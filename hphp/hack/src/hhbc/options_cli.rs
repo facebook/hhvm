@@ -39,7 +39,6 @@ lazy_static! {
             // group 3: we could ignore hhvm. part of prefix in deser.
             "hack.lang.disable_lval_as_an_expression" => "hhvm.hack.lang.disable_lval_as_an_expression",
             // group 4: combination of group 3 & 1
-            "hack.lang.phpism.disallowexecutionoperator" => "hhvm.hack.lang.phpism.disallow_execution_operator",
             "hack.lang.phpism.disablenontopleveldeclarations" => "hhvm.hack.lang.phpism.disable_nontoplevel_declarations",
             "hack.lang.phpism.disablestaticclosures" => "hhvm.hack.lang.phpism.disable_static_closures",
             "hack.lang.enablecoroutines" => "hhvm.hack.lang.enable_coroutines",

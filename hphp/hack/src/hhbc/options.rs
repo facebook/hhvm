@@ -271,7 +271,6 @@ impl Default for LangFlags {
 prefixed_flags!(
     PhpismFlags,
     "hhvm.hack.lang.phpism.",
-    DISALLOW_EXECUTION_OPERATOR,
     DISABLE_NONTOPLEVEL_DECLARATIONS,
     DISABLE_STATIC_CLOSURES,
 );
@@ -1105,30 +1104,36 @@ bitflags! {
     struct Flags: u64 {
         const CONSTANT_FOLDING = 1 << 0;
         const OPTIMIZE_NULL_CHECKS = 1 << 1;
+        // No longer using bit 2.
         const UVS = 1 << 3;
         const LTR_ASSIGN = 1 << 4;
         /// If true, then renumber labels after generating code for a method
         /// body. Semantic diff doesn't care about labels, but for visual diff against
         /// HHVM it's helpful to renumber in order that the labels match more closely
         const RELABEL = 1 << 5;
+        // No longer using bit 6.
         const HACK_ARR_COMPAT_NOTICES = 1 << 7;
         const HACK_ARR_DV_ARRS = 1 << 8;
         const AUTHORITATIVE = 1 << 9;
         const JIT_ENABLE_RENAME_FUNCTION = 1 << 10;
+        // No longer using bit 11.
         const ENABLE_COROUTINES = 1 << 12;
         // No longer using bit 13.
         const LOG_EXTERN_COMPILER_PERF = 1 << 14;
         const ENABLE_INTRINSICS_EXTENSION = 1 << 15;
-        const DISALLOW_EXECUTION_OPERATOR = 1 << 21;
+        // No longer using bits 16-21.
         const DISABLE_NONTOPLEVEL_DECLARATIONS = 1 << 22;
         const DISABLE_STATIC_CLOSURES = 1 << 23;
+        // No longer using bit 24.
         const EMIT_FUNC_POINTERS = 1 << 25;
         const EMIT_CLS_METH_POINTERS = 1 << 26;
         const EMIT_INST_METH_POINTERS = 1 << 27;
         const EMIT_METH_CALLER_FUNC_POINTERS = 1 << 28;
         const RX_IS_ENABLED = 1 << 29;
         const DISABLE_LVAL_AS_AN_EXPRESSION = 1 << 30;
+        // No longer using bits 31-32.
         const ARRAY_PROVENANCE = 1 << 33;
+        // No longer using bit 34.
         const ENABLE_CLASS_LEVEL_WHERE_CLAUSES = 1 << 35;
         const DISABLE_LEGACY_SOFT_TYPEHINTS = 1 << 36;
         const ALLOW_NEW_ATTRIBUTE_SYNTAX = 1 << 37;
@@ -1138,9 +1143,11 @@ bitflags! {
         const ABSTRACT_STATIC_PROPS = 1 << 41;
         const DISABLE_UNSET_CLASS_CONST = 1 << 42;
         const DISALLOW_FUNC_PTRS_IN_CONSTANTS = 1 << 43;
+        // No longer using bit 44.
         const CONST_DEFAULT_LAMBDA_ARGS = 1 << 45;
         const ENABLE_XHP_CLASS_MODIFIER = 1 << 46;
         const ENABLE_FIRST_CLASS_FUNCTION_POINTERS = 1 << 47;
+        // No longer using bit 48.
         const DISABLE_XHP_ELEMENT_MANGLING = 1 << 49;
         const DISABLE_ARRAY = 1 << 50;
         const RUST_EMITTER = 1 << 51;

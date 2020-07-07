@@ -103,7 +103,6 @@ let parse_file ~hhbc_options env text :
       ParserOptions.make
         ~auto_namespace_map:(aliased_namespaces co)
         ~codegen:true
-        ~disallow_execution_operator:(phpism_disallow_execution_operator co)
         ~disable_nontoplevel_declarations:
           (phpism_disable_nontoplevel_declarations co)
         ~disable_static_closures:(phpism_disable_static_closures co)

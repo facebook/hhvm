@@ -814,10 +814,7 @@ int64_t RuntimeOption::HeapLowWaterMark = 16;
 int64_t RuntimeOption::HeapHighWaterMark = 1024;
 uint64_t RuntimeOption::DisableCallUserFunc = 0;
 uint64_t RuntimeOption::DisableCallUserFuncArray = 0;
-uint64_t RuntimeOption::DisableParseStrSingleArg = 0;
 uint64_t RuntimeOption::DisableAssert = 0;
-bool RuntimeOption::DisallowExecutionOperator = true;
-bool RuntimeOption::DisableReservedVariables = true;
 uint64_t RuntimeOption::DisableConstant = 0;
 bool RuntimeOption::DisableNontoplevelDeclarations = false;
 bool RuntimeOption::DisableStaticClosures = false;
@@ -1684,12 +1681,6 @@ void RuntimeOption::Load(
     Config::Bind(DisableCallUserFuncArray, ini, config,
                  "Hack.Lang.Phpism.DisableCallUserFuncArray",
                  DisableCallUserFuncArray);
-    Config::Bind(DisableParseStrSingleArg, ini, config,
-                 "Hack.Lang.Phpism.DisableParseStrSingleArg",
-                 DisableParseStrSingleArg);
-    Config::Bind(DisallowExecutionOperator, ini, config,
-                 "Hack.Lang.Phpism.DisallowExecutionOperator",
-                 DisallowExecutionOperator);
     Config::Bind(DisableAssert, ini, config,
                  "Hack.Lang.Phpism.DisableAssert",
                  DisableAssert);
@@ -1702,9 +1693,6 @@ void RuntimeOption::Load(
     Config::Bind(DisableConstant, ini, config,
                  "Hack.Lang.Phpism.DisableConstant",
                  DisableConstant);
-    Config::Bind(DisableReservedVariables, ini, config,
-                 "Hack.Lang.Phpism.DisableReservedVariables",
-                 DisableReservedVariables);
   }
   {
     // Repo

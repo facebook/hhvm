@@ -55,9 +55,6 @@ let assert_opts_equal caml rust =
     Hhbc_options.(enable_intrinsics_extension caml)
     Hhbc_options.(enable_intrinsics_extension rust);
   assert_equal
-    Hhbc_options.(phpism_disallow_execution_operator caml)
-    Hhbc_options.(phpism_disallow_execution_operator rust);
-  assert_equal
     Hhbc_options.(phpism_disable_nontoplevel_declarations caml)
     Hhbc_options.(phpism_disable_nontoplevel_declarations rust);
   assert_equal
@@ -114,7 +111,7 @@ let assert_opts_equal caml rust =
   assert_equal
     Hhbc_options.(disallow_func_ptrs_in_constants caml)
     Hhbc_options.(disallow_func_ptrs_in_constants rust);
- assert_equal
+  assert_equal
     Hhbc_options.(check_int_overflow caml)
     Hhbc_options.(check_int_overflow rust);
   assert_equal
@@ -350,9 +347,6 @@ let test_all_overrides_json_only _ =
   \"hhvm.hack.lang.enable_xhp_class_modifier\": {
     \"global_value\": true
   },
-  \"hhvm.hack.lang.phpism.disallow_execution_operator\": {
-    \"global_value\": true
-  },
   \"hhvm.hack.lang.phpism.disable_nontoplevel_declarations\": {
     \"global_value\": true
   },
@@ -474,9 +468,6 @@ module CliArgOverrides = struct
   let hhvm'hack'lang'enable_xhp_class_modifier =
     "-vhhvm.hack.lang.enable_xhp_class_modifier=true"
 
-  let hhvm'hack'lang'phpism'disallow_execution_operator =
-    "-vhack.lang.phpism.disallowexecutionoperator=true"
-
   let hhvm'hack'lang'phpism'disable_nontoplevel_declarations =
     "-vhack.lang.phpism.disablenontopleveldeclarations=true"
 
@@ -537,7 +528,6 @@ let test_all_overrides_cli_only _ =
       hhvm'hack'lang'enable_coroutines;
       hhvm'hack'lang'enable_first_class_function_pointers;
       hhvm'hack'lang'enable_xhp_class_modifier;
-      hhvm'hack'lang'phpism'disallow_execution_operator;
       hhvm'hack'lang'phpism'disable_nontoplevel_declarations;
       hhvm'hack'lang'phpism'disable_static_closures;
       hhvm'hack_arr_compat_notices;

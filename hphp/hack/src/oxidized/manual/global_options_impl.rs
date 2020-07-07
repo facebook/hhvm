@@ -29,7 +29,6 @@ impl Default for GlobalOptions {
             po_auto_namespace_map: vec![],
             po_codegen: false,
             po_deregister_php_stdlib: false,
-            po_disallow_execution_operator: false,
             po_disallow_toplevel_requires: false,
             po_disable_nontoplevel_declarations: false,
             po_disable_static_closures: true,

@@ -29,7 +29,6 @@ type t = {
   po_auto_namespace_map: (string * string) list;
   po_codegen: bool;
   po_deregister_php_stdlib: bool;
-  po_disallow_execution_operator: bool;
   po_disallow_toplevel_requires: bool;
   po_disable_nontoplevel_declarations: bool;
   po_disable_static_closures: bool;
@@ -193,7 +192,6 @@ let default =
     so_naming_sqlite_path = None;
     po_auto_namespace_map = [];
     po_codegen = false;
-    po_disallow_execution_operator = false;
     po_disallow_toplevel_requires = false;
     po_deregister_php_stdlib = false;
     po_disable_nontoplevel_declarations = false;
@@ -276,7 +274,6 @@ let default =
 
 let make
     ?(po_deregister_php_stdlib = default.po_deregister_php_stdlib)
-    ?(po_disallow_execution_operator = default.po_disallow_execution_operator)
     ?(po_disallow_toplevel_requires = default.po_disallow_toplevel_requires)
     ?(po_disable_nontoplevel_declarations =
       default.po_disable_nontoplevel_declarations)
@@ -418,7 +415,6 @@ let make
     allowed_fixme_codes_partial;
     codes_not_raised_partial;
     po_deregister_php_stdlib;
-    po_disallow_execution_operator;
     po_disallow_toplevel_requires;
     po_disable_nontoplevel_declarations;
     po_disable_static_closures;
@@ -550,8 +546,6 @@ let po_allow_goto t = t.po_allow_goto
 let tco_log_inference_constraints t = t.tco_log_inference_constraints
 
 let po_codegen t = t.po_codegen
-
-let po_disallow_execution_operator t = t.po_disallow_execution_operator
 
 let po_disallow_toplevel_requires t = t.po_disallow_toplevel_requires
 

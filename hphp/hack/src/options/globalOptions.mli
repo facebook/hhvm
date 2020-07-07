@@ -64,8 +64,6 @@ type t = {
   po_codegen: bool;
   (* Flag for disabling functions in HHI files with the __PHPStdLib attribute *)
   po_deregister_php_stdlib: bool;
-  (* Flag to disable the backticks execution operator *)
-  po_disallow_execution_operator: bool;
   (* Flag to disallow `require`, `require_once` etc as toplevel statements *)
   po_disallow_toplevel_requires: bool;
   (* Flag to disable PHP's non-top-level declarations *)
@@ -271,7 +269,6 @@ type t = {
 
 val make :
   ?po_deregister_php_stdlib:bool ->
-  ?po_disallow_execution_operator:bool ->
   ?po_disallow_toplevel_requires:bool ->
   ?po_disable_nontoplevel_declarations:bool ->
   ?po_disable_static_closures:bool ->
@@ -410,8 +407,6 @@ val so_naming_sqlite_path : t -> string option
 val po_auto_namespace_map : t -> (string * string) list
 
 val po_deregister_php_stdlib : t -> bool
-
-val po_disallow_execution_operator : t -> bool
 
 val po_disallow_toplevel_requires : t -> bool
 

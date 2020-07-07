@@ -604,13 +604,6 @@ struct RuntimeOption {
   // Valid values are 0 => enabled (default),
   // 1 => warning, 2 => error.
   static uint64_t DisableCallUserFuncArray;
-  // Disables PHP's parse_str function with one argument
-  // valid values are 0 => enabled (default)
-  // 1 => warning, 2 => error
-  static uint64_t DisableParseStrSingleArg;
-  // Disables PHP's backtick language
-  // true => error, false => default behaviour
-  static bool DisallowExecutionOperator;
   // Disables PHP's constant function
   // valid values are 0 => enabled (default)
   // 1 => warning, 2 => error
@@ -629,9 +622,6 @@ struct RuntimeOption {
   // true => allow the feature, false => disable the feature
   static bool EnableClassLevelWhereClauses;
 
-  // Disables the setting of reserved variable php_errorsmg
-  // true => error, false => php_errormsg can be set
-  static bool DisableReservedVariables;
   static int GetScannerType();
 
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
@@ -685,7 +675,6 @@ struct RuntimeOption {
   F(bool, DisassemblerDocComments,     true)                            \
   F(bool, DisassemblerPropDocComments, true)                            \
   F(bool, LoadFilepathFromUnitCache,   false)                           \
-  F(bool, WarnOnCoerceBuiltinParams,   false)                           \
   F(bool, FatalOnParserOptionMismatch, true)                            \
   F(bool, WarnOnSkipFrameLookup,       true)                            \
   /*                                                                    \
@@ -1110,9 +1099,6 @@ struct RuntimeOption {
   F(bool, HackArrCompatSerializeNotices, false)                         \
   /* Raise notices when fb_compact_*() would change behavior */         \
   F(bool, HackArrCompatCompactSerializeNotices, false)                  \
-  /* Raises notice when a function that returns a PHP array, not */     \
-  /* a v/darray, is called */                                           \
-  F(bool, HackArrCompatArrayProducingFuncNotices, false)                \
   /* When this flag is on, d/varray constructions are marked. */        \
   F(bool, HackArrDVArrMark, false)                                      \
   /* This is the flag for "unification", meaning that darrays are       \
@@ -1186,7 +1172,6 @@ struct RuntimeOption {
   F(bool, NoticeOnMethCallerHelperUse, false)                           \
   F(bool, NoticeOnCollectionToBool, false)                              \
   F(bool, NoticeOnSimpleXMLBehavior, false)                             \
-  F(bool, NoticeOnBadMethodStaticness, true)                            \
   F(bool, ForbidDivisionByZero, true)                                   \
   /* Enables Hack records. */                                           \
   F(bool, HackRecords, false)                                           \
@@ -1312,7 +1297,6 @@ struct RuntimeOption {
   F(bool, WidenIsArray, false)                                          \
   F(bool, WidenIsArrayLogs, true)                                       \
   F(bool, EnablePerFileCoverage, false)                                 \
-  F(bool, NoUseMagicMethods, false)                                     \
   /* Should we use the autoload map from the repo */                    \
   F(bool, UseRepoAutoloadMap, true)                                     \
   /* */

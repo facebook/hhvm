@@ -245,7 +245,6 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
     popt.po_auto_namespace_map = opts.hhvm.aliased_namespaces_cloned().collect();
     popt.po_codegen = true;
     popt.po_disallow_silence = false;
-    popt.po_disallow_execution_operator = phpism_flags(PhpismFlags::DISALLOW_EXECUTION_OPERATOR);
     popt.po_disable_nontoplevel_declarations =
         phpism_flags(PhpismFlags::DISABLE_NONTOPLEVEL_DECLARATIONS);
     popt.po_disable_static_closures = phpism_flags(PhpismFlags::DISABLE_STATIC_CLOSURES);

@@ -15,8 +15,6 @@ let codegen = GlobalOptions.po_codegen
 
 let deregister_php_stdlib = GlobalOptions.po_deregister_php_stdlib
 
-let disallow_execution_operator = GlobalOptions.po_disallow_execution_operator
-
 let disallow_toplevel_requires = GlobalOptions.po_disallow_toplevel_requires
 
 let allow_goto = GlobalOptions.po_allow_goto
@@ -126,7 +124,6 @@ let disable_array_typehint = GlobalOptions.po_disable_array_typehint
 let make
     ~auto_namespace_map
     ~codegen
-    ~disallow_execution_operator
     ~disable_nontoplevel_declarations
     ~disable_static_closures
     ~disable_lval_as_an_expression
@@ -154,7 +151,6 @@ let make
       default with
       po_auto_namespace_map = auto_namespace_map;
       po_codegen = codegen;
-      po_disallow_execution_operator = disallow_execution_operator;
       po_disable_nontoplevel_declarations = disable_nontoplevel_declarations;
       po_disable_static_closures = disable_static_closures;
       po_disable_lval_as_an_expression = disable_lval_as_an_expression;

@@ -1151,11 +1151,7 @@ void checkForReifiedGenericsErrors(const ActRec* ar, bool hasGenerics) {
     throw_call_reified_func_without_generics(ar->m_func);
   }
   auto const generics = frame_local(ar, ar->m_func->numParams());
-  assertx(
-    RuntimeOption::EvalHackArrDVArrs
-      ? tvIsVec(generics)
-      : tvIsArray(generics)
-  );
+  assertx(tvIsHAMSafeVArray(generics));
   checkFunReifiedGenericMismatch(ar->m_func, val(generics).parr);
 }
 
@@ -1596,7 +1592,7 @@ OPTBLD_INLINE void iopAddElemC() {
   TypedValue* c1 = vmStack().topC();
   TypedValue* c2 = vmStack().indC(1);
   TypedValue* c3 = vmStack().indC(2);
-  if (!isArrayType(c3->m_type) && !isDictType(c3->m_type)) {
+  if (!tvIsArray(c3) && !tvIsDict(c3)) {
     raise_error("AddElemC: $3 must be an array or dict");
   }
   tvAsVariant(*c3).asArrRef().set(tvAsCVarRef(c2), tvAsCVarRef(c1));
@@ -2078,8 +2074,7 @@ OPTBLD_INLINE void iopCombineAndResolveTypeStruct(uint32_t n) {
 
 OPTBLD_INLINE void iopRecordReifiedGeneric() {
   auto const tsList = vmStack().topC();
-  if (RuntimeOption::EvalHackArrDVArrs ?
-      !tvIsVec(tsList) : !tvIsArray(tsList)) {
+  if (!tvIsHAMSafeVArray(tsList)) {
     raise_error("Invalid type-structure list in RecordReifiedGeneric");
   }
   // recordReifiedGenericsAndGetTSList decrefs the tsList
@@ -2097,8 +2092,7 @@ OPTBLD_INLINE void iopCheckReifiedGenericMismatch() {
   Class* cls = arGetContextClass(vmfp());
   if (!cls) raise_error("No class scope is active");
   auto const c = vmStack().topC();
-  if (RuntimeOption::EvalHackArrDVArrs ?
-      !tvIsVec(c) : !tvIsArray(c)) {
+  if (!tvIsHAMSafeVArray(c)) {
     raise_error("Invalid type-structure list in CheckReifiedGenericMismatch");
   }
   checkClassReifiedGenericMismatch(cls, c->m_data.parr);
@@ -4742,11 +4736,7 @@ void iopFCallBuiltin(
 
   if (func->hasVariadicCaptureParam()) {
     assertx(numArgs > 0);
-    assertx(
-      RuntimeOption::EvalHackArrDVArrs
-        ? isVecType(args[1 - safe_cast<int32_t>(numArgs)].m_type)
-        : isArrayType(args[1 - safe_cast<int32_t>(numArgs)].m_type)
-    );
+    assertx(tvIsHAMSafeVArray(args[1 - safe_cast<int32_t>(numArgs)]));
   }
   Native::callFunc(func, vmfp(), ctx, args, numNonDefault, ret, true);
 

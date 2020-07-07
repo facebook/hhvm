@@ -66,7 +66,7 @@ void emitClassGetC(IRGS& env) {
 }
 
 void emitClassGetTS(IRGS& env) {
-  auto const required_ts_type = RuntimeOption::EvalHackArrDVArrs ? TDict : TArr;
+  auto const required_ts_type = RO::EvalHackArrDVArrs ? TDict : TDArr;
   auto const ts = topC(env);
   if (!ts->isA(required_ts_type)) {
     if (ts->type().maybe(required_ts_type)) {

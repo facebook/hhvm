@@ -641,7 +641,7 @@ void emitCheckReifiedGenericMismatch(IRGS& env) {
     return;
   }
   auto const reified = popC(env);
-  if (!reified->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TArr)) {
+  if (!reified->isA(RO::EvalHackArrDVArrs ? TVec : TVArr)) {
     PUNT(CheckReifiedGenericMismatch-InvalidTS);
   }
   gen(env, CheckClsReifiedGenericMismatch, ClassData{cls}, reified);

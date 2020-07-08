@@ -1,4 +1,4 @@
-Fanout calculation at time #0
+Fanout calculation on line 7
 {'cursor': 'cursor,0,integration-test,<hash-redacted-for-test>',
  'debug': {'dependencies': [],
            'fanout_dependents': [],
@@ -9,7 +9,7 @@ Fanout calculation at time #0
  'files': [],
  'telemetry': '<telemetry-redacted-for-test>'}
 
-Fanout calculation at time #1
+Fanout calculation on line 14
 {'cursor': 'cursor,2,integration-test,<hash-redacted-for-test>',
  'debug': {'dependencies': [{'hash': '1107763639',
                              'variant': 'Class NewSymbol'}],

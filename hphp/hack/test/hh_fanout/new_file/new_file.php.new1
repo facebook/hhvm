@@ -1,3 +1,0 @@
-<?hh
-// New symbol defined -- so this file should be in the fanout.
-class NewSymbol {}

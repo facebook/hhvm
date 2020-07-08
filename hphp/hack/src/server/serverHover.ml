@@ -22,9 +22,9 @@ let filter_class_and_constructor results =
   let has_class = List.exists results ~f:result_is_class in
   let has_constructor = List.exists results ~f:result_is_constructor in
   if has_class && has_constructor then
-    List.filter results ~f:result_is_constructor
+    List.filter results ~f:result_is_constructor |> List.map ~f:snd
   else
-    results
+    results |> List.map ~f:snd
 
 let make_hover_doc_block ctx entry occurrence def_opt =
   match def_opt with
@@ -381,6 +381,39 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
       HoverService.
         { snippet; addendum; pos = Some occurrence.SymbolOccurrence.pos }))
 
+let make_hover_info_with_fallback results =
+  let class_fallback =
+    List.hd
+      (List.filter results ~f:(fun (_, _, _, occurrence, _) ->
+           SymbolOccurrence.is_class occurrence))
+  in
+  List.map
+    ~f:(fun (ctx, env_and_ty, entry, occurrence, def_opt) ->
+      if
+        SymbolOccurrence.is_constructor occurrence
+        && List.is_empty (make_hover_doc_block ctx entry occurrence def_opt)
+      then
+        (* Case where constructor docblock is empty. *)
+        let hover_info =
+          make_hover_info ctx env_and_ty entry occurrence def_opt
+        in
+        match class_fallback with
+        | Some (ctx, _, entry, class_occurrence, def_opt) ->
+          let fallback_doc_block =
+            make_hover_doc_block ctx entry class_occurrence def_opt
+          in
+          ( occurrence,
+            HoverService.
+              {
+                snippet = hover_info.snippet;
+                addendum = List.concat [fallback_doc_block; hover_info.addendum];
+                pos = hover_info.pos;
+              } )
+        | None -> (occurrence, hover_info)
+      else
+        (occurrence, make_hover_info ctx env_and_ty entry occurrence def_opt))
+    results
+
 let go_quarantined
     ~(ctx : Provider_context.t)
     ~(entry : Provider_context.entry)
@@ -405,7 +438,6 @@ let go_quarantined
     end
   | identities ->
     identities
-    |> filter_class_and_constructor
     |> List.map ~f:(fun (occurrence, def_opt) ->
            let path =
              def_opt
@@ -416,5 +448,7 @@ let go_quarantined
            let (ctx, entry) =
              Provider_context.add_entry_if_missing ~ctx ~path
            in
-           make_hover_info ctx env_and_ty entry occurrence def_opt)
+           (ctx, env_and_ty, entry, occurrence, def_opt))
+    |> make_hover_info_with_fallback
+    |> filter_class_and_constructor
     |> List.remove_consecutive_duplicates ~equal:equal_hover_info

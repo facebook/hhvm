@@ -324,15 +324,17 @@ function queryDocBlocks(): void {
   DocBlock::manyLineBreaks();
 //          ^15:13
   $x = new DocBlockOnClassButNotConstructor();
-//         ^17:12
+//          ^17:12
+  DocBlockOnClassButNotConstructor::nonConstructorMethod();
+//          ^19:37
 }
 
 function docblockReturn(): DocBlockBase {
-//                         ^21:28
+//          ^23:28
   $x = new DocBlockBase();
-//         ^23:12
+//          ^25:12
   return new DocBlockDerived();
-//           ^25:14
+//          ^27:14
 }
 
 /* Class doc block.
@@ -374,6 +376,9 @@ class DocBlock {
  */
 final class DocBlockOnClassButNotConstructor {
   public function __construct() {}
+
+  /* Docblock for non-constructor method in DocBlockOnClassButNotConstructor */
+  public static function nonConstructorMethod(): void {}
 }
 
 /* DocBlockBase: class doc block. */
@@ -391,30 +396,30 @@ class DocBlockDerived extends DocBlockBase {}
 // We don't want the line comment above to be part of this docblock.
 // We do want both these lines though.
 function line_comment_with_break(): void {}
-//       84^:10
+//       89^:10
 
 // This is another special case.
 /** Only this should be part of the docblock. */
 function two_comment_types(): void {}
-//       ^89:10
+//       ^94:10
 
 // There are too many blank lines between this comment and what it's commenting
 // on.
 
 
 function too_many_blank_lines(): void {}
-//       ^96:10
+//       ^101:10
 
 // For legacy reasons, we have to support a single linebreak between a docblock
 // and the item the docblock is for.
 
 function one_linebreak_is_okay(): void {}
-//       ^102:10
+//       ^107:10
 
 /** A function with an HH_FIXME. */
 /* HH_FIXME[4030] Missing return type hint. */
 function hh_fixme() {}
-//       ^107:10
+//       ^112:10
 "
 
 let docblock_cases =
@@ -500,19 +505,35 @@ the other stars.";
         {
           snippet = "public function __construct(): void";
           addendum =
-            ["Full name: `DocBlockOnClassButNotConstructor::__construct`"];
+            [
+              "Class doc block for a class whose constructor doesn't have a doc block.";
+              "Full name: `DocBlockOnClassButNotConstructor::__construct`";
+            ];
           pos = pos_at (17, 12) (17, 43);
         };
       ] );
-    ( ("docblock.php", 21, 28),
+    ( ("docblock.php", 19, 37),
+      [
+        {
+          snippet = "public static function nonConstructorMethod(): void";
+          addendum =
+            [
+              "Docblock for non-constructor method in DocBlockOnClassButNotConstructor";
+              "Return type: `void`";
+              "Full name: `DocBlockOnClassButNotConstructor::nonConstructorMethod`";
+            ];
+          pos = pos_at (19, 37) (19, 56);
+        };
+      ] );
+    ( ("docblock.php", 23, 28),
       [
         {
           snippet = "DocBlockBase";
           addendum = ["DocBlockBase: class doc block."];
-          pos = pos_at (21, 28) (21, 39);
+          pos = pos_at (23, 28) (23, 39);
         };
       ] );
-    ( ("docblock.php", 23, 12),
+    ( ("docblock.php", 25, 12),
       [
         {
           snippet = "public function __construct(): void";
@@ -521,10 +542,10 @@ the other stars.";
               "DocBlockBase: constructor doc block.";
               "Full name: `DocBlockBase::__construct`";
             ];
-          pos = pos_at (23, 12) (23, 23);
+          pos = pos_at (25, 12) (25, 23);
         };
       ] );
-    ( ("docblock.php", 25, 14),
+    ( ("docblock.php", 27, 14),
       [
         {
           snippet = "public function __construct(): void";
@@ -533,10 +554,10 @@ the other stars.";
               "DocBlockBase: constructor doc block.";
               "Full name: `DocBlockBase::__construct`";
             ];
-          pos = pos_at (25, 14) (25, 28);
+          pos = pos_at (27, 14) (27, 28);
         };
       ] );
-    ( ("docblock.php", 84, 10),
+    ( ("docblock.php", 89, 10),
       [
         {
           snippet = "line_comment_with_break";
@@ -544,26 +565,26 @@ the other stars.";
             [
               "We don't want the line comment above to be part of this docblock.\nWe do want both these lines though.";
             ];
-          pos = pos_at (84, 10) (84, 32);
+          pos = pos_at (89, 10) (89, 32);
         };
       ] );
-    ( ("docblock.php", 89, 10),
+    ( ("docblock.php", 94, 10),
       [
         {
           snippet = "two_comment_types";
           addendum = ["Only this should be part of the docblock."];
-          pos = pos_at (89, 10) (89, 26);
+          pos = pos_at (94, 10) (94, 26);
         };
       ] );
-    ( ("docblock.php", 96, 10),
+    ( ("docblock.php", 101, 10),
       [
         {
           snippet = "too_many_blank_lines";
           addendum = [];
-          pos = pos_at (96, 10) (96, 29);
+          pos = pos_at (101, 10) (101, 29);
         };
       ] );
-    ( ("docblock.php", 102, 10),
+    ( ("docblock.php", 107, 10),
       [
         {
           snippet = "one_linebreak_is_okay";
@@ -571,15 +592,15 @@ the other stars.";
             [
               "For legacy reasons, we have to support a single linebreak between a docblock\nand the item the docblock is for.";
             ];
-          pos = pos_at (102, 10) (102, 30);
+          pos = pos_at (107, 10) (107, 30);
         };
       ] );
-    ( ("docblock.php", 107, 10),
+    ( ("docblock.php", 112, 10),
       [
         {
           snippet = "hh_fixme";
           addendum = ["A function with an HH_FIXME."];
-          pos = pos_at (107, 10) (107, 17);
+          pos = pos_at (112, 10) (112, 17);
         };
       ] );
   ]

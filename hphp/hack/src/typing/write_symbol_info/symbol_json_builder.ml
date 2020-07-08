@@ -220,8 +220,14 @@ let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
   match Str.split (Str.regexp "::") member.full_name with
   | [] -> (xrefs, prog)
   | con_name :: _mem_name ->
-    (match ServerSymbolDefinition.get_class_by_name ctx con_name with
-    | None -> (xrefs, prog)
+    let con_name_with_ns = Utils.add_ns con_name in
+    (match ServerSymbolDefinition.get_class_by_name ctx con_name_with_ns with
+    | None ->
+      Hh_logger.log
+        "WARNING: could not find parent container %s processing reference to %s"
+        con_name_with_ns
+        member.full_name;
+      (xrefs, prog)
     | Some cls ->
       if phys_equal cls.c_kind Cenum then
         match member.kind with

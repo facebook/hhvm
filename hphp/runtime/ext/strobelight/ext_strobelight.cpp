@@ -168,16 +168,20 @@ bool Strobelight::active() {
 }
 
 bool Strobelight::isXenonActive() {
+  TRACE(1, "Strobelight::isXenonActive\n");
   if (RuntimeOption::XenonForceAlwaysOn) {
+    TRACE(2, "Strobelight::isXenonActive => true, forced\n");
     return true;
   }
 
   int64_t now_s = time(NULL);
   int64_t then_s = Xenon::getInstance().getLastSurpriseTime();
   if (now_s - then_s <= kXenonExclusionInterval_s) {
+    TRACE(2, "Strobelight::isXenonActive => true, timeout\n");
     return true;
   }
 
+  TRACE(2, "Strobelight::isXenonActive => false\n");
   return false;
 }
 

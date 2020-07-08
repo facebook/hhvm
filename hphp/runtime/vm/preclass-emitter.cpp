@@ -66,6 +66,13 @@ std::string NewAnonymousClassName(folly::StringPiece name) {
   return folly::sformat("{};{}", name, next_anon_class.fetch_add(1));
 }
 
+folly::StringPiece StripIdFromAnonymousClassName(folly::StringPiece name) {
+  auto const pos = RuntimeOption::RepoAuthoritative ?
+    std::string::npos : qfind(name, ';');
+  return pos == std::string::npos ?
+    name : folly::StringPiece{name.data(), pos};
+}
+
 //=============================================================================
 // PreClassEmitter::Prop.
 
@@ -440,11 +447,7 @@ void PreClassRepoProxy::InsertPreClassStmt
     txn.prepare(*this, insertQuery);
   }
 
-  auto n = name->slice();
-  auto const pos = RuntimeOption::RepoAuthoritative ?
-    std::string::npos : qfind(n, ';');
-  auto const nm = pos == std::string::npos ?
-    n : folly::StringPiece{n.data(), pos};
+  auto const nm = StripIdFromAnonymousClassName(name->slice());
   BlobEncoder extraBlob{pce.useGlobalIds()};
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);

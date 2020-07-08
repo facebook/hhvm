@@ -800,6 +800,233 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
   }
 }
 
+template <typename SerDe>
+void UnitEmitter::serde(SerDe& sd) {
+  MemoryManager::SuppressOOM so(*tl_heap);
+
+  serdeMetaData(sd);
+  // These are not touched by serdeMetaData:
+  sd(m_returnSeen);
+  sd(m_ICE);
+  sd(m_allClassesHoistable);
+
+  auto const seq = [&] (auto const& c, auto const& r, auto const& w) {
+    if constexpr (SerDe::deserializing) {
+      size_t size;
+      sd(size);
+      for (size_t i = 0; i < size; ++i) r(sd, i);
+    } else {
+      sd(c.size());
+      for (auto const& x : c) w(sd, x);
+    }
+  };
+
+  // Literal strings
+  seq(
+    m_litstrs,
+    [&] (auto& sd, size_t i) {
+      const StringData* s;
+      sd(s);
+      auto const id UNUSED = mergeUnitLitstr(s);
+      assertx(id == i);
+    },
+    [&] (auto& sd, const StringData* s) { sd(s); }
+  );
+
+  // Arrays
+  seq(
+    m_arrays,
+    [&] (auto& sd, size_t i) {
+      std::string key;
+      sd(key);
+
+      auto v = [&]{
+        VariableUnserializer vu{
+          key.data(),
+          key.size(),
+          VariableUnserializer::Type::Internal
+        };
+        vu.setUnitFilename(m_filepath);
+        return vu.unserialize();
+      }();
+      assertx(v.isArray());
+      auto ad = v.detach().m_data.parr;
+      ArrayData::GetScalarArray(&ad);
+      auto const id DEBUG_ONLY = mergeArray(ad);
+      assertx(id == i);
+    },
+    [&] (auto& sd, const ArrayData* a) {
+      auto const str = [&]{
+        VariableSerializer vs{VariableSerializer::Type::Internal};
+        vs.setUnitFilename(m_filepath);
+        return
+          vs.serializeValue(VarNR(const_cast<ArrayData*>(a)), false)
+          .toCppString();
+      }();
+      sd(str);
+    }
+  );
+
+  // HHBBC array types
+  sd(m_arrayTypeTable);
+
+  // Pre-class emitters
+  seq(
+    m_pceVec,
+    [&] (auto& sd, size_t i) {
+      std::string name;
+      int hoistable;
+      sd(name);
+      sd(hoistable);
+      auto pce = newPreClassEmitter(name, (PreClass::Hoistable)hoistable);
+      pce->serdeMetaData(sd);
+      assertx(pce->id() == i);
+    },
+    [&] (auto& sd, PreClassEmitter* pce) {
+      auto const nm = StripIdFromAnonymousClassName(pce->name()->slice());
+      sd(nm.toString());
+      sd((int)pce->hoistability());
+      pce->serdeMetaData(sd);
+    }
+  );
+
+  // Record emitters
+  seq(
+    m_reVec,
+    [&] (auto& sd, size_t i) {
+      std::string name;
+      sd(name);
+      auto re = newRecordEmitter(name);
+      re->serdeMetaData(sd);
+      assertx(re->id() == i);
+    },
+    [&] (auto& sd, RecordEmitter* re) {
+      auto const nm = StripIdFromAnonymousClassName(re->name()->slice());
+      sd(nm.toString());
+      re->serdeMetaData(sd);
+    }
+  );
+
+  // Type aliases
+  seq(
+    m_typeAliases,
+    [&] (auto& sd, size_t i) {
+      TypeAlias ta;
+      sd(ta.name);
+      sd(ta);
+      auto const id UNUSED = addTypeAlias(ta);
+      assertx(id == i);
+    },
+    [&] (auto& sd, const TypeAlias& ta) {
+      sd(ta.name);
+      sd(ta);
+    }
+  );
+
+  // Constants
+  seq(
+    m_constants,
+    [&] (auto& sd, size_t i) {
+      Constant cns;
+      sd(cns.name);
+      sd(cns);
+      if (type(cns.val) == KindOfUninit) {
+        cns.val.m_data.pcnt = reinterpret_cast<MaybeCountable*>(Unit::getCns);
+      }
+      auto const id UNUSED = addConstant(cns);
+      assertx(id == i);
+    },
+    [&] (auto& sd, const Constant& cns) {
+      sd(cns.name);
+      sd(cns);
+    }
+  );
+
+  // Line table
+  sd(
+    m_lineTable,
+    [&] (const LineEntry& prev, const LineEntry& curDelta) {
+      if (SerDe::deserializing) {
+        return LineEntry {
+          curDelta.pastOffset() + prev.pastOffset(),
+          curDelta.val() + prev.val()
+        };
+      } else {
+        return LineEntry {
+          curDelta.pastOffset() - prev.pastOffset(),
+          curDelta.val() - prev.val()
+        };
+      }
+    }
+  );
+
+  // Mergeables
+  sd(m_mergeableStmts);
+
+  // Func emitters (we cannot use seq for these because they come from
+  // both the pre-class emitters and m_fes.
+  if constexpr (SerDe::deserializing) {
+    size_t total;
+    sd(total);
+    for (size_t i = 0; i < total; ++i) {
+      Id pceId;
+      const StringData* name;
+      bool top;
+      sd(pceId);
+      sd(name);
+      sd(top);
+
+      FuncEmitter* fe;
+      if (pceId < 0) {
+        fe = newFuncEmitter(name);
+      } else {
+        auto funcPce = pce(pceId);
+        fe = newMethodEmitter(name, funcPce);
+        auto const added UNUSED = funcPce->addMethod(fe);
+        assertx(added);
+      }
+      assertx(fe->sn() == i);
+      fe->top = top;
+      fe->serdeMetaData(sd);
+      fe->setEHTabIsSorted();
+      fe->finish(fe->past);
+    }
+  } else {
+    auto total = m_fes.size();
+    for (auto const pce : m_pceVec) total += pce->methods().size();
+    sd(total);
+
+    auto const write = [&] (FuncEmitter* fe, Id pceId) {
+      sd(pceId);
+      sd(fe->name);
+      sd(fe->top);
+      fe->serdeMetaData(sd);
+    };
+    for (auto const& fe : m_fes) write(fe.get(), -1);
+    for (auto const pce : m_pceVec) {
+      for (auto const fe : pce->methods()) write(fe, pce->id());
+    }
+  }
+
+  // Source location table
+  sd(m_sourceLocTab);
+
+  // Bytecode
+  if constexpr (SerDe::deserializing) {
+    size_t size;
+    sd(size);
+    assertx(sd.remaining() <= size);
+    setBc(sd.data(), size);
+    sd.advance(size);
+  } else {
+    sd(m_bclen);
+    sd.writeRaw((const char*)m_bc, m_bclen);
+  }
+}
+
+template void UnitEmitter::serde<>(BlobDecoder&);
+template void UnitEmitter::serde<>(BlobEncoder&);
+
 ///////////////////////////////////////////////////////////////////////////////
 // UnitRepoProxy.
 

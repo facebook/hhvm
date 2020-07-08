@@ -110,6 +110,13 @@ struct SourceLoc {
   int char0{1};
   int line1{1};
   int char1{1};
+
+  template <typename SerDes> void serde(SerDes& sd) {
+    sd(line0);
+    sd(char0);
+    sd(line1);
+    sd(char1);
+  }
 };
 
 /*

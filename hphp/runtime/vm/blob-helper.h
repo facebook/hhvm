@@ -104,6 +104,13 @@ public:
 struct BlobEncoder {
   static const bool deserializing = false;
   explicit BlobEncoder(bool l) : m_useGlobalIds{l} {}
+
+  void writeRaw(const char* ptr, size_t size) {
+    auto const start = m_blob.size();
+    m_blob.resize(start + size);
+    std::copy(ptr, ptr + size, &m_blob[start]);
+  }
+
   /*
    * Currently the most basic encoder/decode only works for integral
    * types.  (We don't want this to accidentally get used for things
@@ -307,6 +314,13 @@ struct BlobDecoder {
 
   void assertDone() {
     assertx(m_p >= m_last);
+  }
+
+  const unsigned char* data() const { return m_p; }
+  void advance(size_t s) { m_p += s; }
+
+  size_t remaining() const {
+    return m_p <= m_last ? (m_last - m_p) : 0;
   }
 
   // See encode() in BlobEncoder for why this only allows integral

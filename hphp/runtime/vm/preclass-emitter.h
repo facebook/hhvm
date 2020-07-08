@@ -32,6 +32,8 @@ namespace HPHP {
 
 std::string NewAnonymousClassName(folly::StringPiece name);
 
+folly::StringPiece StripIdFromAnonymousClassName(folly::StringPiece name);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct UnitEmitter;

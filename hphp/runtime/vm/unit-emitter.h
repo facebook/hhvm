@@ -108,13 +108,13 @@ struct UnitEmitter {
    */
   std::unique_ptr<Unit> create(bool saveLineTable = false) const;
 
-  template<class SerDe> void serdeMetaData(SerDe&);
+  template<typename SerDe> void serdeMetaData(SerDe&);
+  template<typename SerDe> void serde(SerDe&);
 
   /*
    * Run the verifier on this unit.
    */
   bool check(bool verbose) const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Basic data.
@@ -178,7 +178,7 @@ struct UnitEmitter {
   /*
    * Clear and rebuild the array type table from the builder.
    */
-   void repopulateArrayTypeTable(const ArrayTypeTable::Builder&);
+  void repopulateArrayTypeTable(const ArrayTypeTable::Builder&);
 
   /////////////////////////////////////////////////////////////////////////////
   // FuncEmitters.
@@ -667,8 +667,6 @@ std::unique_ptr<UnitEmitter> createFatalUnit(
   FatalOp op,
   StringData* err
 );
-
-template<class SerDe> void serdeLineTable(SerDe&, LineTable&);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -151,6 +151,9 @@ template<class SerDe> void RecordEmitter::serdeMetaData(SerDe& sd) {
     }
 }
 
+template void RecordEmitter::serdeMetaData<>(BlobDecoder&);
+template void RecordEmitter::serdeMetaData<>(BlobEncoder&);
+
 //=============================================================================
 // RecordRepoProxy.
 
@@ -185,11 +188,7 @@ void RecordRepoProxy::InsertRecordStmt
     txn.prepare(*this, ssInsert.str());
   }
 
-  auto n = name->slice();
-  auto const pos = RuntimeOption::RepoAuthoritative ?
-    std::string::npos : qfind(n, ';');
-  auto const nm = pos == std::string::npos ?
-    n : folly::StringPiece{n.data(), pos};
+  auto const nm = StripIdFromAnonymousClassName(name->slice());
   BlobEncoder extraBlob(pce.ue().useGlobalIds());
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);

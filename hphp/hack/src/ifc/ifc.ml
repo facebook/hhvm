@@ -312,7 +312,7 @@ let call renv env callable_name that_pty_opt args_pty ret_ty =
     | Some _ ->
       let (env, pc_joined) =
         let join (env, pc) pc' = policy_join renv env ~prefix:"pcjoin" pc pc' in
-        List.fold ~f:join ~init:(env, Pbot) (Env.get_gpc_policy env K.Next)
+        List.fold ~f:join ~init:(env, Pbot) (Env.get_gpc_policy renv env K.Next)
       in
       let fp =
         {
@@ -354,7 +354,7 @@ let rec flux_target renv env ((_, lhs_ty), lhs_exp) =
     let obj_pol = (receiver_of_obj_get obj_pty property).c_self in
     let prop_pty = property_ptype renv.re_proto obj_pty property lhs_ty in
     let env = Env.acc env (add_dependencies [obj_pol] prop_pty) in
-    (env, prop_pty, Env.get_gpc_policy env K.Next)
+    (env, prop_pty, Env.get_gpc_policy renv env K.Next)
   | A.Array_get (vec, ix_opt) ->
     (* Copy-on-Write handling of Array_get LHS in an assignment. When there is
      * an assignmnet lhs[ix] = rhs or lhs[] = rhs, we
@@ -526,9 +526,8 @@ let rec stmt renv env ((_pos, s) : Tast.stmt) =
     env
   | A.If (e, b1, b2) ->
     let (env, ety) = expr renv env e in
-    (* Stash the PC's so they can be restored after the if *)
-    let gpc = Env.get_gpc_policy env K.Next in
-    let lpc = Env.get_lpc_policy env K.Next in
+    (* Stash the PC so they can be restored after the if *)
+    let pc = Env.get_lpc_policy env K.Next in
     let env =
       let epol =
         match ety with
@@ -545,7 +544,7 @@ let rec stmt renv env ((_pos, s) : Tast.stmt) =
     let union _env t1 t2 = (env, mk_union t1 t2) in
     let env = Env.merge_and_set_cenv ~union env cenv1 cenv2 in
     (* Restore the program counter from before the IF *)
-    Env.set_pcs env K.Next gpc lpc
+    Env.set_pc env K.Next pc
   | A.Return e ->
     let union env t1 t2 = (env, mk_union t1 t2) in
     let env = Env.merge_conts_into ~union env [K.Next] K.Exit in
@@ -582,10 +581,10 @@ let callable opts decl_env class_name_opt name saved_env params body lrty =
      *)
     let this_ty = Option.map class_name_opt (class_ptype None proto_renv []) in
     let ret_ty = ptype ~prefix:"ret" None proto_renv lrty in
-    let renv = Env.new_renv proto_renv this_ty ret_ty in
+    let renv = Env.new_renv proto_renv this_ty ret_ty global_pc in
 
     (* Initialise the mutable environment *)
-    let env = Env.new_env global_pc in
+    let env = Env.new_env in
     let (env, param_tys) = add_params renv env params in
 
     (* Run the analysis *)

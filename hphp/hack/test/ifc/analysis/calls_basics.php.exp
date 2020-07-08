@@ -11,125 +11,117 @@ Decls:
   function \indirect_flow_a_to_b_bis: { kind = public }
   
 Analyzing setb:
+* pc: pc
 * This: \C<\C, lump, a=?thunk, b=<B>>
 * Return: <ret>
 * Params:
   lvars: { $n -> <$n> }
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: { $n -> <$n> }
-    pc: pc
 Constraints:
   [\C < B, $n < B, pc < B]
 
 Analyzing is_a_pos:
+* pc: pc
 * This: \C<\C, lump, a=<A>, b=?thunk>
 * Return: <ret>
 * Params:
   lvars: {}
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: {}
-    pc: pc
 Constraints:
   [A < .a, \C < .a, .a < ret, PUBLIC < ret, .a < ret, PUBLIC < ret]
 
 Analyzing \dbl:
+* pc: pc
 * This: None
 * Return: <ret>
 * Params:
   lvars: { $x -> <$x> }
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: { $x -> <$x'1> }
-    pc: pc
 Constraints:
   [$x < $x'1, $x'1 < ret]
 
 Analyzing \flow_a_to_b:
+* pc: pc
 * This: None
 * Return: <ret>
 * Params:
   lvars: { $c -> \C<\C, lump, a=<A>, b=?thunk> }
-  pc: pc
 * Final environment:
   Deps: { "\\C#setb"; "\\dbl" }
   Locals:
     lvars: { $c -> \C<\C, lump, a=<A>, b=?thunk>; $n -> <$n> }
-    pc: pc
 Constraints:
   [A < .a, \C < .a, {\dbl<pc>(<.a>): <\dbl_ret>}, \dbl_ret < $n,
    {(this: \C<\C, lump, a=<A>, b=?thunk>)->\C#setb<pc>(<$n>): <\C#setb_ret>}]
 
 Analyzing \flow_b_to_b:
+* pc: pc
 * This: None
 * Return: <ret>
 * Params:
   lvars: { $c -> \C<\C, lump, a=?thunk, b=<B>> }
-  pc: pc
 * Final environment:
   Deps: { "\\C#setb" }
   Locals:
     lvars: { $c -> \C<\C, lump, a=?thunk, b=<B>> }
-    pc: pc
 Constraints:
   [B < .b, \C < .b,
    {(this: \C<\C, lump, a=?thunk, b=<B>>)->\C#setb<pc>(<.b>): <\C#setb_ret>}]
 
 Analyzing \flow_bot_to_b:
+* pc: pc
 * This: None
 * Return: <ret>
 * Params:
   lvars: { $c -> \C<\C, lump, a=?thunk, b=?thunk> }
-  pc: pc
 * Final environment:
   Deps: { "\\C#setb"; "\\dbl" }
   Locals:
     lvars: { $c -> \C<\C, lump, a=?thunk, b=?thunk> }
-    pc: pc
 Constraints:
   [{\dbl<pc>(<PUBLIC>): <\dbl_ret>}, {\dbl<pc>(<\dbl_ret>): <\dbl_ret'1>},
    {(this: \C<\C, lump, a=?thunk, b=?thunk>)->\C#setb<pc>(<\dbl_ret'1>): <\C#setb_ret>}]
 
 Analyzing \indirect_flow_a_to_b:
+* pc: pc
 * This: None
 * Return: <ret>
 * Params:
   lvars: { $c -> \C<\C, lump, a=<A>, b=?thunk> }
-  pc: pc
 * Final environment:
   Deps: { "\\C#setb" }
   Locals:
     lvars: { $c -> \C<\C, lump, a=<A>, b=?thunk> }
-    pc: pc
 Constraints:
-  [A < .a, \C < .a, .a < pcjoin, pc < pcjoin,
+  [A < .a, \C < .a, pc < pcjoin, .a < pcjoin,
    {(this: \C<\C, lump, a=<A>, b=?thunk>)->\C#setb<pcjoin>(<PUBLIC>): <\C#setb_ret>}]
 
 Analyzing \indirect_flow_a_to_b_bis:
+* pc: pc
 * This: None
 * Return: <ret>
 * Params:
   lvars:
     { $c1 -> \C<\C, lump, a=?thunk, b=?thunk>;
       $c2 -> \C<\C'1, lump'1, a=?thunk, b=<B>> }
-  pc: pc
 * Final environment:
   Deps: { "\\C#is_a_pos"; "\\C#setb" }
   Locals:
     lvars:
       { $c1 -> \C<\C, lump, a=?thunk, b=?thunk>;
         $c2 -> \C<\C'1, lump'1, a=?thunk, b=<B>> }
-    pc: pc
 Constraints:
   [{(this: \C<\C, lump, a=?thunk, b=?thunk>)->\C#is_a_pos<pc>(): <\C#is_a_pos_ret>},
-   B < .b, \C'1 < .b, \C#is_a_pos_ret < pcjoin, pc < pcjoin,
+   B < .b, \C'1 < .b, pc < pcjoin, \C#is_a_pos_ret < pcjoin,
    {(this: \C<\C'1, lump'1, a=?thunk, b=<B>>)->\C#setb<pcjoin>(<.b>): <\C#setb_ret>}]
 
 Flow constraints for \C#is_a_pos:
@@ -182,7 +174,7 @@ Flow constraints for \indirect_flow_a_to_b:
   
   Simplified: [PUBLIC < B, A < B]
   Raw:
-  [A < .a, \C < .a, .a < pcjoin, pc < pcjoin,
+  [A < .a, \C < .a, pc < pcjoin, .a < pcjoin,
    exists a b c d e.
      [d < B, a < B, b < B, PUBLIC < a, pcjoin < b, B < B, B < B, A < A,
       A < A, lump = c, \C < d, e < \C#setb_ret]]
@@ -194,7 +186,7 @@ Flow constraints for \indirect_flow_a_to_b_bis:
   [exists a b c d e.
      [A < a, d < a, a < e, PUBLIC < e, a < e, PUBLIC < e, pc < b, B < B,
       B < B, A < A, A < A, lump = c, \C < d, e < \C#is_a_pos_ret], B < .b,
-   \C'1 < .b, \C#is_a_pos_ret < pcjoin, pc < pcjoin,
+   \C'1 < .b, pc < pcjoin, \C#is_a_pos_ret < pcjoin,
    exists a b c d e.
      [d < B, a < B, b < B, .b < a, pcjoin < b, B < B, B < B, A < A, A < A,
       lump'1 = c, \C'1 < d, e < \C#setb_ret]]

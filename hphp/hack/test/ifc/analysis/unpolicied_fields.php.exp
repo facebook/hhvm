@@ -9,74 +9,69 @@ Decls:
   function \D#__construct: { kind = public }
   
 Analyzing __construct:
+* pc: pc
 * This: \C<\C, lump, cx=<.cx>>
 * Return: <ret>
 * Params:
   lvars: { $cd -> \D<\D, lump'1>; $cx -> <$cx>; $cy -> <$cy> }
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: { $cd -> \D<\D, lump'1>; $cx -> <$cx>; $cy -> <$cy> }
-    pc: pc
 Constraints:
   [\C < .cx, $cx < .cx, pc < .cx, \C < lump, $cy < lump, pc < lump,
    \C < lump, lump'1 = lump, \D < lump, pc < lump]
 
 Analyzing testGetUnpolicied:
+* pc: pc
 * This: \C<\C, lump, cx=?thunk>
 * Return: \D<\D, lump'1>
 * Params:
   lvars: {}
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: {}
-    pc: pc
 Constraints:
   [lump < .cd, \C < .cd, lump = lump'1, .cd < \D]
 
 Analyzing testSetMultipleUnpolicied:
+* pc: pc
 * This: \C<\C, lump, cx=?thunk>
 * Return: <ret>
 * Params:
   lvars: { $d -> \D<\D, lump'1> }
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: { $d -> \D<\D, lump'1> }
-    pc: pc
 Constraints:
   [\C < lump, PUBLIC < lump, pc < lump, \C < lump, lump'1 = lump, \D < lump,
    pc < lump]
 
 Analyzing testSetDeep:
+* pc: pc
 * This: \C<\C, lump, cx=?thunk>
 * Return: <ret>
 * Params:
   lvars: { $i -> <$i> }
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: { $i -> <$i> }
-    pc: pc
 Constraints:
   [lump < .cd, \C < .cd, .cd < lump, $i < lump, pc < lump]
 
 Analyzing __construct:
+* pc: pc
 * This: \D<\D, lump>
 * Return: <ret>
 * Params:
   lvars: { $di -> <$di> }
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: { $di -> <$di> }
-    pc: pc
 Constraints:
   [\D < lump, $di < lump, pc < lump]
 

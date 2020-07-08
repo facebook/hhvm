@@ -7,51 +7,49 @@ Decls:
   function \earlyReturn: { kind = public }
   
 Analyzing __construct:
+* pc: pc
 * This: \PublicData<\PublicData, lump, data=<PUBLIC>>
 * Return: <ret>
 * Params:
   lvars: { $data -> <$data> }
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: { $data -> <$data> }
-    pc: pc
 Constraints:
   [\PublicData = PUBLIC, $data = PUBLIC, pc = PUBLIC]
 
 Analyzing __construct:
+* pc: pc
 * This: \PoliciedData<\PoliciedData, lump, data=<SECRET>>
 * Return: <ret>
 * Params:
   lvars: { $data -> <$data> }
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: { $data -> <$data> }
-    pc: pc
 Constraints:
   [\PoliciedData < SECRET, $data < SECRET, pc < SECRET]
 
 Analyzing \earlyReturn:
+* pc: pc
 * This: None
 * Return: <ret>
 * Params:
   lvars:
     { $x -> \PoliciedData<\PoliciedData, lump, data=<SECRET>>;
       $y -> \PublicData<\PublicData, lump'1, data=<PUBLIC>> }
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars:
       { $x -> \PoliciedData<\PoliciedData, lump, data=<SECRET>>;
         $y -> \PublicData<\PublicData, lump'1, data=<PUBLIC>> }
-    pc: pc
+    pc: .data
 Constraints:
   [SECRET < .data, \PoliciedData < .data, \PublicData = PUBLIC,
-   PUBLIC = PUBLIC, .data = PUBLIC, pc = PUBLIC, pc = PUBLIC]
+   PUBLIC = PUBLIC, pc = PUBLIC, .data = PUBLIC]
 
 Flow constraints for \PoliciedData#__construct:
   
@@ -68,7 +66,7 @@ Flow constraints for \earlyReturn:
   Simplified: SECRET = PUBLIC
   Raw:
   [SECRET < .data, \PoliciedData < .data, \PublicData = PUBLIC,
-   PUBLIC = PUBLIC, .data = PUBLIC, pc = PUBLIC, pc = PUBLIC]
+   PUBLIC = PUBLIC, pc = PUBLIC, .data = PUBLIC]
 
 There are privacy policy errors in \earlyReturn:
   Data with policy SECRET appears in context PUBLIC.

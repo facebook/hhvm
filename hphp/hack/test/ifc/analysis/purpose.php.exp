@@ -10,87 +10,81 @@ Decls:
   function \D#__construct: { kind = public }
   
 Analyzing __construct:
+* pc: pc
 * This: \D<\D, lump>
 * Return: <ret>
 * Params:
   lvars: { $di -> <$di> }
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: { $di -> <$di> }
-    pc: pc
 Constraints:
   [\D < lump, $di < lump, pc < lump]
 
 Analyzing __construct:
+* pc: pc
 * This: \C<\C, lump, ci=<SECRET>, d=\D<SECRET, SECRET>>
 * Return: <ret>
 * Params:
   lvars: { $ci -> <$ci>; $d -> \D<\D, lump'1> }
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: { $ci -> <$ci>; $d -> \D<\D, lump'1> }
-    pc: pc
 Constraints:
   [\C < SECRET, $ci < SECRET, pc < SECRET, \C < SECRET, lump'1 = SECRET,
    \D < SECRET, pc < SECRET]
 
 Analyzing getShallow1:
+* pc: pc
 * This: \C<\C, lump, ci=<SECRET>, d=?thunk>
 * Return: <ret>
 * Params:
   lvars: {}
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: {}
-    pc: pc
 Constraints:
   [SECRET < .ci, \C < .ci, .ci < ret]
 
 Analyzing getShallow2:
+* pc: pc
 * This: \C<\C, lump, ci=?thunk, d=\D<SECRET, SECRET>>
 * Return: \D<\D, lump'1>
 * Params:
   lvars: {}
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: {}
-    pc: pc
 Constraints:
   [SECRET < .d, \C < .d, SECRET = lump'1, .d < \D]
 
 Analyzing getDeep:
+* pc: pc
 * This: \C<\C, lump, ci=?thunk, d=\D<SECRET, SECRET>>
 * Return: <ret>
 * Params:
   lvars: {}
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: {}
-    pc: pc
 Constraints:
   [SECRET < .d, \C < .d, SECRET < .di, .d < .di, .di < ret]
 
 Analyzing writeDeep:
+* pc: pc
 * This: \C<\C, lump, ci=?thunk, d=\D<SECRET, SECRET>>
 * Return: <ret>
 * Params:
   lvars: {}
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: {}
-    pc: pc
 Constraints:
   [SECRET < .d, \C < .d, .d < SECRET, PUBLIC < SECRET, pc < SECRET]
 

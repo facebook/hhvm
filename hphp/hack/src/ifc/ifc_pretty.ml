@@ -138,7 +138,13 @@ let locals fmt env =
       "@[<hov2>lvars:@ %a@]"
       (LMap.make_pp Local_id.pp ptype)
       lenv.le_vars;
-    fprintf fmt "@,@[<hov2>pc: @[<hov>%a@]@]" policy (List.last_exn lenv.le_gpc);
+    let policy_list = list comma_sep policy in
+    begin
+      match lenv.le_pc with
+      | [] -> ()
+      | _ :: _ ->
+        fprintf fmt "@,@[<hov2>pc: @[<hov>%a@]@]" policy_list lenv.le_pc
+    end;
     pp_close_box fmt ()
   in
   let pp_lenv_opt fmt = function
@@ -149,7 +155,8 @@ let locals fmt env =
 
 let renv fmt renv =
   pp_open_vbox fmt 0;
-  fprintf fmt "* @[<hov2>This:@ @[<hov>%a@]@]" (option ptype) renv.re_this;
+  fprintf fmt "* @[<hov2>pc: @[<hov>%a@]@]" policy renv.re_gpc;
+  fprintf fmt "@,* @[<hov2>This:@ @[<hov>%a@]@]" (option ptype) renv.re_this;
   fprintf fmt "@,* @[<hov2>Return:@ @[<hov>%a@]@]" ptype renv.re_ret;
   pp_close_box fmt ()
 

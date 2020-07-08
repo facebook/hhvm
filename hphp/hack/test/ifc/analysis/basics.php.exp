@@ -6,58 +6,54 @@ Decls:
   function \condition: { kind = public }
   
 Analyzing \binop:
+* pc: pc
 * This: None
 * Return: <ret>
 * Params:
   lvars: { $x -> <$x>; $y -> <$y> }
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: { $x -> <$x>; $y -> <$y> }
-    pc: pc
 Constraints:
   $x < ret
 
 Analyzing \assign0:
+* pc: pc
 * This: None
 * Return: <ret>
 * Params:
   lvars: { $arg -> <$arg> }
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: { $arg -> <$arg>; $x -> <$x'1> }
-    pc: pc
 Constraints:
   [$arg < $x, PUBLIC < $x'1, $x'1 < ret]
 
 Analyzing \assign1:
+* pc: pc
 * This: None
 * Return: <ret>
 * Params:
   lvars: { $arg -> <$arg> }
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: { $arg -> <$arg>; $x -> <$x'1> }
-    pc: pc
 Constraints:
   [$arg < $x, $x < $x'1, $x'1 < ret]
 
 Analyzing \condition:
+* pc: pc
 * This: None
 * Return: <ret>
 * Params:
   lvars: { $a0 -> <$a0>; $a1 -> <$a1>; $a2 -> <$a2> }
-  pc: pc
 * Final environment:
   Deps: {}
   Locals:
     lvars: { $a0 -> <$a0>; $a1 -> <$a1>; $a2 -> <$a2>; $x -> <$x'2> }
-    pc: pc
 Constraints:
   [$a0 < $x, $a2 < $x, $a1 < $x'1, $a2 < $x'1, $x < $x'2, $x'1 < $x'2,
    $x'2 < ret]

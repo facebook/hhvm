@@ -36,18 +36,18 @@ let new_proto_renv saved_tenv scope decl_env =
     pre_tenv = saved_tenv;
   }
 
-let new_renv proto_renv this_ty ret_ty =
-  { re_proto = proto_renv; re_this = this_ty; re_ret = ret_ty }
-
-let empty_lenv global_pc =
-  { le_vars = LMap.empty; le_gpc = [global_pc]; le_lpc = [] }
-
-let new_env global_pc =
+let new_renv proto_renv this_ty ret_ty global_pc =
   {
-    e_cont = KMap.singleton K.Next (empty_lenv global_pc);
-    e_acc = [];
-    e_deps = SSet.empty;
+    re_proto = proto_renv;
+    re_this = this_ty;
+    re_ret = ret_ty;
+    re_gpc = global_pc;
   }
+
+let empty_lenv = { le_vars = LMap.empty; le_pc = [] }
+
+let new_env =
+  { e_cont = KMap.singleton K.Next empty_lenv; e_acc = []; e_deps = SSet.empty }
 
 let acc env update = { env with e_acc = update env.e_acc }
 
@@ -64,9 +64,8 @@ let merge_lenv ~union env lenv1 lenv2 =
   let (env, le_vars) =
     LMap.merge_env env lenv1.le_vars lenv2.le_vars ~combine
   in
-  let le_gpc = lenv1.le_gpc @ lenv2.le_gpc in
-  let le_lpc = lenv1.le_lpc @ lenv2.le_lpc in
-  (env, { le_vars; le_gpc; le_lpc })
+  let le_pc = lenv1.le_pc @ lenv2.le_pc in
+  (env, { le_vars; le_pc })
 
 (* Merge continuation envs, if a continuation is assigned a
    local env only in one of the arguments it will be kept as
@@ -96,29 +95,24 @@ let get_local_type env lid =
   | None -> Tunion []
   | Some lenv -> LMap.find lid lenv.le_vars
 
-let get_gpc_policy env k =
-  match get_lenv_opt env k with
-  | None -> []
-  | Some lenv -> lenv.le_gpc
-
 let get_lpc_policy env k =
   match get_lenv_opt env k with
   | None -> []
-  | Some lenv -> lenv.le_lpc
+  | Some lenv -> lenv.le_pc
+
+let get_gpc_policy renv env k = renv.re_gpc :: get_lpc_policy env k
 
 let push_pc env k pc =
   match get_lenv_opt env k with
   | None -> env
   | Some lenv ->
-    let lenv =
-      { lenv with le_gpc = pc :: lenv.le_gpc; le_lpc = pc :: lenv.le_lpc }
-    in
+    let lenv = { lenv with le_pc = pc :: lenv.le_pc } in
     set_cont env k lenv
 
-let set_pcs env k gpc lpc =
+let set_pc env k pc =
   match get_lenv_opt env k with
   | None -> env
-  | Some lenv -> set_cont env k { lenv with le_gpc = gpc; le_lpc = lpc }
+  | Some lenv -> set_cont env k { lenv with le_pc = pc }
 
 let merge_lenv_into ~union env lenv k =
   match get_lenv_opt env k with
@@ -143,16 +137,8 @@ let merge_conts_into ~union env ks k_to =
   | Some lenv -> merge_lenv_into ~union env lenv k_to
 
 let merge_pcs_into env ks k_to =
-  let f (lpc, gpc) k =
-    match get_lenv_opt env k with
-    | None -> (lpc, gpc)
-    | Some lenv -> (lenv.le_lpc @ lpc, lenv.le_gpc @ gpc)
-  in
-  let (lpc, gpc) = List.fold_left f ([], []) ks in
+  let f pc k = get_lpc_policy env k @ pc in
+  let pc = List.fold_left f [] ks in
   match get_lenv_opt env k_to with
   | None -> env
-  | Some lenv ->
-    set_cont
-      env
-      k_to
-      { lenv with le_lpc = lpc @ lenv.le_lpc; le_gpc = gpc @ lenv.le_gpc }
+  | Some lenv -> set_cont env k_to { lenv with le_pc = pc @ lenv.le_pc }

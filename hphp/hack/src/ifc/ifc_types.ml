@@ -94,10 +94,7 @@ type local_env = {
      are not observable outside the current function.
      Assignments to local variables fall into this
      category. *)
-  le_lpc: policy list;
-  (* Policy tracking effects with global visibility,
-     like assignments to fields of an argument. *)
-  le_gpc: policy list;
+  le_pc: policy list;
 }
 
 (* The environment is mutable data that
@@ -160,6 +157,8 @@ type renv = {
   re_this: ptype option;
   (* Return type of the function being checked. *)
   re_ret: ptype;
+  (* The initial program counter for the function *)
+  re_gpc: policy;
 }
 
 (* The analysis result for a callable *)

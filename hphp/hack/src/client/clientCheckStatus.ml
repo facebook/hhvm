@@ -78,6 +78,9 @@ let print_error_color e =
 let print_error_contextual e =
   Printf.printf "%s" (Errors.to_contextual_string e)
 
+let print_error_highlighted e =
+  Printf.printf "%s" (Errors.to_highlighted_string e)
+
 let is_stale_msg liveness =
   match liveness with
   | Stale_status ->
@@ -128,6 +131,7 @@ let go status output_json from error_format max_errors =
       match error_format with
       | Errors.Context -> print_error_contextual
       | Errors.Raw -> print_error_color
+      | Errors.Highlighted -> print_error_highlighted
     in
     List.iter error_list f;
     Option.iter

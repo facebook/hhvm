@@ -32,6 +32,7 @@ type severity =
 type format =
   | Context
   | Raw
+  | Highlighted
 
 type typing_error_callback = ?code:int -> (Pos.t * string) list -> unit
 
@@ -579,7 +580,8 @@ let format_messages (msgs : Pos.absolute message list) : string =
 (* E.g. "10 errors found." *)
 let format_summary format errors dropped_count max_errors : string option =
   match format with
-  | Context ->
+  | Context
+  | Highlighted ->
     let total = List.length errors + dropped_count in
     let formatted_total =
       Printf.sprintf
@@ -621,6 +623,22 @@ let to_contextual_string (error : Pos.absolute error_) : string =
        buf
        "Error could not be pretty-printed. Please file a bug.");
   Buffer.add_string buf "\n";
+  Buffer.contents buf
+
+let format_header_highlighted error_code msg : string =
+  let error_code = error_code_to_string error_code in
+  Printf.sprintf "%s %s\n" error_code msg
+
+let to_highlighted_string (error : Pos.absolute error_) : string =
+  let (error_code, msgl) = (get_code error, to_list error) in
+  let buf = Buffer.create 50 in
+  (match msgl with
+  | [] -> failwith "Impossible: an error always has non-empty list of messages"
+  | (_pos1, msg1) :: rest_of_error ->
+    Buffer.add_string buf (format_header_highlighted error_code msg1);
+    List.iter rest_of_error (fun (_p, w) ->
+        let msg = Printf.sprintf "%s\n" w in
+        Buffer.add_string buf msg));
   Buffer.contents buf
 
 let to_absolute_for_test error =

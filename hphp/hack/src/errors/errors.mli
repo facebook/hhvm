@@ -43,6 +43,7 @@ type severity =
 type format =
   | Context
   | Raw
+  | Highlighted
 
 type typing_error_callback = ?code:int -> (Pos.t * string) list -> unit
 
@@ -884,6 +885,10 @@ val convert_errors_to_string :
 val to_string : ?indent:bool -> Pos.absolute error_ -> string
 
 val to_contextual_string : Pos.absolute error_ -> string
+
+val format_header_highlighted : int -> string -> string
+
+val to_highlighted_string : Pos.absolute error_ -> string
 
 val format_summary :
   format -> 'a error_ list -> int -> int option -> string option

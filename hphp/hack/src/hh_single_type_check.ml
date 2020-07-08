@@ -108,6 +108,7 @@ let print_error format ?(oc = stderr) l =
     match format with
     | Errors.Context -> Errors.to_contextual_string
     | Errors.Raw -> (fun e -> Errors.to_string ~indent:false e)
+    | Errors.Highlighted -> Errors.to_highlighted_string
   in
   Out_channel.output_string oc (formatter (Errors.to_absolute_for_test l))
 
@@ -291,6 +292,7 @@ let parse_options () =
             match s with
             | "raw" -> error_format := Errors.Raw
             | "context" -> error_format := Errors.Context
+            | "highlighted" -> error_format := Errors.Highlighted
             | _ -> print_string "Warning: unrecognized error format.\n"),
         "<raw|context> Error formatting style" );
       ("--lint", Arg.Unit (set_mode Lint), " Produce lint errors");

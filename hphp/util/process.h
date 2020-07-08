@@ -114,7 +114,7 @@ struct Process {
   static std::string GetAppName();
 
   /**
-   * This machine'a name.
+   * This machine's name.
    */
   static std::string GetHostName();
 

@@ -270,17 +270,9 @@ std::string Process::GetCurrentUser() {
 }
 
 std::string Process::GetCurrentDirectory() {
-  auto const kDeleted = " (deleted)";
-  auto const kDeletedLen = strlen(kDeleted);
-
-  // Allocate additional space for kDeleted part.
-  char* buf = (char*)alloca(sizeof(char) * (PATH_MAX + kDeletedLen));
-  memset(buf, 0, PATH_MAX + kDeletedLen);
-  char* cwd = getcwd(buf, PATH_MAX);
-
-  if (cwd != nullptr) {
-    return cwd;
-  }
+  char buf[PATH_MAX + 64];   // additional space for suffixes like " (deleted)";
+  memset(buf, 0, sizeof(buf));
+  if (char* cwd = getcwd(buf, PATH_MAX)) return cwd;
 
 #if defined(__linux__)
   if (errno != ENOENT) {
@@ -291,11 +283,12 @@ std::string Process::GetCurrentDirectory() {
   if (r == -1) {
     return "";
   }
-
-  if (r >= kDeletedLen && !strcmp(buf + r - kDeletedLen, " (deleted)")) {
+  auto const kDeleted = " (deleted)";
+  auto const kDeletedLen = strlen(kDeleted);
+  if (r >= kDeletedLen && !strcmp(buf + r - kDeletedLen, kDeleted)) {
     buf[r - kDeletedLen] = 0;
   }
-  return buf;
+  return &(buf[0]);
 #else
   // /proc/self/cwd is not available.
   return "";

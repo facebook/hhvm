@@ -3385,8 +3385,8 @@ void parse_record(AsmState& as) {
  */
 void parse_filepath(AsmState& as) {
   auto const str = read_litstr(as);
-  if (nullptr == g_hhas_handler) {
-    // We don't want to use file path from cached HHAS
+  if (!g_unit_emitter_compile_hook) {
+    // We don't want to use file path from cached data
     as.ue->m_filepath = str;
   }
   as.in.expectWs(';');
@@ -3737,8 +3737,11 @@ std::unique_ptr<UnitEmitter> assemble_string(
     if (!swallowErrors) throw;
     ue = createFatalUnit(sd, sha1, FatalOp::Runtime,
                          makeStaticString(e.what()));
-  } catch (const AssemblerError& e) {
-    if (!swallowErrors) throw;
+  } catch (AssemblerError& e) {
+    if (!swallowErrors) {
+      e.hhas = std::string{code, (size_t)codeLen};
+      throw;
+    }
     ue = createFatalUnit(sd, sha1, FatalOp::Runtime, makeStaticString(e.what()));
   } catch (const AssemblerFatal& e) {
     if (!swallowErrors) throw;
@@ -3746,7 +3749,10 @@ std::unique_ptr<UnitEmitter> assemble_string(
   } catch (const std::exception& e) {
     if (!swallowErrors) {
       // assembler should throw only AssemblerErrors and FatalErrorExceptions
-      throw AssemblerError(folly::sformat("AssemblerError: {}", e.what()));
+      throw AssemblerError(
+        folly::sformat("AssemblerError: {}", e.what()),
+        std::string{code, (size_t)codeLen}
+      );
     }
     ue = createFatalUnit(sd, sha1, FatalOp::Runtime,
                          makeStaticString(e.what()));

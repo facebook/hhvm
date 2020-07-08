@@ -51,7 +51,7 @@ namespace HPHP {
 
 TRACE_SET_MOD(extern_compiler);
 
-HhasHandler g_hhas_handler = nullptr;
+UnitEmitterCompileHook g_unit_emitter_compile_hook = nullptr;
 
 namespace {
 
@@ -352,21 +352,6 @@ struct ExternCompiler {
     }
   }
 
-  int64_t logTime(
-    StructuredLogEntry& log,
-    int64_t t,
-    const char* name,
-    bool first = false
-  ) {
-    if (!RuntimeOption::EvalLogExternCompilerPerf) return 0;
-    int64_t current = Timer::GetCurrentTimeMicros();
-    if (first) return current;
-    int64_t diff = current - t;
-    log.setInt(name, diff);
-    FTRACE(2, "{} took {} us\n", name, diff);
-    return current;
-  }
-
   std::unique_ptr<UnitEmitter> compile(
     const char* filename,
     const SHA1& sha1,
@@ -378,21 +363,8 @@ struct ExternCompiler {
   ) {
     tracing::BlockNoTrace _{"compile-unit-emitter"};
 
-    auto isHookInstalled = nullptr != g_hhas_handler;
-    std::string prog;
-    std::unique_ptr<Unit> u;
     try {
-      m_compilations++;
-      StructuredLogEntry log;
-      log.setStr("filename", filename);
-      int64_t startTime = logTime(log, 0, nullptr, true);
-      int64_t t = startTime;
-
-      auto statefulLogTime = [&](const char* name) {
-        t = logTime(log, t, name);
-      };
-
-      auto compile = [&]() {
+      auto const compileHHAS = [&] {
         tracing::Block _{
           "extern-compiler-invoke",
           [&] {
@@ -401,65 +373,62 @@ struct ExternCompiler {
               .add("code_size", code.size());
           }
         };
-        if (!isRunning()) {
-          start();
-        }
+        if (!isRunning()) start();
         writeProgram(filename, sha1, code, forDebuggerEval, options);
-        statefulLogTime("send_source");
-        auto hhas = readResult(&log);
-        statefulLogTime("receive_hhas");
+        StructuredLogEntry log;
+        auto const hhas = readResult(&log);
+        if (RuntimeOption::EvalLogExternCompilerPerf) {
+          log.setStr("filename", filename);
+          StructuredLog::log("hhvm_detailed_frontend_performance", log);
+        }
         return hhas;
       };
 
-      if (isHookInstalled) {
-        prog = g_hhas_handler(
+      auto const assembleUE = [&] (const std::string& hhas) {
+        return assemble_string(
+          hhas.data(),
+          hhas.length(),
+          filename,
+          sha1,
+          nativeFuncs,
+          false /* swallow errors */,
+          wantsSymbolRefs
+        );
+      };
+
+      if (g_unit_emitter_compile_hook) {
+        return g_unit_emitter_compile_hook(
           filename,
           sha1,
           code.size(),
-          log,
-          statefulLogTime,
-          compile,
-          options
+          compileHHAS,
+          assembleUE,
+          options,
+          nativeFuncs
         );
       } else {
-        prog = compile();
+        return assembleUE(compileHHAS());
       }
-      t = logTime(log, startTime, "total_hhas_retrieval");
-
-      auto ue = assemble_string(prog.data(),
-                                prog.length(),
-                                filename,
-                                sha1,
-                                nativeFuncs,
-                                false /* swallow errors */,
-                                wantsSymbolRefs
-                              );
-      statefulLogTime("assemble_hhas");
-      log.setInt("total_time", t - startTime);
-      if (RuntimeOption::EvalLogExternCompilerPerf) {
-        StructuredLog::log("hhvm_detailed_frontend_performance", log);
-      }
-      return ue;
-    } catch (CompileException& ex) {
+    } catch (const CompileException& ex) {
       stop();
       if (m_options.verboseErrors) {
         Logger::FError("ExternCompiler Error: {}", ex.what());
       }
       throw;
-    } catch (CompilerFatal& ex) {
+    } catch (const CompilerFatal&) {
       // this catch is here so we don't fall into the std::runtime_error one
       throw;
-    } catch (AssemblerFatal& ex) {
+    } catch (const AssemblerFatal&) {
       // this catch is here so we don't fall into the std::runtime_error one
       throw;
-    } catch (FatalErrorException&) {
+    } catch (const FatalErrorException&) {
       // we want these to propagate out of the compiler
       throw;
-    } catch (AssemblerUnserializationError& ex) {
+    } catch (const AssemblerUnserializationError& ex) {
       // This (probably) has nothing to do with the php/hhas, so don't do the
       // verbose error handling we have in the AssemblerError case.
       throw;
-    } catch (AssemblerError& ex) {
+    } catch (const AssemblerError& ex) {
       if (m_options.verboseErrors) {
         auto const msg = folly::sformat(
           "{}\n"
@@ -469,7 +438,8 @@ struct ExternCompiler {
           "{}\n",
           ex.what(),
           code,
-          prog);
+          ex.hhas
+        );
         Logger::FError("ExternCompiler Generated a bad unit: {}", msg);
 
         // Throw the extended message to ensure the fataling unit contains the
@@ -477,7 +447,7 @@ struct ExternCompiler {
         throw AssemblerError(msg);
       }
       throw;
-    } catch (std::runtime_error& ex) {
+    } catch (const std::runtime_error& ex) {
       if (m_options.verboseErrors) {
         Logger::FError("ExternCompiler Runtime Error: {}", ex.what());
       }
@@ -516,7 +486,6 @@ private:
   FILE* m_err{nullptr};
   std::unique_ptr<LogThread> m_logStderrThread;
 
-  unsigned m_compilations{0};
   const CompilerOptions& m_options;
 };
 
@@ -1028,8 +997,6 @@ void ExternCompiler::stop() {
     m_err = m_in = m_out = nullptr;
     m_pid = kInvalidPid;
   };
-
-  m_compilations = 0;
 
   auto ret = kill(m_pid, SIGTERM);
   if (ret == -1) {

@@ -60,8 +60,11 @@ struct AssemblerFatal : std::runtime_error {
 };
 
 struct AssemblerError : std::runtime_error {
-  explicit AssemblerError(const std::string& msg) : std::runtime_error(msg) {}
+  explicit AssemblerError(const std::string& msg, const std::string& hhas = std::string{})
+    : std::runtime_error(msg)
+    , hhas{hhas} {}
   AssemblerError(int where, const std::string& what);
+  std::string hhas;
 };
 
 struct AssemblerUnserializationError : AssemblerError {

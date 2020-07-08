@@ -145,15 +145,16 @@ struct HackcUnitCompiler : public UnitCompiler {
   virtual const char* getName() const override { return "HackC"; }
 };
 
-using HhasHandler = std::string (*)(
-  const char*,
-  const SHA1&,
-  folly::StringPiece::size_type,
-  StructuredLogEntry&,
-  std::function<void(const char *)>,
-  std::function<std::string()>,
-  const RepoOptions&
-);
+using UnitEmitterCompileHook =
+  std::unique_ptr<UnitEmitter> (*)(
+    const char*,
+    const SHA1&,
+    folly::StringPiece::size_type,
+    const std::function<std::string()>&,
+    const std::function<std::unique_ptr<UnitEmitter>(const std::string&)>&,
+    const RepoOptions&,
+    const Native::FuncTable&
+  );
+extern UnitEmitterCompileHook g_unit_emitter_compile_hook;
 
-extern HhasHandler g_hhas_handler;
 }

@@ -388,10 +388,6 @@ ALWAYS_INLINE bool checkHACArrayPlus() {
   return RuntimeOption::EvalHackArrCompatNotices &&
          RuntimeOption::EvalHackArrCompatCheckArrayPlus;
 }
-ALWAYS_INLINE bool checkHACArrayKeyCast() {
-  return RuntimeOption::EvalHackArrCompatNotices &&
-         RuntimeOption::EvalHackArrCompatCheckArrayKeyCast;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -680,14 +680,7 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
 
   // The logic here is a specialization of tvToKey().
   if (key.isNull()) {
-    if (!ad->useWeakKeys()) {
-      throwInvalidArrayKeyException(&immutable_uninit_base, ad);
-    }
-    if (checkHACArrayKeyCast()) {
-      raiseHackArrCompatImplicitArrayKey(&immutable_uninit_base);
-    }
-    return fn(make_tv<KindOfPersistentString>(staticEmptyString()),
-              std::forward<Args>(args)...);
+    throwInvalidArrayKeyException(&immutable_uninit_base, ad);
   }
 
   return fn(key, std::forward<Args>(args)...);

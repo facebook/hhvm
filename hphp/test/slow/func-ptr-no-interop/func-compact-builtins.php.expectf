@@ -1,31 +1,6 @@
-
-Warning: Invalid operand type was used: Invalid type used as key in %s/func-ptr-no-interop/func-compact-builtins.php on line 16
-Cannot convert func to string
-
-Warning: Invalid operand type was used: Invalid type used as key in %s/func-ptr-no-interop/func-compact-builtins.php on line 17
-array(3) {
-  [""]=>
-  int(1)
-  ["foo"]=>
-  int(1)
-  [1]=>
-  int(1)
-}
-
-Warning: Array key should be either a string or an integer in %s/func-ptr-no-interop/func-compact-builtins.php on line 18
-bool(false)
-
-Warning: Invalid operand type was used: Invalid type used as key in %s/func-ptr-no-interop/func-compact-builtins.php on line 19
-
-Warning: Array key should be either a string or an integer in %s/func-ptr-no-interop/func-compact-builtins.php on line 19
-bool(false)
-
-Warning: Invalid operand type was used: Invalid type used as key in %s/func-ptr-no-interop/func-compact-builtins.php on line 20
-
-Warning: Invalid operand type was used: Invalid type used as key in %s/func-ptr-no-interop/func-compact-builtins.php on line 20
-array(0) {
-}
-
-Warning: Invalid operand type was used: Invalid type used as key in %s/func-ptr-no-interop/func-compact-builtins.php on line 21
-array(0) {
-}
+Invalid darray key: expected a key of type int or string, func given
+Invalid darray key: expected a key of type int or string, func given
+Invalid darray key: expected a key of type int or string, func given
+Invalid darray key: expected a key of type int or string, func given
+Invalid darray key: expected a key of type int or string, func given
+Invalid darray key: expected a key of type int or string, func given

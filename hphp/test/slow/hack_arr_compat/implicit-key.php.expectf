@@ -1,236 +1,119 @@
 ======================== get =================================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== null coalesce =======================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== idx =================================
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== isset ===============================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== array key exists ====================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Warning: Array key should be either a string or an integer in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Warning: Array key should be either a string or an integer in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
-
-Warning: Array key should be either a string or an integer in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== empty ===============================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== set =================================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== set-op ==============================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== unset ===============================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== base-elem ===========================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== base-elem no-warn ===================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== base-define =========================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== base-unset ==========================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== dim-elem ============================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== dim-elem no-warn ====================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== dim-define ==========================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== dim-unset ===========================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== fini-get ============================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== fini-get no-warn ====================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== fini-isset ==========================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== fini-empty ==========================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== fini-set ============================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== fini-set-op =========================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given
 ======================== fini-unset ==========================
-
-Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
-
-Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+InvalidArgumentException: Invalid array key: expected a key of type int or string, null given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, bool given
+InvalidArgumentException: Invalid array key: expected a key of type int or string, double given

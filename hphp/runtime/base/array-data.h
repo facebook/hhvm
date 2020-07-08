@@ -902,13 +902,11 @@ void raiseHackArrCompatArrHackArrCmp();
 void raiseHackArrCompatDVArrCmp(const ArrayData*, const ArrayData*, bool);
 
 std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key);
-void raiseHackArrCompatImplicitArrayKey(const TypedValue* key);
 
 StringData* getHackArrCompatNullHackArrayKeyMsg();
 
 bool checkHACCompare();
 bool checkHACArrayPlus();
-bool checkHACArrayKeyCast();
 
 /*
  * Add a provenance tag for the current vmpc to `ad`, copying instead from

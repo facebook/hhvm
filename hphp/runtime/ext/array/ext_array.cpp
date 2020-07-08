@@ -339,24 +339,10 @@ bool HHVM_FUNCTION(array_key_exists,
 
   auto const cell = key.asTypedValue();
 
-  auto const fail = [&] {
-    if (!ad->useWeakKeys()) throwInvalidArrayKeyException(cell, ad);
-    if (checkHACArrayKeyCast()) {
-      raiseHackArrCompatImplicitArrayKey(cell);
-    }
-    raise_warning("Array key should be either a string or an integer");
-    return false;
-  };
-
   switch (cell->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      if (ad->isHackArrayType()) {
-        throwInvalidArrayKeyException(cell, ad);
-      } else if (checkHACArrayKeyCast() && ad->useWeakKeys()) {
-        raiseHackArrCompatImplicitArrayKey(cell);
-      }
-      return ad->useWeakKeys() && ad->exists(staticEmptyString());
+      throwInvalidArrayKeyException(cell, ad);
 
     case KindOfClsMeth:
       raiseClsMethToVecWarningHelper(__FUNCTION__+2);
@@ -380,10 +366,12 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfResource:
     case KindOfRecord:
     case KindOfRFunc:
-      return fail();
+      throwInvalidArrayKeyException(cell, ad);
 
     case KindOfFunc:
-      if (!RO::EvalEnableFuncStringInterop) return fail();
+      if (!RO::EvalEnableFuncStringInterop) {
+        throwInvalidArrayKeyException(cell, ad);
+      }
       return ad->exists(StrNR(funcToStringHelper(cell->m_data.pfunc)));
 
     case KindOfClass:

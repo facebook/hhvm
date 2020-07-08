@@ -1,9 +1,10 @@
 ----
-
-Warning: Invalid operand type was used: Invalid type used as key in %s/promote_exn_001.php on line 10
+after a throw:
+string(72) "Invalid darray key: expected a key of type int or string, stdClass given"
 array(0) {
 }
 ----
 after a throw:
+string(72) "Invalid darray key: expected a key of type int or string, stdClass given"
 array(0) {
 }

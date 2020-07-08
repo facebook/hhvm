@@ -1092,7 +1092,6 @@ struct RuntimeOption {
   F(bool, HackArrCompatNotices, false)                                  \
   F(bool, HackArrCompatCheckCompare, false)                             \
   F(bool, HackArrCompatCheckArrayPlus, false)                           \
-  F(bool, HackArrCompatCheckArrayKeyCast, false)                        \
   F(bool, HackArrCompatFBSerializeHackArraysNotices, false)             \
   /* Raise notices on intish-cast (which may use an is_array check) */  \
   F(bool, HackArrCompatIntishCastNotices, false)                        \

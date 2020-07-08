@@ -1572,28 +1572,8 @@ inline ArrayData* SetElemArrayPre(ArrayData* a, TypedValue key, TypedValue* valu
       a, const_cast<StringData*>(classToStringHelper(key.m_data.pclass)), value
     );
   }
-  if (checkHACArrayKeyCast()) {
-    raiseHackArrCompatImplicitArrayKey(&key);
-  }
-  if (isNullType(key.m_type)) {
-    return a->set(staticEmptyString(), *value);
-  }
-  if (!isArrayLikeType(key.m_type) && key.m_type != KindOfObject) {
-    return SetElemArrayPre<setResult>(
-      a, tvAsCVarRef(&key).toInt64(), value
-    );
-  }
 
-  raise_warning("Invalid operand type was used: Invalid type used as key");
-
-  // Assignment failed, so the result is null rather than the RHS.
-  if (setResult) {
-    tvDecRefGen(value);
-    tvWriteNull(*value);
-  } else {
-    throw InvalidSetMException(make_tv<KindOfNull>());
-  }
-  return a;
+  throwInvalidArrayKeyException(&key, a);
 }
 
 /**

@@ -1223,17 +1223,6 @@ void raiseHackArrCompatDVArrCmp(const ArrayData* ad1,
   );
 }
 
-std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key) {
-  return folly::sformat(
-    "Implicit conversion of {} to array key",
-    describeKeyType(key)
-  );
-}
-
-void raiseHackArrCompatImplicitArrayKey(const TypedValue* key) {
-  raise_hac_array_key_cast_notice(makeHackArrCompatImplicitArrayKeyMsg(key));
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace arrprov_detail {

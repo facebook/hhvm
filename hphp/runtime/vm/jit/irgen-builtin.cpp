@@ -2552,20 +2552,7 @@ void emitAKExists(IRGS& env) {
   if (!arr->isA(TArr) && !arr->isA(TObj)) PUNT(AKExists_badArray);
 
   if (key->isA(TInitNull) && arr->isA(TArr)) {
-    if (checkHACArrayKeyCast()) {
-      gen(
-        env,
-        RaiseHackArrCompatNotice,
-        cns(
-          env,
-          makeStaticString(
-            makeHackArrCompatImplicitArrayKeyMsg(uninit_variant.asTypedValue())
-          )
-        )
-      );
-    }
-
-    key = cns(env, staticEmptyString());
+    return throwBadKey();
   }
 
   if (!key->isA(TStr) && !key->isA(TInt)) PUNT(AKExists_badKey);

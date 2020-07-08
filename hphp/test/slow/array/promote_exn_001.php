@@ -11,6 +11,7 @@ function foo() {
   } catch (Exception $y) {
     echo "after a throw:\n";
     set_error_handler(null);
+    var_dump($y->getMessage());
     var_dump($x);
     return;
   }

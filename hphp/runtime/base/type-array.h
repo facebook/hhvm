@@ -250,16 +250,6 @@ public:
   TypedValue convertKey(const Variant& k) const;
 
   /*
-   * Should int-like string keys be implicitly converted to integers before they
-   * are inserted?
-   */
-  bool useWeakKeys() const {
-    // If array isn't set we may implicitly create a mixed array, which uses
-    // weak keys.  We never implicitly create a Hack array.
-    return !m_arr || m_arr->useWeakKeys();
-  }
-
-  /*
    * Convert the underlying ArrayData to a static copy of itself.
    */
   void setEvalScalar() const;

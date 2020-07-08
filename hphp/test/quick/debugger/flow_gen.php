@@ -30,4 +30,6 @@ function test($a) {
   foo($a);
 }
 
-error_log('flow_gen.php loaded');
+<<__EntryPoint>> function main() {
+  error_log('flow_gen.php loaded');
+}

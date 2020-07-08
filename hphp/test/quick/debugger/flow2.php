@@ -53,4 +53,6 @@ function test($a) {
   foo($a);
 }
 
+<<__EntryPoint>> function main() {
 error_log('flow2.php done');
+}

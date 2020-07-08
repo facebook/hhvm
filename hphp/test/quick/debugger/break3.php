@@ -33,4 +33,7 @@ class cls {
   }
 }
 
-\error_log('break3.php loaded');
+<<__EntryPoint>>
+function main() {
+  \error_log('break3.php loaded');
+}

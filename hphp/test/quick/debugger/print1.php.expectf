@@ -1,6 +1,13 @@
 Program %s/print1.php loaded. Type '[r]un' or '[c]ontinue' to go.
+b print1.php:23
+Breakpoint 1 set on line 23 of print1.php
+But won't break until file print1.php has been loaded.
 c
-Program %s/print1.php exited normally.
+Breakpoint 1 reached at main() on line 23 of %s/print1.php
+  22 $d = new D();
+  23*1;
+  24 }
+
 = $a
 Array
 (

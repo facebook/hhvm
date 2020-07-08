@@ -3,10 +3,10 @@ break error_short_cmd_send.php:3
 Breakpoint 1 set on line 3 of error_short_cmd_send.php
 But won't break until file error_short_cmd_send.php has been loaded.
 run
-Breakpoint 1 reached on line 3 of %s/error_short_cmd_send.php
-   2 
-   3*error_log('error_short_cmd_send.php loaded');
-   4 (END)
+Breakpoint 1 reached at main() on line 3 of %s/error_short_cmd_send.php
+   2 <<__EntryPoint>> function main() {
+   3*  error_log('error_short_cmd_send.php loaded');
+   4 }
 
 internaltesting shortcmdsend
 Executing internal test...

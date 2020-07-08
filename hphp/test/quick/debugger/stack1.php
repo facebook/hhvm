@@ -40,4 +40,6 @@ function test($x, $y) {
   error_log("test done ".$x." ".$y);
 }
 
-error_log('stack1.php loaded');
+<<__EntryPoint>> function main() {
+  error_log('stack1.php loaded');
+}

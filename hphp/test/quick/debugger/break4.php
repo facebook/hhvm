@@ -9,5 +9,7 @@ class :fb:my:thing {
   }
 }
 
-error_log('break4.php loaded');
-
+<<__EntryPoint>>
+function main() {
+  error_log('break4.php loaded');
+}

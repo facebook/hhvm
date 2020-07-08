@@ -6,4 +6,7 @@ function bad() {
   ~false;
 }
 
-error_log('break6.php loaded');
+<<__EntryPoint>>
+function main() {
+  error_log('break6.php loaded');
+}

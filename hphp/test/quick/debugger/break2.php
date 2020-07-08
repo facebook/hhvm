@@ -16,4 +16,7 @@ class cls2 {
   }
 }
 
-error_log('break2.php loaded');
+<<__EntryPoint>>
+function main() {
+  error_log('break2.php loaded');
+}

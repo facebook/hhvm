@@ -7,8 +7,9 @@ function bad() {
   DebuggerBreak5::$x += 10;
   return true;
 }
-
+<<__EntryPoint>> function main() {
 DebuggerBreak5::$x = 1;
 echo DebuggerBreak5::$x."\n";
 echo DebuggerBreak5::$x."\n";
 DebuggerBreak5::$x = 1;
+}

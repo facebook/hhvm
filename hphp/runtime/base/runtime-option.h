@@ -1094,6 +1094,8 @@ struct RuntimeOption {
   F(bool, HackArrCompatCheckArrayPlus, false)                           \
   F(bool, HackArrCompatCheckArrayKeyCast, false)                        \
   F(bool, HackArrCompatFBSerializeHackArraysNotices, false)             \
+  /* Raise notices on intish-cast (which may use an is_array check) */  \
+  F(bool, HackArrCompatIntishCastNotices, false)                        \
   /* Raise notices when is_array is called with any hack array */       \
   F(bool, HackArrCompatIsArrayNotices, false)                           \
   /* Raise notices when is_vec or is_dict  is called with a v/darray */ \

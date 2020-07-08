@@ -62,6 +62,7 @@ dependencies = [
  "arena_trait 0.0.0",
  "bumpalo 3.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "ocamlrep 0.0.0",
+ "ocamlrep_derive 0.0.0",
  "quickcheck 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",

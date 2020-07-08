@@ -10,9 +10,16 @@ pub mod map;
 pub mod set;
 #[macro_use]
 pub mod vec;
+#[macro_use]
+pub mod list;
 
 pub use alist::{AssocList, AssocListMut, SortedAssocList};
 pub use multiset::{MultiSet, MultiSetMut, SortedSet};
+
+pub use arena_trait::Arena;
+
+#[cfg(test)]
+mod test_list;
 
 #[cfg(test)]
 mod test_alist;

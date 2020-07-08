@@ -85,6 +85,44 @@ struct SHA1 : private boost::totally_ordered<SHA1> {
     return ret;
   }
 
+  // Convert to a string using an arbitrary base-64 alphabet. This
+  // leaves two unused bits (27 base-64 characters is 162 bits), which
+  // can be used to encode extra data.
+  std::string toStringBase64(unsigned int extra = 0) const {
+    assertx(extra < 4); // Only room for two bits
+
+    static const char table[64] = {
+      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+      'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+      'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+      'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D',
+      'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+      'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+      'Y', 'Z', '_', '+'
+    };
+
+    std::string ret;
+    char sha1nbo[kQNumWords * kQWordLen];
+    nbo(sha1nbo);
+
+    // Below logic is specialized for this size:
+    static_assert(sizeof(sha1nbo) == 20);
+    ret.reserve(27);
+    for (size_t i = 0; i < sizeof(sha1nbo)-2; i += 3) {
+      ret.push_back(table[(sha1nbo[i] >> 2) & 0x3F]);
+      ret.push_back(table[((sha1nbo[i] & 0x03) << 4) |
+                          ((sha1nbo[i+1] & 0xF0) >> 4)]);
+      ret.push_back(table[((sha1nbo[i+1] & 0x0F) << 2) |
+                          ((sha1nbo[i+2] & 0xC0) >> 6)]);
+      ret.push_back(table[sha1nbo[i+2] & 0x3F]);
+    }
+    ret.push_back(table[(sha1nbo[sizeof(sha1nbo)-2] >> 2) & 0x3F]);
+    ret.push_back(table[((sha1nbo[sizeof(sha1nbo)-2] & 0x03) << 4) |
+                        ((sha1nbo[sizeof(sha1nbo)-1] & 0xF0) >> 4)]);
+    ret.push_back(table[((sha1nbo[sizeof(sha1nbo)-1] & 0x0F) << 2) + extra]);
+    return ret;
+  }
+
   bool operator==(const SHA1& r) const {
     for (auto i = 0; i < kQNumWords; i++) {
       if (q.at(i) != r.q.at(i)) {

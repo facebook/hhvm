@@ -173,12 +173,6 @@ Type typeIncDec(IncDecOp op, Type t) {
     // No-op on bool, array, resource, object.
     if (t.subtypeOfAny(TBool, TArr, TRes, TObj, TVec, TDict, TKeyset)) return t;
 
-    // Last case: strings. These result in Int|Str because of the
-    // behavior on strictly-numeric strings.
-    if (t.subtypeOf(TOptStr)) {
-      return (isInc(op) || t.subtypeOf(TStr)) ? TArrKey : TOptArrKey;
-    }
-
     return TInitCell;
   }
 

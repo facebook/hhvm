@@ -16,7 +16,6 @@
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
 
@@ -51,14 +50,6 @@ const ClsMethData* ClsMethDataRef::operator->() const {
 
 ClsMethDataRef ClsMethDataRef::create(Class* cls, Func* func) {
   return ClsMethDataRef(cls, func);
-}
-
-void checkClsMethFuncHelper(const Func* f) {
-  assertx(f->isMethod());
-  if (!f->isStaticInPrologue()) throw_missing_this(f);
-  if (f->isAbstract()) {
-    raise_error("Cannot call abstract method %s", f->fullName()->data());
-  }
 }
 
 void raiseClsMethVecCompareWarningHelper() {

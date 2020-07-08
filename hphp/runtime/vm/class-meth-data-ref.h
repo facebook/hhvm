@@ -72,8 +72,6 @@ ALWAYS_INLINE bool isRefCountedClsMeth(ClsMethDataRef clsMeth) {
   return clsMeth->isRefCountedType();
 }
 
-void checkClsMethFuncHelper(const Func* f);
-
 void raiseClsMethVecCompareWarningHelper();
 void raiseClsMethNonClsMethRelCompareWarning();
 void raiseClsMethToVecWarningHelper(const char* fn = nullptr);

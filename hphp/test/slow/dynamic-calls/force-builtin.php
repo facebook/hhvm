@@ -15,14 +15,13 @@ function wrap($f) {
 function foo() { var_dump(__FUNCTION__); }
 function bar() { var_dump(__FUNCTION__); }
 
-abstract class Cls {
+class Cls {
   <<__DynamicallyCallable>>
   static function foo() { var_dump(__METHOD__); }
   static function bar() { var_dump(__METHOD__); }
   protected static function prot() { var_dump(__METHOD__); }
   private static function priv() { var_dump(__METHOD__); }
   function inst() { var_dump(__METHOD__); }
-  abstract static function abstr();
 }
 
 <<__EntryPoint>>
@@ -31,7 +30,7 @@ function force_builtin_main() {
     wrap(() ==> HH\dynamic_fun_force(LV($f)));
   }
 
-  foreach (vec['foo', 'bar', 'prot', 'priv', 'inst', 'abstr'] as $m) {
+  foreach (vec['foo', 'bar', 'prot', 'priv', 'inst'] as $m) {
     wrap(() ==> HH\dynamic_class_meth_force(Cls::class, LV($m)));
   }
 }

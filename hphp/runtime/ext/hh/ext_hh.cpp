@@ -794,22 +794,14 @@ TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth) {
                      cls->data(), meth->data())
     );
   }
-  if (func->isAbstract()) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      folly::sformat("Method {}::{} is abstract",
-                     cls->data(), meth->data())
-    );
-  }
   if (!func->isPublic() && checkVis) {
     auto const ctx = fromCaller(
       [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
     );
     if (func->attrs() & AttrPrivate) {
-      auto const fcls = func->cls();
-      if (fcls != ctx) {
+      if (func->cls() != ctx) {
         SystemLib::throwInvalidArgumentExceptionObject(
-          folly::sformat(fcls == c ? "Method {}::{} is marked Private"
-                                   : "Unable to find method {}::{}",
+          folly::sformat("Method {}::{} is marked Private",
                          cls->data(), meth->data())
         );
       }

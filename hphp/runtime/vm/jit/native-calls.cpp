@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/tv-conversions.h"
 
-#include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/property-profile.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -542,9 +541,6 @@ static CallMap s_callMap {
     {GetTime, TimeStamp::CurrentSecond, DSSA, SNone, {}},
     /* clock_gettime_ns($clk_id) */
     {GetTimeNs, folly::chrono::clock_gettime_ns, DSSA, SNone, {{SSA, 0}}},
-
-    /* ClsMethDataRef */
-    {CheckClsMethFunc, checkClsMethFuncHelper, DNone, SSync, {{SSA, 0}}},
 
     /* reified generics operations */
     {CheckClsReifiedGenericMismatch, checkClassReifiedGenericMismatch,

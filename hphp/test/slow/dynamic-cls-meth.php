@@ -38,10 +38,6 @@ class H extends C { use T; }
 
 class W extends B { use T; }
 
-abstract class A extends C {
-  abstract static function j();
-}
-
 <<__EntryPoint>>
 function main() {
   (new H)->go();
@@ -51,11 +47,6 @@ function main() {
   foreach (varray['f', 'g', 'h', 'i'] as $f) {
     wrap(() ==>
       hh\dynamic_class_meth(C::class, __hhvm_intrinsics\launder_value($f))
-    );
-  }
-  foreach (varray['f', 'g', 'h', 'i', 'j'] as $f) {
-    wrap(() ==>
-      hh\dynamic_class_meth(A::class, __hhvm_intrinsics\launder_value($f))
     );
   }
 }

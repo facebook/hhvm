@@ -309,7 +309,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CGetElem:
   case CGetProp:
   case CGetPropQ:
-  case CheckClsMethFunc:
   case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
   case CheckStackOverflow:

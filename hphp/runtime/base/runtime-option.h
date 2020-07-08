@@ -1042,6 +1042,8 @@ struct RuntimeOption {
   F(uint32_t, TracingFirstRequestsSampleRate, 0)                        \
   /* Empty string disables any Artillery tracing */                     \
   F(std::string, ArtilleryTracePolicy, "")                              \
+  /* Opaque tag to add to each trace. Useful for aggregation */         \
+  F(std::string, TracingTagId, "")                                      \
   /* Log the sizes and metadata for all translations in the TC broken
    * down by function and inclusive/exclusive size for inlined regions.
    * When set to "" TC size data will be sampled on a per function basis

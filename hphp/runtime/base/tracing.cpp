@@ -117,6 +117,7 @@ void setCommonFields(StructuredLogEntry& entry) {
     v["is_server"] = RuntimeOption::ServerExecutionMode() ? "true" : "false";
     v["is_cli_server"] = is_cli_server_mode() ? "true" : "false";
     v["use_jit"] = RuntimeOption::EvalJit ? "true" : "false";
+    v["tag_id"] = RuntimeOption::EvalTracingTagId;
     return v;
   }();
 

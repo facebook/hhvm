@@ -12,6 +12,8 @@ use ocamlrep_derive::ToOcamlRep;
 )]
 pub struct DocComment<'a>(pub &'a str);
 
+impl arena_trait::TrivialDrop for DocComment<'_> {}
+
 impl<'a> DocComment<'a> {
     pub fn new(s: &'a str) -> Self {
         Self(s)

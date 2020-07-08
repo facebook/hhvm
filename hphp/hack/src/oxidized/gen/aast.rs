@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<763a5a63516f11882957986510d088da>>
+// @generated SignedSource<<1e6d5f0056eda62e10526361578cffd4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
+use arena_trait::TrivialDrop;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
@@ -819,6 +820,7 @@ pub enum XhpAttrTag {
     Required,
     LateInit,
 }
+impl TrivialDrop for XhpAttrTag {}
 
 #[derive(
     Clone,
@@ -1286,6 +1288,7 @@ pub enum NsKind {
     NSFun,
     NSConst,
 }
+impl TrivialDrop for NsKind {}
 
 #[derive(
     Clone,
@@ -1306,6 +1309,7 @@ pub enum ReifyKind {
     SoftReified,
     Reified,
 }
+impl TrivialDrop for ReifyKind {}
 
 #[derive(
     Clone,

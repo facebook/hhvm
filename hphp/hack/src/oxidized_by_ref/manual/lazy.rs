@@ -19,6 +19,8 @@ use serde::{Deserialize, Serialize};
 )]
 pub struct Lazy<T>(T);
 
+impl<T> arena_trait::TrivialDrop for Lazy<T> {}
+
 impl<T: ToOcamlRep> ToOcamlRep for Lazy<T> {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::Value<'a> {
         unimplemented!()

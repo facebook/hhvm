@@ -17,6 +17,7 @@ pub struct PerContEntry<'a> {
     // TODO(hrust): fake_members
     // TODO(hrust): tpenv
 }
+impl arena_trait::TrivialDrop for PerContEntry<'_> {}
 
 impl<'a> PerContEntry<'a> {
     pub fn to_oxidized<'b>(
@@ -32,9 +33,10 @@ impl<'a> PerContEntry<'a> {
                 arena,
                 local_types.iter().map(|(&k, &v)| (k, v.to_oxidized())),
             ),
-            fake_members: oxidized_by_ref::typing_fake_members::TypingFakeMembers::Valid(
-                Default::default(),
-            ),
+            fake_members: oxidized_by_ref::typing_fake_members::TypingFakeMembers {
+                valid: Default::default(),
+                invalid: Default::default(),
+            },
             tpenv: oxidized_by_ref::type_parameter_env::TypeParameterEnv {
                 tparams: Default::default(),
                 consistent: true,

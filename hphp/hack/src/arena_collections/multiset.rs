@@ -27,6 +27,7 @@ use std::fmt::Debug;
 use bumpalo::Bump;
 use serde::Serialize;
 
+use arena_trait::TrivialDrop;
 use ocamlrep::ToOcamlRep;
 
 use crate::{AssocList, AssocListMut, SortedAssocList};
@@ -151,6 +152,8 @@ impl<'a, T: 'a> MultiSet<'a, T> {
         }
     }
 }
+
+impl<T> TrivialDrop for MultiSet<'_, T> {}
 
 impl<T: Debug> Debug for MultiSet<'_, T> {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -415,6 +418,7 @@ pub struct SortedSet<'a, T: 'a> {
     list: SortedAssocList<'a, T, ()>,
 }
 
+impl<T> TrivialDrop for SortedSet<'_, T> {}
 impl<T> Copy for SortedSet<'_, T> {}
 impl<T> Clone for SortedSet<'_, T> {
     fn clone(&self) -> Self {

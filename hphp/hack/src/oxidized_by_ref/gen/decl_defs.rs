@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bef8d9e7e19718b7e39263e616460400>>
+// @generated SignedSource<<b1c45e7dbc4998b4c66d0f3728b06ef6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 use arena_trait::TrivialDrop;
+use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -58,7 +59,17 @@ pub struct SubstContext<'a> {
 impl<'a> TrivialDrop for SubstContext<'a> {}
 
 #[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum SourceType {
     Child,
@@ -69,6 +80,7 @@ pub enum SourceType {
     ReqImpl,
     ReqExtends,
 }
+impl TrivialDrop for SourceType {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -143,12 +155,23 @@ pub struct MroElement<'a> {
 impl<'a> TrivialDrop for MroElement<'a> {}
 
 #[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum LinearizationKind {
     MemberResolution,
     AncestorTypes,
 }
+impl TrivialDrop for LinearizationKind {}
 
 /// name of condition type for conditional reactivity of methods.
 /// If None - method is unconditionally reactive

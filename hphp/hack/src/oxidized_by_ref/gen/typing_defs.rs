@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c68919008b773105519384f5f2504d13>>
+// @generated SignedSource<<bc7e2e80289a43a3ef397ba0fb65fa49>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 use arena_trait::TrivialDrop;
+use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -189,12 +190,23 @@ pub struct EnumType<'a> {
 impl<'a> TrivialDrop for EnumType<'a> {}
 
 #[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum RecordFieldReq {
     ValueRequired,
     HasDefaultValue,
 }
+impl TrivialDrop for RecordFieldReq {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep

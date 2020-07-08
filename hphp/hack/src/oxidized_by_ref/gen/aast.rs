@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cdb1bcddbc08e4a0e794520b7bf22a8e>>
+// @generated SignedSource<<acc5c17c9568ba4c4acdcb1cceca648f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -30,7 +30,10 @@ pub type Program<'a, Ex, Fb, En, Hi> = &'a [Def<'a, Ex, Fb, En, Hi>];
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct Stmt<'a, Ex, Fb, En, Hi>(pub &'a Pos<'a>, pub Stmt_<'a, Ex, Fb, En, Hi>);
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for Stmt<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for Stmt<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -87,7 +90,10 @@ pub enum Stmt_<'a, Ex, Fb, En, Hi> {
     Block(Block<'a, Ex, Fb, En, Hi>),
     Markup(&'a Pstring<'a>),
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for Stmt_<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for Stmt_<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -98,7 +104,10 @@ pub struct UsingStmt<'a, Ex, Fb, En, Hi> {
     pub expr: Expr<'a, Ex, Fb, En, Hi>,
     pub block: Block<'a, Ex, Fb, En, Hi>,
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for UsingStmt<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for UsingStmt<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -113,7 +122,10 @@ pub enum AsExpr<'a, Ex, Fb, En, Hi> {
         Expr<'a, Ex, Fb, En, Hi>,
     ),
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for AsExpr<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for AsExpr<'a, Ex, Fb, En, Hi>
+{
+}
 
 pub type Block<'a, Ex, Fb, En, Hi> = &'a [Stmt<'a, Ex, Fb, En, Hi>];
 
@@ -121,7 +133,10 @@ pub type Block<'a, Ex, Fb, En, Hi> = &'a [Stmt<'a, Ex, Fb, En, Hi>];
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct ClassId<'a, Ex, Fb, En, Hi>(pub Ex, pub ClassId_<'a, Ex, Fb, En, Hi>);
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for ClassId<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for ClassId<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -133,12 +148,19 @@ pub enum ClassId_<'a, Ex, Fb, En, Hi> {
     CIexpr(Expr<'a, Ex, Fb, En, Hi>),
     CI(Sid<'a>),
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for ClassId_<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for ClassId_<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct Expr<'a, Ex, Fb, En, Hi>(pub Ex, pub Expr_<'a, Ex, Fb, En, Hi>);
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for Expr<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -147,7 +169,7 @@ pub enum CollectionTarg<'a, Hi> {
     CollectionTV(Targ<'a, Hi>),
     CollectionTKV(Targ<'a, Hi>, Targ<'a, Hi>),
 }
-impl<'a, Hi> TrivialDrop for CollectionTarg<'a, Hi> {}
+impl<'a, Hi: TrivialDrop> TrivialDrop for CollectionTarg<'a, Hi> {}
 
 #[derive(
     Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -297,6 +319,10 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
     PUIdentifier(&'a (ClassId<'a, Ex, Fb, En, Hi>, Pstring<'a>, Pstring<'a>)),
     Any,
 }
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for Expr_<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -305,7 +331,10 @@ pub enum ClassGetExpr<'a, Ex, Fb, En, Hi> {
     CGstring(Pstring<'a>),
     CGexpr(Expr<'a, Ex, Fb, En, Hi>),
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for ClassGetExpr<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for ClassGetExpr<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -313,7 +342,10 @@ impl<'a, Ex, Fb, En, Hi> TrivialDrop for ClassGetExpr<'a, Ex, Fb, En, Hi> {}
 pub enum AssertExpr<'a, Ex, Fb, En, Hi> {
     AEAssert(Expr<'a, Ex, Fb, En, Hi>),
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for AssertExpr<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for AssertExpr<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -322,19 +354,28 @@ pub enum Case<'a, Ex, Fb, En, Hi> {
     Default(&'a Pos<'a>, Block<'a, Ex, Fb, En, Hi>),
     Case(Expr<'a, Ex, Fb, En, Hi>, Block<'a, Ex, Fb, En, Hi>),
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for Case<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for Case<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct Catch<'a, Ex, Fb, En, Hi>(pub Sid<'a>, pub Lid<'a>, pub Block<'a, Ex, Fb, En, Hi>);
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for Catch<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for Catch<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct Field<'a, Ex, Fb, En, Hi>(pub Expr<'a, Ex, Fb, En, Hi>, pub Expr<'a, Ex, Fb, En, Hi>);
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for Field<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for Field<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -343,7 +384,10 @@ pub enum Afield<'a, Ex, Fb, En, Hi> {
     AFvalue(Expr<'a, Ex, Fb, En, Hi>),
     AFkvalue(Expr<'a, Ex, Fb, En, Hi>, Expr<'a, Ex, Fb, En, Hi>),
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for Afield<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for Afield<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -352,7 +396,10 @@ pub enum XhpAttribute<'a, Ex, Fb, En, Hi> {
     XhpSimple(Pstring<'a>, Expr<'a, Ex, Fb, En, Hi>),
     XhpSpread(Expr<'a, Ex, Fb, En, Hi>),
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for XhpAttribute<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for XhpAttribute<'a, Ex, Fb, En, Hi>
+{
+}
 
 pub use oxidized::aast::IsVariadic;
 
@@ -370,7 +417,10 @@ pub struct FunParam<'a, Ex, Fb, En, Hi> {
     pub user_attributes: &'a [UserAttribute<'a, Ex, Fb, En, Hi>],
     pub visibility: Option<oxidized::aast::Visibility>,
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for FunParam<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for FunParam<'a, Ex, Fb, En, Hi>
+{
+}
 
 /// does function take varying number of args?
 #[derive(
@@ -384,7 +434,10 @@ pub enum FunVariadicity<'a, Ex, Fb, En, Hi> {
     /// standard non variadic function
     FVnonVariadic,
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for FunVariadicity<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for FunVariadicity<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -410,7 +463,10 @@ pub struct Fun_<'a, Ex, Fb, En, Hi> {
     pub doc_comment: Option<DocComment<'a>>,
     pub static_: bool,
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for Fun_<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for Fun_<'a, Ex, Fb, En, Hi>
+{
+}
 
 /// Naming has two phases and the annotation helps to indicate the phase.
 /// In the first pass, it will perform naming on everything except for function
@@ -425,7 +481,10 @@ pub struct FuncBody<'a, Ex, Fb, En, Hi> {
     pub ast: Block<'a, Ex, Fb, En, Hi>,
     pub annotation: Fb,
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for FuncBody<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for FuncBody<'a, Ex, Fb, En, Hi>
+{
+}
 
 /// A type annotation is two things:
 /// - the localized hint, or if the hint is missing, the inferred type
@@ -434,7 +493,7 @@ impl<'a, Ex, Fb, En, Hi> TrivialDrop for FuncBody<'a, Ex, Fb, En, Hi> {}
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct TypeHint<'a, Hi>(pub Hi, pub TypeHint_<'a>);
-impl<'a, Hi> TrivialDrop for TypeHint<'a, Hi> {}
+impl<'a, Hi: TrivialDrop> TrivialDrop for TypeHint<'a, Hi> {}
 
 /// Explicit type argument to function, constructor, or collection literal.
 /// 'hi = unit in NAST
@@ -444,7 +503,7 @@ impl<'a, Hi> TrivialDrop for TypeHint<'a, Hi> {}
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct Targ<'a, Hi>(pub Hi, pub Hint<'a>);
-impl<'a, Hi> TrivialDrop for Targ<'a, Hi> {}
+impl<'a, Hi: TrivialDrop> TrivialDrop for Targ<'a, Hi> {}
 
 pub type TypeHint_<'a> = Option<Hint<'a>>;
 
@@ -456,6 +515,10 @@ pub struct UserAttribute<'a, Ex, Fb, En, Hi> {
     /// user attributes are restricted to scalar values
     pub params: &'a [Expr<'a, Ex, Fb, En, Hi>],
 }
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for UserAttribute<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -464,7 +527,10 @@ pub struct FileAttribute<'a, Ex, Fb, En, Hi> {
     pub user_attributes: &'a [UserAttribute<'a, Ex, Fb, En, Hi>],
     pub namespace: Nsenv<'a>,
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for FileAttribute<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for FileAttribute<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -476,7 +542,10 @@ pub struct Tparam<'a, Ex, Fb, En, Hi> {
     pub reified: oxidized::aast::ReifyKind,
     pub user_attributes: &'a [UserAttribute<'a, Ex, Fb, En, Hi>],
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for Tparam<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for Tparam<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -494,7 +563,10 @@ pub struct ClassTparams<'a, Ex, Fb, En, Hi> {
         ),
     >,
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for ClassTparams<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for ClassTparams<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -556,7 +628,10 @@ pub struct Class_<'a, Ex, Fb, En, Hi> {
     pub doc_comment: Option<DocComment<'a>>,
     pub emit_id: Option<oxidized::aast::EmitId>,
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for Class_<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for Class_<'a, Ex, Fb, En, Hi>
+{
+}
 
 pub type ClassHint<'a> = Hint<'a>;
 
@@ -575,7 +650,10 @@ pub struct XhpAttr<'a, Ex, Fb, En, Hi>(
     pub Option<oxidized::aast::XhpAttrTag>,
     pub Option<(&'a Pos<'a>, bool, &'a [Expr<'a, Ex, Fb, En, Hi>])>,
 );
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for XhpAttr<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for XhpAttr<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -584,7 +662,10 @@ pub enum ClassAttr<'a, Ex, Fb, En, Hi> {
     CAName(Sid<'a>),
     CAField(CaField<'a, Ex, Fb, En, Hi>),
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for ClassAttr<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for ClassAttr<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -595,7 +676,10 @@ pub struct CaField<'a, Ex, Fb, En, Hi> {
     pub value: Option<Expr<'a, Ex, Fb, En, Hi>>,
     pub required: bool,
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for CaField<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for CaField<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -616,7 +700,10 @@ pub struct ClassConst<'a, Ex, Fb, En, Hi> {
     pub expr: Option<Expr<'a, Ex, Fb, En, Hi>>,
     pub doc_comment: Option<DocComment<'a>>,
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for ClassConst<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for ClassConst<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -645,7 +732,10 @@ pub struct ClassTypeconst<'a, Ex, Fb, En, Hi> {
     pub span: &'a Pos<'a>,
     pub doc_comment: Option<DocComment<'a>>,
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for ClassTypeconst<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for ClassTypeconst<'a, Ex, Fb, En, Hi>
+{
+}
 
 pub use oxidized::aast::XhpAttrInfo;
 
@@ -666,7 +756,10 @@ pub struct ClassVar<'a, Ex, Fb, En, Hi> {
     pub is_static: bool,
     pub span: &'a Pos<'a>,
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for ClassVar<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for ClassVar<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -692,7 +785,10 @@ pub struct Method_<'a, Ex, Fb, En, Hi> {
     pub external: bool,
     pub doc_comment: Option<DocComment<'a>>,
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for Method_<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for Method_<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -713,7 +809,10 @@ pub struct MethodRedeclaration<'a, Ex, Fb, En, Hi> {
     pub method: Pstring<'a>,
     pub user_attributes: &'a [UserAttribute<'a, Ex, Fb, En, Hi>],
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for MethodRedeclaration<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for MethodRedeclaration<'a, Ex, Fb, En, Hi>
+{
+}
 
 pub type Nsenv<'a> = namespace_env::Env<'a>;
 
@@ -732,7 +831,10 @@ pub struct Typedef<'a, Ex, Fb, En, Hi> {
     pub namespace: Nsenv<'a>,
     pub emit_id: Option<oxidized::aast::EmitId>,
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for Typedef<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for Typedef<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -747,7 +849,10 @@ pub struct Gconst<'a, Ex, Fb, En, Hi> {
     pub span: &'a Pos<'a>,
     pub emit_id: Option<oxidized::aast::EmitId>,
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for Gconst<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for Gconst<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -764,7 +869,10 @@ pub struct RecordDef<'a, Ex, Fb, En, Hi> {
     pub doc_comment: Option<DocComment<'a>>,
     pub emit_id: Option<oxidized::aast::EmitId>,
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for RecordDef<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for RecordDef<'a, Ex, Fb, En, Hi>
+{
+}
 
 pub type RecordHint<'a> = Hint<'a>;
 
@@ -806,7 +914,10 @@ pub struct PuEnum<'a, Ex, Fb, En, Hi> {
     pub case_values: &'a [PuCaseValue<'a>],
     pub members: &'a [PuMember<'a, Ex, Fb, En, Hi>],
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for PuEnum<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for PuEnum<'a, Ex, Fb, En, Hi>
+{
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -822,7 +933,10 @@ pub struct PuMember<'a, Ex, Fb, En, Hi> {
     pub types: &'a [(Sid<'a>, Hint<'a>)],
     pub exprs: &'a [(Sid<'a>, Expr<'a, Ex, Fb, En, Hi>)],
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for PuMember<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for PuMember<'a, Ex, Fb, En, Hi>
+{
+}
 
 pub type FunDef<'a, Ex, Fb, En, Hi> = Fun_<'a, Ex, Fb, En, Hi>;
 
@@ -841,7 +955,10 @@ pub enum Def<'a, Ex, Fb, En, Hi> {
     SetNamespaceEnv(&'a Nsenv<'a>),
     FileAttributes(&'a FileAttribute<'a, Ex, Fb, En, Hi>),
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for Def<'a, Ex, Fb, En, Hi> {}
+impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
+    for Def<'a, Ex, Fb, En, Hi>
+{
+}
 
 pub use oxidized::aast::NsKind;
 

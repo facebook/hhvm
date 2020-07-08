@@ -37,7 +37,7 @@ pub fn create_table(connection: &Connection) -> Result<()> {
 }
 
 // Used only in tests for now.
-#[cfg(test)]
+#[allow(dead_code)]
 fn insert(connection: &Connection, items: &[FileInfoItem]) -> Result<()> {
     let insert_statement = "
         INSERT INTO NAMING_FILE_INFO (

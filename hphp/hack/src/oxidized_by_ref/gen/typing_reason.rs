@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9274be1c57acd34b8fcf2dbe744c25b8>>
+// @generated SignedSource<<939701ce3c08186d0fdbbeb4e975b45d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 use arena_trait::TrivialDrop;
+use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -114,13 +115,24 @@ pub enum Reason<'a> {
 impl<'a> TrivialDrop for Reason<'a> {}
 
 #[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ArgPosition {
     Aonly,
     Afirst,
     Asecond,
 }
+impl TrivialDrop for ArgPosition {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -136,7 +148,17 @@ pub enum ExprDepTypeReason<'a> {
 impl<'a> TrivialDrop for ExprDepTypeReason<'a> {}
 
 #[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum BlameSource {
     BScall,
@@ -144,6 +166,7 @@ pub enum BlameSource {
     BSassignment,
     BSoutOfScope,
 }
+impl TrivialDrop for BlameSource {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep

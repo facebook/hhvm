@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<35e13a3e53693cabdf5e0ab80108182f>>
+// @generated SignedSource<<028f212250ffdbfa82f5da85ba864621>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
+use arena_trait::TrivialDrop;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
@@ -75,6 +76,7 @@ pub enum Variance {
     Contravariant,
     Invariant,
 }
+impl TrivialDrop for Variance {}
 
 #[derive(
     Clone,
@@ -95,6 +97,7 @@ pub enum ConstraintKind {
     ConstraintEq,
     ConstraintSuper,
 }
+impl TrivialDrop for ConstraintKind {}
 
 pub type Reified = bool;
 
@@ -119,6 +122,7 @@ pub enum ClassKind {
     Ctrait,
     Cenum,
 }
+impl TrivialDrop for ClassKind {}
 
 #[derive(
     Clone,
@@ -137,6 +141,7 @@ pub enum ClassKind {
 pub enum ParamKind {
     Pinout,
 }
+impl TrivialDrop for ParamKind {}
 
 #[derive(
     Clone,
@@ -156,6 +161,7 @@ pub enum OgNullFlavor {
     OGNullthrows,
     OGNullsafe,
 }
+impl TrivialDrop for OgNullFlavor {}
 
 #[derive(
     Clone,
@@ -178,6 +184,7 @@ pub enum FunKind {
     FAsyncGenerator,
     FCoroutine,
 }
+impl TrivialDrop for FunKind {}
 
 #[derive(
     Clone,
@@ -246,3 +253,4 @@ pub enum Uop {
     Updecr,
     Usilence,
 }
+impl TrivialDrop for Uop {}

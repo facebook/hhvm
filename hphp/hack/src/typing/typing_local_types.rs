@@ -17,5 +17,6 @@ impl<'a> Local<'a> {
         oxidized_by_ref::typing_local_types::Local(ty, pos, eid)
     }
 }
+impl arena_trait::TrivialDrop for Local<'_> {}
 
 pub type TypingLocalTypes<'a> = Map<'a, LocalId<'a>, &'a Local<'a>>;

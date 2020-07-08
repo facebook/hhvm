@@ -30,6 +30,7 @@ pub enum Prefix {
     Dummy,
     Tmp,
 }
+impl arena_trait::TrivialDrop for Prefix {}
 
 impl TryFrom<usize> for Prefix {
     type Error = String;

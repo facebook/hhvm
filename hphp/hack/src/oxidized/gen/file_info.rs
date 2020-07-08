@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3230c4d5cfa597c0d81bed2634bf64fb>>
+// @generated SignedSource<<affe52fa40304c467a6eca71c472247e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
+use arena_trait::TrivialDrop;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
@@ -42,6 +43,7 @@ pub enum Mode {
     /// Don't fail if you see a function/class you don't know
     Mpartial,
 }
+impl TrivialDrop for Mode {}
 
 #[derive(
     Clone,
@@ -64,6 +66,7 @@ pub enum NameType {
     Typedef = 3,
     Const = 4,
 }
+impl TrivialDrop for NameType {}
 
 /// We define two types of positions establishing the location of a given name:
 /// a Full position contains the exact position of a name in a file, and a

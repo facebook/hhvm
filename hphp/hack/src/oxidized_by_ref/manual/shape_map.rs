@@ -14,6 +14,8 @@ use crate::ast_defs::{Id, ShapeFieldName};
 #[derive(Clone, Debug, Hash, Serialize, ToOcamlRep)]
 pub struct ShapeField<'a>(pub ShapeFieldName<'a>);
 
+impl arena_trait::TrivialDrop for ShapeField<'_> {}
+
 impl<'a> Ord for ShapeField<'a> {
     fn cmp(&self, other: &Self) -> Ordering {
         use ShapeFieldName::*;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1cde88368d90d9179a6bfbadd089474b>>
+// @generated SignedSource<<a354813e90b5ffafed67c1d752bd32e5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -33,6 +33,7 @@ pub enum FuncBodyAnn<'a> {
     NamedWithUnsafeBlocks,
     Unnamed(&'a namespace_env::Env<'a>),
 }
+impl<'a> TrivialDrop for FuncBodyAnn<'a> {}
 
 pub type Program<'a> = aast::Program<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
 

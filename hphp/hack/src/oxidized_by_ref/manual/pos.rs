@@ -28,10 +28,14 @@ enum PosImpl<'a> {
     },
 }
 
+impl arena_trait::TrivialDrop for PosImpl<'_> {}
+
 use PosImpl::*;
 
 #[derive(Clone, Hash, Serialize, ToOcamlRep)]
 pub struct Pos<'a>(PosImpl<'a>);
+
+impl arena_trait::TrivialDrop for Pos<'_> {}
 
 const NONE: Pos<'_> = Pos(Small {
     file: RelativePath::empty(),

@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<62c63faf8c256a36ab2b425234490025>>
+// @generated SignedSource<<ca0f041d81ff7a1ef33e939674d305ba>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
+use arena_trait::TrivialDrop;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
@@ -39,6 +40,7 @@ pub enum Parsing {
     CallTimePassByReferenceDEPRECATED,
     XhpParsingError,
 }
+impl TrivialDrop for Parsing {}
 
 #[derive(
     Clone,
@@ -167,6 +169,7 @@ pub enum Naming {
     PocketUniversesLocalization,
     ClassMethNonFinalSelf,
 }
+impl TrivialDrop for Naming {}
 
 #[derive(
     Clone,
@@ -271,6 +274,7 @@ pub enum NastCheck {
     VariadicMemoize,
     AbstractMethodMemoize,
 }
+impl TrivialDrop for NastCheck {}
 
 #[derive(
     Clone,
@@ -644,7 +648,7 @@ pub enum Typing {
     RecordUnknownField,
     CyclicRecordDef,
     InvalidDestructure,
-    StaticCallWithClassLevelReifiedGeneric,
+    StaticMethWithClassReifiedGeneric,
     SplatArrayRequired,
     SplatArrayVariadic,
     ExceptionOccurred,
@@ -662,6 +666,7 @@ pub enum Typing {
     NonObjectMemberWrite,
     ConcreteConstInterfaceOverride,
 }
+impl TrivialDrop for Typing {}
 
 #[derive(
     Clone,
@@ -681,3 +686,4 @@ pub enum Init {
     ForwardCompatibilityNotCurrent = 8001,
     ForwardCompatibilityBelowMinimum,
 }
+impl TrivialDrop for Init {}

@@ -22,6 +22,8 @@ pub enum SubtypeProp<'a> {
     Disj(&'a [SubtypeProp<'a>]),
 }
 
+impl arena_trait::TrivialDrop for SubtypeProp<'_> {}
+
 impl Default for SubtypeProp<'_> {
     fn default() -> Self {
         SubtypeProp::Disj(&[])

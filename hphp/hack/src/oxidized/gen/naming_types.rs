@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3da65be83cb06fa126d2501e1b351bf8>>
+// @generated SignedSource<<269a3d863edc91ddd89f5f9481b9f4ab>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
+use arena_trait::TrivialDrop;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
@@ -35,3 +36,4 @@ pub enum KindOfType {
     TTypedef = 1,
     TRecordDef = 2,
 }
+impl TrivialDrop for KindOfType {}

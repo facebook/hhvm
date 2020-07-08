@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<76785bd1a2a9a3915864f33729feab04>>
+// @generated SignedSource<<cf56ab85e45ead0d43931b6e9cdafa18>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
+use arena_trait::TrivialDrop;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
@@ -63,6 +64,7 @@ pub enum CallType {
     /// when the call looks like call_user_func(...)
     CuserFunc,
 }
+impl TrivialDrop for CallType {}
 
 pub type IsCoroutine = bool;
 
@@ -87,6 +89,7 @@ pub enum FuncReactive {
     FShallow,
     FNonreactive,
 }
+impl TrivialDrop for FuncReactive {}
 
 #[derive(
     Clone,
@@ -107,6 +110,7 @@ pub enum ParamMutability {
     POwnedMutable,
     PMaybeMutable,
 }
+impl TrivialDrop for ParamMutability {}
 
 #[derive(
     Clone,
@@ -128,6 +132,7 @@ pub enum ImportFlavor {
     IncludeOnce,
     RequireOnce,
 }
+impl TrivialDrop for ImportFlavor {}
 
 #[derive(
     Clone,
@@ -168,6 +173,7 @@ pub enum XhpChildOp {
     ChildPlus,
     ChildQuestion,
 }
+impl TrivialDrop for XhpChildOp {}
 
 #[derive(
     Clone,
@@ -356,6 +362,7 @@ pub enum KvcKind {
     ImmMap,
     Dict,
 }
+impl TrivialDrop for KvcKind {}
 
 #[derive(
     Clone,
@@ -380,6 +387,7 @@ pub enum VcKind {
     Pair_,
     Keyset,
 }
+impl TrivialDrop for VcKind {}
 
 #[derive(
     Clone,
@@ -400,6 +408,7 @@ pub enum Visibility {
     Public,
     Protected,
 }
+impl TrivialDrop for Visibility {}
 
 #[derive(
     Clone,
@@ -421,6 +430,7 @@ pub enum UseAsVisibility {
     UseAsProtected,
     UseAsFinal,
 }
+impl TrivialDrop for UseAsVisibility {}
 
 #[derive(
     Clone,
@@ -440,6 +450,7 @@ pub enum TypedefVisibility {
     Transparent,
     Opaque,
 }
+impl TrivialDrop for TypedefVisibility {}
 
 #[derive(
     Clone,

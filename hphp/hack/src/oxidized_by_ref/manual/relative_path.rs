@@ -105,6 +105,8 @@ impl Display for RelativePath<'_> {
     }
 }
 
+impl arena_trait::TrivialDrop for RelativePath<'_> {}
+
 impl ToOcamlRep for RelativePath<'_> {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, alloc: &'a A) -> ocamlrep::Value<'a> {
         alloc.add(&(self.prefix, self.path()))

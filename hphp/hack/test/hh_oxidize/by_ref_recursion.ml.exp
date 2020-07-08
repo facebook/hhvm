@@ -17,4 +17,4 @@ pub enum NAryTree<'a, A> {
     Leaf(A),
     Children(&'a [NAryTree<'a, A>]),
 }
-impl<'a, A> TrivialDrop for NAryTree<'a, A> {}
+impl<'a, A: TrivialDrop> TrivialDrop for NAryTree<'a, A> {}

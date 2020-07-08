@@ -27,6 +27,7 @@ use std::fmt::Debug;
 use bumpalo::Bump;
 use serde::Serialize;
 
+use arena_trait::TrivialDrop;
 use ocamlrep::ToOcamlRep;
 
 /// Perform a linear search for the last entry in the slice with the given key.
@@ -247,6 +248,7 @@ impl<'a, K, V> AssocList<'a, K, V> {
     }
 }
 
+impl<K, V> TrivialDrop for AssocList<'_, K, V> {}
 impl<K, V> Copy for AssocList<'_, K, V> {}
 impl<K, V> Clone for AssocList<'_, K, V> {
     fn clone(&self) -> Self {
@@ -904,6 +906,7 @@ impl<'a, K, V> SortedAssocList<'a, K, V> {
     }
 }
 
+impl<K, V> TrivialDrop for SortedAssocList<'_, K, V> {}
 impl<K, V> Copy for SortedAssocList<'_, K, V> {}
 impl<K, V> Clone for SortedAssocList<'_, K, V> {
     fn clone(&self) -> Self {

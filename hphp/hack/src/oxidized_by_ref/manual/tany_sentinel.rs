@@ -21,3 +21,5 @@ use serde::{Deserialize, Serialize};
     Serialize
 )]
 pub struct TanySentinel;
+
+impl arena_trait::TrivialDrop for TanySentinel {}

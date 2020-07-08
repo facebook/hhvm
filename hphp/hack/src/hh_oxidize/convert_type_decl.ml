@@ -259,7 +259,7 @@ let doc_comment_of_attribute_list attrs =
 
 let type_param (ct, _) = core_type ct
 
-let type_params name params =
+let type_params ?bound name params =
   if List.is_empty params then
     match Configuration.mode () with
     | Configuration.ByRef ->
@@ -271,7 +271,14 @@ let type_params name params =
     | Configuration.ByRc ->
       ""
   else
-    let params = params |> map_and_concat ~f:type_param ~sep:", " in
+    let bound =
+      match bound with
+      | None -> ""
+      | Some bound -> ": " ^ bound
+    in
+    let params =
+      params |> map_and_concat ~f:(fun tp -> type_param tp ^ bound) ~sep:", "
+    in
     match Configuration.mode () with
     | Configuration.ByRef ->
       if Configuration.owned_type name then
@@ -384,7 +391,14 @@ let type_declaration name td =
         []
     in
     let derive_attr =
-      derived_traits name @ additional_derives
+      let traits = derived_traits name @ additional_derives in
+      let traits =
+        if force_derive_copy then
+          (Some "ocamlrep_derive", "FromOcamlRep") :: traits
+        else
+          traits
+      in
+      traits
       |> List.dedup_and_sort ~compare:(fun (_, t1) (_, t2) ->
              String.compare t1 t2)
       |> List.map ~f:(fun (m, trait) ->
@@ -395,25 +409,7 @@ let type_declaration name td =
     in
     doc ^ derive_attr ^ "\npub"
   in
-  let implements tparams ~force_derive_copy =
-    implements_traits name
-    |> ( if
-         derive_copy (sprintf "%s::%s" (curr_module_name ()) name)
-         || force_derive_copy
-       then
-         List.filter ~f:(fun (_, t) -> not (String.equal t "TrivialDrop"))
-       else
-         ident )
-    |> List.dedup_and_sort ~compare:(fun (_, t1) (_, t2) ->
-           String.compare t1 t2)
-    |> List.map ~f:(fun (m, trait) ->
-           Option.iter m ~f:(fun m -> add_extern_use (m ^ "::" ^ trait));
-           trait)
-    |> List.map ~f:(fun trait ->
-           sprintf "\nimpl%s %s for %s%s {}" tparams trait name tparams)
-    |> String.concat ~sep:""
-  in
-  let tparams =
+  let tparam_list =
     match (td.ptype_params, td.ptype_name.txt) with
     (* HACK: eliminate tparam from `type _ ty_` and phase-parameterized types *)
     | ([({ ptyp_desc = Ptyp_any; _ }, _)], "ty_")
@@ -421,12 +417,33 @@ let type_declaration name td =
     | ([({ ptyp_desc = Ptyp_var "ty"; _ }, _)], _)
       when curr_module_name () = "typing_defs_core"
            || curr_module_name () = "typing_defs" ->
-      (match Configuration.mode () with
-      | Configuration.ByRef -> "<'a>"
-      | Configuration.ByBox
-      | Configuration.ByRc ->
-        "")
-    | (tparams, _) -> type_params name tparams
+      []
+    | (tparams, _) -> tparams
+  in
+  let tparams = type_params name tparam_list in
+  let implements ~force_derive_copy =
+    let traits = implements_traits name in
+    let traits =
+      if force_derive_copy then
+        (Some "arena_trait", "TrivialDrop") :: traits
+      else
+        traits
+    in
+    traits
+    |> List.dedup_and_sort ~compare:(fun (_, t1) (_, t2) ->
+           String.compare t1 t2)
+    |> List.map ~f:(fun (m, trait) ->
+           Option.iter m ~f:(fun m -> add_extern_use (m ^ "::" ^ trait));
+           trait)
+    |> List.map ~f:(fun trait ->
+           let tparams_with_bound = type_params name tparam_list ~bound:trait in
+           sprintf
+             "\nimpl%s %s for %s%s {}"
+             tparams_with_bound
+             trait
+             name
+             tparams)
+    |> String.concat ~sep:""
   in
   match (td.ptype_kind, td.ptype_manifest) with
   | (_, Some ty) ->
@@ -502,7 +519,7 @@ let type_declaration name td =
           name
           tparams
           ty
-          (implements tparams ~force_derive_copy:false))
+          (implements ~force_derive_copy:false))
   (* Variant types, including GADTs. *)
   | (Ptype_variant ctors, None) ->
     let all_nullary =
@@ -520,7 +537,7 @@ let type_declaration name td =
       name
       tparams
       ctors
-      (implements tparams ~force_derive_copy:all_nullary)
+      (implements ~force_derive_copy:all_nullary)
   (* Record types. *)
   | (Ptype_record labels, None) ->
     let labels = record_declaration labels ~pub:true in
@@ -530,7 +547,7 @@ let type_declaration name td =
       name
       tparams
       labels
-      (implements tparams ~force_derive_copy:false)
+      (implements ~force_derive_copy:false)
   (* `type foo`; an abstract type with no specified implementation. This doesn't
      mean much outside of an .mli, I don't think. *)
   | (Ptype_abstract, None) ->

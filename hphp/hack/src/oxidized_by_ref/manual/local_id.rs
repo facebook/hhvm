@@ -12,6 +12,8 @@ use ocamlrep_derive::ToOcamlRep;
 )]
 pub struct LocalId<'a>(isize, &'a str);
 
+impl arena_trait::TrivialDrop for LocalId<'_> {}
+
 impl<'a> LocalId<'a> {
     pub fn new_unscoped_in(name: &'a str) -> Self {
         Self(0, name)

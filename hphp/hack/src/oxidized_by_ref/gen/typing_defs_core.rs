@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c9ce45b3e611d07dffcafc433bc647e5>>
+// @generated SignedSource<<41d567dc92057e212597c74cf1a40e08>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 use arena_trait::TrivialDrop;
+use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -28,33 +29,76 @@ pub enum Visibility<'a> {
 impl<'a> TrivialDrop for Visibility<'a> {}
 
 #[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum Exact {
     Exact,
     Nonexact,
 }
+impl TrivialDrop for Exact {}
 
 #[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ValKind {
     Lval,
     LvalSubexpr,
     Other,
 }
+impl TrivialDrop for ValKind {}
 
 #[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ParamMutability {
     ParamOwnedMutable,
     ParamBorrowedMutable,
     ParamMaybeMutable,
 }
+impl TrivialDrop for ParamMutability {}
 
 #[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum FunTparamsKind {
     /// If ft_tparams is empty, the containing fun_type is a concrete function type.
@@ -68,30 +112,64 @@ pub enum FunTparamsKind {
     /// explicit type argument must be reified.
     FTKinstantiatedTargs,
 }
+impl TrivialDrop for FunTparamsKind {}
 
 #[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ShapeKind {
     ClosedShape,
     OpenShape,
 }
+impl TrivialDrop for ShapeKind {}
 
 #[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ParamMode {
     FPnormal,
     FPinout,
 }
+impl TrivialDrop for ParamMode {}
 
 #[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum XhpAttrTag {
     Required,
     Lateinit,
 }
+impl TrivialDrop for XhpAttrTag {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -110,13 +188,24 @@ impl TrivialDrop for XhpAttr {}
 /// then we use Final. Only classes that are Inconsistent or Final can have reified
 /// generics.
 #[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ConsistentKind {
     Inconsistent,
     ConsistentConstruct,
     FinalClass,
 }
+impl TrivialDrop for ConsistentKind {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -129,12 +218,23 @@ pub enum DependentType<'a> {
 impl<'a> TrivialDrop for DependentType<'a> {}
 
 #[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum DestructureKind {
     ListDestructure,
     SplatUnpack,
 }
+impl TrivialDrop for DestructureKind {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -160,6 +260,7 @@ impl<'a> TrivialDrop for WhereConstraint<'a> {}
 
 #[derive(Clone, Copy, Debug, Hash, Serialize, ToOcamlRep)]
 pub struct Ty<'a>(pub &'a reason::Reason<'a>, pub &'a Ty_<'a>);
+impl<'a> TrivialDrop for Ty<'a> {}
 
 /// A shape may specify whether or not fields are required. For example, consider
 /// this typedef:
@@ -313,6 +414,7 @@ pub enum Ty_<'a> {
     /// - second parameter is the name of the type to project
     TpuTypeAccess(&'a (nast::Sid<'a>, nast::Sid<'a>)),
 }
+impl<'a> TrivialDrop for Ty_<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -367,6 +469,7 @@ impl<'a> TrivialDrop for Destructure<'a> {}
 
 #[derive(Clone, Copy, Debug, Hash, Serialize, ToOcamlRep)]
 pub struct ConstraintType<'a>(pub &'a reason::Reason<'a>, pub &'a ConstraintType_<'a>);
+impl<'a> TrivialDrop for ConstraintType<'a> {}
 
 #[derive(
     Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -375,6 +478,7 @@ pub enum InternalType<'a> {
     LoclType(Ty<'a>),
     ConstraintType(ConstraintType<'a>),
 }
+impl<'a> TrivialDrop for InternalType<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep

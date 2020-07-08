@@ -24,6 +24,8 @@ impl<'a, K> Clone for Set<'a, K> {
 
 impl<'a, K> Copy for Set<'a, K> {}
 
+impl<'a, K> TrivialDrop for Set<'a, K> {}
+
 impl<K> Default for Set<'_, K> {
     fn default() -> Self {
         Set(Map::default())

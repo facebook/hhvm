@@ -30,15 +30,12 @@
 
 namespace HPHP {
 
-inline void mapSetAndConvertStaticKeys(Array& map,
-                                       StringData* str,
-                                       Variant&& v) {
+template <IntishCast IC>
+inline void mapSetConvertStatic(Array& map, StringData* str, Variant&& v) {
   int64_t i;
-  if (map->convertKey<IntishCast::Cast>(str, i)) {
+  if (IC == IntishCast::Cast && str->isStrictlyInteger(i)) {
     map.set(i, *v.asTypedValue());
-  } else if (auto sstr = str->isStatic()
-             ? str
-             : lookupStaticString(str)) {
+  } else if (auto sstr = str->isStatic() ? str : lookupStaticString(str)) {
     map.set(String::attach(sstr), *v.asTypedValue());
   } else {
     map.set(String(str), *v.asTypedValue());
@@ -229,7 +226,17 @@ struct VariantControllerImpl {
   }
 
   static void mapSet(MapType& map, StringType&& k, VariantType&& v) {
-    mapSetAndConvertStaticKeys(map, k.get(), std::forward<VariantType>(v));
+    auto constexpr IC = [&]{
+      switch (HackArraysMode) {
+        case VariantControllerHackArraysMode::ON:
+        case VariantControllerHackArraysMode::ON_AND_KEYSET:
+          return IntishCast::None;
+        case VariantControllerHackArraysMode::OFF:
+        case VariantControllerHackArraysMode::MIGRATORY:
+          return IntishCast::Cast;
+      }
+    }();
+    mapSetConvertStatic<IC>(map, k.get(), std::forward<VariantType>(v));
   }
 
   static void mapSet(MapType& map, int64_t k, VariantType&& v) {

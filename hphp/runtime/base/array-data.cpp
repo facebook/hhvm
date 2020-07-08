@@ -1267,4 +1267,16 @@ template ArrayData* tagArrProvImpl<APCArray>(ArrayData*, const APCArray*);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool ArrayData::intishCastKey(const StringData* key, int64_t& i) const {
+  if (key->isStrictlyInteger(i) && useWeakKeys()) {
+    if (RO::EvalHackArrCompatIntishCastNotices) {
+      raise_hackarr_compat_notice("triggered array-based IntishCast");
+    }
+    return true;
+  }
+  return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+
 }

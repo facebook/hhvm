@@ -789,9 +789,10 @@ ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {
     if (elm.hasIntKey()) {
       init.set(elm.intKey(), tvAsCVarRef(&elm.tv));
     } else {
+      int64_t intish;
       auto const key = elm.strKey();
-      if (auto const intish = tryIntishCast<IC>(key)) {
-        init.set(*intish, make_tv<KindOfInt64>(*intish));
+      if (IC == IntishCast::Cast && key->isStrictlyInteger(intish)) {
+        init.set(intish, make_tv<KindOfInt64>(intish));
       } else {
         init.set(key, tvAsCVarRef(&elm.tv));
       }

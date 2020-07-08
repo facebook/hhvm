@@ -121,7 +121,7 @@ inline TypedValue tvToKey(TypedValue cell, const ArrayData* ad) {
 
   auto coerceKey = [&] (const StringData* str) {
     int64_t n;
-    if (ad->convertKey<IC>(str, n)) {
+    if (IC == IntishCast::Cast && ad->intishCastKey(str, n)) {
       return make_tv<KindOfInt64>(n);
     }
     return make_tv<KindOfString>(const_cast<StringData*>(str));
@@ -129,7 +129,7 @@ inline TypedValue tvToKey(TypedValue cell, const ArrayData* ad) {
 
   if (isStringType(cell.m_type)) {
     int64_t n;
-    if (ad->convertKey<IC>(cell.m_data.pstr, n)) {
+    if (IC == IntishCast::Cast && ad->intishCastKey(cell.m_data.pstr, n)) {
       return make_tv<KindOfInt64>(n);
     }
     return cell;

@@ -642,8 +642,7 @@ public:
    * (which may depend on the array kind, e.g.).  If true, `i' is set to the
    * intish value of `key'.
    */
-  template <IntishCast IC = IntishCast::None>
-  bool convertKey(const StringData* key, int64_t& i) const;
+  bool intishCastKey(const StringData* key, int64_t& i) const;
 
   /*
    * Re-index all numeric keys to start from 0. This operation may require
@@ -910,12 +909,6 @@ StringData* getHackArrCompatNullHackArrayKeyMsg();
 bool checkHACCompare();
 bool checkHACArrayPlus();
 bool checkHACArrayKeyCast();
-
-/*
- * Like isStrictlyInteger() but changes behavior with the value of `ic'.
- */
-template <IntishCast IC = IntishCast::None>
-folly::Optional<int64_t> tryIntishCast(const StringData* key);
 
 /*
  * Add a provenance tag for the current vmpc to `ad`, copying instead from

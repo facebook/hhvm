@@ -690,10 +690,6 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
               std::forward<Args>(args)...);
   }
 
-  int64_t n;
-  if (ad->convertKey(key.get(), n)) {
-    return fn(n, std::forward<Args>(args)...);
-  }
   return fn(key, std::forward<Args>(args)...);
 }
 

@@ -1645,16 +1645,16 @@ fb_cu(fb_s(array (
   '0' => 'a',
   '1' => 'b',
 ))) === array (
-  '0' => 'a',
-  '1' => 'b',
-): true
+  0 => 'a',
+  1 => 'b',
+): false
 type(fb_cu(fb_s(dict))) === dict
 fbcu success: true
 is_array: fb_cu(fb_s(type:dict)) === false
 HH\is_darray: fb_cu(fb_s(type:dict)) === true
 HH\is_varray: fb_cu(fb_s(type:dict)) === false
 
-fb_u(fb_cs(x)) === x: true
+fb_u(fb_cs(x)) === x: false
 type(fb_u(fb_s(type:dict))) === dict
 fbcu success: true
 is_array: fb_u(fb_cs(type:dict)) === false
@@ -1681,16 +1681,16 @@ fb_cu(fb_s(array (
   '0' => 'a',
   '1' => 'b',
 ))) === array (
-  '0' => 'a',
-  '1' => 'b',
-): true
+  0 => 'a',
+  1 => 'b',
+): false
 type(fb_cu(fb_s(dict))) === dict
 fbcu success: true
 is_array: fb_cu(fb_s(type:dict)) === false
 HH\is_darray: fb_cu(fb_s(type:dict)) === true
 HH\is_varray: fb_cu(fb_s(type:dict)) === false
 
-fb_u(fb_cs(x)) === x: true
+fb_u(fb_cs(x)) === x: false
 type(fb_u(fb_s(type:dict))) === dict
 fbcu success: true
 is_array: fb_u(fb_cs(type:dict)) === false
@@ -1718,15 +1718,15 @@ fb_cu(fb_s(array (
   '1' => 'b',
 ))) === array (
   0 => 'a',
-  '1' => 'b',
-): true
+  1 => 'b',
+): false
 type(fb_cu(fb_s(dict))) === dict
 fbcu success: true
 is_array: fb_cu(fb_s(type:dict)) === false
 HH\is_darray: fb_cu(fb_s(type:dict)) === true
 HH\is_varray: fb_cu(fb_s(type:dict)) === false
 
-fb_u(fb_cs(x)) === x: true
+fb_u(fb_cs(x)) === x: false
 type(fb_u(fb_s(type:dict))) === dict
 fbcu success: true
 is_array: fb_u(fb_cs(type:dict)) === false
@@ -1754,15 +1754,15 @@ fb_cu(fb_s(array (
   '1' => 'b',
 ))) === array (
   0 => 'a',
-  '1' => 'b',
-): true
+  1 => 'b',
+): false
 type(fb_cu(fb_s(dict))) === dict
 fbcu success: true
 is_array: fb_cu(fb_s(type:dict)) === false
 HH\is_darray: fb_cu(fb_s(type:dict)) === true
 HH\is_varray: fb_cu(fb_s(type:dict)) === false
 
-fb_u(fb_cs(x)) === x: true
+fb_u(fb_cs(x)) === x: false
 type(fb_u(fb_s(type:dict))) === dict
 fbcu success: true
 is_array: fb_u(fb_cs(type:dict)) === false
@@ -1789,16 +1789,16 @@ fb_cu(fb_s(array (
   '0' => 'a',
   1 => 'b',
 ))) === array (
-  '0' => 'a',
+  0 => 'a',
   1 => 'b',
-): true
+): false
 type(fb_cu(fb_s(dict))) === dict
 fbcu success: true
 is_array: fb_cu(fb_s(type:dict)) === false
 HH\is_darray: fb_cu(fb_s(type:dict)) === true
 HH\is_varray: fb_cu(fb_s(type:dict)) === false
 
-fb_u(fb_cs(x)) === x: true
+fb_u(fb_cs(x)) === x: false
 type(fb_u(fb_s(type:dict))) === dict
 fbcu success: true
 is_array: fb_u(fb_cs(type:dict)) === false
@@ -1825,16 +1825,16 @@ fb_cu(fb_s(array (
   '0' => 'a',
   1 => 'b',
 ))) === array (
-  '0' => 'a',
+  0 => 'a',
   1 => 'b',
-): true
+): false
 type(fb_cu(fb_s(dict))) === dict
 fbcu success: true
 is_array: fb_cu(fb_s(type:dict)) === false
 HH\is_darray: fb_cu(fb_s(type:dict)) === true
 HH\is_varray: fb_cu(fb_s(type:dict)) === false
 
-fb_u(fb_cs(x)) === x: true
+fb_u(fb_cs(x)) === x: false
 type(fb_u(fb_s(type:dict))) === dict
 fbcu success: true
 is_array: fb_u(fb_cs(type:dict)) === false
@@ -1897,7 +1897,7 @@ fb_cu(fb_s(array (
   '0' => '0',
   1 => 1,
 ))) === array (
-  '0' => '0',
+  0 => '0',
   1 => 1,
 ): false
 type(fb_cu(fb_s(keyset))) === dict
@@ -1934,7 +1934,7 @@ fb_cu(fb_s(array (
   '1' => '1',
 ))) === array (
   0 => 0,
-  '1' => '1',
+  1 => '1',
 ): false
 type(fb_cu(fb_s(keyset))) === dict
 fbcu success: true
@@ -1969,8 +1969,8 @@ fb_cu(fb_s(array (
   '0' => '0',
   '1' => '1',
 ))) === array (
-  '0' => '0',
-  '1' => '1',
+  0 => '0',
+  1 => '1',
 ): false
 type(fb_cu(fb_s(keyset))) === dict
 fbcu success: true
@@ -2041,7 +2041,7 @@ fb_cu(fb_s(array (
   '-1' => '-1',
   0 => 0,
 ))) === array (
-  '-1' => '-1',
+  -1 => '-1',
   0 => 0,
 ): false
 type(fb_cu(fb_s(keyset))) === dict
@@ -2157,17 +2157,17 @@ fb_cu(fb_s(array (
   '1' => 'b',
   '3' => 'c',
 ))) === array (
-  '0' => 'a',
-  '1' => 'b',
-  '3' => 'c',
-): true
+  0 => 'a',
+  1 => 'b',
+  3 => 'c',
+): false
 type(fb_cu(fb_s(dict))) === dict
 fbcu success: true
 is_array: fb_cu(fb_s(type:dict)) === false
 HH\is_darray: fb_cu(fb_s(type:dict)) === true
 HH\is_varray: fb_cu(fb_s(type:dict)) === false
 
-fb_u(fb_cs(x)) === x: true
+fb_u(fb_cs(x)) === x: false
 type(fb_u(fb_s(type:dict))) === dict
 fbcu success: true
 is_array: fb_u(fb_cs(type:dict)) === false
@@ -2196,17 +2196,17 @@ fb_cu(fb_s(array (
   1 => 'b',
   '3' => 'c',
 ))) === array (
-  '0' => 'a',
+  0 => 'a',
   1 => 'b',
-  '3' => 'c',
-): true
+  3 => 'c',
+): false
 type(fb_cu(fb_s(dict))) === dict
 fbcu success: true
 is_array: fb_cu(fb_s(type:dict)) === false
 HH\is_darray: fb_cu(fb_s(type:dict)) === true
 HH\is_varray: fb_cu(fb_s(type:dict)) === false
 
-fb_u(fb_cs(x)) === x: true
+fb_u(fb_cs(x)) === x: false
 type(fb_u(fb_s(type:dict))) === dict
 fbcu success: true
 is_array: fb_u(fb_cs(type:dict)) === false
@@ -2391,17 +2391,17 @@ fb_cu(fb_s(array (
   '2' => 'b',
   '3' => 'c',
 ))) === array (
-  '0' => 'a',
-  '2' => 'b',
-  '3' => 'c',
-): true
+  0 => 'a',
+  2 => 'b',
+  3 => 'c',
+): false
 type(fb_cu(fb_s(dict))) === dict
 fbcu success: true
 is_array: fb_cu(fb_s(type:dict)) === false
 HH\is_darray: fb_cu(fb_s(type:dict)) === true
 HH\is_varray: fb_cu(fb_s(type:dict)) === false
 
-fb_u(fb_cs(x)) === x: true
+fb_u(fb_cs(x)) === x: false
 type(fb_u(fb_s(type:dict))) === dict
 fbcu success: true
 is_array: fb_u(fb_cs(type:dict)) === false

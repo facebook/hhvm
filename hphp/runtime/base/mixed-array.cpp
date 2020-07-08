@@ -1598,8 +1598,9 @@ ArrayData* MixedArray::copyWithIntishCast(MixedArray* adIn,
     if (e.hasIntKey()) {
       out->update(e.ikey, e.data);
     } else {
-      if (auto const intish = tryIntishCast<IC>(e.skey)) {
-        out->update(*intish, e.data);
+      int64_t intish;
+      if (IC == IntishCast::Cast && e.skey->isStrictlyInteger(intish)) {
+        out->update(intish, e.data);
       } else {
         out->update(e.skey, e.data);
       }

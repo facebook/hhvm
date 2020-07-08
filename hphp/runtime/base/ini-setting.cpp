@@ -533,8 +533,9 @@ IniSettingMap::IniSettingMap(IniSettingMap&& i) noexcept {
 
 const IniSettingMap IniSettingMap::operator[](const String& key) const {
   assertx(this->isArray());
-  if (auto const intish = tryIntishCast<IntishCast::Cast>(key.get())) {
-    return IniSettingMap(m_map.asCArrRef()[*intish]);
+  int64_t intish;
+  if (key.get()->isStrictlyInteger(intish)) {
+    return IniSettingMap(m_map.asCArrRef()[intish]);
   }
   return IniSettingMap(m_map.asCArrRef()[key]);
 }
@@ -660,8 +661,9 @@ void IniSetting::ParserCallback::makeArray(tv_lval val,
     // not exist and will need to be made an array
     auto& arr = forceToArrayForMode(val);
     Variant key = index;
-    if (auto const intish = tryIntishCast<IntishCast::Cast>(index.get())) {
-      key = *intish;
+    int64_t intish;
+    if (index.get()->isStrictlyInteger(intish)) {
+      key = intish;
     }
     if (last) {
       arr.set(key, value);

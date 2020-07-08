@@ -391,10 +391,6 @@ bool HHVM_FUNCTION(array_key_exists,
 
     case KindOfPersistentString:
     case KindOfString: {
-      int64_t n = 0;
-      if (ad->convertKey(cell->m_data.pstr, n)) {
-        return ad->exists(n);
-      }
       return ad->exists(StrNR(cell->m_data.pstr));
     }
     case KindOfInt64:

@@ -411,33 +411,6 @@ inline ArrayData* ArrayData::remove(const Variant& k) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template <IntishCast IC>
-ALWAYS_INLINE bool ArrayData::convertKey(const StringData* key,
-                                         int64_t& i) const {
-  auto const result = IC == IntishCast::Cast &&
-                      key->isStrictlyInteger(i) &&
-                      useWeakKeys();
-  if (result && RO::EvalHackArrCompatIntishCastNotices) {
-    raise_hackarr_compat_notice("triggered array-based IntishCast");
-  }
-  return result;
-}
-
-template <IntishCast IC>
-ALWAYS_INLINE
-folly::Optional<int64_t> tryIntishCast(const StringData* key) {
-  int64_t i;
-  if (UNLIKELY(IC == IntishCast::Cast && key->isStrictlyInteger(i))) {
-    if (RO::EvalHackArrCompatIntishCastNotices) {
-      raise_hackarr_compat_notice("triggered standalone IntishCast");
-    }
-    return i;
-  }
-  return {};
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 }
 
 #endif

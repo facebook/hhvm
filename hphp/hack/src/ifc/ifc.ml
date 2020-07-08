@@ -544,18 +544,31 @@ let rec stmt renv env ((_pos, s) : Tast.stmt) =
     let cenv2 = Env.get_cenv env in
     let union _env t1 t2 = (env, mk_union t1 t2) in
     let env = Env.merge_and_set_cenv ~union env cenv1 cenv2 in
+    (* Restore the program counter from before the IF *)
     Env.set_pcs env K.Next gpc lpc
-  | A.Return (Some e) ->
-    let (env, te) = expr renv env e in
-    (* to account for enclosing conditionals, make the return
-       type depend on the local pc *)
-    let lpc = Env.get_lpc_policy env K.Next in
-    Env.acc env L.(add_dependencies lpc renv.re_ret && subtype te renv.re_ret)
-  | A.Return None -> env
+  | A.Return e ->
+    let union env t1 t2 = (env, mk_union t1 t2) in
+    let env = Env.merge_conts_into ~union env [K.Next] K.Exit in
+    begin
+      match e with
+      | None -> env
+      | Some e ->
+        let (env, te) = expr renv env e in
+        (* to account for enclosing conditionals, make the return
+          type depend on the local pc *)
+        let lpc = Env.get_lpc_policy env K.Next in
+        Env.acc
+          env
+          L.(add_dependencies lpc renv.re_ret && subtype te renv.re_ret)
+    end
   | _ -> env
 
 and block renv env (blk : Tast.block) =
-  List.fold_left ~f:(stmt renv) ~init:env blk
+  let seq env s =
+    let env = Env.merge_pcs_into env [K.Exit] K.Next in
+    stmt renv env s
+  in
+  List.fold_left ~f:seq ~init:env blk
 
 let callable opts decl_env class_name_opt name saved_env params body lrty =
   try

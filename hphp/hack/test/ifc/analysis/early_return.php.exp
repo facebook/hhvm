@@ -1,0 +1,75 @@
+Decls:
+  class \HH\vec: { policied_props = [] }
+  class \PoliciedData: { policied_props = [data:SECRET] }
+  class \PublicData: { policied_props = [data:PUBLIC] }
+  function \PoliciedData#__construct: { kind = public }
+  function \PublicData#__construct: { kind = public }
+  function \earlyReturn: { kind = public }
+  
+Analyzing __construct:
+* This: \PublicData<\PublicData, lump, data=<PUBLIC>>
+* Return: <ret>
+* Params:
+  lvars: { $data -> <$data> }
+  pc: pc
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars: { $data -> <$data> }
+    pc: pc
+Constraints:
+  [\PublicData = PUBLIC, $data = PUBLIC, pc = PUBLIC]
+
+Analyzing __construct:
+* This: \PoliciedData<\PoliciedData, lump, data=<SECRET>>
+* Return: <ret>
+* Params:
+  lvars: { $data -> <$data> }
+  pc: pc
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars: { $data -> <$data> }
+    pc: pc
+Constraints:
+  [\PoliciedData < SECRET, $data < SECRET, pc < SECRET]
+
+Analyzing \earlyReturn:
+* This: None
+* Return: <ret>
+* Params:
+  lvars:
+    { $x -> \PoliciedData<\PoliciedData, lump, data=<SECRET>>;
+      $y -> \PublicData<\PublicData, lump'1, data=<PUBLIC>> }
+  pc: pc
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars:
+      { $x -> \PoliciedData<\PoliciedData, lump, data=<SECRET>>;
+        $y -> \PublicData<\PublicData, lump'1, data=<PUBLIC>> }
+    pc: pc
+Constraints:
+  [SECRET < .data, \PoliciedData < .data, \PublicData = PUBLIC,
+   PUBLIC = PUBLIC, .data = PUBLIC, pc = PUBLIC, pc = PUBLIC]
+
+Flow constraints for \PoliciedData#__construct:
+  
+  Simplified: True
+  Raw: [\PoliciedData < SECRET, $data < SECRET, pc < SECRET]
+
+Flow constraints for \PublicData#__construct:
+  
+  Simplified: True
+  Raw: [\PublicData = PUBLIC, $data = PUBLIC, pc = PUBLIC]
+
+Flow constraints for \earlyReturn:
+  
+  Simplified: SECRET = PUBLIC
+  Raw:
+  [SECRET < .data, \PoliciedData < .data, \PublicData = PUBLIC,
+   PUBLIC = PUBLIC, .data = PUBLIC, pc = PUBLIC, pc = PUBLIC]
+
+There are privacy policy errors in \earlyReturn:
+  Data with policy SECRET appears in context PUBLIC.
+  

@@ -119,3 +119,40 @@ let set_pcs env k gpc lpc =
   match get_lenv_opt env k with
   | None -> env
   | Some lenv -> set_cont env k { lenv with le_gpc = gpc; le_lpc = lpc }
+
+let merge_lenv_into ~union env lenv k =
+  match get_lenv_opt env k with
+  | None -> set_cont env k lenv
+  | Some lenv' ->
+    let (env, merged_lenv) = merge_lenv ~union env lenv lenv' in
+    set_cont env k merged_lenv
+
+let merge_conts_into ~union env ks k_to =
+  let f (env, lenv) k =
+    match (lenv, get_lenv_opt env k) with
+    | (None, l)
+    | (l, None) ->
+      (env, l)
+    | (Some l1, Some l2) ->
+      let (env, merged_lenv) = merge_lenv ~union env l1 l2 in
+      (env, Some merged_lenv)
+  in
+  let (env, lenv) = List.fold_left f (env, None) ks in
+  match lenv with
+  | None -> env
+  | Some lenv -> merge_lenv_into ~union env lenv k_to
+
+let merge_pcs_into env ks k_to =
+  let f (lpc, gpc) k =
+    match get_lenv_opt env k with
+    | None -> (lpc, gpc)
+    | Some lenv -> (lenv.le_lpc @ lpc, lenv.le_gpc @ gpc)
+  in
+  let (lpc, gpc) = List.fold_left f ([], []) ks in
+  match get_lenv_opt env k_to with
+  | None -> env
+  | Some lenv ->
+    set_cont
+      env
+      k_to
+      { lenv with le_lpc = lpc @ lenv.le_lpc; le_gpc = gpc @ lenv.le_gpc }

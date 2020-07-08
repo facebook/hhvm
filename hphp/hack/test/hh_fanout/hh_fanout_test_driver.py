@@ -8,7 +8,7 @@ files need to be re-typechecked"?
 The test cases are in files called `test.txt` in the subdirectories of this
 directory. They are written in a small DSL (detailed later in this file).
 
-TODO: Additionally, we perform the sanity check that the list of typechecking
+Additionally, we perform the sanity check that the list of typechecking
 errors produced from a full typecheck is the same as for an incremental
 typecheck.
 """
@@ -224,6 +224,24 @@ def run_fanout_test(
     return cursor
 
 
+def run_typecheck_test(
+    env: Env, saved_state_info: SavedStateInfo, work_dir: Path, cursor: Cursor
+) -> None:
+    hh_fanout_result = run_hh_fanout_calculate_errors_pretty_print(
+        env=env, saved_state_info=saved_state_info, work_dir=work_dir, cursor=cursor
+    )
+    hh_server_result = run_hh_server_check(env=env, work_dir=work_dir)
+    print(hh_fanout_result)
+
+    if hh_fanout_result == hh_server_result:
+        print("(Additionally, hh_fanout errors matched hh_server errors.)")
+    else:
+        nocommit = "\x40nocommit"
+        print(f"{nocommit} -- hh_fanout did NOT match hh_server output!")
+        print("hh_server errors:")
+        print(hh_server_result)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("test_path", type=os.path.abspath)
@@ -298,6 +316,42 @@ def main() -> None:
                     cursor=cursor,
                 )
                 changed_files = []
+
+            # `calculate-errors` calculates the set of typechecking errors in
+            # the codebase and prints it to the test output for comparison
+            # against the `.exp` file.
+            elif command == "calculate-errors":
+                if is_first:
+                    is_first = False
+                else:
+                    print()
+                print(f"Typecheck for change set at time #{timestamp}")
+
+                # We require a cursor to calculate errors, but we won't have a
+                # non-`None` one on the first iteration of this loop. Do an
+                # `hh_fanout` query to bring us up to date and to ensure we
+                # have a cursor.
+                cursor = cast(
+                    Optional[Cursor],
+                    run_hh_fanout(
+                        env=env,
+                        saved_state_info=saved_state_info,
+                        changed_files=changed_files,
+                        args=[],
+                        cursor=cursor,
+                    )["cursor"],
+                )
+                changed_files = []
+                assert (
+                    cursor is not None
+                ), "Cursor should be available since we queried fanout"
+
+                run_typecheck_test(
+                    env=env,
+                    saved_state_info=saved_state_info,
+                    work_dir=work_dir,
+                    cursor=cursor,
+                )
 
             else:
                 raise ValueError(f"Unrecognized test command: {command}")

@@ -1,8 +1,7 @@
 <?hh
-require(__DIR__ . '/common.inc');
-
-ExtVsdebugStep::$path = __FILE__ . ".test";
-
+abstract final class ExtVsdebugStep {
+  public static $path;
+}
 function verifyStopLine($frames, $line) {
 
 
@@ -59,7 +58,10 @@ function stepCommand($cmd) {
         "threadId" => 1
     ]]);
 }
+<<__EntryPoint>> function main() {
+require(__DIR__ . '/common.inc');
 
+ExtVsdebugStep::$path = __FILE__ . ".test";
 
 $breakpoints = varray[
    darray[
@@ -139,7 +141,5 @@ checkForOutput($testProcess, "hello world 5\n", "stdout");
 vsDebugCleanup($testProcess);
 
 echo "OK!\n";
-
-abstract final class ExtVsdebugStep {
-  public static $path;
 }
+

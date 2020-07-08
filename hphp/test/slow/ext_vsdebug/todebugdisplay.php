@@ -1,6 +1,6 @@
 <?hh
-require(__DIR__ . '/common.inc');
 <<__EntryPoint>> function main(): void {
+require(__DIR__ . '/common.inc');
 $path = __FILE__ . ".test";
 $breakpoints = varray[
    darray[

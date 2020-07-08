@@ -1,8 +1,8 @@
 <?hh
 
-require(__DIR__ . '/common.inc');
 
 <<__EntryPoint>> function main() {
+require(__DIR__ . '/common.inc');
   $path = __FILE__ . '.test';
   $bp1_line = 10;
   $bp2_line = 12;

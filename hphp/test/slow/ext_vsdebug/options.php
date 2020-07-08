@@ -1,5 +1,4 @@
 <?hh
-require(__DIR__ . '/common.inc');
 
 function skipEvents() {
   $msg = json_decode(getNextVsDebugMessage(), true);
@@ -10,6 +9,7 @@ function skipEvents() {
   return $msg;
 }
 <<__EntryPoint>> function main(): void {
+require(__DIR__ . '/common.inc');
 $path = __FILE__ . ".test";
 $testProcess = vsDebugLaunch($path, true, varray[]);
 

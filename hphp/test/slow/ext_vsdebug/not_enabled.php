@@ -1,7 +1,7 @@
 <?hh
 
-require(__DIR__ . '/common.inc');
 <<__EntryPoint>> function main(): void {
+require(__DIR__ . '/common.inc');
 /*
  * Not enabled test: verify that if --mode vsdebug is not specified, the
  * VSDebug extension is not listening and the script executes without waiting

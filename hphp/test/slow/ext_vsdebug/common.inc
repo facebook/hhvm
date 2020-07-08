@@ -1,13 +1,14 @@
 <?hh
 
-// Test globals.
-$GLOBALS['vsDebugData'] = "";
-$GLOBALS['client'] = false;
-$GLOBALS['seq'] = 0;
+final class Data {
+  public static string $vsDebugData = "";
+  public static bool $client = false;
+  public static int $seq = 0;
+}
 
 function getNextVsDebugMessage() {
-  $vsDebugData = $GLOBALS['vsDebugData'];
-  $client = $GLOBALS['client'];
+  $vsDebugData = Data::$vsDebugData;
+  $client = Data::$client;
   if ($client === false) {
     return null;
   }
@@ -35,9 +36,9 @@ function getNextVsDebugMessage() {
 
     $data = substr($vsDebugData, 0, $pos - 1);
     if ($pos == strlen($vsDebugData)) {
-      $GLOBALS['vsDebugData'] = "";
+      Data::$vsDebugData = "";
     } else {
-      $GLOBALS['vsDebugData'] = substr($vsDebugData, $pos + 1);
+      Data::$vsDebugData = substr($vsDebugData, $pos + 1);
     }
     return $data;
   }
@@ -62,7 +63,7 @@ function assertIsNotEmpty($val) {
 }
 
 function checkObjEqualRecursively($msg, $expected) {
-  if ($msg === '' && feof($GLOBALS['client'])) {
+  if ($msg === '' && feof(Data::$client)) {
     throw new ErrorException("Target has exited.");
   }
 
@@ -82,8 +83,8 @@ function checkObjEqualRecursively($msg, $expected) {
 }
 
 function sendVsCommand($commandMsg) {
-  $client = $GLOBALS['client'];
-  $commandMsg{'seq'} = ++$GLOBALS['seq'];
+  $client = Data::$client;
+  $commandMsg{'seq'} = ++Data::$seq;
   fwrite($client, json_encode($commandMsg));
   fwrite($client, chr(0));
   return $commandMsg{'seq'};
@@ -175,7 +176,6 @@ function checkForOutput($testProcess, $expectedOutput, $expectedCategory, $error
   }
 }
 
-ExtVsdebugCommonInc::$bpId = 0;
 function setBreakpoints($breakpoints, $verify = true) {
 
   foreach ($breakpoints as $bpsForFile) {
@@ -283,8 +283,8 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = varr
     throw new UnexpectedValueException("Failed to open child process!");
   }
 
-  $vsDebugData = $GLOBALS['vsDebugData'];
-  $client = $GLOBALS['client'];
+  $vsDebugData = Data::$vsDebugData;
+  $client = Data::$client;
   $tries = 0;
   while ($client === false) {
     $errno = null;
@@ -305,7 +305,7 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = varr
     }
   }
 
-  $GLOBALS['client'] = $client;
+  Data::$client = $client;
 
   if ($sendDefaultInit) {
     $initCommand = darray[
@@ -477,5 +477,5 @@ function vsDebugCleanup($testProcess, $expectedExitCode = 0) {
 }
 
 abstract final class ExtVsdebugCommonInc {
-  public static $bpId;
+  public static $bpId = 0;
 }

@@ -1,4 +1,6 @@
 <?hh
+
+<<__EntryPoint>> function main() {
 require(__DIR__ . '/common.inc');
 
 $path = __FILE__ . ".test";
@@ -810,3 +812,4 @@ checkForOutput($testProcess, "hello world 2\n", "stdout");
 vsDebugCleanup($testProcess);
 
 echo "OK!\n";
+}

@@ -82,9 +82,7 @@ bool poppable(Op op) {
     case Op::Vec:
     case Op::Dict:
     case Op::Keyset:
-    case Op::NewArray:
     case Op::NewDArray:
-    case Op::NewMixedArray:
     case Op::NewDictArray:
     case Op::NewCol:
       return true;
@@ -930,31 +928,10 @@ void in(ISS& env, const bc::Keyset& op) {
   push(env, keyset_val(op.arr1));
 }
 
-void in(ISS& env, const bc::NewArray& op) {
-  effect_free(env);
-  push(env, op.arg1 == 0 ? aempty() : some_aempty());
-}
-
 void in(ISS& env, const bc::NewDictArray& op) {
   effect_free(env);
   push(env, op.arg1 == 0 ? dict_empty(provTagHere(env))
                          : some_dict_empty(provTagHere(env)));
-}
-
-void in(ISS& env, const bc::NewMixedArray& op) {
-  effect_free(env);
-  push(env, op.arg1 == 0 ? aempty() : some_aempty());
-}
-
-void in(ISS& env, const bc::NewPackedArray& op) {
-  auto elems = std::vector<Type>{};
-  elems.reserve(op.arg1);
-  for (auto i = uint32_t{0}; i < op.arg1; ++i) {
-    elems.push_back(std::move(topC(env, op.arg1 - i - 1)));
-  }
-  discard(env, op.arg1);
-  push(env, arr_packed(std::move(elems)));
-  constprop(env);
 }
 
 void in(ISS& env, const bc::NewVArray& op) {
@@ -981,16 +958,6 @@ void in(ISS& env, const bc::NewRecord& op) {
   discard(env, op.keys.size());
   auto const rrec = env.index.resolve_record(op.str1);
   push(env, rrec ? exactRecord(*rrec) : TRecord);
-}
-
-void in(ISS& env, const bc::NewStructArray& op) {
-  auto map = MapElems{};
-  for (auto it = op.keys.end(); it != op.keys.begin(); ) {
-    map.emplace_front(make_tv<KindOfPersistentString>(*--it), popC(env));
-  }
-  push(env, arr_map(std::move(map)));
-  effect_free(env);
-  constprop(env);
 }
 
 void in(ISS& env, const bc::NewStructDArray& op) {
@@ -1815,10 +1782,6 @@ void in(ISS& env, const bc::CastDouble&) {
 
 void in(ISS& env, const bc::CastString&) {
   castImpl(env, TStr, tvCastToStringInPlace);
-}
-
-void in(ISS& env, const bc::CastArray&)  {
-  castImpl(env, TPArr, tvCastToArrayInPlace);
 }
 
 void in(ISS& env, const bc::CastDict&)   {

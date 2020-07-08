@@ -1,7 +1,7 @@
 .hh_file 1;
 # Test type annotations for hhas
 
-.adata A_0 = """a:0:{}""";
+.adata A_0 = """Y:0:{}""";
 
 .main {
   DefCls 0

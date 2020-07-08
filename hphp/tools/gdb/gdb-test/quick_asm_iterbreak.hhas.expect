@@ -5,7 +5,7 @@
 0xXX+10: PopC
 0xXX+11: Int 1
 0xXX+20: RetC
-0xXX+21: NewArray 3
+0xXX+21: NewDArray 3
 0xXX+23: String hello
 0xXX+28: String world
 0xXX+33: AddElemC
@@ -19,13 +19,13 @@
 0xXX+58: PopC
 0xXX+59: CGetL 0 (name: 0)
 0xXX+62: IterInit 0 k:1 v:2 108
-0xXX+71: String 
+0xXX+71: String
 
 0xXX+76: CGetL2 2 (name: 2)
 0xXX+79: Concat
 0xXX+80: Print
 0xXX+81: PopC
-0xXX+82: String 
+0xXX+82: String
 
 0xXX+87: CGetL2 1 (name: 1)
 0xXX+90: Concat
@@ -33,13 +33,13 @@
 0xXX+92: PopC
 0xXX+93: CGetL 0 (name: 0)
 0xXX+96: IterInit 1 k:3 v:4 57
-0xXX+105: String 
+0xXX+105: String
 
 0xXX+110: CGetL2 4 (name: 4)
 0xXX+113: Concat
 0xXX+114: Print
 0xXX+115: PopC
-0xXX+116: String 
+0xXX+116: String
 
 0xXX+121: CGetL2 3 (name: 3)
 0xXX+124: Concat

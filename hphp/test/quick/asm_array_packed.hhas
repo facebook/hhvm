@@ -79,7 +79,7 @@
   Int 62
   Int 63
   Int 64
-  NewPackedArray 64
+  NewVArray 64
 
   FCallFuncD <> 1 1 "" - "" "var_dump"
   PopC

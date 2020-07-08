@@ -18,7 +18,7 @@ use env::{iterator::Id as IterId, local::Type as Local, Env as BodyEnv};
 use escaper::{escape, escape_by, is_lit_printable};
 use hhas_adata_rust::HhasAdata;
 use hhas_adata_rust::{
-    ARRAY_PREFIX, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, LEGACY_DICT_PREFIX, LEGACY_VEC_PREFIX,
+    DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, LEGACY_DICT_PREFIX, LEGACY_VEC_PREFIX,
     VARRAY_PREFIX, VEC_PREFIX,
 };
 use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};
@@ -1038,9 +1038,6 @@ fn print_adata<W: Write>(ctx: &mut Context, w: &mut W, tv: &TypedValue) -> Resul
         TypedValue::DArray((pairs, loc)) => {
             print_adata_dict_collection_argument(ctx, w, DARRAY_PREFIX, loc, pairs)
         }
-        TypedValue::Array(pairs) => {
-            print_adata_dict_collection_argument(ctx, w, ARRAY_PREFIX, &None, pairs)
-        }
         TypedValue::Keyset(values) => {
             print_adata_collection_argument(ctx, w, KEYSET_PREFIX, &None, values)
         }
@@ -2026,18 +2023,11 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
             w.write("Vec ")?;
             print_adata_id(w, id)
         }
-        LC::NewArray(i) => concat_str_by(w, " ", ["NewArray", i.to_string().as_str()]),
-        LC::NewMixedArray(i) => concat_str_by(w, " ", ["NewMixedArray", i.to_string().as_str()]),
         LC::NewDictArray(i) => concat_str_by(w, " ", ["NewDictArray", i.to_string().as_str()]),
         LC::NewDArray(i) => concat_str_by(w, " ", ["NewDArray", i.to_string().as_str()]),
-        LC::NewPackedArray(i) => concat_str_by(w, " ", ["NewPackedArray", i.to_string().as_str()]),
         LC::NewVArray(i) => concat_str_by(w, " ", ["NewVArray", i.to_string().as_str()]),
         LC::NewVec(i) => concat_str_by(w, " ", ["NewVec", i.to_string().as_str()]),
         LC::NewKeysetArray(i) => concat_str_by(w, " ", ["NewKeysetArray", i.to_string().as_str()]),
-        LC::NewStructArray(l) => {
-            w.write("NewStructArray ")?;
-            angle(w, |w| print_shape_fields(w, l))
-        }
         LC::NewStructDArray(l) => {
             w.write("NewStructDArray ")?;
             angle(w, |w| print_shape_fields(w, l))
@@ -2139,7 +2129,6 @@ fn print_op<W: Write>(w: &mut W, op: &InstructOperator) -> Result<(), W::Error> 
         I::CastInt => w.write("CastInt"),
         I::CastDouble => w.write("CastDouble"),
         I::CastString => w.write("CastString"),
-        I::CastArray => w.write("CastArray"),
         I::CastVec => w.write("CastVec"),
         I::CastDict => w.write("CastDict"),
         I::CastKeyset => w.write("CastKeyset"),

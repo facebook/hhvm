@@ -50,7 +50,6 @@ fn rewrite_typed_value(e: &mut Emitter, instr: &mut Instruct) -> Result<()> {
             TV::String(s) => String(s.to_owned()),
             TV::Float(f) => Double(string_utils::float::to_string(*f)),
             TV::Keyset(_) => Keyset(get_array_identifier(e, tv)),
-            TV::Array(_) => Array(get_array_identifier(e, tv)),
             TV::VArray(_) | TV::DArray(_) if !hack_arr_dv_arrs => {
                 Array(get_array_identifier(e, tv))
             }

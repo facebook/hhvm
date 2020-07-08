@@ -467,19 +467,6 @@ IMPL_OPCODE_CALL(ConvTVToStr);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPL_OPCODE_CALL(ConvBoolToArr);
-IMPL_OPCODE_CALL(ConvIntToArr);
-IMPL_OPCODE_CALL(ConvDblToArr);
-IMPL_OPCODE_CALL(ConvStrToArr);
-IMPL_OPCODE_CALL(ConvFuncToArr);
-IMPL_OPCODE_CALL(ConvVecToArr);
-IMPL_OPCODE_CALL(ConvDictToArr);
-IMPL_OPCODE_CALL(ConvKeysetToArr);
-IMPL_OPCODE_CALL(ConvClsMethToArr);
-IMPL_OPCODE_CALL(ConvObjToArr);
-IMPL_OPCODE_CALL(ConvTVToArr);
-IMPL_OPCODE_CALL(ConvArrToNonDVArr);
-
 IMPL_OPCODE_CALL(ConvClsMethToVArr);
 IMPL_OPCODE_CALL(ConvClsMethToDArr);
 

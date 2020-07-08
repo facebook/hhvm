@@ -14,7 +14,7 @@
 }
 
 # array(0,1,2,3,4)
-.adata my_array = """a:5:{i:0;i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:4;i:4;}""";
+.adata my_array = """Y:5:{i:0;i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:4;i:4;}""";
 
 .function main() {
          .numiters 1;

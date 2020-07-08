@@ -101,10 +101,6 @@ let string_of_lit_const instruction =
   | NewVec i -> sep ["NewVec"; string_of_int i]
   | NewVArray i -> sep ["NewVArray"; string_of_int i]
   | NewDArray i -> sep ["NewDArray"; string_of_int i]
-  | NewMixedArray i -> sep ["NewMixedArray"; string_of_int i]
-  | NewPackedArray i -> sep ["NewPackedArray"; string_of_int i]
-  | NewStructArray l ->
-    sep ["NewStructArray"; "<" ^ string_of_list_of_shape_fields l ^ ">"]
   | NewStructDArray l ->
     sep ["NewStructDArray"; "<" ^ string_of_list_of_shape_fields l ^ ">"]
   | NewStructDict l ->
@@ -125,7 +121,6 @@ let string_of_lit_const instruction =
   | FuncCred -> "FuncCred"
   | NullUninit -> "NullUninit"
   | Method -> "Method"
-  | NewArray n -> sep ["NewArray"; string_of_int n]
   | CnsE cnsid -> sep ["CnsE"; string_of_const_id cnsid]
 
 let string_of_typestruct_resolve_op = function
@@ -174,7 +169,6 @@ let string_of_operator instruction =
   | CastInt -> "CastInt"
   | CastDouble -> "CastDouble"
   | CastString -> "CastString"
-  | CastArray -> "CastArray"
   | CastVec -> "CastVec"
   | CastDict -> "CastDict"
   | CastKeyset -> "CastKeyset"

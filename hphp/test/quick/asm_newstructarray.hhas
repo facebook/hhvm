@@ -16,7 +16,7 @@
   String "two"
   Double 3.1415
   Int 4
-  NewStructArray <"one" "two" "three" "four">
+  NewStructDArray <"one" "two" "three" "four">
   SetL $arr
   PopC
 

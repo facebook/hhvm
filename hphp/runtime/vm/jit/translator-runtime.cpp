@@ -114,55 +114,6 @@ TypedValue arrayAdd(ArrayData* a1, ArrayData* a2) {
   return make_array_like_tv(a1);
 }
 
-ArrayData* convTVToArrHelper(TypedValue tv) {
-  // Note: the call sites of this function all assume that
-  // no user code will run and no recoverable exceptions will
-  // occur while running this code. This seems trivially true
-  // in all cases but converting objects to arrays. It also
-  // seems true for that case as well, since the resulting array
-  // is essentially metadata for the object. If that is not true,
-  // you might end up looking at this code in a debugger and now
-  // you know why.
-  tvCastToArrayInPlace(&tv); // consumes a ref on counted values
-  return tv.m_data.parr;
-}
-
-ArrayData* convArrToNonDVArrHelper(ArrayData* adIn) {
-  assertx(adIn->isPHPArrayType());
-  if (adIn->isNotDVArray()) return adIn;
-  auto a = adIn->toPHPArray(adIn->cowCheck());
-  if (a != adIn) decRefArr(adIn);
-  assertx(a->isNotDVArray());
-  return a;
-}
-
-ArrayData* convVecToArrHelper(ArrayData* adIn) {
-  assertx(adIn->isVecKind());
-  auto a = PackedArray::ToPHPArrayVec(adIn, adIn->cowCheck());
-  if (a != adIn) decRefArr(adIn);
-  assertx(a->isPHPArrayType());
-  assertx(a->isNotDVArray());
-  return a;
-}
-
-ArrayData* convDictToArrHelper(ArrayData* adIn) {
-  assertx(adIn->isDictKind());
-  auto a = MixedArray::ToPHPArrayDict(adIn, adIn->cowCheck());
-  if (a != adIn) decRefArr(adIn);
-  assertx(a->isPHPArrayType());
-  assertx(a->isNotDVArray());
-  return a;
-}
-
-ArrayData* convKeysetToArrHelper(ArrayData* adIn) {
-  assertx(adIn->isKeysetKind());
-  auto a = SetArray::ToPHPArray(adIn, adIn->cowCheck());
-  if (a != adIn) decRefArr(adIn);
-  assertx(a->isPHPArrayType());
-  assertx(a->isNotDVArray());
-  return a;
-}
-
 ArrayData* convArrToVecHelper(ArrayData* adIn) {
   assertx(adIn->isPHPArrayType());
   auto a = adIn->toVec(adIn->cowCheck());
@@ -248,14 +199,6 @@ ArrayData* convObjToKeysetHelper(ObjectData* obj) {
   auto a = castObjToKeyset(obj);
   assertx(a->isKeysetType());
   decRefObj(obj);
-  return a;
-}
-
-ArrayData* convClsMethToArrHelper(ClsMethDataRef clsmeth) {
-  raiseClsMethConvertWarningHelper("array");
-  auto a = make_map_array(
-      0, clsmeth->getClsStr(), 1, clsmeth->getFuncStr()).detach();
-  decRefClsMeth(clsmeth);
   return a;
 }
 

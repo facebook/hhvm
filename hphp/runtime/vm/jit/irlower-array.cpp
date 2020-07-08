@@ -257,9 +257,6 @@ void implAllocArray(IRLS& env, const IRInstruction* inst, MakeArrayFn target,
 
 }
 
-void cgNewPlainArray(IRLS& env, const IRInstruction* inst) {
-  implNewArray(env, inst, MixedArray::MakeReserveMixed);
-}
 void cgNewDictArray(IRLS& env, const IRInstruction* inst) {
   implNewArray(env, inst, MixedArray::MakeReserveDict);
 }
@@ -297,10 +294,6 @@ void newStructImpl(
   cgCallHelper(v, env, CallSpec::direct(f), callDest(env, inst), sync, args);
 }
 
-}
-
-void cgNewStructArray(IRLS& env, const IRInstruction* inst) {
-  newStructImpl(env, inst, MixedArray::MakeStruct);
 }
 
 void cgNewStructDArray(IRLS& env, const IRInstruction* inst) {
@@ -358,10 +351,6 @@ void allocStructImpl(
   cgCallHelper(v, env, CallSpec::direct(f), callDest(env, inst), sync, args);
 }
 
-}
-
-void cgAllocStructArray(IRLS& env, const IRInstruction* inst) {
-  allocStructImpl<MixedArrayInit>(env, inst, MixedArray::AllocStruct);
 }
 
 void cgAllocStructDArray(IRLS& env, const IRInstruction* inst) {

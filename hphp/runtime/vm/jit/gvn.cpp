@@ -189,10 +189,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case SubIntO:
   case MulIntO:
   case XorBool:
-  case ConvBoolToArr:
-  case ConvDblToArr:
-  case ConvFuncToArr:
-  case ConvIntToArr:
   case ConvDblToBool:
   case ConvIntToBool:
   case ConvBoolToDbl:

@@ -82,7 +82,6 @@ let rec random_typed_value () : Typed_value.t =
    (fun () -> Typed_value.Float (Random.float 100.0));
    (fun () -> Typed_value.String "");
    (fun () -> Typed_value.Null);
-   (fun () -> Typed_value.Array [random_typed_value (), random_typed_value ()]);
    (fun () -> Typed_value.Vec ([random_typed_value ()], None));
    (fun () -> Typed_value.Keyset [random_typed_value ()]);
    (fun () -> Typed_value.Dict ([random_typed_value (), random_typed_value ()], None))]
@@ -119,8 +118,6 @@ let all_instrs (_ : IS.t) : lazy_instruct list =
     (fun () -> ILitConst (Vec (random_adata_id ())));
     (fun () -> ILitConst (Dict (random_adata_id ())));
     (fun () -> ILitConst (Keyset (random_adata_id ())));
-    (fun () -> ILitConst (NewArray (Random.int 1000)));
-    (fun () -> ILitConst (NewMixedArray (Random.int 1000)));
     (fun () -> ILitConst (NewDictArray (Random.int 1000)));
     (fun () -> ILitConst (NewCol (random_collection_type ())));
     (fun () -> ILitConst (CnsE (Const.from_raw_string "")));
@@ -150,7 +147,6 @@ let all_instrs (_ : IS.t) : lazy_instruct list =
     (fun () -> IOp CastInt);
     (fun () -> IOp CastDouble);
     (fun () -> IOp CastString);
-    (fun () -> IOp CastArray);
     (fun () -> IOp CastVec);
     (fun () -> IOp CastDict);
     (fun () -> IOp CastKeyset);

@@ -1466,29 +1466,10 @@ OPTBLD_INLINE void iopKeyset(const ArrayData* a) {
   vmStack().pushStaticKeyset(bespoke::maybeEnableLogging(a));
 }
 
-OPTBLD_INLINE void iopNewArray(uint32_t capacity) {
-  auto const ad = capacity ? MixedArray::MakeReserveMixed(capacity)
-                           : ArrayData::Create();
-  vmStack().pushArrayNoRc(bespoke::maybeEnableLogging(ad));
-}
-
-OPTBLD_INLINE void iopNewMixedArray(uint32_t capacity) {
-  iopNewArray(capacity);
-}
-
 OPTBLD_INLINE void iopNewDictArray(uint32_t capacity) {
   auto const ad = capacity ? MixedArray::MakeReserveDict(capacity)
                            : ArrayData::CreateDict();
   vmStack().pushDictNoRc(bespoke::maybeEnableLogging(ad));
-}
-
-OPTBLD_INLINE void iopNewPackedArray(uint32_t n) {
-  // This constructor moves values, no inc/decref is necessary.
-  auto vec = PackedArray::MakeVec(n, vmStack().topC());
-  auto arr = PackedArray::ToPHPArrayVec(vec, vec->cowCheck());
-  if (arr != vec) decRefArr(vec);
-  vmStack().ndiscard(n);
-  vmStack().pushArrayNoRc(bespoke::maybeEnableLogging(arr));
 }
 
 namespace {
@@ -1511,11 +1492,6 @@ ArrayData* newStructArrayImpl(imm_array<int32_t> ids, F f) {
   return a;
 }
 
-}
-
-OPTBLD_INLINE void iopNewStructArray(imm_array<int32_t> ids) {
-  auto const ad = newStructArrayImpl(ids, MixedArray::MakeStruct);
-  vmStack().pushArrayNoRc(bespoke::maybeEnableLogging(ad));
 }
 
 OPTBLD_INLINE void iopNewStructDArray(imm_array<int32_t> ids) {
@@ -1901,11 +1877,6 @@ OPTBLD_INLINE void iopCastDouble() {
 OPTBLD_INLINE void iopCastString() {
   TypedValue* c1 = vmStack().topC();
   tvCastToStringInPlace(c1);
-}
-
-OPTBLD_INLINE void iopCastArray() {
-  TypedValue* c1 = vmStack().topC();
-  tvCastToArrayInPlace(c1);
 }
 
 OPTBLD_INLINE void iopCastDict() {

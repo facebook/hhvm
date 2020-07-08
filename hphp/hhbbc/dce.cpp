@@ -207,7 +207,7 @@ enum class Use {
   /*
    * Indicates that the stack slot contains an array-like being
    * constructed by AddElemCs, which looks like it can be optimized to
-   * a NewStructArray, NewPackedArray, or NewVec.
+   * a NewStructDArray, NewPackedVArray, or NewVec.
    */
   AddElemC = 3,
 
@@ -1134,7 +1134,6 @@ void dce(Env& env, const bc::NullUninit&)    { pushRemovable(env); }
 void dce(Env& env, const bc::File&)          { pushRemovable(env); }
 void dce(Env& env, const bc::Dir&)           { pushRemovable(env); }
 void dce(Env& env, const bc::FuncCred&)      { pushRemovable(env); }
-void dce(Env& env, const bc::NewArray&)      { pushRemovable(env); }
 void dce(Env& env, const bc::NewCol&)        { pushRemovable(env); }
 void dce(Env& env, const bc::CheckProp&)     { pushRemovable(env); }
 
@@ -1300,17 +1299,6 @@ void dce(Env& env, const bc::Array& op) {
     });
 }
 
-void dce(Env& env, const bc::NewMixedArray&) {
-  stack_ops(env, [&] (const UseInfo& ui) {
-      if (ui.usage == Use::AddElemC || allUnused(ui)) {
-        env.dceState.didAddOpts  = true;
-        return PushFlags::MarkUnused;
-      }
-
-      return PushFlags::MarkLive;
-    });
-}
-
 void dce(Env& env, const bc::NewDictArray&) {
   stack_ops(env, [&] (const UseInfo& ui) {
       if (ui.usage == Use::AddElemC || allUnused(ui)) {
@@ -1385,20 +1373,14 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
         CompactVector<Bytecode> bcs;
         if (cat.cat == Type::ArrayCat::Struct &&
             *postSize <= ArrayData::MaxElemsOnStack) {
-          if (arrPost.subtypeOf(BPArrN)) {
-            bcs.emplace_back(bc::NewStructArray { get_string_keys(arrPost) });
-          } else if (arrPost.subtypeOf(BDArrN)) {
+          if (arrPost.subtypeOf(BDArrN)) {
             bcs.emplace_back(bc::NewStructDArray { get_string_keys(arrPost) });
           } else {
             return PushFlags::MarkLive;
           }
         } else if (cat.cat == Type::ArrayCat::Packed &&
                    *postSize <= ArrayData::MaxElemsOnStack) {
-          if (arrPost.subtypeOf(BPArrN)) {
-            bcs.emplace_back(
-              bc::NewPackedArray { static_cast<uint32_t>(*postSize) }
-            );
-          } else if (arrPost.subtypeOf(BVArrN)) {
+          if (arrPost.subtypeOf(BVArrN)) {
             bcs.emplace_back(
               bc::NewVArray { static_cast<uint32_t>(*postSize) }
             );
@@ -1438,8 +1420,6 @@ void dceNewArrayLike(Env& env, const Op& op) {
   pushRemovableIfNoThrow(env);
 }
 
-void dce(Env& env, const bc::NewPackedArray& op)  { dceNewArrayLike(env, op); }
-void dce(Env& env, const bc::NewStructArray& op)  { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::NewStructDArray& op) { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::NewStructDict& op)   { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::NewVec& op)          { dceNewArrayLike(env, op); }
@@ -1584,7 +1564,6 @@ void dce(Env& env, const bc::BitAnd&)           { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::BitNot&)           { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::BitOr&)            { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::BitXor&)           { pushRemovableIfNoThrow(env); }
-void dce(Env& env, const bc::CastArray&)        { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastBool&)         { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastDArray&)       { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::CastDict&)         { pushRemovableIfNoThrow(env); }

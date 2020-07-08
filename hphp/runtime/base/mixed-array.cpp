@@ -204,12 +204,6 @@ MixedArray* MixedArray::MakeStructImpl(uint32_t size,
   return ad;
 }
 
-MixedArray* MixedArray::MakeStruct(uint32_t size,
-                                   const StringData* const* keys,
-                                   const TypedValue* values) {
-  return MakeStructImpl(size, keys, values, HeaderKind::Plain);
-}
-
 MixedArray* MixedArray::MakeStructDict(uint32_t size,
                                        const StringData* const* keys,
                                        const TypedValue* values) {
@@ -262,10 +256,6 @@ MixedArray* MixedArray::AllocStructImpl(uint32_t size,
   assertx(ad->m_nextKI == 0);
   assertx(ad->checkInvariants());
   return ad;
-}
-
-MixedArray* MixedArray::AllocStruct(uint32_t size, const int32_t* hash) {
-  return AllocStructImpl(size, hash, HeaderKind::Plain);
 }
 
 MixedArray* MixedArray::AllocStructDict(uint32_t size, const int32_t* hash) {
@@ -337,13 +327,6 @@ MixedArray* MixedArray::MakeMixedImpl(uint32_t size, const TypedValue* kvs) {
   assertx(ad->m_used == size);
   assertx(ad->m_nextKI == 0);
   assertx(ad->checkInvariants());
-  return ad;
-}
-
-MixedArray* MixedArray::MakeMixed(uint32_t size, const TypedValue* kvs) {
-  auto const ad = MakeMixedImpl<HeaderKind::Plain>(size, kvs);
-  assertx(ad == nullptr || ad->kind() == kMixedKind);
-  assertx(ad == nullptr || ad->isNotDVArray());
   return ad;
 }
 

@@ -209,7 +209,6 @@ struct MixedArray final : ArrayData,
    * natural order. Returns nullptr if there are duplicate keys. Does not check
    * for integer-like keys. Takes ownership of keys and values iff successful.
    */
-  static MixedArray* MakeMixed(uint32_t size, const TypedValue* kvs);
   static MixedArray* MakeDArray(uint32_t size, const TypedValue* kvs);
   static MixedArray* MakeDict(uint32_t size, const TypedValue* kvs);
 private:
@@ -239,8 +238,6 @@ public:
    * Like MakePacked, but given static strings, make a struct-like array.
    * Also requires size > 0.
    */
-  static MixedArray* MakeStruct(uint32_t size, const StringData* const* keys,
-                               const TypedValue* values);
   static MixedArray* MakeStructDict(uint32_t size,
                                     const StringData* const* keys,
                                     const TypedValue* values);
@@ -252,7 +249,6 @@ public:
    * Allocate a struct-like array (with string literal keys), but only init
    * the hash table and the header, leaving elms uninit. Requires size > 0.
    */
-  static MixedArray* AllocStruct(uint32_t size, const int32_t* hash);
   static MixedArray* AllocStructDict(uint32_t size, const int32_t* hash);
   static MixedArray* AllocStructDArray(uint32_t size, const int32_t* hash);
 

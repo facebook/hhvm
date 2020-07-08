@@ -1134,7 +1134,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return may_load_store_move(stack_in, AEmpty, stack_in);
     }
 
-  case NewStructArray:
   case NewStructDArray:
   case NewStructDict:
     {
@@ -1431,19 +1430,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NewInstanceRaw:
   case NewDArray:
   case NewDictArray:
-  case NewPlainArray:
   case NewRFunc:
   case FuncCred:
   case AllocVArray:
   case AllocVec:
-  case AllocStructArray:
   case AllocStructDArray:
   case AllocStructDict:
-  case ConvBoolToArr:
   case ConvDblToStr:
-  case ConvDblToArr:
-  case ConvFuncToArr:
-  case ConvIntToArr:
   case ConvIntToStr:
     return IrrelevantEffects {};
 
@@ -1769,7 +1762,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RBTraceMsg:
   case ConvIntToBool:
   case ConvIntToDbl:
-  case ConvStrToArr:   // decrefs src, but src is a string
   case ConvStrToBool:
   case ConvStrToDbl:
   case ConvResToDbl:
@@ -1908,8 +1900,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CmpVec:
   case EqDict:
   case NeqDict:
-  case ConvTVToArr:  // decrefs src, may read obj props
-  case ConvObjToArr:   // decrefs src
   case ConvObjToVArr:  // can invoke PHP
   case ConvObjToDArr:  // can invoke PHP
   case OODeclExists:
@@ -1987,9 +1977,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvDictToKeyset:
   case ConvDictToDArr: // These 4 may raise Hack array compat notices
   case ConvKeysetToDArr:
-  case ConvDictToArr:
-  case ConvKeysetToArr:
-  case ConvClsMethToArr:
   case ConvClsMethToDArr:
   case ConvClsMethToDict:
   case ConvClsMethToKeyset:
@@ -1997,8 +1984,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvClsMethToVec:
     return may_load_store(AElemAny, AEmpty);
 
-  case ConvVecToArr:
-  case ConvArrToNonDVArr:
   case ConvDictToVec:
   case ConvKeysetToVec:
   case ConvVecToDict:

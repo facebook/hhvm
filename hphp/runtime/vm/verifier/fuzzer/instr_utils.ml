@@ -95,11 +95,9 @@ let stk_data : instruct -> stack_sig = function
   | IFinal QueryM (n, _, _)
   | IFinal IncDecM (n, _, _)
   | IMisc CreateCl (n, _)
-  | ILitConst NewPackedArray n             -> produce "C" n, ["C"]
   | IFinal SetOpM (n, _, _)
   | IFinal SetM (n, _)                     -> produce "C" (n + 1), ["C"]
   | IFinal UnsetM (n, _)                   -> produce "C" n, []
-  | ILitConst NewStructArray v             -> produce "C" (List.length v), ["C"]
   | IMisc Idx
   | IMisc ArrayIdx
   | ILitConst AddElemC                     -> ["C"; "C"; "C"], ["C"]
@@ -136,7 +134,6 @@ let stk_data : instruct -> stack_sig = function
   | IOp CastInt
   | IOp CastDouble
   | IOp CastString
-  | IOp CastArray
   | IOp CastVec
   | IOp CastDict
   | IOp CastKeyset

@@ -329,23 +329,18 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvArrToDict:
   case ConvArrToKeyset:
   case ConvArrToVec:
-  case ConvTVToArr:
   case ConvTVToBool:
   case ConvTVToDbl:
   case ConvTVToInt:
   case ConvTVToStr:
-  case ConvClsMethToArr:
   case ConvClsMethToDArr:
   case ConvClsMethToDict:
   case ConvClsMethToKeyset:
   case ConvClsMethToVArr:
   case ConvClsMethToVec:
-  case ConvDictToArr:
   case ConvDictToDArr:
   case ConvDictToKeyset:
-  case ConvKeysetToArr:
   case ConvKeysetToDArr:
-  case ConvObjToArr:
   case ConvObjToBool:
   case ConvObjToDArr:
   case ConvObjToDbl:
@@ -530,7 +525,6 @@ bool opcodeMayRaise(Opcode opc) {
   case AKExistsArr:
   case AKExistsDict:
   case AKExistsKeyset:
-  case AllocStructArray:
   case AllocStructDArray:
   case AllocStructDict:
   case AllocVArray:
@@ -595,19 +589,14 @@ bool opcodeMayRaise(Opcode opc) {
   case ContValid:
   case ConvArrToDArr:
   case ConvArrToDbl:
-  case ConvArrToNonDVArr:
   case ConvArrToVArr:
-  case ConvBoolToArr:
   case ConvBoolToDbl:
   case ConvBoolToInt:
-  case ConvDblToArr:
   case ConvDblToBool:
   case ConvDblToInt:
   case ConvDblToStr:
   case ConvDictToVArr:
   case ConvDictToVec:
-  case ConvFuncToArr:
-  case ConvIntToArr:
   case ConvIntToBool:
   case ConvIntToDbl:
   case ConvIntToStr:
@@ -616,11 +605,9 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvKeysetToVec:
   case ConvResToDbl:
   case ConvResToInt:
-  case ConvStrToArr:
   case ConvStrToBool:
   case ConvStrToDbl:
   case ConvStrToInt:
-  case ConvVecToArr:
   case ConvVecToDArr:
   case ConvVecToDict:
   case ConvVecToVArr:
@@ -904,9 +891,7 @@ bool opcodeMayRaise(Opcode opc) {
   case NewDictArray:
   case NewInstanceRaw:
   case NewPair:
-  case NewPlainArray:
   case NewRFunc:
-  case NewStructArray:
   case NewStructDArray:
   case NewStructDict:
   case NInstanceOfBitmask:

@@ -66,10 +66,6 @@ bool canDCE(IRInstruction* inst) {
   case Ceil:
   case XorBool:
   case Mod:
-  case ConvBoolToArr:
-  case ConvDblToArr:
-  case ConvIntToArr:
-  case ConvFuncToArr:
   case ConvDblToBool:
   case ConvIntToBool:
   case ConvStrToBool:
@@ -210,7 +206,6 @@ bool canDCE(IRInstruction* inst) {
   case NewInstanceRaw:
   case NewDArray:
   case NewDictArray:
-  case NewPlainArray:
   case NewCol:
   case NewPair:
   case NewRFunc:
@@ -289,7 +284,6 @@ bool canDCE(IRInstruction* inst) {
   case GetMemoKeyScalar:
   case LookupSPropSlot:
   case ConstructClosure:
-  case AllocStructArray:
   case AllocStructDArray:
   case AllocStructDict:
   case AllocVArray:
@@ -317,13 +311,6 @@ bool canDCE(IRInstruction* inst) {
     return true;
 
   // Some of these conversion functions can run arbitrary PHP code.
-  case ConvObjToArr:
-  case ConvTVToArr:
-  case ConvStrToArr:
-  case ConvVecToArr:
-  case ConvDictToArr:
-  case ConvKeysetToArr:
-  case ConvArrToNonDVArr:
   case ConvObjToDbl:
   case ConvTVToDbl:
   case ConvObjToInt:
@@ -359,7 +346,6 @@ bool canDCE(IRInstruction* inst) {
     return !opcodeMayRaise(inst->op()) &&
       (!inst->consumesReferences() || inst->producesReference());
 
-  case ConvClsMethToArr:
   case ConvClsMethToDArr:
   case ConvClsMethToDict:
   case ConvClsMethToKeyset:
@@ -495,7 +481,6 @@ bool canDCE(IRInstruction* inst) {
   case InitPackedLayoutArrayLoop:
   case NewKeysetArray:
   case NewRecord:
-  case NewStructArray:
   case NewStructDArray:
   case NewStructDict:
   case Clone:

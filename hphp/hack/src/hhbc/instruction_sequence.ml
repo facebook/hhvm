@@ -247,8 +247,6 @@ let instr_clone = instr (IOp Clone)
 
 let instr_new_record id keys = instr (ILitConst (NewRecord (id, keys)))
 
-let instr_newstructarray keys = instr (ILitConst (NewStructArray keys))
-
 let instr_newstructdarray keys = instr (ILitConst (NewStructDArray keys))
 
 let instr_newstructdict keys = instr (ILitConst (NewStructDict keys))

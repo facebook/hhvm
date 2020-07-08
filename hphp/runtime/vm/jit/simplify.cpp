@@ -1943,13 +1943,6 @@ SSATmp* arrayLikeConvImpl(State& env, const IRInstruction* inst, C convert) {
   return cns(env, converted);
 }
 
-SSATmp* convToArrImpl(State& env, const IRInstruction* inst) {
-  return arrayLikeConvImpl(
-    env, inst,
-    [&](ArrayData* a) { return a->toPHPArray(true); }
-  );
-}
-
 SSATmp* convToVecImpl(State& env, const IRInstruction* inst) {
   return arrayLikeConvImpl(
     env, inst,
@@ -2008,15 +2001,6 @@ SSATmp* convToDArrImpl(State& env, const IRInstruction* inst) {
   );
 }
 
-SSATmp* convNonArrToArrImpl(State& env, const IRInstruction* inst) {
-  auto const src = inst->src(0);
-  if (src->hasConstVal()) {
-    auto arr = Array::attach(ArrayData::Create(src->variantVal()));
-    return cns(env, ArrayData::GetScalarArray(std::move(arr)));
-  }
-  return nullptr;
-}
-
 }
 
 #define X(FromTy, ToTy)                                                   \
@@ -2024,10 +2008,6 @@ SSATmp*                                                                   \
 simplifyConv##FromTy##To##ToTy(State& env, const IRInstruction* inst) {   \
   return convTo##ToTy##Impl(env, inst);                                   \
 }
-
-X(Vec, Arr)
-X(Dict, Arr)
-X(Keyset, Arr)
 
 X(Arr, Vec)
 X(Dict, Vec)
@@ -2054,54 +2034,6 @@ X(Keyset, DArr)
 X(Arr, NonDVArr)
 
 #undef X
-
-SSATmp* simplifyConvTVToArr(State& env, const IRInstruction* inst) {
-  auto const src = inst->src(0);
-  if (src->isA(TArr))    return gen(env, ConvArrToNonDVArr, src);
-  if (src->isA(TVec))    return gen(env, ConvVecToArr, src);
-  if (src->isA(TDict))   return gen(env, ConvDictToArr, inst->taken(), src);
-  if (src->isA(TKeyset)) return gen(env, ConvKeysetToArr, inst->taken(), src);
-  if (src->isA(TNull))   return cns(env, ArrayData::Create());
-  if (src->isA(TBool))   return gen(env, ConvBoolToArr, src);
-  if (src->isA(TDbl))    return gen(env, ConvDblToArr, src);
-  if (src->isA(TInt))    return gen(env, ConvIntToArr, src);
-  if (src->isA(TStr))    return gen(env, ConvStrToArr, src);
-  if (src->isA(TObj))    return gen(env, ConvObjToArr, inst->taken(), src);
-  if (src->isA(TFunc))   return gen(env, ConvFuncToArr, src);
-  if (src->isA(TClsMeth)) return gen(env, ConvClsMethToArr, inst->taken(), src);
-  return nullptr;
-}
-
-SSATmp* simplifyConvBoolToArr(State& env, const IRInstruction* inst) {
-  return convNonArrToArrImpl(env, inst);
-}
-
-SSATmp* simplifyConvIntToArr(State& env, const IRInstruction* inst) {
-  return convNonArrToArrImpl(env, inst);
-}
-
-SSATmp* simplifyConvDblToArr(State& env, const IRInstruction* inst) {
-  return convNonArrToArrImpl(env, inst);
-}
-
-SSATmp* simplifyConvStrToArr(State& env, const IRInstruction* inst) {
-  return convNonArrToArrImpl(env, inst);
-}
-
-SSATmp* simplifyConvFuncToArr(State& env, const IRInstruction* inst) {
-  return convNonArrToArrImpl(env, inst);
-}
-
-SSATmp* simplifyConvClsMethToArr(State& env, const IRInstruction* inst) {
-  auto const src = inst->src(0);
-  if (src->hasConstVal()) {
-    auto const clsmeth = src->clsmethVal();
-    auto arr = make_map_array(0, clsmeth->getClsStr(),
-                              1, clsmeth->getFuncStr());
-    return cns(env, ArrayData::GetScalarArray(std::move(arr)));
-  }
-  return nullptr;
-}
 
 SSATmp* simplifyConvClsMethToVArr(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
@@ -3645,29 +3577,19 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConcatIntStr)
   X(ConcatStrInt)
   X(ConvArrToDbl)
-  X(ConvBoolToArr)
   X(ConvBoolToDbl)
   X(ConvBoolToInt)
   X(ConvTVToBool)
   X(ConvTVToDbl)
   X(ConvTVToInt)
   X(ConvTVToStr)
-  X(ConvTVToArr)
-  X(ConvDblToArr)
   X(ConvDblToBool)
   X(ConvDblToInt)
   X(ConvDblToStr)
-  X(ConvIntToArr)
   X(ConvIntToBool)
   X(ConvIntToDbl)
   X(ConvIntToStr)
   X(ConvObjToBool)
-  X(ConvStrToArr)
-  X(ConvFuncToArr)
-  X(ConvVecToArr)
-  X(ConvDictToArr)
-  X(ConvKeysetToArr)
-  X(ConvClsMethToArr)
   X(ConvClsMethToVArr)
   X(ConvClsMethToDArr)
   X(ConvClsMethToVec)

@@ -221,12 +221,8 @@ type instruct_lit_const =
   | Vec of adata_id
   | Dict of adata_id
   | Keyset of adata_id
-  | NewArray of int (* capacity hint *)
-  | NewMixedArray of int (* capacity hint *)
   | NewDictArray of int (* capacity hint *)
   | NewDArray of int (* capacity hint *)
-  | NewPackedArray of int
-  | NewStructArray of string list
   | NewStructDArray of string list
   | NewStructDict of string list
   | NewVArray of int
@@ -283,7 +279,6 @@ type instruct_operator =
   | CastInt
   | CastDouble
   | CastString
-  | CastArray
   | CastVec
   | CastDict
   | CastKeyset

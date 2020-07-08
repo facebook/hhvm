@@ -316,11 +316,6 @@ void emitClassName(IRGS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitCastArray(IRGS& env) {
-  auto const src = popC(env);
-  push(env, gen(env, ConvTVToArr, src));
-}
-
 void emitCastVArray(IRGS& env) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
 

@@ -785,7 +785,6 @@ and emit_cast env pos hint expr =
         | _ when String.equal id SN.Typehints.int -> instr (IOp CastInt)
         | _ when String.equal id SN.Typehints.bool -> instr (IOp CastBool)
         | _ when String.equal id SN.Typehints.string -> instr (IOp CastString)
-        | _ when String.equal id SN.Typehints.array -> instr (IOp CastArray)
         | _ when String.equal id SN.Typehints.float -> instr (IOp CastDouble)
         | _ ->
           Emit_fatal.raise_fatal_parse
@@ -1815,39 +1814,6 @@ and emit_struct_array env pos es ctor =
   gather
     [gather @@ List.map es ~f:snd; emit_pos pos; ctor @@ List.map es ~f:fst]
 
-(* isPackedInit() returns true if this expression list looks like an
- * array with no keys and no ref values *)
-and is_packed_init ?(hack_arr_compat = true) es =
-  let is_only_values =
-    List.for_all es ~f:(function
-        | A.AFkvalue _ -> false
-        | _ -> true)
-  in
-  let keys_are_zero_indexed_properly_formed =
-    List.foldi es ~init:true ~f:(fun i b f ->
-        b
-        &&
-        match f with
-        | A.AFkvalue ((_, A.Int k), _) -> int_of_string k = i
-        (* arrays with int-like string keys are still considered packed
-         and should be emitted via NewArray *)
-        | A.AFkvalue ((_, A.String k), _) when not hack_arr_compat ->
-          (try int_of_string k = i with Failure _ -> false)
-        (* True and False are considered 1 and 0, respectively *)
-        | A.AFkvalue ((_, A.True), _) -> i = 1
-        | A.AFkvalue ((_, A.False), _) -> i = 0
-        | A.AFvalue _ -> true
-        | _ -> false)
-  in
-  let has_bool_keys =
-    List.exists es ~f:(function
-        | A.AFkvalue ((_, (A.True | A.False)), _) -> true
-        | _ -> false)
-  in
-  (is_only_values || keys_are_zero_indexed_properly_formed)
-  && (not (has_bool_keys && hack_arr_compat && hack_arr_compat_notices ()))
-  && List.length es > 0
-
 and is_struct_init env es allow_numerics =
   let keys = ULS.empty in
   let (are_all_keys_non_numeric_strings, keys) =
@@ -1950,21 +1916,7 @@ and emit_dynamic_collection env (expr : Tast.expr) es =
           NewDictArray count
         else
           NewDArray count )
-  | _ ->
-    (* From here on, we're only dealing with PHP arrays *)
-    if is_packed_init es then
-      emit_value_only_collection env pos es (fun n -> NewPackedArray n)
-    else if is_struct_init env es false then
-      emit_struct_array env pos es instr_newstructarray
-    else if is_packed_init ~hack_arr_compat:false es then
-      emit_keyvalue_collection CollectionType.Array env pos es (NewArray count)
-    else
-      emit_keyvalue_collection
-        CollectionType.Array
-        env
-        pos
-        es
-        (NewMixedArray count)
+  | _ -> failwith @@ "plain PHP arrays cannot be constructed"
 
 and emit_named_collection_str env (expr : Tast.expr) pos name fields =
   let name = SU.Types.fix_casing @@ SU.strip_ns name in

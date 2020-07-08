@@ -389,18 +389,6 @@ void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
   push(env, closure);
 }
 
-void emitNewArray(IRGS& env, uint32_t capacity) {
-  if (capacity == 0) {
-    push(env, cns(env, ArrayData::Create()));
-  } else {
-    push(env, gen(env, NewPlainArray, cns(env, capacity)));
-  }
-}
-
-void emitNewMixedArray(IRGS& env, uint32_t capacity) {
-  emitNewArray(env, capacity);
-}
-
 void emitNewDArray(IRGS& env, uint32_t capacity) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   if (capacity == 0) {
@@ -467,11 +455,6 @@ void emitNewPackedLayoutArray(IRGS& env, uint32_t numArgs, Opcode op) {
 
 }
 
-void emitNewPackedArray(IRGS& env, uint32_t numArgs) {
-  emitNewPackedLayoutArray(env, numArgs, AllocVec);
-  push(env, gen(env, ConvVecToArr, pop(env)));
-}
-
 void emitNewVec(IRGS& env, uint32_t numArgs) {
   emitNewPackedLayoutArray(env, numArgs, AllocVec);
 }
@@ -514,10 +497,6 @@ void newStructImpl(IRGS& env, const ImmVector& immVec,
   push(env, arr);
 }
 
-}
-
-void emitNewStructArray(IRGS& env, const ImmVector& immVec) {
-  newStructImpl(env, immVec, NewStructArray, AllocStructArray);
 }
 
 void emitNewStructDArray(IRGS& env, const ImmVector& immVec) {

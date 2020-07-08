@@ -71,8 +71,6 @@ let rec adata_to_buffer b argument =
   | TV.Bool true -> Acc.add b "b:1;"
   | TV.Int i -> Acc.add b @@ "i:" ^ Int64.to_string i ^ ";"
   | TV.HhasAdata data -> Acc.add b (String.escaped data)
-  | TV.Array pairs ->
-    adata_dict_collection_argument_to_buffer b adata_array_prefix None pairs
   | TV.VArray (values, loc) ->
     adata_collection_argument_to_buffer b adata_varray_prefix loc values
   | TV.Vec (values, loc) ->
@@ -187,7 +185,6 @@ let rewrite_typed_value tv =
         | s when String.equal s adata_dict_prefix -> Dict identifier
         | _ -> failwith ("Unknown HhasAdata data: " ^ d)
       end
-    | TV.Array _ -> Array (get_array_identifier tv)
     | TV.VArray _ when hack_arr_dv_arrs () -> Vec (get_array_identifier tv)
     | TV.VArray _ -> Array (get_array_identifier tv)
     | TV.DArray _ when hack_arr_dv_arrs () -> Dict (get_array_identifier tv)

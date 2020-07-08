@@ -548,11 +548,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(Dict,            ONE(AA),          NOV,             ONE(CV),    NF) \
   O(Keyset,          ONE(AA),          NOV,             ONE(CV),    NF) \
   O(Vec,             ONE(AA),          NOV,             ONE(CV),    NF) \
-  O(NewArray,        ONE(IVA),         NOV,             ONE(CV),    NF) \
-  O(NewMixedArray,   ONE(IVA),         NOV,             ONE(CV),    NF) \
   O(NewDictArray,    ONE(IVA),         NOV,             ONE(CV),    NF) \
-  O(NewPackedArray,  ONE(IVA),         CMANY,           ONE(CV),    NF) \
-  O(NewStructArray,  ONE(VSA),         SMANY,           ONE(CV),    NF) \
   O(NewStructDArray, ONE(VSA),         SMANY,           ONE(CV),    NF) \
   O(NewStructDict,   ONE(VSA),         SMANY,           ONE(CV),    NF) \
   O(NewVec,          ONE(IVA),         CMANY,           ONE(CV),    NF) \
@@ -606,7 +602,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(CastInt,         NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastDouble,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastString,      NA,               ONE(CV),         ONE(CV),    NF) \
-  O(CastArray,       NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastDict,        NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastKeyset,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastVec,         NA,               ONE(CV),         ONE(CV),    NF) \
@@ -1057,7 +1052,6 @@ constexpr bool isCast(Op opcode) {
     opcode == Op::CastInt ||
     opcode == Op::CastDouble ||
     opcode == Op::CastString ||
-    opcode == Op::CastArray ||
     opcode == Op::CastDict ||
     opcode == Op::CastKeyset ||
     opcode == Op::CastVec ||

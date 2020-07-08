@@ -6,13 +6,13 @@
   Int 1
   Int 2
   Int 3
-  NewPackedArray 3
+  NewVArray 3
   SetL $a
   PopC
   Int 1
   Int 2
   Int 3
-  NewPackedArray 3
+  NewVArray 3
   SetL $b
   PopC
 

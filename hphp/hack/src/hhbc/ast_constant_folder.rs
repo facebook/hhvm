@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use indexmap::IndexMap;
-use std::{cell::Cell, collections::hash_map::RandomState, fmt, iter::FromIterator};
+use std::{collections::hash_map::RandomState, fmt, iter::FromIterator};
 
 use ast_class_expr_rust as ast_class_expr;
 use ast_scope_rust as ast_scope;
@@ -119,47 +119,6 @@ fn class_const_to_typed_value(
         }
     }
     Err(Error::UserDefinedConstant)
-}
-
-fn array_to_typed_value(
-    emitter: &Emitter,
-    ns: &Namespace,
-    fields: &Vec<tast::Afield>,
-) -> Result<TypedValue, Error> {
-    Ok(TypedValue::Array(if fields.is_empty() {
-        vec![]
-    } else {
-        let mut res = vec![];
-        let maxindex = Cell::new(0);
-
-        let update_max_index = |mut newindex| {
-            if newindex >= maxindex.get() {
-                newindex += 1;
-                maxindex.set(newindex);
-            }
-        };
-        let default = |key, value| {
-            let k_tv = key_expr_to_typed_value(emitter, ns, key)?;
-            if let TypedValue::Int(newindex) = k_tv {
-                update_max_index(newindex)
-            }
-            Ok((k_tv, expr_to_typed_value(emitter, ns, value)?))
-        };
-        for field in fields {
-            res.push(match field {
-                tast::Afield::AFkvalue(key, value) => default(key, value)?,
-                tast::Afield::AFvalue(value) => {
-                    let index = maxindex.get();
-                    maxindex.set(index + 1);
-                    (
-                        TypedValue::Int(index),
-                        expr_to_typed_value(emitter, ns, value)?,
-                    )
-                }
-            })
-        }
-        res
-    }))
 }
 
 fn varray_to_typed_value(
@@ -399,7 +358,6 @@ pub fn expr_to_typed_value_(
             }
         }
 
-        Array(fields) => array_to_typed_value(emitter, ns, &fields),
         Varray(fields) => varray_to_typed_value(emitter, ns, &fields.1, pos),
         Darray(fields) => darray_to_typed_value(emitter, ns, &fields.1, pos),
 
@@ -578,12 +536,6 @@ fn value_to_expr_(v: TypedValue) -> Result<tast::Expr_, Error> {
         Vec(_) => return Err(Error::unrecoverable("value_to_expr: vec NYI")),
         Keyset(_) => return Err(Error::unrecoverable("value_to_expr: keyset NYI")),
         HhasAdata(_) => return Err(Error::unrecoverable("value_to_expr: HhasAdata NYI")),
-        Array(pairs) => Expr_::Array(
-            pairs
-                .into_iter()
-                .map(|(v1, v2)| Ok(Afield::AFkvalue(value_to_expr(v1)?, value_to_expr(v2)?)))
-                .collect::<Result<std::vec::Vec<_>, Error>>()?,
-        ),
         VArray((values, _)) => Expr_::mk_varray(
             None,
             values

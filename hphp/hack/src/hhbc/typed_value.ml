@@ -27,7 +27,6 @@ type t =
   | Null
   (* Classic PHP arrays with explicit (key,value) entries *)
   | HhasAdata of string
-  | Array of (t * t) list
   | VArray of t list * prov_tag
   | DArray of (t * t) list * prov_tag
   (* Hack arrays: vectors, keysets, and dictionaries *)
@@ -79,7 +78,6 @@ let to_bool v =
   | Float f -> Float.(f <> 0.0)
   (* Empty collections cast to false *)
   | Dict ([], _)
-  | Array []
   | VArray ([], _)
   | DArray ([], _)
   | Keyset []
@@ -88,7 +86,6 @@ let to_bool v =
   (* Non-empty collections cast to true *)
   | HhasAdata _
   | Dict (_, _)
-  | Array _
   | VArray _
   | DArray _
   | Keyset _
@@ -288,7 +285,6 @@ let cast_to_arraykey v =
   | String s -> Some (String s)
   | Null -> Some (String "")
   | Uninit
-  | Array _
   | VArray _
   | DArray _
   | Vec _

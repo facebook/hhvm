@@ -1,1 +1,1 @@
-Fatal error: (array) cast is no longer supported in %s/ban_cast.php on line 5
+Fatal error: Invalid cast type: array in %s/ban_cast.php on line 5

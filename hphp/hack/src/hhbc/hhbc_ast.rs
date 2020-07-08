@@ -225,16 +225,10 @@ pub enum InstructLitConst {
     Vec(AdataId),
     Dict(AdataId),
     Keyset(AdataId),
-    NewArray(isize),
-    /// capacity hint
-    NewMixedArray(isize),
     /// capacity hint
     NewDictArray(isize),
     /// capacity hint
     NewDArray(isize),
-    /// capacity hint
-    NewPackedArray(isize),
-    NewStructArray(Vec<String>),
     NewStructDArray(Vec<String>),
     NewStructDict(Vec<String>),
     NewVArray(isize),
@@ -293,7 +287,6 @@ pub enum InstructOperator {
     CastInt,
     CastDouble,
     CastString,
-    CastArray,
     CastVec,
     CastDict,
     CastKeyset,

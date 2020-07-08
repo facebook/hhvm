@@ -139,32 +139,6 @@ static auto c_AsyncFunctionWaitHandle_Create_false =
  */
 static CallMap s_callMap {
     /* Opcode, Func, Dest, SyncPoint, Args */
-    {ConvBoolToArr,      convTVToArrHelper, DSSA, SNone,
-                           {{TV, 0}}},
-    {ConvDblToArr,       convTVToArrHelper, DSSA, SNone,
-                           {{TV, 0}}},
-    {ConvIntToArr,       convTVToArrHelper, DSSA, SNone,
-                           {{TV, 0}}},
-    {ConvObjToArr,       convTVToArrHelper, DSSA, SSync,
-                           {{TV, 0}}},
-    {ConvStrToArr,       convTVToArrHelper, DSSA, SNone,
-                           {{TV, 0}}},
-    {ConvFuncToArr,      convTVToArrHelper, DSSA, SNone,
-                           {{TV, 0}}},
-    {ConvVecToArr,       convVecToArrHelper, DSSA, SNone,
-                           {{SSA, 0}}},
-    // These two need to sync because of Hack array compat notices
-    {ConvDictToArr,      convDictToArrHelper, DSSA, SSync,
-                           {{SSA, 0}}},
-    {ConvKeysetToArr,    convKeysetToArrHelper, DSSA, SSync,
-                           {{SSA, 0}}},
-    {ConvTVToArr,      convTVToArrHelper, DSSA, SSync,
-                           {{TV, 0}}},
-    {ConvArrToNonDVArr,  convArrToNonDVArrHelper, DSSA, SSync,
-                           {{SSA, 0}}},
-    // ConvClsMethTo##T to sync due to clsmeth conversion notices
-    {ConvClsMethToArr,   convClsMethToArrHelper, DSSA, SSync,
-                           {{SSA, 0}}},
     {ConvClsMethToVArr,  convClsMethToVArrHelper, DSSA, SSync,
                            {{SSA, 0}}},
     {ConvClsMethToDArr,  convClsMethToDArrHelper, DSSA, SSync,

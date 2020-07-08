@@ -112,7 +112,6 @@ let rec expr_to_typed_value ?(allow_maps = false) ns ((_, expr_) as expr) =
   | A.Call (_, (_, A.Id (_, id)), _, [(_, A.String data)], None)
     when String.equal id SN.SpecialFunctions.hhas_adata ->
     TV.HhasAdata data
-  | A.Array fields -> array_to_typed_value ns fields
   | A.Varray (_, fields) -> varray_to_typed_value ns fields pos
   | A.Darray (_, fields) -> darray_to_typed_value ns fields pos
   (* A.Id *)
@@ -214,36 +213,6 @@ and class_const_to_typed_value cid id =
   else
     raise UserDefinedConstant
 
-and array_to_typed_value ns fields =
-  let update_max_index newindex maxindex =
-    if Int64.compare newindex maxindex >= 0 then
-      Int64.( + ) newindex Int64.one
-    else
-      maxindex
-  in
-  let default key value pairs maxindex =
-    let k_tv = key_expr_to_typed_value ns key in
-    let maxindex =
-      match k_tv with
-      | TV.Int newindex -> update_max_index newindex maxindex
-      | _ -> maxindex
-    in
-    ((k_tv, expr_to_typed_value ns value) :: pairs, maxindex)
-  in
-  let (pairs, _) =
-    List.fold_left
-      fields
-      ~init:([], Int64.zero)
-      ~f:(fun (pairs, maxindex) afield ->
-        match afield with
-        | A.AFkvalue (key, value) -> default key value pairs maxindex
-        | A.AFvalue value ->
-          ( (TV.Int maxindex, expr_to_typed_value ns value) :: pairs,
-            Int64.( + ) maxindex Int64.one ))
-  in
-  let a = update_duplicates_in_map @@ List.rev pairs in
-  TV.Array a
-
 and varray_to_typed_value ns fields pos =
   let tv_fields = List.map fields ~f:(expr_to_typed_value ns) in
   TV.VArray (tv_fields, Some pos)
@@ -336,7 +305,6 @@ let rec value_to_expr_ p v =
   | TV.Vec _ -> failwith "value_to_expr: vec NYI"
   | TV.Keyset _ -> failwith "value_to_expr: keyset NYI"
   | TV.HhasAdata _ -> failwith "value_to_expr: HhasAdata NYI"
-  | TV.Array pairs -> A.Array (List.map pairs (value_pair_to_afield p))
   | TV.VArray (values, _) -> A.Varray (None, List.map values (value_to_expr p))
   | TV.DArray (pairs, _) ->
     A.Darray

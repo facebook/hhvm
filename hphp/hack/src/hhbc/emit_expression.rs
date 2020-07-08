@@ -27,8 +27,7 @@ use naming_special_names_rust::{
     emitter_special_functions, fb, pseudo_consts, pseudo_functions, special_functions,
     special_idents, superglobals, typehints, user_attributes,
 };
-use ocaml_helper::int_of_str_opt;
-use options::{CompilerFlags, HhvmFlags, LangFlags, Options};
+use options::{CompilerFlags, HhvmFlags, Options};
 use oxidized::{
     aast, aast_defs,
     aast_visitor::{visit, visit_mut, AstParams, Node, NodeMut, Visitor, VisitorMut},
@@ -1492,51 +1491,8 @@ fn emit_dynamic_collection(
                 Ok(wrap_array_mark_legacy(e, instrs?))
             }
         }
-        _ => {
-            if is_packed_init(e.options(), fields, true /* hack_arr_compat */) {
-                emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewPackedArray)
-            } else if is_struct_init(e, env, fields, false /* allow_numerics */)? {
-                emit_struct_array(e, env, pos, fields, |_, x| Ok(instr::newstructarray(x)))
-            } else if is_packed_init(e.options(), fields, false /* hack_arr_compat*/) {
-                let constr = InstructLitConst::NewArray(count as isize);
-                emit_keyvalue_collection(e, env, pos, fields, CollectionType::Array, constr)
-            } else {
-                let constr = InstructLitConst::NewMixedArray(count as isize);
-                emit_keyvalue_collection(e, env, pos, fields, CollectionType::Array, constr)
-            }
-        }
+        _ => Err(unrecoverable("plain PHP arrays cannot be constructed")),
     }
-}
-
-/// is_packed_init() returns true if this expression list looks like an
-/// array with no keys and no ref values
-fn is_packed_init(opts: &Options, es: &[tast::Afield], hack_arr_compat: bool) -> bool {
-    let is_only_values = es.iter().all(|f| !f.is_afkvalue());
-    let has_bool_keys = es.iter().any(|f| {
-        f.as_afkvalue()
-            .map(|(tast::Expr(_, k), _)| k.is_true() || k.is_false())
-            .is_some()
-    });
-    let keys_are_zero_indexed_properly_formed = es.iter().enumerate().all(|(i, f)| {
-        use tast::{Afield as A, Expr as E, Expr_ as E_};
-        match f {
-            A::AFkvalue(E(_, E_::Int(k)), _) => int_of_str_opt(k).unwrap() == i as i64, // already checked in lowerer
-            // arrays with int-like string keys are still considered packed
-            // and should be emitted via NewArray
-            A::AFkvalue(E(_, E_::String(s)), _) => {
-                int_of_str_opt(s).map_or(false, |s| s == i as i64)
-            }
-            A::AFkvalue(E(_, E_::True), _) => i == 1,
-            A::AFkvalue(E(_, E_::False), _) => i == 0,
-            A::AFvalue(_) => true,
-            _ => false,
-        }
-    });
-    (is_only_values || keys_are_zero_indexed_properly_formed)
-        && (!(has_bool_keys
-            && hack_arr_compat
-            && opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_COMPAT_NOTICES)))
-        && !es.is_empty()
 }
 
 fn emit_value_only_collection<F: FnOnce(isize) -> InstructLitConst>(
@@ -4478,22 +4434,6 @@ fn emit_cast(
                 typehints::BOOL => instr::cast_bool(),
                 typehints::STRING => instr::cast_string(),
                 typehints::FLOAT => instr::cast_double(),
-                typehints::ARRAY => {
-                    let disable_array_cast = e
-                        .options()
-                        .hhvm
-                        .hack_lang
-                        .flags
-                        .contains(LangFlags::DISABLE_ARRAY_CAST);
-                    if disable_array_cast {
-                        return Err(emit_fatal::raise_fatal_parse(
-                            pos,
-                            "(array) cast is no longer supported",
-                        ));
-                    } else {
-                        instr::cast_array()
-                    }
-                }
                 _ => {
                     return Err(emit_fatal::raise_fatal_parse(
                         pos,

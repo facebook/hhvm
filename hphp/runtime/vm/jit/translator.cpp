@@ -110,11 +110,7 @@ static const struct {
   { OpDict,        {None,             Stack1,       OutDictImm      }},
   { OpKeyset,      {None,             Stack1,       OutKeysetImm    }},
   { OpVec,         {None,             Stack1,       OutVecImm       }},
-  { OpNewArray,    {None,             Stack1,       OutArray        }},
-  { OpNewMixedArray,  {None,          Stack1,       OutArray        }},
   { OpNewDictArray,   {None,          Stack1,       OutDict         }},
-  { OpNewPackedArray, {StackN,        Stack1,       OutArray        }},
-  { OpNewStructArray, {StackN,        Stack1,       OutArray        }},
   { OpNewStructDArray,{StackN,        Stack1,       OutDArray       }},
   { OpNewStructDict,  {StackN,        Stack1,       OutDict         }},
   { OpNewVec,         {StackN,        Stack1,       OutVec          }},
@@ -177,7 +173,6 @@ static const struct {
   { OpCastInt,     {Stack1,           Stack1,       OutInt64        }},
   { OpCastDouble,  {Stack1,           Stack1,       OutDouble       }},
   { OpCastString,  {Stack1,           Stack1,       OutString       }},
-  { OpCastArray,   {Stack1,           Stack1,       OutArray        }},
   { OpCastDict,    {Stack1,           Stack1,       OutDict         }},
   { OpCastKeyset,  {Stack1,           Stack1,       OutKeyset       }},
   { OpCastVec,     {Stack1,           Stack1,       OutVec          }},
@@ -491,7 +486,6 @@ int64_t getStackPopped(PC pc) {
     case Op::QueryM:
     case Op::IncDecM:
     case Op::UnsetM:
-    case Op::NewPackedArray:
     case Op::NewVec:
     case Op::NewKeysetArray:
     case Op::NewVArray:
@@ -511,7 +505,6 @@ int64_t getStackPopped(PC pc) {
       return getImm(pc, 0).u_IVA + 1;
 
     case Op::NewRecord:
-    case Op::NewStructArray:
     case Op::NewStructDArray:
     case Op::NewStructDict:
       return getImmVector(pc).size();
@@ -713,7 +706,6 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   if (flags & StackN) {
     int numArgs = [&] () -> int {
       switch (ni.op()) {
-      case Op::NewPackedArray:
       case Op::NewVec:
       case Op::NewKeysetArray:
       case Op::NewVArray:
@@ -844,7 +836,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::JmpNS:
   case Op::ClsCnsD:
   case Op::FCallBuiltin:
-  case Op::NewStructArray:
   case Op::NewStructDArray:
   case Op::NewStructDict:
   case Op::Switch:
@@ -904,7 +895,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::CGetL2:
   case Op::CGetS:
   case Op::CUGetL:
-  case Op::CastArray:
   case Op::CastDouble:
   case Op::CastInt:
   case Op::CastString:
@@ -976,12 +966,9 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Pow:
   case Op::ClassName:
   case Op::NativeImpl:
-  case Op::NewArray:
   case Op::NewCol:
   case Op::NewPair:
-  case Op::NewMixedArray:
   case Op::NewDictArray:
-  case Op::NewPackedArray:
   case Op::NewVec:
   case Op::NewKeysetArray:
   case Op::NewVArray:

@@ -55,11 +55,6 @@ TypedValue arrayAdd(ArrayData* a1, ArrayData* a2);
 /* Helper functions for conversion instructions that are too
  * complicated to inline
  */
-ArrayData* convTVToArrHelper(TypedValue tv);
-ArrayData* convArrToNonDVArrHelper(ArrayData* a);
-ArrayData* convVecToArrHelper(ArrayData* a);
-ArrayData* convDictToArrHelper(ArrayData* a);
-ArrayData* convKeysetToArrHelper(ArrayData* a);
 ArrayData* convArrToVecHelper(ArrayData* a);
 ArrayData* convDictToVecHelper(ArrayData* a);
 ArrayData* convKeysetToVecHelper(ArrayData* a);
@@ -72,7 +67,6 @@ ArrayData* convArrToKeysetHelper(ArrayData* a);
 ArrayData* convVecToKeysetHelper(ArrayData* a);
 ArrayData* convDictToKeysetHelper(ArrayData* a);
 ArrayData* convObjToKeysetHelper(ObjectData* o);
-ArrayData* convClsMethToArrHelper(ClsMethDataRef clsmeth);
 ArrayData* convClsMethToVArrHelper(ClsMethDataRef clsmeth);
 ArrayData* convClsMethToVecHelper(ClsMethDataRef clsmeth);
 ArrayData* convClsMethToDArrHelper(ClsMethDataRef clsmeth);

@@ -374,33 +374,6 @@ Instruction set
 
 3. Type conversions
 
-To array conversions:
-
-| ConvBoolToArr,                D(PArr), S(Bool),                    PRc
-
-| ConvDblToArr,                 D(PArr), S(Dbl),                     PRc
-
-| ConvIntToArr,                 D(PArr), S(Int),                     PRc
-
-| ConvObjToArr,                 D(PArr), S(Obj),                     PRc|CRc
-
-| ConvStrToArr,                 D(PArr), S(Str),                     PRc|CRc
-
-| ConvVecToArr,                 D(PArr), S(Vec),                     PRc|CRc
-
-| ConvDictToArr,                D(PArr), S(Dict),                    PRc|CRc
-
-| ConvKeysetToArr,              D(PArr), S(Keyset),                  PRc|CRc
-
-| ConvFuncToArr,                D(PArr), S(Func),                    PRc
-
-| ConvClsMethToArr,             D(PArr), S(ClsMeth),                 PRc|CRc
-
-| ConvTVToArr,                  D(PArr), S(Cell),                    PRc|CRc
-
-| ConvArrToNonDVArr,            D(PArr), S(Arr),                     PRc|CRc
-
-
 To vec conversions:
 
 | ConvArrToVec,                 D(Vec), S(Arr),                      PRc|CRc
@@ -1526,10 +1499,6 @@ To string conversions:
 
   Clear the IsBeingConstructed flag on the object.
 
-| NewPlainArray, D(PArr), C(Int), PRc
-
-  Allocate a new plain array (that is, a non-dvarray) with expected capacity S0.
-
 | NewDArray, DDArr, C(Int), PRc
 
   Allocate a new dict-like array with the expected capacity S0.
@@ -1569,8 +1538,6 @@ To string conversions:
   array.  Used to initialize an array allocated with AllocPackedArray or
   AllocVec that was too big to use a series of InitPackedLayoutArray ops.
 
-| AllocStructArray<keys...>,  D(PArr),         NA, PRc
-
 | AllocStructDArray<keys...>, DDArr,          NA, PRc
 
 | AllocStructDict<keys...>,   D(Dict), NA, PRc
@@ -1579,7 +1546,7 @@ To string conversions:
   immediates for keys. This op initializes the header and hash table of the
   new array-like, but does not its elements; use InitMixedLayoutArray for that.
 
-| InitMixedLayoutArray<index,key>, ND, S(Arr,Dict) S(Cell), NF
+| InitMixedLayoutArray<index,key>, ND, S(DArr,Dict) S(Cell), NF
 
   Initialize the element at position `index` in array S0 to have the string
   literal `key` as its key and S1 as its value. This instruction assumes that
@@ -1592,8 +1559,6 @@ To string conversions:
   and taking N elements off the stack given by S1, at `offset'.
   This instruction assumes it can take the values from the stack
   without increfing them.
-
-| NewStructArray<offset,keys...>,  D(PArr),         S(StkPtr), PRc|CRc
 
 | NewStructDArray<offset,keys...>, DDArr,          S(StkPtr), PRc|CRc
 
@@ -2319,7 +2284,7 @@ To string conversions:
 
   Concatenate S0, S1, S2, and S3.
 
-| AddNewElem,       DArrSet,   S(PArr,VArr,DArr) S(Cell), CRc|PRc
+| AddNewElem,       DArrSet,   S(VArr,DArr) S(Cell), CRc|PRc
 
 | AddNewElemKeyset, D(Keyset), S(Keyset) S(Cell), CRc|PRc
 

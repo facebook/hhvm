@@ -190,12 +190,9 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::Dict:
   case Op::Vec:
   case Op::Keyset:
-  case Op::NewArray:
   case Op::NewDArray:
   case Op::NewDictArray:
-  case Op::NewPackedArray:
   case Op::NewVArray:
-  case Op::NewStructArray:
   case Op::NewStructDArray:
   case Op::NewStructDict:
   case Op::NewVec:
@@ -225,7 +222,6 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::CastInt:
   case Op::CastDouble:
   case Op::CastString:
-  case Op::CastArray:
   case Op::CastDict:
   case Op::CastVec:
   case Op::CastKeyset:

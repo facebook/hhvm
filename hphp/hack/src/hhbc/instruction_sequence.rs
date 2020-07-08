@@ -326,10 +326,6 @@ pub mod instr {
         instr(Instruct::IOp(InstructOperator::CastDArray))
     }
 
-    pub fn cast_array() -> InstrSeq {
-        instr(Instruct::IOp(InstructOperator::CastArray))
-    }
-
     pub fn cast_dict() -> InstrSeq {
         instr(Instruct::IOp(InstructOperator::CastDict))
     }
@@ -740,10 +736,6 @@ pub mod instr {
 
     pub fn new_record(id: ClassId, keys: Vec<String>) -> InstrSeq {
         instr(Instruct::ILitConst(InstructLitConst::NewRecord(id, keys)))
-    }
-
-    pub fn newstructarray(keys: Vec<String>) -> InstrSeq {
-        instr(Instruct::ILitConst(InstructLitConst::NewStructArray(keys)))
     }
 
     pub fn newstructdarray(keys: Vec<String>) -> InstrSeq {

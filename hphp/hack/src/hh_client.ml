@@ -80,8 +80,8 @@ let () =
     "[hh_client] %s"
     (String.concat ~sep:" " (Array.to_list Sys.argv));
 
-  let exit_status =
-    try
+  try
+    let exit_status =
       match command with
       | ClientCommand.CCheck check_env ->
         Lwt_main.run (ClientCheck.main check_env)
@@ -93,13 +93,23 @@ let () =
       | ClientCommand.CRage env -> Lwt_main.run (ClientRage.main env)
       | ClientCommand.CDownloadSavedState env ->
         Lwt_main.run (ClientDownloadSavedState.main env)
-    with Exit_status.Exit_with es as e ->
-      let e = Exception.wrap e in
-      Hh_logger.log
-        "Client bad exit: %s\n%s"
-        (Exit_status.to_string es)
-        (Exception.get_backtrace_string e |> Exception.clean_stack);
-      HackEventLogger.client_bad_exit ~command_name es e;
-      es
-  in
-  Exit_status.exit exit_status
+    in
+    Exit_status.exit exit_status
+  with exn ->
+    let e = Exception.wrap exn in
+    (* We trust that if someone raised Exit_with then they had the decency to print
+    out a user-facing message; we will only print out a user-facing message here
+    for uncaught exceptions: lvl=Error gets sent to stderr, but lvl=Info doesn't. *)
+    let (es, lvl) =
+      match exn with
+      | Exit_status.Exit_with es -> (es, Hh_logger.Level.Info)
+      | _ -> (Exit_status.Uncaught_exception, Hh_logger.Level.Error)
+    in
+    Hh_logger.log
+      ~lvl
+      "hh_client bad exit: %s - %s\n%s"
+      (Exit_status.to_string es)
+      (Exception.get_ctor_string e)
+      (Exception.get_backtrace_string e |> Exception.clean_stack);
+    HackEventLogger.client_bad_exit ~command_name es e;
+    Exit_status.exit es

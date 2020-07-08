@@ -219,16 +219,10 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
         Lwt.return Exit_status.No_error)
     | MODE_GEN_HOT_CLASSES (threshold, filename) ->
       let%lwt content = rpc args @@ Rpc.GEN_HOT_CLASSES threshold in
-      (try%lwt
-         let oc = Stdlib.open_out filename in
-         Out_channel.output_string oc content;
-         Stdlib.close_out oc;
-         Lwt.return Exit_status.No_error
-       with exn ->
-         Printf.eprintf "Failed to save hot classes file: %s\n"
-         @@ Exn.to_string exn;
-         Printexc.print_backtrace stderr;
-         Lwt.return Exit_status.Uncaught_exception)
+      let oc = Stdlib.open_out filename in
+      Out_channel.output_string oc content;
+      Stdlib.close_out oc;
+      Lwt.return Exit_status.No_error
     | MODE_GO_TO_IMPL_CLASS class_name ->
       let%lwt results =
         rpc_with_retry args

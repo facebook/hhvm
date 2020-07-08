@@ -91,9 +91,12 @@ let exit_code = function
   | Build_terminated -> 1 (* used in clientBuild *)
   | Kill_error -> 1 (* used in clientStop/Start/Restart *)
   | Server_shutting_down -> 1 (* used in server *)
+  (* CARE! exit code 2 is also used when an ocaml binary exits
+  with an unhandled exception. It's a shame that we can't distinguish
+  such exits from the following two codes. *)
   | Build_error -> 2 (* used in clientBuild *)
   | Type_error -> 2 (* used in clientCheck *)
-  | Uncaught_exception -> 2 (* used in server and clientIde *)
+  | Uncaught_exception -> 221
   | Hhconfig_changed -> 4
   | Unused_server -> 5
   | No_server_running_should_retry ->
@@ -230,7 +233,14 @@ let exit_code_to_string (code : int) : string =
     match of_enum candidate_i with
     | Some candidate when exit_code candidate = code ->
       f (to_string candidate :: acc) (candidate_i + 1)
-    | _ when candidate_i > max -> acc
+    | _ when candidate_i > max ->
+      (* If an ocaml binary exits with an uncaught exception, it produces exit code 2.
+      We'll reconstruct that fact here. However our binaries should avoid exiting
+      in this manner, since exit code 2 also means "hh_check completed successfully"! *)
+      if code = 2 then
+        "Uncaught_exception_ocaml" :: acc
+      else
+        acc
     | _ -> f acc (candidate_i + 1)
   in
   match f [] min with

@@ -402,31 +402,6 @@ where
         }
     }
 
-    // Turns a syntax node into a list of nodes; if it is a separated syntax
-    // list then the separators are filtered from the resulting list.
-    fn syntax_to_list(include_separators: bool, node: &Syntax<T, V>) -> Vec<&Syntax<T, V>> {
-        fn on_list_item<T1, V1>(sep: bool, x: &ListItemChildren<T1, V1>) -> Vec<&Syntax<T1, V1>> {
-            if sep {
-                vec![&x.list_item, &x.list_separator]
-            } else {
-                vec![&x.list_item]
-            }
-        }
-        match &node.syntax {
-            Missing => vec![],
-            SyntaxList(s) => s
-                .iter()
-                .map(|x| match &x.syntax {
-                    ListItem(x) => on_list_item(include_separators, x),
-                    _ => vec![node],
-                })
-                .flatten()
-                .collect(),
-            ListItem(x) => on_list_item(include_separators, x),
-            _ => vec![node],
-        }
-    }
-
     fn p_pos(node: &Syntax<T, V>, env: &Env) -> Pos {
         node.position_exclusive(env.indexed_source_text)
             .unwrap_or_else(|| env.mk_none_pos())
@@ -680,20 +655,6 @@ where
             .map_or(s, |m| m.as_bytes())
     }
 
-    fn as_list(node: &Syntax<T, V>) -> Vec<&Syntax<T, V>> {
-        fn strip_list_item<T1, V1>(node: &Syntax<T1, V1>) -> &Syntax<T1, V1> {
-            match &node.syntax {
-                ListItem(i) => &i.list_item,
-                _ => node,
-            }
-        }
-        match &node.syntax {
-            SyntaxList(l) => l.iter().map(strip_list_item).collect(),
-            Missing => vec![],
-            _ => vec![node],
-        }
-    }
-
     fn token_kind(node: &Syntax<T, V>) -> Option<TK> {
         match &node.syntax {
             Token(t) => Some(t.kind()),
@@ -887,13 +848,17 @@ where
             ShapeTypeSpecifier(c) => {
                 let allows_unknown_fields = !c.shape_type_ellipsis.is_missing();
                 /* if last element lacks a separator and ellipsis is present, error */
-                if let Some(l) = Self::syntax_to_list(true, &c.shape_type_fields).last() {
-                    if l.is_missing() && allows_unknown_fields {
-                        Self::raise_parsing_error(
-                            node,
-                            env,
-                            &syntax_error::shape_type_ellipsis_without_trailing_comma,
-                        )
+                if allows_unknown_fields {
+                    if let SyntaxList(items) = &c.shape_type_fields.syntax {
+                        if let Some(ListItem(item)) = items.last().map(|i| &i.syntax) {
+                            if item.list_separator.is_missing() {
+                                Self::raise_parsing_error(
+                                    node,
+                                    env,
+                                    &syntax_error::shape_type_ellipsis_without_trailing_comma,
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -988,13 +953,13 @@ where
             LikeTypeSpecifier(c) => Ok(Hlike(Self::p_hint(&c.like_type, env)?)),
             SoftTypeSpecifier(c) => Ok(Hsoft(Self::p_hint(&c.soft_type, env)?)),
             ClosureTypeSpecifier(c) => {
-                let (param_list, variadic_hints): (Vec<&Syntax<T, V>>, Vec<&Syntax<T, V>>) =
-                    Self::as_list(&c.closure_parameter_list)
-                        .iter()
-                        .partition(|n| match &n.syntax {
-                            VariadicParameter(_) => false,
-                            _ => true,
-                        });
+                let (param_list, variadic_hints): (Vec<&Syntax<T, V>>, Vec<&Syntax<T, V>>) = c
+                    .closure_parameter_list
+                    .syntax_node_to_list_skip_separator()
+                    .partition(|n| match &n.syntax {
+                        VariadicParameter(_) => false,
+                        _ => true,
+                    });
                 let (type_hints, kinds) = param_list
                     .iter()
                     .map(|p| Self::p_closure_parameter(p, env))
@@ -1554,7 +1519,7 @@ where
         let split_args_vararg = |arg_list_node: &Syntax<T, V>,
                                  e: &mut Env|
          -> Result<(Vec<ast::Expr>, Option<ast::Expr>)> {
-            let mut arg_list = Self::as_list(arg_list_node);
+            let mut arg_list: Vec<_> = arg_list_node.syntax_node_to_list_skip_separator().collect();
             if let Some(last_arg) = arg_list.last() {
                 if let DecoratedExpression(c) = &last_arg.syntax {
                     if Self::token_kind(&c.decorated_expression_decorator) == Some(TK::DotDotDot) {
@@ -2078,8 +2043,8 @@ where
                     ast::CallType::Cnormal,
                     mk_id_expr(name),
                     vec![],
-                    Self::as_list(&c.define_argument_list)
-                        .iter()
+                    c.define_argument_list
+                        .syntax_node_to_list_skip_separator()
                         .map(|x| Self::p_expr(x, env))
                         .collect::<std::result::Result<Vec<_>, _>>()?,
                     None,
@@ -2512,7 +2477,7 @@ where
     fn aggregate_xhp_tokens<'b>(
         nodes: &'b Syntax<T, V>,
     ) -> Result<Vec<Either<Syntax<T, V>, &'b Syntax<T, V>>>> {
-        let nodes = Self::as_list(nodes);
+        let nodes = nodes.syntax_node_to_list_skip_separator();
         let mut state = (None, None, vec![]); // (start, end, result)
         let combine = |state: &mut (
             Option<&'b Syntax<T, V>>,
@@ -2621,14 +2586,6 @@ where
         }
     }
 
-    fn is_noop(stmt: &ast::Stmt) -> bool {
-        if let ast::Stmt_::Noop = stmt.1 {
-            true
-        } else {
-            false
-        }
-    }
-
     fn p_stmt_list_(
         pos: &Pos,
         mut nodes: Iter<&Syntax<T, V>>,
@@ -2670,10 +2627,10 @@ where
 
     // TODO: rename to p_stmt_list
     fn handle_loop_body(pos: Pos, node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Stmt> {
-        let list = Self::as_list(node);
+        let list: Vec<_> = node.syntax_node_to_list_skip_separator().collect();
         let blk: Vec<_> = Self::p_stmt_list_(&pos, list.iter(), env)?
             .into_iter()
-            .filter(|stmt| !Self::is_noop(stmt))
+            .filter(|stmt| !stmt.1.is_noop())
             .collect();
         let body = if blk.len() == 0 {
             vec![Self::mk_noop(env)]
@@ -3276,9 +3233,8 @@ where
         node: &Syntax<T, V>,
         env: &mut Env,
     ) -> Result<(modifier::KindSet, R)> {
-        let nodes = Self::as_list(node);
         let mut kind_set = modifier::KindSet::new();
-        for n in nodes.iter() {
+        for n in node.syntax_node_to_list_skip_separator() {
             let token_kind = Self::token_kind(n).map_or(None, modifier::from_token_kind);
             match token_kind {
                 Some(kind) => {
@@ -3316,23 +3272,21 @@ where
         Self::map_fold(&f, &op, node, env, acc)
     }
 
-    fn map_fold<A, R, F, O>(f: &F, op: &O, node: &Syntax<T, V>, env: &mut Env, acc: A) -> Result<A>
+    fn map_fold<A, R, F, O>(
+        f: &F,
+        op: &O,
+        node: &Syntax<T, V>,
+        env: &mut Env,
+        mut acc: A,
+    ) -> Result<A>
     where
         F: Fn(&Syntax<T, V>, &mut Env) -> Result<R>,
         O: Fn(A, R) -> A,
     {
-        match &node.syntax {
-            Missing => Ok(acc),
-            SyntaxList(xs) => {
-                let mut a = acc;
-                for x in xs.iter() {
-                    a = Self::map_fold(f, op, &x, env, a)?;
-                }
-                Ok(a)
-            }
-            ListItem(x) => Ok(op(acc, f(&x.list_item, env)?)),
-            _ => Ok(op(acc, f(node, env)?)),
+        for n in node.syntax_node_to_list_skip_separator() {
+            acc = op(acc, f(n, env)?);
         }
+        Ok(acc)
     }
 
     fn p_visibility(node: &Syntax<T, V>, env: &mut Env) -> Result<Option<ast::Visibility>> {
@@ -3748,7 +3702,10 @@ where
         {
             Self::raise_parsing_error(node, env, &syntax_error::reified_attribute);
         } else if name.1.eq_ignore_ascii_case(special_attrs::SOFT)
-            && Self::as_list(constructor_call_argument_list).len() > 0
+            && constructor_call_argument_list
+                .syntax_node_to_list_skip_separator()
+                .count()
+                > 0
         {
             Self::raise_parsing_error(node, env, &syntax_error::soft_no_arguments);
         }
@@ -4000,9 +3957,11 @@ where
                 Ok(ChildBinary(Box::new(left), Box::new(right)))
             }
             XHPChildrenParenthesizedList(c) => {
-                let children = Self::as_list(&c.xhp_children_list_xhp_children);
-                let children: std::result::Result<Vec<_>, _> =
-                    children.iter().map(|c| Self::p_xhp_child(c, env)).collect();
+                let children: std::result::Result<Vec<_>, _> = c
+                    .xhp_children_list_xhp_children
+                    .syntax_node_to_list_skip_separator()
+                    .map(|c| Self::p_xhp_child(c, env))
+                    .collect();
                 Ok(ChildList(children?))
             }
             _ => Self::missing_syntax("xhp children", node, env),
@@ -4507,18 +4466,20 @@ where
                 let is_final = Self::p_kinds(&c.pocket_enum_modifiers, env)?.has(modifier::FINAL);
                 let user_attributes = Self::p_user_attributes(&c.pocket_enum_attributes, env)?;
                 let id = Self::pos_name(&c.pocket_enum_name, env)?;
-                let flds = Self::as_list(&c.pocket_enum_fields);
+                let flds = c.pocket_enum_fields.syntax_node_to_list_skip_separator();
                 let mut case_types = vec![];
                 let mut case_values = vec![];
                 let mut members = vec![];
-                for fld in flds.iter() {
+                for fld in flds {
                     match &fld.syntax {
                         PocketAtomMappingDeclaration(c) => {
                             let id = Self::pos_name(&c.pocket_atom_mapping_name, env)?;
-                            let maps = Self::as_list(&c.pocket_atom_mapping_mappings);
+                            let maps = c
+                                .pocket_atom_mapping_mappings
+                                .syntax_node_to_list_skip_separator();
                             let mut types = vec![];
                             let mut exprs = vec![];
-                            for map in maps.iter() {
+                            for map in maps {
                                 match &map.syntax {
                                     PocketMappingIdDeclaration(c) => {
                                         let id = Self::pos_name(&c.pocket_mapping_id_name, env)?;
@@ -4623,8 +4584,8 @@ where
                         _ => Self::missing_syntax("where constraint", n, e),
                     }
                 };
-                Self::as_list(&c.where_clause_constraints)
-                    .iter()
+                c.where_clause_constraints
+                    .syntax_node_to_list_skip_separator()
                     .map(|n| f(n, env))
                     .collect()
             }
@@ -4821,7 +4782,10 @@ where
                 };
                 match &c.classish_body.syntax {
                     ClassishBody(c1) => {
-                        for elt in Self::as_list(&c1.classish_body_elements).iter() {
+                        for elt in c1
+                            .classish_body_elements
+                            .syntax_node_to_list_skip_separator()
+                        {
                             Self::p_class_elt(&mut class_, elt, env)?;
                         }
                     }
@@ -4831,9 +4795,9 @@ where
             }
             ConstDeclaration(c) => {
                 let ty = &c.const_type_specifier;
-                let decls = Self::as_list(&c.const_declarators);
+                let decls = c.const_declarators.syntax_node_to_list_skip_separator();
                 let mut defs = vec![];
-                for decl in decls.iter() {
+                for decl in decls {
                     let def = match &decl.syntax {
                         ConstantDeclarator(c) => {
                             let name = &c.constant_declarator_name;
@@ -4870,8 +4834,8 @@ where
                     constraint: Self::mp_optional(Self::p_tconstraint, &c.alias_constraint, env)?
                         .map(|x| x.1),
                     user_attributes: itertools::concat(
-                        Self::as_list(&c.alias_attribute_spec)
-                            .iter()
+                        c.alias_attribute_spec
+                            .syntax_node_to_list_skip_separator()
                             .map(|attr| Self::p_user_attribute(attr, env))
                             .collect::<std::result::Result<Vec<Vec<_>>, _>>()?,
                     ),
@@ -4987,8 +4951,8 @@ where
                         let mut env1 = Env::clone_and_unset_toplevel_if_toplevel(env);
                         let env1 = env1.as_mut();
                         itertools::concat(
-                            Self::as_list(&c.namespace_declarations)
-                                .iter()
+                            c.namespace_declarations
+                                .syntax_node_to_list_skip_separator()
                                 .map(|n| Self::p_def(n, env1))
                                 .collect::<std::result::Result<Vec<Vec<_>>, _>>()?,
                         )
@@ -5001,23 +4965,24 @@ where
                 )])
             }
             NamespaceGroupUseDeclaration(c) => {
-                let uses: std::result::Result<Vec<_>, _> =
-                    Self::as_list(&c.namespace_group_use_clauses)
-                        .iter()
-                        .map(|n| {
-                            Self::p_namespace_use_clause(
-                                Some(&c.namespace_group_use_prefix),
-                                Self::p_namespace_use_kind(&c.namespace_group_use_kind, env),
-                                n,
-                                env,
-                            )
-                        })
-                        .collect();
+                let uses: std::result::Result<Vec<_>, _> = c
+                    .namespace_group_use_clauses
+                    .syntax_node_to_list_skip_separator()
+                    .map(|n| {
+                        Self::p_namespace_use_clause(
+                            Some(&c.namespace_group_use_prefix),
+                            Self::p_namespace_use_kind(&c.namespace_group_use_kind, env),
+                            n,
+                            env,
+                        )
+                    })
+                    .collect();
                 Ok(vec![ast::Def::mk_namespace_use(uses?)])
             }
             NamespaceUseDeclaration(c) => {
-                let uses: std::result::Result<Vec<_>, _> = Self::as_list(&c.namespace_use_clauses)
-                    .iter()
+                let uses: std::result::Result<Vec<_>, _> = c
+                    .namespace_use_clauses
+                    .syntax_node_to_list_skip_separator()
                     .map(|n| {
                         Self::p_namespace_use_clause(
                             None,
@@ -5069,7 +5034,7 @@ where
             }
 
             if let Stmt(s) = &def {
-                if Self::is_noop(&s) {
+                if s.1.is_noop() {
                     continue;
                 }
                 let raise_error = match &s.1 {
@@ -5110,12 +5075,12 @@ where
     }
 
     fn p_program(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::Program> {
-        let nodes = Self::as_list(node);
+        let nodes = node.syntax_node_to_list_skip_separator();
         let mut acc = vec![];
-        for i in 0..nodes.len() {
-            match &nodes[i].syntax {
+        for n in nodes {
+            match &n.syntax {
                 EndOfFile(_) => break,
-                _ => match Self::p_def(nodes[i], env) {
+                _ => match Self::p_def(n, env) {
                     Err(Error::MissingSyntax { .. }) if env.fail_open => {}
                     e @ Err(_) => return e,
                     Ok(mut def) => acc.append(&mut def),

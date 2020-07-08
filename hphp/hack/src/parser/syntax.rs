@@ -278,6 +278,20 @@ where
         }
     }
 
+    pub fn syntax_node_to_list_skip_separator<'a>(
+        &'a self,
+    ) -> impl DoubleEndedIterator<Item = &'a Self> {
+        use std::iter::{empty, once};
+        match &self.syntax {
+            SyntaxVariant::SyntaxList(l) => Left(l.iter().map(|n| match &n.syntax {
+                SyntaxVariant::ListItem(i) => &i.list_item,
+                _ => n,
+            })),
+            SyntaxVariant::Missing => Right(Left(empty())),
+            _ => Right(Right(once(self))),
+        }
+    }
+
     pub fn is_namespace_prefix(&self) -> bool {
         if let SyntaxVariant::QualifiedName(x) = &self.syntax {
             x.qualified_name_parts

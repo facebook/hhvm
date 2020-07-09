@@ -88,13 +88,23 @@ module FlowSet = Set.Make (Flow)
 
 type security_lattice = FlowSet.t
 
+module Policy = struct
+  type t = policy
+
+  let compare = compare
+end
+
+module PCSet = Set.Make (Policy)
+
+type program_counter = PCSet.t
+
 type local_env = {
   le_vars: ptype LMap.t;
   (* Policy tracking local effects, these effects
      are not observable outside the current function.
      Assignments to local variables fall into this
      category. *)
-  le_pc: policy list;
+  le_pc: program_counter;
 }
 
 (* The environment is mutable data that

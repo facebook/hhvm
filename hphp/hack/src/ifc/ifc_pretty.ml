@@ -138,13 +138,11 @@ let locals fmt env =
       "@[<hov2>lvars:@ %a@]"
       (LMap.make_pp Local_id.pp ptype)
       lenv.le_vars;
-    let policy_list = list comma_sep policy in
-    begin
-      match lenv.le_pc with
-      | [] -> ()
-      | _ :: _ ->
-        fprintf fmt "@,@[<hov2>pc: @[<hov>%a@]@]" policy_list lenv.le_pc
-    end;
+    let policy_set fmt s = list comma_sep policy fmt (PCSet.elements s) in
+    if PCSet.is_empty lenv.le_pc then
+      ()
+    else
+      fprintf fmt "@,@[<hov2>pc: @[<hov>%a@]@]" policy_set lenv.le_pc;
     pp_close_box fmt ()
   in
   let pp_lenv_opt fmt = function

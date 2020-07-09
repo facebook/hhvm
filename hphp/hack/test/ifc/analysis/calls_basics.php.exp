@@ -102,7 +102,7 @@ Analyzing \indirect_flow_a_to_b:
   Locals:
     lvars: { $c -> \C<\C, lump, a=<A>, b=?thunk> }
 Constraints:
-  [A < .a, \C < .a, pc < pcjoin, .a < pcjoin,
+  [A < .a, \C < .a, .a < pcjoin, pc < pcjoin,
    {(this: \C<\C, lump, a=<A>, b=?thunk>)->\C#setb<pcjoin>(<PUBLIC>): <\C#setb_ret>}]
 
 Analyzing \indirect_flow_a_to_b_bis:
@@ -121,7 +121,7 @@ Analyzing \indirect_flow_a_to_b_bis:
         $c2 -> \C<\C'1, lump'1, a=?thunk, b=<B>> }
 Constraints:
   [{(this: \C<\C, lump, a=?thunk, b=?thunk>)->\C#is_a_pos<pc>(): <\C#is_a_pos_ret>},
-   B < .b, \C'1 < .b, pc < pcjoin, \C#is_a_pos_ret < pcjoin,
+   B < .b, \C'1 < .b, \C#is_a_pos_ret < pcjoin, pc < pcjoin,
    {(this: \C<\C'1, lump'1, a=?thunk, b=<B>>)->\C#setb<pcjoin>(<.b>): <\C#setb_ret>}]
 
 Flow constraints for \C#is_a_pos:
@@ -174,7 +174,7 @@ Flow constraints for \indirect_flow_a_to_b:
   
   Simplified: [PUBLIC < B, A < B]
   Raw:
-  [A < .a, \C < .a, pc < pcjoin, .a < pcjoin,
+  [A < .a, \C < .a, .a < pcjoin, pc < pcjoin,
    exists a b c d e.
      [d < B, a < B, b < B, PUBLIC < a, pcjoin < b, B < B, B < B, A < A,
       A < A, lump = c, \C < d, e < \C#setb_ret]]
@@ -186,7 +186,7 @@ Flow constraints for \indirect_flow_a_to_b_bis:
   [exists a b c d e.
      [A < a, d < a, a < e, PUBLIC < e, a < e, PUBLIC < e, pc < b, B < B,
       B < B, A < A, A < A, lump = c, \C < d, e < \C#is_a_pos_ret], B < .b,
-   \C'1 < .b, pc < pcjoin, \C#is_a_pos_ret < pcjoin,
+   \C'1 < .b, \C#is_a_pos_ret < pcjoin, pc < pcjoin,
    exists a b c d e.
      [d < B, a < B, b < B, .b < a, pcjoin < b, B < B, B < B, A < A, A < A,
       lump'1 = c, \C'1 < d, e < \C#setb_ret]]

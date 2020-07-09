@@ -311,8 +311,8 @@ let call renv env callable_name that_pty_opt args_pty ret_ty =
      *)
     | Some _ ->
       let (env, pc_joined) =
-        let join (env, pc) pc' = policy_join renv env ~prefix:"pcjoin" pc pc' in
-        List.fold ~f:join ~init:(env, Pbot) (Env.get_gpc_policy renv env K.Next)
+        let join pc' (env, pc) = policy_join renv env ~prefix:"pcjoin" pc pc' in
+        PCSet.fold join (Env.get_gpc_policy renv env K.Next) (env, Pbot)
       in
       let fp =
         {
@@ -397,7 +397,7 @@ and assign renv env op lhs_exp rhs_exp =
   in
   let (env, lhs_pty, pc) = flux_target renv env lhs_exp in
   let env = Env.acc env (subtype rhs_pty lhs_pty) in
-  let env = Env.acc env (add_dependencies pc lhs_pty) in
+  let env = Env.acc env (add_dependencies (PCSet.elements pc) lhs_pty) in
   (env, lhs_pty)
 
 (* Generate flow constraints for an expression *)
@@ -558,7 +558,9 @@ let rec stmt renv env ((_pos, s) : Tast.stmt) =
         let lpc = Env.get_lpc_policy env K.Next in
         Env.acc
           env
-          L.(add_dependencies lpc renv.re_ret && subtype te renv.re_ret)
+          L.(
+            add_dependencies (PCSet.elements lpc) renv.re_ret
+            && subtype te renv.re_ret)
     end
   | _ -> env
 

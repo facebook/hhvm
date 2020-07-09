@@ -44,7 +44,7 @@ let new_renv proto_renv this_ty ret_ty global_pc =
     re_gpc = global_pc;
   }
 
-let empty_lenv = { le_vars = LMap.empty; le_pc = [] }
+let empty_lenv = { le_vars = LMap.empty; le_pc = PCSet.empty }
 
 let new_env =
   { e_cont = KMap.singleton K.Next empty_lenv; e_acc = []; e_deps = SSet.empty }
@@ -64,7 +64,7 @@ let merge_lenv ~union env lenv1 lenv2 =
   let (env, le_vars) =
     LMap.merge_env env lenv1.le_vars lenv2.le_vars ~combine
   in
-  let le_pc = lenv1.le_pc @ lenv2.le_pc in
+  let le_pc = PCSet.union lenv1.le_pc lenv2.le_pc in
   (env, { le_vars; le_pc })
 
 (* Merge continuation envs, if a continuation is assigned a
@@ -97,16 +97,16 @@ let get_local_type env lid =
 
 let get_lpc_policy env k =
   match get_lenv_opt env k with
-  | None -> []
+  | None -> PCSet.empty
   | Some lenv -> lenv.le_pc
 
-let get_gpc_policy renv env k = renv.re_gpc :: get_lpc_policy env k
+let get_gpc_policy renv env k = PCSet.add renv.re_gpc (get_lpc_policy env k)
 
 let push_pc env k pc =
   match get_lenv_opt env k with
   | None -> env
   | Some lenv ->
-    let lenv = { lenv with le_pc = pc :: lenv.le_pc } in
+    let lenv = { lenv with le_pc = PCSet.add pc lenv.le_pc } in
     set_cont env k lenv
 
 let set_pc env k pc =
@@ -137,8 +137,9 @@ let merge_conts_into ~union env ks k_to =
   | Some lenv -> merge_lenv_into ~union env lenv k_to
 
 let merge_pcs_into env ks k_to =
-  let f pc k = get_lpc_policy env k @ pc in
-  let pc = List.fold_left f [] ks in
+  let f pc k = PCSet.union (get_lpc_policy env k) pc in
+  let pc = List.fold_left f PCSet.empty ks in
   match get_lenv_opt env k_to with
   | None -> env
-  | Some lenv -> set_cont env k_to { lenv with le_pc = pc @ lenv.le_pc }
+  | Some lenv ->
+    set_cont env k_to { lenv with le_pc = PCSet.union pc lenv.le_pc }

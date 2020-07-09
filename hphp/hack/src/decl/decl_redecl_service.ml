@@ -32,15 +32,15 @@ let shallow_decl_enabled (ctx : Provider_context.t) =
 (*****************************************************************************)
 (* The neutral element of declaration (cf procs/multiWorker.mli) *)
 (*****************************************************************************)
-let otf_neutral = Errors.empty
+let on_the_fly_neutral = Errors.empty
 
 let compute_deps_neutral = (DepSet.empty, DepSet.empty, DepSet.empty)
 
 (*****************************************************************************)
 (* This is the place where we are going to put everything necessary for
  * the redeclaration. We could "pass" the values directly to the workers,
- * but it gives too much work to the master and slows things downn.
- * So what we do instead is pass the data through shared memory via
+ * but it gives too much work to the master and slows things down,
+ * so what we do instead is pass the data through shared memory via
  * OnTheFlyStore.
  * I tried replicating the data to speed things up but it had no effect.
  *)
@@ -158,7 +158,7 @@ let compute_gconsts_deps
 let redeclare_files ctx filel =
   List.fold_left filel ~f:(on_the_fly_decl_file ctx) ~init:Errors.empty
 
-let otf_decl_files filel =
+let on_the_fly_decl_files filel =
   SharedMem.invalidate_caches ();
 
   (* Redeclaring the files *)
@@ -209,8 +209,8 @@ let compute_deps ctx ~conservative_redecl fast filel =
 (* Load the environment and then redeclare *)
 (*****************************************************************************)
 
-let load_and_otf_decl_files ctx _ filel =
-  try otf_decl_files ctx filel
+let load_and_on_the_fly_decl_files ctx _ filel =
+  try on_the_fly_decl_files ctx filel
   with e ->
     Printf.printf "Error: %s\n" (Exn.to_string e);
     Out_channel.flush stdout;
@@ -240,14 +240,15 @@ let merge_compute_deps
 (*****************************************************************************)
 (* The parallel worker *)
 (*****************************************************************************)
-let parallel_otf_decl ~conservative_redecl ctx workers bucket_size fast fnl =
+let parallel_on_the_fly_decl
+    ~conservative_redecl ctx workers bucket_size fast fnl =
   try
     OnTheFlyStore.store fast;
     let errors =
       MultiWorker.call
         workers
-        ~job:(load_and_otf_decl_files ctx)
-        ~neutral:otf_neutral
+        ~job:(load_and_on_the_fly_decl_files ctx)
+        ~neutral:on_the_fly_neutral
         ~merge:merge_on_the_fly
         ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
     in
@@ -446,13 +447,19 @@ let redo_type_decl
   (* If there aren't enough files, let's do this ourselves ... it's faster! *)
   let (errors, changed, to_redecl, to_recheck) =
     if List.length fnl < 10 then
-      let errors = otf_decl_files ctx fnl in
+      let errors = on_the_fly_decl_files ctx fnl in
       let (changed, to_redecl, to_recheck) =
         compute_deps ctx ~conservative_redecl defs fnl
       in
       (errors, changed, to_redecl, to_recheck)
     else
-      parallel_otf_decl ~conservative_redecl ctx workers bucket_size defs fnl
+      parallel_on_the_fly_decl
+        ~conservative_redecl
+        ctx
+        workers
+        bucket_size
+        defs
+        fnl
   in
   let (changed, to_recheck) =
     if shallow_decl_enabled ctx then (

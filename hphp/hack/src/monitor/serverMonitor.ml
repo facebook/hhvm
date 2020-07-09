@@ -279,7 +279,7 @@ struct
     in
     match cmd with
     | MonitorRpc.HANDOFF_TO_SERVER (tracker, handoff_options) ->
-      tracker.Connection_tracker.t_received_handoff <- Unix.gettimeofday ();
+      Connection_tracker.(track tracker Monitor_received_handoff);
       client_prehandoff
         ~tracker
         ~is_purgatory_client:false
@@ -300,7 +300,7 @@ struct
   and hand_off_client_connection ~tracker server_fd client_fd =
     let status = Libancillary.ancil_send_fd server_fd client_fd in
     if status = 0 then begin
-      tracker.Connection_tracker.t_sent_fd <- Unix.gettimeofday ();
+      Connection_tracker.(track tracker Monitor_sent_fd);
       msg_to_channel server_fd tracker;
       Sent_fds_collector.cleanup_fd client_fd
     end else begin
@@ -379,16 +379,16 @@ struct
         @@ List.find_exn server.out_fds ~f:(fun x ->
                String.equal (fst x) handoff_options.MonitorRpc.pipe_name)
       in
-      tracker.Connection_tracker.t_monitor_ready <- Unix.gettimeofday ();
+      let t_ready = Unix.gettimeofday () in
+      Connection_tracker.(track tracker Monitor_ready ~time:t_ready);
       (* TODO: Send this to client so it is visible. *)
       log
         "Got %s request for typechecker. Prior request %.1f seconds ago"
         ~tracker
         handoff_options.MonitorRpc.pipe_name
-        ( tracker.Connection_tracker.t_monitor_ready
-        -. !(server.last_request_handoff) );
+        (t_ready -. !(server.last_request_handoff));
       msg_to_channel client_fd (PH.Sentinel server.finale_file);
-      tracker.Connection_tracker.t_sent_ack_to_client <- Unix.gettimeofday ();
+      Connection_tracker.(track tracker Monitor_sent_ack_to_client);
       hand_off_client_connection_with_retries ~tracker server_fd 8 client_fd;
       log "handed off client fd to server" ~tracker;
       HackEventLogger.client_connection_sent ();

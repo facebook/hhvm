@@ -225,7 +225,7 @@ let handle_connection_try return client env f =
 
 let handle_connection_ genv env client =
   let tracker = ClientProvider.get_tracker client in
-  tracker.Connection_tracker.t_start_handle_connection <- Unix.gettimeofday ();
+  Connection_tracker.(track tracker Server_start_handle_connection);
   handle_connection_try (fun x -> ServerUtils.Done x) client env @@ fun () ->
   match ClientProvider.read_connection_type client with
   | ServerCommandTypes.Persistent ->
@@ -239,7 +239,7 @@ let handle_connection_ genv env client =
           shutdown_persistent_client old_client env
         | None -> env
       in
-      tracker.Connection_tracker.t_start_server_handle <- Unix.gettimeofday ();
+      Connection_tracker.(track tracker Server_start_handle);
       ClientProvider.send_response_to_client
         client
         ServerCommandTypes.Connected
@@ -668,7 +668,7 @@ let serve_one_iteration genv env client_provider =
         env
     | _ -> env
   in
-  let start_t = Unix.gettimeofday () in
+  let t_start_recheck = Unix.gettimeofday () in
   let stage =
     if env.init_env.needs_full_init then
       `Init
@@ -679,7 +679,7 @@ let serve_one_iteration genv env client_provider =
   (* We'll first do "recheck_loop" to handle all outstanding changes, so that *)
   (* after that we'll be able to give an up-to-date answer to the client. *)
   let env = recheck_loop genv env select_outcome in
-  let env = update_recheck_values env start_t recheck_id in
+  let env = update_recheck_values env t_start_recheck recheck_id in
   let t_done_recheck = Unix.gettimeofday () in
   (* if actual work was done, log whether anything got communicated to client *)
   let log_diagnostics =
@@ -735,14 +735,17 @@ let serve_one_iteration genv env client_provider =
           (* client here is the new client (not the existing persistent client) *)
           (* whose request we're going to handle.                               *)
           let tracker = ClientProvider.get_tracker client in
-          tracker.Connection_tracker.t_start_server <- start_t;
-          tracker.Connection_tracker.t_done_recheck <- t_done_recheck;
-          tracker.Connection_tracker.t_sent_diagnostics <- t_sent_diagnostics;
+          Connection_tracker.(
+            track tracker Server_start_recheck ~time:t_start_recheck);
+          Connection_tracker.(
+            track tracker Server_done_recheck ~time:t_done_recheck);
+          Connection_tracker.(
+            track tracker Server_sent_diagnostics ~time:t_sent_diagnostics);
           let env =
             handle_connection genv env client `Non_persistent
             |> main_loop_command_handler `Non_persistent client
           in
-          HackEventLogger.handled_connection start_t;
+          HackEventLogger.handled_connection t_start_recheck;
           env
         with e ->
           let stack = Utils.Callstack (Printexc.get_backtrace ()) in
@@ -770,13 +773,13 @@ let serve_one_iteration genv env client_provider =
       let client = Utils.unsafe_opt env.persistent_client in
       (* client here is the existing persistent client *)
       (* whose request we're going to handle.          *)
-      HackEventLogger.got_persistent_client_channels start_t;
+      HackEventLogger.got_persistent_client_channels t_start_recheck;
       try
         let env =
           handle_connection genv env client `Persistent
           |> main_loop_command_handler `Persistent client
         in
-        HackEventLogger.handled_persistent_connection start_t;
+        HackEventLogger.handled_persistent_connection t_start_recheck;
         env
       with e ->
         let stack = Utils.Callstack (Printexc.get_backtrace ()) in

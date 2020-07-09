@@ -53,11 +53,12 @@ let accept_client
     Marshal_tools.from_fd_with_preamble parent_in_fd
   in
   let t_got_tracker = Unix.gettimeofday () in
-  tracker.Connection_tracker.t_sleep_and_check <- t_sleep_and_check;
-  tracker.Connection_tracker.t_monitor_fd_ready <- t_monitor_fd_ready;
-  tracker.Connection_tracker.t_got_client_fd <- t_got_client_fd;
-  tracker.Connection_tracker.t_got_tracker <- t_got_tracker;
-  Hh_logger.log "[%s] received fd" (Connection_tracker.log_id tracker);
+  Connection_tracker.(
+    track tracker Server_sleep_and_check ~time:t_sleep_and_check);
+  Connection_tracker.(
+    track tracker Server_monitor_fd_ready ~time:t_monitor_fd_ready);
+  Connection_tracker.(track tracker Server_got_client_fd ~time:t_got_client_fd);
+  Connection_tracker.(track tracker Server_got_tracker ~time:t_got_tracker);
   Non_persistent_client
     {
       ic = Timeout.in_channel_of_descr socket;
@@ -184,9 +185,9 @@ let read_connection_type (client : client) : connection_type =
     begin
       try
         say_hello oc;
-        tracker.Connection_tracker.t_sent_hello <- Unix.gettimeofday ();
+        Connection_tracker.(track tracker Server_sent_hello);
         let connection_type : connection_type = read_connection_type ic in
-        tracker.Connection_tracker.t_got_connection_type <- Unix.gettimeofday ();
+        Connection_tracker.(track tracker Server_got_connection_type);
         connection_type
       with
       | Sys_error "Connection reset by peer"

@@ -6,81 +6,45 @@
  *
  *)
 
-type t = {
-  id: string;
-  (*
-  CLIENT SIDE
-  *)
-  mutable t_start_connect_to_monitor: float;
-      (** 1. The client starts its connection to the monitor *)
-  mutable t_opened_socket: float;
-      (** 2. The client has opened a socket to the monitor *)
-  mutable t_sent_version: float;
-      (** 3. The client has sent version to the monitor *)
-  mutable t_got_cstate: float;
-      (** 4. The client has received cstate back from the monitor *)
-  mutable t_ready_to_send_handoff: float;
-      (** 5. The client will now send the tracker to the monitor *)
-  mutable t_connected_to_monitor: float;
-      (** 6. The client received an ack from the monitor *)
-  mutable t_received_hello: float;
-      (** 7. The client received "hello" from the server *)
-  mutable t_sent_connection_type: float;
-      (** 8. The client has sent connection-type to server *)
-  mutable t_ready_to_send_cmd: float;
-      (** 9. On the client, someone invoked ClientConnect.rpc *)
-  mutable t_sent_cmd: float;
-      (** 10. client has sent the rpc command to server *)
-  mutable t_received_response: float;
-      (** 11. client has received rpc response from server *)
-  (*
-  MONITOR SIDE
-  *)
-  mutable t_received_handoff: float;
-      (** 1. The monitor received handoff from client *)
-  mutable t_monitor_ready: float;
-      (** 2. The monitor is now ready to do its work *)
-  mutable t_sent_ack_to_client: float;
-      (** 3. The monitor has sent an ack back to the client *)
-  mutable t_sent_fd: float;
-      (** 4. The monitor has sent fd to server. It will now send tracker. *)
-  (*
-  SERVER SIDE
-  *)
-  mutable t_sleep_and_check: float;
-      (** 1. The server starts a loop doing slices of major GC *)
-  mutable t_monitor_fd_ready: float;
-      (** 2. until it detects something on the monitor FD *)
-  mutable t_got_client_fd: float;
-      (** 3. It synchronously reads the client FD from the monitor *)
-  mutable t_got_tracker: float;
-      (** 4. and synchronouysly reads the tracker from the monitor *)
-  mutable t_start_server: float;
-      (** 5. This is where tracker has been read from monitor and server_one_iteration is ready *)
-  mutable t_done_recheck: float;
-      (** 6. It finishes 'recheck_loop' to process all outstanding changes *)
-  mutable t_sent_diagnostics: float;
-      (** 7. It sends any diagnostics needed to the persistent connection *)
-  mutable t_start_handle_connection: float;
-      (** 8. At this point it can turn its attention to the client *)
-  mutable t_sent_hello: float;
-      (** 9. It has sent a hello message to the client *)
-  mutable t_got_connection_type: float;
-      (** 10. It received the connection type from the client *)
-  mutable t_waiting_for_cmd: float;
-      (** 11. Now it's ready to receive the cmd from the client *)
-  mutable t_got_cmd: float;
-      (** 12. At this point it got the command from the client *)
-  mutable t_done_full_recheck: float;
-      (** 13. It does another recheck if needed *)
-  mutable t_start_server_handle: float;
-      (** 14. It has sent a ping. It is now proceeds to ServerRpc.handle *)
-  mutable t_end_server_handle: float;
-      (** 15. It has finished ServerRpc.handle *)
-  mutable t_end_server_handle2: float;
-      (** 16. and finished further minor processing. Now it will send the response to the client. *)
-}
+type t
+
+type key =
+  | Client_start_connect  (** Client starts connection to monitor *)
+  | Client_opened_socket  (** Has opened socket to monitor *)
+  | Client_sent_version  (** Has sent version to the monitor *)
+  | Client_got_cstate  (** Has received cstate from monitor *)
+  | Client_ready_to_send_handoff  (** Will now send the tracker to monitor *)
+  | Monitor_received_handoff  (** The monitor received handoff from client *)
+  | Monitor_ready  (** Monitor is now ready to do its work *)
+  | Monitor_sent_ack_to_client  (** Monitor has sent ack back to client *)
+  | Client_connected_to_monitor  (** Received ack from monitor *)
+  | Monitor_sent_fd  (** Has sent fd to server, will now send tracker *)
+  | Server_sleep_and_check  (** Server loops doing slices of major GC... *)
+  | Server_monitor_fd_ready  (** ...until it detects data on monitor's FD *)
+  | Server_got_client_fd  (** Synchronously reads the client FD from monitor *)
+  | Server_got_tracker  (** Synchronously reads tracker from monitor *)
+  | Server_start_recheck  (** serve_one_iteration is ready *)
+  | Server_done_recheck  (** Finished processing all outstanding changes 1st *)
+  | Server_sent_diagnostics  (** Sent diagnostics to persistent connection *)
+  | Server_start_handle_connection  (** Now turns its attention to the client *)
+  | Server_sent_hello  (** Has sent a hello message to the client *)
+  | Client_received_hello  (** Received "hello" from server *)
+  | Client_sent_connection_type  (** Sent connection_type to server *)
+  | Server_got_connection_type  (** Received connection_type from client *)
+  | Server_waiting_for_cmd  (** Ready to receive cmd from the client *)
+  | Client_ready_to_send_cmd  (** Someone invoked ClientConnect.rpc *)
+  | Client_sent_cmd  (** Client has sent the rpc command to server *)
+  | Server_got_cmd  (** Received cmd from the client *)
+  | Server_done_full_recheck  (** Does another recheck if needed *)
+  | Server_start_handle  (** Sent a ping; next up ServerRpc.handle *)
+  | Server_end_handle  (** Has finished ServerRpc.handle *)
+  | Server_end_handle2  (** A bit more work; next up respond to client *)
+  | Client_received_response  (** Received rpc response from server *)
 
 val create : unit -> t
 
 val log_id : t -> string
+
+val track : t -> ?time:float -> key -> unit
+
+val get_server_unblocked_time : t -> float

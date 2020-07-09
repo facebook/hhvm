@@ -30,8 +30,7 @@ let wait_on_server_restart ic =
     (* Server has exited and hung up on us *)
     ()
 
-let send_version ~tracker oc =
-  log "send version" ~tracker;
+let send_version oc =
   Marshal_tools.to_fd_with_preamble
     (Unix.descr_of_out_channel oc)
     Build_id.build_revision
@@ -44,7 +43,6 @@ let send_version ~tracker oc =
   ()
 
 let send_server_handoff_rpc ~tracker handoff_options oc =
-  log "send_server_handoff_rpc" ~tracker;
   Marshal_tools.to_fd_with_preamble
     (Unix.descr_of_out_channel oc)
     (MonitorRpc.HANDOFF_TO_SERVER (tracker, handoff_options))
@@ -70,9 +68,8 @@ let read_server_progress ~tracker ic : string * string option =
   log "read_server_progress" ~tracker;
   from_channel_without_buffering ic
 
-let establish_connection ~tracker ~timeout config =
+let establish_connection ~timeout config =
   let sock_name = Socket.get_path config.socket_file in
-  log "establish_connection %s" ~tracker sock_name;
   let sockaddr =
     if Sys.win32 then (
       let ic = In_channel.create ~binary:true sock_name in
@@ -93,11 +90,10 @@ let establish_connection ~tracker ~timeout config =
 
 let get_cstate ~tracker config (ic, oc) =
   try
-    send_version ~tracker oc;
-    tracker.Connection_tracker.t_sent_version <- Unix.gettimeofday ();
-    log "get cstate" ~tracker;
+    send_version oc;
+    Connection_tracker.(track tracker Client_sent_version);
     let cstate : connection_state = from_channel_without_buffering ic in
-    tracker.Connection_tracker.t_got_cstate <- Unix.gettimeofday ();
+    Connection_tracker.(track tracker Client_got_cstate);
     Ok (ic, oc, cstate)
   with e ->
     let e = Exception.wrap e in
@@ -146,7 +142,6 @@ let rec consume_prehandoff_messages
       ServerMonitorUtils.connection_error )
     result =
   let module PH = Prehandoff in
-  log "consume_prehandoff_messages" ~tracker;
   let m : PH.msg = from_channel_without_buffering ~timeout ic in
   match m with
   | PH.Sentinel finale_file -> Ok (ic, oc, finale_file)
@@ -244,8 +239,8 @@ let connect_to_monitor ~tracker ~timeout config =
     ~do_:
       begin
         fun timeout ->
-        establish_connection ~tracker ~timeout config >>= fun (ic, oc) ->
-        tracker.Connection_tracker.t_opened_socket <- Unix.gettimeofday ();
+        establish_connection ~timeout config >>= fun (ic, oc) ->
+        Connection_tracker.(track tracker Client_opened_socket);
         get_cstate ~tracker config (ic, oc)
       end
 
@@ -366,16 +361,13 @@ connection type indicates Persistent vs Non-persistent.
 *)
 let connect_once ~tracker ~timeout config handoff_options =
   let open Result.Monad_infix in
-  tracker.Connection_tracker.t_start_connect_to_monitor <- Unix.gettimeofday ();
+  let t_start = Unix.gettimeofday () in
+  Connection_tracker.(track tracker Client_start_connect ~time:t_start);
   connect_to_monitor ~tracker ~timeout config >>= fun (ic, oc, cstate) ->
   verify_cstate ~tracker ic cstate >>= fun () ->
-  tracker.Connection_tracker.t_ready_to_send_handoff <- Unix.gettimeofday ();
+  Connection_tracker.(track tracker Client_ready_to_send_handoff);
   send_server_handoff_rpc ~tracker handoff_options oc;
-  let elapsed_t =
-    int_of_float
-      ( Unix.gettimeofday ()
-      -. tracker.Connection_tracker.t_start_connect_to_monitor )
-  in
+  let elapsed_t = int_of_float (Unix.gettimeofday () -. t_start) in
   let timeout = max (timeout - elapsed_t) 1 in
   consume_prehandoff_messages ~tracker ~timeout ic oc
 

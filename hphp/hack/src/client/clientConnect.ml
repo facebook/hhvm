@@ -10,7 +10,15 @@
 open Hh_prelude
 module SMUtils = ServerMonitorUtils
 
-let log s = Hh_logger.log ("[client-connect] " ^^ s)
+let log ?tracker ?connection_log_id s =
+  let id =
+    match tracker with
+    | Some tracker -> Some (Connection_tracker.log_id tracker)
+    | None -> connection_log_id
+  in
+  match id with
+  | Some id -> Hh_logger.log ("[%s] [client-connect] " ^^ s) id
+  | None -> Hh_logger.log ("[client-connect] " ^^ s)
 
 exception Server_hung_up of ServerCommandTypes.finale_data option
 
@@ -82,20 +90,20 @@ let progress_warning : string option ref = ref None
 
 let check_progress (root : Path.t) : unit =
   let tracker = Connection_tracker.create () in
-  log "[%s] ClientConnect.check_progress..." (Connection_tracker.log_id tracker);
+  log ~tracker "ClientConnect.check_progress...";
   match ServerUtils.server_progress ~tracker ~timeout:3 root with
   | Ok (msg, warning) ->
     log
-      "[%s] check_progress: %s / %s"
-      (Connection_tracker.log_id tracker)
+      ~tracker
+      "check_progress: %s / %s"
       msg
       (Option.value warning ~default:"[none]");
     progress := msg;
     progress_warning := warning
   | Error e ->
     log
-      "[%s] check_progress: %s"
-      (Connection_tracker.log_id tracker)
+      ~tracker
+      "check_progress: %s"
       (ServerMonitorUtils.show_connection_error e)
 
 let delta_t : float = 3.0
@@ -171,15 +179,15 @@ let rec wait_for_server_message
       in
       if matches_expected && not is_ping then (
         log
-          "[%s] wait_for_server_message: got expected %s"
-          connection_log_id
+          ~connection_log_id
+          "wait_for_server_message: got expected %s"
           (ServerCommandTypesUtils.debug_describe_message_type msg);
         progress_callback None;
         Lwt.return msg
       ) else (
         log
-          "[%s] wait_for_server_message: didn't want %s"
-          connection_log_id
+          ~connection_log_id
+          "wait_for_server_message: didn't want %s"
           (ServerCommandTypesUtils.debug_describe_message_type msg);
         if not is_ping then print_wait_msg progress_callback root;
         wait_for_server_message
@@ -196,8 +204,8 @@ let rec wait_for_server_message
       let e = Exception.wrap e in
       let finale_data = get_finale_data server_finale_file in
       log
-        "[%s] wait_for_server_message: %s\nfinale_data: %s"
-        connection_log_id
+        ~connection_log_id
+        "wait_for_server_message: %s\nfinale_data: %s"
         (e |> Exception.to_string |> Exception.clean_stack)
         (Option.value_map
            finale_data
@@ -266,9 +274,7 @@ let rec connect
   in
   let tracker = Connection_tracker.create () in
   let connection_log_id = Connection_tracker.log_id tracker in
-  log
-    "[%s] ClientConnect.connect: attempting connect_to_monitor"
-    connection_log_id;
+  log ~connection_log_id "ClientConnect.connect: attempting connect_to_monitor";
   let conn =
     ServerUtils.connect_to_monitor ~tracker ~timeout:1 env.root handoff_options
   in
@@ -277,8 +283,8 @@ let rec connect
   match conn with
   | Ok (ic, oc, server_finale_file) ->
     log
-      "[%s] ClientConnect.connect: successfully connected to monitor."
-      connection_log_id;
+      ~connection_log_id
+      "ClientConnect.connect: successfully connected to monitor.";
     let%lwt () =
       if env.do_post_handoff_handshake then
         with_server_hung_up @@ fun () ->
@@ -343,8 +349,8 @@ let rec connect
         }
   | Error e ->
     log
-      "[%s] connect: error %s"
-      (Connection_tracker.log_id tracker)
+      ~tracker
+      "connect: error %s"
       (ServerMonitorUtils.show_connection_error e);
     if first_attempt then
       Printf.eprintf
@@ -356,10 +362,7 @@ let rec connect
       connect env start_time
     | SMUtils.Server_missing_exn _
     | SMUtils.Server_missing_timeout _ ->
-      log
-        "[%s] connect: autostart=%b"
-        (Connection_tracker.log_id tracker)
-        env.autostart;
+      log ~tracker "connect: autostart=%b" env.autostart;
       if env.autostart then (
         ClientStart.start_server
           {
@@ -501,14 +504,15 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t =
   in
   match res with
   | ServerCommandTypes.Response (response, tracker) ->
-    tracker.Connection_tracker.t_ready_to_send_cmd <- t_ready_to_send_cmd;
-    tracker.Connection_tracker.t_sent_cmd <- t_sent_cmd;
-    tracker.Connection_tracker.t_received_response <- Unix.gettimeofday ();
+    let open Connection_tracker in
+    track tracker Client_ready_to_send_cmd ~time:t_ready_to_send_cmd;
+    track tracker Client_sent_cmd ~time:t_sent_cmd;
+    track tracker Client_received_response;
     (* now we can fill in missing information in tracker, which we couldn't fill in earlier
     because we'd already transferred ownership of the tracker to the monitor... *)
-    tracker.Connection_tracker.t_connected_to_monitor <- t_connected_to_monitor;
-    tracker.Connection_tracker.t_received_hello <- t_received_hello;
-    tracker.Connection_tracker.t_sent_connection_type <- t_sent_connection_type;
+    track tracker Client_connected_to_monitor ~time:t_connected_to_monitor;
+    track tracker Client_received_hello ~time:t_received_hello;
+    track tracker Client_sent_connection_type ~time:t_sent_connection_type;
     Lwt.return response
   | ServerCommandTypes.Push _ -> failwith "unexpected 'push' RPC response"
   | ServerCommandTypes.Hello -> failwith "unexpected 'hello' RPC response"

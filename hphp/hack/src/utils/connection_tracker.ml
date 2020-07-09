@@ -6,81 +6,73 @@
  *
  *)
 
+open Hh_prelude
+
 type t = {
   id: string;
-  (* client *)
-  mutable t_start_connect_to_monitor: float;
-  mutable t_opened_socket: float;
-  mutable t_sent_version: float;
-  mutable t_got_cstate: float;
-  mutable t_ready_to_send_handoff: float;
-  mutable t_connected_to_monitor: float;
-  mutable t_received_hello: float;
-  mutable t_sent_connection_type: float;
-  mutable t_ready_to_send_cmd: float;
-  mutable t_sent_cmd: float;
-  mutable t_received_response: float;
-  (* monitor *)
-  mutable t_received_handoff: float;
-  mutable t_monitor_ready: float;
-  mutable t_sent_ack_to_client: float;
-  mutable t_sent_fd: float;
-  (* server *)
-  mutable t_sleep_and_check: float;
-  mutable t_monitor_fd_ready: float;
-  mutable t_got_client_fd: float;
-  mutable t_got_tracker: float;
-  mutable t_start_server: float;
-  mutable t_done_recheck: float;
-  mutable t_sent_diagnostics: float;
-  mutable t_start_handle_connection: float;
-  mutable t_sent_hello: float;
-  mutable t_got_connection_type: float;
-  mutable t_waiting_for_cmd: float;
-  mutable t_got_cmd: float;
-  mutable t_done_full_recheck: float;
-  mutable t_start_server_handle: float;
-  mutable t_end_server_handle: float;
-  mutable t_end_server_handle2: float;
+  mutable telemetry: Telemetry.t;
+  mutable server_unblocked_time: float;
+      (** this field is read by clientLsp,
+      so we store it explicitly here as well as inside telemetry *)
 }
+
+type key =
+  | Client_start_connect
+  | Client_opened_socket
+  | Client_sent_version
+  | Client_got_cstate
+  | Client_ready_to_send_handoff
+  | Monitor_received_handoff
+  | Monitor_ready
+  | Monitor_sent_ack_to_client
+  | Client_connected_to_monitor
+  | Monitor_sent_fd
+  | Server_sleep_and_check
+  | Server_monitor_fd_ready
+  | Server_got_client_fd
+  | Server_got_tracker
+  | Server_start_recheck
+  | Server_done_recheck
+  | Server_sent_diagnostics
+  | Server_start_handle_connection
+  | Server_sent_hello
+  | Client_received_hello
+  | Client_sent_connection_type
+  | Server_got_connection_type
+  | Server_waiting_for_cmd
+  | Client_ready_to_send_cmd
+  | Client_sent_cmd
+  | Server_got_cmd
+  | Server_done_full_recheck
+  | Server_start_handle
+  | Server_end_handle
+  | Server_end_handle2
+  | Client_received_response
+[@@deriving eq, show]
 
 let create () : t =
   {
     id = Random_id.short_string ();
-    (* client *)
-    t_start_connect_to_monitor = 0.;
-    t_opened_socket = 0.;
-    t_sent_version = 0.;
-    t_got_cstate = 0.;
-    t_ready_to_send_handoff = 0.;
-    t_connected_to_monitor = 0.;
-    t_received_hello = 0.;
-    t_sent_connection_type = 0.;
-    t_ready_to_send_cmd = 0.;
-    t_sent_cmd = 0.;
-    t_received_response = 0.;
-    (* monitor *)
-    t_received_handoff = 0.;
-    t_monitor_ready = 0.;
-    t_sent_ack_to_client = 0.;
-    t_sent_fd = 0.;
-    (* server *)
-    t_sleep_and_check = 0.;
-    t_monitor_fd_ready = 0.;
-    t_got_client_fd = 0.;
-    t_got_tracker = 0.;
-    t_start_server = 0.;
-    t_done_recheck = 0.;
-    t_sent_diagnostics = 0.;
-    t_start_handle_connection = 0.;
-    t_sent_hello = 0.;
-    t_got_connection_type = 0.;
-    t_waiting_for_cmd = 0.;
-    t_got_cmd = 0.;
-    t_done_full_recheck = 0.;
-    t_start_server_handle = 0.;
-    t_end_server_handle = 0.;
-    t_end_server_handle2 = 0.;
+    server_unblocked_time = 0.;
+    telemetry = Telemetry.create ();
   }
 
-let log_id (t : t) : string = "mc#" ^ t.id
+let log_id (t : t) : string = "t#" ^ t.id
+
+let get_server_unblocked_time (t : t) : float = t.server_unblocked_time
+
+let track (t : t) ?(time : float option) (key : key) : unit =
+  let tnow = Unix.gettimeofday () in
+  let time = Option.value time ~default:tnow in
+  if equal_key key Server_start_handle then t.server_unblocked_time <- time;
+  let key = String_utils.lstrip (show_key key) "Connection_tracker." in
+  Hh_logger.log
+    "[%s] Connection_tracker.%s%s"
+    (log_id t)
+    key
+    ( if String.equal (Utils.timestring tnow) (Utils.timestring time) then
+      ""
+    else
+      ", was at " ^ Utils.timestring time );
+  t.telemetry <- Telemetry.float_ t.telemetry ~key ~value:time;
+  ()

@@ -47,7 +47,7 @@ function inout_args<reify Tarr, reify Tvar, reify Ttrav, reify Tcont>(
 }
 
 function test_static() {
-  args<array, varray, Traversable, Container>(
+  args<arraylike, varray, Traversable, Container>(
     class_meth(Foo::class, 'bar'),
     class_meth(Foo::class, 'bar'),
     class_meth(Foo::class, 'bar'),
@@ -55,14 +55,14 @@ function test_static() {
   );
 
   var_dump(ret_varr<varray>());
-  var_dump(ret_arr<array>());
+  var_dump(ret_arr<arraylike>());
 
   $io1 = class_meth(Foo::class, 'bar');
   $io2 = class_meth(Foo::class, 'bar');
   $io3 = class_meth(Foo::class, 'bar');
   $io4 = class_meth(Foo::class, 'bar');
 
-  inout_args<array, varray, Traversable, Container>(
+  inout_args<arraylike, varray, Traversable, Container>(
     inout $io1,
     inout $io2,
     inout $io3,
@@ -77,7 +77,7 @@ function test_static() {
 }
 
 function test_dynamic() {
-  args<array, varray, Traversable, Container>(
+  args<arraylike, varray, Traversable, Container>(
     LV(class_meth(Foo::class, 'bar')),
     LV(class_meth(Foo::class, 'bar')),
     LV(class_meth(Foo::class, 'bar')),
@@ -85,14 +85,14 @@ function test_dynamic() {
   );
 
   var_dump(ret_varr_dyn<varray>());
-  var_dump(ret_arr_dyn<array>());
+  var_dump(ret_arr_dyn<arraylike>());
 
   $io1 = LV(class_meth(Foo::class, 'bar'));
   $io2 = LV(class_meth(Foo::class, 'bar'));
   $io3 = LV(class_meth(Foo::class, 'bar'));
   $io4 = LV(class_meth(Foo::class, 'bar'));
 
-  inout_args<array, varray, Traversable, Container>(
+  inout_args<arraylike, varray, Traversable, Container>(
     inout $io1,
     inout $io2,
     inout $io3,

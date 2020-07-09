@@ -3,7 +3,7 @@
 class X {
   private $a;
   private int $b;
-  private array $c;
+  private arraylike $c;
   private stdclass $d;
 }
 

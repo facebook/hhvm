@@ -15,7 +15,7 @@ function http_server_skipif($socket_string) {
  * $files is an array of files containing N responses for N expected requests. Server dies after N requests.
  * $output is a stream on which everything sent by clients is written to
  */
-function http_server($socket_string, array $files, inout $output)
+function http_server($socket_string, arraylike $files, inout $output)
 {
 	ini_set('default_socket_timeout', 5);
 	pcntl_alarm(10);

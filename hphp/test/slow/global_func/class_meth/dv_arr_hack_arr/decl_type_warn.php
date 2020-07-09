@@ -19,7 +19,7 @@ function test_vec_as_param(vec $x) { var_dump($x); }
 function test_vec_dict_as_param(vec_or_dict $x) { var_dump($x); }
 function test_container_as_param(HH\Container $x) { var_dump($x); }
 
-function test_soft_type_array_as_param(<<__Soft>> array $x) { var_dump($x); }
+
 function test_soft_type_varray_as_param(<<__Soft>> varray $x) { var_dump($x); }
 
 function test_param_type_cast($c, $f) {
@@ -29,18 +29,18 @@ function test_param_type_cast($c, $f) {
   test_vec_as_param(CM($c, $f));
   test_vec_dict_as_param(CM($c, $f));
   test_container_as_param(CM($c, $f));
-  test_soft_type_array_as_param(CM($c, $f));
   test_soft_type_varray_as_param(CM($c, $f));
 }
 
 function test_clsmeth_as_io_param(inout $x) { var_dump($x); }
+
 function test_varry_as_io_param(inout varray $x) { var_dump($x); }
 function test_vdarray_as_io_param(inout varray_or_darray $x) { var_dump($x); }
 function test_vec_as_io_param(inout vec $x) { var_dump($x); }
 function test_vec_dict_as_io_param(inout vec_or_dict $x) { var_dump($x); }
 function test_container_as_io_param(inout HH\Container $x) { var_dump($x); }
 
-function test_soft_type_array_as_io_param(<<__Soft>> inout array $x) { var_dump($x); }
+
 function test_soft_type_varry_as_io_param(<<__Soft>> inout varray $x) { var_dump($x); }
 
 function test_inout_param_type_cast($c, $f) {
@@ -50,16 +50,16 @@ function test_inout_param_type_cast($c, $f) {
   $x = CM($c, $f); test_vec_as_io_param(inout $x);
   $x = CM($c, $f); test_vec_dict_as_io_param(inout $x);
   $x = CM($c, $f); test_container_as_io_param(inout $x);
-  $x = CM($c, $f); test_soft_type_array_as_io_param(inout $x);
   $x = CM($c, $f); test_soft_type_varry_as_io_param(inout $x);
 }
 
 function test_return_as_clsmeth() {
   return CM(A::class, 'func1');
 }
-function test_return_as_array() : array {
-  return CM(A::class, 'func1');
-}
+
+
+
+
 function test_return_as_varray() : varray {
   return CM(A::class, 'func1');
 }
@@ -78,7 +78,6 @@ function test_return_as_container() : HH\Container {
 
 function test_return_type_cast() {
   var_dump(test_return_as_clsmeth());
-  var_dump(test_return_as_array());
   var_dump(test_return_as_varray());
   var_dump(test_return_as_vdarray());
   var_dump(test_return_as_vec());
@@ -87,14 +86,12 @@ function test_return_type_cast() {
 }
 
 class B {
-  public array $a;
   public varray $v_a;
   public varray_or_darray $v_d_a;
   public vec $vec_a;
   public vec_or_dict $vec_dict_a;
   public HH\Container $container_a;
 
-  public static array $s_a;
   public static varray $s_v_a;
   public static varray_or_darray $s_v_d_a;
   public static vec $s_vec_a;
@@ -102,18 +99,21 @@ class B {
   public static HH\Container $s_container_a;
 }
 
+
+
+
+
 function test_class_prop_type_check($c, $f) {
-  B::$s_a = CM($c, $f);
   B::$s_v_a = CM($c, $f);
   B::$s_v_d_a = CM($c, $f);
   B::$s_vec_a = CM($c, $f);
   B::$s_vec_dict_a = CM($c, $f);
   B::$s_container_a = CM($c, $f);
-  var_dump(B::$s_a, B::$s_v_a, B::$s_v_d_a, B::$s_vec_a, B::$s_vec_dict_a,
+  var_dump(B::$s_v_a, B::$s_v_d_a, B::$s_vec_a, B::$s_vec_dict_a,
            B::$s_container_a);
 
+
   $v = new B();
-  $v->a = CM($c, $f);
   $v->v_a = CM($c, $f);
   $v->v_d_a = CM($c, $f);
   $v->vec_a = CM($c, $f);

@@ -3,11 +3,11 @@
 // If anything breaks, it's should be easier to debug by running shell:
 // #export TRACE=objprof:3
 
-function get_instances(string $cls, ?array $objs) {
+function get_instances(string $cls, ?arraylike $objs) {
   if (!$objs) return 0;
   return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "instances", 0);
 }
-function get_bytes_eq(string $cls, ?array $objs) {
+function get_bytes_eq(string $cls, ?arraylike $objs) {
   if (!$objs) return 0;
   $bytes = get_bytes($cls, $objs);
   $bytesd = get_bytesd($cls, $objs);
@@ -16,11 +16,11 @@ function get_bytes_eq(string $cls, ?array $objs) {
   }
   return $bytes;
 }
-function get_bytes(string $cls, ?array $objs) {
+function get_bytes(string $cls, ?arraylike $objs) {
   if (!$objs) return 0;
   return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "bytes", 0);
 }
-function get_bytesd(string $cls, ?array $objs) {
+function get_bytesd(string $cls, ?arraylike $objs) {
   if (!$objs) return 0;
   return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]),
     "bytes_normalized", 0);
@@ -59,8 +59,8 @@ class ParentClass {
 class ChildClass extends ParentClass{
   public string $childString = "abcdef";
   public NestedClass $childNested;
-  public array $mixedArr = varray[];
-  public array $packedArr = varray[];
+  public arraylike $mixedArr = varray[];
+  public arraylike $packedArr = varray[];
 }
 
 

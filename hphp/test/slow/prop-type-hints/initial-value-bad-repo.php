@@ -43,7 +43,7 @@ class A {
   public string $p2 = 123;
   public bool $p3 = 123;
   public float $p4 = false;
-  public array $p5 = vec[1, 2, 3];
+  public arraylike $p5 = vec[1, 2, 3];
   public resource $p6 = null;
   public nonnull $p7 = null;
   public num $p8 = true;
@@ -87,7 +87,7 @@ class A {
   public arraykey $p45 = BOOLCONST;
   public vec $p46 = keyset[INTCONST, STRCONST, INTCONST];
   public dict $p47 = darray[STRCONST => INTCONST, INTCONST => STRCONST];
-  public array $p48 = vec[INTCONST, STRCONST, INTCONST];
+  public arraylike $p48 = vec[INTCONST, STRCONST, INTCONST];
   public Enum1 $p49 = INTCONST;
   public Enum2 $p50 = STRCONST;
   public Enum3 $p51 = vec[INTCONST];
@@ -112,7 +112,7 @@ class A {
   public arraykey $p69 = CONDCONST3;
   public vec $p70 = keyset[CONDCONST1, CONDCONST2, CONDCONST1];
   public dict $p71 = vec[CONDCONST2, CONDCONST1];
-  public array $p72 = vec[CONDCONST1, CONDCONST2, CONDCONST1];
+  public arraylike $p72 = vec[CONDCONST1, CONDCONST2, CONDCONST1];
   public Enum1 $p73 = CONDCONST1;
   public Enum2 $p74 = CONDCONST2;
   public Enum3 $p75 = CONDCONST3;
@@ -133,7 +133,7 @@ class A {
   public static string $s2 = 123;
   public static bool $s3 = 123;
   public static float $s4 = false;
-  public static array $s5 = vec[1, 2, 3];
+  public static arraylike $s5 = vec[1, 2, 3];
   public static resource $s6 = null;
   public static nonnull $s7 = null;
   public static num $s8 = true;
@@ -177,7 +177,7 @@ class A {
   public static arraykey $s45 = STRCONST;
   public static vec $s46 = keyset[INTCONST, STRCONST, INTCONST];
   public static dict $s47 = darray[STRCONST => INTCONST, INTCONST => STRCONST];
-  public static array $s48 = vec[INTCONST, STRCONST, INTCONST];
+  public static arraylike $s48 = vec[INTCONST, STRCONST, INTCONST];
   public static Enum1 $s49 = INTCONST;
   public static Enum2 $s50 = STRCONST;
   public static Enum3 $s51 = vec[INTCONST];
@@ -202,7 +202,7 @@ class A {
   public static arraykey $s69 = CONDCONST3;
   public static vec $s70 = keyset[CONDCONST1, CONDCONST2, CONDCONST1];
   public static dict $s71 = vec[CONDCONST2, CONDCONST1];
-  public static array $s72 = vec[CONDCONST1, CONDCONST2, CONDCONST1];
+  public static arraylike $s72 = vec[CONDCONST1, CONDCONST2, CONDCONST1];
   public static Enum1 $s73 = CONDCONST1;
   public static Enum2 $s74 = CONDCONST2;
   public static Enum3 $s75 = CONDCONST3;

@@ -5,8 +5,8 @@ namespace HTML
 	interface Helper
 	{
 		function text($text);
-		function attributes(array $attributes = null);
-		function textArea(array $attributes = null, $value);
+		function attributes(arraylike $attributes = null);
+		function textArea(arraylike $attributes = null, $value);
 	}
 
 	trait TextUTF8
@@ -16,14 +16,14 @@ namespace HTML
 
 	trait TextArea
 	{
-		function textArea(array $attributes = null, $value) {}
-		abstract function attributes(array $attributes = null);
+		function textArea(arraylike $attributes = null, $value) {}
+		abstract function attributes(arraylike $attributes = null);
 		abstract function text($text);
 	}
 
 	trait HTMLAttributes
 	{
-		function attributes(array $attributes = null) {	}
+		function attributes(arraylike $attributes = null) {	}
 		abstract function text($text);
 	}
 

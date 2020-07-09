@@ -2,7 +2,7 @@ int(0)
 string(0) ""
 bool(false)
 float(0)
-array(0) {
+vec(0) {
 }
 NULL
 int(0)
@@ -80,7 +80,7 @@ int(0)
 string(0) ""
 bool(false)
 float(0)
-array(0) {
+vec(0) {
 }
 NULL
 int(0)

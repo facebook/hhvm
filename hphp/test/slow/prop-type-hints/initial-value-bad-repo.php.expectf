@@ -6,8 +6,6 @@ Warning: Property 'A::p3' declared as type bool, int assigned in %s/initial-valu
 
 Warning: Property 'A::p4' declared as type float, bool assigned in %s/initial-value-bad-repo.php on line 223
 
-Warning: Property 'A::p5' declared as type array, HH\vec assigned in %s/initial-value-bad-repo.php on line 223
-
 Warning: Property 'A::p6' declared as type resource, null assigned in %s/initial-value-bad-repo.php on line 223
 
 Warning: Property 'A::p7' declared as type nonnull, null assigned in %s/initial-value-bad-repo.php on line 223
@@ -80,8 +78,6 @@ Warning: Property 'A::p46' declared as type HH\vec, HH\keyset assigned in %s/ini
 
 Warning: Property 'A::p47' declared as type HH\dict, %r[dv]?%rarray assigned in %s/initial-value-bad-repo.php on line 223
 
-Warning: Property 'A::p48' declared as type array, HH\vec assigned in %s/initial-value-bad-repo.php on line 223
-
 Warning: Property 'A::p49' declared as type Enum1, int assigned in %s/initial-value-bad-repo.php on line 223
 
 Warning: Property 'A::p50' declared as type Enum2, string assigned in %s/initial-value-bad-repo.php on line 223
@@ -119,8 +115,6 @@ Warning: Property 'A::p69' declared as type arraykey, HH\vec assigned in %s/init
 Warning: Property 'A::p70' declared as type HH\vec, HH\keyset assigned in %s/initial-value-bad-repo.php on line 223
 
 Warning: Property 'A::p71' declared as type HH\dict, HH\vec assigned in %s/initial-value-bad-repo.php on line 223
-
-Warning: Property 'A::p72' declared as type array, HH\vec assigned in %s/initial-value-bad-repo.php on line 223
 
 Warning: Property 'A::p73' declared as type Enum1, int assigned in %s/initial-value-bad-repo.php on line 223
 
@@ -179,8 +173,6 @@ Warning: Static property 'A::s2' declared as type string, int assigned in %s/ini
 Warning: Static property 'A::s3' declared as type bool, int assigned in %s/initial-value-bad-repo.php on line 223
 
 Warning: Static property 'A::s4' declared as type float, bool assigned in %s/initial-value-bad-repo.php on line 223
-
-Warning: Static property 'A::s5' declared as type array, HH\vec assigned in %s/initial-value-bad-repo.php on line 223
 
 Warning: Static property 'A::s6' declared as type resource, null assigned in %s/initial-value-bad-repo.php on line 223
 
@@ -252,8 +244,6 @@ Warning: Static property 'A::s46' declared as type HH\vec, HH\keyset assigned in
 
 Warning: Static property 'A::s47' declared as type HH\dict, %r[dv]?%rarray assigned in %s/initial-value-bad-repo.php on line 223
 
-Warning: Static property 'A::s48' declared as type array, HH\vec assigned in %s/initial-value-bad-repo.php on line 223
-
 Warning: Static property 'A::s49' declared as type Enum1, int assigned in %s/initial-value-bad-repo.php on line 223
 
 Warning: Static property 'A::s50' declared as type Enum2, string assigned in %s/initial-value-bad-repo.php on line 223
@@ -291,8 +281,6 @@ Warning: Static property 'A::s69' declared as type arraykey, HH\vec assigned in 
 Warning: Static property 'A::s70' declared as type HH\vec, HH\keyset assigned in %s/initial-value-bad-repo.php on line 223
 
 Warning: Static property 'A::s71' declared as type HH\dict, HH\vec assigned in %s/initial-value-bad-repo.php on line 223
-
-Warning: Static property 'A::s72' declared as type array, HH\vec assigned in %s/initial-value-bad-repo.php on line 223
 
 Warning: Static property 'A::s73' declared as type Enum1, int assigned in %s/initial-value-bad-repo.php on line 223
 

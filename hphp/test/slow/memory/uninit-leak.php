@@ -6,7 +6,7 @@ class Obj {
 }
 
 class X {
-  public array $arr;
+  public arraylike $arr;
   public int $id;
 
   public function f() {

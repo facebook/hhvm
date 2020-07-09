@@ -42,7 +42,7 @@ function takes_string(<<__Soft>> string $s): string {
 function takes_array1(<<__Soft>> varray $a): varray {
   return $a;
 }
-function takes_array2(<<__Soft>> ?varray $a): ?array {
+function takes_array2(<<__Soft>> ?varray $a): ?varray {
   return $a;
 }
 function takes_xhp_child(<<__Soft>> XHPChild $x): XHPChild {

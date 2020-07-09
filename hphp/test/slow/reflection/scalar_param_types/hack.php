@@ -1,6 +1,6 @@
 <?hh
 
-function foo(int $bar, array $baz) {
+function foo(int $bar, arraylike $baz) {
 }
 function herp(\hh\int $derp) {
 }

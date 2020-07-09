@@ -48,7 +48,7 @@ class A {
   public string $p2;
   public bool $p3;
   public float $p4;
-  public array $p5;
+  public arraylike $p5;
   public resource $p6;
   public nonnull $p7;
   public num $p8;
@@ -82,8 +82,8 @@ class A {
   public Alias9 $p36;
   public Enum4 $p37;
   public varray_or_darray $p38;
-  public array $p39;
-  public array $p40;
+  public arraylike $p39;
+  public arraylike $p40;
   public mixed $p41;
   public ?mixed $p42;
   public Alias10 $p43;
@@ -134,7 +134,7 @@ class A {
   private string $pp2;
   private bool $pp3;
   private float $pp4;
-  private array $pp5;
+  private arraylike $pp5;
   private resource $pp6;
   private nonnull $pp7;
   private num $pp8;
@@ -168,8 +168,8 @@ class A {
   private Alias9 $pp36;
   private Enum4 $pp37;
   private varray_or_darray $pp38;
-  private array $pp39;
-  private array $pp40;
+  private arraylike $pp39;
+  private arraylike $pp40;
   private mixed $pp41;
   private ?mixed $pp42;
   private Alias10 $pp43;
@@ -220,7 +220,7 @@ class A {
   public static string $s2;
   public static bool $s3;
   public static float $s4;
-  public static array $s5;
+  public static arraylike $s5;
   public static resource $s6;
   public static nonnull $s7;
   public static num $s8;
@@ -254,8 +254,8 @@ class A {
   public static Alias9 $s36;
   public static Enum4 $s37;
   public static varray_or_darray $s38;
-  public static array $s39;
-  public static array $s40;
+  public static arraylike $s39;
+  public static arraylike $s40;
   public static mixed $s41;
   public static ?mixed $s42;
   public static Alias10 $s43;

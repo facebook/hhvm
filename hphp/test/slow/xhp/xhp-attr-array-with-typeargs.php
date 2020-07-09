@@ -8,8 +8,8 @@ abstract class :base {
   }
 }
 class :node1 extends :base {
-  attribute array<float> foo;
-  attribute array<int, string> bar;
+  attribute varray<float> foo;
+  attribute darray<int, string> bar;
 }
 function main() {
   var_dump(:node1::xhpAttributeDeclaration()['foo'][0]);

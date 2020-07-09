@@ -16,7 +16,7 @@ interface M {
   function foo($x, $y=0, varray $z=varray[]);
 }
 class C implements I, J, K, L, M {
-  public function foo($x, $y=0, varray $z=null, array $a=null) {
+  public function foo($x, $y=0, varray $z=null, arraylike $a=null) {
     echo "$x $y $z\n";
   }
 }

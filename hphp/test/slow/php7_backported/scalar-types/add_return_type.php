@@ -10,7 +10,7 @@ interface One {
 interface Two extends One {
     public function a() : stdClass;
     public function c() : callable;
-    public function b() : array;
+    public function b() : arraylike;
     public function d() : int;
 }
 <<__EntryPoint>> function main(): void {

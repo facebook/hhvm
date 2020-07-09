@@ -1,6 +1,6 @@
 <?hh
 
-function foo(int $bar, array $baz) {
+function foo(int $bar, arraylike $baz) {
 }
 <<__EntryPoint>>
 function main_php_forcehh() {

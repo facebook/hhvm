@@ -33,12 +33,6 @@ vec(2) {
   string(5) "func1"
 }
 
-Warning: Argument 1 to test_soft_type_array_as_param() must be of type @array, clsmeth given in %s/decl_type_warn.php on line 22
-classMeth{
-    class(A)
-    function(func1)
-}
-
 Notice: class_meth Compat: Argument 1 passed to test_soft_type_varray_as_param() must be of type @HH\varray, clsmeth given in %s/decl_type_warn.php on line 23
 vec(2) {
   string(1) "A"
@@ -79,24 +73,11 @@ vec(2) {
   string(5) "func1"
 }
 
-Warning: Argument 1 to test_soft_type_array_as_io_param() must be of type @array, clsmeth given in %s/decl_type_warn.php on line 43
-classMeth{
-    class(A)
-    function(func1)
-}
-
-Warning: Argument 1 returned from test_soft_type_array_as_io_param() as an inout parameter must be of type @array, clsmeth given in %s/decl_type_warn.php on line 43
-
 Notice: class_meth Compat: Argument 1 passed to test_soft_type_varry_as_io_param() must be of type @HH\varray, clsmeth given in %s/decl_type_warn.php on line 44
 vec(2) {
   string(1) "A"
   string(5) "func1"
 }
-classMeth{
-    class(A)
-    function(func1)
-}
-Caught: Value returned from function test_return_as_array() must be of type array, clsmeth given
 classMeth{
     class(A)
     function(func1)
@@ -131,7 +112,6 @@ vec(2) {
   string(1) "A"
   string(5) "func1"
 }
-Caught: Static property 'B::s_a' declared as type array, clsmeth assigned
 
 Notice: class_meth Compat: Static property 'B::s_v_a' declared as type HH\varray, clsmeth assigned in %s/decl_type_warn.php on line 107
 
@@ -162,11 +142,6 @@ classMeth{
     class(A)
     function(func1)
 }
-classMeth{
-    class(A)
-    function(func1)
-}
-Caught: Property 'B::a' declared as type array, clsmeth assigned
 
 Notice: class_meth Compat: Property 'B::v_a' declared as type HH\varray, clsmeth assigned in %s/decl_type_warn.php on line 117
 
@@ -177,12 +152,7 @@ Notice: class_meth Compat: Property 'B::vec_a' declared as type HH\vec, clsmeth 
 Notice: class_meth Compat: Property 'B::vec_dict_a' declared as type HH\vec_or_dict, clsmeth assigned in %s/decl_type_warn.php on line 120
 
 Notice: class_meth Compat: Property 'B::container_a' declared as type HH\Container, clsmeth assigned in %s/decl_type_warn.php on line 121
-object(B) (6) {
-  ["a"]=>
-classMeth{
-    class(A)
-    function(func1)
-}
+object(B) (5) {
   ["v_a"]=>
 classMeth{
     class(A)

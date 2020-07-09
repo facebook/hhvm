@@ -10,7 +10,7 @@ class MyClass {
   const ANOTHER_CONST = 'another';
 }
 
-type MyType1 = array<string, shape(
+type MyType1 = darray<string, shape(
   MyEnum::MY_KEY => int,
 )>;
 
@@ -24,7 +24,7 @@ type MyType3 = shape(
   ),
 );
 
-type MyType4 = array<string, shape(
+type MyType4 = darray<string, shape(
   MyClass::MY_CONST => int,
 )>;
 

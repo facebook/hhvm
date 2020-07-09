@@ -1,7 +1,7 @@
 <?hh
 
 interface A {
-  public function a(array $a = null);
+  public function a(arraylike $a = null);
 }
 class B implements A {
   public function a($a) {}

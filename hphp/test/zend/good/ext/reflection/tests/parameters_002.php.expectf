@@ -13,7 +13,7 @@ getName: string(2) "ar"
 isPassedByReference: bool(false)
 getClass: NULL
 getDeclaringClass: NULL
-isArray: bool(true)
+isArray: bool(false)
 allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
@@ -78,7 +78,7 @@ getName: string(2) "ar"
 isPassedByReference: bool(false)
 getClass: NULL
 getDeclaringClass: test
-isArray: bool(true)
+isArray: bool(false)
 allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)

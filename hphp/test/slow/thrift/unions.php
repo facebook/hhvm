@@ -53,7 +53,7 @@ enum ComplexUnionEnum: int {
   stringValue = 2;
 }
 class ComplexUnion {
-  const array SPEC = darray[
+  const arraylike SPEC = darray[
     1 => darray[
       'var' => 'intValue',
       'union' => true,

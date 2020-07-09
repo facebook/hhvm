@@ -7,8 +7,8 @@ string(8) "stdClass"
 ** Function 0 - Parameter 1
 bool(true)
 bool(false)
-bool(true)
-string(5) "array"
+bool(false)
+string(12) "HH\arraylike"
 ** Function 0 - Parameter 2
 bool(true)
 bool(false)
@@ -54,8 +54,8 @@ string(9) "?stdClass"
 ** Function 1 - Parameter 1
 bool(true)
 bool(true)
-bool(true)
-string(6) "?array"
+bool(false)
+string(13) "?HH\arraylike"
 ** Function 1 - Parameter 2
 bool(true)
 bool(true)

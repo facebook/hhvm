@@ -7,7 +7,7 @@ class D {
 class X {
   public function f($x1, $x2 = null, $x3 = 123, string $x4,
                     string $x5 = null, string $x6 = "abc",
-                    array $x7, array $x8 = null, C $x9,
+                    arraylike $x7, arraylike $x8 = null, C $x9,
                     D $x10 = null, bool $x11, bool $x12 = true,
                     int $x13, int $x14 = 73, float $x15,
                     float $x16 = 1.5, float $x17) {

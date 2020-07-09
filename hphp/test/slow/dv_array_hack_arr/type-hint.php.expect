@@ -1,7 +1,3 @@
-================ takes_array ============================
-string(75) "Argument 1 passed to takes_array() must be an instance of array, null given"
-================ takes_nullable_array ============================
-PASSES
 ================ takes_varray ============================
 string(80) "Argument 1 passed to takes_varray() must be an instance of HH\varray, null given"
 ================ takes_nullable_varray ============================
@@ -22,10 +18,6 @@ PASSES
 string(81) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, null given"
 ================ takes_darray2 ============================
 string(81) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, null given"
-================ returns_array ============================
-string(78) "Value returned from function returns_array() must be of type array, null given"
-================ returns_nullable_array ============================
-PASSES
 ================ returns_varray ============================
 string(83) "Value returned from function returns_varray() must be of type HH\varray, null given"
 ================ returns_nullable_varray ============================
@@ -42,10 +34,6 @@ PASSES
 string(93) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, null given"
 ================ returns_nullable_vec_or_dict ============================
 PASSES
-================ takes_array ============================
-string(75) "Argument 1 passed to takes_array() must be an instance of array, bool given"
-================ takes_nullable_array ============================
-string(71) "Argument 1 to takes_nullable_array() must be of type ?array, bool given"
 ================ takes_varray ============================
 string(80) "Argument 1 passed to takes_varray() must be an instance of HH\varray, bool given"
 ================ takes_nullable_varray ============================
@@ -66,10 +54,6 @@ string(86) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_o
 string(81) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, bool given"
 ================ takes_darray2 ============================
 string(81) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, bool given"
-================ returns_array ============================
-string(78) "Value returned from function returns_array() must be of type array, bool given"
-================ returns_nullable_array ============================
-string(88) "Value returned from function returns_nullable_array() must be of type ?array, bool given"
 ================ returns_varray ============================
 string(83) "Value returned from function returns_varray() must be of type HH\varray, bool given"
 ================ returns_nullable_varray ============================
@@ -86,10 +70,6 @@ string(113) "Value returned from function returns_nullable_varray_or_darray() mu
 string(93) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, bool given"
 ================ returns_nullable_vec_or_dict ============================
 string(103) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, bool given"
-================ takes_array ============================
-string(75) "Argument 1 passed to takes_array() must be an instance of array, bool given"
-================ takes_nullable_array ============================
-string(71) "Argument 1 to takes_nullable_array() must be of type ?array, bool given"
 ================ takes_varray ============================
 string(80) "Argument 1 passed to takes_varray() must be an instance of HH\varray, bool given"
 ================ takes_nullable_varray ============================
@@ -110,10 +90,6 @@ string(86) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_o
 string(81) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, bool given"
 ================ takes_darray2 ============================
 string(81) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, bool given"
-================ returns_array ============================
-string(78) "Value returned from function returns_array() must be of type array, bool given"
-================ returns_nullable_array ============================
-string(88) "Value returned from function returns_nullable_array() must be of type ?array, bool given"
 ================ returns_varray ============================
 string(83) "Value returned from function returns_varray() must be of type HH\varray, bool given"
 ================ returns_nullable_varray ============================
@@ -130,10 +106,6 @@ string(113) "Value returned from function returns_nullable_varray_or_darray() mu
 string(93) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, bool given"
 ================ returns_nullable_vec_or_dict ============================
 string(103) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, bool given"
-================ takes_array ============================
-string(77) "Argument 1 passed to takes_array() must be an instance of array, string given"
-================ takes_nullable_array ============================
-string(73) "Argument 1 to takes_nullable_array() must be of type ?array, string given"
 ================ takes_varray ============================
 string(82) "Argument 1 passed to takes_varray() must be an instance of HH\varray, string given"
 ================ takes_nullable_varray ============================
@@ -154,10 +126,6 @@ string(88) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_o
 string(83) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, string given"
 ================ takes_darray2 ============================
 string(83) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, string given"
-================ returns_array ============================
-string(80) "Value returned from function returns_array() must be of type array, string given"
-================ returns_nullable_array ============================
-string(90) "Value returned from function returns_nullable_array() must be of type ?array, string given"
 ================ returns_varray ============================
 string(85) "Value returned from function returns_varray() must be of type HH\varray, string given"
 ================ returns_nullable_varray ============================
@@ -174,10 +142,6 @@ string(115) "Value returned from function returns_nullable_varray_or_darray() mu
 string(95) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, string given"
 ================ returns_nullable_vec_or_dict ============================
 string(105) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, string given"
-================ takes_array ============================
-string(74) "Argument 1 passed to takes_array() must be an instance of array, int given"
-================ takes_nullable_array ============================
-string(70) "Argument 1 to takes_nullable_array() must be of type ?array, int given"
 ================ takes_varray ============================
 string(79) "Argument 1 passed to takes_varray() must be an instance of HH\varray, int given"
 ================ takes_nullable_varray ============================
@@ -198,10 +162,6 @@ string(85) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_o
 string(80) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, int given"
 ================ takes_darray2 ============================
 string(80) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, int given"
-================ returns_array ============================
-string(77) "Value returned from function returns_array() must be of type array, int given"
-================ returns_nullable_array ============================
-string(87) "Value returned from function returns_nullable_array() must be of type ?array, int given"
 ================ returns_varray ============================
 string(82) "Value returned from function returns_varray() must be of type HH\varray, int given"
 ================ returns_nullable_varray ============================
@@ -218,10 +178,6 @@ string(112) "Value returned from function returns_nullable_varray_or_darray() mu
 string(92) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, int given"
 ================ returns_nullable_vec_or_dict ============================
 string(102) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, int given"
-================ takes_array ============================
-string(76) "Argument 1 passed to takes_array() must be an instance of array, float given"
-================ takes_nullable_array ============================
-string(72) "Argument 1 to takes_nullable_array() must be of type ?array, float given"
 ================ takes_varray ============================
 string(81) "Argument 1 passed to takes_varray() must be an instance of HH\varray, float given"
 ================ takes_nullable_varray ============================
@@ -242,10 +198,6 @@ string(87) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_o
 string(82) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, float given"
 ================ takes_darray2 ============================
 string(82) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, float given"
-================ returns_array ============================
-string(79) "Value returned from function returns_array() must be of type array, float given"
-================ returns_nullable_array ============================
-string(89) "Value returned from function returns_nullable_array() must be of type ?array, float given"
 ================ returns_varray ============================
 string(84) "Value returned from function returns_varray() must be of type HH\varray, float given"
 ================ returns_nullable_varray ============================
@@ -262,10 +214,6 @@ string(114) "Value returned from function returns_nullable_varray_or_darray() mu
 string(94) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, float given"
 ================ returns_nullable_vec_or_dict ============================
 string(104) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, float given"
-================ takes_array ============================
-string(77) "Argument 1 passed to takes_array() must be an instance of array, HH\vec given"
-================ takes_nullable_array ============================
-string(73) "Argument 1 to takes_nullable_array() must be of type ?array, HH\vec given"
 ================ takes_varray ============================
 PASSES
 ================ takes_nullable_varray ============================
@@ -286,10 +234,6 @@ PASSES
 PASSES
 ================ takes_darray2 ============================
 string(83) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, HH\vec given"
-================ returns_array ============================
-string(80) "Value returned from function returns_array() must be of type array, HH\vec given"
-================ returns_nullable_array ============================
-string(90) "Value returned from function returns_nullable_array() must be of type ?array, HH\vec given"
 ================ returns_varray ============================
 PASSES
 ================ returns_nullable_varray ============================
@@ -306,10 +250,6 @@ PASSES
 PASSES
 ================ returns_nullable_vec_or_dict ============================
 PASSES
-================ takes_array ============================
-string(77) "Argument 1 passed to takes_array() must be an instance of array, HH\vec given"
-================ takes_nullable_array ============================
-string(73) "Argument 1 to takes_nullable_array() must be of type ?array, HH\vec given"
 ================ takes_varray ============================
 PASSES
 ================ takes_nullable_varray ============================
@@ -330,10 +270,6 @@ PASSES
 PASSES
 ================ takes_darray2 ============================
 string(83) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, HH\vec given"
-================ returns_array ============================
-string(80) "Value returned from function returns_array() must be of type array, HH\vec given"
-================ returns_nullable_array ============================
-string(90) "Value returned from function returns_nullable_array() must be of type ?array, HH\vec given"
 ================ returns_varray ============================
 PASSES
 ================ returns_nullable_varray ============================
@@ -350,10 +286,6 @@ PASSES
 PASSES
 ================ returns_nullable_vec_or_dict ============================
 PASSES
-================ takes_array ============================
-string(78) "Argument 1 passed to takes_array() must be an instance of array, HH\dict given"
-================ takes_nullable_array ============================
-string(74) "Argument 1 to takes_nullable_array() must be of type ?array, HH\dict given"
 ================ takes_varray ============================
 string(83) "Argument 1 passed to takes_varray() must be an instance of HH\varray, HH\dict given"
 ================ takes_nullable_varray ============================
@@ -374,10 +306,6 @@ PASSES
 string(84) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\dict given"
 ================ takes_darray2 ============================
 PASSES
-================ returns_array ============================
-string(81) "Value returned from function returns_array() must be of type array, HH\dict given"
-================ returns_nullable_array ============================
-string(91) "Value returned from function returns_nullable_array() must be of type ?array, HH\dict given"
 ================ returns_varray ============================
 string(86) "Value returned from function returns_varray() must be of type HH\varray, HH\dict given"
 ================ returns_nullable_varray ============================
@@ -394,10 +322,6 @@ PASSES
 PASSES
 ================ returns_nullable_vec_or_dict ============================
 PASSES
-================ takes_array ============================
-string(78) "Argument 1 passed to takes_array() must be an instance of array, HH\dict given"
-================ takes_nullable_array ============================
-string(74) "Argument 1 to takes_nullable_array() must be of type ?array, HH\dict given"
 ================ takes_varray ============================
 string(83) "Argument 1 passed to takes_varray() must be an instance of HH\varray, HH\dict given"
 ================ takes_nullable_varray ============================
@@ -418,10 +342,6 @@ PASSES
 string(84) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\dict given"
 ================ takes_darray2 ============================
 PASSES
-================ returns_array ============================
-string(81) "Value returned from function returns_array() must be of type array, HH\dict given"
-================ returns_nullable_array ============================
-string(91) "Value returned from function returns_nullable_array() must be of type ?array, HH\dict given"
 ================ returns_varray ============================
 string(86) "Value returned from function returns_varray() must be of type HH\varray, HH\dict given"
 ================ returns_nullable_varray ============================
@@ -438,10 +358,6 @@ PASSES
 PASSES
 ================ returns_nullable_vec_or_dict ============================
 PASSES
-================ takes_array ============================
-string(80) "Argument 1 passed to takes_array() must be an instance of array, HH\keyset given"
-================ takes_nullable_array ============================
-string(76) "Argument 1 to takes_nullable_array() must be of type ?array, HH\keyset given"
 ================ takes_varray ============================
 string(85) "Argument 1 passed to takes_varray() must be an instance of HH\varray, HH\keyset given"
 ================ takes_nullable_varray ============================
@@ -462,10 +378,6 @@ string(91) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_o
 string(86) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\keyset given"
 ================ takes_darray2 ============================
 string(86) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, HH\keyset given"
-================ returns_array ============================
-string(83) "Value returned from function returns_array() must be of type array, HH\keyset given"
-================ returns_nullable_array ============================
-string(93) "Value returned from function returns_nullable_array() must be of type ?array, HH\keyset given"
 ================ returns_varray ============================
 string(88) "Value returned from function returns_varray() must be of type HH\varray, HH\keyset given"
 ================ returns_nullable_varray ============================
@@ -482,10 +394,6 @@ string(118) "Value returned from function returns_nullable_varray_or_darray() mu
 string(98) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, HH\keyset given"
 ================ returns_nullable_vec_or_dict ============================
 string(108) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, HH\keyset given"
-================ takes_array ============================
-string(80) "Argument 1 passed to takes_array() must be an instance of array, HH\keyset given"
-================ takes_nullable_array ============================
-string(76) "Argument 1 to takes_nullable_array() must be of type ?array, HH\keyset given"
 ================ takes_varray ============================
 string(85) "Argument 1 passed to takes_varray() must be an instance of HH\varray, HH\keyset given"
 ================ takes_nullable_varray ============================
@@ -506,10 +414,6 @@ string(91) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_o
 string(86) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\keyset given"
 ================ takes_darray2 ============================
 string(86) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, HH\keyset given"
-================ returns_array ============================
-string(83) "Value returned from function returns_array() must be of type array, HH\keyset given"
-================ returns_nullable_array ============================
-string(93) "Value returned from function returns_nullable_array() must be of type ?array, HH\keyset given"
 ================ returns_varray ============================
 string(88) "Value returned from function returns_varray() must be of type HH\varray, HH\keyset given"
 ================ returns_nullable_varray ============================
@@ -526,10 +430,6 @@ string(118) "Value returned from function returns_nullable_varray_or_darray() mu
 string(98) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, HH\keyset given"
 ================ returns_nullable_vec_or_dict ============================
 string(108) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, HH\keyset given"
-================ takes_array ============================
-string(74) "Argument 1 passed to takes_array() must be an instance of array, xml given"
-================ takes_nullable_array ============================
-string(70) "Argument 1 to takes_nullable_array() must be of type ?array, xml given"
 ================ takes_varray ============================
 string(79) "Argument 1 passed to takes_varray() must be an instance of HH\varray, xml given"
 ================ takes_nullable_varray ============================
@@ -550,10 +450,6 @@ string(85) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_o
 string(80) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, xml given"
 ================ takes_darray2 ============================
 string(80) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, xml given"
-================ returns_array ============================
-string(77) "Value returned from function returns_array() must be of type array, xml given"
-================ returns_nullable_array ============================
-string(87) "Value returned from function returns_nullable_array() must be of type ?array, xml given"
 ================ returns_varray ============================
 string(82) "Value returned from function returns_varray() must be of type HH\varray, xml given"
 ================ returns_nullable_varray ============================
@@ -570,10 +466,6 @@ string(112) "Value returned from function returns_nullable_varray_or_darray() mu
 string(92) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, xml given"
 ================ returns_nullable_vec_or_dict ============================
 string(102) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, xml given"
-================ takes_array ============================
-string(79) "Argument 1 passed to takes_array() must be an instance of array, stdClass given"
-================ takes_nullable_array ============================
-string(75) "Argument 1 to takes_nullable_array() must be of type ?array, stdClass given"
 ================ takes_varray ============================
 string(84) "Argument 1 passed to takes_varray() must be an instance of HH\varray, stdClass given"
 ================ takes_nullable_varray ============================
@@ -594,10 +486,6 @@ string(90) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_o
 string(85) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, stdClass given"
 ================ takes_darray2 ============================
 string(85) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, stdClass given"
-================ returns_array ============================
-string(82) "Value returned from function returns_array() must be of type array, stdClass given"
-================ returns_nullable_array ============================
-string(92) "Value returned from function returns_nullable_array() must be of type ?array, stdClass given"
 ================ returns_varray ============================
 string(87) "Value returned from function returns_varray() must be of type HH\varray, stdClass given"
 ================ returns_nullable_varray ============================
@@ -614,10 +502,6 @@ string(117) "Value returned from function returns_nullable_varray_or_darray() mu
 string(97) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, stdClass given"
 ================ returns_nullable_vec_or_dict ============================
 string(107) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, stdClass given"
-================ takes_array ============================
-PASSES
-================ takes_nullable_array ============================
-PASSES
 ================ takes_varray ============================
 string(81) "Argument 1 passed to takes_varray() must be an instance of HH\varray, array given"
 ================ takes_nullable_varray ============================
@@ -638,10 +522,6 @@ string(87) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_o
 string(82) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, array given"
 ================ takes_darray2 ============================
 string(82) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, array given"
-================ returns_array ============================
-PASSES
-================ returns_nullable_array ============================
-PASSES
 ================ returns_varray ============================
 string(84) "Value returned from function returns_varray() must be of type HH\varray, array given"
 ================ returns_nullable_varray ============================
@@ -658,10 +538,6 @@ string(114) "Value returned from function returns_nullable_varray_or_darray() mu
 string(94) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, array given"
 ================ returns_nullable_vec_or_dict ============================
 string(104) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, array given"
-================ takes_array ============================
-PASSES
-================ takes_nullable_array ============================
-PASSES
 ================ takes_varray ============================
 string(81) "Argument 1 passed to takes_varray() must be an instance of HH\varray, array given"
 ================ takes_nullable_varray ============================
@@ -682,10 +558,6 @@ string(87) "Argument 1 to takes_nullable_vec_or_dict() must be of type ?HH\vec_o
 string(82) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, array given"
 ================ takes_darray2 ============================
 string(82) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, array given"
-================ returns_array ============================
-PASSES
-================ returns_nullable_array ============================
-PASSES
 ================ returns_varray ============================
 string(84) "Value returned from function returns_varray() must be of type HH\varray, array given"
 ================ returns_nullable_varray ============================
@@ -702,10 +574,6 @@ string(114) "Value returned from function returns_nullable_varray_or_darray() mu
 string(94) "Value returned from function returns_vec_or_dict() must be of type HH\vec_or_dict, array given"
 ================ returns_nullable_vec_or_dict ============================
 string(104) "Value returned from function returns_nullable_vec_or_dict() must be of type ?HH\vec_or_dict, array given"
-================ takes_array ============================
-string(77) "Argument 1 passed to takes_array() must be an instance of array, HH\vec given"
-================ takes_nullable_array ============================
-string(73) "Argument 1 to takes_nullable_array() must be of type ?array, HH\vec given"
 ================ takes_varray ============================
 PASSES
 ================ takes_nullable_varray ============================
@@ -726,10 +594,6 @@ PASSES
 PASSES
 ================ takes_darray2 ============================
 string(83) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, HH\vec given"
-================ returns_array ============================
-string(80) "Value returned from function returns_array() must be of type array, HH\vec given"
-================ returns_nullable_array ============================
-string(90) "Value returned from function returns_nullable_array() must be of type ?array, HH\vec given"
 ================ returns_varray ============================
 PASSES
 ================ returns_nullable_varray ============================
@@ -746,10 +610,6 @@ PASSES
 PASSES
 ================ returns_nullable_vec_or_dict ============================
 PASSES
-================ takes_array ============================
-string(77) "Argument 1 passed to takes_array() must be an instance of array, HH\vec given"
-================ takes_nullable_array ============================
-string(73) "Argument 1 to takes_nullable_array() must be of type ?array, HH\vec given"
 ================ takes_varray ============================
 PASSES
 ================ takes_nullable_varray ============================
@@ -770,10 +630,6 @@ PASSES
 PASSES
 ================ takes_darray2 ============================
 string(83) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, HH\vec given"
-================ returns_array ============================
-string(80) "Value returned from function returns_array() must be of type array, HH\vec given"
-================ returns_nullable_array ============================
-string(90) "Value returned from function returns_nullable_array() must be of type ?array, HH\vec given"
 ================ returns_varray ============================
 PASSES
 ================ returns_nullable_varray ============================
@@ -790,10 +646,6 @@ PASSES
 PASSES
 ================ returns_nullable_vec_or_dict ============================
 PASSES
-================ takes_array ============================
-string(78) "Argument 1 passed to takes_array() must be an instance of array, HH\dict given"
-================ takes_nullable_array ============================
-string(74) "Argument 1 to takes_nullable_array() must be of type ?array, HH\dict given"
 ================ takes_varray ============================
 string(83) "Argument 1 passed to takes_varray() must be an instance of HH\varray, HH\dict given"
 ================ takes_nullable_varray ============================
@@ -814,10 +666,6 @@ PASSES
 string(84) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\dict given"
 ================ takes_darray2 ============================
 PASSES
-================ returns_array ============================
-string(81) "Value returned from function returns_array() must be of type array, HH\dict given"
-================ returns_nullable_array ============================
-string(91) "Value returned from function returns_nullable_array() must be of type ?array, HH\dict given"
 ================ returns_varray ============================
 string(86) "Value returned from function returns_varray() must be of type HH\varray, HH\dict given"
 ================ returns_nullable_varray ============================
@@ -834,10 +682,6 @@ PASSES
 PASSES
 ================ returns_nullable_vec_or_dict ============================
 PASSES
-================ takes_array ============================
-string(78) "Argument 1 passed to takes_array() must be an instance of array, HH\dict given"
-================ takes_nullable_array ============================
-string(74) "Argument 1 to takes_nullable_array() must be of type ?array, HH\dict given"
 ================ takes_varray ============================
 string(83) "Argument 1 passed to takes_varray() must be an instance of HH\varray, HH\dict given"
 ================ takes_nullable_varray ============================
@@ -858,10 +702,6 @@ PASSES
 string(84) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\dict given"
 ================ takes_darray2 ============================
 PASSES
-================ returns_array ============================
-string(81) "Value returned from function returns_array() must be of type array, HH\dict given"
-================ returns_nullable_array ============================
-string(91) "Value returned from function returns_nullable_array() must be of type ?array, HH\dict given"
 ================ returns_varray ============================
 string(86) "Value returned from function returns_varray() must be of type HH\varray, HH\dict given"
 ================ returns_nullable_varray ============================

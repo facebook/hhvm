@@ -1,9 +1,9 @@
-string(24) "?array<HH\int, @HH\bool>"
+string(28) "?HH\darray<HH\int, @HH\bool>"
 array(3) {
   ["nullable"]=>
   bool(true)
   ["kind"]=>
-  int(12)
+  int(24)
   ["generic_types"]=>
   array(2) {
     [0]=>
@@ -20,7 +20,7 @@ array(3) {
     }
   }
 }
-string(45) "HH\Map<HH\arraykey, HH\Vector<array<HH\int>>>"
+string(49) "HH\Map<HH\arraykey, HH\Vector<HH\varray<HH\int>>>"
 array(3) {
   ["kind"]=>
   int(15)
@@ -44,7 +44,7 @@ array(3) {
         [0]=>
         array(2) {
           ["kind"]=>
-          int(12)
+          int(25)
           ["generic_types"]=>
           array(1) {
             [0]=>
@@ -96,14 +96,14 @@ array(3) {
   array(0) {
   }
 }
-string(41) "(function (HH\mixed, HH\resource): array)"
+string(48) "(function (HH\mixed, HH\resource): HH\arraylike)"
 array(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
   array(1) {
     ["kind"]=>
-    int(12)
+    int(27)
   }
   ["param_types"]=>
   array(2) {

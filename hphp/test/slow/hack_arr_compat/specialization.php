@@ -130,14 +130,11 @@ function get_count() {
   return $count;
 }
 
-function takes_array(array $x)   { return 'array to array: OK!'; }
 function takes_varray(varray $x) { return 'varray to varray: OK!'; }
 function takes_darray(darray $x) { return 'darray to darray: OK!'; }
-function returns_array($fn): array   { return $fn(); }
 function returns_varray($fn): varray { return $fn(); }
 function returns_darray($fn): darray { return $fn(); }
 class C {
-  public ?array $a = null;
   public ?varray $v = null;
   public ?darray $d = null;
 }
@@ -151,18 +148,15 @@ function test_typehint_enforcement(int $count) {
   $array = __hhvm_intrinsics\dummy_cast_to_kindofarray(varray[]);
   $clsmeth = class_meth(ClsMethTest::class, 'fn');
   foreach (vec[$array, varray[], darray[], $clsmeth] as $input) {
-    if (!($count--)) run(() ==> takes_array($input));
     if (!($count--)) run(() ==> takes_varray($input));
     if (!($count--)) run(() ==> takes_darray($input));
   }
   foreach (vec[$array, varray[], darray[], $clsmeth] as $input) {
-    if (!($count--)) run(() ==> returns_array(() ==> $input));
     if (!($count--)) run(() ==> returns_varray(() ==> $input));
     if (!($count--)) run(() ==> returns_darray(() ==> $input));
   }
   $c = new C();
   foreach (vec[$array, varray[], darray[], $clsmeth] as $input) {
-    if (!($count--)) run(() ==> $c->a = $input);
     if (!($count--)) run(() ==> $c->v = $input);
     if (!($count--)) run(() ==> $c->d = $input);
   }

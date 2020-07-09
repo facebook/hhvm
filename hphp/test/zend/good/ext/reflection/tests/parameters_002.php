@@ -1,12 +1,12 @@
 <?hh
 
-function test($nix, array $ar, inout $ref, stdClass $std, NonExistingClass $na, inout stdClass $opt, $def = "FooBar")
+function test($nix, arraylike $ar, inout $ref, stdClass $std, NonExistingClass $na, inout stdClass $opt, $def = "FooBar")
 {
 }
 
 class test
 {
-    function test($nix, array $ar, $ref, stdClass $std, NonExistingClass $na, stdClass $opt = NULL, $def = "FooBar")
+    function test($nix, arraylike $ar, $ref, stdClass $std, NonExistingClass $na, stdClass $opt = NULL, $def = "FooBar")
     {
     }
 }

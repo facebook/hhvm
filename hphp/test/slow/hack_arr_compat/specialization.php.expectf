@@ -265,63 +265,42 @@ Invalid varray key: expected a key of type int, string given
 
 =====================================
 Typehints:
-"array to array: OK!"
 
 Catchable fatal error: Argument 1 passed to takes_varray() must be an instance of HH\varray, array given in %s/specialization.php on line %d
 
 Catchable fatal error: Argument 1 passed to takes_darray() must be an instance of HH\darray, array given in %s/specialization.php on line %d
-
-Catchable fatal error: Argument 1 passed to takes_array() must be an instance of array, varray given in %s/specialization.php on line %d
 "varray to varray: OK!"
 
 Catchable fatal error: Argument 1 passed to takes_darray() must be an instance of HH\darray, varray given in %s/specialization.php on line %d
 
-Catchable fatal error: Argument 1 passed to takes_array() must be an instance of array, darray given in %s/specialization.php on line %d
-
 Catchable fatal error: Argument 1 passed to takes_varray() must be an instance of HH\varray, darray given in %s/specialization.php on line %d
 "darray to darray: OK!"
-
-Catchable fatal error: Argument 1 passed to takes_array() must be an instance of array, clsmeth given in %s/specialization.php on line %d
 "varray to varray: OK!"
 
 Catchable fatal error: Argument 1 passed to takes_darray() must be an instance of HH\darray, clsmeth given in %s/specialization.php on line %d
-[]
 
 Catchable fatal error: Value returned from function returns_varray() must be of type HH\varray, array given in %s/specialization.php on line %d
 
 Catchable fatal error: Value returned from function returns_darray() must be of type HH\darray, array given in %s/specialization.php on line %d
-
-Catchable fatal error: Value returned from function returns_array() must be of type array, varray given in %s/specialization.php on line %d
 []
 
 Catchable fatal error: Value returned from function returns_darray() must be of type HH\darray, varray given in %s/specialization.php on line %d
 
-Catchable fatal error: Value returned from function returns_array() must be of type array, darray given in %s/specialization.php on line %d
-
 Catchable fatal error: Value returned from function returns_varray() must be of type HH\varray, darray given in %s/specialization.php on line %d
 []
-
-Catchable fatal error: Value returned from function returns_array() must be of type array, clsmeth given in %s/specialization.php on line %d
 ["ClsMethTest","fn"]
 
 Catchable fatal error: Value returned from function returns_darray() must be of type HH\darray, clsmeth given in %s/specialization.php on line %d
-[]
 
 Catchable fatal error: Property 'C::v' declared as type ?HH\varray, array assigned in %s/specialization.php on line %d
 
 Catchable fatal error: Property 'C::d' declared as type ?HH\darray, array assigned in %s/specialization.php on line %d
-
-Catchable fatal error: Property 'C::a' declared as type ?array, varray assigned in %s/specialization.php on line %d
 []
 
 Catchable fatal error: Property 'C::d' declared as type ?HH\darray, varray assigned in %s/specialization.php on line %d
 
-Catchable fatal error: Property 'C::a' declared as type ?array, darray assigned in %s/specialization.php on line %d
-
 Catchable fatal error: Property 'C::v' declared as type ?HH\varray, darray assigned in %s/specialization.php on line %d
 []
-
-Catchable fatal error: Property 'C::a' declared as type ?array, clsmeth assigned in %s/specialization.php on line %d
 ["ClsMethTest","fn"]
 
 Catchable fatal error: Property 'C::d' declared as type ?HH\darray, clsmeth assigned in %s/specialization.php on line %d

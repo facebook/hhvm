@@ -21,7 +21,7 @@ class A {
 
 interface I {
   public function a(int   $a1 = 0);
-  public function b(array $b1 = null);
+  public function b(arraylike $b1 = null);
 }
 
 class B implements I {

@@ -31,7 +31,7 @@ class A {
   public string $p2;
   public bool $p3;
   public float $p4;
-  public array $p5;
+  public arraylike $p5;
   public resource $p6;
   public nonnull $p7;
   public num $p8;
@@ -63,7 +63,7 @@ class A {
   public ?string $opt2;
   public ?bool $opt3;
   public ?float $opt4;
-  public ?array $opt5;
+  public ?arraylike $opt5;
   public ?resource $opt6;
   public ?nonnull $opt7;
   public ?num $opt8;
@@ -95,7 +95,7 @@ class A {
   public static string $s2;
   public static bool $s3;
   public static float $s4;
-  public static array $s5;
+  public static arraylike $s5;
   public static resource $s6;
   public static nonnull $s7;
   public static num $s8;
@@ -127,7 +127,7 @@ class A {
   public static ?string $sopt2;
   public static ?bool $sopt3;
   public static ?float $sopt4;
-  public static ?array $sopt5;
+  public static ?arraylike $sopt5;
   public static ?resource $sopt6;
   public static ?nonnull $sopt7;
   public static ?num $sopt8;

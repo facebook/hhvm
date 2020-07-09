@@ -6,8 +6,6 @@ Warning: Type-hint of 'C::p3' must be bool (as in class A), not float in %s/rede
 
 Warning: Type-hint of 'C::p4' must be float (as in class A), not num in %s/redefine-bad.php on line 553
 
-Warning: Type-hint of 'C::p5' must be array (as in class A), not HH\arraylike in %s/redefine-bad.php on line 553
-
 Warning: Type-hint of 'C::p6' must be resource (as in class A), not Cls1 in %s/redefine-bad.php on line 553
 
 Warning: Type-hint of 'C::p7' must be nonnull (as in class A), not int in %s/redefine-bad.php on line 553
@@ -71,10 +69,6 @@ Warning: Type-hint of 'C::p36' must be Alias9 (as in class A), not string in %s/
 Warning: Type-hint of 'C::p37' must be Enum4 (as in class A), not ?Enum4 in %s/redefine-bad.php on line 553
 
 Warning: Type-hint of 'C::p38' must be HH\varray_or_darray (as in class A), not HH\vec in %s/redefine-bad.php on line 553
-
-Warning: Type-hint of 'C::p39' must be array (as in class A), not HH\arraylike in %s/redefine-bad.php on line 553
-
-Warning: Type-hint of 'C::p40' must be array (as in class A), not HH\arraylike in %s/redefine-bad.php on line 553
 
 Warning: Type-hint of 'C::p41' must be mixed (as in class A), not nonnull in %s/redefine-bad.php on line 553
 

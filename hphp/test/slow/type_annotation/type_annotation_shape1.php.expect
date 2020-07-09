@@ -96,7 +96,7 @@ array(2) {
     }
   }
 }
-string(54) "HH\Map<HH\int, HH\shape('foo'=>array, 'bar'=>HH\bool)>"
+string(61) "HH\Map<HH\int, HH\shape('foo'=>HH\arraylike, 'bar'=>HH\bool)>"
 array(3) {
   ["kind"]=>
   int(15)
@@ -118,7 +118,7 @@ array(3) {
         ["foo"]=>
         array(1) {
           ["kind"]=>
-          int(12)
+          int(27)
         }
         ["bar"]=>
         array(1) {

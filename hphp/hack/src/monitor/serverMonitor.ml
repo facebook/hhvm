@@ -296,13 +296,15 @@ struct
       Unix.close client_fd;
       env
 
-  and hand_off_client_connection server_fd client_fd =
+  and hand_off_client_connection ~tracker server_fd client_fd =
     let status = Libancillary.ancil_send_fd server_fd client_fd in
-    if status <> 0 then (
+    if status = 0 then begin
+      msg_to_channel server_fd tracker;
+      Sent_fds_collector.cleanup_fd client_fd
+    end else begin
       Hh_logger.log "Failed to handoff FD to server.";
       raise (Send_fd_failure status)
-    ) else
-      Sent_fds_collector.cleanup_fd client_fd
+    end
 
   (* Sends the client connection FD to the server process then closes the
    * FD. *)
@@ -310,7 +312,7 @@ struct
       ~tracker server_fd retries client_fd =
     let (_, ready_l, _) = Unix.select [] [server_fd] [] 0.5 in
     if not (List.is_empty ready_l) then
-      try hand_off_client_connection server_fd client_fd
+      try hand_off_client_connection ~tracker server_fd client_fd
       with e ->
         if retries > 0 then (
           log "Retrying FD handoff" ~tracker;

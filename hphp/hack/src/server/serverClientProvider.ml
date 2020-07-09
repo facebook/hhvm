@@ -25,6 +25,7 @@ type client =
       ic: Timeout.in_channel;
       oc: Out_channel.t;
       priority: priority;
+      tracker: Connection_tracker.t;
     }
   | Persistent_client of Unix.file_descr
 
@@ -41,11 +42,16 @@ let provider_for_test () = failwith "for use in tests only"
 let accept_client (priority : priority) (parent_in_fd : Unix.file_descr) :
     client =
   let socket = Libancillary.ancil_recv_fd parent_in_fd in
+  let tracker : Connection_tracker.t =
+    Marshal_tools.from_fd_with_preamble parent_in_fd
+  in
+  Hh_logger.log "[%s] received fd" (Connection_tracker.log_id tracker);
   Non_persistent_client
     {
       ic = Timeout.in_channel_of_descr socket;
       oc = Unix.out_channel_of_descr socket;
       priority;
+      tracker;
     }
 
 let select ~idle_gc_slice fd_list timeout =

@@ -155,6 +155,12 @@ function accept(FileDescriptor $socket): varray<mixed> /* (FileDescriptor, SockA
 function fcntl(FileDescriptor $fd, int $cmd, mixed $arg = null): mixed;
 
 <<__Native>>
+function isatty(FileDescriptor $fd): bool;
+
+<<__Native>>
+function ttyname(FileDescriptor $fd): string;
+
+<<__Native>>
 function getsockopt_int(FileDescriptor $fd, int $level, int $option): int;
 
 <<__Native>>

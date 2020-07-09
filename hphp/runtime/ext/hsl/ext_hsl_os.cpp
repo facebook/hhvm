@@ -784,6 +784,38 @@ Variant HHVM_FUNCTION(HSL_os_fcntl,
   }
 }
 
+bool HHVM_FUNCTION(HSL_os_isatty, const Object& obj) {
+  const auto fd = HSLFileDescriptor::fd(obj);
+  errno = 0;
+  const auto result = isatty(fd);
+  if (result == 1) {
+    return true;
+  }
+  // Not-a-TTY is definitely an expected case for this function,
+  // so don't throw. Both Linux and MaOS set errno no ENOTTY for
+  // this case.
+  //
+  // Will still throw for EBADF etc
+  if (errno == 0 || errno == ENOTTY) {
+    return false;
+  }
+  throw_errno_exception(errno, "isatty() call failed");
+}
+
+String HHVM_FUNCTION(HSL_os_ttyname, const Object& obj) {
+  const auto fd = HSLFileDescriptor::fd(obj);
+  char buf[1024];
+  auto error = ttyname_r(fd, buf, sizeof(buf));
+  if (error != 0) {
+    throw_errno_exception(error, "ttyname_r() call failed");
+  }
+  const auto len = strnlen(buf, sizeof(buf));
+  if (len < 1) {
+    throw_errno_exception(ERANGE, "Did not get a valid ttyname");
+  }
+  return String(buf, len, CopyString);
+}
+
 int64_t HHVM_FUNCTION(HSL_os_getsockopt_int,
                       const Object& obj,
                       int64_t level,
@@ -1246,6 +1278,8 @@ struct OSExtension final : Extension {
 
     CLI_REGISTER_HANDLER(HSL_os_fcntl_intarg);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\fcntl, HSL_os_fcntl);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\isatty, HSL_os_isatty);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\ttyname, HSL_os_ttyname);
 
     HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\SOL_SOCKET, SOL_SOCKET);
     // The constant formerly known as SOL_TCP

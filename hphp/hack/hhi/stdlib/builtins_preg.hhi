@@ -9,11 +9,11 @@
  */
 
 <<__PHPStdLib>>
-function preg_grep(string $pattern, $input, int $flags = 0);
+function preg_grep(string $pattern, varray_or_darray $input, int $flags = 0);
 <<__PHPStdLib, __Pure>>
 function preg_grep_with_error(
   string $pattern,
-  $input,
+  varray_or_darray $input,
   inout ?int $error,
   int $flags = 0,
 );

@@ -20,6 +20,11 @@ type t = {
   mutable t_ready_to_send_cmd: float;
   mutable t_sent_cmd: float;
   mutable t_received_response: float;
+  (* monitor *)
+  mutable t_received_handoff: float;
+  mutable t_monitor_ready: float;
+  mutable t_sent_ack_to_client: float;
+  mutable t_sent_fd: float;
   (* server *)
   mutable t_sleep_and_check: float;
   mutable t_monitor_fd_ready: float;
@@ -54,6 +59,11 @@ let create () : t =
     t_ready_to_send_cmd = 0.;
     t_sent_cmd = 0.;
     t_received_response = 0.;
+    (* monitor *)
+    t_received_handoff = 0.;
+    t_monitor_ready = 0.;
+    t_sent_ack_to_client = 0.;
+    t_sent_fd = 0.;
     (* server *)
     t_sleep_and_check = 0.;
     t_monitor_fd_ready = 0.;

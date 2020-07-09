@@ -34,6 +34,17 @@ type t = {
   mutable t_received_response: float;
       (** 11. client has received rpc response from server *)
   (*
+  MONITOR SIDE
+  *)
+  mutable t_received_handoff: float;
+      (** 1. The monitor received handoff from client *)
+  mutable t_monitor_ready: float;
+      (** 2. The monitor is now ready to do its work *)
+  mutable t_sent_ack_to_client: float;
+      (** 3. The monitor has sent an ack back to the client *)
+  mutable t_sent_fd: float;
+      (** 4. The monitor has sent fd to server. It will now send tracker. *)
+  (*
   SERVER SIDE
   *)
   mutable t_sleep_and_check: float;

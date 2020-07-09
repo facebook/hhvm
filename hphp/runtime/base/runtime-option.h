@@ -1002,6 +1002,7 @@ struct RuntimeOption {
   F(bool, FilterGCPoints,              true)                            \
   F(bool, Quarantine,                  eagerGcDefault())                \
   F(bool, HeapAllocSampleNativeStack,  false)                           \
+  F(bool, LogKilledRequests,           true)                            \
   F(uint32_t, GCSampleRate,            0)                               \
   F(uint32_t, HeapAllocSampleRequests, 0)                               \
   F(uint32_t, HeapAllocSampleBytes,    256 * 1024)                      \

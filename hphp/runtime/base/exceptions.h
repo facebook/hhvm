@@ -139,7 +139,9 @@ struct RequestOOMKilledException : ResourceExceededException {
         folly::sformat("request aborted due to memory pressure, "
                        "used {} bytes", usedBytes),
         empty_varray())
+    , m_usedBytes(usedBytes)
   {}
+  const size_t m_usedBytes;
   EXCEPTION_COMMON_IMPL(RequestOOMKilledException);
 };
 

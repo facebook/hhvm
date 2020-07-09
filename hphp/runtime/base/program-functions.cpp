@@ -464,6 +464,15 @@ void bump_counter_and_rethrow(bool isPsp) {
       requestHostOOMCounter->addValue(1);
       ServerStats::Log("request.oom_killed.non_psp", 1);
     }
+    if (RuntimeOption::EvalLogKilledRequests && StructuredLog::enabled()) {
+      StructuredLogEntry entry;
+      entry.setInt("mem_used", e.m_usedBytes);
+      entry.setInt("is_psp", static_cast<int>(isPsp));
+      if (g_context) {
+        entry.setStr("url", g_context->getRequestUrl());
+      }
+      StructuredLog::log("hhvm_oom_killed", entry);
+    }
     throw;
   }
 }

@@ -66,13 +66,14 @@ if(LZ4_FOUND)
   list(APPEND extra_lib_paths ${pth})
   list(APPEND extra_native_libraries "lz4")
 else()
-  list(APPEND extra_include_paths "${TP_DIR}/lz4/src/lib")
+  get_target_property(LZ4_INCLUDE_DIRS lz4 INTERFACE_INCLUDE_DIRECTORIES)
+  list(APPEND extra_include_paths ${LZ4_INCLUDE_DIRS})
   # If LZ4_FOUND is false either we didn't find lz4 or we found it but it's the
   # wrong version.  We can't just add the new path and a native_lib because we
   # can't control the order (and -l won't accept the raw path to the lib).  By
   # doing it this way we specify the path explicitly.
-  get_target_property(LZ4_DIR lz4 BINARY_DIR)
-  list(APPEND extra_link_opts "${LZ4_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}lz4${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  get_target_property(LZ4_LIBS lz4 INTERFACE_LINK_LIBRARIES)
+  list(APPEND extra_link_opts ${LZ4_LIBS})
 endif()
 
 if(PC_SQLITE3_FOUND)

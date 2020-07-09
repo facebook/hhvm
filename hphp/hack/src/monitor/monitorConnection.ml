@@ -94,8 +94,10 @@ let establish_connection ~tracker ~timeout config =
 let get_cstate ~tracker config (ic, oc) =
   try
     send_version ~tracker oc;
+    tracker.Connection_tracker.t_sent_version <- Unix.gettimeofday ();
     log "get cstate" ~tracker;
     let cstate : connection_state = from_channel_without_buffering ic in
+    tracker.Connection_tracker.t_got_cstate <- Unix.gettimeofday ();
     Ok (ic, oc, cstate)
   with e ->
     let e = Exception.wrap e in
@@ -243,6 +245,7 @@ let connect_to_monitor ~tracker ~timeout config =
       begin
         fun timeout ->
         establish_connection ~tracker ~timeout config >>= fun (ic, oc) ->
+        tracker.Connection_tracker.t_opened_socket <- Unix.gettimeofday ();
         get_cstate ~tracker config (ic, oc)
       end
 
@@ -265,112 +268,114 @@ let connect_and_shut_down ~tracker config =
         Ok ServerMonitorUtils.SHUTDOWN_VERIFIED
       end
 
+(** connect_once.
+1. OPEN SOCKET. After this point we have a working stdin/stdout to the
+process. Implemented in establish_connection.
+  | catch EConnRefused/ENoEnt/Timeout 1s when lockfile present ->
+    Error Monitor_socket_not_ready.
+      This is unexpected! But can happen if you manage to catch the
+      monitor in the short timeframe after it has grabbed its lock but
+      before it has started listening in on its socket.
+      -> "hh_client check/ide" -> retry from step 1, up to 800 times.
+         The number 800 is hard-coded in 9 places through the codebase.
+      -> "hh_client start" -> print "replacing unresponsive server"
+             kill_server; start_server; exit.
+  | catch Timeout <retries>s when lockfile present ->
+    Error Monitor_establish_connection_timeout
+      This is unexpected! after all the monitor is always responsive,
+      and indeed start_server waits until responsive before returning.
+      But this can happen during a DDOS.
+      -> "hh_client check/ide" -> Its retry attempts are passed to the
+          monitor connection attempt already. So in this timeout all
+          the retries have already been consumed. Just exit.
+      -> "hh_client start" -> print "replacing unresponsive server"
+             kill_server; start_server; exit.
+  | catch EConnRefused/ENoEnt/Timeout when lockfile absent ->
+    Error Server_missing.
+      -> "hh_client ide" -> raise Exit_with IDE_no_server.
+      -> "hh_client check" -> start_server; retry step 1, up to 800x.
+      -> "hh_client start" -> start_server; exit.
+  | catch other exception -> unhandled.
+
+2. SEND VERSION; READ VERSION; CHECK VERSIONS. After this point we can
+safely marshal OCaml types back and forth. Implemented in get_cstate
+and verify_cstate.
+  | catch any exception when lockfile present ->
+    close_connection; Error Monitor_connection_failure.
+      This is unexpected!
+      -> "hh_client check/ide" -> retry from step 1, up to 800 times.
+      -> "hh_client start" -> print "replacing unresponsive server"
+             kill_server; start_server; exit.
+  | catch any exception when lockfile absent ->
+    close_connection; Error Server_missing.
+      -> "hh_client ide" -> raise Exit_with IDE_no_server
+      -> "hh_client check" -> start_server; retry step 1, up to 800x.
+      -> "hh_client start" -> start_server; exit.
+  | if version numbers differ ->
+    Error Build_mismatch.
+      -> "hh_client ide" -> raise Exit_with IDE_no_server.
+      -> "hh_client check" -> close_log_tailer; retry from step 1.
+      -> "hh_client start" -> start_server; exit.
+
+3. SEND HANDOFF; READ RESPONSE. After this point we have a working
+connection to a server who we believe is ready to handle our messages.
+Handoff is the stage of the protocol when we're speaking to the monitor
+rather than directly to the server process itself. Implemented in
+send_server_handoff_rpc and consume_prehandoff_message.
+  | response Server_name_not_found ->
+    raise Exit_with Server_name_not_found.
+  | response Server_not_alive_dormant ->
+    print "Waiting for server to start"; retry step 5, unlimited times.
+  | response Server_dormant_connections_limit_reached ->
+    Error Server_dormant.
+      -> "hh_client ide" -> raise Exit_with IDE_no_server.
+      -> "hh_client start" -> print "Server already exists but is
+        dormant"; exit.
+      -> "hh_client check" -> print "No server running, and connection
+        limit reached for waiting  on the next server to be started.
+        Please wait patiently." raise Exit_with No_server_running.
+  | response Server_died ->
+    print "Last killed by OOM / signal / stopped by signal / exited";
+    wait for server to close; Error Server_died.
+      -> "hh_client ide" -> raise Exit_with IDE_no_server.
+      -> "hh_client start" -> start_server.
+      -> "hh_client check" -> retry from step 1, up to 800 times.
+  | catch any exception -> unhandled.
+
+The following two steps aren't implemented inside connect_once but are
+typically done by callers after connect_once has succeeded...
+
+4. READ "HELLO" FROM SERVER. After this point we have evidence that the
+server is ready to handle our messages. We basically gobble whatever
+the server sends until it finally sends a line with just "hello".
+Implemented in wait_for_server_hello.
+  | read anything other than "hello" -> retry from step 4, up to 800x.
+  | catch Timeout 1s -> retry from step 4, up to 800 times.
+  | catch exception EndOfFile/Sys_error ->
+    raise ServerHungUp.
+      -> "hh_client ide/check" -> program exit, code=No_server_running.
+      -> clientStart never actually bothers to do step 4.
+  | catch other exception -> unhandled.
+
+5. SEND CONNECTION TYPE; READ RESPONSE. After this point we have
+evidence that the server is able to handle our connection. The
+connection type indicates Persistent vs Non-persistent.
+  | response Denied_due_to_existing_persistent_connection.
+      -> "hh_client lsp" -> raise Lsp.Error_server_start.
+  | catch any exception -> unhandled.
+*)
 let connect_once ~tracker ~timeout config handoff_options =
-  (***************************************************************************)
-  (* CONNECTION HANDSHAKES                                                   *)
-  (* Explains what connect_once does+returns, and how callers use the result.*)
-  (***************************************************************************)
-  (* 1. OPEN SOCKET. After this point we have a working stdin/stdout to the  *)
-  (* process. Implemented in establish_connection.                           *)
-  (*   | catch EConnRefused/ENoEnt/Timeout 1s when lockfile present ->       *)
-  (*     Error Monitor_socket_not_ready.                                     *)
-  (*       This is unexpected! But can happen if you manage to catch the     *)
-  (*       monitor in the short timeframe after it has grabbed its lock but  *)
-  (*       before it has started listening in on its socket.                 *)
-  (*       -> "hh_client check/ide" -> retry from step 1, up to 800 times.   *)
-  (*          The number 800 is hard-coded in 9 places through the codebase. *)
-  (*       -> "hh_client start" -> print "replacing unresponsive server"     *)
-  (*              kill_server; start_server; exit.                           *)
-  (*   | catch Timeout <retries>s when lockfile present ->                   *)
-  (*     Error Monitor_establish_connection_timeout                          *)
-  (*       This is unexpected! after all the monitor is always responsive,   *)
-  (*       and indeed start_server waits until responsive before returning.  *)
-  (*       But this can happen during a DDOS.                                *)
-  (*       -> "hh_client check/ide" -> Its retry attempts are passed to the  *)
-  (*           monitor connection attempt already. So in this timeout all    *)
-  (*           the retries have already been consumed. Just exit.            *)
-  (*       -> "hh_client start" -> print "replacing unresponsive server"     *)
-  (*              kill_server; start_server; exit.                           *)
-  (*   | catch EConnRefused/ENoEnt/Timeout when lockfile absent ->           *)
-  (*     Error Server_missing.                                               *)
-  (*       -> "hh_client ide" -> raise Exit_with IDE_no_server.              *)
-  (*       -> "hh_client check" -> start_server; retry step 1, up to 800x.   *)
-  (*       -> "hh_client start" -> start_server; exit.                       *)
-  (*   | catch other exception -> unhandled.                                 *)
-  (*                                                                         *)
-  (* 2. SEND VERSION; READ VERSION; CHECK VERSIONS. After this point we can  *)
-  (* safely marshal OCaml types back and forth. Implemented in get_cstate    *)
-  (* and verify_cstate.                                                      *)
-  (*   | catch any exception when lockfile present ->                        *)
-  (*     close_connection; Error Monitor_connection_failure.                 *)
-  (*       This is unexpected!                                               *)
-  (*       -> "hh_client check/ide" -> retry from step 1, up to 800 times.   *)
-  (*       -> "hh_client start" -> print "replacing unresponsive server"     *)
-  (*              kill_server; start_server; exit.                           *)
-  (*   | catch any exception when lockfile absent ->                         *)
-  (*     close_connection; Error Server_missing.                             *)
-  (*       -> "hh_client ide" -> raise Exit_with IDE_no_server               *)
-  (*       -> "hh_client check" -> start_server; retry step 1, up to 800x.   *)
-  (*       -> "hh_client start" -> start_server; exit.                       *)
-  (*   | if version numbers differ ->                                        *)
-  (*     Error Build_mismatch.                                               *)
-  (*       -> "hh_client ide" -> raise Exit_with IDE_no_server.              *)
-  (*       -> "hh_client check" -> close_log_tailer; retry from step 1.      *)
-  (*       -> "hh_client start" -> start_server; exit.                       *)
-  (*                                                                         *)
-  (* 3. SEND HANDOFF; READ RESPONSE. After this point we have a working      *)
-  (* connection to a server who we believe is ready to handle our messages.  *)
-  (* Handoff is the stage of the protocol when we're speaking to the monitor *)
-  (* rather than directly to the server process itself. Implemented in       *)
-  (* send_server_handoff_rpc and consume_prehandoff_message.                 *)
-  (*   | response Server_name_not_found ->                                   *)
-  (*     raise Exit_with Server_name_not_found.                              *)
-  (*   | response Server_not_alive_dormant ->                                *)
-  (*     print "Waiting for server to start"; retry step 5, unlimited times. *)
-  (*   | response Server_dormant_connections_limit_reached ->                *)
-  (*     Error Server_dormant.                                               *)
-  (*       -> "hh_client ide" -> raise Exit_with IDE_no_server.              *)
-  (*       -> "hh_client start" -> print "Server already exists but is       *)
-  (*         dormant"; exit.                                                 *)
-  (*       -> "hh_client check" -> print "No server running, and connection  *)
-  (*         limit reached for waiting  on the next server to be started.    *)
-  (*         Please wait patiently." raise Exit_with No_server_running.      *)
-  (*   | response Server_died ->                                             *)
-  (*     print "Last killed by OOM / signal / stopped by signal / exited";   *)
-  (*     wait for server to close; Error Server_died.                        *)
-  (*       -> "hh_client ide" -> raise Exit_with IDE_no_server.              *)
-  (*       -> "hh_client start" -> start_server.                             *)
-  (*       -> "hh_client check" -> retry from step 1, up to 800 times.       *)
-  (*   | catch any exception -> unhandled.                                   *)
-  (*                                                                         *)
-  (* The following two steps aren't implemented inside connect_once but are  *)
-  (* typically done by callers after connect_once has succeeded...           *)
-  (*                                                                         *)
-  (* 4. READ "HELLO" FROM SERVER. After this point we have evidence that the *)
-  (* server is ready to handle our messages. We basically gobble whatever    *)
-  (* the server sends until it finally sends a line with just "hello".       *)
-  (* Implemented in wait_for_server_hello.                                   *)
-  (*   | read anything other than "hello" -> retry from step 4, up to 800x.  *)
-  (*   | catch Timeout 1s -> retry from step 4, up to 800 times.             *)
-  (*   | catch exception EndOfFile/Sys_error ->                              *)
-  (*     raise ServerHungUp.                                                 *)
-  (*       -> "hh_client ide/check" -> program exit, code=No_server_running. *)
-  (*       -> clientStart never actually bothers to do step 4.               *)
-  (*   | catch other exception -> unhandled.                                 *)
-  (*                                                                         *)
-  (* 5. SEND CONNECTION TYPE; READ RESPONSE. After this point we have        *)
-  (* evidence that the server is able to handle our connection. The          *)
-  (* connection type indicates Persistent vs Non-persistent.                 *)
-  (*   | response Denied_due_to_existing_persistent_connection.               *)
-  (*       -> "hh_client lsp" -> raise Lsp.Error_server_start.               *)
-  (*   | catch any exception -> unhandled.                                   *)
-  (***************************************************************************)
   let open Result.Monad_infix in
-  let start_t = Unix.gettimeofday () in
+  tracker.Connection_tracker.t_start_connect_to_monitor <- Unix.gettimeofday ();
   connect_to_monitor ~tracker ~timeout config >>= fun (ic, oc, cstate) ->
   verify_cstate ~tracker ic cstate >>= fun () ->
+  tracker.Connection_tracker.t_ready_to_send_handoff <- Unix.gettimeofday ();
   send_server_handoff_rpc ~tracker handoff_options oc;
-  let elapsed_t = int_of_float (Unix.gettimeofday () -. start_t) in
+  let elapsed_t =
+    int_of_float
+      ( Unix.gettimeofday ()
+      -. tracker.Connection_tracker.t_start_connect_to_monitor )
+  in
   let timeout = max (timeout - elapsed_t) 1 in
   consume_prehandoff_messages ~tracker ~timeout ic oc
 

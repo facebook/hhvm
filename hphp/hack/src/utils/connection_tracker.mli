@@ -8,6 +8,34 @@
 
 type t = {
   id: string;
+  (*
+  CLIENT SIDE
+  *)
+  mutable t_start_connect_to_monitor: float;
+      (** 1. The client starts its connection to the monitor *)
+  mutable t_opened_socket: float;
+      (** 2. The client has opened a socket to the monitor *)
+  mutable t_sent_version: float;
+      (** 3. The client has sent version to the monitor *)
+  mutable t_got_cstate: float;
+      (** 4. The client has received cstate back from the monitor *)
+  mutable t_ready_to_send_handoff: float;
+      (** 5. The client will now send the tracker to the monitor *)
+  mutable t_connected_to_monitor: float;
+      (** 6. The client received an ack from the monitor *)
+  mutable t_received_hello: float;
+      (** 7. The client received "hello" from the server *)
+  mutable t_sent_connection_type: float;
+      (** 8. The client has sent connection-type to server *)
+  mutable t_ready_to_send_cmd: float;
+      (** 9. On the client, someone invoked ClientConnect.rpc *)
+  mutable t_sent_cmd: float;
+      (** 10. client has sent the rpc command to server *)
+  mutable t_received_response: float;
+      (** 11. client has received rpc response from server *)
+  (*
+  SERVER SIDE
+  *)
   mutable t_sleep_and_check: float;
       (** 1. The server starts a loop doing slices of major GC *)
   mutable t_monitor_fd_ready: float;

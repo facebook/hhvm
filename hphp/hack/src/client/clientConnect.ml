@@ -38,6 +38,9 @@ type env = {
 
 type conn = {
   connection_log_id: string;
+  t_connected_to_monitor: float;
+  t_received_hello: float;
+  t_sent_connection_type: float;
   channels: Timeout.in_channel * Out_channel.t;
   server_finale_file: string;
   conn_progress_callback: string option -> unit;
@@ -269,13 +272,13 @@ let rec connect
   let conn =
     ServerUtils.connect_to_monitor ~tracker ~timeout:1 env.root handoff_options
   in
+  let t_connected_to_monitor = Unix.gettimeofday () in
   HackEventLogger.client_connect_once connect_once_start_t;
   match conn with
   | Ok (ic, oc, server_finale_file) ->
     log
       "[%s] ClientConnect.connect: successfully connected to monitor."
       connection_log_id;
-    let start = Unix.gettimeofday () in
     let%lwt () =
       if env.do_post_handoff_handshake then
         with_server_hung_up @@ fun () ->
@@ -289,11 +292,12 @@ let rec connect
       else
         Lwt.return_unit
     in
+    let t_received_hello = Unix.gettimeofday () in
     let threshold = 2.0 in
     if
       Sys_utils.is_apple_os ()
       && allow_macos_hack
-      && Float.(Unix.gettimeofday () -. start > threshold)
+      && Float.(Unix.gettimeofday () -. t_connected_to_monitor > threshold)
     then (
       (*
         HACK: on MacOS, re-establish the connection if it took a long time
@@ -327,6 +331,10 @@ let rec connect
       Lwt.return
         {
           connection_log_id = Connection_tracker.log_id tracker;
+          t_connected_to_monitor;
+          t_received_hello;
+          t_sent_connection_type = 0.;
+          (* placeholder, until we actually send it *)
           channels = (ic, oc);
           server_finale_file;
           conn_progress_callback = env.progress_callback;
@@ -455,7 +463,7 @@ let connect (env : env) : conn Lwt.t =
     HackEventLogger.client_established_connection start_time;
     if env.do_post_handoff_handshake then
       ServerCommandLwt.send_connection_type oc ServerCommandTypes.Non_persistent;
-    Lwt.return conn
+    Lwt.return { conn with t_sent_connection_type = Unix.gettimeofday () }
   with e ->
     (* we'll log this exception, then re-raise the exception, but using the *)
     (* original backtrace of "e" rather than generating a new backtrace.    *)
@@ -466,6 +474,9 @@ let connect (env : env) : conn Lwt.t =
 let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t =
  fun {
        connection_log_id;
+       t_connected_to_monitor;
+       t_received_hello;
+       t_sent_connection_type;
        channels = (ic, oc);
        server_finale_file;
        conn_progress_callback = progress_callback;
@@ -473,8 +484,10 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t =
        conn_deadline = deadline;
      }
      cmd ->
+  let t_ready_to_send_cmd = Unix.gettimeofday () in
   Marshal.to_channel oc (ServerCommandTypes.Rpc cmd) [];
   Out_channel.flush oc;
+  let t_sent_cmd = Unix.gettimeofday () in
   with_server_hung_up @@ fun () ->
   let%lwt res =
     wait_for_server_message
@@ -487,7 +500,16 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t =
       ~root:conn_root
   in
   match res with
-  | ServerCommandTypes.Response (response, _) -> Lwt.return response
+  | ServerCommandTypes.Response (response, tracker) ->
+    tracker.Connection_tracker.t_ready_to_send_cmd <- t_ready_to_send_cmd;
+    tracker.Connection_tracker.t_sent_cmd <- t_sent_cmd;
+    tracker.Connection_tracker.t_received_response <- Unix.gettimeofday ();
+    (* now we can fill in missing information in tracker, which we couldn't fill in earlier
+    because we'd already transferred ownership of the tracker to the monitor... *)
+    tracker.Connection_tracker.t_connected_to_monitor <- t_connected_to_monitor;
+    tracker.Connection_tracker.t_received_hello <- t_received_hello;
+    tracker.Connection_tracker.t_sent_connection_type <- t_sent_connection_type;
+    Lwt.return response
   | ServerCommandTypes.Push _ -> failwith "unexpected 'push' RPC response"
   | ServerCommandTypes.Hello -> failwith "unexpected 'hello' RPC response"
   | ServerCommandTypes.Ping -> failwith "unexpected 'ping' RPC response"

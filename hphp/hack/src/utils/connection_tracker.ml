@@ -8,6 +8,19 @@
 
 type t = {
   id: string;
+  (* client *)
+  mutable t_start_connect_to_monitor: float;
+  mutable t_opened_socket: float;
+  mutable t_sent_version: float;
+  mutable t_got_cstate: float;
+  mutable t_ready_to_send_handoff: float;
+  mutable t_connected_to_monitor: float;
+  mutable t_received_hello: float;
+  mutable t_sent_connection_type: float;
+  mutable t_ready_to_send_cmd: float;
+  mutable t_sent_cmd: float;
+  mutable t_received_response: float;
+  (* server *)
   mutable t_sleep_and_check: float;
   mutable t_monitor_fd_ready: float;
   mutable t_got_client_fd: float;
@@ -29,6 +42,19 @@ type t = {
 let create () : t =
   {
     id = Random_id.short_string ();
+    (* client *)
+    t_start_connect_to_monitor = 0.;
+    t_opened_socket = 0.;
+    t_sent_version = 0.;
+    t_got_cstate = 0.;
+    t_ready_to_send_handoff = 0.;
+    t_connected_to_monitor = 0.;
+    t_received_hello = 0.;
+    t_sent_connection_type = 0.;
+    t_ready_to_send_cmd = 0.;
+    t_sent_cmd = 0.;
+    t_received_response = 0.;
+    (* server *)
     t_sleep_and_check = 0.;
     t_monitor_fd_ready = 0.;
     t_got_client_fd = 0.;

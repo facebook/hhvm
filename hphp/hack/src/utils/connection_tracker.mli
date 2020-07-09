@@ -48,3 +48,5 @@ val log_id : t -> string
 val track : key:key -> ?time:float -> t -> t
 
 val get_server_unblocked_time : t -> float
+
+val get_telemetry : t -> Telemetry.t

@@ -474,7 +474,7 @@ let connect (env : env) : conn Lwt.t =
     HackEventLogger.client_establish_connection_exception e;
     Caml.Printexc.raise_with_backtrace e backtrace
 
-let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t =
+let rpc : type a. conn -> a ServerCommandTypes.t -> (a * Telemetry.t) Lwt.t =
  fun {
        connection_log_id;
        t_connected_to_monitor;
@@ -505,19 +505,19 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t =
   match res with
   | ServerCommandTypes.Response (response, tracker) ->
     let open Connection_tracker in
-    (* TODO(ljw): print the tracked data *)
-    let _tracker =
+    let telemetry =
       tracker
       |> track ~key:Client_ready_to_send_cmd ~time:t_ready_to_send_cmd
       |> track ~key:Client_sent_cmd ~time:t_sent_cmd
       |> track ~key:Client_received_response
       (* now we can fill in missing information in tracker, which we couldn't fill in earlier
-    because we'd already transferred ownership of the tracker to the monitor... *)
+      because we'd already transferred ownership of the tracker to the monitor... *)
       |> track ~key:Client_connected_to_monitor ~time:t_connected_to_monitor
       |> track ~key:Client_received_hello ~time:t_received_hello
       |> track ~key:Client_sent_connection_type ~time:t_sent_connection_type
+      |> get_telemetry
     in
-    Lwt.return response
+    Lwt.return (response, telemetry)
   | ServerCommandTypes.Push _ -> failwith "unexpected 'push' RPC response"
   | ServerCommandTypes.Hello -> failwith "unexpected 'hello' RPC response"
   | ServerCommandTypes.Ping -> failwith "unexpected 'ping' RPC response"
@@ -528,5 +528,5 @@ let rpc_with_retry
     'a Lwt.t =
   ServerCommandTypes.Done_or_retry.call ~f:(fun () ->
       let%lwt conn = conn_f () in
-      let%lwt result = rpc conn cmd in
+      let%lwt (result, _telemetry) = rpc conn cmd in
       Lwt.return result)

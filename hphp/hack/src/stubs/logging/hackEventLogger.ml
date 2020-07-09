@@ -125,7 +125,7 @@ let client_stop _ = ()
 
 let client_restart _ = ()
 
-let client_check_finish _ = ()
+let client_check_finish _ _ = ()
 
 let client_lsp_method_handled
     ~root:_

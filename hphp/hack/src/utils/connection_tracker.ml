@@ -57,6 +57,8 @@ let create () : t =
     telemetry = Telemetry.create ();
   }
 
+let get_telemetry (t : t) : Telemetry.t = t.telemetry
+
 let log_id (t : t) : string = "t#" ^ t.id
 
 let get_server_unblocked_time (t : t) : float = t.server_unblocked_time

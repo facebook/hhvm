@@ -3539,6 +3539,15 @@ SSATmp* simplifyRaiseErrorOnInvalidIsAsExpressionType(
   return ts;
 }
 
+SSATmp* simplifyCheckClsMethFunc(State& env, const IRInstruction* inst) {
+  if (!inst->src(0)->hasConstVal(TFunc)) return nullptr;
+  auto const func = inst->src(0)->funcVal();
+  if (func->isStaticInPrologue() && !func->isAbstract()) {
+    return gen(env, Nop);
+  }
+  return nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
@@ -3784,6 +3793,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(StrictlyIntegerConv)
   X(RaiseErrorOnInvalidIsAsExpressionType)
   X(LdFrameCls)
+  X(CheckClsMethFunc)
   default: break;
   }
 #undef X

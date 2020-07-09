@@ -2228,6 +2228,10 @@ To string conversions:
 
   Raise a notice if a string is implicitly converted to a class.
 
+| CheckClsMethFunc, ND, S(Func), NF
+
+  Raises runtime errors if the func in S0 is not a callable static method.
+
 | CheckClsReifiedGenericMismatch<cls>, ND, SVArr, NF
 
   Raises a runtime error unless whether each generic in S0 is reified or erased
@@ -2406,7 +2410,7 @@ To string conversions:
 | OutlineSetOp<op>, D(Cell), S(Cell) S(Cell), NF
 
   Similar to SetOpTV, but does not write back the result to S0, instead it is
-  returned as the dest.  This is useful to handle ops that may require a 
+  returned as the dest.  This is useful to handle ops that may require a
   type check before writing the value back.
 
 | GetTime, D(Dbl), NA, NF

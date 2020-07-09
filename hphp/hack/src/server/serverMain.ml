@@ -224,48 +224,50 @@ let handle_connection_try return client env f =
     return (handle_connection_exception ~env ~client ~exn ~stack)
 
 let handle_connection_ genv env client =
-  ServerCommandTypes.(
-    let t = Unix.gettimeofday () in
-    handle_connection_try (fun x -> ServerUtils.Done x) client env @@ fun () ->
-    match ClientProvider.read_connection_type client with
-    | Persistent ->
-      let f env =
-        let env =
-          match env.persistent_client with
-          | Some old_client ->
-            ClientProvider.send_push_message_to_client
-              old_client
-              NEW_CLIENT_CONNECTED;
-            shutdown_persistent_client old_client env
-          | None -> env
-        in
-        let tracker = ClientProvider.get_tracker client in
-        tracker.Connection_tracker.t_start_server_handle <- t;
-        ClientProvider.send_response_to_client client Connected tracker;
-        let env =
-          {
-            env with
-            persistent_client = Some (ClientProvider.make_persistent client);
-          }
-        in
-        (* If the client connected in the middle of recheck, let them know it's
-         * happening. *)
-        if is_full_check_started env.full_check then
-          ServerBusyStatus.send
-            env
-            (ServerCommandTypes.Doing_global_typecheck
-               (ServerCheckUtils.global_typecheck_kind genv env));
-        env
+  let tracker = ClientProvider.get_tracker client in
+  tracker.Connection_tracker.t_start_handle_connection <- Unix.gettimeofday ();
+  handle_connection_try (fun x -> ServerUtils.Done x) client env @@ fun () ->
+  match ClientProvider.read_connection_type client with
+  | ServerCommandTypes.Persistent ->
+    let f env =
+      let env =
+        match env.persistent_client with
+        | Some old_client ->
+          ClientProvider.send_push_message_to_client
+            old_client
+            ServerCommandTypes.NEW_CLIENT_CONNECTED;
+          shutdown_persistent_client old_client env
+        | None -> env
       in
-      if
-        Option.is_some env.persistent_client
-        (* Cleaning up after existing client (in shutdown_persistent_client)
-         * will attempt to write to shared memory *)
-      then
-        ServerUtils.Needs_writes (env, f, true, "Cleaning up persistent client")
-      else
-        ServerUtils.Done (f env)
-    | Non_persistent -> ServerCommand.handle genv env client)
+      tracker.Connection_tracker.t_start_server_handle <- Unix.gettimeofday ();
+      ClientProvider.send_response_to_client
+        client
+        ServerCommandTypes.Connected
+        tracker;
+      let env =
+        {
+          env with
+          persistent_client = Some (ClientProvider.make_persistent client);
+        }
+      in
+      (* If the client connected in the middle of recheck, let them know it's
+       * happening. *)
+      if is_full_check_started env.full_check then
+        ServerBusyStatus.send
+          env
+          (ServerCommandTypes.Doing_global_typecheck
+             (ServerCheckUtils.global_typecheck_kind genv env));
+      env
+    in
+    if
+      Option.is_some env.persistent_client
+      (* Cleaning up after existing client (in shutdown_persistent_client)
+       * will attempt to write to shared memory *)
+    then
+      ServerUtils.Needs_writes (env, f, true, "Cleaning up persistent client")
+    else
+      ServerUtils.Done (f env)
+  | ServerCommandTypes.Non_persistent -> ServerCommand.handle genv env client
 
 let report_persistent_exception
     ~(e : exn)
@@ -678,6 +680,7 @@ let serve_one_iteration genv env client_provider =
   (* after that we'll be able to give an up-to-date answer to the client. *)
   let env = recheck_loop genv env select_outcome in
   let env = update_recheck_values env start_t recheck_id in
+  let t_done_recheck = Unix.gettimeofday () in
   (* if actual work was done, log whether anything got communicated to client *)
   let log_diagnostics =
     env.recent_recheck_loop_stats.total_rechecked_count > 0
@@ -721,6 +724,7 @@ let serve_one_iteration genv env client_provider =
             Hh_logger.log "Finished recheck_loop; Client_went_away" );
         { env with diag_subscribe = Some sub }
   in
+  let t_sent_diagnostics = Unix.gettimeofday () in
   let env =
     match select_outcome with
     | ClientProvider.Select_persistent -> env
@@ -730,6 +734,10 @@ let serve_one_iteration genv env client_provider =
         try
           (* client here is the new client (not the existing persistent client) *)
           (* whose request we're going to handle.                               *)
+          let tracker = ClientProvider.get_tracker client in
+          tracker.Connection_tracker.t_start_server <- start_t;
+          tracker.Connection_tracker.t_done_recheck <- t_done_recheck;
+          tracker.Connection_tracker.t_sent_diagnostics <- t_sent_diagnostics;
           let env =
             handle_connection genv env client `Non_persistent
             |> main_loop_command_handler `Non_persistent client

@@ -42,12 +42,21 @@ let provider_from_file_descriptors x = x
 let provider_for_test () = failwith "for use in tests only"
 
 (** Retrieve channels to client from monitor process. *)
-let accept_client (priority : priority) (parent_in_fd : Unix.file_descr) :
-    client =
+let accept_client
+    (priority : priority)
+    (parent_in_fd : Unix.file_descr)
+    (t_sleep_and_check : float)
+    (t_monitor_fd_ready : float) : client =
   let socket = Libancillary.ancil_recv_fd parent_in_fd in
+  let t_got_client_fd = Unix.gettimeofday () in
   let tracker : Connection_tracker.t =
     Marshal_tools.from_fd_with_preamble parent_in_fd
   in
+  let t_got_tracker = Unix.gettimeofday () in
+  tracker.Connection_tracker.t_sleep_and_check <- t_sleep_and_check;
+  tracker.Connection_tracker.t_monitor_fd_ready <- t_monitor_fd_ready;
+  tracker.Connection_tracker.t_got_client_fd <- t_got_client_fd;
+  tracker.Connection_tracker.t_got_tracker <- t_got_tracker;
   Hh_logger.log "[%s] received fd" (Connection_tracker.log_id tracker);
   Non_persistent_client
     {
@@ -75,6 +84,7 @@ let sleep_and_check
     ~(idle_gc_slice : int)
     (kind : [< `Any | `Force_dormant_start_only | `Priority ]) : select_outcome
     =
+  let t_sleep_and_check = Unix.gettimeofday () in
   let in_fds = [default_in_fd; priority_in_fd; force_dormant_start_only] in
   let l =
     match (kind, persistent_client_opt) with
@@ -95,6 +105,7 @@ let sleep_and_check
     | (`Any, None) -> in_fds
   in
   let ready_fd_l = select ~idle_gc_slice l 0.1 in
+  let t_monitor_fd_ready = Unix.gettimeofday () in
   (* Prioritize existing persistent client requests over command line ones *)
   let is_persistent fd =
     match persistent_client_opt with
@@ -105,11 +116,26 @@ let sleep_and_check
     if List.exists ready_fd_l ~f:is_persistent then
       Select_persistent
     else if List.mem ~equal:Poly.( = ) ready_fd_l priority_in_fd then
-      Select_new (accept_client Priority_high priority_in_fd)
+      Select_new
+        (accept_client
+           Priority_high
+           priority_in_fd
+           t_sleep_and_check
+           t_monitor_fd_ready)
     else if List.mem ~equal:Poly.( = ) ready_fd_l default_in_fd then
-      Select_new (accept_client Priority_default default_in_fd)
+      Select_new
+        (accept_client
+           Priority_default
+           default_in_fd
+           t_sleep_and_check
+           t_monitor_fd_ready)
     else if List.mem ~equal:Poly.( = ) ready_fd_l force_dormant_start_only then
-      Select_new (accept_client Priority_dormant force_dormant_start_only)
+      Select_new
+        (accept_client
+           Priority_dormant
+           force_dormant_start_only
+           t_sleep_and_check
+           t_monitor_fd_ready)
     else if List.is_empty ready_fd_l then
       Select_nothing
     else
@@ -140,22 +166,28 @@ let say_hello oc =
   let fd = Unix.descr_of_out_channel oc in
   Marshal_tools.to_fd_with_preamble fd ServerCommandTypes.Hello |> ignore
 
-let read_connection_type ic =
+let read_connection_type (ic : Timeout.in_channel) : connection_type =
   Timeout.with_timeout
     ~timeout:1
     ~on_timeout:(fun _ -> raise Read_command_timeout)
-    ~do_:(fun timeout -> Timeout.input_value ~timeout ic)
+    ~do_:(fun timeout ->
+      let connection_type : connection_type = Timeout.input_value ~timeout ic in
+      connection_type)
 
 [@@@warning "-52"]
 
 (* we have no alternative but to depend on Sys_error strings *)
 
-let read_connection_type = function
-  | Non_persistent_client { ic; oc; _ } ->
+let read_connection_type (client : client) : connection_type =
+  match client with
+  | Non_persistent_client { ic; oc; tracker; _ } ->
     begin
       try
         say_hello oc;
-        read_connection_type ic
+        tracker.Connection_tracker.t_sent_hello <- Unix.gettimeofday ();
+        let connection_type : connection_type = read_connection_type ic in
+        tracker.Connection_tracker.t_got_connection_type <- Unix.gettimeofday ();
+        connection_type
       with
       | Sys_error "Connection reset by peer"
       | Unix.Unix_error (Unix.EPIPE, "write", _) ->

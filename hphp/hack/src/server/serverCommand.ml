@@ -252,6 +252,7 @@ let with_decl_tracking f =
  * to be completed later (when full recheck is completed, when workers are
  * available, when current recheck is cancelled... *)
 let actually_handle genv client msg full_recheck_needed ~is_stale env =
+  let tracker = ClientProvider.get_tracker client in
   Hh_logger.debug "SeverCommand.actually_handle preamble";
   with_dependency_table_reads full_recheck_needed @@ fun () ->
   Errors.ignore_ @@ fun () ->
@@ -263,12 +264,14 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
    * changes and we asked for an answer that requires ignoring those.
    * This is very rare. *)
   let env = full_recheck_if_needed genv env msg in
+  tracker.Connection_tracker.t_done_full_recheck <- Unix.gettimeofday ();
+
   match msg with
   | Rpc cmd ->
     let cmd_string = ServerCommandTypesUtils.debug_describe_t cmd in
     Hh_logger.debug "ServerCommand.actually_handle rpc %s" cmd_string;
     ClientProvider.ping client;
-    let t = Unix.gettimeofday () in
+    tracker.Connection_tracker.t_start_server_handle <- Unix.gettimeofday ();
     Sys_utils.start_gc_profiling ();
     Full_fidelity_parser_profiling.start_profiling ();
     let ((new_env, response), declared_names) =
@@ -285,7 +288,9 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     in
     let parsed_files = Full_fidelity_parser_profiling.stop_profiling () in
     let ctx = Provider_utils.ctx_from_server_env env in
+    tracker.Connection_tracker.t_end_server_handle <- Unix.gettimeofday ();
     predeclare_ide_deps genv ctx declared_names;
+    tracker.Connection_tracker.t_end_server_handle2 <- Unix.gettimeofday ();
     let (major_gc_time, minor_gc_time) = Sys_utils.get_gc_time () in
     let lvl =
       if ClientProvider.is_persistent client then
@@ -298,15 +303,14 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
       "Handled %s priority: %s [%f ms]"
       (ClientProvider.priority_to_string client)
       cmd_string
-      (Unix.gettimeofday () -. t);
+      ( tracker.Connection_tracker.t_end_server_handle2
+      -. tracker.Connection_tracker.t_start_server_handle );
     HackEventLogger.handled_command
       cmd_string
-      ~start_t:t
+      ~start_t:tracker.Connection_tracker.t_start_server_handle
       ~major_gc_time
       ~minor_gc_time
       ~parsed_files;
-    let tracker = ClientProvider.get_tracker client in
-    tracker.Connection_tracker.t_start_server_handle <- t;
     ClientProvider.send_response_to_client client response tracker;
     if
       ServerCommandTypes.is_disconnect_rpc cmd
@@ -325,7 +329,10 @@ let handle
     (env : ServerEnv.env)
     (client : ClientProvider.client) :
     ServerEnv.env ServerUtils.handle_command_result =
+  let tracker = ClientProvider.get_tracker client in
+  tracker.Connection_tracker.t_waiting_for_cmd <- Unix.gettimeofday ();
   let msg = ClientProvider.read_client_msg client in
+  tracker.Connection_tracker.t_got_cmd <- Unix.gettimeofday ();
   let env = { env with ServerEnv.remote = force_remote msg } in
   let full_recheck_needed = command_needs_full_check msg in
   let is_stale = ServerEnv.(env.recent_recheck_loop_stats.updates_stale) in

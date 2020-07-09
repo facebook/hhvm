@@ -18,10 +18,10 @@ type handoff_options = {
 }
 
 type command =
-  | HANDOFF_TO_SERVER of handoff_options
+  | HANDOFF_TO_SERVER of Connection_tracker.t * handoff_options
   (* Shut down all servers and then the monitor. *)
-  | SHUT_DOWN
-  | SERVER_PROGRESS
+  | SHUT_DOWN of Connection_tracker.t
+  | SERVER_PROGRESS of Connection_tracker.t
 
 type server_to_monitor_message =
   | PROGRESS of string

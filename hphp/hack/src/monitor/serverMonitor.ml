@@ -24,6 +24,9 @@ open Hh_prelude
 open ServerProcess
 open ServerMonitorUtils
 
+let log s ~tracker =
+  Hh_logger.log ("[%s] " ^^ s) (Connection_tracker.log_id tracker)
+
 module Sent_fds_collector = struct
   (*
    This module exists to fix an issue with libancillary (passing a file descriptor
@@ -115,7 +118,9 @@ struct
      * then sent to the living server.
      *
      * String is the server name it wants to connect to. *)
-    purgatory_clients: (MonitorRpc.handoff_options * Unix.file_descr) Queue.t;
+    purgatory_clients:
+      (Connection_tracker.t * MonitorRpc.handoff_options * Unix.file_descr)
+      Queue.t;
     (* Whether to ignore hh version mismatches *)
     ignore_hh_version: bool;
     (* What server is doing now *)
@@ -273,15 +278,20 @@ struct
       Marshal_tools.from_fd_with_preamble client_fd
     in
     match cmd with
-    | MonitorRpc.HANDOFF_TO_SERVER handoff_options ->
-      client_prehandoff ~is_purgatory_client:false env handoff_options client_fd
-    | MonitorRpc.SHUT_DOWN ->
-      Hh_logger.log "Got shutdown RPC. Shutting down.";
+    | MonitorRpc.HANDOFF_TO_SERVER (tracker, handoff_options) ->
+      client_prehandoff
+        ~tracker
+        ~is_purgatory_client:false
+        env
+        handoff_options
+        client_fd
+    | MonitorRpc.SHUT_DOWN tracker ->
+      log "Got shutdown RPC. Shutting down." ~tracker;
       let kill_signal_time = Unix.gettimeofday () in
       kill_server_with_check env.server;
       wait_for_server_exit_with_check env.server kill_signal_time;
       Exit_status.(exit No_error)
-    | MonitorRpc.SERVER_PROGRESS ->
+    | MonitorRpc.SERVER_PROGRESS _tracker ->
       msg_to_channel client_fd (env.server_progress, env.server_progress_warning);
       Unix.close client_fd;
       env
@@ -296,28 +306,35 @@ struct
 
   (* Sends the client connection FD to the server process then closes the
    * FD. *)
-  and hand_off_client_connection_with_retries server_fd retries client_fd =
+  and hand_off_client_connection_with_retries
+      ~tracker server_fd retries client_fd =
     let (_, ready_l, _) = Unix.select [] [server_fd] [] 0.5 in
     if not (List.is_empty ready_l) then
       try hand_off_client_connection server_fd client_fd
       with e ->
         if retries > 0 then (
-          Hh_logger.log "Retrying FD handoff";
+          log "Retrying FD handoff" ~tracker;
           hand_off_client_connection_with_retries
+            ~tracker
             server_fd
             (retries - 1)
             client_fd
         ) else (
-          Hh_logger.log "No more retries. Ignoring request.";
+          log "No more retries. Ignoring request." ~tracker;
           HackEventLogger.send_fd_failure e;
           Unix.close client_fd
         )
     else if retries > 0 then (
-      Hh_logger.log "server socket not yet ready. Retrying.";
-      hand_off_client_connection_with_retries server_fd (retries - 1) client_fd
+      log "server socket not yet ready. Retrying." ~tracker;
+      hand_off_client_connection_with_retries
+        ~tracker
+        server_fd
+        (retries - 1)
+        client_fd
     ) else (
-      Hh_logger.log
-        "server socket not yet ready. No more retries. Ignoring request.";
+      log
+        "server socket not yet ready. No more retries. Ignoring request."
+        ~tracker;
       Unix.close client_fd
     )
 
@@ -348,7 +365,8 @@ struct
 
   (* Send (possibly empty) sequences of messages before handing off to
    * server. *)
-  and client_prehandoff ~is_purgatory_client env handoff_options client_fd =
+  and client_prehandoff
+      ~tracker ~is_purgatory_client env handoff_options client_fd =
     let module PH = Prehandoff in
     match env.server with
     | Alive server ->
@@ -359,12 +377,14 @@ struct
       in
       let since_last_request = Unix.time () -. !(server.last_request_handoff) in
       (* TODO: Send this to client so it is visible. *)
-      Hh_logger.log
+      log
         "Got %s request for typechecker. Prior request %.1f seconds ago"
+        ~tracker
         handoff_options.MonitorRpc.pipe_name
         since_last_request;
       msg_to_channel client_fd (PH.Sentinel server.finale_file);
-      hand_off_client_connection_with_retries server_fd 8 client_fd;
+      hand_off_client_connection_with_retries ~tracker server_fd 8 client_fd;
+      log "handed off client fd to server" ~tracker;
       HackEventLogger.client_connection_sent ();
       server.last_request_handoff := Unix.time ();
       { env with server = Alive server }
@@ -382,7 +402,12 @@ struct
         | Alive _ ->
           (* Server restarted. We want to re-run prehandoff, which will
            * actually do the prehandoff this time. *)
-          client_prehandoff ~is_purgatory_client env handoff_options client_fd
+          client_prehandoff
+            ~tracker
+            ~is_purgatory_client
+            env
+            handoff_options
+            client_fd
         | Died_unexpectedly _
         | Died_config_changed
         | Not_yet_started ->
@@ -418,7 +443,9 @@ struct
         env
       else
         let () =
-          Queue.enqueue env.purgatory_clients (handoff_options, client_fd)
+          Queue.enqueue
+            env.purgatory_clients
+            (tracker, handoff_options, client_fd)
         in
         env
 
@@ -451,9 +478,10 @@ struct
       Queue.fold
         ~f:
           begin
-            fun env (handoff_options, client_fd) ->
+            fun env (tracker, handoff_options, client_fd) ->
             try
               client_prehandoff
+                ~tracker
                 ~is_purgatory_client:true
                 env
                 handoff_options
@@ -461,7 +489,7 @@ struct
             with
             | Unix.Unix_error (Unix.EPIPE, _, _)
             | Unix.Unix_error (Unix.EBADF, _, _) ->
-              Hh_logger.log "Purgatory client disconnected. Dropping.";
+              log "Purgatory client disconnected. Dropping." ~tracker;
               env
           end
         ~init:env

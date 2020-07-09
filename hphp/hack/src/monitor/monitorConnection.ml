@@ -47,14 +47,14 @@ let send_server_handoff_rpc ~tracker handoff_options oc =
   log "send_server_handoff_rpc" ~tracker;
   Marshal_tools.to_fd_with_preamble
     (Unix.descr_of_out_channel oc)
-    (MonitorRpc.HANDOFF_TO_SERVER handoff_options)
+    (MonitorRpc.HANDOFF_TO_SERVER (tracker, handoff_options))
   |> ignore
 
 let send_shutdown_rpc ~tracker oc =
   log "send_shutdown" ~tracker;
   Marshal_tools.to_fd_with_preamble
     (Unix.descr_of_out_channel oc)
-    MonitorRpc.SHUT_DOWN
+    (MonitorRpc.SHUT_DOWN tracker)
   |> ignore
 
 let send_server_progress_rpc ~tracker oc =
@@ -62,7 +62,7 @@ let send_server_progress_rpc ~tracker oc =
   let (_ : int) =
     Marshal_tools.to_fd_with_preamble
       (Unix.descr_of_out_channel oc)
-      MonitorRpc.SERVER_PROGRESS
+      (MonitorRpc.SERVER_PROGRESS tracker)
   in
   ()
 

@@ -1,5 +1,5 @@
 <?hh
-include "016.inc";
 <<__EntryPoint>> function main(): void {
-MyFunc("Hello");
+  include "016.inc";
+  MyFunc("Hello");
 }

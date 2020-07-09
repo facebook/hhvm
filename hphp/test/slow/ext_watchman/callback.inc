@@ -1,7 +1,5 @@
 <?hh
 
-require_once 'constants.inc';
-
 function callback_stress(
   string $path,
   string $query,
@@ -26,6 +24,8 @@ function callback_files(
   string $data_json,
   string $socket_path,
 ): void {
+  require_once 'constants.inc';
+
   chdir($path);
 //  print("DIR: $path, JSON: $data_json\n");
   $data = json_decode($data_json, true);

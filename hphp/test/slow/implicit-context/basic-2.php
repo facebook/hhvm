@@ -1,7 +1,5 @@
 <?hh
 
-include 'implicit.inc';
-
 function printImplicit() {
   var_dump(IntContext::getContext());
 }
@@ -13,5 +11,7 @@ function addFive() {
 
 <<__EntryPoint>>
 function main() {
+  include 'implicit.inc';
+
   var_dump(IntContext::start(5, fun('addFive')));
 }

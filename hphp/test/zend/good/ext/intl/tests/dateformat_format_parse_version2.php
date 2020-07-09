@@ -129,8 +129,8 @@ function ut_main()
 
 }
 
-include_once( 'ut_common.inc' );
 <<__EntryPoint>> function main_entry(): void {
-// Run the test
-ut_run();
+    include_once( 'ut_common.inc' );
+    // Run the test
+    ut_run();
 }

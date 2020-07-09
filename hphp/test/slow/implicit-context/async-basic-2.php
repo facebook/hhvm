@@ -1,7 +1,5 @@
 <?hh
 
-include 'async-implicit.inc';
-
 async function printImplicit() {
   var_dump(IntContext::getContext());
 }
@@ -13,5 +11,7 @@ async function addFive() {
 
 <<__EntryPoint>>
 async function main() {
+  include 'async-implicit.inc';
+
   var_dump(await IntContext::genStart(5, fun('addFive')));
 }

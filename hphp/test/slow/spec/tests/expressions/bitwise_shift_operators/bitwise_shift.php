@@ -6,8 +6,8 @@
    +-------------------------------------------------------------+
 */
 
-require 'bitwise_shift_helper.inc';
 <<__EntryPoint>> function main(): void {
+require 'bitwise_shift_helper.inc';
 error_reporting(-1);
 
 $i32 = 1 << 31; // if this is negative, we have a 32-bit int

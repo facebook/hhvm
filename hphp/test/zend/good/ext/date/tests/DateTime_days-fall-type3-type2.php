@@ -1,7 +1,9 @@
 <?hh
 
-require 'examine_diff.inc';
 const PHPT_DATETIME_SHOW = PHPT_DATETIME_SHOW_DAYS;
-require 'DateTime_data-fall-type3-type2.inc';
 
-<<__EntryPoint>> function main(): void { test(); }
+<<__EntryPoint>> function main(): void {
+  require 'examine_diff.inc';
+  require 'DateTime_data-fall-type3-type2.inc';
+  test();
+}

@@ -1,8 +1,10 @@
 <?hh
 
-include "prop-ub-class.inc";
-
 <<__EntryPoint>> function main() {
+  include "prop-ub-class-1.inc";
+  include "prop-type-alias.inc";
+  include "prop-ub-class-2.inc";
+
   $o = new Foo;
   $o->x = 3.14;
   $o->x = vec[1];

@@ -1,7 +1,5 @@
 <?hh
 
-include 'async-implicit.inc';
-
 async function printImplicit() {
   echo "Implicit: " . (string) IntContext::getContext() . "\n";
 }
@@ -15,5 +13,7 @@ async function aux() {
 
 <<__EntryPoint>>
 async function main() {
+  include 'async-implicit.inc';
+
   await IntContext::genStart(0, fun('aux'));
 }

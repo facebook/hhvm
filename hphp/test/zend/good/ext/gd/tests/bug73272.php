@@ -1,6 +1,7 @@
 <?hh
-require_once 'func.inc';
+
 <<__EntryPoint>> function main(): void {
+require_once 'func.inc';
 $src = imagecreatetruecolor(100, 100);
 imagefilledrectangle($src, 0,0, 99,99, 0xFFFFFF);
 imageellipse($src, 49,49, 40,40, 0x000000);

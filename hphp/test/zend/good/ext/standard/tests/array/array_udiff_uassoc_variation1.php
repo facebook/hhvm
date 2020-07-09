@@ -16,8 +16,8 @@ class classWithToString
 class classWithoutToString
 {
 }
-include('compare_function.inc');
 <<__EntryPoint>> function main(): void {
+include('compare_function.inc');
 echo "*** Testing array_udiff_uassoc() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)

@@ -1,6 +1,7 @@
 <?hh
-require_once 'func.inc';
+
 <<__EntryPoint>> function main(): void {
+require_once 'func.inc';
 $im = imagecreatetruecolor(32768, 1);
 $black = imagecolorallocate($im, 0, 0, 0);
 imageantialias($im, true);

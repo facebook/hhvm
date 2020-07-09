@@ -1,7 +1,5 @@
 <?hh
 
-include 'async-implicit.inc';
-
 class Foo {
   static mixed $bar;
 }
@@ -32,5 +30,6 @@ async function f() {
 
 <<__EntryPoint>>
 async function main() {
+  include 'async-implicit.inc';
   await ClassContext::genStart(new C, fun('f'));
 }

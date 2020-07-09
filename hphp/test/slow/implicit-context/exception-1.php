@@ -1,13 +1,13 @@
 <?hh
 
-include 'implicit.inc';
-
 function throwExn() {
   throw new Exception();
 }
 
 <<__EntryPoint>>
 function main() {
+  include 'implicit.inc';
+
   IntContext::start(1, () ==> {
     try {
       IntContext::start(2, () ==> {

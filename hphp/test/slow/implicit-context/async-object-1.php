@@ -1,7 +1,5 @@
 <?hh
 
-include 'async-implicit.inc';
-
 async function g() {
   echo "in g 1 should be C got ";
   echo ClassContext::getContext()->name() . "\n";
@@ -40,5 +38,7 @@ async function f() {
 
 <<__EntryPoint>>
 async function main() {
+  include 'async-implicit.inc';
+
   await ClassContext::genStart(new C, fun('f'));
 }

@@ -1,7 +1,5 @@
 <?hh
 
-include 'implicit.inc';
-
 function f() {
   try {
     ClassContext::getContext();
@@ -21,6 +19,8 @@ function g() {
 
 <<__EntryPoint>>
 function main() {
+  include 'implicit.inc';
+
   HH\without_implicit_context(fun('f'));
   ClassContext::start(new C, () ==> {
     HH\without_implicit_context(fun('f'));

@@ -1,9 +1,3 @@
-interface Barable {}
-class Bar implements Barable {}
-class NoBar {}
-
-include "prop-type-alias.inc";
-
 class Foo <T1 as num, T2 as BarBar, T3 as T1, T4 as NoCheck> {
   public T1 $x = null;
   public ?T2 $y = 'a';

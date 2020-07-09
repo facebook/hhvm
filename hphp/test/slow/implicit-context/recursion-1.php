@@ -1,7 +1,5 @@
 <?hh
 
-include 'implicit.inc';
-
 function aux() {
   $x = IntContext::getContext();
   if ($x > 10) return;
@@ -12,5 +10,7 @@ function aux() {
 
 <<__EntryPoint>>
 function main() {
+  include 'implicit.inc';
+
   IntContext::start(0, fun('aux'));
 }

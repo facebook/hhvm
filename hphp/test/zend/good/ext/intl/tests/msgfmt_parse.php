@@ -4,8 +4,6 @@
  * Format a number using misc locales/patterns.
  */
 
-include_once( 'ut_common.inc' );
-
 function ut_main()
 {
     $locales = darray[
@@ -45,7 +43,7 @@ function ut_main()
 
 <<__EntryPoint>>
 function main_entry(): void {
-
+	include_once( 'ut_common.inc' );
   // Run the test
   ut_run();
 }

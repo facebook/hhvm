@@ -1,7 +1,5 @@
 <?hh
 
-include 'async-implicit.inc';
-
 async function f() {
   try {
     ClassContext::getContext();
@@ -21,6 +19,8 @@ async function g() {
 
 <<__EntryPoint>>
 async function main() {
+  include 'async-implicit.inc';
+
   HH\gen_without_implicit_context(fun('f'));
   await ClassContext::genStart(new C, async () ==> {
     await HH\gen_without_implicit_context(fun('f'));

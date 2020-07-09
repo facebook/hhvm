@@ -1,6 +1,6 @@
 <?hh
-include_once( 'ut_common.inc' );
 <<__EntryPoint>> function main(): void {
+include_once( 'ut_common.inc' );
 $GLOBALS['oo-mode'] = true;
 $res_str = '';
 /*

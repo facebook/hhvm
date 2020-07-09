@@ -1,7 +1,5 @@
 <?hh
 
-include 'async-implicit.inc';
-
 async function aux() {
   $x = IntContext::getContext();
   if ($x > 10) return;
@@ -12,5 +10,7 @@ async function aux() {
 
 <<__EntryPoint>>
 async function main() {
+  include 'async-implicit.inc';
+
   await IntContext::genStart(0, fun('aux'));
 }

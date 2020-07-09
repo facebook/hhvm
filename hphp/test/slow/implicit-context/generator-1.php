@@ -1,7 +1,5 @@
 <?hh
 
-include 'implicit.inc';
-
 function genA() {
   echo 'genA:' . (string)IntContext::getContext() . "\n";
   yield 1;
@@ -20,6 +18,8 @@ function genB() {
 
 <<__EntryPoint>>
 function main() {
+  include 'implicit.inc';
+
   IntContext::start(1, () ==> {
     $a = genA();
     $a->next(); // 1

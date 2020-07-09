@@ -1,7 +1,5 @@
 <?hh
 
-include 'implicit.inc';
-
 function printImplicit() {
   echo "Implicit: " . (string) IntContext::getContext() . "\n";
 }
@@ -15,5 +13,7 @@ function aux() {
 
 <<__EntryPoint>>
 function main() {
+  include 'implicit.inc';
+
   IntContext::start(0, fun('aux'));
 }

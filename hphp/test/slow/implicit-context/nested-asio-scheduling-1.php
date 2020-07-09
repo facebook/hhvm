@@ -1,7 +1,5 @@
 <?hh
 
-include 'async-implicit.inc';
-
 async function f($n = 'D') {
   echo "Expecting {$n} got " . ClassContext::getContext()->name() . "\n";
   await RescheduleWaitHandle::create(RescheduleWaitHandle::QUEUE_DEFAULT,0);
@@ -20,6 +18,8 @@ async function g() {
 
 <<__EntryPoint>>
 async function main() {
+  include 'async-implicit.inc';
+
   await ClassContext::genStart(new A, async () ==> {
     concurrent {
       await f('A');

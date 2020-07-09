@@ -3,7 +3,7 @@ Stack trace:
 #0 %s/hphp/test/quick/traits_exception.inc(12): XABC::fromTraitInner3()
 #1 %s/hphp/test/quick/traits_exception.inc(8): XABC::fromTraitInner2()
 #2 %s/hphp/test/quick/traits_exception.inc(4): XABC::fromTraitInner1()
-#3 %s/hphp/test/quick/traits_exception.php(7): XABC::fromTrait()
-#4 %s/hphp/test/quick/traits_exception.php(13): XABC::fromClass()
+#3 %s/hphp/test/quick/traits_exception-2.inc(6): XABC::fromTrait()
+#4 %s/hphp/test/quick/traits_exception.php(7): XABC::fromClass()
 #5 (): main()
 #6 {main}

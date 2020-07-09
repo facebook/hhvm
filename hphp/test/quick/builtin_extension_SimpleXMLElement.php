@@ -1,7 +1,5 @@
 <?hh
 
-include __DIR__."/builtin_extensions.inc";
-
 class A_SimpleXMLElement extends SimpleXMLElement {
   public $___x;
 }
@@ -30,9 +28,10 @@ function testCanBeWrappedByIteratorIterator() {
 }
 
 <<__EntryPoint>> function main(): void {
-test("SimpleXMLElement", "<?xml version='1.0'?><document></document>");
+  include __DIR__."/builtin_extensions.inc";
+  test("SimpleXMLElement", "<?xml version='1.0'?><document></document>");
 
-testIteration();
+  testIteration();
 
-testCanBeWrappedByIteratorIterator();
+  testCanBeWrappedByIteratorIterator();
 }

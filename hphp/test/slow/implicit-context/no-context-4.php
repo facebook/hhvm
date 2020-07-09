@@ -1,7 +1,5 @@
 <?hh
 
-include 'implicit.inc';
-
 class Foo {
   static int $x = 0;
 }
@@ -18,6 +16,8 @@ function f() {
 
 <<__EntryPoint>>
 function main() {
+  include 'implicit.inc';
+
   f();
   try {
     ClassContext::start(new C, fun('f'));

@@ -1,5 +1,5 @@
 <?hh
-include 'constants_basic_003.inc';
+
 class B
 {
     public static $a = A::MY_CONST;
@@ -13,6 +13,7 @@ class C
     const MY_CONST = "hello from C";
 }
 <<__EntryPoint>> function main(): void {
+include 'constants_basic_003.inc';
 var_dump(B::$a);
 var_dump(B::$c);
 var_dump(B::ca);

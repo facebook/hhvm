@@ -1,5 +1,4 @@
 <?hh
-require "ns_028.inc";
 
 class Foo {
   function __construct() {
@@ -10,6 +9,7 @@ class Foo {
   }
 }
 <<__EntryPoint>> function main(): void {
+require "ns_028.inc";
 $x = new Foo;
 Foo\Bar();
 $x = new Foo\Foo;

@@ -27,7 +27,7 @@ function ut_main()
     return $res;
 }
 
-include_once( 'ut_common.inc' );
 <<__EntryPoint>> function main_entry(): void {
-ut_run();
+    include_once( 'ut_common.inc' );
+    ut_run();
 }

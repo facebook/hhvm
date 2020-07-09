@@ -1,7 +1,5 @@
 <?hh
 
-include 'async-implicit.inc';
-
 async function throwExn() {
   RescheduleWaitHandle::create(
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
@@ -12,6 +10,8 @@ async function throwExn() {
 
 <<__EntryPoint>>
 async function main() {
+  include 'async-implicit.inc';
+
   await IntContext::genStart(1, () ==> async {
     try {
       await IntContext::genStart(2, () ==> async {

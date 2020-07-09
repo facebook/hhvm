@@ -1,7 +1,5 @@
 <?hh
 
-include 'async-implicit.inc';
-
 async function g($i, $s) {
   if ($i > 1) return;
   echo "in g should be {$s} got ";
@@ -46,5 +44,7 @@ async function f() {
 
 <<__EntryPoint>>
 async function main() {
+  include 'async-implicit.inc';
+
   await ClassContext::genStart(new C, fun('f'));
 }

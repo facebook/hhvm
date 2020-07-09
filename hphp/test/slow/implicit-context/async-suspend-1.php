@@ -1,7 +1,5 @@
 <?hh
 
-include 'async-implicit.inc';
-
 async function answer() {
   await reschedule();
   echo "In answer\n";
@@ -24,6 +22,8 @@ async function change() {
 
 <<__EntryPoint>>
 async function main() {
+  include 'async-implicit.inc';
+
   $result = await IntContext::genStart(1, async () ==> {
     concurrent {
       $x = await answer();

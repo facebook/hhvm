@@ -6,22 +6,22 @@
    +-------------------------------------------------------------+
 */
 
-require 'bitwise_shift_helper.inc';
 <<__EntryPoint>> function main(): void {
-error_reporting(-1);
+   require 'bitwise_shift_helper.inc';
+   error_reporting(-1);
 
-$i32 = 1 << 31; // if this is negative, we have a 32-bit int
-$NumBitsPerInt = ($i32 < 0) ? 32 : 64;
+   $i32 = 1 << 31; // if this is negative, we have a 32-bit int
+   $NumBitsPerInt = ($i32 < 0) ? 32 : 64;
 
-// Shift a positive value right and left using both in- and out-of-range counts
+   // Shift a positive value right and left using both in- and out-of-range counts
 
-$v = 1000;
-printShiftRange($v, -$NumBitsPerInt - 1, -1);
-printShiftRange($v, $NumBitsPerInt, $NumBitsPerInt + 1);
+   $v = 1000;
+   printShiftRange($v, -$NumBitsPerInt - 1, -1);
+   printShiftRange($v, $NumBitsPerInt, $NumBitsPerInt + 1);
 
-// Shift a negative value right and left using both in- and out-of-range counts
+   // Shift a negative value right and left using both in- and out-of-range counts
 
-$v = -1000;
-printShiftRange($v, -$NumBitsPerInt - 1, -1);
-printShiftRange($v, $NumBitsPerInt, $NumBitsPerInt + 1);
+   $v = -1000;
+   printShiftRange($v, -$NumBitsPerInt - 1, -1);
+   printShiftRange($v, $NumBitsPerInt, $NumBitsPerInt + 1);
 }

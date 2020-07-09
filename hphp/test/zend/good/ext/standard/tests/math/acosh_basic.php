@@ -4,9 +4,8 @@
  * Function is implemented in ext/standard/math.c
  */
 
-require(__DIR__."/allowed_rounding_error.inc");
-
 <<__EntryPoint>> function main(): void {
+require(__DIR__."/allowed_rounding_error.inc");
 
 echo "acosh  1.1276259652064= ";
 var_dump(acosh(1.1276259652064));

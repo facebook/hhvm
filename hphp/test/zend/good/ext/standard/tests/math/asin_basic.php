@@ -4,9 +4,8 @@
  * Function is implemented in ext/standard/math.c
  */
 
-require(__DIR__."/allowed_rounding_error.inc");
-
 <<__EntryPoint>> function main(): void {
+require(__DIR__."/allowed_rounding_error.inc");
 
 //output is in degrees
 

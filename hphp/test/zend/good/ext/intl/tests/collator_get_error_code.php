@@ -4,8 +4,6 @@
  * Retreive error code.
  */
 
-include_once( 'ut_common.inc' );
-
 /*
  * Check if error code equals to expected one.
  */
@@ -33,6 +31,7 @@ function ut_main()
 }
 <<__EntryPoint>>
 function main_entry(): void {
+  include_once( 'ut_common.inc' );
 
   # Suppress warning messages.
   error_reporting( E_ERROR );

@@ -1,8 +1,7 @@
 <?hh
 
 namespace {
-    require 'includes/global_bar.php';
-    require 'includes/foo_bar.php';
+
 }
 
 namespace {
@@ -22,6 +21,9 @@ namespace {
 namespace {
     <<__EntryPoint>>
     function main() {
+        require 'includes/global_bar.php';
+        require 'includes/foo_bar.php';
+
         test1();
         test2();
     }

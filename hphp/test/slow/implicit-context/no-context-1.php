@@ -1,7 +1,5 @@
 <?hh
 
-include 'implicit.inc';
-
 <<__NoContext>>
 function f() {
   echo "Failure!\n";
@@ -9,6 +7,7 @@ function f() {
 
 <<__EntryPoint>>
 function main() {
+  include 'implicit.inc';
   try {
     ClassContext::start(new C, fun('f'));
     echo "Failure2!\n";

@@ -1,7 +1,5 @@
 <?hh
 
-require_once 'call_user_func.inc';
-
 function test($f) {
   try {
     \var_dump(fb_call_user_func_async(__DIR__.'/call_user_func.inc', $f, 2));
@@ -12,6 +10,8 @@ function test($f) {
 
 <<__EntryPoint>>
 function main() {
+  require_once 'call_user_func.inc';
+
   test('afunc');
   test(HH\fun('afunc'));
   test(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec['C', 'cfunc']));

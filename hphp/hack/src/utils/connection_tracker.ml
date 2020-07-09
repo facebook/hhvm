@@ -10,10 +10,10 @@ open Hh_prelude
 
 type t = {
   id: string;
-  mutable telemetry: Telemetry.t;
-  mutable server_unblocked_time: float;
-      (** this field is read by clientLsp,
-      so we store it explicitly here as well as inside telemetry *)
+  telemetry: Telemetry.t;
+  server_unblocked_time: float;
+      (** this field is read by clientLsp: we store it explicitly
+      here so we can read it, as well as inside the write-only Telemetry.t *)
 }
 
 type key =
@@ -61,10 +61,15 @@ let log_id (t : t) : string = "t#" ^ t.id
 
 let get_server_unblocked_time (t : t) : float = t.server_unblocked_time
 
-let track (t : t) ?(time : float option) (key : key) : unit =
+let track ~(key : key) ?(time : float option) (t : t) : t =
   let tnow = Unix.gettimeofday () in
   let time = Option.value time ~default:tnow in
-  if equal_key key Server_start_handle then t.server_unblocked_time <- time;
+  let t =
+    if equal_key key Server_start_handle then
+      { t with server_unblocked_time = time }
+    else
+      t
+  in
   let key = String_utils.lstrip (show_key key) "Connection_tracker." in
   Hh_logger.log
     "[%s] Connection_tracker.%s%s"
@@ -74,5 +79,4 @@ let track (t : t) ?(time : float option) (key : key) : unit =
       ""
     else
       ", was at " ^ Utils.timestring time );
-  t.telemetry <- Telemetry.float_ t.telemetry ~key ~value:time;
-  ()
+  { t with telemetry = Telemetry.float_ t.telemetry ~key ~value:time }

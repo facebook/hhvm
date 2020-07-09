@@ -42,11 +42,11 @@ module type S = sig
 
   val get_client_fd : client -> Unix.file_descr option
 
-  val get_tracker : client -> Connection_tracker.t
+  val track : key:Connection_tracker.key -> ?time:float -> client -> unit
 
   val read_connection_type : client -> ServerCommandTypes.connection_type
 
-  val send_response_to_client : client -> 'a -> Connection_tracker.t -> unit
+  val send_response_to_client : client -> 'a -> unit
 
   val send_push_message_to_client : client -> ServerCommandTypes.push -> unit
 

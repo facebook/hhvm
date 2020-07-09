@@ -224,8 +224,9 @@ let handle_connection_try return client env f =
     return (handle_connection_exception ~env ~client ~exn ~stack)
 
 let handle_connection_ genv env client =
-  let tracker = ClientProvider.get_tracker client in
-  Connection_tracker.(track tracker Server_start_handle_connection);
+  ClientProvider.track
+    client
+    ~key:Connection_tracker.Server_start_handle_connection;
   handle_connection_try (fun x -> ServerUtils.Done x) client env @@ fun () ->
   match ClientProvider.read_connection_type client with
   | ServerCommandTypes.Persistent ->
@@ -239,11 +240,8 @@ let handle_connection_ genv env client =
           shutdown_persistent_client old_client env
         | None -> env
       in
-      Connection_tracker.(track tracker Server_start_handle);
-      ClientProvider.send_response_to_client
-        client
-        ServerCommandTypes.Connected
-        tracker;
+      ClientProvider.track client ~key:Connection_tracker.Server_start_handle;
+      ClientProvider.send_response_to_client client ServerCommandTypes.Connected;
       let env =
         {
           env with
@@ -734,13 +732,18 @@ let serve_one_iteration genv env client_provider =
         try
           (* client here is the new client (not the existing persistent client) *)
           (* whose request we're going to handle.                               *)
-          let tracker = ClientProvider.get_tracker client in
-          Connection_tracker.(
-            track tracker Server_start_recheck ~time:t_start_recheck);
-          Connection_tracker.(
-            track tracker Server_done_recheck ~time:t_done_recheck);
-          Connection_tracker.(
-            track tracker Server_sent_diagnostics ~time:t_sent_diagnostics);
+          ClientProvider.track
+            client
+            ~key:Connection_tracker.Server_start_recheck
+            ~time:t_start_recheck;
+          ClientProvider.track
+            client
+            ~key:Connection_tracker.Server_done_recheck
+            ~time:t_done_recheck;
+          ClientProvider.track
+            client
+            ~key:Connection_tracker.Server_sent_diagnostics
+            ~time:t_sent_diagnostics;
           let env =
             handle_connection genv env client `Non_persistent
             |> main_loop_command_handler `Non_persistent client

@@ -45,6 +45,6 @@ val create : unit -> t
 
 val log_id : t -> string
 
-val track : t -> ?time:float -> key -> unit
+val track : key:key -> ?time:float -> t -> t
 
 val get_server_unblocked_time : t -> float

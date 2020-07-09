@@ -252,7 +252,6 @@ let with_decl_tracking f =
  * to be completed later (when full recheck is completed, when workers are
  * available, when current recheck is cancelled... *)
 let actually_handle genv client msg full_recheck_needed ~is_stale env =
-  let tracker = ClientProvider.get_tracker client in
   Hh_logger.debug "SeverCommand.actually_handle preamble";
   with_dependency_table_reads full_recheck_needed @@ fun () ->
   Errors.ignore_ @@ fun () ->
@@ -264,7 +263,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
    * changes and we asked for an answer that requires ignoring those.
    * This is very rare. *)
   let env = full_recheck_if_needed genv env msg in
-  Connection_tracker.(track tracker Server_done_full_recheck);
+  ClientProvider.track client ~key:Connection_tracker.Server_done_full_recheck;
 
   match msg with
   | Rpc cmd ->
@@ -272,7 +271,10 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     Hh_logger.debug "ServerCommand.actually_handle rpc %s" cmd_string;
     ClientProvider.ping client;
     let t_start = Unix.gettimeofday () in
-    Connection_tracker.(track tracker Server_start_handle ~time:t_start);
+    ClientProvider.track
+      client
+      ~key:Connection_tracker.Server_start_handle
+      ~time:t_start;
     Sys_utils.start_gc_profiling ();
     Full_fidelity_parser_profiling.start_profiling ();
     let ((new_env, response), declared_names) =
@@ -289,10 +291,13 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
     in
     let parsed_files = Full_fidelity_parser_profiling.stop_profiling () in
     let ctx = Provider_utils.ctx_from_server_env env in
-    Connection_tracker.(track tracker Server_end_handle);
+    ClientProvider.track client ~key:Connection_tracker.Server_end_handle;
     predeclare_ide_deps genv ctx declared_names;
     let t_end = Unix.gettimeofday () in
-    Connection_tracker.(track tracker Server_end_handle2 ~time:t_end);
+    ClientProvider.track
+      client
+      ~key:Connection_tracker.Server_end_handle2
+      ~time:t_end;
     let (major_gc_time, minor_gc_time) = Sys_utils.get_gc_time () in
     let lvl =
       if ClientProvider.is_persistent client then
@@ -312,7 +317,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
       ~major_gc_time
       ~minor_gc_time
       ~parsed_files;
-    ClientProvider.send_response_to_client client response tracker;
+    ClientProvider.send_response_to_client client response;
     if
       ServerCommandTypes.is_disconnect_rpc cmd
       || (not @@ ClientProvider.is_persistent client)
@@ -330,10 +335,9 @@ let handle
     (env : ServerEnv.env)
     (client : ClientProvider.client) :
     ServerEnv.env ServerUtils.handle_command_result =
-  let tracker = ClientProvider.get_tracker client in
-  Connection_tracker.(track tracker Server_waiting_for_cmd);
+  ClientProvider.track client ~key:Connection_tracker.Server_waiting_for_cmd;
   let msg = ClientProvider.read_client_msg client in
-  Connection_tracker.(track tracker Server_got_cmd);
+  ClientProvider.track client ~key:Connection_tracker.Server_got_cmd;
   let env = { env with ServerEnv.remote = force_remote msg } in
   let full_recheck_needed = command_needs_full_check msg in
   let is_stale = ServerEnv.(env.recent_recheck_loop_stats.updates_stale) in

@@ -505,14 +505,18 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t =
   match res with
   | ServerCommandTypes.Response (response, tracker) ->
     let open Connection_tracker in
-    track tracker Client_ready_to_send_cmd ~time:t_ready_to_send_cmd;
-    track tracker Client_sent_cmd ~time:t_sent_cmd;
-    track tracker Client_received_response;
-    (* now we can fill in missing information in tracker, which we couldn't fill in earlier
+    (* TODO(ljw): print the tracked data *)
+    let _tracker =
+      tracker
+      |> track ~key:Client_ready_to_send_cmd ~time:t_ready_to_send_cmd
+      |> track ~key:Client_sent_cmd ~time:t_sent_cmd
+      |> track ~key:Client_received_response
+      (* now we can fill in missing information in tracker, which we couldn't fill in earlier
     because we'd already transferred ownership of the tracker to the monitor... *)
-    track tracker Client_connected_to_monitor ~time:t_connected_to_monitor;
-    track tracker Client_received_hello ~time:t_received_hello;
-    track tracker Client_sent_connection_type ~time:t_sent_connection_type;
+      |> track ~key:Client_connected_to_monitor ~time:t_connected_to_monitor
+      |> track ~key:Client_received_hello ~time:t_received_hello
+      |> track ~key:Client_sent_connection_type ~time:t_sent_connection_type
+    in
     Lwt.return response
   | ServerCommandTypes.Push _ -> failwith "unexpected 'push' RPC response"
   | ServerCommandTypes.Hello -> failwith "unexpected 'hello' RPC response"

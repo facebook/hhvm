@@ -88,13 +88,22 @@ let establish_connection ~timeout config =
     else
       Error (Monitor_socket_not_ready e)
 
-let get_cstate ~tracker config (ic, oc) =
+let get_cstate
+    ~(tracker : Connection_tracker.t)
+    (config : ServerMonitorUtils.monitor_config)
+    ((ic, oc) : Timeout.in_channel * Out_channel.t) :
+    ( Timeout.in_channel
+      * Out_channel.t
+      * ServerMonitorUtils.connection_state
+      * Connection_tracker.t,
+      ServerMonitorUtils.connection_error )
+    result =
   try
     send_version oc;
-    Connection_tracker.(track tracker Client_sent_version);
+    let tracker = Connection_tracker.(track tracker ~key:Client_sent_version) in
     let cstate : connection_state = from_channel_without_buffering ic in
-    Connection_tracker.(track tracker Client_got_cstate);
-    Ok (ic, oc, cstate)
+    let tracker = Connection_tracker.(track tracker ~key:Client_got_cstate) in
+    Ok (ic, oc, cstate, tracker)
   with e ->
     let e = Exception.wrap e in
     log
@@ -134,10 +143,7 @@ let verify_cstate ~tracker ic cstate =
 
 (* Consume sequence of Prehandoff messages. *)
 let rec consume_prehandoff_messages
-    ~(tracker : Connection_tracker.t)
-    ~(timeout : Timeout.t)
-    (ic : Timeout.in_channel)
-    (oc : Stdlib.out_channel) :
+    ~(timeout : Timeout.t) (ic : Timeout.in_channel) (oc : Stdlib.out_channel) :
     ( Timeout.in_channel * Stdlib.out_channel * string,
       ServerMonitorUtils.connection_error )
     result =
@@ -154,7 +160,7 @@ let rec consume_prehandoff_messages
     Printf.eprintf
       "Waiting for a server to be started...%s\n%!"
       ClientMessages.waiting_for_server_to_be_started_doc;
-    consume_prehandoff_messages ~tracker ~timeout ic oc
+    consume_prehandoff_messages ~timeout ic oc
   | PH.Server_died_config_change ->
     Printf.eprintf
       ( "Last server exited due to config change. Please re-run client"
@@ -176,16 +182,13 @@ let rec consume_prehandoff_messages
     Error Server_died
 
 let consume_prehandoff_messages
-    ~(tracker : Connection_tracker.t)
-    ~(timeout : int)
-    (ic : Timeout.in_channel)
-    (oc : Stdlib.out_channel) :
+    ~(timeout : int) (ic : Timeout.in_channel) (oc : Stdlib.out_channel) :
     ( Timeout.in_channel * Stdlib.out_channel * string,
       ServerMonitorUtils.connection_error )
     result =
   Timeout.with_timeout
     ~timeout
-    ~do_:(fun timeout -> consume_prehandoff_messages ~tracker ~timeout ic oc)
+    ~do_:(fun timeout -> consume_prehandoff_messages ~timeout ic oc)
     ~on_timeout:(fun _ ->
       Error ServerMonitorUtils.Server_dormant_out_of_retries)
 
@@ -240,13 +243,16 @@ let connect_to_monitor ~tracker ~timeout config =
       begin
         fun timeout ->
         establish_connection ~timeout config >>= fun (ic, oc) ->
-        Connection_tracker.(track tracker Client_opened_socket);
+        let tracker =
+          Connection_tracker.(track tracker ~key:Client_opened_socket)
+        in
         get_cstate ~tracker config (ic, oc)
       end
 
 let connect_and_shut_down ~tracker config =
   let open Result.Monad_infix in
-  connect_to_monitor ~tracker ~timeout:3 config >>= fun (ic, oc, cstate) ->
+  connect_to_monitor ~tracker ~timeout:3 config
+  >>= fun (ic, oc, cstate, tracker) ->
   verify_cstate ~tracker ic cstate >>= fun () ->
   send_shutdown_rpc ~tracker oc;
   Timeout.with_timeout
@@ -362,19 +368,25 @@ connection type indicates Persistent vs Non-persistent.
 let connect_once ~tracker ~timeout config handoff_options =
   let open Result.Monad_infix in
   let t_start = Unix.gettimeofday () in
-  Connection_tracker.(track tracker Client_start_connect ~time:t_start);
-  connect_to_monitor ~tracker ~timeout config >>= fun (ic, oc, cstate) ->
+  let tracker =
+    Connection_tracker.(track tracker ~key:Client_start_connect ~time:t_start)
+  in
+  connect_to_monitor ~tracker ~timeout config
+  >>= fun (ic, oc, cstate, tracker) ->
   verify_cstate ~tracker ic cstate >>= fun () ->
-  Connection_tracker.(track tracker Client_ready_to_send_handoff);
+  let tracker =
+    Connection_tracker.(track tracker ~key:Client_ready_to_send_handoff)
+  in
   send_server_handoff_rpc ~tracker handoff_options oc;
   let elapsed_t = int_of_float (Unix.gettimeofday () -. t_start) in
   let timeout = max (timeout - elapsed_t) 1 in
-  consume_prehandoff_messages ~tracker ~timeout ic oc
+  consume_prehandoff_messages ~timeout ic oc
 
 let connect_to_monitor_and_get_server_progress ~tracker ~timeout config :
     (string * string option, ServerMonitorUtils.connection_error) result =
   let open Result.Monad_infix in
-  connect_to_monitor ~tracker ~timeout config >>= fun (ic, oc, cstate) ->
+  connect_to_monitor ~tracker ~timeout config
+  >>= fun (ic, oc, cstate, tracker) ->
   verify_cstate ~tracker ic cstate >>= fun () ->
   (* This is similar to connect_once up to this point, where instead of
     * being handed off to server we just get our answer from monitor *)

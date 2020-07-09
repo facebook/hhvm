@@ -25,11 +25,11 @@ type client =
       ic: Timeout.in_channel;
       oc: Out_channel.t;
       priority: priority;
-      tracker: Connection_tracker.t;
+      mutable tracker: Connection_tracker.t;
     }
   | Persistent_client of {
       fd: Unix.file_descr;
-      tracker: Connection_tracker.t;
+      mutable tracker: Connection_tracker.t;
     }
 
 type select_outcome =
@@ -52,13 +52,14 @@ let accept_client
   let tracker : Connection_tracker.t =
     Marshal_tools.from_fd_with_preamble parent_in_fd
   in
-  let t_got_tracker = Unix.gettimeofday () in
-  Connection_tracker.(
-    track tracker Server_sleep_and_check ~time:t_sleep_and_check);
-  Connection_tracker.(
-    track tracker Server_monitor_fd_ready ~time:t_monitor_fd_ready);
-  Connection_tracker.(track tracker Server_got_client_fd ~time:t_got_client_fd);
-  Connection_tracker.(track tracker Server_got_tracker ~time:t_got_tracker);
+  let tracker =
+    let open Connection_tracker in
+    tracker
+    |> track ~key:Server_sleep_and_check ~time:t_sleep_and_check
+    |> track ~key:Server_monitor_fd_ready ~time:t_monitor_fd_ready
+    |> track ~key:Server_got_client_fd ~time:t_got_client_fd
+    |> track ~key:Server_got_tracker
+  in
   Non_persistent_client
     {
       ic = Timeout.in_channel_of_descr socket;
@@ -158,10 +159,12 @@ let get_client_fd = function
   | Persistent_client { fd; _ } -> Some fd
   | Non_persistent_client _ -> failwith "not implemented"
 
-let get_tracker client =
+let track ~key ?time client =
   match client with
-  | Persistent_client { tracker; _ } -> tracker
-  | Non_persistent_client { tracker; _ } -> tracker
+  | Persistent_client client ->
+    client.tracker <- Connection_tracker.track client.tracker ~key ?time
+  | Non_persistent_client client ->
+    client.tracker <- Connection_tracker.track client.tracker ~key ?time
 
 let say_hello oc =
   let fd = Unix.descr_of_out_channel oc in
@@ -181,13 +184,18 @@ let read_connection_type (ic : Timeout.in_channel) : connection_type =
 
 let read_connection_type (client : client) : connection_type =
   match client with
-  | Non_persistent_client { ic; oc; tracker; _ } ->
+  | Non_persistent_client client ->
     begin
       try
-        say_hello oc;
-        Connection_tracker.(track tracker Server_sent_hello);
-        let connection_type : connection_type = read_connection_type ic in
-        Connection_tracker.(track tracker Server_got_connection_type);
+        say_hello client.oc;
+        client.tracker <-
+          Connection_tracker.(track client.tracker ~key:Server_sent_hello);
+        let connection_type : connection_type =
+          read_connection_type client.ic
+        in
+        client.tracker <-
+          Connection_tracker.(
+            track client.tracker ~key:Server_got_connection_type);
         connection_type
       with
       | Sys_error "Connection reset by peer"
@@ -204,11 +212,12 @@ let read_connection_type (client : client) : connection_type =
 
 (* CARE! scope of suppression should be only read_connection_type *)
 
-let send_response_to_client client response tracker =
-  let fd =
+let send_response_to_client client response =
+  let (fd, tracker) =
     match client with
-    | Non_persistent_client { oc; _ } -> Unix.descr_of_out_channel oc
-    | Persistent_client { fd; _ } -> fd
+    | Non_persistent_client { oc; tracker; _ } ->
+      (Unix.descr_of_out_channel oc, tracker)
+    | Persistent_client { fd; tracker; _ } -> (fd, tracker)
   in
   let (_ : int) =
     Marshal_tools.to_fd_with_preamble

@@ -126,12 +126,6 @@ if (DOUBLE_CONVERSION_INCLUDE_DIR)
   include_directories(${DOUBLE_CONVERSION_INCLUDE_DIR})
 endif ()
 
-# liblz4
-find_package(LZ4)
-if (LZ4_FOUND)
-  include_directories(${LZ4_INCLUDE_DIR})
-endif()
-
 # fastlz
 find_package(FastLZ)
 if (FASTLZ_INCLUDE_DIR)
@@ -464,14 +458,7 @@ macro(hphp_link target)
     target_link_libraries(${target} double-conversion)
   endif()
 
-  if (LZ4_FOUND)
-    target_link_libraries(${target} ${LZ4_LIBRARY})
-  else()
-    target_link_libraries(${target} lz4)
-  endif()
-  # The syntax used for these warnings is unparsable by Apple's Clang
-  add_definitions("-DLZ4_DISABLE_DEPRECATE_WARNINGS=1")
-
+  target_link_libraries(${target} lz4)
   target_link_libraries(${target} libzip)
 
   if (PCRE_LIBRARY)

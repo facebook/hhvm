@@ -112,6 +112,18 @@ type connection_error =
    * waiting for the next server. *)
   | Server_dormant
   | Server_dormant_out_of_retries
+  (* Build ID mismatch indicates that hh_client binary is a different
+   * version from hh_server binary, and hence hh_server will shutdown.
+   *
+   * It may happen due to several reasons:
+   * - It is the expected mechanism by which hh_server shuts down upon a
+   *   version bump (i.e. it doesn't shutdown until a newer version of the client
+   *   pings it).
+   * - It can arise also if you've rebuilt Hack yourself and this versionless
+   *   hh_client connects to an already-running hh_server.
+   * - More rarely, it may happen if chef/fbpkg didn't update binaries on disk
+   *   correctly.
+   *)
   | Build_id_mismatched of build_mismatch_info option
   | Monitor_connection_failure of Exception.t
 [@@deriving show]

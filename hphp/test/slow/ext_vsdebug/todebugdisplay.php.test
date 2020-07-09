@@ -13,6 +13,7 @@ function innerFunc() {
 
   echo "lol\n";
 }
-
+<<__EntryPoint>> function main() {
 innerFunc();
 echo "hello world 2\n";
+}

@@ -1,2 +1,2 @@
 <?hh
-hphp_debug_break();
+<<__EntryPoint>> function main() { hphp_debug_break(); }

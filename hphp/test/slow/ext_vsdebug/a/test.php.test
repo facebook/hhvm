@@ -1,4 +1,5 @@
 <?hh
-
+function maina() {
 echo "hello\n";
 echo "world\n";
+}

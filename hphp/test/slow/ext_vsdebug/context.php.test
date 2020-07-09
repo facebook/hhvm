@@ -27,6 +27,7 @@ function innerFunc() {
 
   echo "hello world 1\n";
 }
-
+<<__EntryPoint>> function main() {
 innerFunc();
 echo "hello world 2\n";
+}

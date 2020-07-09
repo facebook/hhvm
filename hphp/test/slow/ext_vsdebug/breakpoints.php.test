@@ -4,7 +4,7 @@ function foo($a, $b, $c) {
   echo $a + $b + $c;
   echo "\n";
 }
-
+<<__EntryPoint>> function main() {
 echo "Hello world.\n";
 $x = 1;
 $x = 2;
@@ -32,10 +32,11 @@ for ($i = 0; $i < 10; $i++) {
 hphp_debug_break();
 
 $dir = dirname(__FILE__);
-require($dir . '/a/test.php.test');
-require($dir . '/b/test.php.test');
+require($dir . '/a/test.php.test'); maina();
+require($dir . '/b/test.php.test'); mainb();
 
-require($dir . '/a/test.php.test');
-require($dir . '/b/test.php.test');
+require($dir . '/a/test.php.test'); maina();
+require($dir . '/b/test.php.test'); mainb();
 
 echo "goodbye.\n";
+}

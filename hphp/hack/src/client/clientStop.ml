@@ -34,10 +34,10 @@ let wait_for_death root secs =
 let nice_kill env =
   let root_s = Path.to_string env.root in
   Printf.eprintf "Attempting to nicely kill server for %s\n%!" root_s;
-  let id = Random_id.short_string () in
-  Hh_logger.log "[mc#%s] ClientStop.nice_kill" id;
+  let tracker = Connection_tracker.create () in
+  Hh_logger.log "[%s] ClientStop.nice_kill" (Connection_tracker.log_id tracker);
   try
-    match ServerUtils.shut_down_server ~id env.root with
+    match ServerUtils.shut_down_server ~tracker env.root with
     | Ok shutdown_result ->
       begin
         match shutdown_result with

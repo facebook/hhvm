@@ -172,10 +172,12 @@ let should_start env =
         pipe_name = HhServerMonitorConfig.(pipe_type_to_string Default);
       }
   in
-  let id = Random_id.short_string () in
-  Hh_logger.log "[mc#%s] ClientStart.should_start" id;
+  let tracker = Connection_tracker.create () in
+  Hh_logger.log
+    "[%s] ClientStart.should_start"
+    (Connection_tracker.log_id tracker);
   match
-    ServerUtils.connect_to_monitor ~id ~timeout:3 env.root handoff_options
+    ServerUtils.connect_to_monitor ~tracker ~timeout:3 env.root handoff_options
   with
   | Ok _conn -> false
   | Error

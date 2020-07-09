@@ -10,8 +10,6 @@
 open Hh_prelude
 module SMUtils = ServerMonitorUtils
 
-type monitor_connection_id = string
-
 let log s = Hh_logger.log ("[client-connect] " ^^ s)
 
 exception Server_hung_up of ServerCommandTypes.finale_data option
@@ -39,7 +37,7 @@ type env = {
 }
 
 type conn = {
-  mcid: monitor_connection_id;
+  connection_log_id: string;
   channels: Timeout.in_channel * Out_channel.t;
   server_finale_file: string;
   conn_progress_callback: string option -> unit;
@@ -80,21 +78,21 @@ let progress : string ref = ref "connecting"
 let progress_warning : string option ref = ref None
 
 let check_progress (root : Path.t) : unit =
-  let mcid : monitor_connection_id = Random_id.short_string () in
-  log "[mc#%s] ClientConnect.check_progress..." mcid;
-  match ServerUtils.server_progress ~id:mcid ~timeout:3 root with
+  let tracker = Connection_tracker.create () in
+  log "[%s] ClientConnect.check_progress..." (Connection_tracker.log_id tracker);
+  match ServerUtils.server_progress ~tracker ~timeout:3 root with
   | Ok (msg, warning) ->
     log
-      "[mc#%s] check_progress: %s / %s"
-      mcid
+      "[%s] check_progress: %s / %s"
+      (Connection_tracker.log_id tracker)
       msg
       (Option.value warning ~default:"[none]");
     progress := msg;
     progress_warning := warning
   | Error e ->
     log
-      "[mc#%s] check_progress: %s"
-      mcid
+      "[%s] check_progress: %s"
+      (Connection_tracker.log_id tracker)
       (ServerMonitorUtils.show_connection_error e)
 
 let delta_t : float = 3.0
@@ -129,7 +127,7 @@ let check_for_deadline deadline_opt =
 (* Sleeps until the server sends a message. While waiting, prints out spinner
  * and progress information using the argument callback. *)
 let rec wait_for_server_message
-    ~(mcid : monitor_connection_id)
+    ~(connection_log_id : string)
     ~(expected_message : 'a ServerCommandTypes.message_type option)
     ~(ic : Timeout.in_channel)
     ~(deadline : float option)
@@ -147,7 +145,7 @@ let rec wait_for_server_message
   if List.is_empty readable then (
     print_wait_msg progress_callback root;
     wait_for_server_message
-      ~mcid
+      ~connection_log_id
       ~expected_message
       ~ic
       ~deadline
@@ -170,19 +168,19 @@ let rec wait_for_server_message
       in
       if matches_expected && not is_ping then (
         log
-          "[mc#%s] wait_for_server_message: got expected %s"
-          mcid
+          "[%s] wait_for_server_message: got expected %s"
+          connection_log_id
           (ServerCommandTypesUtils.debug_describe_message_type msg);
         progress_callback None;
         Lwt.return msg
       ) else (
         log
-          "[mc#%s] wait_for_server_message: didn't want %s"
-          mcid
+          "[%s] wait_for_server_message: didn't want %s"
+          connection_log_id
           (ServerCommandTypesUtils.debug_describe_message_type msg);
         if not is_ping then print_wait_msg progress_callback root;
         wait_for_server_message
-          ~mcid
+          ~connection_log_id
           ~expected_message
           ~ic
           ~deadline
@@ -195,8 +193,8 @@ let rec wait_for_server_message
       let e = Exception.wrap e in
       let finale_data = get_finale_data server_finale_file in
       log
-        "[mc#%s] wait_for_server_message: %s\nfinale_data: %s"
-        mcid
+        "[%s] wait_for_server_message: %s\nfinale_data: %s"
+        connection_log_id
         (e |> Exception.to_string |> Exception.clean_stack)
         (Option.value_map
            finale_data
@@ -206,7 +204,7 @@ let rec wait_for_server_message
       raise (Server_hung_up finale_data)
 
 let wait_for_server_hello
-    (mcid : monitor_connection_id)
+    (connection_log_id : string)
     (ic : Timeout.in_channel)
     (deadline : float option)
     (server_finale_file : string)
@@ -214,7 +212,7 @@ let wait_for_server_hello
     (root : Path.t) : unit Lwt.t =
   let%lwt (_ : 'a ServerCommandTypes.message_type) =
     wait_for_server_message
-      ~mcid
+      ~connection_log_id
       ~expected_message:(Some ServerCommandTypes.Hello)
       ~ic
       ~deadline
@@ -263,21 +261,26 @@ let rec connect
             HhServerMonitorConfig.Default );
     }
   in
-  let mcid : monitor_connection_id = Random_id.short_string () in
-  log "[mc#%s] ClientConnect.connect: attempting connect_to_monitor" mcid;
+  let tracker = Connection_tracker.create () in
+  let connection_log_id = Connection_tracker.log_id tracker in
+  log
+    "[%s] ClientConnect.connect: attempting connect_to_monitor"
+    connection_log_id;
   let conn =
-    ServerUtils.connect_to_monitor ~id:mcid ~timeout:1 env.root handoff_options
+    ServerUtils.connect_to_monitor ~tracker ~timeout:1 env.root handoff_options
   in
   HackEventLogger.client_connect_once connect_once_start_t;
   match conn with
   | Ok (ic, oc, server_finale_file) ->
-    log "[mc#%s] ClientConnect.connect: successfully connected to monitor." mcid;
+    log
+      "[%s] ClientConnect.connect: successfully connected to monitor."
+      connection_log_id;
     let start = Unix.gettimeofday () in
     let%lwt () =
       if env.do_post_handoff_handshake then
         with_server_hung_up @@ fun () ->
         wait_for_server_hello
-          mcid
+          connection_log_id
           ic
           env.deadline
           server_finale_file
@@ -323,7 +326,7 @@ let rec connect
     ) else
       Lwt.return
         {
-          mcid;
+          connection_log_id = Connection_tracker.log_id tracker;
           channels = (ic, oc);
           server_finale_file;
           conn_progress_callback = env.progress_callback;
@@ -332,8 +335,8 @@ let rec connect
         }
   | Error e ->
     log
-      "[mc#%s] connect: error %s"
-      mcid
+      "[%s] connect: error %s"
+      (Connection_tracker.log_id tracker)
       (ServerMonitorUtils.show_connection_error e);
     if first_attempt then
       Printf.eprintf
@@ -345,7 +348,10 @@ let rec connect
       connect env start_time
     | SMUtils.Server_missing_exn _
     | SMUtils.Server_missing_timeout _ ->
-      log "[mc#%s] connect: autostart=%b" mcid env.autostart;
+      log
+        "[%s] connect: autostart=%b"
+        (Connection_tracker.log_id tracker)
+        env.autostart;
       if env.autostart then (
         ClientStart.start_server
           {
@@ -459,7 +465,7 @@ let connect (env : env) : conn Lwt.t =
 
 let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t =
  fun {
-       mcid;
+       connection_log_id;
        channels = (ic, oc);
        server_finale_file;
        conn_progress_callback = progress_callback;
@@ -472,7 +478,7 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t =
   with_server_hung_up @@ fun () ->
   let%lwt res =
     wait_for_server_message
-      ~mcid
+      ~connection_log_id
       ~expected_message:None
       ~ic
       ~deadline

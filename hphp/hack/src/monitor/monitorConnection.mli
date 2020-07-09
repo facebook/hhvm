@@ -10,7 +10,7 @@
 val server_exists : string -> bool
 
 val connect_once :
-  id:string ->
+  tracker:Connection_tracker.t ->
   timeout:int ->
   ServerMonitorUtils.monitor_config ->
   MonitorRpc.handoff_options ->
@@ -19,14 +19,14 @@ val connect_once :
   result
 
 val connect_and_shut_down :
-  id:string ->
+  tracker:Connection_tracker.t ->
   ServerMonitorUtils.monitor_config ->
   ( ServerMonitorUtils.shutdown_result,
     ServerMonitorUtils.connection_error )
   result
 
 val connect_to_monitor_and_get_server_progress :
-  id:string ->
+  tracker:Connection_tracker.t ->
   timeout:int ->
   ServerMonitorUtils.monitor_config ->
   (string * string option, ServerMonitorUtils.connection_error) result

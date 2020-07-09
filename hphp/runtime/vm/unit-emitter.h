@@ -665,7 +665,8 @@ std::unique_ptr<UnitEmitter> createFatalUnit(
   StringData* filename,
   const SHA1& sha1,
   FatalOp op,
-  StringData* err
+  StringData* err,
+  Location::Range loc = {-1,-1,-1,-1}
 );
 
 ///////////////////////////////////////////////////////////////////////////////

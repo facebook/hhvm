@@ -203,6 +203,14 @@ pub fn print_program<W: Write>(
     }
 }
 
+fn get_fatal_op(f: &FatalOp) -> &str {
+    return match f {
+        FatalOp::Parse => "Parse",
+        FatalOp::Runtime => "Runtime",
+        FatalOp::RuntimeOmitFrame => "RuntimeOmitFrame",
+    };
+}
+
 fn print_program_<W: Write>(
     ctx: &mut Context,
     w: &mut W,
@@ -211,6 +219,28 @@ fn print_program_<W: Write>(
     let is_hh = if prog.is_hh { "1" } else { "0" };
     newline(w)?;
     concat_str(w, [".hh_file ", is_hh, ";"])?;
+
+    if let Some((fop, p, msg)) = &prog.fatal {
+        newline(w)?;
+        let (line_begin, line_end, col_begin, col_end) = if p.is_none() {
+            (1, 1, 0, 0)
+        } else {
+            p.info_pos_extended()
+        };
+        let pos = format!("{}:{},{}:{}", line_begin, col_begin, line_end, col_end);
+        concat_str(
+            w,
+            [
+                ".fatal ",
+                pos.as_ref(),
+                " ",
+                get_fatal_op(fop),
+                " \"",
+                escape(msg).as_ref(),
+                "\";",
+            ],
+        )?;
+    }
 
     newline(w)?;
     concat(w, &prog.adata, |w, a| print_adata_region(ctx, w, a))?;

@@ -18,3 +18,5 @@ hhas_function_rust = { path = "../hhas_function" }
 hhas_record_def_rust = { path = "../hhas_record_def" }
 hhas_symbol_refs_rust = { path = "../hhas_symbol_refs" }
 hhas_typedef_rust = { path = "../hhas_typedef" }
+hhbc_ast_rust = { path = "../hhbc_ast" }
+oxidized = { path = "../../../oxidized" }

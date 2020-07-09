@@ -925,7 +925,6 @@ dependencies = [
  "emit_body_rust 0.0.0",
  "emit_class_rust 0.0.0",
  "emit_constant_rust 0.0.0",
- "emit_fatal_rust 0.0.0",
  "emit_file_attributes_rust 0.0.0",
  "emit_function_rust 0.0.0",
  "emit_record_def_rust 0.0.0",
@@ -1396,6 +1395,8 @@ dependencies = [
  "hhas_record_def_rust 0.0.0",
  "hhas_symbol_refs_rust 0.0.0",
  "hhas_typedef_rust 0.0.0",
+ "hhbc_ast_rust 0.0.0",
+ "oxidized 0.0.0",
 ]
 
 [[package]]

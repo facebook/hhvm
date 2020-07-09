@@ -1704,20 +1704,20 @@ UnitRepoProxy::GetSourceLocTabStmt::get(int64_t unitSn,
 }
 
 std::unique_ptr<UnitEmitter>
-createFatalUnit(StringData* filename, const SHA1& sha1, FatalOp /*op*/,
-                StringData* err) {
+createFatalUnit(StringData* filename, const SHA1& sha1, FatalOp op,
+                StringData* err, Location::Range loc) {
   auto ue = std::make_unique<UnitEmitter>(sha1, SHA1{}, Native::s_noNativeFuncs,
                                           false);
   ue->m_filepath = filename;
   ue->m_isHHFile = true;
   ue->initMain(1, 1);
+  ue->recordSourceLocation(loc, ue->bcPos());
   ue->emitOp(OpString);
   ue->emitInt32(ue->mergeLitstr(err));
   ue->emitOp(OpFatal);
-  ue->emitByte(static_cast<uint8_t>(FatalOp::Runtime));
+  ue->emitByte(static_cast<uint8_t>(op));
   FuncEmitter* fe = ue->getMain();
   fe->maxStackCells = 1;
-  // XXX line numbers are bogus
   fe->finish(ue->bcPos());
   return ue;
 }

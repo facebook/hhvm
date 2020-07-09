@@ -12,6 +12,8 @@ use hhas_function_rust::HhasFunction;
 use hhas_record_def_rust::HhasRecord;
 use hhas_symbol_refs_rust::HhasSymbolRefs;
 use hhas_typedef_rust::Typedef;
+use hhbc_ast_rust::FatalOp;
+use oxidized::pos::Pos;
 
 #[derive(Default, Debug)]
 pub struct HhasProgram<'a> {
@@ -25,4 +27,5 @@ pub struct HhasProgram<'a> {
     pub main: HhasBody<'a>,
     pub symbol_refs: HhasSymbolRefs,
     pub constants: Vec<HhasConstant<'a>>,
+    pub fatal: Option<(FatalOp, Pos, String)>,
 }

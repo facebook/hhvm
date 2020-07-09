@@ -117,6 +117,17 @@ AssemblerError::AssemblerError(int where, const std::string& what)
       folly::sformat("Assembler Error: line {}: {}", where, what))
 {}
 
+
+namespace {
+
+struct FatalUnitError {
+  Location::Range pos;
+  FatalOp op;
+  const std::string msg;
+};
+
+} // namespace
+
 //////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -1930,6 +1941,17 @@ void parse_try_catch(AsmState& as, int nestLevel) {
   eh.m_end = end;
 }
 
+Location::Range parse_srcloc_raw(AsmState& as) {
+  auto const line0 = as.in.readint();
+  as.in.expectWs(':');
+  auto const char0 = as.in.readint();
+  as.in.expectWs(',');
+  auto const line1 = as.in.readint();
+  as.in.expectWs(':');
+  auto const char1 = as.in.readint();
+  return Location::Range(line0, char0, line1, char1);
+}
+
 /*
  * directive-srcloc : line_no ':' chr_no ',' line_no ':' chr_no ';'
  *                  ;
@@ -1942,16 +1964,9 @@ void parse_try_catch(AsmState& as, int nestLevel) {
  * range of inline numbers and character positions specified.
  */
 void parse_srcloc(AsmState& as, int /*nestLevel*/) {
-  auto const line0 = as.in.readint();
-  as.in.expectWs(':');
-  auto const char0 = as.in.readint();
-  as.in.expectWs(',');
-  auto const line1 = as.in.readint();
-  as.in.expectWs(':');
-  auto const char1 = as.in.readint();
+  auto loc = parse_srcloc_raw(as);
   as.in.expectWs(';');
-
-  as.srcLoc = Location::Range(line0, char0, line1, char1);
+  as.srcLoc = loc;
 }
 
 /*
@@ -3539,6 +3554,23 @@ void parse_hh_file(AsmState& as) {
 }
 
 /*
+ * directive-fatal : pos FatalOp string ';'
+ */
+void parse_fatal(AsmState& as) {
+  as.in.skipWhitespace();
+  auto pos = parse_srcloc_raw(as);
+  as.in.skipWhitespace();
+  FatalOp op = static_cast<FatalOp>(read_subop<FatalOp>(as));
+  as.in.skipWhitespace();
+  std::string msg;
+  if (!as.in.readQuotedStr(msg)) {
+    as.error(".fatal must have a message");
+  }
+  as.in.expectWs(';');
+  throw FatalUnitError{pos, op, msg};
+}
+
+/*
  * directive-symbols : '{' identifier identifier* '}'
  */
 void parse_symbol_refs(AsmState& as, SymbolRef symbol_kind) {
@@ -3667,6 +3699,7 @@ void parse(AsmState& as) {
     if (directive == ".class_refs")    { parse_class_refs(as)    ; continue; }
     if (directive == ".metadata")      { parse_metadata(as)      ; continue; }
     if (directive == ".file_attributes") { parse_file_attributes(as); continue;}
+    if (directive == ".fatal")         { parse_fatal(as)         ; continue; }
 
     as.error("unrecognized top-level directive `" + directive + "'");
   }
@@ -3733,6 +3766,8 @@ std::unique_ptr<UnitEmitter> assemble_string(
     AsmState as(instr, wantsSymbolRefs);
     as.ue = ue.get();
     parse(as);
+  } catch (const FatalUnitError& e) {
+    ue = createFatalUnit(sd, sha1, e.op, makeStaticString(e.msg), e.pos);
   } catch (const FatalErrorException& e) {
     if (!swallowErrors) throw;
     ue = createFatalUnit(sd, sha1, FatalOp::Runtime,

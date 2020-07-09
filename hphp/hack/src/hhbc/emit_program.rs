@@ -8,7 +8,6 @@ use emit_adata_rust as emit_adata;
 use emit_body_rust::{emit_body_with_default_args, make_body};
 use emit_class_rust::emit_classes_from_program;
 use emit_constant_rust::emit_constants_from_program;
-use emit_fatal_rust::emit_fatal;
 use emit_file_attributes_rust::emit_file_attributes_from_program;
 use emit_function_rust::emit_functions_from_program;
 use emit_record_def_rust::emit_record_defs_from_program;
@@ -18,7 +17,7 @@ use env::{self, emitter::Emitter, Env};
 use hhas_body_rust::HhasBody;
 use hhas_program_rust::HhasProgram;
 use hhbc_ast_rust::FatalOp;
-use instruction_sequence_rust::{instr, unrecoverable, Error, Result};
+use instruction_sequence_rust::{instr, unrecoverable, Error, InstrSeq, Result};
 use ocamlrep::rc::RcOc;
 use options::Options;
 use oxidized::{ast as Tast, namespace_env, pos::Pos};
@@ -37,7 +36,7 @@ pub fn emit_fatal_program<'p>(
     msg: impl AsRef<str>,
 ) -> Result<HhasProgram<'p>> {
     let mut emitter = Emitter::new(options.clone(), is_systemlib, false);
-    let body_instrs = emit_fatal(op, pos, msg);
+    let body_instrs = InstrSeq::gather(vec![]);
     let main = make_body(
         &mut emitter,
         body_instrs,
@@ -53,6 +52,7 @@ pub fn emit_fatal_program<'p>(
     )?;
     Ok(HhasProgram {
         is_hh: true,
+        fatal: Some((op, pos.clone(), msg.as_ref().to_string())),
         main,
         ..HhasProgram::default()
     })
@@ -126,6 +126,7 @@ fn emit_program_<'p>(
     let file_attributes = emit_file_attributes_from_program(emitter, prog)?;
     let adata = emit_adata::take(emitter).adata;
     let symbol_refs = emit_symbol_refs::take(emitter).symbol_refs;
+    let fatal = None;
 
     Ok(HhasProgram {
         main,
@@ -138,6 +139,7 @@ fn emit_program_<'p>(
         is_hh: flags.contains(FromAstFlags::IS_HH_FILE),
         file_attributes,
         symbol_refs,
+        fatal,
     })
 }
 

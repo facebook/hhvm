@@ -1950,8 +1950,8 @@ let rpc
         let msg = ServerCommandTypesUtils.debug_describe_t command in
         log_debug "hh_server rpc: [%s] [%0.3f]" msg duration;
         match result with
-        | Ok ((), res, start_server_handle_time) ->
-          ref_unblocked_time := start_server_handle_time;
+        | Ok ((), res, tracker) ->
+          ref_unblocked_time := tracker.Connection_tracker.t_start_server_handle;
           Lwt.return res
         | Error
             ( (),

@@ -11,7 +11,7 @@ val rpc_persistent :
   's ->
   ('s -> ServerCommandTypes.push -> 's) ->
   'a ServerCommandTypes.t ->
-  ('s * 'a * float, 's * Utils.callstack * exn) result Lwt.t
+  ('s * 'a * Connection_tracker.t, 's * Utils.callstack * exn) result Lwt.t
 
 val connect_debug : out_channel -> unit
 

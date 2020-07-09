@@ -163,11 +163,13 @@ let not_implemented () = failwith "not implemented"
 
 let get_client_fd _ = not_implemented ()
 
+let get_tracker _ = Connection_tracker.create ()
+
 let accept_client _ = Non_persistent
 
 let read_connection_type _ = Utils.unsafe_opt (get_mocked_new_client_type ())
 
-let send_response_to_client c x _t =
+let send_response_to_client c x _tracker =
   if get_mocked_unclean_disconnect c then
     raise Client_went_away
   else

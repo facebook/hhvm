@@ -6,8 +6,12 @@
  *
  *)
 
-type t = string
+type t = {
+  id: string;
+  mutable t_start_server_handle: float;
+}
 
-let create () : t = Random_id.short_string ()
+let create () : t =
+  { id = Random_id.short_string (); t_start_server_handle = 0. }
 
-let log_id (t : t) : string = "mc#" ^ t
+let log_id (t : t) : string = "mc#" ^ t.id

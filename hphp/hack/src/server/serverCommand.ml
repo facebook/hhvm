@@ -305,7 +305,9 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
       ~major_gc_time
       ~minor_gc_time
       ~parsed_files;
-    ClientProvider.send_response_to_client client response t;
+    let tracker = ClientProvider.get_tracker client in
+    tracker.Connection_tracker.t_start_server_handle <- t;
+    ClientProvider.send_response_to_client client response tracker;
     if
       ServerCommandTypes.is_disconnect_rpc cmd
       || (not @@ ClientProvider.is_persistent client)

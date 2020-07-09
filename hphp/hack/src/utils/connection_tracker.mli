@@ -6,7 +6,10 @@
  *
  *)
 
-type t
+type t = {
+  id: string;
+  mutable t_start_server_handle: float;
+}
 
 val create : unit -> t
 

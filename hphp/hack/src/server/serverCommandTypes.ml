@@ -402,7 +402,7 @@ type 'a message_type =
   (* Only sent to persistent connections. *)
   | Push of push
   (* records the time at which hh_server started handling *)
-  | Response of 'a * float
+  | Response of 'a * Connection_tracker.t
   (* Hello is the first message sent after handoff. It's used for both *)
   (* persistent and non-persistent connections. *)
   | Hello

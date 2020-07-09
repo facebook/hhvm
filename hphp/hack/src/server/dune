@@ -93,6 +93,7 @@
     serverRageTypes
     serverRefactorTypes)
   (libraries
+    connection_tracker
     full_fidelity
     hh_json
     ide_rpc_api_types

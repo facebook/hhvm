@@ -9,7 +9,7 @@ let rec wait_for_rpc_response stack fd state callback =
   try%lwt
     let%lwt message = Marshal_tools_lwt.from_fd_with_preamble fd in
     match message with
-    | Response (r, t) -> Lwt.return (Ok (state, r, t))
+    | Response (r, tracker) -> Lwt.return (Ok (state, r, tracker))
     | Push (ServerCommandTypes.FATAL_EXCEPTION remote_e_data) ->
       Lwt.return (Error (state, stack, Remote_fatal_exception remote_e_data))
     | Push (ServerCommandTypes.NONFATAL_EXCEPTION remote_e_data) ->
@@ -39,7 +39,7 @@ let rpc_persistent :
     s ->
     (s -> push -> s) ->
     a t ->
-    (s * a * float, s * Utils.callstack * exn) result Lwt.t =
+    (s * a * Connection_tracker.t, s * Utils.callstack * exn) result Lwt.t =
  fun (_, oc) state callback cmd ->
   let stack =
     Caml.Printexc.get_callstack 100 |> Caml.Printexc.raw_backtrace_to_string

@@ -27,7 +27,10 @@ type client =
       priority: priority;
       tracker: Connection_tracker.t;
     }
-  | Persistent_client of Unix.file_descr
+  | Persistent_client of {
+      fd: Unix.file_descr;
+      tracker: Connection_tracker.t;
+    }
 
 type select_outcome =
   | Select_persistent
@@ -77,7 +80,7 @@ let sleep_and_check
     match (kind, persistent_client_opt) with
     | (`Force_dormant_start_only, _) -> [force_dormant_start_only]
     | (`Priority, _) -> [priority_in_fd]
-    | (`Any, Some (Persistent_client fd)) ->
+    | (`Any, Some (Persistent_client { fd; _ })) ->
       (* If we are not sure that there are no more IDE commands, do not even
        * look at non-persistent client to avoid race conditions.*)
       if not ide_idle then
@@ -95,7 +98,7 @@ let sleep_and_check
   (* Prioritize existing persistent client requests over command line ones *)
   let is_persistent fd =
     match persistent_client_opt with
-    | Some (Persistent_client x) -> Poly.equal fd x
+    | Some (Persistent_client { fd = x; _ }) -> Poly.equal fd x
     | _ -> false
   in
   try
@@ -117,7 +120,7 @@ let sleep_and_check
     Select_nothing
 
 let has_persistent_connection_request = function
-  | Persistent_client fd ->
+  | Persistent_client { fd; _ } ->
     let (ready, _, _) = Unix.select [fd] [] [] 0.0 in
     not (List.is_empty ready)
   | _ -> false
@@ -125,8 +128,13 @@ let has_persistent_connection_request = function
 let priority_fd (_, x, _) = Some x
 
 let get_client_fd = function
-  | Persistent_client fd -> Some fd
+  | Persistent_client { fd; _ } -> Some fd
   | Non_persistent_client _ -> failwith "not implemented"
+
+let get_tracker client =
+  match client with
+  | Persistent_client { tracker; _ } -> tracker
+  | Non_persistent_client { tracker; _ } -> tracker
 
 let say_hello oc =
   let fd = Unix.descr_of_out_channel oc in
@@ -163,16 +171,16 @@ let read_connection_type = function
 
 (* CARE! scope of suppression should be only read_connection_type *)
 
-let send_response_to_client client response t =
+let send_response_to_client client response tracker =
   let fd =
     match client with
     | Non_persistent_client { oc; _ } -> Unix.descr_of_out_channel oc
-    | Persistent_client fd -> fd
+    | Persistent_client { fd; _ } -> fd
   in
   let (_ : int) =
     Marshal_tools.to_fd_with_preamble
       fd
-      (ServerCommandTypes.Response (response, t))
+      (ServerCommandTypes.Response (response, tracker))
   in
   ()
 
@@ -180,7 +188,7 @@ let send_push_message_to_client client response =
   match client with
   | Non_persistent_client _ ->
     failwith "non-persistent clients don't expect push messages "
-  | Persistent_client fd ->
+  | Persistent_client { fd; _ } ->
     (try
        let (_ : int) =
          Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Push response)
@@ -198,13 +206,13 @@ let read_client_msg ic =
 
 let client_has_message = function
   | Non_persistent_client _ -> true
-  | Persistent_client fd ->
+  | Persistent_client { fd; _ } ->
     let (ready, _, _) = Unix.select [fd] [] [] 0.0 in
     not (List.is_empty ready)
 
 let read_client_msg = function
   | Non_persistent_client { ic; _ } -> read_client_msg ic
-  | Persistent_client fd ->
+  | Persistent_client { fd; _ } ->
     (* TODO: this is probably wrong, since for persistent client we'll
      * construct a new input channel for each message, while the old one
      * could have already buffered it *)
@@ -221,8 +229,8 @@ let get_channels = function
     assert false
 
 let make_persistent = function
-  | Non_persistent_client { ic; _ } ->
-    Persistent_client (Timeout.descr_of_in_channel ic)
+  | Non_persistent_client { ic; tracker; _ } ->
+    Persistent_client { fd = Timeout.descr_of_in_channel ic; tracker }
   | Persistent_client _ ->
     (* See comment on read_connection_type. Non_persistent_client can be
      * turned into Persistent_client, but not the other way *)
@@ -243,7 +251,7 @@ let shutdown_client client =
   let (ic, oc) =
     match client with
     | Non_persistent_client { ic; oc; _ } -> (ic, oc)
-    | Persistent_client fd ->
+    | Persistent_client { fd; _ } ->
       (Timeout.in_channel_of_descr fd, Unix.out_channel_of_descr fd)
   in
   ServerUtils.shutdown_client (ic, oc)

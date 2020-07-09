@@ -239,7 +239,9 @@ let handle_connection_ genv env client =
             shutdown_persistent_client old_client env
           | None -> env
         in
-        ClientProvider.send_response_to_client client Connected t;
+        let tracker = ClientProvider.get_tracker client in
+        tracker.Connection_tracker.t_start_server_handle <- t;
+        ClientProvider.send_response_to_client client Connected tracker;
         let env =
           {
             env with

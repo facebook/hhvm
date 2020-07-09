@@ -5,6 +5,7 @@
     (:standard
       \ clientLogCommand))
   (libraries
+    connection_tracker
     client_ide_service
     clowder_paste
     flytrap

@@ -3,6 +3,7 @@
   (wrapped false)
   (libraries
     collections
+    connection_tracker
     core_kernel
     libancillary
     logging

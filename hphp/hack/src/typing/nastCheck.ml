@@ -239,6 +239,7 @@ and class_ tenv c =
   List.iter c.c_where_constraints (where_constr env);
   List.iter c.c_extends (hint env);
   List.iter c.c_implements (hint env);
+  List.iter c.c_uses (hint env);
   List.iter c.c_typeconsts (typeconst (env, c.c_tparams.c_tparam_list));
   List.iter c_static_vars (class_var env);
   List.iter c_vars (class_var env);

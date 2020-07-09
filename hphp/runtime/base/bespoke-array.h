@@ -125,7 +125,6 @@ public:
   static ArrayData* Copy(const ArrayData* ad);
   static ArrayData* CopyStatic(const ArrayData* ad);
   static ArrayData* ToPHPArray(ArrayData* ad, bool copy);
-  static ArrayData* ToPHPArrayIntishCast(ArrayData* ad, bool copy);
   static ArrayData* ToVArray(ArrayData* ad, bool copy);
   static ArrayData* ToDArray(ArrayData* ad, bool copy);
   static ArrayData* ToVec(ArrayData* ad, bool copy);

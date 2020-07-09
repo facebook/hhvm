@@ -339,7 +339,6 @@ public:
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, TypedValue v);
   static ArrayData* ToPHPArray(ArrayData*, bool);
-  static ArrayData* ToPHPArrayIntishCast(ArrayData*, bool);
   static ArrayData* ToDict(ArrayData*, bool);
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
@@ -403,7 +402,6 @@ public:
   static constexpr auto RenumberDict = &Renumber;
   static constexpr auto OnSetEvalScalarDict = &OnSetEvalScalar;
   static ArrayData* ToPHPArrayDict(ArrayData*, bool);
-  static ArrayData* ToPHPArrayIntishCastDict(ArrayData*, bool);
   static ArrayData* ToDictDict(ArrayData*, bool);
   static constexpr auto ToVecDict = &ArrayCommon::ToVec;
   static constexpr auto ToKeysetDict = &ArrayCommon::ToKeyset;
@@ -437,8 +435,8 @@ private:
                                     const TypedValue*, HeaderKind);
   static MixedArray* AllocStructImpl(uint32_t, const int32_t*, HeaderKind);
 
-  template <IntishCast IC>
-  static ArrayData* FromDictImpl(ArrayData*, bool, bool);
+  // Returns a plain array or darray given the dict input.
+  static ArrayData* FromDictImpl(ArrayData*, bool copy, bool toDArray);
 
   static bool DictEqualHelper(const ArrayData*, const ArrayData*, bool);
 
@@ -553,12 +551,11 @@ private:
   static void copyElmsNextUnsafe(MixedArray* to, const MixedArray* from,
                                  uint32_t nElems);
 
-  /*
-   * Copy this from adIn, intish casting all the intish string keys in
-   * accordance with the value of the intishCast template parameter
-   */
-  template <IntishCast IC>
-  static ArrayData* copyWithIntishCast(MixedArray* adIn, bool asDArray = false);
+  // TODO(kshaunak): Delete this method and use CopyMixed.
+  //
+  // There are subtleties which make it tricky, though; this method clears the
+  // m_nextKI and m_pos fields in the result array, which CopyMixed does not.
+  static ArrayData* copyToPHPArray(MixedArray* adIn, bool asDArray = false);
 
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
@@ -609,8 +606,6 @@ private:
   }
 
   MixedArray* copyImpl(MixedArray* target) const;
-
-  bool hasIntishKeys() const;
 
   MixedArray* moveVal(TypedValue& tv, TypedValue v);
 

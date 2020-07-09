@@ -317,9 +317,6 @@ ArrayData* LoggingLayout::copy(const ArrayData* ad) const {
 ArrayData* LoggingLayout::toPHPArray(ArrayData* ad, bool copy) const {
   return conv(ad, [=](ArrayData* w) { return w->toPHPArray(copy); });
 }
-ArrayData* LoggingLayout::toPHPArrayIntishCast(ArrayData* ad, bool copy) const {
-  return conv(ad, [=](ArrayData* w) { return w->toPHPArrayIntishCast(copy); });
-}
 ArrayData* LoggingLayout::toVArray(ArrayData* ad, bool copy) const {
   return conv(ad, [=](ArrayData* w) { return w->toVArray(copy); });
 }

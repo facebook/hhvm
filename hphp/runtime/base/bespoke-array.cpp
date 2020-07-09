@@ -234,9 +234,6 @@ ArrayData* BespokeArray::CopyStatic(const ArrayData*) {
 ArrayData* BespokeArray::ToPHPArray(ArrayData* ad, bool copy) {
   return asBespoke(ad)->layout()->toPHPArray(ad, copy);
 }
-ArrayData* BespokeArray::ToPHPArrayIntishCast(ArrayData* ad, bool copy) {
-  return asBespoke(ad)->layout()->toPHPArrayIntishCast(ad, copy);
-}
 ArrayData* BespokeArray::ToVArray(ArrayData* ad, bool copy) {
   return asBespoke(ad)->layout()->toVArray(ad, copy);
 }

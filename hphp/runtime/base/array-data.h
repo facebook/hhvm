@@ -864,7 +864,6 @@ struct ArrayFunctions {
   ArrayData* (*renumber[NK])(ArrayData*);
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*toPHPArray[NK])(ArrayData*, bool);
-  ArrayData* (*toPHPArrayIntishCast[NK])(ArrayData*, bool);
   ArrayData* (*toDict[NK])(ArrayData*, bool);
   ArrayData* (*toVec[NK])(ArrayData*, bool);
   ArrayData* (*toKeyset[NK])(ArrayData*, bool);

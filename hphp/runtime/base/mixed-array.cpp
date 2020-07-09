@@ -1565,29 +1565,8 @@ ArrayData* MixedArray::ToPHPArray(ArrayData* in, bool copy) {
   return ad;
 }
 
-bool MixedArray::hasIntishKeys() const {
-  auto const elms = data();
-  for (uint32_t i = 0, limit = m_used; i < limit; ++i) {
-    auto const& e = elms[i];
-    if (e.isTombstone()) continue;
-    if (e.hasStrKey()) {
-      int64_t ignore;
-      if (e.skey->isStrictlyInteger(ignore)) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-/*
-  * Copy this from adIn, intish casting all the intish string keys in
-  * accordance with the value of the intishCast template parameter
-  */
-template <IntishCast IC>
 ALWAYS_INLINE
-ArrayData* MixedArray::copyWithIntishCast(MixedArray* adIn,
-                                          bool asDArray /* = false */) {
+ArrayData* MixedArray::copyToPHPArray(MixedArray* adIn, bool asDArray) {
   auto size = adIn->size();
   auto const elms = adIn->data();
   auto out =
@@ -1598,12 +1577,7 @@ ArrayData* MixedArray::copyWithIntishCast(MixedArray* adIn,
     if (e.hasIntKey()) {
       out->update(e.ikey, e.data);
     } else {
-      int64_t intish;
-      if (IC == IntishCast::Cast && e.skey->isStrictlyInteger(intish)) {
-        out->update(intish, e.data);
-      } else {
-        out->update(e.skey, e.data);
-      }
+      out->update(e.skey, e.data);
     }
   }
 
@@ -1613,40 +1587,16 @@ ArrayData* MixedArray::copyWithIntishCast(MixedArray* adIn,
   return out;
 }
 
-ArrayData* MixedArray::ToPHPArrayIntishCast(ArrayData* in, bool copy) {
-  // the input array should already be a PHP-array so we just need to
-  // clear DV array bits and cast any intish strings that may appear
-  auto adIn = asMixed(in);
-  assertx(adIn->isPHPArrayType());
-  if (adIn->size() == 0) return ArrayData::Create();
-
-  if (copy || adIn->hasIntishKeys()) {
-    return copyWithIntishCast<IntishCast::Cast>(adIn);
-  } else {
-    // We don't need to CoW and there were no intish keys, so we can just
-    // update the ArrayKind in place and get on with our day.
-    adIn->m_kind = HeaderKind::Plain;
-    return adIn;
-  }
-}
-
-template <IntishCast IC>
 ALWAYS_INLINE
-ArrayData* MixedArray::FromDictImpl(ArrayData* adIn,
-                                    bool copy,
-                                    bool toDArray) {
+ArrayData* MixedArray::FromDictImpl(ArrayData* adIn, bool copy, bool toDArray) {
   assertx(adIn->isDictKind());
   auto a = asMixed(adIn);
 
   auto const size = a->size();
-
   if (!size) return toDArray ? ArrayData::CreateDArray() : ArrayData::Create();
 
-  // If we don't necessarily have to make a copy, first scan the dict looking
-  // for any int-like string keys. If we don't find any, we can transform the
-  // dict in place.
-  if (!copy && !a->hasIntishKeys()) {
-    // No int-like string keys, so transform in place.
+  // Transform the array in place or create a copy, as needed.
+  if (!copy) {
     a->m_kind = toDArray ? HeaderKind::Mixed : HeaderKind::Plain;
     a->setLegacyArray(false);
     if (RO::EvalArrayProvenance) arrprov::reassignTag(a);
@@ -1656,19 +1606,12 @@ ArrayData* MixedArray::FromDictImpl(ArrayData* adIn,
     // Either we need to make a copy anyways, or we don't, but there are
     // int-like string keys. In either case, create the array from scratch,
     // inserting each element one-by-one, doing key conversion as necessary.
-    return copyWithIntishCast<IC>(a, toDArray);
+    return copyToPHPArray(a, toDArray);
   }
 }
 
 ArrayData* MixedArray::ToPHPArrayDict(ArrayData* adIn, bool copy) {
-  auto out = FromDictImpl<IntishCast::None>(adIn, copy, false);
-  assertx(out->isNotDVArray());
-  assertx(!out->isLegacyArray());
-  return out;
-}
-
-ArrayData* MixedArray::ToPHPArrayIntishCastDict(ArrayData* adIn, bool copy) {
-  auto out = FromDictImpl<IntishCast::Cast>(adIn, copy, false);
+  auto out = FromDictImpl(adIn, copy, false);
   assertx(out->isNotDVArray());
   assertx(!out->isLegacyArray());
   return out;
@@ -1690,7 +1633,7 @@ ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
 
 ArrayData* MixedArray::ToDArrayDict(ArrayData* in, bool copy) {
   if (RuntimeOption::EvalHackArrDVArrs) return in;
-  auto out = FromDictImpl<IntishCast::None>(in, copy, true);
+  auto out = FromDictImpl(in, copy, true);
   assertx(out->isDArray());
   assertx(!out->isLegacyArray());
   return out;

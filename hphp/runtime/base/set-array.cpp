@@ -771,7 +771,7 @@ void SetArray::OnSetEvalScalar(ArrayData* ad) {
   }
 }
 
-template <typename Init, IntishCast IC>
+template <typename Init>
 ALWAYS_INLINE
 ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {
   auto a = asSet(ad);
@@ -789,13 +789,7 @@ ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {
     if (elm.hasIntKey()) {
       init.set(elm.intKey(), tvAsCVarRef(&elm.tv));
     } else {
-      int64_t intish;
-      auto const key = elm.strKey();
-      if (IC == IntishCast::Cast && key->isStrictlyInteger(intish)) {
-        init.set(intish, make_tv<KindOfInt64>(intish));
-      } else {
-        init.set(key, tvAsCVarRef(&elm.tv));
-      }
+      init.set(elm.strKey(), tvAsCVarRef(&elm.tv));
     }
   }
 
@@ -805,21 +799,14 @@ ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {
 }
 
 ArrayData* SetArray::ToPHPArray(ArrayData* ad, bool) {
-  auto out =
-    ToArrayImpl<MixedArrayInit, IntishCast::None>(ad, false);
-  assertx(out->isNotDVArray());
-  return out;
-}
-
-ArrayData* SetArray::ToPHPArrayIntishCast(ArrayData* ad, bool) {
-  auto out = ToArrayImpl<MixedArrayInit, IntishCast::Cast>(ad, false);
+  auto out = ToArrayImpl<MixedArrayInit>(ad, false);
   assertx(out->isNotDVArray());
   return out;
 }
 
 ArrayData* SetArray::ToDArray(ArrayData* ad, bool copy) {
   if (RuntimeOption::EvalHackArrDVArrs) return ToDict(ad, copy);
-  auto out = ToArrayImpl<DArrayInit, IntishCast::None>(ad, true);
+  auto out = ToArrayImpl<DArrayInit>(ad, true);
   assertx(out->isDArray());
   return out;
 }

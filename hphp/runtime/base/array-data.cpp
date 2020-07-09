@@ -629,11 +629,10 @@ const ArrayFunctions g_array_funcs = {
    * ArrayData* ToPHPArray(ArrayData*, bool)
    *
    *   Convert to a PHP array. If already a PHP array, it will be returned
-   *   unchange (without copying). If copy is false, it may be converted in
+   *   unchanged (without copying). If copy is false, it may be converted in
    *   place.
    */
   DISPATCH(ToPHPArray)
-  DISPATCH(ToPHPArrayIntishCast)
 
    /*
    * ArrayData* ToDict(ArrayData*, bool)
@@ -1256,6 +1255,40 @@ template ArrayData* tagArrProvImpl<APCArray>(ArrayData*, const APCArray*);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+ArrayData* ArrayData::toPHPArrayIntishCast(bool copy) {
+  auto const base = toPHPArray(copy);
+  if (isVArray() || isVecType()) return base;
+
+  // Check if we need to intish-cast any string keys.
+  int64_t i;
+  auto intish = false;
+  IterateKVNoInc(base, [&](TypedValue k, TypedValue) {
+    return intish |= tvIsString(k) && val(k).pstr->isStrictlyInteger(i);
+  });
+  if (!intish) return base;
+
+  // Create a new, plain PHP array with the casted keys.
+  auto result = MixedArrayInit(base->size());
+  IterateKVNoInc(base, [&](TypedValue k, TypedValue v) {
+    result.setUnknownKey<IntishCast::Cast>(tvAsCVarRef(&k), tvAsCVarRef(&v));
+  });
+  if (base != this) decRefArr(base);
+  auto ad = result.create();
+  if (!isKeysetType()) return ad;
+
+  // When keysets are intish-casted, we cast the values, too. Do so in place.
+  // This case is rare, so we keep the extra checks out of the loop above.
+  assertx(ad->hasExactlyOneRef());
+  auto elm = MixedArray::asMixed(ad)->data();
+  for (auto const end = elm + ad->size(); elm != end; elm++) {
+    if (tvIsString(elm->data) && elm->hasIntKey()) {
+      decRefStr(val(elm->data).pstr);
+      tvCopy(make_tv<KindOfInt64>(elm->intKey()), elm->data);
+    }
+  }
+  return ad;
+}
+
 bool ArrayData::intishCastKey(const StringData* key, int64_t& i) const {
   if (key->isStrictlyInteger(i) && useWeakKeys()) {
     if (RO::EvalHackArrCompatIntishCastNotices) {
@@ -1266,6 +1299,6 @@ bool ArrayData::intishCastKey(const StringData* key, int64_t& i) const {
   return false;
 }
 
-/////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }

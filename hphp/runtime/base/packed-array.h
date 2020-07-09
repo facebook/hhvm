@@ -104,7 +104,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, TypedValue v);
   static ArrayData* ToPHPArray(ArrayData*, bool);
-  static constexpr auto ToPHPArrayIntishCast = &ToPHPArray;
   static ArrayData* ToVArray(ArrayData*, bool);
   static ArrayData* ToDArray(ArrayData*, bool);
   static ArrayData* ToDict(ArrayData*, bool);
@@ -118,7 +117,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static arr_lval LvalStrVec(ArrayData*, StringData*);
   static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);
   static constexpr auto ToPHPArrayVec = &ToPHPArray;
-  static constexpr auto ToPHPArrayIntishCastVec = &ToPHPArray;
   static ArrayData* ToVArrayVec(ArrayData*, bool);
   static constexpr auto ToDictVec = &ToDict;
   static ArrayData* ToVecVec(ArrayData*, bool);

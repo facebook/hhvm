@@ -112,7 +112,7 @@ ArrayData* ArrayCommon::ToDArray(ArrayData* a, bool) {
   IterateKV(
     a,
     [&](TypedValue k, TypedValue v) {
-      init.setUnknownKey(tvAsCVarRef(&k), tvAsCVarRef(&v));
+      init.setValidKey(tvAsCVarRef(&k), tvAsCVarRef(&v));
     }
   );
   return init.create();

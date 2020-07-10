@@ -205,15 +205,18 @@ let rec localize ~ety_env env (dty : decl_ty) =
     when String.equal x Naming_special_names.FB.cIncorrectType
          && Env.is_typedef env x ->
     localize ~ety_env env (mk (r, Tlike arg))
-  | (r, Tapply ((_, x), argl)) when Env.is_typedef env x ->
-    let (env, argl) = List.map_env env argl (localize ~ety_env) in
-    TUtils.expand_typedef ety_env env r x argl
   | (r, Tapply (((p, cid) as cls), argl)) ->
     begin
       match Env.get_class env cid with
       | None ->
         let (env, tyl) = List.map_env env argl (localize ~ety_env) in
-        (env, mk (r, Tclass (cls, Nonexact, tyl)))
+        (* If it isn't a class, try fetching it as a typedef instead.
+         * We attempt fetching as a class first since it is the common case.
+         *)
+        if Env.is_typedef env cid then
+          TUtils.expand_typedef ety_env env r cid tyl
+        else
+          (env, mk (r, Tclass (cls, Nonexact, tyl)))
       | Some class_info ->
         if Option.is_some (Cls.enum_type class_info) then
           (* if argl <> [], nastInitCheck would have raised an error *)

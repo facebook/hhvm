@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use ast_scope_rust::{self as ast_scope, Scope, ScopeItem};
-use closure_convert_rust::HoistKind;
 use emit_attribute_rust as emit_attribute;
 use emit_body_rust as emit_body;
 use emit_memoize_helpers_rust as emit_memoize_helpers;
@@ -103,7 +102,6 @@ pub(crate) fn emit_wrapper_function<'a>(
         body,
         span: Span::from_pos(&f.span),
         rx_level,
-        hoisted: HoistKind::TopLevel,
         flags,
     })
 }

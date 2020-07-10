@@ -318,9 +318,9 @@ ImmutableFuncLookup lookupImmutableFunc(const Unit* unit,
                                         const StringData* name) {
   auto const ne = NamedEntity::get(name);
   if (auto const f = ne->uniqueFunc()) {
-    // We have an unique function. However, it may be conditionally defined
-    // (!f->top()) or interceptable, which means we can't use it directly.
-    if (!f->top() || f->isInterceptable()) return {nullptr, true};
+    // We have an unique function. However, it may be interceptable, which means
+    // we can't use it directly.
+    if (f->isInterceptable()) return {nullptr, true};
     // We can use this function. If its persistent (which means its unit's
     // pseudo-main is trivial), its safe to use unconditionally. If its defined
     // in the same unit as the caller, its also safe to use unconditionally. By
@@ -358,7 +358,7 @@ ImmutableFuncLookup lookupImmutableFunc(const Unit* unit,
     found = f;
   }
 
-  if (found && found->top() && !found->isInterceptable()) {
+  if (found && !found->isInterceptable()) {
     return {found, false};
   }
   return {nullptr, true};

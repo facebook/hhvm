@@ -93,10 +93,6 @@ inline Func** Unit::MergeInfo::funcEnd() const {
   return funcBegin() + m_firstHoistablePreClass;
 }
 
-inline Func** Unit::MergeInfo::funcHoistableBegin() const {
-  return funcBegin() + m_firstHoistableFunc;
-}
-
 inline
 Unit::MergeInfo::FuncRange Unit::MergeInfo::funcs() const {
   return { funcBegin(), funcEnd() };
@@ -105,11 +101,6 @@ Unit::MergeInfo::FuncRange Unit::MergeInfo::funcs() const {
 inline
 Unit::MergeInfo::MutableFuncRange Unit::MergeInfo::mutableFuncs() const {
   return { funcBegin(), funcEnd() };
-}
-
-inline
-Unit::MergeInfo::MutableFuncRange Unit::MergeInfo::nonMainFuncs() const {
-  return { funcBegin() + 1, funcEnd() };
 }
 
 inline void*& Unit::MergeInfo::mergeableObj(int idx) {

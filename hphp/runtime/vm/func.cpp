@@ -687,7 +687,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
 // SharedData.
 
 Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
-                             int line1, int line2, bool top, bool isPhpLeafFn,
+                             int line1, int line2, bool isPhpLeafFn,
                              const StringData* docComment)
   : m_base(base)
   , m_preClass(preClass)
@@ -699,7 +699,6 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
   , m_originalFilename(nullptr)
   , m_cti_base(0)
 {
-  m_allFlags.m_top = top;
   m_allFlags.m_isClosureBody = false;
   m_allFlags.m_isAsync = false;
   m_allFlags.m_isGenerator = false;

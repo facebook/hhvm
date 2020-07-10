@@ -278,11 +278,6 @@ struct Func final {
   // Basic info.                                                        [const]
 
   /*
-   * Whether this function was defined in a pseudomain.
-   */
-  bool top() const;
-
-  /*
    * The Unit the function is defined in.
    */
   Unit* unit() const;
@@ -1142,7 +1137,7 @@ private:
    */
   struct SharedData : AtomicCountable {
     SharedData(PreClass* preClass, Offset base, Offset past,
-               int line1, int line2, bool top, bool isPhpLeafFn,
+               int line1, int line2, bool isPhpLeafFn,
                const StringData* docComment);
     ~SharedData();
 
@@ -1174,7 +1169,6 @@ private:
      */
     union Flags {
       struct {
-        bool m_top : true;
         bool m_isClosureBody : true;
         bool m_isAsync : true;
         bool m_isGenerator : true;

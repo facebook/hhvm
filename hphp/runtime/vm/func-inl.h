@@ -125,10 +125,6 @@ inline FuncId Func::getFuncId() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Basic info.
 
-inline bool Func::top() const {
-  return shared()->m_allFlags.m_top;
-}
-
 inline Unit* Func::unit() const {
   return m_unit;
 }

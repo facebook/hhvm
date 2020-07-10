@@ -67,7 +67,6 @@ let emit_constant_cinit env (ast_constant : Tast.gconst) (c : Hhas_constant.t) :
          false (* is_async *)
          false (* is_generator *)
          false (* is_pair_generator *)
-         Closure_convert.TopLevel
          true (* no_injection *)
          false (* is_interceptable *)
          false (* is_memoize_impl *)

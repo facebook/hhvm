@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use closure_convert_rust::HoistKind;
 use core_utils_rust as utils;
 use emit_body_rust as emit_body;
 use emit_type_hint_rust::{self as emit_type_hint, Kind};
@@ -66,7 +65,6 @@ fn emit_constant_cinit<'a>(
                 body,
                 span: Span::from_pos(&constant.span),
                 rx_level: rx::Level::NonRx,
-                hoisted: HoistKind::TopLevel,
                 flags: hhas_function::Flags::NO_INJECTION,
             })
         })

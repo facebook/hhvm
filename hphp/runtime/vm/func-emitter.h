@@ -86,7 +86,7 @@ struct FuncEmitter {
   /*
    * Just set some fields when we start and stop emitting.
    */
-  void init(int l1, int l2, Offset base_, Attr attrs_, bool top_,
+  void init(int l1, int l2, Offset base_, Attr attrs_,
             const StringData* docComment_);
   void finish(Offset past);
 
@@ -255,7 +255,6 @@ public:
   int line1;
   int line2;
   LowStringPtr name;
-  bool top;
   Attr attrs;
 
   ParamInfoVec params;
@@ -325,7 +324,7 @@ struct FuncRepoProxy : public RepoProxy {
     InsertFuncStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(const FuncEmitter& fe,
                 RepoTxn& txn, int64_t unitSn, int funcSn, Id preClassId,
-                const StringData* name, bool top); // throws(RepoExc)
+                const StringData* name); // throws(RepoExc)
   };
 
   struct GetFuncsStmt : public RepoProxy::Stmt {

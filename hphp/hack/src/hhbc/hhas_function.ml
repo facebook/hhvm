@@ -15,7 +15,6 @@ type t = {
   function_is_async: bool;
   function_is_generator: bool;
   function_is_pair_generator: bool;
-  function_hoisted: Closure_convert.hoist_kind;
   function_no_injection: bool;
   function_is_interceptable: bool;
   function_is_memoize_impl: bool;
@@ -31,7 +30,6 @@ let make
     function_is_async
     function_is_generator
     function_is_pair_generator
-    function_hoisted
     function_no_injection
     function_is_interceptable
     function_is_memoize_impl
@@ -45,7 +43,6 @@ let make
     function_is_async;
     function_is_generator;
     function_is_pair_generator;
-    function_hoisted;
     function_no_injection;
     function_is_interceptable;
     function_is_memoize_impl;
@@ -66,11 +63,6 @@ let is_async f = f.function_is_async
 let is_generator f = f.function_is_generator
 
 let is_pair_generator f = f.function_is_pair_generator
-
-let is_top f =
-  match f.function_hoisted with
-  | Closure_convert.TopLevel -> true
-  | Closure_convert.Hoisted -> false
 
 let no_injection f = f.function_no_injection
 

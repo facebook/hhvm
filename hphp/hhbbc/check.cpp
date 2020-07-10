@@ -144,7 +144,6 @@ bool check(const php::Func& f) {
    * implementation progresses.  Asserting them now so they are
    * revisited here if they aren't true anymore.
    */
-  if (f.isClosureBody)          assert(!f.top);
   if (f.isPairGenerator)        assert(f.isGenerator);
 
   if (f.isClosureBody) {

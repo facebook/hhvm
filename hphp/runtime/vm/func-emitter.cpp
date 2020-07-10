@@ -50,7 +50,6 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_sn(sn)
   , m_id(id)
   , name(n)
-  , top(false)
   , maxStackCells(0)
   , hniReturnType(folly::none)
   , retUserType(nullptr)
@@ -73,7 +72,6 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_sn(sn)
   , m_id(kInvalidId)
   , name(n)
-  , top(false)
   , maxStackCells(0)
   , hniReturnType(folly::none)
   , retUserType(nullptr)
@@ -96,12 +94,11 @@ FuncEmitter::~FuncEmitter() {
 ///////////////////////////////////////////////////////////////////////////////
 // Initialization and execution.
 
-void FuncEmitter::init(int l1, int l2, Offset base_, Attr attrs_, bool top_,
+void FuncEmitter::init(int l1, int l2, Offset base_, Attr attrs_,
                        const StringData* docComment_) {
   base = base_;
   line1 = l1;
   line2 = l2;
-  top = top_;
   attrs = fix_attrs(attrs_);
   docComment = docComment_;
 
@@ -124,7 +121,7 @@ void FuncEmitter::commit(RepoTxn& txn) const {
   int64_t usn = m_ue.m_sn;
 
   frp.insertFunc[repoId]
-     .insert(*this, txn, usn, m_sn, m_pce ? m_pce->id() : -1, name, top);
+     .insert(*this, txn, usn, m_sn, m_pce ? m_pce->id() : -1, name);
 }
 
 const StaticString s_DynamicallyCallable("__DynamicallyCallable");
@@ -206,9 +203,9 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->m_shared.reset(
     needsExtendedSharedData
       ? new Func::ExtendedSharedData(preClass, base, past, line1, line2,
-                                     top, !containsCalls, docComment)
+                                     !containsCalls, docComment)
       : new Func::SharedData(preClass, base, past,
-                             line1, line2, top, !containsCalls, docComment)
+                             line1, line2, !containsCalls, docComment)
   );
 
   f->init(params.size());
@@ -518,7 +515,7 @@ Attr FuncEmitter::fix_attrs(Attr a) const {
 
 template<class SerDe>
 void FuncEmitter::serdeMetaData(SerDe& sd) {
-  // NOTE: name, top, and a few other fields currently handled outside of this.
+  // NOTE: name and a few other fields currently handled outside of this.
   Offset past_delta;
   Attr a = attrs;
 
@@ -588,7 +585,7 @@ void FuncRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   auto createQuery = folly::sformat(
     "CREATE TABLE {} "
     "(unitSn INTEGER, funcSn INTEGER, preClassId INTEGER, name TEXT, "
-    " top INTEGER, extraData BLOB, PRIMARY KEY (unitSn, funcSn));",
+    " extraData BLOB, PRIMARY KEY (unitSn, funcSn));",
     m_repo.table(repoId, "Func"));
   txn.exec(createQuery);
 }
@@ -596,12 +593,11 @@ void FuncRepoProxy::createSchema(int repoId, RepoTxn& txn) {
 void FuncRepoProxy::InsertFuncStmt
                   ::insert(const FuncEmitter& fe,
                            RepoTxn& txn, int64_t unitSn, int funcSn,
-                           Id preClassId, const StringData* name,
-                           bool top) {
+                           Id preClassId, const StringData* name) {
   if (!prepared()) {
     auto insertQuery = folly::sformat(
       "INSERT INTO {} "
-      "VALUES(@unitSn, @funcSn, @preClassId, @name, @top, @extraData);",
+      "VALUES(@unitSn, @funcSn, @preClassId, @name, @extraData);",
       m_repo.table(m_repoId, "Func"));
     txn.prepare(*this, insertQuery);
   }
@@ -612,7 +608,6 @@ void FuncRepoProxy::InsertFuncStmt
   query.bindInt("@funcSn", funcSn);
   query.bindId("@preClassId", preClassId);
   query.bindStaticString("@name", name);
-  query.bindBool("@top", top);
   const_cast<FuncEmitter&>(fe).serdeMetaData(extraBlob);
   query.bindBlob("@extraData", extraBlob, /* static */ true);
   query.exec();
@@ -623,7 +618,7 @@ void FuncRepoProxy::GetFuncsStmt
   auto txn = RepoTxn{m_repo.begin()};
   if (!prepared()) {
     auto selectQuery = folly::sformat(
-      "SELECT funcSn, preClassId, name, top, extraData "
+      "SELECT funcSn, preClassId, name, extraData "
       "FROM {} "
       "WHERE unitSn == @unitSn ORDER BY funcSn ASC;",
       m_repo.table(m_repoId, "Func"));
@@ -637,8 +632,7 @@ void FuncRepoProxy::GetFuncsStmt
       int funcSn;               /**/ query.getInt(0, funcSn);
       Id preClassId;            /**/ query.getId(1, preClassId);
       StringData* name;         /**/ query.getStaticString(2, name);
-      bool top;                 /**/ query.getBool(3, top);
-      BlobDecoder extraBlob =   /**/ query.getBlob(4, ue.useGlobalIds());
+      BlobDecoder extraBlob =   /**/ query.getBlob(3, ue.useGlobalIds());
 
       FuncEmitter* fe;
       if (preClassId < 0) {
@@ -650,7 +644,6 @@ void FuncRepoProxy::GetFuncsStmt
         assertx(added);
       }
       assertx(fe->sn() == funcSn);
-      fe->top = top;
       fe->serdeMetaData(extraBlob);
       if (!SystemLib::s_inited && !fe->isPseudoMain()) {
         assertx(fe->attrs & AttrBuiltin);

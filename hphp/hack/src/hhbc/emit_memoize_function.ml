@@ -275,7 +275,6 @@ let emit_wrapper_function
     function_is_async
     false (* is_generator *)
     false (* is_pair_generator *)
-    Closure_convert.TopLevel
     false (* no_injection *)
     is_interceptable
     false (* is_memoize_impl *)

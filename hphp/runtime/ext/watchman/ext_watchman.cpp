@@ -629,7 +629,7 @@ Object HHVM_FUNCTION(HH_watchman_subscribe,
 
   // Validate callback
   const Func* f = Unit::loadFunc(callback_function.get());
-  if (!f || !f->top() || f->hasVariadicCaptureParam() || f->numParams() != 5 ||
+  if (!f || f->hasVariadicCaptureParam() || f->numParams() != 5 ||
     !f->fullName() || !f->filename())
   {
     SystemLib::throwInvalidOperationExceptionObject(

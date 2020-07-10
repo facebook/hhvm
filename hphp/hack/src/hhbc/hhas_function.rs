@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use closure_convert_rust::HoistKind;
 use hhas_attribute_rust::HhasAttribute;
 use hhas_body_rust::HhasBody;
 use hhas_param_rust::HhasParam;
@@ -22,7 +21,6 @@ pub struct HhasFunction<'a> {
     pub body: HhasBody<'a>,
     pub span: hhas_pos::Span,
     pub rx_level: rx::Level,
-    pub hoisted: HoistKind,
     pub flags: Flags,
 }
 
@@ -39,13 +37,6 @@ bitflags! {
 }
 
 impl<'a> HhasFunction<'a> {
-    pub fn is_top(&self) -> bool {
-        match self.hoisted {
-            HoistKind::TopLevel => true,
-            HoistKind::Hoisted => false,
-        }
-    }
-
     pub fn is_async(&self) -> bool {
         self.flags.contains(Flags::ASYNC)
     }

@@ -372,7 +372,6 @@ bool UnitChecker::checkFuncs() {
   const FuncEmitter* pseudo = nullptr;
   bool multi = false;
   bool ok = true;
-  bool nonTops = true;
 
   auto doCheck = [&] (const FuncEmitter* func) {
     if (func->isPseudoMain()) {
@@ -386,15 +385,6 @@ bool UnitChecker::checkFuncs() {
         ok = false;
       }
       pseudo = func;
-    }
-
-    if (!func->pce()) {
-      if (!nonTops && !func->top) {
-        error("Non-top function %s defined after a toplevel function\n",
-              func->name->data());
-        ok = false;
-      }
-      nonTops &= !func->top;
     }
 
     if (func->isNative) {

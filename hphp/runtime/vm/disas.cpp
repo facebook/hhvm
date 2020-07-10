@@ -628,8 +628,7 @@ void print_func(Output& out, const Func* func) {
   } else {
     out.fmtln(".function{}{}{} {}{}({}){}{{",
       opt_ubs(finfo.ubs),
-      opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes(),
-                func->top()),
+      opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
       format_line_pair(func),
       opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
       func->name(),

@@ -716,7 +716,6 @@ let mutate_metadata (input : HP.t)  =
       (f |> Hhas_function.is_async          |> mutate_bool)
       (f |> Hhas_function.is_generator      |> mutate_bool)
       (f |> Hhas_function.is_pair_generator |> mutate_bool)
-      (f.Hhas_function.function_hoisted     |> mutate_hoisted)
       (f |> Hhas_function.no_injection      |> mutate_bool)
       (f |> Hhas_function.is_interceptable  |> mutate_bool)
       (f |> Hhas_function.is_memoize_impl   |> mutate_bool)

@@ -721,7 +721,6 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->returnUBs          = fe.retUpperBounds;
   ret->originalFilename   = fe.originalFilename;
 
-  ret->top                 = fe.top;
   ret->isClosureBody       = fe.isClosureBody;
   ret->isAsync             = fe.isAsync;
   ret->isGenerator         = fe.isGenerator;

@@ -193,7 +193,7 @@ void UnitEmitter::initMain(int line1, int line2) {
   StringData* name = staticEmptyString();
   FuncEmitter* pseudomain = newFuncEmitter(name);
   Attr attrs = AttrMayUseVV;
-  pseudomain->init(line1, line2, 0, attrs, false, name);
+  pseudomain->init(line1, line2, 0, attrs, name);
 }
 
 void UnitEmitter::addTrivialPseudoMain() {
@@ -671,20 +671,10 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   ix = 0;
   for (auto& fe : m_fes) {
     auto const func = fe->create(*u);
-    if (func->top()) {
-      if (!mi->m_firstHoistableFunc) {
-        mi->m_firstHoistableFunc = ix;
-      }
-    } else {
-      assertx(!mi->m_firstHoistableFunc);
-    }
     assertx(ix == fe->id());
     mi->mergeableObj(ix++) = func;
   }
   assertx(u->getMain(nullptr, false)->isPseudoMain());
-  if (!mi->m_firstHoistableFunc) {
-    mi->m_firstHoistableFunc =  ix;
-  }
   mi->m_firstHoistablePreClass = ix;
   assertx(m_fes.size());
   for (auto& id : m_hoistablePceIdList) {
@@ -971,10 +961,8 @@ void UnitEmitter::serde(SerDe& sd) {
     for (size_t i = 0; i < total; ++i) {
       Id pceId;
       const StringData* name;
-      bool top;
       sd(pceId);
       sd(name);
-      sd(top);
 
       FuncEmitter* fe;
       if (pceId < 0) {
@@ -986,7 +974,6 @@ void UnitEmitter::serde(SerDe& sd) {
         assertx(added);
       }
       assertx(fe->sn() == i);
-      fe->top = top;
       fe->serdeMetaData(sd);
       fe->setEHTabIsSorted();
       fe->finish(fe->past);
@@ -999,7 +986,6 @@ void UnitEmitter::serde(SerDe& sd) {
     auto const write = [&] (FuncEmitter* fe, Id pceId) {
       sd(pceId);
       sd(fe->name);
-      sd(fe->top);
       fe->serdeMetaData(sd);
     };
     for (auto const& fe : m_fes) write(fe.get(), -1);

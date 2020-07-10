@@ -1505,12 +1505,6 @@ let function_attributes f =
       attrs
   in
   let attrs =
-    if not (Hhas_function.is_top f) then
-      "nontop" :: attrs
-    else
-      attrs
-  in
-  let attrs =
     if Hhas_function.no_injection f then
       "no_injection" :: attrs
     else

@@ -363,12 +363,6 @@ struct Func : FuncBase {
   Unit* originalUnit{};
 
   /*
-   * Whether or not this function is a top-level function.  (Defined
-   * outside of any other function body.)
-   */
-  bool top : 1;
-
-  /*
    * This is the generated function for a closure body.  I.e. this
    * function contains the code that should run when the closure is
    * invoked.

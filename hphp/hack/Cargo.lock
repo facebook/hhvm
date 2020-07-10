@@ -707,7 +707,6 @@ dependencies = [
 name = "emit_constant_rust"
 version = "0.0.0"
 dependencies = [
- "closure_convert_rust 0.0.0",
  "core_utils_rust 0.0.0",
  "emit_body_rust 0.0.0",
  "emit_type_hint_rust 0.0.0",
@@ -781,7 +780,6 @@ name = "emit_function_rust"
 version = "0.0.0"
 dependencies = [
  "ast_scope_rust 0.0.0",
- "closure_convert_rust 0.0.0",
  "emit_attribute_rust 0.0.0",
  "emit_body_rust 0.0.0",
  "emit_memoize_helpers_rust 0.0.0",
@@ -1342,7 +1340,6 @@ name = "hhas_function_rust"
 version = "0.0.0"
 dependencies = [
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "closure_convert_rust 0.0.0",
  "hhas_attribute_rust 0.0.0",
  "hhas_body_rust 0.0.0",
  "hhas_param_rust 0.0.0",

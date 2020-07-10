@@ -10,7 +10,6 @@ path = "../../emit_function.rs"
 
 [dependencies]
 ast_scope_rust = { path = "../ast_scope" }
-closure_convert_rust = { path = "../closure_convert" }
 emit_attribute_rust = { path = "../emit_attribute" }
 emit_body_rust = { path = "../emit_body" }
 emit_memoize_helpers_rust = { path = "../emit_memoize_helpers" }

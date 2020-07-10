@@ -172,7 +172,6 @@ std::array<std::atomic<LineCacheEntry*>, 512> s_lineCache;
 Unit::MergeInfo* Unit::MergeInfo::alloc(size_t size) {
   MergeInfo* mi = (MergeInfo*)malloc(
     sizeof(MergeInfo) + size * sizeof(void*));
-  mi->m_firstHoistableFunc = 0;
   mi->m_firstHoistablePreClass = 0;
   mi->m_firstMergeablePreClass = 0;
   mi->m_mergeablesSize = size;
@@ -1631,7 +1630,8 @@ void Unit::initialMerge() {
 
   auto const mi = m_mergeInfo.load(std::memory_order_relaxed);
   bool allFuncsUnique = RuntimeOption::RepoAuthoritative;
-  for (auto& func : mi->nonMainFuncs()) {
+  for (auto& func : mi->mutableFuncs()) {
+    if (func->isPseudoMain()) continue;
     if (allFuncsUnique) {
       allFuncsUnique = (func->attrs() & AttrUnique);
     }
@@ -1737,20 +1737,20 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
                                const Unit::ConstantVec& constantInfo) {
   using MergeKind = Unit::MergeKind;
 
-  Func** it = in->funcHoistableBegin();
+  Func** it = in->funcBegin();
   Func** fend = in->funcEnd();
-  Func** iout = 0;
+  Func** iout = nullptr;
   unsigned ix, end, oix = 0;
 
   if (out) {
     if (in != out) memcpy(out, in, uintptr_t(it) - uintptr_t(in));
-    iout = out->funcHoistableBegin();
+    iout = out->funcBegin();
   }
 
   size_t delta = 0;
   while (it != fend) {
     Func* func = *it++;
-    if (rds::isPersistentHandle(func->funcHandle())) {
+    if (!func->isPseudoMain() && rds::isPersistentHandle(func->funcHandle())) {
       delta++;
     } else if (iout) {
       *iout++ = func;
@@ -1849,14 +1849,14 @@ void Unit::mergeImpl(MergeInfo* mi) {
   assertx(m_mergeState.load(std::memory_order_relaxed) & MergeState::Merged);
   autoTypecheck(this);
 
-  Func** it = mi->funcHoistableBegin();
+  Func** it = mi->funcBegin();
   Func** fend = mi->funcEnd();
   if (it != fend) {
     if (LIKELY((m_mergeState.load(std::memory_order_relaxed) &
                 MergeState::UniqueFuncs) != 0)) {
       do {
         Func* func = *it;
-        assertx(func->top());
+        if (func->isPseudoMain()) continue;
         assertx(func->isUnique());
         auto const handle = func->funcHandle();
         if (rds::isNormalHandle(handle)) {
@@ -1879,7 +1879,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
     } else {
       do {
         Func* func = *it;
-        assertx(func->top());
+        if (func->isPseudoMain()) continue;
         defFunc(func, debugger);
       } while (++it != fend);
     }
@@ -2100,8 +2100,8 @@ void Unit::mergeImpl(MergeInfo* mi) {
             if (newMi != mi) {
               this->m_mergeInfo.store(newMi, std::memory_order_release);
               Treadmill::deferredFree(mi);
-              if (isMergeOnly() &&
-                  newMi->m_firstHoistableFunc == newMi->m_mergeablesSize) {
+              if (isMergeOnly() && newMi->m_mergeablesSize == 1) {
+                assertx(newMi->funcBegin()[0]->isPseudoMain());
                 m_mergeState.fetch_or(MergeState::Empty,
                                       std::memory_order_relaxed);
               }

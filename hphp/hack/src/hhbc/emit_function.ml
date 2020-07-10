@@ -16,7 +16,7 @@ module SU = Hhbc_string_utils
 (* Given a function definition, emit code, and in the case of <<__Memoize>>,
  * a wrapper function
  *)
-let emit_function (ast_fun, hoisted) : Hhas_function.t list =
+let emit_function ast_fun : Hhas_function.t list =
   let namespace = ast_fun.T.f_namespace in
   let original_id = Hhbc_id.Function.from_ast_name (snd ast_fun.T.f_name) in
   let function_is_async =
@@ -116,7 +116,6 @@ let emit_function (ast_fun, hoisted) : Hhas_function.t list =
       function_is_async
       function_is_generator
       function_is_pair_generator
-      hoisted
       is_no_injection
       is_interceptable
       is_memoize (*is_memoize_impl*)
@@ -138,9 +137,9 @@ let emit_function (ast_fun, hoisted) : Hhas_function.t list =
 
 let emit_functions_from_program
     (ast : (Closure_convert.hoist_kind * Tast.def) list) =
-  let aux (is_top, def) =
+  let aux (_, def) =
     match def with
-    | T.Fun fd -> emit_function (fd, is_top)
+    | T.Fun fd -> emit_function fd
     | _ -> []
   in
   List.concat_map ast ~f:aux

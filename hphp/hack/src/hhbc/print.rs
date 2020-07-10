@@ -3205,9 +3205,6 @@ fn print_fun_attrs<W: Write>(
     if f.is_no_injection() {
         special_attrs.push("no_injection");
     }
-    if !f.is_top() {
-        special_attrs.push("nontop");
-    }
     if ctx.is_system_lib() || (has_dynamically_callable(user_attrs) && !f.is_memoize_impl()) {
         special_attrs.push("dyn_callable")
     }

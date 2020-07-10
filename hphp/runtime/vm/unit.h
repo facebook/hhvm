@@ -271,11 +271,10 @@ public:
     /*
      * Iterators.
      *
-     * funcHoistableBegin() is in (funcBegin, funcEnd].
+     * funcNonMain() is in (funcBegin, funcEnd].
      */
     Func** funcBegin() const;
     Func** funcEnd() const;
-    Func** funcHoistableBegin() const;
 
     /*
      * Ranges.
@@ -284,7 +283,6 @@ public:
      */
     FuncRange funcs() const;
     MutableFuncRange mutableFuncs() const;
-    MutableFuncRange nonMainFuncs() const;
 
     /*
      * Get a reference or pointer to the mergeable at index `idx'.
@@ -292,7 +290,6 @@ public:
     void*& mergeableObj(int idx);
     void** mergeableData(int idx);
 
-    unsigned m_firstHoistableFunc;
     unsigned m_firstHoistablePreClass;
     unsigned m_firstMergeablePreClass;
     unsigned m_mergeablesSize;

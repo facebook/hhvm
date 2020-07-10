@@ -739,7 +739,6 @@ struct AsmState {
   UnitEmitter* ue;
   Input in;
   bool emittedPseudoMain{false};
-  bool emittedTopLevelFunc{false};
 
   /*
    * Map of adata identifiers to their serialized contents
@@ -2688,10 +2687,8 @@ void parse_function(AsmState& as) {
 
   auto const ubs = parse_ubs(as);
 
-  bool isTop = true;
-
   UserAttributeMap userAttrs;
-  Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs, &isTop);
+  Attr attrs = parse_attribute_list(as, AttrContext::Func, &userAttrs);
 
   if (!SystemLib::s_inited) {
     attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
@@ -2699,13 +2696,6 @@ void parse_function(AsmState& as) {
 
   // Be conservative by default. HHBBC can clear it where appropriate.
   attrs |= AttrMayUseVV;
-
-  if(!isTop && as.emittedTopLevelFunc) {
-    as.error("All top level functions must be defined after any "
-             "non-top functions");
-  }
-
-  as.emittedTopLevelFunc |= isTop;
 
   int line0;
   int line1;
@@ -2718,7 +2708,7 @@ void parse_function(AsmState& as) {
   }
 
   as.fe = as.ue->newFuncEmitter(makeStaticString(name));
-  as.fe->init(line0, line1, as.ue->bcPos(), attrs, isTop, 0);
+  as.fe->init(line0, line1, as.ue->bcPos(), attrs, nullptr);
 
   auto currUBs = getRelevantUpperBounds(retTypeInfo.second, ubs, {}, {});
   auto const hasReifiedGenerics =
@@ -2780,8 +2770,7 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
 
   as.fe = as.ue->newMethodEmitter(sname, as.pce);
   as.pce->addMethod(as.fe);
-  as.fe->init(line0, line1,
-              as.ue->bcPos(), attrs, false, 0);
+  as.fe->init(line0, line1, as.ue->bcPos(), attrs, nullptr);
 
   auto const hasReifiedGenerics =
     userAttrs.find(s___Reified.get()) != userAttrs.end() ||

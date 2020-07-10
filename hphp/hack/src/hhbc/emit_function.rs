@@ -6,7 +6,6 @@
 mod emit_memoize_function;
 
 use ast_scope_rust::{self as ast_scope, Scope, ScopeItem};
-use closure_convert_rust::HoistKind;
 use emit_attribute_rust as emit_attribute;
 use emit_body_rust::{self as emit_body};
 use emit_memoize_helpers_rust as emit_memoize_helpers;
@@ -24,11 +23,7 @@ use rx_rust as rx;
 
 use itertools::Either;
 
-pub fn emit_function<'a>(
-    e: &mut Emitter,
-    f: &'a tast::Fun_,
-    hoisted: HoistKind,
-) -> Result<Vec<HhasFunction<'a>>> {
+pub fn emit_function<'a>(e: &mut Emitter, f: &'a tast::Fun_) -> Result<Vec<HhasFunction<'a>>> {
     use ast_defs::FunKind;
     use hhas_function::Flags;
     let original_id = hhbc_id::function::Type::from_ast_name(&f.name.1);
@@ -167,7 +162,6 @@ pub fn emit_function<'a>(
         span: Span::from_pos(&f.span),
         rx_level,
         body,
-        hoisted,
         flags,
     };
 
@@ -180,13 +174,11 @@ pub fn emit_function<'a>(
 
 pub fn emit_functions_from_program<'a>(
     e: &mut Emitter,
-    hoist_kinds: &[HoistKind],
-    prog: &'a tast::Program,
+    tast: &'a tast::Program,
 ) -> Result<Vec<HhasFunction<'a>>> {
-    Ok(hoist_kinds
-        .into_iter()
-        .zip(prog)
-        .filter_map(|(hoist_kind, d)| d.as_fun().map(|f| emit_function(e, f, *hoist_kind)))
+    Ok(tast
+        .iter()
+        .filter_map(|d| d.as_fun().map(|f| emit_function(e, f)))
         .collect::<Result<Vec<Vec<_>>>>()?
         .into_iter()
         .flatten()

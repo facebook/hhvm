@@ -1183,8 +1183,12 @@ struct RuntimeOption {
    * classes which haven't opted into being called that way.            \
    *                                                                    \
    * 0 - Nothing                                                        \
-   * 1 - Warn                                                           \
-   * 2 - Throw exception                                                \
+   * 1 - Warn if target is not annotated or dynamic callsite is using   \
+   *     a raw string or array                                          \
+   *     (depending on ForbidDynamicCallsWithAttr setting)              \
+   * 2 - Throw exception if target is not annotated, and warn if        \
+   *     dynamic callsite is using a raw string or array                \
+   * 3 - Throw exception                                                \
    *                                                                    \
    */                                                                   \
   F(int32_t, ForbidDynamicCallsToFunc, 0)                               \

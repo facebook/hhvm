@@ -262,7 +262,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     attrs = Attr(attrs & ~AttrPersistent);
   }
 
-  auto const dynamicConstructSampleRate = [&] () -> int64_t {
+  auto const dynConstructSampleRate = [&] () -> int64_t {
     if (!(attrs & AttrDynamicallyConstructible)) return -1;
 
     auto const it = m_userAttributes.find(s_DynamicallyConstructible.get());
@@ -290,7 +290,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   pc->m_enumBaseTy = m_enumBaseTy;
   pc->m_numDeclMethods = -1;
   pc->m_ifaceVtableSlot = m_ifaceVtableSlot;
-  pc->m_dynamicConstructSampleRate = dynamicConstructSampleRate;
+  pc->m_dynConstructSampleRate = dynConstructSampleRate;
 
   // Set user attributes.
   [&] {

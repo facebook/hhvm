@@ -286,8 +286,8 @@ inline bool Class::isDynamicallyConstructible() const {
   return attrs() & AttrDynamicallyConstructible;
 }
 
-inline folly::Optional<int64_t> Class::dynamicConstructSampleRete() const {
-  auto const rate = preClass()->dynamicConstructSampleRete();
+inline folly::Optional<int64_t> Class::dynConstructSampleRate() const {
+  auto const rate = preClass()->dynConstructSampleRate();
   if (rate < 0) return {};
   return rate;
 }

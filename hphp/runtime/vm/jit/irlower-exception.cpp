@@ -134,7 +134,8 @@ void cgRaiseHackArrCompatNotice(IRLS& env, const IRInstruction* inst) {
 }
 
 static void raiseForbiddenDynCall(const Func* func) {
-  assertx(!func->isDynamicallyCallable() || RO::EvalForbidDynamicCallsWithAttr);
+  auto dynCallable = func->isDynamicallyCallable();
+  assertx(!dynCallable || RO::EvalForbidDynamicCallsWithAttr);
   auto level = func->isMethod()
     ? (func->isStatic()
         ? RO::EvalForbidDynamicCallsToClsMeth
@@ -147,31 +148,23 @@ static void raiseForbiddenDynCall(const Func* func) {
     level = 1;
   }
 
-  auto error_msg = func->isDynamicallyCallable() ?
+  auto error_msg = dynCallable ?
     Strings::FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE :
     Strings::FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE;
-  if (level >= 2) {
+  if (level >= 3 || (level >= 2 && !dynCallable)) {
     std::string msg;
-    string_printf(
-      msg,
-      error_msg,
-      func->fullName()->data()
-    );
+    string_printf(msg, error_msg, func->fullName()->data());
     throw_invalid_operation_exception(makeStaticString(msg));
-  } else {
-    raise_notice(
-      error_msg,
-      func->fullName()->data()
-    );
   }
+  raise_notice(error_msg, func->fullName()->data());
 }
 
 static void raiseForbiddenDynConstruct(const Class* cls) {
-  assertx(RuntimeOption::EvalForbidDynamicConstructs > 0);
+  auto level = RO::EvalForbidDynamicConstructs;
+  assertx(level > 0);
   assertx(!cls->isDynamicallyConstructible());
 
-  auto level = RuntimeOption::EvalForbidDynamicConstructs;
-  if (auto const rate = cls->dynamicConstructSampleRete()) {
+  if (auto const rate = cls->dynConstructSampleRate()) {
     if (folly::Random::rand32(*rate) != 0) return;
     level = 1;
   }

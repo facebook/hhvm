@@ -1,0 +1,1 @@
+-vRuntime.Eval.EmitFuncPointers=true -vRuntime.Eval.EmitClsMethPointers=true -vRuntime.Eval.ForbidDynamicCallsToFunc=3 -vRuntime.Eval.ForbidDynamicCallsWithAttr=true

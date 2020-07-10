@@ -324,8 +324,8 @@ public:
   const StringData* docComment()   const { return m_docComment; }
   Hoistable         hoistability() const { return m_hoistable; }
 
-  int64_t dynamicConstructSampleRete() const {
-    return m_dynamicConstructSampleRate;
+  int64_t dynConstructSampleRate() const {
+    return m_dynConstructSampleRate;
   }
 
   /*
@@ -479,7 +479,7 @@ private:
   MethodMap m_methods;
   PropMap m_properties;
   ConstMap m_constants;
-  int64_t m_dynamicConstructSampleRate;
+  int64_t m_dynConstructSampleRate;
 };
 
 typedef AtomicSharedPtr<PreClass> PreClassPtr;

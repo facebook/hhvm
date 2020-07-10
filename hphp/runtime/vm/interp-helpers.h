@@ -45,59 +45,41 @@ inline void callerInOutChecks(const Func* func, const FCallArgs& fca) {
   }
 }
 
-/*
- * Check if a dynamic call to `func` is allowed. Return true if it is, otherwise
- * raise a notice and return false or raise an exception.
- */
-inline bool callerDynamicCallChecks(const Func* func,
+inline void callerDynamicCallChecks(const Func* func,
                                     bool allowDynCallNoPointer = false) {
-  if (allowDynCallNoPointer && func->isDynamicallyCallable()) {
-    return false;
+  auto dynCallable = func->isDynamicallyCallable();
+  if (dynCallable) {
+    if (allowDynCallNoPointer) return;
+    if (!RO::EvalForbidDynamicCallsWithAttr) return;
   }
-  int dynCallErrorLevel = func->isMethod() ?
-    (
-      func->isStatic() ?
-        RuntimeOption::EvalForbidDynamicCallsToClsMeth :
-        RuntimeOption::EvalForbidDynamicCallsToInstMeth
-    ) :
-    RuntimeOption::EvalForbidDynamicCallsToFunc;
-  if (dynCallErrorLevel <= 0) return true;
-  if (func->isDynamicallyCallable() &&
-      !RuntimeOption::EvalForbidDynamicCallsWithAttr) {
-    return true;
-  }
+  auto level = func->isMethod()
+    ? (func->isStatic()
+        ? RO::EvalForbidDynamicCallsToClsMeth
+        : RO::EvalForbidDynamicCallsToInstMeth)
+    : RO::EvalForbidDynamicCallsToFunc;
+  if (level <= 0) return;
 
   if (auto const rate = func->dynCallSampleRate()) {
-    if (folly::Random::rand32(*rate) != 0) return true;
-    dynCallErrorLevel = 1;
+    if (folly::Random::rand32(*rate) != 0) return;
+    level = 1;
   }
 
-  auto error_msg = func->isDynamicallyCallable() ?
+  auto error_msg = dynCallable ?
     Strings::FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE :
     Strings::FUNCTION_CALLED_DYNAMICALLY_WITHOUT_ATTRIBUTE;
-  if (dynCallErrorLevel >= 2) {
+  if (level >= 3 || (level >= 2 && !dynCallable)) {
     std::string msg;
-    string_printf(
-      msg,
-      error_msg,
-      func->fullName()->data()
-    );
+    string_printf(msg, error_msg, func->fullName()->data());
     throw_invalid_operation_exception(makeStaticString(msg));
-  } else {
-    raise_notice(
-      error_msg,
-      func->fullName()->data()
-    );
-    return false;
   }
+  raise_notice(error_msg, func->fullName()->data());
 }
 
 inline void callerDynamicConstructChecks(const Class* cls) {
-  if (RuntimeOption::EvalForbidDynamicConstructs <= 0) return;
-  if (cls->isDynamicallyConstructible()) return;
+  auto level = RO::EvalForbidDynamicConstructs;
+  if (level <= 0 || cls->isDynamicallyConstructible()) return;
 
-  auto level = RuntimeOption::EvalForbidDynamicConstructs;
-  if (auto const rate = cls->dynamicConstructSampleRete()) {
+  if (auto const rate = cls->dynConstructSampleRate()) {
     if (folly::Random::rand32(*rate) != 0) return;
     level = 1;
   }

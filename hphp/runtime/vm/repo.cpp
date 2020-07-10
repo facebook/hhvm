@@ -294,6 +294,8 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
       s_globalData.IsCompatibleClsMethType;
     RuntimeOption::EvalEmitClsMethPointers = s_globalData.EmitClsMethPointers;
     RO::EvalEnableFuncStringInterop = s_globalData.EnableFuncStringInterop;
+    RO::EvalForbidDynamicCallsWithAttr =
+      s_globalData.ForbidDynamicCallsWithAttr;
 
     RO::EvalHackArrCompatIsArrayNotices =
       s_globalData.HackArrCompatIsArrayNotices;

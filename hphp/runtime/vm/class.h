@@ -618,7 +618,7 @@ public:
   /*
    * If the class is called dynamically should we sample the calls?
    */
-  folly::Optional<int64_t> dynamicConstructSampleRete() const;
+  folly::Optional<int64_t> dynConstructSampleRate() const;
 
 
   /////////////////////////////////////////////////////////////////////////////

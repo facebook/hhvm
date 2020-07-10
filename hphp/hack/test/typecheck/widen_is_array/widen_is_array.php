@@ -1,13 +1,14 @@
 <?hh
 
 function foobar(mixed $foo): void {
-  if (!is_array($foo)) {
-    return;
+  if (is_array($foo)) {
+    hh_show($foo);
+    $_ = vec($foo);
+    $_ = $foo[42];
+    $_ = $foo['foo'];
+    takes_container($foo);
+    takes_vec($foo);
   }
-  hh_show($foo);
-  $_ = vec($foo);
-  takes_container($foo);
-  takes_vec($foo);
 }
 
 function takes_container(Container<mixed> $_): void {}

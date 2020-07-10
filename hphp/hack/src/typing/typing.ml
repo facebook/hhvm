@@ -6887,30 +6887,24 @@ and safely_refine_is_array env ty p pred_name arg_expr =
         in
         MakeType.varray_or_darray r tk tv
       in
-      let any_array_ty =
-        MakeType.union
-          r
-          [
-            MakeType.dict r tarrkey tfresh;
-            MakeType.vec r tfresh;
-            MakeType.keyset r tarrkey;
-            array_ty;
-          ]
-      in
       (* This is the refined type of e inside the branch *)
-      let refined_ty =
+      let hint_ty =
         match ty with
         | `HackDict -> MakeType.dict r tarrkey tfresh
         | `HackVec -> MakeType.vec r tfresh
         | `HackKeyset -> MakeType.keyset r tarrkey
         | `PHPArray -> array_ty
-        | `AnyArray -> any_array_ty
+        | `AnyArray -> MakeType.keyed_container r tarrkey tfresh
         | `HackDictOrDArray ->
           MakeType.union
             r
             [MakeType.dict r tarrkey tfresh; MakeType.darray r tarrkey tfresh]
         | `HackVecOrVArray ->
           MakeType.union r [MakeType.vec r tfresh; MakeType.varray r tfresh]
+      in
+      let ((arg_pos, _), _) = arg_expr in
+      let (env, hint_ty) =
+        class_for_refinement env p r arg_pos arg_ty hint_ty
       in
       (* Add constraints on generic parameters that must
        * hold for refined_ty <:arg_ty. For example, if arg_ty is Traversable<T>
@@ -6920,9 +6914,9 @@ and safely_refine_is_array env ty p pred_name arg_expr =
       let (env, supertypes) = TUtils.get_concrete_supertypes env arg_ty in
       let env =
         List.fold_left supertypes ~init:env ~f:(fun env ty ->
-            SubType.add_constraint p env Ast_defs.Constraint_as refined_ty ty)
+            SubType.add_constraint p env Ast_defs.Constraint_as hint_ty ty)
       in
-      Inter.intersect ~r env refined_ty arg_ty)
+      Inter.intersect ~r env hint_ty arg_ty)
 
 and key_exists env pos shape field =
   let field = Tast.to_nast_expr field in

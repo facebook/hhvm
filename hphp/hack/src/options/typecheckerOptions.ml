@@ -145,3 +145,5 @@ let enable_systemlib_annotations =
   GlobalOptions.tco_enable_systemlib_annotations
 
 let widen_is_array = GlobalOptions.tco_widen_is_array
+
+let higher_kinded_types = GlobalOptions.tco_higher_kinded_types

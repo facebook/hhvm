@@ -244,6 +244,7 @@ let parse_options () =
   let disable_hh_ignore_error = ref false in
   let enable_systemlib_annotations = ref false in
   let enable_pocket_universes_syntax = ref false in
+  let enable_higher_kinded_types = ref false in
   let allowed_fixme_codes_strict = ref ISet.empty in
   let allowed_fixme_codes_partial = ref ISet.empty in
   let codes_not_raised_partial = ref ISet.empty in
@@ -554,6 +555,9 @@ let parse_options () =
       ( "--enable-pocket-universes-syntax",
         Arg.Set enable_pocket_universes_syntax,
         "Enable the pocket universes syntax" );
+      ( "--enable-higher-kinded-types",
+        Arg.Set enable_higher_kinded_types,
+        "Enable support for higher-kinded types" );
       ( "--allowed-fixme-codes-strict",
         Arg.String
           (fun s ->
@@ -662,6 +666,7 @@ let parse_options () =
       ~po_disable_hh_ignore_error:!disable_hh_ignore_error
       ~tco_enable_systemlib_annotations:!enable_systemlib_annotations
       ~tco_pu_enabled_paths:(!enable_pocket_universes_syntax, [])
+      ~tco_higher_kinded_types:!enable_higher_kinded_types
       ~po_allowed_decl_fixme_codes:!allowed_decl_fixme_codes
       ~tco_widen_is_array:!widen_is_array
       ()

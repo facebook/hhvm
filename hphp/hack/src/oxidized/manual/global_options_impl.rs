@@ -106,6 +106,7 @@ impl Default for GlobalOptions {
             tco_enable_systemlib_annotations: false,
             tco_pu_enabled_paths: (false, vec![]),
             tco_widen_is_array: false,
+            tco_higher_kinded_types: false,
         }
     }
 }

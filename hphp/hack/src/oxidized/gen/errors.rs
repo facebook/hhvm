@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1abe7d7d84e48d687dcfccea7c4186f8>>
+// @generated SignedSource<<90923541ba0956641fe8fe2644fe6820>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -88,6 +88,7 @@ impl TrivialDrop for Severity {}
 pub enum Format {
     Context,
     Raw,
+    Highlighted,
 }
 impl TrivialDrop for Format {}
 

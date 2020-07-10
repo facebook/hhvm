@@ -1,0 +1,11 @@
+Decls:
+  class \A: { policied_props = [aPri, aPro, aPub] }
+  class \B: { policied_props = [aPro, aPub, bPri, bPro, bPub] }
+  class \C: { policied_props = [aPro, aPub, bPro, bPub, cPri, cPro, cPub,
+                                tPro, tPub] }
+  class \HH\vec: { policied_props = [] }
+  class \R: { policied_props = [rPri, rPro, rPub, tPro, tPub] }
+  class \T: { policied_props = [tPri, tPro, tPub] }
+  class \Z: { policied_props = [replicaPP, replicaPU, replicaUP] }
+  class \ZTrait: { policied_props = [replicaPP, replicaPU] }
+  

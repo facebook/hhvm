@@ -123,6 +123,9 @@ type policied_property = {
   pp_name: string;
   pp_type: Type.locl_ty;
   pp_purpose: purpose option;
+  (* Visibility is not needed beyond the decl phase, but OCaml makes
+   * it difficult to map between collections, so it is carried to the analysis. *)
+  pp_visibility: Aast.visibility;
 }
 
 type class_decl = {

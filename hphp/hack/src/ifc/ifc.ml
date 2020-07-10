@@ -178,7 +178,7 @@ let rec class_ptype lump_pol_opt proto_renv tparams name =
     | Some class_sig -> class_sig
     | None -> fail "could not found a class policy signature for %s" name
   in
-  let prop_ptype { pp_name; pp_type; pp_purpose } =
+  let prop_ptype { pp_name; pp_type; pp_purpose; _ } =
     (* Purpose of the property takes precedence over any lump policy. *)
     let lump_pol_opt =
       Option.merge

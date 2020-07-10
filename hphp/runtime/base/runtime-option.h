@@ -1222,6 +1222,14 @@ struct RuntimeOption {
    */                                                                   \
   F(int32_t, RxVerifyBody, 0)                                           \
   F(bool, RxIsEnabled, EvalRxPretendIsEnabled)                          \
+  /*                                                                    \
+   * Controls behavior on reflection to default value expressions       \
+   * that throw during evaluation                                       \
+   * 0 - Nothing                                                        \
+   * 1 - Warn and retain current behavior                               \
+   * 2 - Return null for parameter value                                \
+   */                                                                   \
+  F(int32_t, FixDefaultArgReflection, 1)                                \
   F(int32_t, ServerOOMAdj, 0)                                           \
   F(std::string, PreludePath, "")                                       \
   F(uint32_t, NonSharedInstanceMemoCaches, 10)                          \

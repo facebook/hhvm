@@ -158,6 +158,14 @@ Variant default_arg_from_php_code(const Func::ParamInfo& fpi,
   // fatal, e.g. due to the use of undefined class constants or static:: .
   // When this happens, instead of fataling the execution, set the default
   // value to null and raise a warning.
+  auto const on_eval_exn = [&] {
+    raise_warning("Failed to eval default value of %s()'s $%s argument for "
+                  "reflection, assigning NULL instead",
+                  func->fullNameStr().data(),
+                  func->localNames()[argIdx]->data());
+    return init_null_variant;
+  };
+
   try {
     return g_context->getEvaledArg(
       fpi.phpCode,
@@ -168,12 +176,21 @@ Variant default_arg_from_php_code(const Func::ParamInfo& fpi,
       func->cls() ? func->cls()->nameStr() : func->nameStr(),
       func->unit()
     );
-  } catch (Exception& e) {
-    raise_warning("Failed to eval default value of %s()'s $%s argument for "
-                  "reflection, assigning NULL instead",
-                  func->fullNameStr().data(),
-                  func->localNames()[argIdx]->data());
-    return init_null_variant;
+  } catch (const Exception&) {
+    return on_eval_exn();
+  } catch (const Object&) {
+    if (RO::EvalFixDefaultArgReflection > 1) {
+      return on_eval_exn();
+    } else {
+      if (RO::EvalFixDefaultArgReflection > 0) {
+        raise_notice("Evaluation of default arg initializer in func=%s, arg=%s "
+                     "threw a PHP exception--this reflection call won't throw "
+                     "in future HHVMs!",
+                     func->fullNameStr().data(),
+                     func->localNames()[argIdx]->data());
+      }
+      throw;
+    }
   }
 }
 

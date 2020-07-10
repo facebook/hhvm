@@ -290,3 +290,6 @@ function accept(FileDescriptor $socket): (FileDescriptor, sockaddr);
 function lseek(FileDescriptor $fd, int $offset, int $whence): int;
 function ftruncate(FileDescriptor $fd, int $length): void;
 function flock(FileDescriptor $fd, int $operation): void;
+
+function isatty(FileDescriptor $fd): bool;
+function ttyname(FileDescriptor $fd): string;

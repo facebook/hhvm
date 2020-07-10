@@ -238,11 +238,11 @@ let build_visibility_json (visibility : Aast.visibility) =
   in
   JSON_Number (string_of_int num)
 
-let build_xrefs_json xref_map =
+let build_xrefs_json (xref_map : (Hh_json.json * Pos.t list) IMap.t) =
   let xrefs =
     IMap.fold
       (fun _id (target_json, pos_list) acc ->
-        let sorted_pos = List.sort Pos.compare pos_list in
+        let sorted_pos = Caml.List.sort_uniq Pos.compare pos_list in
         let (byte_spans, _) =
           List.fold sorted_pos ~init:([], 0) ~f:(fun (spans, last_start) pos ->
               let start = fst (Pos.info_raw pos) in

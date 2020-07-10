@@ -13,4 +13,5 @@
     tast
     typechecker_options
     typing_ast
-    typing_defs))
+    typing_defs
+    utils_core))

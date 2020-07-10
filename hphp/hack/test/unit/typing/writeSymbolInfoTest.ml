@@ -11,6 +11,7 @@ open Hh_json
 open Hh_json.Access
 open Hh_json_helpers
 open Symbol_add_fact
+open Symbol_build_json
 open Symbol_builder_types
 open Symbol_json_util
 open OUnit2
@@ -79,10 +80,58 @@ let test_add_decl_fact _test_ctxt =
     String_asserter.assert_equals gconst_name name "Nested fact contains name"
   | _ -> assert_failure "Could not extract decl name"
 
+let test_build_xrefs _test_ctxt =
+  let xrefs =
+    (SMap.empty : (Hh_json.json * Relative_path.t Pos.pos list) IMap.t SMap.t)
+  in
+  Relative_path.set_path_prefix Relative_path.Root (Path.make "www");
+  let file = Relative_path.from_root ~suffix:"test.php" in
+  let decl_name = "TestDecl" in
+  let target_json = JSON_Object [("declaration", JSON_String decl_name)] in
+  let target_id = 1 in
+  let ref_pos1 =
+    Pos.set_file
+      file
+      (Pos.make_from_lnum_bol_cnum
+         ~pos_file:file
+         ~pos_start:(0, 0, 0)
+         ~pos_end:(0, 0, 0))
+  in
+  let ref_pos2 =
+    Pos.set_file
+      file
+      (Pos.make_from_lnum_bol_cnum
+         ~pos_file:file
+         ~pos_start:(0, 0, 0)
+         ~pos_end:(0, 0, 0))
+  in
+  let xrefs = add_xref target_json target_id ref_pos1 xrefs in
+  let xrefs = add_xref target_json target_id ref_pos2 xrefs in
+  let file_map : (Hh_json.json * Pos.t list) IMap.t =
+    SMap.find (Relative_path.to_absolute file) xrefs
+  in
+  let result = List.nth (get_array_exn (build_xrefs_json file_map)) 0 in
+  let target_decl =
+    return result >>= get_obj "target" >>= get_string "declaration"
+  in
+  (match target_decl with
+  | Ok (name, _) ->
+    String_asserter.assert_equals decl_name name "Target decl JSON set"
+  | _ -> assert_failure "Could not extract decl JSON");
+  let ranges_arr = return result >>= get_array "ranges" in
+  match ranges_arr with
+  | Ok (ranges, _) ->
+    Int_asserter.assert_equals
+      1
+      (List.length ranges)
+      "Duplicate references removed"
+  | _ -> assert_failure "Could not extract ranges"
+
 let () =
   "write_symbol_info_test"
   >::: [
          "test_add_fact" >:: test_add_fact;
          "test_add_decl_fact" >:: test_add_decl_fact;
+         "test_build_xrefs" >:: test_build_xrefs;
        ]
   |> run_test_tt_main

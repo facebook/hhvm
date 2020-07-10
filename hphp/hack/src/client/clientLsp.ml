@@ -4021,7 +4021,7 @@ let handle_client_message
       let open DidChangeWatchedFiles in
       let changes =
         List.map notification.changes ~f:(fun change ->
-            change.uri |> lsp_uri_to_path |> Path.make)
+            ClientIdeMessage.Changed_file (lsp_uri_to_path change.uri))
       in
       let%lwt () =
         ide_rpc

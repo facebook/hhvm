@@ -712,8 +712,8 @@ let handle_request :
   | ( (During_init { dfiles = files; _ } | Initialized { ifiles = files; _ }),
       Disk_files_changed paths ) ->
     let paths =
-      List.filter paths ~f:(fun path ->
-          path |> Path.to_string |> FindUtils.file_filter)
+      List.filter paths ~f:(fun (Changed_file path) ->
+          FindUtils.file_filter path)
     in
     (* That filtered-out non-hack files *)
     let files =
@@ -723,10 +723,10 @@ let handle_request :
           List.fold
             paths
             ~init:files.changed_files_to_process
-            ~f:(fun acc path ->
+            ~f:(fun acc (Changed_file path) ->
               Relative_path.Set.add
                 acc
-                (Relative_path.create_detect_prefix (Path.to_string path)));
+                (Relative_path.create_detect_prefix path));
         changed_files_denominator =
           files.changed_files_denominator + List.length paths;
       }

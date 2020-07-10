@@ -124,6 +124,20 @@ module Type_coverage = struct
   type result = Coverage_level_defs.result
 end
 
+(** Represents a path corresponding to a file which has changed on disk. We
+don't use `Path.t`:
+
+  * It invokes `realpath`. However, for files that don't exist (i.e. deleted
+  files), it returns the path unchanged. This can cause bugs. For example, if
+  the repo root is a symlink, it will be resolved for files which do exist,
+  but left unchanged for files that don't exist.
+  * It's an unnecessary syscall per file.
+  * It can cause accidental file fetches on a virtual filesystem. We typically
+  end up filtering the list of changed files, so we may never use the fetched
+  file content.
+*)
+type changed_file = Changed_file of string
+
 (* GADT for request/response types. See [ServerCommandTypes] for a discussion on
    using GADTs in this way. *)
 type _ t =
@@ -132,7 +146,7 @@ type _ t =
       Initialize_from_state. And the daemon sends no messages before
       it has responded. *)
   | Shutdown : unit -> unit t
-  | Disk_files_changed : Path.t list -> unit t
+  | Disk_files_changed : changed_file list -> unit t
   | Ide_file_opened : Ide_file_opened.request -> unit t
   | Ide_file_changed : Ide_file_changed.request -> unit t
   | Ide_file_closed : Path.t -> unit t
@@ -159,7 +173,7 @@ let t_to_string : type a. a t -> string = function
   | Initialize_from_saved_state _ -> "Initialize_from_saved_state"
   | Shutdown () -> "Shutdown"
   | Disk_files_changed files ->
-    let files = List.map files ~f:Path.to_string in
+    let files = List.map files ~f:(fun (Changed_file path) -> path) in
     let (files, remainder) = List.split_n files 10 in
     let remainder =
       if List.is_empty remainder then

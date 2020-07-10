@@ -559,7 +559,6 @@ struct RuntimeOption {
   // Eval options
   static bool EnableHipHopSyntax;
   static bool EnableShortTags;
-  static bool EnableRustEmitter;
   static bool EnableXHP;
   static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;

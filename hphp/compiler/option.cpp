@@ -214,9 +214,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalArrayProvenance,
                ini, config, "ArrayProvenance",
                RuntimeOption::EvalArrayProvenance);
-  Config::Bind(RuntimeOption::EnableRustEmitter,
-              ini, config, "EnableRustEmitter",
-              RuntimeOption::EnableRustEmitter);
   RO::EvalArrProvHackArrays = RO::EvalArrayProvenance;
   RO::EvalArrProvDVArrays   = RO::EvalArrayProvenance;
   Config::Bind(EnableShortTags, ini, config, "EnableShortTags", true);

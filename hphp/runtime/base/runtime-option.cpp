@@ -477,7 +477,6 @@ bool RuntimeOption::ServerMode = false;
 
 bool RuntimeOption::EnableHipHopSyntax = true;
 bool RuntimeOption::EnableShortTags = true;
-bool RuntimeOption::EnableRustEmitter = true;
 bool RuntimeOption::EnableXHP = true;
 bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
@@ -884,9 +883,8 @@ static inline bool eagerGcDefault() {
 
 static inline std::string hackCompilerArgsDefault() {
   return folly::sformat(
-    "--daemon{}{}",
-    RuntimeOption::RepoAuthoritative ? " --dump-symbol-refs" : "",
-    RuntimeOption::EnableRustEmitter ? "" : " --disable-rust-emitter"
+    "--daemon{}",
+    RuntimeOption::RepoAuthoritative ? " --dump-symbol-refs" : ""
   );
 }
 
@@ -1774,7 +1772,6 @@ void RuntimeOption::Load(
                  EnableHipHopSyntax);
     Config::Bind(EnableShortTags, ini, config, "Eval.EnableShortTags", true);
     Config::Bind(EnableXHP, ini, config, "Eval.EnableXHP", EnableXHP);
-    Config::Bind(EnableRustEmitter, ini, config, "Eval.EnableRustEmitter", EnableRustEmitter);
     Config::Bind(TimeoutsUseWallTime, ini, config, "Eval.TimeoutsUseWallTime",
                  true);
     Config::Bind(CheckFlushOnUserClose, ini, config,

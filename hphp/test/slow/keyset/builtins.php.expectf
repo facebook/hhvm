@@ -720,7 +720,15 @@ keyset(4) {
   string(1) "8"
   string(2) "10"
 }
-array_diff_assoc: array(4) {
+array_diff_assoc: 
+Notice: Hack Array Compat: missed IntishCast for keyset in %s/builtins.php on line 24
+
+Notice: Hack Array Compat: missed IntishCast for keyset in %s/builtins.php on line 24
+
+Notice: Hack Array Compat: missed IntishCast for keyset in %s/builtins.php on line 24
+
+Notice: Hack Array Compat: missed IntishCast for keyset in %s/builtins.php on line 24
+array(4) {
   ["5"]=>
   string(1) "5"
   ["7"]=>
@@ -780,7 +788,15 @@ array_udiff: array(4) {
   ["10"]=>
   string(2) "10"
 }
-array_udiff_assoc: array(4) {
+array_udiff_assoc: 
+Notice: Hack Array Compat: missed IntishCast for keyset in %s/builtins.php on line 36
+
+Notice: Hack Array Compat: missed IntishCast for keyset in %s/builtins.php on line 36
+
+Notice: Hack Array Compat: missed IntishCast for keyset in %s/builtins.php on line 36
+
+Notice: Hack Array Compat: missed IntishCast for keyset in %s/builtins.php on line 36
+array(4) {
   ["5"]=>
   string(1) "5"
   ["7"]=>
@@ -806,11 +822,27 @@ bool(false)
 array_combine 2: 
 Warning: array_combine(): Both parameters should have an equal number of elements in %s/builtins.php on line %d
 bool(false)
-array_uintersect_assoc: array(0) {
+array_uintersect_assoc: 
+Notice: Hack Array Compat: missed IntishCast for keyset in %s/builtins.php on line 44
+
+Notice: Hack Array Compat: missed IntishCast for keyset in %s/builtins.php on line 44
+
+Notice: Hack Array Compat: missed IntishCast for keyset in %s/builtins.php on line 44
+
+Notice: Hack Array Compat: missed IntishCast for keyset in %s/builtins.php on line 44
+array(0) {
 }
 array_uintersect_uassoc: array(0) {
 }
-array_intersect_assoc: array(0) {
+array_intersect_assoc: 
+Notice: Hack Array Compat: missed IntishCast for keyset in %s/builtins.php on line 48
+
+Notice: Hack Array Compat: missed IntishCast for keyset in %s/builtins.php on line 48
+
+Notice: Hack Array Compat: missed IntishCast for keyset in %s/builtins.php on line 48
+
+Notice: Hack Array Compat: missed IntishCast for keyset in %s/builtins.php on line 48
+array(0) {
 }
 array_intersect_key: array(0) {
 }

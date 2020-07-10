@@ -1,0 +1,2 @@
+Notice: Hack Array Compat: missed IntishCast for dict in %s/strtr.php on line 3
+string(3) ".42"

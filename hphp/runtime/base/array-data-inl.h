@@ -258,10 +258,6 @@ inline uint8_t ArrayData::auxBits() const {
   return isLegacyArray() ? kLegacyArray : 0;
 }
 
-inline bool ArrayData::useWeakKeys() const {
-  return isPHPArrayType();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE

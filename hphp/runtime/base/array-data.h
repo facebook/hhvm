@@ -332,12 +332,6 @@ public:
   bool notCyclic(TypedValue v) const;
 
   /*
-   * Should int-like string keys be implicitly converted to integers before
-   * they are inserted?
-   */
-  bool useWeakKeys() const;
-
-  /*
    * Get the DataType (persistent or non-persistent version) corresponding to
    * the array's kind.
    */

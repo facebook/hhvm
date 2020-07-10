@@ -11,10 +11,8 @@
   DefCls 4
   DefCls 5
   DefCls 6
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "main"
+
+  Int 1
   RetC
 }
 
@@ -70,7 +68,7 @@
   }
 }
 
-.function main() {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   NewObjD "UseFrob"
   Dup
   NullUninit

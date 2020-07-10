@@ -4,16 +4,11 @@
 #
 
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "main"
-  PopC
-  Null
+  Int 1
   RetC
 }
 
-.function main() {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   Int 5
   SetL $x
   PopC

@@ -4,17 +4,11 @@
 #
 
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-  Int 12
-  FCallFuncD <> 1 1 "" - "" "main"
-  PopC
-  Null
+  Int 1
   RetC
 }
 
-.function main($x) {
+.function foo($x) {
   # $y should get assigned to _1 even though $z is used first
   .declvars $y $z;
 
@@ -36,6 +30,17 @@
   Print
   PopC
 
+  Null
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  Int 12
+  FCallFuncD <> 1 1 "" - "" "foo"
+  PopC
   Null
   RetC
 }

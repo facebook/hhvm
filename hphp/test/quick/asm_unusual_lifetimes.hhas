@@ -4,28 +4,10 @@
 
 .main {
   Int 1
-  Int 2
-  Int 3
-  NewVArray 3
-  SetL $a
-  PopC
-  Int 1
-  Int 2
-  Int 3
-  NewVArray 3
-  SetL $b
-  PopC
-
-  NullUninit
-  NullUninit
-  NullUninit
-    PushL $a
-    PushL $b
-  FCallFuncD <> 2 1 "" - "" "main"
   RetC
 }
 
-.function main($a, $b) {
+.function foo($a, $b) {
   CGetL $a
   Dup
   CGetL $b
@@ -44,5 +26,28 @@
   CGetL $k
   CGetL $k2
   Add
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  Int 1
+  Int 2
+  Int 3
+  NewVArray 3
+  SetL $a
+  PopC
+  Int 1
+  Int 2
+  Int 3
+  NewVArray 3
+  SetL $b
+  PopC
+
+  NullUninit
+  NullUninit
+  NullUninit
+    PushL $a
+    PushL $b
+  FCallFuncD <> 2 1 "" - "" "foo"
   RetC
 }

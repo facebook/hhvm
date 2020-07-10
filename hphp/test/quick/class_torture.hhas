@@ -5,59 +5,10 @@
   .declvars $x;
 
   DefCls 0
-  NewObjD "A"
-  Dup
-  NullUninit
-  NullUninit
-  String "foo"
-  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
-  PopC
-  LockObj
-  PopC
-
-  DefCls 0
-  NewObjD "B"
-  Dup
-  NullUninit
-  NullUninit
-  String "foo"
-  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
-  PopC
-  LockObj
-  PopC
-
-  DefCls 0
-  NewObjD "C"
-  Dup
-  NullUninit
-  NullUninit
-  String "foo"
-  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
-  PopC
-  LockObj
-  PopC
-
-  DefCls 0
-  NewObjD "E"
-  Dup
-  NullUninit
-  NullUninit
-  String "foo"
-  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
-  PopC
-  LockObj
-  PopC
-
-  DefCls 0
-  NewObjD "G"
-  Dup
-  NullUninit
-  NullUninit
-  String "foo"
-  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
-  PopC
-  LockObj
-  PopC
+  DefCls 1
+  DefCls 2
+  DefCls 4
+  DefCls 6
 
   Int 1
   RetC
@@ -94,4 +45,61 @@
 
 .class G extends F{
 
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  .declvars $x;
+
+  NewObjD "A"
+  Dup
+  NullUninit
+  NullUninit
+  String "foo"
+  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  PopC
+  LockObj
+  PopC
+
+  NewObjD "B"
+  Dup
+  NullUninit
+  NullUninit
+  String "foo"
+  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  PopC
+  LockObj
+  PopC
+
+  NewObjD "C"
+  Dup
+  NullUninit
+  NullUninit
+  String "foo"
+  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  PopC
+  LockObj
+  PopC
+
+  NewObjD "E"
+  Dup
+  NullUninit
+  NullUninit
+  String "foo"
+  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  PopC
+  LockObj
+  PopC
+
+  NewObjD "G"
+  Dup
+  NullUninit
+  NullUninit
+  String "foo"
+  FCallCtor <LockWhileUnwinding> 1 1 "" - "" ""
+  PopC
+  LockObj
+  PopC
+
+  Int 1
+  RetC
 }

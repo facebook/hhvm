@@ -4,18 +4,6 @@
 #
 
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "init_test"
-  PopC
-
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "uninit_test"
-  PopC
-
   Int 1
   RetC
 }
@@ -124,5 +112,22 @@
   NullUninit
     String "Uninit"
   FCallFuncD <> 1 1 "" - "" "do_test"
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "init_test"
+  PopC
+
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "uninit_test"
+  PopC
+
+  Int 1
   RetC
 }

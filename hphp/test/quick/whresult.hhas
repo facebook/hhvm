@@ -4,6 +4,11 @@
 
 .main {
   Int 1
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  Int 1
   WHResult
   RetC
 }

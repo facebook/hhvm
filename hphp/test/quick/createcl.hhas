@@ -2,22 +2,6 @@
 # tests that verifier checks properties of the CreateCl bytecode
 
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "foo"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "bar"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "baz"
-  PopC
-
   Int 1
   RetC
 }
@@ -52,4 +36,25 @@
     Int 1
     RetC
   }
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "foo"
+  PopC
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "bar"
+  PopC
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "baz"
+  PopC
+
+  Int 1
+  RetC
 }

@@ -1,11 +1,12 @@
 .hh_file 1;
+
 .main {
   Int 1
-  Await
   RetC
 }
 
 .function foo () {
   Int 1
+  Await
   RetC
 }

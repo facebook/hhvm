@@ -1,15 +1,6 @@
 .hh_file 1;
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "main"
-  FCallFuncD <> 1 1 "" - "" "HH\\Asio\\join"
-  PopC
-  Null
+  Int 1
   RetC
 }
 
@@ -17,7 +8,7 @@
   .default_ctor;
 }
 
-.function main() isAsync {
+.function foo() isAsync {
   NewObjD "heh"
   Dup
   NullUninit
@@ -33,5 +24,19 @@
   PopC
 
   Int 1
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "foo"
+  FCallFuncD <> 1 1 "" - "" "HH\\Asio\\join"
+  PopC
+  Null
   RetC
 }

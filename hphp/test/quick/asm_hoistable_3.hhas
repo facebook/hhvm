@@ -6,12 +6,6 @@
   DefClsNop 0
   DefClsNop 1
 
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallClsMethodD <> 0 1 "" - "" "" "B" "print"
-  PopC
-
   Int 1
   RetC
 }
@@ -32,4 +26,15 @@
 
 .class [unique] A {
   .default_ctor;
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallClsMethodD <> 0 1 "" - "" "" "B" "print"
+  PopC
+
+  Int 1
+  RetC
 }

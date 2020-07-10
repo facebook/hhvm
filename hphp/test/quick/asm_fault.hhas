@@ -2,11 +2,6 @@
 # Some tests for catch regions.
 
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "main"
-  PopC
   Int 1
   RetC
 }
@@ -144,7 +139,7 @@ on_three:    String "three\n"
            }
 }
 
-.function main() {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
          False
          SetL $ever_caught
          PopC

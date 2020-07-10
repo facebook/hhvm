@@ -1,20 +1,10 @@
 .hh_file 1;
 .main {
-  .try {
-    NullUninit
-    NullUninit
-    NullUninit
-    FCallFuncD <> 0 1 "" - "" "main"
-    RetC
-  } .catch {
-    PopC
-    String "Finished!\n"
-    Print
-    RetC
-  }
+  Int 1
+  RetC
 }
 
-.function main {
+.function foo {
   .try {
     String "foo\n"
     Print
@@ -41,5 +31,20 @@
     Print
     PopC
     Throw
+  }
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  .try {
+    NullUninit
+    NullUninit
+    NullUninit
+    FCallFuncD <> 0 1 "" - "" "foo"
+    RetC
+  } .catch {
+    PopC
+    String "Finished!\n"
+    Print
+    RetC
   }
 }

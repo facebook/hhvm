@@ -1,24 +1,5 @@
 .hh_file 1;
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  NullUninit
-  String "a"
-  String "b"
-  String "c"
-  FCallFuncD <> 3 1 "" - "" "test"
-  NullUninit
-  NullUninit
-  NullUninit
-  Null
-  String "b"
-  String "c"
-  FCallFuncD <> 3 1 "" - "" "test"
-  FCallFuncD <> 2 1 "" - "" "var_dump"
-  PopC
   Int 1
   RetC
 }
@@ -40,5 +21,29 @@ L5:
   PopC
   CGetL $c
 L4:
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main {
+  NullUninit
+  NullUninit
+  NullUninit
+  NullUninit
+  NullUninit
+  NullUninit
+  String "a"
+  String "b"
+  String "c"
+  FCallFuncD <> 3 1 "" - "" "test"
+  NullUninit
+  NullUninit
+  NullUninit
+  Null
+  String "b"
+  String "c"
+  FCallFuncD <> 3 1 "" - "" "test"
+  FCallFuncD <> 2 1 "" - "" "var_dump"
+  PopC
+  Int 1
   RetC
 }

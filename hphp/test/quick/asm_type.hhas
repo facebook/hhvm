@@ -2,16 +2,11 @@
 # just testing istype opcodes
 
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "main"
-  PopC
   Int 1
   RetC
 }
 
-.function main() {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   Int 1
   IsTypeC Int
   JmpNZ was_int

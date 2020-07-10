@@ -1,8 +1,5 @@
 .hh_file 1;
 .main (1,1) {
-  String "FAIL: should not run this\n"
-  Print
-  PopC
   Int 1
   RetC
 }
@@ -12,4 +9,12 @@
     Null
     RetC
   }
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  String "FAIL: should not run this\n"
+  Print
+  PopC
+  Int 1
+  RetC  
 }

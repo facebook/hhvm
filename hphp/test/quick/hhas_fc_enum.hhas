@@ -3,18 +3,7 @@
 
 .main {
   DefCls 0
-  NullUninit
-  NullUninit
-  NullUninit
-  ClsCnsD "FOO" "Foo"
-  FCallFuncD <> 1 1 "" - "" "test"
-  PopC
-  NullUninit
-  NullUninit
-  NullUninit
-  String "hi"
-  FCallFuncD <> 1 1 "" - "" "test"
-  PopC
+
   Int 1
   RetC
 }
@@ -30,4 +19,21 @@
 
   .const FOO = """i:1;""";
   .default_ctor;
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  ClsCnsD "FOO" "Foo"
+  FCallFuncD <> 1 1 "" - "" "test"
+  PopC
+  NullUninit
+  NullUninit
+  NullUninit
+  String "hi"
+  FCallFuncD <> 1 1 "" - "" "test"
+  PopC
+  Int 1
+  RetC
 }

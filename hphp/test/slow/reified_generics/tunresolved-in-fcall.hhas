@@ -2,12 +2,6 @@
 .adata A_0 = """Y:2:{s:4:\"kind\";i:19;s:13:\"generic_types\";y:2:{Y:1:{s:4:\"kind\";i:1;}Y:2:{s:4:\"kind\";i:101;s:9:\"classname\";s:1:\"C\";}}}""";
 
 .main (1,1) {
-  NullUninit
-  NullUninit
-  NullUninit
-  Array @A_0
-  FCallFuncD <Generics> 0 1 "" - "" "f"
-  PopC
   Int 1
   RetC
 }
@@ -21,5 +15,16 @@
   PopC
   .srcloc 3:41,3:41;
   Null
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  Array @A_0
+  FCallFuncD <Generics> 0 1 "" - "" "f"
+  PopC
+  Int 1
   RetC
 }

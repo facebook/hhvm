@@ -1,7 +1,7 @@
-Verification Error (unit %s func ): CreateCont may only appear in a generator
+Verification Error (unit %s func main): CreateCont may only appear in a generator
 
-Verification Error (unit %s func ): Yield may only appear in a generator
+Verification Error (unit %s func main): Yield may only appear in a generator
 
-Verification Error (unit %s func ): YieldK may only appear in a generator
+Verification Error (unit %s func main): YieldK may only appear in a generator
 
 Verification failed for unit %s. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details.

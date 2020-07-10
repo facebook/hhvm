@@ -1,4 +1,4 @@
-Verification Error (unit %s func ): BareThis required that $this be guaranteed to be non-null
+Verification Error (unit %s func main): BareThis required that $this be guaranteed to be non-null
 
 Verification Error (unit %s func C::foo): BareThis required that $this be guaranteed to be non-null
 

@@ -4,6 +4,27 @@
 #
 
 .main {
+  Int 1
+  RetC
+}
+
+.function R() isGenerator {
+  CreateCont
+  PopC
+  Int 1
+  Yield
+  PopC
+  Int 2
+  Yield
+  PopC
+  Int 3
+  Yield
+  PopC
+  Null
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main {
   .numiters 1;
   NullUninit
   NullUninit
@@ -25,22 +46,6 @@
   }
 L0:
   Int 1
-  RetC
-}
-
-.function R() isGenerator {
-  CreateCont
-  PopC
-  Int 1
-  Yield
-  PopC
-  Int 2
-  Yield
-  PopC
-  Int 3
-  Yield
-  PopC
-  Null
   RetC
 }
 

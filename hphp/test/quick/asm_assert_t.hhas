@@ -4,46 +4,6 @@
 #
 
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "main"
-  PopC
-
-  NewObjD "Foo"
-  Dup
-  NullUninit
-  NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
-  PopC
-  LockObj
-  SetL $x
-  PopC
-
-  NewObjD "Bar"
-  Dup
-  NullUninit
-  NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
-  PopC
-  LockObj
-  SetL $y
-  PopC
-
-  NullUninit
-  NullUninit
-  NullUninit
-  CGetL $x
-  CGetL $y
-  FCallFuncD <> 2 1 "" - "" "obj_type"
-  PopC
-
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "obj_type2"
-  PopC
-
   Int 1
   RetC
 }
@@ -107,7 +67,7 @@
   RetC
 }
 
-.function main() {
+.function foo() {
   Jmp stuff
 out:
   Null
@@ -134,5 +94,50 @@ stuff:
   SetL $k
   PopC
   Jmp out
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "foo"
+  PopC
+
+  NewObjD "Foo"
+  Dup
+  NullUninit
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+  SetL $x
+  PopC
+
+  NewObjD "Bar"
+  Dup
+  NullUninit
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+  SetL $y
+  PopC
+
+  NullUninit
+  NullUninit
+  NullUninit
+  CGetL $x
+  CGetL $y
+  FCallFuncD <> 2 1 "" - "" "obj_type"
+  PopC
+
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "obj_type2"
+  PopC
+
+  Int 1
+  RetC
 }
 

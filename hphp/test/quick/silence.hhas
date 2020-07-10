@@ -1,6 +1,18 @@
 .hh_file 1;
 # Tests that silence ends without silence starts fail the verifier
 .main {
+  Int 1
+  RetC
+}
+
+.function <"" N  > add($x, $y) {
+  CGetL $y
+  CGetL2 $x
+  AddO
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   .declvars $z;
   NullUninit
   NullUninit
@@ -53,12 +65,5 @@ L1:
   Silence _8 End
   Silence _9 End
   Int 1
-  RetC
-}
-
-.function <"" N  > add($x, $y) {
-  CGetL $y
-  CGetL2 $x
-  AddO
   RetC
 }

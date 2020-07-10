@@ -3,6 +3,11 @@
 
 .main {
   Int 1
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  Int 1
   NullUninit
   NullUninit
   NullUninit
@@ -15,5 +20,5 @@ target_label:
   PopC
   PopC
   Int 1
-  RetC
+  RetC  
 }

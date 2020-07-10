@@ -3,10 +3,7 @@
 # implementation.
 
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "main"
+  Int 1
   RetC
 }
 
@@ -95,7 +92,7 @@ fail:
   RetC
 }
 
-.function main() {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
   NullUninit
   NullUninit

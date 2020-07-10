@@ -8,6 +8,43 @@
   DefTypeAlias 2
   DefTypeAlias 3
 
+  Int 1
+  RetC
+}
+
+.function foo(<"@Foo" "Foo" extended_hint soft > $x) {
+  VerifyParamType $x
+  Null
+  RetC
+}
+
+.function bar(<"@Bar" "Bar" extended_hint soft > $x) {
+  VerifyParamType $x
+  Null
+  RetC
+}
+
+.function baz(<"@Baz" "Baz" extended_hint soft > $x) {
+  VerifyParamType $x
+  Null
+  RetC
+}
+
+.function quux(<"@Quux" "Quux" extended_hint soft > $x) {
+  VerifyParamType $x
+  Null
+  RetC
+}
+
+.class C {
+}
+
+.alias Foo = <"HH\\int"> """Y:1:{s:4:\"kind\";i:1;}""";
+.alias Bar = <"C"> """Y:2:{s:4:\"kind\";i:101;s:9:\"classname\";s:1:\"C\";}""";
+.alias Baz = <"C" nullable> """Y:3:{s:8:\"nullable\";b:1;s:4:\"kind\";i:101;s:9:\"classname\";s:1:\"C\";}""";
+.alias Quux = <N> """Y:1:{s:4:\"kind\";i:1;}""";
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
   NullUninit
   NullUninit
@@ -98,35 +135,3 @@
   Int 1
   RetC
 }
-
-.function foo(<"@Foo" "Foo" extended_hint soft > $x) {
-  VerifyParamType $x
-  Null
-  RetC
-}
-
-.function bar(<"@Bar" "Bar" extended_hint soft > $x) {
-  VerifyParamType $x
-  Null
-  RetC
-}
-
-.function baz(<"@Baz" "Baz" extended_hint soft > $x) {
-  VerifyParamType $x
-  Null
-  RetC
-}
-
-.function quux(<"@Quux" "Quux" extended_hint soft > $x) {
-  VerifyParamType $x
-  Null
-  RetC
-}
-
-.class C {
-}
-
-.alias Foo = <"HH\\int">;
-.alias Bar = <"C">;
-.alias Baz = <"C" nullable>;
-.alias Quux = <N>;

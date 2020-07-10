@@ -4,14 +4,7 @@
 #
 
 .main {
-  String "beginning...\n"
-  Print
-  PopC
-
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "main"
+  Int 1
   RetC
 }
 
@@ -65,7 +58,11 @@
           Jmp entry
 }
 
-.function main() {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  String "beginning...\n"
+  Print
+  PopC
+
   NullUninit
   NullUninit
   NullUninit

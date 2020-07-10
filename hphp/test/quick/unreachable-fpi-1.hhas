@@ -1,5 +1,10 @@
 .hh_file 1;
 .main {
+  Int 1
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   NewObjD "Exception"
   Dup
   NullUninit
@@ -15,5 +20,5 @@
   FCallFuncD <> 0 1 "" - "" "bar"
   PopC
   Int 1
-  RetC
+  RetC 
 }

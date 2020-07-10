@@ -1,60 +1,55 @@
-0xXX+0: NullUninit
-0xXX+1: NullUninit
-0xXX+2: NullUninit
-0xXX+3: FCallFuncD 0 0 1 main
-0xXX+10: PopC
-0xXX+11: Int 1
-0xXX+20: RetC
-0xXX+21: NewDArray 3
-0xXX+23: String hello
-0xXX+28: String world
+0xXX+0: Int 1
+0xXX+9: RetC
+0xXX+10: NewDArray 3
+0xXX+12: String hello
+0xXX+17: String world
+0xXX+22: AddElemC
+0xXX+23: String this
+0xXX+28: String is
 0xXX+33: AddElemC
-0xXX+34: String this
-0xXX+39: String is
+0xXX+34: String a
+0xXX+39: String test
 0xXX+44: AddElemC
-0xXX+45: String a
-0xXX+50: String test
-0xXX+55: AddElemC
-0xXX+56: SetL 0
-0xXX+58: PopC
-0xXX+59: CGetL 0 (name: 0)
-0xXX+62: IterInit 0 k:1 v:2 108
+0xXX+45: SetL 0
+0xXX+47: PopC
+0xXX+48: CGetL 0 (name: 0)
+0xXX+51: IterInit 0 k:1 v:2 108
+0xXX+60: String
+
+0xXX+65: CGetL2 2 (name: 2)
+0xXX+68: Concat
+0xXX+69: Print
+0xXX+70: PopC
 0xXX+71: String
 
-0xXX+76: CGetL2 2 (name: 2)
+0xXX+76: CGetL2 1 (name: 1)
 0xXX+79: Concat
 0xXX+80: Print
 0xXX+81: PopC
-0xXX+82: String
+0xXX+82: CGetL 0 (name: 0)
+0xXX+85: IterInit 1 k:3 v:4 57
+0xXX+94: String
 
-0xXX+87: CGetL2 1 (name: 1)
-0xXX+90: Concat
-0xXX+91: Print
-0xXX+92: PopC
-0xXX+93: CGetL 0 (name: 0)
-0xXX+96: IterInit 1 k:3 v:4 57
+0xXX+99: CGetL2 4 (name: 4)
+0xXX+102: Concat
+0xXX+103: Print
+0xXX+104: PopC
 0xXX+105: String
 
-0xXX+110: CGetL2 4 (name: 4)
+0xXX+110: CGetL2 3 (name: 3)
 0xXX+113: Concat
 0xXX+114: Print
 0xXX+115: PopC
-0xXX+116: String
-
-0xXX+121: CGetL2 3 (name: 3)
-0xXX+124: Concat
-0xXX+125: Print
-0xXX+126: PopC
-0xXX+127: IterFree 1
-0xXX+129: IterFree 0
-0xXX+131: Jmp 39
-0xXX+136: IterNext 1 k:3 v:4 -31
-0xXX+145: Jmp 8
-0xXX+150: IterFree 1
-0xXX+152: Throw
-0xXX+153: IterNext 0 k:1 v:2 -82
-0xXX+162: Jmp 8
-0xXX+167: IterFree 0
-0xXX+169: Throw
-0xXX+170: Int 1
-0xXX+179: RetC
+0xXX+116: IterFree 1
+0xXX+118: IterFree 0
+0xXX+120: Jmp 39
+0xXX+125: IterNext 1 k:3 v:4 -31
+0xXX+134: Jmp 8
+0xXX+139: IterFree 1
+0xXX+141: Throw
+0xXX+142: IterNext 0 k:1 v:2 -82
+0xXX+151: Jmp 8
+0xXX+156: IterFree 0
+0xXX+158: Throw
+0xXX+159: Int 1
+0xXX+168: RetC

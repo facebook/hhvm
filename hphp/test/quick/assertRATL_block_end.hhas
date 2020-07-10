@@ -2,12 +2,6 @@
 # tests that AssertRATL cannot appear at the end of a block
 
 .main {
-    NullUninit
-    NullUninit
-    NullUninit
-    Int 9
-    FCallFuncD <> 1 1 "" - "" "foo"
-    PopC
     Int 1
     RetC
 }
@@ -23,4 +17,15 @@
     Int 42
     FCallFuncD <> 1 1 "" - "" "var_dump"
     RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  Int 9
+  FCallFuncD <> 1 1 "" - "" "foo"
+  PopC
+  Int 1
+  RetC
 }

@@ -3,47 +3,8 @@
 # execution stack locations.
 
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-    String "thrower"
-  FCallFuncD <> 1 1 "" - "" "set_error_handler"
-  PopC
-
-  # If get_undefined_var is inlined then the context passed to handler will
-  # contain the locals from test_unwind_dirty_stack_regs in an array which will
-  # be stored along wtih other arguments inside the exception unless we pass
-  # ignore args. If this happens the exception will keep the DtorPrinter objects
-  # alive past the end of test_unwind_dirty_stack_regs.
-  NullUninit
-  NullUninit
-  NullUninit
-    CnsE "DEBUG_BACKTRACE_IGNORE_ARGS"
-  FCallClsMethodD <> 1 1 "" - "" "" "Exception" "setTraceOptions"
-  PopC
-
-  .try {
-    NullUninit
-    NullUninit
-    NullUninit
-    FCallFuncD <> 0 1 "" - "" "test_unwind_dirty_stack_regs"
-    RetC
-  } .catch {
-    SetL _1
-    PopC
-    String "Received exception:  "
-    PushL _1
-    NullUninit
-    NullUninit
-    FCallObjMethodD <> 0 1 "" - "" "" NullThrows "getMessage"
-    Concat
-    String "\n"
-    Concat
-    Print
-    PopC
-    Int 1
-    RetC
-  }
+  Int 1
+  RetC
 }
 
 .function thrower() {
@@ -148,4 +109,48 @@
 
   Int 1
   RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+    String "thrower"
+  FCallFuncD <> 1 1 "" - "" "set_error_handler"
+  PopC
+
+  # If get_undefined_var is inlined then the context passed to handler will
+  # contain the locals from test_unwind_dirty_stack_regs in an array which will
+  # be stored along wtih other arguments inside the exception unless we pass
+  # ignore args. If this happens the exception will keep the DtorPrinter objects
+  # alive past the end of test_unwind_dirty_stack_regs.
+  NullUninit
+  NullUninit
+  NullUninit
+    CnsE "DEBUG_BACKTRACE_IGNORE_ARGS"
+  FCallClsMethodD <> 1 1 "" - "" "" "Exception" "setTraceOptions"
+  PopC
+
+  .try {
+    NullUninit
+    NullUninit
+    NullUninit
+    FCallFuncD <> 0 1 "" - "" "test_unwind_dirty_stack_regs"
+    RetC
+  } .catch {
+    SetL _1
+    PopC
+    String "Received exception:  "
+    PushL _1
+    NullUninit
+    NullUninit
+    FCallObjMethodD <> 0 1 "" - "" "" NullThrows "getMessage"
+    Concat
+    String "\n"
+    Concat
+    Print
+    PopC
+    Int 1
+    RetC
+  } 
 }

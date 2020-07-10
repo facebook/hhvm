@@ -4,11 +4,6 @@
 #
 
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "main"
-  PopC
   Int 1
   RetC
 }
@@ -34,7 +29,7 @@
   RetC
 }
 
-.function main() {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
 
 # two registers
   NullUninit

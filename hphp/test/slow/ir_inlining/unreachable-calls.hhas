@@ -1,13 +1,6 @@
 .hh_file 1;
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "main"
-  PopC
-
-  String "DONE\n"
-  Print
+  Int 1
   RetC
 }
 
@@ -130,7 +123,7 @@ end:
   RetC
 }
 
-.function main() {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
   NullUninit
   NullUninit
@@ -145,5 +138,9 @@ end:
   True
   Int 100
   FCallFuncD <> 2 1 "" - "" "loop"
+  PopC
+
+  String "DONE\n"
+  Print
   RetC
 }

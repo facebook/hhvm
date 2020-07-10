@@ -4,13 +4,6 @@
 #
 
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-  String "main"
-  FCallFunc <> 0 1 "" - "" # allow the JIT why not
-  PopC
-
   Int 1
   RetC
 }
@@ -53,7 +46,7 @@
   RetC
 }
 
-.function main() {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
   NullUninit
   NullUninit

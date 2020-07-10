@@ -4,11 +4,6 @@
 .adata A_0 = """Y:0:{}""";
 
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "fail"
-  PopC
   Int 1
   RetC
 }
@@ -16,5 +11,15 @@
 .function <"HH\\int" "HH\\int" extended_hint> fail() {
   Array @A_0
   VerifyRetTypeC
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "fail"
+  PopC
+  Int 1
   RetC
 }

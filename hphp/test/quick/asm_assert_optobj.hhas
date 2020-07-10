@@ -2,6 +2,39 @@
 .main {
   DefCls 0
 
+  Int 1
+  RetC
+}
+
+.class [unique] Foo {
+  .default_ctor;
+
+  .property [public] x = """s:3:"heh";""";
+
+  .method [public] __toString() {
+    String "hey\n"
+    RetC
+  }
+
+  # Do all this work in a member function so that we will assert
+  # specific object types without RepoAuthoritative mode
+  .method [public] main($x) {
+    # Test that the guard for an optional AssertObj stays: we could be
+    # called with the object or nulls.
+
+    AssertRATL $x ?Obj=Foo
+    CGetL $x
+    Print
+    PopC
+    BaseL $x Warn
+    QueryM 0 CGet PT:"x"
+    PopC
+    Int 1
+    RetC
+  }
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   NewObjD "Foo"
   Dup
   NullUninit
@@ -34,32 +67,4 @@
 
   Int 1
   RetC
-}
-
-.class [unique] Foo {
-  .default_ctor;
-
-  .property [public] x = """s:3:"heh";""";
-
-  .method [public] __toString() {
-    String "hey\n"
-    RetC
-  }
-
-  # Do all this work in a member function so that we will assert
-  # specific object types without RepoAuthoritative mode
-  .method [public] main($x) {
-    # Test that the guard for an optional AssertObj stays: we could be
-    # called with the object or nulls.
-
-    AssertRATL $x ?Obj=Foo
-    CGetL $x
-    Print
-    PopC
-    BaseL $x Warn
-    QueryM 0 CGet PT:"x"
-    PopC
-    Int 1
-    RetC
-  }
 }

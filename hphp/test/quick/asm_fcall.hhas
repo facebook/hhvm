@@ -4,12 +4,7 @@
 #
 
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "main"
-  PopC
-  Null
+  Int 1
   RetC
 }
 
@@ -62,7 +57,7 @@
   RetM 2
 }
 
-.function main() {
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
   NullUninit
   NullUninit

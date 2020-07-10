@@ -4,14 +4,11 @@
 .main {
   DefCls 0
   DefClsNop 1
-  CreateCl 0 2
   DefCls 3
   DefClsNop 4
-  CreateCl 0 5
   DefTypeAlias 0
   DefTypeAlias 1
-  PopC
-  PopC
+
   Int 1
   RetC
 }
@@ -38,4 +35,15 @@
   Int 1
   RetC
 }
-.alias al = <"HH\\int">;
+.alias al = <"HH\\int"> """Y:1:{s:4:\"kind\";i:1;}""";
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  CreateCl 0 2
+  PopC
+
+  CreateCl 0 5
+  PopC
+
+  Int 1
+  RetC
+}

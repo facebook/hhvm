@@ -6,20 +6,11 @@
 #
 
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-    NullUninit
-    NullUninit
-    NullUninit
-    FCallFuncD <> 0 1 "" - "" "main"
-  FCallFuncD <> 1 1 "" - "" "var_dump"
-  PopC
   Int 1
   RetC
 }
 
-.function main($x = dv_init1, $y = dv_init2) {
+.function foo($x = dv_init1, $y = dv_init2) {
 main_entry:
   CGetL $x
   CGetL2 $y
@@ -58,4 +49,18 @@ dv_init2:
 
 out_of_catch:
   Jmp main_entry
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main {
+  NullUninit
+  NullUninit
+  NullUninit
+    NullUninit
+    NullUninit
+    NullUninit
+    FCallFuncD <> 0 1 "" - "" "foo"
+  FCallFuncD <> 1 1 "" - "" "var_dump"
+  PopC
+  Int 1
+  RetC
 }

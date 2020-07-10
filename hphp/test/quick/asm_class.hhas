@@ -9,12 +9,8 @@
   DefCls 2
   DefCls 3
   DefCls 4
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "main"
-  PopC
-  True
+
+  Int 1
   RetC
 }
 
@@ -165,7 +161,7 @@
   RetC
 }
 
-.function main {
+.function ["__EntryPoint"("""y:0:{}""")] main {
   NewObjD "Base"
   Dup
   NullUninit

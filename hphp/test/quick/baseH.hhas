@@ -2,6 +2,11 @@
 # check that baseH fails to verify if $this can be null
 
 .main {
+  Int 1
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
   .declvars $foo $baz $t;
   Null
   SetL $foo
@@ -27,5 +32,5 @@
   CGetL $foo
   FCallFuncD <> 1 1 "" - "" "var_dump"
   PopC
-  RetC
+  RetC  
 }

@@ -1,6 +1,6 @@
-Verification Error (unit %s func ): CheckProp cannot appear in  function
+Verification Error (unit %s func main): CheckProp cannot appear in main function
 
-Verification Error (unit %s func ): InitProp cannot appear in  function
+Verification Error (unit %s func main): InitProp cannot appear in main function
 
 Verification Error (unit %s func C::86sinit): InitProp references non-existent property foo
 

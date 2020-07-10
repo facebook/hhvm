@@ -2,17 +2,8 @@
 
 .main {
   DefCls 0
-  NewObjD "C"
-  Dup
-  NullUninit
-  NullUninit
-  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
-  PopC
-  LockObj
 
-  CheckProp "foo"
-  InitProp "bar" NonStatic
-
+  Int 1
   RetC
 }
 
@@ -34,4 +25,19 @@
 
     RetC
   }
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NewObjD "C"
+  Dup
+  NullUninit
+  NullUninit
+  FCallCtor <LockWhileUnwinding> 0 1 "" - "" ""
+  PopC
+  LockObj
+
+  CheckProp "foo"
+  InitProp "bar" NonStatic
+
+  RetC
 }

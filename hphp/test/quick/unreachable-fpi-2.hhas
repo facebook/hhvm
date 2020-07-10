@@ -1,13 +1,5 @@
 .hh_file 1;
 .main {
-  NullUninit
-  NullUninit
-  NullUninit
-  FCallFuncD <> 0 1 "" - "" "foo"
-  PopC
-  String "done.\n"
-  Print
-  PopC
   Int 1
   RetC
 }
@@ -25,5 +17,18 @@ L1:
   Jmp L2
 L0:
   Null
+  RetC
+}
+
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  NullUninit
+  NullUninit
+  NullUninit
+  FCallFuncD <> 0 1 "" - "" "foo"
+  PopC
+  String "done.\n"
+  Print
+  PopC
+  Int 1
   RetC
 }

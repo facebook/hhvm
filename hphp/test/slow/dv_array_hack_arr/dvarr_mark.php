@@ -5,34 +5,46 @@ class Baz {
   public static function sm() {}
 }
 
-function foo($c) {
-  $a = darray['a' => $c];
+function foo($x) {
+  $a = darray['a' => $x];
   var_dump(HH\is_array_marked_legacy($a));
-  $b = varray[$c, $c];
+  var_dump($a);
+  $b = varray[$x, $x];
   var_dump(HH\is_array_marked_legacy($b));
+  var_dump($b);
   $c = darray['a' => 1];
   var_dump(HH\is_array_marked_legacy($c));
+  var_dump($b);
   $d = varray[1, 2];
   var_dump(HH\is_array_marked_legacy($d));
-  $e = darray[1 => $c];
+  var_dump($d);
+  $e = darray[1 => $x];
   var_dump(HH\is_array_marked_legacy($e));
+  var_dump($e);
   $f = class_meth(Baz::class, "sm");
   var_dump(HH\is_array_marked_legacy($f));
+  var_dump($f);
   $obj = new Baz();
   $g = inst_meth($obj, "m");
   var_dump(HH\is_array_marked_legacy($g));
+  var_dump($g);
 
   // real vecs/dicts are not marked
-  $a = dict['a' => $c];
+  $a = dict['a' => $x];
   var_dump(HH\is_array_marked_legacy($a));
-  $b = vec[$c, $c];
+  var_dump($a);
+  $b = vec[$x, $x];
   var_dump(HH\is_array_marked_legacy($b));
+  var_dump($b);
   $c = dict['a' => 1];
   var_dump(HH\is_array_marked_legacy($c));
+  var_dump($c);
   $d = vec[1, 2];
   var_dump(HH\is_array_marked_legacy($d));
-  $e = dict[1 => $c];
+  var_dump($d);
+  $e = dict[1 => $x];
   var_dump(HH\is_array_marked_legacy($e));
+  var_dump($e);
 }
 
 function bar<reify T>(vec<T> $v, int $i) {

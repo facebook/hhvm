@@ -1,13 +1,62 @@
 bool(true)
+darray(1) {
+  ["a"]=>
+  int(1)
+}
 bool(true)
+varray(2) {
+  int(1)
+  int(1)
+}
 bool(true)
+varray(2) {
+  int(1)
+  int(1)
+}
 bool(true)
+varray(2) {
+  int(1)
+  int(2)
+}
 bool(true)
+darray(1) {
+  [1]=>
+  int(1)
+}
 bool(true)
+varray(2) {
+  string(3) "Baz"
+  string(2) "sm"
+}
 bool(true)
+varray(2) {
+  object(Baz) (0) {
+  }
+  string(1) "m"
+}
 bool(false)
+dict(1) {
+  ["a"]=>
+  int(1)
+}
 bool(false)
+vec(2) {
+  int(1)
+  int(1)
+}
 bool(false)
+dict(1) {
+  ["a"]=>
+  int(1)
+}
 bool(false)
+vec(2) {
+  int(1)
+  int(2)
+}
 bool(false)
+dict(1) {
+  [1]=>
+  int(1)
+}
 int(1)

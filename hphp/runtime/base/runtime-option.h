@@ -696,6 +696,10 @@ struct RuntimeOption {
   F(string, HackCompilerCommand,       hackCompilerCommandDefault())    \
   /* The number of hh_single_compile daemons to keep alive. */          \
   F(uint64_t, HackCompilerWorkers,     Process::GetCPUCount())          \
+  /* The number of hh_single_compile daemons to keep alive during a     \
+   * repo build after the files in the tree are parsed--set to 0 to     \
+   * disable resizing the pool of compilers */                          \
+  F(uint64_t, HackCompilerSecondaryWorkers, 2)                          \
   /* The number of times to retry after an infra failure communicating
      with a compiler process. */                                        \
   F(uint64_t, HackCompilerMaxRetries,  0)                               \

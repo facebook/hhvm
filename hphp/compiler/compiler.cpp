@@ -630,6 +630,17 @@ int process(const CompilerOptions &po) {
       if (!package.parse(!po.force, unit_cache_thread)) {
         return 1;
       }
+
+      // nuke the compiler pool so we don't waste memory on ten gajillion
+      // instances of hackc
+      if (auto const new_workers = RO::EvalHackCompilerSecondaryWorkers) {
+        Logger::Info(
+          "shutting down hackc worker pool and resizing to %ld workers",
+          new_workers
+        );
+        RO::EvalHackCompilerWorkers = new_workers;
+        compilers_shutdown();
+      }
     }
   }
 

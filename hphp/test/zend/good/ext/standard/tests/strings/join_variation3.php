@@ -14,7 +14,7 @@ echo "*** Testing join() : usage variations ***\n";
 $pieces_arrays = varray [
   varray[1, 2], // array with default keys and numrice values
   varray[1.1, 2.2], // array with default keys & float values
-  varray[ varray[2], varray[1]], // sub arrays
+  varray['Array', 'Array'], // former sub arrays
   varray[false,true], // array with default keys and boolean values
   varray[], // empty array
   varray[NULL], // array with NULL

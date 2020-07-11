@@ -1,28 +1,14 @@
 f1:
-
-Notice: Array to string conversion in %s/functions/default_arguments.php on line %d
 $p1: 10, $p2: 1.23, $p3: 1, $p4: , $p5: abc, $p6: Array
 f1:
-
-Notice: Array to string conversion in %s/functions/default_arguments.php on line %d
 $p1: 20, $p2: 1.23, $p3: 1, $p4: , $p5: abc, $p6: Array
 f1:
-
-Notice: Array to string conversion in %s/functions/default_arguments.php on line %d
 $p1: 10, $p2: 1, $p3: 1, $p4: , $p5: abc, $p6: Array
 f1:
-
-Notice: Array to string conversion in %s/functions/default_arguments.php on line %d
 $p1: , $p2: 12, $p3: 1.234, $p4: , $p5: abc, $p6: Array
 f1:
-
-Notice: Array to string conversion in %s/functions/default_arguments.php on line %d
-
-Notice: Array to string conversion in %s/functions/default_arguments.php on line %d
 $p1: , $p2: 1200, $p3: Array, $p4: abc, $p5: abc, $p6: Array
 f1:
-
-Notice: Array to string conversion in %s/functions/default_arguments.php on line %d
 $p1: 9, $p2: 8, $p3: 7, $p4: 6, $p5: 5, $p6: Array
 f1:
 $p1: 10, $p2: 20, $p3: 30, $p4: 40, $p5: 50, $p6: 60

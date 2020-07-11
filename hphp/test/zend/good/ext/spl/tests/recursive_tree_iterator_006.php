@@ -34,23 +34,23 @@ function main_entry(): void {
   $it = new RecursiveArrayIteratorAggregated($ary);
   echo "-- flags = BYPASS_KEY --\n";
   foreach(new RecursiveTreeIterator($it) as $k => $v) {
-  	echo "[$k] => $v\n";
+  	$v = HH\is_any_array($v) ? 'Array' : $v; echo "[$k] => $v\n";
   }
   echo "-- flags = BYPASS_CURRENT --\n";
   foreach(new RecursiveTreeIterator($it, RecursiveTreeIterator::BYPASS_CURRENT) as $k => $v) {
-  	echo "[$k] => $v\n";
+  	$v = HH\is_any_array($v) ? 'Array' : $v; echo "[$k] => $v\n";
   }
   echo "-- flags = BYPASS_KEY|BYPASS_KEY --\n";
   foreach(new RecursiveTreeIterator($it, RecursiveTreeIterator::BYPASS_CURRENT|RecursiveTreeIterator::BYPASS_KEY) as $k => $v) {
-  	echo "[$k] => $v\n";
+  	$v = HH\is_any_array($v) ? 'Array' : $v; echo "[$k] => $v\n";
   }
   echo "-- flags = 0 --\n";
   foreach(new RecursiveTreeIterator($it, 0) as $k => $v) {
-  	echo "[$k] => $v\n";
+  	$v = HH\is_any_array($v) ? 'Array' : $v; echo "[$k] => $v\n";
   }
   echo "-- flags = 0, caching_it_flags = CachingIterator::CATCH_GET_CHILD --\n";
   foreach(new RecursiveTreeIterator($it, 0, CachingIterator::CATCH_GET_CHILD) as $k => $v) {
-  	echo "[$k] => $v\n";
+  	$v = HH\is_any_array($v) ? 'Array' : $v; echo "[$k] => $v\n";
   }
 
   echo "===DONE===\n";

@@ -52,7 +52,7 @@ $phrase  = 'eat fruits, vegetables, and fiber every day.';
 $healthy = varray['fruits', 'vegetables'];
 $yummy   = varray['pizza', 'beer', 'ice cream'];
 var_dump(str_replace($healthy, $yummy, $phrase));
-var_dump(str_replace_with_count('ll', $yummy, 'good golly miss molly!', inout $count));
+var_dump(str_replace_with_count('ll', 'Array', 'good golly miss molly!', inout $count));
 var_dump(setlocale(LC_ALL, varray['de_DE@garbage', 'de_DE', 'deu_deu'], varray[1, 2]));
 var_dump(setlocale(LC_ALL, str_pad('a', 255)));
 var_dump(pack("\xf4", 0x1234, 0x5678, 65, 66));

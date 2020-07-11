@@ -36,26 +36,6 @@ Arg value 0.5
 
 Warning: fpassthru() expects parameter 1 to be resource, double given in %s/fpassthru_variation1.php on line 76
 
-Arg value Array 
-
-Warning: fpassthru() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/fpassthru_variation1.php on line 76
-
-Arg value Array 
-
-Warning: fpassthru() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/fpassthru_variation1.php on line 76
-
-Arg value Array 
-
-Warning: fpassthru() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/fpassthru_variation1.php on line 76
-
-Arg value Array 
-
-Warning: fpassthru() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/fpassthru_variation1.php on line 76
-
-Arg value Array 
-
-Warning: fpassthru() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/fpassthru_variation1.php on line 76
-
 Arg value  
 
 Warning: fpassthru() expects parameter 1 to be resource, null given in %s/fpassthru_variation1.php on line 76

@@ -50,8 +50,8 @@ $values = varray[
           .5,
 
           // array data
-/*18*/    varray[],
-          darray['color' => 'red', 'item' => 'pen'],
+/*18*/    'Array',
+          'Array',
 
           // null data
 /*20*/    NULL,

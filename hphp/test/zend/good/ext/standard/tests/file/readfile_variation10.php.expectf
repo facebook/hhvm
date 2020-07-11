@@ -1,35 +1,33 @@
 *** Testing readfile() : variation ***
 -- testing '-1' --
 
-Warning: readfile() expects parameter 1 to be string, integer given in %s/readfile_variation10.php on line 32
+Warning: readfile() expects parameter 1 to be string, integer given in %s/readfile_variation10.php on line 33
 -- testing '1' --
 
-Warning: readfile() expects parameter 1 to be string, boolean given in %s/readfile_variation10.php on line 32
+Warning: readfile() expects parameter 1 to be string, boolean given in %s/readfile_variation10.php on line 33
 -- testing '' --
 
-Warning: readfile() expects parameter 1 to be string, boolean given in %s/readfile_variation10.php on line 32
+Warning: readfile() expects parameter 1 to be string, boolean given in %s/readfile_variation10.php on line 33
 -- testing '' --
 
-Warning: readfile() expects parameter 1 to be string, null given in %s/readfile_variation10.php on line 32
+Warning: readfile() expects parameter 1 to be string, null given in %s/readfile_variation10.php on line 33
 -- testing '' --
 
-Warning: Filename cannot be empty in %s/readfile_variation10.php on line 32
+Warning: Filename cannot be empty in %s/readfile_variation10.php on line 33
 -- testing ' ' --
 
-Warning: No such file or directory in %s/readfile_variation10.php on line 32
+Warning: No such file or directory in %s/readfile_variation10.php on line 33
 -- testing '%r\x00%r' --
 
-Warning: readfile() expects parameter 1 to be a valid path, string given in %s/readfile_variation10.php on line 32
-
-Notice: Array to string conversion in %s/readfile_variation10.php on line 31
+Warning: readfile() expects parameter 1 to be a valid path, string given in %s/readfile_variation10.php on line 33
 -- testing 'Array' --
 
-Warning: readfile() expects parameter 1 to be string, %rv?%rarray given in %s/readfile_variation10.php on line 32
+Warning: readfile() expects parameter 1 to be string, %rv?%rarray given in %s/readfile_variation10.php on line 33
 -- testing '/no/such/file/dir' --
 
-Warning: No such file or directory in %s/readfile_variation10.php on line 32
+Warning: No such file or directory in %s/readfile_variation10.php on line 33
 -- testing 'php/php' --
 
-Warning: No such file or directory in %s/readfile_variation10.php on line 32
+Warning: No such file or directory in %s/readfile_variation10.php on line 33
 
 *** Done ***

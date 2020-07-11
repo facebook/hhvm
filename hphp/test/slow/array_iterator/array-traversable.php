@@ -3,23 +3,23 @@
 interface IFoo {
 }
 function trav(Traversable $x) {
-  echo "Traversable ", $x, "\n";
+  echo "Traversable Array\n";
   var_dump($x);
 }
 function ktrav(KeyedTraversable $x) {
-  echo "KeyedTraversable ", $x, "\n";
+  echo "KeyedTraversable Array\n";
   var_dump($x);
 }
 function cont(Container $x) {
-  echo "Container ", $x, "\n";
+  echo "Container Array\n";
   var_dump($x);
 }
 function kcont(KeyedContainer $x) {
-  echo "KeyedContainer ", $x, "\n";
+  echo "KeyedContainer Array\n";
   var_dump($x);
 }
 function ifoo(IFoo $x) {
-  echo "IFoo ", $x, "\n";
+  echo "IFoo Array\n";
   var_dump($x);
 }
 function main() {
@@ -37,9 +37,7 @@ function main() {
 }
 
 
-// disable array -> "Array" conversion notice
 <<__EntryPoint>>
 function main_array_traversable() {
-error_reporting(error_reporting() & ~E_NOTICE);
 main();
 }

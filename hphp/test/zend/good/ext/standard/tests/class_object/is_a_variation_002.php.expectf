@@ -40,26 +40,6 @@ Arg value 0.5
 
 Warning: is_a() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
 
-Arg value Array 
-
-Warning: is_a() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
-
-Arg value Array 
-
-Warning: is_a() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
-
-Arg value Array 
-
-Warning: is_a() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
-
-Arg value Array 
-
-Warning: is_a() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
-
-Arg value Array 
-
-Warning: is_a() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74
-
 Arg value  
 
 Warning: is_a() expects parameter 2 to be string, null given in %s/zend/good/ext/standard/tests/class_object/is_a_variation_002.php on line 74

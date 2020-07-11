@@ -1,6 +1,6 @@
 *** Testing is_subclass_of() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(66)
-Error: 8 - Undefined variable: unset_var, %s(69)
+Error: 8 - Undefined variable: undefined_var, %s(59)
+Error: 8 - Undefined variable: unset_var, %s(62)
 
 Arg value 0 
 bool(false)
@@ -27,26 +27,6 @@ Arg value 1.07654321E-9
 bool(false)
 
 Arg value 0.5 
-bool(false)
-Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(%d)
-
-Arg value Array 
-bool(false)
-Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(%d)
-
-Arg value Array 
-bool(false)
-Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(%d)
-
-Arg value Array 
-bool(false)
-Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(%d)
-
-Arg value Array 
-bool(false)
-Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(%d)
-
-Arg value Array 
 bool(false)
 
 Arg value  

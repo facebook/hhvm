@@ -37,31 +37,6 @@ Warning: base64_encode() expects parameter 1 to be string, double given in %s/ze
 Arg value 0.5
 
 Warning: base64_encode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(74)
-
-Arg value Array
-
-Warning: base64_encode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(74)
-
-Arg value Array
-
-Warning: base64_encode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(74)
-
-Arg value Array
-
-Warning: base64_encode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(74)
-
-Arg value Array
-
-Warning: base64_encode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(74)
-
-Arg value Array
-
-Warning: base64_encode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value 
 

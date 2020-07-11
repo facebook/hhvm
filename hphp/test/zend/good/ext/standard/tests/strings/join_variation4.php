@@ -15,7 +15,7 @@ $glues = varray [
   "TRUE",
   true,
   false,
-  varray["key1", "key2"],
+  'Array',
   "",
   " ",
   "string\x00between",

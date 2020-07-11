@@ -45,19 +45,7 @@ function foo9() {
   return (bool)$x;
 }
 
-function foo10() {
-  $x = varray[];
-  return (string)$x;
-}
-
-function foo11() {
-  $x = varray[1,2,3];
-  return (string)$x;
-}
-
 <<__EntryPoint>> function main(): void {
-error_reporting(error_reporting() & ~E_NOTICE);
-
 var_dump(foo1());
 var_dump(foo2(5, 6));
 var_dump(foo3());
@@ -67,6 +55,4 @@ var_dump(foo6(2));
 var_dump(foo7(2));
 var_dump(foo8());
 var_dump(foo9());
-var_dump(foo10());
-var_dump(foo11());
 }

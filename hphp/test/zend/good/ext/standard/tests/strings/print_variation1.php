@@ -38,9 +38,9 @@ $inputs =  varray [
           10.1234567e10,
 
           // array values
-/*9*/      varray[],
-          varray[0],
-          varray[1, 2],
+/*9*/     'Array',
+          'Array',
+          'Array',
 
           // boolean values
 /*12*/      true,

@@ -42,13 +42,14 @@ $scalarValueList = varray[10, -100, 0, 1.234, 0.0, TRUE, FALSE, NULL, 'xx', "", 
 
 foreach ($scalarValueList as $e)
 {
+    $text = HH\is_any_array($e) ? 'Array' : $e;
     if ($e)
     {
-        echo ">$e< is TRUE\t"; var_dump($e);
+        echo ">$text< is TRUE\t"; var_dump($e);
     }
     else
     {
-        echo ">$e< is FALSE\t"; var_dump($e);
+        echo ">$text< is FALSE\t"; var_dump($e);
     }
 }
 

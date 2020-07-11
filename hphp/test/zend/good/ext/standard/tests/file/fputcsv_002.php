@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 $file = __SystemLib\hphp_test_tmppath('fgetcsv-test.csv');
 
-$data = varray[1, 2, 'foo', 'haha', varray[4, 5, 6], 1.3, null];
+$data = varray[1, 2, 'foo', 'haha', 1.3, null];
 
 $fp = fopen($file, 'w');
 

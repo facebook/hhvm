@@ -11,8 +11,6 @@ Line 2
 >< is FALSE	NULL
 >xx< is TRUE	string(2) "xx"
 >< is FALSE	string(0) ""
-
-Notice: Array to string conversion in %s/statements/selection/if.php on line 47
 >Array< is TRUE	array(3) {
   [0]=>
   string(3) "red"

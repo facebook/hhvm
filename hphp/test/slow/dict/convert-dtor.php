@@ -56,12 +56,6 @@ function main() {
   echo "====================================================\n";
 
   $i += 3;
-  var_dump((string)dict[$i => new Dtor($i),
-                        $i+1 => new Dtor($i+1),
-                        $i+2 => new Dtor($i+2)]);
-  echo "====================================================\n";
-
-  $i += 3;
   var_dump(new Vector(dict[$i => new Dtor($i),
                            $i+1 => new Dtor($i+1),
                            $i+2 => new Dtor($i+2)]));

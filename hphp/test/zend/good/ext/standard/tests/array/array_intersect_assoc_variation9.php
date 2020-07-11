@@ -30,17 +30,6 @@ $arr2 = varray [
   darray[1 => "one", 2 => "two", 3 => "three"]
 ];
 
-/* Passing the entire array as argument to $arr1 and $arr2 */
-// Calling array_intersect_assoc() with default arguments
-echo "-- Passing the entire 2-D array to \$arr1 and \$arr2 --\n";
-echo "- With default arguments -\n";
-var_dump( array_intersect_assoc($arr1, $arr2) );
-
-// Calling array_intersect_assoc() with more arguments
-// additional argument passed is the same as $arr1
-echo "- With more arguments -\n";
-var_dump( array_intersect_assoc($arr1, $arr2, $arr1) );
-
 /* Passing the sub-array as argument to $arr1 and $arr2 */
 // Calling array_intersect_assoc() with default arguments
 echo "-- Passing the sub-array to \$arr1 and \$arr2 --\n";

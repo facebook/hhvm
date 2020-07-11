@@ -27,8 +27,6 @@ function bar($i) {
     $v7 = 1.1;
     $v8 = "abc";
     $v9 = new C();
-    $v10 = varray[];
-    $v11 = varray[123];
   }
   var_dump((string)$v1);
   var_dump((string)$v2);
@@ -39,24 +37,17 @@ function bar($i) {
   var_dump((string)$v7);
   var_dump((string)$v8);
   var_dump((string)$v9);
-  var_dump((string)$v10);
-  var_dump((string)$v11);
 }
 
 class D { }
 <<__EntryPoint>>
 function entrypoint_cnvStr(): void {
-
-  // disable array -> "Array" conversion notice
-  error_reporting(error_reporting() & ~E_NOTICE);
-
   var_dump(foo(null));
   var_dump(foo(false));
   var_dump(foo(true));
   var_dump(foo(1));
   var_dump(foo(1.1));
   var_dump(foo("abc"));
-  var_dump(foo(varray[123]));
   var_dump(foo(new C));
 
   bar(1);

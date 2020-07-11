@@ -6,7 +6,6 @@
    +-------------------------------------------------------------+
 */
 <<__EntryPoint>> function main(): void {
-error_reporting(-1);
 
 ///*
 $oper = varray[darray[0 => 1, 5 => FALSE, 6 => "red"], varray[NULL], darray[4 => -5, 5 => 1.23]];
@@ -15,7 +14,7 @@ foreach ($oper as $e1)
 {
     foreach ($oper as $e2)
     {
-        echo ">$e1< + >$e2<, result: "; var_dump($e1 + $e2);
+        echo ">Array< + >Array<, result: "; var_dump($e1 + $e2);
     }
     echo "-------------------------------------\n";
 }

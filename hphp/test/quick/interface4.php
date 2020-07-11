@@ -17,13 +17,13 @@ interface M {
 }
 class C implements I, J, K, L, M {
   public function foo($x, $y=0, varray $z=null, arraylike $a=null) {
+    $x = HH\is_any_array($x) ? 'Array' : $x;
+    $y = HH\is_any_array($y) ? 'Array' : $y;
+    $z = HH\is_any_array($z) ? 'Array' : $z;
     echo "$x $y $z\n";
   }
 }
 <<__EntryPoint>> function main(): void {
-// disable array -> "Array" conversion notice
-error_reporting(error_reporting() & ~E_NOTICE);
-
 $obj = new C;
 $obj->foo(1);
 $obj->foo(1, 2);

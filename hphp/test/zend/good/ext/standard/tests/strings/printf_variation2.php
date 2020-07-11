@@ -44,11 +44,11 @@ $values = varray[
           .5,
 
           // array data
-/*10*/    varray[],
-          varray[0],
-          varray[1],
-          varray[1, 2],
-          darray['color' => 'red', 'item' => 'pen'],
+/*10*/    'Array',
+          'Array',
+          'Array',
+          'Array',
+          'Array',
 
           // null data
 /*15*/    NULL,

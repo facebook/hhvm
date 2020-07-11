@@ -88,7 +88,7 @@ $values = varray[
 // loop through each element of the array for str
 
 foreach($values as $value) {
-      echo "\n-- Iteration with str value as \"$value\"\n";
+      $text = HH\is_any_array($value) ? 'Array' : $value; echo "\n-- Iteration with str value as \"$text\"\n";
       try { var_dump( strcspn($value,$mask) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // with default args
       try { var_dump( strcspn($value,$mask,$start) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // with default len value
       try { var_dump( strcspn($value,$mask,$start,$len) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } //  with all args

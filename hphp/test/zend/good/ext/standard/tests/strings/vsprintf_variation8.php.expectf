@@ -15,13 +15,6 @@ string(130) "2 -2 2
    2 123456 2 -2"
 
 -- Iteration 3 --
-string(129) "Array Array Array 
-   Array Array Array
-         Arra Arra       Array Arra
-   Array Array Array Array
-   Array Array Array Array"
-
--- Iteration 4 --
 string(79) "1 1  
    1      1   
             1            0001 0000

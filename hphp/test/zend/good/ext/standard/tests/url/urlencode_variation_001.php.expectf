@@ -37,31 +37,6 @@ Warning: urlencode() expects parameter 1 to be string, double given in %s/zend/g
 Arg value 0.5
 
 Warning: urlencode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/urlencode_variation_001.php on line 74
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/urlencode_variation_001.php(73)
-
-Arg value Array
-
-Warning: urlencode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/urlencode_variation_001.php on line 74
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/urlencode_variation_001.php(73)
-
-Arg value Array
-
-Warning: urlencode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/urlencode_variation_001.php on line 74
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/urlencode_variation_001.php(73)
-
-Arg value Array
-
-Warning: urlencode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/urlencode_variation_001.php on line 74
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/urlencode_variation_001.php(73)
-
-Arg value Array
-
-Warning: urlencode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/urlencode_variation_001.php on line 74
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/urlencode_variation_001.php(73)
-
-Arg value Array
-
-Warning: urlencode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/urlencode_variation_001.php on line 74
 
 Arg value 
 

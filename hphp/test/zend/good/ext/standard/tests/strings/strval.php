@@ -9,5 +9,4 @@ var_dump(strval(1));
 var_dump(strval(1.1));
 var_dump(strval(true));
 var_dump(strval(false));
-var_dump(strval(varray['foo']));
 }

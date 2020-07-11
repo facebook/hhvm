@@ -23,8 +23,9 @@ function main_bitop_types() {
   $func = ($a, $b, $bitop_str, $bitop) ==> {
     $res = $bitop($a, $b);
     printf("%s(%s) %s %s(%s) = %s(%s)\n",
-           gettype($a), $a, $bitop_str, gettype($b),
-           $b, gettype($res), $res);
+           gettype($a), HH\is_any_array($a) ? 'Array' : $a, $bitop_str,
+           gettype($b), HH\is_any_array($b) ? 'Array' : $b,
+           gettype($res), $res);
   };
 
 $ops = varray[

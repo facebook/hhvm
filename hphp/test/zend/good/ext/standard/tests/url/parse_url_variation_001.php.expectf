@@ -37,31 +37,6 @@ Warning: parse_url() expects parameter 1 to be string, double given in %s/zend/g
 Arg value 0.5
 
 Warning: parse_url() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php(69)
-
-Arg value Array
-
-Warning: parse_url() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php(69)
-
-Arg value Array
-
-Warning: parse_url() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php(69)
-
-Arg value Array
-
-Warning: parse_url() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php(69)
-
-Arg value Array
-
-Warning: parse_url() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php(69)
-
-Arg value Array
-
-Warning: parse_url() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 
 Arg value 
 

@@ -8,9 +8,9 @@ class aClass {
 <<__EntryPoint>>
 function main_entry(): void {
   /* Prototype  : proto int xml_parser_set_option(resource parser, int option, mixed value)
-   * Description: Set options in an XML parser 
+   * Description: Set options in an XML parser
    * Source code: ext/xml/xml.c
-   * Alias to functions: 
+   * Alias to functions:
    */
 
   echo "*** Testing xml_parser_set_option() : usage variations ***\n";
@@ -42,12 +42,12 @@ function main_entry(): void {
         10.7654321E-10,
         .5,
 
-        // array data
-        varray[],
-        varray[0],
-        varray[1],
-        varray[1, 2],
-        darray['color' => 'red', 'item' => 'pen'],
+
+
+
+
+
+
 
         // null data
         NULL,
@@ -71,7 +71,7 @@ function main_entry(): void {
         new aClass(),
 
         // resource data
-        $fp, 
+        $fp,
 
         // undefined data
         $undefined_var,

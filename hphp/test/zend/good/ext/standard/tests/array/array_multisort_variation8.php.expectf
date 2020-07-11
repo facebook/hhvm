@@ -17,8 +17,7 @@ array(10) {
   ["lowercase true"]=>
   bool(true)
   [0]=>
-  array(0) {
-  }
+  string(5) "Array"
   ["instance of classWithToString"]=>
   object(classWithToString) (0) {
   }

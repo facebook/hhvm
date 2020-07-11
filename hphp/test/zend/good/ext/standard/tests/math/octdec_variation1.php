@@ -47,7 +47,7 @@ $inputs = varray[
        // empty data
 /*18*/ "",
        '',
-       varray[],
+       'Array',
 
        // string data
 /*21*/ "abcxyz",

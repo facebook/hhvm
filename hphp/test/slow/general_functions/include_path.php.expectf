@@ -1,11 +1,11 @@
 string(1) "."
 
-Warning: get_include_path() expects exactly 0 parameters, 1 given in %s/test/slow/general_functions/include_path.php on line 12
+Warning: get_include_path() expects exactly 0 parameters, 1 given in %s/test/slow/general_functions/include_path.php on line 10
 NULL
 
-Warning: restore_include_path() expects exactly 0 parameters, 1 given %s/test/slow/general_functions/include_path.php on line 15
+Warning: restore_include_path() expects exactly 0 parameters, 1 given %s/test/slow/general_functions/include_path.php on line 13
 
-Warning: set_include_path() expects exactly 1 parameter, 0 given in %s/test/slow/general_functions/include_path.php on line 18
+Warning: set_include_path() expects exactly 1 parameter, 0 given in %s/test/slow/general_functions/include_path.php on line 16
 string(1) "."
 string(1) "."
 string(3) "var"

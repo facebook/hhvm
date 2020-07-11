@@ -37,12 +37,12 @@ function entrypoint_base64_encode_variation_001(): void {
         10.7654321E-10,
         .5,
 
-        // array data
-        varray[],
-        varray[0],
-        varray[1],
-        varray[1, 2],
-        darray['color' => 'red', 'item' => 'pen'],
+
+
+
+
+
+
 
         // null data
         NULL,

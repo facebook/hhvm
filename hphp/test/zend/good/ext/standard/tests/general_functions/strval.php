@@ -119,10 +119,6 @@ $not_scalars = varray [
   new foo, //object
   $fp,  // resource
   $dfp,
-  varray[],  // arrays
-  varray[NULL],
-  varray[1,2,3,4],
-  varray["string"],
   NULL,  // nulls
   null,
   @$unset_var,  // unset variable

@@ -26,7 +26,7 @@ set_error_handler(fun('test_error_handler'));
 $inputs = darray[
       'int 0' => 0,
       'float -10.5' => -10.5,
-      0 => varray[],
+      0 => 'Array',
       'uppercase NULL' => NULL,
       'lowercase true' => true,
       'empty string DQ' => "",

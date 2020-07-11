@@ -35,7 +35,7 @@ class A {
     print "  C::e: " . C::$e . "\n";
 #    print "  C::f: " . C::$f . "\n";
     print "  C::g: " . C::$g . "\n";
-    print "  C::h: " . C::$h . "\n";
+    print "  C::h: " . (HH\is_any_array(C::$h) ? 'Array' : C::$h) . "\n";
   }
 }
 
@@ -70,7 +70,7 @@ class B extends A {
     print "  C::e: " . C::$e . "\n";
 #    print "  C::f: " . C::$f . "\n";
     print "  C::g: " . C::$g . "\n";
-    print "  C::h: " . C::$h . "\n";
+    print "  C::h: " . (HH\is_any_array(C::$h) ? 'Array' : C::$h) . "\n";
   }
 }
 
@@ -103,7 +103,7 @@ class C extends B {
     print "  C::e: " . C::$e . "\n";
 #    print "  C::f: " . C::$f . "\n";
     print "  C::g: " . C::$g . "\n";
-    print "  C::h: " . C::$h . "\n";
+    print "  C::h: " . (HH\is_any_array(C::$h) ? 'Array' : C::$h) . "\n";
   }
 }
 
@@ -166,7 +166,7 @@ class D {
 
     print "isset(C::\$i): ".(isset(C::$i)?"true":"false")."\n";
 
-    print "C::\$h: ".C::$h."\n";
+    print "C::\$h: " . (HH\is_any_array(C::$h) ? 'Array' : C::$h) . "\n";
 
     C::$h = 42;
     print "C::\$h: ".C::$h."\n";

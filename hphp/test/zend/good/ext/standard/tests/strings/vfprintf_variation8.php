@@ -40,13 +40,6 @@ $args_array = varray[
        3, +4, 1,-2 ],
 
 
-  // different arrays
-  varray[ varray[0], varray[1, 2], varray[-1, -1],
-         varray["123"], varray['123'], varray['-123'], varray["-123"],
-         varray[true], varray[false], varray[TRUE], varray[FALSE],
-         varray["123hello"], varray["1", "2"], varray['123hello'], darray[12=>"12twelve"],
-         varray["3"], varray["4"], varray["1"], varray["2"] ],
-
   // array of boolean data
   varray[ true, TRUE, false,
          TRUE, 0, FALSE, 1,

@@ -38,8 +38,6 @@ function entrypoint_prop_order_parens(): void {
   var_dump(((C::$z)[0])->prop());
 
   $obj = new C;
-  $x = varray['bar1'];
-  var_dump(($obj->$x)[0]);
   $x = varray['bar2'];
   var_dump($obj->$x[0]());
 
@@ -49,6 +47,5 @@ function entrypoint_prop_order_parens(): void {
 
   $obj = new C;
   $w = varray['baz'];
-  var_dump(($obj->$w)[0]->blah);
   var_dump($obj->$w[0]->blah());
 }

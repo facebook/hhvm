@@ -21,7 +21,8 @@ function f1(...$argList)
 
     foreach ($argList as $k => $e)
     {
-        echo "\targ[$k] = >$e<\n";
+        $t = HH\is_any_array($e) ? 'Array' : $e;
+        echo "\targ[$k] = >$t<\n";
     }
 }
 

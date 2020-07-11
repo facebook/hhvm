@@ -36,7 +36,7 @@ $inputs = varray[
 
        // empty data
 /*10*/ "",
-       varray[],
+       'Array',
 
        // string data
 /*12*/ "double_file",

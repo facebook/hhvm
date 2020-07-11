@@ -29,9 +29,6 @@ vec(2) {
 int(1)
 float(1)
 bool(true)
-
-Notice: Dict to string conversion in %s/dict_conversions.php on line 15
-string(4) "Dict"
 bool(false)
 bool(true)
 bool(false)

@@ -38,8 +38,6 @@ int(200)
 g In:  $p1: abc.
 g Out: $p1: 200.
 int(200)
-
-Notice: Array to string conversion in %s/functions/passing_arguments.php on line 21
 g In:  $p1: Array.
 g Out: $p1: 200.
 int(200)

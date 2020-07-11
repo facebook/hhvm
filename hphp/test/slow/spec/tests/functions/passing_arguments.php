@@ -18,6 +18,7 @@ function f($p1, inout $p2)
 
 function g(inout $p1)
 {
+    $p1 = HH\is_any_array($p1) ? 'Array' : $p1;
     echo "g In:  \$p1: $p1.\n";
     $p1 = 200;      // actual argument's value changed
     echo "g Out: \$p1: $p1.\n";

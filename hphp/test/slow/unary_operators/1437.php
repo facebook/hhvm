@@ -1,10 +1,8 @@
 <?hh
 
 
-// disable array -> "Array" conversion notice
 <<__EntryPoint>>
 function main_1437() {
-error_reporting(error_reporting() & ~E_NOTICE);
 
 var_dump(darray["\0" => 1]);
 var_dump(darray["\0" => "\0"]);
@@ -28,7 +26,6 @@ var_dump((bool)darray["\0" => "\0"]);
 var_dump((float)darray["\0" => "\0"]);
 var_dump((float)darray["\0" => "\0"]);
 var_dump((float)darray["\0" => "\0"]);
-var_dump((string)darray["\0" => "\0"]);
 $a = "0x10";
 var_dump($a);
 var_dump("\0");

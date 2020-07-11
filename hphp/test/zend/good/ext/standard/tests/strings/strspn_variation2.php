@@ -87,7 +87,7 @@ $values = varray[
 // loop through each element of the array for mask
 
 foreach($values as $value) {
-      echo "\n-- Iteration with mask value as \"$value\" --\n";
+      $text = HH\is_any_array($value) ? 'Array' : $value; echo "\n-- Iteration with mask value as \"$text\" --\n";
       try { var_dump( strspn($str,$value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // with defalut args
       try { var_dump( strspn($str,$value,$start) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // with default len value
       try { var_dump( strspn($str,$value,$start,$len) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // with all args

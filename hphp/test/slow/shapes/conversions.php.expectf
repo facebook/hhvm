@@ -32,9 +32,6 @@ vec(2) {
 int(1)
 float(1)
 bool(true)
-
-Notice: Array to string conversion in %s on line %d
-string(5) "Array"
 bool(true)
 bool(true)
 bool(false)

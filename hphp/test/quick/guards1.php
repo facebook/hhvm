@@ -3,12 +3,12 @@
 class C {}
 
 function foo($x, $y) {
-   echo "$x $y\n";
+  $x = HH\is_any_array($x) ? 'Array' : $x;
+  $y = HH\is_any_array($y) ? 'Array' : $y;
+  echo "$x $y\n";
 }
 
 <<__EntryPoint>> function main(): void {
-// disable array -> "Array" conversion notice
-error_reporting(error_reporting() & ~E_NOTICE);
 
 foo(1, 1);
 foo(1, 2.1);

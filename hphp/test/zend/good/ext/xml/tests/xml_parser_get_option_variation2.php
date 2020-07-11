@@ -8,9 +8,9 @@ class aClass {
 <<__EntryPoint>>
 function entrypoint_xml_parser_get_option_variation2(): void {
   /* Prototype  : proto int xml_parser_get_option(resource parser, int option)
-   * Description: Get options from an XML parser 
+   * Description: Get options from an XML parser
    * Source code: ext/xml/xml.c
-   * Alias to functions: 
+   * Alias to functions:
    */
 
   echo "*** Testing xml_parser_get_option() : usage variations ***\n";
@@ -38,12 +38,12 @@ function entrypoint_xml_parser_get_option_variation2(): void {
         10.7654321E-10,
         .5,
 
-        // array data
-        varray[],
-        varray[0],
-        varray[1],
-        varray[1, 2],
-        darray['color' => 'red', 'item' => 'pen'],
+
+
+
+
+
+
 
         // null data
         NULL,
@@ -67,7 +67,7 @@ function entrypoint_xml_parser_get_option_variation2(): void {
         new aClass(),
 
         // resource data
-        $fp, 
+        $fp,
 
         // undefined data
         $undefined_var,

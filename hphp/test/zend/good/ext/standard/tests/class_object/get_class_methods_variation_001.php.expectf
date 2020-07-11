@@ -1,6 +1,6 @@
 *** Testing get_class_methods() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(67)
-Error: 8 - Undefined variable: unset_var, %s(70)
+Error: 8 - Undefined variable: undefined_var, %s(60)
+Error: 8 - Undefined variable: unset_var, %s(63)
 
 Arg value 0 
 NULL
@@ -28,26 +28,6 @@ NULL
 
 Arg value 0.5 
 NULL
-Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
-
-Arg value Array 
-NULL
-Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
-
-Arg value Array 
-NULL
-Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
-
-Arg value Array 
-NULL
-Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
-
-Arg value Array 
-NULL
-Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
-
-Arg value Array 
-NULL
 
 Arg value  
 NULL
@@ -78,7 +58,7 @@ NULL
 
 Arg value string 
 NULL
-Error: 4096 - Object of class stdClass could not be converted to string, %s(76)
+Error: 4096 - Object of class stdClass could not be converted to string, %s(69)
 
 Arg value  
 array(0) {

@@ -24,13 +24,14 @@ trait T {
   public function unary($la) {
     for ($i = 0; $i < 3; $i++) {
       foreach($la as $l) {
-        if (is_int($l)) echo "$l is_int\n";
-        if (is_string($l)) echo "$l is_string\n";
-        if (is_double($l)) echo "$l is_double\n";
-        if (is_null($l)) echo "$l is_null\n";
-        if (is_double($l)) echo "$l is_double\n";
-        if (is_array($l)) echo "$l is_array\n";
-        if (is_object($l)) echo "$l is_object\n";
+        $text = HH\is_any_array($l) ? 'Array' : $l;
+        if (is_int($l)) echo "$text is_int\n";
+        if (is_string($l)) echo "$text is_string\n";
+        if (is_double($l)) echo "$text is_double\n";
+        if (is_null($l)) echo "$text is_null\n";
+        if (is_double($l)) echo "$text is_double\n";
+        if (is_array($l)) echo "$text is_array\n";
+        if (is_object($l)) echo "$text is_object\n";
       }
     }
   }
@@ -102,8 +103,6 @@ class DifferentTypes {
 
 <<__EntryPoint>>
 function main() {
-  // disable array -> "Array" conversion notice
-  error_reporting(error_reporting() & ~E_NOTICE);
   $asc = new Ascending();
   $desc = new Descending();
   $eq = new Equal();

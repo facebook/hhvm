@@ -8,9 +8,9 @@ class aClass {
 <<__EntryPoint>>
 function entrypoint_utf8_decode_variation1(): void {
   /* Prototype  : proto string utf8_decode(string data)
-   * Description: Converts a UTF-8 encoded string to ISO-8859-1 
+   * Description: Converts a UTF-8 encoded string to ISO-8859-1
    * Source code: ext/xml/xml.c
-   * Alias to functions: 
+   * Alias to functions:
    */
 
   echo "*** Testing utf8_decode() : usage variations ***\n";
@@ -38,12 +38,12 @@ function entrypoint_utf8_decode_variation1(): void {
         10.7654321E-10,
         .5,
 
-        // array data
-        varray[],
-        varray[0],
-        varray[1],
-        varray[1, 2],
-        darray['color' => 'red', 'item' => 'pen'],
+
+
+
+
+
+
 
         // null data
         NULL,

@@ -24,36 +24,6 @@ Arg value 0.5
 
 Warning: posix_getpwuid() expects parameter 1 to be integer, double given in %s/zend/good/ext/posix/tests/posix_getpwuid_variation.php on line 74
 
-Notice: Array to string conversion in %s/posix_getpwuid_variation.php on line 64
-
-Arg value Array
-
-Warning: posix_getpwuid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_getpwuid_variation.php on line 74
-
-Notice: Array to string conversion in %s/posix_getpwuid_variation.php on line 64
-
-Arg value Array
-
-Warning: posix_getpwuid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_getpwuid_variation.php on line 74
-
-Notice: Array to string conversion in %s/posix_getpwuid_variation.php on line 64
-
-Arg value Array
-
-Warning: posix_getpwuid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_getpwuid_variation.php on line 74
-
-Notice: Array to string conversion in %s/posix_getpwuid_variation.php on line 64
-
-Arg value Array
-
-Warning: posix_getpwuid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_getpwuid_variation.php on line 74
-
-Notice: Array to string conversion in %s/posix_getpwuid_variation.php on line 64
-
-Arg value Array
-
-Warning: posix_getpwuid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_getpwuid_variation.php on line 74
-
 Arg value 
 
 Warning: posix_getpwuid() expects parameter 1 to be integer, null given in %s/zend/good/ext/posix/tests/posix_getpwuid_variation.php on line 74

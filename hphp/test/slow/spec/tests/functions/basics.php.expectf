@@ -10,8 +10,6 @@ f1: # arguments passed is 2
 f1: # arguments passed is 3
 	arg[0] = >23.45<
 	arg[1] = ><
-
-Notice: Array to string conversion in %s/tests/functions/basics.php on line 24
 	arg[2] = >Array<
 string(42) "f2() expects exactly 2 parameters, 0 given"
 string(42) "f2() expects exactly 2 parameters, 1 given"

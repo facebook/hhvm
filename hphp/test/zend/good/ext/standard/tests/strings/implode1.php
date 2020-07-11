@@ -16,7 +16,6 @@ echo "*** Testing implode() for basic opeartions ***\n";
 $arrays = varray [
   varray[1,2],
   varray[1.1,2.2],
-  varray[varray[2],varray[1]],
   varray[false,true],
   varray[],
   varray["a","aaaa","b","bbbb","c","ccccccccccccccccccccc"]
@@ -45,7 +44,6 @@ $glues = varray [
   "TRUE",
   true,
   false,
-  varray["key1", "key2"],
   "",
   " ",
   "string\x00between",
@@ -65,13 +63,6 @@ foreach($glues as $glue) {
 /* empty string */
 echo "\n*** Testing implode() on empty string ***\n";
 var_dump( implode("") );
-
-/* checking sub-arrays */
-echo "\n*** Testing implode() on sub-arrays ***\n";
-$sub_array = varray[varray[1,2,3,4], darray[1 => "one", 2 => "two"], "PHP", 50];
-var_dump( implode("TEST", $sub_array) );
-var_dump( implode(varray[1, 2, 3, 4], $sub_array) );
-var_dump( implode(2, $sub_array) );
 
 echo "\n*** Testing implode() on objects ***\n";
 /* checking on objects */

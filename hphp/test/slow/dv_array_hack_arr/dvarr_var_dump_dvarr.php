@@ -1,8 +1,7 @@
 <?hh
 
-require 'dvarr_var_dump.inc';
-
 <<__EntryPoint>>
 function main() {
+  require 'dvarr_var_dump.inc';
   foo(1);
 }

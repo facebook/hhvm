@@ -60,10 +60,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_Array("Array");
-const StaticString s_Vec("Vec");
-const StaticString s_Dict("Dict");
-const StaticString s_Keyset("Keyset");
 const StaticString s_isEmpty("isEmpty");
 const StaticString s_count("count");
 const StaticString s_1("1");
@@ -2199,7 +2195,7 @@ const StaticString
     s_msgFuncToStr("Func to string conversion"),
     s_msgFuncToInt("Func to int conversion"),
     s_msgFuncToDbl("Func to double conversion"),
-    s_msgClsMethToStr("Implicit clsmeth to string conversion"),
+    s_msgClsMethToStr("clsmeth to string conversion"),
     s_msgClsMethToInt("Implicit clsmeth to int conversion"),
     s_msgClsMethToDbl("Implicit clsmeth to double conversion");
 }
@@ -2264,20 +2260,21 @@ SSATmp* simplifyConvTVToStr(State& env, const IRInstruction* inst) {
   }
   if (srcType <= TNull)   return cns(env, staticEmptyString());
   if (srcType <= TArr){
-    gen(env, RaiseNotice, catchTrace, cns(env, s_msgArrToStr.get()));
-    return cns(env, s_Array.get());
+    gen(env, ThrowInvalidOperation, catchTrace, cns(env, s_msgArrToStr.get()));
+    return cns(env, TBottom);
   }
   if (srcType <= TVec) {
-    gen(env, RaiseNotice, catchTrace, cns(env, s_msgVecToStr.get()));
-    return cns(env, s_Vec.get());
+    gen(env, ThrowInvalidOperation, catchTrace, cns(env, s_msgVecToStr.get()));
+    return cns(env, TBottom);
   }
   if (srcType <= TDict) {
-    gen(env, RaiseNotice, catchTrace, cns(env, s_msgDictToStr.get()));
-    return cns(env, s_Dict.get());
+    gen(env, ThrowInvalidOperation, catchTrace, cns(env, s_msgDictToStr.get()));
+    return cns(env, TBottom);
   }
   if (srcType <= TKeyset) {
-    gen(env, RaiseNotice, catchTrace, cns(env, s_msgKeysetToStr.get()));
-    return cns(env, s_Keyset.get());
+    auto const message = cns(env, s_msgKeysetToStr.get());
+    gen(env, ThrowInvalidOperation, catchTrace, message);
+    return cns(env, TBottom);
   }
   if (srcType <= TDbl)    return gen(env, ConvDblToStr, src);
   if (srcType <= TInt)    return gen(env, ConvIntToStr, src);
@@ -2296,14 +2293,9 @@ SSATmp* simplifyConvTVToStr(State& env, const IRInstruction* inst) {
     return ret;
   }
   if (srcType <= TClsMeth) {
-    if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
-      gen(env, RaiseNotice, catchTrace, cns(env, s_msgClsMethToStr.get()));
-    }
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      return cns(env, s_Vec.get());
-    } else {
-      return cns(env, s_Array.get());
-    }
+    auto const message = cns(env, s_msgClsMethToStr.get());
+    gen(env, ThrowInvalidOperation, catchTrace, message);
+    return cns(env, TBottom);
   }
 
   return nullptr;

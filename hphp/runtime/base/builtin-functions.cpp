@@ -63,6 +63,7 @@ using std::string;
 // static strings
 
 const StaticString
+  s_Array("Array"),
   s_offsetExists("offsetExists"),
   s___invoke("__invoke"),
   s_self("self"),
@@ -188,7 +189,7 @@ bool is_callable(const Variant& v, bool syntax_only, Variant* name) {
 
     if (arr.size() != 2 || !clsname.is_init() ||
         (!isStringType(mthname.type()) && !isFuncType(mthname.type()))) {
-      if (name) *name = array_string;
+      if (name) *name = s_Array;
       return false;
     }
 
@@ -200,7 +201,7 @@ bool is_callable(const Variant& v, bool syntax_only, Variant* name) {
     } else if (isClassType(clsname.type())) {
       clsString = const_cast<StringData*>(clsname.val().pclass->name());
     } else {
-      if (name) *name = array_string;
+      if (name) *name = s_Array;
       return false;
     }
 

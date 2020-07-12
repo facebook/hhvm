@@ -676,12 +676,9 @@ Variant str_replace(const Variant& search, const Variant& replace,
     return ret;
   }
 
-  if (replace.isArray()) {
-    raise_notice("Array to string conversion");
-  }
   int icount;
-  auto ret = string_replace(subject, search.toString(), replace.toString(), icount,
-                            caseSensitive);
+  auto ret = string_replace(subject, search.toString(), replace.toString(),
+                            icount, caseSensitive);
   count = icount;
   return ret;
 }

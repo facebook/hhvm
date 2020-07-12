@@ -379,9 +379,7 @@ keyset(0) {
 bool(false)
 int(0)
 float(0)
-
-Notice: Dict to string conversion in %s on line %d
-string(4) "Dict"
+Exception: "Dict to string conversion"
 object(HH\Vector) (0) {
 }
 object(HH\Map) (0) {
@@ -424,9 +422,7 @@ Exception: "Invalid keyset key: expected a key of type int or string, bool given
 bool(true)
 int(1)
 float(1)
-
-Notice: Dict to string conversion in %s on line %d
-string(4) "Dict"
+Exception: "Dict to string conversion"
 object(HH\Vector) (4) {
   [0]=>
   int(1)
@@ -482,9 +478,7 @@ keyset(3) {
 bool(true)
 int(1)
 float(1)
-
-Notice: Dict to string conversion in %s on line %d
-string(4) "Dict"
+Exception: "Dict to string conversion"
 object(HH\Vector) (3) {
   [0]=>
   string(4) "val1"
@@ -544,9 +538,7 @@ keyset(4) {
 bool(true)
 int(1)
 float(1)
-
-Notice: Dict to string conversion in %s on line %d
-string(4) "Dict"
+Exception: "Dict to string conversion"
 object(HH\Vector) (4) {
   [0]=>
   int(100)
@@ -599,9 +591,7 @@ keyset(2) {
 bool(true)
 int(1)
 float(1)
-
-Notice: Dict to string conversion in %s on line %d
-string(4) "Dict"
+Exception: "Dict to string conversion"
 object(HH\Vector) (2) {
   [0]=>
   int(100)
@@ -659,9 +649,7 @@ Exception: "Invalid keyset key: expected a key of type int or string, dict given
 bool(true)
 int(1)
 float(1)
-
-Notice: Dict to string conversion in %s on line %d
-string(4) "Dict"
+Exception: "Dict to string conversion"
 object(HH\Vector) (2) {
   [0]=>
   dict(1) {

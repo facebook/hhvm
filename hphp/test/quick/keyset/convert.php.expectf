@@ -509,9 +509,7 @@ dict(0) {
 bool(false)
 int(0)
 float(0)
-
-Notice: Keyset to string conversion in %s on line %d
-string(6) "Keyset"
+Exception: "Keyset to string conversion"
 object(HH\Vector) (0) {
 }
 object(HH\Map) (0) {
@@ -556,9 +554,7 @@ dict(4) {
 bool(true)
 int(1)
 float(1)
-
-Notice: Keyset to string conversion in %s on line %d
-string(6) "Keyset"
+Exception: "Keyset to string conversion"
 object(HH\Vector) (4) {
   [0]=>
   int(1)
@@ -617,9 +613,7 @@ dict(3) {
 bool(true)
 int(1)
 float(1)
-
-Notice: Keyset to string conversion in %s on line %d
-string(6) "Keyset"
+Exception: "Keyset to string conversion"
 object(HH\Vector) (3) {
   [0]=>
   string(1) "z"
@@ -679,9 +673,7 @@ dict(4) {
 bool(true)
 int(1)
 float(1)
-
-Notice: Keyset to string conversion in %s on line %d
-string(6) "Keyset"
+Exception: "Keyset to string conversion"
 object(HH\Vector) (4) {
   [0]=>
   int(1)

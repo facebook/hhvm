@@ -100,9 +100,10 @@ echo ">$1|$&<\n";
 // use arrays and array elements
 
 $colors = varray["red", "white", "blue"];
-echo "\colors contains >$colors<\n";
+try { echo "\colors contains >$colors<\n"; } catch (Exception $e) { echo $e->getMessage()."\n"; }
 try { echo "\colors[1] contains >$colors[1]<\n"; } catch (Exception $e) { echo $e->getMessage()."\n"; }
-echo "\colors[1] contains >$colors [1]<\n";     // whitespace permitted, but semantics change
+// whitespace permitted, but semantics change
+try { echo "\colors [1] contains >$colors [1]<\n"; } catch (Exception $e) { echo $e->getMessage()."\n"; }
 //echo "\colors[1] contains >$colors[ 1]<\n";   // whitespace not permitted
 //echo "\colors[1] contains >$colors[1 ]<\n";   // whitespace not permitted
 try { var_dump("$colors[1]"); } catch (Exception $e) { echo $e->getMessage()."\n"; }
@@ -120,7 +121,7 @@ $indices = varray[2, 1, 0];
 ///*
 $a1 = varray[10,20];
 $a2 = varray[FALSE,10.3,NULL];
-echo ">$a1|$a2<\n";
+try { echo ">$a1|$a2<\n"; } catch (Exception $e) { echo $e->getMessage()."\n"; }
 
 // use class properties
 

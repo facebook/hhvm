@@ -27,7 +27,7 @@ $vars = varray[
 ];
 
 foreach ($vars as $var) {
-    $tmp = (string)$var;
+    try { $tmp = (string)$var; } catch (Exception $e) { $tmp = $e->getMessage(); }
     var_dump($tmp);
 }
 

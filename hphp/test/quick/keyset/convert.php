@@ -56,7 +56,11 @@ function convert_from($ks) {
   var_dump((bool)$ks);
   var_dump((int)$ks);
   var_dump((float)$ks);
-  var_dump((string)$ks);
+  try {
+    var_dump((string)$ks);
+  } catch (Exception $e) {
+    echo "Exception: \"" . $e->getMessage() . "\"\n";
+  }
   var_dump(new Vector($ks));
   var_dump(new Map($ks));
 

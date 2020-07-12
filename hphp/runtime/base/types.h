@@ -33,10 +33,6 @@ struct Variant;
 
 extern const String null_string;
 extern const Array null_array;
-extern const StaticString array_string; // String("Array")
-extern const StaticString vec_string; // String("Vec")
-extern const StaticString dict_string; // String("Dict")
-extern const StaticString keyset_string; // String("Keyset")
 
 // Use empty_string() if you're returning String
 // Use empty_string_tv() if you're returning TypedValue

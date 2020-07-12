@@ -4,12 +4,8 @@ string(0) ""
 string(1) "%r\x00%r"
 string(7) "9876545"
 string(3) "0.1"
-
-Notice: %s
-string(5) "Array"
-
-Notice: %s
-string(5) "Array"
+string(%d) "%s to string conversion"
+string(%d) "%s to string conversion"
 string(0) ""
 string(1) "1"
 string(0) ""

@@ -190,7 +190,6 @@ TEST(ARRAY, Conversions) {
   EXPECT_TRUE(arr1.toInt32() == 1);
   EXPECT_TRUE(arr1.toInt64() == 1);
   EXPECT_TRUE(arr1.toDouble() == 1.0);
-  EXPECT_TRUE(arr1.toString() == s_Array);
 
   Array vec0 = Array::CreateVec();
   EXPECT_TRUE(vec0.toBoolean() == false);
@@ -199,7 +198,6 @@ TEST(ARRAY, Conversions) {
   EXPECT_TRUE(vec0.toInt32() == 0);
   EXPECT_TRUE(vec0.toInt64() == 0);
   EXPECT_TRUE(vec0.toDouble() == 0.0);
-  EXPECT_TRUE(vec0.toString() == s_Vec);
 
   Array vec1 = Array::CreateVec();
   vec1.append("test");
@@ -209,7 +207,6 @@ TEST(ARRAY, Conversions) {
   EXPECT_TRUE(vec1.toInt32() == 1);
   EXPECT_TRUE(vec1.toInt64() == 1);
   EXPECT_TRUE(vec1.toDouble() == 1.0);
-  EXPECT_TRUE(vec1.toString() == s_Vec);
 
   Array dict0 = Array::CreateDict();
   EXPECT_TRUE(dict0.toBoolean() == false);
@@ -218,7 +215,6 @@ TEST(ARRAY, Conversions) {
   EXPECT_TRUE(dict0.toInt32() == 0);
   EXPECT_TRUE(dict0.toInt64() == 0);
   EXPECT_TRUE(dict0.toDouble() == 0.0);
-  EXPECT_TRUE(dict0.toString() == s_Dict);
 
   Array dict1 = Array::CreateDict();
   dict1.set(Variant{"key"}, Variant{"value"});
@@ -228,7 +224,6 @@ TEST(ARRAY, Conversions) {
   EXPECT_TRUE(dict1.toInt32() == 1);
   EXPECT_TRUE(dict1.toInt64() == 1);
   EXPECT_TRUE(dict1.toDouble() == 1.0);
-  EXPECT_TRUE(dict1.toString() == s_Dict);
 
   Array keyset0 = Array::CreateKeyset();
   EXPECT_TRUE(keyset0.toBoolean() == false);
@@ -237,7 +232,6 @@ TEST(ARRAY, Conversions) {
   EXPECT_TRUE(keyset0.toInt32() == 0);
   EXPECT_TRUE(keyset0.toInt64() == 0);
   EXPECT_TRUE(keyset0.toDouble() == 0.0);
-  EXPECT_TRUE(keyset0.toString() == s_Keyset);
 
   Array keyset1 = Array::CreateKeyset();
   keyset1.append("test");
@@ -247,7 +241,6 @@ TEST(ARRAY, Conversions) {
   EXPECT_TRUE(keyset1.toInt32() == 1);
   EXPECT_TRUE(keyset1.toInt64() == 1);
   EXPECT_TRUE(keyset1.toDouble() == 1.0);
-  EXPECT_TRUE(keyset1.toString() == s_Keyset);
 }
 
 TEST(Array, Offsets) {

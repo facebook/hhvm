@@ -10,7 +10,7 @@ function getClsMeth() {
   return __hhvm_intrinsics\launder_value(HH\class_meth(A::class, 'meth'));
 }
 
-function stringCast($x) { return (string) $x; }
+function stringCast($x) { try { return (string) $x; } catch (Exception $e) { return $e->getMessage(); } }
 function boolCast($x) { return (bool) $x; }
 function doubleCast($x) { return (float)$x; }
 function intCast($x) { return (int) $x; }

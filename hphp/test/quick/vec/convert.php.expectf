@@ -309,9 +309,7 @@ keyset(0) {
 bool(false)
 int(0)
 float(0)
-
-Notice: Vec to string conversion in %s on line %d
-string(3) "Vec"
+Exception: "Vec to string conversion"
 object(HH\Vector) (0) {
 }
 object(HH\Map) (0) {
@@ -356,9 +354,7 @@ keyset(4) {
 bool(true)
 int(1)
 float(1)
-
-Notice: Vec to string conversion in %s on line %d
-string(3) "Vec"
+Exception: "Vec to string conversion"
 object(HH\Vector) (4) {
   [0]=>
   int(1)
@@ -417,9 +413,7 @@ keyset(3) {
 bool(true)
 int(1)
 float(1)
-
-Notice: Vec to string conversion in %s on line %d
-string(3) "Vec"
+Exception: "Vec to string conversion"
 object(HH\Vector) (3) {
   [0]=>
   string(1) "z"
@@ -479,9 +473,7 @@ keyset(4) {
 bool(true)
 int(1)
 float(1)
-
-Notice: Vec to string conversion in %s on line %d
-string(3) "Vec"
+Exception: "Vec to string conversion"
 object(HH\Vector) (4) {
   [0]=>
   int(1)
@@ -552,9 +544,7 @@ Exception: "Invalid keyset key: expected a key of type int or string, vec given"
 bool(true)
 int(1)
 float(1)
-
-Notice: Vec to string conversion in %s on line %d
-string(3) "Vec"
+Exception: "Vec to string conversion"
 object(HH\Vector) (2) {
   [0]=>
   vec(2) {
@@ -620,9 +610,7 @@ Exception: "Invalid keyset key: expected a key of type int or string, bool given
 bool(true)
 int(1)
 float(1)
-
-Notice: Vec to string conversion in %s on line %d
-string(3) "Vec"
+Exception: "Vec to string conversion"
 object(HH\Vector) (5) {
   [0]=>
   int(1)
@@ -674,9 +662,7 @@ keyset(2) {
 bool(true)
 int(1)
 float(1)
-
-Notice: Vec to string conversion in %s on line %d
-string(3) "Vec"
+Exception: "Vec to string conversion"
 object(HH\Vector) (2) {
   [0]=>
   int(1)
@@ -729,9 +715,7 @@ keyset(2) {
 bool(true)
 int(1)
 float(1)
-
-Notice: Vec to string conversion in %s on line %d
-string(3) "Vec"
+Exception: "Vec to string conversion"
 object(HH\Vector) (4) {
   [0]=>
   string(3) "abc"

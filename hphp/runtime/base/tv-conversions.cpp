@@ -440,21 +440,21 @@ enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
 
     case KindOfVec:
     case KindOfPersistentVec:
-      raise_notice("Vec to string conversion");
-      if (type(tv) == KindOfVec) tvDecRefArr(*tv);
-      return persistentString(vec_string.get());
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Vec to string conversion"
+      );
 
     case KindOfDict:
     case KindOfPersistentDict:
-      raise_notice("Dict to string conversion");
-      if (type(tv) == KindOfDict) tvDecRefArr(*tv);
-      return persistentString(dict_string.get());
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Dict to string conversion"
+      );
 
     case KindOfKeyset:
     case KindOfPersistentKeyset:
-      raise_notice("Keyset to string conversion");
-      if (type(tv) == KindOfKeyset) tvDecRefArr(*tv);
-      return persistentString(keyset_string.get());
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Keyset to string conversion"
+      );
 
     case KindOfPersistentDArray:
     case KindOfDArray:
@@ -462,11 +462,9 @@ enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
     case KindOfVArray:
     case KindOfArray:
     case KindOfPersistentArray:
-      raise_notice("Array to string conversion");
-      if (isRefcountedType(type(tv))) {
-        tvDecRefArr(*tv);
-      }
-      return persistentString(array_string.get());
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Array to string conversion"
+      );
 
     case KindOfObject:
       tvMove(
@@ -497,15 +495,9 @@ enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
     }
 
     case KindOfClsMeth:
-      if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
-        raise_notice("Implicit clsmeth to string conversion");
-      }
-      tvDecRefClsMeth(tv);
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        return persistentString(vec_string.get());
-      } else {
-        return persistentString(array_string.get());
-      }
+      SystemLib::throwInvalidOperationExceptionObject(
+        "clsmeth to string conversion"
+      );
 
     case KindOfRClsMeth:
       raise_convert_rcls_meth_to_type("string");
@@ -544,18 +536,21 @@ StringData* tvCastToStringData(TypedValue tv) {
 
     case KindOfPersistentVec:
     case KindOfVec:
-      raise_notice("Vec to string conversion");
-      return vec_string.get();
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Vec to string conversion"
+      );
 
     case KindOfPersistentDict:
     case KindOfDict:
-      raise_notice("Dict to string conversion");
-      return dict_string.get();
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Dict to string conversion"
+      );
 
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-      raise_notice("Keyset to string conversion");
-      return keyset_string.get();
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Keyset to string conversion"
+      );
 
     case KindOfPersistentDArray:
     case KindOfDArray:
@@ -563,8 +558,9 @@ StringData* tvCastToStringData(TypedValue tv) {
     case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
-      raise_notice("Array to string conversion");
-      return array_string.get();
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Array to string conversion"
+      );
 
     case KindOfObject:
       return tv.m_data.pobj->invokeToString().detach();
@@ -587,14 +583,9 @@ StringData* tvCastToStringData(TypedValue tv) {
     }
 
     case KindOfClsMeth:
-      if (RuntimeOption::EvalRaiseClsMethConversionWarning) {
-        raise_notice("Implicit clsmeth to string conversion");
-      }
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        return vec_string.get();
-      } else {
-        return array_string.get();
-      }
+      SystemLib::throwInvalidOperationExceptionObject(
+        "clsmeth to string conversion"
+      );
 
     case KindOfRClsMeth:
       raise_convert_rcls_meth_to_type("string");

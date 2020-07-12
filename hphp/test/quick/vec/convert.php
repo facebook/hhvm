@@ -62,7 +62,11 @@ function convert_from($v) {
   var_dump((bool)$v);
   var_dump((int)$v);
   var_dump((float)$v);
-  var_dump((string)$v);
+  try {
+    var_dump((string)$v);
+  } catch (Exception $e) {
+    echo "Exception: \"" . $e->getMessage() . "\"\n";
+  }
   var_dump(new Vector($v));
   var_dump(new Map($v));
 

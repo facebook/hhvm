@@ -43,10 +43,6 @@ namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
 
 const Array null_array{};
-const StaticString array_string("Array");
-const StaticString vec_string("Vec");
-const StaticString dict_string("Dict");
-const StaticString keyset_string("Keyset");
 
 void Array::setEvalScalar() const {
   Array* thisPtr = const_cast<Array*>(this);
@@ -329,21 +325,25 @@ Array& Array::mergeImpl(ArrayData *data) {
 String Array::toString() const {
   if (m_arr == nullptr) return empty_string();
   if (m_arr->isPHPArrayType()) {
-    raise_notice("Array to string conversion");
-    return array_string;
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Array to string conversion"
+    );
   }
   assertx(m_arr->isHackArrayType());
   if (m_arr->isVecType()) {
-    raise_notice("Vec to string conversion");
-    return vec_string;
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Vec to string conversion"
+    );
   }
   if (m_arr->isDictType()) {
-    raise_notice("Dict to string conversion");
-    return dict_string;
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Dict to string conversion"
+    );
   }
   assertx(m_arr->isKeysetType());
-  raise_notice("Keyset to string conversion");
-  return keyset_string;
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Keyset to string conversion"
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2029,9 +2029,7 @@ bool strtr_slow(const Array& arr, StringBuffer& result, String& key,
   memcpy(key.mutableData(), s + pos, maxlen);
   for (int len = maxlen; len >= minlen; len--) {
     key.setSize(len);
-    auto const key_tval = make_tv<KindOfString>(key.get());
-    auto const arrkey = arr.convertKey<IntishCast::Cast>(key_tval);
-    auto const tv = arr->get(arrkey);
+    auto const tv = arr->get(key);
     if (tv.is_init()) {
       String replace = tvCastToString(tv);
       if (!replace.empty()) {

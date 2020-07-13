@@ -126,7 +126,9 @@ _readField_key:
   {
     
     iprot->readBinary(this->key.rawUnsafe());
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -234,7 +236,9 @@ void McVersionReply::readNoXfer(Protocol_* iprot) {
 _readField_result:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.result = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -248,7 +252,9 @@ _readField_value:
   {
     
     iprot->readBinary(this->value);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.value = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -262,7 +268,9 @@ _readField_message:
   {
     
     iprot->readString(this->message);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -275,7 +283,9 @@ _readField_message:
 _readField_appSpecificErrorCode:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->appSpecificErrorCode, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.appSpecificErrorCode = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -429,7 +439,9 @@ _readField_key:
   {
     
     iprot->readBinary(this->key.rawUnsafe());
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -537,7 +549,9 @@ void McStatsReply::readNoXfer(Protocol_* iprot) {
 _readField_result:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.result = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -551,7 +565,9 @@ _readField_message:
   {
     
     iprot->readString(this->message);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -567,7 +583,9 @@ _readField_stats:
     
     this->stats = ::std::vector<::std::string>();
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::list<::apache::thrift::type_class::string>, ::std::vector<::std::string>>::read(*iprot, this->stats);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.stats = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
     _readState.afterSubobject(iprot);
   }
 
@@ -581,7 +599,9 @@ _readField_stats:
 _readField_appSpecificErrorCode:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->appSpecificErrorCode, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.appSpecificErrorCode = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -735,7 +755,9 @@ _readField_key:
   {
     
     iprot->readBinary(this->key.rawUnsafe());
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -843,7 +865,9 @@ void McShutdownReply::readNoXfer(Protocol_* iprot) {
 _readField_result:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.result = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -857,7 +881,9 @@ _readField_message:
   {
     
     iprot->readString(this->message);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -870,7 +896,9 @@ _readField_message:
 _readField_appSpecificErrorCode:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->appSpecificErrorCode, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.appSpecificErrorCode = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -1009,7 +1037,9 @@ _readField_key:
   {
     
     iprot->readBinary(this->key.rawUnsafe());
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -1117,7 +1147,9 @@ void McQuitReply::readNoXfer(Protocol_* iprot) {
 _readField_result:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.result = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -1131,7 +1163,9 @@ _readField_message:
   {
     
     iprot->readString(this->message);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -1144,7 +1178,9 @@ _readField_message:
 _readField_appSpecificErrorCode:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->appSpecificErrorCode, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.appSpecificErrorCode = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -1283,7 +1319,9 @@ _readField_key:
   {
     
     iprot->readBinary(this->key.rawUnsafe());
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -1391,7 +1429,9 @@ void McExecReply::readNoXfer(Protocol_* iprot) {
 _readField_result:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.result = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -1405,7 +1445,9 @@ _readField_response:
   {
     
     iprot->readString(this->response);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.response = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -1419,7 +1461,9 @@ _readField_message:
   {
     
     iprot->readString(this->message);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -1432,7 +1476,9 @@ _readField_message:
 _readField_appSpecificErrorCode:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->appSpecificErrorCode, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.appSpecificErrorCode = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -1664,7 +1710,9 @@ void GoAwayRequest::readNoXfer(Protocol_* iprot) {
 _readField_result:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::readWithContext(*iprot, this->result, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.result = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -1678,7 +1726,9 @@ _readField_reason:
   {
     
     iprot->readString(this->reason);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.reason = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(

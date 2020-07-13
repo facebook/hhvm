@@ -10,10 +10,6 @@
 
 #include "mcrouter/lib/carbon/gen-cpp2/carbon_types.h"
 
-namespace carbon { namespace thrift {
-
-}} // carbon::thrift
-
 namespace apache { namespace thrift {
 
 

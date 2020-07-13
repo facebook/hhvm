@@ -31,7 +31,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
 
   virtual void mcGet(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGetRequest& request);
   virtual void mcGet(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGetRequest& request);
- private:
+ protected:
   void mcGetImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGetRequest& request);
  public:
   virtual void sync_mcGet(facebook::memcache::McGetReply& _return, const facebook::memcache::McGetRequest& request);
@@ -65,7 +65,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcSet(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McSetRequest& request);
   virtual void mcSet(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McSetRequest& request);
- private:
+ protected:
   void mcSetImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McSetRequest& request);
  public:
   virtual void sync_mcSet(facebook::memcache::McSetReply& _return, const facebook::memcache::McSetRequest& request);
@@ -99,7 +99,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcDelete(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McDeleteRequest& request);
   virtual void mcDelete(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McDeleteRequest& request);
- private:
+ protected:
   void mcDeleteImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McDeleteRequest& request);
  public:
   virtual void sync_mcDelete(facebook::memcache::McDeleteReply& _return, const facebook::memcache::McDeleteRequest& request);
@@ -133,7 +133,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcLeaseGet(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McLeaseGetRequest& request);
   virtual void mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McLeaseGetRequest& request);
- private:
+ protected:
   void mcLeaseGetImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McLeaseGetRequest& request);
  public:
   virtual void sync_mcLeaseGet(facebook::memcache::McLeaseGetReply& _return, const facebook::memcache::McLeaseGetRequest& request);
@@ -167,7 +167,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcLeaseSet(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McLeaseSetRequest& request);
   virtual void mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McLeaseSetRequest& request);
- private:
+ protected:
   void mcLeaseSetImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McLeaseSetRequest& request);
  public:
   virtual void sync_mcLeaseSet(facebook::memcache::McLeaseSetReply& _return, const facebook::memcache::McLeaseSetRequest& request);
@@ -201,7 +201,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcAdd(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McAddRequest& request);
   virtual void mcAdd(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McAddRequest& request);
- private:
+ protected:
   void mcAddImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McAddRequest& request);
  public:
   virtual void sync_mcAdd(facebook::memcache::McAddReply& _return, const facebook::memcache::McAddRequest& request);
@@ -235,7 +235,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcReplace(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McReplaceRequest& request);
   virtual void mcReplace(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McReplaceRequest& request);
- private:
+ protected:
   void mcReplaceImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McReplaceRequest& request);
  public:
   virtual void sync_mcReplace(facebook::memcache::McReplaceReply& _return, const facebook::memcache::McReplaceRequest& request);
@@ -269,7 +269,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcGets(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGetsRequest& request);
   virtual void mcGets(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGetsRequest& request);
- private:
+ protected:
   void mcGetsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGetsRequest& request);
  public:
   virtual void sync_mcGets(facebook::memcache::McGetsReply& _return, const facebook::memcache::McGetsRequest& request);
@@ -303,7 +303,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcCas(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McCasRequest& request);
   virtual void mcCas(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McCasRequest& request);
- private:
+ protected:
   void mcCasImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McCasRequest& request);
  public:
   virtual void sync_mcCas(facebook::memcache::McCasReply& _return, const facebook::memcache::McCasRequest& request);
@@ -337,7 +337,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcIncr(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McIncrRequest& request);
   virtual void mcIncr(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McIncrRequest& request);
- private:
+ protected:
   void mcIncrImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McIncrRequest& request);
  public:
   virtual void sync_mcIncr(facebook::memcache::McIncrReply& _return, const facebook::memcache::McIncrRequest& request);
@@ -371,7 +371,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcDecr(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McDecrRequest& request);
   virtual void mcDecr(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McDecrRequest& request);
- private:
+ protected:
   void mcDecrImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McDecrRequest& request);
  public:
   virtual void sync_mcDecr(facebook::memcache::McDecrReply& _return, const facebook::memcache::McDecrRequest& request);
@@ -405,7 +405,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcMetaget(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McMetagetRequest& request);
   virtual void mcMetaget(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McMetagetRequest& request);
- private:
+ protected:
   void mcMetagetImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McMetagetRequest& request);
  public:
   virtual void sync_mcMetaget(facebook::memcache::McMetagetReply& _return, const facebook::memcache::McMetagetRequest& request);
@@ -439,7 +439,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcAppend(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McAppendRequest& request);
   virtual void mcAppend(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McAppendRequest& request);
- private:
+ protected:
   void mcAppendImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McAppendRequest& request);
  public:
   virtual void sync_mcAppend(facebook::memcache::McAppendReply& _return, const facebook::memcache::McAppendRequest& request);
@@ -473,7 +473,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcPrepend(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McPrependRequest& request);
   virtual void mcPrepend(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McPrependRequest& request);
- private:
+ protected:
   void mcPrependImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McPrependRequest& request);
  public:
   virtual void sync_mcPrepend(facebook::memcache::McPrependReply& _return, const facebook::memcache::McPrependRequest& request);
@@ -507,7 +507,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcTouch(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McTouchRequest& request);
   virtual void mcTouch(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McTouchRequest& request);
- private:
+ protected:
   void mcTouchImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McTouchRequest& request);
  public:
   virtual void sync_mcTouch(facebook::memcache::McTouchReply& _return, const facebook::memcache::McTouchRequest& request);
@@ -541,7 +541,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcFlushRe(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McFlushReRequest& request);
   virtual void mcFlushRe(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McFlushReRequest& request);
- private:
+ protected:
   void mcFlushReImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McFlushReRequest& request);
  public:
   virtual void sync_mcFlushRe(facebook::memcache::McFlushReReply& _return, const facebook::memcache::McFlushReRequest& request);
@@ -575,7 +575,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcFlushAll(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McFlushAllRequest& request);
   virtual void mcFlushAll(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McFlushAllRequest& request);
- private:
+ protected:
   void mcFlushAllImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McFlushAllRequest& request);
  public:
   virtual void sync_mcFlushAll(facebook::memcache::McFlushAllReply& _return, const facebook::memcache::McFlushAllRequest& request);
@@ -609,7 +609,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcGat(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGatRequest& request);
   virtual void mcGat(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGatRequest& request);
- private:
+ protected:
   void mcGatImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGatRequest& request);
  public:
   virtual void sync_mcGat(facebook::memcache::McGatReply& _return, const facebook::memcache::McGatRequest& request);
@@ -643,7 +643,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcGats(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGatsRequest& request);
   virtual void mcGats(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McGatsRequest& request);
- private:
+ protected:
   void mcGatsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGatsRequest& request);
  public:
   virtual void sync_mcGats(facebook::memcache::McGatsReply& _return, const facebook::memcache::McGatsRequest& request);
@@ -677,7 +677,7 @@ class MemcacheAsyncClient : public apache::thrift::GeneratedAsyncClient {
  public:
   virtual void mcVersion(std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McVersionRequest& request);
   virtual void mcVersion(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const facebook::memcache::McVersionRequest& request);
- private:
+ protected:
   void mcVersionImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McVersionRequest& request);
  public:
   virtual void sync_mcVersion(facebook::memcache::McVersionReply& _return, const facebook::memcache::McVersionRequest& request);

@@ -62,7 +62,9 @@ void Field::readNoXfer(Protocol_* iprot) {
 _readField_layoutId:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->layoutId, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.layoutId = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -75,7 +77,9 @@ _readField_layoutId:
 _readField_offset:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->offset, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.offset = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -198,7 +202,9 @@ void Layout::readNoXfer(Protocol_* iprot) {
 _readField_size:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::readWithContext(*iprot, this->size, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.size = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -211,7 +217,9 @@ _readField_size:
 _readField_bits:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->bits, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.bits = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -227,7 +235,9 @@ _readField_fields:
     
     this->fields = ::std::map<int16_t,  ::apache::thrift::frozen::schema::Field>();
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, ::std::map<int16_t,  ::apache::thrift::frozen::schema::Field>>::read(*iprot, this->fields);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.fields = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
     _readState.afterSubobject(iprot);
   }
 
@@ -242,7 +252,9 @@ _readField_typeName:
   {
     
     iprot->readString(this->typeName);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.typeName = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -395,7 +407,9 @@ void Schema::readNoXfer(Protocol_* iprot) {
 _readField_fileVersion:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::readWithContext(*iprot, this->fileVersion, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.fileVersion = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -408,7 +422,9 @@ _readField_fileVersion:
 _readField_relaxTypeChecks:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, bool>::readWithContext(*iprot, this->relaxTypeChecks, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.relaxTypeChecks = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -424,7 +440,9 @@ _readField_layouts:
     
     this->layouts = ::std::map<int16_t,  ::apache::thrift::frozen::schema::Layout>();
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, ::std::map<int16_t,  ::apache::thrift::frozen::schema::Layout>>::read(*iprot, this->layouts);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.layouts = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
     _readState.afterSubobject(iprot);
   }
 
@@ -438,7 +456,9 @@ _readField_layouts:
 _readField_rootLayout:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->rootLayout, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.rootLayout = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(

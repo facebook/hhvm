@@ -9,52 +9,49 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
-namespace apache { namespace thrift {
-
-constexpr const std::size_t _ProtocolIdEnumDataStorage::size;
-constexpr const std::array<ProtocolId, 2> _ProtocolIdEnumDataStorage::values;
-constexpr const std::array<folly::StringPiece, 2> _ProtocolIdEnumDataStorage::names;
-
-}} // apache::thrift
-
-namespace apache { namespace thrift {
-
-constexpr const std::size_t _RpcKindEnumDataStorage::size;
-constexpr const std::array<RpcKind, 7> _RpcKindEnumDataStorage::values;
-constexpr const std::array<folly::StringPiece, 7> _RpcKindEnumDataStorage::names;
-
-}} // apache::thrift
-
-namespace apache { namespace thrift {
-
-constexpr const std::size_t _RpcPriorityEnumDataStorage::size;
-constexpr const std::array<RpcPriority, 6> _RpcPriorityEnumDataStorage::values;
-constexpr const std::array<folly::StringPiece, 6> _RpcPriorityEnumDataStorage::names;
-
-}} // apache::thrift
-
-namespace apache { namespace thrift {
-
-constexpr const std::size_t _CompressionAlgorithmEnumDataStorage::size;
-constexpr const std::array<CompressionAlgorithm, 3> _CompressionAlgorithmEnumDataStorage::values;
-constexpr const std::array<folly::StringPiece, 3> _CompressionAlgorithmEnumDataStorage::names;
-
-}} // apache::thrift
-
-namespace apache { namespace thrift {
-
-constexpr const std::size_t _RequestRpcMetadataFlagsEnumDataStorage::size;
-constexpr const std::array<RequestRpcMetadataFlags, 2> _RequestRpcMetadataFlagsEnumDataStorage::values;
-constexpr const std::array<folly::StringPiece, 2> _RequestRpcMetadataFlagsEnumDataStorage::names;
-
-}} // apache::thrift
-
-namespace apache { namespace thrift {
-
-constexpr const std::size_t _InterfaceKindEnumDataStorage::size;
-constexpr const std::array<InterfaceKind, 2> _InterfaceKindEnumDataStorage::values;
-constexpr const std::array<folly::StringPiece, 2> _InterfaceKindEnumDataStorage::names;
-
-}} // apache::thrift
+namespace apache {
+namespace thrift {
 
 
+constexpr const std::size_t TEnumDataStorage<::apache::thrift::ProtocolId>::size;
+constexpr const std::array<::apache::thrift::ProtocolId, 2> TEnumDataStorage<::apache::thrift::ProtocolId>::values;
+constexpr const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::ProtocolId>::names;
+
+
+constexpr const std::size_t TEnumDataStorage<::apache::thrift::RpcKind>::size;
+constexpr const std::array<::apache::thrift::RpcKind, 7> TEnumDataStorage<::apache::thrift::RpcKind>::values;
+constexpr const std::array<folly::StringPiece, 7> TEnumDataStorage<::apache::thrift::RpcKind>::names;
+
+
+constexpr const std::size_t TEnumDataStorage<::apache::thrift::RpcPriority>::size;
+constexpr const std::array<::apache::thrift::RpcPriority, 6> TEnumDataStorage<::apache::thrift::RpcPriority>::values;
+constexpr const std::array<folly::StringPiece, 6> TEnumDataStorage<::apache::thrift::RpcPriority>::names;
+
+
+constexpr const std::size_t TEnumDataStorage<::apache::thrift::CompressionAlgorithm>::size;
+constexpr const std::array<::apache::thrift::CompressionAlgorithm, 3> TEnumDataStorage<::apache::thrift::CompressionAlgorithm>::values;
+constexpr const std::array<folly::StringPiece, 3> TEnumDataStorage<::apache::thrift::CompressionAlgorithm>::names;
+
+
+constexpr const std::size_t TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags>::size;
+constexpr const std::array<::apache::thrift::RequestRpcMetadataFlags, 2> TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags>::values;
+constexpr const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags>::names;
+
+
+constexpr const std::size_t TEnumDataStorage<::apache::thrift::ResponseRpcErrorCategory>::size;
+constexpr const std::array<::apache::thrift::ResponseRpcErrorCategory, 4> TEnumDataStorage<::apache::thrift::ResponseRpcErrorCategory>::values;
+constexpr const std::array<folly::StringPiece, 4> TEnumDataStorage<::apache::thrift::ResponseRpcErrorCategory>::names;
+
+
+constexpr const std::size_t TEnumDataStorage<::apache::thrift::ResponseRpcErrorCode>::size;
+constexpr const std::array<::apache::thrift::ResponseRpcErrorCode, 14> TEnumDataStorage<::apache::thrift::ResponseRpcErrorCode>::values;
+constexpr const std::array<folly::StringPiece, 14> TEnumDataStorage<::apache::thrift::ResponseRpcErrorCode>::names;
+
+
+constexpr const std::size_t TEnumDataStorage<::apache::thrift::InterfaceKind>::size;
+constexpr const std::array<::apache::thrift::InterfaceKind, 2> TEnumDataStorage<::apache::thrift::InterfaceKind>::values;
+constexpr const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::InterfaceKind>::names;
+
+
+} // namespace thrift
+} // namespace apache

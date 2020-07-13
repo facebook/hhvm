@@ -10,28 +10,28 @@
 
 #include "thrift/lib/thrift/gen-cpp2/reflection_types.h"
 
-namespace apache { namespace thrift { namespace reflection {
+namespace apache { namespace thrift {
 
-struct _TypeEnumDataStorage {
-  using type = Type;
+template <> struct TEnumDataStorage<::apache::thrift::reflection::Type> {
+  using type = ::apache::thrift::reflection::Type;
   static constexpr const std::size_t size = 16;
-  static constexpr const std::array<Type, 16> values = {{
-    Type::TYPE_VOID,
-    Type::TYPE_STRING,
-    Type::TYPE_BOOL,
-    Type::TYPE_BYTE,
-    Type::TYPE_I16,
-    Type::TYPE_I32,
-    Type::TYPE_I64,
-    Type::TYPE_DOUBLE,
-    Type::TYPE_ENUM,
-    Type::TYPE_LIST,
-    Type::TYPE_SET,
-    Type::TYPE_MAP,
-    Type::TYPE_STRUCT,
-    Type::TYPE_SERVICE,
-    Type::TYPE_PROGRAM,
-    Type::TYPE_FLOAT,
+  static constexpr const std::array<type, 16> values = {{
+    type::TYPE_VOID,
+    type::TYPE_STRING,
+    type::TYPE_BOOL,
+    type::TYPE_BYTE,
+    type::TYPE_I16,
+    type::TYPE_I32,
+    type::TYPE_I64,
+    type::TYPE_DOUBLE,
+    type::TYPE_ENUM,
+    type::TYPE_LIST,
+    type::TYPE_SET,
+    type::TYPE_MAP,
+    type::TYPE_STRUCT,
+    type::TYPE_SERVICE,
+    type::TYPE_PROGRAM,
+    type::TYPE_FLOAT,
   }};
   static constexpr const std::array<folly::StringPiece, 16> names = {{
     "TYPE_VOID",
@@ -51,14 +51,6 @@ struct _TypeEnumDataStorage {
     "TYPE_PROGRAM",
     "TYPE_FLOAT",
   }};
-};
-
-}}} // apache::thrift::reflection
-
-namespace apache { namespace thrift {
-
-template <> struct TEnumDataStorage<::apache::thrift::reflection::Type> {
-  using storage_type = ::apache::thrift::reflection::_TypeEnumDataStorage;
 };
 
 }} // apache::thrift

@@ -69,7 +69,9 @@ void StructField::readNoXfer(Protocol_* iprot) {
 _readField_isRequired:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, bool>::readWithContext(*iprot, this->isRequired, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.isRequired = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -82,7 +84,9 @@ _readField_isRequired:
 _readField_type:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::readWithContext(*iprot, this->type, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.type = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -96,7 +100,9 @@ _readField_name:
   {
     
     iprot->readString(this->name);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.name = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -112,7 +118,9 @@ _readField_annotations:
     
     this->annotations = std::unordered_map<::std::string, ::std::string>();
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, std::unordered_map<::std::string, ::std::string>>::read(*iprot, this->annotations);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.annotations = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
     _readState.afterSubobject(iprot);
   }
 
@@ -126,7 +134,9 @@ _readField_annotations:
 _readField_order:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::readWithContext(*iprot, this->order, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.order = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -213,7 +223,7 @@ uint32_t StructField::serializedSize(Protocol_ const* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->type);
   xfer += prot_->serializedFieldSize("name", apache::thrift::protocol::T_STRING, 3);
   xfer += prot_->serializedSizeString(this->name);
-  if (this->__isset.annotations) {
+  if (this->annotations_ref().has_value()) {
     xfer += prot_->serializedFieldSize("annotations", apache::thrift::protocol::T_MAP, 4);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, std::unordered_map<::std::string, ::std::string>>::serializedSize<false>(*prot_, this->annotations);
   }
@@ -233,7 +243,7 @@ uint32_t StructField::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->type);
   xfer += prot_->serializedFieldSize("name", apache::thrift::protocol::T_STRING, 3);
   xfer += prot_->serializedSizeString(this->name);
-  if (this->__isset.annotations) {
+  if (this->annotations_ref().has_value()) {
     xfer += prot_->serializedFieldSize("annotations", apache::thrift::protocol::T_MAP, 4);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, std::unordered_map<::std::string, ::std::string>>::serializedSize<false>(*prot_, this->annotations);
   }
@@ -256,7 +266,7 @@ uint32_t StructField::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldBegin("name", apache::thrift::protocol::T_STRING, 3);
   xfer += prot_->writeString(this->name);
   xfer += prot_->writeFieldEnd();
-  if (this->__isset.annotations) {
+  if (this->annotations_ref().has_value()) {
     xfer += prot_->writeFieldBegin("annotations", apache::thrift::protocol::T_MAP, 4);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, std::unordered_map<::std::string, ::std::string>>::write(*prot_, this->annotations);
     xfer += prot_->writeFieldEnd();
@@ -301,7 +311,9 @@ _readField_name:
   {
     
     iprot->readString(this->name);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.name = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -317,7 +329,9 @@ _readField_fields:
     
     this->fields = std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>();
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>>::read(*iprot, this->fields);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.fields = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
     _readState.afterSubobject(iprot);
   }
 
@@ -331,7 +345,9 @@ _readField_fields:
 _readField_mapKeyType:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::readWithContext(*iprot, this->mapKeyType, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.mapKeyType = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -344,7 +360,9 @@ _readField_mapKeyType:
 _readField_valueType:
   {
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::readWithContext(*iprot, this->valueType, _readState);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.valueType = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
   }
 
   if (UNLIKELY(!_readState.advanceToNextField(
@@ -360,7 +378,9 @@ _readField_enumValues:
     
     this->enumValues = std::unordered_map<::std::string, int32_t>();
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, std::unordered_map<::std::string, int32_t>>::read(*iprot, this->enumValues);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.enumValues = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
     _readState.afterSubobject(iprot);
   }
 
@@ -444,19 +464,19 @@ uint32_t DataType::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("DataType");
   xfer += prot_->serializedFieldSize("name", apache::thrift::protocol::T_STRING, 1);
   xfer += prot_->serializedSizeString(this->name);
-  if (this->__isset.fields) {
+  if (this->fields_ref().has_value()) {
     xfer += prot_->serializedFieldSize("fields", apache::thrift::protocol::T_MAP, 2);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>>::serializedSize<false>(*prot_, this->fields);
   }
-  if (this->__isset.mapKeyType) {
+  if (this->mapKeyType_ref().has_value()) {
     xfer += prot_->serializedFieldSize("mapKeyType", apache::thrift::protocol::T_I64, 3);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->mapKeyType);
   }
-  if (this->__isset.valueType) {
+  if (this->valueType_ref().has_value()) {
     xfer += prot_->serializedFieldSize("valueType", apache::thrift::protocol::T_I64, 4);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->valueType);
   }
-  if (this->__isset.enumValues) {
+  if (this->enumValues_ref().has_value()) {
     xfer += prot_->serializedFieldSize("enumValues", apache::thrift::protocol::T_MAP, 5);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, std::unordered_map<::std::string, int32_t>>::serializedSize<false>(*prot_, this->enumValues);
   }
@@ -470,19 +490,19 @@ uint32_t DataType::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("DataType");
   xfer += prot_->serializedFieldSize("name", apache::thrift::protocol::T_STRING, 1);
   xfer += prot_->serializedSizeString(this->name);
-  if (this->__isset.fields) {
+  if (this->fields_ref().has_value()) {
     xfer += prot_->serializedFieldSize("fields", apache::thrift::protocol::T_MAP, 2);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>>::serializedSize<false>(*prot_, this->fields);
   }
-  if (this->__isset.mapKeyType) {
+  if (this->mapKeyType_ref().has_value()) {
     xfer += prot_->serializedFieldSize("mapKeyType", apache::thrift::protocol::T_I64, 3);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->mapKeyType);
   }
-  if (this->__isset.valueType) {
+  if (this->valueType_ref().has_value()) {
     xfer += prot_->serializedFieldSize("valueType", apache::thrift::protocol::T_I64, 4);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->valueType);
   }
-  if (this->__isset.enumValues) {
+  if (this->enumValues_ref().has_value()) {
     xfer += prot_->serializedFieldSize("enumValues", apache::thrift::protocol::T_MAP, 5);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, std::unordered_map<::std::string, int32_t>>::serializedSize<false>(*prot_, this->enumValues);
   }
@@ -497,22 +517,22 @@ uint32_t DataType::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldBegin("name", apache::thrift::protocol::T_STRING, 1);
   xfer += prot_->writeString(this->name);
   xfer += prot_->writeFieldEnd();
-  if (this->__isset.fields) {
+  if (this->fields_ref().has_value()) {
     xfer += prot_->writeFieldBegin("fields", apache::thrift::protocol::T_MAP, 2);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>>::write(*prot_, this->fields);
     xfer += prot_->writeFieldEnd();
   }
-  if (this->__isset.mapKeyType) {
+  if (this->mapKeyType_ref().has_value()) {
     xfer += prot_->writeFieldBegin("mapKeyType", apache::thrift::protocol::T_I64, 3);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::write(*prot_, this->mapKeyType);
     xfer += prot_->writeFieldEnd();
   }
-  if (this->__isset.valueType) {
+  if (this->valueType_ref().has_value()) {
     xfer += prot_->writeFieldBegin("valueType", apache::thrift::protocol::T_I64, 4);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::write(*prot_, this->valueType);
     xfer += prot_->writeFieldEnd();
   }
-  if (this->__isset.enumValues) {
+  if (this->enumValues_ref().has_value()) {
     xfer += prot_->writeFieldBegin("enumValues", apache::thrift::protocol::T_MAP, 5);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, std::unordered_map<::std::string, int32_t>>::write(*prot_, this->enumValues);
     xfer += prot_->writeFieldEnd();
@@ -556,7 +576,9 @@ _readField_dataTypes:
     
     this->dataTypes = std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>();
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>>::read(*iprot, this->dataTypes);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.dataTypes = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
     _readState.afterSubobject(iprot);
   }
 
@@ -573,7 +595,9 @@ _readField_names:
     
     this->names = std::unordered_map<::std::string, int64_t>();
     ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, std::unordered_map<::std::string, int64_t>>::read(*iprot, this->names);
+    THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.names = true;
+    THRIFT_IGNORE_ISSET_USE_WARNING_END
     _readState.afterSubobject(iprot);
   }
 

@@ -9,12 +9,14 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
-namespace apache { namespace thrift { namespace reflection {
-
-constexpr const std::size_t _TypeEnumDataStorage::size;
-constexpr const std::array<Type, 16> _TypeEnumDataStorage::values;
-constexpr const std::array<folly::StringPiece, 16> _TypeEnumDataStorage::names;
-
-}}} // apache::thrift::reflection
+namespace apache {
+namespace thrift {
 
 
+constexpr const std::size_t TEnumDataStorage<::apache::thrift::reflection::Type>::size;
+constexpr const std::array<::apache::thrift::reflection::Type, 16> TEnumDataStorage<::apache::thrift::reflection::Type>::values;
+constexpr const std::array<folly::StringPiece, 16> TEnumDataStorage<::apache::thrift::reflection::Type>::names;
+
+
+} // namespace thrift
+} // namespace apache

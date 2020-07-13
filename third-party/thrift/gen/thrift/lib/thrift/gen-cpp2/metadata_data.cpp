@@ -9,12 +9,14 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
-namespace apache { namespace thrift { namespace metadata {
-
-constexpr const std::size_t _ThriftPrimitiveTypeEnumDataStorage::size;
-constexpr const std::array<ThriftPrimitiveType, 10> _ThriftPrimitiveTypeEnumDataStorage::values;
-constexpr const std::array<folly::StringPiece, 10> _ThriftPrimitiveTypeEnumDataStorage::names;
-
-}}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
 
 
+constexpr const std::size_t TEnumDataStorage<::apache::thrift::metadata::ThriftPrimitiveType>::size;
+constexpr const std::array<::apache::thrift::metadata::ThriftPrimitiveType, 10> TEnumDataStorage<::apache::thrift::metadata::ThriftPrimitiveType>::values;
+constexpr const std::array<folly::StringPiece, 10> TEnumDataStorage<::apache::thrift::metadata::ThriftPrimitiveType>::names;
+
+
+} // namespace thrift
+} // namespace apache

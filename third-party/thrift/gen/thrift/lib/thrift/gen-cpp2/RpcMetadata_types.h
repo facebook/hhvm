@@ -14,7 +14,13 @@
 namespace apache {
 namespace thrift {
 namespace tag {
+struct zlibConfig;
+struct zstdConfig;
+struct codecConfig;
+struct compressionSizeLimit;
 struct compressionAlgos;
+struct interactionId;
+struct interactionName;
 struct protocol;
 struct name;
 struct kind;
@@ -29,23 +35,68 @@ struct crc32c;
 struct flags;
 struct loadMetric;
 struct compression;
+struct compressionConfig;
+struct interactionId;
+struct interactionCreate;
+struct declaredException;
+struct proxyException;
+struct proxiedException;
+struct appClientException;
+struct appServerException;
+struct name_utf8;
+struct what_utf8;
+struct metadata;
+struct responseMetadata;
+struct exceptionMetadata;
 struct protocol;
 struct seqId;
 struct otherMetadata;
 struct load;
 struct crc32c;
 struct compression;
+struct payloadMetadata;
+struct name_utf8;
+struct what_utf8;
+struct category;
+struct code;
+struct load;
 struct compression;
 struct otherMetadata;
 struct opaque;
 struct interfaceKind;
+struct minVersion;
+struct maxVersion;
 struct otherMetadata;
 struct compression;
 } // namespace tag
 namespace detail {
+#ifndef APACHE_THRIFT_ACCESSOR_zlibConfig
+#define APACHE_THRIFT_ACCESSOR_zlibConfig
+APACHE_THRIFT_DEFINE_ACCESSOR(zlibConfig);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_zstdConfig
+#define APACHE_THRIFT_ACCESSOR_zstdConfig
+APACHE_THRIFT_DEFINE_ACCESSOR(zstdConfig);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_codecConfig
+#define APACHE_THRIFT_ACCESSOR_codecConfig
+APACHE_THRIFT_DEFINE_ACCESSOR(codecConfig);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_compressionSizeLimit
+#define APACHE_THRIFT_ACCESSOR_compressionSizeLimit
+APACHE_THRIFT_DEFINE_ACCESSOR(compressionSizeLimit);
+#endif
 #ifndef APACHE_THRIFT_ACCESSOR_compressionAlgos
 #define APACHE_THRIFT_ACCESSOR_compressionAlgos
 APACHE_THRIFT_DEFINE_ACCESSOR(compressionAlgos);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_interactionId
+#define APACHE_THRIFT_ACCESSOR_interactionId
+APACHE_THRIFT_DEFINE_ACCESSOR(interactionId);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_interactionName
+#define APACHE_THRIFT_ACCESSOR_interactionName
+APACHE_THRIFT_DEFINE_ACCESSOR(interactionName);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_protocol
 #define APACHE_THRIFT_ACCESSOR_protocol
@@ -103,6 +154,58 @@ APACHE_THRIFT_DEFINE_ACCESSOR(loadMetric);
 #define APACHE_THRIFT_ACCESSOR_compression
 APACHE_THRIFT_DEFINE_ACCESSOR(compression);
 #endif
+#ifndef APACHE_THRIFT_ACCESSOR_compressionConfig
+#define APACHE_THRIFT_ACCESSOR_compressionConfig
+APACHE_THRIFT_DEFINE_ACCESSOR(compressionConfig);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_interactionId
+#define APACHE_THRIFT_ACCESSOR_interactionId
+APACHE_THRIFT_DEFINE_ACCESSOR(interactionId);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_interactionCreate
+#define APACHE_THRIFT_ACCESSOR_interactionCreate
+APACHE_THRIFT_DEFINE_ACCESSOR(interactionCreate);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_declaredException
+#define APACHE_THRIFT_ACCESSOR_declaredException
+APACHE_THRIFT_DEFINE_ACCESSOR(declaredException);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_proxyException
+#define APACHE_THRIFT_ACCESSOR_proxyException
+APACHE_THRIFT_DEFINE_ACCESSOR(proxyException);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_proxiedException
+#define APACHE_THRIFT_ACCESSOR_proxiedException
+APACHE_THRIFT_DEFINE_ACCESSOR(proxiedException);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_appClientException
+#define APACHE_THRIFT_ACCESSOR_appClientException
+APACHE_THRIFT_DEFINE_ACCESSOR(appClientException);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_appServerException
+#define APACHE_THRIFT_ACCESSOR_appServerException
+APACHE_THRIFT_DEFINE_ACCESSOR(appServerException);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_name_utf8
+#define APACHE_THRIFT_ACCESSOR_name_utf8
+APACHE_THRIFT_DEFINE_ACCESSOR(name_utf8);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_what_utf8
+#define APACHE_THRIFT_ACCESSOR_what_utf8
+APACHE_THRIFT_DEFINE_ACCESSOR(what_utf8);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_metadata
+#define APACHE_THRIFT_ACCESSOR_metadata
+APACHE_THRIFT_DEFINE_ACCESSOR(metadata);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_responseMetadata
+#define APACHE_THRIFT_ACCESSOR_responseMetadata
+APACHE_THRIFT_DEFINE_ACCESSOR(responseMetadata);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_exceptionMetadata
+#define APACHE_THRIFT_ACCESSOR_exceptionMetadata
+APACHE_THRIFT_DEFINE_ACCESSOR(exceptionMetadata);
+#endif
 #ifndef APACHE_THRIFT_ACCESSOR_protocol
 #define APACHE_THRIFT_ACCESSOR_protocol
 APACHE_THRIFT_DEFINE_ACCESSOR(protocol);
@@ -127,6 +230,30 @@ APACHE_THRIFT_DEFINE_ACCESSOR(crc32c);
 #define APACHE_THRIFT_ACCESSOR_compression
 APACHE_THRIFT_DEFINE_ACCESSOR(compression);
 #endif
+#ifndef APACHE_THRIFT_ACCESSOR_payloadMetadata
+#define APACHE_THRIFT_ACCESSOR_payloadMetadata
+APACHE_THRIFT_DEFINE_ACCESSOR(payloadMetadata);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_name_utf8
+#define APACHE_THRIFT_ACCESSOR_name_utf8
+APACHE_THRIFT_DEFINE_ACCESSOR(name_utf8);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_what_utf8
+#define APACHE_THRIFT_ACCESSOR_what_utf8
+APACHE_THRIFT_DEFINE_ACCESSOR(what_utf8);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_category
+#define APACHE_THRIFT_ACCESSOR_category
+APACHE_THRIFT_DEFINE_ACCESSOR(category);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_code
+#define APACHE_THRIFT_ACCESSOR_code
+APACHE_THRIFT_DEFINE_ACCESSOR(code);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_load
+#define APACHE_THRIFT_ACCESSOR_load
+APACHE_THRIFT_DEFINE_ACCESSOR(load);
+#endif
 #ifndef APACHE_THRIFT_ACCESSOR_compression
 #define APACHE_THRIFT_ACCESSOR_compression
 APACHE_THRIFT_DEFINE_ACCESSOR(compression);
@@ -142,6 +269,14 @@ APACHE_THRIFT_DEFINE_ACCESSOR(opaque);
 #ifndef APACHE_THRIFT_ACCESSOR_interfaceKind
 #define APACHE_THRIFT_ACCESSOR_interfaceKind
 APACHE_THRIFT_DEFINE_ACCESSOR(interfaceKind);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_minVersion
+#define APACHE_THRIFT_ACCESSOR_minVersion
+APACHE_THRIFT_DEFINE_ACCESSOR(minVersion);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_maxVersion
+#define APACHE_THRIFT_ACCESSOR_maxVersion
+APACHE_THRIFT_DEFINE_ACCESSOR(maxVersion);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_otherMetadata
 #define APACHE_THRIFT_ACCESSOR_otherMetadata
@@ -160,7 +295,7 @@ namespace apache { namespace thrift {
 
 enum class ProtocolId {
   BINARY = 0,
-  COMPACT = 2
+  COMPACT = 2,
 };
 
 
@@ -173,7 +308,7 @@ enum class RpcKind {
   STREAMING_REQUEST_NO_RESPONSE = 3,
   SINGLE_REQUEST_STREAMING_RESPONSE = 4,
   STREAMING_REQUEST_STREAMING_RESPONSE = 5,
-  SINK = 6
+  SINK = 6,
 };
 
 
@@ -185,7 +320,7 @@ enum class RpcPriority {
   IMPORTANT = 2,
   NORMAL = 3,
   BEST_EFFORT = 4,
-  N_PRIORITIES = 5
+  N_PRIORITIES = 5,
 };
 
 
@@ -194,7 +329,7 @@ enum class RpcPriority {
 enum class CompressionAlgorithm {
   NONE = 0,
   ZLIB = 1,
-  ZSTD = 2
+  ZSTD = 2,
 };
 
 
@@ -202,7 +337,37 @@ enum class CompressionAlgorithm {
 
 enum class RequestRpcMetadataFlags {
   UNKNOWN = 0,
-  QUERY_SERVER_LOAD = 1
+  QUERY_SERVER_LOAD = 1,
+};
+
+
+
+
+enum class ResponseRpcErrorCategory {
+  INTERNAL_ERROR = 0,
+  INVALID_REQUEST = 1,
+  LOADSHEDDING = 2,
+  SHUTDOWN = 3,
+};
+
+
+
+
+enum class ResponseRpcErrorCode {
+  UNKNOWN = 0,
+  OVERLOAD = 1,
+  TASK_EXPIRED = 2,
+  QUEUE_OVERLOADED = 3,
+  SHUTDOWN = 4,
+  INJECTED_FAILURE = 5,
+  REQUEST_PARSING_FAILURE = 6,
+  QUEUE_TIMEOUT = 7,
+  RESPONSE_TOO_BIG = 8,
+  WRONG_RPC_KIND = 9,
+  UNKNOWN_METHOD = 10,
+  CHECKSUM_MISMATCH = 11,
+  INTERRUPTION = 12,
+  APP_OVERLOAD = 13,
 };
 
 
@@ -210,7 +375,7 @@ enum class RequestRpcMetadataFlags {
 
 enum class InterfaceKind {
   USER = 0,
-  DEBUGGING = 1
+  DEBUGGING = 1,
 };
 
 
@@ -238,6 +403,14 @@ template<> struct equal_to<typename ::apache::thrift::CompressionAlgorithm> : pu
 
 template<> struct hash<typename ::apache::thrift::RequestRpcMetadataFlags> : public apache::thrift::detail::enum_hash<typename ::apache::thrift::RequestRpcMetadataFlags> {};
 template<> struct equal_to<typename ::apache::thrift::RequestRpcMetadataFlags> : public apache::thrift::detail::enum_equal_to<typename ::apache::thrift::RequestRpcMetadataFlags> {};
+
+
+template<> struct hash<typename ::apache::thrift::ResponseRpcErrorCategory> : public apache::thrift::detail::enum_hash<typename ::apache::thrift::ResponseRpcErrorCategory> {};
+template<> struct equal_to<typename ::apache::thrift::ResponseRpcErrorCategory> : public apache::thrift::detail::enum_equal_to<typename ::apache::thrift::ResponseRpcErrorCategory> {};
+
+
+template<> struct hash<typename ::apache::thrift::ResponseRpcErrorCode> : public apache::thrift::detail::enum_hash<typename ::apache::thrift::ResponseRpcErrorCode> {};
+template<> struct equal_to<typename ::apache::thrift::ResponseRpcErrorCode> : public apache::thrift::detail::enum_equal_to<typename ::apache::thrift::ResponseRpcErrorCode> {};
 
 
 template<> struct hash<typename ::apache::thrift::InterfaceKind> : public apache::thrift::detail::enum_hash<typename ::apache::thrift::InterfaceKind> {};
@@ -334,6 +507,40 @@ template <> struct TEnumTraits<::apache::thrift::RequestRpcMetadataFlags> {
 };
 
 
+template <> struct TEnumDataStorage<::apache::thrift::ResponseRpcErrorCategory>;
+
+template <> struct TEnumTraits<::apache::thrift::ResponseRpcErrorCategory> {
+  using type = ::apache::thrift::ResponseRpcErrorCategory;
+
+  static constexpr std::size_t const size = 4;
+  static folly::Range<type const*> const values;
+  static folly::Range<folly::StringPiece const*> const names;
+
+  static char const* findName(type value);
+  static bool findValue(char const* name, type* out);
+
+  static constexpr type min() { return type::INTERNAL_ERROR; }
+  static constexpr type max() { return type::SHUTDOWN; }
+};
+
+
+template <> struct TEnumDataStorage<::apache::thrift::ResponseRpcErrorCode>;
+
+template <> struct TEnumTraits<::apache::thrift::ResponseRpcErrorCode> {
+  using type = ::apache::thrift::ResponseRpcErrorCode;
+
+  static constexpr std::size_t const size = 14;
+  static folly::Range<type const*> const values;
+  static folly::Range<folly::StringPiece const*> const names;
+
+  static char const* findName(type value);
+  static bool findValue(char const* name, type* out);
+
+  static constexpr type min() { return type::UNKNOWN; }
+  static constexpr type max() { return type::APP_OVERLOAD; }
+};
+
+
 template <> struct TEnumDataStorage<::apache::thrift::InterfaceKind>;
 
 template <> struct TEnumTraits<::apache::thrift::InterfaceKind> {
@@ -385,6 +592,18 @@ extern const _RequestRpcMetadataFlags_EnumMapFactory::ValuesToNamesMapType _Requ
 [[deprecated("use apache::thrift::TEnumTraits")]]
 extern const _RequestRpcMetadataFlags_EnumMapFactory::NamesToValuesMapType _RequestRpcMetadataFlags_NAMES_TO_VALUES;
 
+using _ResponseRpcErrorCategory_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<ResponseRpcErrorCategory>;
+[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
+extern const _ResponseRpcErrorCategory_EnumMapFactory::ValuesToNamesMapType _ResponseRpcErrorCategory_VALUES_TO_NAMES;
+[[deprecated("use apache::thrift::TEnumTraits")]]
+extern const _ResponseRpcErrorCategory_EnumMapFactory::NamesToValuesMapType _ResponseRpcErrorCategory_NAMES_TO_VALUES;
+
+using _ResponseRpcErrorCode_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<ResponseRpcErrorCode>;
+[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
+extern const _ResponseRpcErrorCode_EnumMapFactory::ValuesToNamesMapType _ResponseRpcErrorCode_VALUES_TO_NAMES;
+[[deprecated("use apache::thrift::TEnumTraits")]]
+extern const _ResponseRpcErrorCode_EnumMapFactory::NamesToValuesMapType _ResponseRpcErrorCode_NAMES_TO_VALUES;
+
 using _InterfaceKind_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<InterfaceKind>;
 [[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _InterfaceKind_EnumMapFactory::ValuesToNamesMapType _InterfaceKind_VALUES_TO_NAMES;
@@ -399,9 +618,24 @@ extern const _InterfaceKind_EnumMapFactory::NamesToValuesMapType _InterfaceKind_
 // END struct_indirection
 // BEGIN forward_declare
 namespace apache { namespace thrift {
+class ZlibCompressionCodecConfig;
+class ZstdCompressionCodecConfig;
+class CodecConfig;
+class CompressionConfig;
 class NegotiationParameters;
+class InteractionCreate;
 class RequestRpcMetadata;
+class PayloadResponseMetadata;
+class PayloadDeclaredExceptionMetadata;
+class PayloadProxyExceptionMetadata;
+class PayloadProxiedExceptionMetadata;
+class PayloadAppClientExceptionMetadata;
+class PayloadAppServerExceptionMetadata;
+class PayloadExceptionMetadata;
+class PayloadExceptionMetadataBase;
+class PayloadMetadata;
 class ResponseRpcMetadata;
+class ResponseRpcError;
 class StreamPayloadMetadata;
 class RequestSetupMetadata;
 class HeadersPayloadContent;
@@ -414,9 +648,530 @@ class HeadersPayloadMetadata;
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace apache { namespace thrift {
-class NegotiationParameters final : private apache::thrift::detail::st::ComparisonOperators<NegotiationParameters> {
+class ZlibCompressionCodecConfig final  {
  public:
+  using __fbthrift_cpp2_type = ZlibCompressionCodecConfig;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  ZlibCompressionCodecConfig() {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  ZlibCompressionCodecConfig(apache::thrift::FragileConstructor);
+
+  ZlibCompressionCodecConfig(ZlibCompressionCodecConfig&&) = default;
+
+  ZlibCompressionCodecConfig(const ZlibCompressionCodecConfig&) = default;
+
+  ZlibCompressionCodecConfig& operator=(ZlibCompressionCodecConfig&&) = default;
+
+  ZlibCompressionCodecConfig& operator=(const ZlibCompressionCodecConfig&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+  void __clear();
+  bool operator==(const ZlibCompressionCodecConfig& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const ZlibCompressionCodecConfig& __x, const ZlibCompressionCodecConfig& __y) {
+    return !(__x == __y);
+  }
+#endif
+  bool operator<(const ZlibCompressionCodecConfig& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const ZlibCompressionCodecConfig& __x, const ZlibCompressionCodecConfig& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const ZlibCompressionCodecConfig& __x, const ZlibCompressionCodecConfig& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const ZlibCompressionCodecConfig& __x, const ZlibCompressionCodecConfig& __y) {
+    return !(__x < __y);
+  }
+#endif
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< ZlibCompressionCodecConfig >;
+};
+
+void swap(ZlibCompressionCodecConfig& a, ZlibCompressionCodecConfig& b);
+
+template <class Protocol_>
+uint32_t ZlibCompressionCodecConfig::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+class ZstdCompressionCodecConfig final  {
+ public:
+  using __fbthrift_cpp2_type = ZstdCompressionCodecConfig;
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  ZstdCompressionCodecConfig() {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  ZstdCompressionCodecConfig(apache::thrift::FragileConstructor);
+
+  ZstdCompressionCodecConfig(ZstdCompressionCodecConfig&&) = default;
+
+  ZstdCompressionCodecConfig(const ZstdCompressionCodecConfig&) = default;
+
+  ZstdCompressionCodecConfig& operator=(ZstdCompressionCodecConfig&&) = default;
+
+  ZstdCompressionCodecConfig& operator=(const ZstdCompressionCodecConfig&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+  void __clear();
+  bool operator==(const ZstdCompressionCodecConfig& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const ZstdCompressionCodecConfig& __x, const ZstdCompressionCodecConfig& __y) {
+    return !(__x == __y);
+  }
+#endif
+  bool operator<(const ZstdCompressionCodecConfig& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const ZstdCompressionCodecConfig& __x, const ZstdCompressionCodecConfig& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const ZstdCompressionCodecConfig& __x, const ZstdCompressionCodecConfig& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const ZstdCompressionCodecConfig& __x, const ZstdCompressionCodecConfig& __y) {
+    return !(__x < __y);
+  }
+#endif
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< ZstdCompressionCodecConfig >;
+};
+
+void swap(ZstdCompressionCodecConfig& a, ZstdCompressionCodecConfig& b);
+
+template <class Protocol_>
+uint32_t ZstdCompressionCodecConfig::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+class CodecConfig final  {
+ public:
+  using __fbthrift_cpp2_type = CodecConfig;
+  enum Type : int {
+    __EMPTY__ = 0,
+    zlibConfig = 1,
+    zstdConfig = 2,
+  } ;
+
+  CodecConfig()
+      : type_(Type::__EMPTY__) {}
+
+  CodecConfig(CodecConfig&& rhs)
+      : type_(Type::__EMPTY__) {
+    if (this == &rhs) { return; }
+    if (rhs.type_ == Type::__EMPTY__) { return; }
+    switch (rhs.type_) {
+      case Type::zlibConfig:
+      {
+        set_zlibConfig(std::move(rhs.value_.zlibConfig));
+        break;
+      }
+      case Type::zstdConfig:
+      {
+        set_zstdConfig(std::move(rhs.value_.zstdConfig));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    rhs.__clear();
+  }
+
+  CodecConfig(const CodecConfig& rhs)
+      : type_(Type::__EMPTY__) {
+    if (this == &rhs) { return; }
+    if (rhs.type_ == Type::__EMPTY__) { return; }
+    switch (rhs.type_) {
+      case Type::zlibConfig:
+      {
+        set_zlibConfig(rhs.value_.zlibConfig);
+        break;
+      }
+      case Type::zstdConfig:
+      {
+        set_zstdConfig(rhs.value_.zstdConfig);
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+  }
+
+  CodecConfig& operator=(CodecConfig&& rhs) {
+    if (this == &rhs) { return *this; }
+    __clear();
+    if (rhs.type_ == Type::__EMPTY__) { return *this; }
+    switch (rhs.type_) {
+      case Type::zlibConfig:
+      {
+        set_zlibConfig(std::move(rhs.value_.zlibConfig));
+        break;
+      }
+      case Type::zstdConfig:
+      {
+        set_zstdConfig(std::move(rhs.value_.zstdConfig));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    rhs.__clear();
+    return *this;
+  }
+
+  CodecConfig& operator=(const CodecConfig& rhs) {
+    if (this == &rhs) { return *this; }
+    __clear();
+    if (rhs.type_ == Type::__EMPTY__) { return *this; }
+    switch (rhs.type_) {
+      case Type::zlibConfig:
+      {
+        set_zlibConfig(rhs.value_.zlibConfig);
+        break;
+      }
+      case Type::zstdConfig:
+      {
+        set_zstdConfig(rhs.value_.zstdConfig);
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    return *this;
+  }
+  void __clear();
+
+  ~CodecConfig() {
+    __clear();
+  }
+  union storage_type {
+     ::apache::thrift::ZlibCompressionCodecConfig zlibConfig;
+     ::apache::thrift::ZstdCompressionCodecConfig zstdConfig;
+
+    storage_type() {}
+    ~storage_type() {}
+  } ;
+  bool operator==(const CodecConfig& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const CodecConfig& __x, const CodecConfig& __y) {
+    return !(__x == __y);
+  }
+#endif
+  bool operator<(const CodecConfig& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const CodecConfig& __x, const CodecConfig& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const CodecConfig& __x, const CodecConfig& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const CodecConfig& __x, const CodecConfig& __y) {
+    return !(__x < __y);
+  }
+#endif
+
+   ::apache::thrift::ZlibCompressionCodecConfig& set_zlibConfig( ::apache::thrift::ZlibCompressionCodecConfig const &t) {
+    __clear();
+    type_ = Type::zlibConfig;
+    ::new (std::addressof(value_.zlibConfig))  ::apache::thrift::ZlibCompressionCodecConfig(t);
+    return value_.zlibConfig;
+  }
+
+   ::apache::thrift::ZlibCompressionCodecConfig& set_zlibConfig( ::apache::thrift::ZlibCompressionCodecConfig&& t) {
+    __clear();
+    type_ = Type::zlibConfig;
+    ::new (std::addressof(value_.zlibConfig))  ::apache::thrift::ZlibCompressionCodecConfig(std::move(t));
+    return value_.zlibConfig;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t< ::apache::thrift::ZlibCompressionCodecConfig, T...>>  ::apache::thrift::ZlibCompressionCodecConfig& set_zlibConfig(T&&... t) {
+    __clear();
+    type_ = Type::zlibConfig;
+    ::new (std::addressof(value_.zlibConfig))  ::apache::thrift::ZlibCompressionCodecConfig(std::forward<T>(t)...);
+    return value_.zlibConfig;
+  }
+
+   ::apache::thrift::ZstdCompressionCodecConfig& set_zstdConfig( ::apache::thrift::ZstdCompressionCodecConfig const &t) {
+    __clear();
+    type_ = Type::zstdConfig;
+    ::new (std::addressof(value_.zstdConfig))  ::apache::thrift::ZstdCompressionCodecConfig(t);
+    return value_.zstdConfig;
+  }
+
+   ::apache::thrift::ZstdCompressionCodecConfig& set_zstdConfig( ::apache::thrift::ZstdCompressionCodecConfig&& t) {
+    __clear();
+    type_ = Type::zstdConfig;
+    ::new (std::addressof(value_.zstdConfig))  ::apache::thrift::ZstdCompressionCodecConfig(std::move(t));
+    return value_.zstdConfig;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t< ::apache::thrift::ZstdCompressionCodecConfig, T...>>  ::apache::thrift::ZstdCompressionCodecConfig& set_zstdConfig(T&&... t) {
+    __clear();
+    type_ = Type::zstdConfig;
+    ::new (std::addressof(value_.zstdConfig))  ::apache::thrift::ZstdCompressionCodecConfig(std::forward<T>(t)...);
+    return value_.zstdConfig;
+  }
+
+   ::apache::thrift::ZlibCompressionCodecConfig const & get_zlibConfig() const {
+    assert(type_ == Type::zlibConfig);
+    return value_.zlibConfig;
+  }
+
+   ::apache::thrift::ZstdCompressionCodecConfig const & get_zstdConfig() const {
+    assert(type_ == Type::zstdConfig);
+    return value_.zstdConfig;
+  }
+
+   ::apache::thrift::ZlibCompressionCodecConfig & mutable_zlibConfig() {
+    assert(type_ == Type::zlibConfig);
+    return value_.zlibConfig;
+  }
+
+   ::apache::thrift::ZstdCompressionCodecConfig & mutable_zstdConfig() {
+    assert(type_ == Type::zstdConfig);
+    return value_.zstdConfig;
+  }
+
+   ::apache::thrift::ZlibCompressionCodecConfig move_zlibConfig() {
+    assert(type_ == Type::zlibConfig);
+    return std::move(value_.zlibConfig);
+  }
+
+   ::apache::thrift::ZstdCompressionCodecConfig move_zstdConfig() {
+    assert(type_ == Type::zstdConfig);
+    return std::move(value_.zstdConfig);
+  }
+
+  Type getType() const { return type_; }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+ protected:
+  template <class T>
+  void destruct(T &val) {
+    (&val)->~T();
+  }
+
+  Type type_;
+  storage_type value_;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< CodecConfig >;
+};
+
+void swap(CodecConfig& a, CodecConfig& b);
+
+template <class Protocol_>
+uint32_t CodecConfig::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+class CompressionConfig final  {
+ public:
+  using __fbthrift_cpp2_type = CompressionConfig;
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  CompressionConfig() :
+      compressionSizeLimit(0) {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  CompressionConfig(apache::thrift::FragileConstructor,  ::apache::thrift::CodecConfig codecConfig__arg, int64_t compressionSizeLimit__arg);
+
+  CompressionConfig(CompressionConfig&&) = default;
+
+  CompressionConfig(const CompressionConfig&) = default;
+
+  CompressionConfig& operator=(CompressionConfig&&) = default;
+
+  CompressionConfig& operator=(const CompressionConfig&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+  void __clear();
+ private:
+   ::apache::thrift::CodecConfig codecConfig;
+ private:
+  int64_t compressionSizeLimit;
+
+ public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
+  struct __isset {
+    bool codecConfig;
+    bool compressionSizeLimit;
+  } __isset = {};
+  bool operator==(const CompressionConfig& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const CompressionConfig& __x, const CompressionConfig& __y) {
+    return !(__x == __y);
+  }
+#endif
+  bool operator<(const CompressionConfig& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const CompressionConfig& __x, const CompressionConfig& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const CompressionConfig& __x, const CompressionConfig& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const CompressionConfig& __x, const CompressionConfig& __y) {
+    return !(__x < __y);
+  }
+#endif
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::CodecConfig&> codecConfig_ref() const& {
+    return {codecConfig, __isset.codecConfig};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::CodecConfig&&> codecConfig_ref() const&& {
+    return {std::move(codecConfig), __isset.codecConfig};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::CodecConfig&> codecConfig_ref() & {
+    return {codecConfig, __isset.codecConfig};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::CodecConfig&&> codecConfig_ref() && {
+    return {std::move(codecConfig), __isset.codecConfig};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const int64_t&> compressionSizeLimit_ref() const& {
+    return {compressionSizeLimit, __isset.compressionSizeLimit};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const int64_t&&> compressionSizeLimit_ref() const&& {
+    return {std::move(compressionSizeLimit), __isset.compressionSizeLimit};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<int64_t&> compressionSizeLimit_ref() & {
+    return {compressionSizeLimit, __isset.compressionSizeLimit};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<int64_t&&> compressionSizeLimit_ref() && {
+    return {std::move(compressionSizeLimit), __isset.compressionSizeLimit};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+  const  ::apache::thrift::CodecConfig* get_codecConfig() const&;
+   ::apache::thrift::CodecConfig* get_codecConfig() &;
+   ::apache::thrift::CodecConfig* get_codecConfig() && = delete;
+
+  template <typename T_CompressionConfig_codecConfig_struct_setter =  ::apache::thrift::CodecConfig>
+   ::apache::thrift::CodecConfig& set_codecConfig(T_CompressionConfig_codecConfig_struct_setter&& codecConfig_) {
+    codecConfig = std::forward<T_CompressionConfig_codecConfig_struct_setter>(codecConfig_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.codecConfig = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return codecConfig;
+  }
+
+  const int64_t* get_compressionSizeLimit() const& {
+    return compressionSizeLimit_ref() ? std::addressof(compressionSizeLimit) : nullptr;
+  }
+
+  int64_t* get_compressionSizeLimit() & {
+    return compressionSizeLimit_ref() ? std::addressof(compressionSizeLimit) : nullptr;
+  }
+  int64_t* get_compressionSizeLimit() && = delete;
+
+  int64_t& set_compressionSizeLimit(int64_t compressionSizeLimit_) {
+    compressionSizeLimit = compressionSizeLimit_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.compressionSizeLimit = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return compressionSizeLimit;
+  }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< CompressionConfig >;
+};
+
+void swap(CompressionConfig& a, CompressionConfig& b);
+
+template <class Protocol_>
+uint32_t CompressionConfig::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+class NegotiationParameters final  {
+ public:
+  using __fbthrift_cpp2_type = NegotiationParameters;
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   NegotiationParameters() :
       compressionAlgos(0) {}
   // FragileConstructor for use in initialization lists only.
@@ -430,17 +1185,36 @@ class NegotiationParameters final : private apache::thrift::detail::st::Comparis
   NegotiationParameters& operator=(NegotiationParameters&&) = default;
 
   NegotiationParameters& operator=(const NegotiationParameters&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   std::uint64_t compressionAlgos;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool compressionAlgos;
   } __isset = {};
   bool operator==(const NegotiationParameters& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const NegotiationParameters& __x, const NegotiationParameters& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const NegotiationParameters& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const NegotiationParameters& __x, const NegotiationParameters& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const NegotiationParameters& __x, const NegotiationParameters& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const NegotiationParameters& __x, const NegotiationParameters& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const std::uint64_t&> compressionAlgos_ref() const& {
     return {compressionAlgos, __isset.compressionAlgos};
   }
@@ -456,19 +1230,22 @@ class NegotiationParameters final : private apache::thrift::detail::st::Comparis
   FOLLY_ERASE ::apache::thrift::optional_field_ref<std::uint64_t&&> compressionAlgos_ref() && {
     return {std::move(compressionAlgos), __isset.compressionAlgos};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const std::uint64_t* get_compressionAlgos() const& {
-    return __isset.compressionAlgos ? std::addressof(compressionAlgos) : nullptr;
+    return compressionAlgos_ref() ? std::addressof(compressionAlgos) : nullptr;
   }
 
   std::uint64_t* get_compressionAlgos() & {
-    return __isset.compressionAlgos ? std::addressof(compressionAlgos) : nullptr;
+    return compressionAlgos_ref() ? std::addressof(compressionAlgos) : nullptr;
   }
   std::uint64_t* get_compressionAlgos() && = delete;
 
   std::uint64_t& set_compressionAlgos(std::uint64_t compressionAlgos_) {
     compressionAlgos = compressionAlgos_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.compressionAlgos = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return compressionAlgos;
   }
 
@@ -499,14 +1276,166 @@ uint32_t NegotiationParameters::read(Protocol_* iprot) {
 
 }} // apache::thrift
 namespace apache { namespace thrift {
-class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonOperators<RequestRpcMetadata> {
+class InteractionCreate final  {
  public:
+  using __fbthrift_cpp2_type = InteractionCreate;
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  InteractionCreate() :
+      interactionId(0) {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  InteractionCreate(apache::thrift::FragileConstructor, int64_t interactionId__arg, ::std::string interactionName__arg);
+
+  InteractionCreate(InteractionCreate&&) = default;
+
+  InteractionCreate(const InteractionCreate&) = default;
+
+  InteractionCreate& operator=(InteractionCreate&&) = default;
+
+  InteractionCreate& operator=(const InteractionCreate&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+  void __clear();
+ public:
+  int64_t interactionId;
+ public:
+  ::std::string interactionName;
+
+ public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
+  struct __isset {
+    bool interactionId;
+    bool interactionName;
+  } __isset = {};
+  bool operator==(const InteractionCreate& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const InteractionCreate& __x, const InteractionCreate& __y) {
+    return !(__x == __y);
+  }
+#endif
+  bool operator<(const InteractionCreate& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const InteractionCreate& __x, const InteractionCreate& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const InteractionCreate& __x, const InteractionCreate& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const InteractionCreate& __x, const InteractionCreate& __y) {
+    return !(__x < __y);
+  }
+#endif
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  template <typename..., typename T = int64_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> interactionId_ref() const& {
+    return {this->interactionId, __isset.interactionId};
+  }
+
+  template <typename..., typename T = int64_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> interactionId_ref() const&& {
+    return {std::move(this->interactionId), __isset.interactionId};
+  }
+
+  template <typename..., typename T = int64_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> interactionId_ref() & {
+    return {this->interactionId, __isset.interactionId};
+  }
+
+  template <typename..., typename T = int64_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> interactionId_ref() && {
+    return {std::move(this->interactionId), __isset.interactionId};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> interactionName_ref() const& {
+    return {this->interactionName, __isset.interactionName};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> interactionName_ref() const&& {
+    return {std::move(this->interactionName), __isset.interactionName};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> interactionName_ref() & {
+    return {this->interactionName, __isset.interactionName};
+  }
+
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> interactionName_ref() && {
+    return {std::move(this->interactionName), __isset.interactionName};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+  int64_t get_interactionId() const {
+    return interactionId;
+  }
+
+  int64_t& set_interactionId(int64_t interactionId_) {
+    interactionId = interactionId_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.interactionId = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return interactionId;
+  }
+
+  const ::std::string& get_interactionName() const& {
+    return interactionName;
+  }
+
+  ::std::string get_interactionName() && {
+    return std::move(interactionName);
+  }
+
+  template <typename T_InteractionCreate_interactionName_struct_setter = ::std::string>
+  ::std::string& set_interactionName(T_InteractionCreate_interactionName_struct_setter&& interactionName_) {
+    interactionName = std::forward<T_InteractionCreate_interactionName_struct_setter>(interactionName_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.interactionName = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return interactionName;
+  }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< InteractionCreate >;
+};
+
+void swap(InteractionCreate& a, InteractionCreate& b);
+
+template <class Protocol_>
+uint32_t InteractionCreate::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+class RequestRpcMetadata final  {
+ public:
+  using __fbthrift_cpp2_type = RequestRpcMetadata;
 
   RequestRpcMetadata();
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  RequestRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, ::std::string name__arg,  ::apache::thrift::RpcKind kind__arg, int32_t seqId__arg, int32_t clientTimeoutMs__arg, int32_t queueTimeoutMs__arg,  ::apache::thrift::RpcPriority priority__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, ::std::string host__arg, ::std::string url__arg, std::uint32_t crc32c__arg, std::uint64_t flags__arg, ::std::string loadMetric__arg,  ::apache::thrift::CompressionAlgorithm compression__arg);
+  RequestRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, ::std::string name__arg,  ::apache::thrift::RpcKind kind__arg, int32_t seqId__arg, int32_t clientTimeoutMs__arg, int32_t queueTimeoutMs__arg,  ::apache::thrift::RpcPriority priority__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, ::std::string host__arg, ::std::string url__arg, std::uint32_t crc32c__arg, std::uint64_t flags__arg, ::std::string loadMetric__arg,  ::apache::thrift::CompressionAlgorithm compression__arg,  ::apache::thrift::CompressionConfig compressionConfig__arg, int64_t interactionId__arg,  ::apache::thrift::InteractionCreate interactionCreate__arg);
 
   RequestRpcMetadata(RequestRpcMetadata&&) = default;
 
@@ -515,6 +1444,7 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
   RequestRpcMetadata& operator=(RequestRpcMetadata&&) = default;
 
   RequestRpcMetadata& operator=(const RequestRpcMetadata&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   ~RequestRpcMetadata();
@@ -547,8 +1477,15 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
   ::std::string loadMetric;
  private:
    ::apache::thrift::CompressionAlgorithm compression;
+ private:
+   ::apache::thrift::CompressionConfig compressionConfig;
+ private:
+  int64_t interactionId;
+ private:
+   ::apache::thrift::InteractionCreate interactionCreate;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool protocol;
     bool name;
@@ -564,10 +1501,30 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
     bool flags;
     bool loadMetric;
     bool compression;
+    bool compressionConfig;
+    bool interactionId;
+    bool interactionCreate;
   } __isset = {};
   bool operator==(const RequestRpcMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const RequestRpcMetadata& __x, const RequestRpcMetadata& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const RequestRpcMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const RequestRpcMetadata& __x, const RequestRpcMetadata& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const RequestRpcMetadata& __x, const RequestRpcMetadata& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const RequestRpcMetadata& __x, const RequestRpcMetadata& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::ProtocolId&> protocol_ref() const& {
     return {protocol, __isset.protocol};
   }
@@ -583,7 +1540,9 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
   FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::ProtocolId&&> protocol_ref() && {
     return {std::move(protocol), __isset.protocol};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::string&> name_ref() const& {
     return {name, __isset.name};
   }
@@ -599,7 +1558,9 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
   FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::string&&> name_ref() && {
     return {std::move(name), __isset.name};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::RpcKind&> kind_ref() const& {
     return {kind, __isset.kind};
   }
@@ -615,7 +1576,9 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
   FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::RpcKind&&> kind_ref() && {
     return {std::move(kind), __isset.kind};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const int32_t&> seqId_ref() const& {
     return {seqId, __isset.seqId};
   }
@@ -631,7 +1594,9 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
   FOLLY_ERASE ::apache::thrift::optional_field_ref<int32_t&&> seqId_ref() && {
     return {std::move(seqId), __isset.seqId};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const int32_t&> clientTimeoutMs_ref() const& {
     return {clientTimeoutMs, __isset.clientTimeoutMs};
   }
@@ -647,7 +1612,9 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
   FOLLY_ERASE ::apache::thrift::optional_field_ref<int32_t&&> clientTimeoutMs_ref() && {
     return {std::move(clientTimeoutMs), __isset.clientTimeoutMs};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const int32_t&> queueTimeoutMs_ref() const& {
     return {queueTimeoutMs, __isset.queueTimeoutMs};
   }
@@ -663,7 +1630,9 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
   FOLLY_ERASE ::apache::thrift::optional_field_ref<int32_t&&> queueTimeoutMs_ref() && {
     return {std::move(queueTimeoutMs), __isset.queueTimeoutMs};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::RpcPriority&> priority_ref() const& {
     return {priority, __isset.priority};
   }
@@ -679,7 +1648,9 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
   FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::RpcPriority&&> priority_ref() && {
     return {std::move(priority), __isset.priority};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::map<::std::string, ::std::string>&> otherMetadata_ref() const& {
     return {otherMetadata, __isset.otherMetadata};
   }
@@ -695,7 +1666,9 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
   FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::map<::std::string, ::std::string>&&> otherMetadata_ref() && {
     return {std::move(otherMetadata), __isset.otherMetadata};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::string&> host_ref() const& {
     return {host, __isset.host};
   }
@@ -711,7 +1684,9 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
   FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::string&&> host_ref() && {
     return {std::move(host), __isset.host};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::string&> url_ref() const& {
     return {url, __isset.url};
   }
@@ -727,7 +1702,9 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
   FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::string&&> url_ref() && {
     return {std::move(url), __isset.url};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const std::uint32_t&> crc32c_ref() const& {
     return {crc32c, __isset.crc32c};
   }
@@ -743,7 +1720,9 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
   FOLLY_ERASE ::apache::thrift::optional_field_ref<std::uint32_t&&> crc32c_ref() && {
     return {std::move(crc32c), __isset.crc32c};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const std::uint64_t&> flags_ref() const& {
     return {flags, __isset.flags};
   }
@@ -759,7 +1738,9 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
   FOLLY_ERASE ::apache::thrift::optional_field_ref<std::uint64_t&&> flags_ref() && {
     return {std::move(flags), __isset.flags};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::string&> loadMetric_ref() const& {
     return {loadMetric, __isset.loadMetric};
   }
@@ -775,7 +1756,9 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
   FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::string&&> loadMetric_ref() && {
     return {std::move(loadMetric), __isset.loadMetric};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::CompressionAlgorithm&> compression_ref() const& {
     return {compression, __isset.compression};
   }
@@ -791,110 +1774,179 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
   FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::CompressionAlgorithm&&> compression_ref() && {
     return {std::move(compression), __isset.compression};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::CompressionConfig&> compressionConfig_ref() const& {
+    return {compressionConfig, __isset.compressionConfig};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::CompressionConfig&&> compressionConfig_ref() const&& {
+    return {std::move(compressionConfig), __isset.compressionConfig};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::CompressionConfig&> compressionConfig_ref() & {
+    return {compressionConfig, __isset.compressionConfig};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::CompressionConfig&&> compressionConfig_ref() && {
+    return {std::move(compressionConfig), __isset.compressionConfig};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const int64_t&> interactionId_ref() const& {
+    return {interactionId, __isset.interactionId};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const int64_t&&> interactionId_ref() const&& {
+    return {std::move(interactionId), __isset.interactionId};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<int64_t&> interactionId_ref() & {
+    return {interactionId, __isset.interactionId};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<int64_t&&> interactionId_ref() && {
+    return {std::move(interactionId), __isset.interactionId};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::InteractionCreate&> interactionCreate_ref() const& {
+    return {interactionCreate, __isset.interactionCreate};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::InteractionCreate&&> interactionCreate_ref() const&& {
+    return {std::move(interactionCreate), __isset.interactionCreate};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::InteractionCreate&> interactionCreate_ref() & {
+    return {interactionCreate, __isset.interactionCreate};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::InteractionCreate&&> interactionCreate_ref() && {
+    return {std::move(interactionCreate), __isset.interactionCreate};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const  ::apache::thrift::ProtocolId* get_protocol() const& {
-    return __isset.protocol ? std::addressof(protocol) : nullptr;
+    return protocol_ref() ? std::addressof(protocol) : nullptr;
   }
 
    ::apache::thrift::ProtocolId* get_protocol() & {
-    return __isset.protocol ? std::addressof(protocol) : nullptr;
+    return protocol_ref() ? std::addressof(protocol) : nullptr;
   }
    ::apache::thrift::ProtocolId* get_protocol() && = delete;
 
    ::apache::thrift::ProtocolId& set_protocol( ::apache::thrift::ProtocolId protocol_) {
     protocol = protocol_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.protocol = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return protocol;
   }
 
   const ::std::string* get_name() const& {
-    return __isset.name ? std::addressof(name) : nullptr;
+    return name_ref() ? std::addressof(name) : nullptr;
   }
 
   ::std::string* get_name() & {
-    return __isset.name ? std::addressof(name) : nullptr;
+    return name_ref() ? std::addressof(name) : nullptr;
   }
   ::std::string* get_name() && = delete;
 
   template <typename T_RequestRpcMetadata_name_struct_setter = ::std::string>
   ::std::string& set_name(T_RequestRpcMetadata_name_struct_setter&& name_) {
     name = std::forward<T_RequestRpcMetadata_name_struct_setter>(name_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.name = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return name;
   }
 
   const  ::apache::thrift::RpcKind* get_kind() const& {
-    return __isset.kind ? std::addressof(kind) : nullptr;
+    return kind_ref() ? std::addressof(kind) : nullptr;
   }
 
    ::apache::thrift::RpcKind* get_kind() & {
-    return __isset.kind ? std::addressof(kind) : nullptr;
+    return kind_ref() ? std::addressof(kind) : nullptr;
   }
    ::apache::thrift::RpcKind* get_kind() && = delete;
 
    ::apache::thrift::RpcKind& set_kind( ::apache::thrift::RpcKind kind_) {
     kind = kind_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.kind = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return kind;
   }
 
   const int32_t* get_seqId() const& {
-    return __isset.seqId ? std::addressof(seqId) : nullptr;
+    return seqId_ref() ? std::addressof(seqId) : nullptr;
   }
 
   int32_t* get_seqId() & {
-    return __isset.seqId ? std::addressof(seqId) : nullptr;
+    return seqId_ref() ? std::addressof(seqId) : nullptr;
   }
   int32_t* get_seqId() && = delete;
 
   int32_t& set_seqId(int32_t seqId_) {
     seqId = seqId_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.seqId = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return seqId;
   }
 
   const int32_t* get_clientTimeoutMs() const& {
-    return __isset.clientTimeoutMs ? std::addressof(clientTimeoutMs) : nullptr;
+    return clientTimeoutMs_ref() ? std::addressof(clientTimeoutMs) : nullptr;
   }
 
   int32_t* get_clientTimeoutMs() & {
-    return __isset.clientTimeoutMs ? std::addressof(clientTimeoutMs) : nullptr;
+    return clientTimeoutMs_ref() ? std::addressof(clientTimeoutMs) : nullptr;
   }
   int32_t* get_clientTimeoutMs() && = delete;
 
   int32_t& set_clientTimeoutMs(int32_t clientTimeoutMs_) {
     clientTimeoutMs = clientTimeoutMs_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.clientTimeoutMs = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return clientTimeoutMs;
   }
 
   const int32_t* get_queueTimeoutMs() const& {
-    return __isset.queueTimeoutMs ? std::addressof(queueTimeoutMs) : nullptr;
+    return queueTimeoutMs_ref() ? std::addressof(queueTimeoutMs) : nullptr;
   }
 
   int32_t* get_queueTimeoutMs() & {
-    return __isset.queueTimeoutMs ? std::addressof(queueTimeoutMs) : nullptr;
+    return queueTimeoutMs_ref() ? std::addressof(queueTimeoutMs) : nullptr;
   }
   int32_t* get_queueTimeoutMs() && = delete;
 
   int32_t& set_queueTimeoutMs(int32_t queueTimeoutMs_) {
     queueTimeoutMs = queueTimeoutMs_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.queueTimeoutMs = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return queueTimeoutMs;
   }
 
   const  ::apache::thrift::RpcPriority* get_priority() const& {
-    return __isset.priority ? std::addressof(priority) : nullptr;
+    return priority_ref() ? std::addressof(priority) : nullptr;
   }
 
    ::apache::thrift::RpcPriority* get_priority() & {
-    return __isset.priority ? std::addressof(priority) : nullptr;
+    return priority_ref() ? std::addressof(priority) : nullptr;
   }
    ::apache::thrift::RpcPriority* get_priority() && = delete;
 
    ::apache::thrift::RpcPriority& set_priority( ::apache::thrift::RpcPriority priority_) {
     priority = priority_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.priority = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return priority;
   }
   const ::std::map<::std::string, ::std::string>* get_otherMetadata() const&;
@@ -904,101 +1956,156 @@ class RequestRpcMetadata final : private apache::thrift::detail::st::ComparisonO
   template <typename T_RequestRpcMetadata_otherMetadata_struct_setter = ::std::map<::std::string, ::std::string>>
   ::std::map<::std::string, ::std::string>& set_otherMetadata(T_RequestRpcMetadata_otherMetadata_struct_setter&& otherMetadata_) {
     otherMetadata = std::forward<T_RequestRpcMetadata_otherMetadata_struct_setter>(otherMetadata_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.otherMetadata = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return otherMetadata;
   }
 
   const ::std::string* get_host() const& {
-    return __isset.host ? std::addressof(host) : nullptr;
+    return host_ref() ? std::addressof(host) : nullptr;
   }
 
   ::std::string* get_host() & {
-    return __isset.host ? std::addressof(host) : nullptr;
+    return host_ref() ? std::addressof(host) : nullptr;
   }
   ::std::string* get_host() && = delete;
 
   template <typename T_RequestRpcMetadata_host_struct_setter = ::std::string>
   ::std::string& set_host(T_RequestRpcMetadata_host_struct_setter&& host_) {
     host = std::forward<T_RequestRpcMetadata_host_struct_setter>(host_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.host = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return host;
   }
 
   const ::std::string* get_url() const& {
-    return __isset.url ? std::addressof(url) : nullptr;
+    return url_ref() ? std::addressof(url) : nullptr;
   }
 
   ::std::string* get_url() & {
-    return __isset.url ? std::addressof(url) : nullptr;
+    return url_ref() ? std::addressof(url) : nullptr;
   }
   ::std::string* get_url() && = delete;
 
   template <typename T_RequestRpcMetadata_url_struct_setter = ::std::string>
   ::std::string& set_url(T_RequestRpcMetadata_url_struct_setter&& url_) {
     url = std::forward<T_RequestRpcMetadata_url_struct_setter>(url_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.url = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return url;
   }
 
   const std::uint32_t* get_crc32c() const& {
-    return __isset.crc32c ? std::addressof(crc32c) : nullptr;
+    return crc32c_ref() ? std::addressof(crc32c) : nullptr;
   }
 
   std::uint32_t* get_crc32c() & {
-    return __isset.crc32c ? std::addressof(crc32c) : nullptr;
+    return crc32c_ref() ? std::addressof(crc32c) : nullptr;
   }
   std::uint32_t* get_crc32c() && = delete;
 
   std::uint32_t& set_crc32c(std::uint32_t crc32c_) {
     crc32c = crc32c_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.crc32c = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return crc32c;
   }
 
   const std::uint64_t* get_flags() const& {
-    return __isset.flags ? std::addressof(flags) : nullptr;
+    return flags_ref() ? std::addressof(flags) : nullptr;
   }
 
   std::uint64_t* get_flags() & {
-    return __isset.flags ? std::addressof(flags) : nullptr;
+    return flags_ref() ? std::addressof(flags) : nullptr;
   }
   std::uint64_t* get_flags() && = delete;
 
   std::uint64_t& set_flags(std::uint64_t flags_) {
     flags = flags_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.flags = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return flags;
   }
 
   const ::std::string* get_loadMetric() const& {
-    return __isset.loadMetric ? std::addressof(loadMetric) : nullptr;
+    return loadMetric_ref() ? std::addressof(loadMetric) : nullptr;
   }
 
   ::std::string* get_loadMetric() & {
-    return __isset.loadMetric ? std::addressof(loadMetric) : nullptr;
+    return loadMetric_ref() ? std::addressof(loadMetric) : nullptr;
   }
   ::std::string* get_loadMetric() && = delete;
 
   template <typename T_RequestRpcMetadata_loadMetric_struct_setter = ::std::string>
   ::std::string& set_loadMetric(T_RequestRpcMetadata_loadMetric_struct_setter&& loadMetric_) {
     loadMetric = std::forward<T_RequestRpcMetadata_loadMetric_struct_setter>(loadMetric_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.loadMetric = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return loadMetric;
   }
 
   const  ::apache::thrift::CompressionAlgorithm* get_compression() const& {
-    return __isset.compression ? std::addressof(compression) : nullptr;
+    return compression_ref() ? std::addressof(compression) : nullptr;
   }
 
    ::apache::thrift::CompressionAlgorithm* get_compression() & {
-    return __isset.compression ? std::addressof(compression) : nullptr;
+    return compression_ref() ? std::addressof(compression) : nullptr;
   }
    ::apache::thrift::CompressionAlgorithm* get_compression() && = delete;
 
    ::apache::thrift::CompressionAlgorithm& set_compression( ::apache::thrift::CompressionAlgorithm compression_) {
     compression = compression_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.compression = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return compression;
+  }
+  const  ::apache::thrift::CompressionConfig* get_compressionConfig() const&;
+   ::apache::thrift::CompressionConfig* get_compressionConfig() &;
+   ::apache::thrift::CompressionConfig* get_compressionConfig() && = delete;
+
+  template <typename T_RequestRpcMetadata_compressionConfig_struct_setter =  ::apache::thrift::CompressionConfig>
+   ::apache::thrift::CompressionConfig& set_compressionConfig(T_RequestRpcMetadata_compressionConfig_struct_setter&& compressionConfig_) {
+    compressionConfig = std::forward<T_RequestRpcMetadata_compressionConfig_struct_setter>(compressionConfig_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.compressionConfig = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return compressionConfig;
+  }
+
+  const int64_t* get_interactionId() const& {
+    return interactionId_ref() ? std::addressof(interactionId) : nullptr;
+  }
+
+  int64_t* get_interactionId() & {
+    return interactionId_ref() ? std::addressof(interactionId) : nullptr;
+  }
+  int64_t* get_interactionId() && = delete;
+
+  int64_t& set_interactionId(int64_t interactionId_) {
+    interactionId = interactionId_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.interactionId = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return interactionId;
+  }
+  const  ::apache::thrift::InteractionCreate* get_interactionCreate() const&;
+   ::apache::thrift::InteractionCreate* get_interactionCreate() &;
+   ::apache::thrift::InteractionCreate* get_interactionCreate() && = delete;
+
+  template <typename T_RequestRpcMetadata_interactionCreate_struct_setter =  ::apache::thrift::InteractionCreate>
+   ::apache::thrift::InteractionCreate& set_interactionCreate(T_RequestRpcMetadata_interactionCreate_struct_setter&& interactionCreate_) {
+    interactionCreate = std::forward<T_RequestRpcMetadata_interactionCreate_struct_setter>(interactionCreate_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.interactionCreate = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return interactionCreate;
   }
 
   template <class Protocol_>
@@ -1028,14 +2135,1255 @@ uint32_t RequestRpcMetadata::read(Protocol_* iprot) {
 
 }} // apache::thrift
 namespace apache { namespace thrift {
-class ResponseRpcMetadata final : private apache::thrift::detail::st::ComparisonOperators<ResponseRpcMetadata> {
+class PayloadResponseMetadata final  {
  public:
+  using __fbthrift_cpp2_type = PayloadResponseMetadata;
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  PayloadResponseMetadata() {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  PayloadResponseMetadata(apache::thrift::FragileConstructor);
+
+  PayloadResponseMetadata(PayloadResponseMetadata&&) = default;
+
+  PayloadResponseMetadata(const PayloadResponseMetadata&) = default;
+
+  PayloadResponseMetadata& operator=(PayloadResponseMetadata&&) = default;
+
+  PayloadResponseMetadata& operator=(const PayloadResponseMetadata&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+  void __clear();
+  bool operator==(const PayloadResponseMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const PayloadResponseMetadata& __x, const PayloadResponseMetadata& __y) {
+    return !(__x == __y);
+  }
+#endif
+  bool operator<(const PayloadResponseMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const PayloadResponseMetadata& __x, const PayloadResponseMetadata& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const PayloadResponseMetadata& __x, const PayloadResponseMetadata& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const PayloadResponseMetadata& __x, const PayloadResponseMetadata& __y) {
+    return !(__x < __y);
+  }
+#endif
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< PayloadResponseMetadata >;
+};
+
+void swap(PayloadResponseMetadata& a, PayloadResponseMetadata& b);
+
+template <class Protocol_>
+uint32_t PayloadResponseMetadata::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+class PayloadDeclaredExceptionMetadata final  {
+ public:
+  using __fbthrift_cpp2_type = PayloadDeclaredExceptionMetadata;
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  PayloadDeclaredExceptionMetadata() {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  PayloadDeclaredExceptionMetadata(apache::thrift::FragileConstructor);
+
+  PayloadDeclaredExceptionMetadata(PayloadDeclaredExceptionMetadata&&) = default;
+
+  PayloadDeclaredExceptionMetadata(const PayloadDeclaredExceptionMetadata&) = default;
+
+  PayloadDeclaredExceptionMetadata& operator=(PayloadDeclaredExceptionMetadata&&) = default;
+
+  PayloadDeclaredExceptionMetadata& operator=(const PayloadDeclaredExceptionMetadata&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+  void __clear();
+  bool operator==(const PayloadDeclaredExceptionMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const PayloadDeclaredExceptionMetadata& __x, const PayloadDeclaredExceptionMetadata& __y) {
+    return !(__x == __y);
+  }
+#endif
+  bool operator<(const PayloadDeclaredExceptionMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const PayloadDeclaredExceptionMetadata& __x, const PayloadDeclaredExceptionMetadata& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const PayloadDeclaredExceptionMetadata& __x, const PayloadDeclaredExceptionMetadata& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const PayloadDeclaredExceptionMetadata& __x, const PayloadDeclaredExceptionMetadata& __y) {
+    return !(__x < __y);
+  }
+#endif
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< PayloadDeclaredExceptionMetadata >;
+};
+
+void swap(PayloadDeclaredExceptionMetadata& a, PayloadDeclaredExceptionMetadata& b);
+
+template <class Protocol_>
+uint32_t PayloadDeclaredExceptionMetadata::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+class PayloadProxyExceptionMetadata final  {
+ public:
+  using __fbthrift_cpp2_type = PayloadProxyExceptionMetadata;
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  PayloadProxyExceptionMetadata() {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  PayloadProxyExceptionMetadata(apache::thrift::FragileConstructor);
+
+  PayloadProxyExceptionMetadata(PayloadProxyExceptionMetadata&&) = default;
+
+  PayloadProxyExceptionMetadata(const PayloadProxyExceptionMetadata&) = default;
+
+  PayloadProxyExceptionMetadata& operator=(PayloadProxyExceptionMetadata&&) = default;
+
+  PayloadProxyExceptionMetadata& operator=(const PayloadProxyExceptionMetadata&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+  void __clear();
+  bool operator==(const PayloadProxyExceptionMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const PayloadProxyExceptionMetadata& __x, const PayloadProxyExceptionMetadata& __y) {
+    return !(__x == __y);
+  }
+#endif
+  bool operator<(const PayloadProxyExceptionMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const PayloadProxyExceptionMetadata& __x, const PayloadProxyExceptionMetadata& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const PayloadProxyExceptionMetadata& __x, const PayloadProxyExceptionMetadata& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const PayloadProxyExceptionMetadata& __x, const PayloadProxyExceptionMetadata& __y) {
+    return !(__x < __y);
+  }
+#endif
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< PayloadProxyExceptionMetadata >;
+};
+
+void swap(PayloadProxyExceptionMetadata& a, PayloadProxyExceptionMetadata& b);
+
+template <class Protocol_>
+uint32_t PayloadProxyExceptionMetadata::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+class PayloadProxiedExceptionMetadata final  {
+ public:
+  using __fbthrift_cpp2_type = PayloadProxiedExceptionMetadata;
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  PayloadProxiedExceptionMetadata() {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  PayloadProxiedExceptionMetadata(apache::thrift::FragileConstructor);
+
+  PayloadProxiedExceptionMetadata(PayloadProxiedExceptionMetadata&&) = default;
+
+  PayloadProxiedExceptionMetadata(const PayloadProxiedExceptionMetadata&) = default;
+
+  PayloadProxiedExceptionMetadata& operator=(PayloadProxiedExceptionMetadata&&) = default;
+
+  PayloadProxiedExceptionMetadata& operator=(const PayloadProxiedExceptionMetadata&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+  void __clear();
+  bool operator==(const PayloadProxiedExceptionMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const PayloadProxiedExceptionMetadata& __x, const PayloadProxiedExceptionMetadata& __y) {
+    return !(__x == __y);
+  }
+#endif
+  bool operator<(const PayloadProxiedExceptionMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const PayloadProxiedExceptionMetadata& __x, const PayloadProxiedExceptionMetadata& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const PayloadProxiedExceptionMetadata& __x, const PayloadProxiedExceptionMetadata& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const PayloadProxiedExceptionMetadata& __x, const PayloadProxiedExceptionMetadata& __y) {
+    return !(__x < __y);
+  }
+#endif
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< PayloadProxiedExceptionMetadata >;
+};
+
+void swap(PayloadProxiedExceptionMetadata& a, PayloadProxiedExceptionMetadata& b);
+
+template <class Protocol_>
+uint32_t PayloadProxiedExceptionMetadata::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+class PayloadAppClientExceptionMetadata final  {
+ public:
+  using __fbthrift_cpp2_type = PayloadAppClientExceptionMetadata;
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  PayloadAppClientExceptionMetadata() {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  PayloadAppClientExceptionMetadata(apache::thrift::FragileConstructor);
+
+  PayloadAppClientExceptionMetadata(PayloadAppClientExceptionMetadata&&) = default;
+
+  PayloadAppClientExceptionMetadata(const PayloadAppClientExceptionMetadata&) = default;
+
+  PayloadAppClientExceptionMetadata& operator=(PayloadAppClientExceptionMetadata&&) = default;
+
+  PayloadAppClientExceptionMetadata& operator=(const PayloadAppClientExceptionMetadata&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+  void __clear();
+  bool operator==(const PayloadAppClientExceptionMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const PayloadAppClientExceptionMetadata& __x, const PayloadAppClientExceptionMetadata& __y) {
+    return !(__x == __y);
+  }
+#endif
+  bool operator<(const PayloadAppClientExceptionMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const PayloadAppClientExceptionMetadata& __x, const PayloadAppClientExceptionMetadata& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const PayloadAppClientExceptionMetadata& __x, const PayloadAppClientExceptionMetadata& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const PayloadAppClientExceptionMetadata& __x, const PayloadAppClientExceptionMetadata& __y) {
+    return !(__x < __y);
+  }
+#endif
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< PayloadAppClientExceptionMetadata >;
+};
+
+void swap(PayloadAppClientExceptionMetadata& a, PayloadAppClientExceptionMetadata& b);
+
+template <class Protocol_>
+uint32_t PayloadAppClientExceptionMetadata::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+class PayloadAppServerExceptionMetadata final  {
+ public:
+  using __fbthrift_cpp2_type = PayloadAppServerExceptionMetadata;
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  PayloadAppServerExceptionMetadata() {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  PayloadAppServerExceptionMetadata(apache::thrift::FragileConstructor);
+
+  PayloadAppServerExceptionMetadata(PayloadAppServerExceptionMetadata&&) = default;
+
+  PayloadAppServerExceptionMetadata(const PayloadAppServerExceptionMetadata&) = default;
+
+  PayloadAppServerExceptionMetadata& operator=(PayloadAppServerExceptionMetadata&&) = default;
+
+  PayloadAppServerExceptionMetadata& operator=(const PayloadAppServerExceptionMetadata&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+  void __clear();
+  bool operator==(const PayloadAppServerExceptionMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const PayloadAppServerExceptionMetadata& __x, const PayloadAppServerExceptionMetadata& __y) {
+    return !(__x == __y);
+  }
+#endif
+  bool operator<(const PayloadAppServerExceptionMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const PayloadAppServerExceptionMetadata& __x, const PayloadAppServerExceptionMetadata& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const PayloadAppServerExceptionMetadata& __x, const PayloadAppServerExceptionMetadata& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const PayloadAppServerExceptionMetadata& __x, const PayloadAppServerExceptionMetadata& __y) {
+    return !(__x < __y);
+  }
+#endif
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< PayloadAppServerExceptionMetadata >;
+};
+
+void swap(PayloadAppServerExceptionMetadata& a, PayloadAppServerExceptionMetadata& b);
+
+template <class Protocol_>
+uint32_t PayloadAppServerExceptionMetadata::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+class PayloadExceptionMetadata final  {
+ public:
+  using __fbthrift_cpp2_type = PayloadExceptionMetadata;
+  enum Type : int {
+    __EMPTY__ = 0,
+    declaredException = 1,
+    proxyException = 2,
+    proxiedException = 3,
+    appClientException = 4,
+    appServerException = 5,
+  } ;
+
+  PayloadExceptionMetadata()
+      : type_(Type::__EMPTY__) {}
+
+  PayloadExceptionMetadata(PayloadExceptionMetadata&& rhs)
+      : type_(Type::__EMPTY__) {
+    if (this == &rhs) { return; }
+    if (rhs.type_ == Type::__EMPTY__) { return; }
+    switch (rhs.type_) {
+      case Type::declaredException:
+      {
+        set_declaredException(std::move(rhs.value_.declaredException));
+        break;
+      }
+      case Type::proxyException:
+      {
+        set_proxyException(std::move(rhs.value_.proxyException));
+        break;
+      }
+      case Type::proxiedException:
+      {
+        set_proxiedException(std::move(rhs.value_.proxiedException));
+        break;
+      }
+      case Type::appClientException:
+      {
+        set_appClientException(std::move(rhs.value_.appClientException));
+        break;
+      }
+      case Type::appServerException:
+      {
+        set_appServerException(std::move(rhs.value_.appServerException));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    rhs.__clear();
+  }
+
+  PayloadExceptionMetadata(const PayloadExceptionMetadata& rhs)
+      : type_(Type::__EMPTY__) {
+    if (this == &rhs) { return; }
+    if (rhs.type_ == Type::__EMPTY__) { return; }
+    switch (rhs.type_) {
+      case Type::declaredException:
+      {
+        set_declaredException(rhs.value_.declaredException);
+        break;
+      }
+      case Type::proxyException:
+      {
+        set_proxyException(rhs.value_.proxyException);
+        break;
+      }
+      case Type::proxiedException:
+      {
+        set_proxiedException(rhs.value_.proxiedException);
+        break;
+      }
+      case Type::appClientException:
+      {
+        set_appClientException(rhs.value_.appClientException);
+        break;
+      }
+      case Type::appServerException:
+      {
+        set_appServerException(rhs.value_.appServerException);
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+  }
+
+  PayloadExceptionMetadata& operator=(PayloadExceptionMetadata&& rhs) {
+    if (this == &rhs) { return *this; }
+    __clear();
+    if (rhs.type_ == Type::__EMPTY__) { return *this; }
+    switch (rhs.type_) {
+      case Type::declaredException:
+      {
+        set_declaredException(std::move(rhs.value_.declaredException));
+        break;
+      }
+      case Type::proxyException:
+      {
+        set_proxyException(std::move(rhs.value_.proxyException));
+        break;
+      }
+      case Type::proxiedException:
+      {
+        set_proxiedException(std::move(rhs.value_.proxiedException));
+        break;
+      }
+      case Type::appClientException:
+      {
+        set_appClientException(std::move(rhs.value_.appClientException));
+        break;
+      }
+      case Type::appServerException:
+      {
+        set_appServerException(std::move(rhs.value_.appServerException));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    rhs.__clear();
+    return *this;
+  }
+
+  PayloadExceptionMetadata& operator=(const PayloadExceptionMetadata& rhs) {
+    if (this == &rhs) { return *this; }
+    __clear();
+    if (rhs.type_ == Type::__EMPTY__) { return *this; }
+    switch (rhs.type_) {
+      case Type::declaredException:
+      {
+        set_declaredException(rhs.value_.declaredException);
+        break;
+      }
+      case Type::proxyException:
+      {
+        set_proxyException(rhs.value_.proxyException);
+        break;
+      }
+      case Type::proxiedException:
+      {
+        set_proxiedException(rhs.value_.proxiedException);
+        break;
+      }
+      case Type::appClientException:
+      {
+        set_appClientException(rhs.value_.appClientException);
+        break;
+      }
+      case Type::appServerException:
+      {
+        set_appServerException(rhs.value_.appServerException);
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    return *this;
+  }
+  void __clear();
+
+  ~PayloadExceptionMetadata() {
+    __clear();
+  }
+  union storage_type {
+     ::apache::thrift::PayloadDeclaredExceptionMetadata declaredException;
+     ::apache::thrift::PayloadProxyExceptionMetadata proxyException;
+     ::apache::thrift::PayloadProxiedExceptionMetadata proxiedException;
+     ::apache::thrift::PayloadAppClientExceptionMetadata appClientException;
+     ::apache::thrift::PayloadAppServerExceptionMetadata appServerException;
+
+    storage_type() {}
+    ~storage_type() {}
+  } ;
+  bool operator==(const PayloadExceptionMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const PayloadExceptionMetadata& __x, const PayloadExceptionMetadata& __y) {
+    return !(__x == __y);
+  }
+#endif
+  bool operator<(const PayloadExceptionMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const PayloadExceptionMetadata& __x, const PayloadExceptionMetadata& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const PayloadExceptionMetadata& __x, const PayloadExceptionMetadata& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const PayloadExceptionMetadata& __x, const PayloadExceptionMetadata& __y) {
+    return !(__x < __y);
+  }
+#endif
+
+   ::apache::thrift::PayloadDeclaredExceptionMetadata& set_declaredException( ::apache::thrift::PayloadDeclaredExceptionMetadata const &t) {
+    __clear();
+    type_ = Type::declaredException;
+    ::new (std::addressof(value_.declaredException))  ::apache::thrift::PayloadDeclaredExceptionMetadata(t);
+    return value_.declaredException;
+  }
+
+   ::apache::thrift::PayloadDeclaredExceptionMetadata& set_declaredException( ::apache::thrift::PayloadDeclaredExceptionMetadata&& t) {
+    __clear();
+    type_ = Type::declaredException;
+    ::new (std::addressof(value_.declaredException))  ::apache::thrift::PayloadDeclaredExceptionMetadata(std::move(t));
+    return value_.declaredException;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t< ::apache::thrift::PayloadDeclaredExceptionMetadata, T...>>  ::apache::thrift::PayloadDeclaredExceptionMetadata& set_declaredException(T&&... t) {
+    __clear();
+    type_ = Type::declaredException;
+    ::new (std::addressof(value_.declaredException))  ::apache::thrift::PayloadDeclaredExceptionMetadata(std::forward<T>(t)...);
+    return value_.declaredException;
+  }
+
+   ::apache::thrift::PayloadProxyExceptionMetadata& set_proxyException( ::apache::thrift::PayloadProxyExceptionMetadata const &t) {
+    __clear();
+    type_ = Type::proxyException;
+    ::new (std::addressof(value_.proxyException))  ::apache::thrift::PayloadProxyExceptionMetadata(t);
+    return value_.proxyException;
+  }
+
+   ::apache::thrift::PayloadProxyExceptionMetadata& set_proxyException( ::apache::thrift::PayloadProxyExceptionMetadata&& t) {
+    __clear();
+    type_ = Type::proxyException;
+    ::new (std::addressof(value_.proxyException))  ::apache::thrift::PayloadProxyExceptionMetadata(std::move(t));
+    return value_.proxyException;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t< ::apache::thrift::PayloadProxyExceptionMetadata, T...>>  ::apache::thrift::PayloadProxyExceptionMetadata& set_proxyException(T&&... t) {
+    __clear();
+    type_ = Type::proxyException;
+    ::new (std::addressof(value_.proxyException))  ::apache::thrift::PayloadProxyExceptionMetadata(std::forward<T>(t)...);
+    return value_.proxyException;
+  }
+
+   ::apache::thrift::PayloadProxiedExceptionMetadata& set_proxiedException( ::apache::thrift::PayloadProxiedExceptionMetadata const &t) {
+    __clear();
+    type_ = Type::proxiedException;
+    ::new (std::addressof(value_.proxiedException))  ::apache::thrift::PayloadProxiedExceptionMetadata(t);
+    return value_.proxiedException;
+  }
+
+   ::apache::thrift::PayloadProxiedExceptionMetadata& set_proxiedException( ::apache::thrift::PayloadProxiedExceptionMetadata&& t) {
+    __clear();
+    type_ = Type::proxiedException;
+    ::new (std::addressof(value_.proxiedException))  ::apache::thrift::PayloadProxiedExceptionMetadata(std::move(t));
+    return value_.proxiedException;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t< ::apache::thrift::PayloadProxiedExceptionMetadata, T...>>  ::apache::thrift::PayloadProxiedExceptionMetadata& set_proxiedException(T&&... t) {
+    __clear();
+    type_ = Type::proxiedException;
+    ::new (std::addressof(value_.proxiedException))  ::apache::thrift::PayloadProxiedExceptionMetadata(std::forward<T>(t)...);
+    return value_.proxiedException;
+  }
+
+   ::apache::thrift::PayloadAppClientExceptionMetadata& set_appClientException( ::apache::thrift::PayloadAppClientExceptionMetadata const &t) {
+    __clear();
+    type_ = Type::appClientException;
+    ::new (std::addressof(value_.appClientException))  ::apache::thrift::PayloadAppClientExceptionMetadata(t);
+    return value_.appClientException;
+  }
+
+   ::apache::thrift::PayloadAppClientExceptionMetadata& set_appClientException( ::apache::thrift::PayloadAppClientExceptionMetadata&& t) {
+    __clear();
+    type_ = Type::appClientException;
+    ::new (std::addressof(value_.appClientException))  ::apache::thrift::PayloadAppClientExceptionMetadata(std::move(t));
+    return value_.appClientException;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t< ::apache::thrift::PayloadAppClientExceptionMetadata, T...>>  ::apache::thrift::PayloadAppClientExceptionMetadata& set_appClientException(T&&... t) {
+    __clear();
+    type_ = Type::appClientException;
+    ::new (std::addressof(value_.appClientException))  ::apache::thrift::PayloadAppClientExceptionMetadata(std::forward<T>(t)...);
+    return value_.appClientException;
+  }
+
+   ::apache::thrift::PayloadAppServerExceptionMetadata& set_appServerException( ::apache::thrift::PayloadAppServerExceptionMetadata const &t) {
+    __clear();
+    type_ = Type::appServerException;
+    ::new (std::addressof(value_.appServerException))  ::apache::thrift::PayloadAppServerExceptionMetadata(t);
+    return value_.appServerException;
+  }
+
+   ::apache::thrift::PayloadAppServerExceptionMetadata& set_appServerException( ::apache::thrift::PayloadAppServerExceptionMetadata&& t) {
+    __clear();
+    type_ = Type::appServerException;
+    ::new (std::addressof(value_.appServerException))  ::apache::thrift::PayloadAppServerExceptionMetadata(std::move(t));
+    return value_.appServerException;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t< ::apache::thrift::PayloadAppServerExceptionMetadata, T...>>  ::apache::thrift::PayloadAppServerExceptionMetadata& set_appServerException(T&&... t) {
+    __clear();
+    type_ = Type::appServerException;
+    ::new (std::addressof(value_.appServerException))  ::apache::thrift::PayloadAppServerExceptionMetadata(std::forward<T>(t)...);
+    return value_.appServerException;
+  }
+
+   ::apache::thrift::PayloadDeclaredExceptionMetadata const & get_declaredException() const {
+    assert(type_ == Type::declaredException);
+    return value_.declaredException;
+  }
+
+   ::apache::thrift::PayloadProxyExceptionMetadata const & get_proxyException() const {
+    assert(type_ == Type::proxyException);
+    return value_.proxyException;
+  }
+
+   ::apache::thrift::PayloadProxiedExceptionMetadata const & get_proxiedException() const {
+    assert(type_ == Type::proxiedException);
+    return value_.proxiedException;
+  }
+
+   ::apache::thrift::PayloadAppClientExceptionMetadata const & get_appClientException() const {
+    assert(type_ == Type::appClientException);
+    return value_.appClientException;
+  }
+
+   ::apache::thrift::PayloadAppServerExceptionMetadata const & get_appServerException() const {
+    assert(type_ == Type::appServerException);
+    return value_.appServerException;
+  }
+
+   ::apache::thrift::PayloadDeclaredExceptionMetadata & mutable_declaredException() {
+    assert(type_ == Type::declaredException);
+    return value_.declaredException;
+  }
+
+   ::apache::thrift::PayloadProxyExceptionMetadata & mutable_proxyException() {
+    assert(type_ == Type::proxyException);
+    return value_.proxyException;
+  }
+
+   ::apache::thrift::PayloadProxiedExceptionMetadata & mutable_proxiedException() {
+    assert(type_ == Type::proxiedException);
+    return value_.proxiedException;
+  }
+
+   ::apache::thrift::PayloadAppClientExceptionMetadata & mutable_appClientException() {
+    assert(type_ == Type::appClientException);
+    return value_.appClientException;
+  }
+
+   ::apache::thrift::PayloadAppServerExceptionMetadata & mutable_appServerException() {
+    assert(type_ == Type::appServerException);
+    return value_.appServerException;
+  }
+
+   ::apache::thrift::PayloadDeclaredExceptionMetadata move_declaredException() {
+    assert(type_ == Type::declaredException);
+    return std::move(value_.declaredException);
+  }
+
+   ::apache::thrift::PayloadProxyExceptionMetadata move_proxyException() {
+    assert(type_ == Type::proxyException);
+    return std::move(value_.proxyException);
+  }
+
+   ::apache::thrift::PayloadProxiedExceptionMetadata move_proxiedException() {
+    assert(type_ == Type::proxiedException);
+    return std::move(value_.proxiedException);
+  }
+
+   ::apache::thrift::PayloadAppClientExceptionMetadata move_appClientException() {
+    assert(type_ == Type::appClientException);
+    return std::move(value_.appClientException);
+  }
+
+   ::apache::thrift::PayloadAppServerExceptionMetadata move_appServerException() {
+    assert(type_ == Type::appServerException);
+    return std::move(value_.appServerException);
+  }
+
+  Type getType() const { return type_; }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+ protected:
+  template <class T>
+  void destruct(T &val) {
+    (&val)->~T();
+  }
+
+  Type type_;
+  storage_type value_;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< PayloadExceptionMetadata >;
+};
+
+void swap(PayloadExceptionMetadata& a, PayloadExceptionMetadata& b);
+
+template <class Protocol_>
+uint32_t PayloadExceptionMetadata::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+class PayloadExceptionMetadataBase final  {
+ public:
+  using __fbthrift_cpp2_type = PayloadExceptionMetadataBase;
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  PayloadExceptionMetadataBase() {}
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  PayloadExceptionMetadataBase(apache::thrift::FragileConstructor, ::std::string name_utf8__arg, ::std::string what_utf8__arg,  ::apache::thrift::PayloadExceptionMetadata metadata__arg);
+
+  PayloadExceptionMetadataBase(PayloadExceptionMetadataBase&&) = default;
+
+  PayloadExceptionMetadataBase(const PayloadExceptionMetadataBase&) = default;
+
+  PayloadExceptionMetadataBase& operator=(PayloadExceptionMetadataBase&&) = default;
+
+  PayloadExceptionMetadataBase& operator=(const PayloadExceptionMetadataBase&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+  void __clear();
+ private:
+  ::std::string name_utf8;
+ private:
+  ::std::string what_utf8;
+ private:
+   ::apache::thrift::PayloadExceptionMetadata metadata;
+
+ public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
+  struct __isset {
+    bool name_utf8;
+    bool what_utf8;
+    bool metadata;
+  } __isset = {};
+  bool operator==(const PayloadExceptionMetadataBase& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const PayloadExceptionMetadataBase& __x, const PayloadExceptionMetadataBase& __y) {
+    return !(__x == __y);
+  }
+#endif
+  bool operator<(const PayloadExceptionMetadataBase& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const PayloadExceptionMetadataBase& __x, const PayloadExceptionMetadataBase& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const PayloadExceptionMetadataBase& __x, const PayloadExceptionMetadataBase& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const PayloadExceptionMetadataBase& __x, const PayloadExceptionMetadataBase& __y) {
+    return !(__x < __y);
+  }
+#endif
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::string&> name_utf8_ref() const& {
+    return {name_utf8, __isset.name_utf8};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::string&&> name_utf8_ref() const&& {
+    return {std::move(name_utf8), __isset.name_utf8};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::string&> name_utf8_ref() & {
+    return {name_utf8, __isset.name_utf8};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::string&&> name_utf8_ref() && {
+    return {std::move(name_utf8), __isset.name_utf8};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::string&> what_utf8_ref() const& {
+    return {what_utf8, __isset.what_utf8};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::string&&> what_utf8_ref() const&& {
+    return {std::move(what_utf8), __isset.what_utf8};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::string&> what_utf8_ref() & {
+    return {what_utf8, __isset.what_utf8};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::string&&> what_utf8_ref() && {
+    return {std::move(what_utf8), __isset.what_utf8};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::PayloadExceptionMetadata&> metadata_ref() const& {
+    return {metadata, __isset.metadata};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::PayloadExceptionMetadata&&> metadata_ref() const&& {
+    return {std::move(metadata), __isset.metadata};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::PayloadExceptionMetadata&> metadata_ref() & {
+    return {metadata, __isset.metadata};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::PayloadExceptionMetadata&&> metadata_ref() && {
+    return {std::move(metadata), __isset.metadata};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+  const ::std::string* get_name_utf8() const& {
+    return name_utf8_ref() ? std::addressof(name_utf8) : nullptr;
+  }
+
+  ::std::string* get_name_utf8() & {
+    return name_utf8_ref() ? std::addressof(name_utf8) : nullptr;
+  }
+  ::std::string* get_name_utf8() && = delete;
+
+  template <typename T_PayloadExceptionMetadataBase_name_utf8_struct_setter = ::std::string>
+  ::std::string& set_name_utf8(T_PayloadExceptionMetadataBase_name_utf8_struct_setter&& name_utf8_) {
+    name_utf8 = std::forward<T_PayloadExceptionMetadataBase_name_utf8_struct_setter>(name_utf8_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.name_utf8 = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return name_utf8;
+  }
+
+  const ::std::string* get_what_utf8() const& {
+    return what_utf8_ref() ? std::addressof(what_utf8) : nullptr;
+  }
+
+  ::std::string* get_what_utf8() & {
+    return what_utf8_ref() ? std::addressof(what_utf8) : nullptr;
+  }
+  ::std::string* get_what_utf8() && = delete;
+
+  template <typename T_PayloadExceptionMetadataBase_what_utf8_struct_setter = ::std::string>
+  ::std::string& set_what_utf8(T_PayloadExceptionMetadataBase_what_utf8_struct_setter&& what_utf8_) {
+    what_utf8 = std::forward<T_PayloadExceptionMetadataBase_what_utf8_struct_setter>(what_utf8_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.what_utf8 = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return what_utf8;
+  }
+  const  ::apache::thrift::PayloadExceptionMetadata* get_metadata() const&;
+   ::apache::thrift::PayloadExceptionMetadata* get_metadata() &;
+   ::apache::thrift::PayloadExceptionMetadata* get_metadata() && = delete;
+
+  template <typename T_PayloadExceptionMetadataBase_metadata_struct_setter =  ::apache::thrift::PayloadExceptionMetadata>
+   ::apache::thrift::PayloadExceptionMetadata& set_metadata(T_PayloadExceptionMetadataBase_metadata_struct_setter&& metadata_) {
+    metadata = std::forward<T_PayloadExceptionMetadataBase_metadata_struct_setter>(metadata_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.metadata = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return metadata;
+  }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< PayloadExceptionMetadataBase >;
+};
+
+void swap(PayloadExceptionMetadataBase& a, PayloadExceptionMetadataBase& b);
+
+template <class Protocol_>
+uint32_t PayloadExceptionMetadataBase::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+class PayloadMetadata final  {
+ public:
+  using __fbthrift_cpp2_type = PayloadMetadata;
+  enum Type : int {
+    __EMPTY__ = 0,
+    responseMetadata = 1,
+    exceptionMetadata = 2,
+  } ;
+
+  PayloadMetadata()
+      : type_(Type::__EMPTY__) {}
+
+  PayloadMetadata(PayloadMetadata&& rhs)
+      : type_(Type::__EMPTY__) {
+    if (this == &rhs) { return; }
+    if (rhs.type_ == Type::__EMPTY__) { return; }
+    switch (rhs.type_) {
+      case Type::responseMetadata:
+      {
+        set_responseMetadata(std::move(rhs.value_.responseMetadata));
+        break;
+      }
+      case Type::exceptionMetadata:
+      {
+        set_exceptionMetadata(std::move(rhs.value_.exceptionMetadata));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    rhs.__clear();
+  }
+
+  PayloadMetadata(const PayloadMetadata& rhs)
+      : type_(Type::__EMPTY__) {
+    if (this == &rhs) { return; }
+    if (rhs.type_ == Type::__EMPTY__) { return; }
+    switch (rhs.type_) {
+      case Type::responseMetadata:
+      {
+        set_responseMetadata(rhs.value_.responseMetadata);
+        break;
+      }
+      case Type::exceptionMetadata:
+      {
+        set_exceptionMetadata(rhs.value_.exceptionMetadata);
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+  }
+
+  PayloadMetadata& operator=(PayloadMetadata&& rhs) {
+    if (this == &rhs) { return *this; }
+    __clear();
+    if (rhs.type_ == Type::__EMPTY__) { return *this; }
+    switch (rhs.type_) {
+      case Type::responseMetadata:
+      {
+        set_responseMetadata(std::move(rhs.value_.responseMetadata));
+        break;
+      }
+      case Type::exceptionMetadata:
+      {
+        set_exceptionMetadata(std::move(rhs.value_.exceptionMetadata));
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    rhs.__clear();
+    return *this;
+  }
+
+  PayloadMetadata& operator=(const PayloadMetadata& rhs) {
+    if (this == &rhs) { return *this; }
+    __clear();
+    if (rhs.type_ == Type::__EMPTY__) { return *this; }
+    switch (rhs.type_) {
+      case Type::responseMetadata:
+      {
+        set_responseMetadata(rhs.value_.responseMetadata);
+        break;
+      }
+      case Type::exceptionMetadata:
+      {
+        set_exceptionMetadata(rhs.value_.exceptionMetadata);
+        break;
+      }
+      default:
+      {
+        assert(false);
+        break;
+      }
+    }
+    return *this;
+  }
+  void __clear();
+
+  ~PayloadMetadata() {
+    __clear();
+  }
+  union storage_type {
+     ::apache::thrift::PayloadResponseMetadata responseMetadata;
+     ::apache::thrift::PayloadExceptionMetadataBase exceptionMetadata;
+
+    storage_type() {}
+    ~storage_type() {}
+  } ;
+  bool operator==(const PayloadMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const PayloadMetadata& __x, const PayloadMetadata& __y) {
+    return !(__x == __y);
+  }
+#endif
+  bool operator<(const PayloadMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const PayloadMetadata& __x, const PayloadMetadata& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const PayloadMetadata& __x, const PayloadMetadata& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const PayloadMetadata& __x, const PayloadMetadata& __y) {
+    return !(__x < __y);
+  }
+#endif
+
+   ::apache::thrift::PayloadResponseMetadata& set_responseMetadata( ::apache::thrift::PayloadResponseMetadata const &t) {
+    __clear();
+    type_ = Type::responseMetadata;
+    ::new (std::addressof(value_.responseMetadata))  ::apache::thrift::PayloadResponseMetadata(t);
+    return value_.responseMetadata;
+  }
+
+   ::apache::thrift::PayloadResponseMetadata& set_responseMetadata( ::apache::thrift::PayloadResponseMetadata&& t) {
+    __clear();
+    type_ = Type::responseMetadata;
+    ::new (std::addressof(value_.responseMetadata))  ::apache::thrift::PayloadResponseMetadata(std::move(t));
+    return value_.responseMetadata;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t< ::apache::thrift::PayloadResponseMetadata, T...>>  ::apache::thrift::PayloadResponseMetadata& set_responseMetadata(T&&... t) {
+    __clear();
+    type_ = Type::responseMetadata;
+    ::new (std::addressof(value_.responseMetadata))  ::apache::thrift::PayloadResponseMetadata(std::forward<T>(t)...);
+    return value_.responseMetadata;
+  }
+
+   ::apache::thrift::PayloadExceptionMetadataBase& set_exceptionMetadata( ::apache::thrift::PayloadExceptionMetadataBase const &t) {
+    __clear();
+    type_ = Type::exceptionMetadata;
+    ::new (std::addressof(value_.exceptionMetadata))  ::apache::thrift::PayloadExceptionMetadataBase(t);
+    return value_.exceptionMetadata;
+  }
+
+   ::apache::thrift::PayloadExceptionMetadataBase& set_exceptionMetadata( ::apache::thrift::PayloadExceptionMetadataBase&& t) {
+    __clear();
+    type_ = Type::exceptionMetadata;
+    ::new (std::addressof(value_.exceptionMetadata))  ::apache::thrift::PayloadExceptionMetadataBase(std::move(t));
+    return value_.exceptionMetadata;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t< ::apache::thrift::PayloadExceptionMetadataBase, T...>>  ::apache::thrift::PayloadExceptionMetadataBase& set_exceptionMetadata(T&&... t) {
+    __clear();
+    type_ = Type::exceptionMetadata;
+    ::new (std::addressof(value_.exceptionMetadata))  ::apache::thrift::PayloadExceptionMetadataBase(std::forward<T>(t)...);
+    return value_.exceptionMetadata;
+  }
+
+   ::apache::thrift::PayloadResponseMetadata const & get_responseMetadata() const {
+    assert(type_ == Type::responseMetadata);
+    return value_.responseMetadata;
+  }
+
+   ::apache::thrift::PayloadExceptionMetadataBase const & get_exceptionMetadata() const {
+    assert(type_ == Type::exceptionMetadata);
+    return value_.exceptionMetadata;
+  }
+
+   ::apache::thrift::PayloadResponseMetadata & mutable_responseMetadata() {
+    assert(type_ == Type::responseMetadata);
+    return value_.responseMetadata;
+  }
+
+   ::apache::thrift::PayloadExceptionMetadataBase & mutable_exceptionMetadata() {
+    assert(type_ == Type::exceptionMetadata);
+    return value_.exceptionMetadata;
+  }
+
+   ::apache::thrift::PayloadResponseMetadata move_responseMetadata() {
+    assert(type_ == Type::responseMetadata);
+    return std::move(value_.responseMetadata);
+  }
+
+   ::apache::thrift::PayloadExceptionMetadataBase move_exceptionMetadata() {
+    assert(type_ == Type::exceptionMetadata);
+    return std::move(value_.exceptionMetadata);
+  }
+
+  Type getType() const { return type_; }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+ protected:
+  template <class T>
+  void destruct(T &val) {
+    (&val)->~T();
+  }
+
+  Type type_;
+  storage_type value_;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< PayloadMetadata >;
+};
+
+void swap(PayloadMetadata& a, PayloadMetadata& b);
+
+template <class Protocol_>
+uint32_t PayloadMetadata::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+class ResponseRpcMetadata final  {
+ public:
+  using __fbthrift_cpp2_type = ResponseRpcMetadata;
 
   ResponseRpcMetadata();
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  ResponseRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, int32_t seqId__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, int64_t load__arg, std::uint32_t crc32c__arg,  ::apache::thrift::CompressionAlgorithm compression__arg);
+  ResponseRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, int32_t seqId__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, int64_t load__arg, std::uint32_t crc32c__arg,  ::apache::thrift::CompressionAlgorithm compression__arg,  ::apache::thrift::PayloadMetadata payloadMetadata__arg);
 
   ResponseRpcMetadata(ResponseRpcMetadata&&) = default;
 
@@ -1044,6 +3392,7 @@ class ResponseRpcMetadata final : private apache::thrift::detail::st::Comparison
   ResponseRpcMetadata& operator=(ResponseRpcMetadata&&) = default;
 
   ResponseRpcMetadata& operator=(const ResponseRpcMetadata&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
 
   ~ResponseRpcMetadata();
@@ -1060,8 +3409,11 @@ class ResponseRpcMetadata final : private apache::thrift::detail::st::Comparison
   std::uint32_t crc32c;
  private:
    ::apache::thrift::CompressionAlgorithm compression;
+ private:
+   ::apache::thrift::PayloadMetadata payloadMetadata;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool protocol;
     bool seqId;
@@ -1069,10 +3421,28 @@ class ResponseRpcMetadata final : private apache::thrift::detail::st::Comparison
     bool load;
     bool crc32c;
     bool compression;
+    bool payloadMetadata;
   } __isset = {};
   bool operator==(const ResponseRpcMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const ResponseRpcMetadata& __x, const ResponseRpcMetadata& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const ResponseRpcMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const ResponseRpcMetadata& __x, const ResponseRpcMetadata& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const ResponseRpcMetadata& __x, const ResponseRpcMetadata& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const ResponseRpcMetadata& __x, const ResponseRpcMetadata& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::ProtocolId&> protocol_ref() const& {
     return {protocol, __isset.protocol};
   }
@@ -1088,7 +3458,9 @@ class ResponseRpcMetadata final : private apache::thrift::detail::st::Comparison
   FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::ProtocolId&&> protocol_ref() && {
     return {std::move(protocol), __isset.protocol};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const int32_t&> seqId_ref() const& {
     return {seqId, __isset.seqId};
   }
@@ -1104,7 +3476,9 @@ class ResponseRpcMetadata final : private apache::thrift::detail::st::Comparison
   FOLLY_ERASE ::apache::thrift::optional_field_ref<int32_t&&> seqId_ref() && {
     return {std::move(seqId), __isset.seqId};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::map<::std::string, ::std::string>&> otherMetadata_ref() const& {
     return {otherMetadata, __isset.otherMetadata};
   }
@@ -1120,7 +3494,9 @@ class ResponseRpcMetadata final : private apache::thrift::detail::st::Comparison
   FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::map<::std::string, ::std::string>&&> otherMetadata_ref() && {
     return {std::move(otherMetadata), __isset.otherMetadata};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const int64_t&> load_ref() const& {
     return {load, __isset.load};
   }
@@ -1136,7 +3512,9 @@ class ResponseRpcMetadata final : private apache::thrift::detail::st::Comparison
   FOLLY_ERASE ::apache::thrift::optional_field_ref<int64_t&&> load_ref() && {
     return {std::move(load), __isset.load};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const std::uint32_t&> crc32c_ref() const& {
     return {crc32c, __isset.crc32c};
   }
@@ -1152,7 +3530,9 @@ class ResponseRpcMetadata final : private apache::thrift::detail::st::Comparison
   FOLLY_ERASE ::apache::thrift::optional_field_ref<std::uint32_t&&> crc32c_ref() && {
     return {std::move(crc32c), __isset.crc32c};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::CompressionAlgorithm&> compression_ref() const& {
     return {compression, __isset.compression};
   }
@@ -1168,34 +3548,57 @@ class ResponseRpcMetadata final : private apache::thrift::detail::st::Comparison
   FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::CompressionAlgorithm&&> compression_ref() && {
     return {std::move(compression), __isset.compression};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::PayloadMetadata&> payloadMetadata_ref() const& {
+    return {payloadMetadata, __isset.payloadMetadata};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::PayloadMetadata&&> payloadMetadata_ref() const&& {
+    return {std::move(payloadMetadata), __isset.payloadMetadata};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::PayloadMetadata&> payloadMetadata_ref() & {
+    return {payloadMetadata, __isset.payloadMetadata};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::PayloadMetadata&&> payloadMetadata_ref() && {
+    return {std::move(payloadMetadata), __isset.payloadMetadata};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const  ::apache::thrift::ProtocolId* get_protocol() const& {
-    return __isset.protocol ? std::addressof(protocol) : nullptr;
+    return protocol_ref() ? std::addressof(protocol) : nullptr;
   }
 
    ::apache::thrift::ProtocolId* get_protocol() & {
-    return __isset.protocol ? std::addressof(protocol) : nullptr;
+    return protocol_ref() ? std::addressof(protocol) : nullptr;
   }
    ::apache::thrift::ProtocolId* get_protocol() && = delete;
 
    ::apache::thrift::ProtocolId& set_protocol( ::apache::thrift::ProtocolId protocol_) {
     protocol = protocol_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.protocol = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return protocol;
   }
 
   const int32_t* get_seqId() const& {
-    return __isset.seqId ? std::addressof(seqId) : nullptr;
+    return seqId_ref() ? std::addressof(seqId) : nullptr;
   }
 
   int32_t* get_seqId() & {
-    return __isset.seqId ? std::addressof(seqId) : nullptr;
+    return seqId_ref() ? std::addressof(seqId) : nullptr;
   }
   int32_t* get_seqId() && = delete;
 
   int32_t& set_seqId(int32_t seqId_) {
     seqId = seqId_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.seqId = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return seqId;
   }
   const ::std::map<::std::string, ::std::string>* get_otherMetadata() const&;
@@ -1205,53 +3608,73 @@ class ResponseRpcMetadata final : private apache::thrift::detail::st::Comparison
   template <typename T_ResponseRpcMetadata_otherMetadata_struct_setter = ::std::map<::std::string, ::std::string>>
   ::std::map<::std::string, ::std::string>& set_otherMetadata(T_ResponseRpcMetadata_otherMetadata_struct_setter&& otherMetadata_) {
     otherMetadata = std::forward<T_ResponseRpcMetadata_otherMetadata_struct_setter>(otherMetadata_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.otherMetadata = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return otherMetadata;
   }
 
   const int64_t* get_load() const& {
-    return __isset.load ? std::addressof(load) : nullptr;
+    return load_ref() ? std::addressof(load) : nullptr;
   }
 
   int64_t* get_load() & {
-    return __isset.load ? std::addressof(load) : nullptr;
+    return load_ref() ? std::addressof(load) : nullptr;
   }
   int64_t* get_load() && = delete;
 
   int64_t& set_load(int64_t load_) {
     load = load_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.load = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return load;
   }
 
   const std::uint32_t* get_crc32c() const& {
-    return __isset.crc32c ? std::addressof(crc32c) : nullptr;
+    return crc32c_ref() ? std::addressof(crc32c) : nullptr;
   }
 
   std::uint32_t* get_crc32c() & {
-    return __isset.crc32c ? std::addressof(crc32c) : nullptr;
+    return crc32c_ref() ? std::addressof(crc32c) : nullptr;
   }
   std::uint32_t* get_crc32c() && = delete;
 
   std::uint32_t& set_crc32c(std::uint32_t crc32c_) {
     crc32c = crc32c_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.crc32c = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return crc32c;
   }
 
   const  ::apache::thrift::CompressionAlgorithm* get_compression() const& {
-    return __isset.compression ? std::addressof(compression) : nullptr;
+    return compression_ref() ? std::addressof(compression) : nullptr;
   }
 
    ::apache::thrift::CompressionAlgorithm* get_compression() & {
-    return __isset.compression ? std::addressof(compression) : nullptr;
+    return compression_ref() ? std::addressof(compression) : nullptr;
   }
    ::apache::thrift::CompressionAlgorithm* get_compression() && = delete;
 
    ::apache::thrift::CompressionAlgorithm& set_compression( ::apache::thrift::CompressionAlgorithm compression_) {
     compression = compression_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.compression = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return compression;
+  }
+  const  ::apache::thrift::PayloadMetadata* get_payloadMetadata() const&;
+   ::apache::thrift::PayloadMetadata* get_payloadMetadata() &;
+   ::apache::thrift::PayloadMetadata* get_payloadMetadata() && = delete;
+
+  template <typename T_ResponseRpcMetadata_payloadMetadata_struct_setter =  ::apache::thrift::PayloadMetadata>
+   ::apache::thrift::PayloadMetadata& set_payloadMetadata(T_ResponseRpcMetadata_payloadMetadata_struct_setter&& payloadMetadata_) {
+    payloadMetadata = std::forward<T_ResponseRpcMetadata_payloadMetadata_struct_setter>(payloadMetadata_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.payloadMetadata = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return payloadMetadata;
   }
 
   template <class Protocol_>
@@ -1281,9 +3704,277 @@ uint32_t ResponseRpcMetadata::read(Protocol_* iprot) {
 
 }} // apache::thrift
 namespace apache { namespace thrift {
-class StreamPayloadMetadata final : private apache::thrift::detail::st::ComparisonOperators<StreamPayloadMetadata> {
+class ResponseRpcError final  {
  public:
+  using __fbthrift_cpp2_type = ResponseRpcError;
 
+  ResponseRpcError();
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  ResponseRpcError(apache::thrift::FragileConstructor, ::std::string name_utf8__arg, ::std::string what_utf8__arg,  ::apache::thrift::ResponseRpcErrorCategory category__arg,  ::apache::thrift::ResponseRpcErrorCode code__arg, int64_t load__arg);
+
+  ResponseRpcError(ResponseRpcError&&) = default;
+
+  ResponseRpcError(const ResponseRpcError&) = default;
+
+  ResponseRpcError& operator=(ResponseRpcError&&) = default;
+
+  ResponseRpcError& operator=(const ResponseRpcError&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+  void __clear();
+
+  ~ResponseRpcError();
+
+ private:
+  ::std::string name_utf8;
+ private:
+  ::std::string what_utf8;
+ private:
+   ::apache::thrift::ResponseRpcErrorCategory category;
+ private:
+   ::apache::thrift::ResponseRpcErrorCode code;
+ private:
+  int64_t load;
+
+ public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
+  struct __isset {
+    bool name_utf8;
+    bool what_utf8;
+    bool category;
+    bool code;
+    bool load;
+  } __isset = {};
+  bool operator==(const ResponseRpcError& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const ResponseRpcError& __x, const ResponseRpcError& __y) {
+    return !(__x == __y);
+  }
+#endif
+  bool operator<(const ResponseRpcError& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const ResponseRpcError& __x, const ResponseRpcError& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const ResponseRpcError& __x, const ResponseRpcError& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const ResponseRpcError& __x, const ResponseRpcError& __y) {
+    return !(__x < __y);
+  }
+#endif
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::string&> name_utf8_ref() const& {
+    return {name_utf8, __isset.name_utf8};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::string&&> name_utf8_ref() const&& {
+    return {std::move(name_utf8), __isset.name_utf8};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::string&> name_utf8_ref() & {
+    return {name_utf8, __isset.name_utf8};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::string&&> name_utf8_ref() && {
+    return {std::move(name_utf8), __isset.name_utf8};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::string&> what_utf8_ref() const& {
+    return {what_utf8, __isset.what_utf8};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::string&&> what_utf8_ref() const&& {
+    return {std::move(what_utf8), __isset.what_utf8};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::string&> what_utf8_ref() & {
+    return {what_utf8, __isset.what_utf8};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::string&&> what_utf8_ref() && {
+    return {std::move(what_utf8), __isset.what_utf8};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::ResponseRpcErrorCategory&> category_ref() const& {
+    return {category, __isset.category};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::ResponseRpcErrorCategory&&> category_ref() const&& {
+    return {std::move(category), __isset.category};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::ResponseRpcErrorCategory&> category_ref() & {
+    return {category, __isset.category};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::ResponseRpcErrorCategory&&> category_ref() && {
+    return {std::move(category), __isset.category};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::ResponseRpcErrorCode&> code_ref() const& {
+    return {code, __isset.code};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::ResponseRpcErrorCode&&> code_ref() const&& {
+    return {std::move(code), __isset.code};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::ResponseRpcErrorCode&> code_ref() & {
+    return {code, __isset.code};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::ResponseRpcErrorCode&&> code_ref() && {
+    return {std::move(code), __isset.code};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const int64_t&> load_ref() const& {
+    return {load, __isset.load};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const int64_t&&> load_ref() const&& {
+    return {std::move(load), __isset.load};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<int64_t&> load_ref() & {
+    return {load, __isset.load};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<int64_t&&> load_ref() && {
+    return {std::move(load), __isset.load};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+  const ::std::string* get_name_utf8() const& {
+    return name_utf8_ref() ? std::addressof(name_utf8) : nullptr;
+  }
+
+  ::std::string* get_name_utf8() & {
+    return name_utf8_ref() ? std::addressof(name_utf8) : nullptr;
+  }
+  ::std::string* get_name_utf8() && = delete;
+
+  template <typename T_ResponseRpcError_name_utf8_struct_setter = ::std::string>
+  ::std::string& set_name_utf8(T_ResponseRpcError_name_utf8_struct_setter&& name_utf8_) {
+    name_utf8 = std::forward<T_ResponseRpcError_name_utf8_struct_setter>(name_utf8_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.name_utf8 = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return name_utf8;
+  }
+
+  const ::std::string* get_what_utf8() const& {
+    return what_utf8_ref() ? std::addressof(what_utf8) : nullptr;
+  }
+
+  ::std::string* get_what_utf8() & {
+    return what_utf8_ref() ? std::addressof(what_utf8) : nullptr;
+  }
+  ::std::string* get_what_utf8() && = delete;
+
+  template <typename T_ResponseRpcError_what_utf8_struct_setter = ::std::string>
+  ::std::string& set_what_utf8(T_ResponseRpcError_what_utf8_struct_setter&& what_utf8_) {
+    what_utf8 = std::forward<T_ResponseRpcError_what_utf8_struct_setter>(what_utf8_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.what_utf8 = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return what_utf8;
+  }
+
+  const  ::apache::thrift::ResponseRpcErrorCategory* get_category() const& {
+    return category_ref() ? std::addressof(category) : nullptr;
+  }
+
+   ::apache::thrift::ResponseRpcErrorCategory* get_category() & {
+    return category_ref() ? std::addressof(category) : nullptr;
+  }
+   ::apache::thrift::ResponseRpcErrorCategory* get_category() && = delete;
+
+   ::apache::thrift::ResponseRpcErrorCategory& set_category( ::apache::thrift::ResponseRpcErrorCategory category_) {
+    category = category_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.category = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return category;
+  }
+
+  const  ::apache::thrift::ResponseRpcErrorCode* get_code() const& {
+    return code_ref() ? std::addressof(code) : nullptr;
+  }
+
+   ::apache::thrift::ResponseRpcErrorCode* get_code() & {
+    return code_ref() ? std::addressof(code) : nullptr;
+  }
+   ::apache::thrift::ResponseRpcErrorCode* get_code() && = delete;
+
+   ::apache::thrift::ResponseRpcErrorCode& set_code( ::apache::thrift::ResponseRpcErrorCode code_) {
+    code = code_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.code = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return code;
+  }
+
+  const int64_t* get_load() const& {
+    return load_ref() ? std::addressof(load) : nullptr;
+  }
+
+  int64_t* get_load() & {
+    return load_ref() ? std::addressof(load) : nullptr;
+  }
+  int64_t* get_load() && = delete;
+
+  int64_t& set_load(int64_t load_) {
+    load = load_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.load = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return load;
+  }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops< ResponseRpcError >;
+};
+
+void swap(ResponseRpcError& a, ResponseRpcError& b);
+
+template <class Protocol_>
+uint32_t ResponseRpcError::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+class StreamPayloadMetadata final  {
+ public:
+  using __fbthrift_cpp2_type = StreamPayloadMetadata;
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   StreamPayloadMetadata() :
       compression( ::apache::thrift::CompressionAlgorithm::NONE) {}
   // FragileConstructor for use in initialization lists only.
@@ -1297,6 +3988,7 @@ class StreamPayloadMetadata final : private apache::thrift::detail::st::Comparis
   StreamPayloadMetadata& operator=(StreamPayloadMetadata&&) = default;
 
   StreamPayloadMetadata& operator=(const StreamPayloadMetadata&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
    ::apache::thrift::CompressionAlgorithm compression;
@@ -1304,13 +3996,31 @@ class StreamPayloadMetadata final : private apache::thrift::detail::st::Comparis
   ::std::map<::std::string, ::std::string> otherMetadata;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool compression;
     bool otherMetadata;
   } __isset = {};
   bool operator==(const StreamPayloadMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const StreamPayloadMetadata& __x, const StreamPayloadMetadata& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const StreamPayloadMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const StreamPayloadMetadata& __x, const StreamPayloadMetadata& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const StreamPayloadMetadata& __x, const StreamPayloadMetadata& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const StreamPayloadMetadata& __x, const StreamPayloadMetadata& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::CompressionAlgorithm&> compression_ref() const& {
     return {compression, __isset.compression};
   }
@@ -1326,7 +4036,9 @@ class StreamPayloadMetadata final : private apache::thrift::detail::st::Comparis
   FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::CompressionAlgorithm&&> compression_ref() && {
     return {std::move(compression), __isset.compression};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::map<::std::string, ::std::string>&> otherMetadata_ref() const& {
     return {otherMetadata, __isset.otherMetadata};
   }
@@ -1342,19 +4054,22 @@ class StreamPayloadMetadata final : private apache::thrift::detail::st::Comparis
   FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::map<::std::string, ::std::string>&&> otherMetadata_ref() && {
     return {std::move(otherMetadata), __isset.otherMetadata};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const  ::apache::thrift::CompressionAlgorithm* get_compression() const& {
-    return __isset.compression ? std::addressof(compression) : nullptr;
+    return compression_ref() ? std::addressof(compression) : nullptr;
   }
 
    ::apache::thrift::CompressionAlgorithm* get_compression() & {
-    return __isset.compression ? std::addressof(compression) : nullptr;
+    return compression_ref() ? std::addressof(compression) : nullptr;
   }
    ::apache::thrift::CompressionAlgorithm* get_compression() && = delete;
 
    ::apache::thrift::CompressionAlgorithm& set_compression( ::apache::thrift::CompressionAlgorithm compression_) {
     compression = compression_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.compression = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return compression;
   }
   const ::std::map<::std::string, ::std::string>* get_otherMetadata() const&;
@@ -1364,7 +4079,9 @@ class StreamPayloadMetadata final : private apache::thrift::detail::st::Comparis
   template <typename T_StreamPayloadMetadata_otherMetadata_struct_setter = ::std::map<::std::string, ::std::string>>
   ::std::map<::std::string, ::std::string>& set_otherMetadata(T_StreamPayloadMetadata_otherMetadata_struct_setter&& otherMetadata_) {
     otherMetadata = std::forward<T_StreamPayloadMetadata_otherMetadata_struct_setter>(otherMetadata_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.otherMetadata = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return otherMetadata;
   }
 
@@ -1395,14 +4112,18 @@ uint32_t StreamPayloadMetadata::read(Protocol_* iprot) {
 
 }} // apache::thrift
 namespace apache { namespace thrift {
-class RequestSetupMetadata final : private apache::thrift::detail::st::ComparisonOperators<RequestSetupMetadata> {
+class RequestSetupMetadata final  {
  public:
+  using __fbthrift_cpp2_type = RequestSetupMetadata;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   RequestSetupMetadata() :
-      interfaceKind( ::apache::thrift::InterfaceKind::USER) {}
+      interfaceKind( ::apache::thrift::InterfaceKind::USER),
+      minVersion(0),
+      maxVersion(0) {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  RequestSetupMetadata(apache::thrift::FragileConstructor, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque__arg,  ::apache::thrift::InterfaceKind interfaceKind__arg);
+  RequestSetupMetadata(apache::thrift::FragileConstructor, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque__arg,  ::apache::thrift::InterfaceKind interfaceKind__arg, int32_t minVersion__arg, int32_t maxVersion__arg);
 
   RequestSetupMetadata(RequestSetupMetadata&&) = default;
 
@@ -1411,20 +4132,45 @@ class RequestSetupMetadata final : private apache::thrift::detail::st::Compariso
   RequestSetupMetadata& operator=(RequestSetupMetadata&&) = default;
 
   RequestSetupMetadata& operator=(const RequestSetupMetadata&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque;
  private:
    ::apache::thrift::InterfaceKind interfaceKind;
+ private:
+  int32_t minVersion;
+ private:
+  int32_t maxVersion;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool opaque;
     bool interfaceKind;
+    bool minVersion;
+    bool maxVersion;
   } __isset = {};
   bool operator==(const RequestSetupMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const RequestSetupMetadata& __x, const RequestSetupMetadata& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const RequestSetupMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const RequestSetupMetadata& __x, const RequestSetupMetadata& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const RequestSetupMetadata& __x, const RequestSetupMetadata& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const RequestSetupMetadata& __x, const RequestSetupMetadata& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>&> opaque_ref() const& {
     return {opaque, __isset.opaque};
   }
@@ -1440,7 +4186,9 @@ class RequestSetupMetadata final : private apache::thrift::detail::st::Compariso
   FOLLY_ERASE ::apache::thrift::optional_field_ref<apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>&&> opaque_ref() && {
     return {std::move(opaque), __isset.opaque};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::InterfaceKind&> interfaceKind_ref() const& {
     return {interfaceKind, __isset.interfaceKind};
   }
@@ -1456,6 +4204,43 @@ class RequestSetupMetadata final : private apache::thrift::detail::st::Compariso
   FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::InterfaceKind&&> interfaceKind_ref() && {
     return {std::move(interfaceKind), __isset.interfaceKind};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const int32_t&> minVersion_ref() const& {
+    return {minVersion, __isset.minVersion};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const int32_t&&> minVersion_ref() const&& {
+    return {std::move(minVersion), __isset.minVersion};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<int32_t&> minVersion_ref() & {
+    return {minVersion, __isset.minVersion};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<int32_t&&> minVersion_ref() && {
+    return {std::move(minVersion), __isset.minVersion};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const int32_t&> maxVersion_ref() const& {
+    return {maxVersion, __isset.maxVersion};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const int32_t&&> maxVersion_ref() const&& {
+    return {std::move(maxVersion), __isset.maxVersion};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<int32_t&> maxVersion_ref() & {
+    return {maxVersion, __isset.maxVersion};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<int32_t&&> maxVersion_ref() && {
+    return {std::move(maxVersion), __isset.maxVersion};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   const apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>* get_opaque() const&;
   apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>* get_opaque() &;
   apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>* get_opaque() && = delete;
@@ -1463,23 +4248,61 @@ class RequestSetupMetadata final : private apache::thrift::detail::st::Compariso
   template <typename T_RequestSetupMetadata_opaque_struct_setter = apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>>
   apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>& set_opaque(T_RequestSetupMetadata_opaque_struct_setter&& opaque_) {
     opaque = std::forward<T_RequestSetupMetadata_opaque_struct_setter>(opaque_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.opaque = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return opaque;
   }
 
   const  ::apache::thrift::InterfaceKind* get_interfaceKind() const& {
-    return __isset.interfaceKind ? std::addressof(interfaceKind) : nullptr;
+    return interfaceKind_ref() ? std::addressof(interfaceKind) : nullptr;
   }
 
    ::apache::thrift::InterfaceKind* get_interfaceKind() & {
-    return __isset.interfaceKind ? std::addressof(interfaceKind) : nullptr;
+    return interfaceKind_ref() ? std::addressof(interfaceKind) : nullptr;
   }
    ::apache::thrift::InterfaceKind* get_interfaceKind() && = delete;
 
    ::apache::thrift::InterfaceKind& set_interfaceKind( ::apache::thrift::InterfaceKind interfaceKind_) {
     interfaceKind = interfaceKind_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.interfaceKind = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return interfaceKind;
+  }
+
+  const int32_t* get_minVersion() const& {
+    return minVersion_ref() ? std::addressof(minVersion) : nullptr;
+  }
+
+  int32_t* get_minVersion() & {
+    return minVersion_ref() ? std::addressof(minVersion) : nullptr;
+  }
+  int32_t* get_minVersion() && = delete;
+
+  int32_t& set_minVersion(int32_t minVersion_) {
+    minVersion = minVersion_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.minVersion = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return minVersion;
+  }
+
+  const int32_t* get_maxVersion() const& {
+    return maxVersion_ref() ? std::addressof(maxVersion) : nullptr;
+  }
+
+  int32_t* get_maxVersion() & {
+    return maxVersion_ref() ? std::addressof(maxVersion) : nullptr;
+  }
+  int32_t* get_maxVersion() && = delete;
+
+  int32_t& set_maxVersion(int32_t maxVersion_) {
+    maxVersion = maxVersion_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+    __isset.maxVersion = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+    return maxVersion;
   }
 
   template <class Protocol_>
@@ -1509,9 +4332,11 @@ uint32_t RequestSetupMetadata::read(Protocol_* iprot) {
 
 }} // apache::thrift
 namespace apache { namespace thrift {
-class HeadersPayloadContent final : private apache::thrift::detail::st::ComparisonOperators<HeadersPayloadContent> {
+class HeadersPayloadContent final  {
  public:
+  using __fbthrift_cpp2_type = HeadersPayloadContent;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   HeadersPayloadContent() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -1524,17 +4349,36 @@ class HeadersPayloadContent final : private apache::thrift::detail::st::Comparis
   HeadersPayloadContent& operator=(HeadersPayloadContent&&) = default;
 
   HeadersPayloadContent& operator=(const HeadersPayloadContent&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
   ::std::map<::std::string, ::std::string> otherMetadata;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool otherMetadata;
   } __isset = {};
   bool operator==(const HeadersPayloadContent& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const HeadersPayloadContent& __x, const HeadersPayloadContent& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const HeadersPayloadContent& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const HeadersPayloadContent& __x, const HeadersPayloadContent& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const HeadersPayloadContent& __x, const HeadersPayloadContent& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const HeadersPayloadContent& __x, const HeadersPayloadContent& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::map<::std::string, ::std::string>&> otherMetadata_ref() const& {
     return {otherMetadata, __isset.otherMetadata};
   }
@@ -1550,6 +4394,7 @@ class HeadersPayloadContent final : private apache::thrift::detail::st::Comparis
   FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::map<::std::string, ::std::string>&&> otherMetadata_ref() && {
     return {std::move(otherMetadata), __isset.otherMetadata};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   const ::std::map<::std::string, ::std::string>* get_otherMetadata() const&;
   ::std::map<::std::string, ::std::string>* get_otherMetadata() &;
   ::std::map<::std::string, ::std::string>* get_otherMetadata() && = delete;
@@ -1557,7 +4402,9 @@ class HeadersPayloadContent final : private apache::thrift::detail::st::Comparis
   template <typename T_HeadersPayloadContent_otherMetadata_struct_setter = ::std::map<::std::string, ::std::string>>
   ::std::map<::std::string, ::std::string>& set_otherMetadata(T_HeadersPayloadContent_otherMetadata_struct_setter&& otherMetadata_) {
     otherMetadata = std::forward<T_HeadersPayloadContent_otherMetadata_struct_setter>(otherMetadata_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.otherMetadata = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return otherMetadata;
   }
 
@@ -1588,9 +4435,11 @@ uint32_t HeadersPayloadContent::read(Protocol_* iprot) {
 
 }} // apache::thrift
 namespace apache { namespace thrift {
-class HeadersPayloadMetadata final : private apache::thrift::detail::st::ComparisonOperators<HeadersPayloadMetadata> {
+class HeadersPayloadMetadata final  {
  public:
+  using __fbthrift_cpp2_type = HeadersPayloadMetadata;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   HeadersPayloadMetadata() :
       compression( ::apache::thrift::CompressionAlgorithm::NONE) {}
   // FragileConstructor for use in initialization lists only.
@@ -1604,17 +4453,36 @@ class HeadersPayloadMetadata final : private apache::thrift::detail::st::Compari
   HeadersPayloadMetadata& operator=(HeadersPayloadMetadata&&) = default;
 
   HeadersPayloadMetadata& operator=(const HeadersPayloadMetadata&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  private:
    ::apache::thrift::CompressionAlgorithm compression;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool compression;
   } __isset = {};
   bool operator==(const HeadersPayloadMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const HeadersPayloadMetadata& __x, const HeadersPayloadMetadata& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const HeadersPayloadMetadata& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const HeadersPayloadMetadata& __x, const HeadersPayloadMetadata& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const HeadersPayloadMetadata& __x, const HeadersPayloadMetadata& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const HeadersPayloadMetadata& __x, const HeadersPayloadMetadata& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const  ::apache::thrift::CompressionAlgorithm&> compression_ref() const& {
     return {compression, __isset.compression};
   }
@@ -1630,19 +4498,22 @@ class HeadersPayloadMetadata final : private apache::thrift::detail::st::Compari
   FOLLY_ERASE ::apache::thrift::optional_field_ref< ::apache::thrift::CompressionAlgorithm&&> compression_ref() && {
     return {std::move(compression), __isset.compression};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const  ::apache::thrift::CompressionAlgorithm* get_compression() const& {
-    return __isset.compression ? std::addressof(compression) : nullptr;
+    return compression_ref() ? std::addressof(compression) : nullptr;
   }
 
    ::apache::thrift::CompressionAlgorithm* get_compression() & {
-    return __isset.compression ? std::addressof(compression) : nullptr;
+    return compression_ref() ? std::addressof(compression) : nullptr;
   }
    ::apache::thrift::CompressionAlgorithm* get_compression() && = delete;
 
    ::apache::thrift::CompressionAlgorithm& set_compression( ::apache::thrift::CompressionAlgorithm compression_) {
     compression = compression_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.compression = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return compression;
   }
 

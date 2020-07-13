@@ -174,9 +174,11 @@ class GoAwayRequest;
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace facebook { namespace memcache { namespace thrift {
-class McVersionRequest final : private apache::thrift::detail::st::ComparisonOperators<McVersionRequest> {
+class McVersionRequest final  {
  public:
+  using __fbthrift_cpp2_type = McVersionRequest;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McVersionRequest() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -189,17 +191,36 @@ class McVersionRequest final : private apache::thrift::detail::st::ComparisonOpe
   McVersionRequest& operator=(McVersionRequest&&) = default;
 
   McVersionRequest& operator=(const McVersionRequest&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
    ::carbon::thrift::IOBufKey key;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
   } __isset = {};
   bool operator==(const McVersionRequest& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const McVersionRequest& __x, const McVersionRequest& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const McVersionRequest& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const McVersionRequest& __x, const McVersionRequest& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const McVersionRequest& __x, const McVersionRequest& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const McVersionRequest& __x, const McVersionRequest& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T =  ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -219,6 +240,7 @@ class McVersionRequest final : private apache::thrift::detail::st::ComparisonOpe
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const  ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -231,7 +253,9 @@ class McVersionRequest final : private apache::thrift::detail::st::ComparisonOpe
   template <typename T_McVersionRequest_key_struct_setter =  ::carbon::thrift::IOBufKey>
    ::carbon::thrift::IOBufKey& set_key(T_McVersionRequest_key_struct_setter&& key_) {
     key = std::forward<T_McVersionRequest_key_struct_setter>(key_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -262,9 +286,11 @@ uint32_t McVersionRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McVersionReply final : private apache::thrift::detail::st::ComparisonOperators<McVersionReply> {
+class McVersionReply final  {
  public:
+  using __fbthrift_cpp2_type = McVersionReply;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McVersionReply() :
       result( ::carbon::Result::UNKNOWN),
       appSpecificErrorCode(0) {}
@@ -279,6 +305,7 @@ class McVersionReply final : private apache::thrift::detail::st::ComparisonOpera
   McVersionReply& operator=(McVersionReply&&) = default;
 
   McVersionReply& operator=(const McVersionReply&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
    ::carbon::Result result;
@@ -290,6 +317,7 @@ class McVersionReply final : private apache::thrift::detail::st::ComparisonOpera
   int16_t appSpecificErrorCode;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
     bool value;
@@ -297,8 +325,25 @@ class McVersionReply final : private apache::thrift::detail::st::ComparisonOpera
     bool appSpecificErrorCode;
   } __isset = {};
   bool operator==(const McVersionReply& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const McVersionReply& __x, const McVersionReply& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const McVersionReply& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const McVersionReply& __x, const McVersionReply& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const McVersionReply& __x, const McVersionReply& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const McVersionReply& __x, const McVersionReply& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T =  ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -318,7 +363,9 @@ class McVersionReply final : private apache::thrift::detail::st::ComparisonOpera
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = folly::IOBuf>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> value_ref() const& {
     return {this->value, __isset.value};
@@ -338,7 +385,9 @@ class McVersionReply final : private apache::thrift::detail::st::ComparisonOpera
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> value_ref() && {
     return {std::move(this->value), __isset.value};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -358,7 +407,9 @@ class McVersionReply final : private apache::thrift::detail::st::ComparisonOpera
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -378,6 +429,7 @@ class McVersionReply final : private apache::thrift::detail::st::ComparisonOpera
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
    ::carbon::Result get_result() const {
     return result;
@@ -385,7 +437,9 @@ class McVersionReply final : private apache::thrift::detail::st::ComparisonOpera
 
    ::carbon::Result& set_result( ::carbon::Result result_) {
     result = result_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -400,7 +454,9 @@ class McVersionReply final : private apache::thrift::detail::st::ComparisonOpera
   template <typename T_McVersionReply_value_struct_setter = folly::IOBuf>
   folly::IOBuf& set_value(T_McVersionReply_value_struct_setter&& value_) {
     value = std::forward<T_McVersionReply_value_struct_setter>(value_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.value = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return value;
   }
 
@@ -415,7 +471,9 @@ class McVersionReply final : private apache::thrift::detail::st::ComparisonOpera
   template <typename T_McVersionReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McVersionReply_message_struct_setter&& message_) {
     message = std::forward<T_McVersionReply_message_struct_setter>(message_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -425,7 +483,9 @@ class McVersionReply final : private apache::thrift::detail::st::ComparisonOpera
 
   int16_t& set_appSpecificErrorCode(int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -456,9 +516,11 @@ uint32_t McVersionReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McStatsRequest final : private apache::thrift::detail::st::ComparisonOperators<McStatsRequest> {
+class McStatsRequest final  {
  public:
+  using __fbthrift_cpp2_type = McStatsRequest;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McStatsRequest() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -471,17 +533,36 @@ class McStatsRequest final : private apache::thrift::detail::st::ComparisonOpera
   McStatsRequest& operator=(McStatsRequest&&) = default;
 
   McStatsRequest& operator=(const McStatsRequest&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
    ::carbon::thrift::IOBufKey key;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
   } __isset = {};
   bool operator==(const McStatsRequest& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const McStatsRequest& __x, const McStatsRequest& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const McStatsRequest& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const McStatsRequest& __x, const McStatsRequest& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const McStatsRequest& __x, const McStatsRequest& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const McStatsRequest& __x, const McStatsRequest& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T =  ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -501,6 +582,7 @@ class McStatsRequest final : private apache::thrift::detail::st::ComparisonOpera
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const  ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -513,7 +595,9 @@ class McStatsRequest final : private apache::thrift::detail::st::ComparisonOpera
   template <typename T_McStatsRequest_key_struct_setter =  ::carbon::thrift::IOBufKey>
    ::carbon::thrift::IOBufKey& set_key(T_McStatsRequest_key_struct_setter&& key_) {
     key = std::forward<T_McStatsRequest_key_struct_setter>(key_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -544,9 +628,11 @@ uint32_t McStatsRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McStatsReply final : private apache::thrift::detail::st::ComparisonOperators<McStatsReply> {
+class McStatsReply final  {
  public:
+  using __fbthrift_cpp2_type = McStatsReply;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McStatsReply() :
       result( ::carbon::Result::UNKNOWN),
       appSpecificErrorCode(0) {}
@@ -561,6 +647,7 @@ class McStatsReply final : private apache::thrift::detail::st::ComparisonOperato
   McStatsReply& operator=(McStatsReply&&) = default;
 
   McStatsReply& operator=(const McStatsReply&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
    ::carbon::Result result;
@@ -572,6 +659,7 @@ class McStatsReply final : private apache::thrift::detail::st::ComparisonOperato
   int16_t appSpecificErrorCode;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
     bool message;
@@ -579,8 +667,25 @@ class McStatsReply final : private apache::thrift::detail::st::ComparisonOperato
     bool appSpecificErrorCode;
   } __isset = {};
   bool operator==(const McStatsReply& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const McStatsReply& __x, const McStatsReply& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const McStatsReply& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const McStatsReply& __x, const McStatsReply& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const McStatsReply& __x, const McStatsReply& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const McStatsReply& __x, const McStatsReply& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T =  ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -600,7 +705,9 @@ class McStatsReply final : private apache::thrift::detail::st::ComparisonOperato
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -620,7 +727,9 @@ class McStatsReply final : private apache::thrift::detail::st::ComparisonOperato
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::vector<::std::string>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> stats_ref() const& {
     return {this->stats, __isset.stats};
@@ -640,7 +749,9 @@ class McStatsReply final : private apache::thrift::detail::st::ComparisonOperato
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> stats_ref() && {
     return {std::move(this->stats), __isset.stats};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -660,6 +771,7 @@ class McStatsReply final : private apache::thrift::detail::st::ComparisonOperato
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
    ::carbon::Result get_result() const {
     return result;
@@ -667,7 +779,9 @@ class McStatsReply final : private apache::thrift::detail::st::ComparisonOperato
 
    ::carbon::Result& set_result( ::carbon::Result result_) {
     result = result_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -682,7 +796,9 @@ class McStatsReply final : private apache::thrift::detail::st::ComparisonOperato
   template <typename T_McStatsReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McStatsReply_message_struct_setter&& message_) {
     message = std::forward<T_McStatsReply_message_struct_setter>(message_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
   const ::std::vector<::std::string>& get_stats() const&;
@@ -691,7 +807,9 @@ class McStatsReply final : private apache::thrift::detail::st::ComparisonOperato
   template <typename T_McStatsReply_stats_struct_setter = ::std::vector<::std::string>>
   ::std::vector<::std::string>& set_stats(T_McStatsReply_stats_struct_setter&& stats_) {
     stats = std::forward<T_McStatsReply_stats_struct_setter>(stats_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.stats = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return stats;
   }
 
@@ -701,7 +819,9 @@ class McStatsReply final : private apache::thrift::detail::st::ComparisonOperato
 
   int16_t& set_appSpecificErrorCode(int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -732,9 +852,11 @@ uint32_t McStatsReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McShutdownRequest final : private apache::thrift::detail::st::ComparisonOperators<McShutdownRequest> {
+class McShutdownRequest final  {
  public:
+  using __fbthrift_cpp2_type = McShutdownRequest;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McShutdownRequest() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -747,17 +869,36 @@ class McShutdownRequest final : private apache::thrift::detail::st::ComparisonOp
   McShutdownRequest& operator=(McShutdownRequest&&) = default;
 
   McShutdownRequest& operator=(const McShutdownRequest&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
    ::carbon::thrift::IOBufKey key;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
   } __isset = {};
   bool operator==(const McShutdownRequest& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const McShutdownRequest& __x, const McShutdownRequest& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const McShutdownRequest& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const McShutdownRequest& __x, const McShutdownRequest& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const McShutdownRequest& __x, const McShutdownRequest& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const McShutdownRequest& __x, const McShutdownRequest& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T =  ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -777,6 +918,7 @@ class McShutdownRequest final : private apache::thrift::detail::st::ComparisonOp
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const  ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -789,7 +931,9 @@ class McShutdownRequest final : private apache::thrift::detail::st::ComparisonOp
   template <typename T_McShutdownRequest_key_struct_setter =  ::carbon::thrift::IOBufKey>
    ::carbon::thrift::IOBufKey& set_key(T_McShutdownRequest_key_struct_setter&& key_) {
     key = std::forward<T_McShutdownRequest_key_struct_setter>(key_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -820,9 +964,11 @@ uint32_t McShutdownRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McShutdownReply final : private apache::thrift::detail::st::ComparisonOperators<McShutdownReply> {
+class McShutdownReply final  {
  public:
+  using __fbthrift_cpp2_type = McShutdownReply;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McShutdownReply() :
       result( ::carbon::Result::UNKNOWN),
       appSpecificErrorCode(0) {}
@@ -837,6 +983,7 @@ class McShutdownReply final : private apache::thrift::detail::st::ComparisonOper
   McShutdownReply& operator=(McShutdownReply&&) = default;
 
   McShutdownReply& operator=(const McShutdownReply&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
    ::carbon::Result result;
@@ -846,14 +993,32 @@ class McShutdownReply final : private apache::thrift::detail::st::ComparisonOper
   int16_t appSpecificErrorCode;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
   bool operator==(const McShutdownReply& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const McShutdownReply& __x, const McShutdownReply& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const McShutdownReply& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const McShutdownReply& __x, const McShutdownReply& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const McShutdownReply& __x, const McShutdownReply& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const McShutdownReply& __x, const McShutdownReply& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T =  ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -873,7 +1038,9 @@ class McShutdownReply final : private apache::thrift::detail::st::ComparisonOper
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -893,7 +1060,9 @@ class McShutdownReply final : private apache::thrift::detail::st::ComparisonOper
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -913,6 +1082,7 @@ class McShutdownReply final : private apache::thrift::detail::st::ComparisonOper
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
    ::carbon::Result get_result() const {
     return result;
@@ -920,7 +1090,9 @@ class McShutdownReply final : private apache::thrift::detail::st::ComparisonOper
 
    ::carbon::Result& set_result( ::carbon::Result result_) {
     result = result_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -935,7 +1107,9 @@ class McShutdownReply final : private apache::thrift::detail::st::ComparisonOper
   template <typename T_McShutdownReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McShutdownReply_message_struct_setter&& message_) {
     message = std::forward<T_McShutdownReply_message_struct_setter>(message_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -945,7 +1119,9 @@ class McShutdownReply final : private apache::thrift::detail::st::ComparisonOper
 
   int16_t& set_appSpecificErrorCode(int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -976,9 +1152,11 @@ uint32_t McShutdownReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McQuitRequest final : private apache::thrift::detail::st::ComparisonOperators<McQuitRequest> {
+class McQuitRequest final  {
  public:
+  using __fbthrift_cpp2_type = McQuitRequest;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McQuitRequest() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -991,17 +1169,36 @@ class McQuitRequest final : private apache::thrift::detail::st::ComparisonOperat
   McQuitRequest& operator=(McQuitRequest&&) = default;
 
   McQuitRequest& operator=(const McQuitRequest&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
    ::carbon::thrift::IOBufKey key;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
   } __isset = {};
   bool operator==(const McQuitRequest& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const McQuitRequest& __x, const McQuitRequest& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const McQuitRequest& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const McQuitRequest& __x, const McQuitRequest& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const McQuitRequest& __x, const McQuitRequest& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const McQuitRequest& __x, const McQuitRequest& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T =  ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -1021,6 +1218,7 @@ class McQuitRequest final : private apache::thrift::detail::st::ComparisonOperat
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const  ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -1033,7 +1231,9 @@ class McQuitRequest final : private apache::thrift::detail::st::ComparisonOperat
   template <typename T_McQuitRequest_key_struct_setter =  ::carbon::thrift::IOBufKey>
    ::carbon::thrift::IOBufKey& set_key(T_McQuitRequest_key_struct_setter&& key_) {
     key = std::forward<T_McQuitRequest_key_struct_setter>(key_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -1064,9 +1264,11 @@ uint32_t McQuitRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McQuitReply final : private apache::thrift::detail::st::ComparisonOperators<McQuitReply> {
+class McQuitReply final  {
  public:
+  using __fbthrift_cpp2_type = McQuitReply;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McQuitReply() :
       result( ::carbon::Result::UNKNOWN),
       appSpecificErrorCode(0) {}
@@ -1081,6 +1283,7 @@ class McQuitReply final : private apache::thrift::detail::st::ComparisonOperator
   McQuitReply& operator=(McQuitReply&&) = default;
 
   McQuitReply& operator=(const McQuitReply&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
    ::carbon::Result result;
@@ -1090,14 +1293,32 @@ class McQuitReply final : private apache::thrift::detail::st::ComparisonOperator
   int16_t appSpecificErrorCode;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
     bool message;
     bool appSpecificErrorCode;
   } __isset = {};
   bool operator==(const McQuitReply& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const McQuitReply& __x, const McQuitReply& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const McQuitReply& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const McQuitReply& __x, const McQuitReply& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const McQuitReply& __x, const McQuitReply& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const McQuitReply& __x, const McQuitReply& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T =  ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -1117,7 +1338,9 @@ class McQuitReply final : private apache::thrift::detail::st::ComparisonOperator
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -1137,7 +1360,9 @@ class McQuitReply final : private apache::thrift::detail::st::ComparisonOperator
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -1157,6 +1382,7 @@ class McQuitReply final : private apache::thrift::detail::st::ComparisonOperator
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
    ::carbon::Result get_result() const {
     return result;
@@ -1164,7 +1390,9 @@ class McQuitReply final : private apache::thrift::detail::st::ComparisonOperator
 
    ::carbon::Result& set_result( ::carbon::Result result_) {
     result = result_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -1179,7 +1407,9 @@ class McQuitReply final : private apache::thrift::detail::st::ComparisonOperator
   template <typename T_McQuitReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McQuitReply_message_struct_setter&& message_) {
     message = std::forward<T_McQuitReply_message_struct_setter>(message_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -1189,7 +1419,9 @@ class McQuitReply final : private apache::thrift::detail::st::ComparisonOperator
 
   int16_t& set_appSpecificErrorCode(int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -1220,9 +1452,11 @@ uint32_t McQuitReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McExecRequest final : private apache::thrift::detail::st::ComparisonOperators<McExecRequest> {
+class McExecRequest final  {
  public:
+  using __fbthrift_cpp2_type = McExecRequest;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McExecRequest() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -1235,17 +1469,36 @@ class McExecRequest final : private apache::thrift::detail::st::ComparisonOperat
   McExecRequest& operator=(McExecRequest&&) = default;
 
   McExecRequest& operator=(const McExecRequest&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
    ::carbon::thrift::IOBufKey key;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool key;
   } __isset = {};
   bool operator==(const McExecRequest& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const McExecRequest& __x, const McExecRequest& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const McExecRequest& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const McExecRequest& __x, const McExecRequest& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const McExecRequest& __x, const McExecRequest& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const McExecRequest& __x, const McExecRequest& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T =  ::carbon::thrift::IOBufKey>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
     return {this->key, __isset.key};
@@ -1265,6 +1518,7 @@ class McExecRequest final : private apache::thrift::detail::st::ComparisonOperat
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
     return {std::move(this->key), __isset.key};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   const  ::carbon::thrift::IOBufKey& get_key() const& {
     return key;
@@ -1277,7 +1531,9 @@ class McExecRequest final : private apache::thrift::detail::st::ComparisonOperat
   template <typename T_McExecRequest_key_struct_setter =  ::carbon::thrift::IOBufKey>
    ::carbon::thrift::IOBufKey& set_key(T_McExecRequest_key_struct_setter&& key_) {
     key = std::forward<T_McExecRequest_key_struct_setter>(key_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.key = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return key;
   }
 
@@ -1308,9 +1564,11 @@ uint32_t McExecRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McExecReply final : private apache::thrift::detail::st::ComparisonOperators<McExecReply> {
+class McExecReply final  {
  public:
+  using __fbthrift_cpp2_type = McExecReply;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McExecReply() :
       result( ::carbon::Result::UNKNOWN),
       appSpecificErrorCode(0) {}
@@ -1325,6 +1583,7 @@ class McExecReply final : private apache::thrift::detail::st::ComparisonOperator
   McExecReply& operator=(McExecReply&&) = default;
 
   McExecReply& operator=(const McExecReply&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
    ::carbon::Result result;
@@ -1336,6 +1595,7 @@ class McExecReply final : private apache::thrift::detail::st::ComparisonOperator
   int16_t appSpecificErrorCode;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
     bool response;
@@ -1343,8 +1603,25 @@ class McExecReply final : private apache::thrift::detail::st::ComparisonOperator
     bool appSpecificErrorCode;
   } __isset = {};
   bool operator==(const McExecReply& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const McExecReply& __x, const McExecReply& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const McExecReply& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const McExecReply& __x, const McExecReply& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const McExecReply& __x, const McExecReply& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const McExecReply& __x, const McExecReply& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T =  ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -1364,7 +1641,9 @@ class McExecReply final : private apache::thrift::detail::st::ComparisonOperator
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> response_ref() const& {
     return {this->response, __isset.response};
@@ -1384,7 +1663,9 @@ class McExecReply final : private apache::thrift::detail::st::ComparisonOperator
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> response_ref() && {
     return {std::move(this->response), __isset.response};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
     return {this->message, __isset.message};
@@ -1404,7 +1685,9 @@ class McExecReply final : private apache::thrift::detail::st::ComparisonOperator
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
     return {std::move(this->message), __isset.message};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
     return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
@@ -1424,6 +1707,7 @@ class McExecReply final : private apache::thrift::detail::st::ComparisonOperator
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
     return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
    ::carbon::Result get_result() const {
     return result;
@@ -1431,7 +1715,9 @@ class McExecReply final : private apache::thrift::detail::st::ComparisonOperator
 
    ::carbon::Result& set_result( ::carbon::Result result_) {
     result = result_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -1446,7 +1732,9 @@ class McExecReply final : private apache::thrift::detail::st::ComparisonOperator
   template <typename T_McExecReply_response_struct_setter = ::std::string>
   ::std::string& set_response(T_McExecReply_response_struct_setter&& response_) {
     response = std::forward<T_McExecReply_response_struct_setter>(response_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.response = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return response;
   }
 
@@ -1461,7 +1749,9 @@ class McExecReply final : private apache::thrift::detail::st::ComparisonOperator
   template <typename T_McExecReply_message_struct_setter = ::std::string>
   ::std::string& set_message(T_McExecReply_message_struct_setter&& message_) {
     message = std::forward<T_McExecReply_message_struct_setter>(message_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.message = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return message;
   }
 
@@ -1471,7 +1761,9 @@ class McExecReply final : private apache::thrift::detail::st::ComparisonOperator
 
   int16_t& set_appSpecificErrorCode(int16_t appSpecificErrorCode_) {
     appSpecificErrorCode = appSpecificErrorCode_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.appSpecificErrorCode = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return appSpecificErrorCode;
   }
 
@@ -1502,9 +1794,11 @@ uint32_t McExecReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class GoAwayAcknowledgement final : private apache::thrift::detail::st::ComparisonOperators<GoAwayAcknowledgement> {
+class GoAwayAcknowledgement final  {
  public:
+  using __fbthrift_cpp2_type = GoAwayAcknowledgement;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   GoAwayAcknowledgement() {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -1517,9 +1811,26 @@ class GoAwayAcknowledgement final : private apache::thrift::detail::st::Comparis
   GoAwayAcknowledgement& operator=(GoAwayAcknowledgement&&) = default;
 
   GoAwayAcknowledgement& operator=(const GoAwayAcknowledgement&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
   bool operator==(const GoAwayAcknowledgement& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const GoAwayAcknowledgement& __x, const GoAwayAcknowledgement& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const GoAwayAcknowledgement& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const GoAwayAcknowledgement& __x, const GoAwayAcknowledgement& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const GoAwayAcknowledgement& __x, const GoAwayAcknowledgement& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const GoAwayAcknowledgement& __x, const GoAwayAcknowledgement& __y) {
+    return !(__x < __y);
+  }
+#endif
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -1548,9 +1859,11 @@ uint32_t GoAwayAcknowledgement::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class GoAwayRequest final : private apache::thrift::detail::st::ComparisonOperators<GoAwayRequest> {
+class GoAwayRequest final  {
  public:
+  using __fbthrift_cpp2_type = GoAwayRequest;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   GoAwayRequest() :
       result( ::carbon::Result::UNKNOWN) {}
   // FragileConstructor for use in initialization lists only.
@@ -1564,6 +1877,7 @@ class GoAwayRequest final : private apache::thrift::detail::st::ComparisonOperat
   GoAwayRequest& operator=(GoAwayRequest&&) = default;
 
   GoAwayRequest& operator=(const GoAwayRequest&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
    ::carbon::Result result;
@@ -1571,13 +1885,31 @@ class GoAwayRequest final : private apache::thrift::detail::st::ComparisonOperat
   ::std::string reason;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool result;
     bool reason;
   } __isset = {};
   bool operator==(const GoAwayRequest& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const GoAwayRequest& __x, const GoAwayRequest& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const GoAwayRequest& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const GoAwayRequest& __x, const GoAwayRequest& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const GoAwayRequest& __x, const GoAwayRequest& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const GoAwayRequest& __x, const GoAwayRequest& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T =  ::carbon::Result>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
     return {this->result, __isset.result};
@@ -1597,7 +1929,9 @@ class GoAwayRequest final : private apache::thrift::detail::st::ComparisonOperat
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
     return {std::move(this->result), __isset.result};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> reason_ref() const& {
     return {this->reason, __isset.reason};
@@ -1617,6 +1951,7 @@ class GoAwayRequest final : private apache::thrift::detail::st::ComparisonOperat
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> reason_ref() && {
     return {std::move(this->reason), __isset.reason};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
    ::carbon::Result get_result() const {
     return result;
@@ -1624,7 +1959,9 @@ class GoAwayRequest final : private apache::thrift::detail::st::ComparisonOperat
 
    ::carbon::Result& set_result( ::carbon::Result result_) {
     result = result_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.result = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return result;
   }
 
@@ -1639,7 +1976,9 @@ class GoAwayRequest final : private apache::thrift::detail::st::ComparisonOperat
   template <typename T_GoAwayRequest_reason_struct_setter = ::std::string>
   ::std::string& set_reason(T_GoAwayRequest_reason_struct_setter&& reason_) {
     reason = std::forward<T_GoAwayRequest_reason_struct_setter>(reason_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.reason = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return reason;
   }
 

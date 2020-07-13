@@ -338,6 +338,8 @@ void HttpServer::runOrExitProcess() {
 
   block_sync_signals_and_start_handler_thread();
 
+  ServerStats::Clear();                 // Clear stats from warmup requests
+
   if (RuntimeOption::ServerPort) {
     if (!startServer(true)) {
       startupFailure("Unable to start page server");

@@ -248,7 +248,7 @@ let build_xrefs_json (xref_map : (Hh_json.json * Pos.t list) IMap.t) =
               let start = fst (Pos.info_raw pos) in
               let length = Pos.length pos in
               let span = build_rel_bytespan_json (start - last_start) length in
-              (span :: spans, start))
+              (spans @ [span], start))
         in
         let xref =
           JSON_Object

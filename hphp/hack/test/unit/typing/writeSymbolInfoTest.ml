@@ -89,24 +89,33 @@ let test_build_xrefs _test_ctxt =
   let decl_name = "TestDecl" in
   let target_json = JSON_Object [("declaration", JSON_String decl_name)] in
   let target_id = 1 in
-  let ref_pos1 =
+  let ref_pos =
     Pos.set_file
       file
       (Pos.make_from_lnum_bol_cnum
          ~pos_file:file
-         ~pos_start:(0, 0, 0)
-         ~pos_end:(0, 0, 0))
+         ~pos_start:(2, 5, 10)
+         ~pos_end:(2, 5, 15))
   in
-  let ref_pos2 =
+  let dup_ref_pos =
     Pos.set_file
       file
       (Pos.make_from_lnum_bol_cnum
          ~pos_file:file
-         ~pos_start:(0, 0, 0)
-         ~pos_end:(0, 0, 0))
+         ~pos_start:(2, 5, 10)
+         ~pos_end:(2, 5, 15))
   in
-  let xrefs = add_xref target_json target_id ref_pos1 xrefs in
-  let xrefs = add_xref target_json target_id ref_pos2 xrefs in
+  let next_ref_pos =
+    Pos.set_file
+      file
+      (Pos.make_from_lnum_bol_cnum
+         ~pos_file:file
+         ~pos_start:(3, 25, 40)
+         ~pos_end:(3, 25, 45))
+  in
+  let xrefs = add_xref target_json target_id next_ref_pos xrefs in
+  let xrefs = add_xref target_json target_id ref_pos xrefs in
+  let xrefs = add_xref target_json target_id dup_ref_pos xrefs in
   let file_map : (Hh_json.json * Pos.t list) IMap.t =
     SMap.find (Relative_path.to_absolute file) xrefs
   in
@@ -122,9 +131,17 @@ let test_build_xrefs _test_ctxt =
   match ranges_arr with
   | Ok (ranges, _) ->
     Int_asserter.assert_equals
-      1
+      2
       (List.length ranges)
-      "Duplicate references removed"
+      "Duplicate references removed";
+    let offset = return (List.nth ranges 1) >>= get_number_int "offset" in
+    (match offset with
+    | Ok (offset2, _) ->
+      Int_asserter.assert_equals
+        30
+        offset2
+        "Byte offset between references calculated correctly"
+    | _ -> assert_failure "Could not extract offset")
   | _ -> assert_failure "Could not extract ranges"
 
 let () =

@@ -69,11 +69,6 @@ void AllocSamples::addStack(bool skipTop) {
     if (iter->phpStack) break;
     iter->phpStack = stack;
   }
-  const StaticString s_DYNO_SCRIPT_FILENAME("DYNO_SCRIPT_FILENAME");
-  auto const name = ServerNote::Get(s_DYNO_SCRIPT_FILENAME);
-  if (!name.empty()) {
-    script = name.toCppString();
-  }
 }
 
 void AllocSamples::logSamples() {
@@ -102,7 +97,6 @@ void AllocSamples::logSamples() {
     if (RuntimeOption::EvalHeapAllocSampleNativeStack) {
       entry.setStackTrace("native_stack", sample.nativeStack);
     }
-    entry.setStr("script", script);
     StructuredLog::log("hhvm_xenon_heap_profiler", entry);
   }
   clear();

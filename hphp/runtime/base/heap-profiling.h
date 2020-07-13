@@ -50,8 +50,6 @@ struct AllocSamples : public std::vector<HeapAllocSample,
 
  private:
   void logSamples();
-
-  std::string script;
 };
 
 }

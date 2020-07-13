@@ -580,8 +580,7 @@ public:
   /*
    * Comparisons.
    */
-  int compare(const ArrayData* v2) const;
-  bool equal(const ArrayData* v2, bool strict) const;
+  bool same(const ArrayData* v2) const;
 
   static bool Equal(const ArrayData*, const ArrayData*);
   static bool NotEqual(const ArrayData*, const ArrayData*);

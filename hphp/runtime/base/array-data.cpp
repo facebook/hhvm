@@ -753,7 +753,7 @@ bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
   if (strict) {
     for (ArrayIter iter1{ad1}, iter2{ad2}; iter1; ++iter1, ++iter2) {
       assertx(iter2);
-      if (!same(iter1.first(), iter2.first()) ||
+      if (!HPHP::same(iter1.first(), iter2.first()) ||
           !tvSame(iter1.secondVal(), iter2.secondVal())) {
         return false;
       }
@@ -860,45 +860,7 @@ int64_t ArrayData::Compare(const ArrayData* ad1, const ArrayData* ad2) {
   return CompareHelper(ad1, ad2);
 }
 
-int ArrayData::compare(const ArrayData* v2) const {
-  assertx(v2);
-
-  if (isPHPArrayType()) {
-    if (UNLIKELY(!v2->isPHPArrayType())) {
-      if (UNLIKELY(checkHACCompare())) {
-        raiseHackArrCompatArrHackArrCmp();
-      }
-      if (v2->isVecType()) throw_vec_compare_exception();
-      if (v2->isDictType()) throw_dict_compare_exception();
-      if (v2->isKeysetType()) throw_keyset_compare_exception();
-      not_reached();
-    }
-    return Compare(this, v2);
-  }
-
-  if (isVecType()) {
-    if (UNLIKELY(!v2->isVecType())) {
-      if (UNLIKELY(checkHACCompare() && v2->isPHPArrayType())) {
-        raiseHackArrCompatArrHackArrCmp();
-      }
-      throw_vec_compare_exception();
-    }
-    if (!bothVanilla(this, v2)) return Compare(this, v2);
-    assertx(isVecKind() && v2->isVecKind());
-    return PackedArray::VecCmp(this, v2);
-  }
-
-  if (UNLIKELY(checkHACCompare() && v2->isPHPArrayType())) {
-    raiseHackArrCompatArrHackArrCmp();
-  }
-
-  if (isDictType()) throw_dict_compare_exception();
-  if (isKeysetType()) throw_keyset_compare_exception();
-
-  not_reached();
-}
-
-bool ArrayData::equal(const ArrayData* v2, bool strict) const {
+bool ArrayData::same(const ArrayData* v2) const {
   assertx(v2);
 
   if (toDataType() != v2->toDataType()) {
@@ -909,24 +871,12 @@ bool ArrayData::equal(const ArrayData* v2, bool strict) const {
   }
 
   if (isPHPArrayType() || !bothVanilla(this, v2)) {
-    return strict ? Same(this, v2) : Equal(this, v2);
+    return Same(this, v2);
   }
 
-  if (isVecType()) {
-    return strict
-      ? PackedArray::VecSame(this, v2) : PackedArray::VecEqual(this, v2);
-  }
-
-  if (isDictKind()) {
-    return strict
-      ? MixedArray::DictSame(this, v2) : MixedArray::DictEqual(this, v2);
-  }
-
-  if (isKeysetKind()) {
-    return strict ? SetArray::Same(this, v2) : SetArray::Equal(this, v2);
-  }
-
-  not_reached();
+  if (isVecKind())  return PackedArray::VecSame(this, v2);
+  if (isDictKind()) return MixedArray::DictSame(this, v2);
+  return SetArray::Same(this, v2);
 }
 
 Variant ArrayData::reset() {

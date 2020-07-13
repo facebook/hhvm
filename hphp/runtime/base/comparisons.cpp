@@ -54,15 +54,6 @@ bool same(const Variant& v1, const String& v2) {
   return same(v1, sd);
 }
 
-bool same(const Variant& v1, const Array& v2) {
-  bool null1 = v1.isNull();
-  bool null2 = v2.isNull();
-  if (null1 && null2) return true;
-  if (null1 || null2) return false;
-  if (!v1.isArray()) return false;
-  return v1.asCArrRef().same(v2);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 bool equal(int64_t v1, const StringData *v2) {

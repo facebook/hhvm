@@ -258,7 +258,7 @@ bool typeStructureIsType(
       auto const inputGenerics = getGenericTypesOpt(input);
       auto const typeGenerics = getGenericTypesOpt(type);
       if (!inputGenerics) {
-        return !strict || (!typeGenerics && type->equal(input, true));
+        return !strict || (!typeGenerics && type->same(input));
       }
       return typeGenerics && typeStructureIsTypeList(*inputGenerics,
                                                      *typeGenerics,

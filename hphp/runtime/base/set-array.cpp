@@ -849,7 +849,7 @@ bool SetArray::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
       } else {
         assertx(elm1->hasStrKey());
         if (!elm2->hasStrKey()) return false;
-        if (!same(elm1->strKey(), elm2->strKey())) return false;
+        if (!HPHP::same(elm1->strKey(), elm2->strKey())) return false;
       }
       ++elm1;
       ++elm2;

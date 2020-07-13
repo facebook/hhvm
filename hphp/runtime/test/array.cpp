@@ -26,6 +26,12 @@
 
 namespace HPHP {
 
+namespace {
+bool same_arrays(const Array& a1, const Array& a2) {
+  return a1->same(a2.get());
+}
+}
+
 TEST(ARRAY, Constructors) {
   const String s_name("name");
 
@@ -252,13 +258,13 @@ TEST(Array, Offsets) {
     Array arr;
     arr.set(0, "v1");
     arr.set(1, "v2");
-    EXPECT_TRUE(equal(arr, make_varray("v1", "v2").toPHPArray()));
+    EXPECT_TRUE(same_arrays(arr, make_varray("v1", "v2").toPHPArray()));
   }
   {
     Array arr;
     arr.set(s_n1, "v1");
     arr.set(s_n2, "v2");
-    EXPECT_TRUE(equal(arr, make_map_array("n1", "v1", "n2", "v2")));
+    EXPECT_TRUE(same_arrays(arr, make_map_array("n1", "v1", "n2", "v2")));
   }
   {
     Array arr;
@@ -266,7 +272,7 @@ TEST(Array, Offsets) {
     Variant v2 = String("v2");
     tvSet(*v1.asTypedValue(), arr.lvalForce(0));
     tvSet(*v2.asTypedValue(), arr.lvalForce(1));
-    EXPECT_TRUE(equal(arr, make_varray("v1", "v2").toPHPArray()));
+    EXPECT_TRUE(same_arrays(arr, make_varray("v1", "v2").toPHPArray()));
   }
   {
     Array arr;
@@ -274,32 +280,32 @@ TEST(Array, Offsets) {
     Variant v2 = String("v2");
     tvSet(*v1.asTypedValue(), arr.lvalForce(s_n1));
     tvSet(*v2.asTypedValue(), arr.lvalForce(s_n2));
-    EXPECT_TRUE(equal(arr, make_map_array("n1", "v1", "n2", "v2")));
+    EXPECT_TRUE(same_arrays(arr, make_map_array("n1", "v1", "n2", "v2")));
   }
   {
     Array arr;
     Variant name = "name";
     Variant value = String("value");
     tvSet(*value.asTypedValue(), arr.lvalForce(name));
-    EXPECT_TRUE(equal(arr, make_map_array("name", "value")));
+    EXPECT_TRUE(same_arrays(arr, make_map_array("name", "value")));
   }
   {
     Array arr = Array::CreateVec();
     arr.append("v1");
     arr.append("v2");
-    EXPECT_TRUE(equal(arr, make_vec_array("v1", "v2")));
+    EXPECT_TRUE(same_arrays(arr, make_vec_array("v1", "v2")));
   }
   {
     Array arr = Array::CreateDict();
     arr.set(Variant{"k1"}, Variant{"v1"});
     arr.set(Variant{"k2"}, Variant{"v2"});
-    EXPECT_TRUE(equal(arr, make_dict_array("k1", "v1", "k2", "v2")));
+    EXPECT_TRUE(same_arrays(arr, make_dict_array("k1", "v1", "k2", "v2")));
   }
   {
     Array arr = Array::CreateKeyset();
     arr.append("v1");
     arr.append("v2");
-    EXPECT_TRUE(equal(arr, make_keyset_array("v1", "v2")));
+    EXPECT_TRUE(same_arrays(arr, make_keyset_array("v1", "v2")));
   }
 
   {
@@ -372,9 +378,9 @@ TEST(ARRAY, Membership) {
     EXPECT_TRUE(arr.exists(0));
     arr.remove(0);
     EXPECT_TRUE(!arr.exists(0));
-    EXPECT_TRUE(equal(arr, make_map_array(1, "v2")));
+    EXPECT_TRUE(same_arrays(arr, make_map_array(1, "v2")));
     arr.append("v3");
-    EXPECT_TRUE(equal(arr, make_map_array(1, "v2", 2, "v3")));
+    EXPECT_TRUE(same_arrays(arr, make_map_array(1, "v2", 2, "v3")));
   }
   {
     const String s_0("0");
@@ -410,19 +416,19 @@ TEST(ARRAY, Membership) {
     EXPECT_TRUE(arr.exists(s_n1));
     arr.remove(s_n1);
     EXPECT_TRUE(!arr.exists(s_n1));
-    EXPECT_TRUE(equal(arr, make_map_array(s_n2, "v2")));
+    EXPECT_TRUE(same_arrays(arr, make_map_array(s_n2, "v2")));
     arr.append("v3");
-    EXPECT_TRUE(equal(arr, make_map_array("n2", "v2", 0, "v3")));
+    EXPECT_TRUE(same_arrays(arr, make_map_array("n2", "v2", 0, "v3")));
   }
   {
     Array arr;
     arr.append(Variant("test"));
-    EXPECT_TRUE(equal(arr, make_varray("test").toPHPArray()));
+    EXPECT_TRUE(same_arrays(arr, make_varray("test").toPHPArray()));
   }
   {
     Array arr = Array::CreateVArray();
     arr.append(Variant("test"));
-    EXPECT_TRUE(equal(arr, make_varray("test")));
+    EXPECT_TRUE(same_arrays(arr, make_varray("test")));
   }
   {
     Array arr;
@@ -496,28 +502,28 @@ TEST(ARRAY, Membership) {
 TEST(ARRAY, Merge) {
   {
     Array arr = make_varray(0) + make_varray(1);
-    EXPECT_TRUE(equal(arr, make_varray(0).toDArray()));
+    EXPECT_TRUE(same_arrays(arr, make_varray(0).toDArray()));
     arr += make_varray(0, 1);
-    EXPECT_TRUE(equal(arr, make_varray(0, 1).toDArray()));
+    EXPECT_TRUE(same_arrays(arr, make_varray(0, 1).toDArray()));
 
     arr = make_varray(0).merge(make_varray(1));
-    EXPECT_TRUE(equal(arr, make_varray(0, 1).toDArray()));
+    EXPECT_TRUE(same_arrays(arr, make_varray(0, 1).toDArray()));
     arr = arr.merge(make_varray(0, 1));
-    EXPECT_TRUE(equal(arr, make_varray(0, 1, 0, 1).toDArray()));
+    EXPECT_TRUE(same_arrays(arr, make_varray(0, 1, 0, 1).toDArray()));
 
     arr = make_varray("s0").merge(make_varray("s1"));
-    EXPECT_TRUE(equal(arr, make_varray("s0", "s1").toDArray()));
+    EXPECT_TRUE(same_arrays(arr, make_varray("s0", "s1").toDArray()));
 
     arr = make_map_array("n0", "s0") + make_map_array("n1", "s1");
-    EXPECT_TRUE(equal(arr, make_map_array("n0", "s0", "n1", "s1")));
+    EXPECT_TRUE(same_arrays(arr, make_map_array("n0", "s0", "n1", "s1")));
     arr += make_map_array("n0", "s0", "n1", "s1");
-    EXPECT_TRUE(equal(arr, make_map_array("n0", "s0", "n1", "s1")));
+    EXPECT_TRUE(same_arrays(arr, make_map_array("n0", "s0", "n1", "s1")));
 
     arr = make_map_array("n0", "s0").merge(make_map_array("n1", "s1"));
-    EXPECT_TRUE(equal(arr, make_darray("n0", "s0", "n1", "s1")));
+    EXPECT_TRUE(same_arrays(arr, make_darray("n0", "s0", "n1", "s1")));
     Array arrX = make_map_array("n0", "s2", "n1", "s3");
     arr = arr.merge(arrX);
-    EXPECT_TRUE(equal(arr, make_darray("n0", "s2", "n1", "s3")));
+    EXPECT_TRUE(same_arrays(arr, make_darray("n0", "s2", "n1", "s3")));
   }
 
   {

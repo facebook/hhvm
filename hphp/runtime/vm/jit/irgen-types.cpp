@@ -1263,7 +1263,7 @@ void emitThrowAsTypeStructException(IRGS& env) {
       bool partial = true, invalidType = true;
       maybe_resolved =
         staticallyResolveTypeStructure(env, ts, partial, invalidType);
-      if (!ts->equal(maybe_resolved, true)) {
+      if (!ts->same(maybe_resolved)) {
         auto const inputTS = cns(env, maybe_resolved);
         return {inputTS, create_catch_block(env, [&]{ decRef(env, inputTS); })};
       }

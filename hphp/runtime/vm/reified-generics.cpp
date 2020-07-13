@@ -48,7 +48,7 @@ ArrayData* addToReifiedGenericsTable(
   // Same key should never result in different values.
   // If this assertion fires, there's a high chance that two different type
   // structure mangle to the same name and they should not.
-  assertx(tsList->equal(generics, true));
+  assertx(tsList->same(generics));
   decRefArr(tsList);
   return generics;
 }

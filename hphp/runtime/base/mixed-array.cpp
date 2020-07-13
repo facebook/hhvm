@@ -1732,7 +1732,7 @@ bool MixedArray::DictEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
       } else {
         assertx(elm1->hasStrKey());
         if (!elm2->hasStrKey()) return false;
-        if (!same(elm1->skey, elm2->skey)) return false;
+        if (!HPHP::same(elm1->skey, elm2->skey)) return false;
       }
       if (!tvSame(*tvAssertPlausible(&elm1->data), *tvAssertPlausible(&elm2->data))) {
         return false;

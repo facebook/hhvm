@@ -33,7 +33,7 @@ bool same(const Variant& v1, double v2);
 bool same(const Variant& v1, const StringData* v2);
 bool same(const Variant& v1, const String& v2);
 bool same(const Variant& v1, const char* v2) = delete;
-bool same(const Variant& v1, const Array& v2);
+bool same(const Variant& v1, const Array& v2) = delete;
 bool same(const Variant& v1, const Object& v2) = delete;
 bool same(const Variant& v1, const ObjectData* v2) = delete;
 bool same(const Variant& v1, const Resource& v2) = delete;
@@ -698,55 +698,53 @@ inline bool more(const char* v1, const Variant& v2) = delete;
 ///////////////////////////////////////////////////////////////////////////////
 // Array
 
-inline bool same(const Array& v1, bool    v2) { return same(v2, v1); }
+inline bool same(const Array& v1, bool    v2) = delete;
 inline bool same(const Array& v1, int     v2) = delete;
-inline bool same(const Array& v1, int64_t v2) { return same(v2, v1); }
-inline bool same(const Array& v1, double  v2) { return same(v2, v1); }
-inline bool same(const Array& v1, const StringData *v2) { return same(v2, v1); }
-inline bool same(const Array& v1, const String& v2) { return same(v2, v1); }
+inline bool same(const Array& v1, int64_t v2) = delete;
+inline bool same(const Array& v1, double  v2) = delete;
+inline bool same(const Array& v1, const StringData *v2) = delete;
+inline bool same(const Array& v1, const String& v2) = delete;
 inline bool same(const Array& v1, const char* v2)  = delete;
-inline bool same(const Array& v1, const Array& v2) { return v1.same(v2); }
+inline bool same(const Array& v1, const Array& v2) = delete;
 inline bool same(const Array& v1, const Object& v2) = delete;
 inline bool same(const Array& /*v1*/, const Resource& /*v2*/) = delete;
-inline bool same(const Array& v1, const Variant& v2) { return same(v2, v1); }
+inline bool same(const Array& v1, const Variant& v2) = delete;
 
-inline bool equal(const Array& v1, bool    v2) { return equal(v2, v1); }
+inline bool equal(const Array& v1, bool    v2) = delete;
 inline bool equal(const Array& v1, int     v2) = delete;
-inline bool equal(const Array& v1, int64_t v2) { return equal(v2, v1); }
-inline bool equal(const Array& v1, double  v2) { return equal(v2, v1); }
-inline bool equal(const Array& v1, const StringData *v2) {
-  return equal(v2, v1);
-}
-inline bool equal(const Array& v1, const String& v2) { return equal(v2, v1); }
+inline bool equal(const Array& v1, int64_t v2) = delete;
+inline bool equal(const Array& v1, double  v2) = delete;
+inline bool equal(const Array& v1, const StringData *v2) = delete;
+inline bool equal(const Array& v1, const String& v2) = delete;
 inline bool equal(const Array& v1, const char* v2) = delete;
-inline bool equal(const Array& v1, const Array& v2) { return v1.equal(v2); }
+inline bool equal(const Array& v1, const Array& v2) = delete;
 inline bool equal(const Array& v1, const Object& v2) = delete;
-inline bool equal(const Array& /*v1*/, const Resource& /*v2*/) = delete;
-inline bool equal(const Array& v1, const Variant& v2) { return equal(v2, v1); }
+inline bool equal(const Array& v1, const Resource& v2) = delete;
+inline bool equal(const Array& v1, const Variant& v2) = delete;
 
-inline bool less(const Array& v1, bool    v2) { return more(v2, v1); }
+inline bool less(const Array& v1, bool    v2) = delete;
 inline bool less(const Array& v1, int     v2) = delete;
-inline bool less(const Array& v1, int64_t v2) { return more(v2, v1); }
-inline bool less(const Array& v1, double  v2) { return more(v2, v1); }
-inline bool less(const Array& v1, const StringData *v2) { return more(v2, v1); }
-inline bool less(const Array& v1, const String& v2) { return more(v2, v1); }
+inline bool less(const Array& v1, int64_t v2) = delete;
+inline bool less(const Array& v1, double  v2) = delete;
+inline bool less(const Array& v1, const StringData *v2) = delete;
+inline bool less(const Array& v1, const String& v2) = delete;
 inline bool less(const Array& v1, const char* v2) = delete;
-inline bool less(const Array& v1, const Array& v2) { return v1.less(v2); }
+inline bool less(const Array& v1, const Array& v2) = delete;
 inline bool less(const Array& v1, const Object& v2) = delete;
 inline bool less(const Array& v1, const Resource& /*v2*/) = delete;
-inline bool less(const Array& v1, const Variant& v2) { return v1.less(v2); }
+inline bool less(const Array& v1, const Variant& v2) = delete;
 
-inline bool more(const Array& v1, bool    v2) { return less(v2, v1); }
+inline bool more(const Array& v1, bool    v2) = delete;
 inline bool more(const Array& v1, int     v2) = delete;
-inline bool more(const Array& v1, int64_t v2) { return less(v2, v1); }
-inline bool more(const Array& v1, double  v2) { return less(v2, v1); }
-inline bool more(const Array& v1, const StringData *v2) { return less(v2, v1); }
-inline bool more(const Array& v1, const String& v2) { return less(v2, v1); }
+inline bool more(const Array& v1, int64_t v2) = delete;
+inline bool more(const Array& v1, double  v2) = delete;
+inline bool more(const Array& v1, const StringData *v2) = delete;
+inline bool more(const Array& v1, const String& v2) = delete;
 inline bool more(const Array& v1, const char* v2)  = delete;
-inline bool more(const Array& v1, const Array& v2) { return v1.more(v2); }
+inline bool more(const Array& v1, const Array& v2) = delete;
 inline bool more(const Array& v1, const Object& v2) = delete;
 inline bool more(const Array& v1, const Resource& /*v2*/) = delete;
-inline bool more(const Array& v1, const Variant& v2) { return v1.more(v2); }
+inline bool more(const Array& v1, const Variant& v2) = delete;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Object

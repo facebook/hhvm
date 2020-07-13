@@ -28,7 +28,7 @@ class ThriftMetadataServiceAsyncClient : public apache::thrift::GeneratedAsyncCl
 
   virtual void getThriftServiceMetadata(std::unique_ptr<apache::thrift::RequestCallback> callback);
   virtual void getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback);
- private:
+ protected:
   void getThriftServiceMetadataImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback);
  public:
   virtual void sync_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return);

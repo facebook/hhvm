@@ -41,7 +41,8 @@ void ThriftMetadataServiceAsyncClient::getThriftServiceMetadata(apache::thrift::
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  getThriftServiceMetadataImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)));
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  getThriftServiceMetadataImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback));
 }
 
 void ThriftMetadataServiceAsyncClient::getThriftServiceMetadataImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback) {
@@ -81,7 +82,8 @@ void ThriftMetadataServiceAsyncClient::sync_getThriftServiceMetadata(apache::thr
       this->handlers_,
       this->getServiceName(),
       "ThriftMetadataService.getThriftServiceMetadata");
-  getThriftServiceMetadataImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback));
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  getThriftServiceMetadataImpl(rpcOptions, ctx, std::move(wrappedCallback));
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -144,6 +146,8 @@ void ThriftMetadataServiceAsyncClient::getThriftServiceMetadata(folly::Function<
   getThriftServiceMetadata(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)));
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper ThriftMetadataServiceAsyncClient::recv_wrapped_getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());

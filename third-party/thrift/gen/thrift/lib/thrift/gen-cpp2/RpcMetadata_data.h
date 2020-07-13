@@ -12,30 +12,29 @@
 
 namespace apache { namespace thrift {
 
-struct _ProtocolIdEnumDataStorage {
-  using type = ProtocolId;
+template <> struct TEnumDataStorage<::apache::thrift::ProtocolId> {
+  using type = ::apache::thrift::ProtocolId;
   static constexpr const std::size_t size = 2;
-  static constexpr const std::array<ProtocolId, 2> values = {{
-    ProtocolId::BINARY,
-    ProtocolId::COMPACT,
+  static constexpr const std::array<type, 2> values = {{
+    type::BINARY,
+    type::COMPACT,
   }};
   static constexpr const std::array<folly::StringPiece, 2> names = {{
     "BINARY",
     "COMPACT",
   }};
 };
-
-struct _RpcKindEnumDataStorage {
-  using type = RpcKind;
+template <> struct TEnumDataStorage<::apache::thrift::RpcKind> {
+  using type = ::apache::thrift::RpcKind;
   static constexpr const std::size_t size = 7;
-  static constexpr const std::array<RpcKind, 7> values = {{
-    RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-    RpcKind::SINGLE_REQUEST_NO_RESPONSE,
-    RpcKind::STREAMING_REQUEST_SINGLE_RESPONSE,
-    RpcKind::STREAMING_REQUEST_NO_RESPONSE,
-    RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
-    RpcKind::STREAMING_REQUEST_STREAMING_RESPONSE,
-    RpcKind::SINK,
+  static constexpr const std::array<type, 7> values = {{
+    type::SINGLE_REQUEST_SINGLE_RESPONSE,
+    type::SINGLE_REQUEST_NO_RESPONSE,
+    type::STREAMING_REQUEST_SINGLE_RESPONSE,
+    type::STREAMING_REQUEST_NO_RESPONSE,
+    type::SINGLE_REQUEST_STREAMING_RESPONSE,
+    type::STREAMING_REQUEST_STREAMING_RESPONSE,
+    type::SINK,
   }};
   static constexpr const std::array<folly::StringPiece, 7> names = {{
     "SINGLE_REQUEST_SINGLE_RESPONSE",
@@ -47,17 +46,16 @@ struct _RpcKindEnumDataStorage {
     "SINK",
   }};
 };
-
-struct _RpcPriorityEnumDataStorage {
-  using type = RpcPriority;
+template <> struct TEnumDataStorage<::apache::thrift::RpcPriority> {
+  using type = ::apache::thrift::RpcPriority;
   static constexpr const std::size_t size = 6;
-  static constexpr const std::array<RpcPriority, 6> values = {{
-    RpcPriority::HIGH_IMPORTANT,
-    RpcPriority::HIGH,
-    RpcPriority::IMPORTANT,
-    RpcPriority::NORMAL,
-    RpcPriority::BEST_EFFORT,
-    RpcPriority::N_PRIORITIES,
+  static constexpr const std::array<type, 6> values = {{
+    type::HIGH_IMPORTANT,
+    type::HIGH,
+    type::IMPORTANT,
+    type::NORMAL,
+    type::BEST_EFFORT,
+    type::N_PRIORITIES,
   }};
   static constexpr const std::array<folly::StringPiece, 6> names = {{
     "HIGH_IMPORTANT",
@@ -68,14 +66,13 @@ struct _RpcPriorityEnumDataStorage {
     "N_PRIORITIES",
   }};
 };
-
-struct _CompressionAlgorithmEnumDataStorage {
-  using type = CompressionAlgorithm;
+template <> struct TEnumDataStorage<::apache::thrift::CompressionAlgorithm> {
+  using type = ::apache::thrift::CompressionAlgorithm;
   static constexpr const std::size_t size = 3;
-  static constexpr const std::array<CompressionAlgorithm, 3> values = {{
-    CompressionAlgorithm::NONE,
-    CompressionAlgorithm::ZLIB,
-    CompressionAlgorithm::ZSTD,
+  static constexpr const std::array<type, 3> values = {{
+    type::NONE,
+    type::ZLIB,
+    type::ZSTD,
   }};
   static constexpr const std::array<folly::StringPiece, 3> names = {{
     "NONE",
@@ -83,54 +80,81 @@ struct _CompressionAlgorithmEnumDataStorage {
     "ZSTD",
   }};
 };
-
-struct _RequestRpcMetadataFlagsEnumDataStorage {
-  using type = RequestRpcMetadataFlags;
+template <> struct TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags> {
+  using type = ::apache::thrift::RequestRpcMetadataFlags;
   static constexpr const std::size_t size = 2;
-  static constexpr const std::array<RequestRpcMetadataFlags, 2> values = {{
-    RequestRpcMetadataFlags::UNKNOWN,
-    RequestRpcMetadataFlags::QUERY_SERVER_LOAD,
+  static constexpr const std::array<type, 2> values = {{
+    type::UNKNOWN,
+    type::QUERY_SERVER_LOAD,
   }};
   static constexpr const std::array<folly::StringPiece, 2> names = {{
     "UNKNOWN",
     "QUERY_SERVER_LOAD",
   }};
 };
-
-struct _InterfaceKindEnumDataStorage {
-  using type = InterfaceKind;
+template <> struct TEnumDataStorage<::apache::thrift::ResponseRpcErrorCategory> {
+  using type = ::apache::thrift::ResponseRpcErrorCategory;
+  static constexpr const std::size_t size = 4;
+  static constexpr const std::array<type, 4> values = {{
+    type::INTERNAL_ERROR,
+    type::INVALID_REQUEST,
+    type::LOADSHEDDING,
+    type::SHUTDOWN,
+  }};
+  static constexpr const std::array<folly::StringPiece, 4> names = {{
+    "INTERNAL_ERROR",
+    "INVALID_REQUEST",
+    "LOADSHEDDING",
+    "SHUTDOWN",
+  }};
+};
+template <> struct TEnumDataStorage<::apache::thrift::ResponseRpcErrorCode> {
+  using type = ::apache::thrift::ResponseRpcErrorCode;
+  static constexpr const std::size_t size = 14;
+  static constexpr const std::array<type, 14> values = {{
+    type::UNKNOWN,
+    type::OVERLOAD,
+    type::TASK_EXPIRED,
+    type::QUEUE_OVERLOADED,
+    type::SHUTDOWN,
+    type::INJECTED_FAILURE,
+    type::REQUEST_PARSING_FAILURE,
+    type::QUEUE_TIMEOUT,
+    type::RESPONSE_TOO_BIG,
+    type::WRONG_RPC_KIND,
+    type::UNKNOWN_METHOD,
+    type::CHECKSUM_MISMATCH,
+    type::INTERRUPTION,
+    type::APP_OVERLOAD,
+  }};
+  static constexpr const std::array<folly::StringPiece, 14> names = {{
+    "UNKNOWN",
+    "OVERLOAD",
+    "TASK_EXPIRED",
+    "QUEUE_OVERLOADED",
+    "SHUTDOWN",
+    "INJECTED_FAILURE",
+    "REQUEST_PARSING_FAILURE",
+    "QUEUE_TIMEOUT",
+    "RESPONSE_TOO_BIG",
+    "WRONG_RPC_KIND",
+    "UNKNOWN_METHOD",
+    "CHECKSUM_MISMATCH",
+    "INTERRUPTION",
+    "APP_OVERLOAD",
+  }};
+};
+template <> struct TEnumDataStorage<::apache::thrift::InterfaceKind> {
+  using type = ::apache::thrift::InterfaceKind;
   static constexpr const std::size_t size = 2;
-  static constexpr const std::array<InterfaceKind, 2> values = {{
-    InterfaceKind::USER,
-    InterfaceKind::DEBUGGING,
+  static constexpr const std::array<type, 2> values = {{
+    type::USER,
+    type::DEBUGGING,
   }};
   static constexpr const std::array<folly::StringPiece, 2> names = {{
     "USER",
     "DEBUGGING",
   }};
-};
-
-}} // apache::thrift
-
-namespace apache { namespace thrift {
-
-template <> struct TEnumDataStorage<::apache::thrift::ProtocolId> {
-  using storage_type = ::apache::thrift::_ProtocolIdEnumDataStorage;
-};
-template <> struct TEnumDataStorage<::apache::thrift::RpcKind> {
-  using storage_type = ::apache::thrift::_RpcKindEnumDataStorage;
-};
-template <> struct TEnumDataStorage<::apache::thrift::RpcPriority> {
-  using storage_type = ::apache::thrift::_RpcPriorityEnumDataStorage;
-};
-template <> struct TEnumDataStorage<::apache::thrift::CompressionAlgorithm> {
-  using storage_type = ::apache::thrift::_CompressionAlgorithmEnumDataStorage;
-};
-template <> struct TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags> {
-  using storage_type = ::apache::thrift::_RequestRpcMetadataFlagsEnumDataStorage;
-};
-template <> struct TEnumDataStorage<::apache::thrift::InterfaceKind> {
-  using storage_type = ::apache::thrift::_InterfaceKindEnumDataStorage;
 };
 
 }} // apache::thrift

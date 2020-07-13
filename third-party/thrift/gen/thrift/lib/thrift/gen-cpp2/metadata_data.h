@@ -10,22 +10,22 @@
 
 #include "thrift/lib/thrift/gen-cpp2/metadata_types.h"
 
-namespace apache { namespace thrift { namespace metadata {
+namespace apache { namespace thrift {
 
-struct _ThriftPrimitiveTypeEnumDataStorage {
-  using type = ThriftPrimitiveType;
+template <> struct TEnumDataStorage<::apache::thrift::metadata::ThriftPrimitiveType> {
+  using type = ::apache::thrift::metadata::ThriftPrimitiveType;
   static constexpr const std::size_t size = 10;
-  static constexpr const std::array<ThriftPrimitiveType, 10> values = {{
-    ThriftPrimitiveType::THRIFT_BOOL_TYPE,
-    ThriftPrimitiveType::THRIFT_BYTE_TYPE,
-    ThriftPrimitiveType::THRIFT_I16_TYPE,
-    ThriftPrimitiveType::THRIFT_I32_TYPE,
-    ThriftPrimitiveType::THRIFT_I64_TYPE,
-    ThriftPrimitiveType::THRIFT_FLOAT_TYPE,
-    ThriftPrimitiveType::THRIFT_DOUBLE_TYPE,
-    ThriftPrimitiveType::THRIFT_BINARY_TYPE,
-    ThriftPrimitiveType::THRIFT_STRING_TYPE,
-    ThriftPrimitiveType::THRIFT_VOID_TYPE,
+  static constexpr const std::array<type, 10> values = {{
+    type::THRIFT_BOOL_TYPE,
+    type::THRIFT_BYTE_TYPE,
+    type::THRIFT_I16_TYPE,
+    type::THRIFT_I32_TYPE,
+    type::THRIFT_I64_TYPE,
+    type::THRIFT_FLOAT_TYPE,
+    type::THRIFT_DOUBLE_TYPE,
+    type::THRIFT_BINARY_TYPE,
+    type::THRIFT_STRING_TYPE,
+    type::THRIFT_VOID_TYPE,
   }};
   static constexpr const std::array<folly::StringPiece, 10> names = {{
     "THRIFT_BOOL_TYPE",
@@ -39,14 +39,6 @@ struct _ThriftPrimitiveTypeEnumDataStorage {
     "THRIFT_STRING_TYPE",
     "THRIFT_VOID_TYPE",
   }};
-};
-
-}}} // apache::thrift::metadata
-
-namespace apache { namespace thrift {
-
-template <> struct TEnumDataStorage<::apache::thrift::metadata::ThriftPrimitiveType> {
-  using storage_type = ::apache::thrift::metadata::_ThriftPrimitiveTypeEnumDataStorage;
 };
 
 }} // apache::thrift

@@ -15,8 +15,8 @@
 namespace apache { namespace thrift {
 
 constexpr std::size_t const TEnumTraits<::apache::thrift::ProtocolId>::size;
-folly::Range<::apache::thrift::ProtocolId const*> const TEnumTraits<::apache::thrift::ProtocolId>::values = folly::range(::apache::thrift::_ProtocolIdEnumDataStorage::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::ProtocolId>::names = folly::range(::apache::thrift::_ProtocolIdEnumDataStorage::names);
+folly::Range<::apache::thrift::ProtocolId const*> const TEnumTraits<::apache::thrift::ProtocolId>::values = folly::range(TEnumDataStorage<::apache::thrift::ProtocolId>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::ProtocolId>::names = folly::range(TEnumDataStorage<::apache::thrift::ProtocolId>::names);
 
 char const* TEnumTraits<::apache::thrift::ProtocolId>::findName(type value) {
   using factory = ::apache::thrift::_ProtocolId_EnumMapFactory;
@@ -48,8 +48,8 @@ FOLLY_POP_WARNING
 namespace apache { namespace thrift {
 
 constexpr std::size_t const TEnumTraits<::apache::thrift::RpcKind>::size;
-folly::Range<::apache::thrift::RpcKind const*> const TEnumTraits<::apache::thrift::RpcKind>::values = folly::range(::apache::thrift::_RpcKindEnumDataStorage::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::RpcKind>::names = folly::range(::apache::thrift::_RpcKindEnumDataStorage::names);
+folly::Range<::apache::thrift::RpcKind const*> const TEnumTraits<::apache::thrift::RpcKind>::values = folly::range(TEnumDataStorage<::apache::thrift::RpcKind>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::RpcKind>::names = folly::range(TEnumDataStorage<::apache::thrift::RpcKind>::names);
 
 char const* TEnumTraits<::apache::thrift::RpcKind>::findName(type value) {
   using factory = ::apache::thrift::_RpcKind_EnumMapFactory;
@@ -81,8 +81,8 @@ FOLLY_POP_WARNING
 namespace apache { namespace thrift {
 
 constexpr std::size_t const TEnumTraits<::apache::thrift::RpcPriority>::size;
-folly::Range<::apache::thrift::RpcPriority const*> const TEnumTraits<::apache::thrift::RpcPriority>::values = folly::range(::apache::thrift::_RpcPriorityEnumDataStorage::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::RpcPriority>::names = folly::range(::apache::thrift::_RpcPriorityEnumDataStorage::names);
+folly::Range<::apache::thrift::RpcPriority const*> const TEnumTraits<::apache::thrift::RpcPriority>::values = folly::range(TEnumDataStorage<::apache::thrift::RpcPriority>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::RpcPriority>::names = folly::range(TEnumDataStorage<::apache::thrift::RpcPriority>::names);
 
 char const* TEnumTraits<::apache::thrift::RpcPriority>::findName(type value) {
   using factory = ::apache::thrift::_RpcPriority_EnumMapFactory;
@@ -114,8 +114,8 @@ FOLLY_POP_WARNING
 namespace apache { namespace thrift {
 
 constexpr std::size_t const TEnumTraits<::apache::thrift::CompressionAlgorithm>::size;
-folly::Range<::apache::thrift::CompressionAlgorithm const*> const TEnumTraits<::apache::thrift::CompressionAlgorithm>::values = folly::range(::apache::thrift::_CompressionAlgorithmEnumDataStorage::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::CompressionAlgorithm>::names = folly::range(::apache::thrift::_CompressionAlgorithmEnumDataStorage::names);
+folly::Range<::apache::thrift::CompressionAlgorithm const*> const TEnumTraits<::apache::thrift::CompressionAlgorithm>::values = folly::range(TEnumDataStorage<::apache::thrift::CompressionAlgorithm>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::CompressionAlgorithm>::names = folly::range(TEnumDataStorage<::apache::thrift::CompressionAlgorithm>::names);
 
 char const* TEnumTraits<::apache::thrift::CompressionAlgorithm>::findName(type value) {
   using factory = ::apache::thrift::_CompressionAlgorithm_EnumMapFactory;
@@ -147,8 +147,8 @@ FOLLY_POP_WARNING
 namespace apache { namespace thrift {
 
 constexpr std::size_t const TEnumTraits<::apache::thrift::RequestRpcMetadataFlags>::size;
-folly::Range<::apache::thrift::RequestRpcMetadataFlags const*> const TEnumTraits<::apache::thrift::RequestRpcMetadataFlags>::values = folly::range(::apache::thrift::_RequestRpcMetadataFlagsEnumDataStorage::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::RequestRpcMetadataFlags>::names = folly::range(::apache::thrift::_RequestRpcMetadataFlagsEnumDataStorage::names);
+folly::Range<::apache::thrift::RequestRpcMetadataFlags const*> const TEnumTraits<::apache::thrift::RequestRpcMetadataFlags>::values = folly::range(TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::RequestRpcMetadataFlags>::names = folly::range(TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags>::names);
 
 char const* TEnumTraits<::apache::thrift::RequestRpcMetadataFlags>::findName(type value) {
   using factory = ::apache::thrift::_RequestRpcMetadataFlags_EnumMapFactory;
@@ -179,9 +179,75 @@ FOLLY_POP_WARNING
 
 namespace apache { namespace thrift {
 
+constexpr std::size_t const TEnumTraits<::apache::thrift::ResponseRpcErrorCategory>::size;
+folly::Range<::apache::thrift::ResponseRpcErrorCategory const*> const TEnumTraits<::apache::thrift::ResponseRpcErrorCategory>::values = folly::range(TEnumDataStorage<::apache::thrift::ResponseRpcErrorCategory>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::ResponseRpcErrorCategory>::names = folly::range(TEnumDataStorage<::apache::thrift::ResponseRpcErrorCategory>::names);
+
+char const* TEnumTraits<::apache::thrift::ResponseRpcErrorCategory>::findName(type value) {
+  using factory = ::apache::thrift::_ResponseRpcErrorCategory_EnumMapFactory;
+  static folly::Indestructible<factory::ValuesToNamesMapType> const map{
+      factory::makeValuesToNamesMap()};
+  auto found = map->find(value);
+  return found == map->end() ? nullptr : found->second;
+}
+
+bool TEnumTraits<::apache::thrift::ResponseRpcErrorCategory>::findValue(char const* name, type* out) {
+  using factory = ::apache::thrift::_ResponseRpcErrorCategory_EnumMapFactory;
+  static folly::Indestructible<factory::NamesToValuesMapType> const map{
+      factory::makeNamesToValuesMap()};
+  auto found = map->find(name);
+  return found == map->end() ? false : (*out = found->second, true);
+}
+
+}} // apache::thrift
+
+namespace apache { namespace thrift {
+FOLLY_PUSH_WARNING
+FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
+const _ResponseRpcErrorCategory_EnumMapFactory::ValuesToNamesMapType _ResponseRpcErrorCategory_VALUES_TO_NAMES = _ResponseRpcErrorCategory_EnumMapFactory::makeValuesToNamesMap();
+const _ResponseRpcErrorCategory_EnumMapFactory::NamesToValuesMapType _ResponseRpcErrorCategory_NAMES_TO_VALUES = _ResponseRpcErrorCategory_EnumMapFactory::makeNamesToValuesMap();
+FOLLY_POP_WARNING
+
+}} // apache::thrift
+
+namespace apache { namespace thrift {
+
+constexpr std::size_t const TEnumTraits<::apache::thrift::ResponseRpcErrorCode>::size;
+folly::Range<::apache::thrift::ResponseRpcErrorCode const*> const TEnumTraits<::apache::thrift::ResponseRpcErrorCode>::values = folly::range(TEnumDataStorage<::apache::thrift::ResponseRpcErrorCode>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::ResponseRpcErrorCode>::names = folly::range(TEnumDataStorage<::apache::thrift::ResponseRpcErrorCode>::names);
+
+char const* TEnumTraits<::apache::thrift::ResponseRpcErrorCode>::findName(type value) {
+  using factory = ::apache::thrift::_ResponseRpcErrorCode_EnumMapFactory;
+  static folly::Indestructible<factory::ValuesToNamesMapType> const map{
+      factory::makeValuesToNamesMap()};
+  auto found = map->find(value);
+  return found == map->end() ? nullptr : found->second;
+}
+
+bool TEnumTraits<::apache::thrift::ResponseRpcErrorCode>::findValue(char const* name, type* out) {
+  using factory = ::apache::thrift::_ResponseRpcErrorCode_EnumMapFactory;
+  static folly::Indestructible<factory::NamesToValuesMapType> const map{
+      factory::makeNamesToValuesMap()};
+  auto found = map->find(name);
+  return found == map->end() ? false : (*out = found->second, true);
+}
+
+}} // apache::thrift
+
+namespace apache { namespace thrift {
+FOLLY_PUSH_WARNING
+FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
+const _ResponseRpcErrorCode_EnumMapFactory::ValuesToNamesMapType _ResponseRpcErrorCode_VALUES_TO_NAMES = _ResponseRpcErrorCode_EnumMapFactory::makeValuesToNamesMap();
+const _ResponseRpcErrorCode_EnumMapFactory::NamesToValuesMapType _ResponseRpcErrorCode_NAMES_TO_VALUES = _ResponseRpcErrorCode_EnumMapFactory::makeNamesToValuesMap();
+FOLLY_POP_WARNING
+
+}} // apache::thrift
+
+namespace apache { namespace thrift {
+
 constexpr std::size_t const TEnumTraits<::apache::thrift::InterfaceKind>::size;
-folly::Range<::apache::thrift::InterfaceKind const*> const TEnumTraits<::apache::thrift::InterfaceKind>::values = folly::range(::apache::thrift::_InterfaceKindEnumDataStorage::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::InterfaceKind>::names = folly::range(::apache::thrift::_InterfaceKindEnumDataStorage::names);
+folly::Range<::apache::thrift::InterfaceKind const*> const TEnumTraits<::apache::thrift::InterfaceKind>::values = folly::range(TEnumDataStorage<::apache::thrift::InterfaceKind>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::InterfaceKind>::names = folly::range(TEnumDataStorage<::apache::thrift::InterfaceKind>::names);
 
 char const* TEnumTraits<::apache::thrift::InterfaceKind>::findName(type value) {
   using factory = ::apache::thrift::_InterfaceKind_EnumMapFactory;
@@ -214,6 +280,46 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::apache::thrift::ZlibCompressionCodecConfig>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+}
+void TccStructTraits<::apache::thrift::ZstdCompressionCodecConfig>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+}
+void TccStructTraits<::apache::thrift::CodecConfig>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+  else if (_fname == "zlibConfig") {
+    fid = 1;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+  else if (_fname == "zstdConfig") {
+    fid = 2;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+}
+void TccStructTraits<::apache::thrift::CompressionConfig>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+  else if (_fname == "codecConfig") {
+    fid = 1;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+  else if (_fname == "compressionSizeLimit") {
+    fid = 2;
+    _ftype = apache::thrift::protocol::T_I64;
+  }
+}
 void TccStructTraits<::apache::thrift::NegotiationParameters>::translateFieldName(
     FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
     FOLLY_MAYBE_UNUSED int16_t& fid,
@@ -222,6 +328,20 @@ void TccStructTraits<::apache::thrift::NegotiationParameters>::translateFieldNam
   else if (_fname == "compressionAlgos") {
     fid = 1;
     _ftype = apache::thrift::protocol::T_I64;
+  }
+}
+void TccStructTraits<::apache::thrift::InteractionCreate>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+  else if (_fname == "interactionId") {
+    fid = 1;
+    _ftype = apache::thrift::protocol::T_I64;
+  }
+  else if (_fname == "interactionName") {
+    fid = 2;
+    _ftype = apache::thrift::protocol::T_STRING;
   }
 }
 void TccStructTraits<::apache::thrift::RequestRpcMetadata>::translateFieldName(
@@ -285,6 +405,112 @@ void TccStructTraits<::apache::thrift::RequestRpcMetadata>::translateFieldName(
     fid = 14;
     _ftype = apache::thrift::protocol::T_I32;
   }
+  else if (_fname == "compressionConfig") {
+    fid = 15;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+  else if (_fname == "interactionId") {
+    fid = 16;
+    _ftype = apache::thrift::protocol::T_I64;
+  }
+  else if (_fname == "interactionCreate") {
+    fid = 17;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+}
+void TccStructTraits<::apache::thrift::PayloadResponseMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+}
+void TccStructTraits<::apache::thrift::PayloadDeclaredExceptionMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+}
+void TccStructTraits<::apache::thrift::PayloadProxyExceptionMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+}
+void TccStructTraits<::apache::thrift::PayloadProxiedExceptionMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+}
+void TccStructTraits<::apache::thrift::PayloadAppClientExceptionMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+}
+void TccStructTraits<::apache::thrift::PayloadAppServerExceptionMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+}
+void TccStructTraits<::apache::thrift::PayloadExceptionMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+  else if (_fname == "declaredException") {
+    fid = 1;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+  else if (_fname == "proxyException") {
+    fid = 2;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+  else if (_fname == "proxiedException") {
+    fid = 3;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+  else if (_fname == "appClientException") {
+    fid = 4;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+  else if (_fname == "appServerException") {
+    fid = 5;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+}
+void TccStructTraits<::apache::thrift::PayloadExceptionMetadataBase>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+  else if (_fname == "name_utf8") {
+    fid = 1;
+    _ftype = apache::thrift::protocol::T_STRING;
+  }
+  else if (_fname == "what_utf8") {
+    fid = 2;
+    _ftype = apache::thrift::protocol::T_STRING;
+  }
+  else if (_fname == "metadata") {
+    fid = 3;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+}
+void TccStructTraits<::apache::thrift::PayloadMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+  else if (_fname == "responseMetadata") {
+    fid = 1;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+  else if (_fname == "exceptionMetadata") {
+    fid = 2;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
 }
 void TccStructTraits<::apache::thrift::ResponseRpcMetadata>::translateFieldName(
     FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
@@ -315,6 +541,36 @@ void TccStructTraits<::apache::thrift::ResponseRpcMetadata>::translateFieldName(
     fid = 6;
     _ftype = apache::thrift::protocol::T_I32;
   }
+  else if (_fname == "payloadMetadata") {
+    fid = 7;
+    _ftype = apache::thrift::protocol::T_STRUCT;
+  }
+}
+void TccStructTraits<::apache::thrift::ResponseRpcError>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
+  if (false) {}
+  else if (_fname == "name_utf8") {
+    fid = 1;
+    _ftype = apache::thrift::protocol::T_STRING;
+  }
+  else if (_fname == "what_utf8") {
+    fid = 2;
+    _ftype = apache::thrift::protocol::T_STRING;
+  }
+  else if (_fname == "category") {
+    fid = 3;
+    _ftype = apache::thrift::protocol::T_I32;
+  }
+  else if (_fname == "code") {
+    fid = 4;
+    _ftype = apache::thrift::protocol::T_I32;
+  }
+  else if (_fname == "load") {
+    fid = 5;
+    _ftype = apache::thrift::protocol::T_I64;
+  }
 }
 void TccStructTraits<::apache::thrift::StreamPayloadMetadata>::translateFieldName(
     FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
@@ -341,6 +597,14 @@ void TccStructTraits<::apache::thrift::RequestSetupMetadata>::translateFieldName
   }
   else if (_fname == "interfaceKind") {
     fid = 2;
+    _ftype = apache::thrift::protocol::T_I32;
+  }
+  else if (_fname == "minVersion") {
+    fid = 3;
+    _ftype = apache::thrift::protocol::T_I32;
+  }
+  else if (_fname == "maxVersion") {
+    fid = 4;
     _ftype = apache::thrift::protocol::T_I32;
   }
 }
@@ -371,25 +635,277 @@ void TccStructTraits<::apache::thrift::HeadersPayloadMetadata>::translateFieldNa
 
 namespace apache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+ZlibCompressionCodecConfig::ZlibCompressionCodecConfig(apache::thrift::FragileConstructor) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void ZlibCompressionCodecConfig::__clear() {
+  // clear all fields
+}
+
+bool ZlibCompressionCodecConfig::operator==(const ZlibCompressionCodecConfig& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return true;
+}
+
+bool ZlibCompressionCodecConfig::operator<(const ZlibCompressionCodecConfig& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return false;
+}
+
+
+void swap(ZlibCompressionCodecConfig& a, ZlibCompressionCodecConfig& b) {
+  using ::std::swap;
+  (void)a;
+  (void)b;
+}
+
+template void ZlibCompressionCodecConfig::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ZlibCompressionCodecConfig::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ZlibCompressionCodecConfig::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ZlibCompressionCodecConfig::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ZlibCompressionCodecConfig::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ZlibCompressionCodecConfig::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ZlibCompressionCodecConfig::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ZlibCompressionCodecConfig::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+ZstdCompressionCodecConfig::ZstdCompressionCodecConfig(apache::thrift::FragileConstructor) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void ZstdCompressionCodecConfig::__clear() {
+  // clear all fields
+}
+
+bool ZstdCompressionCodecConfig::operator==(const ZstdCompressionCodecConfig& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return true;
+}
+
+bool ZstdCompressionCodecConfig::operator<(const ZstdCompressionCodecConfig& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return false;
+}
+
+
+void swap(ZstdCompressionCodecConfig& a, ZstdCompressionCodecConfig& b) {
+  using ::std::swap;
+  (void)a;
+  (void)b;
+}
+
+template void ZstdCompressionCodecConfig::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ZstdCompressionCodecConfig::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ZstdCompressionCodecConfig::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ZstdCompressionCodecConfig::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ZstdCompressionCodecConfig::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ZstdCompressionCodecConfig::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ZstdCompressionCodecConfig::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ZstdCompressionCodecConfig::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+void CodecConfig::__clear() {
+  // clear all fields
+  if (type_ == Type::__EMPTY__) { return; }
+  switch(type_) {
+    case Type::zlibConfig:
+    {
+      destruct(value_.zlibConfig);
+      break;
+    }
+    case Type::zstdConfig:
+    {
+      destruct(value_.zstdConfig);
+      break;
+    }
+    default:
+    {
+      assert(false);
+      break;
+    }
+  }
+  type_ = Type::__EMPTY__;
+}
+
+bool CodecConfig::operator==(const CodecConfig& rhs) const {
+  if (type_ != rhs.type_) { return false; }
+  switch(type_) {
+    case Type::zlibConfig:
+    {
+      return value_.zlibConfig == rhs.value_.zlibConfig;
+    }
+    case Type::zstdConfig:
+    {
+      return value_.zstdConfig == rhs.value_.zstdConfig;
+    }
+    default:
+    {
+      return true;
+    }
+  }
+}
+
+bool CodecConfig::operator<(const CodecConfig& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.type_ != rhs.type_) {
+    return lhs.type_ < rhs.type_;
+  }
+  switch (lhs.type_) {
+    case Type::zlibConfig:
+      return lhs.value_.zlibConfig < rhs.value_.zlibConfig;
+    case Type::zstdConfig:
+      return lhs.value_.zstdConfig < rhs.value_.zstdConfig;
+    default:
+      return false;
+  }
+}
+
+void swap(CodecConfig& a, CodecConfig& b) {
+  CodecConfig temp(std::move(a));
+  a = std::move(b);
+  b = std::move(temp);
+}
+
+template void CodecConfig::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t CodecConfig::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t CodecConfig::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t CodecConfig::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void CodecConfig::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t CodecConfig::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t CodecConfig::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t CodecConfig::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+CompressionConfig::CompressionConfig(apache::thrift::FragileConstructor,  ::apache::thrift::CodecConfig codecConfig__arg, int64_t compressionSizeLimit__arg) :
+    codecConfig(std::move(codecConfig__arg)),
+    compressionSizeLimit(std::move(compressionSizeLimit__arg)) {
+  __isset.codecConfig = true;
+  __isset.compressionSizeLimit = true;
+}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void CompressionConfig::__clear() {
+  // clear all fields
+  ::apache::thrift::Cpp2Ops<  ::apache::thrift::CodecConfig>::clear(&codecConfig);
+  compressionSizeLimit = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+bool CompressionConfig::operator==(const CompressionConfig& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.codecConfig_ref().has_value() != rhs.codecConfig_ref().has_value()) {
+    return false;
+  }
+  if (lhs.codecConfig_ref().has_value()) {
+    if (!(lhs.codecConfig == rhs.codecConfig)) {
+      return false;
+    }
+  }
+  if (lhs.compressionSizeLimit_ref().has_value() != rhs.compressionSizeLimit_ref().has_value()) {
+    return false;
+  }
+  if (lhs.compressionSizeLimit_ref().has_value()) {
+    if (!(lhs.compressionSizeLimit == rhs.compressionSizeLimit)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool CompressionConfig::operator<(const CompressionConfig& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.codecConfig_ref().has_value() != rhs.codecConfig_ref().has_value()) {
+    return lhs.codecConfig_ref().has_value() < rhs.codecConfig_ref().has_value();
+  }
+  if (lhs.codecConfig_ref().has_value()) {
+    if (!(lhs.codecConfig == rhs.codecConfig)) {
+      return lhs.codecConfig < rhs.codecConfig;
+    }
+  }
+  if (lhs.compressionSizeLimit_ref().has_value() != rhs.compressionSizeLimit_ref().has_value()) {
+    return lhs.compressionSizeLimit_ref().has_value() < rhs.compressionSizeLimit_ref().has_value();
+  }
+  if (lhs.compressionSizeLimit_ref().has_value()) {
+    if (!(lhs.compressionSizeLimit == rhs.compressionSizeLimit)) {
+      return lhs.compressionSizeLimit < rhs.compressionSizeLimit;
+    }
+  }
+  return false;
+}
+
+const  ::apache::thrift::CodecConfig* CompressionConfig::get_codecConfig() const& {
+  return codecConfig_ref().has_value() ? std::addressof(codecConfig) : nullptr;
+}
+
+ ::apache::thrift::CodecConfig* CompressionConfig::get_codecConfig() & {
+  return codecConfig_ref().has_value() ? std::addressof(codecConfig) : nullptr;
+}
+
+
+void swap(CompressionConfig& a, CompressionConfig& b) {
+  using ::std::swap;
+  swap(a.codecConfig_ref().value_unchecked(), b.codecConfig_ref().value_unchecked());
+  swap(a.compressionSizeLimit_ref().value_unchecked(), b.compressionSizeLimit_ref().value_unchecked());
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+template void CompressionConfig::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t CompressionConfig::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t CompressionConfig::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t CompressionConfig::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void CompressionConfig::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t CompressionConfig::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t CompressionConfig::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t CompressionConfig::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 NegotiationParameters::NegotiationParameters(apache::thrift::FragileConstructor, std::uint64_t compressionAlgos__arg) :
     compressionAlgos(std::move(compressionAlgos__arg)) {
   __isset.compressionAlgos = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void NegotiationParameters::__clear() {
   // clear all fields
   compressionAlgos = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool NegotiationParameters::operator==(const NegotiationParameters& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.__isset.compressionAlgos != rhs.__isset.compressionAlgos) {
+  if (lhs.compressionAlgos_ref().has_value() != rhs.compressionAlgos_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.compressionAlgos) {
+  if (lhs.compressionAlgos_ref().has_value()) {
     if (!(lhs.compressionAlgos == rhs.compressionAlgos)) {
       return false;
     }
@@ -401,10 +917,10 @@ bool NegotiationParameters::operator<(const NegotiationParameters& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.__isset.compressionAlgos != rhs.__isset.compressionAlgos) {
-    return lhs.__isset.compressionAlgos < rhs.__isset.compressionAlgos;
+  if (lhs.compressionAlgos_ref().has_value() != rhs.compressionAlgos_ref().has_value()) {
+    return lhs.compressionAlgos_ref().has_value() < rhs.compressionAlgos_ref().has_value();
   }
-  if (lhs.__isset.compressionAlgos) {
+  if (lhs.compressionAlgos_ref().has_value()) {
     if (!(lhs.compressionAlgos == rhs.compressionAlgos)) {
       return lhs.compressionAlgos < rhs.compressionAlgos;
     }
@@ -416,7 +932,9 @@ bool NegotiationParameters::operator<(const NegotiationParameters& rhs) const {
 void swap(NegotiationParameters& a, NegotiationParameters& b) {
   using ::std::swap;
   swap(a.compressionAlgos_ref().value_unchecked(), b.compressionAlgos_ref().value_unchecked());
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void NegotiationParameters::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -431,6 +949,72 @@ template uint32_t NegotiationParameters::serializedSizeZC<>(apache::thrift::Comp
 }} // apache::thrift
 namespace apache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+InteractionCreate::InteractionCreate(apache::thrift::FragileConstructor, int64_t interactionId__arg, ::std::string interactionName__arg) :
+    interactionId(std::move(interactionId__arg)),
+    interactionName(std::move(interactionName__arg)) {
+  __isset.interactionId = true;
+  __isset.interactionName = true;
+}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void InteractionCreate::__clear() {
+  // clear all fields
+  interactionId = 0;
+  interactionName = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+bool InteractionCreate::operator==(const InteractionCreate& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.interactionId == rhs.interactionId)) {
+    return false;
+  }
+  if (!(lhs.interactionName == rhs.interactionName)) {
+    return false;
+  }
+  return true;
+}
+
+bool InteractionCreate::operator<(const InteractionCreate& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.interactionId == rhs.interactionId)) {
+    return lhs.interactionId < rhs.interactionId;
+  }
+  if (!(lhs.interactionName == rhs.interactionName)) {
+    return lhs.interactionName < rhs.interactionName;
+  }
+  return false;
+}
+
+
+void swap(InteractionCreate& a, InteractionCreate& b) {
+  using ::std::swap;
+  swap(a.interactionId, b.interactionId);
+  swap(a.interactionName, b.interactionName);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+template void InteractionCreate::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t InteractionCreate::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t InteractionCreate::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t InteractionCreate::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void InteractionCreate::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t InteractionCreate::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t InteractionCreate::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t InteractionCreate::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 RequestRpcMetadata::RequestRpcMetadata() :
       protocol( ::apache::thrift::ProtocolId::BINARY),
       kind( ::apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE),
@@ -440,12 +1024,15 @@ RequestRpcMetadata::RequestRpcMetadata() :
       priority( ::apache::thrift::RpcPriority::HIGH_IMPORTANT),
       crc32c(0),
       flags(0),
-      compression( ::apache::thrift::CompressionAlgorithm::NONE) {}
+      compression( ::apache::thrift::CompressionAlgorithm::NONE),
+      interactionId(0) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
 RequestRpcMetadata::~RequestRpcMetadata() {}
 
-RequestRpcMetadata::RequestRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, ::std::string name__arg,  ::apache::thrift::RpcKind kind__arg, int32_t seqId__arg, int32_t clientTimeoutMs__arg, int32_t queueTimeoutMs__arg,  ::apache::thrift::RpcPriority priority__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, ::std::string host__arg, ::std::string url__arg, std::uint32_t crc32c__arg, std::uint64_t flags__arg, ::std::string loadMetric__arg,  ::apache::thrift::CompressionAlgorithm compression__arg) :
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+RequestRpcMetadata::RequestRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, ::std::string name__arg,  ::apache::thrift::RpcKind kind__arg, int32_t seqId__arg, int32_t clientTimeoutMs__arg, int32_t queueTimeoutMs__arg,  ::apache::thrift::RpcPriority priority__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, ::std::string host__arg, ::std::string url__arg, std::uint32_t crc32c__arg, std::uint64_t flags__arg, ::std::string loadMetric__arg,  ::apache::thrift::CompressionAlgorithm compression__arg,  ::apache::thrift::CompressionConfig compressionConfig__arg, int64_t interactionId__arg,  ::apache::thrift::InteractionCreate interactionCreate__arg) :
     protocol(std::move(protocol__arg)),
     name(std::move(name__arg)),
     kind(std::move(kind__arg)),
@@ -459,7 +1046,10 @@ RequestRpcMetadata::RequestRpcMetadata(apache::thrift::FragileConstructor,  ::ap
     crc32c(std::move(crc32c__arg)),
     flags(std::move(flags__arg)),
     loadMetric(std::move(loadMetric__arg)),
-    compression(std::move(compression__arg)) {
+    compression(std::move(compression__arg)),
+    compressionConfig(std::move(compressionConfig__arg)),
+    interactionId(std::move(interactionId__arg)),
+    interactionCreate(std::move(interactionCreate__arg)) {
   __isset.protocol = true;
   __isset.name = true;
   __isset.kind = true;
@@ -474,8 +1064,11 @@ RequestRpcMetadata::RequestRpcMetadata(apache::thrift::FragileConstructor,  ::ap
   __isset.flags = true;
   __isset.loadMetric = true;
   __isset.compression = true;
+  __isset.compressionConfig = true;
+  __isset.interactionId = true;
+  __isset.interactionCreate = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void RequestRpcMetadata::__clear() {
   // clear all fields
   protocol =  ::apache::thrift::ProtocolId::BINARY;
@@ -492,122 +1085,151 @@ void RequestRpcMetadata::__clear() {
   flags = 0;
   loadMetric = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   compression =  ::apache::thrift::CompressionAlgorithm::NONE;
+  ::apache::thrift::Cpp2Ops<  ::apache::thrift::CompressionConfig>::clear(&compressionConfig);
+  interactionId = 0;
+  ::apache::thrift::Cpp2Ops<  ::apache::thrift::InteractionCreate>::clear(&interactionCreate);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool RequestRpcMetadata::operator==(const RequestRpcMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.__isset.protocol != rhs.__isset.protocol) {
+  if (lhs.protocol_ref().has_value() != rhs.protocol_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.protocol) {
+  if (lhs.protocol_ref().has_value()) {
     if (!(lhs.protocol == rhs.protocol)) {
       return false;
     }
   }
-  if (lhs.__isset.name != rhs.__isset.name) {
+  if (lhs.name_ref().has_value() != rhs.name_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.name) {
+  if (lhs.name_ref().has_value()) {
     if (!(lhs.name == rhs.name)) {
       return false;
     }
   }
-  if (lhs.__isset.kind != rhs.__isset.kind) {
+  if (lhs.kind_ref().has_value() != rhs.kind_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.kind) {
+  if (lhs.kind_ref().has_value()) {
     if (!(lhs.kind == rhs.kind)) {
       return false;
     }
   }
-  if (lhs.__isset.seqId != rhs.__isset.seqId) {
+  if (lhs.seqId_ref().has_value() != rhs.seqId_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.seqId) {
+  if (lhs.seqId_ref().has_value()) {
     if (!(lhs.seqId == rhs.seqId)) {
       return false;
     }
   }
-  if (lhs.__isset.clientTimeoutMs != rhs.__isset.clientTimeoutMs) {
+  if (lhs.clientTimeoutMs_ref().has_value() != rhs.clientTimeoutMs_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.clientTimeoutMs) {
+  if (lhs.clientTimeoutMs_ref().has_value()) {
     if (!(lhs.clientTimeoutMs == rhs.clientTimeoutMs)) {
       return false;
     }
   }
-  if (lhs.__isset.queueTimeoutMs != rhs.__isset.queueTimeoutMs) {
+  if (lhs.queueTimeoutMs_ref().has_value() != rhs.queueTimeoutMs_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.queueTimeoutMs) {
+  if (lhs.queueTimeoutMs_ref().has_value()) {
     if (!(lhs.queueTimeoutMs == rhs.queueTimeoutMs)) {
       return false;
     }
   }
-  if (lhs.__isset.priority != rhs.__isset.priority) {
+  if (lhs.priority_ref().has_value() != rhs.priority_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.priority) {
+  if (lhs.priority_ref().has_value()) {
     if (!(lhs.priority == rhs.priority)) {
       return false;
     }
   }
-  if (lhs.__isset.otherMetadata != rhs.__isset.otherMetadata) {
+  if (lhs.otherMetadata_ref().has_value() != rhs.otherMetadata_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.otherMetadata) {
+  if (lhs.otherMetadata_ref().has_value()) {
     if (!(lhs.otherMetadata == rhs.otherMetadata)) {
       return false;
     }
   }
-  if (lhs.__isset.host != rhs.__isset.host) {
+  if (lhs.host_ref().has_value() != rhs.host_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.host) {
+  if (lhs.host_ref().has_value()) {
     if (!(lhs.host == rhs.host)) {
       return false;
     }
   }
-  if (lhs.__isset.url != rhs.__isset.url) {
+  if (lhs.url_ref().has_value() != rhs.url_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.url) {
+  if (lhs.url_ref().has_value()) {
     if (!(lhs.url == rhs.url)) {
       return false;
     }
   }
-  if (lhs.__isset.crc32c != rhs.__isset.crc32c) {
+  if (lhs.crc32c_ref().has_value() != rhs.crc32c_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.crc32c) {
+  if (lhs.crc32c_ref().has_value()) {
     if (!(lhs.crc32c == rhs.crc32c)) {
       return false;
     }
   }
-  if (lhs.__isset.flags != rhs.__isset.flags) {
+  if (lhs.flags_ref().has_value() != rhs.flags_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.flags) {
+  if (lhs.flags_ref().has_value()) {
     if (!(lhs.flags == rhs.flags)) {
       return false;
     }
   }
-  if (lhs.__isset.loadMetric != rhs.__isset.loadMetric) {
+  if (lhs.loadMetric_ref().has_value() != rhs.loadMetric_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.loadMetric) {
+  if (lhs.loadMetric_ref().has_value()) {
     if (!(lhs.loadMetric == rhs.loadMetric)) {
       return false;
     }
   }
-  if (lhs.__isset.compression != rhs.__isset.compression) {
+  if (lhs.compression_ref().has_value() != rhs.compression_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.compression) {
+  if (lhs.compression_ref().has_value()) {
     if (!(lhs.compression == rhs.compression)) {
+      return false;
+    }
+  }
+  if (lhs.compressionConfig_ref().has_value() != rhs.compressionConfig_ref().has_value()) {
+    return false;
+  }
+  if (lhs.compressionConfig_ref().has_value()) {
+    if (!(lhs.compressionConfig == rhs.compressionConfig)) {
+      return false;
+    }
+  }
+  if (lhs.interactionId_ref().has_value() != rhs.interactionId_ref().has_value()) {
+    return false;
+  }
+  if (lhs.interactionId_ref().has_value()) {
+    if (!(lhs.interactionId == rhs.interactionId)) {
+      return false;
+    }
+  }
+  if (lhs.interactionCreate_ref().has_value() != rhs.interactionCreate_ref().has_value()) {
+    return false;
+  }
+  if (lhs.interactionCreate_ref().has_value()) {
+    if (!(lhs.interactionCreate == rhs.interactionCreate)) {
       return false;
     }
   }
@@ -618,127 +1240,167 @@ bool RequestRpcMetadata::operator<(const RequestRpcMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.__isset.protocol != rhs.__isset.protocol) {
-    return lhs.__isset.protocol < rhs.__isset.protocol;
+  if (lhs.protocol_ref().has_value() != rhs.protocol_ref().has_value()) {
+    return lhs.protocol_ref().has_value() < rhs.protocol_ref().has_value();
   }
-  if (lhs.__isset.protocol) {
+  if (lhs.protocol_ref().has_value()) {
     if (!(lhs.protocol == rhs.protocol)) {
       return lhs.protocol < rhs.protocol;
     }
   }
-  if (lhs.__isset.name != rhs.__isset.name) {
-    return lhs.__isset.name < rhs.__isset.name;
+  if (lhs.name_ref().has_value() != rhs.name_ref().has_value()) {
+    return lhs.name_ref().has_value() < rhs.name_ref().has_value();
   }
-  if (lhs.__isset.name) {
+  if (lhs.name_ref().has_value()) {
     if (!(lhs.name == rhs.name)) {
       return lhs.name < rhs.name;
     }
   }
-  if (lhs.__isset.kind != rhs.__isset.kind) {
-    return lhs.__isset.kind < rhs.__isset.kind;
+  if (lhs.kind_ref().has_value() != rhs.kind_ref().has_value()) {
+    return lhs.kind_ref().has_value() < rhs.kind_ref().has_value();
   }
-  if (lhs.__isset.kind) {
+  if (lhs.kind_ref().has_value()) {
     if (!(lhs.kind == rhs.kind)) {
       return lhs.kind < rhs.kind;
     }
   }
-  if (lhs.__isset.seqId != rhs.__isset.seqId) {
-    return lhs.__isset.seqId < rhs.__isset.seqId;
+  if (lhs.seqId_ref().has_value() != rhs.seqId_ref().has_value()) {
+    return lhs.seqId_ref().has_value() < rhs.seqId_ref().has_value();
   }
-  if (lhs.__isset.seqId) {
+  if (lhs.seqId_ref().has_value()) {
     if (!(lhs.seqId == rhs.seqId)) {
       return lhs.seqId < rhs.seqId;
     }
   }
-  if (lhs.__isset.clientTimeoutMs != rhs.__isset.clientTimeoutMs) {
-    return lhs.__isset.clientTimeoutMs < rhs.__isset.clientTimeoutMs;
+  if (lhs.clientTimeoutMs_ref().has_value() != rhs.clientTimeoutMs_ref().has_value()) {
+    return lhs.clientTimeoutMs_ref().has_value() < rhs.clientTimeoutMs_ref().has_value();
   }
-  if (lhs.__isset.clientTimeoutMs) {
+  if (lhs.clientTimeoutMs_ref().has_value()) {
     if (!(lhs.clientTimeoutMs == rhs.clientTimeoutMs)) {
       return lhs.clientTimeoutMs < rhs.clientTimeoutMs;
     }
   }
-  if (lhs.__isset.queueTimeoutMs != rhs.__isset.queueTimeoutMs) {
-    return lhs.__isset.queueTimeoutMs < rhs.__isset.queueTimeoutMs;
+  if (lhs.queueTimeoutMs_ref().has_value() != rhs.queueTimeoutMs_ref().has_value()) {
+    return lhs.queueTimeoutMs_ref().has_value() < rhs.queueTimeoutMs_ref().has_value();
   }
-  if (lhs.__isset.queueTimeoutMs) {
+  if (lhs.queueTimeoutMs_ref().has_value()) {
     if (!(lhs.queueTimeoutMs == rhs.queueTimeoutMs)) {
       return lhs.queueTimeoutMs < rhs.queueTimeoutMs;
     }
   }
-  if (lhs.__isset.priority != rhs.__isset.priority) {
-    return lhs.__isset.priority < rhs.__isset.priority;
+  if (lhs.priority_ref().has_value() != rhs.priority_ref().has_value()) {
+    return lhs.priority_ref().has_value() < rhs.priority_ref().has_value();
   }
-  if (lhs.__isset.priority) {
+  if (lhs.priority_ref().has_value()) {
     if (!(lhs.priority == rhs.priority)) {
       return lhs.priority < rhs.priority;
     }
   }
-  if (lhs.__isset.otherMetadata != rhs.__isset.otherMetadata) {
-    return lhs.__isset.otherMetadata < rhs.__isset.otherMetadata;
+  if (lhs.otherMetadata_ref().has_value() != rhs.otherMetadata_ref().has_value()) {
+    return lhs.otherMetadata_ref().has_value() < rhs.otherMetadata_ref().has_value();
   }
-  if (lhs.__isset.otherMetadata) {
+  if (lhs.otherMetadata_ref().has_value()) {
     if (!(lhs.otherMetadata == rhs.otherMetadata)) {
       return lhs.otherMetadata < rhs.otherMetadata;
     }
   }
-  if (lhs.__isset.host != rhs.__isset.host) {
-    return lhs.__isset.host < rhs.__isset.host;
+  if (lhs.host_ref().has_value() != rhs.host_ref().has_value()) {
+    return lhs.host_ref().has_value() < rhs.host_ref().has_value();
   }
-  if (lhs.__isset.host) {
+  if (lhs.host_ref().has_value()) {
     if (!(lhs.host == rhs.host)) {
       return lhs.host < rhs.host;
     }
   }
-  if (lhs.__isset.url != rhs.__isset.url) {
-    return lhs.__isset.url < rhs.__isset.url;
+  if (lhs.url_ref().has_value() != rhs.url_ref().has_value()) {
+    return lhs.url_ref().has_value() < rhs.url_ref().has_value();
   }
-  if (lhs.__isset.url) {
+  if (lhs.url_ref().has_value()) {
     if (!(lhs.url == rhs.url)) {
       return lhs.url < rhs.url;
     }
   }
-  if (lhs.__isset.crc32c != rhs.__isset.crc32c) {
-    return lhs.__isset.crc32c < rhs.__isset.crc32c;
+  if (lhs.crc32c_ref().has_value() != rhs.crc32c_ref().has_value()) {
+    return lhs.crc32c_ref().has_value() < rhs.crc32c_ref().has_value();
   }
-  if (lhs.__isset.crc32c) {
+  if (lhs.crc32c_ref().has_value()) {
     if (!(lhs.crc32c == rhs.crc32c)) {
       return lhs.crc32c < rhs.crc32c;
     }
   }
-  if (lhs.__isset.flags != rhs.__isset.flags) {
-    return lhs.__isset.flags < rhs.__isset.flags;
+  if (lhs.flags_ref().has_value() != rhs.flags_ref().has_value()) {
+    return lhs.flags_ref().has_value() < rhs.flags_ref().has_value();
   }
-  if (lhs.__isset.flags) {
+  if (lhs.flags_ref().has_value()) {
     if (!(lhs.flags == rhs.flags)) {
       return lhs.flags < rhs.flags;
     }
   }
-  if (lhs.__isset.loadMetric != rhs.__isset.loadMetric) {
-    return lhs.__isset.loadMetric < rhs.__isset.loadMetric;
+  if (lhs.loadMetric_ref().has_value() != rhs.loadMetric_ref().has_value()) {
+    return lhs.loadMetric_ref().has_value() < rhs.loadMetric_ref().has_value();
   }
-  if (lhs.__isset.loadMetric) {
+  if (lhs.loadMetric_ref().has_value()) {
     if (!(lhs.loadMetric == rhs.loadMetric)) {
       return lhs.loadMetric < rhs.loadMetric;
     }
   }
-  if (lhs.__isset.compression != rhs.__isset.compression) {
-    return lhs.__isset.compression < rhs.__isset.compression;
+  if (lhs.compression_ref().has_value() != rhs.compression_ref().has_value()) {
+    return lhs.compression_ref().has_value() < rhs.compression_ref().has_value();
   }
-  if (lhs.__isset.compression) {
+  if (lhs.compression_ref().has_value()) {
     if (!(lhs.compression == rhs.compression)) {
       return lhs.compression < rhs.compression;
+    }
+  }
+  if (lhs.compressionConfig_ref().has_value() != rhs.compressionConfig_ref().has_value()) {
+    return lhs.compressionConfig_ref().has_value() < rhs.compressionConfig_ref().has_value();
+  }
+  if (lhs.compressionConfig_ref().has_value()) {
+    if (!(lhs.compressionConfig == rhs.compressionConfig)) {
+      return lhs.compressionConfig < rhs.compressionConfig;
+    }
+  }
+  if (lhs.interactionId_ref().has_value() != rhs.interactionId_ref().has_value()) {
+    return lhs.interactionId_ref().has_value() < rhs.interactionId_ref().has_value();
+  }
+  if (lhs.interactionId_ref().has_value()) {
+    if (!(lhs.interactionId == rhs.interactionId)) {
+      return lhs.interactionId < rhs.interactionId;
+    }
+  }
+  if (lhs.interactionCreate_ref().has_value() != rhs.interactionCreate_ref().has_value()) {
+    return lhs.interactionCreate_ref().has_value() < rhs.interactionCreate_ref().has_value();
+  }
+  if (lhs.interactionCreate_ref().has_value()) {
+    if (!(lhs.interactionCreate == rhs.interactionCreate)) {
+      return lhs.interactionCreate < rhs.interactionCreate;
     }
   }
   return false;
 }
 
 const ::std::map<::std::string, ::std::string>* RequestRpcMetadata::get_otherMetadata() const& {
-  return __isset.otherMetadata ? std::addressof(otherMetadata) : nullptr;
+  return otherMetadata_ref().has_value() ? std::addressof(otherMetadata) : nullptr;
 }
 
 ::std::map<::std::string, ::std::string>* RequestRpcMetadata::get_otherMetadata() & {
-  return __isset.otherMetadata ? std::addressof(otherMetadata) : nullptr;
+  return otherMetadata_ref().has_value() ? std::addressof(otherMetadata) : nullptr;
+}
+
+const  ::apache::thrift::CompressionConfig* RequestRpcMetadata::get_compressionConfig() const& {
+  return compressionConfig_ref().has_value() ? std::addressof(compressionConfig) : nullptr;
+}
+
+ ::apache::thrift::CompressionConfig* RequestRpcMetadata::get_compressionConfig() & {
+  return compressionConfig_ref().has_value() ? std::addressof(compressionConfig) : nullptr;
+}
+
+const  ::apache::thrift::InteractionCreate* RequestRpcMetadata::get_interactionCreate() const& {
+  return interactionCreate_ref().has_value() ? std::addressof(interactionCreate) : nullptr;
+}
+
+ ::apache::thrift::InteractionCreate* RequestRpcMetadata::get_interactionCreate() & {
+  return interactionCreate_ref().has_value() ? std::addressof(interactionCreate) : nullptr;
 }
 
 
@@ -758,7 +1420,12 @@ void swap(RequestRpcMetadata& a, RequestRpcMetadata& b) {
   swap(a.flags_ref().value_unchecked(), b.flags_ref().value_unchecked());
   swap(a.loadMetric_ref().value_unchecked(), b.loadMetric_ref().value_unchecked());
   swap(a.compression_ref().value_unchecked(), b.compression_ref().value_unchecked());
+  swap(a.compressionConfig_ref().value_unchecked(), b.compressionConfig_ref().value_unchecked());
+  swap(a.interactionId_ref().value_unchecked(), b.interactionId_ref().value_unchecked());
+  swap(a.interactionCreate_ref().value_unchecked(), b.interactionCreate_ref().value_unchecked());
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void RequestRpcMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -773,31 +1440,574 @@ template uint32_t RequestRpcMetadata::serializedSizeZC<>(apache::thrift::Compact
 }} // apache::thrift
 namespace apache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+PayloadResponseMetadata::PayloadResponseMetadata(apache::thrift::FragileConstructor) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void PayloadResponseMetadata::__clear() {
+  // clear all fields
+}
+
+bool PayloadResponseMetadata::operator==(const PayloadResponseMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return true;
+}
+
+bool PayloadResponseMetadata::operator<(const PayloadResponseMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return false;
+}
+
+
+void swap(PayloadResponseMetadata& a, PayloadResponseMetadata& b) {
+  using ::std::swap;
+  (void)a;
+  (void)b;
+}
+
+template void PayloadResponseMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t PayloadResponseMetadata::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t PayloadResponseMetadata::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t PayloadResponseMetadata::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void PayloadResponseMetadata::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t PayloadResponseMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t PayloadResponseMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t PayloadResponseMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+PayloadDeclaredExceptionMetadata::PayloadDeclaredExceptionMetadata(apache::thrift::FragileConstructor) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void PayloadDeclaredExceptionMetadata::__clear() {
+  // clear all fields
+}
+
+bool PayloadDeclaredExceptionMetadata::operator==(const PayloadDeclaredExceptionMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return true;
+}
+
+bool PayloadDeclaredExceptionMetadata::operator<(const PayloadDeclaredExceptionMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return false;
+}
+
+
+void swap(PayloadDeclaredExceptionMetadata& a, PayloadDeclaredExceptionMetadata& b) {
+  using ::std::swap;
+  (void)a;
+  (void)b;
+}
+
+template void PayloadDeclaredExceptionMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t PayloadDeclaredExceptionMetadata::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t PayloadDeclaredExceptionMetadata::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t PayloadDeclaredExceptionMetadata::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void PayloadDeclaredExceptionMetadata::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t PayloadDeclaredExceptionMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t PayloadDeclaredExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t PayloadDeclaredExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+PayloadProxyExceptionMetadata::PayloadProxyExceptionMetadata(apache::thrift::FragileConstructor) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void PayloadProxyExceptionMetadata::__clear() {
+  // clear all fields
+}
+
+bool PayloadProxyExceptionMetadata::operator==(const PayloadProxyExceptionMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return true;
+}
+
+bool PayloadProxyExceptionMetadata::operator<(const PayloadProxyExceptionMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return false;
+}
+
+
+void swap(PayloadProxyExceptionMetadata& a, PayloadProxyExceptionMetadata& b) {
+  using ::std::swap;
+  (void)a;
+  (void)b;
+}
+
+template void PayloadProxyExceptionMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t PayloadProxyExceptionMetadata::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t PayloadProxyExceptionMetadata::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t PayloadProxyExceptionMetadata::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void PayloadProxyExceptionMetadata::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t PayloadProxyExceptionMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t PayloadProxyExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t PayloadProxyExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+PayloadProxiedExceptionMetadata::PayloadProxiedExceptionMetadata(apache::thrift::FragileConstructor) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void PayloadProxiedExceptionMetadata::__clear() {
+  // clear all fields
+}
+
+bool PayloadProxiedExceptionMetadata::operator==(const PayloadProxiedExceptionMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return true;
+}
+
+bool PayloadProxiedExceptionMetadata::operator<(const PayloadProxiedExceptionMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return false;
+}
+
+
+void swap(PayloadProxiedExceptionMetadata& a, PayloadProxiedExceptionMetadata& b) {
+  using ::std::swap;
+  (void)a;
+  (void)b;
+}
+
+template void PayloadProxiedExceptionMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t PayloadProxiedExceptionMetadata::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t PayloadProxiedExceptionMetadata::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t PayloadProxiedExceptionMetadata::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void PayloadProxiedExceptionMetadata::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t PayloadProxiedExceptionMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t PayloadProxiedExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t PayloadProxiedExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+PayloadAppClientExceptionMetadata::PayloadAppClientExceptionMetadata(apache::thrift::FragileConstructor) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void PayloadAppClientExceptionMetadata::__clear() {
+  // clear all fields
+}
+
+bool PayloadAppClientExceptionMetadata::operator==(const PayloadAppClientExceptionMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return true;
+}
+
+bool PayloadAppClientExceptionMetadata::operator<(const PayloadAppClientExceptionMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return false;
+}
+
+
+void swap(PayloadAppClientExceptionMetadata& a, PayloadAppClientExceptionMetadata& b) {
+  using ::std::swap;
+  (void)a;
+  (void)b;
+}
+
+template void PayloadAppClientExceptionMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t PayloadAppClientExceptionMetadata::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t PayloadAppClientExceptionMetadata::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t PayloadAppClientExceptionMetadata::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void PayloadAppClientExceptionMetadata::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t PayloadAppClientExceptionMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t PayloadAppClientExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t PayloadAppClientExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+PayloadAppServerExceptionMetadata::PayloadAppServerExceptionMetadata(apache::thrift::FragileConstructor) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void PayloadAppServerExceptionMetadata::__clear() {
+  // clear all fields
+}
+
+bool PayloadAppServerExceptionMetadata::operator==(const PayloadAppServerExceptionMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return true;
+}
+
+bool PayloadAppServerExceptionMetadata::operator<(const PayloadAppServerExceptionMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return false;
+}
+
+
+void swap(PayloadAppServerExceptionMetadata& a, PayloadAppServerExceptionMetadata& b) {
+  using ::std::swap;
+  (void)a;
+  (void)b;
+}
+
+template void PayloadAppServerExceptionMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t PayloadAppServerExceptionMetadata::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t PayloadAppServerExceptionMetadata::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t PayloadAppServerExceptionMetadata::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void PayloadAppServerExceptionMetadata::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t PayloadAppServerExceptionMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t PayloadAppServerExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t PayloadAppServerExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+void PayloadExceptionMetadata::__clear() {
+  // clear all fields
+  if (type_ == Type::__EMPTY__) { return; }
+  switch(type_) {
+    case Type::declaredException:
+    {
+      destruct(value_.declaredException);
+      break;
+    }
+    case Type::proxyException:
+    {
+      destruct(value_.proxyException);
+      break;
+    }
+    case Type::proxiedException:
+    {
+      destruct(value_.proxiedException);
+      break;
+    }
+    case Type::appClientException:
+    {
+      destruct(value_.appClientException);
+      break;
+    }
+    case Type::appServerException:
+    {
+      destruct(value_.appServerException);
+      break;
+    }
+    default:
+    {
+      assert(false);
+      break;
+    }
+  }
+  type_ = Type::__EMPTY__;
+}
+
+bool PayloadExceptionMetadata::operator==(const PayloadExceptionMetadata& rhs) const {
+  if (type_ != rhs.type_) { return false; }
+  switch(type_) {
+    case Type::declaredException:
+    {
+      return value_.declaredException == rhs.value_.declaredException;
+    }
+    case Type::proxyException:
+    {
+      return value_.proxyException == rhs.value_.proxyException;
+    }
+    case Type::proxiedException:
+    {
+      return value_.proxiedException == rhs.value_.proxiedException;
+    }
+    case Type::appClientException:
+    {
+      return value_.appClientException == rhs.value_.appClientException;
+    }
+    case Type::appServerException:
+    {
+      return value_.appServerException == rhs.value_.appServerException;
+    }
+    default:
+    {
+      return true;
+    }
+  }
+}
+
+bool PayloadExceptionMetadata::operator<(const PayloadExceptionMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.type_ != rhs.type_) {
+    return lhs.type_ < rhs.type_;
+  }
+  switch (lhs.type_) {
+    case Type::declaredException:
+      return lhs.value_.declaredException < rhs.value_.declaredException;
+    case Type::proxyException:
+      return lhs.value_.proxyException < rhs.value_.proxyException;
+    case Type::proxiedException:
+      return lhs.value_.proxiedException < rhs.value_.proxiedException;
+    case Type::appClientException:
+      return lhs.value_.appClientException < rhs.value_.appClientException;
+    case Type::appServerException:
+      return lhs.value_.appServerException < rhs.value_.appServerException;
+    default:
+      return false;
+  }
+}
+
+void swap(PayloadExceptionMetadata& a, PayloadExceptionMetadata& b) {
+  PayloadExceptionMetadata temp(std::move(a));
+  a = std::move(b);
+  b = std::move(temp);
+}
+
+template void PayloadExceptionMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t PayloadExceptionMetadata::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t PayloadExceptionMetadata::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t PayloadExceptionMetadata::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void PayloadExceptionMetadata::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t PayloadExceptionMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t PayloadExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t PayloadExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+PayloadExceptionMetadataBase::PayloadExceptionMetadataBase(apache::thrift::FragileConstructor, ::std::string name_utf8__arg, ::std::string what_utf8__arg,  ::apache::thrift::PayloadExceptionMetadata metadata__arg) :
+    name_utf8(std::move(name_utf8__arg)),
+    what_utf8(std::move(what_utf8__arg)),
+    metadata(std::move(metadata__arg)) {
+  __isset.name_utf8 = true;
+  __isset.what_utf8 = true;
+  __isset.metadata = true;
+}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void PayloadExceptionMetadataBase::__clear() {
+  // clear all fields
+  name_utf8 = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  what_utf8 = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  ::apache::thrift::Cpp2Ops<  ::apache::thrift::PayloadExceptionMetadata>::clear(&metadata);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+bool PayloadExceptionMetadataBase::operator==(const PayloadExceptionMetadataBase& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.name_utf8_ref().has_value() != rhs.name_utf8_ref().has_value()) {
+    return false;
+  }
+  if (lhs.name_utf8_ref().has_value()) {
+    if (!(lhs.name_utf8 == rhs.name_utf8)) {
+      return false;
+    }
+  }
+  if (lhs.what_utf8_ref().has_value() != rhs.what_utf8_ref().has_value()) {
+    return false;
+  }
+  if (lhs.what_utf8_ref().has_value()) {
+    if (!(lhs.what_utf8 == rhs.what_utf8)) {
+      return false;
+    }
+  }
+  if (lhs.metadata_ref().has_value() != rhs.metadata_ref().has_value()) {
+    return false;
+  }
+  if (lhs.metadata_ref().has_value()) {
+    if (!(lhs.metadata == rhs.metadata)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool PayloadExceptionMetadataBase::operator<(const PayloadExceptionMetadataBase& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.name_utf8_ref().has_value() != rhs.name_utf8_ref().has_value()) {
+    return lhs.name_utf8_ref().has_value() < rhs.name_utf8_ref().has_value();
+  }
+  if (lhs.name_utf8_ref().has_value()) {
+    if (!(lhs.name_utf8 == rhs.name_utf8)) {
+      return lhs.name_utf8 < rhs.name_utf8;
+    }
+  }
+  if (lhs.what_utf8_ref().has_value() != rhs.what_utf8_ref().has_value()) {
+    return lhs.what_utf8_ref().has_value() < rhs.what_utf8_ref().has_value();
+  }
+  if (lhs.what_utf8_ref().has_value()) {
+    if (!(lhs.what_utf8 == rhs.what_utf8)) {
+      return lhs.what_utf8 < rhs.what_utf8;
+    }
+  }
+  if (lhs.metadata_ref().has_value() != rhs.metadata_ref().has_value()) {
+    return lhs.metadata_ref().has_value() < rhs.metadata_ref().has_value();
+  }
+  if (lhs.metadata_ref().has_value()) {
+    if (!(lhs.metadata == rhs.metadata)) {
+      return lhs.metadata < rhs.metadata;
+    }
+  }
+  return false;
+}
+
+const  ::apache::thrift::PayloadExceptionMetadata* PayloadExceptionMetadataBase::get_metadata() const& {
+  return metadata_ref().has_value() ? std::addressof(metadata) : nullptr;
+}
+
+ ::apache::thrift::PayloadExceptionMetadata* PayloadExceptionMetadataBase::get_metadata() & {
+  return metadata_ref().has_value() ? std::addressof(metadata) : nullptr;
+}
+
+
+void swap(PayloadExceptionMetadataBase& a, PayloadExceptionMetadataBase& b) {
+  using ::std::swap;
+  swap(a.name_utf8_ref().value_unchecked(), b.name_utf8_ref().value_unchecked());
+  swap(a.what_utf8_ref().value_unchecked(), b.what_utf8_ref().value_unchecked());
+  swap(a.metadata_ref().value_unchecked(), b.metadata_ref().value_unchecked());
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+template void PayloadExceptionMetadataBase::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t PayloadExceptionMetadataBase::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t PayloadExceptionMetadataBase::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t PayloadExceptionMetadataBase::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void PayloadExceptionMetadataBase::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t PayloadExceptionMetadataBase::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t PayloadExceptionMetadataBase::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t PayloadExceptionMetadataBase::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+void PayloadMetadata::__clear() {
+  // clear all fields
+  if (type_ == Type::__EMPTY__) { return; }
+  switch(type_) {
+    case Type::responseMetadata:
+    {
+      destruct(value_.responseMetadata);
+      break;
+    }
+    case Type::exceptionMetadata:
+    {
+      destruct(value_.exceptionMetadata);
+      break;
+    }
+    default:
+    {
+      assert(false);
+      break;
+    }
+  }
+  type_ = Type::__EMPTY__;
+}
+
+bool PayloadMetadata::operator==(const PayloadMetadata& rhs) const {
+  if (type_ != rhs.type_) { return false; }
+  switch(type_) {
+    case Type::responseMetadata:
+    {
+      return value_.responseMetadata == rhs.value_.responseMetadata;
+    }
+    case Type::exceptionMetadata:
+    {
+      return value_.exceptionMetadata == rhs.value_.exceptionMetadata;
+    }
+    default:
+    {
+      return true;
+    }
+  }
+}
+
+bool PayloadMetadata::operator<(const PayloadMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.type_ != rhs.type_) {
+    return lhs.type_ < rhs.type_;
+  }
+  switch (lhs.type_) {
+    case Type::responseMetadata:
+      return lhs.value_.responseMetadata < rhs.value_.responseMetadata;
+    case Type::exceptionMetadata:
+      return lhs.value_.exceptionMetadata < rhs.value_.exceptionMetadata;
+    default:
+      return false;
+  }
+}
+
+void swap(PayloadMetadata& a, PayloadMetadata& b) {
+  PayloadMetadata temp(std::move(a));
+  a = std::move(b);
+  b = std::move(temp);
+}
+
+template void PayloadMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t PayloadMetadata::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t PayloadMetadata::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t PayloadMetadata::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void PayloadMetadata::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t PayloadMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t PayloadMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t PayloadMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 ResponseRpcMetadata::ResponseRpcMetadata() :
       protocol( ::apache::thrift::ProtocolId::BINARY),
       seqId(0),
       load(0),
       crc32c(0),
       compression( ::apache::thrift::CompressionAlgorithm::NONE) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
 ResponseRpcMetadata::~ResponseRpcMetadata() {}
 
-ResponseRpcMetadata::ResponseRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, int32_t seqId__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, int64_t load__arg, std::uint32_t crc32c__arg,  ::apache::thrift::CompressionAlgorithm compression__arg) :
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+ResponseRpcMetadata::ResponseRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, int32_t seqId__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, int64_t load__arg, std::uint32_t crc32c__arg,  ::apache::thrift::CompressionAlgorithm compression__arg,  ::apache::thrift::PayloadMetadata payloadMetadata__arg) :
     protocol(std::move(protocol__arg)),
     seqId(std::move(seqId__arg)),
     otherMetadata(std::move(otherMetadata__arg)),
     load(std::move(load__arg)),
     crc32c(std::move(crc32c__arg)),
-    compression(std::move(compression__arg)) {
+    compression(std::move(compression__arg)),
+    payloadMetadata(std::move(payloadMetadata__arg)) {
   __isset.protocol = true;
   __isset.seqId = true;
   __isset.otherMetadata = true;
   __isset.load = true;
   __isset.crc32c = true;
   __isset.compression = true;
+  __isset.payloadMetadata = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void ResponseRpcMetadata::__clear() {
   // clear all fields
   protocol =  ::apache::thrift::ProtocolId::BINARY;
@@ -806,58 +2016,69 @@ void ResponseRpcMetadata::__clear() {
   load = 0;
   crc32c = 0;
   compression =  ::apache::thrift::CompressionAlgorithm::NONE;
+  ::apache::thrift::Cpp2Ops<  ::apache::thrift::PayloadMetadata>::clear(&payloadMetadata);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool ResponseRpcMetadata::operator==(const ResponseRpcMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.__isset.protocol != rhs.__isset.protocol) {
+  if (lhs.protocol_ref().has_value() != rhs.protocol_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.protocol) {
+  if (lhs.protocol_ref().has_value()) {
     if (!(lhs.protocol == rhs.protocol)) {
       return false;
     }
   }
-  if (lhs.__isset.seqId != rhs.__isset.seqId) {
+  if (lhs.seqId_ref().has_value() != rhs.seqId_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.seqId) {
+  if (lhs.seqId_ref().has_value()) {
     if (!(lhs.seqId == rhs.seqId)) {
       return false;
     }
   }
-  if (lhs.__isset.otherMetadata != rhs.__isset.otherMetadata) {
+  if (lhs.otherMetadata_ref().has_value() != rhs.otherMetadata_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.otherMetadata) {
+  if (lhs.otherMetadata_ref().has_value()) {
     if (!(lhs.otherMetadata == rhs.otherMetadata)) {
       return false;
     }
   }
-  if (lhs.__isset.load != rhs.__isset.load) {
+  if (lhs.load_ref().has_value() != rhs.load_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.load) {
+  if (lhs.load_ref().has_value()) {
     if (!(lhs.load == rhs.load)) {
       return false;
     }
   }
-  if (lhs.__isset.crc32c != rhs.__isset.crc32c) {
+  if (lhs.crc32c_ref().has_value() != rhs.crc32c_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.crc32c) {
+  if (lhs.crc32c_ref().has_value()) {
     if (!(lhs.crc32c == rhs.crc32c)) {
       return false;
     }
   }
-  if (lhs.__isset.compression != rhs.__isset.compression) {
+  if (lhs.compression_ref().has_value() != rhs.compression_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.compression) {
+  if (lhs.compression_ref().has_value()) {
     if (!(lhs.compression == rhs.compression)) {
+      return false;
+    }
+  }
+  if (lhs.payloadMetadata_ref().has_value() != rhs.payloadMetadata_ref().has_value()) {
+    return false;
+  }
+  if (lhs.payloadMetadata_ref().has_value()) {
+    if (!(lhs.payloadMetadata == rhs.payloadMetadata)) {
       return false;
     }
   }
@@ -868,63 +2089,79 @@ bool ResponseRpcMetadata::operator<(const ResponseRpcMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.__isset.protocol != rhs.__isset.protocol) {
-    return lhs.__isset.protocol < rhs.__isset.protocol;
+  if (lhs.protocol_ref().has_value() != rhs.protocol_ref().has_value()) {
+    return lhs.protocol_ref().has_value() < rhs.protocol_ref().has_value();
   }
-  if (lhs.__isset.protocol) {
+  if (lhs.protocol_ref().has_value()) {
     if (!(lhs.protocol == rhs.protocol)) {
       return lhs.protocol < rhs.protocol;
     }
   }
-  if (lhs.__isset.seqId != rhs.__isset.seqId) {
-    return lhs.__isset.seqId < rhs.__isset.seqId;
+  if (lhs.seqId_ref().has_value() != rhs.seqId_ref().has_value()) {
+    return lhs.seqId_ref().has_value() < rhs.seqId_ref().has_value();
   }
-  if (lhs.__isset.seqId) {
+  if (lhs.seqId_ref().has_value()) {
     if (!(lhs.seqId == rhs.seqId)) {
       return lhs.seqId < rhs.seqId;
     }
   }
-  if (lhs.__isset.otherMetadata != rhs.__isset.otherMetadata) {
-    return lhs.__isset.otherMetadata < rhs.__isset.otherMetadata;
+  if (lhs.otherMetadata_ref().has_value() != rhs.otherMetadata_ref().has_value()) {
+    return lhs.otherMetadata_ref().has_value() < rhs.otherMetadata_ref().has_value();
   }
-  if (lhs.__isset.otherMetadata) {
+  if (lhs.otherMetadata_ref().has_value()) {
     if (!(lhs.otherMetadata == rhs.otherMetadata)) {
       return lhs.otherMetadata < rhs.otherMetadata;
     }
   }
-  if (lhs.__isset.load != rhs.__isset.load) {
-    return lhs.__isset.load < rhs.__isset.load;
+  if (lhs.load_ref().has_value() != rhs.load_ref().has_value()) {
+    return lhs.load_ref().has_value() < rhs.load_ref().has_value();
   }
-  if (lhs.__isset.load) {
+  if (lhs.load_ref().has_value()) {
     if (!(lhs.load == rhs.load)) {
       return lhs.load < rhs.load;
     }
   }
-  if (lhs.__isset.crc32c != rhs.__isset.crc32c) {
-    return lhs.__isset.crc32c < rhs.__isset.crc32c;
+  if (lhs.crc32c_ref().has_value() != rhs.crc32c_ref().has_value()) {
+    return lhs.crc32c_ref().has_value() < rhs.crc32c_ref().has_value();
   }
-  if (lhs.__isset.crc32c) {
+  if (lhs.crc32c_ref().has_value()) {
     if (!(lhs.crc32c == rhs.crc32c)) {
       return lhs.crc32c < rhs.crc32c;
     }
   }
-  if (lhs.__isset.compression != rhs.__isset.compression) {
-    return lhs.__isset.compression < rhs.__isset.compression;
+  if (lhs.compression_ref().has_value() != rhs.compression_ref().has_value()) {
+    return lhs.compression_ref().has_value() < rhs.compression_ref().has_value();
   }
-  if (lhs.__isset.compression) {
+  if (lhs.compression_ref().has_value()) {
     if (!(lhs.compression == rhs.compression)) {
       return lhs.compression < rhs.compression;
+    }
+  }
+  if (lhs.payloadMetadata_ref().has_value() != rhs.payloadMetadata_ref().has_value()) {
+    return lhs.payloadMetadata_ref().has_value() < rhs.payloadMetadata_ref().has_value();
+  }
+  if (lhs.payloadMetadata_ref().has_value()) {
+    if (!(lhs.payloadMetadata == rhs.payloadMetadata)) {
+      return lhs.payloadMetadata < rhs.payloadMetadata;
     }
   }
   return false;
 }
 
 const ::std::map<::std::string, ::std::string>* ResponseRpcMetadata::get_otherMetadata() const& {
-  return __isset.otherMetadata ? std::addressof(otherMetadata) : nullptr;
+  return otherMetadata_ref().has_value() ? std::addressof(otherMetadata) : nullptr;
 }
 
 ::std::map<::std::string, ::std::string>* ResponseRpcMetadata::get_otherMetadata() & {
-  return __isset.otherMetadata ? std::addressof(otherMetadata) : nullptr;
+  return otherMetadata_ref().has_value() ? std::addressof(otherMetadata) : nullptr;
+}
+
+const  ::apache::thrift::PayloadMetadata* ResponseRpcMetadata::get_payloadMetadata() const& {
+  return payloadMetadata_ref().has_value() ? std::addressof(payloadMetadata) : nullptr;
+}
+
+ ::apache::thrift::PayloadMetadata* ResponseRpcMetadata::get_payloadMetadata() & {
+  return payloadMetadata_ref().has_value() ? std::addressof(payloadMetadata) : nullptr;
 }
 
 
@@ -936,7 +2173,10 @@ void swap(ResponseRpcMetadata& a, ResponseRpcMetadata& b) {
   swap(a.load_ref().value_unchecked(), b.load_ref().value_unchecked());
   swap(a.crc32c_ref().value_unchecked(), b.crc32c_ref().value_unchecked());
   swap(a.compression_ref().value_unchecked(), b.compression_ref().value_unchecked());
+  swap(a.payloadMetadata_ref().value_unchecked(), b.payloadMetadata_ref().value_unchecked());
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void ResponseRpcMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -951,36 +2191,194 @@ template uint32_t ResponseRpcMetadata::serializedSizeZC<>(apache::thrift::Compac
 }} // apache::thrift
 namespace apache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+ResponseRpcError::ResponseRpcError() :
+      category( ::apache::thrift::ResponseRpcErrorCategory::INTERNAL_ERROR),
+      code( ::apache::thrift::ResponseRpcErrorCode::UNKNOWN),
+      load(0) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+
+ResponseRpcError::~ResponseRpcError() {}
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+ResponseRpcError::ResponseRpcError(apache::thrift::FragileConstructor, ::std::string name_utf8__arg, ::std::string what_utf8__arg,  ::apache::thrift::ResponseRpcErrorCategory category__arg,  ::apache::thrift::ResponseRpcErrorCode code__arg, int64_t load__arg) :
+    name_utf8(std::move(name_utf8__arg)),
+    what_utf8(std::move(what_utf8__arg)),
+    category(std::move(category__arg)),
+    code(std::move(code__arg)),
+    load(std::move(load__arg)) {
+  __isset.name_utf8 = true;
+  __isset.what_utf8 = true;
+  __isset.category = true;
+  __isset.code = true;
+  __isset.load = true;
+}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void ResponseRpcError::__clear() {
+  // clear all fields
+  name_utf8 = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  what_utf8 = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
+  category =  ::apache::thrift::ResponseRpcErrorCategory::INTERNAL_ERROR;
+  code =  ::apache::thrift::ResponseRpcErrorCode::UNKNOWN;
+  load = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+bool ResponseRpcError::operator==(const ResponseRpcError& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.name_utf8_ref().has_value() != rhs.name_utf8_ref().has_value()) {
+    return false;
+  }
+  if (lhs.name_utf8_ref().has_value()) {
+    if (!(lhs.name_utf8 == rhs.name_utf8)) {
+      return false;
+    }
+  }
+  if (lhs.what_utf8_ref().has_value() != rhs.what_utf8_ref().has_value()) {
+    return false;
+  }
+  if (lhs.what_utf8_ref().has_value()) {
+    if (!(lhs.what_utf8 == rhs.what_utf8)) {
+      return false;
+    }
+  }
+  if (lhs.category_ref().has_value() != rhs.category_ref().has_value()) {
+    return false;
+  }
+  if (lhs.category_ref().has_value()) {
+    if (!(lhs.category == rhs.category)) {
+      return false;
+    }
+  }
+  if (lhs.code_ref().has_value() != rhs.code_ref().has_value()) {
+    return false;
+  }
+  if (lhs.code_ref().has_value()) {
+    if (!(lhs.code == rhs.code)) {
+      return false;
+    }
+  }
+  if (lhs.load_ref().has_value() != rhs.load_ref().has_value()) {
+    return false;
+  }
+  if (lhs.load_ref().has_value()) {
+    if (!(lhs.load == rhs.load)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool ResponseRpcError::operator<(const ResponseRpcError& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (lhs.name_utf8_ref().has_value() != rhs.name_utf8_ref().has_value()) {
+    return lhs.name_utf8_ref().has_value() < rhs.name_utf8_ref().has_value();
+  }
+  if (lhs.name_utf8_ref().has_value()) {
+    if (!(lhs.name_utf8 == rhs.name_utf8)) {
+      return lhs.name_utf8 < rhs.name_utf8;
+    }
+  }
+  if (lhs.what_utf8_ref().has_value() != rhs.what_utf8_ref().has_value()) {
+    return lhs.what_utf8_ref().has_value() < rhs.what_utf8_ref().has_value();
+  }
+  if (lhs.what_utf8_ref().has_value()) {
+    if (!(lhs.what_utf8 == rhs.what_utf8)) {
+      return lhs.what_utf8 < rhs.what_utf8;
+    }
+  }
+  if (lhs.category_ref().has_value() != rhs.category_ref().has_value()) {
+    return lhs.category_ref().has_value() < rhs.category_ref().has_value();
+  }
+  if (lhs.category_ref().has_value()) {
+    if (!(lhs.category == rhs.category)) {
+      return lhs.category < rhs.category;
+    }
+  }
+  if (lhs.code_ref().has_value() != rhs.code_ref().has_value()) {
+    return lhs.code_ref().has_value() < rhs.code_ref().has_value();
+  }
+  if (lhs.code_ref().has_value()) {
+    if (!(lhs.code == rhs.code)) {
+      return lhs.code < rhs.code;
+    }
+  }
+  if (lhs.load_ref().has_value() != rhs.load_ref().has_value()) {
+    return lhs.load_ref().has_value() < rhs.load_ref().has_value();
+  }
+  if (lhs.load_ref().has_value()) {
+    if (!(lhs.load == rhs.load)) {
+      return lhs.load < rhs.load;
+    }
+  }
+  return false;
+}
+
+
+void swap(ResponseRpcError& a, ResponseRpcError& b) {
+  using ::std::swap;
+  swap(a.name_utf8_ref().value_unchecked(), b.name_utf8_ref().value_unchecked());
+  swap(a.what_utf8_ref().value_unchecked(), b.what_utf8_ref().value_unchecked());
+  swap(a.category_ref().value_unchecked(), b.category_ref().value_unchecked());
+  swap(a.code_ref().value_unchecked(), b.code_ref().value_unchecked());
+  swap(a.load_ref().value_unchecked(), b.load_ref().value_unchecked());
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+template void ResponseRpcError::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ResponseRpcError::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ResponseRpcError::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ResponseRpcError::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ResponseRpcError::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ResponseRpcError::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ResponseRpcError::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ResponseRpcError::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+}} // apache::thrift
+namespace apache { namespace thrift {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 StreamPayloadMetadata::StreamPayloadMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::CompressionAlgorithm compression__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg) :
     compression(std::move(compression__arg)),
     otherMetadata(std::move(otherMetadata__arg)) {
   __isset.compression = true;
   __isset.otherMetadata = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void StreamPayloadMetadata::__clear() {
   // clear all fields
   compression =  ::apache::thrift::CompressionAlgorithm::NONE;
   otherMetadata.clear();
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool StreamPayloadMetadata::operator==(const StreamPayloadMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.__isset.compression != rhs.__isset.compression) {
+  if (lhs.compression_ref().has_value() != rhs.compression_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.compression) {
+  if (lhs.compression_ref().has_value()) {
     if (!(lhs.compression == rhs.compression)) {
       return false;
     }
   }
-  if (lhs.__isset.otherMetadata != rhs.__isset.otherMetadata) {
+  if (lhs.otherMetadata_ref().has_value() != rhs.otherMetadata_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.otherMetadata) {
+  if (lhs.otherMetadata_ref().has_value()) {
     if (!(lhs.otherMetadata == rhs.otherMetadata)) {
       return false;
     }
@@ -992,18 +2390,18 @@ bool StreamPayloadMetadata::operator<(const StreamPayloadMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.__isset.compression != rhs.__isset.compression) {
-    return lhs.__isset.compression < rhs.__isset.compression;
+  if (lhs.compression_ref().has_value() != rhs.compression_ref().has_value()) {
+    return lhs.compression_ref().has_value() < rhs.compression_ref().has_value();
   }
-  if (lhs.__isset.compression) {
+  if (lhs.compression_ref().has_value()) {
     if (!(lhs.compression == rhs.compression)) {
       return lhs.compression < rhs.compression;
     }
   }
-  if (lhs.__isset.otherMetadata != rhs.__isset.otherMetadata) {
-    return lhs.__isset.otherMetadata < rhs.__isset.otherMetadata;
+  if (lhs.otherMetadata_ref().has_value() != rhs.otherMetadata_ref().has_value()) {
+    return lhs.otherMetadata_ref().has_value() < rhs.otherMetadata_ref().has_value();
   }
-  if (lhs.__isset.otherMetadata) {
+  if (lhs.otherMetadata_ref().has_value()) {
     if (!(lhs.otherMetadata == rhs.otherMetadata)) {
       return lhs.otherMetadata < rhs.otherMetadata;
     }
@@ -1012,11 +2410,11 @@ bool StreamPayloadMetadata::operator<(const StreamPayloadMetadata& rhs) const {
 }
 
 const ::std::map<::std::string, ::std::string>* StreamPayloadMetadata::get_otherMetadata() const& {
-  return __isset.otherMetadata ? std::addressof(otherMetadata) : nullptr;
+  return otherMetadata_ref().has_value() ? std::addressof(otherMetadata) : nullptr;
 }
 
 ::std::map<::std::string, ::std::string>* StreamPayloadMetadata::get_otherMetadata() & {
-  return __isset.otherMetadata ? std::addressof(otherMetadata) : nullptr;
+  return otherMetadata_ref().has_value() ? std::addressof(otherMetadata) : nullptr;
 }
 
 
@@ -1024,7 +2422,9 @@ void swap(StreamPayloadMetadata& a, StreamPayloadMetadata& b) {
   using ::std::swap;
   swap(a.compression_ref().value_unchecked(), b.compression_ref().value_unchecked());
   swap(a.otherMetadata_ref().value_unchecked(), b.otherMetadata_ref().value_unchecked());
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void StreamPayloadMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1039,37 +2439,62 @@ template uint32_t StreamPayloadMetadata::serializedSizeZC<>(apache::thrift::Comp
 }} // apache::thrift
 namespace apache { namespace thrift {
 
-RequestSetupMetadata::RequestSetupMetadata(apache::thrift::FragileConstructor, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque__arg,  ::apache::thrift::InterfaceKind interfaceKind__arg) :
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+RequestSetupMetadata::RequestSetupMetadata(apache::thrift::FragileConstructor, apache::thrift::MetadataOpaqueMap<::std::string, ::std::string> opaque__arg,  ::apache::thrift::InterfaceKind interfaceKind__arg, int32_t minVersion__arg, int32_t maxVersion__arg) :
     opaque(std::move(opaque__arg)),
-    interfaceKind(std::move(interfaceKind__arg)) {
+    interfaceKind(std::move(interfaceKind__arg)),
+    minVersion(std::move(minVersion__arg)),
+    maxVersion(std::move(maxVersion__arg)) {
   __isset.opaque = true;
   __isset.interfaceKind = true;
+  __isset.minVersion = true;
+  __isset.maxVersion = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void RequestSetupMetadata::__clear() {
   // clear all fields
   opaque.clear();
   interfaceKind =  ::apache::thrift::InterfaceKind::USER;
+  minVersion = 0;
+  maxVersion = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool RequestSetupMetadata::operator==(const RequestSetupMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.__isset.opaque != rhs.__isset.opaque) {
+  if (lhs.opaque_ref().has_value() != rhs.opaque_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.opaque) {
+  if (lhs.opaque_ref().has_value()) {
     if (!(lhs.opaque == rhs.opaque)) {
       return false;
     }
   }
-  if (lhs.__isset.interfaceKind != rhs.__isset.interfaceKind) {
+  if (lhs.interfaceKind_ref().has_value() != rhs.interfaceKind_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.interfaceKind) {
+  if (lhs.interfaceKind_ref().has_value()) {
     if (!(lhs.interfaceKind == rhs.interfaceKind)) {
+      return false;
+    }
+  }
+  if (lhs.minVersion_ref().has_value() != rhs.minVersion_ref().has_value()) {
+    return false;
+  }
+  if (lhs.minVersion_ref().has_value()) {
+    if (!(lhs.minVersion == rhs.minVersion)) {
+      return false;
+    }
+  }
+  if (lhs.maxVersion_ref().has_value() != rhs.maxVersion_ref().has_value()) {
+    return false;
+  }
+  if (lhs.maxVersion_ref().has_value()) {
+    if (!(lhs.maxVersion == rhs.maxVersion)) {
       return false;
     }
   }
@@ -1077,11 +2502,11 @@ bool RequestSetupMetadata::operator==(const RequestSetupMetadata& rhs) const {
 }
 
 const apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>* RequestSetupMetadata::get_opaque() const& {
-  return __isset.opaque ? std::addressof(opaque) : nullptr;
+  return opaque_ref().has_value() ? std::addressof(opaque) : nullptr;
 }
 
 apache::thrift::MetadataOpaqueMap<::std::string, ::std::string>* RequestSetupMetadata::get_opaque() & {
-  return __isset.opaque ? std::addressof(opaque) : nullptr;
+  return opaque_ref().has_value() ? std::addressof(opaque) : nullptr;
 }
 
 
@@ -1089,7 +2514,11 @@ void swap(RequestSetupMetadata& a, RequestSetupMetadata& b) {
   using ::std::swap;
   swap(a.opaque_ref().value_unchecked(), b.opaque_ref().value_unchecked());
   swap(a.interfaceKind_ref().value_unchecked(), b.interfaceKind_ref().value_unchecked());
+  swap(a.minVersion_ref().value_unchecked(), b.minVersion_ref().value_unchecked());
+  swap(a.maxVersion_ref().value_unchecked(), b.maxVersion_ref().value_unchecked());
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void RequestSetupMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1104,25 +2533,28 @@ template uint32_t RequestSetupMetadata::serializedSizeZC<>(apache::thrift::Compa
 }} // apache::thrift
 namespace apache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 HeadersPayloadContent::HeadersPayloadContent(apache::thrift::FragileConstructor, ::std::map<::std::string, ::std::string> otherMetadata__arg) :
     otherMetadata(std::move(otherMetadata__arg)) {
   __isset.otherMetadata = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void HeadersPayloadContent::__clear() {
   // clear all fields
   otherMetadata.clear();
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool HeadersPayloadContent::operator==(const HeadersPayloadContent& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.__isset.otherMetadata != rhs.__isset.otherMetadata) {
+  if (lhs.otherMetadata_ref().has_value() != rhs.otherMetadata_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.otherMetadata) {
+  if (lhs.otherMetadata_ref().has_value()) {
     if (!(lhs.otherMetadata == rhs.otherMetadata)) {
       return false;
     }
@@ -1134,10 +2566,10 @@ bool HeadersPayloadContent::operator<(const HeadersPayloadContent& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.__isset.otherMetadata != rhs.__isset.otherMetadata) {
-    return lhs.__isset.otherMetadata < rhs.__isset.otherMetadata;
+  if (lhs.otherMetadata_ref().has_value() != rhs.otherMetadata_ref().has_value()) {
+    return lhs.otherMetadata_ref().has_value() < rhs.otherMetadata_ref().has_value();
   }
-  if (lhs.__isset.otherMetadata) {
+  if (lhs.otherMetadata_ref().has_value()) {
     if (!(lhs.otherMetadata == rhs.otherMetadata)) {
       return lhs.otherMetadata < rhs.otherMetadata;
     }
@@ -1146,18 +2578,20 @@ bool HeadersPayloadContent::operator<(const HeadersPayloadContent& rhs) const {
 }
 
 const ::std::map<::std::string, ::std::string>* HeadersPayloadContent::get_otherMetadata() const& {
-  return __isset.otherMetadata ? std::addressof(otherMetadata) : nullptr;
+  return otherMetadata_ref().has_value() ? std::addressof(otherMetadata) : nullptr;
 }
 
 ::std::map<::std::string, ::std::string>* HeadersPayloadContent::get_otherMetadata() & {
-  return __isset.otherMetadata ? std::addressof(otherMetadata) : nullptr;
+  return otherMetadata_ref().has_value() ? std::addressof(otherMetadata) : nullptr;
 }
 
 
 void swap(HeadersPayloadContent& a, HeadersPayloadContent& b) {
   using ::std::swap;
   swap(a.otherMetadata_ref().value_unchecked(), b.otherMetadata_ref().value_unchecked());
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void HeadersPayloadContent::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1172,25 +2606,28 @@ template uint32_t HeadersPayloadContent::serializedSizeZC<>(apache::thrift::Comp
 }} // apache::thrift
 namespace apache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 HeadersPayloadMetadata::HeadersPayloadMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::CompressionAlgorithm compression__arg) :
     compression(std::move(compression__arg)) {
   __isset.compression = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void HeadersPayloadMetadata::__clear() {
   // clear all fields
   compression =  ::apache::thrift::CompressionAlgorithm::NONE;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool HeadersPayloadMetadata::operator==(const HeadersPayloadMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.__isset.compression != rhs.__isset.compression) {
+  if (lhs.compression_ref().has_value() != rhs.compression_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.compression) {
+  if (lhs.compression_ref().has_value()) {
     if (!(lhs.compression == rhs.compression)) {
       return false;
     }
@@ -1202,10 +2639,10 @@ bool HeadersPayloadMetadata::operator<(const HeadersPayloadMetadata& rhs) const 
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.__isset.compression != rhs.__isset.compression) {
-    return lhs.__isset.compression < rhs.__isset.compression;
+  if (lhs.compression_ref().has_value() != rhs.compression_ref().has_value()) {
+    return lhs.compression_ref().has_value() < rhs.compression_ref().has_value();
   }
-  if (lhs.__isset.compression) {
+  if (lhs.compression_ref().has_value()) {
     if (!(lhs.compression == rhs.compression)) {
       return lhs.compression < rhs.compression;
     }
@@ -1217,7 +2654,9 @@ bool HeadersPayloadMetadata::operator<(const HeadersPayloadMetadata& rhs) const 
 void swap(HeadersPayloadMetadata& a, HeadersPayloadMetadata& b) {
   using ::std::swap;
   swap(a.compression_ref().value_unchecked(), b.compression_ref().value_unchecked());
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void HeadersPayloadMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);

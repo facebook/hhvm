@@ -9,4 +9,9 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+namespace apache {
+namespace thrift {
 
+
+} // namespace thrift
+} // namespace apache

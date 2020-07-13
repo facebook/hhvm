@@ -357,9 +357,10 @@ void StructMetadata<::apache::thrift::metadata::ThriftFunction>::gen(ThriftMetad
   static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
   metadata_ThriftFunction_fields[] = {
     std::make_tuple(1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE)),
-    std::make_tuple(2, "returnType", false, std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType")),
+    std::make_tuple(2, "return_type", false, std::make_unique<Union< ::apache::thrift::metadata::ThriftType>>("metadata.ThriftType")),
     std::make_tuple(3, "arguments", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftField>>("metadata.ThriftField"))),
     std::make_tuple(4, "exceptions", false, std::make_unique<List>(std::make_unique<Struct< ::apache::thrift::metadata::ThriftField>>("metadata.ThriftField"))),
+    std::make_tuple(5, "is_oneway", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE)),
   };
   for (const auto& f : metadata_ThriftFunction_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -488,7 +489,8 @@ void ServiceMetadata<::apache::thrift::metadata::ThriftMetadataServiceSvIf>::gen
   (void)metadata;
   func.name = "getThriftServiceMetadata";
   auto func_ret_type = std::make_unique<Struct< ::apache::thrift::metadata::ThriftServiceMetadataResponse>>("metadata.ThriftServiceMetadataResponse");
-  func_ret_type->writeAndGenType(func.returnType, metadata);
+  func_ret_type->writeAndGenType(*func.return_type_ref(), metadata);
+  func.is_oneway_ref() = false;
   service.functions.push_back(std::move(func));
 }
 
@@ -502,10 +504,10 @@ void ServiceMetadata<::apache::thrift::metadata::ThriftMetadataServiceSvIf>::gen
   for (auto& function_gen : functions) {
     function_gen(metadata, metadata_ThriftMetadataService);
   }
-  context.set_service_info(std::move(metadata_ThriftMetadataService));
+  context.service_info_ref() = std::move(metadata_ThriftMetadataService);
   ::apache::thrift::metadata::ThriftModuleContext module;
-  module.set_name("metadata");
-  context.set_module(std::move(module));
+  module.name_ref() = "metadata";
+  context.module_ref() = std::move(module);
 }
 } // namespace md
 } // namespace detail

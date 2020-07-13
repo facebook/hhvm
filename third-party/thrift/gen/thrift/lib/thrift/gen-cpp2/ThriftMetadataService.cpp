@@ -34,7 +34,6 @@ void ThriftMetadataServiceSvIf::async_tm_getThriftServiceMetadata(std::unique_pt
   });
 }
 
-
 void ThriftMetadataServiceSvNull::getThriftServiceMetadata( ::apache::thrift::metadata::ThriftServiceMetadataResponse& /*_return*/) {}
 
 const char* ThriftMetadataServiceAsyncProcessor::getServiceName() {

@@ -39,7 +39,6 @@ void ThriftMetadataServiceAsyncProcessor::process_getThriftServiceMetadata(apach
     callback.release()->deleteInThread();
     return;
   }
-  ctx->setStartedProcessing();
   iface_->async_tm_getThriftServiceMetadata(std::move(callback));
 }
 

@@ -47,7 +47,7 @@ enum class Result {
   REMOTE_ERROR = 30,
   WAITING = 31,
   DEADLINE_EXCEEDED = 32,
-  NUM_RESULTS = 33
+  NUM_RESULTS = 33,
 };
 
 

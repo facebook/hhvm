@@ -791,18 +791,21 @@ void TccStructTraits<::facebook::memcache::thrift::McGatsReply>::translateFieldN
 
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McGetRequest::McGetRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg, uint64_t flags__arg) :
     key(std::move(key__arg)),
     flags(std::move(flags__arg)) {
   __isset.key = true;
   __isset.flags = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McGetRequest::__clear() {
   // clear all fields
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
   flags = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McGetRequest::operator==(const McGetRequest& rhs) const {
@@ -836,7 +839,9 @@ void swap(McGetRequest& a, McGetRequest& b) {
   using ::std::swap;
   swap(a.key, b.key);
   swap(a.flags, b.flags);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McGetRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -851,14 +856,17 @@ template uint32_t McGetRequest::serializedSizeZC<>(apache::thrift::CompactProtoc
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McGetReply::McGetReply() :
       result( ::carbon::Result::UNKNOWN),
       flags(0),
       appSpecificErrorCode(0) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
 McGetReply::~McGetReply() {}
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McGetReply::McGetReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, folly::IOBuf value__arg, uint64_t flags__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     value(std::move(value__arg)),
@@ -871,7 +879,7 @@ McGetReply::McGetReply(apache::thrift::FragileConstructor,  ::carbon::Result res
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McGetReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
@@ -879,7 +887,9 @@ void McGetReply::__clear() {
   flags = 0;
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McGetReply::operator==(const McGetReply& rhs) const {
@@ -889,10 +899,10 @@ bool McGetReply::operator==(const McGetReply& rhs) const {
   if (!(lhs.result == rhs.result)) {
     return false;
   }
-  if (lhs.__isset.value != rhs.__isset.value) {
+  if (lhs.value_ref().has_value() != rhs.value_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.value) {
+  if (lhs.value_ref().has_value()) {
     if (!apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.value, rhs.value)) {
       return false;
     }
@@ -916,10 +926,10 @@ bool McGetReply::operator<(const McGetReply& rhs) const {
   if (!(lhs.result == rhs.result)) {
     return lhs.result < rhs.result;
   }
-  if (lhs.__isset.value != rhs.__isset.value) {
-    return lhs.__isset.value < rhs.__isset.value;
+  if (lhs.value_ref().has_value() != rhs.value_ref().has_value()) {
+    return lhs.value_ref().has_value() < rhs.value_ref().has_value();
   }
-  if (lhs.__isset.value) {
+  if (lhs.value_ref().has_value()) {
     if (!apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.value, rhs.value)) {
       return apache::thrift::StringTraits<folly::IOBuf>::isLess(lhs.value, rhs.value);
     }
@@ -944,7 +954,9 @@ void swap(McGetReply& a, McGetReply& b) {
   swap(a.flags, b.flags);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McGetReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -959,6 +971,7 @@ template uint32_t McGetReply::serializedSizeZC<>(apache::thrift::CompactProtocol
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McSetRequest::McSetRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg, int32_t exptime__arg, uint64_t flags__arg, folly::IOBuf value__arg) :
     key(std::move(key__arg)),
     exptime(std::move(exptime__arg)),
@@ -969,14 +982,16 @@ McSetRequest::McSetRequest(apache::thrift::FragileConstructor,  ::carbon::thrift
   __isset.flags = true;
   __isset.value = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McSetRequest::__clear() {
   // clear all fields
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
   exptime = 0;
   flags = 0;
   value = apache::thrift::StringTraits< folly::IOBuf>::fromStringLiteral("");
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McSetRequest::operator==(const McSetRequest& rhs) const {
@@ -1024,7 +1039,9 @@ void swap(McSetRequest& a, McSetRequest& b) {
   swap(a.exptime, b.exptime);
   swap(a.flags, b.flags);
   swap(a.value, b.value);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McSetRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1039,14 +1056,17 @@ template uint32_t McSetRequest::serializedSizeZC<>(apache::thrift::CompactProtoc
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McSetReply::McSetReply() :
       result( ::carbon::Result::UNKNOWN),
       flags(0),
       appSpecificErrorCode(0) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
 McSetReply::~McSetReply() {}
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McSetReply::McSetReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, uint64_t flags__arg, folly::IOBuf value__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     flags(std::move(flags__arg)),
@@ -1059,7 +1079,7 @@ McSetReply::McSetReply(apache::thrift::FragileConstructor,  ::carbon::Result res
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McSetReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
@@ -1067,7 +1087,9 @@ void McSetReply::__clear() {
   value = apache::thrift::StringTraits< folly::IOBuf>::fromStringLiteral("");
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McSetReply::operator==(const McSetReply& rhs) const {
@@ -1122,7 +1144,9 @@ void swap(McSetReply& a, McSetReply& b) {
   swap(a.value, b.value);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McSetReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1137,13 +1161,16 @@ template uint32_t McSetReply::serializedSizeZC<>(apache::thrift::CompactProtocol
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McDeleteRequest::McDeleteRequest() :
       flags(0),
       exptime(0) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
 McDeleteRequest::~McDeleteRequest() {}
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McDeleteRequest::McDeleteRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg, uint64_t flags__arg, int32_t exptime__arg, folly::IOBuf value__arg, std::unordered_map<std::string, uint64_t> attributes__arg) :
     key(std::move(key__arg)),
     flags(std::move(flags__arg)),
@@ -1156,7 +1183,7 @@ McDeleteRequest::McDeleteRequest(apache::thrift::FragileConstructor,  ::carbon::
   __isset.value = true;
   __isset.attributes = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McDeleteRequest::__clear() {
   // clear all fields
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
@@ -1164,7 +1191,9 @@ void McDeleteRequest::__clear() {
   exptime = 0;
   value = apache::thrift::StringTraits< folly::IOBuf>::fromStringLiteral("");
   attributes.clear();
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McDeleteRequest::operator==(const McDeleteRequest& rhs) const {
@@ -1205,7 +1234,9 @@ void swap(McDeleteRequest& a, McDeleteRequest& b) {
   swap(a.exptime, b.exptime);
   swap(a.value, b.value);
   swap(a.attributes, b.attributes);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McDeleteRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1220,14 +1251,17 @@ template uint32_t McDeleteRequest::serializedSizeZC<>(apache::thrift::CompactPro
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McDeleteReply::McDeleteReply() :
       result( ::carbon::Result::UNKNOWN),
       flags(0),
       appSpecificErrorCode(0) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
 McDeleteReply::~McDeleteReply() {}
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McDeleteReply::McDeleteReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, uint64_t flags__arg, folly::IOBuf value__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     flags(std::move(flags__arg)),
@@ -1240,7 +1274,7 @@ McDeleteReply::McDeleteReply(apache::thrift::FragileConstructor,  ::carbon::Resu
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McDeleteReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
@@ -1248,7 +1282,9 @@ void McDeleteReply::__clear() {
   value = apache::thrift::StringTraits< folly::IOBuf>::fromStringLiteral("");
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McDeleteReply::operator==(const McDeleteReply& rhs) const {
@@ -1303,7 +1339,9 @@ void swap(McDeleteReply& a, McDeleteReply& b) {
   swap(a.value, b.value);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McDeleteReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1318,18 +1356,21 @@ template uint32_t McDeleteReply::serializedSizeZC<>(apache::thrift::CompactProto
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McLeaseGetRequest::McLeaseGetRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg, uint64_t flags__arg) :
     key(std::move(key__arg)),
     flags(std::move(flags__arg)) {
   __isset.key = true;
   __isset.flags = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McLeaseGetRequest::__clear() {
   // clear all fields
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
   flags = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McLeaseGetRequest::operator==(const McLeaseGetRequest& rhs) const {
@@ -1363,7 +1404,9 @@ void swap(McLeaseGetRequest& a, McLeaseGetRequest& b) {
   using ::std::swap;
   swap(a.key, b.key);
   swap(a.flags, b.flags);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McLeaseGetRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1378,15 +1421,18 @@ template uint32_t McLeaseGetRequest::serializedSizeZC<>(apache::thrift::CompactP
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McLeaseGetReply::McLeaseGetReply() :
       result( ::carbon::Result::UNKNOWN),
       leaseToken(0),
       flags(0),
       appSpecificErrorCode(0) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
 McLeaseGetReply::~McLeaseGetReply() {}
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McLeaseGetReply::McLeaseGetReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, int64_t leaseToken__arg, folly::IOBuf value__arg, uint64_t flags__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     leaseToken(std::move(leaseToken__arg)),
@@ -1401,7 +1447,7 @@ McLeaseGetReply::McLeaseGetReply(apache::thrift::FragileConstructor,  ::carbon::
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McLeaseGetReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
@@ -1410,7 +1456,9 @@ void McLeaseGetReply::__clear() {
   flags = 0;
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McLeaseGetReply::operator==(const McLeaseGetReply& rhs) const {
@@ -1423,10 +1471,10 @@ bool McLeaseGetReply::operator==(const McLeaseGetReply& rhs) const {
   if (!(lhs.leaseToken == rhs.leaseToken)) {
     return false;
   }
-  if (lhs.__isset.value != rhs.__isset.value) {
+  if (lhs.value_ref().has_value() != rhs.value_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.value) {
+  if (lhs.value_ref().has_value()) {
     if (!apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.value, rhs.value)) {
       return false;
     }
@@ -1453,10 +1501,10 @@ bool McLeaseGetReply::operator<(const McLeaseGetReply& rhs) const {
   if (!(lhs.leaseToken == rhs.leaseToken)) {
     return lhs.leaseToken < rhs.leaseToken;
   }
-  if (lhs.__isset.value != rhs.__isset.value) {
-    return lhs.__isset.value < rhs.__isset.value;
+  if (lhs.value_ref().has_value() != rhs.value_ref().has_value()) {
+    return lhs.value_ref().has_value() < rhs.value_ref().has_value();
   }
-  if (lhs.__isset.value) {
+  if (lhs.value_ref().has_value()) {
     if (!apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.value, rhs.value)) {
       return apache::thrift::StringTraits<folly::IOBuf>::isLess(lhs.value, rhs.value);
     }
@@ -1482,7 +1530,9 @@ void swap(McLeaseGetReply& a, McLeaseGetReply& b) {
   swap(a.flags, b.flags);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McLeaseGetReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1497,14 +1547,17 @@ template uint32_t McLeaseGetReply::serializedSizeZC<>(apache::thrift::CompactPro
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McLeaseSetRequest::McLeaseSetRequest() :
       exptime(0),
       flags(0),
       leaseToken(0) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
 McLeaseSetRequest::~McLeaseSetRequest() {}
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McLeaseSetRequest::McLeaseSetRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg, int32_t exptime__arg, uint64_t flags__arg, folly::IOBuf value__arg, int64_t leaseToken__arg) :
     key(std::move(key__arg)),
     exptime(std::move(exptime__arg)),
@@ -1517,7 +1570,7 @@ McLeaseSetRequest::McLeaseSetRequest(apache::thrift::FragileConstructor,  ::carb
   __isset.value = true;
   __isset.leaseToken = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McLeaseSetRequest::__clear() {
   // clear all fields
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
@@ -1525,7 +1578,9 @@ void McLeaseSetRequest::__clear() {
   flags = 0;
   value = apache::thrift::StringTraits< folly::IOBuf>::fromStringLiteral("");
   leaseToken = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McLeaseSetRequest::operator==(const McLeaseSetRequest& rhs) const {
@@ -1580,7 +1635,9 @@ void swap(McLeaseSetRequest& a, McLeaseSetRequest& b) {
   swap(a.flags, b.flags);
   swap(a.value, b.value);
   swap(a.leaseToken, b.leaseToken);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McLeaseSetRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1595,6 +1652,7 @@ template uint32_t McLeaseSetRequest::serializedSizeZC<>(apache::thrift::CompactP
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McLeaseSetReply::McLeaseSetReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     message(std::move(message__arg)),
@@ -1603,13 +1661,15 @@ McLeaseSetReply::McLeaseSetReply(apache::thrift::FragileConstructor,  ::carbon::
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McLeaseSetReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McLeaseSetReply::operator==(const McLeaseSetReply& rhs) const {
@@ -1650,7 +1710,9 @@ void swap(McLeaseSetReply& a, McLeaseSetReply& b) {
   swap(a.result, b.result);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McLeaseSetReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1665,6 +1727,7 @@ template uint32_t McLeaseSetReply::serializedSizeZC<>(apache::thrift::CompactPro
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McAddRequest::McAddRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg, int32_t exptime__arg, uint64_t flags__arg, folly::IOBuf value__arg) :
     key(std::move(key__arg)),
     exptime(std::move(exptime__arg)),
@@ -1675,14 +1738,16 @@ McAddRequest::McAddRequest(apache::thrift::FragileConstructor,  ::carbon::thrift
   __isset.flags = true;
   __isset.value = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McAddRequest::__clear() {
   // clear all fields
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
   exptime = 0;
   flags = 0;
   value = apache::thrift::StringTraits< folly::IOBuf>::fromStringLiteral("");
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McAddRequest::operator==(const McAddRequest& rhs) const {
@@ -1730,7 +1795,9 @@ void swap(McAddRequest& a, McAddRequest& b) {
   swap(a.exptime, b.exptime);
   swap(a.flags, b.flags);
   swap(a.value, b.value);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McAddRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1745,6 +1812,7 @@ template uint32_t McAddRequest::serializedSizeZC<>(apache::thrift::CompactProtoc
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McAddReply::McAddReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     message(std::move(message__arg)),
@@ -1753,13 +1821,15 @@ McAddReply::McAddReply(apache::thrift::FragileConstructor,  ::carbon::Result res
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McAddReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McAddReply::operator==(const McAddReply& rhs) const {
@@ -1800,7 +1870,9 @@ void swap(McAddReply& a, McAddReply& b) {
   swap(a.result, b.result);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McAddReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1815,6 +1887,7 @@ template uint32_t McAddReply::serializedSizeZC<>(apache::thrift::CompactProtocol
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McReplaceRequest::McReplaceRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg, int32_t exptime__arg, uint64_t flags__arg, folly::IOBuf value__arg) :
     key(std::move(key__arg)),
     exptime(std::move(exptime__arg)),
@@ -1825,14 +1898,16 @@ McReplaceRequest::McReplaceRequest(apache::thrift::FragileConstructor,  ::carbon
   __isset.flags = true;
   __isset.value = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McReplaceRequest::__clear() {
   // clear all fields
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
   exptime = 0;
   flags = 0;
   value = apache::thrift::StringTraits< folly::IOBuf>::fromStringLiteral("");
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McReplaceRequest::operator==(const McReplaceRequest& rhs) const {
@@ -1880,7 +1955,9 @@ void swap(McReplaceRequest& a, McReplaceRequest& b) {
   swap(a.exptime, b.exptime);
   swap(a.flags, b.flags);
   swap(a.value, b.value);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McReplaceRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1895,6 +1972,7 @@ template uint32_t McReplaceRequest::serializedSizeZC<>(apache::thrift::CompactPr
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McReplaceReply::McReplaceReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     message(std::move(message__arg)),
@@ -1903,13 +1981,15 @@ McReplaceReply::McReplaceReply(apache::thrift::FragileConstructor,  ::carbon::Re
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McReplaceReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McReplaceReply::operator==(const McReplaceReply& rhs) const {
@@ -1950,7 +2030,9 @@ void swap(McReplaceReply& a, McReplaceReply& b) {
   swap(a.result, b.result);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McReplaceReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1965,18 +2047,21 @@ template uint32_t McReplaceReply::serializedSizeZC<>(apache::thrift::CompactProt
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McGetsRequest::McGetsRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg, uint64_t flags__arg) :
     key(std::move(key__arg)),
     flags(std::move(flags__arg)) {
   __isset.key = true;
   __isset.flags = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McGetsRequest::__clear() {
   // clear all fields
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
   flags = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McGetsRequest::operator==(const McGetsRequest& rhs) const {
@@ -2010,7 +2095,9 @@ void swap(McGetsRequest& a, McGetsRequest& b) {
   using ::std::swap;
   swap(a.key, b.key);
   swap(a.flags, b.flags);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McGetsRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2025,15 +2112,18 @@ template uint32_t McGetsRequest::serializedSizeZC<>(apache::thrift::CompactProto
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McGetsReply::McGetsReply() :
       result( ::carbon::Result::UNKNOWN),
       casToken(0),
       flags(0),
       appSpecificErrorCode(0) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
 McGetsReply::~McGetsReply() {}
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McGetsReply::McGetsReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, uint64_t casToken__arg, folly::IOBuf value__arg, uint64_t flags__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     casToken(std::move(casToken__arg)),
@@ -2048,7 +2138,7 @@ McGetsReply::McGetsReply(apache::thrift::FragileConstructor,  ::carbon::Result r
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McGetsReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
@@ -2057,7 +2147,9 @@ void McGetsReply::__clear() {
   flags = 0;
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McGetsReply::operator==(const McGetsReply& rhs) const {
@@ -2070,10 +2162,10 @@ bool McGetsReply::operator==(const McGetsReply& rhs) const {
   if (!(lhs.casToken == rhs.casToken)) {
     return false;
   }
-  if (lhs.__isset.value != rhs.__isset.value) {
+  if (lhs.value_ref().has_value() != rhs.value_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.value) {
+  if (lhs.value_ref().has_value()) {
     if (!apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.value, rhs.value)) {
       return false;
     }
@@ -2100,10 +2192,10 @@ bool McGetsReply::operator<(const McGetsReply& rhs) const {
   if (!(lhs.casToken == rhs.casToken)) {
     return lhs.casToken < rhs.casToken;
   }
-  if (lhs.__isset.value != rhs.__isset.value) {
-    return lhs.__isset.value < rhs.__isset.value;
+  if (lhs.value_ref().has_value() != rhs.value_ref().has_value()) {
+    return lhs.value_ref().has_value() < rhs.value_ref().has_value();
   }
-  if (lhs.__isset.value) {
+  if (lhs.value_ref().has_value()) {
     if (!apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.value, rhs.value)) {
       return apache::thrift::StringTraits<folly::IOBuf>::isLess(lhs.value, rhs.value);
     }
@@ -2129,7 +2221,9 @@ void swap(McGetsReply& a, McGetsReply& b) {
   swap(a.flags, b.flags);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McGetsReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2144,14 +2238,17 @@ template uint32_t McGetsReply::serializedSizeZC<>(apache::thrift::CompactProtoco
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McCasRequest::McCasRequest() :
       exptime(0),
       flags(0),
       casToken(0) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
 McCasRequest::~McCasRequest() {}
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McCasRequest::McCasRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg, int32_t exptime__arg, uint64_t flags__arg, folly::IOBuf value__arg, uint64_t casToken__arg) :
     key(std::move(key__arg)),
     exptime(std::move(exptime__arg)),
@@ -2164,7 +2261,7 @@ McCasRequest::McCasRequest(apache::thrift::FragileConstructor,  ::carbon::thrift
   __isset.value = true;
   __isset.casToken = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McCasRequest::__clear() {
   // clear all fields
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
@@ -2172,7 +2269,9 @@ void McCasRequest::__clear() {
   flags = 0;
   value = apache::thrift::StringTraits< folly::IOBuf>::fromStringLiteral("");
   casToken = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McCasRequest::operator==(const McCasRequest& rhs) const {
@@ -2227,7 +2326,9 @@ void swap(McCasRequest& a, McCasRequest& b) {
   swap(a.flags, b.flags);
   swap(a.value, b.value);
   swap(a.casToken, b.casToken);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McCasRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2242,6 +2343,7 @@ template uint32_t McCasRequest::serializedSizeZC<>(apache::thrift::CompactProtoc
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McCasReply::McCasReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     message(std::move(message__arg)),
@@ -2250,13 +2352,15 @@ McCasReply::McCasReply(apache::thrift::FragileConstructor,  ::carbon::Result res
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McCasReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McCasReply::operator==(const McCasReply& rhs) const {
@@ -2297,7 +2401,9 @@ void swap(McCasReply& a, McCasReply& b) {
   swap(a.result, b.result);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McCasReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2312,18 +2418,21 @@ template uint32_t McCasReply::serializedSizeZC<>(apache::thrift::CompactProtocol
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McIncrRequest::McIncrRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg, int64_t delta__arg) :
     key(std::move(key__arg)),
     delta(std::move(delta__arg)) {
   __isset.key = true;
   __isset.delta = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McIncrRequest::__clear() {
   // clear all fields
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
   delta = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McIncrRequest::operator==(const McIncrRequest& rhs) const {
@@ -2357,7 +2466,9 @@ void swap(McIncrRequest& a, McIncrRequest& b) {
   using ::std::swap;
   swap(a.key, b.key);
   swap(a.delta, b.delta);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McIncrRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2372,6 +2483,7 @@ template uint32_t McIncrRequest::serializedSizeZC<>(apache::thrift::CompactProto
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McIncrReply::McIncrReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, int64_t delta__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     delta(std::move(delta__arg)),
@@ -2382,14 +2494,16 @@ McIncrReply::McIncrReply(apache::thrift::FragileConstructor,  ::carbon::Result r
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McIncrReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
   delta = 0;
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McIncrReply::operator==(const McIncrReply& rhs) const {
@@ -2437,7 +2551,9 @@ void swap(McIncrReply& a, McIncrReply& b) {
   swap(a.delta, b.delta);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McIncrReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2452,18 +2568,21 @@ template uint32_t McIncrReply::serializedSizeZC<>(apache::thrift::CompactProtoco
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McDecrRequest::McDecrRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg, int64_t delta__arg) :
     key(std::move(key__arg)),
     delta(std::move(delta__arg)) {
   __isset.key = true;
   __isset.delta = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McDecrRequest::__clear() {
   // clear all fields
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
   delta = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McDecrRequest::operator==(const McDecrRequest& rhs) const {
@@ -2497,7 +2616,9 @@ void swap(McDecrRequest& a, McDecrRequest& b) {
   using ::std::swap;
   swap(a.key, b.key);
   swap(a.delta, b.delta);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McDecrRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2512,6 +2633,7 @@ template uint32_t McDecrRequest::serializedSizeZC<>(apache::thrift::CompactProto
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McDecrReply::McDecrReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, int64_t delta__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     delta(std::move(delta__arg)),
@@ -2522,14 +2644,16 @@ McDecrReply::McDecrReply(apache::thrift::FragileConstructor,  ::carbon::Result r
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McDecrReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
   delta = 0;
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McDecrReply::operator==(const McDecrReply& rhs) const {
@@ -2577,7 +2701,9 @@ void swap(McDecrReply& a, McDecrReply& b) {
   swap(a.delta, b.delta);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McDecrReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2592,15 +2718,18 @@ template uint32_t McDecrReply::serializedSizeZC<>(apache::thrift::CompactProtoco
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McMetagetRequest::McMetagetRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg) :
     key(std::move(key__arg)) {
   __isset.key = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McMetagetRequest::__clear() {
   // clear all fields
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McMetagetRequest::operator==(const McMetagetRequest& rhs) const {
@@ -2627,7 +2756,9 @@ bool McMetagetRequest::operator<(const McMetagetRequest& rhs) const {
 void swap(McMetagetRequest& a, McMetagetRequest& b) {
   using ::std::swap;
   swap(a.key, b.key);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McMetagetRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2642,16 +2773,19 @@ template uint32_t McMetagetRequest::serializedSizeZC<>(apache::thrift::CompactPr
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McMetagetReply::McMetagetReply() :
       result( ::carbon::Result::UNKNOWN),
       age(0),
       exptime(0),
       ipv(0),
       appSpecificErrorCode(0) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
 McMetagetReply::~McMetagetReply() {}
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McMetagetReply::McMetagetReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, int32_t age__arg, int32_t exptime__arg, int16_t ipv__arg, ::std::string ipAddress__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     age(std::move(age__arg)),
@@ -2668,7 +2802,7 @@ McMetagetReply::McMetagetReply(apache::thrift::FragileConstructor,  ::carbon::Re
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McMetagetReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
@@ -2678,7 +2812,9 @@ void McMetagetReply::__clear() {
   ipAddress = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McMetagetReply::operator==(const McMetagetReply& rhs) const {
@@ -2747,7 +2883,9 @@ void swap(McMetagetReply& a, McMetagetReply& b) {
   swap(a.ipAddress, b.ipAddress);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McMetagetReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2762,6 +2900,7 @@ template uint32_t McMetagetReply::serializedSizeZC<>(apache::thrift::CompactProt
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McAppendRequest::McAppendRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg, int32_t exptime__arg, uint64_t flags__arg, folly::IOBuf value__arg) :
     key(std::move(key__arg)),
     exptime(std::move(exptime__arg)),
@@ -2772,14 +2911,16 @@ McAppendRequest::McAppendRequest(apache::thrift::FragileConstructor,  ::carbon::
   __isset.flags = true;
   __isset.value = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McAppendRequest::__clear() {
   // clear all fields
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
   exptime = 0;
   flags = 0;
   value = apache::thrift::StringTraits< folly::IOBuf>::fromStringLiteral("");
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McAppendRequest::operator==(const McAppendRequest& rhs) const {
@@ -2827,7 +2968,9 @@ void swap(McAppendRequest& a, McAppendRequest& b) {
   swap(a.exptime, b.exptime);
   swap(a.flags, b.flags);
   swap(a.value, b.value);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McAppendRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2842,6 +2985,7 @@ template uint32_t McAppendRequest::serializedSizeZC<>(apache::thrift::CompactPro
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McAppendReply::McAppendReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     message(std::move(message__arg)),
@@ -2850,13 +2994,15 @@ McAppendReply::McAppendReply(apache::thrift::FragileConstructor,  ::carbon::Resu
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McAppendReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McAppendReply::operator==(const McAppendReply& rhs) const {
@@ -2897,7 +3043,9 @@ void swap(McAppendReply& a, McAppendReply& b) {
   swap(a.result, b.result);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McAppendReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2912,6 +3060,7 @@ template uint32_t McAppendReply::serializedSizeZC<>(apache::thrift::CompactProto
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McPrependRequest::McPrependRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg, int32_t exptime__arg, uint64_t flags__arg, folly::IOBuf value__arg) :
     key(std::move(key__arg)),
     exptime(std::move(exptime__arg)),
@@ -2922,14 +3071,16 @@ McPrependRequest::McPrependRequest(apache::thrift::FragileConstructor,  ::carbon
   __isset.flags = true;
   __isset.value = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McPrependRequest::__clear() {
   // clear all fields
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
   exptime = 0;
   flags = 0;
   value = apache::thrift::StringTraits< folly::IOBuf>::fromStringLiteral("");
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McPrependRequest::operator==(const McPrependRequest& rhs) const {
@@ -2977,7 +3128,9 @@ void swap(McPrependRequest& a, McPrependRequest& b) {
   swap(a.exptime, b.exptime);
   swap(a.flags, b.flags);
   swap(a.value, b.value);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McPrependRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -2992,6 +3145,7 @@ template uint32_t McPrependRequest::serializedSizeZC<>(apache::thrift::CompactPr
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McPrependReply::McPrependReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     message(std::move(message__arg)),
@@ -3000,13 +3154,15 @@ McPrependReply::McPrependReply(apache::thrift::FragileConstructor,  ::carbon::Re
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McPrependReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McPrependReply::operator==(const McPrependReply& rhs) const {
@@ -3047,7 +3203,9 @@ void swap(McPrependReply& a, McPrependReply& b) {
   swap(a.result, b.result);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McPrependReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3062,18 +3220,21 @@ template uint32_t McPrependReply::serializedSizeZC<>(apache::thrift::CompactProt
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McTouchRequest::McTouchRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg, int32_t exptime__arg) :
     key(std::move(key__arg)),
     exptime(std::move(exptime__arg)) {
   __isset.key = true;
   __isset.exptime = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McTouchRequest::__clear() {
   // clear all fields
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
   exptime = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McTouchRequest::operator==(const McTouchRequest& rhs) const {
@@ -3107,7 +3268,9 @@ void swap(McTouchRequest& a, McTouchRequest& b) {
   using ::std::swap;
   swap(a.key, b.key);
   swap(a.exptime, b.exptime);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McTouchRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3122,6 +3285,7 @@ template uint32_t McTouchRequest::serializedSizeZC<>(apache::thrift::CompactProt
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McTouchReply::McTouchReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     message(std::move(message__arg)),
@@ -3130,13 +3294,15 @@ McTouchReply::McTouchReply(apache::thrift::FragileConstructor,  ::carbon::Result
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McTouchReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McTouchReply::operator==(const McTouchReply& rhs) const {
@@ -3177,7 +3343,9 @@ void swap(McTouchReply& a, McTouchReply& b) {
   swap(a.result, b.result);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McTouchReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3192,15 +3360,18 @@ template uint32_t McTouchReply::serializedSizeZC<>(apache::thrift::CompactProtoc
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McFlushReRequest::McFlushReRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg) :
     key(std::move(key__arg)) {
   __isset.key = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McFlushReRequest::__clear() {
   // clear all fields
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McFlushReRequest::operator==(const McFlushReRequest& rhs) const {
@@ -3227,7 +3398,9 @@ bool McFlushReRequest::operator<(const McFlushReRequest& rhs) const {
 void swap(McFlushReRequest& a, McFlushReRequest& b) {
   using ::std::swap;
   swap(a.key, b.key);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McFlushReRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3242,6 +3415,7 @@ template uint32_t McFlushReRequest::serializedSizeZC<>(apache::thrift::CompactPr
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McFlushReReply::McFlushReReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     message(std::move(message__arg)),
@@ -3250,13 +3424,15 @@ McFlushReReply::McFlushReReply(apache::thrift::FragileConstructor,  ::carbon::Re
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McFlushReReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McFlushReReply::operator==(const McFlushReReply& rhs) const {
@@ -3297,7 +3473,9 @@ void swap(McFlushReReply& a, McFlushReReply& b) {
   swap(a.result, b.result);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McFlushReReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3312,18 +3490,21 @@ template uint32_t McFlushReReply::serializedSizeZC<>(apache::thrift::CompactProt
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McFlushAllRequest::McFlushAllRequest(apache::thrift::FragileConstructor,  ::carbon::thrift::IOBufKey key__arg, int32_t delay__arg) :
     key(std::move(key__arg)),
     delay(std::move(delay__arg)) {
   __isset.key = true;
   __isset.delay = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McFlushAllRequest::__clear() {
   // clear all fields
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
   delay = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McFlushAllRequest::operator==(const McFlushAllRequest& rhs) const {
@@ -3357,7 +3538,9 @@ void swap(McFlushAllRequest& a, McFlushAllRequest& b) {
   using ::std::swap;
   swap(a.key, b.key);
   swap(a.delay, b.delay);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McFlushAllRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3372,6 +3555,7 @@ template uint32_t McFlushAllRequest::serializedSizeZC<>(apache::thrift::CompactP
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McFlushAllReply::McFlushAllReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     message(std::move(message__arg)),
@@ -3380,13 +3564,15 @@ McFlushAllReply::McFlushAllReply(apache::thrift::FragileConstructor,  ::carbon::
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McFlushAllReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McFlushAllReply::operator==(const McFlushAllReply& rhs) const {
@@ -3427,7 +3613,9 @@ void swap(McFlushAllReply& a, McFlushAllReply& b) {
   swap(a.result, b.result);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McFlushAllReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3442,18 +3630,21 @@ template uint32_t McFlushAllReply::serializedSizeZC<>(apache::thrift::CompactPro
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McGatRequest::McGatRequest(apache::thrift::FragileConstructor, int32_t exptime__arg,  ::carbon::thrift::IOBufKey key__arg) :
     exptime(std::move(exptime__arg)),
     key(std::move(key__arg)) {
   __isset.exptime = true;
   __isset.key = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McGatRequest::__clear() {
   // clear all fields
   exptime = 0;
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McGatRequest::operator==(const McGatRequest& rhs) const {
@@ -3487,7 +3678,9 @@ void swap(McGatRequest& a, McGatRequest& b) {
   using ::std::swap;
   swap(a.exptime, b.exptime);
   swap(a.key, b.key);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McGatRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3502,14 +3695,17 @@ template uint32_t McGatRequest::serializedSizeZC<>(apache::thrift::CompactProtoc
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McGatReply::McGatReply() :
       result( ::carbon::Result::UNKNOWN),
       flags(0),
       appSpecificErrorCode(0) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
 McGatReply::~McGatReply() {}
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McGatReply::McGatReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, folly::IOBuf value__arg, uint64_t flags__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     value(std::move(value__arg)),
@@ -3522,7 +3718,7 @@ McGatReply::McGatReply(apache::thrift::FragileConstructor,  ::carbon::Result res
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McGatReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
@@ -3530,7 +3726,9 @@ void McGatReply::__clear() {
   flags = 0;
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McGatReply::operator==(const McGatReply& rhs) const {
@@ -3540,10 +3738,10 @@ bool McGatReply::operator==(const McGatReply& rhs) const {
   if (!(lhs.result == rhs.result)) {
     return false;
   }
-  if (lhs.__isset.value != rhs.__isset.value) {
+  if (lhs.value_ref().has_value() != rhs.value_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.value) {
+  if (lhs.value_ref().has_value()) {
     if (!apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.value, rhs.value)) {
       return false;
     }
@@ -3567,10 +3765,10 @@ bool McGatReply::operator<(const McGatReply& rhs) const {
   if (!(lhs.result == rhs.result)) {
     return lhs.result < rhs.result;
   }
-  if (lhs.__isset.value != rhs.__isset.value) {
-    return lhs.__isset.value < rhs.__isset.value;
+  if (lhs.value_ref().has_value() != rhs.value_ref().has_value()) {
+    return lhs.value_ref().has_value() < rhs.value_ref().has_value();
   }
-  if (lhs.__isset.value) {
+  if (lhs.value_ref().has_value()) {
     if (!apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.value, rhs.value)) {
       return apache::thrift::StringTraits<folly::IOBuf>::isLess(lhs.value, rhs.value);
     }
@@ -3595,7 +3793,9 @@ void swap(McGatReply& a, McGatReply& b) {
   swap(a.flags, b.flags);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McGatReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3610,18 +3810,21 @@ template uint32_t McGatReply::serializedSizeZC<>(apache::thrift::CompactProtocol
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McGatsRequest::McGatsRequest(apache::thrift::FragileConstructor, int32_t exptime__arg,  ::carbon::thrift::IOBufKey key__arg) :
     exptime(std::move(exptime__arg)),
     key(std::move(key__arg)) {
   __isset.exptime = true;
   __isset.key = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McGatsRequest::__clear() {
   // clear all fields
   exptime = 0;
   key.rawUnsafe() = apache::thrift::StringTraits< folly::remove_cvref_t<decltype(std::declval<carbon::Keys<folly::IOBuf>>().rawUnsafe())>>::fromStringLiteral("");
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McGatsRequest::operator==(const McGatsRequest& rhs) const {
@@ -3655,7 +3858,9 @@ void swap(McGatsRequest& a, McGatsRequest& b) {
   using ::std::swap;
   swap(a.exptime, b.exptime);
   swap(a.key, b.key);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McGatsRequest::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -3670,15 +3875,18 @@ template uint32_t McGatsRequest::serializedSizeZC<>(apache::thrift::CompactProto
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McGatsReply::McGatsReply() :
       result( ::carbon::Result::UNKNOWN),
       casToken(0),
       flags(0),
       appSpecificErrorCode(0) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
 McGatsReply::~McGatsReply() {}
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 McGatsReply::McGatsReply(apache::thrift::FragileConstructor,  ::carbon::Result result__arg, uint64_t casToken__arg, folly::IOBuf value__arg, uint64_t flags__arg, ::std::string message__arg, int16_t appSpecificErrorCode__arg) :
     result(std::move(result__arg)),
     casToken(std::move(casToken__arg)),
@@ -3693,7 +3901,7 @@ McGatsReply::McGatsReply(apache::thrift::FragileConstructor,  ::carbon::Result r
   __isset.message = true;
   __isset.appSpecificErrorCode = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void McGatsReply::__clear() {
   // clear all fields
   result =  ::carbon::Result::UNKNOWN;
@@ -3702,7 +3910,9 @@ void McGatsReply::__clear() {
   flags = 0;
   message = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   appSpecificErrorCode = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool McGatsReply::operator==(const McGatsReply& rhs) const {
@@ -3715,10 +3925,10 @@ bool McGatsReply::operator==(const McGatsReply& rhs) const {
   if (!(lhs.casToken == rhs.casToken)) {
     return false;
   }
-  if (lhs.__isset.value != rhs.__isset.value) {
+  if (lhs.value_ref().has_value() != rhs.value_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.value) {
+  if (lhs.value_ref().has_value()) {
     if (!apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.value, rhs.value)) {
       return false;
     }
@@ -3745,10 +3955,10 @@ bool McGatsReply::operator<(const McGatsReply& rhs) const {
   if (!(lhs.casToken == rhs.casToken)) {
     return lhs.casToken < rhs.casToken;
   }
-  if (lhs.__isset.value != rhs.__isset.value) {
-    return lhs.__isset.value < rhs.__isset.value;
+  if (lhs.value_ref().has_value() != rhs.value_ref().has_value()) {
+    return lhs.value_ref().has_value() < rhs.value_ref().has_value();
   }
-  if (lhs.__isset.value) {
+  if (lhs.value_ref().has_value()) {
     if (!apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.value, rhs.value)) {
       return apache::thrift::StringTraits<folly::IOBuf>::isLess(lhs.value, rhs.value);
     }
@@ -3774,7 +3984,9 @@ void swap(McGatsReply& a, McGatsReply& b) {
   swap(a.flags, b.flags);
   swap(a.message, b.message);
   swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void McGatsReply::readNoXfer<>(apache::thrift::BinaryProtocolReader*);

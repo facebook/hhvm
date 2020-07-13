@@ -10,10 +10,6 @@
 
 #include "thrift/lib/thrift/gen-cpp2/frozen_types.h"
 
-namespace apache { namespace thrift { namespace frozen { namespace schema {
-
-}}}} // apache::thrift::frozen::schema
-
 namespace apache { namespace thrift {
 
 

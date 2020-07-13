@@ -15,8 +15,8 @@
 namespace apache { namespace thrift {
 
 constexpr std::size_t const TEnumTraits<::apache::thrift::reflection::Type>::size;
-folly::Range<::apache::thrift::reflection::Type const*> const TEnumTraits<::apache::thrift::reflection::Type>::values = folly::range(::apache::thrift::reflection::_TypeEnumDataStorage::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::reflection::Type>::names = folly::range(::apache::thrift::reflection::_TypeEnumDataStorage::names);
+folly::Range<::apache::thrift::reflection::Type const*> const TEnumTraits<::apache::thrift::reflection::Type>::values = folly::range(TEnumDataStorage<::apache::thrift::reflection::Type>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::reflection::Type>::names = folly::range(TEnumDataStorage<::apache::thrift::reflection::Type>::names);
 
 char const* TEnumTraits<::apache::thrift::reflection::Type>::findName(type value) {
   using factory = ::apache::thrift::reflection::_Type_EnumMapFactory;
@@ -122,14 +122,17 @@ void TccStructTraits<::apache::thrift::reflection::Schema>::translateFieldName(
 
 namespace apache { namespace thrift { namespace reflection {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 StructField::StructField() :
       isRequired(0),
       type(0),
       order(0) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
 StructField::~StructField() {}
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 StructField::StructField(apache::thrift::FragileConstructor, bool isRequired__arg, int64_t type__arg, ::std::string name__arg, std::unordered_map<::std::string, ::std::string> annotations__arg, int16_t order__arg) :
     isRequired(std::move(isRequired__arg)),
     type(std::move(type__arg)),
@@ -142,7 +145,7 @@ StructField::StructField(apache::thrift::FragileConstructor, bool isRequired__ar
   __isset.annotations = true;
   __isset.order = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void StructField::__clear() {
   // clear all fields
   isRequired = 0;
@@ -150,7 +153,9 @@ void StructField::__clear() {
   name = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
   annotations.clear();
   order = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool StructField::operator==(const StructField& rhs) const {
@@ -166,10 +171,10 @@ bool StructField::operator==(const StructField& rhs) const {
   if (!(lhs.name == rhs.name)) {
     return false;
   }
-  if (lhs.__isset.annotations != rhs.__isset.annotations) {
+  if (lhs.annotations_ref().has_value() != rhs.annotations_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.annotations) {
+  if (lhs.annotations_ref().has_value()) {
     if (!(lhs.annotations == rhs.annotations)) {
       return false;
     }
@@ -181,11 +186,11 @@ bool StructField::operator==(const StructField& rhs) const {
 }
 
 const std::unordered_map<::std::string, ::std::string>* StructField::get_annotations() const& {
-  return __isset.annotations ? std::addressof(annotations) : nullptr;
+  return annotations_ref().has_value() ? std::addressof(annotations) : nullptr;
 }
 
 std::unordered_map<::std::string, ::std::string>* StructField::get_annotations() & {
-  return __isset.annotations ? std::addressof(annotations) : nullptr;
+  return annotations_ref().has_value() ? std::addressof(annotations) : nullptr;
 }
 
 
@@ -196,7 +201,9 @@ void swap(StructField& a, StructField& b) {
   swap(a.name, b.name);
   swap(a.annotations_ref().value_unchecked(), b.annotations_ref().value_unchecked());
   swap(a.order, b.order);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void StructField::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -211,13 +218,16 @@ template uint32_t StructField::serializedSizeZC<>(apache::thrift::CompactProtoco
 }}} // apache::thrift::reflection
 namespace apache { namespace thrift { namespace reflection {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 DataType::DataType() :
       mapKeyType(0),
       valueType(0) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 
 DataType::~DataType() {}
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 DataType::DataType(apache::thrift::FragileConstructor, ::std::string name__arg, std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField> fields__arg, int64_t mapKeyType__arg, int64_t valueType__arg, std::unordered_map<::std::string, int32_t> enumValues__arg) :
     name(std::move(name__arg)),
     fields(std::move(fields__arg)),
@@ -230,7 +240,7 @@ DataType::DataType(apache::thrift::FragileConstructor, ::std::string name__arg, 
   __isset.valueType = true;
   __isset.enumValues = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void DataType::__clear() {
   // clear all fields
   name = apache::thrift::StringTraits< std::string>::fromStringLiteral("");
@@ -238,7 +248,9 @@ void DataType::__clear() {
   mapKeyType = 0;
   valueType = 0;
   enumValues.clear();
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool DataType::operator==(const DataType& rhs) const {
@@ -248,34 +260,34 @@ bool DataType::operator==(const DataType& rhs) const {
   if (!(lhs.name == rhs.name)) {
     return false;
   }
-  if (lhs.__isset.fields != rhs.__isset.fields) {
+  if (lhs.fields_ref().has_value() != rhs.fields_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.fields) {
+  if (lhs.fields_ref().has_value()) {
     if (!(lhs.fields == rhs.fields)) {
       return false;
     }
   }
-  if (lhs.__isset.mapKeyType != rhs.__isset.mapKeyType) {
+  if (lhs.mapKeyType_ref().has_value() != rhs.mapKeyType_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.mapKeyType) {
+  if (lhs.mapKeyType_ref().has_value()) {
     if (!(lhs.mapKeyType == rhs.mapKeyType)) {
       return false;
     }
   }
-  if (lhs.__isset.valueType != rhs.__isset.valueType) {
+  if (lhs.valueType_ref().has_value() != rhs.valueType_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.valueType) {
+  if (lhs.valueType_ref().has_value()) {
     if (!(lhs.valueType == rhs.valueType)) {
       return false;
     }
   }
-  if (lhs.__isset.enumValues != rhs.__isset.enumValues) {
+  if (lhs.enumValues_ref().has_value() != rhs.enumValues_ref().has_value()) {
     return false;
   }
-  if (lhs.__isset.enumValues) {
+  if (lhs.enumValues_ref().has_value()) {
     if (!(lhs.enumValues == rhs.enumValues)) {
       return false;
     }
@@ -284,19 +296,19 @@ bool DataType::operator==(const DataType& rhs) const {
 }
 
 const std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>* DataType::get_fields() const& {
-  return __isset.fields ? std::addressof(fields) : nullptr;
+  return fields_ref().has_value() ? std::addressof(fields) : nullptr;
 }
 
 std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>* DataType::get_fields() & {
-  return __isset.fields ? std::addressof(fields) : nullptr;
+  return fields_ref().has_value() ? std::addressof(fields) : nullptr;
 }
 
 const std::unordered_map<::std::string, int32_t>* DataType::get_enumValues() const& {
-  return __isset.enumValues ? std::addressof(enumValues) : nullptr;
+  return enumValues_ref().has_value() ? std::addressof(enumValues) : nullptr;
 }
 
 std::unordered_map<::std::string, int32_t>* DataType::get_enumValues() & {
-  return __isset.enumValues ? std::addressof(enumValues) : nullptr;
+  return enumValues_ref().has_value() ? std::addressof(enumValues) : nullptr;
 }
 
 
@@ -307,7 +319,9 @@ void swap(DataType& a, DataType& b) {
   swap(a.mapKeyType_ref().value_unchecked(), b.mapKeyType_ref().value_unchecked());
   swap(a.valueType_ref().value_unchecked(), b.valueType_ref().value_unchecked());
   swap(a.enumValues_ref().value_unchecked(), b.enumValues_ref().value_unchecked());
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void DataType::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -322,18 +336,21 @@ template uint32_t DataType::serializedSizeZC<>(apache::thrift::CompactProtocolWr
 }}} // apache::thrift::reflection
 namespace apache { namespace thrift { namespace reflection {
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 Schema::Schema(apache::thrift::FragileConstructor, std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType> dataTypes__arg, std::unordered_map<::std::string, int64_t> names__arg) :
     dataTypes(std::move(dataTypes__arg)),
     names(std::move(names__arg)) {
   __isset.dataTypes = true;
   __isset.names = true;
 }
-
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 void Schema::__clear() {
   // clear all fields
   dataTypes.clear();
   names.clear();
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 bool Schema::operator==(const Schema& rhs) const {
@@ -370,7 +387,9 @@ void swap(Schema& a, Schema& b) {
   using ::std::swap;
   swap(a.dataTypes, b.dataTypes);
   swap(a.names, b.names);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 }
 
 template void Schema::readNoXfer<>(apache::thrift::BinaryProtocolReader*);

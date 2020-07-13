@@ -48,7 +48,7 @@
 namespace HPHP {
 
 static char s_hugePath[256];
-constexpr size_t maxErrorMsgLen = 256;
+constexpr size_t maxErrorMsgLen = 512;
 static char s_errorMsg[maxErrorMsgLen];
 
 static unsigned s_num1GPages;

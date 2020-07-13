@@ -744,7 +744,14 @@ bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
   assertx(IMPLIES(ad1->isHackArrayType(), !bothVanilla(ad1, ad2)));
 
   if (ad1 == ad2) return true;
-  if (!ArrayData::dvArrayEqual(ad1, ad2)) return false;
+  if (!ArrayData::dvArrayEqual(ad1, ad2)) {
+    if (checkHACCompare() &&
+        ((ad1->isDArray() && ad2->isNotDVArray()) ||
+         (ad1->isNotDVArray() && ad2->isDArray()))) {
+      raise_hackarr_compat_notice("Comparing plain array and darray");
+    }
+    return false;
+  }
   if (ad1->size() != ad2->size()) return false;
 
   // Prevent circular referenced objects/arrays or deep ones.
@@ -791,8 +798,11 @@ int64_t ArrayData::CompareHelper(const ArrayData* ad1, const ArrayData* ad2) {
     if (ad2->isVArray()) throw_varray_compare_exception();
     if (ad2->isDArray()) throw_darray_compare_exception();
     always_assert(false);
-  } else if (ad1->isDArray()) {
-    throw_darray_compare_exception();
+  } else if (!ad1->isVArray()) {
+    if (ad1->isDArray()) throw_darray_compare_exception();
+    if (checkHACCompare()) {
+      raise_hackarr_compat_notice("Comparing two plain arrays relationally");
+    }
   }
 
   auto const size1 = ad1->size();

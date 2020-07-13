@@ -108,7 +108,6 @@ let emit_program ~is_hh_file ~is_evaled ~for_debugger_eval ~empty_namespace tast
             convert_toplevel_prog ~empty_namespace ~for_debugger_eval tast
           in
           Emit_env.set_global_state global_state;
-          let flat_closed_ast = List.map ~f:snd closed_ast in
           let debugger_modify_program =
             for_debugger_eval && debugger_eval_should_modify tast
           in
@@ -117,7 +116,7 @@ let emit_program ~is_hh_file ~is_evaled ~for_debugger_eval ~empty_namespace tast
               is_evaled
               debugger_modify_program
               empty_namespace
-              flat_closed_ast
+              closed_ast
           in
           let compiled_funs =
             Emit_function.emit_functions_from_program closed_ast
@@ -129,15 +128,15 @@ let emit_program ~is_hh_file ~is_evaled ~for_debugger_eval ~empty_namespace tast
             Emit_record_def.emit_record_defs_from_program closed_ast
           in
           let compiled_typedefs =
-            Emit_typedef.emit_typedefs_from_program flat_closed_ast
+            Emit_typedef.emit_typedefs_from_program closed_ast
           in
           let env = Emit_env.(empty |> with_namespace empty_namespace) in
           let (compiled_constants, compiled_constant_funs) =
-            Emit_constant.emit_constants_from_program env flat_closed_ast
+            Emit_constant.emit_constants_from_program env closed_ast
           in
           let compiled_file_attributes =
             Emit_file_attributes.emit_file_attributes_from_program
-              flat_closed_ast
+              closed_ast
           in
           let adata = Emit_adata.get_adata () in
           let symbol_refs = Emit_symbol_refs.get_symbol_refs () in

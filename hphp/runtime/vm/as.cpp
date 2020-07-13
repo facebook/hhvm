@@ -2215,8 +2215,7 @@ void parse_user_attribute(AsmState& as,
  * if attributeMap is non null.
  */
 Attr parse_attribute_list(AsmState& as, AttrContext ctx,
-                          UserAttributeMap *userAttrs = nullptr,
-                          bool* isTop = nullptr) {
+                          UserAttributeMap *userAttrs = nullptr) {
   as.in.skipWhitespace();
   int ret = AttrNone;
   if (as.in.peek() != '[') return Attr(ret);
@@ -2236,10 +2235,6 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx,
     auto const abit = string_to_attr(ctx, word);
     if (abit) {
       ret |= *abit;
-      continue;
-    }
-    if (isTop && word == "nontop") {
-      *isTop = false;
       continue;
     }
     auto const rxAttrs = rxAttrsFromAttrString(word);
@@ -3251,9 +3246,8 @@ void parse_class(AsmState& as) {
 
   auto ubs = parse_ubs(as);
 
-  bool isTop = true;
   UserAttributeMap userAttrs;
-  Attr attrs = parse_attribute_list(as, AttrContext::Class, &userAttrs, &isTop);
+  Attr attrs = parse_attribute_list(as, AttrContext::Class, &userAttrs);
   if (!SystemLib::s_inited) {
     attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
   }
@@ -3319,9 +3313,7 @@ void parse_class(AsmState& as) {
   as.in.expectWs('{');
   parse_class_body(as, attrs & AttrIsConst, ubs);
 
-  as.pce->setHoistable(
-    isTop ? compute_hoistable(as, name, parentName) : PreClass::NotHoistable
-  );
+  as.pce->setHoistable(compute_hoistable(as, name, parentName));
 
   as.finishClass();
 }

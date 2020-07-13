@@ -33,7 +33,6 @@ type t = {
   class_is_interface: bool;
   class_is_trait: bool;
   class_is_xhp: bool;
-  class_hoisted: Closure_convert.hoist_kind;
   class_is_const: bool;
   class_no_dynamic_props: bool;
   class_needs_no_reifiedinit: bool;
@@ -66,7 +65,6 @@ let make
     class_is_interface
     class_is_trait
     class_is_xhp
-    class_hoisted
     class_is_const
     class_no_dynamic_props
     class_needs_no_reifiedinit
@@ -94,7 +92,6 @@ let make
     class_is_interface;
     class_is_trait;
     class_is_xhp;
-    class_hoisted;
     class_is_const;
     class_no_dynamic_props;
     class_needs_no_reifiedinit;
@@ -133,11 +130,6 @@ let is_interface hhas_class = hhas_class.class_is_interface
 let is_trait hhas_class = hhas_class.class_is_trait
 
 let is_xhp hhas_class = hhas_class.class_is_xhp
-
-let is_top hhas_class =
-  match hhas_class.class_hoisted with
-  | Closure_convert.TopLevel -> true
-  | Closure_convert.Hoisted -> false
 
 let is_const hhas_class = hhas_class.class_is_const
 

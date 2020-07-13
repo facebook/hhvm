@@ -19,14 +19,8 @@ module SU = Hhbc_string_utils
 let constant_folding () =
   Hhbc_options.constant_folding !Hhbc_options.compiler_options
 
-type hoist_kind =
-  (* Def that is already at top-level *)
-  | TopLevel
-  (* Def that was hoisted to top-level *)
-  | Hoisted
-
 type convert_result = {
-  ast_defs: (hoist_kind * def) list;
+  ast_defs: def list;
   global_state: Emit_env.global_state;
 }
 
@@ -1639,7 +1633,7 @@ and convert_defs env class_count record_count typedef_count const_count st dl =
     let (st, dl) =
       convert_defs env class_count record_count typedef_count const_count st dl
     in
-    (st, (TopLevel, Fun fd) :: dl)
+    (st, Fun fd :: dl)
   (* Convert a top-level class definition into a true class definition and
    * a stub class that just corresponds to the DefCls instruction *)
   | Class cd :: dl ->
@@ -1654,13 +1648,13 @@ and convert_defs env class_count record_count typedef_count const_count st dl =
         st
         dl
     in
-    (st, (TopLevel, Class cd) :: dl)
+    (st, Class cd :: dl)
   | Stmt stmt :: dl ->
     let (st, stmt) = convert_stmt env st stmt in
     let (st, dl) =
       convert_defs env class_count record_count typedef_count const_count st dl
     in
-    (st, (TopLevel, Stmt stmt) :: dl)
+    (st, Stmt stmt :: dl)
   | RecordDef rd :: dl ->
     let (st, rd_fields) = convert_record_fields env st rd.rd_fields in
     let (st, dl) =
@@ -1674,7 +1668,7 @@ and convert_defs env class_count record_count typedef_count const_count st dl =
         dl
     in
     let rd_emit_id = Some (Emit_id record_count) in
-    (st, (TopLevel, RecordDef { rd with rd_fields; rd_emit_id }) :: dl)
+    (st, RecordDef { rd with rd_fields; rd_emit_id } :: dl)
   | Typedef td :: dl ->
     let (st, dl) =
       convert_defs
@@ -1691,7 +1685,7 @@ and convert_defs env class_count record_count typedef_count const_count st dl =
     in
     let t_emit_id = Some (Emit_id typedef_count) in
     let td = { td with t_user_attributes; t_emit_id } in
-    (st, (TopLevel, Typedef td) :: dl)
+    (st, Typedef td :: dl)
   | Constant c :: dl ->
     let (st, c) = convert_gconst env st c const_count in
     let (st, dl) =
@@ -1704,7 +1698,7 @@ and convert_defs env class_count record_count typedef_count const_count st dl =
         st
         dl
     in
-    (st, (TopLevel, Constant c) :: dl)
+    (st, Constant c :: dl)
   | Namespace (_id, dl) :: dl' ->
     convert_defs
       env
@@ -1718,13 +1712,13 @@ and convert_defs env class_count record_count typedef_count const_count st dl =
     let (st, dl) =
       convert_defs env class_count record_count typedef_count const_count st dl
     in
-    (st, (TopLevel, NamespaceUse x) :: dl)
+    (st, NamespaceUse x :: dl)
   | SetNamespaceEnv ns :: dl ->
     let st = set_namespace st ns in
     let (st, dl) =
       convert_defs env class_count record_count typedef_count const_count st dl
     in
-    (st, (TopLevel, SetNamespaceEnv ns) :: dl)
+    (st, SetNamespaceEnv ns :: dl)
   | FileAttributes fa :: dl ->
     let (st, dl) =
       convert_defs env class_count record_count typedef_count const_count st dl
@@ -1733,7 +1727,7 @@ and convert_defs env class_count record_count typedef_count const_count st dl =
       convert_user_attributes env st fa.fa_user_attributes
     in
     let fa = { fa with fa_user_attributes } in
-    (st, (TopLevel, FileAttributes fa) :: dl)
+    (st, FileAttributes fa :: dl)
 
 let count_classes (defs : program) =
   List.count defs ~f:(function
@@ -1748,7 +1742,7 @@ let count_records defs =
 let hoist_toplevel_functions all_defs =
   let (funs, nonfuns) =
     List.partition_tf all_defs ~f:(function
-        | (_, Fun _) -> true
+        | Fun _ -> true
         | _ -> false)
   in
   funs @ nonfuns
@@ -1893,11 +1887,9 @@ let convert_toplevel_prog ~empty_namespace ~for_debugger_eval defs =
   let original_defs = hoist_toplevel_functions original_defs in
   let named_hoisted_functions = SMap.values st.named_hoisted_functions in
   let named_fun_defs =
-    List.rev_map named_hoisted_functions (fun fd -> (TopLevel, Fun fd))
+    List.rev_map named_hoisted_functions (fun fd -> Fun fd)
   in
-  let class_defs =
-    List.rev_map st.hoisted_classes (fun cd -> (Hoisted, Class cd))
-  in
+  let class_defs = List.rev_map st.hoisted_classes (fun cd -> Class cd) in
   let ast_defs = named_fun_defs @ original_defs @ class_defs in
   let global_state =
     Emit_env.

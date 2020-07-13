@@ -533,16 +533,12 @@ std::string opt_type_info(const StringData *userType,
 
 std::string opt_attrs(AttrContext ctx, Attr attrs,
                       const UserAttributeMap* userAttrs = nullptr,
-                      bool isTop = true,
                       bool needPrefix = true) {
   auto str = folly::trimWhitespace(folly::sformat(
                "{} {}",
                attrs_to_string(ctx, attrs), user_attrs(userAttrs))).str();
   if (!str.empty()) {
-    str = folly::sformat("{}[{}{}]",
-      needPrefix ? " " : "", str, isTop ? "" : " nontop");
-  } else if (!isTop) {
-    str = " [nontop]";
+    str = folly::sformat("{}[{}]", needPrefix ? " " : "", str);
   }
   return str;
 }
@@ -556,7 +552,7 @@ std::string func_param_list(const FuncInfo& finfo) {
 
     ret += opt_attrs(AttrContext::Parameter,
         Attr(), &func->params()[i].userAttributes,
-        /*isTop*/true, /*needPrefix*/false);
+        /*needPrefix*/false);
 
     if (func->params()[i].isVariadic()) {
       ret += "...";
@@ -841,8 +837,7 @@ void print_cls(Output& out, const PreClass* cls) {
 
   out.fmt(".class {} {} {}",
     opt_ubs(cls_ubs),
-    opt_attrs(AttrContext::Class, cls->attrs(), &cls->userAttributes(),
-              cls->hoistability() != PreClass::NotHoistable),
+    opt_attrs(AttrContext::Class, cls->attrs(), &cls->userAttributes()),
     name,
     format_line_pair(cls));
   print_cls_inheritance_list(out, cls);

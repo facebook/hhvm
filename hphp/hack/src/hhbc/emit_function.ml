@@ -136,8 +136,8 @@ let emit_function ast_fun : Hhas_function.t list =
     [normal_function]
 
 let emit_functions_from_program
-    (ast : (Closure_convert.hoist_kind * Tast.def) list) =
-  let aux (_, def) =
+    (ast : Tast.def list) =
+  let aux def =
     match def with
     | T.Fun fd -> emit_function fd
     | _ -> []

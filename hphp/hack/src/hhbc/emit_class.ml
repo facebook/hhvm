@@ -311,7 +311,7 @@ let emit_reified_init_method env ast_class =
         instrs;
     ]
 
-let emit_class (ast_class, hoisted) =
+let emit_class ast_class =
   let namespace = ast_class.A.c_namespace in
   validate_class_name namespace ast_class.A.c_name;
   let env = Emit_env.make_class_env ast_class in
@@ -659,7 +659,6 @@ let emit_class (ast_class, hoisted) =
     class_is_interface
     class_is_trait
     (ast_class.A.c_is_xhp || ast_class.A.c_has_xhp_keyword)
-    hoisted
     class_is_const
     class_no_dynamic_props
     no_reifiedinit_needed
@@ -677,10 +676,10 @@ let emit_class (ast_class, hoisted) =
     ast_class.A.c_doc_comment
 
 let emit_classes_from_program
-    (ast : (Closure_convert.hoist_kind * Tast.def) list) =
-  let aux (is_top, d) =
+    (ast : Tast.def list) =
+  let aux d =
     match d with
-    | A.Class cd -> Some (emit_class (cd, is_top))
+    | A.Class cd -> Some (emit_class cd)
     | _ -> None
   in
   List.filter_map ~f:aux ast

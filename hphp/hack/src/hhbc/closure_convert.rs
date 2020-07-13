@@ -39,14 +39,6 @@ use unique_list_rust::UniqueList;
 type Scope<'a> = AstScope<'a>;
 type ScopeItem<'a> = AstScopeItem<'a>;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum HoistKind {
-    /// Def that is already at top-level
-    TopLevel,
-    /// Def that was hoisted to top-level
-    Hoisted,
-}
-
 #[derive(Debug, Clone)] // TODO(hrust): Clone is used when bactracking now, can we somehow avoid it?
 struct Variables {
     /// all variables declared/used in the scope
@@ -1469,7 +1461,7 @@ fn extract_debugger_main(
     Ok(())
 }
 
-pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Result<Vec<HoistKind>> {
+pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Result<()> {
     let empty_namespace = namespace_env::Env::empty(vec![], false, false);
     if e.options()
         .hack_compiler_flags
@@ -1548,11 +1540,9 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Result<Vec<
         .map(|(_, fd)| Def::mk_fun(fd));
     *defs = named_fun_defs.collect();
     defs.extend(new_defs.drain(..));
-    let mut hoist_kinds = defs.iter().map(|_| HoistKind::TopLevel).collect::<Vec<_>>();
     for class in visitor.state.hoisted_classes.into_iter() {
         defs.push(Def::mk_class(class));
-        hoist_kinds.push(HoistKind::Hoisted);
     }
     *e.emit_state_mut() = visitor.state.global_state;
-    Ok(hoist_kinds)
+    Ok(())
 }

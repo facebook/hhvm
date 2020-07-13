@@ -54,8 +54,8 @@ let emit_record_def rd =
     (List.map rd.rd_fields ~f:(emit_field rd.rd_namespace))
 
 let emit_record_defs_from_program
-    (ast : (Closure_convert.hoist_kind * Tast.def) list) =
-  let aux (_, d) =
+    (ast : Tast.def list) =
+  let aux d =
     match d with
     | RecordDef rd -> Some (emit_record_def rd)
     | _ -> None

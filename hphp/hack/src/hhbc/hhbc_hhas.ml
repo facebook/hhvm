@@ -1750,12 +1750,6 @@ let class_special_attributes c =
       attrs
   in
   let attrs =
-    if not (Hhas_class.is_top c) then
-      "nontop" :: attrs
-    else
-      attrs
-  in
-  let attrs =
     if Hhas_class.is_closure_class c && (not @@ Emit_env.is_systemlib ()) then
       "unique" :: attrs
     else

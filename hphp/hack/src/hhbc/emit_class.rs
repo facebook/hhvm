@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use closure_convert_rust as closure_convert;
 use emit_attribute_rust as emit_attribute;
 use emit_body_rust as emit_body;
 use emit_expression_rust as emit_expression;
@@ -464,7 +463,6 @@ where
 pub fn emit_class<'a>(
     emitter: &mut Emitter,
     ast_class: &'a tast::Class_,
-    hoisted: closure_convert::HoistKind,
 ) -> Result<HhasClass<'a>> {
     let namespace = &ast_class.namespace;
     validate_class_name(namespace, &ast_class.name)?;
@@ -805,7 +803,6 @@ pub fn emit_class<'a>(
         method_trait_resolutions,
         methods,
         enum_type,
-        hoisted,
         upper_bounds,
         properties,
         requirements,
@@ -816,14 +813,12 @@ pub fn emit_class<'a>(
 
 pub fn emit_classes_from_program<'a>(
     emitter: &mut Emitter,
-    hoist_kinds: &[closure_convert::HoistKind],
     tast: &'a tast::Program,
 ) -> Result<Vec<HhasClass<'a>>> {
     tast.iter()
-        .zip(hoist_kinds)
-        .filter_map(|(class, hoist_kind)| {
+        .filter_map(|class| {
             if let tast::Def::Class(cd) = class {
-                Some(emit_class(emitter, cd, *hoist_kind))
+                Some(emit_class(emitter, cd))
             } else {
                 None
             }

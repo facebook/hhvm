@@ -7,12 +7,8 @@
  *
  *)
 
-type hoist_kind =
-  | TopLevel
-  | Hoisted
-
 type convert_result = {
-  ast_defs: (hoist_kind * Tast.def) list;
+  ast_defs: Tast.def list;
   global_state: Emit_env.global_state;
 }
 

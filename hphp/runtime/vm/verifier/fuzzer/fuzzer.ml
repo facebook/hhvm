@@ -179,14 +179,6 @@ let mutate_visibility v =
     )
   else v
 
-let mutate_hoisted h =
-  if should_mutate () then
-    match h with
-    | Closure_convert.TopLevel -> Closure_convert.Hoisted
-    | Closure_convert.Hoisted -> Closure_convert.TopLevel
-  else
-    h
-
 (* adds a random integer in range [-c, c] to n, produces the result if it is
    positive, or 0 otherwise *)
 let mutate_int n c =
@@ -691,7 +683,6 @@ let mutate_metadata (input : HP.t)  =
       (cls |> HC.is_interface       |> mutate_bool)
       (cls |> HC.is_trait           |> mutate_bool)
       (cls |> HC.is_xhp             |> mutate_bool)
-      (cls.HC.class_hoisted         |> mutate_hoisted)
       (cls |> HC.is_const           |> mutate_bool)
       (cls |> HC.no_dynamic_props   |> mutate_bool)
       (cls |> HC.needs_no_reifiedinit |> mutate_bool)

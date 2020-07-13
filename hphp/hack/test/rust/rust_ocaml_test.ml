@@ -710,7 +710,6 @@ module ClosureConvertTest_ = struct
            ~for_debugger_eval:false
       |> fun x ->
       x.Closure_convert.ast_defs
-      |> List.map ~f:snd
       |> Full_fidelity_ast.tast_to_aast
       |> fun y -> (y, x.Closure_convert.global_state)
     in

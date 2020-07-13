@@ -5,7 +5,6 @@
 
 use bitflags::bitflags;
 
-use closure_convert_rust as closure_convert;
 use hhas_attribute_rust::HhasAttribute;
 use hhas_constant_rust::HhasConstant;
 use hhas_method_rust::HhasMethod;
@@ -28,7 +27,6 @@ pub struct HhasClass<'a> {
     pub implements: Vec<class::Type<'a>>,
     pub name: class::Type<'a>,
     pub span: Span,
-    pub hoisted: closure_convert::HoistKind,
     pub uses: Vec<&'a str>,
     // Deprecated - kill please
     pub use_aliases: Vec<(
@@ -95,8 +93,5 @@ impl<'a> HhasClass<'a> {
     }
     pub fn is_closure(&self) -> bool {
         self.methods.iter().any(|x| x.is_closure_body())
-    }
-    pub fn is_top(&self) -> bool {
-        self.hoisted == closure_convert::HoistKind::TopLevel
     }
 }

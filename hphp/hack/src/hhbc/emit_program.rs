@@ -111,11 +111,11 @@ fn emit_program_<'p>(
     prog: &'p mut Tast::Program,
 ) -> Result<HhasProgram<'p>> {
     let for_debugger_eval = emitter.for_debugger_eval && debugger_eval_should_modify(prog)?;
-    let hoist_kinds = closure_convert::convert_toplevel_prog(emitter, prog)?;
+    closure_convert::convert_toplevel_prog(emitter, prog)?;
     emitter.for_debugger_eval = for_debugger_eval;
     let main = emit_main(emitter, flags, RcOc::clone(&namespace), prog)?;
     let mut functions = emit_functions_from_program(emitter, prog)?;
-    let classes = emit_classes_from_program(emitter, &hoist_kinds, prog)?;
+    let classes = emit_classes_from_program(emitter, prog)?;
     let record_defs = emit_record_defs_from_program(emitter, prog)?;
     let typedefs = emit_typedefs_from_program(emitter, prog)?;
     let (constants, mut const_inits) = {

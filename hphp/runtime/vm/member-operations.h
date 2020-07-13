@@ -200,16 +200,13 @@ inline TypedValue ElemArrayPre(ArrayData* base, StringData* key) {
 }
 
 inline TypedValue ElemArrayPre(ArrayData* base, TypedValue key) {
-  auto const dt = key.m_type;
-  if (isIntType(dt))    return ElemArrayPre(base, key.m_data.num);
-  if (isStringType(dt)) return ElemArrayPre(base, key.m_data.pstr);
+  if (tvIsInt(key))    return ElemArrayPre(base, key.m_data.num);
+  if (tvIsString(key)) return ElemArrayPre(base, key.m_data.pstr);
 
-  // tvToKey will raise a warning for most remaining inputs, which the error
-  // elevator may convert into an error (and thus halt the lookup).
-  auto const tv = tvToKey(key, base);
-  if (isIntType(type(tv)))    return ElemArrayPre(base, tv.m_data.num);
-  if (isStringType(type(tv))) return ElemArrayPre(base, tv.m_data.pstr);
-  return make_tv<KindOfUninit>();
+  key = tvToKey(key, base);
+  assertx(tvIsInt(key) || tvIsString(key));
+  return tvIsInt(key) ? ElemArrayPre(base, key.m_data.num)
+                      : ElemArrayPre(base, key.m_data.pstr);
 }
 
 /**
@@ -1538,7 +1535,6 @@ void arraySetUpdateBase(ArrayData* oldData, ArrayData* newData, tv_lval base) {
 /**
  * SetElem helper with Array base and Int64 key
  */
-template<bool setResult>
 inline ArrayData* SetElemArrayPre(ArrayData* a, int64_t key, TypedValue* value) {
   return a->set(key, *value);
 }
@@ -1546,46 +1542,31 @@ inline ArrayData* SetElemArrayPre(ArrayData* a, int64_t key, TypedValue* value) 
 /**
  * SetElem helper with Array base and String key
  */
-template<bool setResult>
 inline ArrayData* SetElemArrayPre(ArrayData* a, StringData* key, TypedValue* value) {
   assertx(a->isPHPArrayType());
   return a->set(key, *value);
 }
 
-template<bool setResult>
 inline ArrayData* SetElemArrayPre(ArrayData* a, TypedValue key, TypedValue* value) {
-  if (isStringType(key.m_type)) {
-    return SetElemArrayPre<setResult>(a, key.m_data.pstr, value);
-  }
-  if (key.m_type == KindOfInt64) {
-    return SetElemArrayPre<setResult>(
-      a, key.m_data.num, value
-    );
-  }
-  if (isFuncType(key.m_type) && RO::EvalEnableFuncStringInterop) {
-    return SetElemArrayPre<setResult>(
-      a, const_cast<StringData*>(funcToStringHelper(key.m_data.pfunc)), value
-    );
-  }
-  if (isClassType(key.m_type)) {
-    return SetElemArrayPre<setResult>(
-      a, const_cast<StringData*>(classToStringHelper(key.m_data.pclass)), value
-    );
-  }
+  if (tvIsInt(key))    return SetElemArrayPre(a, key.m_data.num, value);
+  if (tvIsString(key)) return SetElemArrayPre(a, key.m_data.pstr, value);
 
-  throwInvalidArrayKeyException(&key, a);
+  key = tvToKey(key, a);
+  assertx(tvIsInt(key) || tvIsString(key));
+  return tvIsInt(key) ? SetElemArrayPre(a, key.m_data.num, value)
+                      : SetElemArrayPre(a, key.m_data.pstr, value);
 }
 
 /**
  * SetElem when base is an Array
  */
-template <bool setResult, KeyType keyType>
+template <KeyType keyType>
 inline void SetElemArray(tv_lval base, key_type<keyType> key, TypedValue* value) {
   assertx(tvIsArray(base));
   assertx(tvIsPlausible(*base));
 
   ArrayData* a = val(base).parr;
-  auto const newData = SetElemArrayPre<setResult>(a, key, value);
+  auto const newData = SetElemArrayPre(a, key, value);
   assertx(newData->isPHPArrayType());
   arraySetUpdateBase(a, newData, base);
 }
@@ -1593,40 +1574,29 @@ inline void SetElemArray(tv_lval base, key_type<keyType> key, TypedValue* value)
 /**
  * SetElem when base is a Vec
  */
-template<bool setResult>
-inline ArrayData* SetElemVecPre(ArrayData* a,
-                                int64_t key,
-                                TypedValue* value) {
+inline ArrayData* SetElemVecPre(ArrayData* a, int64_t key, TypedValue* value) {
   return PackedArray::SetIntVec(a, key, *value);
 }
 
-template <bool setResult>
 inline ArrayData*
 SetElemVecPre(ArrayData* a, StringData* key, TypedValue* /*value*/) {
   throwInvalidArrayKeyException(key, a);
 }
 
-template<bool setResult>
-inline ArrayData* SetElemVecPre(ArrayData* a,
-                                TypedValue key,
-                                TypedValue* value) {
-  auto const dt = key.m_type;
-  if (LIKELY(isIntType(dt))) {
-    return SetElemVecPre<setResult>(a, key.m_data.num, value);
-  }
-  if (isStringType(dt)) {
-    return SetElemVecPre<setResult>(a, key.m_data.pstr, value);
-  }
+inline ArrayData*
+SetElemVecPre(ArrayData* a, TypedValue key, TypedValue* value) {
+  if (tvIsInt(key))    return SetElemVecPre(a, key.m_data.num, value);
+  if (tvIsString(key)) return SetElemVecPre(a, key.m_data.pstr, value);
   throwInvalidArrayKeyException(&key, a);
 }
 
-template <bool setResult, KeyType keyType>
+template <KeyType keyType>
 inline void SetElemVec(tv_lval base, key_type<keyType> key, TypedValue* value) {
   assertx(tvIsVec(base));
   assertx(tvIsPlausible(*base));
 
   ArrayData* a = val(base).parr;
-  auto const newData = SetElemVecPre<setResult>(a, key, value);
+  auto const newData = SetElemVecPre(a, key, value);
   assertx(newData->isVecType());
   arraySetUpdateBase(a, newData, base);
 }
@@ -1634,42 +1604,30 @@ inline void SetElemVec(tv_lval base, key_type<keyType> key, TypedValue* value) {
 /**
  * SetElem when base is a Dict
  */
-template<bool setResult>
-inline ArrayData* SetElemDictPre(ArrayData* a,
-                                 int64_t key,
-                                 TypedValue* value) {
+inline ArrayData* SetElemDictPre(ArrayData* a, int64_t key, TypedValue* value) {
   return MixedArray::SetIntDict(a, key, *value);
 }
 
-template<bool setResult>
-inline ArrayData* SetElemDictPre(ArrayData* a,
-                                 StringData* key,
-                                 TypedValue* value) {
+inline ArrayData*
+SetElemDictPre(ArrayData* a, StringData* key, TypedValue* value) {
   return MixedArray::SetStrDict(a, key, *value);
 }
 
-template<bool setResult>
-inline ArrayData* SetElemDictPre(ArrayData* a,
-                                 TypedValue key,
-                                 TypedValue* value) {
-  auto const dt = key.m_type;
-  if (isIntType(dt)) {
-    return SetElemDictPre<setResult>(a, key.m_data.num, value);
-  }
-  if (isStringType(dt)) {
-    return SetElemDictPre<setResult>(a, key.m_data.pstr, value);
-  }
+inline ArrayData*
+SetElemDictPre(ArrayData* a, TypedValue key, TypedValue* value) {
+  if (tvIsInt(key))    return SetElemDictPre(a, key.m_data.num, value);
+  if (tvIsString(key)) return SetElemDictPre(a, key.m_data.pstr, value);
   throwInvalidArrayKeyException(&key, a);
 }
 
-template <bool setResult, KeyType keyType>
+template <KeyType keyType>
 inline void SetElemDict(tv_lval base, key_type<keyType> key,
                         TypedValue* value) {
   assertx(tvIsDict(base));
   assertx(tvIsPlausible(*base));
 
   ArrayData* a = val(base).parr;
-  auto const newData = SetElemDictPre<setResult>(a, key, value);
+  auto const newData = SetElemDictPre(a, key, value);
   assertx(newData->isDictKind());
   arraySetUpdateBase(a, newData, base);
 }
@@ -1766,9 +1724,9 @@ StringData* SetElemSlow(tv_lval base, key_type<keyType> key,
     case KindOfClsMeth:
       detail::promoteClsMeth(base);
       if (RO::EvalHackArrDVArrs) {
-        SetElemVec<setResult, keyType>(base, key, value);
+        SetElemVec<keyType>(base, key, value);
       } else {
-        SetElemArray<setResult, keyType>(base, key, value);
+        SetElemArray<keyType>(base, key, value);
       }
       return nullptr;
     case KindOfRecord:
@@ -1787,19 +1745,17 @@ inline StringData* SetElem(tv_lval base, key_type<keyType> key,
   assertx(tvIsPlausible(*base));
 
   if (LIKELY(tvIsArray(base))) {
-    SetElemArray<setResult, keyType>(base, key, value);
+    SetElemArray<keyType>(base, key, value);
     return nullptr;
   }
   if (LIKELY(tvIsVec(base))) {
-    base.val().parr->isVanilla()
-      ? SetElemVec<setResult, keyType>(base, key, value)
-      : SetElemBespoke<keyType>(base, key, value);
+    base.val().parr->isVanilla() ? SetElemVec<keyType>(base, key, value)
+                                 : SetElemBespoke<keyType>(base, key, value);
     return nullptr;
   }
   if (LIKELY(tvIsDict(base))) {
-    base.val().parr->isVanilla()
-      ? SetElemDict<setResult, keyType>(base, key, value)
-      : SetElemBespoke<keyType>(base, key, value);
+    base.val().parr->isVanilla() ? SetElemDict<keyType>(base, key, value)
+                                 : SetElemBespoke<keyType>(base, key, value);
     return nullptr;
   }
   return SetElemSlow<setResult, keyType>(base, key, value);
@@ -2400,25 +2356,13 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, StringData* key) {
 }
 
 inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key) {
-  if (isStringType(key.m_type)) {
-    return UnsetElemArrayPre(a, key.m_data.pstr);
-  }
-  if (key.m_type == KindOfInt64) {
-    return UnsetElemArrayPre(a, key.m_data.num);
-  }
-  if (isFuncType(key.m_type) && RO::EvalEnableFuncStringInterop) {
-    return UnsetElemArrayPre(
-      a, const_cast<StringData*>(funcToStringHelper(key.m_data.pfunc))
-    );
-  }
-  if (isClassType(key.m_type)) {
-    return UnsetElemArrayPre(
-      a, const_cast<StringData*>(classToStringHelper(key.m_data.pclass))
-    );
-  }
-  auto const k = tvToKey(key, a);
-  if (isNullType(k.m_type)) return a;
-  return a->remove(k);
+  if (tvIsInt(key))    return UnsetElemArrayPre(a, key.m_data.num);
+  if (tvIsString(key)) return UnsetElemArrayPre(a, key.m_data.pstr);
+
+  key = tvToKey(key, a);
+  assertx(tvIsInt(key) || tvIsString(key));
+  return tvIsInt(key) ? UnsetElemArrayPre(a, key.m_data.num)
+                      : UnsetElemArrayPre(a, key.m_data.pstr);
 }
 
 /**

@@ -59,13 +59,6 @@ function comp($x, $y) {
 
 <<__EntryPoint>>
 function main() {
-  print "* vec vs array:\n";
-  comp(vec[A::class, 'func1'], __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[A::class, 'func1']));
-  comp(vec[A::class, 'func1'], __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[A::class, 'func2']));
-  print "* clsmeth vs array:\n";
-  comp(HH\class_meth(A::class, 'func1'), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[A::class, 'func1']));
-  comp(HH\class_meth(A::class, 'func1'), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[A::class, 'func2']));
-
   print "* vec vs vec:\n";
   comp(vec[A::class, 'func1'], vec[A::class, 'func1']);
   comp(vec[A::class, 'func1'], vec[A::class, 'func2']);

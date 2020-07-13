@@ -25,8 +25,6 @@ function test_unserialize($options) {
 function main() {
   echo "=== serialize ===\n";
   $options = dict['keepDVArrays' => true];
-  var_dump(HH\serialize_with_options(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]), $options));
-  var_dump(HH\serialize_with_options(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3]), $options));
   var_dump(HH\serialize_with_options(varray[], $options));
   var_dump(HH\serialize_with_options(varray[1, 2, 3], $options));
   var_dump(HH\serialize_with_options(darray[], $options));

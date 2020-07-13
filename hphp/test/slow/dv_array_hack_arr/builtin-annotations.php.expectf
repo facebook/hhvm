@@ -42,12 +42,8 @@ dict(3) {
 ====================================================
 
 Warning: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, dict given in %s/builtin-annotations.php on line 37
-
-Warning: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, array given in %s/builtin-annotations.php on line 38
 ====================================================
 
-Warning: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be dict, vec given in %s/builtin-annotations.php on line 41
-
-Warning: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be dict, array given in %s/builtin-annotations.php on line 43
+Warning: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be dict, vec given in %s/builtin-annotations.php on line 40
 ====================================================
 ====================================================

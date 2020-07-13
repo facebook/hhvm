@@ -7,7 +7,7 @@ function test_varray() {
   var_dump(varray['a', 'b', 'c']);
   var_dump(varray[null, true, false, 'abc', 100, 1.23,
                   new stdclass, xml_parser_create(),
-                  __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2]), vec[3, 4], dict[1 => 2], keyset['abc']]);
+                  varray[1, 2], vec[3, 4], dict[1 => 2], keyset['abc']]);
   var_dump(varray[varray[], varray['a', 100, false]]);
   var_dump(varray[darray[], darray[100 => 'a', 'b' => 200]]);
 }
@@ -26,7 +26,7 @@ function test_darray() {
       'key3' => 1.23,
       40 => new stdclass,
       50 => xml_parser_create(),
-      60 => __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2]),
+      60 => varray[1, 2],
       'key4' => vec[3, 4],
       'key5' => dict[1 => 2],
       70 => keyset['abc']

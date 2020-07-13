@@ -86,36 +86,6 @@ is_varray => FALSE
 is_darray => FALSE
 gettype => keyset
 ============= direct_test_dv_arrays ================
-value => array(0) {
-}
-is_varray => FALSE
-is_darray => FALSE
-gettype => array
-============= direct_test_dv_arrays ================
-value => array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-is_varray => FALSE
-is_darray => FALSE
-gettype => array
-============= direct_test_dv_arrays ================
-value => array(3) {
-  ["a"]=>
-  int(100)
-  ["b"]=>
-  int(200)
-  ["c"]=>
-  int(300)
-}
-is_varray => FALSE
-is_darray => FALSE
-gettype => array
-============= direct_test_dv_arrays ================
 value => vec(0) {
 }
 is_varray => TRUE
@@ -290,36 +260,6 @@ value => keyset(3) {
 HH\is_varray => FALSE
 HH\is_darray => FALSE
 gettype => keyset
-============= indirect_test_dv_arrays ==============
-value => array(0) {
-}
-HH\is_varray => FALSE
-HH\is_darray => FALSE
-gettype => array
-============= indirect_test_dv_arrays ==============
-value => array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-HH\is_varray => FALSE
-HH\is_darray => FALSE
-gettype => array
-============= indirect_test_dv_arrays ==============
-value => array(3) {
-  ["a"]=>
-  int(100)
-  ["b"]=>
-  int(200)
-  ["c"]=>
-  int(300)
-}
-HH\is_varray => FALSE
-HH\is_darray => FALSE
-gettype => array
 ============= indirect_test_dv_arrays ==============
 value => vec(0) {
 }
@@ -747,10 +687,6 @@ HH\is_dict => TRUE
 HH\is_keyset => FALSE
 is_scalar => FALSE
 ============= constant-folding ===================
-bool(false)
-bool(false)
-bool(false)
-bool(false)
 bool(false)
 bool(false)
 bool(true)

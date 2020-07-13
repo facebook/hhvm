@@ -1,6 +1,4 @@
 === serialize ===
-string(6) "a:0:{}"
-string(30) "a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}"
 string(6) "y:0:{}"
 string(18) "y:3:{i:1;i:2;i:3;}"
 string(6) "Y:0:{}"

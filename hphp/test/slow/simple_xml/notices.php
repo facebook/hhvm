@@ -15,12 +15,6 @@ function main() {
     var_dump($c);
   }
 
-  // comparisons
-  var_dump($config < $config2);
-  var_dump($config > $config2);
-  var_dump($config <= $config2);
-  var_dump($config >= $config2);
-
   // equality
   var_dump($config == $config2);
 }

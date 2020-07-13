@@ -69,8 +69,6 @@ function test1() {
         keyset[100, 'abc', 200],
         xml_parser_create(),
         new stdclass(),
-        __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]),
-        __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3, 4]),
         varray[],
         varray[1, 2, 3],
         darray[],

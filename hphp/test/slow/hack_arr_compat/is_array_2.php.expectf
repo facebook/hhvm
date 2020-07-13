@@ -1,20 +1,18 @@
 ================= literals ===========================
 ---------------------- is_array --------------------
 bool(false)
-bool(true)
 
-Notice: Hack Array Compat: is_array() called on vec in %s/is_array_2.php on line 41
+Notice: Hack Array Compat: is_array() called on vec in %s/is_array_2.php on line 40
 bool(false)
 
-Notice: Hack Array Compat: is_array() called on dict in %s/is_array_2.php on line 42
+Notice: Hack Array Compat: is_array() called on dict in %s/is_array_2.php on line 41
 bool(false)
 
-Notice: Hack Array Compat: is_array() called on keyset in %s/is_array_2.php on line 43
+Notice: Hack Array Compat: is_array() called on keyset in %s/is_array_2.php on line 42
 bool(false)
 bool(true)
 bool(true)
 ---------------------- is_varray -------------------
-bool(false)
 bool(false)
 bool(false)
 bool(false)
@@ -27,10 +25,8 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-bool(false)
 bool(true)
 ---------------------- is_vec ----------------------
-bool(false)
 bool(false)
 bool(true)
 bool(false)
@@ -40,7 +36,6 @@ bool(false)
 ---------------------- is_dict ---------------------
 bool(false)
 bool(false)
-bool(false)
 bool(true)
 bool(false)
 bool(false)
@@ -48,7 +43,6 @@ bool(false)
 ================= normal =============================
 ---------------------- is_array ----------------------
 bool(false)
-bool(true)
 
 Notice: Hack Array Compat: is_array() called on vec in %s/is_array_2.php on line 5
 bool(false)
@@ -65,7 +59,6 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-bool(false)
 bool(true)
 bool(false)
 ---------------------- is_darray ---------------------
@@ -74,10 +67,8 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-bool(false)
 bool(true)
 ---------------------- is_vec ------------------------
-bool(false)
 bool(false)
 bool(true)
 bool(false)
@@ -87,7 +78,6 @@ bool(false)
 ---------------------- is_dict -----------------------
 bool(false)
 bool(false)
-bool(false)
 bool(true)
 bool(false)
 bool(false)
@@ -95,7 +85,6 @@ bool(false)
 ================= dynamic =============================
 ---------------------- is_array ----------------------
 bool(false)
-bool(true)
 
 Notice: Hack Array Compat: is_array() called on vec in %s/is_array_2.php on line 21
 bool(false)
@@ -112,7 +101,6 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-bool(false)
 bool(true)
 bool(false)
 ---------------------- is_darray ---------------------
@@ -121,10 +109,8 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-bool(false)
 bool(true)
 ---------------------- is_vec ------------------------
-bool(false)
 bool(false)
 bool(true)
 bool(false)
@@ -132,7 +118,6 @@ bool(false)
 bool(false)
 bool(false)
 ---------------------- is_dict -----------------------
-bool(false)
 bool(false)
 bool(false)
 bool(true)

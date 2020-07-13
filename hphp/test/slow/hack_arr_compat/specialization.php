@@ -31,8 +31,7 @@ function test_as_is_shape_tuple() {
   print("\n");
   $darray = darray['a' => 17, 'b' => false];
   $varray = varray($darray);
-  $array = __hhvm_intrinsics\dummy_cast_to_kindofarray($darray);
-  foreach (vec[$array, $varray, $darray] as $input) {
+  foreach (vec[$varray, $darray] as $input) {
     print(display($input).' as shape: ');
     run(() ==> $input as shape('a' => int, 'b' => bool));
     print(display($input).' is shape: ');
@@ -41,8 +40,7 @@ function test_as_is_shape_tuple() {
   print("\n");
   $varray = varray['a', false];
   $darray = darray($varray);
-  $array = __hhvm_intrinsics\dummy_cast_to_kindofarray($varray);
-  foreach (vec[$array, $varray, $darray] as $input) {
+  foreach (vec[$varray, $darray] as $input) {
     print(display($input).' as tuple: ');
     run(() ==> $input as (string, bool));
     print(display($input).' is tuple: ');
@@ -62,9 +60,8 @@ function test_builtin_error_messages() {
 // Test that builtins enforce dvarray-ness of inputs.
 function test_builtin_enforcement() {
   print("\n=====================================\nBuiltins:\n");
-  $array = __hhvm_intrinsics\dummy_cast_to_kindofarray(varray[]);
   $clsmeth = class_meth(ClsMethTest::class, 'fn');
-  foreach (vec[$array, varray[], darray[], $clsmeth] as $input) {
+  foreach (vec[varray[], darray[], $clsmeth] as $input) {
     print('Passing '.display($input).' to varray: ');
     run(() ==> __hhvm_intrinsics\dummy_varray_builtin($input));
     print('Passing '.display($input).' to darray: ');
@@ -77,11 +74,10 @@ function test_darray_varray_comparisons() {
   print("\n=====================================\nComparisons:\n");
   $varray = varray[2, 3, 5];
   $darray = darray[0 => 2, 1 => 3, 2 => 5];
-  $array = __hhvm_intrinsics\dummy_cast_to_kindofarray($varray);
   $vec = vec[2, 3, 5];
   $dict = dict[0 => 2, 1 => 3, 2 => 5];
-  foreach (vec[$array, $varray, $darray, $vec, $dict] as $a1) {
-    foreach (vec[$array, $varray, $darray, $vec, $dict] as $a2) {
+  foreach (vec[$varray, $darray, $vec, $dict] as $a1) {
+    foreach (vec[$varray, $darray, $vec, $dict] as $a2) {
       print('  Comparing '.display($a1).' and '.display($a2).":\n");
       print('    === '); run(() ==> $a1 === $a2);
       print('    !== '); run(() ==> $a1 !== $a2);
@@ -145,18 +141,17 @@ class D extends C {
 // Test that regular Hack function typehints are enforced.
 function test_typehint_enforcement(int $count) {
   if (!$count) print("\n=====================================\nTypehints:\n");
-  $array = __hhvm_intrinsics\dummy_cast_to_kindofarray(varray[]);
   $clsmeth = class_meth(ClsMethTest::class, 'fn');
-  foreach (vec[$array, varray[], darray[], $clsmeth] as $input) {
+  foreach (vec[varray[], darray[], $clsmeth] as $input) {
     if (!($count--)) run(() ==> takes_varray($input));
     if (!($count--)) run(() ==> takes_darray($input));
   }
-  foreach (vec[$array, varray[], darray[], $clsmeth] as $input) {
+  foreach (vec[varray[], darray[], $clsmeth] as $input) {
     if (!($count--)) run(() ==> returns_varray(() ==> $input));
     if (!($count--)) run(() ==> returns_darray(() ==> $input));
   }
   $c = new C();
-  foreach (vec[$array, varray[], darray[], $clsmeth] as $input) {
+  foreach (vec[varray[], darray[], $clsmeth] as $input) {
     if (!($count--)) run(() ==> $c->v = $input);
     if (!($count--)) run(() ==> $c->d = $input);
   }

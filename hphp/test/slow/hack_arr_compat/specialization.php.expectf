@@ -2,15 +2,11 @@
 =====================================
 as/is shape/tuple:
 
-array as shape: Expected shape('a' => int, 'b' => bool), got array
-array is shape: false
 varray as shape: Expected shape('a' => int, 'b' => bool) at ["a"], got varray
 varray is shape: false
 darray as shape: {"a":17,"b":false}
 darray is shape: true
 
-array as tuple: Expected (string, bool), got array
-array is tuple: false
 varray as tuple: ["a",false]
 varray is tuple: true
 darray as tuple: Expected (string, bool), got darray
@@ -23,8 +19,6 @@ Passing darray to boolean: json_decode() expects parameter 2 to be boolean, darr
 
 =====================================
 Builtins:
-Passing array to varray: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be varray, array given
-Passing array to darray: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be darray, array given
 Passing varray to varray: []
 Passing varray to darray: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be darray, varray given
 Passing darray to varray: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be varray, darray given
@@ -34,54 +28,6 @@ Passing clsmeth to darray: __hhvm_intrinsics\dummy_darray_builtin() expects para
 
 =====================================
 Comparisons:
-  Comparing array and array:
-    === true
-    !== false
-    <   false
-    >   false
-    <=  true
-    >=  true
-    <=> 0
-  Comparing array and varray:
-    === false
-    !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-  Comparing array and darray:
-    === false
-    !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-  Comparing array and vec:
-    === false
-    !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-  Comparing array and dict:
-    === false
-    !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-  Comparing varray and array:
-    === false
-    !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
   Comparing varray and varray:
     === true
     !== false
@@ -114,14 +60,6 @@ Comparisons:
     <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
     >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
     <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-  Comparing darray and array:
-    === false
-    !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
   Comparing darray and varray:
     === false
     !== true
@@ -154,14 +92,6 @@ Comparisons:
     <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
     >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
     <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-  Comparing vec and array:
-    === false
-    !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
   Comparing vec and varray:
     === false
     !== true
@@ -194,14 +124,6 @@ Comparisons:
     <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
     >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
     <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-  Comparing dict and array:
-    === false
-    !== true
-    <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-    <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
   Comparing dict and varray:
     === false
     !== true
@@ -265,10 +187,6 @@ Invalid varray key: expected a key of type int, string given
 
 =====================================
 Typehints:
-
-Catchable fatal error: Argument 1 passed to takes_varray() must be an instance of HH\varray, array given in %s/specialization.php on line %d
-
-Catchable fatal error: Argument 1 passed to takes_darray() must be an instance of HH\darray, array given in %s/specialization.php on line %d
 "varray to varray: OK!"
 
 Catchable fatal error: Argument 1 passed to takes_darray() must be an instance of HH\darray, varray given in %s/specialization.php on line %d
@@ -278,10 +196,6 @@ Catchable fatal error: Argument 1 passed to takes_varray() must be an instance o
 "varray to varray: OK!"
 
 Catchable fatal error: Argument 1 passed to takes_darray() must be an instance of HH\darray, clsmeth given in %s/specialization.php on line %d
-
-Catchable fatal error: Value returned from function returns_varray() must be of type HH\varray, array given in %s/specialization.php on line %d
-
-Catchable fatal error: Value returned from function returns_darray() must be of type HH\darray, array given in %s/specialization.php on line %d
 []
 
 Catchable fatal error: Value returned from function returns_darray() must be of type HH\darray, varray given in %s/specialization.php on line %d
@@ -291,10 +205,6 @@ Catchable fatal error: Value returned from function returns_varray() must be of 
 ["ClsMethTest","fn"]
 
 Catchable fatal error: Value returned from function returns_darray() must be of type HH\darray, clsmeth given in %s/specialization.php on line %d
-
-Catchable fatal error: Property 'C::v' declared as type ?HH\varray, array assigned in %s/specialization.php on line %d
-
-Catchable fatal error: Property 'C::d' declared as type ?HH\darray, array assigned in %s/specialization.php on line %d
 []
 
 Catchable fatal error: Property 'C::d' declared as type ?HH\darray, varray assigned in %s/specialization.php on line %d

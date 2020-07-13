@@ -13,17 +13,5 @@ Notice: SimpleXMLElement to array cast in %s/notices.php on line 15
 object(SimpleXMLElement) (0) {
 }
 
-Notice: SimpleXMLElement comparison in %s/notices.php on line 19
-bool(false)
-
-Notice: SimpleXMLElement comparison in %s/notices.php on line 20
-bool(false)
-
-Notice: SimpleXMLElement comparison in %s/notices.php on line 21
-bool(false)
-
-Notice: SimpleXMLElement comparison in %s/notices.php on line 22
-bool(false)
-
-Notice: SimpleXMLElement equality comparison in %s/notices.php on line 25
+Notice: SimpleXMLElement equality comparison in %s/notices.php on line 19
 bool(false)

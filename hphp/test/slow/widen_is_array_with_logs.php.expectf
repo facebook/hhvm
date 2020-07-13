@@ -1,21 +1,19 @@
 ================= literals ===========================
 ---------------------- is_array --------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 1
 
-Notice: Hack Array Compat: is_array() called on vec in %s/hphp/test/slow/widen_is_array_with_logs.php on line 66
+Notice: Hack Array Compat: is_array() called on vec in %s/hphp/test/slow/widen_is_array_with_logs.php on line 65
 arrkind: vec, check: 1
 
-Notice: Hack Array Compat: is_array() called on dict in %s/hphp/test/slow/widen_is_array_with_logs.php on line 67
+Notice: Hack Array Compat: is_array() called on dict in %s/hphp/test/slow/widen_is_array_with_logs.php on line 66
 arrkind: dict, check: 1
 
-Notice: Hack Array Compat: is_array() called on keyset in %s/hphp/test/slow/widen_is_array_with_logs.php on line 68
+Notice: Hack Array Compat: is_array() called on keyset in %s/hphp/test/slow/widen_is_array_with_logs.php on line 67
 arrkind: keyset, check: 1
 arrkind: varray, check: 1
 arrkind: darray, check: 1
 ---------------------- is_varray -------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 0
 arrkind: vec, check: 0
 arrkind: dict, check: 0
 arrkind: keyset, check: 0
@@ -23,7 +21,6 @@ arrkind: varray, check: 1
 arrkind: darray, check: 0
 ---------------------- is_darray -------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 0
 arrkind: vec, check: 0
 arrkind: dict, check: 0
 arrkind: keyset, check: 0
@@ -31,7 +28,6 @@ arrkind: varray, check: 0
 arrkind: darray, check: 1
 ---------------------- is_vec ----------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 0
 arrkind: vec, check: 1
 arrkind: dict, check: 0
 arrkind: keyset, check: 0
@@ -39,7 +35,6 @@ arrkind: varray, check: 0
 arrkind: darray, check: 0
 ---------------------- is_dict ---------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 0
 arrkind: vec, check: 0
 arrkind: dict, check: 1
 arrkind: keyset, check: 0
@@ -47,7 +42,6 @@ arrkind: varray, check: 0
 arrkind: darray, check: 0
 ---------------------- is_php_array ----------------
 arrkind: non-array, check: 0
-arrkind: array, check: 1
 arrkind: vec, check: 0
 arrkind: dict, check: 0
 arrkind: keyset, check: 0
@@ -55,7 +49,6 @@ arrkind: varray, check: 1
 arrkind: darray, check: 1
 ---------------------- is_any_array ----------------
 arrkind: non-array, check: 0
-arrkind: array, check: 1
 arrkind: vec, check: 1
 arrkind: dict, check: 1
 arrkind: keyset, check: 1
@@ -64,7 +57,6 @@ arrkind: darray, check: 1
 ================= normal =============================
 ---------------------- is_array ----------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 1
 
 Notice: Hack Array Compat: is_array() called on vec in %s/hphp/test/slow/widen_is_array_with_logs.php on line 18
 arrkind: vec, check: 1
@@ -78,7 +70,6 @@ arrkind: varray, check: 1
 arrkind: darray, check: 1
 ---------------------- is_varray ---------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 0
 arrkind: vec, check: 0
 arrkind: dict, check: 0
 arrkind: keyset, check: 0
@@ -86,7 +77,6 @@ arrkind: varray, check: 1
 arrkind: darray, check: 0
 ---------------------- is_darray ---------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 0
 arrkind: vec, check: 0
 arrkind: dict, check: 0
 arrkind: keyset, check: 0
@@ -94,7 +84,6 @@ arrkind: varray, check: 0
 arrkind: darray, check: 1
 ---------------------- is_vec ------------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 0
 arrkind: vec, check: 1
 arrkind: dict, check: 0
 arrkind: keyset, check: 0
@@ -102,7 +91,6 @@ arrkind: varray, check: 0
 arrkind: darray, check: 0
 ---------------------- is_dict -----------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 0
 arrkind: vec, check: 0
 arrkind: dict, check: 1
 arrkind: keyset, check: 0
@@ -110,7 +98,6 @@ arrkind: varray, check: 0
 arrkind: darray, check: 0
 ---------------------- is_php_array ------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 1
 arrkind: vec, check: 0
 arrkind: dict, check: 0
 arrkind: keyset, check: 0
@@ -118,7 +105,6 @@ arrkind: varray, check: 1
 arrkind: darray, check: 1
 ---------------------- is_any_array ------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 1
 arrkind: vec, check: 1
 arrkind: dict, check: 1
 arrkind: keyset, check: 1
@@ -127,7 +113,6 @@ arrkind: darray, check: 1
 ================= dynamic =============================
 ---------------------- is_array ----------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 1
 
 Notice: Hack Array Compat: is_array() called on vec in %s/hphp/test/slow/widen_is_array_with_logs.php on line 40
 arrkind: vec, check: 1
@@ -141,7 +126,6 @@ arrkind: varray, check: 1
 arrkind: darray, check: 1
 ---------------------- is_varray ---------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 0
 arrkind: vec, check: 0
 arrkind: dict, check: 0
 arrkind: keyset, check: 0
@@ -149,7 +133,6 @@ arrkind: varray, check: 1
 arrkind: darray, check: 0
 ---------------------- is_darray ---------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 0
 arrkind: vec, check: 0
 arrkind: dict, check: 0
 arrkind: keyset, check: 0
@@ -157,7 +140,6 @@ arrkind: varray, check: 0
 arrkind: darray, check: 1
 ---------------------- is_vec ------------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 0
 arrkind: vec, check: 1
 arrkind: dict, check: 0
 arrkind: keyset, check: 0
@@ -165,7 +147,6 @@ arrkind: varray, check: 0
 arrkind: darray, check: 0
 ---------------------- is_dict -----------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 0
 arrkind: vec, check: 0
 arrkind: dict, check: 1
 arrkind: keyset, check: 0
@@ -173,7 +154,6 @@ arrkind: varray, check: 0
 arrkind: darray, check: 0
 ---------------------- is_php_array ------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 1
 arrkind: vec, check: 0
 arrkind: dict, check: 0
 arrkind: keyset, check: 0
@@ -181,7 +161,6 @@ arrkind: varray, check: 1
 arrkind: darray, check: 1
 ---------------------- is_any_array ------------------
 arrkind: non-array, check: 0
-arrkind: array, check: 1
 arrkind: vec, check: 1
 arrkind: dict, check: 1
 arrkind: keyset, check: 1

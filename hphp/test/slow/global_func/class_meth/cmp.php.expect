@@ -136,94 +136,79 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP 
 Test 9
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 
 Test 10
+bool(true)
+bool(true)
 bool(false)
+bool(true)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+bool(true)
 
+bool(true)
+bool(true)
 bool(false)
+bool(true)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+bool(true)
 
 Test 11
-bool(true)
-bool(true)
 bool(false)
-bool(true)
 bool(false)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
-bool(true)
-bool(true)
 bool(false)
-bool(true)
 bool(false)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 Test 12
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
 
 Test 13
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 
 Test 14
-bool(false)
-bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-
-bool(false)
-bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-
-Test 15
 bool(false)
 bool(false)
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
@@ -377,94 +362,79 @@ bool(false)
 Test 9
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
 
 Test 10
+bool(true)
+bool(true)
 bool(false)
+bool(true)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+bool(true)
 
+bool(true)
+bool(true)
 bool(false)
+bool(true)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a collection with an integer, double, string, array, or object
+bool(true)
 
 Test 11
-bool(true)
-bool(true)
 bool(false)
-bool(true)
 bool(false)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
-bool(true)
-bool(true)
 bool(false)
-bool(true)
 bool(false)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 
 Test 12
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
 
 Test 13
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
 
 Test 14
-bool(false)
-bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-
-bool(false)
-bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare dicts
-
-Test 15
 bool(false)
 bool(false)
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets

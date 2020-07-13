@@ -36,7 +36,6 @@ function getTestcase(int $num) {
     0.0, 1.0,
     "Array",
     HH\fun("wrap"),
-    __hhvm_intrinsics\dummy_cast_to_kindofarray(vec['A', 'func1']),
     Vector {'A', 'func1'},
     varray['A', 'func1'],
     vec['A', 'func1'],
@@ -48,7 +47,7 @@ function getTestcase(int $num) {
 }
 
 function comp_test($x) {
-  for ($i = 0; $i < 16; $i++) {
+  for ($i = 0; $i < 15; $i++) {
     print("Test ".$i."\n");
     comp($x, getTestcase($i));
     comp(getTestcase($i), $x);

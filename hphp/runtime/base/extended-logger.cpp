@@ -87,19 +87,22 @@ void ExtendedLogger::LogImpl(LogLevelType level, const std::string &msg) {
       auto growth = logger->log(level, msg, nullptr, true, writeBt);
       if (writeBt) {
         // escape the BT too as well as the log
-        growth.second += PrintStackTrace(stFile, bt, true);
+        auto stacktraceSize = PrintStackTrace(stFile, bt, true);
+        growth.serializedBytes += stacktraceSize;
+        growth.compressedBytes += stacktraceSize;
         FILE* tf = s_threadData.get()->log;
         if (tf && tf != stFile) {
           PrintStackTrace(tf, bt, true);
         }
       }
-      s_errorLines->addValue(growth.first);
-      s_errorBytes->addValue(growth.second);
+      s_errorLines->addValue(growth.lines);
+      s_errorSerializedBytes->addValue(growth.serializedBytes);
+      s_errorCompressedBytes->addValue(growth.compressedBytes);
     }
   }
 }
 
-std::pair<int, int> ExtendedLogger::log(LogLevelType level,
+LogGrowth ExtendedLogger::log(LogLevelType level,
                                         const std::string &msg,
                                         const StackTrace *stackTrace,
                                         bool escape /* = true */,
@@ -114,12 +117,14 @@ std::pair<int, int> ExtendedLogger::log(LogLevelType level,
   FILE* out = output();
   FILE* tf = s_threadData.get()->log;
   if (out) {
-    growth.second += PrintStackTrace(out, bt, escape);
+    auto stackTraceBytes = PrintStackTrace(out, bt, escape);
+    growth.compressedBytes += stackTraceBytes;
+    growth.serializedBytes += stackTraceBytes;
   }
   if (tf && tf != out) {
     PrintStackTrace(tf, bt, escape);
   }
-  return std::make_pair(growth.first, growth.second);
+  return growth;
 }
 
 const StaticString

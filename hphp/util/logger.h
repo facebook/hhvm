@@ -53,6 +53,17 @@ struct LoggerHook {
                           const char* ending) = 0;
 };
 
+struct LogGrowth {
+  LogGrowth(uint64_t lines, uint64_t serialized_bytes, uint64_t compressed_bytes)
+    : lines(lines)
+    , serializedBytes(serialized_bytes)
+    , compressedBytes(compressed_bytes)
+  {}
+  uint64_t lines;
+  uint64_t serializedBytes;
+  uint64_t compressedBytes;
+};
+
 struct Logger {
   enum LogLevelType {
     LogNone,
@@ -154,13 +165,15 @@ protected:
   friend struct ExtendedLogger;
 
   // For subclasses to override, e.g., to support injected stack trace.
-  // Returns (lines, bytes) it's going to output. Used for monitoring growth.
-  virtual std::pair<int, int> log(LogLevelType level, const std::string& msg,
+  // Returns LogGrowth it's going to output. Used for monitoring growth.
+  virtual LogGrowth log(LogLevelType level, const std::string& msg,
                                   const StackTrace* stackTrace,
                                   bool escape = false, bool escapeMore = false);
   // Intended for subclass of loggers that batch.
   // Returns (lines, bytes) it's going to output. Used for monitoring growth.
-  virtual std::pair<int, int> flush() { return std::make_pair(0, 0); }
+  virtual LogGrowth flush() {
+    return LogGrowth(0, 0, 0);
+  }
 
   virtual void setBatchSize(size_t /*bsize*/) {}
 
@@ -185,9 +198,10 @@ protected:
   Cronolog m_cronOutput;
   LogFileFlusher m_flusher;
   static std::map<std::string, Logger*> s_loggers;
-  // bytes and lines the DEFAULT logger has written
+  // serialized/compressed bytes and lines the DEFAULT logger has written
   static ServiceData::ExportedCounter* s_errorLines;
-  static ServiceData::ExportedCounter* s_errorBytes;
+  static ServiceData::ExportedCounter* s_errorSerializedBytes;
+  static ServiceData::ExportedCounter* s_errorCompressedBytes;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

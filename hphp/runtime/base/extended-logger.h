@@ -50,7 +50,7 @@ private:
 
   static std::string StringOfFrame(const Array& frame, int i,
                                    bool escape = false);
-  std::pair<int, int> log(LogLevelType level, const std::string &msg,
+  LogGrowth log(LogLevelType level, const std::string &msg,
                           const StackTrace *stackTrace,
                           bool escape = true, bool escapeMore = false) override;
   static int PrintStackTrace(FILE *f, const Array& stackTrace,

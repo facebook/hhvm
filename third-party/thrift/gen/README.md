@@ -19,7 +19,6 @@ rm -rf cpp2 thrift
 mkdir thrift
 # Don't use /home/install/... as those are only the .h files, and we need the .cpp too
 docker cp $CONTAINER_ID:/home/fbthrift/thrift/thrift/lib/thrift/gen-cpp2/ thrift/gen-cpp2
-docker cp $CONTAINER_ID:/home/fbthrift/thrift/thrift/lib/cpp2/ cpp2
 ```
 
 Assuming you're rebuilding and retesting, re-run cmake so that the glob patterns used to

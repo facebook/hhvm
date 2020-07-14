@@ -605,14 +605,11 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     ${libraryName} STREQUAL "lz4" OR
     ${libraryName} STREQUAL "mbfl" OR
     ${libraryName} STREQUAL "mcrouter" OR
-    ${libraryName} STREQUAL "mysql" OR
     ${libraryName} STREQUAL "oniguruma" OR
     ${libraryName} STREQUAL "openssl" OR
     ${libraryName} STREQUAL "pcre" OR
     ${libraryName} STREQUAL "readline" OR
     ${libraryName} STREQUAL "sqlite" OR
-    ${libraryName} STREQUAL "squangle" OR
-    ${libraryName} STREQUAL "webscalesql" OR
     ${libraryName} STREQUAL "zip" OR
     ${libraryName} STREQUAL "zlib"
   )
@@ -906,6 +903,10 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBMEMCACHED_LIBRARY})
       HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBMEMCACHED")
     endif()
+  elseif (${libraryName} STREQUAL "mysql")
+    HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(fbmysqlclient)
+    MYSQL_SOCKET_SEARCH()
+    HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DPHP_MYSQL_UNIX_SOCK_ADDR=\"${MYSQL_UNIX_SOCK_ADDR}\"")
   elseif (${libraryName} STREQUAL "pgsql")
     FIND_PATH(PGSQL_INCLUDE_DIR NAMES libpq-fe.h
       PATHS
@@ -956,6 +957,8 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${SNAPPY_INCLUDE_DIRS})
       HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${SNAPPY_LIBRARIES})
     endif()
+  elseif (${libraryName} STREQUAL "squangle")
+    HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(squangle)
   elseif (${libraryName} STREQUAL "vpx")
     find_package(LibVpx ${requiredVersion})
     if (NOT LIBVPX_INCLUDE_DIRS OR NOT LIBVPX_LIBRARIES)

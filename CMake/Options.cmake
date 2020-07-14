@@ -27,7 +27,6 @@ option(ENABLE_TRACE "Enable tracing in release build" OFF)
 option(CPACK_GENERATOR "Enable build of distribution packages using CPack" OFF)
 
 option(ENABLE_COTIRE "Speed up the build by precompiling headers" OFF)
-option(ENABLE_ASYNC_MYSQL "Build the async_mysql extension" ON)
 if (APPLE)
   option(ENABLE_MCROUTER "Build the mcrouter library and extension" OFF)
 else()

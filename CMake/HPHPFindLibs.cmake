@@ -40,17 +40,6 @@ if (LIBINOTIFY_INCLUDE_DIR)
   include_directories(${LIBINOTIFY_INCLUDE_DIR})
 endif()
 
-MYSQL_SOCKET_SEARCH()
-if (MYSQL_UNIX_SOCK_ADDR)
-  add_definitions(-DPHP_MYSQL_UNIX_SOCK_ADDR="${MYSQL_UNIX_SOCK_ADDR}")
-else ()
-  message(FATAL_ERROR "Could not find MySQL socket path - if you install a MySQL server, this should be automatically detected. Alternatively, specify -DMYSQL_UNIX_SOCK_ADDR=/path/to/mysql.socket ; if you don't care about unix socket support for MySQL, specify -DMYSQL_UNIX_SOCK_ADDR=/dev/null")
-endif ()
-
-if (ENABLE_ASYNC_MYSQL)
-  add_definitions(-DENABLE_ASYNC_MYSQL=1)
-endif ()
-
 # pcre checks
 find_package(PCRE)
 include_directories(${PCRE_INCLUDE_DIR})
@@ -374,10 +363,6 @@ macro(hphp_link target)
   add_dependencies(${target} libsodiumMaybeBuild)
   target_link_libraries(${target} libsodium)
 
-  target_link_libraries(${target} mysqlclient)
-  if (ENABLE_ASYNC_MYSQL)
-    target_link_libraries(${target} squangle)
-  endif()
   target_link_libraries(${target} ${PCRE_LIBRARY})
   target_link_libraries(${target} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
   target_link_libraries(${target} ${LIBEVENT_LIB})

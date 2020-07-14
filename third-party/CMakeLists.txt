@@ -90,14 +90,12 @@ add_subdirectory(lz4)
 
 # fb-mysql must go after lz4 because it needs to know its <INSTALL_DIR>
 add_subdirectory(fb-mysql)
-if(ENABLE_ASYNC_MYSQL)
-  find_package(RE2)
-  if(NOT RE2_LIBRARY)
-    message(STATUS "Building RE2 from third-party")
-    add_subdirectory(re2)
-  endif()
-  add_subdirectory(squangle)
+find_package(RE2)
+if(NOT RE2_LIBRARY)
+  message(STATUS "Building RE2 from third-party")
+  add_subdirectory(re2)
 endif()
+add_subdirectory(squangle)
 
 if (ENABLE_MCROUTER)
   # Ragel is only used at build time to generate some files for MCRouter.

@@ -886,7 +886,7 @@ val to_string : ?indent:bool -> Pos.absolute error_ -> string
 
 val to_contextual_string : Pos.absolute error_ -> string
 
-val format_header_highlighted : int -> string -> string
+val format_claim_highlighted : int -> ?marker:int -> string -> string
 
 val to_highlighted_string : Pos.absolute error_ -> string
 

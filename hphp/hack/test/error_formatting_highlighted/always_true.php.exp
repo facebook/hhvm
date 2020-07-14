@@ -1,9 +1,9 @@
-Typing[4151] This expression is always true
- -> This is a varray and cannot be null
+Typing[4151] This expression is always true [1]
+ -> This is a varray and cannot be null [2]
 
 always_true.php:4:60
-4 |   if (null !== $arg) {
+    4 |   if (null !== $arg) {
 always_true.php:3:29
-3 | function foo(array<int> $arg): void {
+    3 | function foo(array<int> $arg): void {
 
 1 error found.

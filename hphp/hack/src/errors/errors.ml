@@ -625,13 +625,19 @@ let to_contextual_string (error : Pos.absolute error_) : string =
   Buffer.add_string buf "\n";
   Buffer.contents buf
 
-let format_header_highlighted error_code msg : string =
+let format_claim_highlighted error_code ?marker msg : string =
+  let suffix =
+    match marker with
+    | None -> ""
+    | Some m -> Printf.sprintf " [%d]" m
+  in
   let error_code = error_code_to_string error_code in
-  Printf.sprintf "%s %s" error_code msg
+  Printf.sprintf "%s %s%s" error_code msg suffix
 
-let format_reason_highlighted msg : string = Printf.sprintf " -> %s" msg
+let format_reason_highlighted (marker, msg) : string =
+  Printf.sprintf " -> %s [%d]" (snd msg) marker
 
-let format_context_highlighted (pos : Pos.absolute) col_width =
+let format_context_highlighted pos _pos_to_markers col_width =
   let relative_path path =
     let cwd = Filename.concat (Sys.getcwd ()) "" in
     lstrip path cwd
@@ -644,12 +650,10 @@ let format_context_highlighted (pos : Pos.absolute) col_width =
   let pretty_ctx = format_context_lines pos context_lines col_width in
   line_info ^ "\n" ^ pretty_ctx
 
-(* The eventual goal of this is to determine the size of the
-   column, which will precede the " |" before each code context.
-   It will need to use both number of characters in the largest
-   line number that will be displayed in this error as well as
-   length of the largest list containing indicators that will
-   precede the line.
+(* The column size will be the length of the largest prefix before
+   the " |", which is composed of the list of markers, a space, and
+   the line number. The column size will be the same for all messages
+   in this error, regardless of file, so that they are all aligned.
 
    For example:
     overlap_pos.php:4:10
@@ -661,42 +665,74 @@ let format_context_highlighted (pos : Pos.absolute) col_width =
           13 |
 
     The length of the column is the length of "[1,3] 11" = 8
-   *)
-let col_width_for_highlighted msgl =
-  (* For now, just get largest line referenced *)
-  let len_of_largest_line =
+*)
+let format_all_contexts_highlighted
+    (marker_and_msgs : (int * Pos.absolute message) list) =
+  let msgl = List.map ~f:snd marker_and_msgs in
+  let largest_line_length =
     List.fold msgl ~init:0 ~f:(fun curr_max (pos, _) ->
         let line = Pos.line pos in
         max curr_max (num_digits line))
   in
-  len_of_largest_line
+  (* Need a way to compare absolute positions *)
+  let pos_cmp p1 p2 =
+    match String.compare (Pos.filename p1) (Pos.filename p2) with
+    | 0 -> Int.compare (Pos.line p1) (Pos.line p2)
+    | _ -> 0
+  in
+  let unique_pos = List.map msgl fst |> List.dedup_and_sort ~compare:pos_cmp in
+  let pos_to_prefix pos =
+    let markers =
+      List.filter marker_and_msgs ~f:(fun (_, (p, _)) -> pos_cmp pos p = 0)
+      |> List.map ~f:(fun (marker, _) -> string_of_int marker)
+    in
+    let prefix = Printf.sprintf "[%s]" (String.concat ~sep:"," markers) in
+    prefix
+  in
+  let max_marker_prefix_length =
+    List.fold unique_pos ~init:0 ~f:(fun accum pos ->
+        let len = String.length (pos_to_prefix pos) in
+        max len accum)
+  in
+  let col_width = max_marker_prefix_length + 1 + largest_line_length in
+  let contexts =
+    List.map msgl (fun (p, _) ->
+        format_context_highlighted p pos_to_prefix col_width)
+  in
+  String.concat ~sep:"\n" contexts ^ "\n\n"
 
 let to_highlighted_string (error : Pos.absolute error_) : string =
   let (error_code, msgl) = (get_code error, to_list error) in
   let buf = Buffer.create 50 in
-  (match msgl with
-  | [] -> failwith "Impossible: an error always has non-empty list of messages"
-  | (_pos1, msg1) :: rest ->
-    (* Handle the first and rest of the messages separately when printing the
-      reasons, so we can highlight the first message (the main claim) specially
-      which includes the type error. Then print the contexts for all them.
+  let marker_and_msgs = List.mapi msgl ~f:(fun i m -> (i + 1, m)) in
 
-      header: e.g. 'Typing[4110] Invalid return type'
-      reasons: list of e.g. '-> Expected int'
-      contexts: list of e.g. 'foo/a.php:3:2\n 3 | return "hello";'
-      *)
-    let header = format_header_highlighted error_code msg1 in
-    let reasons = List.map rest (fun (_, w) -> format_reason_highlighted w) in
-    let col_width = col_width_for_highlighted msgl in
-    let contexts =
-      List.map msgl (fun (p, _) -> format_context_highlighted p col_width)
-    in
+  (* Typing[4110] Invalid return type [1]   <claim>
+      -> Expected int [2]                   <reasons>
+      -> But got string [3]                 <reasons>
+  *)
+  let (claim, reasons) =
+    match marker_and_msgs with
+    | (marker, (_, msg)) :: msgs ->
+      ( format_claim_highlighted error_code ~marker msg,
+        List.map msgs format_reason_highlighted )
+    | [] ->
+      failwith "Impossible: an error always has non-empty list of messages"
+  in
 
-    Buffer.add_string buf (header ^ "\n");
-    if not (List.is_empty reasons) then
-      Buffer.add_string buf (String.concat ~sep:"\n" reasons ^ "\n");
-    Buffer.add_string buf "\n";
-    Buffer.add_string buf (String.concat ~sep:"\n" contexts ^ "\n\n"));
+  (* overlap_pos.php:4:10
+          1 | <?hh
+          2 |
+    [2]   3 | function returns_int(): int {
+    [1,3] 4 |   return 'foo';
+          5 | }
+  *)
+  let all_context = format_all_contexts_highlighted marker_and_msgs in
+
+  Buffer.add_string buf (claim ^ "\n");
+  if not (List.is_empty reasons) then
+    Buffer.add_string buf (String.concat ~sep:"\n" reasons ^ "\n");
+  Buffer.add_string buf "\n";
+  Buffer.add_string buf all_context;
   Buffer.contents buf
 
 let to_absolute_for_test error =

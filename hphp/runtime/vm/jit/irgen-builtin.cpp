@@ -1640,11 +1640,7 @@ SSATmp* maybeCoerceValue(
   return bail();
 }
 
-StaticString
-  s_varray("varray"),
-  s_darray("darray"),
-  s_varray_or_darray("varray_or_darray"),
-  s_array("array");
+StaticString s_varray_or_darray("varray_or_darray");
 
 /*
  * Prepare the actual arguments to the CallBuiltin instruction, by converting a
@@ -1665,8 +1661,6 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
   auto const genFail = [&](uint32_t param, SSATmp* val) {
     auto const expected_type = [&]{
       auto const& tc = callee->params()[param].typeConstraint;
-      if (tc.isVArray()) return s_varray.get();
-      if (tc.isDArray()) return s_darray.get();
       if (tc.isVArrayOrDArray()) return s_varray_or_darray.get();
       auto const dt = param_target_type(callee, param) - TNull;
       return getDataTypeString(dt.toDataType()).get();

@@ -408,9 +408,9 @@ StaticString getDataTypeString(DataType t) {
     case KindOfPersistentKeyset:
     case KindOfKeyset:     return s_keyset;
     case KindOfPersistentDArray:
-    case KindOfDArray:     return s_array;
+    case KindOfDArray:     return s_darray;
     case KindOfPersistentVArray:
-    case KindOfVArray:     return s_array;
+    case KindOfVArray:     return s_varray;
     case KindOfPersistentArray:
     case KindOfArray:      return s_array;
     case KindOfObject:     return s_object;

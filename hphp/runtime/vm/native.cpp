@@ -350,8 +350,6 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
 
     auto const raise_type_error = [&]{
       auto const expected_type = [&]{
-        if (tc.isVArray()) return "varray";
-        if (tc.isDArray()) return "darray";
         if (tc.isVArrayOrDArray()) return "varray_or_darray";
         return getDataTypeString(*targetType).data();
       }();

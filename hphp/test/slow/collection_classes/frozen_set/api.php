@@ -140,6 +140,7 @@ function static_methods() {
 
   echo "\nfromArrays...\n";
   show_elems(ImmSet::fromArrays(varray[], varray[1, 2, 3], varray[4, 5, 6]));
+  show_elems(ImmSet::fromArrays(vec[], vec[1, 2, 3], vec[4, 5, 6]));
 }
 
 function constructors() {

@@ -461,8 +461,8 @@ final class Set implements \MutableSet {
     if (!$argv) return \HH\Set {};
     $ret = \HH\Set {};
     foreach ($argv as $arr) {
-      if (!\is_array($arr)) {
-        throw new \InvalidArgumentException("Parameters must be arrays");
+      if (!\HH\is_any_array($arr)) {
+        throw new \InvalidArgumentException("Parameters must be array-likes");
       }
       $ret->addAll($arr);
     }
@@ -800,8 +800,8 @@ final class ImmSet implements \ConstSet {
     if (!$argv) return \HH\ImmSet {};
     $ret = \HH\Set {};
     foreach ($argv as $arr) {
-      if (!\is_array($arr)) {
-        throw new \InvalidArgumentException("Parameters must be arrays");
+      if (!\HH\is_any_array($arr)) {
+        throw new \InvalidArgumentException("Parameters must be array-likes");
       }
       $ret->addAll($arr);
     }

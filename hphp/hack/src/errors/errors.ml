@@ -625,19 +625,37 @@ let to_contextual_string (error : Pos.absolute error_) : string =
   Buffer.add_string buf "\n";
   Buffer.contents buf
 
-let format_claim_highlighted error_code ?marker msg : string =
-  let suffix =
-    match marker with
-    | None -> ""
-    | Some m -> Printf.sprintf " [%d]" m
+let line_margin_highlighted line_num (markers_prefix : string option) col_width
+    : string =
+  let padded_num =
+    match markers_prefix with
+    | Some ms ->
+      Printf.sprintf "%s%*d" ms (col_width - String.length ms) line_num
+    | None -> Printf.sprintf "%*d" col_width line_num
   in
-  let error_code = error_code_to_string error_code in
-  Printf.sprintf "%s %s%s" error_code msg suffix
+  padded_num ^ " |"
 
-let format_reason_highlighted (marker, msg) : string =
-  Printf.sprintf " -> %s [%d]" (snd msg) marker
+let format_context_lines_highlighted
+    ~(pos : Pos.absolute)
+    ~(lines : string list)
+    ~(markers_prefix : string)
+    ~(col_width : int) : string =
+  let lines =
+    match lines with
+    | [] -> ["No source found"]
+    | ls -> ls
+  in
+  let line_num = Pos.line pos in
+  let format_line i (line : string) =
+    Printf.sprintf
+      "%s %s"
+      (line_margin_highlighted (line_num + i) (Some markers_prefix) col_width)
+      line
+  in
+  let formatted_lines = List.mapi ~f:format_line lines in
+  String.concat ~sep:"\n" formatted_lines
 
-let format_context_highlighted pos _pos_to_markers col_width =
+let format_context_highlighted pos markers_prefix col_width =
   let relative_path path =
     let cwd = Filename.concat (Sys.getcwd ()) "" in
     lstrip path cwd
@@ -646,8 +664,10 @@ let format_context_highlighted pos _pos_to_markers col_width =
   let line = Pos.line pos in
   let col = Pos.start_cnum pos in
   let line_info = Printf.sprintf "%s:%d:%d" filename line col in
-  let context_lines = load_context_lines pos in
-  let pretty_ctx = format_context_lines pos context_lines col_width in
+  let lines = load_context_lines pos in
+  let pretty_ctx =
+    format_context_lines_highlighted ~pos ~lines ~markers_prefix ~col_width
+  in
   line_info ^ "\n" ^ pretty_ctx
 
 (* The column size will be the length of the largest prefix before
@@ -696,10 +716,22 @@ let format_all_contexts_highlighted
   in
   let col_width = max_marker_prefix_length + 1 + largest_line_length in
   let contexts =
-    List.map msgl (fun (p, _) ->
-        format_context_highlighted p pos_to_prefix col_width)
+    List.map unique_pos (fun p ->
+        format_context_highlighted p (pos_to_prefix p) col_width)
   in
   String.concat ~sep:"\n" contexts ^ "\n\n"
+
+let format_claim_highlighted error_code ?marker msg : string =
+  let suffix =
+    match marker with
+    | None -> ""
+    | Some m -> Printf.sprintf " [%d]" m
+  in
+  let error_code = error_code_to_string error_code in
+  Printf.sprintf "%s %s%s" error_code msg suffix
+
+let format_reason_highlighted (marker, msg) : string =
+  Printf.sprintf " -> %s [%d]" (snd msg) marker
 
 let to_highlighted_string (error : Pos.absolute error_) : string =
   let (error_code, msgl) = (get_code error, to_list error) in

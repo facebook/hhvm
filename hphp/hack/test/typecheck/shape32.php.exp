@@ -1,4 +1,4 @@
 File "shape32.php", line 9, characters 16-18:
-Unexpected typedef (Naming[2052])
+Expected a class but got a type alias. (Naming[2052])
 File "shape32.php", line 7, characters 6-8:
-Definition is here
+Alias definition is here.

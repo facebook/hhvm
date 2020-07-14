@@ -118,7 +118,7 @@ let check_type_name
           let (full_pos, _) =
             Naming_global.GEnv.get_full_pos env.ctx (def_pos, name)
           in
-          Errors.unexpected_typedef pos full_pos
+          Errors.unexpected_typedef pos full_pos kind
         | Some _ -> ()
         | None ->
           if

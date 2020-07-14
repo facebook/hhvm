@@ -286,6 +286,14 @@ let phase_of_string (value : string) : phase option =
   | "typing" -> Some Typing
   | _ -> None
 
+let (name_context_to_string : name_context -> string) = function
+  | FunctionNamespace -> "function"
+  | ConstantNamespace -> "constant"
+  | TypeNamespace -> "type"
+  | TraitContext -> "trait"
+  | ClassContext -> "class"
+  | RecordContext -> "record"
+
 let get_message (error : error) =
   (* We get the position of the first item in the message error list, which
     represents the location of the error (error claim). Other messages represent
@@ -1381,10 +1389,14 @@ let already_bound pos name =
     pos
     ("Argument already bound: " ^ name)
 
-let unexpected_typedef pos def_pos =
+let unexpected_typedef pos def_pos expected_kind =
+  let expected_type = name_context_to_string expected_kind in
   add_list
     (Naming.err_code Naming.UnexpectedTypedef)
-    [(pos, "Unexpected typedef"); (def_pos, "Definition is here")]
+    [
+      (pos, Printf.sprintf "Expected a %s but got a type alias." expected_type);
+      (def_pos, "Alias definition is here.");
+    ]
 
 let mk_fd_name_already_bound pos =
   ( Naming.err_code Naming.FdNameAlreadyBound,

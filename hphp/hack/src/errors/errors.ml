@@ -627,18 +627,43 @@ let to_contextual_string (error : Pos.absolute error_) : string =
 
 let format_header_highlighted error_code msg : string =
   let error_code = error_code_to_string error_code in
-  Printf.sprintf "%s %s\n" error_code msg
+  Printf.sprintf "%s %s" error_code msg
+
+let format_reason_highlighted msg : string = Printf.sprintf " -> %s" msg
+
+let format_context_highlighted (pos : Pos.absolute) =
+  let relative_path path =
+    let cwd = Filename.concat (Sys.getcwd ()) "" in
+    lstrip path cwd
+  in
+  let filename = relative_path (Pos.filename pos) in
+  let line = Pos.line pos in
+  let col = Pos.start_cnum pos in
+  Printf.sprintf "%s:%d:%d" filename line col
 
 let to_highlighted_string (error : Pos.absolute error_) : string =
   let (error_code, msgl) = (get_code error, to_list error) in
   let buf = Buffer.create 50 in
   (match msgl with
   | [] -> failwith "Impossible: an error always has non-empty list of messages"
-  | (_pos1, msg1) :: rest_of_error ->
-    Buffer.add_string buf (format_header_highlighted error_code msg1);
-    List.iter rest_of_error (fun (_p, w) ->
-        let msg = Printf.sprintf "%s\n" w in
-        Buffer.add_string buf msg));
+  | (_pos1, msg1) :: rest ->
+    (* Handle the first and rest of the messages separately when printing the
+      reasons, so we can highlight the first message (the main claim) specially
+      and include the type error. Then print the contexts for all them.
+
+      header: e.g. 'Typing[4110] Invalid return type'
+      reasons: list of e.g. '-> Expected int'
+      contexts: list of e.g. 'foo/a.php:3:2'
+      *)
+    let header = format_header_highlighted error_code msg1 in
+    let reasons = List.map rest (fun (_, w) -> format_reason_highlighted w) in
+    let contexts = List.map msgl (fun (p, _) -> format_context_highlighted p) in
+
+    Buffer.add_string buf (header ^ "\n");
+    if not (List.is_empty reasons) then
+      Buffer.add_string buf (String.concat ~sep:"\n" reasons ^ "\n");
+    Buffer.add_string buf "\n";
+    Buffer.add_string buf (String.concat ~sep:"\n" contexts ^ "\n\n"));
   Buffer.contents buf
 
 let to_absolute_for_test error =

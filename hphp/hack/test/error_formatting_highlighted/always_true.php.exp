@@ -1,3 +1,7 @@
 Typing[4151] This expression is always true
-This is a varray and cannot be null
+ -> This is a varray and cannot be null
+
+always_true.php:4:60
+always_true.php:3:29
+
 1 error found.

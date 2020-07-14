@@ -1,4 +1,11 @@
 Typing[4105] Too many arguments (expected 0 but got 1)
-Definition is here
+ -> Definition is here
+
+messages_same_line.php:3:57
+messages_same_line.php:3:25
+
 Typing[4030] Was expecting a return type hint
+
+messages_same_line.php:3:49
+
 2 errors found.

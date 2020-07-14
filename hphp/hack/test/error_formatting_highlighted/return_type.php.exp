@@ -1,4 +1,9 @@
 Typing[4110] Invalid return type
-Expected int
-But got string
+ -> Expected int
+ -> But got string
+
+return_type.php:4:35
+return_type.php:3:20
+return_type.php:4:35
+
 1 error found.

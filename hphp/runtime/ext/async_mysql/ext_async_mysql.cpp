@@ -1274,6 +1274,20 @@ static String HHVM_METHOD(AsyncMysqlQueryResult, recvGtid) {
   return String(data->m_query_result->recvGtid(), CopyString);
 }
 
+static Object HHVM_METHOD(AsyncMysqlQueryResult, responseAttributes) {
+  auto ret = req::make<c_Map>();
+
+  #ifdef FACEBOOK
+  auto* data = Native::data<AsyncMysqlQueryResult>(this_);
+  const auto& responseAttributes = data->m_query_result->responseAttributes();
+  for (const auto& [key, value] : responseAttributes) {
+    ret->set(key, value);
+  }
+  #endif
+
+  return Object{std::move(ret)};
+}
+
 namespace {
 Variant buildTypedValue(const am::RowFields* row_fields,
                         const am::Row& row,
@@ -1796,7 +1810,13 @@ static const int64_t DISABLE_COPY_AND_SWEEP = Native::NDIFlags::NO_COPY |
   Native::NDIFlags::NO_SWEEP;
 
 static struct AsyncMysqlExtension final : Extension {
-  AsyncMysqlExtension() : Extension("async_mysql") {}
+  // Since hhvm (and thereby the extension) is on a one-week release cycle
+  // whereas www release is continuous, for forward compatibility, any future
+  // modification of the extension that requires client (www) changes should
+  // bump the version number and use a version guard in www:
+  //   $ext = new ReflectionExtension("async_mysql");
+  //   $version = (float) $ext->getVersion();
+  AsyncMysqlExtension() : Extension("async_mysql", "1.0") {}
   void moduleInit() override {
     // expose the mysql flags
     HHVM_RC_INT_SAME(NOT_NULL_FLAG);
@@ -1924,6 +1944,7 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlQueryResult, rowBlocks);
     HHVM_ME(AsyncMysqlQueryResult, noIndexUsed);
     HHVM_ME(AsyncMysqlQueryResult, recvGtid);
+    HHVM_ME(AsyncMysqlQueryResult, responseAttributes);
     Native::registerNativeDataInfo<AsyncMysqlQueryResult>(
       AsyncMysqlQueryResult::s_className.get(), Native::NDIFlags::NO_COPY);
 

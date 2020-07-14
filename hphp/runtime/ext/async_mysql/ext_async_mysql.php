@@ -1243,6 +1243,14 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    */
   <<__HipHopSpecific, __Native>>
   public function recvGtid(): string;
+
+  /**
+   * The response attributes returned for the current query
+   *
+   * @return - A Map<string, string> of the response attributes from MySQL
+   */
+  <<__HipHopSpecific, __Native>>
+  public function responseAttributes(): Map;
 }
 
 /**

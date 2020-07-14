@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/repo.h"
@@ -345,6 +346,8 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("compiler-id", "display the git hash for the compiler id")
     ("repo-schema", "display the repo schema id used by this app")
     ;
+
+  ARRPROV_USE_RUNTIME_LOCATION_FORCE();
 
   positional_options_description p;
   p.add("inputs", -1);

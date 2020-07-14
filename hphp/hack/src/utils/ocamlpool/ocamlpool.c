@@ -3,6 +3,8 @@
 #include "ocamlpool.h"
 #include <caml/version.h>
 
+#include <stdio.h>
+
 #if OCAML_VERSION < 40700
 
 extern value *caml_young_ptr;
@@ -59,9 +61,18 @@ value *ocamlpool_limit = 0, *ocamlpool_cursor = 0, *ocamlpool_bound = 0;
  * and that the API is used correctly.
  */
 
-static void abort_unless(int x)
+static void abort_unless(int x, const char* message)
 {
-  if (!x) abort();
+  if (!x)
+  {
+    fprintf(
+      stderr,
+      "OCamlPool invariant violation (%d): %s\n",
+    x,
+    message
+  );
+    abort();
+  }
 }
 
 #define WORD_SIZE (sizeof(void*))
@@ -69,14 +80,14 @@ static void abort_unless(int x)
 
 #ifndef OCAMLPOOL_NO_ASSERT
 
-static void ocamlpool_assert(int x)
+static void ocamlpool_assert(int x, const char* message)
 {
-  abort_unless(x);
+  abort_unless(x, message);
 }
 
 #else
 
-static void ocamlpool_assert(int x)
+static void ocamlpool_assert(int x, const char* message)
 {
   (void)x;
 }
@@ -86,12 +97,13 @@ static void ocamlpool_assert(int x)
 static void assert_in_section(void)
 {
   ocamlpool_assert(ocamlpool_in_section == 1 &&
-                   ocamlpool_sane_young_ptr == caml_young_ptr);
+                   ocamlpool_sane_young_ptr == caml_young_ptr,
+                   "assert_in_section");
 }
 
 static void assert_out_of_section(void)
 {
-  ocamlpool_assert(ocamlpool_in_section == 0);
+  ocamlpool_assert(ocamlpool_in_section == 0, "assert_out_of_section");
 }
 
 #define OCAMLPOOL_SET_HEADER(v, size, tag, color) \
@@ -121,7 +133,9 @@ static void ocamlpool_chunk_alloc(void);
 static void ocamlpool_chunk_truncate(void)
 {
   if (ocamlpool_root == Val_unit)
+  {
     return;
+  }
 
   size_t word_size = (value*)ocamlpool_cursor - (value*)ocamlpool_root;
 
@@ -205,7 +219,7 @@ size_t ocamlpool_get_next_chunk_size(void)
 
 void ocamlpool_set_next_chunk_size(size_t sz)
 {
-  abort_unless(IS_WORD_ALIGNED(sz));
+  abort_unless(IS_WORD_ALIGNED(sz), "ocamlpool_set_next_chunk_size");
   ocamlpool_next_chunk_size = sz;
 }
 
@@ -220,12 +234,12 @@ void ocamlpool_chunk_release(void)
 
 static void ocamlpool_chunk_alloc(void)
 {
-  ocamlpool_assert(ocamlpool_next_chunk_size > 1);
+  ocamlpool_assert(ocamlpool_next_chunk_size > 1, "ocamlpool_chunk_alloc: next chunk size > 1");
   void *block = caml_alloc_for_heap(ocamlpool_next_chunk_size * WORD_SIZE);
-  abort_unless(block != NULL);
+  abort_unless(block != NULL, "ocamlpool_chunk_alloc");
 
   size_t chunk_size = Chunk_size(block);
-  ocamlpool_assert(IS_WORD_ALIGNED(chunk_size));
+  ocamlpool_assert(IS_WORD_ALIGNED(chunk_size), "ocamlpool_chunk_alloc: is word-aligned");
 
   ocamlpool_color = caml_allocation_color(block);
   ocamlpool_allocated_chunks_counter += 1;
@@ -260,7 +274,7 @@ value ocamlpool_reserve_block(int tag, size_t words)
     ocamlpool_chunk_alloc();
     ocamlpool_next_chunk_size = old_ocamlpool_next_chunk_size;
     pointer = ocamlpool_cursor - size;
-    abort_unless(pointer >= ocamlpool_limit);
+    abort_unless(pointer >= ocamlpool_limit, "ocamlpool_reserve_block");
   }
 
   ocamlpool_cursor = pointer;

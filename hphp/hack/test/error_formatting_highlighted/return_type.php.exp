@@ -3,7 +3,10 @@ Typing[4110] Invalid return type
  -> But got string
 
 return_type.php:4:35
+4 |   return "hello";
 return_type.php:3:20
+3 | function f(): int {
 return_type.php:4:35
+4 |   return "hello";
 
 1 error found.

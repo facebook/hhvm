@@ -465,9 +465,9 @@ let format_filename (pos : Pos.absolute) : string =
     (Tty.apply_color (Tty.Normal Tty.Cyan) "-->")
     (Tty.apply_color (Tty.Normal Tty.Green) filename)
 
-let column_width line_number =
-  let num_digits x = int_of_float (Float.log10 (float_of_int x)) + 1 in
-  max 3 (num_digits line_number)
+let num_digits x = int_of_float (Float.log10 (float_of_int x)) + 1
+
+let column_width line_number = max 3 (num_digits line_number)
 
 (* Format the line of code associated with this message, and the message itself. *)
 let format_message (msg : string) (pos : Pos.absolute) ~is_first ~col_width :
@@ -631,7 +631,7 @@ let format_header_highlighted error_code msg : string =
 
 let format_reason_highlighted msg : string = Printf.sprintf " -> %s" msg
 
-let format_context_highlighted (pos : Pos.absolute) =
+let format_context_highlighted (pos : Pos.absolute) col_width =
   let relative_path path =
     let cwd = Filename.concat (Sys.getcwd ()) "" in
     lstrip path cwd
@@ -639,7 +639,37 @@ let format_context_highlighted (pos : Pos.absolute) =
   let filename = relative_path (Pos.filename pos) in
   let line = Pos.line pos in
   let col = Pos.start_cnum pos in
-  Printf.sprintf "%s:%d:%d" filename line col
+  let line_info = Printf.sprintf "%s:%d:%d" filename line col in
+  let context_lines = load_context_lines pos in
+  let pretty_ctx = format_context_lines pos context_lines col_width in
+  line_info ^ "\n" ^ pretty_ctx
+
+(* The eventual goal of this is to determine the size of the
+   column, which will precede the " |" before each code context.
+   It will need to use both number of characters in the largest
+   line number that will be displayed in this error as well as
+   length of the largest list containing indicators that will
+   precede the line.
+
+   For example:
+    overlap_pos.php:4:10
+           8 |
+           9 |
+    [2]   10 | function returns_int(): int {
+    [1,3] 11 |   return 'foo';
+          12 | }
+          13 |
+
+    The length of the column is the length of "[1,3] 11" = 8
+   *)
+let col_width_for_highlighted msgl =
+  (* For now, just get largest line referenced *)
+  let len_of_largest_line =
+    List.fold msgl ~init:0 ~f:(fun curr_max (pos, _) ->
+        let line = Pos.line pos in
+        max curr_max (num_digits line))
+  in
+  len_of_largest_line
 
 let to_highlighted_string (error : Pos.absolute error_) : string =
   let (error_code, msgl) = (get_code error, to_list error) in
@@ -649,15 +679,18 @@ let to_highlighted_string (error : Pos.absolute error_) : string =
   | (_pos1, msg1) :: rest ->
     (* Handle the first and rest of the messages separately when printing the
       reasons, so we can highlight the first message (the main claim) specially
-      and include the type error. Then print the contexts for all them.
+      which includes the type error. Then print the contexts for all them.
 
       header: e.g. 'Typing[4110] Invalid return type'
       reasons: list of e.g. '-> Expected int'
-      contexts: list of e.g. 'foo/a.php:3:2'
+      contexts: list of e.g. 'foo/a.php:3:2\n 3 | return "hello";'
       *)
     let header = format_header_highlighted error_code msg1 in
     let reasons = List.map rest (fun (_, w) -> format_reason_highlighted w) in
-    let contexts = List.map msgl (fun (p, _) -> format_context_highlighted p) in
+    let col_width = col_width_for_highlighted msgl in
+    let contexts =
+      List.map msgl (fun (p, _) -> format_context_highlighted p col_width)
+    in
 
     Buffer.add_string buf (header ^ "\n");
     if not (List.is_empty reasons) then

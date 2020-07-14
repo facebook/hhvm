@@ -1,3 +1,3 @@
 <?hh
-include "syntax-error.php";
+<<__EntryPoint>> function main() { include "syntax-error.php"; }
 

@@ -30,4 +30,4 @@ class derived extends cls {
   }
 }
 
-error_log('break1.php loaded');
+<<__EntryPoint>> function main() { error_log('break1.php loaded'); }

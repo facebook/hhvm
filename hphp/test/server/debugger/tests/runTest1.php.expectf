@@ -9,10 +9,9 @@ Requesting test1.php
 Web request /test1.php started.
 next
 Waiting for server response
-Break on line 2 of %s/test1.php
+Break on line 1 of %s/test1.php
    1 <?hh
-   2*include 'break1.php';
-   3 
+   2 
 
 break break1.php:7
 Breakpoint 2 set on line 7 of break1.php

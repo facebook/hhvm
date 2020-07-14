@@ -728,7 +728,7 @@ struct RuntimeOption {
    * 1 - Raise Warning                                                  \
    * 2 - Throw exception                                                \
    */                                                                   \
-  F(int32_t, WarnOnPseudomain, 0)                                       \
+  F(int32_t, WarnOnPseudomain, 2)                                       \
   /* ThrowOnNonExhaustiveSwitch
    * Generates warnings when switch statements are non exhaustive.
    *  0 - Nothing

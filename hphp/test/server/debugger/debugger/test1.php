@@ -1,5 +1,4 @@
 <?hh
-include 'break1.php';
 
 function test_break() {
   $x = 'test_break() in test1.php';
@@ -11,5 +10,5 @@ function test_break() {
   $obj->pubHardBreak($x);
 }
 
-test_break();
-echo "request done\n";
+<<__EntryPoint>> function mainn() { include 'break1.php'; test_break();
+echo "request done\n"; }

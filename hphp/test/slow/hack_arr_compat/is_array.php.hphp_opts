@@ -2,8 +2,5 @@
 -vRuntime.Eval.HackArrCompatIsArrayNotices=true
 -vRuntime.Eval.HackArrCompatIsVecDictNotices=true
 -vRuntime.Eval.ArrayProvenance=1
--vEval.ArrayProvenanceEmpty=1
--vRuntime.Eval.ArrProvDVArrays=1
--vRuntime.Eval.ArrProvHackArrays=0
 -vRuntime.Eval.LogArrayProvenance=1
 -vEval.LogArrayProvenanceSampleRatio=1

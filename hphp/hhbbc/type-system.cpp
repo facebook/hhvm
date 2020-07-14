@@ -2954,18 +2954,14 @@ Type vec_val(SArray val) {
 
 Type vec_empty(ProvTag tag) {
   auto r = Type { BSVecE };
-  r.m_data.aval = tag.valid()
-    ? arrprov::tagStaticArr(staticEmptyVec(), tag.get())
-    : staticEmptyVec();
+  r.m_data.aval = staticEmptyVec();
   r.m_dataTag = DataTag::ArrLikeVal;
   return r;
 }
 
 Type some_vec_empty(ProvTag tag) {
   auto r = Type { BVecE };
-  r.m_data.aval = tag.valid()
-    ? arrprov::tagStaticArr(staticEmptyVec(), tag.get())
-    : staticEmptyVec();
+  r.m_data.aval = staticEmptyVec();
   r.m_dataTag = DataTag::ArrLikeVal;
   return r;
 }
@@ -3014,18 +3010,14 @@ Type dict_val(SArray val) {
 
 Type dict_empty(ProvTag tag) {
   auto r = Type { BSDictE };
-  r.m_data.aval = tag.valid()
-    ? arrprov::tagStaticArr(staticEmptyDictArray(), tag.get())
-    : staticEmptyDictArray();
+  r.m_data.aval = staticEmptyDictArray();
   r.m_dataTag   = DataTag::ArrLikeVal;
   return r;
 }
 
 Type some_dict_empty(ProvTag tag) {
   auto r = Type { BDictE };
-  r.m_data.aval = tag.valid()
-    ? arrprov::tagStaticArr(staticEmptyDictArray(), tag.get())
-    : staticEmptyDictArray();
+  r.m_data.aval = staticEmptyDictArray();
   r.m_dataTag   = DataTag::ArrLikeVal;
   return r;
 }

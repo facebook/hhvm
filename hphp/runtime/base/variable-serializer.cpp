@@ -1710,9 +1710,7 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr,
     }
   };
 
-  if (m_type == Type::Internal &&
-      RuntimeOption::EvalArrayProvenance &&
-      arrprov::arrayWantsTag(arr)) {
+  if (m_type == Type::Internal && arrprov::arrayWantsTag(arr)) {
     auto const tag = arrprov::getTag(arr);
     if (tag.valid()) {
       switch (tag.kind()) {
@@ -1780,9 +1778,7 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
 
   const bool isVectorData = arr->isVectorData();
 
-  if (UNLIKELY(RuntimeOption::EvalLogArrayProvenance &&
-               !m_forcePHPArrays &&
-               arrprov::arrayWantsTag(arr))) {
+  if (UNLIKELY(!m_forcePHPArrays && arrprov::arrayWantsTag(arr))) {
     auto const source = [&]() -> folly::Optional<SerializationSite> {
       switch (getType()) {
       case VariableSerializer::Type::JSON:
@@ -1803,7 +1799,7 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
     if (source) raise_array_serialization_notice(*source, arr);
   }
 
-  if (arr->size() == 0 && LIKELY(!RuntimeOption::EvalArrayProvenance)) {
+  if (arr->size() == 0 && LIKELY(!RO::EvalArrayProvenance)) {
     auto const kind = getKind(arr);
     writeArrayHeader(0, isVectorData, kind);
     writeArrayFooter(kind);

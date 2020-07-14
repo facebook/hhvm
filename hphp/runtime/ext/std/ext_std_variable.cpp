@@ -65,8 +65,7 @@ String HHVM_FUNCTION(gettype, const Variant& v) {
   if (v.isNull()) {
     return s_NULL;
   }
-  if (RuntimeOption::EvalLogArrayProvenance &&
-      v.isArray() && arrprov::arrayWantsTag(v.asCArrRef().get())) {
+  if (v.isArray() && arrprov::arrayWantsTag(v.asCArrRef().get())) {
     raise_array_serialization_notice(SerializationSite::Gettype,
                                      v.getArrayData());
   }

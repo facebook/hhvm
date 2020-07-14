@@ -94,7 +94,7 @@ APCArray::MakeSharedArray(ArrayData* arr, APCHandleLevel level,
     level,
     [&]() {
       auto const add_prov = [arr] (APCHandle::Pair pair) {
-        if (UNLIKELY(RO::EvalArrayProvenance && RO::EvalArrProvDVArrays)) {
+        if (UNLIKELY(RO::EvalArrayProvenance)) {
           if (auto const tag = arrprov::getTag(arr)) {
             arrprov::setTag(APCArray::fromHandle(pair.handle), tag);
           }
@@ -130,15 +130,7 @@ APCArray::MakeSharedVec(ArrayData* vec, APCHandleLevel level,
   return MakeSharedImpl(
     vec,
     level,
-    [&] {
-      auto const pair = MakePacked(vec, APCKind::SharedVec, unserializeObj);
-      if (UNLIKELY(RO::EvalArrayProvenance && RO::EvalArrProvHackArrays)) {
-        if (auto const tag = arrprov::getTag(vec)) {
-          arrprov::setTag(APCArray::fromHandle(pair.handle), tag);
-        }
-      }
-      return pair;
-    },
+    [&] { return MakePacked(vec, APCKind::SharedVec, unserializeObj); },
     [&](DataWalker::PointerMap* m) { return MakeUncountedVec(vec, m); },
     [&](StringData* s) { return APCString::MakeSerializedVec(s); }
   );
@@ -155,15 +147,7 @@ APCArray::MakeSharedDict(ArrayData* dict, APCHandleLevel level,
   return MakeSharedImpl(
     dict,
     level,
-    [&] {
-      auto const pair = MakeHash(dict, APCKind::SharedDict, unserializeObj);
-      if (UNLIKELY(RO::EvalArrayProvenance && RO::EvalArrProvHackArrays)) {
-        if (auto const tag = arrprov::getTag(dict)) {
-          arrprov::setTag(APCArray::fromHandle(pair.handle), tag);
-        }
-      }
-      return pair;
-    },
+    [&] { return MakeHash(dict, APCKind::SharedDict, unserializeObj); },
     [&](DataWalker::PointerMap* m) { return MakeUncountedDict(dict, m); },
     [&](StringData* s) { return APCString::MakeSerializedDict(s); }
   );

@@ -7,7 +7,7 @@ async function gen_sleep() {
 async function gen_stuff() {
   await gen_sleep();
 
-  $wh = __hhvm_intrinsics\dummy_dict_await();
+  $wh = __hhvm_intrinsics\dummy_darray_await();
   $d = await $wh;
 
   var_dump($d);

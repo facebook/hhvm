@@ -78,31 +78,23 @@ ALWAYS_INLINE ArrayData* ArrayData::Create() {
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateVArray(arrprov::Tag tag /* = {} */) {
-  return RO::EvalArrayProvenanceEmpty &&
-         RO::EvalArrProvDVArrays
+  return RO::EvalArrayProvenance
     ? arrprov::tagStaticArr(staticEmptyVArray(), tag)
     : staticEmptyVArray();
 }
 
-ALWAYS_INLINE ArrayData* ArrayData::CreateVec(arrprov::Tag tag /* = {} */) {
-  return RO::EvalArrayProvenanceEmpty &&
-         RO::EvalArrProvHackArrays
-    ? arrprov::tagStaticArr(staticEmptyVec(), tag)
-    : staticEmptyVec();
-}
-
 ALWAYS_INLINE ArrayData* ArrayData::CreateDArray(arrprov::Tag tag /* = {} */) {
-  return RO::EvalArrayProvenanceEmpty &&
-         RO::EvalArrProvDVArrays
+  return RO::EvalArrayProvenance
     ? arrprov::tagStaticArr(staticEmptyDArray(), tag)
     : staticEmptyDArray();
 }
 
+ALWAYS_INLINE ArrayData* ArrayData::CreateVec(arrprov::Tag tag /* = {} */) {
+  return staticEmptyVec();
+}
+
 ALWAYS_INLINE ArrayData* ArrayData::CreateDict(arrprov::Tag tag /* = {} */) {
-  return RO::EvalArrayProvenanceEmpty &&
-         RO::EvalArrProvHackArrays
-    ? arrprov::tagStaticArr(staticEmptyDictArray(), tag)
-    : staticEmptyDictArray();
+  return staticEmptyDictArray();
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateKeyset() {

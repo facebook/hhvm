@@ -4,9 +4,9 @@
 // that it wraps should have provenance. We display both for testing.
 <<__ProvenanceSkipFrame>>
 function show_provenance($x) {
-  var_dump(dict[
+  var_dump(darray[
     'outer' => HH\get_provenance($x),
-    'inner' => HH\get_provenance(dict($x)),
+    'inner' => HH\get_provenance(darray($x)),
   ]);
 }
 

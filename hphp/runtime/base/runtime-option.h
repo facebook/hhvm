@@ -1123,14 +1123,12 @@ struct RuntimeOption {
    * RepoAuthoritativeMode wasn't built with this flag or if the        \
    * flag LogArrayProvenance is unset */                                \
   F(bool, ArrayProvenance, false)                                       \
-  /* Tag _all_ empty arrays we create at runtime. */                    \
-  F(bool, ArrayProvenanceEmpty, false)                                  \
-  /* Whether v/darrays and vecs/dicts (respectively) should admit       \
-   * provenance tags. */                                                \
-  F(bool, ArrProvDVArrays, false)                                       \
-  F(bool, ArrProvHackArrays, true)                                      \
-  /* Enable logging the source of vecs/dicts whose vec/dict-ness is     \
-   * observed, e.g. through serialization */                            \
+  /* Log the source of dvarrays whose dvarray-ness is observed, e.g.    \
+   * through serialization. If this flag is off, we won't bother to     \
+   * track array provenance at runtime, because it isn't exposed.       \
+   *                                                                    \
+   * Code should just depend on ArrayProvenance alone - we'll set it    \
+   * based on this flag when loading a repo build. */                   \
   F(bool, LogArrayProvenance, false)                                    \
   /* Log only out out of this many array headers when serializing */    \
   F(uint32_t, LogArrayProvenanceSampleRatio, 1000)                      \

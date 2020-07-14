@@ -345,7 +345,7 @@ struct VariantControllerImpl {
      useful to instrument the serialization process if needed */
   ALWAYS_INLINE
   static void traceSerialization(const_variant_ref thing) {
-    if (LIKELY(!RuntimeOption::EvalLogArrayProvenance)) return;
+    if (LIKELY(!RuntimeOption::EvalArrayProvenance)) return;
     if (HackArraysMode != VariantControllerHackArraysMode::ON &&
         HackArraysMode != VariantControllerHackArraysMode::ON_AND_KEYSET) {
       return;

@@ -19,7 +19,7 @@ function foo() {
 
 <<__ProvenanceSkipFrame>>
 function bar() {
-  return varray[1, dict[2 => varray[17]], 3];
+  return varray[1, darray[2 => varray[17]], 3];
 }
 
 <<__EntryPoint>>

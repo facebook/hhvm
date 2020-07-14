@@ -7,11 +7,7 @@ Notice: Observing list-like varray in is_tuple from %s/array_provenance/type-str
 bool(true)
 bool(false)
 bool(false)
-
-Notice: Observing map-like dict in is_shape from %s/array_provenance/type-structure.php:12 in %s/array_provenance/type-structure.php on line 29
 bool(false)
-
-Notice: Observing list-like vec in is_tuple from %s/array_provenance/type-structure.php:15 in %s/array_provenance/type-structure.php on line 28
 bool(false)
 bool(false)
 bool(false)

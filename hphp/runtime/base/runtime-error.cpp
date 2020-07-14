@@ -316,7 +316,7 @@ InitFiniNode s_initProvLoggingCounters([] {
 
 void raise_array_serialization_notice(SerializationSite src,
                                       const ArrayData* arr) {
-  assertx(RuntimeOption::EvalLogArrayProvenance);
+  assertx(RuntimeOption::EvalArrayProvenance);
   if (UNLIKELY(g_context.isNull())) return;
   if (arr->isLegacyArray()) return;
   if (UNLIKELY(g_context->getThrowAllErrors())) {

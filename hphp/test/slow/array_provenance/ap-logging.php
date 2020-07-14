@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main() {
-  $a = __hhvm_intrinsics\launder_value(vec[]);
+  $a = __hhvm_intrinsics\launder_value(varray[]);
   $a[] = "hello";
   var_dump(json_encode($a));
   var_dump(serialize($a));
@@ -15,7 +15,7 @@ function main() {
   var_dump(HH\serialize_with_options($a, dict["forcePHPArrays" => true]));
   var_dump(json_encode($a, JSON_FB_FORCE_PHP_ARRAYS));
 
-  $b = __hhvm_intrinsics\launder_value(dict[]);
+  $b = __hhvm_intrinsics\launder_value(darray[]);
   $b['foo'] = 42;
   var_dump(fb_serialize($b, FB_SERIALIZE_HACK_ARRAYS));
 

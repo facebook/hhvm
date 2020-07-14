@@ -2,7 +2,7 @@
 
 <<__ProvenanceSkipFrame>>
 function map($v, $f) {
-  $ret = vec[];
+  $ret = varray[];
   foreach($v as $x) {
     $ret[] = $f($x);
   }
@@ -11,10 +11,10 @@ function map($v, $f) {
 
 <<__EntryPoint>>
 function main(): void {
-  $a = vec[1, 2, 3];
-  $e = vec[];
+  $a = varray[1, 2, 3];
+  $e = varray[];
 
-  $results = vec[];
+  $results = varray[];
   $results[] = map($a, $x ==> $x + 1);
   $results[] = map($a, $x ==> $x + 2);
   $results[] = map($e, $x ==> $x + 1);

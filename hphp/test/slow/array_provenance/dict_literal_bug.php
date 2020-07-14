@@ -6,7 +6,7 @@ class Foo {
 
 <<__EntryPoint>>
 function main() {
-  $x = dict[
+  $x = darray[
     42 => "garbage",
     Foo::GARBAGE => "more garbage"
   ];

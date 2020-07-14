@@ -1092,8 +1092,7 @@ SSATmp* opt_enum_coerce(IRGS& env, const ParamPrep& params) {
 }
 
 SSATmp* opt_tag_provenance_here(IRGS& env, const ParamPrep& params) {
-  if (params.size() != 1) return nullptr;
-  if (RO::EvalLogArrayProvenance) return nullptr;
+  if (RO::EvalArrayProvenance || params.size() != 1) return nullptr;
   auto const result = params[0].value;
   gen(env, IncRef, result);
   return result;

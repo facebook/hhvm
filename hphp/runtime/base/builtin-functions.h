@@ -116,7 +116,7 @@ inline void maybe_raise_array_serialization_notice(
     SerializationSite site, const TypedValue* tv) {
   assertx(isArrayLikeType(tv->m_type));
   auto const ad = tv->m_data.parr;
-  if (RuntimeOption::EvalLogArrayProvenance && arrprov::arrayWantsTag(ad)) {
+  if (arrprov::arrayWantsTag(ad)) {
     raise_array_serialization_notice(site, ad);
   }
 }

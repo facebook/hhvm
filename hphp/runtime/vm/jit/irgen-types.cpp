@@ -468,17 +468,13 @@ SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
 // Checks if the `arr` has provenance, implementing the same logic as in the
 // runtume helper arrprov::arrayWantsTag. If so, logs a serialization notice.
 void maybeLogSerialization(IRGS& env, SSATmp* arr, SerializationSite site) {
-  assertx(arr->isA(TArr) || arr->type().isKnownDataType());
-  if (!RO::EvalLogArrayProvenance) return;
+  assertx(arr->isA(TArr));
+  if (!RO::EvalArrayProvenance) return;
 
-  if (arr->isA(TArr) && RO::EvalArrProvDVArrays) {
-    ifThen(env, [&](Block* taken) {
-      arr = gen(env, CheckType, TVArr|TDArr, taken, arr);
-      gen(env, RaiseArraySerializeNotice, cns(env, site), arr);
-    }, [&]{});
-  } else if ((arr->isA(TVec) || arr->isA(TDict)) && RO::EvalArrProvHackArrays) {
+  ifThen(env, [&](Block* taken) {
+    arr = gen(env, CheckType, TVArr|TDArr, taken, arr);
     gen(env, RaiseArraySerializeNotice, cns(env, site), arr);
-  }
+  }, [&]{});
 }
 
 SSATmp* isArrayImpl(IRGS& env, SSATmp* src, bool log_on_hack_arrays) {
@@ -505,17 +501,14 @@ SSATmp* isArrayImpl(IRGS& env, SSATmp* src, bool log_on_hack_arrays) {
   };
 
   if (!curFunc(env)->isBuiltin() &&
-      (RO::EvalHackArrCompatIsArrayNotices ||
-      (RO::EvalLogArrayProvenance && RO::EvalArrProvHackArrays)) &&
+      RO::EvalHackArrCompatIsArrayNotices &&
       log_on_hack_arrays) {
     mc.ifTypeThen(src, TVec, [&](SSATmp* src) {
       hacLogging(Strings::HACKARR_COMPAT_VEC_IS_ARR);
-      maybeLogSerialization(env, src, SerializationSite::IsArray);
       return cns(env, false);
     });
     mc.ifTypeThen(src, TDict, [&](SSATmp* src) {
       hacLogging(Strings::HACKARR_COMPAT_DICT_IS_ARR);
-      maybeLogSerialization(env, src, SerializationSite::IsArray);
       return cns(env, false);
     });
     mc.ifTypeThen(src, TKeyset, [&](SSATmp* src) {
@@ -531,7 +524,6 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
   MultiCond mc{env};
 
   mc.ifTypeThen(src, TVec, [&](SSATmp* src) {
-    maybeLogSerialization(env, src, SerializationSite::IsVec);
     return cns(env, true);
   });
 
@@ -557,8 +549,7 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
     }
   }
 
-  if (RO::EvalHackArrCompatIsVecDictNotices ||
-      (RO::EvalLogArrayProvenance && RO::EvalArrProvDVArrays)) {
+  if (RO::EvalHackArrCompatIsVecDictNotices || RO::EvalArrayProvenance) {
     mc.ifTypeThen(src, TVArr, [&](SSATmp* src) {
       hacLogging(Strings::HACKARR_COMPAT_VARR_IS_VEC);
       maybeLogSerialization(env, src, SerializationSite::IsVec);
@@ -573,7 +564,6 @@ SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
   MultiCond mc{env};
 
   mc.ifTypeThen(src, TDict, [&](SSATmp* src) {
-    maybeLogSerialization(env, src, SerializationSite::IsDict);
     return cns(env, true);
   });
 
@@ -582,8 +572,7 @@ SSATmp* isDictImpl(IRGS& env, SSATmp* src) {
     gen(env, RaiseHackArrCompatNotice, cns(env, makeStaticString(msg)));
   };
 
-  if (RO::EvalHackArrCompatIsVecDictNotices ||
-      (RO::EvalLogArrayProvenance && RO::EvalArrProvDVArrays)) {
+  if (RO::EvalHackArrCompatIsVecDictNotices || RO::EvalArrayProvenance) {
     mc.ifTypeThen(src, TDArr, [&](SSATmp* src) {
       hacLogging(Strings::HACKARR_COMPAT_DARR_IS_DICT);
       maybeLogSerialization(env, src, SerializationSite::IsDict);
@@ -626,7 +615,6 @@ SSATmp* isDVArrayImpl(IRGS& env, SSATmp* src, IsTypeOp subop) {
   mc.ifTypeThen(src, varray ? TVec : TDict, [&](SSATmp* src) {
     hacLogging(varray ? Strings::HACKARR_COMPAT_VEC_IS_VARR
                       : Strings::HACKARR_COMPAT_DICT_IS_DARR);
-    maybeLogSerialization(env, src, site);
     return cns(env, false);
   });
 

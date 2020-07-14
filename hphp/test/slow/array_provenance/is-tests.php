@@ -45,8 +45,8 @@ function coerce_tuple($arr) {
 
 <<__EntryPoint>>
 function main() {
-    $a = vec[1, 2, 3];
-    $b = dict["foo" => 5, "bar" => 6];
+    $a = varray[1, 2, 3];
+    $b = darray["foo" => 5, "bar" => 6];
     print "---- is vec_or_dict ----\n";
     var_dump($a is vec_or_dict);
     var_dump($b is vec_or_dict);

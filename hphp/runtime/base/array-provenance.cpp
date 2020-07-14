@@ -99,17 +99,11 @@ InitFiniNode flushTable([]{
 ///////////////////////////////////////////////////////////////////////////////
 
 bool arrayWantsTag(const ArrayData* ad) {
-  return !ad->isLegacyArray() && (
-    (RO::EvalArrProvHackArrays && (ad->isVecType() || ad->isDictType())) ||
-    (RO::EvalArrProvDVArrays && (ad->isVArray() || ad->isDArray()))
-  );
+  return RO::EvalArrayProvenance && ad->isDVArray() && !ad->isLegacyArray();
 }
 
 bool arrayWantsTag(const APCArray* a) {
-  return (
-    (RO::EvalArrProvHackArrays && (a->isVec() || a->isDict())) ||
-    (RO::EvalArrProvDVArrays && (a->isVArray() || a->isDArray()))
-  );
+  return RO::EvalArrayProvenance && (a->isVArray() || a->isDArray());
 }
 
 bool arrayWantsTag(const AsioExternalThreadEvent* ev) {

@@ -29,7 +29,7 @@ namespace HPHP {
 static Array HHVM_STATIC_METHOD(BuiltinEnum, getValues) {
   const EnumValues* values = EnumCache::getValuesBuiltin(self_);
   assertx(values->values.isHAMSafeDArray());
-  if (!RO::EvalLogArrayProvenance) return values->values;
+  if (!RO::EvalArrayProvenance) return values->values;
   return EnumCache::tagEnumWithProvenance(values->values);
 }
 
@@ -47,7 +47,7 @@ static Array HHVM_STATIC_METHOD(BuiltinEnum, getNames) {
   }
 
   assertx(values->names.isHAMSafeDArray());
-  if (!RO::EvalLogArrayProvenance) return values->names;
+  if (!RO::EvalArrayProvenance) return values->names;
   return EnumCache::tagEnumWithProvenance(values->names);
 }
 

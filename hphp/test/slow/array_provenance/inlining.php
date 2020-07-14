@@ -1,7 +1,7 @@
 <?hh
 
 final class C {
-  private dict<string, int> $ints = dict[];
+  private darray<string, int> $ints = darray[];
 
   <<__ALWAYS_INLINE>>
   public function addInt(string $name, int $value): this {
@@ -10,7 +10,7 @@ final class C {
   }
 
   <<__ALWAYS_INLINE>>
-  public function get(): dict<string, int> {
+  public function get(): darray<string, int> {
     return __hhvm_intrinsics\launder_value($this->ints);
   }
 }

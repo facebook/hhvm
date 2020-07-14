@@ -1,35 +1,38 @@
-vec(2) {
+array(2) {
+  [0]=>
   int(%d)
+  [1]=>
   string(5) "hello"
 }
 string(%d) "%s/array-provenance.php:45"
-dict(2) {
+array(2) {
   ["trash"]=>
   int(%d)
   [0]=>
   string(5) "hello"
 }
 string(%d) "%s/array-provenance.php:48"
-dict(2) {
+array(2) {
   ["trash"]=>
   int(%d)
   [42]=>
   string(5) "hello"
 }
 string(%d) "%s/array-provenance.php:51"
-dict(2) {
+array(2) {
   ["trash"]=>
   int(%d)
   ["blargh!"]=>
   string(7) "goodbye"
 }
 string(%d) "%s/array-provenance.php:54"
-dict(1) {
+array(1) {
   [0]=>
   int(15)
 }
 string(%d) "%s/array-provenance.php:57"
-vec(1) {
+array(1) {
+  [0]=>
   int(15)
 }
 string(%d) "%s/array-provenance.php:60"

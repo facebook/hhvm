@@ -2,7 +2,7 @@
 
 <<__ProvenanceSkipFrame>>
 function foo($v) {
-    $ret = vec[];
+    $ret = varray[];
     foreach ($v as $x) {
         $ret[] = $x;
     }
@@ -11,12 +11,12 @@ function foo($v) {
 
 <<__ProvenanceSkipFrame>>
 function returns_static() {
-    return vec[1, 2, 3];
+    return varray[1, 2, 3];
 }
 
 <<__EntryPoint>>
 function main() {
-    $x = foo(vec[1, 2, 3]);
+    $x = foo(varray[1, 2, 3]);
     var_dump(HH\get_provenance($x));
     var_dump(HH\get_provenance(returns_static()));
 }

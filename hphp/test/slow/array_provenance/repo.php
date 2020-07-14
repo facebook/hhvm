@@ -9,7 +9,7 @@ function main() {
   $a = rand();
 
   $b = __hhvm_intrinsics\launder_value(
-    dict[ConstBag::MY_TRASH_GARBAGE => $a]
+    darray[ConstBag::MY_TRASH_GARBAGE => $a]
   );
   var_dump(HH\get_provenance($b));
 }

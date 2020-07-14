@@ -517,10 +517,6 @@ static int fb_compact_serialize_variant(
     case KindOfVec: {
       Array arr = var.toArray();
       assertx(arr->isVecType());
-      if (UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
-        raise_array_serialization_notice(SerializationSite::FBCompactSerialize,
-                                         arr.get());
-      }
       fb_compact_serialize_vec(sb, std::move(arr), depth);
       return 0;
     }
@@ -529,10 +525,6 @@ static int fb_compact_serialize_variant(
     case KindOfDict: {
       Array arr = var.toArray();
       assertx(arr->isDictType());
-      if (UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
-        raise_array_serialization_notice(SerializationSite::FBCompactSerialize,
-                                         arr.get());
-      }
       fb_compact_serialize_array_as_map(sb, std::move(arr), depth);
       return 0;
     }
@@ -554,12 +546,9 @@ static int fb_compact_serialize_variant(
       Array arr = var.toArray();
       assertx(arr->isPHPArrayType());
       int64_t index_limit;
-      if (UNLIKELY(RuntimeOption::EvalLogArrayProvenance) &&
-          arrprov::arrayWantsTag(arr.get())) {
+      if (arrprov::arrayWantsTag(arr.get())) {
         raise_array_serialization_notice(
-          SerializationSite::FBCompactSerialize,
-          arr.get()
-        );
+          SerializationSite::FBCompactSerialize, arr.get());
       }
       if (fb_compact_serialize_is_list(arr, index_limit)) {
         fb_compact_serialize_array_as_list_map(

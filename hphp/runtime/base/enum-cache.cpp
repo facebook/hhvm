@@ -179,7 +179,7 @@ const EnumValues* EnumCache::loadEnumValues(
 
   // Tag all enums with the large enum tag. Small enums will be tagged again
   // based on the actual PC by the reflection methods that access this cache.
-  if (RO::EvalLogArrayProvenance) {
+  if (RO::EvalArrayProvenance) {
     auto const tag = arrprov::Tag::LargeEnum(klass->name());
     arrprov::setTag<arrprov::Mode::Emplace>(names.get(), tag);
     arrprov::setTag<arrprov::Mode::Emplace>(values.get(), tag);

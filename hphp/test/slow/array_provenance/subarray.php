@@ -1,6 +1,6 @@
 <?hh
 
-const FOO = darray["garbage" => vec[1, 2, 3]];
+const FOO = darray["garbage" => varray[1, 2, 3]];
 
 <<__EntryPoint>>
 function main() {

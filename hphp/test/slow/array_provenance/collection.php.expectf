@@ -1,11 +1,11 @@
 Notice: tag_provenance_here called on object: HH\Set in %s/collection.php on line 16
-dict(2) {
+array(2) {
   ["outer"]=>
   string(0) ""
   ["inner"]=>
   string(%d) "%s/collection.php:26"
 }
-dict(2) {
+array(2) {
   ["outer"]=>
   string(0) ""
   ["inner"]=>

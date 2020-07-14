@@ -1246,7 +1246,7 @@ Array VariableUnserializer::unserializeArray() {
 
 arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
   auto const finish = [&] (auto tag) -> arrprov::Tag {
-    if (!RuntimeOption::EvalArrayProvenance) return {};
+    if (!RO::EvalArrayProvenance) return {};
     return tag;
   };
 
@@ -1309,15 +1309,11 @@ Array VariableUnserializer::unserializeDict() {
   expectChar(':');
   expectChar('{');
 
-  auto provTag = unserializeProvenanceTag();
-  if (!RO::EvalArrProvHackArrays) provTag = {};
+  unserializeProvenanceTag();
 
   if (size == 0) {
     expectChar('}');
-    return Array::attach(provTag
-      ? arrprov::tagStaticArr(staticEmptyDictArray(), provTag)
-      : staticEmptyDictArray()
-    );
+    return Array::attach(staticEmptyDictArray());
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
@@ -1340,7 +1336,6 @@ Array VariableUnserializer::unserializeDict() {
 
   check_non_safepoint_surprise();
   expectChar('}');
-  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), provTag);
   return arr;
 }
 
@@ -1351,15 +1346,11 @@ Array VariableUnserializer::unserializeVec() {
   expectChar(':');
   expectChar('{');
 
-  auto provTag = unserializeProvenanceTag();
-  if (!RO::EvalArrProvHackArrays) provTag = {};
+  unserializeProvenanceTag();
 
   if (size == 0) {
     expectChar('}');
-    return Array::attach(provTag
-      ? arrprov::tagStaticArr(staticEmptyVec(), provTag)
-      : staticEmptyVec()
-    );
+    return Array::attach(staticEmptyVec());
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
@@ -1381,7 +1372,6 @@ Array VariableUnserializer::unserializeVec() {
   }
   check_non_safepoint_surprise();
   expectChar('}');
-  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), provTag);
   return arr;
 }
 
@@ -1393,7 +1383,7 @@ Array VariableUnserializer::unserializeVArray() {
   expectChar('{');
 
   auto provTag = unserializeProvenanceTag();
-  if (!RO::EvalArrProvDVArrays) provTag = {};
+  if (!RO::EvalArrayProvenance) provTag = {};
 
   if (size == 0) {
     expectChar('}');
@@ -1464,7 +1454,7 @@ Array VariableUnserializer::unserializeDArray() {
   expectChar('{');
 
   auto provTag = unserializeProvenanceTag();
-  if (!RO::EvalArrProvDVArrays) provTag = {};
+  if (!RO::EvalArrayProvenance) provTag = {};
 
   if (size == 0) {
     expectChar('}');

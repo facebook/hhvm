@@ -3,7 +3,7 @@
 <<__EntryPoint>>
 function main() {
   $a = __hhvm_intrinsics\launder_value(
-    dict['crap' => rand(), 'fuck' => rand()]
+    darray['crap' => rand(), 'fuck' => rand()]
   );
   apc_store('hello', $a);
   $success = false;

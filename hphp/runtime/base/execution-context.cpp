@@ -1242,12 +1242,7 @@ const StaticString s___HasTopLevelCode("__HasTopLevelCode");
 void checkPseudomain(const Unit* unit) {
   auto& attrs = unit->fileAttributes();
   if (attrs.find(s___HasTopLevelCode.get()) != attrs.end()) {
-    if (RuntimeOption::EvalWarnOnPseudomain == 1) {
-      raise_warning("Found top-level code in %s", unit->filepath()->data());
-      return;
-    } else if (RuntimeOption::EvalWarnOnPseudomain == 2) {
-      throw TopLevelCodeBannedException(unit->filepath()->data());
-    }
+    throw TopLevelCodeBannedException(unit->filepath()->data());
   }
 }
 

@@ -56,7 +56,7 @@ impl Pos {
     // Validness based on HHVM's definition
     pub fn is_valid(&self) -> bool {
         let (line0, line1, char0, char1) = self.info_pos_extended();
-        return line0 != 1 || char0 != 1 || line1 != 1 || char1 != 1;
+        line0 != 1 || char0 != 1 || line1 != 1 || char1 != 1
     }
 
     pub fn filename(&self) -> &RelativePath {

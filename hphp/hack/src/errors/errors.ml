@@ -635,7 +635,7 @@ let to_contextual_string (error : Pos.absolute error_) : string =
 
 (******** Highlighted error formatting ********)
 
-type marker = int
+type marker = int * Tty.raw_color
 
 type marked_message = marker * Pos.absolute message
 
@@ -682,34 +682,73 @@ type position_group = {
 
 let n_extra_lines_hl = 2
 
-let line_margin_highlighted line_num (markers_prefix : string option) col_width
-    : string =
-  let padded_num =
-    match markers_prefix with
-    | Some ms ->
-      Printf.sprintf "%s%*d" ms (col_width - String.length ms) line_num
-    | None -> Printf.sprintf "%*d" col_width line_num
-  in
-  padded_num ^ " |"
+let default_highlighted = Tty.apply_color (Tty.Dim Tty.Default)
+
+let line_num_highlighted line_num = default_highlighted (string_of_int line_num)
+
+let markers (position_group : position_group) (line_num : int) =
+  let mml = position_group.messages in
+  List.filter mml ~f:(fun (_, (pos, _)) ->
+      let begin_line = Pos.line pos in
+      let end_line = Pos.end_line pos in
+      begin_line <= line_num && line_num <= end_line)
+  |> List.map ~f:fst
 
 (* Gets the string containing the markers that should be displayed next to this line,
    e.g. something like "[1,4,5]" *)
-let markers_string (position_group : position_group) (line_num : int) =
-  let mml = position_group.messages in
-  let markers =
-    List.filter mml ~f:(fun (_, (pos, _)) ->
-        let begin_line = Pos.line pos in
-        let end_line = Pos.end_line pos in
-        begin_line <= line_num && line_num <= end_line)
-    |> List.map ~f:fst
+let markers_string
+    (position_group : position_group) ?(apply_color = true) (line_num : int) =
+  let add_color f s =
+    if apply_color then
+      f s
+    else
+      s
   in
-  if List.is_empty markers then
-    None
-  else
-    let ms = List.map markers string_of_int in
-    let prefix = Printf.sprintf "[%s]" (String.concat ~sep:"," ms) in
-    Some prefix
+  let msl = markers position_group line_num in
+  match msl with
+  | [] -> ""
+  | markers ->
+    let ms =
+      List.map markers ~f:(fun (marker, color) ->
+          let marker_str = string_of_int marker in
+          add_color (Tty.apply_color (Tty.Normal color)) marker_str)
+    in
+    let lbracket = add_color default_highlighted "[" in
+    let rbracket = add_color default_highlighted "]" in
+    let prefix =
+      Printf.sprintf "%s%s%s" lbracket (String.concat ~sep:"," ms) rbracket
+    in
+    prefix
 
+let line_margin_highlighted position_group line_num col_width_raw : string =
+  (* Separate the margin into several sections:
+    |markers|space(s)|line_num|space|vertical_bar|
+    i.e.
+    [1,2]  9 |
+    [3]   10 |
+    We need to do this because each has its own color and length
+  *)
+  let nspaces =
+    let markers_raw_len =
+      markers_string position_group line_num ~apply_color:false |> String.length
+    in
+    let line_num_raw_len = string_of_int line_num |> String.length in
+    col_width_raw - (markers_raw_len + line_num_raw_len)
+  in
+  let markers_pretty = markers_string position_group line_num in
+  let spaces = String.make nspaces ' ' in
+  let line_num_pretty = line_num_highlighted line_num in
+  let prefix =
+    Printf.sprintf
+      "%s%s%s%s"
+      markers_pretty
+      spaces
+      line_num_pretty
+      (default_highlighted " |")
+  in
+  prefix
+
+(* Prefixes each line with its corresponding formatted margin *)
 let format_context_lines_highlighted
     ~(position_group : position_group)
     ~(lines : (int * string) list)
@@ -720,10 +759,9 @@ let format_context_lines_highlighted
     | ls -> ls
   in
   let format_line (line_num, line) =
-    let prefix = markers_string position_group line_num in
     Printf.sprintf
       "%s %s"
-      (line_margin_highlighted line_num prefix col_width)
+      (line_margin_highlighted position_group line_num col_width)
       line
   in
   let formatted_lines = List.map ~f:format_line lines in
@@ -772,6 +810,7 @@ let merge_abs_pos (pos1 : Pos.absolute) (pos2 : Pos.absolute) =
    the " |", which is composed of the list of markers, a space, and
    the line number. The column size will be the same for all messages
    in this error, regardless of file, so that they are all aligned.
+   Returns the length of the raw (uncolored) prefix string.
 
    For example:
     overlap_pos.php:4:10
@@ -802,8 +841,7 @@ let col_width_for_highlighted (position_groups : position_group list) =
       let end_line = Pos.end_line pos in
       List.range start_line (end_line + 1)
       |> List.map ~f:(fun line_num ->
-             markers_string pg line_num |> Option.to_list)
-      |> List.concat
+             markers_string pg ~apply_color:false line_num)
     in
     let marker_lens =
       List.map position_groups ~f:markers_strs
@@ -869,22 +907,68 @@ let format_all_contexts_highlighted (marker_and_msgs : marked_message list) =
   in
   String.concat ~sep:"\n" contexts ^ "\n\n"
 
+let single_marker_highlighted marker =
+  let (n, color) = marker in
+  let lbracket = default_highlighted "[" in
+  let rbracket = default_highlighted "]" in
+  let npretty = Tty.apply_color (Tty.Normal color) (string_of_int n) in
+  lbracket ^ npretty ^ rbracket
+
 let format_claim_highlighted error_code ?marker msg : string =
   let suffix =
     match marker with
     | None -> ""
-    | Some m -> Printf.sprintf " [%d]" m
+    | Some marker -> single_marker_highlighted marker
   in
-  let error_code = error_code_to_string error_code in
-  Printf.sprintf "%s %s%s" error_code msg suffix
+  let color =
+    match marker with
+    | None -> Tty.Default
+    | Some (_, color) -> color
+  in
+  let pretty_error_code =
+    Tty.apply_color (Tty.Bold color) (error_code_to_string error_code)
+  in
+  let pretty_msg = Tty.apply_color (Tty.Bold Tty.Default) msg in
+  Printf.sprintf "%s %s %s" pretty_error_code pretty_msg suffix
 
 let format_reason_highlighted (marker, msg) : string =
-  Printf.sprintf " -> %s [%d]" (snd msg) marker
+  let suffix = single_marker_highlighted marker in
+  let pretty_arrow = default_highlighted "->" in
+  let pretty_msg = Tty.apply_color (Tty.Normal Tty.Default) (snd msg) in
+  Printf.sprintf "%s %s %s" pretty_arrow pretty_msg suffix
+
+let make_marker n error_code : marker =
+  (* Explicitly list out the various codes, rather than a catch-all
+     for non 5 or 6 codes, to make the correspondence clear and to
+     make updating this in the future more straightforward *)
+  let claim_color =
+    match error_code / 1000 with
+    | 1 -> Tty.Red (* Parsing *)
+    | 2 -> Tty.Red (* Naming *)
+    | 3 -> Tty.Red (* NastCheck *)
+    | 4 -> Tty.Red (* Typing *)
+    | 5 -> Tty.Yellow (* Lint *)
+    | 6 -> Tty.Yellow (* Zoncolan (AI) *)
+    | 8 -> Tty.Red (* Init *)
+    | _ -> Tty.Red
+    (* Other *)
+  in
+  let color_wheel = [Tty.Cyan; Tty.Green; Tty.Magenta; Tty.Blue] in
+  let color =
+    if n <= 1 then
+      claim_color
+    else
+      let ix = (n - 1) mod List.length color_wheel in
+      List.nth_exn color_wheel ix
+  in
+  (n, color)
 
 let to_highlighted_string (error : Pos.absolute error_) : string =
   let (error_code, msgl) = (get_code error, to_list error |> group_by_file) in
   let buf = Buffer.create 50 in
-  let marker_and_msgs = List.mapi msgl ~f:(fun i m -> (i + 1, m)) in
+  let marker_and_msgs =
+    List.mapi msgl ~f:(fun i m -> (make_marker (i + 1) error_code, m))
+  in
 
   (* Typing[4110] Invalid return type [1]   <claim>
       -> Expected int [2]                   <reasons>

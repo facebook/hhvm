@@ -460,10 +460,7 @@ where
     }
 }
 
-pub fn emit_class<'a>(
-    emitter: &mut Emitter,
-    ast_class: &'a tast::Class_,
-) -> Result<HhasClass<'a>> {
+pub fn emit_class<'a>(emitter: &mut Emitter, ast_class: &'a tast::Class_) -> Result<HhasClass<'a>> {
     let namespace = &ast_class.namespace;
     validate_class_name(namespace, &ast_class.name)?;
     let mut env = Env::make_class_env(ast_class);

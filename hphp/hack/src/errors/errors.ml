@@ -682,17 +682,22 @@ type position_group = {
 
 let n_extra_lines_hl = 2
 
-let default_highlighted = Tty.apply_color (Tty.Dim Tty.Default)
+let background_highlighted = Tty.apply_color (Tty.Dim Tty.Default)
 
-let line_num_highlighted line_num = default_highlighted (string_of_int line_num)
+let default_highlighted = Tty.apply_color (Tty.Normal Tty.Default)
 
-let markers (position_group : position_group) (line_num : int) =
+let line_num_highlighted line_num =
+  background_highlighted (string_of_int line_num)
+
+let marked_messages (position_group : position_group) (line_num : int) =
   let mml = position_group.messages in
   List.filter mml ~f:(fun (_, (pos, _)) ->
       let begin_line = Pos.line pos in
       let end_line = Pos.end_line pos in
       begin_line <= line_num && line_num <= end_line)
-  |> List.map ~f:fst
+
+let markers (position_group : position_group) (line_num : int) =
+  marked_messages position_group line_num |> List.map ~f:fst
 
 (* Gets the string containing the markers that should be displayed next to this line,
    e.g. something like "[1,4,5]" *)
@@ -713,8 +718,8 @@ let markers_string
           let marker_str = string_of_int marker in
           add_color (Tty.apply_color (Tty.Normal color)) marker_str)
     in
-    let lbracket = add_color default_highlighted "[" in
-    let rbracket = add_color default_highlighted "]" in
+    let lbracket = add_color background_highlighted "[" in
+    let rbracket = add_color background_highlighted "]" in
     let prefix =
       Printf.sprintf "%s%s%s" lbracket (String.concat ~sep:"," ms) rbracket
     in
@@ -744,9 +749,36 @@ let line_margin_highlighted position_group line_num col_width_raw : string =
       markers_pretty
       spaces
       line_num_pretty
-      (default_highlighted " |")
+      (background_highlighted " |")
   in
   prefix
+
+(* line_num is 1-based *)
+let line_highlighted position_group line_num line =
+  match marked_messages position_group line_num with
+  | [] -> default_highlighted line
+  | ms ->
+    let get_markers_at_col col_num =
+      (* +1 because Pos.inside expects 1-indexed *)
+      List.filter ms ~f:(fun (_, (pos, _)) ->
+          Pos.inside pos line_num (col_num + 1))
+      |> List.map ~f:fst
+    in
+    let highlighted_columns : string list =
+      (* Not String.mapi because we don't want to return a char from each element *)
+      List.mapi (String.to_list line) ~f:(fun i c ->
+          match get_markers_at_col i with
+          | [] -> default_highlighted (Char.to_string c)
+          | ms ->
+            (* For multiple marked messages for same position, highlight with
+               color of lower-numbered (i.e. more important) message *)
+            let sorted =
+              List.sort ms ~compare:(fun (m, _) (n, _) -> Int.compare m n)
+            in
+            let (_, color) = List.hd_exn sorted in
+            Tty.apply_color (Tty.Normal color) (Char.to_string c))
+    in
+    String.concat highlighted_columns
 
 (* Prefixes each line with its corresponding formatted margin *)
 let format_context_lines_highlighted
@@ -762,7 +794,7 @@ let format_context_lines_highlighted
     Printf.sprintf
       "%s %s"
       (line_margin_highlighted position_group line_num col_width)
-      line
+      (line_highlighted position_group line_num line)
   in
   let formatted_lines = List.map ~f:format_line lines in
   String.concat ~sep:"\n" formatted_lines
@@ -798,7 +830,19 @@ let format_context_highlighted
   if is_first then
     let filename = relative_path (Pos.filename pos) in
     let (line, col) = Pos.line_column pos in
-    let line_info = Printf.sprintf "%s:%d:%d" filename line col in
+    let dirname =
+      let dn = Filename.dirname filename in
+      if String.equal Filename.current_dir_name dn then
+        ""
+      else
+        background_highlighted (Filename.dirname filename ^ "/")
+    in
+    let filename = default_highlighted (Filename.basename filename) in
+    let filename_ppt = Printf.sprintf "%s%s" dirname filename in
+    let position_ppt =
+      Printf.sprintf ":%d:%d" line col |> background_highlighted
+    in
+    let line_info = Printf.sprintf "%s%s" filename_ppt position_ppt in
     line_info ^ "\n" ^ pretty_ctx
   else
     pretty_ctx
@@ -895,7 +939,12 @@ let format_all_contexts_highlighted (marker_and_msgs : marked_message list) =
   (* Create a set of position_groups (set of positions that can be written in the same snippet) *)
   let position_groups = position_groups_by_file marker_and_msgs in
   let col_width = col_width_for_highlighted (List.concat position_groups) in
-  let sep = "\n" ^ String.make col_width ' ' ^ " :\n" in
+  let sep =
+    Printf.sprintf
+      "\n%s %s\n"
+      (String.make col_width ' ')
+      (background_highlighted ":")
+  in
   let contexts =
     List.map position_groups (fun spnl ->
         (* Each position_groups list (spnl) is for a single file, so separate each with ':' *)
@@ -909,12 +958,15 @@ let format_all_contexts_highlighted (marker_and_msgs : marked_message list) =
 
 let single_marker_highlighted marker =
   let (n, color) = marker in
-  let lbracket = default_highlighted "[" in
-  let rbracket = default_highlighted "]" in
+  let lbracket = background_highlighted "[" in
+  let rbracket = background_highlighted "]" in
   let npretty = Tty.apply_color (Tty.Normal color) (string_of_int n) in
   lbracket ^ npretty ^ rbracket
 
-let format_claim_highlighted error_code ?marker msg : string =
+let format_claim_highlighted
+    (error_code : error_code)
+    ?(marker : (error_code * Tty.raw_color) option)
+    (msg : string) : string =
   let suffix =
     match marker with
     | None -> ""
@@ -933,8 +985,8 @@ let format_claim_highlighted error_code ?marker msg : string =
 
 let format_reason_highlighted (marker, msg) : string =
   let suffix = single_marker_highlighted marker in
-  let pretty_arrow = default_highlighted "->" in
-  let pretty_msg = Tty.apply_color (Tty.Normal Tty.Default) (snd msg) in
+  let pretty_arrow = background_highlighted "->" in
+  let pretty_msg = default_highlighted (snd msg) in
   Printf.sprintf "%s %s %s" pretty_arrow pretty_msg suffix
 
 let make_marker n error_code : marker =
@@ -990,13 +1042,13 @@ let to_highlighted_string (error : Pos.absolute error_) : string =
     [1,3] 4 |   return 'foo';
           5 | }
   *)
-  let all_context = format_all_contexts_highlighted marker_and_msgs in
+  let all_contexts = format_all_contexts_highlighted marker_and_msgs in
 
   Buffer.add_string buf (claim ^ "\n");
   if not (List.is_empty reasons) then
     Buffer.add_string buf (String.concat ~sep:"\n" reasons ^ "\n");
   Buffer.add_string buf "\n";
-  Buffer.add_string buf all_context;
+  Buffer.add_string buf all_contexts;
   Buffer.contents buf
 
 let to_absolute_for_test error =

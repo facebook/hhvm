@@ -13,6 +13,5 @@ emit_attribute_rust = { path = "../emit_attribute" }
 env = { path = "../env" }
 hhas_attribute_rust = { path = "../hhas_attribute" }
 instruction_sequence_rust = { path = "../instruction_sequence" }
-naming_special_names_rust = { path = "../../../naming" }
 oxidized = { path = "../../../oxidized" }
 itertools = "0.8"

@@ -1238,14 +1238,6 @@ bool ExecutionContext::setHeaderCallback(const Variant& callback) {
   return true;
 }
 
-const StaticString s___HasTopLevelCode("__HasTopLevelCode");
-void checkPseudomain(const Unit* unit) {
-  auto& attrs = unit->fileAttributes();
-  if (attrs.find(s___HasTopLevelCode.get()) != attrs.end()) {
-    throw TopLevelCodeBannedException(unit->filepath()->data());
-  }
-}
-
 const static StaticString
   s_enter_async_entry_point("__SystemLib\\enter_async_entry_point");
 
@@ -1595,8 +1587,6 @@ TypedValue ExecutionContext::invokePseudoMain(const Func* f,
     return *toMerge->getMainReturn();
   }
 
-  checkPseudomain(toMerge);
-
   Stats::inc(Stats::PseudoMain_Executed);
   VMRegAnchor _;
 
@@ -1886,8 +1876,6 @@ bool ExecutionContext::evalUnit(Unit* unit, PC callPC, PC& pc, int funcType) {
     *vmStack().allocTV() = *unit->getMainReturn();
     return false;
   }
-
-  checkPseudomain(unit);
 
   Stats::inc(Stats::PseudoMain_Executed);
 

@@ -284,8 +284,6 @@ pub mod user_attributes {
 
     pub const NEVER_INLINE: &str = "__NEVER_INLINE";
 
-    pub const HAS_TOP_LEVEL_CODE: &str = "__HasTopLevelCode";
-
     lazy_static! {
         static ref AS_SET: HashSet<&'static str> = vec![
             OVERRIDE,

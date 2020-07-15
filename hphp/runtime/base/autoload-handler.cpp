@@ -263,8 +263,6 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
     throw;
   } catch (PhpNotSupportedException&) {
     throw;
-  } catch (TopLevelCodeBannedException&) {
-    throw;
   } catch (ExtendedException& ee) {
     auto fileAndLine = ee.getFileAndLine();
     err = (fileAndLine.first.empty())

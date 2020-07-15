@@ -771,7 +771,6 @@ dependencies = [
  "hhas_attribute_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "naming_special_names_rust 0.0.0",
  "oxidized 0.0.0",
 ]
 
@@ -923,6 +922,7 @@ dependencies = [
  "emit_body_rust 0.0.0",
  "emit_class_rust 0.0.0",
  "emit_constant_rust 0.0.0",
+ "emit_fatal_rust 0.0.0",
  "emit_file_attributes_rust 0.0.0",
  "emit_function_rust 0.0.0",
  "emit_record_def_rust 0.0.0",

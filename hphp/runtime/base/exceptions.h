@@ -178,12 +178,6 @@ struct PhpNotSupportedException : ExtendedException {
   EXCEPTION_COMMON_IMPL(PhpNotSupportedException);
 };
 
-struct TopLevelCodeBannedException : ExtendedException {
-  explicit TopLevelCodeBannedException(const char* file)
-    : ExtendedException("Found top-level code in %s", file) {}
-  EXCEPTION_COMMON_IMPL(TopLevelCodeBannedException);
-};
-
 //////////////////////////////////////////////////////////////////////
 
 /*

@@ -8,6 +8,7 @@ use emit_adata_rust as emit_adata;
 use emit_body_rust::{emit_body_with_default_args, make_body};
 use emit_class_rust::emit_classes_from_program;
 use emit_constant_rust::emit_constants_from_program;
+use emit_fatal_rust as emit_fatal;
 use emit_file_attributes_rust::emit_file_attributes_from_program;
 use emit_function_rust::emit_functions_from_program;
 use emit_record_def_rust::emit_record_defs_from_program;
@@ -111,6 +112,22 @@ fn emit_program_<'p>(
     prog: &'p mut Tast::Program,
 ) -> Result<HhasProgram<'p>> {
     let for_debugger_eval = emitter.for_debugger_eval && debugger_eval_should_modify(prog)?;
+    if !emitter.for_debugger_eval {
+        let contains_toplevel_code = prog.iter().find_map(|d| {
+            if let Some(Tast::Stmt(pos, s_)) = d.as_stmt() {
+                if s_.is_markup() {
+                    None
+                } else {
+                    Some(pos)
+                }
+            } else {
+                None
+            }
+        });
+        if let Some(pos) = contains_toplevel_code {
+            return Err(emit_fatal::raise_fatal_parse(pos, "Found top-level code"));
+        }
+    }
     closure_convert::convert_toplevel_prog(emitter, prog)?;
     emitter.for_debugger_eval = for_debugger_eval;
     let main = emit_main(emitter, flags, RcOc::clone(&namespace), prog)?;

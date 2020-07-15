@@ -425,6 +425,8 @@ std::unique_ptr<UnitEmitter> Package::createSymlinkWrapper(
     const UserAttributeMap& attrs = fe->userAttributes;
     if (attrs.find(s___EntryPoint.get()) != attrs.end()) {
       found_entrypoint = true;
+      std::string escaped_name;
+      folly::cEscape(fe->name->toCppString(), escaped_name);
       ss << ".function{} [unique persistent \"__EntryPoint\"(\"\"\"y:0:{}\"\"\")] (4,7) <\"\" N  > entrypoint$symlink$" << string_sha1(full_path) << "() {\n"
          << "  String \"" << target_path.string() << "\"\n"
          << "  ReqOnce\n"
@@ -432,7 +434,7 @@ std::unique_ptr<UnitEmitter> Package::createSymlinkWrapper(
          << "  NullUninit\n"
          << "  NullUninit\n"
          << "  NullUninit\n"
-         << "  FCallFuncD <SkipNumArgsCheck> 0 1 \"\" - \"\" \"" << fe->name->toCppString() << "\"\n"
+         << "  FCallFuncD <SkipNumArgsCheck> 0 1 \"\" - \"\" \"" << escaped_name << "\"\n"
          << "  PopC\n"
          << "  Null\n"
          << "  RetC\n"

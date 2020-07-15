@@ -10,7 +10,6 @@ HHVM_DEFINE_EXTENSION("async_mysql"
     ext_mysqlrow.php
   DEPENDS
     libFolly
+    libMySQL
     libSquangle
-    libWebscaleSQL
-    varENABLE_ASYNC_MYSQL
 )

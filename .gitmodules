@@ -34,9 +34,6 @@
 [submodule "libsodium"]
 	path = third-party/libsodium/libsodium
 	url = https://github.com/jedisct1/libsodium.git
-[submodule "lz4"]
-	path = third-party/lz4/src
-	url = https://github.com/Cyan4973/lz4
 [submodule "mcrouter"]
 	path = third-party/mcrouter/src
 	url = https://github.com/facebook/mcrouter
@@ -52,9 +49,6 @@
 [submodule "re2"]
 	path = third-party/re2/src
 	url = https://github.com/google/re2.git
-[submodule "rsocket-cpp"]
-	path = third-party/rsocket-cpp/rsocket-cpp
-	url = https://github.com/rsocket/rsocket-cpp.git
 [submodule "squangle"]
 	path = third-party/squangle/src
 	url = https://github.com/facebook/squangle.git

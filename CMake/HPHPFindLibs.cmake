@@ -40,30 +40,6 @@ if (LIBINOTIFY_INCLUDE_DIR)
   include_directories(${LIBINOTIFY_INCLUDE_DIR})
 endif()
 
-# mysql checks - if we're using async mysql, we use fbmysqlclient from
-# third-party/ instead
-if (ENABLE_ASYNC_MYSQL)
-  include_directories(
-    ${RE2_INCLUDE_DIR}
-    ${TP_DIR}/squangle/src/
-    ${TP_DIR}/fb-mysql/src/include/
-  )
-  set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/fb-mysql/src/)
-  set(MYSQL_CLIENT_LIBS
-    ${MYSQL_CLIENT_LIB_DIR}/libmysql/libfbmysqlclient_r.a
-  )
-else()
-  find_package(MySQL REQUIRED)
-  link_directories(${MYSQL_LIB_DIR})
-  include_directories(${MYSQL_INCLUDE_DIR})
-endif()
-MYSQL_SOCKET_SEARCH()
-if (MYSQL_UNIX_SOCK_ADDR)
-  add_definitions(-DPHP_MYSQL_UNIX_SOCK_ADDR="${MYSQL_UNIX_SOCK_ADDR}")
-else ()
-  message(FATAL_ERROR "Could not find MySQL socket path - if you install a MySQL server, this should be automatically detected. Alternatively, specify -DMYSQL_UNIX_SOCK_ADDR=/path/to/mysql.socket ; if you don't care about unix socket support for MySQL, specify -DMYSQL_UNIX_SOCK_ADDR=/dev/null")
-endif ()
-
 # pcre checks
 find_package(PCRE)
 include_directories(${PCRE_INCLUDE_DIR})
@@ -125,12 +101,6 @@ find_package(DoubleConversion)
 if (DOUBLE_CONVERSION_INCLUDE_DIR)
   include_directories(${DOUBLE_CONVERSION_INCLUDE_DIR})
 endif ()
-
-# liblz4
-find_package(LZ4)
-if (LZ4_FOUND)
-  include_directories(${LZ4_INCLUDE_DIR})
-endif()
 
 # fastlz
 find_package(FastLZ)
@@ -393,10 +363,6 @@ macro(hphp_link target)
   add_dependencies(${target} libsodiumMaybeBuild)
   target_link_libraries(${target} libsodium)
 
-  target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
-  if (ENABLE_ASYNC_MYSQL)
-    target_link_libraries(${target} squangle)
-  endif()
   target_link_libraries(${target} ${PCRE_LIBRARY})
   target_link_libraries(${target} ${ICU_DATA_LIBRARIES} ${ICU_I18N_LIBRARIES} ${ICU_LIBRARIES})
   target_link_libraries(${target} ${LIBEVENT_LIB})
@@ -464,14 +430,7 @@ macro(hphp_link target)
     target_link_libraries(${target} double-conversion)
   endif()
 
-  if (LZ4_FOUND)
-    target_link_libraries(${target} ${LZ4_LIBRARY})
-  else()
-    target_link_libraries(${target} lz4)
-  endif()
-  # The syntax used for these warnings is unparsable by Apple's Clang
-  add_definitions("-DLZ4_DISABLE_DEPRECATE_WARNINGS=1")
-
+  target_link_libraries(${target} lz4)
   target_link_libraries(${target} libzip)
 
   if (PCRE_LIBRARY)

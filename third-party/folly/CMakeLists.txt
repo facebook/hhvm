@@ -114,6 +114,10 @@ list(REMOVE_ITEM hfiles
   ${FOLLY_DIR}/python/GILAwareManualExecutor.h
 )
 
+# Actually delete this file (not just remove from the list) because
+# proxygen/lib/services/WorkerThread.cpp checks for it via __has_include.
+file(REMOVE ${FOLLY_DIR}/experimental/io/IoUringBackend.h)
+
 CHECK_CXX_SOURCE_COMPILES("#include <bits/functexcept.h>
 int main() {
   return 0;
@@ -193,6 +197,11 @@ add_definitions("-DFOLLY_VERSION=\"0.1\"")
 # add_definitions as needed
 target_compile_definitions(folly PUBLIC "FOLLY_NO_CONFIG=1")
 target_compile_definitions(folly PUBLIC "FOLLY_HAVE_PTHREAD=1")
+if (LINUX)
+  target_compile_definitions(folly PUBLIC "FOLLY_HAVE_RECVMMSG=1")
+else()
+  target_compile_definitions(folly PUBLIC "FOLLY_HAVE_RECVMMSG=0")
+endif()
 
 # Check for the function FNNAME and set RETURN_VALUE based on the result.  Also
 # sets RETURN_VALUE=<result> as a preprocessor macro.
@@ -266,20 +275,17 @@ endif()
 
 # Weak linking on Linux, Windows, and OS X all work somewhat differently. The following test
 # works well on Linux and Windows, but fails for annoying reasons on OS X, and even works
-# differently on different releases of OS X, cf. http://glandium.org/blog/?p=2764. Getting
-# the test to work properly on OS X would require an APPLE check anyways, so just hardcode
-# OS X as "we know weak linking works".
-if(APPLE)
-  target_compile_definitions(folly PUBLIC "FOLLY_HAVE_WEAK_SYMBOLS=1")
-else()
-  # check for weak symbols
-  folly_check_source_compiles("
-      extern \"C\" void configure_link_extern_weak_test() __attribute__((weak));
-      int main(int argc, char** argv) {
-          return configure_link_extern_weak_test == nullptr;
-      }
-  " FOLLY_HAVE_WEAK_SYMBOLS)
-endif()
+# differently on different releases of OS X, cf. http://glandium.org/blog/?p=2764.
+# Therefore, the value of FOLLY_HAVE_WEAK_SYMBOLS may not be accurate for OS X
+# (likely it will be 0 even though OS X technically supports weak linking), but
+# we really need to know whether this code compiles, not whether the system
+# technically supports weak linking or not.
+folly_check_source_compiles("
+    extern \"C\" void configure_link_extern_weak_test() __attribute__((weak));
+    int main(int argc, char** argv) {
+        return configure_link_extern_weak_test == nullptr;
+    }
+" FOLLY_HAVE_WEAK_SYMBOLS)
 
 folly_check_function_exists("memrchr" FOLLY_HAVE_MEMRCHR)
 folly_check_function_exists("preadv" FOLLY_HAVE_PREADV)

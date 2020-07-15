@@ -88,9 +88,11 @@ class Schema;
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace apache { namespace thrift { namespace frozen { namespace schema {
-class Field final : private apache::thrift::detail::st::ComparisonOperators<Field> {
+class Field final  {
  public:
+  using __fbthrift_cpp2_type = Field;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   Field() :
       layoutId(0),
       offset(static_cast<int16_t>(0)) {}
@@ -105,6 +107,7 @@ class Field final : private apache::thrift::detail::st::ComparisonOperators<Fiel
   Field& operator=(Field&&) = default;
 
   Field& operator=(const Field&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
   int16_t layoutId;
@@ -112,13 +115,31 @@ class Field final : private apache::thrift::detail::st::ComparisonOperators<Fiel
   int16_t offset;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool layoutId;
     bool offset;
   } __isset = {};
   bool operator==(const Field& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const Field& __x, const Field& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const Field& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const Field& __x, const Field& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const Field& __x, const Field& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const Field& __x, const Field& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> layoutId_ref() const& {
     return {this->layoutId, __isset.layoutId};
@@ -138,7 +159,9 @@ class Field final : private apache::thrift::detail::st::ComparisonOperators<Fiel
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> layoutId_ref() && {
     return {std::move(this->layoutId), __isset.layoutId};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> offset_ref() const& {
     return {this->offset, __isset.offset};
@@ -158,6 +181,7 @@ class Field final : private apache::thrift::detail::st::ComparisonOperators<Fiel
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> offset_ref() && {
     return {std::move(this->offset), __isset.offset};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   int16_t get_layoutId() const {
     return layoutId;
@@ -165,7 +189,9 @@ class Field final : private apache::thrift::detail::st::ComparisonOperators<Fiel
 
   int16_t& set_layoutId(int16_t layoutId_) {
     layoutId = layoutId_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.layoutId = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return layoutId;
   }
 
@@ -175,7 +201,9 @@ class Field final : private apache::thrift::detail::st::ComparisonOperators<Fiel
 
   int16_t& set_offset(int16_t offset_) {
     offset = offset_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.offset = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return offset;
   }
 
@@ -206,9 +234,11 @@ uint32_t Field::read(Protocol_* iprot) {
 
 }}}} // apache::thrift::frozen::schema
 namespace apache { namespace thrift { namespace frozen { namespace schema {
-class Layout final : private apache::thrift::detail::st::ComparisonOperators<Layout> {
+class Layout final  {
  public:
+  using __fbthrift_cpp2_type = Layout;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   Layout() :
       size(0),
       bits(static_cast<int16_t>(0)) {}
@@ -223,6 +253,7 @@ class Layout final : private apache::thrift::detail::st::ComparisonOperators<Lay
   Layout& operator=(Layout&&) = default;
 
   Layout& operator=(const Layout&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
   int32_t size;
@@ -234,6 +265,7 @@ class Layout final : private apache::thrift::detail::st::ComparisonOperators<Lay
   ::std::string typeName;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool size;
     bool bits;
@@ -241,8 +273,25 @@ class Layout final : private apache::thrift::detail::st::ComparisonOperators<Lay
     bool typeName;
   } __isset = {};
   bool operator==(const Layout& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const Layout& __x, const Layout& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const Layout& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const Layout& __x, const Layout& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const Layout& __x, const Layout& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const Layout& __x, const Layout& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> size_ref() const& {
     return {this->size, __isset.size};
@@ -262,7 +311,9 @@ class Layout final : private apache::thrift::detail::st::ComparisonOperators<Lay
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> size_ref() && {
     return {std::move(this->size), __isset.size};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> bits_ref() const& {
     return {this->bits, __isset.bits};
@@ -282,7 +333,9 @@ class Layout final : private apache::thrift::detail::st::ComparisonOperators<Lay
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> bits_ref() && {
     return {std::move(this->bits), __isset.bits};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::map<int16_t,  ::apache::thrift::frozen::schema::Field>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> fields_ref() const& {
     return {this->fields, __isset.fields};
@@ -302,7 +355,9 @@ class Layout final : private apache::thrift::detail::st::ComparisonOperators<Lay
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> fields_ref() && {
     return {std::move(this->fields), __isset.fields};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::string>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> typeName_ref() const& {
     return {this->typeName, __isset.typeName};
@@ -322,6 +377,7 @@ class Layout final : private apache::thrift::detail::st::ComparisonOperators<Lay
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> typeName_ref() && {
     return {std::move(this->typeName), __isset.typeName};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   int32_t get_size() const {
     return size;
@@ -329,7 +385,9 @@ class Layout final : private apache::thrift::detail::st::ComparisonOperators<Lay
 
   int32_t& set_size(int32_t size_) {
     size = size_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.size = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return size;
   }
 
@@ -339,7 +397,9 @@ class Layout final : private apache::thrift::detail::st::ComparisonOperators<Lay
 
   int16_t& set_bits(int16_t bits_) {
     bits = bits_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.bits = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return bits;
   }
   const ::std::map<int16_t,  ::apache::thrift::frozen::schema::Field>& get_fields() const&;
@@ -348,7 +408,9 @@ class Layout final : private apache::thrift::detail::st::ComparisonOperators<Lay
   template <typename T_Layout_fields_struct_setter = ::std::map<int16_t,  ::apache::thrift::frozen::schema::Field>>
   ::std::map<int16_t,  ::apache::thrift::frozen::schema::Field>& set_fields(T_Layout_fields_struct_setter&& fields_) {
     fields = std::forward<T_Layout_fields_struct_setter>(fields_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.fields = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return fields;
   }
 
@@ -363,7 +425,9 @@ class Layout final : private apache::thrift::detail::st::ComparisonOperators<Lay
   template <typename T_Layout_typeName_struct_setter = ::std::string>
   ::std::string& set_typeName(T_Layout_typeName_struct_setter&& typeName_) {
     typeName = std::forward<T_Layout_typeName_struct_setter>(typeName_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.typeName = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return typeName;
   }
 
@@ -394,9 +458,11 @@ uint32_t Layout::read(Protocol_* iprot) {
 
 }}}} // apache::thrift::frozen::schema
 namespace apache { namespace thrift { namespace frozen { namespace schema {
-class Schema final : private apache::thrift::detail::st::ComparisonOperators<Schema> {
+class Schema final  {
  public:
+  using __fbthrift_cpp2_type = Schema;
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   Schema() :
       fileVersion(0),
       relaxTypeChecks(0),
@@ -412,6 +478,7 @@ class Schema final : private apache::thrift::detail::st::ComparisonOperators<Sch
   Schema& operator=(Schema&&) = default;
 
   Schema& operator=(const Schema&) = default;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
  public:
   int32_t fileVersion;
@@ -423,6 +490,7 @@ class Schema final : private apache::thrift::detail::st::ComparisonOperators<Sch
   int16_t rootLayout;
 
  public:
+  [[deprecated("__isset field is deprecated in Thrift struct. Use _ref() accessors instead.")]]
   struct __isset {
     bool fileVersion;
     bool relaxTypeChecks;
@@ -430,8 +498,25 @@ class Schema final : private apache::thrift::detail::st::ComparisonOperators<Sch
     bool rootLayout;
   } __isset = {};
   bool operator==(const Schema& rhs) const;
+#ifndef SWIG
+  friend bool operator!=(const Schema& __x, const Schema& __y) {
+    return !(__x == __y);
+  }
+#endif
   bool operator<(const Schema& rhs) const;
+#ifndef SWIG
+  friend bool operator>(const Schema& __x, const Schema& __y) {
+    return __y < __x;
+  }
+  friend bool operator<=(const Schema& __x, const Schema& __y) {
+    return !(__y < __x);
+  }
+  friend bool operator>=(const Schema& __x, const Schema& __y) {
+    return !(__x < __y);
+  }
+#endif
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = int32_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> fileVersion_ref() const& {
     return {this->fileVersion, __isset.fileVersion};
@@ -451,7 +536,9 @@ class Schema final : private apache::thrift::detail::st::ComparisonOperators<Sch
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> fileVersion_ref() && {
     return {std::move(this->fileVersion), __isset.fileVersion};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> relaxTypeChecks_ref() const& {
     return {this->relaxTypeChecks, __isset.relaxTypeChecks};
@@ -471,7 +558,9 @@ class Schema final : private apache::thrift::detail::st::ComparisonOperators<Sch
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> relaxTypeChecks_ref() && {
     return {std::move(this->relaxTypeChecks), __isset.relaxTypeChecks};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = ::std::map<int16_t,  ::apache::thrift::frozen::schema::Layout>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> layouts_ref() const& {
     return {this->layouts, __isset.layouts};
@@ -491,7 +580,9 @@ class Schema final : private apache::thrift::detail::st::ComparisonOperators<Sch
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> layouts_ref() && {
     return {std::move(this->layouts), __isset.layouts};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   template <typename..., typename T = int16_t>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> rootLayout_ref() const& {
     return {this->rootLayout, __isset.rootLayout};
@@ -511,6 +602,7 @@ class Schema final : private apache::thrift::detail::st::ComparisonOperators<Sch
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> rootLayout_ref() && {
     return {std::move(this->rootLayout), __isset.rootLayout};
   }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
 
   int32_t get_fileVersion() const {
     return fileVersion;
@@ -518,7 +610,9 @@ class Schema final : private apache::thrift::detail::st::ComparisonOperators<Sch
 
   int32_t& set_fileVersion(int32_t fileVersion_) {
     fileVersion = fileVersion_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.fileVersion = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return fileVersion;
   }
 
@@ -528,7 +622,9 @@ class Schema final : private apache::thrift::detail::st::ComparisonOperators<Sch
 
   bool& set_relaxTypeChecks(bool relaxTypeChecks_) {
     relaxTypeChecks = relaxTypeChecks_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.relaxTypeChecks = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return relaxTypeChecks;
   }
   const ::std::map<int16_t,  ::apache::thrift::frozen::schema::Layout>& get_layouts() const&;
@@ -537,7 +633,9 @@ class Schema final : private apache::thrift::detail::st::ComparisonOperators<Sch
   template <typename T_Schema_layouts_struct_setter = ::std::map<int16_t,  ::apache::thrift::frozen::schema::Layout>>
   ::std::map<int16_t,  ::apache::thrift::frozen::schema::Layout>& set_layouts(T_Schema_layouts_struct_setter&& layouts_) {
     layouts = std::forward<T_Schema_layouts_struct_setter>(layouts_);
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.layouts = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return layouts;
   }
 
@@ -547,7 +645,9 @@ class Schema final : private apache::thrift::detail::st::ComparisonOperators<Sch
 
   int16_t& set_rootLayout(int16_t rootLayout_) {
     rootLayout = rootLayout_;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     __isset.rootLayout = true;
+THRIFT_IGNORE_ISSET_USE_WARNING_END
     return rootLayout;
   }
 

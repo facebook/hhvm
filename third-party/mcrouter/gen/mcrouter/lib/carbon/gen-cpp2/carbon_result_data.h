@@ -10,46 +10,46 @@
 
 #include "mcrouter/lib/carbon/gen-cpp2/carbon_result_types.h"
 
-namespace carbon {
+namespace apache { namespace thrift {
 
-struct _ResultEnumDataStorage {
-  using type = Result;
+template <> struct TEnumDataStorage<::carbon::Result> {
+  using type = ::carbon::Result;
   static constexpr const std::size_t size = 34;
-  static constexpr const std::array<Result, 34> values = {{
-    Result::UNKNOWN,
-    Result::DELETED,
-    Result::TOUCHED,
-    Result::FOUND,
-    Result::FOUNDSTALE,
-    Result::NOTFOUND,
-    Result::NOTFOUNDHOT,
-    Result::NOTSTORED,
-    Result::STALESTORED,
-    Result::OK,
-    Result::STORED,
-    Result::EXISTS,
-    Result::OOO,
-    Result::TIMEOUT,
-    Result::CONNECT_TIMEOUT,
-    Result::CONNECT_ERROR,
-    Result::BUSY,
-    Result::RES_TRY_AGAIN,
-    Result::SHUTDOWN,
-    Result::TKO,
-    Result::BAD_COMMAND,
-    Result::BAD_KEY,
-    Result::BAD_FLAGS,
-    Result::BAD_EXPTIME,
-    Result::BAD_LEASE_ID,
-    Result::BAD_CAS_ID,
-    Result::BAD_VALUE,
-    Result::ABORTED,
-    Result::CLIENT_ERROR,
-    Result::LOCAL_ERROR,
-    Result::REMOTE_ERROR,
-    Result::WAITING,
-    Result::DEADLINE_EXCEEDED,
-    Result::NUM_RESULTS,
+  static constexpr const std::array<type, 34> values = {{
+    type::UNKNOWN,
+    type::DELETED,
+    type::TOUCHED,
+    type::FOUND,
+    type::FOUNDSTALE,
+    type::NOTFOUND,
+    type::NOTFOUNDHOT,
+    type::NOTSTORED,
+    type::STALESTORED,
+    type::OK,
+    type::STORED,
+    type::EXISTS,
+    type::OOO,
+    type::TIMEOUT,
+    type::CONNECT_TIMEOUT,
+    type::CONNECT_ERROR,
+    type::BUSY,
+    type::RES_TRY_AGAIN,
+    type::SHUTDOWN,
+    type::TKO,
+    type::BAD_COMMAND,
+    type::BAD_KEY,
+    type::BAD_FLAGS,
+    type::BAD_EXPTIME,
+    type::BAD_LEASE_ID,
+    type::BAD_CAS_ID,
+    type::BAD_VALUE,
+    type::ABORTED,
+    type::CLIENT_ERROR,
+    type::LOCAL_ERROR,
+    type::REMOTE_ERROR,
+    type::WAITING,
+    type::DEADLINE_EXCEEDED,
+    type::NUM_RESULTS,
   }};
   static constexpr const std::array<folly::StringPiece, 34> names = {{
     "UNKNOWN",
@@ -87,14 +87,6 @@ struct _ResultEnumDataStorage {
     "DEADLINE_EXCEEDED",
     "NUM_RESULTS",
   }};
-};
-
-} // carbon
-
-namespace apache { namespace thrift {
-
-template <> struct TEnumDataStorage<::carbon::Result> {
-  using storage_type = ::carbon::_ResultEnumDataStorage;
 };
 
 }} // apache::thrift

@@ -16,7 +16,6 @@ if (EXISTS "${HPHP_HOME}/deps/")
 
   # Disable a few extensions that we can't currently build because we can't
   # compile the library they depend on.
-  set(ENABLE_ASYNC_MYSQL OFF CACHE BOOL "")
   set(ENABLE_MCROUTER OFF CACHE BOOL "")
   set(ENABLE_EXTENSION_MEMCACHE OFF CACHE BOOL "")
   set(ENABLE_EXTENSION_MEMCACHED OFF CACHE BOOL "")

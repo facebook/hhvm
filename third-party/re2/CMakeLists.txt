@@ -12,3 +12,4 @@ set(RE2_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src" CACHE STRING "RE2 include 
 # util/arena.h
 SET_PROPERTY(DIRECTORY PROPERTY INCLUDE_DIRECTORIES "${RE2_INCLUDE_DIR}")
 add_library(re2 STATIC ${util_sources} ${sources})
+target_include_directories(re2 PUBLIC ${RE2_INCLUDE_DIR})

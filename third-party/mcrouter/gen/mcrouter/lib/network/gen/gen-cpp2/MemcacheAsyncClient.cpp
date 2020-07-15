@@ -289,7 +289,8 @@ void MemcacheAsyncClient::mcGet(apache::thrift::RpcOptions& rpcOptions, std::uni
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcGetImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcGetImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcGetImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGetRequest& request) {
@@ -329,7 +330,8 @@ void MemcacheAsyncClient::sync_mcGet(apache::thrift::RpcOptions& rpcOptions, fac
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcGet");
-  mcGetImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcGetImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -392,6 +394,8 @@ void MemcacheAsyncClient::mcGet(folly::Function<void (::apache::thrift::ClientRe
   mcGet(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcGet(facebook::memcache::McGetReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -453,7 +457,8 @@ void MemcacheAsyncClient::mcSet(apache::thrift::RpcOptions& rpcOptions, std::uni
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcSetImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcSetImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcSetImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McSetRequest& request) {
@@ -493,7 +498,8 @@ void MemcacheAsyncClient::sync_mcSet(apache::thrift::RpcOptions& rpcOptions, fac
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcSet");
-  mcSetImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcSetImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -556,6 +562,8 @@ void MemcacheAsyncClient::mcSet(folly::Function<void (::apache::thrift::ClientRe
   mcSet(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcSet(facebook::memcache::McSetReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -617,7 +625,8 @@ void MemcacheAsyncClient::mcDelete(apache::thrift::RpcOptions& rpcOptions, std::
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcDeleteImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcDeleteImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcDeleteImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McDeleteRequest& request) {
@@ -657,7 +666,8 @@ void MemcacheAsyncClient::sync_mcDelete(apache::thrift::RpcOptions& rpcOptions, 
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcDelete");
-  mcDeleteImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcDeleteImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -720,6 +730,8 @@ void MemcacheAsyncClient::mcDelete(folly::Function<void (::apache::thrift::Clien
   mcDelete(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcDelete(facebook::memcache::McDeleteReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -781,7 +793,8 @@ void MemcacheAsyncClient::mcLeaseGet(apache::thrift::RpcOptions& rpcOptions, std
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcLeaseGetImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcLeaseGetImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcLeaseGetImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McLeaseGetRequest& request) {
@@ -821,7 +834,8 @@ void MemcacheAsyncClient::sync_mcLeaseGet(apache::thrift::RpcOptions& rpcOptions
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcLeaseGet");
-  mcLeaseGetImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcLeaseGetImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -884,6 +898,8 @@ void MemcacheAsyncClient::mcLeaseGet(folly::Function<void (::apache::thrift::Cli
   mcLeaseGet(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcLeaseGet(facebook::memcache::McLeaseGetReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -945,7 +961,8 @@ void MemcacheAsyncClient::mcLeaseSet(apache::thrift::RpcOptions& rpcOptions, std
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcLeaseSetImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcLeaseSetImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcLeaseSetImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McLeaseSetRequest& request) {
@@ -985,7 +1002,8 @@ void MemcacheAsyncClient::sync_mcLeaseSet(apache::thrift::RpcOptions& rpcOptions
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcLeaseSet");
-  mcLeaseSetImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcLeaseSetImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -1048,6 +1066,8 @@ void MemcacheAsyncClient::mcLeaseSet(folly::Function<void (::apache::thrift::Cli
   mcLeaseSet(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcLeaseSet(facebook::memcache::McLeaseSetReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -1109,7 +1129,8 @@ void MemcacheAsyncClient::mcAdd(apache::thrift::RpcOptions& rpcOptions, std::uni
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcAddImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcAddImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcAddImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McAddRequest& request) {
@@ -1149,7 +1170,8 @@ void MemcacheAsyncClient::sync_mcAdd(apache::thrift::RpcOptions& rpcOptions, fac
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcAdd");
-  mcAddImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcAddImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -1212,6 +1234,8 @@ void MemcacheAsyncClient::mcAdd(folly::Function<void (::apache::thrift::ClientRe
   mcAdd(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcAdd(facebook::memcache::McAddReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -1273,7 +1297,8 @@ void MemcacheAsyncClient::mcReplace(apache::thrift::RpcOptions& rpcOptions, std:
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcReplaceImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcReplaceImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcReplaceImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McReplaceRequest& request) {
@@ -1313,7 +1338,8 @@ void MemcacheAsyncClient::sync_mcReplace(apache::thrift::RpcOptions& rpcOptions,
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcReplace");
-  mcReplaceImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcReplaceImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -1376,6 +1402,8 @@ void MemcacheAsyncClient::mcReplace(folly::Function<void (::apache::thrift::Clie
   mcReplace(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcReplace(facebook::memcache::McReplaceReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -1437,7 +1465,8 @@ void MemcacheAsyncClient::mcGets(apache::thrift::RpcOptions& rpcOptions, std::un
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcGetsImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcGetsImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcGetsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGetsRequest& request) {
@@ -1477,7 +1506,8 @@ void MemcacheAsyncClient::sync_mcGets(apache::thrift::RpcOptions& rpcOptions, fa
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcGets");
-  mcGetsImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcGetsImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -1540,6 +1570,8 @@ void MemcacheAsyncClient::mcGets(folly::Function<void (::apache::thrift::ClientR
   mcGets(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcGets(facebook::memcache::McGetsReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -1601,7 +1633,8 @@ void MemcacheAsyncClient::mcCas(apache::thrift::RpcOptions& rpcOptions, std::uni
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcCasImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcCasImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcCasImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McCasRequest& request) {
@@ -1641,7 +1674,8 @@ void MemcacheAsyncClient::sync_mcCas(apache::thrift::RpcOptions& rpcOptions, fac
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcCas");
-  mcCasImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcCasImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -1704,6 +1738,8 @@ void MemcacheAsyncClient::mcCas(folly::Function<void (::apache::thrift::ClientRe
   mcCas(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcCas(facebook::memcache::McCasReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -1765,7 +1801,8 @@ void MemcacheAsyncClient::mcIncr(apache::thrift::RpcOptions& rpcOptions, std::un
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcIncrImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcIncrImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcIncrImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McIncrRequest& request) {
@@ -1805,7 +1842,8 @@ void MemcacheAsyncClient::sync_mcIncr(apache::thrift::RpcOptions& rpcOptions, fa
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcIncr");
-  mcIncrImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcIncrImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -1868,6 +1906,8 @@ void MemcacheAsyncClient::mcIncr(folly::Function<void (::apache::thrift::ClientR
   mcIncr(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcIncr(facebook::memcache::McIncrReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -1929,7 +1969,8 @@ void MemcacheAsyncClient::mcDecr(apache::thrift::RpcOptions& rpcOptions, std::un
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcDecrImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcDecrImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcDecrImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McDecrRequest& request) {
@@ -1969,7 +2010,8 @@ void MemcacheAsyncClient::sync_mcDecr(apache::thrift::RpcOptions& rpcOptions, fa
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcDecr");
-  mcDecrImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcDecrImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -2032,6 +2074,8 @@ void MemcacheAsyncClient::mcDecr(folly::Function<void (::apache::thrift::ClientR
   mcDecr(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcDecr(facebook::memcache::McDecrReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -2093,7 +2137,8 @@ void MemcacheAsyncClient::mcMetaget(apache::thrift::RpcOptions& rpcOptions, std:
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcMetagetImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcMetagetImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcMetagetImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McMetagetRequest& request) {
@@ -2133,7 +2178,8 @@ void MemcacheAsyncClient::sync_mcMetaget(apache::thrift::RpcOptions& rpcOptions,
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcMetaget");
-  mcMetagetImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcMetagetImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -2196,6 +2242,8 @@ void MemcacheAsyncClient::mcMetaget(folly::Function<void (::apache::thrift::Clie
   mcMetaget(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcMetaget(facebook::memcache::McMetagetReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -2257,7 +2305,8 @@ void MemcacheAsyncClient::mcAppend(apache::thrift::RpcOptions& rpcOptions, std::
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcAppendImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcAppendImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcAppendImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McAppendRequest& request) {
@@ -2297,7 +2346,8 @@ void MemcacheAsyncClient::sync_mcAppend(apache::thrift::RpcOptions& rpcOptions, 
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcAppend");
-  mcAppendImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcAppendImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -2360,6 +2410,8 @@ void MemcacheAsyncClient::mcAppend(folly::Function<void (::apache::thrift::Clien
   mcAppend(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcAppend(facebook::memcache::McAppendReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -2421,7 +2473,8 @@ void MemcacheAsyncClient::mcPrepend(apache::thrift::RpcOptions& rpcOptions, std:
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcPrependImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcPrependImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcPrependImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McPrependRequest& request) {
@@ -2461,7 +2514,8 @@ void MemcacheAsyncClient::sync_mcPrepend(apache::thrift::RpcOptions& rpcOptions,
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcPrepend");
-  mcPrependImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcPrependImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -2524,6 +2578,8 @@ void MemcacheAsyncClient::mcPrepend(folly::Function<void (::apache::thrift::Clie
   mcPrepend(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcPrepend(facebook::memcache::McPrependReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -2585,7 +2641,8 @@ void MemcacheAsyncClient::mcTouch(apache::thrift::RpcOptions& rpcOptions, std::u
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcTouchImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcTouchImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcTouchImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McTouchRequest& request) {
@@ -2625,7 +2682,8 @@ void MemcacheAsyncClient::sync_mcTouch(apache::thrift::RpcOptions& rpcOptions, f
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcTouch");
-  mcTouchImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcTouchImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -2688,6 +2746,8 @@ void MemcacheAsyncClient::mcTouch(folly::Function<void (::apache::thrift::Client
   mcTouch(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcTouch(facebook::memcache::McTouchReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -2749,7 +2809,8 @@ void MemcacheAsyncClient::mcFlushRe(apache::thrift::RpcOptions& rpcOptions, std:
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcFlushReImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcFlushReImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcFlushReImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McFlushReRequest& request) {
@@ -2789,7 +2850,8 @@ void MemcacheAsyncClient::sync_mcFlushRe(apache::thrift::RpcOptions& rpcOptions,
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcFlushRe");
-  mcFlushReImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcFlushReImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -2852,6 +2914,8 @@ void MemcacheAsyncClient::mcFlushRe(folly::Function<void (::apache::thrift::Clie
   mcFlushRe(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcFlushRe(facebook::memcache::McFlushReReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -2913,7 +2977,8 @@ void MemcacheAsyncClient::mcFlushAll(apache::thrift::RpcOptions& rpcOptions, std
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcFlushAllImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcFlushAllImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcFlushAllImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McFlushAllRequest& request) {
@@ -2953,7 +3018,8 @@ void MemcacheAsyncClient::sync_mcFlushAll(apache::thrift::RpcOptions& rpcOptions
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcFlushAll");
-  mcFlushAllImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcFlushAllImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -3016,6 +3082,8 @@ void MemcacheAsyncClient::mcFlushAll(folly::Function<void (::apache::thrift::Cli
   mcFlushAll(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcFlushAll(facebook::memcache::McFlushAllReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -3077,7 +3145,8 @@ void MemcacheAsyncClient::mcGat(apache::thrift::RpcOptions& rpcOptions, std::uni
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcGatImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcGatImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcGatImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGatRequest& request) {
@@ -3117,7 +3186,8 @@ void MemcacheAsyncClient::sync_mcGat(apache::thrift::RpcOptions& rpcOptions, fac
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcGat");
-  mcGatImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcGatImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -3180,6 +3250,8 @@ void MemcacheAsyncClient::mcGat(folly::Function<void (::apache::thrift::ClientRe
   mcGat(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcGat(facebook::memcache::McGatReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -3241,7 +3313,8 @@ void MemcacheAsyncClient::mcGats(apache::thrift::RpcOptions& rpcOptions, std::un
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcGatsImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcGatsImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcGatsImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McGatsRequest& request) {
@@ -3281,7 +3354,8 @@ void MemcacheAsyncClient::sync_mcGats(apache::thrift::RpcOptions& rpcOptions, fa
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcGats");
-  mcGatsImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcGatsImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -3344,6 +3418,8 @@ void MemcacheAsyncClient::mcGats(folly::Function<void (::apache::thrift::ClientR
   mcGats(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcGats(facebook::memcache::McGatsReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());
@@ -3405,7 +3481,8 @@ void MemcacheAsyncClient::mcVersion(apache::thrift::RpcOptions& rpcOptions, std:
   callbackContext.protocolId =
       apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
   callbackContext.ctx = std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx);
-  mcVersionImpl(rpcOptions, std::move(ctx), apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext)), request);
+  auto wrappedCallback = apache::thrift::toRequestClientCallbackPtr(std::move(callback), std::move(callbackContext));
+  mcVersionImpl(rpcOptions, std::move(ctx), std::move(wrappedCallback), request);
 }
 
 void MemcacheAsyncClient::mcVersionImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::detail::ac::ClientRequestContext> ctx, apache::thrift::RequestClientCallback::Ptr callback, const facebook::memcache::McVersionRequest& request) {
@@ -3445,7 +3522,8 @@ void MemcacheAsyncClient::sync_mcVersion(apache::thrift::RpcOptions& rpcOptions,
       this->handlers_,
       this->getServiceName(),
       "Memcache.mcVersion");
-  mcVersionImpl(rpcOptions, ctx, apache::thrift::RequestClientCallback::Ptr(&callback), request);
+  auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
+  mcVersionImpl(rpcOptions, ctx, std::move(wrappedCallback), request);
   callback.waitUntilDone(evb);
   _returnState.resetProtocolId(protocolId);
   _returnState.resetCtx(std::shared_ptr<apache::thrift::ContextStack>(ctx, &ctx->ctx));
@@ -3508,6 +3586,8 @@ void MemcacheAsyncClient::mcVersion(folly::Function<void (::apache::thrift::Clie
   mcVersion(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)), request);
 }
 
+#if FOLLY_HAS_COROUTINES
+#endif // FOLLY_HAS_COROUTINES
 folly::exception_wrapper MemcacheAsyncClient::recv_wrapped_mcVersion(facebook::memcache::McVersionReply& _return, ::apache::thrift::ClientReceiveState& state) {
   if (state.isException()) {
     return std::move(state.exception());

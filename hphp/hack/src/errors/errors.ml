@@ -633,6 +633,55 @@ let to_contextual_string (error : Pos.absolute error_) : string =
   Buffer.add_string buf "\n";
   Buffer.contents buf
 
+(******** Highlighted error formatting ********)
+
+type marker = int
+
+type marked_message = marker * Pos.absolute message
+
+(* A position_group is a record composed of a position (we'll call
+   the aggregate_position) and a list of marked_message. Each
+   marked_message contains a position, and all of these positions are
+   closed enough together to be printed in one coalesced code context.
+
+   For example, say we have the following code:
+      1 | <?hh
+      2 |
+      3 | function f(): dict<int,
+      4 |   int>
+      5 | {
+      6 |   return "hello";
+      7 | }
+      8 |
+
+   We would be given three individual positions (one corresponding to line 2
+   and two corresponding to lines 6), i.e.
+
+      Typing[4110] Invalid return type [1]
+      -> Expected dict<int, int> [2]
+      -> But got string [3]
+
+   They are close enough together so that code only needs to be printed once
+   for all of them since their context overlaps. Thus the position_group would
+   be composed of a list of the three individual aforementioned positions, as
+   well as the aggregate_position whose first line is 1 and last line 7, and
+   the final output would look like this.
+
+      1 | <?hh
+      2 |
+[2]   3 | function f(): dict<int,
+[2]   4 |   int>
+      5 | {
+[1,3] 6 |   return "hello";
+      7 | }
+*)
+type position_group = {
+  aggregate_position: Pos.absolute;
+  messages: marked_message list;
+}
+
+let n_extra_lines_hl = 2
+
 let line_margin_highlighted line_num (markers_prefix : string option) col_width
     : string =
   let padded_num =
@@ -643,42 +692,83 @@ let line_margin_highlighted line_num (markers_prefix : string option) col_width
   in
   padded_num ^ " |"
 
+(* Gets the string containing the markers that should be displayed next to this line,
+   e.g. something like "[1,4,5]" *)
+let markers_string (position_group : position_group) (line_num : int) =
+  let mml = position_group.messages in
+  let markers =
+    List.filter mml ~f:(fun (_, (pos, _)) ->
+        let begin_line = Pos.line pos in
+        let end_line = Pos.end_line pos in
+        begin_line <= line_num && line_num <= end_line)
+    |> List.map ~f:fst
+  in
+  if List.is_empty markers then
+    None
+  else
+    let ms = List.map markers string_of_int in
+    let prefix = Printf.sprintf "[%s]" (String.concat ~sep:"," ms) in
+    Some prefix
+
 let format_context_lines_highlighted
-    ~(pos : Pos.absolute)
-    ~(lines : string list)
-    ~(markers_prefix : string)
+    ~(position_group : position_group)
+    ~(lines : (int * string) list)
     ~(col_width : int) : string =
   let lines =
     match lines with
-    | [] -> ["No source found"]
+    | [] -> [(1, "No source found")]
     | ls -> ls
   in
-  let line_num = Pos.line pos in
-  let format_line i (line : string) =
+  let format_line (line_num, line) =
+    let prefix = markers_string position_group line_num in
     Printf.sprintf
       "%s %s"
-      (line_margin_highlighted (line_num + i) (Some markers_prefix) col_width)
+      (line_margin_highlighted line_num prefix col_width)
       line
   in
-  let formatted_lines = List.mapi ~f:format_line lines in
+  let formatted_lines = List.map ~f:format_line lines in
   String.concat ~sep:"\n" formatted_lines
 
-let format_context_highlighted pos markers_prefix col_width =
+(* Gets lines from a position, including additional before/after
+   lines from the current position; line numbers are 1-indexed. *)
+let load_context_lines_highlighted ~before ~after ~(pos : Pos.absolute) :
+    (int * string) list =
+  let path = Pos.filename pos in
+  let start_line = Pos.line pos in
+  let end_line = Pos.end_line pos in
+  let lines = (try read_lines path with Sys_error _ -> []) in
+  let numbered_lines = List.mapi lines ~f:(fun i l -> (i + 1, l)) in
+  List.filter numbered_lines (fun (i, _) ->
+      i >= start_line - before && i <= end_line + after)
+
+let format_context_highlighted
+    (position_group : position_group) (col_width : int) ~(is_first : bool) =
+  let pos = position_group.aggregate_position in
   let relative_path path =
     let cwd = Filename.concat (Sys.getcwd ()) "" in
     lstrip path cwd
   in
-  let filename = relative_path (Pos.filename pos) in
-  let line = Pos.line pos in
-  let col = Pos.start_cnum pos in
-  let line_info = Printf.sprintf "%s:%d:%d" filename line col in
-  let lines = load_context_lines pos in
-  let pretty_ctx =
-    format_context_lines_highlighted ~pos ~lines ~markers_prefix ~col_width
+  let lines =
+    load_context_lines_highlighted
+      ~before:n_extra_lines_hl
+      ~after:n_extra_lines_hl
+      ~pos
   in
-  line_info ^ "\n" ^ pretty_ctx
+  let pretty_ctx =
+    format_context_lines_highlighted ~position_group ~lines ~col_width
+  in
+  if is_first then
+    let filename = relative_path (Pos.filename pos) in
+    let (line, col) = Pos.line_column pos in
+    let line_info = Printf.sprintf "%s:%d:%d" filename line col in
+    line_info ^ "\n" ^ pretty_ctx
+  else
+    pretty_ctx
 
-(* The column size will be the length of the largest prefix before
+let merge_abs_pos (pos1 : Pos.absolute) (pos2 : Pos.absolute) =
+  Pos.merge (Pos.to_relative pos1) (Pos.to_relative pos2) |> Pos.to_absolute
+
+(* The column width will be the length of the largest prefix before
    the " |", which is composed of the list of markers, a space, and
    the line number. The column size will be the same for all messages
    in this error, regardless of file, so that they are all aligned.
@@ -692,40 +782,90 @@ let format_context_highlighted pos markers_prefix col_width =
           12 | }
           13 |
 
-    The length of the column is the length of "[1,3] 11" = 8
-*)
-let format_all_contexts_highlighted
-    (marker_and_msgs : (int * Pos.absolute message) list) =
-  let msgl = List.map ~f:snd marker_and_msgs in
+    The length of the column is the length of "[1,3] 11" = 8 *)
+let col_width_for_highlighted (position_groups : position_group list) =
   let largest_line_length =
-    List.fold msgl ~init:0 ~f:(fun curr_max (pos, _) ->
-        let line = Pos.line pos in
-        max curr_max (num_digits line))
-  in
-  (* Need a way to compare absolute positions *)
-  let pos_cmp p1 p2 =
-    match String.compare (Pos.filename p1) (Pos.filename p2) with
-    | 0 -> Int.compare (Pos.line p1) (Pos.line p2)
-    | _ -> 0
-  in
-  let unique_pos = List.map msgl fst |> List.dedup_and_sort ~compare:pos_cmp in
-  let pos_to_prefix pos =
-    let markers =
-      List.filter marker_and_msgs ~f:(fun (_, (p, _)) -> pos_cmp pos p = 0)
-      |> List.map ~f:(fun (marker, _) -> string_of_int marker)
+    let message_positions (messages : marked_message list) =
+      List.map messages ~f:(fun (_, (pos, _)) -> pos)
     in
-    let prefix = Printf.sprintf "[%s]" (String.concat ~sep:"," markers) in
-    prefix
+    let line_nums =
+      List.map position_groups ~f:(fun pg -> pg.messages |> message_positions)
+      |> List.concat_no_order
+      |> List.map ~f:Pos.line
+    in
+    List.max_elt line_nums Int.compare |> Option.value ~default:0 |> num_digits
   in
   let max_marker_prefix_length =
-    List.fold unique_pos ~init:0 ~f:(fun accum pos ->
-        let len = String.length (pos_to_prefix pos) in
-        max len accum)
+    let markers_strs (pg : position_group) =
+      let pos = pg.aggregate_position in
+      let start_line = Pos.line pos in
+      let end_line = Pos.end_line pos in
+      List.range start_line (end_line + 1)
+      |> List.map ~f:(fun line_num ->
+             markers_string pg line_num |> Option.to_list)
+      |> List.concat
+    in
+    let marker_lens =
+      List.map position_groups ~f:markers_strs
+      |> List.concat
+      |> List.map ~f:String.length
+    in
+    List.max_elt marker_lens Int.compare |> Option.value ~default:0
   in
+  (* +1 for the space between them *)
   let col_width = max_marker_prefix_length + 1 + largest_line_length in
+  col_width
+
+(* Each list of position_groups in the returned list is from a different file *)
+let position_groups_by_file marker_and_msgs : position_group list list =
+  let msgs_by_file : marked_message list list =
+    List.group marker_and_msgs ~break:(fun (_, msg1) (_, msg2) ->
+        let (p1, _) = msg1 in
+        let (p2, _) = msg2 in
+        String.compare (Pos.filename p1) (Pos.filename p2) <> 0)
+    (* Must make sure list of positions is ordered *)
+    |> List.map ~f:(fun msgs ->
+           List.sort
+             (fun (_, m1) (_, m2) ->
+               let (p1, _) = m1 in
+               let (p2, _) = m2 in
+               Int.compare (Pos.line p1) (Pos.line p2))
+             msgs)
+  in
+  let close_enough prev_pos curr_pos =
+    let line1_end = Pos.end_line prev_pos in
+    let line2_begin = Pos.line curr_pos in
+    line1_end + n_extra_lines_hl + 1 >= line2_begin - n_extra_lines_hl
+  in
+  (* Group marked messages that are sufficiently close. *)
+  let grouped_messages (messages : marked_message list) :
+      marked_message list list =
+    List.group messages ~break:(fun (_, (prev_pos, _)) (_, (curr_pos, _)) ->
+        not (close_enough prev_pos curr_pos))
+  in
+  List.map msgs_by_file ~f:(fun (mmsgl : marked_message list) ->
+      grouped_messages mmsgl
+      |> List.map ~f:(fun messages ->
+             {
+               aggregate_position =
+                 List.map ~f:(fun (_, (pos, _)) -> pos) messages
+                 |> List.reduce_exn ~f:merge_abs_pos;
+               messages;
+             }))
+
+let format_all_contexts_highlighted (marker_and_msgs : marked_message list) =
+  (* Create a set of position_groups (set of positions that can be written in the same snippet) *)
+  let position_groups = position_groups_by_file marker_and_msgs in
+  let col_width = col_width_for_highlighted (List.concat position_groups) in
+  let sep = "\n" ^ String.make col_width ' ' ^ " :\n" in
   let contexts =
-    List.map unique_pos (fun p ->
-        format_context_highlighted p (pos_to_prefix p) col_width)
+    List.map position_groups (fun spnl ->
+        (* Each position_groups list (spnl) is for a single file, so separate each with ':' *)
+        let ctx_strs =
+          List.mapi spnl ~f:(fun i spn ->
+              format_context_highlighted spn col_width ~is_first:(i = 0))
+        in
+        String.concat ~sep ctx_strs)
   in
   String.concat ~sep:"\n" contexts ^ "\n\n"
 
@@ -742,7 +882,7 @@ let format_reason_highlighted (marker, msg) : string =
   Printf.sprintf " -> %s [%d]" (snd msg) marker
 
 let to_highlighted_string (error : Pos.absolute error_) : string =
-  let (error_code, msgl) = (get_code error, to_list error) in
+  let (error_code, msgl) = (get_code error, to_list error |> group_by_file) in
   let buf = Buffer.create 50 in
   let marker_and_msgs = List.mapi msgl ~f:(fun i m -> (i + 1, m)) in
 

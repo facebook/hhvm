@@ -352,6 +352,8 @@ let do_compile_rust
     rust_output_config
     filename
     source_text =
+  (* dummy line to load Full_fidelity_ast *)
+  let _ = Full_fidelity_ast.make_env filename in
   let env =
     Compile_ffi.
       {
@@ -385,36 +387,6 @@ let do_compile_rust
   match Compile_ffi.rust_from_text_ffi env rust_output_config source_text with
   | Ok () -> ()
   | Error msg -> raise (Failure msg)
-
-let do_compile
-    ~is_systemlib
-    ~config_jsons
-    (compiler_options : options)
-    filename
-    source_text
-    debug_time =
-  let env =
-    Compile.
-      {
-        is_systemlib;
-        filepath = filename;
-        is_evaled = is_file_path_for_evaled_code filename;
-        for_debugger_eval = compiler_options.for_debugger_eval;
-        dump_symbol_refs = compiler_options.dump_symbol_refs;
-        config_list = compiler_options.config_list;
-        config_jsons;
-        disable_toplevel_elaboration =
-          compiler_options.disable_toplevel_elaboration;
-      }
-  in
-  let (ret, log_config_json) = Compile.from_text source_text env in
-  (debug_time.parsing_t := Compile.(ret.parsing_t));
-  (debug_time.codegen_t := Compile.(ret.codegen_t));
-  (debug_time.printing_t := Compile.(ret.printing_t));
-  if compiler_options.debug_time then print_debug_time_info filename debug_time;
-  if compiler_options.log_stats then
-    log_success compiler_options filename debug_time;
-  Compile.(ret.bytecode_segments, ret.hhbc_options, log_config_json)
 
 let extract_facts ~compiler_options ~config_jsons ~filename text =
   let (co, log_config_json) =

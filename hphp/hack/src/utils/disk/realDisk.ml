@@ -52,7 +52,15 @@ let rec mkdir_p = function
   | "" -> failwith "Unexpected empty directory, should never happen"
   | d when not (Sys.file_exists d) ->
     mkdir_p (Filename.dirname d);
-    (try Unix.mkdir d 0o777 with Unix.Unix_error (Unix.EEXIST, _, _) -> ())
+    let old_mask = Unix.umask 0 in
+    Utils.try_finally
+      ~f:
+        begin
+          fun () ->
+          try Unix.mkdir d 0o777
+          with Unix.Unix_error (Unix.EEXIST, _, _) -> ()
+        end
+      ~finally:(fun () -> ignore (Unix.umask old_mask))
   | d when Sys.is_directory d -> ()
   | d -> raise (NotADirectory d)
 

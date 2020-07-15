@@ -348,45 +348,6 @@ void insert_assertions(const Index& index,
   }
 }
 
-bool persistence_check(php::ConstFunc func) {
-  auto bid = func->mainEntry;
-  while (bid != NoBlockId) {
-    auto const& blk = func.blocks()[bid];
-    for (auto& op : blk->hhbcs) {
-      switch (op.op) {
-        case Op::Nop:
-        case Op::DefCls:
-        case Op::DefClsNop:
-        case Op::DefCns:
-        case Op::DefTypeAlias:
-        case Op::DefRecord:
-        case Op::Null:
-        case Op::True:
-        case Op::False:
-        case Op::Int:
-        case Op::Double:
-        case Op::String:
-        case Op::Vec:
-        case Op::Dict:
-        case Op::Keyset:
-        case Op::Array:
-          continue;
-        case Op::PopC:
-          // Not strictly no-side effects, but as long as the rest of
-          // the unit is limited to the above, we're fine (and we expect
-          // one following a DefCns).
-          continue;
-        case Op::RetC:
-          continue;
-        default:
-          return false;
-      }
-    }
-    bid = blk->fallthrough;
-  }
-  return true;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 template<class Gen>
@@ -1033,13 +994,6 @@ void update_bytecode(
     }
   }
   blockUpdates.clear();
-
-  if (is_pseudomain(func) &&
-      func->unit->persistent.load(std::memory_order_relaxed)) {
-    func->unit->persistent_pseudomain.store(
-      persistence_check(func), std::memory_order_relaxed
-    );
-  }
 }
 
 //////////////////////////////////////////////////////////////////////

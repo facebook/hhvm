@@ -3876,9 +3876,7 @@ Index::~Index() {}
 
 void Index::mark_persistent_types_and_functions(php::Program& program) {
   auto persist = [] (const php::Unit* unit) {
-    return
-      unit->persistent.load(std::memory_order_relaxed) &&
-      unit->persistent_pseudomain.load(std::memory_order_relaxed);
+    return unit->persistent.load(std::memory_order_relaxed);
   };
   for (auto& unit : program.units) {
     auto const persistent = persist(unit.get());

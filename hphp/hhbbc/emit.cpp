@@ -1322,12 +1322,12 @@ void emit_pseudomain(EmitUnitState& state,
   auto const func = php::ConstFunc(&pm);
   auto const info = emit_bytecode(state, ue, func);
   if (is_systemlib_part(unit)) {
-    ue.m_mergeOnly = true;
     auto const tv = make_tv<KindOfInt64>(1);
     ue.m_mainReturn = tv;
   } else {
-    ue.m_mergeOnly = ue.m_returnSeen && ue.m_mainReturn.m_type != KindOfUninit;
+    assertx(ue.m_returnSeen && ue.m_mainReturn.m_type != KindOfUninit);
   }
+  ue.m_mergeOnly = true;
 
   emit_finish_func(state, func, *fe, info);
 }

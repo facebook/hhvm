@@ -372,20 +372,16 @@ std::string warmupStatusString() {
   std::string status_str;
 
   if (!s_warmedUp.load(std::memory_order_relaxed)) {
-    // 1. Are we still profiling new functions?
-    if (shouldProfileNewFuncs()) {
-      status_str = "New functions are still being profiled.\n";
-    }
-    // 2. Has retranslateAll happened yet?
-    else if (jit::mcgen::retranslateAllPending()) {
+    if (jit::mcgen::retranslateAllPending()) {
       status_str = "Waiting on retranslateAll().\n";
-    }
-    // 3. Has code size in both main and hot plateaued?
-    else {
+    } else {
       auto checkCodeSize = [&](std::string name) {
         assertx(!s_counters.empty());
         auto series = s_counters.at(name);
-
+        if (!series) {
+          status_str = "initializing";
+          return;
+        }
         auto const codeSizeRate = series->getRateByDuration(
           std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds));
         if (codeSizeRate > RuntimeOption::EvalJitWarmupMaxCodeGenRate) {

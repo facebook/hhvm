@@ -4,5 +4,3 @@
     protected static function foo() {
 }
   }
-
-$x = 1;

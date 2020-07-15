@@ -2,10 +2,11 @@
 
 namespace AutoimportTest;
 
-include 'autoimport_defs.inc';
+
 
 class ContainerExt extends Container {}
 <<__EntryPoint>> function main(): void {
+include 'autoimport_defs.inc';
 \var_dump(Container::class);
 
 $a = new ContainerExt;

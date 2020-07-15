@@ -222,7 +222,7 @@ fn print_program_<W: Write>(
 
     if let Some((fop, p, msg)) = &prog.fatal {
         newline(w)?;
-        let (line_begin, line_end, col_begin, col_end) = if p.is_none() {
+        let (line_begin, line_end, col_begin, col_end) = if p.is_none() || !p.is_valid() {
             (1, 1, 0, 0)
         } else {
             p.info_pos_extended()

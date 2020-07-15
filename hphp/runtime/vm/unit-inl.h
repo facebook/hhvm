@@ -124,6 +124,10 @@ inline const UnitExtended* Unit::getExtended() const {
   return static_cast<const UnitExtended*>(this);
 }
 
+inline const FatalInfo* Unit::getFatalInfo() const {
+  return m_fatalInfo.get();
+}
+
 inline int Unit::repoID() const {
   return m_repoId;
 }

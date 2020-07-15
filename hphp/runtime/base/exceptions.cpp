@@ -193,6 +193,19 @@ void raise_fatal_error(const char* msg,
   throw ex;
 }
 
+[[noreturn]]
+void raise_parse_error(const StringData* filename,
+                       const char* msg,
+                       const Location::Range& loc) {
+  VMParserFrame parserFrame;
+  parserFrame.filename = filename;
+  parserFrame.lineNumber = loc.line1;
+  Array bt = createBacktrace(BacktraceArgs()
+    .withSelf()
+    .setParserFrame(&parserFrame));
+  raise_fatal_error(msg, bt);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {

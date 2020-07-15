@@ -611,7 +611,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
           const_cast<StringData*>(m_filepath),
           m_sha1,
           FatalOp::Parse,
-          makeStaticString("A bytecode verification error was detected")
+          "A bytecode verification error was detected"
         )->create(saveLineTable);
       }
     }
@@ -626,6 +626,11 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
       m_litstrs.empty() && m_arrayTypeTable.empty() ?
     new Unit : new UnitExtended
   };
+
+  if (m_fatalUnit) {
+    FatalInfo info{m_fatalLoc, m_fatalOp, m_fatalMsg};
+    u->m_fatalInfo = std::make_unique<FatalInfo>(info);
+  }
 
   u->m_repoId = saveLineTable ? RepoIdInvalid : m_repoId;
   u->m_sn = m_sn;
@@ -782,7 +787,14 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
     (m_fileAttributes)
     (m_symbol_refs)
     (m_bcSha1)
+    (m_fatalUnit)
     ;
+  if (m_fatalUnit) {
+    sd(m_fatalLoc)
+      (m_fatalOp)
+      (m_fatalMsg)
+      ;
+  }
 
   if (RuntimeOption::EvalLoadFilepathFromUnitCache) {
     /* May be different than the unit origin: e.g. for hhas files. */
@@ -1690,21 +1702,20 @@ UnitRepoProxy::GetSourceLocTabStmt::get(int64_t unitSn,
 }
 
 std::unique_ptr<UnitEmitter>
-createFatalUnit(StringData* filename, const SHA1& sha1, FatalOp op,
-                StringData* err, Location::Range loc) {
+createFatalUnit(const StringData* filename, const SHA1& sha1, FatalOp op,
+                std::string err, Location::Range loc) {
   auto ue = std::make_unique<UnitEmitter>(sha1, SHA1{}, Native::s_noNativeFuncs,
                                           false);
   ue->m_filepath = filename;
   ue->m_isHHFile = true;
-  ue->initMain(1, 1);
-  ue->recordSourceLocation(loc, ue->bcPos());
-  ue->emitOp(OpString);
-  ue->emitInt32(ue->mergeLitstr(err));
-  ue->emitOp(OpFatal);
-  ue->emitByte(static_cast<uint8_t>(op));
-  FuncEmitter* fe = ue->getMain();
-  fe->maxStackCells = 1;
-  fe->finish(ue->bcPos());
+
+  ue->m_fatalUnit = true;
+  ue->m_fatalLoc = loc;
+  ue->m_fatalOp = op;
+  ue->m_fatalMsg = err;
+
+  ue->addTrivialPseudoMain();
+  ue->m_mergeOnly = false;
   return ue;
 }
 

@@ -124,6 +124,7 @@ struct FatalUnitError {
   Location::Range pos;
   FatalOp op;
   const std::string msg;
+  const StringData* filePath;
 };
 
 } // namespace
@@ -3548,7 +3549,7 @@ void parse_fatal(AsmState& as) {
     as.error(".fatal must have a message");
   }
   as.in.expectWs(';');
-  throw FatalUnitError{pos, op, msg};
+  throw FatalUnitError{pos, op, msg, as.ue->m_filepath};
 }
 
 /*
@@ -3748,20 +3749,20 @@ std::unique_ptr<UnitEmitter> assemble_string(
     as.ue = ue.get();
     parse(as);
   } catch (const FatalUnitError& e) {
-    ue = createFatalUnit(sd, sha1, e.op, makeStaticString(e.msg), e.pos);
+    auto const filePath = e.filePath ? e.filePath : sd;
+    ue = createFatalUnit(filePath, sha1, e.op, e.msg, e.pos);
   } catch (const FatalErrorException& e) {
     if (!swallowErrors) throw;
-    ue = createFatalUnit(sd, sha1, FatalOp::Runtime,
-                         makeStaticString(e.what()));
+    ue = createFatalUnit(sd, sha1, FatalOp::Runtime, e.what());
   } catch (AssemblerError& e) {
     if (!swallowErrors) {
       e.hhas = std::string{code, (size_t)codeLen};
       throw;
     }
-    ue = createFatalUnit(sd, sha1, FatalOp::Runtime, makeStaticString(e.what()));
+    ue = createFatalUnit(sd, sha1, FatalOp::Runtime, e.what());
   } catch (const AssemblerFatal& e) {
     if (!swallowErrors) throw;
-    ue = createFatalUnit(sd, sha1, FatalOp::Runtime, makeStaticString(e.what()));
+    ue = createFatalUnit(sd, sha1, FatalOp::Runtime, e.what());
   } catch (const std::exception& e) {
     if (!swallowErrors) {
       // assembler should throw only AssemblerErrors and FatalErrorExceptions
@@ -3770,8 +3771,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
         std::string{code, (size_t)codeLen}
       );
     }
-    ue = createFatalUnit(sd, sha1, FatalOp::Runtime,
-                         makeStaticString(e.what()));
+    ue = createFatalUnit(sd, sha1, FatalOp::Runtime, e.what());
   }
 
   return ue;

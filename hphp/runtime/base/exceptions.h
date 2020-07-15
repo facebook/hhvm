@@ -25,6 +25,7 @@
 
 #include "hphp/util/portability.h"
 #include "hphp/util/exception.h"
+#include "hphp/parser/location.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/util/rds-local.h"
@@ -101,6 +102,10 @@ private:
 void raise_fatal_error(const char* msg, const Array& bt = null_array,
                        bool recoverable = false, bool silent = false,
                        bool throws = true);
+
+[[noreturn]] void raise_parse_error(const StringData*,
+                                    const char*,
+                                    const Location::Range& loc);
 
 //////////////////////////////////////////////////////////////////////
 

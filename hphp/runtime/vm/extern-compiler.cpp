@@ -1325,7 +1325,7 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
         makeStaticString(m_filename),
         m_sha1,
         FatalOp::Runtime,
-        makeStaticString(err));
+        err);
     }
   );
 

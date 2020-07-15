@@ -4916,20 +4916,18 @@ OPTBLD_INLINE void iopEval(PC origpc, PC& pc) {
   if (!RuntimeOption::EvalJitEvaledCode) {
     unit->setInterpretOnly();
   }
-  const StringData* msg;
-  int line = 0;
 
   vmStack().popC();
-  if (unit->parseFatal(msg, line)) {
+  if (auto const info = unit->getFatalInfo()) {
     auto const errnum = static_cast<int>(ErrorMode::WARNING);
     if (vm->errorNeedsLogging(errnum)) {
       // manual call to Logger instead of logError as we need to use
       // evalFileName and line as the exception doesn't track the eval()
       Logger::Error(
         "\nFatal error: %s in %s on line %d",
-        msg->data(),
+        info->m_fatalMsg.c_str(),
         evalFilename.c_str(),
-        line
+        info->m_fatalLoc.line1
       );
     }
 

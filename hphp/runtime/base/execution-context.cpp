@@ -2338,7 +2338,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
 
 void ExecutionContext::enterDebuggerDummyEnv() {
   static Unit* s_debuggerDummy = compile_debugger_string(
-    "<?php?>", 7, RepoOptions::defaults()
+    "<?hh", 4, RepoOptions::defaults()
   );
   // Ensure that the VM stack is completely empty (vmfp() should be null)
   // and that we're not in a nested VM (reentrancy)

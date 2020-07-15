@@ -158,6 +158,13 @@ struct BlobEncoder {
     for (auto w : sha1.q) encode(w);
   }
 
+  void encode(Location::Range loc) {
+    encode(loc.line0);
+    encode(loc.char0);
+    encode(loc.line1);
+    encode(loc.char1);
+  }
+
   void encode(DataType t) {
     // always encode DataType as int8 even if it's a bigger size.
     assertx(DataType(int8_t(t)) == t);
@@ -355,6 +362,15 @@ struct BlobDecoder {
 
   void decode(SHA1& sha1) {
     for (auto& w : sha1.q) decode(w);
+  }
+
+  void decode(Location::Range& loc) {
+    int line0, char0, line1, char1;
+    decode(line0);
+    decode(char0);
+    decode(line1);
+    decode(char1);
+    loc = {line0, char0, line1, char1};
   }
 
   void decode(DataType& t) {

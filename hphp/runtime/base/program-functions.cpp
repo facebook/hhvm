@@ -1980,16 +1980,9 @@ static int execute_program_impl(int argc, char** argv) {
       if (unit == nullptr) {
         throw FileOpenException(po.lint);
       }
-      const StringData* msg;
-      int line;
-      if (unit->compileTimeFatal(msg, line)) {
-        VMParserFrame parserFrame;
-        parserFrame.filename = filename;
-        parserFrame.lineNumber = line;
-        Array bt = createBacktrace(BacktraceArgs()
-                                   .withSelf()
-                                   .setParserFrame(&parserFrame));
-        raise_fatal_error(msg->data(), bt);
+      if (auto const info = unit->getFatalInfo()) {
+        raise_parse_error(unit->filepath(), info->m_fatalMsg.c_str(),
+                          info->m_fatalLoc);
       }
     } catch (FileOpenException& e) {
       Logger::Error(e.getMessage());

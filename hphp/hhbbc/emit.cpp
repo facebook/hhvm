@@ -1541,6 +1541,13 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   ue->m_metaData = unit.metaData;
   ue->m_fileAttributes = unit.fileAttributes;
 
+  if (unit.fatalInfo) {
+    ue->m_fatalUnit = true;
+    ue->m_fatalOp = unit.fatalInfo->fatalOp;
+    ue->m_fatalLoc = unit.fatalInfo->fatalLoc;
+    ue->m_fatalMsg = unit.fatalInfo->fatalMsg;
+  }
+
   EmitUnitState state { index, &unit };
   state.classOffsets.resize(unit.classes.size(), kInvalidOffset);
 

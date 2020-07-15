@@ -426,13 +426,14 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
   }
 }
 
+std::string get_srcloc_str(SourceLoc loc) {
+  if (!loc.valid()) return "-1:-1,-1:-1";
+  return folly::sformat("{}:{},{}:{}",
+                        loc.line0, loc.char0, loc.line1, loc.char1);
+}
+
 void print_srcloc(Output& out, SourceLoc loc) {
-  if (!loc.valid()) {
-    out.fmtln(".srcloc -1:-1,-1:-1;");
-  } else {
-    out.fmtln(".srcloc {}:{},{}:{};",
-            loc.line0, loc.char0, loc.line1, loc.char1);
-  }
+  out.fmtln(".srcloc {};", get_srcloc_str(loc));
 }
 
 void print_func_body(Output& out, const FuncInfo& finfo) {
@@ -873,11 +874,22 @@ void print_hh_file(Output& out, const Unit* unit) {
   else out.fmtln(".hh_file 0;");
 }
 
+void print_fatal(Output& out, const Unit* unit) {
+  if (auto const info = unit->getFatalInfo()) {
+    out.nl();
+    out.fmtln(".fatal {} {} {};",
+              get_srcloc_str(SourceLoc{info->m_fatalLoc}),
+              subopToName(info->m_fatalOp),
+              escaped(info->m_fatalMsg));
+  }
+}
+
 void print_unit_metadata(Output& out, const Unit* unit) {
   out.nl();
 
   out.fmtln(".filepath {};", escaped(unit->filepath()));
   print_hh_file(out, unit);
+  print_fatal(out, unit);
   if (!unit->fileAttributes().empty()) {
     out.nl();
     out.fmtln(".file_attributes [{}] ;", user_attrs(&unit->fileAttributes()));

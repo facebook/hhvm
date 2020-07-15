@@ -1725,6 +1725,12 @@ void Unit::merge() {
     initialMerge();
   }
 
+  if (m_fatalInfo) {
+    raise_parse_error(filepath(),
+                      m_fatalInfo->m_fatalMsg.c_str(),
+                      m_fatalInfo->m_fatalLoc);
+  }
+
   if (UNLIKELY(isDebuggerAttached())) {
     mergeImpl<true>(mergeInfo());
   } else {
@@ -2248,45 +2254,6 @@ std::string Unit::toString() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
-
-bool Unit::compileTimeFatal(const StringData*& msg, int& line) const {
-  auto entry = getMain(nullptr, false)->getEntry();
-  auto pc = entry;
-  // String <id>; Fatal;
-  // ^^^^^^
-  if (decode_op(pc) != Op::String) {
-    return false;
-  }
-  // String <id>; Fatal;
-  //        ^^^^
-  Id id = *(Id*)pc;
-  pc += sizeof(Id);
-  // String <id>; Fatal;
-  //              ^^^^^
-  if (decode_op(pc) != Op::Fatal) {
-    return false;
-  }
-  msg = lookupLitstrId(id);
-  line = getLineNumber(Offset(pc - entry));
-  return true;
-}
-
-bool Unit::parseFatal(const StringData*& msg, int& line) const {
-  if (!compileTimeFatal(msg, line)) {
-    return false;
-  }
-
-  auto pc = getMain(nullptr, false)->getEntry();
-
-  // String <id>
-  decode_op(pc);
-  pc += sizeof(Id);
-
-  // Fatal <kind>
-  decode_op(pc);
-  auto kind_char = *pc;
-  return kind_char == static_cast<uint8_t>(FatalOp::Parse);
-}
 
 std::string mangleReifiedGenericsName(const ArrayData* tsList) {
   std::vector<std::string> l;

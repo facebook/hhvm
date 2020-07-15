@@ -111,13 +111,12 @@ void ProcessInit() {
                                                "/:systemlib.php",
                                                Native::s_systemNativeFuncs);
 
-  const StringData* msg;
-  int line;
-  if (SystemLib::s_unit->compileTimeFatal(msg, line)) {
+  if (auto const info = SystemLib::s_unit->getFatalInfo()) {
     Logger::Error("An error has been introduced into the systemlib, "
                   "but we cannot give you a file and line number right now.");
     Logger::Error("Check all of your changes to hphp/system/php");
-    Logger::Error("HipHop Parse Error: %s %d", msg->data(), line);
+    Logger::Error("HipHop Parse Error: %s %d",
+                  info->m_fatalMsg.c_str(), info->m_fatalLoc.line1);
     _exit(1);
   }
 
@@ -125,12 +124,12 @@ void ProcessInit() {
     SystemLib::s_hhas_unit = compile_systemlib_string(
       hhas.c_str(), hhas.size(), "/:systemlib.hhas",
       Native::s_systemNativeFuncs);
-    if (SystemLib::s_hhas_unit->compileTimeFatal(msg, line)) {
+    if (auto const info = SystemLib::s_hhas_unit->getFatalInfo()) {
       Logger::Error("An error has been introduced in the hhas portion of "
                     "systemlib.");
       Logger::Error("Check all of your changes to hhas files in "
                     "hphp/system/php");
-      Logger::Error("HipHop Parse Error: %s", msg->data());
+      Logger::Error("HipHop Parse Error: %s", info->m_fatalMsg.c_str());
       _exit(1);
     }
   }

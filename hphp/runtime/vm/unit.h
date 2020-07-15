@@ -71,6 +71,19 @@ enum class UnitOrigin {
   Eval = 1
 };
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Fatal info
+
+/*
+ * Information regarding parse/runtime errors in units
+ */
+struct FatalInfo {
+  Location::Range m_fatalLoc;
+  FatalOp m_fatalOp;
+  std::string m_fatalMsg;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // Location tables.
 
@@ -894,21 +907,6 @@ public:
   // Other methods.
 
   /*
-   * Is this Unit a compile-time fatal?
-   *
-   * A compile-time fatal is encoded as a pseudomain that contains precisely:
-   *
-   *   String <id>; Fatal;
-   *
-   * Decode enough of pseudomain to determine whether it contains a
-   * compile-time fatal, and if so, extract the error message and line number.
-   *
-   * Parse-time fatals are a subset of compile-time fatals.
-   */
-  bool compileTimeFatal(const StringData*& msg, int& line) const;
-  bool parseFatal(const StringData*& msg, int& line) const;
-
-  /*
    * Get or set whether this Unit is interpret-only.
    *
    * This is used by the debugger to signal to the JIT that eval'd commands
@@ -921,6 +919,12 @@ public:
    * Does this unit correspond to a file with "<?hh" at the top?
    */
   bool isHHFile() const;
+
+  /*
+   * Get parse/runtime failure information if this unit is created as
+   * a result of one.
+   */
+  const FatalInfo* getFatalInfo() const;
 
   UserAttributeMap metaData() const;
 
@@ -1000,6 +1004,7 @@ private:
   mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;
+  std::unique_ptr<FatalInfo> m_fatalInfo{nullptr};
 
   rds::Link<req::dynamic_bitset, rds::Mode::Normal> m_coverage;
 };

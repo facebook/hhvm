@@ -63,13 +63,11 @@ void Extension::CompileSystemlib(const std::string &slib,
                                              nativeFuncs);
   always_assert_flog(unit, "No unit created for systemlib `{}'", moduleName);
 
-  const StringData* msg;
-  int line;
-  if (unit->compileTimeFatal(msg, line) || unit->parseFatal(msg, line)) {
+  if (auto const info = unit->getFatalInfo()) {
     std::fprintf(stderr, "Systemlib `%s' contains a fataling unit: %s, %d\n",
                  name.c_str(),
-                 msg->data(),
-                 line);
+                 info->m_fatalMsg.c_str(),
+                 info->m_fatalLoc.line1);
     _Exit(0);
   }
 

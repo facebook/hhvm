@@ -662,6 +662,16 @@ struct Record {
 };
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Information regarding a runtime/parse error in a unit
+ */
+struct FatalInfo {
+  Location::Range fatalLoc;
+  FatalOp fatalOp;
+  std::string fatalMsg;
+};
+
 /*
  * Representation of a php file (normal compilation unit).
  */
@@ -673,6 +683,7 @@ struct Unit {
   std::atomic<bool> persistent{true};
   std::atomic<bool> persistent_pseudomain{false};
   std::unique_ptr<Func> pseudomain;
+  std::unique_ptr<FatalInfo> fatalInfo{nullptr};
   CompactVector<std::unique_ptr<Func>> funcs;
   CompactVector<std::unique_ptr<Class>> classes;
   CompactVector<std::unique_ptr<Record>> records;

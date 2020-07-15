@@ -1136,6 +1136,11 @@ void parse_unit(php::Program& prog, const UnitEmitter* uep) {
   ret->metaData = ue.m_metaData;
   ret->fileAttributes = ue.m_fileAttributes;
 
+  if (ue.m_fatalUnit) {
+    php::FatalInfo fi{ue.m_fatalLoc, ue.m_fatalOp, ue.m_fatalMsg};
+    ret->fatalInfo = std::make_unique<php::FatalInfo>(fi);
+  }
+
   ParseUnitState puState{ prog.nextFuncId };
   if (ue.hasSourceLocInfo()) {
     puState.srcLocInfo = ue.createSourceLocTable();

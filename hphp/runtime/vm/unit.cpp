@@ -189,7 +189,6 @@ Unit::Unit()
   , m_extended(false)
   , m_serialized(false)
   , m_ICE(false)
-  , m_mainReturn(make_tv<KindOfUninit>())
 {}
 
 Unit::~Unit() {

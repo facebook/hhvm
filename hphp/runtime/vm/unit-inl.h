@@ -402,11 +402,6 @@ inline bool Unit::isEmpty() const {
   return m_mergeState.load(std::memory_order_relaxed) & MergeState::Empty;
 }
 
-inline const TypedValue* Unit::getMainReturn() const {
-  assertx(isMergeOnly());
-  return &m_mainReturn;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
 

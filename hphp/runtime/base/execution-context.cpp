@@ -1584,7 +1584,7 @@ TypedValue ExecutionContext::invokePseudoMain(const Func* f,
   toMerge->merge();
   if (toMerge->isMergeOnly()) {
     Stats::inc(Stats::PseudoMain_Skipped);
-    return *toMerge->getMainReturn();
+    return make_tv<KindOfInt64>(1);
   }
 
   Stats::inc(Stats::PseudoMain_Executed);
@@ -1873,7 +1873,7 @@ bool ExecutionContext::evalUnit(Unit* unit, PC callPC, PC& pc, int funcType) {
   unit->merge();
   if (unit->isMergeOnly()) {
     Stats::inc(Stats::PseudoMain_Skipped);
-    *vmStack().allocTV() = *unit->getMainReturn();
+    *vmStack().allocTV() = make_tv<KindOfInt64>(1);
     return false;
   }
 

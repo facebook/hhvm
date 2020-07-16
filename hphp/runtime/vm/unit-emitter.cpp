@@ -95,7 +95,6 @@ UnitEmitter::UnitEmitter(const SHA1& sha1,
                          const Native::FuncTable& nativeFuncs,
                          bool useGlobalIds)
   : m_useGlobalIds(useGlobalIds)
-  , m_mainReturn(make_tv<KindOfUninit>())
   , m_nativeFuncs(nativeFuncs)
   , m_sha1(sha1)
   , m_bcSha1(bcSha1)
@@ -204,11 +203,6 @@ void UnitEmitter::addTrivialPseudoMain() {
   emitOp(OpRetC);
   mfe->maxStackCells = 1;
   mfe->finish(bcPos());
-
-  TypedValue mainReturn;
-  mainReturn.m_data.num = 1;
-  mainReturn.m_type = KindOfInt64;
-  m_mainReturn = mainReturn;
   m_mergeOnly = true;
 }
 
@@ -256,20 +250,14 @@ void UnitEmitter::addPreClassEmitter(PreClassEmitter* pce) {
     pce->setHoistable(PreClass::Mergeable);
   }
   auto hoistable = pce->hoistability();
-
+  if (hoistable <= PreClass::Mergeable) m_allClassesHoistable = false;
   if (hoistable >= PreClass::MaybeHoistable) {
     m_hoistablePreClassSet.insert(pce->name());
     m_hoistablePceIdList.push_back(pce->id());
-  } else {
-    m_allClassesHoistable = false;
   }
   if (hoistable >= PreClass::Mergeable &&
       hoistable < PreClass::AlwaysHoistable) {
-    if (m_returnSeen) {
-      m_allClassesHoistable = false;
-    } else {
-      pushMergeableClass(pce);
-    }
+    pushMergeableClass(pce);
   }
 }
 
@@ -637,7 +625,6 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_bc = allocateBCRegion(m_bc, m_bclen);
   u->m_bclen = m_bclen;
   u->m_filepath = m_filepath;
-  u->m_mainReturn = m_mainReturn;
   u->m_mergeOnly = m_mergeOnly;
   u->m_isHHFile = m_isHHFile;
   u->m_dirpath = makeStaticString(FileUtil::dirname(StrNR{m_filepath}));
@@ -780,8 +767,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
 
 template<class SerDe>
 void UnitEmitter::serdeMetaData(SerDe& sd) {
-  sd(m_mainReturn)
-    (m_mergeOnly)
+  sd(m_mergeOnly)
     (m_isHHFile)
     (m_metaData)
     (m_fileAttributes)
@@ -808,7 +794,6 @@ void UnitEmitter::serde(SerDe& sd) {
 
   serdeMetaData(sd);
   // These are not touched by serdeMetaData:
-  sd(m_returnSeen);
   sd(m_ICE);
   sd(m_allClassesHoistable);
 

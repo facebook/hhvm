@@ -836,14 +836,6 @@ public:
    */
   bool isEmpty() const;
 
-  /*
-   * Get the return value of the pseudomain, or KindOfUninit if not
-   * known.
-   *
-   * @requires: isMergeOnly()
-   */
-  const TypedValue* getMainReturn() const;
-
   /////////////////////////////////////////////////////////////////////////////
   // Info arrays.                                                      [static]
 
@@ -981,7 +973,6 @@ private:
   bool m_ICE : 1; // was this unit the result of an internal compiler error
   LowStringPtr m_dirpath{nullptr};
 
-  TypedValue m_mainReturn;
   PreClassPtrVec m_preClasses;
   TypeAliasVec m_typeAliases;
   ConstantVec m_constants;

@@ -37,7 +37,7 @@ data exists in the other tables.
   BEGIN TRANSACTION;
   CREATE TABLE Unit_77fae842fab099b2eb4771f620e15a4bbf3883aa(
     unitSn INTEGER PRIMARY KEY, md5 BLOB, bc BLOB,
-    mainReturn BLOB, mergeable INTEGER,lines BLOB, UNIQUE (md5));
+    mergeable INTEGER,lines BLOB, UNIQUE (md5));
   COMMIT;
 
 Rather than use the bulky md5 blob as a unique identifier throughout the repo,

@@ -283,8 +283,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
   bool traceBc = false;
 
-  Type tos{};
-
   SCOPE_ASSERT_DETAIL("emit") {
     std::string ret;
     for (auto bid : func.blockRange()) {
@@ -300,22 +298,15 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     if (!pseudomain) return;
     switch (bc.op) {
       case Op::DefCls:
-      case Op::DefClsNop:
-        if (!ue.m_returnSeen) {
-          auto const& cls = euState.unit->classes[
-            bc.op == Op::DefCls ? bc.DefCls.arg1 : bc.DefClsNop.arg1];
-          if (cls->hoistability == PreClass::NotHoistable) {
-            cls->hoistability = PreClass::Mergeable;
-          }
+      case Op::DefClsNop: {
+        auto const& cls = euState.unit->classes[
+          bc.op == Op::DefCls ? bc.DefCls.arg1 : bc.DefClsNop.arg1];
+        if (cls->hoistability == PreClass::NotHoistable) {
+          cls->hoistability = PreClass::Mergeable;
         }
         return;
-      case Op::AssertRATL:
-      case Op::AssertRATStk:
-      case Op::Nop:
-        return;
-
+      }
       case Op::DefCns: {
-        if (ue.m_returnSeen || tos.subtypeOf(BBottom)) break;
         auto cid = bc.DefCns.arg1;
         ue.pushMergeableId(Unit::MergeKind::Define, cid);
         euState.processedConstant.insert(cid);
@@ -332,35 +323,9 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
         ue.pushMergeableRecord(rid);
         return;
       }
-
-      case Op::Null:   tos = TInitNull; return;
-      case Op::True:   tos = TTrue; return;
-      case Op::False:  tos = TFalse; return;
-      case Op::Int:    tos = ival(bc.Int.arg1); return;
-      case Op::Double: tos = dval(bc.Double.dbl1); return;
-      case Op::String: tos = sval(bc.String.str1); return;
-      case Op::Vec:    tos = vec_val(bc.Vec.arr1); return;
-      case Op::Dict:   tos = dict_val(bc.Dict.arr1); return;
-      case Op::Keyset: tos = keyset_val(bc.Keyset.arr1); return;
-      case Op::Array:  tos = aval(bc.Array.arr1); return;
-      case Op::PopC:
-        tos = TBottom;
-        return;
-      case Op::RetC: {
-        if (ue.m_returnSeen || tos.subtypeOf(BBottom)) break;
-        auto top = tv(tos);
-        assertx(top);
-        ue.m_returnSeen = true;
-        ue.m_mainReturn = *top;
-        tos = TBottom;
-        return;
-      }
       default:
-        break;
+        return;
     }
-    ue.m_returnSeen = true;
-    ue.m_mainReturn = make_tv<KindOfUninit>();
-    tos = TBottom;
   };
 
   auto const map_local = [&] (LocalId id) {
@@ -1321,12 +1286,6 @@ void emit_pseudomain(EmitUnitState& state,
   auto const fe = ue.getMain();
   auto const func = php::ConstFunc(&pm);
   auto const info = emit_bytecode(state, ue, func);
-  if (is_systemlib_part(unit)) {
-    auto const tv = make_tv<KindOfInt64>(1);
-    ue.m_mainReturn = tv;
-  } else {
-    assertx(ue.m_returnSeen && ue.m_mainReturn.m_type != KindOfUninit);
-  }
   ue.m_mergeOnly = true;
 
   emit_finish_func(state, func, *fe, info);

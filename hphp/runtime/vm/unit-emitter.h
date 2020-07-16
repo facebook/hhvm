@@ -421,11 +421,9 @@ public:
 
   bool m_mergeOnly{false};
   bool m_isHHFile{false};
-  bool m_returnSeen{false};
   bool m_ICE{false}; // internal compiler error
   bool m_useGlobalIds{0};
   bool m_fatalUnit{false}; // parse/runtime error
-  TypedValue m_mainReturn;
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;
   CompactVector<

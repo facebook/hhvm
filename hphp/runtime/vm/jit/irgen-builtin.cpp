@@ -591,7 +591,8 @@ SSATmp* opt_is_vec_or_varray(IRGS& env, const ParamPrep& params) {
     return cns(env, true);
   }
 
-  if (!type.maybe(TVec) && !type.maybe(TVArr)) {
+  if (!type.maybe(TVec) && !type.maybe(TVArr) &&
+      !(type.maybe(TClsMeth) && RO::EvalIsCompatibleClsMethType)) {
     return cns(env, false);
   }
 

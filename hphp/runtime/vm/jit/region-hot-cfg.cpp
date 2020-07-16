@@ -187,6 +187,7 @@ private:
       if (!m_inlining) {
         logLowPriPerfWarning(
           "selectHotCFG",
+          RO::EvalSelectHotCFGSampleRate * kDefaultPerfWarningRate,
           [&](StructuredLogEntry& cols) {
             cols.setInt("maxBCInstrSize", m_numBCInstrs);
             cols.setInt("tidRegionInstrSize", tidInstrs);

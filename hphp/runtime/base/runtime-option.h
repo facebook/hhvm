@@ -1071,7 +1071,9 @@ struct RuntimeOption {
    * If we don't end up using a reusable TC, we'll drop the padding. */ \
   F(uint32_t, ReusableTCPadding, 128)                                   \
   F(int64_t,  StressUnitCacheFreq, 0)                                   \
+  /* Perf warning sampling rates. The SelectHotCFG warning is noisy. */ \
   F(int64_t, PerfWarningSampleRate, 1)                                  \
+  F(int64_t, SelectHotCFGSampleRate, 100)                               \
   F(int64_t, FunctionCallSampleRate, 0)                                 \
   F(double, InitialLoadFactor, 1.0)                                     \
   /* When the "allow" flag is off, we assume that all array-likes have  \

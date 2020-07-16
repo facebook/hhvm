@@ -43,10 +43,19 @@ def copy(source: Path, dest: Path) -> None:
     shutil.copy(source, dest)
 
 
+DEFAULT_EXEC_ENV = {
+    # Local configuration may be different on local vs. CI machines, so just
+    # don't use one for test runs.
+    "HH_LOCALCONF_PATH": "/tmp/nonexistent"
+}
+
+
 def exec(args: List[str], *, raise_on_error: bool = True) -> str:
     command_line = " ".join(args)
     log(f"Running: {command_line}")
-    result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    result = subprocess.run(
+        args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=DEFAULT_EXEC_ENV
+    )
     stdout = result.stdout.decode()
     if raise_on_error and result.returncode != 0:
         # stderr is pretty noisy ordinarily, and causes the logs to be

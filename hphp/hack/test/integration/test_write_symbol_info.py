@@ -111,7 +111,7 @@ max_workers = 2
                             )
 
     def predicate_name_to_type(self, predicate_name: str) -> Optional[Type[Struct]]:
-        ver = 2
+        ver = 3
         predicate_dict = {
             "hack.ClassConstDeclaration.{}".format(ver): ClassConstDeclaration,
             "hack.ClassConstDefinition.{}".format(ver): ClassConstDefinition,

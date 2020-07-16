@@ -47,16 +47,17 @@ def exec(args: List[str], *, raise_on_error: bool = True) -> str:
     command_line = " ".join(args)
     log(f"Running: {command_line}")
     result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout = result.stdout
+    stdout = result.stdout.decode()
     if raise_on_error and result.returncode != 0:
         # stderr is pretty noisy ordinarily, and causes the logs to be
         # truncated with its length, so only surface it in cases of error.
         stderr = result.stderr.decode()
         raise RuntimeError(
             f"Command {command_line} failed with return code {result.returncode}.\n"
+            + f"Stdout: {stdout}\n"
             + f"Stderr: {stderr}\n"
         )
-    return stdout.decode()
+    return stdout
 
 
 @dataclass

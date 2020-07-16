@@ -1894,6 +1894,7 @@ Class::Class(PreClass* preClass, Class* parent,
   setClassVec();
   setRequirements();
   setNativeDataInfo();
+  initClosure();
   setEnumType();
   setInstanceMemoCacheInfo();
   setLSBMemoCacheInfo();
@@ -3704,6 +3705,19 @@ void Class::setNativeDataInfo() {
       break;
     }
   }
+}
+
+void Class::initClosure() {
+  if (!isBuiltin() || !m_preClass->name()->equal(s_Closure.get())) return;
+
+  c_Closure::cls_Closure = this;
+  assertx(!hasMemoSlots());
+  allocExtraData();
+  auto& extraData = *m_extra.raw();
+  extraData.m_instanceCtor = c_Closure::instanceCtor;
+  extraData.m_instanceCtorUnlocked = c_Closure::instanceCtor;
+  extraData.m_instanceDtor = c_Closure::instanceDtor;
+  m_releaseFunc = c_Closure::instanceDtor;
 }
 
 bool Class::hasNativePropHandler() const {

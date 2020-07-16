@@ -164,6 +164,26 @@ int c_Closure::initActRecFromClosure(ActRec* ar, TypedValue* sp) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+ObjectData* c_Closure::instanceCtor(Class* cls) {
+  raise_error("Can't create a Closure directly");
+}
+
+void c_Closure::instanceDtor(ObjectData* obj, const Class* cls) {
+  if (UNLIKELY(obj->getAttribute(ObjectData::IsWeakRefed))) {
+    WeakRefData::invalidateWeakRef((uintptr_t)obj);
+  }
+
+  auto closure = c_Closure::fromObject(obj);
+  if (auto t = closure->getThis()) decRefObj(t);
+
+  closure->props()->release(cls->countablePropsEnd());
+
+  auto hdr = closure->hdr();
+  tl_heap->objFree(hdr, hdr->size());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 ObjectData* createClosureRepoAuthRawSmall(Class* cls, size_t size,
                                           size_t index) {
   assertx(!(cls->attrs() & (AttrAbstract|AttrInterface|AttrTrait|AttrEnum)));
@@ -202,10 +222,6 @@ ObjectData* createClosure(Class* cls) {
   return createClosureRepoAuth(cls);
 }
 
-static ObjectData* closureInstanceCtor(Class* cls) {
-  raise_error("Can't create a Closure directly");
-}
-
 // should never be called
 ATTRIBUTE_USED ATTRIBUTE_UNUSED EXTERNALLY_VISIBLE
 static void closuseInstanceReference(void) {
@@ -233,35 +249,9 @@ ObjectData* c_Closure::clone() {
   return ret;
 }
 
-static void closureInstanceDtor(ObjectData* obj, const Class* cls) {
-  if (UNLIKELY(obj->getAttribute(ObjectData::IsWeakRefed))) {
-    WeakRefData::invalidateWeakRef((uintptr_t)obj);
-  }
-
-  auto closure = c_Closure::fromObject(obj);
-  if (auto t = closure->getThis()) decRefObj(t);
-
-  closure->props()->release(cls->countablePropsEnd());
-
-  auto hdr = closure->hdr();
-  tl_heap->objFree(hdr, hdr->size());
-}
-
 void StandardExtension::loadClosure() {
   Native::registerNativePropHandler<ClosurePropHandler>(s_Closure);
   HHVM_SYS_ME(Closure, __debugInfo);
-}
-
-void StandardExtension::initClosure() {
-  c_Closure::cls_Closure = Unit::lookupClass(s_Closure.get());
-  assertx(c_Closure::cls_Closure);
-  assertx(!c_Closure::cls_Closure->hasMemoSlots());
-  c_Closure::cls_Closure->allocExtraData();
-  auto& extraData = *c_Closure::cls_Closure->m_extra.raw();
-  extraData.m_instanceCtor = extraData.m_instanceCtorUnlocked =
-    closureInstanceCtor;
-  extraData.m_instanceDtor = closureInstanceDtor;
-  c_Closure::cls_Closure->m_releaseFunc = closureInstanceDtor;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

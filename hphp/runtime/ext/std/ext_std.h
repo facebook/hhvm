@@ -16,7 +16,6 @@ struct StandardExtension final : Extension {
   }
 
   void moduleInit() override {
-    initClosure();
     initStandard();
     initErrorFunc();
     initClassobj();
@@ -48,7 +47,6 @@ struct StandardExtension final : Extension {
   void initStandard();
   void initErrorFunc();
   void initClassobj();
-  void initClosure();
   void initNetwork();
   void initOptions();
   void initGc();

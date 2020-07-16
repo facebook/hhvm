@@ -1545,6 +1545,7 @@ private:
   void checkRequirementConstraints() const;
   void raiseUnsatisfiedRequirement(const PreClass::ClassRequirement*) const;
   void setNativeDataInfo();
+  void initClosure();
   void setInstanceMemoCacheInfo();
   void setLSBMemoCacheInfo();
   void setReleaseData();

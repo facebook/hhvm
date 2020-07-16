@@ -98,6 +98,10 @@ struct c_Closure final : ObjectData {
    * Returns the number of cells copied to the stack.
    */
   static int initActRecFromClosure(ActRec* ar, TypedValue* sp);
+  /////////////////////////////////////////////////////////////////////////////
+
+  static ObjectData* instanceCtor(Class* cls);
+  static void instanceDtor(ObjectData* obj, const Class* cls);
 
   /////////////////////////////////////////////////////////////////////////////
 

@@ -804,6 +804,14 @@ folly::Optional<Type> const_fold(ISS& env,
       auto retVal = g_context->invokeFuncFew(
         func, cls, args.size(), args.data(), false, false);
 
+      if (tvIsArrayLike(retVal)) {
+        if (auto const tag = provTagHere(env).get()) {
+          arrprov::TagOverride _(tag);
+          auto const tagged = arrprov::tagTvRecursively(retVal, /*flags=*/0);
+          tvMove(tagged, retVal);
+        }
+      }
+
       assert(tvIsPlausible(retVal));
       return retVal;
     }

@@ -1430,7 +1430,7 @@ ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
       tvSet(value, lval);
     }
   }
-  return ret;
+  return tagArrProv(ret);
 }
 
 ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
@@ -1457,7 +1457,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
         tvSet(srcElem->data, lval);
       }
     }
-    return ret;
+    return tagArrProv(ret);
   }
 
   if (UNLIKELY(!elems->hasVanillaPackedLayout())) {
@@ -1471,7 +1471,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
     ret->nextInsert(*src);
   }
 
-  return ret;
+  return tagArrProv(ret);
 
   // Note: currently caller is responsible for calling renumber after
   // this.  Should refactor so we handle it (we already know things
@@ -1671,7 +1671,7 @@ ArrayData* MixedArray::ToDictDict(ArrayData* ad, bool) {
 ArrayData* MixedArray::Renumber(ArrayData* adIn) {
   auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
   asMixed(ad)->compact(true);
-  return ad;
+  return tagArrProv(ad);
 }
 
 void MixedArray::OnSetEvalScalar(ArrayData* ad) {

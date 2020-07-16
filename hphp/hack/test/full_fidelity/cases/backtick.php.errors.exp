@@ -1,0 +1,5 @@
+(4,3)-(4,3) This character is invalid.
+(4,4)-(4,4) An expression is expected here.
+(4,10)-(4,10) A semicolon (';') is expected here.
+(4,15)-(4,15) This character is invalid.
+(4,15)-(4,16) Encountered unexpected token '`'.

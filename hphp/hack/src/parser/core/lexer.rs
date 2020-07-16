@@ -645,11 +645,11 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         }
     }
 
-    fn skip_uninteresting_double_quote_like_string_characters(&mut self, start_char: char) {
+    fn skip_uninteresting_double_quote_like_string_characters(&mut self) {
         let is_uninteresting = |ch| match ch {
             INVALID | '\\' | '$' | '{' | '[' | ']' | '-' => false,
             ch if '0' <= ch && ch <= '9' => false,
-            ch => ch != start_char && !Self::is_name_nondigit(ch),
+            ch => ch != '"' && !Self::is_name_nondigit(ch),
         };
         self.skip_while(&is_uninteresting);
     }
@@ -681,14 +681,14 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         }
     }
 
-    fn scan_double_quote_like_string_literal_from_start(&mut self, start_char: char) -> TokenKind {
+    fn scan_double_quote_like_string_literal_from_start(&mut self) -> TokenKind {
         let literal_token_kind = TokenKind::DoubleQuotedStringLiteral;
         let head_token_kind = TokenKind::DoubleQuotedStringLiteralHead;
         self.advance(1);
         loop {
             // If there's nothing interesting in this double-quoted string then
             // we can just hand it back as-is.
-            self.skip_uninteresting_double_quote_like_string_characters(start_char);
+            self.skip_uninteresting_double_quote_like_string_characters();
             match self.peek_char(0) {
                 INVALID => {
                     // If the string is unterminated then give an error; if this is an
@@ -702,7 +702,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
                         self.advance(1)
                     }
                 }
-                '`' | '"' => {
+                '"' => {
                     // We made it to the end without finding a special character.
                     self.advance(1);
                     break literal_token_kind;
@@ -772,7 +772,6 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             StringLiteralKind::LiteralHeredoc { heredoc } => (true, &heredoc),
             _ => (false, b""),
         };
-        let start_char = '"';
         let ch0 = self.peek_char(0);
         if Self::is_name_nondigit(ch0) {
             if is_heredoc && (self.is_heredoc_tail(name)) {
@@ -791,7 +790,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
                     } else {
                         self.with_error(Errors::error0006);
                         self.advance(1);
-                        self.skip_uninteresting_double_quote_like_string_characters(start_char);
+                        self.skip_uninteresting_double_quote_like_string_characters();
                         TokenKind::StringLiteralBody
                     }
                 }
@@ -821,15 +820,15 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
                         // if there are, we'll just eat them as normal characters.
                         | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' => {
                             self.advance(2);
-                            self.skip_uninteresting_double_quote_like_string_characters(start_char);
+                            self.skip_uninteresting_double_quote_like_string_characters();
                             TokenKind::StringLiteralBody}
                         | 'x' => {
                             self.scan_hexadecimal_escape();
-                            self.skip_uninteresting_double_quote_like_string_characters(start_char);
+                            self.skip_uninteresting_double_quote_like_string_characters();
                             TokenKind::StringLiteralBody }
                         | 'u' => {
                             self.scan_unicode_escape();
-                            self.skip_uninteresting_double_quote_like_string_characters(start_char);
+                            self.skip_uninteresting_double_quote_like_string_characters();
                             TokenKind::StringLiteralBody }
                         | '{' => {
                             // The rules for escaping open braces in Hack are bizarre. Suppose we
@@ -858,7 +857,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
                        // continuation but in fact it just means to put a backslash and newline
                        // in the string.
                           self.advance(1);
-                          self.skip_uninteresting_double_quote_like_string_characters(start_char);
+                          self.skip_uninteresting_double_quote_like_string_characters();
                           TokenKind::StringLiteralBody
                       }
                    }
@@ -879,7 +878,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
                         // Nothing interesting here. Skip it and find the next
                         // interesting character.
                         self.advance(1);
-                        self.skip_uninteresting_double_quote_like_string_characters(start_char);
+                        self.skip_uninteresting_double_quote_like_string_characters();
                         TokenKind::StringLiteralBody
                     }
                 }
@@ -900,7 +899,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
                     // Nothing interesting here. Skip it and find the next
                     // interesting character.
                     self.advance(1);
-                    self.skip_uninteresting_double_quote_like_string_characters(start_char);
+                    self.skip_uninteresting_double_quote_like_string_characters();
                     TokenKind::StringLiteralBody
                 }
             }
@@ -1632,8 +1631,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             },
             ch if '1' <= ch && ch <= '9' => self.scan_decimal_or_float(),
             '\'' => self.scan_single_quote_string_literal(),
-            '`' => self.scan_double_quote_like_string_literal_from_start('`'),
-            '"' => self.scan_double_quote_like_string_literal_from_start('"'),
+            '"' => self.scan_double_quote_like_string_literal_from_start(),
             '\\' => {
                 self.advance(1);
                 TokenKind::Backslash

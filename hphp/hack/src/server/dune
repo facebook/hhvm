@@ -290,6 +290,7 @@
     lwt
     parent
     provider_backend
+    security_stubs
     server
     state_loader
     typing_service_api

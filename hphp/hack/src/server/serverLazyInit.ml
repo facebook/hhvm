@@ -992,6 +992,25 @@ let saved_state_init
     ( (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t),
       load_state_error )
     result =
+  let t = Unix.gettimeofday () in
+  let attempt_fix = genv.local_config.SLC.attempt_fix_credentials in
+  let () =
+    match Security.check_credentials ~attempt_fix with
+    | Ok fixes_applied ->
+      HackEventLogger.credentials_check_end
+        (Printf.sprintf
+           "saved_state_init: OK; fixed credentials: %b"
+           fixes_applied)
+        t
+    | Error error ->
+      let kind = Security.to_error_kind_string error in
+      let message = Security.to_error_message_string error in
+      Hh_logger.log "Error kind: %s\nError message: %s" kind message;
+      HackEventLogger.credentials_check_failure
+        (Printf.sprintf "saved_state_init: [%s]" kind)
+        t
+  in
+
   ServerProgress.send_progress_to_monitor "loading saved state";
 
   let ctx = Provider_utils.ctx_from_server_env env in

@@ -157,7 +157,7 @@ ALWAYS_INLINE const TypeStructure::Kind get_ts_kind(const ArrayData* ts) {
 
 ALWAYS_INLINE bool isValidTSType(TypedValue c, bool error) {
   if (!tvIsHAMSafeDArray(c)) {
-    if (error) raise_error("Type structure must be a dict");
+    if (error) raise_error("Type structure must be a darray");
     return false;
   }
   return true;

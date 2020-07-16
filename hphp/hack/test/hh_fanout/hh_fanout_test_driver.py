@@ -85,6 +85,10 @@ def generate_saved_state(env: Env, target_dir: Path) -> SavedStateInfo:
             "--gen-saved-ignore-type-errors",
         ]
     )
+
+    # Used to force a lazy init, without reporting typechecking errors (which
+    # would otherwise cause the process to terminate with error).
+    lazy_init_args = ["--config", "lazy_init2=true", "--config", "lazy_parse=true"]
     exec(
         [
             env.hh_server_path,
@@ -92,6 +96,7 @@ def generate_saved_state(env: Env, target_dir: Path) -> SavedStateInfo:
             env.root_dir,
             "--save-naming",
             naming_table_path,
+            *lazy_init_args,
         ]
     )
     return SavedStateInfo(

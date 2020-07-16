@@ -564,7 +564,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
     if (RuntimeOption::EvalNoticeOnSimpleXMLBehavior) {
       raise_notice("SimpleXMLElement to array cast");
     }
-    return SimpleXMLElement_objectCast(this, KindOfArray).toArray();
+    return SimpleXMLElement_darrayCast(this);
   } else if (UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
     auto const flags = getProp(SystemLib::s_ArrayIteratorClass, s_flags.get());
     assertx(flags.is_set());
@@ -851,8 +851,8 @@ bool ObjectData::equal(const ObjectData& other) const {
       raise_notice("SimpleXMLElement equality comparison");
     }
     // Compare the whole object (including native data), not just props
-    auto ar1 = SimpleXMLElement_objectCast(this, KindOfArray).toArray();
-    auto ar2 = SimpleXMLElement_objectCast(&other, KindOfArray).toArray();
+    auto ar1 = SimpleXMLElement_darrayCast(this);
+    auto ar2 = SimpleXMLElement_darrayCast(&other);
     return ArrayData::Equal(ar1.get(), ar2.get());
   }
   if (UNLIKELY(instanceof(c_Closure::classof()))) {
@@ -939,8 +939,8 @@ int64_t ObjectData::compare(const ObjectData& other) const {
       raise_notice("SimpleXMLElement comparison");
     }
     // Compare the whole object (including native data), not just props
-    auto ar1 = SimpleXMLElement_objectCast(this, KindOfArray).toArray();
-    auto ar2 = SimpleXMLElement_objectCast(&other, KindOfArray).toArray();
+    auto ar1 = SimpleXMLElement_darrayCast(this);
+    auto ar2 = SimpleXMLElement_darrayCast(&other);
     return ArrayData::Compare(ar1.get(), ar2.get());
   }
   if (UNLIKELY(instanceof(c_Closure::classof()))) {

@@ -887,7 +887,15 @@ next_iter:
   }
 }
 
+Array SimpleXMLElement_darrayCast(const ObjectData* obj) {
+  auto sxe = Native::data<SimpleXMLElement>(const_cast<ObjectData*>(obj));
+  Array properties = Array::CreateDArray();
+  sxe_get_prop_hash(sxe, true, properties);
+  return properties;
+}
+
 Variant SimpleXMLElement_objectCast(const ObjectData* obj, DataType type) {
+  assertx(!isArrayLikeType(type));
   assertx(obj->instanceof(SimpleXMLElement_classof()));
   auto sxe = Native::data<SimpleXMLElement>(const_cast<ObjectData*>(obj));
   if (type == KindOfBoolean) {
@@ -896,11 +904,6 @@ Variant SimpleXMLElement_objectCast(const ObjectData* obj, DataType type) {
     Array properties = Array::CreateDArray();
     sxe_get_prop_hash(sxe, true, properties, true);
     return properties.size() != 0;
-  }
-  if (isArrayType((DataType)type)) {
-    Array properties = Array::CreateDArray();
-    sxe_get_prop_hash(sxe, true, properties);
-    return properties;
   }
 
   xmlChar* contents = nullptr;

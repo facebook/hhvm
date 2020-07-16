@@ -916,6 +916,8 @@ TypedValue HHVM_FUNCTION(array_slice,
   // preserve_keys is true, or when preserve_keys is false but the container
   // is packed so we know the keys already map to [0,N].
   if (offset == 0 && len == num_in && (preserve_keys || input_is_packed)) {
+    // TODO(kshaunak): Either intish-cast here, or DON'T intish-cast below.
+    // We should behave the same for arrays and other array-likes.
     if (isArrayType(cell_input.m_type)) {
       return tvReturn(Variant{cell_input.m_data.parr});
     }
@@ -3329,9 +3331,9 @@ Array HHVM_FUNCTION(merge_xhp_attr_declarations,
   IterateV(
     rest.get(),
     [&](TypedValue arr) {
-      if (!tvIsArray(arr)) {
+      if (!tvIsArrayLike(arr)) {
         raise_param_type_warning("__SystemLib\\merge_xhp_attr_declarations",
-                                 idx+1, "array", arr);
+                                 idx+1, "array-like", arr);
         ret = Array{};
         return true;
       }

@@ -84,14 +84,9 @@ struct TypeAlias {
     TypedValue tv;
     sd(tv);
     assertx(tvIsPlausible(tv));
-    assertx(
-      RuntimeOption::EvalHackArrDVArrs
-        ? isDictType(tv.m_type)
-        : isArrayType(tv.m_type)
-    );
+    assertx(tvIsHAMSafeDArray(tv));
     typeStructure = tv.m_data.parr;
   }
-
 };
 
 

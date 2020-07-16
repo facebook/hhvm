@@ -935,7 +935,6 @@ void TypeConstraint::verifyParamFail(const Func* func, tv_lval val,
   verifyFail(func, val, paramNums);
   assertx(
     isSoft() ||
-    isArrayType(val.type()) ||
     (isThis() && couldSeeMockObject()) ||
     (RO::EvalEnforceGenericsUB < 2 && isUpperBound()) ||
     check(val, func->cls())

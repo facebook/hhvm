@@ -1552,7 +1552,7 @@ static Variant to_zval_object_ex(encodeType* etype, xmlNodePtr data,
             obj->o_set(name, arr.toArray());
           }
         } else {
-          if (!isArrayType(prop.type())) {
+          if (!tvIsHAMSafeVArray(prop)) {
             /* Convert into array */
             VArrayInit arr{2};
             arr.append(prop.tv());

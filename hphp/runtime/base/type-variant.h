@@ -991,7 +991,7 @@ struct Variant : private TypedValue {
 
   Array toVArray() const {
     if (RuntimeOption::EvalHackArrDVArrs) return toVec();
-    if (isArrayType(m_type)) return asCArrRef().toVArray();
+    if (isArrayLikeType(m_type)) return asCArrRef().toVArray();
     auto copy = *this;
     tvCastToVArrayInPlace(copy.asTypedValue());
     assertx(copy.isPHPArray() && copy.asCArrRef().isVArray());
@@ -1000,7 +1000,7 @@ struct Variant : private TypedValue {
 
   Array toDArray() const {
     if (RuntimeOption::EvalHackArrDVArrs) return toDict();
-    if (isArrayType(m_type)) return asCArrRef().toDArray();
+    if (isArrayLikeType(m_type)) return asCArrRef().toDArray();
     auto copy = *this;
     tvCastToDArrayInPlace(copy.asTypedValue());
     assertx(copy.isPHPArray() && copy.asCArrRef().isDArray());
@@ -1023,13 +1023,6 @@ struct Variant : private TypedValue {
       return m_data.pobj->instanceof<T>();
     }
     return false;
-  }
-
-  /**
-   * Whether or not calling toKey() will throw a bad type exception
-   */
-  bool canBeValidKey() const {
-    return !isArrayType(getType()) && getType() != KindOfObject;
   }
 
   /*
@@ -1553,16 +1546,14 @@ inline Array& forceToDict(tv_lval lval) {
 }
 
 inline Array& forceToDArray(Variant& var) {
-  if (RuntimeOption::EvalHackArrDVArrs) return forceToDict(var);
-  if (!(var.isPHPArray() && var.asCArrRef().isDArray())) {
+  if (!tvIsHAMSafeDArray(var.asTypedValue())) {
     var = Variant(Array::CreateDArray());
   }
   return var.asArrRef();
 }
 
 inline Array& forceToDArray(tv_lval lval) {
-  if (RuntimeOption::EvalHackArrDVArrs) return forceToDict(lval);
-  if (!(isArrayType(lval.type()) && lval.val().parr->isDArray())) {
+  if (!tvIsHAMSafeDArray(lval)) {
     tvMove(make_array_like_tv(ArrayData::CreateDArray()), lval);
   }
   return asArrRef(lval);

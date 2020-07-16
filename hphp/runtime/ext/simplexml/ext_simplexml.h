@@ -33,6 +33,7 @@ const Class* SimpleXMLElement_classof();
 const Class* SimpleXMLElementIterator_classof();
 const Class* SimpleXMLIterator_classof();
 
+Array SimpleXMLElement_darrayCast(const ObjectData* obj);
 Variant SimpleXMLElement_objectCast(const ObjectData* obj, DataType type);
 xmlNodePtr SimpleXMLElement_exportNode(const Object& sxe);
 

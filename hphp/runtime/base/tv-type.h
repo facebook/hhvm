@@ -32,6 +32,19 @@ ALWAYS_INLINE bool tvIsNull(const TypedValue* tv) {
   return tvIsNull(*tv);
 }
 
+// We don't expose isVArrayType or isDArrayType. They shouldn't be used.
+ALWAYS_INLINE bool isHAMSafeDArrayType(DataType t) {
+  return RO::EvalHackArrDVArrs ? isDictType(t) : dt_with_rc(t) == KindOfDArray;
+}
+ALWAYS_INLINE bool isHAMSafeVArrayType(DataType t) {
+  return RO::EvalHackArrDVArrs ? isVecType(t) : dt_with_rc(t) == KindOfVArray;
+}
+ALWAYS_INLINE bool isHAMSafeDVArrayType(DataType t) {
+  if (RO::EvalHackArrDVArrs) return isVecType(t) || isDictType(t);
+  auto const dtrc = dt_with_rc(t);
+  return dtrc == KindOfVArray || dtrc == KindOfDArray;
+}
+
 #define CASE(ty)                                                        \
   template<typename T>                                                  \
   ALWAYS_INLINE enable_if_tv_val_t<T&&, bool> tvIs##ty(T&& tv) {        \
@@ -44,6 +57,9 @@ CASE(Int)
 CASE(Double)
 CASE(String)
 CASE(Array)
+CASE(HAMSafeVArray)
+CASE(HAMSafeDArray)
+CASE(HAMSafeDVArray)
 CASE(ArrayLike)
 CASE(HackArray)
 CASE(Vec)
@@ -59,30 +75,6 @@ CASE(RClsMeth)
 CASE(Record)
 
 #undef CASE
-
-// We don't expose isVArrayType or isDArrayType. They shouldn't be used.
-ALWAYS_INLINE bool isHAMSafeDVArrayType(DataType dt) {
-  if (RO::EvalHackArrDVArrs) return isVecType(dt) || isDictType(dt);
-  auto const dtrc = dt_with_rc(dt);
-  return dtrc == KindOfVArray || dtrc == KindOfDArray;
-}
-
-template<typename T>
-ALWAYS_INLINE bool tvIsHAMSafeVArray(const T& tv) {
-  if (RO::EvalHackArrDVArrs) return tvIsVec(tv);
-  return tvIsArrayLike(tv) && val(tv).parr->isVArray();
-}
-
-template<typename T>
-ALWAYS_INLINE bool tvIsHAMSafeDArray(const T& tv) {
-  if (RO::EvalHackArrDVArrs) return tvIsDict(tv);
-  return tvIsArrayLike(tv) && val(tv).parr->isDArray();
-}
-
-template<typename T>
-ALWAYS_INLINE bool tvIsHAMSafeDVArray(const T& tv) {
-  return isHAMSafeDVArrayType(type(tv));
-}
 
 template<typename T>
 ALWAYS_INLINE int64_t tvAssertInt(T&& tv) {

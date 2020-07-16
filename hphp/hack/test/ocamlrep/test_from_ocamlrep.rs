@@ -6,7 +6,7 @@
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
 #[cfg(test)]
-use ocamlrep::{Allocator, Arena, FromError::*, FromOcamlRep, Value};
+use ocamlrep::{Allocator, Arena, FromError::*, FromOcamlRep, OpaqueValue, Value};
 
 #[test]
 fn expected_block_but_got_int() {
@@ -19,6 +19,8 @@ fn expected_block_but_got_int() {
 fn expected_int_but_got_block() {
     let arena = Arena::new();
     let value = arena.block_with_size_and_tag(1, 0).build();
+    // SAFETY: The value was allocated by an `Arena`.
+    let value = unsafe { Arena::make_transparent(value) };
     let err = isize::from_ocamlrep(value).err().unwrap();
     match err {
         ExpectedImmediate(..) => (),
@@ -37,6 +39,8 @@ fn wrong_tag_for_none() {
 fn wrong_tag_for_some() {
     let arena = Arena::new();
     let value = arena.block_with_size_and_tag(1, 1).build();
+    // SAFETY: The value was allocated by an `Arena`.
+    let value = unsafe { Arena::make_transparent(value) };
     let err = <Option<isize>>::from_ocamlrep(value).err().unwrap();
     assert_eq!(
         err,
@@ -72,9 +76,10 @@ fn bad_struct_field() {
     let arena = Arena::new();
     let value = {
         let mut foo = arena.block_with_size_and_tag(2, 0);
-        Arena::set_field(&mut foo, 0, Value::int(0));
-        Arena::set_field(&mut foo, 1, Value::int(42));
-        foo.build()
+        Arena::set_field(&mut foo, 0, OpaqueValue::int(0));
+        Arena::set_field(&mut foo, 1, OpaqueValue::int(42));
+        // SAFETY: `foo` was allocated by an `Arena`.
+        unsafe { Arena::make_transparent(foo.build()) }
     };
     let err = Foo::from_ocamlrep(value).err().unwrap();
     assert_eq!(err, ErrorInField(1, Box::new(ExpectedBool(42))));
@@ -92,16 +97,17 @@ fn bad_nested_struct_field() {
 
     let foo = {
         let mut foo = arena.block_with_size_and_tag(2, 0);
-        Arena::set_field(&mut foo, 0, Value::int(0));
-        Arena::set_field(&mut foo, 1, Value::int(42));
+        Arena::set_field(&mut foo, 0, OpaqueValue::int(0));
+        Arena::set_field(&mut foo, 1, OpaqueValue::int(42));
         foo.build()
     };
 
     let bar = {
         let mut bar = arena.block_with_size_and_tag(2, 0);
         Arena::set_field(&mut bar, 0, foo);
-        Arena::set_field(&mut bar, 1, Value::int(0));
-        bar.build()
+        Arena::set_field(&mut bar, 1, OpaqueValue::int(0));
+        // SAFETY: `bar` was allocated by an `Arena`.
+        unsafe { Arena::make_transparent(bar.build()) }
     };
 
     let err = Bar::from_ocamlrep(bar).err().unwrap();
@@ -125,6 +131,8 @@ fn expected_unit_struct_but_got_nonzero() {
 fn expected_unit_struct_but_got_block() {
     let arena = Arena::new();
     let value = arena.block_with_size_and_tag(1, 0).build();
+    // SAFETY: The value was allocated by an `Arena`.
+    let value = unsafe { Arena::make_transparent(value) };
     let err = UnitStruct::from_ocamlrep(value).err().unwrap();
     match err {
         ExpectedImmediate(..) => (),
@@ -162,6 +170,8 @@ fn nullary_variant_tag_out_of_range() {
 fn block_variant_tag_out_of_range() {
     let arena = Arena::new();
     let value = arena.block_with_size_and_tag(1, 42).build();
+    // SAFETY: The value was allocated by an `Arena`.
+    let value = unsafe { Arena::make_transparent(value) };
     let err = Fruit::from_ocamlrep(value).err().unwrap();
     assert_eq!(err, BlockTagOutOfRange { max: 2, actual: 42 });
 }
@@ -170,6 +180,8 @@ fn block_variant_tag_out_of_range() {
 fn wrong_block_variant_size() {
     let arena = Arena::new();
     let value = arena.block_with_size_and_tag(42, 0).build();
+    // SAFETY: The value was allocated by an `Arena`.
+    let value = unsafe { Arena::make_transparent(value) };
     let err = Fruit::from_ocamlrep(value).err().unwrap();
     assert_eq!(
         err,
@@ -185,8 +197,9 @@ fn bad_tuple_variant_value() {
     let arena = Arena::new();
     let orange = {
         let mut orange = arena.block_with_size_and_tag(1, 0);
-        Arena::set_field(&mut orange, 0, Value::int(42));
-        orange.build()
+        Arena::set_field(&mut orange, 0, OpaqueValue::int(42));
+        // SAFETY: `orange` was allocated by an `Arena`.
+        unsafe { Arena::make_transparent(orange.build()) }
     };
     let err = Fruit::from_ocamlrep(orange).err().unwrap();
     assert_eq!(err, ErrorInField(0, Box::new(ExpectedBool(42))));
@@ -197,8 +210,9 @@ fn bad_struct_variant_value() {
     let arena = Arena::new();
     let pear = {
         let mut pear = arena.block_with_size_and_tag(1, 1);
-        Arena::set_field(&mut pear, 0, Value::int(42));
-        pear.build()
+        Arena::set_field(&mut pear, 0, OpaqueValue::int(42));
+        // SAFETY: `pear` was allocated by an `Arena`.
+        unsafe { Arena::make_transparent(pear.build()) }
     };
     let err = Fruit::from_ocamlrep(pear).err().unwrap();
     assert_eq!(err, ErrorInField(0, Box::new(ExpectedBool(42))));
@@ -209,9 +223,10 @@ fn good_boxed_tuple_variant() {
     let arena = Arena::new();
     let peach = {
         let mut peach = arena.block_with_size_and_tag(2, 2);
-        Arena::set_field(&mut peach, 0, Value::int(42));
-        Arena::set_field(&mut peach, 1, Value::int(1));
-        peach.build()
+        Arena::set_field(&mut peach, 0, OpaqueValue::int(42));
+        Arena::set_field(&mut peach, 1, OpaqueValue::int(1));
+        // SAFETY: `peach` was allocated by an `Arena`.
+        unsafe { Arena::make_transparent(peach.build()) }
     };
     let peach = Fruit::from_ocamlrep(peach);
     assert_eq!(peach, Ok(Fruit::Peach(Box::new((42, true)))));

@@ -7,7 +7,7 @@ use std::ffi::CString;
 use std::panic::UnwindSafe;
 
 use ocamlpool_rust::utils::{caml_set_field, reserve_block};
-use ocamlrep::{Allocator, BlockBuilder, MemoizationCache, ToOcamlRep, Value};
+use ocamlrep::{Allocator, BlockBuilder, MemoizationCache, OpaqueValue, ToOcamlRep};
 
 pub use ocamlrep::FromOcamlRep;
 
@@ -40,7 +40,7 @@ impl Pool {
     }
 
     #[inline(always)]
-    pub fn add<T: ToOcamlRep + ?Sized>(&mut self, value: &T) -> Value<'_> {
+    pub fn add<T: ToOcamlRep + ?Sized>(&mut self, value: &T) -> OpaqueValue<'_> {
         value.to_ocamlrep(self)
     }
 }
@@ -61,14 +61,14 @@ impl Allocator for Pool {
     #[inline(always)]
     fn block_with_size_and_tag(&self, size: usize, tag: u8) -> BlockBuilder<'_> {
         let block = unsafe {
-            let ptr = reserve_block(tag, size) as *mut Value<'_>;
+            let ptr = reserve_block(tag, size) as *mut OpaqueValue<'_>;
             std::slice::from_raw_parts_mut(ptr, size)
         };
         BlockBuilder::new(block)
     }
 
     #[inline(always)]
-    fn set_field<'a>(block: &mut BlockBuilder<'a>, index: usize, value: Value<'a>) {
+    fn set_field<'a>(block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>) {
         assert!(index < block.size());
         unsafe { caml_set_field(block.as_mut_ptr() as usize, index, value.to_bits()) };
     }
@@ -77,16 +77,16 @@ impl Allocator for Pool {
         &'a self,
         ptr: usize,
         size: usize,
-        f: impl FnOnce(&'a Self) -> Value<'a>,
-    ) -> Value<'a> {
+        f: impl FnOnce(&'a Self) -> OpaqueValue<'a>,
+    ) -> OpaqueValue<'a> {
         let bits = self.cache.memoized(ptr, size, || f(self).to_bits());
         // SAFETY: The only memoized values in the cache are those computed in
-        // the closure on the previous line. Since f returns Value<'a>, any
-        // cached bits must represent a valid Value<'a>,
-        unsafe { Value::from_bits(bits) }
+        // the closure on the previous line. Since f returns OpaqueValue<'a>, any
+        // cached bits must represent a valid OpaqueValue<'a>,
+        unsafe { OpaqueValue::from_bits(bits) }
     }
 
-    fn add_root<T: ToOcamlRep + ?Sized>(&self, value: &T) -> Value<'_> {
+    fn add_root<T: ToOcamlRep + ?Sized>(&self, value: &T) -> OpaqueValue<'_> {
         self.cache.with_cache(|| value.to_ocamlrep(self))
     }
 }

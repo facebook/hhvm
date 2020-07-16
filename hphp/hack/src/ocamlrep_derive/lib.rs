@@ -26,7 +26,7 @@ fn derive_to_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
             fn to_ocamlrep<'__ocamlrep_derive_allocator, Alloc: ::ocamlrep::Allocator>(
                 &self,
                 arena: &'__ocamlrep_derive_allocator Alloc,
-            ) -> ::ocamlrep::Value<'__ocamlrep_derive_allocator> {
+            ) -> ::ocamlrep::OpaqueValue<'__ocamlrep_derive_allocator> {
                 use ::ocamlrep::Allocator;
                 match self { #to_body }
             }
@@ -157,7 +157,7 @@ fn enum_to_ocamlrep(s: &synstructure::Structure, variants: EnumVariants<'_>) -> 
                 .unwrap()
         };
         if size == 0 {
-            quote!(::ocamlrep::Value::int(#tag))
+            quote!(::ocamlrep::OpaqueValue::int(#tag))
         } else {
             let tag = tag as u8;
             match get_boxed_tuple_len(v) {

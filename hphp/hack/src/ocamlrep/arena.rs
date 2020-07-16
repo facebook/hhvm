@@ -7,10 +7,12 @@ use std::cell::{Cell, RefCell};
 use std::cmp::max;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use crate::{block::Header, Allocator, BlockBuilder, MemoizationCache, ToOcamlRep, Value};
+use crate::{
+    block::Header, Allocator, BlockBuilder, MemoizationCache, OpaqueValue, ToOcamlRep, Value,
+};
 
 struct Chunk {
-    data: Box<[Value<'static>]>,
+    data: Box<[OpaqueValue<'static>]>,
     index: usize,
 
     /// Pointer to the prev arena segment.
@@ -21,7 +23,7 @@ impl Chunk {
     fn with_capacity(capacity: usize) -> Self {
         Self {
             index: 0,
-            data: vec![Value::int(0); capacity].into_boxed_slice(),
+            data: vec![OpaqueValue::int(0); capacity].into_boxed_slice(),
             prev: None,
         }
     }
@@ -35,7 +37,7 @@ impl Chunk {
     }
 
     #[inline]
-    pub fn alloc(&mut self, requested_size: usize) -> &mut [Value<'static>] {
+    pub fn alloc(&mut self, requested_size: usize) -> &mut [OpaqueValue<'static>] {
         let previous_index = self.index;
         self.index += requested_size;
         &mut self.data[previous_index..self.index]
@@ -81,7 +83,8 @@ impl Arena {
     }
 
     #[inline]
-    fn alloc<'a>(&'a self, requested_size: usize) -> &'a mut [Value<'a>] {
+    #[allow(clippy::mut_from_ref)]
+    fn alloc<'a>(&'a self, requested_size: usize) -> &'a mut [OpaqueValue<'a>] {
         if !self.current_chunk.borrow().can_fit(requested_size) {
             let prev_chunk_capacity = self.current_chunk.borrow().capacity();
             let prev_chunk = self.current_chunk.replace(Chunk::with_capacity(max(
@@ -103,12 +106,28 @@ impl Arena {
         // of `chunk` to 'a. This allows callers to hold multiple mutable blocks
         // at once. This is safe because the blocks handed out by Chunk::alloc
         // are non-overlapping, so there is no aliasing.
-        unsafe { std::mem::transmute::<&'_ mut [Value<'static>], &'a mut [Value<'a>]>(slice) }
+        unsafe {
+            std::mem::transmute::<&'_ mut [OpaqueValue<'static>], &'a mut [OpaqueValue<'a>]>(slice)
+        }
+    }
+
+    /// # Safety
+    ///
+    /// Must be used only with values allocated by an `ocamlrep::Arena`.
+    pub unsafe fn make_transparent(value: OpaqueValue<'_>) -> Value<'_> {
+        Value::from_bits(value.to_bits())
     }
 
     #[inline(always)]
     pub fn add<T: ToOcamlRep + ?Sized>(&self, value: &T) -> Value<'_> {
-        value.to_ocamlrep(self)
+        // SAFETY: We just allocated this value using `self`, which is an `Arena`.
+        unsafe { Self::make_transparent(value.to_ocamlrep(self)) }
+    }
+
+    #[inline(always)]
+    pub fn add_root<T: ToOcamlRep + ?Sized>(&self, value: &T) -> Value<'_> {
+        // SAFETY: We just allocated this value using `self`, which is an `Arena`.
+        unsafe { Self::make_transparent(Allocator::add_root(self, value)) }
     }
 }
 
@@ -124,12 +143,12 @@ impl Allocator for Arena {
         // Safety: We need to make sure that the Header written to index 0 of
         // this slice is never observed as a Value. We guarantee that by not
         // exposing raw Chunk memory--only allocated Values.
-        block[0] = unsafe { Value::from_bits(header.to_bits()) };
+        block[0] = unsafe { OpaqueValue::from_bits(header.to_bits()) };
         BlockBuilder::new(&mut block[1..])
     }
 
     #[inline(always)]
-    fn set_field<'a>(block: &mut BlockBuilder<'a>, index: usize, value: Value<'a>) {
+    fn set_field<'a>(block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>) {
         block.0[index] = value;
     }
 
@@ -137,16 +156,16 @@ impl Allocator for Arena {
         &'a self,
         ptr: usize,
         size: usize,
-        f: impl FnOnce(&'a Self) -> Value<'a>,
-    ) -> Value<'a> {
+        f: impl FnOnce(&'a Self) -> OpaqueValue<'a>,
+    ) -> OpaqueValue<'a> {
         let bits = self.cache.memoized(ptr, size, || f(self).to_bits());
         // SAFETY: The only memoized values in the cache are those computed in
-        // the closure on the previous line. Since f returns Value<'a>, any
-        // cached bits must represent a valid Value<'a>,
-        unsafe { Value::from_bits(bits) }
+        // the closure on the previous line. Since f returns OpaqueValue<'a>, any
+        // cached bits must represent a valid OpaqueValue<'a>,
+        unsafe { OpaqueValue::from_bits(bits) }
     }
 
-    fn add_root<T: ToOcamlRep + ?Sized>(&self, value: &T) -> Value<'_> {
+    fn add_root<T: ToOcamlRep + ?Sized>(&self, value: &T) -> OpaqueValue<'_> {
         self.cache.with_cache(|| value.to_ocamlrep(self))
     }
 }
@@ -162,10 +181,14 @@ mod tests {
         let arena = Arena::with_capacity(1000);
 
         let mut block = arena.block_with_size(3);
-        Arena::set_field(&mut block, 0, Value::int(1));
-        Arena::set_field(&mut block, 1, Value::int(2));
-        Arena::set_field(&mut block, 2, Value::int(3));
-        let block = block.build().as_block().unwrap();
+        Arena::set_field(&mut block, 0, OpaqueValue::int(1));
+        Arena::set_field(&mut block, 1, OpaqueValue::int(2));
+        Arena::set_field(&mut block, 2, OpaqueValue::int(3));
+        let block = block.build();
+        // SAFETY: The block was allocated by an `Arena`.
+        let block = unsafe { Arena::make_transparent(block) }
+            .as_block()
+            .unwrap();
 
         assert_eq!(block.size(), 3);
         assert_eq!(block[0].as_int().unwrap(), 1);
@@ -177,7 +200,12 @@ mod tests {
     fn test_large_allocs() {
         let arena = Arena::with_capacity(1000);
 
-        let alloc_block = |size| arena.block_with_size(size).build().as_block().unwrap();
+        let alloc_block = |size| {
+            // SAFETY: The block was allocated by an `Arena`.
+            unsafe { Arena::make_transparent(arena.block_with_size(size).build()) }
+                .as_block()
+                .unwrap()
+        };
 
         let max = alloc_block(1000);
         assert_eq!(max.size(), 1000);
@@ -193,7 +221,12 @@ mod tests {
     fn perf_test() {
         let arena = Arena::with_capacity(10_000);
 
-        let alloc_block = |size| arena.block_with_size(size).build().as_block().unwrap();
+        let alloc_block = |size| {
+            // SAFETY: The block was allocated by an `Arena`.
+            unsafe { Arena::make_transparent(arena.block_with_size(size).build()) }
+                .as_block()
+                .unwrap()
+        };
 
         println!("Benchmarks for allocating [1] 200,000 times");
         let now = Instant::now();

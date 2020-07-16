@@ -43,8 +43,8 @@ bitflags! {
 }
 
 impl ocamlrep::ToOcamlRep for FunTypeFlags {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::Value<'a> {
-        ocamlrep::Value::int(self.bits() as isize)
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
+        ocamlrep::OpaqueValue::int(self.bits() as isize)
     }
 }
 
@@ -79,8 +79,8 @@ impl<'de> serde::Deserialize<'de> for FunTypeFlags {
 }
 
 impl ocamlrep::ToOcamlRep for FunParamFlags {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::Value<'a> {
-        ocamlrep::Value::int(self.bits() as isize)
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
+        ocamlrep::OpaqueValue::int(self.bits() as isize)
     }
 }
 

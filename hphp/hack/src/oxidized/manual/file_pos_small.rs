@@ -189,8 +189,8 @@ impl fmt::Debug for FilePosSmall {
 }
 
 impl ToOcamlRep for FilePosSmall {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::Value<'a> {
-        ocamlrep::Value::int(self.0 as isize)
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
+        ocamlrep::OpaqueValue::int(self.0 as isize)
     }
 }
 

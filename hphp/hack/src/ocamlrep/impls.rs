@@ -13,7 +13,7 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 use crate::{block, from};
-use crate::{Allocator, FromError, FromOcamlRep, ToOcamlRep, Value};
+use crate::{Allocator, FromError, FromOcamlRep, OpaqueValue, ToOcamlRep, Value};
 
 const WORD_SIZE: usize = std::mem::size_of::<Value<'_>>();
 
@@ -29,8 +29,8 @@ fn expect_block_with_size_and_tag<'a>(
 }
 
 impl ToOcamlRep for () {
-    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
-        Value::int(0)
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
+        OpaqueValue::int(0)
     }
 }
 
@@ -44,8 +44,8 @@ impl FromOcamlRep for () {
 }
 
 impl ToOcamlRep for isize {
-    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
-        Value::int(*self)
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
+        OpaqueValue::int(*self)
     }
 }
 
@@ -56,8 +56,8 @@ impl FromOcamlRep for isize {
 }
 
 impl ToOcamlRep for usize {
-    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
-        Value::int((*self).try_into().unwrap())
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
+        OpaqueValue::int((*self).try_into().unwrap())
     }
 }
 
@@ -68,8 +68,8 @@ impl FromOcamlRep for usize {
 }
 
 impl ToOcamlRep for i64 {
-    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
-        Value::int((*self).try_into().unwrap())
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
+        OpaqueValue::int((*self).try_into().unwrap())
     }
 }
 
@@ -80,8 +80,8 @@ impl FromOcamlRep for i64 {
 }
 
 impl ToOcamlRep for u64 {
-    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
-        Value::int((*self).try_into().unwrap())
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
+        OpaqueValue::int((*self).try_into().unwrap())
     }
 }
 
@@ -92,8 +92,8 @@ impl FromOcamlRep for u64 {
 }
 
 impl ToOcamlRep for i32 {
-    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
-        Value::int((*self).try_into().unwrap())
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
+        OpaqueValue::int((*self).try_into().unwrap())
     }
 }
 
@@ -104,8 +104,8 @@ impl FromOcamlRep for i32 {
 }
 
 impl ToOcamlRep for u32 {
-    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
-        Value::int((*self).try_into().unwrap())
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
+        OpaqueValue::int((*self).try_into().unwrap())
     }
 }
 
@@ -116,8 +116,8 @@ impl FromOcamlRep for u32 {
 }
 
 impl ToOcamlRep for bool {
-    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
-        Value::int((*self).into())
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
+        OpaqueValue::int((*self).into())
     }
 }
 
@@ -132,11 +132,11 @@ impl FromOcamlRep for bool {
 }
 
 impl ToOcamlRep for char {
-    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
         if *self as u32 > 255 {
             panic!("char out of range: {}", self.to_string())
         }
-        Value::int(*self as isize)
+        OpaqueValue::int(*self as isize)
     }
 }
 
@@ -152,10 +152,10 @@ impl FromOcamlRep for char {
 }
 
 impl ToOcamlRep for f64 {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size_and_tag(1, block::DOUBLE_TAG);
         A::set_field(&mut block, 0, unsafe {
-            Value::from_bits(self.to_bits() as usize)
+            OpaqueValue::from_bits(self.to_bits() as usize)
         });
         block.build()
     }
@@ -169,7 +169,7 @@ impl FromOcamlRep for f64 {
 }
 
 impl<T: ToOcamlRep> ToOcamlRep for Box<T> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         alloc.add(&**self)
     }
 }
@@ -181,7 +181,7 @@ impl<T: FromOcamlRep> FromOcamlRep for Box<T> {
 }
 
 impl<T: ToOcamlRep + Sized> ToOcamlRep for &'_ T {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         alloc.memoized(
             *self as *const T as *const usize as usize,
             size_of::<T>(),
@@ -191,7 +191,7 @@ impl<T: ToOcamlRep + Sized> ToOcamlRep for &'_ T {
 }
 
 impl<T: ToOcamlRep + Sized> ToOcamlRep for Rc<T> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         alloc.memoized(
             self.as_ref() as *const T as usize,
             size_of::<T>(),
@@ -208,7 +208,7 @@ impl<T: FromOcamlRep> FromOcamlRep for Rc<T> {
 }
 
 impl<T: ToOcamlRep> ToOcamlRep for RefCell<T> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size(1);
         A::set_field(&mut block, 0, alloc.add(&*self.borrow()));
         block.build()
@@ -224,9 +224,9 @@ impl<T: FromOcamlRep> FromOcamlRep for RefCell<T> {
 }
 
 impl<T: ToOcamlRep> ToOcamlRep for Option<T> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         match self {
-            None => Value::int(0),
+            None => OpaqueValue::int(0),
             Some(val) => {
                 let mut block = alloc.block_with_size(1);
                 A::set_field(&mut block, 0, alloc.add(val));
@@ -249,7 +249,7 @@ impl<T: FromOcamlRep> FromOcamlRep for Option<T> {
 }
 
 impl<T: ToOcamlRep, E: ToOcamlRep> ToOcamlRep for Result<T, E> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         match self {
             Ok(val) => {
                 let mut block = alloc.block_with_size(1);
@@ -277,7 +277,7 @@ impl<T: FromOcamlRep, E: FromOcamlRep> FromOcamlRep for Result<T, E> {
 }
 
 impl<T: ToOcamlRep> ToOcamlRep for [T] {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut hd = alloc.add(&());
         for val in self.iter().rev() {
             let mut block = alloc.block_with_size(2);
@@ -290,7 +290,7 @@ impl<T: ToOcamlRep> ToOcamlRep for [T] {
 }
 
 impl<T: ToOcamlRep> ToOcamlRep for &'_ [T] {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         alloc.memoized(
             self.as_ptr() as usize,
             self.len() * size_of::<T>(),
@@ -300,7 +300,7 @@ impl<T: ToOcamlRep> ToOcamlRep for &'_ [T] {
 }
 
 impl<T: ToOcamlRep> ToOcamlRep for Vec<T> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         alloc.add(self.as_slice())
     }
 }
@@ -323,9 +323,9 @@ impl<T: FromOcamlRep> FromOcamlRep for Vec<T> {
 }
 
 impl<K: ToOcamlRep + Ord, V: ToOcamlRep> ToOcamlRep for BTreeMap<K, V> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         if self.is_empty() {
-            return Value::int(0);
+            return OpaqueValue::int(0);
         }
         let len = self.len();
         let mut iter = self.iter();
@@ -350,9 +350,9 @@ pub fn sorted_iter_to_ocaml_map<'a, 'i, A: Allocator, K: ToOcamlRep + 'i, V: ToO
     iter: &mut impl Iterator<Item = (&'i K, &'i V)>,
     alloc: &'a A,
     size: usize,
-) -> (Value<'a>, usize) {
+) -> (OpaqueValue<'a>, usize) {
     if size == 0 {
-        return (Value::int(0), 0);
+        return (OpaqueValue::int(0), 0);
     }
     let (left, left_height) = sorted_iter_to_ocaml_map(iter, alloc, size / 2);
     let (key, val) = iter.next().unwrap();
@@ -385,9 +385,9 @@ fn btree_map_from_ocamlrep<K: FromOcamlRep + Ord, V: FromOcamlRep>(
 }
 
 impl<T: ToOcamlRep + Ord> ToOcamlRep for BTreeSet<T> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         if self.is_empty() {
-            return Value::int(0);
+            return OpaqueValue::int(0);
         }
         let len = self.len();
         let mut iter = self.iter();
@@ -411,9 +411,9 @@ pub fn sorted_iter_to_ocaml_set<'a, 'i, A: Allocator, T: ToOcamlRep + 'i>(
     iter: &mut impl Iterator<Item = &'i T>,
     alloc: &'a A,
     size: usize,
-) -> (Value<'a>, usize) {
+) -> (OpaqueValue<'a>, usize) {
     if size == 0 {
-        return (Value::int(0), 0);
+        return (OpaqueValue::int(0), 0);
     }
     let (left, left_height) = sorted_iter_to_ocaml_set(iter, alloc, size / 2);
     let val = iter.next().unwrap();
@@ -446,7 +446,7 @@ impl ToOcamlRep for OsStr {
     // TODO: A Windows implementation would be nice, but what does the OCaml
     // runtime do? If we need Windows support, we'll have to find out.
     #[cfg(unix)]
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         use std::os::unix::ffi::OsStrExt;
         alloc.add(self.as_bytes())
     }
@@ -454,14 +454,14 @@ impl ToOcamlRep for OsStr {
 
 impl ToOcamlRep for &'_ OsStr {
     #[cfg(unix)]
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         use std::os::unix::ffi::OsStrExt;
         alloc.add(self.as_bytes())
     }
 }
 
 impl ToOcamlRep for OsString {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         alloc.add(self.as_os_str())
     }
 }
@@ -477,19 +477,19 @@ impl FromOcamlRep for OsString {
 }
 
 impl ToOcamlRep for Path {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         alloc.add(self.as_os_str())
     }
 }
 
 impl ToOcamlRep for &'_ Path {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         alloc.add(self.as_os_str())
     }
 }
 
 impl ToOcamlRep for PathBuf {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         alloc.add(self.as_os_str())
     }
 }
@@ -501,7 +501,7 @@ impl FromOcamlRep for PathBuf {
 }
 
 impl ToOcamlRep for String {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         alloc.add(self.as_str())
     }
 }
@@ -513,7 +513,7 @@ impl FromOcamlRep for String {
 }
 
 impl ToOcamlRep for Cow<'_, str> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let s: &str = self.borrow();
         alloc.add(s)
     }
@@ -526,13 +526,13 @@ impl FromOcamlRep for Cow<'_, str> {
 }
 
 impl ToOcamlRep for str {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         str_to_ocamlrep(self, alloc)
     }
 }
 
 impl ToOcamlRep for &'_ str {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         alloc.memoized(self.as_bytes().as_ptr() as usize, self.len(), |alloc| {
             (**self).to_ocamlrep(alloc)
         })
@@ -541,8 +541,8 @@ impl ToOcamlRep for &'_ str {
 
 /// Allocate an OCaml string using the given allocator and copy the given string
 /// slice into it.
-pub fn str_to_ocamlrep<'a, A: Allocator>(s: &str, alloc: &'a A) -> Value<'a> {
-    alloc.add(s.as_bytes())
+pub fn str_to_ocamlrep<'a, A: Allocator>(s: &str, alloc: &'a A) -> OpaqueValue<'a> {
+    bytes_to_ocamlrep(s.as_bytes(), alloc)
 }
 
 /// Given an OCaml string, return a string slice pointing to its contents, if
@@ -552,7 +552,7 @@ pub fn str_from_ocamlrep<'a>(value: Value<'a>) -> Result<&'a str, FromError> {
 }
 
 impl ToOcamlRep for Vec<u8> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         alloc.add(self.as_slice())
     }
 }
@@ -564,13 +564,13 @@ impl FromOcamlRep for Vec<u8> {
 }
 
 impl ToOcamlRep for [u8] {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         bytes_to_ocamlrep(self, alloc)
     }
 }
 
 impl ToOcamlRep for &'_ [u8] {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         alloc.memoized(self.as_ptr() as usize, self.len(), |alloc| {
             (**self).to_ocamlrep(alloc)
         })
@@ -579,13 +579,13 @@ impl ToOcamlRep for &'_ [u8] {
 
 /// Allocate an OCaml string using the given allocator and copy the given byte
 /// slice into it.
-pub fn bytes_to_ocamlrep<'a, A: Allocator>(s: &[u8], alloc: &'a A) -> Value<'a> {
+pub fn bytes_to_ocamlrep<'a, A: Allocator>(s: &[u8], alloc: &'a A) -> OpaqueValue<'a> {
     let words = (s.len() + 1 /*null-ending*/ + (WORD_SIZE - 1)/*rounding*/) / WORD_SIZE;
     let length = words * WORD_SIZE;
     let mut block = alloc.block_with_size_and_tag(words, block::STRING_TAG);
     let block_contents_as_slice: &mut [u8] = unsafe {
         let block = block.as_mut_ptr();
-        *block.add(words - 1) = Value::from_bits(0);
+        *block.add(words - 1) = OpaqueValue::from_bits(0);
         let block_bytes = block as *mut u8;
         *block_bytes.add(length - 1) = (length - s.len() - 1) as u8;
         std::slice::from_raw_parts_mut(block_bytes, s.len())
@@ -613,7 +613,7 @@ where
     T0: ToOcamlRep,
     T1: ToOcamlRep,
 {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size(2);
         A::set_field(&mut block, 0, alloc.add(&self.0));
         A::set_field(&mut block, 1, alloc.add(&self.1));
@@ -640,7 +640,7 @@ where
     T1: ToOcamlRep,
     T2: ToOcamlRep,
 {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size(3);
         A::set_field(&mut block, 0, alloc.add(&self.0));
         A::set_field(&mut block, 1, alloc.add(&self.1));
@@ -671,7 +671,7 @@ where
     T2: ToOcamlRep,
     T3: ToOcamlRep,
 {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size(4);
         A::set_field(&mut block, 0, alloc.add(&self.0));
         A::set_field(&mut block, 1, alloc.add(&self.1));
@@ -706,7 +706,7 @@ where
     T3: ToOcamlRep,
     T4: ToOcamlRep,
 {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size(5);
         A::set_field(&mut block, 0, alloc.add(&self.0));
         A::set_field(&mut block, 1, alloc.add(&self.1));
@@ -745,7 +745,7 @@ where
     T4: ToOcamlRep,
     T5: ToOcamlRep,
 {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size(6);
         A::set_field(&mut block, 0, alloc.add(&self.0));
         A::set_field(&mut block, 1, alloc.add(&self.1));
@@ -788,7 +788,7 @@ where
     T5: ToOcamlRep,
     T6: ToOcamlRep,
 {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size(7);
         A::set_field(&mut block, 0, alloc.add(&self.0));
         A::set_field(&mut block, 1, alloc.add(&self.1));
@@ -835,7 +835,7 @@ where
     T6: ToOcamlRep,
     T7: ToOcamlRep,
 {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size(8);
         A::set_field(&mut block, 0, alloc.add(&self.0));
         A::set_field(&mut block, 1, alloc.add(&self.1));

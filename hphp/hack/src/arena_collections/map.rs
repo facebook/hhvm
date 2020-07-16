@@ -80,7 +80,7 @@ impl<K, V> Default for Map<'_, K, V> {
 }
 
 impl<K: ToOcamlRep + Ord, V: ToOcamlRep> ToOcamlRep for Map<'_, K, V> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, alloc: &'a A) -> ocamlrep::Value<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
         let len = self.count();
         let mut iter = self.iter();
         let (value, _) = ocamlrep::sorted_iter_to_ocaml_map(&mut iter, alloc, len);

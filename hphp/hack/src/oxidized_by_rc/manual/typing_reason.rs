@@ -122,7 +122,7 @@ impl serde::Serialize for Reason {
 }
 
 impl ocamlrep::ToOcamlRep for Reason {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::Value<'a> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
         unimplemented!()
     }
 }

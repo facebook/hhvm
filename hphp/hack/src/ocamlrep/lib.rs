@@ -329,7 +329,7 @@ pub trait ToOcamlRep {
     /// Implementors of this method must not mutate or drop any values after
     /// passing them to `Allocator::add` (or invoking `to_ocamlrep` on them),
     /// else `Allocator::memoized` may return incorrect results.
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a>;
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a>;
 }
 
 pub trait FromOcamlRep: Sized {
@@ -367,7 +367,7 @@ pub trait Allocator: Sized {
     ///
     /// Panics if `index` is out of bounds for `block` (i.e., greater than or
     /// equal to the block's size).
-    fn set_field<'a>(block: &mut BlockBuilder<'a>, index: usize, value: Value<'a>);
+    fn set_field<'a>(block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>);
 
     #[inline(always)]
     fn block_with_size(&self, size: usize) -> BlockBuilder<'_> {
@@ -382,7 +382,7 @@ pub trait Allocator: Sized {
     /// overhead of maintaining a cache that comes with it), consider using
     /// `ocamlrep::rc::RcOc` instead of `Rc`.
     #[inline(always)]
-    fn add<T: ToOcamlRep + ?Sized>(&self, value: &T) -> Value<'_> {
+    fn add<T: ToOcamlRep + ?Sized>(&self, value: &T) -> OpaqueValue<'_> {
         value.to_ocamlrep(self)
     }
 
@@ -399,8 +399,8 @@ pub trait Allocator: Sized {
         &'a self,
         ptr: usize,
         size_in_bytes: usize,
-        f: impl FnOnce(&'a Self) -> Value<'a>,
-    ) -> Value<'a>;
+        f: impl FnOnce(&'a Self) -> OpaqueValue<'a>,
+    ) -> OpaqueValue<'a>;
 
     /// Convert the given data structure to an OCaml value. Structural sharing
     /// (via references or `Rc`) will be preserved.
@@ -426,5 +426,5 @@ pub trait Allocator: Sized {
     /// # Panics
     ///
     /// `add_root` is not re-entrant, and panics upon attempts to do so.
-    fn add_root<T: ToOcamlRep + ?Sized>(&self, value: &T) -> Value<'_>;
+    fn add_root<T: ToOcamlRep + ?Sized>(&self, value: &T) -> OpaqueValue<'_>;
 }

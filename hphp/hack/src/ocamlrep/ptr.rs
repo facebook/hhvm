@@ -9,7 +9,7 @@
 use std::fmt;
 use std::num::NonZeroUsize;
 
-use crate::{Allocator, FromError, FromOcamlRep, ToOcamlRep, Value};
+use crate::{Allocator, FromError, FromOcamlRep, OpaqueValue, ToOcamlRep, Value};
 
 /// Unsafe pointer to an OCaml value which is (possibly) managed by the garbage
 /// collector.
@@ -49,8 +49,8 @@ impl fmt::Debug for UnsafeOcamlPtr {
 }
 
 impl ToOcamlRep for UnsafeOcamlPtr {
-    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
-        unsafe { Value::from_bits(self.0.get()) }
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
+        unsafe { OpaqueValue::from_bits(self.0.get()) }
     }
 }
 
@@ -97,8 +97,8 @@ impl<T> fmt::Debug for NakedPtr<T> {
 }
 
 impl<T> ToOcamlRep for NakedPtr<T> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
-        unsafe { Value::from_bits(self.0 as usize) }
+    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
+        unsafe { OpaqueValue::from_bits(self.0 as usize) }
     }
 }
 

@@ -98,10 +98,10 @@ where
 
                 let mut res = pool.block_with_size(4);
                 Pool::set_field(&mut res, 0, unsafe {
-                    ocamlrep::Value::from_bits(ocaml_state)
+                    ocamlrep::OpaqueValue::from_bits(ocaml_state)
                 });
                 Pool::set_field(&mut res, 1, unsafe {
-                    ocamlrep::Value::from_bits(ocaml_root)
+                    ocamlrep::OpaqueValue::from_bits(ocaml_root)
                 });
                 Pool::set_field(&mut res, 2, ocaml_errors);
                 Pool::set_field(&mut res, 3, ocaml_tree);

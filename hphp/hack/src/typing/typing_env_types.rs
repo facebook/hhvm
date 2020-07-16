@@ -7,7 +7,7 @@ use crate::typing_make_type::TypeBuilder;
 use crate::typing_per_cont_env::{PerContEntry, TypingPerContEnv};
 use arena_trait::Arena;
 use decl_provider_rust::DeclProvider;
-use ocamlrep::{Allocator, ToOcamlRep, Value};
+use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
 use oxidized::pos::Pos as OwnedPos;
 use oxidized::{relative_path, typechecker_options};
 use oxidized_by_ref::pos::Pos;
@@ -113,7 +113,7 @@ impl<'a> Env<'a> {
 }
 
 impl ToOcamlRep for Env<'_> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let arena = bumpalo::Bump::new();
         self.to_oxidized(&arena).to_ocamlrep(alloc)
     }

@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::fmt::{self, Debug};
 use std::ops::Index;
 
-use crate::{Allocator, Value};
+use crate::{Allocator, OpaqueValue, Value};
 
 /// Blocks with tags greater than or equal to NO_SCAN_TAG contain binary data,
 /// and are not scanned by the garbage collector. Likewise, we must avoid
@@ -18,11 +18,11 @@ pub const DOUBLE_TAG: u8 = 253;
 
 /// A recently-allocated, not-yet-finalized Block.
 #[repr(transparent)]
-pub struct BlockBuilder<'a>(pub(crate) &'a mut [Value<'a>]);
+pub struct BlockBuilder<'a>(pub(crate) &'a mut [OpaqueValue<'a>]);
 
 impl<'a> BlockBuilder<'a> {
     #[inline(always)]
-    pub fn new(block: &'a mut [Value<'a>]) -> Self {
+    pub fn new(block: &'a mut [OpaqueValue<'a>]) -> Self {
         if block.len() == 0 {
             panic!()
         }
@@ -36,13 +36,13 @@ impl<'a> BlockBuilder<'a> {
     }
 
     #[inline(always)]
-    pub fn build(self) -> Value<'a> {
-        unsafe { Value::from_bits(self.0.as_ptr() as usize) }
+    pub fn build(self) -> OpaqueValue<'a> {
+        unsafe { OpaqueValue::from_bits(self.0.as_ptr() as usize) }
     }
 
     /// Return a pointer to the first field in the block.
     #[inline(always)]
-    pub fn as_mut_ptr(&mut self) -> *mut Value<'a> {
+    pub fn as_mut_ptr(&mut self) -> *mut OpaqueValue<'a> {
         self.0.as_mut_ptr()
     }
 }
@@ -85,8 +85,8 @@ impl<'a> Block<'a> {
     pub(crate) fn clone_with<'b, A: Allocator>(
         &self,
         alloc: &'b A,
-        seen: &mut HashMap<usize, Value<'b>>,
-    ) -> Value<'b> {
+        seen: &mut HashMap<usize, OpaqueValue<'b>>,
+    ) -> OpaqueValue<'b> {
         let mut block = alloc.block_with_size_and_tag(self.size(), self.tag());
         match self.as_values() {
             Some(fields) => {

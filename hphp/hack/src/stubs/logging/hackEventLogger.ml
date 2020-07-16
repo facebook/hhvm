@@ -228,6 +228,10 @@ let remote_scheduler_update_dependency_graph_end ~edges:_ _ = ()
 
 let remote_scheduler_save_naming_end _ = ()
 
+let credentials_check_failure _ _ = ()
+
+let credentials_check_end _ _ = ()
+
 let remote_worker_type_check_end _ = ()
 
 let remote_worker_load_naming_end _ = ()

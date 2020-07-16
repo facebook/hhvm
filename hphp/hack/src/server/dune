@@ -244,6 +244,7 @@
     parsing_service
     remote
     search
+    security_stubs
     server_env
     server_services
     sys_utils

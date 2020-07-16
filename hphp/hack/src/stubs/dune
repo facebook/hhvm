@@ -184,3 +184,10 @@
   (modules flytrap)
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))
+
+(library
+  (name security_stubs)
+  (wrapped false)
+  (modules security)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))

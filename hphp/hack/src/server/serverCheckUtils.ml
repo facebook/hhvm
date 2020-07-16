@@ -50,18 +50,41 @@ let should_do_remote
     end
   in
   let do_remote =
+    do_remote
+    &&
     let open Relative_path.Set in
-    if do_remote then begin
-      let phases = genv.local_config.remote_type_check.disabled_on_errors in
-      let do_remote =
-        List.fold phases ~init:true ~f:(fun acc phase ->
-            acc && not (cardinal (Errors.get_failed_files errors phase) > 0))
-      in
-      if not do_remote then
-        Hh_logger.log
-          "Errors were present in phases that disqualify from remote type checking";
-      do_remote
-    end else
+    let phases = genv.local_config.remote_type_check.disabled_on_errors in
+    let do_remote =
+      List.fold phases ~init:true ~f:(fun acc phase ->
+          acc && not (cardinal (Errors.get_failed_files errors phase) > 0))
+    in
+    if not do_remote then
+      Hh_logger.log
+        "Errors were present in phases that disqualify from remote type checking";
+    do_remote
+  in
+
+  (* Finally, let's check whether our credentials are OK *)
+  let do_remote =
+    do_remote
+    &&
+    let t = Unix.gettimeofday () in
+    let attempt_fix = genv.local_config.attempt_fix_credentials in
+    match Security.check_credentials ~attempt_fix with
+    | Ok fixes_applied ->
+      HackEventLogger.credentials_check_end
+        (Printf.sprintf
+           "should_do_remote: OK; fixed credentials: %b"
+           fixes_applied)
+        t;
+      true
+    | Error error ->
+      let kind = Security.to_error_kind_string error in
+      let message = Security.to_error_message_string error in
+      Hh_logger.log "Error kind: %s\nError message: %s" kind message;
+      HackEventLogger.credentials_check_failure
+        (Printf.sprintf "should_do_remote: [%s]" kind)
+        t;
       false
   in
   Hh_logger.log

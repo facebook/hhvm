@@ -346,6 +346,8 @@ end
 
 type t = {
   min_log_level: Hh_logger.Level.t;
+  (* Indicates whether we attempt to fix the credentials if they're broken *)
+  attempt_fix_credentials: bool;
   log_categories: string list;
   (* the list of experiments from the experiments config *)
   experiments: string list;
@@ -478,6 +480,7 @@ type t = {
 let default =
   {
     min_log_level = Hh_logger.Level.Info;
+    attempt_fix_credentials = false;
     log_categories = [];
     experiments = [];
     experiments_config_meta = "";
@@ -687,6 +690,13 @@ let load_ fn ~silent ~current_version overrides =
     bool_if_version
       "require_saved_state"
       ~default:default.require_saved_state
+      config
+  in
+  let attempt_fix_credentials =
+    bool_if_min_version
+      "attempt_fix_credentials"
+      ~default:default.attempt_fix_credentials
+      ~current_version
       config
   in
   let enable_on_nfs =
@@ -969,6 +979,7 @@ let load_ fn ~silent ~current_version overrides =
   in
   {
     min_log_level;
+    attempt_fix_credentials;
     log_categories;
     experiments;
     experiments_config_meta;

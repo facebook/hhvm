@@ -824,6 +824,8 @@ struct RuntimeOption {
   F(bool,     JitPGOVasmBlockCountersForceSaveSF, false)                \
   F(bool,     JitPGOVasmBlockCountersForceSaveGP, false)                \
   F(uint32_t, JitPGOVasmBlockCountersMaxOpMismatches, 12)               \
+  F(uint32_t, JitPGOVasmBlockCountersMinEntryValue,                     \
+                                       ServerExecutionMode() ? 200 : 0) \
   F(bool,     JitPGOVasmBlockCountersSkipFixWeights, false)             \
   F(double,   JitPGOVasmBlockCountersHotWeightMultiplier, 0)            \
   F(bool, JitLayoutSeparateZeroWeightBlocks, false)                     \

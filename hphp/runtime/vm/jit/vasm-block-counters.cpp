@@ -194,27 +194,34 @@ void setWeights(Vunit& unit) {
 
   std::string errorMsg = checkProfile(unit, sortedBlocks, counters, opcodes);
 
-  auto DEBUG_ONLY prefix = "";
+  auto DEBUG_ONLY prefix = "un";
+  bool enoughProfile = false;
+
   if (errorMsg == "") {
-    // Update the block weights.
-    for (size_t index = 0; index < sortedBlocks.size(); index++) {
-      auto const b = sortedBlocks[index];
-      auto& block = unit.blocks[b];
-      assertx(index < counters.size());
-      block.weight = counters[index];
-      // Drop the separation between the main, cold and frozen areas, to avoid
-      // scaling of the block weights based on the area since we have accurate
-      // counters.  The code-layout pass may re-split the code into
-      // hot/cold/frozen later.
-      block.area_idx = AreaIndex::Main;
+    // Check that enough profile was collected.
+    if (counters[0] >= RuntimeOption::EvalJitPGOVasmBlockCountersMinEntryValue) {
+      prefix = "";
+      enoughProfile = true;
+      // Update the block weights.
+      for (size_t index = 0; index < sortedBlocks.size(); index++) {
+        auto const b = sortedBlocks[index];
+        auto& block = unit.blocks[b];
+        assertx(index < counters.size());
+        block.weight = counters[index];
+        // Drop the separation between the main, cold and frozen areas, to avoid
+        // scaling of the block weights based on the area since we have accurate
+        // counters.  The code-layout pass may re-split the code into
+        // hot/cold/frozen later.
+        block.area_idx = AreaIndex::Main;
+      }
     }
-  } else {
-    prefix = "un";
   }
 
   if (RuntimeOption::EvalDumpVBC) {
     unit.annotations.emplace_back("VasmBlockCounters",
-                                  errorMsg != "" ? errorMsg : "matches");
+                                  errorMsg != "" ? errorMsg :
+                                  enoughProfile ? "matches" :
+                                  "matches, but not enough profile data");
   }
   FTRACE(1, "VasmBlockCounters::setWeights: {}modified unit\n{}",
          prefix, show(unit));

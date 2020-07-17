@@ -42,13 +42,28 @@ let add_container_defn_fact ctx source_map clss decl_id member_decls prog =
         let ref = build_id_json decl_id in
         (ref :: decl_refs, prog))
   in
+  let (req_extends_hints, req_implements_hints) =
+    List.partition_tf clss.c_reqs snd
+  in
+  let (req_extends, prog) =
+    add_decls (List.map req_extends_hints fst) ClassDeclaration prog
+  in
+  let (req_implements, prog) =
+    add_decls (List.map req_implements_hints fst) InterfaceDeclaration prog
+  in
   let (defn_pred, json_fields, prog) =
     match get_container_kind clss with
     | InterfaceContainer ->
       let (extends, prog) =
         add_decls clss.c_extends InterfaceDeclaration prog
       in
-      let req_fields = ("extends_", JSON_Array extends) :: common_fields in
+      let req_fields =
+        common_fields
+        @ [
+            ("extends_", JSON_Array extends);
+            ("requireExtends", JSON_Array req_extends);
+          ]
+      in
       (InterfaceDefinition, req_fields, prog)
     | TraitContainer ->
       let (impls, prog) =
@@ -56,8 +71,13 @@ let add_container_defn_fact ctx source_map clss decl_id member_decls prog =
       in
       let (uses, prog) = add_decls clss.c_uses TraitDeclaration prog in
       let req_fields =
-        [("implements_", JSON_Array impls); ("uses", JSON_Array uses)]
-        @ common_fields
+        common_fields
+        @ [
+            ("implements_", JSON_Array impls);
+            ("uses", JSON_Array uses);
+            ("requireExtends", JSON_Array req_extends);
+            ("requireImplements", JSON_Array req_implements);
+          ]
       in
       (TraitDefinition, req_fields, prog)
     | ClassContainer ->

@@ -3,10 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::fmt::Debug;
+
 use arena_trait::{Arena, TrivialDrop};
 use ocamlrep_derive::ToOcamlRep;
 
-#[derive(Debug, Eq, Hash, PartialEq, Ord, PartialOrd, ToOcamlRep)]
+#[derive(Eq, Hash, PartialEq, Ord, PartialOrd, ToOcamlRep)]
 pub enum List<'a, T> {
     Nil,
     Cons(&'a (T, List<'a, T>)),
@@ -249,6 +251,12 @@ impl<'a, T> Clone for List<'a, T> {
 }
 impl<'a, T> Copy for List<'a, T> {}
 impl<'a, T: TrivialDrop> TrivialDrop for List<'a, T> {}
+
+impl<T: Debug> Debug for List<'_, T> {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fmt.debug_list().entries(self.iter()).finish()
+    }
+}
 
 pub struct Iter<'a, T>(List<'a, T>);
 

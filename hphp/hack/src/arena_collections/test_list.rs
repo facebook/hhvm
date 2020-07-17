@@ -236,3 +236,9 @@ fn into_iter() {
         expected += 1;
     }
 }
+
+#[test]
+fn debug() {
+    assert_eq!(format!("{:?}", l![]), "[]");
+    assert_eq!(format!("{:?}", l![1, 2, 3]), "[1, 2, 3]");
+}

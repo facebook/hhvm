@@ -163,24 +163,66 @@ let build_is_async_json fun_kind =
   in
   JSON_Bool is_async
 
-let build_parameter_json param_name param_type_name =
+let build_parameter_json
+    source_map param_name param_type_name def_val is_inout is_variadic attrs =
   let fields =
-    let name_field = [("name", build_name_json_nested param_name)] in
+    [
+      ("name", build_name_json_nested param_name);
+      ("isInout", JSON_Bool is_inout);
+      ("isVariadic", JSON_Bool is_variadic);
+      ("attributes", build_attributes_json_nested source_map attrs);
+    ]
+  in
+  let fields =
     match param_type_name with
-    | None -> name_field
-    | Some ty -> ("type", build_type_json_nested ty) :: name_field
+    | None -> fields
+    | Some ty -> ("type", build_type_json_nested ty) :: fields
+  in
+  let fields =
+    match def_val with
+    | None -> fields
+    | Some expr -> ("defaultValue", JSON_String expr) :: fields
   in
   JSON_Object fields
 
-let build_signature_json ctx params ret_ty =
+let build_signature_json ctx source_map params vararg ret_ty =
+  let build_param p =
+    let ty =
+      match hint_of_type_hint p.param_type_hint with
+      | None -> None
+      | Some h -> Some (get_type_from_hint ctx h)
+    in
+    let is_inout =
+      match p.param_callconv with
+      | Some Pinout -> true
+      | _ -> false
+    in
+    let def_value =
+      match p.param_expr with
+      | None -> None
+      | Some ((expr_pos, _), _) ->
+        let fp = Relative_path.to_absolute (Pos.filename expr_pos) in
+        (match SMap.find_opt fp source_map with
+        | Some st -> Some (source_at_span st expr_pos)
+        | None -> None)
+    in
+    build_parameter_json
+      source_map
+      p.param_name
+      ty
+      def_value
+      is_inout
+      p.param_is_variadic
+      p.param_user_attributes
+  in
+  let parameters = List.map params (fun param -> build_param param) in
   let parameters =
-    List.map params (fun param ->
-        let ty =
-          match hint_of_type_hint param.param_type_hint with
-          | None -> None
-          | Some h -> Some (get_type_from_hint ctx h)
-        in
-        build_parameter_json param.param_name ty)
+    match vararg with
+    | FVnonVariadic -> parameters
+    | FVellipsis _ ->
+      parameters
+      @ [build_parameter_json source_map "..." None None false true []]
+    | FVvariadicArg vararg -> parameters @ [build_param vararg]
   in
   let return_type_name =
     match hint_of_type_hint ret_ty with

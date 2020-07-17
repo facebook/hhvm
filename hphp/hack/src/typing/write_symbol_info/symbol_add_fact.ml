@@ -312,17 +312,24 @@ let add_gconst_decl_fact name progress =
   let json_fact = JSON_Object [("name", build_qname_json_nested name)] in
   add_fact GlobalConstDeclaration json_fact progress
 
-let add_gconst_defn_fact ctx elem decl_id progress =
-  let base_fields =
-    [("declaration", build_id_json decl_id)]
+let add_gconst_defn_fact ctx source_map elem decl_id progress =
+  let value =
+    let ((expr_pos, _), _) = elem.cst_value in
+    let fp = Relative_path.to_absolute (Pos.filename expr_pos) in
+    match SMap.find_opt fp source_map with
+    | Some st -> source_at_span st expr_pos
+    | None -> ""
+  in
+  let req_fields =
+    [("declaration", build_id_json decl_id); ("value", JSON_String value)]
     @ build_namespace_decl_json_nested elem.cst_namespace
   in
   let json_fields =
     match elem.cst_type with
-    | None -> base_fields
+    | None -> req_fields
     | Some h ->
       let ty = get_type_from_hint ctx h in
-      ("type", build_type_json_nested ty) :: base_fields
+      ("type", build_type_json_nested ty) :: req_fields
   in
   let json_fact = JSON_Object json_fields in
   add_fact GlobalConstDefinition json_fact progress

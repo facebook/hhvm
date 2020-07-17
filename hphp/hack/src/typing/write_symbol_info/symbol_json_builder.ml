@@ -193,12 +193,12 @@ let process_function_xref symbol_def pos (xrefs, progress) =
     pos
     (xrefs, progress)
 
-let process_gconst_decl ctx elem progress =
+let process_gconst_decl ctx source_map elem progress =
   let (pos, id) = elem.cst_name in
   let (_, prog) =
     process_decl_loc
       add_gconst_decl_fact
-      (add_gconst_defn_fact ctx)
+      (add_gconst_defn_fact ctx source_map)
       build_gconst_decl_json_ref
       pos
       id
@@ -283,7 +283,7 @@ let process_decls ctx files_info (tasts : Tast.program list) =
           | Class en when phys_equal en.c_kind Cenum ->
             process_enum_decl ctx source_map en acc
           | Class cd -> process_container_decl ctx source_map cd acc
-          | Constant gd -> process_gconst_decl ctx gd acc
+          | Constant gd -> process_gconst_decl ctx source_map gd acc
           | Fun fd -> process_func_decl ctx source_map fd acc
           | Typedef td -> process_typedef_decl ctx source_map td acc
           | _ -> acc))

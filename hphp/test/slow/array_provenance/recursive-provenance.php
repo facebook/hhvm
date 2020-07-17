@@ -36,6 +36,14 @@ function test_recursive_provenance() {
 
   $y = HH\tag_provenance_here($x);
   print_recursive_provenance($y, '$y');
+
+  $x = vec[
+    varray[1, 2, 3],
+  ];
+  print_recursive_provenance($x, '$x');
+
+  $y = HH\tag_provenance_here($x);
+  print_recursive_provenance($y, '$y');
 }
 
 // Nested refcount 1 arrays. We should update them in place.

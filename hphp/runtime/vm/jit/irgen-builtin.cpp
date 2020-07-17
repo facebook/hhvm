@@ -1093,10 +1093,27 @@ SSATmp* opt_enum_coerce(IRGS& env, const ParamPrep& params) {
 }
 
 SSATmp* opt_tag_provenance_here(IRGS& env, const ParamPrep& params) {
-  if (RO::EvalArrayProvenance || params.size() != 1) return nullptr;
+
+  if (!(params.size() == 1 ||
+        (params.size() == 2 && params[1].value->isA(TInt)))) {
+    return nullptr;
+  }
   auto const result = params[0].value;
-  gen(env, IncRef, result);
-  return result;
+
+  auto emit_noop = [&]() {
+    gen(env, IncRef, result);
+    return result;
+  };
+
+  if (!RO::EvalArrayProvenance) {
+    return emit_noop();
+  }
+
+  if (!result->type().maybe(TArrLike) && !result->type().maybe(TObj)) {
+    return emit_noop();
+  }
+
+  return nullptr;
 }
 
 StaticString s_ARRAY_MARK_LEGACY_VEC(Strings::ARRAY_MARK_LEGACY_VEC);

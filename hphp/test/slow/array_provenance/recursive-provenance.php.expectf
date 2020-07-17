@@ -108,10 +108,44 @@ $y[2][1][0]: <not an array>
 $y[2][2]: %s/recursive-provenance.php:37
 $y[2][2][0]: <not an array>
 
+Printing provenance for $x:
+vec(1) {
+  array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+}
+$x: <none>
+$x[0]: %s
+$x[0][0]: <not an array>
+$x[0][1]: <not an array>
+$x[0][2]: <not an array>
+
+Printing provenance for $y:
+vec(1) {
+  array(3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+}
+$y: <none>
+$y[0]: %s/recursive-provenance.php:45
+$y[0][0]: <not an array>
+$y[0][1]: <not an array>
+$y[0][2]: <not an array>
+
 ==============================================
 test_cow_optimizations:
 
-Notice: tag_provenance_here called on object: C in %s/recursive-provenance.php on line 47
+Notice: tag_provenance_here called on object: C in %s/recursive-provenance.php on line 55
 
 Printing provenance for $x:
 array(1) {
@@ -122,14 +156,14 @@ array(1) {
     }
   }
 }
-$x: %s/recursive-provenance.php:47
-$x[0]: %s/recursive-provenance.php:47
+$x: %s/recursive-provenance.php:55
+$x[0]: %s/recursive-provenance.php:55
 $x[0][0]: <not an array>
 
 ==============================================
 test_unable_to_cow:
 
-Notice: tag_provenance_here called on object: C in %s/recursive-provenance.php on line 56
+Notice: tag_provenance_here called on object: C in %s/recursive-provenance.php on line 64
 
 Printing provenance for $x:
 array(1) {
@@ -143,9 +177,9 @@ array(1) {
     }
   }
 }
-$x: %s/recursive-provenance.php:55
-$x[a]: %s/recursive-provenance.php:55
-$x[a][b]: %s/recursive-provenance.php:55
+$x: %s/recursive-provenance.php:63
+$x[a]: %s/recursive-provenance.php:63
+$x[a][b]: %s/recursive-provenance.php:63
 $x[a][b][0]: <not an array>
 
 Printing provenance for $y:
@@ -160,12 +194,12 @@ array(1) {
     }
   }
 }
-$y: %s/recursive-provenance.php:56
-$y[0]: %s/recursive-provenance.php:56
-$y[0][b]: %s/recursive-provenance.php:56
+$y: %s/recursive-provenance.php:64
+$y[0]: %s/recursive-provenance.php:64
+$y[0][b]: %s/recursive-provenance.php:64
 $y[0][b][0]: <not an array>
 
 ==============================================
 test_object_notice:
 
-Notice: tag_provenance_here called on object: C in %s/recursive-provenance.php on line 64
+Notice: tag_provenance_here called on object: C in %s/recursive-provenance.php on line 72

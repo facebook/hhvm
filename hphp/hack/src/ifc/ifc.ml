@@ -467,6 +467,32 @@ and expr renv env (((_epos, ety), e) : Tast.expr) =
     let (env, vec_pty) = expr env exp in
     let element_pty = vec_element_pty vec_pty in
     (env, element_pty)
+  (* TODO(T70139741): support variadic functions and constructors
+   * TODO(T70139893): support classes with type parameters
+   *)
+  | A.New (((_, lty), cid), _targs, args, _extra_args, _) ->
+    let (env, args_pty) = List.map_env ~f:expr env args in
+    let (env, obj_pty) =
+      match cid with
+      | A.CIexpr e -> expr env e
+      | A.CI (_, _) -> (env, ptype None renv.re_proto lty)
+      (* TODO(T70140005) support additional types of constructor calls *)
+      | _ -> fail "could not find class name for constructor"
+    in
+    begin
+      match obj_pty with
+      | Tclass cls ->
+        let callable_name =
+          Decl.make_callable_name (Some cls.c_name) "__construct"
+        in
+        let lty = T.mk (Typing_reason.Rnone, T.Tprim A.Tvoid) in
+        let (env, _) =
+          call renv env callable_name (Some obj_pty) args_pty lty
+        in
+        let pty = ptype ?prefix:(Some "constr") None renv.re_proto ety in
+        (env, pty)
+      | _ -> fail "unhandled method call on %a" Pp.ptype obj_pty
+    end
   (* --- expressions below are not yet supported *)
   | A.Array _
   | A.Darray (_, _)
@@ -498,7 +524,6 @@ and expr renv env (((_epos, ety), e) : Tast.expr) =
   | A.Eif (_, _, _)
   | A.Is (_, _)
   | A.As (_, _, _)
-  | A.New (_, _, _, _, _)
   | A.Record (_, _)
   | A.Efun (_, _)
   | A.Lfun (_, _)

@@ -1,0 +1,82 @@
+Decls:
+  class \Exception: { policied_props = [] }
+  class \HH\vec: { policied_props = [] }
+  class \X: { policied_props = [valuex:PRIVATE] }
+  class \Y: { policied_props = [valuey:PUBLIC] }
+  function \X#__construct: { kind = public }
+  function \Y#__construct: { kind = public }
+  function \f: { kind = public }
+  
+Analyzing __construct:
+* pc: pc
+* This: \X<\X, lump, valuex=<PRIVATE>>
+* Return: <ret>
+* Params:
+  lvars: { $valuex -> <$valuex> }
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars: { $valuex -> <$valuex> }
+Constraints:
+  [\X < PRIVATE, $valuex < PRIVATE, pc < PRIVATE]
+
+Analyzing __construct:
+* pc: pc
+* This: \Y<\Y, lump, valuey=<PUBLIC>>
+* Return: <ret>
+* Params:
+  lvars: { $valuey -> <$valuey> }
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars: { $valuey -> <$valuey> }
+Constraints:
+  [\Y = PUBLIC, $valuey = PUBLIC, pc = PUBLIC]
+
+Analyzing \f:
+* pc: pc
+* This: None
+* Return: <ret>
+* Params:
+  lvars: {}
+* Final environment:
+  Deps: { "\\X#__construct"; "\\Y#__construct" }
+  Locals:
+    lvars: { $x -> \X<\X'2, lump'2, valuex=<PRIVATE>> }
+Constraints:
+  [{(this: \X<\X, lump, valuex=?thunk>)->\X#__construct<pc>(<PUBLIC>): <\X#__construct_ret>},
+   PRIVATE = PRIVATE, PRIVATE = PRIVATE, lump'1 = lump'2, \X'1 < \X'2,
+   .valuex = PRIVATE, \X'2 < .valuex, .valuex < pcjoin, pc < pcjoin,
+   {(this: \Y<\Y, lump'3, valuey=?thunk>)->\Y#__construct<pcjoin>(<PUBLIC>): <\Y#__construct_ret>},
+   PUBLIC = PUBLIC, PUBLIC = PUBLIC, lump'4 = lump'5, \Y'1 < \Y'2,
+   .valuex < \Y'2]
+
+Flow constraints for \X#__construct:
+  
+  Simplified: True
+  Raw: [\X < PRIVATE, $valuex < PRIVATE, pc < PRIVATE]
+
+Flow constraints for \Y#__construct:
+  
+  Simplified: True
+  Raw: [\Y = PUBLIC, $valuey = PUBLIC, pc = PUBLIC]
+
+Flow constraints for \f:
+  
+  Simplified: PRIVATE = PUBLIC
+  Raw:
+  [exists a b c d e.
+     [d < PRIVATE, a < PRIVATE, b < PRIVATE, PUBLIC < a, pc < b,
+      PRIVATE = PRIVATE, PRIVATE = PRIVATE, lump = c, \X < d,
+      e < \X#__construct_ret], PRIVATE = PRIVATE, PRIVATE = PRIVATE,
+   lump'1 = lump'2, \X'1 < \X'2, .valuex = PRIVATE, \X'2 < .valuex,
+   .valuex < pcjoin, pc < pcjoin,
+   exists a b c d e.
+     [d = PUBLIC, a = PUBLIC, b = PUBLIC, PUBLIC < a, pcjoin < b,
+      PUBLIC = PUBLIC, PUBLIC = PUBLIC, lump'3 = c, \Y < d,
+      e < \Y#__construct_ret], PUBLIC = PUBLIC, PUBLIC = PUBLIC,
+   lump'4 = lump'5, \Y'1 < \Y'2, .valuex < \Y'2]
+
+There are privacy policy errors in \f:
+  Data with policy PRIVATE appears in context PUBLIC.
+  

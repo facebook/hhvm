@@ -1,4 +1,5 @@
 Decls:
+  class \Exception: { policied_props = [] }
   class \HH\vec: { policied_props = [] }
   function \assign0: { kind = public }
   function \assign1: { kind = public }

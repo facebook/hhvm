@@ -1,4 +1,5 @@
 Decls:
+  class \Exception: { policied_props = [] }
   class \HH\vec: { policied_props = [] }
   class \PoliciedData: { policied_props = [data:SECRET] }
   class \PublicData: { policied_props = [data:PUBLIC] }

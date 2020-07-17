@@ -1,6 +1,7 @@
 Decls:
   class \C: { policied_props = [cx] }
   class \D: { policied_props = [] }
+  class \Exception: { policied_props = [] }
   class \HH\vec: { policied_props = [] }
   function \C#__construct: { kind = public }
   function \C#testGetUnpolicied: { kind = public }

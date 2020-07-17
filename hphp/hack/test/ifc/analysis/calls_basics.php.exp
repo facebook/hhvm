@@ -1,5 +1,6 @@
 Decls:
   class \C: { policied_props = [a:A, b:B] }
+  class \Exception: { policied_props = [] }
   class \HH\vec: { policied_props = [] }
   function \C#is_a_pos: { kind = infer }
   function \C#setb: { kind = infer }

@@ -159,6 +159,7 @@ let magic_class_decls =
           cd_policied_properties = [];
           cd_tparam_variance = [Ast_defs.Covariant];
         } );
+      ("\\Exception", { cd_policied_properties = []; cd_tparam_variance = [] });
     ]
 
 let topsort_classes classes =
@@ -184,7 +185,10 @@ let topsort_classes classes =
         List.iter ~f:process dependencies;
         schedule := class_ :: !schedule
       end
-    | None -> fail @@ id ^ " is missing entity in the inheritance hierarchy"
+    | None ->
+      (* If it's a magic builtin, then it has no dependencies, so do nothing *)
+      if not @@ SMap.mem id magic_class_decls then
+        fail @@ id ^ " is missing entity in the inheritance hierarchy"
   in
   List.iter ~f:process (List.map ~f:(fun c -> snd c.A.c_name) classes);
 

@@ -562,11 +562,15 @@ let rec stmt renv env ((_pos, s) : Tast.stmt) =
             add_dependencies (PCSet.elements lpc) renv.re_ret
             && subtype te renv.re_ret)
     end
+  | A.Throw e ->
+    let (env, _ty) = expr renv env e in
+    let union env t1 t2 = (env, mk_union t1 t2) in
+    Env.merge_conts_into ~union env [K.Next] K.Catch
   | _ -> env
 
 and block renv env (blk : Tast.block) =
   let seq env s =
-    let env = Env.merge_pcs_into env [K.Exit] K.Next in
+    let env = Env.merge_pcs_into env [K.Exit; K.Catch] K.Next in
     stmt renv env s
   in
   List.fold_left ~f:seq ~init:env blk

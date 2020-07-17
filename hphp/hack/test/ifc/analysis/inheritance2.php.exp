@@ -1,6 +1,7 @@
 Decls:
   class \A: { policied_props = [i:P1] }
   class \B: { policied_props = [i:P1, j:P2, k:P3] }
+  class \Exception: { policied_props = [] }
   class \HH\vec: { policied_props = [] }
   class \T: { policied_props = [j:P2] }
   function \test: { kind = public }

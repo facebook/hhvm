@@ -1,5 +1,6 @@
 Decls:
   class \C: { policied_props = [i:INT, v:VEC] }
+  class \Exception: { policied_props = [] }
   class \HH\vec: { policied_props = [] }
   function \C#mutation: { kind = public }
   function \C#nested: { kind = public }

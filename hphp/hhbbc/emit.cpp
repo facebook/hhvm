@@ -297,15 +297,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
   auto process_mergeable = [&] (const Bytecode& bc) {
     if (!pseudomain) return;
     switch (bc.op) {
-      case Op::DefCls:
-      case Op::DefClsNop: {
-        auto const& cls = euState.unit->classes[
-          bc.op == Op::DefCls ? bc.DefCls.arg1 : bc.DefClsNop.arg1];
-        if (cls->hoistability == PreClass::NotHoistable) {
-          cls->hoistability = PreClass::Mergeable;
-        }
-        return;
-      }
       case Op::DefCns: {
         auto cid = bc.DefCns.arg1;
         ue.pushMergeableId(Unit::MergeKind::Define, cid);

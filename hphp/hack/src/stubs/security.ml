@@ -8,9 +8,11 @@
 
 type error = string
 
+type success = Checks_skipped [@@deriving show]
+
 let check_credentials ~attempt_fix =
   ignore attempt_fix;
-  Ok false
+  Ok Checks_skipped
 
 let to_error_message_string error = error
 

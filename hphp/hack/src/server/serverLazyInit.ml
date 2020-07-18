@@ -996,11 +996,9 @@ let saved_state_init
   let attempt_fix = genv.local_config.SLC.attempt_fix_credentials in
   let () =
     match Security.check_credentials ~attempt_fix with
-    | Ok fixes_applied ->
+    | Ok success ->
       HackEventLogger.credentials_check_end
-        (Printf.sprintf
-           "saved_state_init: OK; fixed credentials: %b"
-           fixes_applied)
+        (Printf.sprintf "saved_state_init: %s" (Security.show_success success))
         t
     | Error error ->
       let kind = Security.to_error_kind_string error in

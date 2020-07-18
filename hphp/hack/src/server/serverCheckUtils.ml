@@ -71,11 +71,9 @@ let should_do_remote
     let t = Unix.gettimeofday () in
     let attempt_fix = genv.local_config.attempt_fix_credentials in
     match Security.check_credentials ~attempt_fix with
-    | Ok fixes_applied ->
+    | Ok success ->
       HackEventLogger.credentials_check_end
-        (Printf.sprintf
-           "should_do_remote: OK; fixed credentials: %b"
-           fixes_applied)
+        (Printf.sprintf "should_do_remote: %s" (Security.show_success success))
         t;
       true
     | Error error ->

@@ -1424,8 +1424,8 @@ struct DualDispatchUnionImpl {
 
       auto r = [&] {
         auto const tag = unionProvTag(aTag, bTag);
-        if (a->isVecType()) return vec_empty(tag);
-        if (a->isDictType()) return dict_empty(tag);
+        if (a->isVecType()) return vec_empty();
+        if (a->isDictType()) return dict_empty();
         if (a->isVArray()) return aempty_varray(tag);
         if (a->isDArray()) return aempty_darray(tag);
         always_assert(false);
@@ -2952,14 +2952,14 @@ Type vec_val(SArray val) {
   return r;
 }
 
-Type vec_empty(ProvTag tag) {
+Type vec_empty() {
   auto r = Type { BSVecE };
   r.m_data.aval = staticEmptyVec();
   r.m_dataTag = DataTag::ArrLikeVal;
   return r;
 }
 
-Type some_vec_empty(ProvTag tag) {
+Type some_vec_empty() {
   auto r = Type { BVecE };
   r.m_data.aval = staticEmptyVec();
   r.m_dataTag = DataTag::ArrLikeVal;
@@ -2990,12 +2990,12 @@ Type svec_n(Type ty) {
   return packedn_impl(BSVecN, std::move(ty));
 }
 
-Type vec(std::vector<Type> elems, ProvTag tag) {
-  return packed_impl(BVecN, std::move(elems), tag);
+Type vec(std::vector<Type> elems) {
+  return packed_impl(BVecN, std::move(elems), ProvTag::Top);
 }
 
-Type svec(std::vector<Type> elems, ProvTag tag) {
-  return packed_impl(BSVecN, std::move(elems), tag);
+Type svec(std::vector<Type> elems) {
+  return packed_impl(BSVecN, std::move(elems), ProvTag::Top);
 }
 
 Type dict_val(SArray val) {
@@ -3008,36 +3008,36 @@ Type dict_val(SArray val) {
   return r;
 }
 
-Type dict_empty(ProvTag tag) {
+Type dict_empty() {
   auto r = Type { BSDictE };
   r.m_data.aval = staticEmptyDictArray();
   r.m_dataTag   = DataTag::ArrLikeVal;
   return r;
 }
 
-Type some_dict_empty(ProvTag tag) {
+Type some_dict_empty() {
   auto r = Type { BDictE };
   r.m_data.aval = staticEmptyDictArray();
   r.m_dataTag   = DataTag::ArrLikeVal;
   return r;
 }
 
-Type dict_map(MapElems m, ProvTag tag, Type optKey, Type optVal) {
+Type dict_map(MapElems m, Type optKey, Type optVal) {
   return map_impl(
     BDictN,
     std::move(m),
     std::move(optKey),
     std::move(optVal),
-    tag
+    ProvTag::Top
   );
 }
 
-Type dict_n(Type k, Type v, ProvTag tag) {
-  return mapn_impl(BDictN, std::move(k), std::move(v), tag);
+Type dict_n(Type k, Type v) {
+  return mapn_impl(BDictN, std::move(k), std::move(v), ProvTag::Top);
 }
 
-Type sdict_n(Type k, Type v, ProvTag tag) {
-  return mapn_impl(BSDictN, std::move(k), std::move(v), tag);
+Type sdict_n(Type k, Type v) {
+  return mapn_impl(BSDictN, std::move(k), std::move(v), ProvTag::Top);
 }
 
 Type keyset_val(SArray val) {
@@ -6447,19 +6447,19 @@ vec_elem(const Type& vec, const Type& undisectedKey, const Type& defaultTy) {
 }
 
 std::pair<Type, ThrowMode>
-vec_set(Type vec, const Type& undisectedKey, const Type& val, ProvTag src) {
+vec_set(Type vec, const Type& undisectedKey, const Type& val) {
   if (!val.couldBe(BInitCell)) return {TBottom, ThrowMode::BadOperation};
 
   auto const key = disect_vec_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
 
-  return array_like_set(std::move(vec), key, val, src);
+  return array_like_set(std::move(vec), key, val, ProvTag::Top);
 }
 
-std::pair<Type,Type> vec_newelem(Type vec, const Type& val, ProvTag src) {
+std::pair<Type,Type> vec_newelem(Type vec, const Type& val) {
   return array_like_newelem(std::move(vec),
                             val.subtypeOf(BInitCell) ? val : TInitCell,
-                            src);
+                            ProvTag::Top);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -6504,19 +6504,19 @@ dict_elem(const Type& dict, const Type& undisectedKey, const Type& defaultTy) {
 }
 
 std::pair<Type, ThrowMode>
-dict_set(Type dict, const Type& undisectedKey, const Type& val, ProvTag src) {
+dict_set(Type dict, const Type& undisectedKey, const Type& val) {
   if (!val.couldBe(BInitCell)) return {TBottom, ThrowMode::BadOperation};
 
   auto const key = disect_strict_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
 
-  return array_like_set(std::move(dict), key, val, src);
+  return array_like_set(std::move(dict), key, val, ProvTag::Top);
 }
 
-std::pair<Type,Type> dict_newelem(Type dict, const Type& val, ProvTag src) {
+std::pair<Type,Type> dict_newelem(Type dict, const Type& val) {
   return array_like_newelem(std::move(dict),
                             val.subtypeOf(BInitCell) ? val : TInitCell,
-                            src);
+                            ProvTag::Top);
 }
 
 //////////////////////////////////////////////////////////////////////

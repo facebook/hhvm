@@ -198,9 +198,9 @@ bool array_do_set(ISS& env, const Type& key, const Type& value) {
     if (base.subtypeOf(BArr)) {
       return array_set(std::move(base), key, value, tag);
     } else if (base.subtypeOf(BVec)) {
-      return vec_set(std::move(base), key, value, tag);
+      return vec_set(std::move(base), key, value);
     } else if (base.subtypeOf(BDict)) {
-      return dict_set(std::move(base), key, value, tag);
+      return dict_set(std::move(base), key, value);
     } else if (base.subtypeOf(BKeyset)) {
       return keyset_set(std::move(base), key, value);
     }
@@ -282,9 +282,9 @@ folly::Optional<Type> array_do_newelem(ISS& env, const Type& value) {
     if (base.subtypeOf(BArr)) {
       return array_newelem(std::move(base), value, tag);
     } else if (base.subtypeOf(BVec)) {
-      return vec_newelem(std::move(base), value, tag);
+      return vec_newelem(std::move(base), value);
     } else if (base.subtypeOf(BDict)) {
-      return dict_newelem(std::move(base), value, tag);
+      return dict_newelem(std::move(base), value);
     } else if (base.subtypeOf(BKeyset)) {
       return keyset_newelem(std::move(base), value);
     }
@@ -381,10 +381,10 @@ Type currentChainType(ISS& env, Type val) {
       val = array_set(it->base, it->key, val, tag).first;
       if (val == TBottom) val = TArr;
     } else if (it->base.subtypeOf(BVec)) {
-      val = vec_set(it->base, it->key, val, tag).first;
+      val = vec_set(it->base, it->key, val).first;
       if (val == TBottom) val = TVec;
     } else if (it->base.subtypeOf(BDict)) {
-      val = dict_set(it->base, it->key, val, tag).first;
+      val = dict_set(it->base, it->key, val).first;
       if (val == TBottom) val = TDict;
     } else {
       assert(it->base.subtypeOf(BKeyset));
@@ -406,10 +406,10 @@ Type resolveArrayChain(ISS& env, Type val) {
     FTRACE(5, "{}  | {} := {} in {}\n", prefix,
       show(key), show(val), show(arr));
     if (arr.subtypeOf(BVec)) {
-      val = vec_set(std::move(arr), key, val, tag).first;
+      val = vec_set(std::move(arr), key, val).first;
       if (val == TBottom) val = TVec;
     } else if (arr.subtypeOf(BDict)) {
-      val = dict_set(std::move(arr), key, val, tag).first;
+      val = dict_set(std::move(arr), key, val).first;
       if (val == TBottom) val = TDict;
     } else if (arr.subtypeOf(BKeyset)) {
       val = keyset_set(std::move(arr), key, val).first;

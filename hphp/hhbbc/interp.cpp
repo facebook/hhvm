@@ -930,8 +930,7 @@ void in(ISS& env, const bc::Keyset& op) {
 
 void in(ISS& env, const bc::NewDictArray& op) {
   effect_free(env);
-  push(env, op.arg1 == 0 ? dict_empty(provTagHere(env))
-                         : some_dict_empty(provTagHere(env)));
+  push(env, op.arg1 == 0 ? dict_empty() : some_dict_empty());
 }
 
 void in(ISS& env, const bc::NewVArray& op) {
@@ -976,7 +975,7 @@ void in(ISS& env, const bc::NewStructDict& op) {
   for (auto it = op.keys.end(); it != op.keys.begin(); ) {
     map.emplace_front(make_tv<KindOfPersistentString>(*--it), popC(env));
   }
-  push(env, dict_map(std::move(map), provTagHere(env)));
+  push(env, dict_map(std::move(map)));
   effect_free(env);
   constprop(env);
 }
@@ -990,7 +989,7 @@ void in(ISS& env, const bc::NewVec& op) {
   discard(env, op.arg1);
   effect_free(env);
   constprop(env);
-  push(env, vec(std::move(elems), provTagHere(env)));
+  push(env, vec(std::move(elems)));
 }
 
 void in(ISS& env, const bc::NewKeysetArray& op) {
@@ -1042,7 +1041,7 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
       return array_set(std::move(ty), k, v, tag);
     }
     if (ty.subtypeOf(BDict)) {
-      return dict_set(std::move(ty), k, v, tag);
+      return dict_set(std::move(ty), k, v);
     }
     return folly::none;
   }(std::move(inTy));
@@ -1102,7 +1101,7 @@ void in(ISS& env, const bc::AddNewElemC&) {
       return array_newelem(std::move(ty), std::move(v), tag).first;
     }
     if (ty.subtypeOf(BVec)) {
-      return vec_newelem(std::move(ty), std::move(v), tag).first;
+      return vec_newelem(std::move(ty), std::move(v)).first;
     }
     if (ty.subtypeOf(BKeyset)) {
       return keyset_newelem(std::move(ty), std::move(v)).first;
@@ -1785,12 +1784,10 @@ void in(ISS& env, const bc::CastString&) {
 }
 
 void in(ISS& env, const bc::CastDict&)   {
-  arrprov::TagOverride tag_override{provTagHere(env).get()};
   castImpl(env, TDict, tvCastToDictInPlace);
 }
 
 void in(ISS& env, const bc::CastVec&)    {
-  arrprov::TagOverride tag_override{provTagHere(env).get()};
   castImpl(env, TVec, tvCastToVecInPlace);
 }
 
@@ -2250,7 +2247,7 @@ void in(ISS& env, const bc::RetM& op) {
   for (int i = 0; i < op.arg1; i++) {
     ret[op.arg1 - i - 1] = popC(env);
   }
-  doRet(env, vec(std::move(ret), provTagHere(env)), false);
+  doRet(env, vec(std::move(ret)), false);
 }
 
 void in(ISS& env, const bc::RetCSuspended&) {

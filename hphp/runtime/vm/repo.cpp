@@ -299,6 +299,8 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
 
     RO::EvalHackArrCompatIsArrayNotices =
       s_globalData.HackArrCompatIsArrayNotices;
+    RO::EvalHackArrCompatIsVecDictNotices =
+      s_globalData.HackArrCompatIsVecDictNotices;
 
     RO::EvalWidenIsArray = s_globalData.WidenIsArray;
     RO::EvalWidenIsArrayLogs = s_globalData.WidenIsArrayLogs;

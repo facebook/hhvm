@@ -838,6 +838,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalEnableCallBuiltin ? '1' : '0')
     + (RuntimeOption::EvalHackArrCompatNotices ? '1' : '0')
     + (RuntimeOption::EvalHackArrCompatIsArrayNotices ? '1' : '0')
+    + (RuntimeOption::EvalHackArrCompatIsVecDictNotices ? '1' : '0')
     + (RuntimeOption::EvalHackArrCompatSerializeNotices ? '1' : '0')
     + (RuntimeOption::EvalHackCompilerUseEmbedded ? '1' : '0')
     + (RuntimeOption::EvalHackCompilerVerboseErrors ? '1' : '0')

@@ -303,6 +303,8 @@ std::vector<SString> load_input(F&& fun) {
     gd.NoticeOnBuiltinDynamicCalls;
   RO::EvalHackArrCompatIsArrayNotices =
     gd.HackArrCompatIsArrayNotices;
+  RO::EvalHackArrCompatIsVecDictNotices =
+    gd.HackArrCompatIsVecDictNotices;
   RO::EvalHackArrCompatSerializeNotices =
     gd.HackArrCompatSerializeNotices;
   RO::EvalHackArrDVArrs = gd.HackArrDVArrs;
@@ -407,6 +409,8 @@ void write_global_data(
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
   gd.HackArrCompatIsArrayNotices =
     RuntimeOption::EvalHackArrCompatIsArrayNotices;
+  gd.HackArrCompatIsVecDictNotices =
+    RuntimeOption::EvalHackArrCompatIsVecDictNotices;
   gd.HackArrCompatSerializeNotices =
     RuntimeOption::EvalHackArrCompatSerializeNotices;
   gd.HackArrDVArrs = RuntimeOption::EvalHackArrDVArrs;

@@ -2313,10 +2313,10 @@ TEST(Type, ArrIntersections) {
   EXPECT_EQ(intersection_of(sarr_packed({TNum, TDbl, TNum}),
                             sarr_packed({TDbl, TNum, TInt})),
             sarr_packed({TDbl, TDbl, TInt}));
-  EXPECT_EQ(intersection_of(TSDictN, dict_n(TArrKey, TInitCell, ProvTag::Top)),
-            sdict_n(TUncArrKey, TInitUnc, ProvTag::Top));
-  EXPECT_EQ(intersection_of(TSDictN, dict_n(TArrKey, TInitCell, ProvTag::Top)),
-            sdict_n(TUncArrKey, TInitUnc, ProvTag::Top));
+  EXPECT_EQ(intersection_of(TSDictN, dict_n(TArrKey, TInitCell)),
+            sdict_n(TUncArrKey, TInitUnc));
+  EXPECT_EQ(intersection_of(TSDictN, dict_n(TArrKey, TInitCell)),
+            sdict_n(TUncArrKey, TInitUnc));
   EXPECT_EQ(intersection_of(tstruct9, TSArrN), tstruct10);
   EXPECT_EQ(intersection_of(TSArrN, arr_packed({TStr, TVec, TInt, TInitCell})),
                             sarr_packed({TSStr, TSVec, TInt, TInitUnc}));
@@ -2325,7 +2325,7 @@ TEST(Type, ArrIntersections) {
   EXPECT_EQ(intersection_of(arr_packed({TStr, TInt, TObj}), TSArrN), TBottom);
   EXPECT_EQ(intersection_of(TSArrN, tstruct11), TBottom);
   EXPECT_EQ(
-    intersection_of(dict_n(TArrKey, TObj, ProvTag::Top), TSDictN),
+    intersection_of(dict_n(TArrKey, TObj), TSDictN),
     TBottom
   );
   EXPECT_EQ(

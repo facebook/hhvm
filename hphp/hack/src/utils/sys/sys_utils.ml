@@ -108,6 +108,8 @@ let close_out_no_fail fn oc =
     Printf.fprintf stderr "Could not close: '%s' (%s)\n" fn e;
     exit 3
 
+let file_exists = Disk.file_exists
+
 let cat = Disk.cat
 
 let cat_or_failed file =

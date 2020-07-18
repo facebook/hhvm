@@ -52,7 +52,7 @@ impl Default for GlobalOptions {
             po_rust_parser_errors: false,
             profile_type_check_duration_threshold: 0.0,
             profile_type_check_twice: false,
-            profile_owner: String::new(),
+            profile_owner: None,
             profile_desc: String::new(),
             tco_like_type_hints: false,
             tco_union_intersection_type_hints: false,

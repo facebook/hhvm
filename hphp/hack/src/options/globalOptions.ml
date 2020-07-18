@@ -52,7 +52,7 @@ type t = {
   po_rust_parser_errors: bool;
   profile_type_check_duration_threshold: float;
   profile_type_check_twice: bool;
-  profile_owner: string;
+  profile_owner: string option;
   profile_desc: string;
   tco_like_type_hints: bool;
   tco_union_intersection_type_hints: bool;
@@ -217,7 +217,7 @@ let default =
     po_rust_parser_errors = false;
     profile_type_check_duration_threshold = 0.05;
     profile_type_check_twice = false;
-    profile_owner = "";
+    profile_owner = None;
     profile_desc = "";
     tco_like_type_hints = false;
     tco_union_intersection_type_hints = false;
@@ -325,7 +325,7 @@ let make
     ?(profile_type_check_duration_threshold =
       default.profile_type_check_duration_threshold)
     ?(profile_type_check_twice = default.profile_type_check_twice)
-    ?(profile_owner = default.profile_owner)
+    ?profile_owner
     ?(profile_desc = default.profile_desc)
     ?(tco_like_type_hints = default.tco_like_type_hints)
     ?(tco_union_intersection_type_hints =

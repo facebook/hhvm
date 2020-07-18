@@ -41,6 +41,8 @@ val open_out_bin_no_fail : string -> out_channel
 
 val close_out_no_fail : string -> out_channel -> unit
 
+val file_exists : string -> bool
+
 val cat : string -> string
 
 val cat_or_failed : string -> string option

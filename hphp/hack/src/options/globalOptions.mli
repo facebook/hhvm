@@ -143,7 +143,7 @@ type t = {
   (* Two more profile options, used solely to send to logging backend. These allow
       the person who launches hack, to provide unique identifying keys that get
       sent to logging, so they can correlate/sort/filter their logs as they want. *)
-  profile_owner: string;
+  profile_owner: string option;
   profile_desc: string;
   (* Enables like type hints *)
   tco_like_type_hints: bool;
@@ -481,7 +481,7 @@ val profile_type_check_duration_threshold : t -> float
 
 val profile_type_check_twice : t -> bool
 
-val profile_owner : t -> string
+val profile_owner : t -> string option
 
 val profile_desc : t -> string
 

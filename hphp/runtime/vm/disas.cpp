@@ -854,10 +854,12 @@ void print_alias(Output& out, const TypeAlias& alias) {
   if (alias.nullable) flags = flags | TypeConstraint::Nullable;
   TypeConstraint constraint(alias.value, flags);
 
-  out.fmtln(".alias{} {} = <{}> {};",
+  out.fmtln(".alias{} {} = <{}> ({}, {}) {};",
             opt_attrs(AttrContext::Alias, alias.attrs, &alias.userAttrs),
             (const StringData*)alias.name,
             type_constraint(constraint),
+            alias.line0,
+            alias.line1,
             escaped_long(alias.typeStructure.get()));
 }
 

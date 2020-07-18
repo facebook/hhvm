@@ -10,6 +10,7 @@ path = "../../hhas_typedef.rs"
 
 [dependencies]
 hhas_attribute_rust = { path = "../hhas_attribute" }
+hhas_pos_rust = { path = "../hhas_pos" }
 hhas_type = { path = "../hhas_type" }
 hhbc_id_rust = { path = "../hhbc_id" }
 runtime = { path = "../runtime" }

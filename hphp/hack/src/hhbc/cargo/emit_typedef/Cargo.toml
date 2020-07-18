@@ -14,6 +14,7 @@ emit_body_rust = { path = "../emit_body" }
 emit_type_constant_rust = { path = "../emit_type_constant" }
 emit_type_hint_rust = { path = "../emit_type_hint" }
 env = { path = "../env" }
+hhas_pos_rust = { path = "../hhas_pos" }
 hhas_type = { path = "../hhas_type" }
 hhas_typedef_rust = { path = "../hhas_typedef" }
 hhbc_id_rust = { path = "../hhbc_id" }

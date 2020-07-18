@@ -381,6 +381,8 @@ fn print_typedef<W: Write>(ctx: &mut Context, w: &mut W, td: &HhasTypedef) -> Re
     w.write(" = ")?;
     print_typedef_info(w, &td.type_info)?;
     w.write(" ")?;
+    print_span(w, &td.span)?;
+    w.write(" ")?;
     triple_quotes(w, |w| print_adata(ctx, w, &td.type_structure))?;
     w.write(";")
 }

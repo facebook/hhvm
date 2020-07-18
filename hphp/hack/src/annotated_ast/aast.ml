@@ -522,6 +522,7 @@ and ('ex, 'fb, 'en, 'hi) typedef = {
   t_mode: FileInfo.mode; [@visitors.opaque]
   t_vis: typedef_visibility;
   t_namespace: nsenv;
+  t_span: pos;
   t_emit_id: emit_id option;
 }
 

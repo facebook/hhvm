@@ -2591,6 +2591,7 @@ let typedef ctx tdef =
     t_mode = tdef.Aast.t_mode;
     t_namespace = tdef.Aast.t_namespace;
     t_vis = tdef.Aast.t_vis;
+    t_span = tdef.Aast.t_span;
     t_emit_id = tdef.Aast.t_emit_id;
   }
 

@@ -625,6 +625,7 @@ struct Constant {
 
 struct TypeAlias {
   Unit* unit;
+  SrcInfo srcInfo;
   LSString name;
   LSString value;
   Attr attrs;

@@ -13,7 +13,7 @@ Errors:
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      t_emit_id = None })
+      t_span = [2:1-35]; t_emit_id = None })
   ]
 [(Typedef
     { t_annotation = (); t_name = ([4:6-26], "\\UNSAFE_TYPE_HH_FIXME");
@@ -26,7 +26,7 @@ Errors:
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
         ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
         ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      t_emit_id = None })
+      t_span = [4:1-51]; t_emit_id = None })
   ]
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial;

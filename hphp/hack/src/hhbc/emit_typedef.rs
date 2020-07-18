@@ -7,6 +7,7 @@ use emit_body_rust as emit_body;
 use emit_type_constant_rust as emit_type_constant;
 use emit_type_hint_rust as emit_type_hint;
 use env::emitter::Emitter;
+use hhas_pos_rust::Span;
 use hhas_type::Info as TypeInfo;
 use hhas_typedef_rust::Typedef;
 use hhbc_id_rust::{class, Id};
@@ -37,6 +38,7 @@ fn emit_typedef<'a>(emitter: &mut Emitter, typedef: &'a tast::Typedef) -> Result
         typedef.kind.clone(),
         typedef.vis.is_opaque(),
     );
+    let span = Span::from_pos(&typedef.span);
 
     attributes_res.and_then(|attributes| {
         type_info_res.and_then(|type_info| {
@@ -46,6 +48,7 @@ fn emit_typedef<'a>(emitter: &mut Emitter, typedef: &'a tast::Typedef) -> Result
                     attributes,
                     type_info,
                     type_structure,
+                    span,
                 })
             })
         })

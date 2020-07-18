@@ -4847,6 +4847,7 @@ where
                         _ => Self::missing_syntax("kind", &c.alias_keyword, env)?,
                     },
                     kind: Self::p_hint(&c.alias_type, env)?,
+                    span: Self::p_pos(node, env),
                     emit_id: None,
                 })])
             }

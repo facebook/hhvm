@@ -3462,6 +3462,11 @@ void parse_alias(AsmState& as) {
   as.in.expectWs('=');
 
   TypeConstraint ty = parse_type_constraint(as);
+
+  int line0;
+  int line1;
+  parse_line_range(as, line0, line1);
+
   Variant ts = parse_maybe_php_serialized(as);
 
   if (ts.isInitialized() && !ts.isArray()) {
@@ -3481,6 +3486,8 @@ void parse_alias(AsmState& as) {
   record.type = typeName->empty() ? AnnotType::Mixed : ty.type();
   record.nullable = (ty.flags() & TypeConstraint::Nullable) != 0;
   record.attrs = attrs;
+  record.line0 = line0;
+  record.line1 = line1;
   if (ts.isInitialized()) {
     record.typeStructure = ArrNR(ArrayData::GetScalarArray(std::move(ts)));
   }

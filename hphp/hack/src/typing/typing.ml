@@ -6999,6 +6999,7 @@ and typedef_def ctx typedef =
     t_vis = _;
     t_mode = _;
     t_namespace = _;
+    t_span = _;
     t_emit_id = _;
   } =
     typedef
@@ -7049,6 +7050,7 @@ and typedef_def ctx typedef =
     Aast.t_kind = typedef.t_kind;
     Aast.t_tparams = tparams;
     Aast.t_namespace = typedef.t_namespace;
+    Aast.t_span = typedef.t_span;
     Aast.t_emit_id = typedef.t_emit_id;
   }
 

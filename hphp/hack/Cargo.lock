@@ -1028,6 +1028,7 @@ dependencies = [
  "emit_type_constant_rust 0.0.0",
  "emit_type_hint_rust 0.0.0",
  "env 0.0.0",
+ "hhas_pos_rust 0.0.0",
  "hhas_type 0.0.0",
  "hhas_typedef_rust 0.0.0",
  "hhbc_id_rust 0.0.0",
@@ -1441,6 +1442,7 @@ name = "hhas_typedef_rust"
 version = "0.0.0"
 dependencies = [
  "hhas_attribute_rust 0.0.0",
+ "hhas_pos_rust 0.0.0",
  "hhas_type 0.0.0",
  "hhbc_id_rust 0.0.0",
  "runtime 0.0.0",

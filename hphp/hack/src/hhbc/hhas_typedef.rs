@@ -9,6 +9,7 @@ use hhbc_id_rust as hhas_id;
 use runtime;
 
 use hhas_attribute::HhasAttribute;
+use hhas_pos_rust::Span;
 use runtime::TypedValue;
 
 #[derive(Debug)]
@@ -17,4 +18,5 @@ pub struct Typedef<'a> {
     pub attributes: Vec<HhasAttribute>,
     pub type_info: hhas_type::Info,
     pub type_structure: TypedValue,
+    pub span: Span,
 }

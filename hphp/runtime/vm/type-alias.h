@@ -53,15 +53,23 @@ struct TypeAlias {
   LowStringPtr value;
   Attr attrs;
   AnnotType type;
+  int line0;
+  int line1;
   bool nullable;  // null is allowed; for ?Foo aliases
   UserAttributeMap userAttrs;
   Array typeStructure{ArrayData::CreateDArray(ARRPROV_HERE())};
+
+  std::pair<int,int> getLocation() const {
+    return std::make_pair(line0, line1);
+  }
 
   template<class SerDe>
   typename std::enable_if<!SerDe::deserializing>::type
   serde(SerDe& sd) {
     sd(value)
       (type)
+      (line0)
+      (line1)
       (nullable)
       (userAttrs)
       (attrs)
@@ -76,6 +84,8 @@ struct TypeAlias {
   serde(SerDe& sd) {
     sd(value)
       (type)
+      (line0)
+      (line1)
       (nullable)
       (userAttrs)
       (attrs)

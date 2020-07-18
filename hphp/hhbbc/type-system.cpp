@@ -4441,7 +4441,7 @@ Type union_of(Type a, Type b) {
   // are strict subtypes of TCls we look for a common ancestor if one
   // exists.
   if (is_specialized_obj(a) && is_specialized_obj(b)) {
-    auto t = a.m_data.dobj.cls.commonAncestor(dobj_of(b).cls);
+    auto const t = a.m_data.dobj.cls.commonAncestor(dobj_of(b).cls);
     // We need not to distinguish between Obj<=T and Obj=T, and always
     // return an Obj<=Ancestor, because that is the single type that
     // includes both children.
@@ -4741,6 +4741,19 @@ Type stack_flav(Type a) {
   if (a.subtypeOf(BUninit))   return TUninit;
   if (a.subtypeOf(BInitCell)) return TInitCell;
   always_assert(0 && "stack_flav passed invalid type");
+}
+
+Type loosen_interfaces(Type t) {
+  if (is_specialized_wait_handle(t)) {
+    auto const inner = wait_handle_inner(t);
+    if (is_specialized_obj(inner) && dobj_of(inner).cls.couldBeInterface()) {
+      *t.m_data.dobj.whType.mutate() = is_opt(inner) ? TOptObj : TObj;
+    }
+    return t;
+  } else if (is_specialized_obj(t) && dobj_of(t).cls.couldBeInterface()) {
+    return is_opt(t) ? TOptObj : TObj;
+  }
+  return t;
 }
 
 Type loosen_staticness(Type t) {
@@ -6737,16 +6750,10 @@ Type adjust_type_for_prop(const Index& index,
   if (!tc || index.prop_tc_maybe_unenforced(propCls, *tc)) return ret;
   auto const ctx = Context { nullptr, nullptr, &propCls };
   // Otherwise lookup what we know about the constraint.
-  auto tcType = unctx(remove_uninit(index.lookup_constraint(ctx, *tc, ret)));
-  // For the same reason as property/return type enforcement, we have to be
-  // pessimistic with interfaces to ensure that types in the index always
-  // shrink.
-  if (is_specialized_obj(tcType) &&
-      dobj_of(tcType).cls.couldBeInterfaceOrTrait()) {
-    tcType = is_opt(tcType) ? TOptObj : TObj;
-  }
-  // The adjusted type is the intersection of the constraint and the type (which
-  // might not exist).
+  auto const tcBase = index.lookup_constraint(ctx, *tc, ret);
+  auto const tcType = unctx(loosen_interfaces(remove_uninit(tcBase)));
+  // The adjusted type is the intersection of the constraint and the type
+  // (which might not exist).
   return intersection_of(tcType, std::move(ret));
 }
 

@@ -4928,21 +4928,6 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
     // throw or it will produce a value whose type is compatible with the
     // return type constraint.
     auto tcT = remove_uninit(env.index.lookup_constraint(env.ctx, *constraint));
-
-    // If tcT could be an interface or trait, we upcast it to TObj/TOptObj.
-    // Why?  Because we want uphold the invariant that we only refine return
-    // types and never widen them, and if we allow tcT to be an interface then
-    // it's possible for violations of this invariant to arise.  For an example,
-    // see "hphp/test/slow/hhbbc/return-type-opt-bug.php".
-    // Note: It's safe to use TObj/TOptObj because lookup_constraint() only
-    // returns classes or interfaces or traits (it never returns something that
-    // could be an enum or type alias) and it never returns anything that could
-    // be a "magic" interface that supports non-objects.  (For traits the return
-    // typehint will always throw at run time, so it's safe to use TObj/TOptObj.)
-    if (is_specialized_obj(tcT) && dobj_of(tcT).cls.couldBeInterfaceOrTrait()) {
-      tcT = is_opt(tcT) ? TOptObj : TObj;
-    }
-
     constraintTypes.push_back(tcT);
 
     // In some circumstances, verifyRetType can modify the type. If it

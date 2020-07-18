@@ -880,6 +880,7 @@ private:
   friend Type keyset_val(SArray);
   friend bool could_contain_objects(const Type&);
   friend bool could_copy_on_write(const Type&);
+  friend Type loosen_interfaces(Type);
   friend Type loosen_staticness(Type);
   friend Type loosen_dvarrayness(Type);
   friend Type loosen_provenance(Type);
@@ -1684,6 +1685,21 @@ bool could_have_magic_bool_conversion(const Type&);
  * Pre: `a' is a subtype of TCell.
  */
 Type stack_flav(Type a);
+
+/*
+ * The HHBBC type system is not monotonic. However, we want types stored in
+ * the index to become monotonically more refined. We call this helper before
+ * updating function return types to help maintain that invariant. A function
+ * return type should never be an object with some known interface.
+ *
+ * The monotonicity requirement on our types is that given a, b, A, and B
+ * such that A <= a and B <= b, we must have union_of(A, B) <= union_of(a, b)
+ * and intersection_of(A, B) <= intersection_of(a, b).
+ *
+ * The union_of case can fail if a and b are some interface and A and B are
+ * concrete, unrelated classes that implement that interface.
+ */
+Type loosen_interfaces(Type);
 
 /*
  * Discard any countedness information about the type. Force any type

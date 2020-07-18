@@ -229,7 +229,6 @@ struct Class {
    * True means it might be, false means it is not.
    */
   bool couldBeInterface() const;
-  bool couldBeInterfaceOrTrait() const;
 
   /*
    * Whether this class must be an interface.

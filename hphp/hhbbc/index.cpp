@@ -320,7 +320,7 @@ struct res::Func::FuncInfo {
   /*
    * The number of times we've refined returnTy.
    */
-  uint32_t returnRefinments{0};
+  uint32_t returnRefinements{0};
 
   /*
    * Whether the function is effectFree.
@@ -747,15 +747,6 @@ SString Class::name() const {
   return val.match(
     [] (SString s) { return s; },
     [] (ClassInfo* ci) { return ci->cls->name.get(); }
-  );
-}
-
-bool Class::couldBeInterfaceOrTrait() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (ClassInfo* cinfo) {
-      return (cinfo->cls->attrs & (AttrInterface | AttrTrait));
-    }
   );
 }
 
@@ -5628,14 +5619,8 @@ void Index::init_return_type(const php::Func* func) {
     tcT = vec(std::move(types));
   }
 
-  tcT = to_cell(std::move(tcT));
-  if (is_specialized_obj(tcT)) {
-    if (dobj_of(tcT).cls.couldBeInterfaceOrTrait()) {
-      tcT = is_opt(tcT) ? TOptObj : TObj;
-    }
-  } else {
-    tcT = loosen_all(std::move(tcT));
-  }
+  tcT = loosen_interfaces(loosen_all(to_cell(std::move(tcT))));
+
   FTRACE(4, "Pre-fixup return type for {}{}{}: {}\n",
          func->cls ? func->cls->name->data() : "",
          func->cls ? "::" : "",
@@ -5654,7 +5639,6 @@ static bool moreRefinedForIndex(const Type& newType,
   if (newType.moreRefined(oldType)) return true;
   if (!newType.subtypeOf(BOptObj) ||
       !oldType.subtypeOf(BOptObj) ||
-      !oldType.couldBe(BObj) ||
       !is_specialized_obj(oldType)) {
     return false;
   }
@@ -5663,9 +5647,9 @@ static bool moreRefinedForIndex(const Type& newType,
 
 void Index::refine_return_info(const FuncAnalysisResult& fa,
                                DependencyContextSet& deps) {
-  auto const& t = fa.inferredReturn;
   auto const func = fa.ctx.func;
   auto const finfo = create_func_info(*m_data, func);
+  auto const t = loosen_interfaces(fa.inferredReturn);
 
   auto error_loc = [&] {
     return folly::sformat(
@@ -5702,9 +5686,9 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
   }
 
   if (t.strictlyMoreRefined(finfo->returnTy)) {
-    if (finfo->returnRefinments + 1 < options.returnTypeRefineLimit) {
+    if (finfo->returnRefinements + 1 < options.returnTypeRefineLimit) {
       finfo->returnTy = t;
-      ++finfo->returnRefinments;
+      ++finfo->returnRefinements;
       dep = is_scalar(t) ?
         Dep::ReturnTy | Dep::InlineDepthLimit : Dep::ReturnTy;
     } else {

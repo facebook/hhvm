@@ -220,9 +220,13 @@ public:
   std::string getAddress() const { return m_address;}
   int getPort() const { return m_port;}
 
-  // Access to the status should be synchronized, but isn't.
-  RunStatus getStatus() const { return m_status;}
-  void setStatus(RunStatus status) { m_status = status;}
+  RunStatus getStatus() const {
+    return m_status.load(std::memory_order_acquire);
+  }
+  void setStatus(RunStatus status) {
+    m_status.store(status, std::memory_order_release);
+  }
+
   /**
    * IHostHealthObserver interface.  Note that m_status doesn't
    * contain server health information.
@@ -316,7 +320,7 @@ protected:
   std::list<ServerEventListener*> m_listeners;
 
 private:
-  RunStatus m_status{RunStatus::NOT_YET_STARTED};
+  std::atomic<RunStatus> m_status{RunStatus::NOT_YET_STARTED};
   HealthLevel m_healthLevel{HealthLevel::Bold};
 };
 

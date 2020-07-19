@@ -132,6 +132,7 @@ struct HPHPWorkerThread : proxygen::WorkerThread,
 struct ProxygenServer : Server,
                         folly::AsyncTimeout,
                         TakeoverAgent::Callback {
+  friend HPHPSessionAcceptor;
   friend HPHPWorkerThread;
   explicit ProxygenServer(const ServerOptions& options);
   ~ProxygenServer() override;
@@ -192,7 +193,8 @@ struct ProxygenServer : Server,
    public:
      using ClockT = std::chrono::steady_clock;
 
-     explicit ProxygenEventBaseObserver(uint32_t loop_sample_rate);
+     explicit ProxygenEventBaseObserver(uint32_t loop_sample_rate,
+                                        int worker);
 
      ~ProxygenEventBaseObserver() = default;
 
@@ -232,10 +234,11 @@ struct ProxygenServer : Server,
   void timeoutExpired() noexcept override;
 
   bool drained() const {
-    return (m_https ? m_drainCount > 1 : m_drainCount > 0);
+    return (m_https ? m_drainCount >= m_workers.size() * 2
+                    : m_drainCount >= m_workers.size());
   }
 
-  // These functions can only be called from the m_worker thread
+  // These functions can only be called from the m_workers[0] thread
   void stopListening(bool hard = false);
 
   virtual bool partialPostEchoEnabled() { return false; }
@@ -276,11 +279,12 @@ struct ProxygenServer : Server,
   folly::AsyncServerSocket::UniquePtr m_httpServerSocket;
   folly::AsyncServerSocket::UniquePtr m_httpsServerSocket;
   folly::EventBaseManager m_eventBaseManager;
-  HPHPWorkerThread m_worker;
+  // The main worker that handles accepting connections is at index 0.
+  std::vector<std::unique_ptr<HPHPWorkerThread>> m_workers;
   proxygen::AcceptorConfiguration m_httpConfig;
   proxygen::AcceptorConfiguration m_httpsConfig;
-  std::unique_ptr<HPHPSessionAcceptor> m_httpAcceptor;
-  std::unique_ptr<HPHPSessionAcceptor> m_httpsAcceptor;
+  std::vector<std::unique_ptr<HPHPSessionAcceptor>> m_httpAcceptors;
+  std::vector<std::unique_ptr<HPHPSessionAcceptor>> m_httpsAcceptors;
   std::unique_ptr<wangle::FilePoller> m_filePoller;
 
   JobQueueDispatcher<ProxygenWorker> m_dispatcher;

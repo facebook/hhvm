@@ -83,7 +83,10 @@ HPHPSessionAcceptor::newHandler(proxygen::HTTPTransaction& /*txn*/,
 }
 
 void HPHPSessionAcceptor::onConnectionsDrained() {
-  m_server->onConnectionsDrained();
+  auto const evb = m_server->m_workers[0]->getEventBase();
+  evb->runInEventBaseThread([server = m_server] {
+    server->onConnectionsDrained();
+  });
 }
 
 ProxygenJob::ProxygenJob(std::shared_ptr<ProxygenTransport> t) :
@@ -161,31 +164,41 @@ void HPHPWorkerThread::abortPendingTransports() {
 
 ///////////////////////////////////////////////////////////////////////////////
 ProxygenServer::ProxygenEventBaseObserver::ProxygenEventBaseObserver(
-    uint32_t loop_sample_rate
+    uint32_t loop_sample_rate, int worker
   ) : m_sample_rate_(loop_sample_rate),
       m_busytime_estimator(std::chrono::seconds{60}),
       m_idletime_estimator(std::chrono::seconds{60}),
       m_evbLoopCountTimeSeries(ServiceData::createTimeSeries(
-                                "proxygen_evb_loop_count",
-                                {ServiceData::StatsType::COUNT},
-                                {std::chrono::seconds(60)}, 60)) {
-  m_counterCallback.init([this](std::map<std::string, int64_t>& values){
+                                 folly::to<std::string>(
+                                   "proxygen_evb_loop_count_",
+                                   worker),
+                                 {ServiceData::StatsType::COUNT},
+                                 {std::chrono::seconds(60)}, 60)) {
+  m_counterCallback.init([this, worker](std::map<std::string, int64_t>& values){
     auto now = ClockT::now();
     // export p90 p99 for evb busy time
     const std::array<double, 2> quantiles_busytime {0.9, 0.99};
     auto estimates = m_busytime_estimator.estimateQuantiles(
       quantiles_busytime, now).quantiles;
 
-    values["proxygen_evb_busy_time_us.p90.60"] = estimates[0].second;
-    values["proxygen_evb_busy_time_us.p99.60"] = estimates[1].second;
+    auto const p90_busy_name = folly::to<std::string>(
+        "proxygen_evb_busy_time_us_", worker, ".p90.60");
+    values[p90_busy_name] = estimates[0].second;
+    auto const p99_busy_name = folly::to<std::string>(
+        "proxygen_evb_busy_time_us_", worker, ".p99.60");
+    values[p99_busy_name] = estimates[1].second;
 
     // export p1 p10 for evb idle time
     const std::array<double, 2> quantiles_idletime {0.01, 0.1};
     estimates = m_idletime_estimator.estimateQuantiles(
       quantiles_idletime, now).quantiles;
 
-    values["proxygen_evb_idle_time_us.p1.60"] = estimates[0].second;
-    values["proxygen_evb_idle_time_us.p10.60"] = estimates[1].second;
+    auto const p1_idle_name = folly::to<std::string>(
+        "proxygen_evb_idle_time_us_", worker, ".p1.60");
+    values[p1_idle_name] = estimates[0].second;
+    auto const p10_idle_name = folly::to<std::string>(
+        "proxygen_evb_idle_time_us_", worker, ".p10.60");
+    values[p10_idle_name] = estimates[1].second;
   });
 }
 
@@ -202,7 +215,6 @@ ProxygenServer::ProxygenServer(
   ) : Server(options.m_address, options.m_port),
       m_accept_sock(options.m_serverFD),
       m_accept_sock_ssl(options.m_sslFD),
-      m_worker(&m_eventBaseManager, this),
       m_dispatcher(options.m_maxThreads,
                    options.m_maxQueue,
                    RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
@@ -215,9 +227,21 @@ ProxygenServer::ProxygenServer(
                    options.m_hugeStackKb,
                    options.m_extraKb,
                    options.m_legacyBehavior) {
+  always_assert_flog(RuntimeOption::ServerIOThreadCount > 0,
+                     "Proxygen must have at least 1 thread to function.");
+  for (int i = 0; i < RuntimeOption::ServerIOThreadCount; i++) {
+    m_workers.emplace_back(
+      std::make_unique<HPHPWorkerThread>(&m_eventBaseManager, this));
+  }
+  m_httpAcceptors.resize(RuntimeOption::ServerIOThreadCount);
+  m_httpsAcceptors.resize(RuntimeOption::ServerIOThreadCount);
+
   if (options.m_loop_sample_rate > 0) {
-    m_worker.getEventBase()->setObserver(
-      std::make_shared<ProxygenEventBaseObserver>(options.m_loop_sample_rate));
+    for (int i = 0; i < m_workers.size(); i++) {
+      auto observer = std::make_shared<ProxygenEventBaseObserver>(
+          options.m_loop_sample_rate, i);
+      m_workers[i]->getEventBase()->setObserver(std::move(observer));
+    }
   }
   SocketAddress address;
   if (options.m_address.empty()) {
@@ -310,7 +334,7 @@ std::unique_ptr<HPHPSessionAcceptor> ProxygenServer::createAcceptor(
 }
 
 void ProxygenServer::start() {
-  m_httpServerSocket.reset(new AsyncServerSocket(m_worker.getEventBase()));
+  m_httpServerSocket.reset(new AsyncServerSocket(m_workers[0]->getEventBase()));
   bool needListen = true;
   auto failedToListen = [](const std::exception& ex,
                            const folly::SocketAddress& addr) {
@@ -369,12 +393,15 @@ void ProxygenServer::start() {
   }
 
   if (m_takeover_agent) {
-    m_takeover_agent->setupFdServer(m_worker.getEventBase()->getLibeventBase(),
+    m_takeover_agent->setupFdServer(m_workers[0]->getEventBase()->getLibeventBase(),
                                     m_httpServerSocket->getNetworkSocket().toFd(), this);
   }
 
-  m_httpAcceptor = createAcceptor(m_httpConfig, &m_worker);
-  m_httpAcceptor->init(m_httpServerSocket.get(), m_worker.getEventBase());
+  for (int i = 0; i < m_workers.size(); i++) {
+    auto acceptor = createAcceptor(m_httpConfig, m_workers[i].get());
+    acceptor->init(m_httpServerSocket.get(), m_workers[i]->getEventBase());
+    m_httpAcceptors[i] = std::move(acceptor);
+  }
 
   if (m_httpConfig.isSSL() || m_httpsConfig.isSSL()) {
 
@@ -400,7 +427,8 @@ void ProxygenServer::start() {
     }
   }
   if (m_httpsConfig.isSSL()) {
-    m_httpsServerSocket.reset(new AsyncServerSocket(m_worker.getEventBase()));
+    m_httpsServerSocket.reset(
+      new AsyncServerSocket(m_workers[0]->getEventBase()));
     try {
       if (m_accept_sock_ssl >= 0) {
         Logger::Info("inheritfd: using inherited fd %d for ssl",
@@ -415,17 +443,21 @@ void ProxygenServer::start() {
       failedToListen(ex, m_httpsConfig.bindAddress);
     }
 
-    m_httpsAcceptor = createAcceptor(m_httpsConfig, &m_worker);
-    try {
-      m_httpsAcceptor->init(m_httpsServerSocket.get(), m_worker.getEventBase());
-    } catch (const std::exception& ex) {
-      // Could be some cert thing
-      failedToListen(ex, m_httpsConfig.bindAddress);
+    for (int i = 0; i < m_workers.size(); i++) {
+      auto acceptor = createAcceptor(m_httpsConfig, m_workers[i].get());
+      try {
+        acceptor->init(m_httpsServerSocket.get(),
+                       m_workers[i]->getEventBase());
+      } catch (const std::exception& ex) {
+        // Could be some cert thing
+        failedToListen(ex, m_httpsConfig.bindAddress);
+      }
+      m_httpsAcceptors[i] = std::move(acceptor);
     }
   }
 
   if (!RuntimeOption::SSLTicketSeedFile.empty() &&
-      (m_httpsAcceptor || m_httpConfig.isSSL())) {
+      (!m_httpsAcceptors.empty() || m_httpConfig.isSSL())) {
     // setup ticket seed watcher
     const auto& ticketPath = RuntimeOption::SSLTicketSeedFile;
     auto seeds = wangle::TLSCredProcessor::processTLSTickets(ticketPath);
@@ -460,15 +492,19 @@ void ProxygenServer::start() {
   }
 
   setStatus(RunStatus::RUNNING);
-  folly::AsyncTimeout::attachEventBase(m_worker.getEventBase());
-  m_worker.start();
+  folly::AsyncTimeout::attachEventBase(m_workers[0]->getEventBase());
+  for (auto& worker : m_workers) {
+    worker->start();
+  }
   m_dispatcher.start();
 }
 
 void ProxygenServer::waitForEnd() {
   Logger::Info("%p: Waiting for ProxygenServer port=%d", this, m_port);
-  // m_worker.wait is always safe to call from any thread at any time.
-  m_worker.wait();
+  // worker.wait is always safe to call from any thread at any time.
+  for (auto& worker : m_workers) {
+    worker->wait();
+  }
 }
 
 // Server shutdown - Explained
@@ -515,20 +551,20 @@ void ProxygenServer::stop() {
   }
 
   if (m_takeover_agent) {
-    m_worker.getEventBase()->runInEventBaseThread([this] {
+    m_workers[0]->getEventBase()->runInEventBaseThread([this] {
         m_takeover_agent->stop();
       });
   }
 
   // close listening sockets, this will initiate draining, including closing
   // idle conns
-  m_worker.getEventBase()->runInEventBaseThread([this] {
+  m_workers[0]->getEventBase()->runInEventBaseThread([this] {
       // Only wait ServerPreShutdownWait seconds for the page server.
       int delayMilliSeconds = RuntimeOption::ServerPreShutdownWait * 1000;
       if (delayMilliSeconds < 0 || getPort() != RuntimeOption::ServerPort) {
         delayMilliSeconds = 0;
       }
-      m_worker.getEventBase()->runAfterDelay([this] { stopListening(); },
+      m_workers[0]->getEventBase()->runAfterDelay([this] { stopListening(); },
                                              delayMilliSeconds);
       reportShutdownStatus();
     });
@@ -558,13 +594,26 @@ void ProxygenServer::stopListening(bool hard) {
     scheduleTimeout(s);
     if (RuntimeOption::ServerShutdownEOMWait > 0) {
       int delayMilliSeconds = RuntimeOption::ServerShutdownEOMWait * 1000;
-      m_worker.getEventBase()->runAfterDelay([this] {
-        m_worker.abortPendingTransports();
-        // Accelerate shutdown if all requests that were enqueued are done,
-        // since no more is coming in.
-        if (m_enqueuedCount == 0 &&
-            m_shutdownState == ShutdownState::DRAINING_READS) {
-          doShutdown();
+      m_workers[0]->getEventBase()->runAfterDelay([this] {
+
+        auto const accelerateShutdown = [this] {
+          // Accelerate shutdown if all requests that were enqueued are done,
+          // since no more is coming in.
+          auto const evb = m_workers[0]->getEventBase();
+          evb->runInEventBaseThread([this] {
+            if (m_enqueuedCount == 0 &&
+                m_shutdownState == ShutdownState::DRAINING_READS) {
+                doShutdown();
+            }
+          });
+        };
+
+        for (auto const& worker : m_workers) {
+          auto evb = worker->getEventBase();
+          evb->runInEventBaseThread([w = worker.get(), accelerateShutdown] {
+            w->abortPendingTransports();
+            accelerateShutdown();
+          });
         }
       }, delayMilliSeconds);
     }
@@ -578,8 +627,8 @@ void ProxygenServer::onConnectionsDrained() {
   Logger::Info("All connections drained from ProxygenServer drainCount=%d",
                m_drainCount);
   if (!drained()) {
-    // both servers have to finish
-    Logger::Verbose("%p: waiting for other server port=%d", this, m_port);
+    // All acceptors have to finish
+    Logger::Verbose("%p: waiting for all acceptors", this);
     return;
   }
 
@@ -634,7 +683,7 @@ void ProxygenServer::stopVM() {
       m_dispatcher.stop();
       Logger::Info("%p: Dispatcher stopped port=%d.  conns=%d", this, m_port,
                    getLibEventConnectionCount());
-      m_worker.getEventBase()->runInEventBaseThread([this] {
+      m_workers[0]->getEventBase()->runInEventBaseThread([this] {
           vmStopped();
         });
     });
@@ -645,7 +694,7 @@ void ProxygenServer::vmStopped() {
   m_shutdownState = ShutdownState::DRAINING_WRITES;
   HttpServer::MarkShutdownStat(ShutdownEvent::SHUTDOWN_DRAIN_WRITES);
   if (!drained() && RuntimeOption::ServerGracefulShutdownWait > 0) {
-    m_worker.getEventBase()->runInEventBaseThread([&] {
+    m_workers[0]->getEventBase()->runInEventBaseThread([&] {
         std::chrono::seconds s(RuntimeOption::ServerGracefulShutdownWait);
         VLOG(4) << this << ": scheduling graceful timeout=" << s.count() <<
           " port=" << m_port;
@@ -664,19 +713,24 @@ void ProxygenServer::forceStop() {
   m_httpsServerSocket.reset();
 
   // Drops all open connections
-  if (m_httpAcceptor && m_httpAcceptor->getState() < Acceptor::State::kDone) {
-    m_httpAcceptor->forceStop();
+  // forceStop may be called from any thread.
+  for (auto const& acceptor : m_httpAcceptors) {
+    if (acceptor && acceptor->getState() < Acceptor::State::kDone) {
+      acceptor->forceStop();
+    }
   }
-  if (m_httpsAcceptor && m_httpAcceptor->getState() < Acceptor::State::kDone) {
-    m_httpsAcceptor->forceStop();
+  for (auto const& acceptor : m_httpsAcceptors) {
+    if (acceptor && acceptor->getState() < Acceptor::State::kDone) {
+      acceptor->forceStop();
+    }
   }
 
   // No more responses coming from worker threads
-  m_worker.stopConsuming();
+  for (auto& worker : m_workers) {
+    worker->stopConsuming();
+  }
   Logger::Verbose("%p: Stopped response queue consumer port=%d", this, m_port);
 
-  // The worker should exit gracefully
-  m_worker.stopWhenIdle();
   Logger::Verbose("%p: i/o thread notified to stop port=%d", this, m_port);
 
   // Aaaand we're done - oops not thread safe.  Does it matter?
@@ -684,9 +738,21 @@ void ProxygenServer::forceStop() {
 
   HttpServer::MarkShutdownStat(ShutdownEvent::SHUTDOWN_DONE);
 
-  for (auto listener: m_listeners) {
+  // Listeners may need to run code in the event bases.
+  for (auto listener : m_listeners) {
     listener->serverStopped(this);
   }
+
+  // The worker should exit gracefully
+  // Shutdown the main worker last in case its event base needs to handle
+  // requests from other workers.
+  for (int i = 1; i < m_workers.size(); i++) {
+    m_workers[i]->stopWhenIdle();
+    m_workers[i]->wait();
+  }
+  // We are running on event base 0 we can't wait for it here.  Let it get
+  // cleaned up by the ProxygenServer destructor.
+  m_workers[0]->stopWhenIdle();
 }
 
 void ProxygenServer::reportShutdownStatus() {
@@ -699,7 +765,8 @@ void ProxygenServer::reportShutdownStatus() {
                 getLibEventConnectionCount(),
                 getPendingTransportsCount(),
                 Process::GetMemUsageMb());
-  m_worker.getEventBase()->runAfterDelay([this]{reportShutdownStatus();}, 500);
+  m_workers[0]->getEventBase()->runAfterDelay([this]{reportShutdownStatus();},
+                                             500);
 }
 
 bool ProxygenServer::canAccept() {
@@ -708,16 +775,25 @@ bool ProxygenServer::canAccept() {
 }
 
 int ProxygenServer::getLibEventConnectionCount() {
-  uint32_t conns = m_httpAcceptor->getNumConnections();
-  if (m_httpsAcceptor) {
-    conns += m_httpsAcceptor->getNumConnections();
+  uint32_t conns = 0;
+  for (auto const& acceptor : m_httpAcceptors) {
+    if (acceptor) {
+      conns += acceptor->getNumConnections();
+    }
+  }
+  for (auto const& acceptor : m_httpsAcceptors) {
+    if (acceptor) {
+      conns += acceptor->getNumConnections();
+    }
   }
   return conns;
 }
 
 uint32_t ProxygenServer::getPendingTransportsCount() {
   uint32_t count = 0;
-  count += m_worker.getPendingTransportsCount();
+  for (auto& worker : m_workers) {
+    count += worker->getPendingTransportsCount();
+  }
   return count;
 }
 
@@ -734,35 +810,37 @@ void ProxygenServer::resetSSLContextConfigs(
     configs.emplace_back(createContextConfig(path));
   }
 
-#ifdef FACEBOOK // proxygen update
-  auto evb = m_worker.getEventBase();
-  evb->runInEventBaseThread([this, configs] {
-      if (m_httpsAcceptor && m_httpsConfig.isSSL()) {
-        m_httpsAcceptor->getServerSocketConfig(
-          ).updateSSLContextConfigs(configs);
-        m_httpsAcceptor->resetSSLContextConfigs();
-      }
-      if (m_httpAcceptor && m_httpConfig.isSSL()) {
-        m_httpAcceptor->getServerSocketConfig(
-          ).updateSSLContextConfigs(configs);
-        m_httpAcceptor->resetSSLContextConfigs();
-      }
-  });
-#endif
+  for (int i = 0; i < m_workers.size(); i++) {
+    auto evb = m_workers[i]->getEventBase();
+    evb->runInEventBaseThread([this, configs, i] {
+        if (m_httpsAcceptors[i] && m_httpsConfig.isSSL()) {
+          m_httpsAcceptors[i]->getServerSocketConfig(
+            ).updateSSLContextConfigs(configs);
+          m_httpsAcceptors[i]->resetSSLContextConfigs();
+        }
+        if (m_httpAcceptors[i] && m_httpConfig.isSSL()) {
+          m_httpAcceptors[i]->getServerSocketConfig(
+            ).updateSSLContextConfigs(configs);
+          m_httpAcceptors[i]->resetSSLContextConfigs();
+        }
+    });
+  }
 }
 
 void ProxygenServer::updateTLSTicketSeeds(wangle::TLSTicketKeySeeds seeds) {
-  auto evb = m_worker.getEventBase();
-  evb->runInEventBaseThread([seeds = std::move(seeds), this] {
-      if (m_httpsAcceptor) {
-        m_httpsAcceptor->setTLSTicketSecrets(
-            seeds.oldSeeds, seeds.currentSeeds, seeds.newSeeds);
-      }
-      if (m_httpAcceptor && m_httpConfig.isSSL()) {
-        m_httpAcceptor->setTLSTicketSecrets(
-            seeds.oldSeeds, seeds.currentSeeds, seeds.newSeeds);
-      }
-  });
+  for (int i = 0; i < m_workers.size(); i++) {
+    auto evb = m_workers[i]->getEventBase();
+    evb->runInEventBaseThread([seeds = seeds, this, i] {
+        if (m_httpsAcceptors[i]) {
+          m_httpsAcceptors[i]->setTLSTicketSecrets(
+              seeds.oldSeeds, seeds.currentSeeds, seeds.newSeeds);
+        }
+        if (m_httpAcceptors[i] && m_httpConfig.isSSL()) {
+          m_httpAcceptors[i]->setTLSTicketSecrets(
+              seeds.oldSeeds, seeds.currentSeeds, seeds.newSeeds);
+        }
+    });
+  }
 }
 
 bool ProxygenServer::enableSSL(int port) {
@@ -848,7 +926,7 @@ void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
     RequestPriority priority = getRequestPriority(transport->getUrl());
     VLOG(4) << this << ": enqueing request with path=" << transport->getUrl() <<
       " and priority=" << priority;
-    m_enqueuedCount++;
+    m_enqueuedCount.fetch_add(1, std::memory_order_release);
     transport->setEnqueued();
     m_dispatcher.enqueue(std::make_shared<ProxygenJob>(transport), priority);
   } else {
@@ -865,16 +943,22 @@ void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
 }
 
 void ProxygenServer::decrementEnqueuedCount() {
-  m_enqueuedCount--;
-  if (m_enqueuedCount == 0 && isScheduled()) {
-    // If all requests that got enqueued are done, and no more request
-    // is coming in, accelerate shutdown.
-    if ((m_shutdownState == ShutdownState::DRAINING_READS &&
-         !getPendingTransportsCount()) ||
-        m_shutdownState == ShutdownState::DRAINING_WRITES) {
-      cancelTimeout();
-      doShutdown();
-    }
+  auto const cnt = m_enqueuedCount.fetch_sub(1, std::memory_order_acquire);
+  if (cnt == 1) {
+    auto const evb = m_workers[0]->getEventBase();
+    evb->runInEventBaseThread([this] {
+      if (m_enqueuedCount.load(std::memory_order_acquire) == 0 &&
+          isScheduled()) {
+        // If all requests that got enqueued are done, and no more request
+        // is coming in, accelerate shutdown.
+        if ((m_shutdownState == ShutdownState::DRAINING_READS &&
+             !getPendingTransportsCount()) ||
+            m_shutdownState == ShutdownState::DRAINING_WRITES) {
+          cancelTimeout();
+          doShutdown();
+        }
+      }
+    });
   }
 }
 

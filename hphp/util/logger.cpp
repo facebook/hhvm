@@ -74,7 +74,7 @@ ServiceData::ExportedCounter* Logger::s_errorLines =
 ServiceData::ExportedCounter* Logger::s_errorSerializedBytes =
     ServiceData::createCounter("errorlog_bytes");
 ServiceData::ExportedCounter* Logger::s_errorCompressedBytes =
-    ServiceData::createCounter("errorlog_compressed_bytes");
+    ServiceData::createCounter("errorlog_bytes_compressed");
 THREAD_LOCAL(Logger::ThreadData, Logger::s_threadData);
 
 std::map<std::string, Logger*> Logger::s_loggers = {

@@ -1,3 +1,2 @@
 -vRuntime.Eval.CheckPropTypeHints=3
 -vRuntime.Eval.EnforceGenericsUB=1
--vRuntime.Eval.EnforcePropUB=true

@@ -2868,13 +2868,11 @@ void parse_prop_or_field_impl(AsmState& as,
     userAttributes.find(s___Reified.get()) != userAttributes.end();
   auto ub = getRelevantUpperBounds(typeConstraint, class_ubs, {}, {});
   auto needsMultiUBs = false;
-  if (RuntimeOption::EvalEnforcePropUB) {
-    if (ub.size() == 1 && !hasReifiedGenerics) {
-      applyFlagsToUB(ub[0], typeConstraint);
-      typeConstraint = ub[0];
-    } else if (!ub.empty()) {
-      needsMultiUBs = true;
-    }
+  if (ub.size() == 1 && !hasReifiedGenerics) {
+    applyFlagsToUB(ub[0], typeConstraint);
+    typeConstraint = ub[0];
+  } else if (!ub.empty()) {
+    needsMultiUBs = true;
   }
   std::string name;
   as.in.skipSpaceTab();

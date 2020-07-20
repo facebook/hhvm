@@ -1,3 +1,2 @@
 -vEval.CheckPropTypeHints=3
 -vEval.EnforceGenericsUB=1
--vEval.EnforcePropUB=true

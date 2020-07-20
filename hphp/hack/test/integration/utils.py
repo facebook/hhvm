@@ -12,17 +12,19 @@ from typing import BinaryIO, Callable, Iterable, Mapping, Union
 try:
     from typing import ForwardRef
 except ImportError:
+    # pyre-fixme[21]: Could not find name `_ForwardRef` in `typing`.
     from typing import _ForwardRef as ForwardRef
 
 # pyre-fixme[5]: Global expression must be annotated.
-# pyre-fixme[16]: Module `typing` has no attribute `ForwardRef`.
+# pyre-fixme[6]: Expected `Tuple[typing.Type[Variable[typing._KT]],
+#  typing.Type[Variable[typing._VT_co](covariant)]]` for 1st param but got
+#  `Tuple[typing.Type[str], ForwardRef]`.
 JsonObject = Mapping[str, ForwardRef("Json")]
 # pyre-fixme[5]: Global expression must be annotated.
 # pyre-fixme[16]: `Iterable` has no attribute `__getitem__`.
 JsonArray = Iterable[ForwardRef("Json")]
 JsonScalar = Union[str, int, float, bool, None]
 # pyre-fixme[5]: Global expression must be annotated.
-# pyre-fixme[16]: `Union` has no attribute `__getitem__`.
 Json = Union[JsonObject, JsonArray, JsonScalar]
 
 VariableMap = Mapping[str, str]

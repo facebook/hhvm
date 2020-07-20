@@ -44,7 +44,6 @@ _MessageSpec = Union[
 
 
 # pyre-fixme[5]: Global expression must be annotated.
-# pyre-fixme[16]: `Mapping` has no attribute `__getitem__`.
 _LspIdMap = Mapping[_MessageSpec, Json]
 
 _Traceback = Sequence[inspect.FrameInfo]
@@ -951,14 +950,19 @@ class _RequestSpec:
         powered_by: Optional[str],
         call_site_info: _CallSiteInfo,
     ) -> None:
+        # pyre-fixme[4]: Attribute must be annotated.
         self.method = method
         # pyre-fixme[4]: Attribute must be annotated.
         self.params = params
         # pyre-fixme[4]: Attribute must be annotated.
         self.result = result
+        # pyre-fixme[4]: Attribute must be annotated.
         self.wait_id = wait_id
+        # pyre-fixme[4]: Attribute must be annotated.
         self.comment = comment
+        # pyre-fixme[4]: Attribute must be annotated.
         self.powered_by = powered_by
+        # pyre-fixme[4]: Attribute must be annotated.
         self.call_site_info = call_site_info
 
 
@@ -970,9 +974,11 @@ class _NotificationSpec:
     __slots__ = ["method", "params", "comment"]
 
     def __init__(self, *, method: str, params: Json, comment: Optional[str]) -> None:
+        # pyre-fixme[4]: Attribute must be annotated.
         self.method = method
         # pyre-fixme[4]: Attribute must be annotated.
         self.params = params
+        # pyre-fixme[4]: Attribute must be annotated.
         self.comment = comment
 
 
@@ -987,11 +993,13 @@ class _WaitForRequestSpec:
         result: Union[Json, NoResponse],
         comment: Optional[str],
     ) -> None:
+        # pyre-fixme[4]: Attribute must be annotated.
         self.method = method
         # pyre-fixme[4]: Attribute must be annotated.
         self.params = params
         # pyre-fixme[4]: Attribute must be annotated.
         self.result = result
+        # pyre-fixme[4]: Attribute must be annotated.
         self.comment = comment
 
 
@@ -999,9 +1007,11 @@ class _WaitForNotificationSpec:
     __slots__ = ["method", "params", "comment"]
 
     def __init__(self, *, method: str, params: Json, comment: Optional[str]) -> None:
+        # pyre-fixme[4]: Attribute must be annotated.
         self.method = method
         # pyre-fixme[4]: Attribute must be annotated.
         self.params = params
+        # pyre-fixme[4]: Attribute must be annotated.
         self.comment = comment
 
 
@@ -1009,6 +1019,7 @@ class _WaitForResponseSpec:
     __slots__ = ["wait_id"]
 
     def __init__(self, *, wait_id: str) -> None:
+        # pyre-fixme[4]: Attribute must be annotated.
         self.wait_id = wait_id
 
 

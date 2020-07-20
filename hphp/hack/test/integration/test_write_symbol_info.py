@@ -99,6 +99,10 @@ max_workers = 2
                     for fact in pred_obj["facts"]:
                         try:
                             deserialize(
+                                # pyre-fixme[6]: Expected
+                                #  `Type[Variable[thrift.py3.serializer.sT (bound to
+                                #  thrift.py3.types.Struct)]]` for 1st param but got
+                                #  `Optional[Type[thrift.py3.types.Struct]]`.
                                 fact_type,
                                 json.dumps(fact).encode("UTF-8"),
                                 protocol=Protocol.JSON,

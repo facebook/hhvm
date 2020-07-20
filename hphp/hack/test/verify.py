@@ -234,7 +234,6 @@ def run_batch_tests(
 
     results = [future.result() for future in futures]
     # Flatten the list
-    # pyre-fixme[10]: Name `sublist` is used but not defined.
     return [item for sublist in results for item in sublist]
 
 

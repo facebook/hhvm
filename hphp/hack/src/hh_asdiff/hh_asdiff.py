@@ -130,6 +130,8 @@ def report_summary(exp_file: Iterator[AnyStr], act_file: Iterator[AnyStr]):
         act[fn] = content
     exp_keys = set(exp.keys())
     act_keys = set(act.keys())
+    # pyre-fixme[6]: Expected `Iterable[Variable[_LT (bound to _SupportsLessThan)]]`
+    #  for 1st param but got `Set[Optional[str]]`.
     all_keys = sorted(exp_keys.union(act_keys))
 
     for k in all_keys:

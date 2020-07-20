@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use hhas_pos_rust::Span;
 use hhas_type::Info;
 use hhbc_id_rust::record;
 use runtime::TypedValue;
@@ -15,4 +16,5 @@ pub struct HhasRecord<'a> {
     pub is_abstract: bool,
     pub base: Option<record::Type<'a>>,
     pub fields: Vec<Field<'a>>,
+    pub span: Span,
 }

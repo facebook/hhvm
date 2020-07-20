@@ -3376,6 +3376,8 @@ fn print_record_def<W: Write>(
     } else {
         concat_str_by(w, " ", [".record", "[final]", record.name.to_raw_string()])?;
     }
+    w.write(" ")?;
+    print_span(w, &record.span)?;
     print_extends(w, record.base.as_ref().map(|b| b.to_raw_string()))?;
     w.write(" ")?;
 

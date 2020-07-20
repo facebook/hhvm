@@ -800,9 +800,10 @@ void print_rec_fields(Output& out, const PreRecordDesc* rec) {
 
 void print_rec(Output& out, const PreRecordDesc* rec) {
   out.indent();
-  out.fmt(".record {} {}",
+  out.fmt(".record {} {}{}",
       opt_attrs(AttrContext::Class, rec->attrs()),
-      rec->name()->toCppString());
+      rec->name()->toCppString(),
+      format_line_pair(rec));
   if (!rec->parentName()->empty()) {
     out.fmt(" extends {}", rec->parentName());
   }
@@ -836,7 +837,7 @@ void print_cls(Output& out, const PreClass* cls) {
     }
   }
 
-  out.fmt(".class {} {} {}",
+  out.fmt(".class {} {} {}{}",
     opt_ubs(cls_ubs),
     opt_attrs(AttrContext::Class, cls->attrs(), &cls->userAttributes()),
     name,

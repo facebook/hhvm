@@ -6,6 +6,7 @@ use ast_constant_folder_rust as constant_folder;
 use emit_fatal_rust as emit_fatal;
 use emit_type_hint_rust as emit_type_hint;
 use env::emitter::Emitter;
+use hhas_pos_rust::Span;
 use hhas_record_def_rust::{Field as RecordField, HhasRecord};
 use hhas_type::constraint;
 use hhbc_id_rust::record;
@@ -79,6 +80,7 @@ fn emit_record_def<'a>(emitter: &Emitter, rd: &'a RecordDef) -> Result<HhasRecor
             .iter()
             .map(|f| emit_field(emitter, rd.namespace.as_ref(), &f))
             .collect::<Result<Vec<_>>>()?,
+        span: Span::from_pos(&rd.span),
     })
 }
 

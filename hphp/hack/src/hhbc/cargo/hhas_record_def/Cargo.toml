@@ -9,6 +9,7 @@ include = ["../../hhas_record_def.rs"]
 path = "../../hhas_record_def.rs"
 
 [dependencies]
+hhas_pos_rust = { path = "../hhas_pos" }
 hhas_type = { path = "../hhas_type" }
 hhbc_id_rust = { path = "../hhbc_id" }
 runtime = { path = "../runtime" }

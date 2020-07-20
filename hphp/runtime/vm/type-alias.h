@@ -46,9 +46,9 @@ struct Unit;
  * name.  At runtime we still might resolve this name to another type alias,
  * becoming a type alias for KindOfArray or something in that request.
  *
- * For the per-request struct, see TypeAliasReq below.
+ * For the per-request struct, see TypeAlias below.
  */
-struct TypeAlias {
+struct PreTypeAlias {
   LowStringPtr name;
   LowStringPtr value;
   Attr attrs;
@@ -103,26 +103,26 @@ struct TypeAlias {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * In a given request, a defined type alias is turned into a TypeAliasReq
+ * In a given request, a defined type alias is turned into a TypeAlias
  * struct.  This contains the information needed to validate parameter type
  * hints for a type alias at runtime.
  */
-struct TypeAliasReq {
+struct TypeAlias {
 
   /////////////////////////////////////////////////////////////////////////////
   // Static constructors.
 
-  static TypeAliasReq Invalid(Unit* unit);
-  static TypeAliasReq From(Unit* unit, const TypeAlias& alias);
-  static TypeAliasReq From(Unit* unit, TypeAliasReq req,
-                           const TypeAlias& alias);
+  static TypeAlias Invalid(Unit* unit);
+  static TypeAlias From(Unit* unit, const PreTypeAlias& alias);
+  static TypeAlias From(Unit* unit, TypeAlias req,
+                           const PreTypeAlias& alias);
 
 
   /////////////////////////////////////////////////////////////////////////////
   // Comparison.
 
-  bool same(const TypeAliasReq& req) const;
-  bool compat(const TypeAlias& alias) const;
+  bool same(const TypeAlias& req) const;
+  bool compat(const PreTypeAlias& alias) const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -145,8 +145,8 @@ struct TypeAliasReq {
   Unit* unit{nullptr};
 };
 
-bool operator==(const TypeAliasReq& l, const TypeAliasReq& r);
-bool operator!=(const TypeAliasReq& l, const TypeAliasReq& r);
+bool operator==(const TypeAlias& l, const TypeAlias& r);
+bool operator!=(const TypeAlias& l, const TypeAlias& r);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -476,18 +476,18 @@ Array getAlias(TSEnv& env, const String& aliasName) {
   }
 
   auto persistentTA = true;
-  auto typeAliasReq = env.allow_partial
+  auto typeAlias = env.allow_partial
     ? Unit::lookupTypeAlias(aliasName.get(), &persistentTA)
     : Unit::loadTypeAlias(aliasName.get(), &persistentTA);
-  if (!typeAliasReq) {
+  if (!typeAlias) {
     env.partial = true;
     return Array::CreateDArray();
   }
 
   // this returned type structure is unresolved.
-  assertx(typeAliasReq->typeStructure.isHAMSafeDArray());
+  assertx(typeAlias->typeStructure.isHAMSafeDArray());
   env.persistent &= persistentTA;
-  return typeAliasReq->typeStructure;
+  return typeAlias->typeStructure;
 }
 
 const Class* getClass(TSEnv& env, const TSCtx& ctx, const String& clsName) {
@@ -880,7 +880,7 @@ Array TypeStructure::resolve(const ArrayData* ts,
 }
 
 /*
- * Called by TypeAliasReq to get resolved TypeStructure for type aliases.
+ * Called by TypeAlias to get resolved TypeStructure for type aliases.
  */
 Array TypeStructure::resolve(const String& aliasName,
                              const Array& arr,

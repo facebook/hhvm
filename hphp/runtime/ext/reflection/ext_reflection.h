@@ -233,23 +233,23 @@ struct ReflectionPropHandle {
   Type m_type;
 };
 
-/* A ReflectionTypeAliasHandle is a NativeData object wrapping a TypeAliasReq*
+/* A ReflectionTypeAliasHandle is a NativeData object wrapping a TypeAlias*
  * for the purposes of static ReflectionTypeAlias. */
 struct ReflectionTypeAliasHandle {
   ReflectionTypeAliasHandle(): m_req(nullptr) {}
-  explicit ReflectionTypeAliasHandle(const TypeAliasReq* req): m_req(req) {};
+  explicit ReflectionTypeAliasHandle(const TypeAlias* req): m_req(req) {};
 
   static ReflectionTypeAliasHandle* Get(ObjectData* obj) {
     return Native::data<ReflectionTypeAliasHandle>(obj);
   }
 
-  static const TypeAliasReq* GetTypeAliasReqFor(ObjectData* obj) {
-    return Native::data<ReflectionTypeAliasHandle>(obj)->getTypeAliasReq();
+  static const TypeAlias* GetTypeAliasFor(ObjectData* obj) {
+    return Native::data<ReflectionTypeAliasHandle>(obj)->getTypeAlias();
   }
 
-  const TypeAliasReq* getTypeAliasReq() const { return m_req; }
+  const TypeAlias* getTypeAlias() const { return m_req; }
 
-  void setTypeAliasReq(const TypeAliasReq* req) {
+  void setTypeAlias(const TypeAlias* req) {
     assertx(req != nullptr);
     assertx(m_req == nullptr);
     m_req = req;
@@ -257,7 +257,7 @@ struct ReflectionTypeAliasHandle {
 
  private:
   template <typename F> friend void scan(const ReflectionTypeAliasHandle&, F&);
-  const TypeAliasReq* m_req;
+  const TypeAlias* m_req;
 };
 
 namespace DebuggerReflection {

@@ -338,7 +338,7 @@ public:
   >;
 
   using PreClassPtrVec = VMCompactVector<PreClassPtr>;
-  using TypeAliasVec = VMFixedVector<TypeAlias>;
+  using TypeAliasVec = VMFixedVector<PreTypeAlias>;
   using ConstantVec = VMFixedVector<Constant>;
 
   /////////////////////////////////////////////////////////////////////////////
@@ -781,28 +781,28 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Type aliases.
 
-  folly::Range<TypeAlias*> typeAliases();
-  folly::Range<const TypeAlias*> typeAliases() const;
+  folly::Range<PreTypeAlias*> typeAliases();
+  folly::Range<const PreTypeAlias*> typeAliases() const;
 
   /*
    * Look up without autoloading a type alias named `name'. Returns nullptr
    * if one cannot be found.
    *
    * If the type alias is found and `persistent' is provided, it will be set to
-   * whether or not the TypeAliasReq's RDS handle is persistent.
+   * whether or not the TypeAlias's RDS handle is persistent.
    */
-  static const TypeAliasReq* lookupTypeAlias(const StringData* name,
-                                             bool* persistent = nullptr);
+  static const TypeAlias* lookupTypeAlias(const StringData* name,
+                                          bool* persistent = nullptr);
 
   /*
    * Look up or attempt to autoload a type alias named `name'. Returns nullptr
    * if one cannot be found or autoloaded.
    *
    * If the type alias is found and `persistent' is provided, it will be set to
-   * whether or not the TypeAliasReq's RDS handle is persistent.
+   * whether or not the TypeAlias's RDS handle is persistent.
    */
-  static const TypeAliasReq* loadTypeAlias(const StringData* name,
-                                           bool* persistent = nullptr);
+  static const TypeAlias* loadTypeAlias(const StringData* name,
+                                        bool* persistent = nullptr);
 
   /*
    * Define the type alias given by `id', binding it to the appropriate

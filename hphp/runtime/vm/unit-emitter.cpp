@@ -297,7 +297,7 @@ Id UnitEmitter::pceId(folly::StringPiece clsName) {
 ///////////////////////////////////////////////////////////////////////////////
 // Type aliases.
 
-Id UnitEmitter::addTypeAlias(const TypeAlias& td) {
+Id UnitEmitter::addTypeAlias(const PreTypeAlias& td) {
   Id id = m_typeAliases.size();
   m_typeAliases.push_back(td);
   return id;
@@ -898,13 +898,13 @@ void UnitEmitter::serde(SerDe& sd) {
   seq(
     m_typeAliases,
     [&] (auto& sd, size_t i) {
-      TypeAlias ta;
+      PreTypeAlias ta;
       sd(ta.name);
       sd(ta);
       auto const id UNUSED = addTypeAlias(ta);
       assertx(id == i);
     },
-    [&] (auto& sd, const TypeAlias& ta) {
+    [&] (auto& sd, const PreTypeAlias& ta) {
       sd(ta.name);
       sd(ta);
     }
@@ -1523,7 +1523,7 @@ void UnitRepoProxy::InsertUnitTypeAliasStmt
                            RepoTxn& txn,
                            int64_t unitSn,
                            Id typeAliasId,
-                           const TypeAlias& typeAlias) {
+                           const PreTypeAlias& typeAlias) {
   if (!prepared()) {
     auto insertQuery = folly::sformat(
       "INSERT INTO {} VALUES (@unitSn, @typeAliasId, @name, @data);",
@@ -1556,7 +1556,7 @@ void UnitRepoProxy::GetUnitTypeAliasesStmt::get(UnitEmitter& ue) {
   do {
     query.step();
     if (query.row()) {
-      TypeAlias ta;
+      PreTypeAlias ta;
       Id typeAliasId;        /**/ query.getId(0, typeAliasId);
       StringData *name;      /**/ query.getStaticString(1, name);
       ta.name = makeStaticString(name);

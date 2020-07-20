@@ -148,10 +148,10 @@ struct NamedEntity {
   bool isPersistentTypeAlias() const;
 
   /*
-   * Set and get the cached TypeAliasReq.
+   * Set and get the cached TypeAlias.
    */
-  void setCachedTypeAlias(const TypeAliasReq&);
-  const TypeAliasReq* getCachedTypeAlias() const;
+  void setCachedTypeAlias(const TypeAlias&);
+  const TypeAlias* getCachedTypeAlias() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Reified generic cache.
@@ -244,7 +244,7 @@ public:
   mutable rds::Link<LowPtr<Class>, rds::Mode::NonLocal> m_cachedClass;
   mutable rds::Link<LowPtr<Func>, rds::Mode::NonLocal> m_cachedFunc;
   union {
-    mutable rds::Link<TypeAliasReq, rds::Mode::NonLocal> m_cachedTypeAlias{};
+    mutable rds::Link<TypeAlias, rds::Mode::NonLocal> m_cachedTypeAlias{};
     mutable rds::Link<ArrayData*, rds::Mode::NonLocal> m_cachedReifiedGenerics;
   };
   mutable rds::Link<LowPtr<RecordDesc>, rds::Mode::NonLocal> m_cachedRecordDesc;

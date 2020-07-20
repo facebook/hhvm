@@ -89,7 +89,7 @@ inline const RecordEmitter* UnitEmitter::re(Id recordId) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Type aliases.
 
-inline const std::vector<TypeAlias>& UnitEmitter::typeAliases() const {
+inline const std::vector<PreTypeAlias>& UnitEmitter::typeAliases() const {
   return m_typeAliases;
 }
 

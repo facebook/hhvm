@@ -184,7 +184,7 @@ const Class* getThis() {
 }
 
 /*
- * Look up a TypeAliasReq for the supplied NamedEntity (which must be the
+ * Look up a TypeAlias for the supplied NamedEntity (which must be the
  * NamedEntity for `name'), invoking autoload if necessary for types but not
  * for classes.
  *
@@ -192,8 +192,8 @@ const Class* getThis() {
  * instance of a class if it's not defined.  However, we need to autoload
  * typedefs because they can affect whether VerifyParamType would succeed.
  */
-const TypeAliasReq* getTypeAliasWithAutoload(const NamedEntity* ne,
-                                             const StringData* name) {
+const TypeAlias* getTypeAliasWithAutoload(const NamedEntity* ne,
+                                          const StringData* name) {
   auto def = ne->getCachedTypeAlias();
   if (!def) {
     VMRegAnchor _;
@@ -207,7 +207,7 @@ const TypeAliasReq* getTypeAliasWithAutoload(const NamedEntity* ne,
 }
 
 /*
- * Look up a TypeAliasReq or a Class for the supplied NamedEntity
+ * Look up a TypeAlias or a Class for the supplied NamedEntity
  * (which must be the NamedEntity for `name'), invoking autoload if
  * necessary.
  *
@@ -215,7 +215,7 @@ const TypeAliasReq* getTypeAliasWithAutoload(const NamedEntity* ne,
  * type alias or an enum class; enum classes are strange in that it
  * *is* possible to have an instance of them even if they are not defined.
  */
-boost::variant<const TypeAliasReq*, RecordDesc*, Class*>
+boost::variant<const TypeAlias*, RecordDesc*, Class*>
 getNamedTypeWithAutoload(const NamedEntity* ne,
                          const StringData* name) {
 
@@ -264,7 +264,7 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
 
   if (boost::get<RecordDesc*>(&p)) return KindOfRecord;
 
-  auto ptd = boost::get<const TypeAliasReq*>(&p);
+  auto ptd = boost::get<const TypeAlias*>(&p);
   auto td = ptd ? *ptd : nullptr;
   auto pc = boost::get<Class*>(&p);
   auto c = pc ? *pc : nullptr;
@@ -297,7 +297,7 @@ bool TypeConstraint::isMixedResolved() const {
   // we know it cannot be mixed.
   if (!isObject() || isResolved()) return false;
   auto v = getNamedTypeWithAutoload(m_namedEntity, m_typeName);
-  auto const pTyAlias = boost::get<const TypeAliasReq*>(&v);
+  auto const pTyAlias = boost::get<const TypeAlias*>(&v);
   return pTyAlias && (*pTyAlias)->type == AnnotType::Mixed;
 }
 
@@ -376,12 +376,12 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
 
     assertx(tc.isObject());
 
-    const TypeAliasReq* tyAlias = nullptr;
+    const TypeAlias* tyAlias = nullptr;
     Class* klass = nullptr;
     RecordDesc* rec = nullptr;
     auto v =
       getNamedTypeWithAutoload(tc.m_namedEntity, tc.m_typeName);
-    if (auto pT = boost::get<const TypeAliasReq*>(&v)) {
+    if (auto pT = boost::get<const TypeAlias*>(&v)) {
       tyAlias = *pT;
     }
     if (auto pR = boost::get<RecordDesc*>(&v)) {
@@ -431,7 +431,7 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
   assertx(isObject() || isRecord());
 
   auto const p = [&]() ->
-    boost::variant<const TypeAliasReq*, RecordDesc*, Class*> {
+    boost::variant<const TypeAlias*, RecordDesc*, Class*> {
     if (!Assert) {
       return getNamedTypeWithAutoload(m_namedEntity, m_typeName);
     }
@@ -443,7 +443,7 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
     }
     return Unit::lookupClass(m_namedEntity);
   }();
-  auto ptd = boost::get<const TypeAliasReq*>(&p);
+  auto ptd = boost::get<const TypeAlias*>(&p);
   auto td = ptd ? *ptd : nullptr;
   auto prec = boost::get<RecordDesc*>(&p);
   auto rec = prec ? *prec : nullptr;
@@ -515,14 +515,14 @@ template <>
 bool isValid<RecordDesc>(const TypeConstraint* tc) { return tc->isRecord(); }
 
 template <typename T>
-bool isInstanceOf(const T*, const TypeAliasReq*);
+bool isInstanceOf(const T*, const TypeAlias*);
 template<>
-bool isInstanceOf<Class>(const Class* type, const TypeAliasReq* td) {
+bool isInstanceOf<Class>(const Class* type, const TypeAlias* td) {
   return td->type == AnnotType::Object && td->klass &&
     type->classof(td->klass);
 }
 template<>
-bool isInstanceOf<RecordDesc>(const RecordDesc* type, const TypeAliasReq* td) {
+bool isInstanceOf<RecordDesc>(const RecordDesc* type, const TypeAlias* td) {
   return td->type == AnnotType::Record && td->rec &&
     type->recordDescOf(td->rec);
 }

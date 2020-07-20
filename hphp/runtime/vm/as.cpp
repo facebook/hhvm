@@ -3450,7 +3450,7 @@ void parse_adata(AsmState& as) {
 void parse_alias(AsmState& as) {
   as.in.skipWhitespace();
 
-  TypeAlias record;
+  PreTypeAlias record;
   Attr attrs = parse_attribute_list(as, AttrContext::Alias, &record.userAttrs);
   if (!SystemLib::s_inited) {
     attrs |= AttrPersistent;

@@ -21,7 +21,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool TypeAliasReq::compat(const TypeAlias& alias) const {
+bool TypeAlias::compat(const PreTypeAlias& alias) const {
   return (alias.type == AnnotType::Mixed && type == AnnotType::Mixed) ||
          (alias.type == type && alias.nullable == nullable &&
           Unit::lookupClass(alias.value) == klass &&

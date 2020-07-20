@@ -1436,7 +1436,7 @@ void emit_class(EmitUnitState& state,
 
 void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias,
                     const EmitUnitState& state) {
-  TypeAlias t {
+  PreTypeAlias t {
     alias.name,
     alias.value,
     alias.attrs,

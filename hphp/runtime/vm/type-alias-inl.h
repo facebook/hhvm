@@ -27,19 +27,19 @@ struct ArrayData;
 ///////////////////////////////////////////////////////////////////////////////
 // Static constructors.
 
-inline TypeAliasReq TypeAliasReq::Invalid(Unit* unit) {
+inline TypeAlias TypeAlias::Invalid(Unit* unit) {
   assertx(unit);
-  TypeAliasReq req;
+  TypeAlias req;
   req.unit = unit;
   req.invalid = true;
   return req;
 }
 
-inline TypeAliasReq TypeAliasReq::From(Unit* unit, const TypeAlias& alias) {
+inline TypeAlias TypeAlias::From(Unit* unit, const PreTypeAlias& alias) {
   assertx(alias.type != AnnotType::Object);
   assertx(unit);
 
-  TypeAliasReq req;
+  TypeAlias req;
   req.unit = unit;
   req.name = alias.name;
   req.type = alias.type;
@@ -50,8 +50,8 @@ inline TypeAliasReq TypeAliasReq::From(Unit* unit, const TypeAlias& alias) {
   return req;
 }
 
-inline TypeAliasReq TypeAliasReq::From(Unit* unit, TypeAliasReq req,
-                                       const TypeAlias& alias) {
+inline TypeAlias TypeAlias::From(Unit* unit, TypeAlias req,
+                                       const PreTypeAlias& alias) {
   assertx(alias.type == AnnotType::Object);
   assertx(unit);
 
@@ -70,20 +70,20 @@ inline TypeAliasReq TypeAliasReq::From(Unit* unit, TypeAliasReq req,
 ///////////////////////////////////////////////////////////////////////////////
 // Comparison.
 
-inline bool TypeAliasReq::same(const TypeAliasReq& req) const {
+inline bool TypeAlias::same(const TypeAlias& req) const {
   return (invalid && req.invalid) ||
          (type == AnnotType::Mixed && req.type == AnnotType::Mixed) ||
          (type == req.type && nullable == req.nullable &&
           klass == req.klass && rec == req.rec);
 }
 
-inline bool operator==(const TypeAliasReq& l,
-                       const TypeAliasReq& r) {
+inline bool operator==(const TypeAlias& l,
+                       const TypeAlias& r) {
   return l.same(r);
 }
 
-inline bool operator!=(const TypeAliasReq& l,
-                       const TypeAliasReq& r) {
+inline bool operator!=(const TypeAlias& l,
+                       const TypeAlias& r) {
   return !l.same(r);
 }
 

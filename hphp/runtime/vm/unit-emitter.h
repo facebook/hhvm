@@ -298,12 +298,12 @@ struct UnitEmitter {
   /*
    * Const reference to all of the Unit's type aliases.
    */
-  const std::vector<TypeAlias>& typeAliases() const;
+  const std::vector<PreTypeAlias>& typeAliases() const;
 
   /*
    * Add a new type alias to the Unit.
    */
-  Id addTypeAlias(const TypeAlias& td);
+  Id addTypeAlias(const PreTypeAlias& td);
 
   /////////////////////////////////////////////////////////////////////////////
   // Constants.
@@ -468,7 +468,7 @@ private:
   /*
    * Type alias table.
    */
-  std::vector<TypeAlias> m_typeAliases;
+  std::vector<PreTypeAlias> m_typeAliases;
 
   /*
    * Constants table.
@@ -555,7 +555,7 @@ struct UnitRepoProxy : public RepoProxy {
                 RepoTxn& txn,
                 int64_t unitSn,
                 Id typeAliasId,
-                const TypeAlias& typeAlias); // throws(RepoExc)
+                const PreTypeAlias& typeAlias); // throws(RepoExc)
   };
   struct GetUnitTypeAliasesStmt : public RepoProxy::Stmt {
     GetUnitTypeAliasesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}

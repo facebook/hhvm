@@ -907,7 +907,7 @@ struct FrameRestore : private VMRegAnchor {
 
 template<class T>
 const char* checkSameName(NamedEntity* nameList) {
-  if (!std::is_same<T, TypeAlias>::value && nameList->getCachedTypeAlias()) {
+  if (!std::is_same<T, PreTypeAlias>::value && nameList->getCachedTypeAlias()) {
     return "type";
   } else if (!std::is_same<T, RecordDesc>::value &&
              nameList->getCachedRecordDesc()) {
@@ -1362,10 +1362,10 @@ bool Unit::defNativeConstantCallback(const StringData* cnsName,
 
 namespace {
 
-TypeAliasReq typeAliasFromRecordDesc(Unit* unit, const TypeAlias* thisType,
-                                     RecordDesc* rec) {
+TypeAlias typeAliasFromRecordDesc(Unit* unit, const PreTypeAlias* thisType,
+                                  RecordDesc* rec) {
   assertx(unit);
-  TypeAliasReq req;
+  TypeAlias req;
   req.unit = unit;
   req.name = thisType->name;
   req.nullable = thisType->nullable;
@@ -1377,10 +1377,10 @@ TypeAliasReq typeAliasFromRecordDesc(Unit* unit, const TypeAlias* thisType,
   return req;
 }
 
-TypeAliasReq typeAliasFromClass(Unit* unit, const TypeAlias* thisType,
-                                Class *klass) {
+TypeAlias typeAliasFromClass(Unit* unit, const PreTypeAlias* thisType,
+                             Class *klass) {
   assertx(unit);
-  TypeAliasReq req;
+  TypeAlias req;
   req.unit = unit;
   req.name = thisType->name;
   req.nullable = thisType->nullable;
@@ -1401,7 +1401,7 @@ TypeAliasReq typeAliasFromClass(Unit* unit, const TypeAlias* thisType,
   return req;
 }
 
-TypeAliasReq resolveTypeAlias(Unit* unit, const TypeAlias* thisType) {
+TypeAlias resolveTypeAlias(Unit* unit, const PreTypeAlias* thisType) {
   /*
    * If this type alias is a KindOfObject and the name on the right
    * hand side was another type alias, we will bind the name to the
@@ -1414,7 +1414,7 @@ TypeAliasReq resolveTypeAlias(Unit* unit, const TypeAlias* thisType) {
    * ensure it exists at this point.
    */
   if (thisType->type != AnnotType::Object) {
-    return TypeAliasReq::From(unit, *thisType);
+    return TypeAlias::From(unit, *thisType);
   }
 
   /*
@@ -1439,7 +1439,7 @@ TypeAliasReq resolveTypeAlias(Unit* unit, const TypeAlias* thisType) {
   }
 
   if (auto targetTd = targetNE->getCachedTypeAlias()) {
-    return TypeAliasReq::From(unit, *targetTd, *thisType);
+    return TypeAlias::From(unit, *targetTd, *thisType);
   }
 
   if (auto rec = Unit::lookupRecordDesc(targetNE)) {
@@ -1453,29 +1453,29 @@ TypeAliasReq resolveTypeAlias(Unit* unit, const TypeAlias* thisType) {
       return typeAliasFromClass(unit, thisType, klass);
     }
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
-      return TypeAliasReq::From(unit, *targetTd, *thisType);
+      return TypeAlias::From(unit, *targetTd, *thisType);
     }
     if (auto rec = Unit::lookupRecordDesc(targetNE)) {
       return typeAliasFromRecordDesc(unit, thisType, rec);
     }
   }
 
-  return TypeAliasReq::Invalid(unit);
+  return TypeAlias::Invalid(unit);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-const TypeAliasReq* Unit::lookupTypeAlias(const StringData* name,
-                                          bool* persistent) {
+const TypeAlias* Unit::lookupTypeAlias(const StringData* name,
+                                       bool* persistent) {
   auto ne = NamedEntity::get(name);
   auto target = ne->getCachedTypeAlias();
   if (persistent) *persistent = ne->isPersistentTypeAlias();
   return target;
 }
 
-const TypeAliasReq* Unit::loadTypeAlias(const StringData* name,
-                                        bool* persistent) {
+const TypeAlias* Unit::loadTypeAlias(const StringData* name,
+                                     bool* persistent) {
   auto ne = NamedEntity::get(name);
   auto target = ne->getCachedTypeAlias();
   if (!target) {
@@ -1522,7 +1522,7 @@ bool Unit::defTypeAlias(Id id) {
   }
 
   // There might also be a class or record with this name already.
-  auto existingKind = checkSameName<TypeAlias>(nameList);
+  auto existingKind = checkSameName<PreTypeAlias>(nameList);
   if (existingKind) {
     FrameRestore _(this, Op::DefTypeAlias, id);
     raise_error("The name %s is already defined as a %s",

@@ -75,7 +75,7 @@ bool NamedEntity::isPersistentTypeAlias() const {
   return m_cachedTypeAlias.bound() && m_cachedTypeAlias.isPersistent();
 }
 
-void NamedEntity::setCachedTypeAlias(const TypeAliasReq& td) {
+void NamedEntity::setCachedTypeAlias(const TypeAlias& td) {
   if (!m_cachedTypeAlias.isInit()) {
     m_cachedTypeAlias.initWith(td);
   } else {
@@ -83,7 +83,7 @@ void NamedEntity::setCachedTypeAlias(const TypeAliasReq& td) {
   }
 }
 
-const TypeAliasReq* NamedEntity::getCachedTypeAlias() const {
+const TypeAlias* NamedEntity::getCachedTypeAlias() const {
   return m_cachedTypeAlias.bound() &&
          m_cachedTypeAlias.isInit() &&
          m_cachedTypeAlias->name

@@ -447,7 +447,7 @@ std::unique_ptr<ProfTransRec> read_prof_trans_rec(ProfDataDeserializer& ser) {
   return ret;
 }
 
-bool write_type_alias(ProfDataSerializer&, const TypeAliasReq*);
+bool write_type_alias(ProfDataSerializer&, const TypeAlias*);
 
 bool write_named_type(ProfDataSerializer& ser, const NamedEntity* ne) {
   if (!ne) return false;
@@ -468,13 +468,13 @@ bool write_named_type(ProfDataSerializer& ser, const NamedEntity* ne) {
   return write_type_alias(ser, ne->getCachedTypeAlias());
 }
 
-bool write_type_alias(ProfDataSerializer& ser, const TypeAliasReq* td) {
+bool write_type_alias(ProfDataSerializer& ser, const TypeAlias* td) {
   SCOPE_EXIT {
     ITRACE(2, "TypeAlias: {}\n", td->name);
   };
   ITRACE(2, "TypeAlias>\n");
-  // we're writing out Class* and TypeAliasReq* intermingled here. Set
-  // bit 1 for TypeAliasReq's so we can distinguish when reading back
+  // we're writing out Class* and TypeAlias* intermingled here. Set
+  // bit 1 for TypeAlias's so we can distinguish when reading back
   // in. We also need to keep track of both whether we already tried
   // serialize this one, and whether it was successful. Use td2 for
   // that too.
@@ -567,7 +567,7 @@ Class* read_class_internal(ProfDataDeserializer& ser) {
                  });
 
   auto const preClass = unit->lookupPreClassId(id);
-  folly::Optional<TypeAliasReq> enumBaseReq;
+  folly::Optional<TypeAlias> enumBaseReq;
   SCOPE_EXIT {
     if (enumBaseReq) {
       preClass->enumBaseTy().namedEntity()->m_cachedTypeAlias.markUninit();
@@ -1561,7 +1561,7 @@ std::string serializeProfData(const std::string& filename) {
     write_target_profiles(ser);
 
     // We've written everything directly referenced by the profile
-    // data, but jitted code might still use Classes and TypeAliasReqs
+    // data, but jitted code might still use Classes and TypeAliases
     // that haven't been otherwise mentioned (eg VerifyParamType,
     // InstanceOfD etc).
     write_named_types(ser, pd);

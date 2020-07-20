@@ -2036,18 +2036,18 @@ const StaticString s_ReflectionTypeAliasHandle("ReflectionTypeAliasHandle");
 // helper for __construct:
 // caller throws exception when return value is false
 static String HHVM_METHOD(ReflectionTypeAlias, __init, const String& name) {
-  auto const typeAliasReq = Unit::loadTypeAlias(name.get());
+  auto const typeAlias = Unit::loadTypeAlias(name.get());
 
-  if (!typeAliasReq) {
+  if (!typeAlias) {
     return empty_string();
   }
 
-  ReflectionTypeAliasHandle::Get(this_)->setTypeAliasReq(typeAliasReq);
-  return String::attach(const_cast<StringData*>(typeAliasReq->name.get()));
+  ReflectionTypeAliasHandle::Get(this_)->setTypeAlias(typeAlias);
+  return String::attach(const_cast<StringData*>(typeAlias->name.get()));
 }
 
 static Array HHVM_METHOD(ReflectionTypeAlias, getTypeStructure) {
-  auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
+  auto const req = ReflectionTypeAliasHandle::GetTypeAliasFor(this_);
   assertx(req);
   auto const typeStructure = req->typeStructure;
   assertx(!typeStructure.empty());
@@ -2056,7 +2056,7 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getTypeStructure) {
 }
 
 static String HHVM_METHOD(ReflectionTypeAlias, getAssignedTypeText) {
-  auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
+  auto const req = ReflectionTypeAliasHandle::GetTypeAliasFor(this_);
   assertx(req);
   auto const typeStructure = req->typeStructure;
   assertx(!typeStructure.empty());
@@ -2066,7 +2066,7 @@ static String HHVM_METHOD(ReflectionTypeAlias, getAssignedTypeText) {
 }
 
 static Array HHVM_METHOD(ReflectionTypeAlias, getAttributesNamespaced) {
-  auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
+  auto const req = ReflectionTypeAliasHandle::GetTypeAliasFor(this_);
   assertx(req);
   auto const userAttrs = req->userAttrs;
 
@@ -2078,7 +2078,7 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getAttributesNamespaced) {
 }
 
 static String HHVM_METHOD(ReflectionTypeAlias, getFileName) {
-  auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
+  auto const req = ReflectionTypeAliasHandle::GetTypeAliasFor(this_);
   assertx(req);
   auto file = req->unit->filepath();
   if (!file) file = staticEmptyString();

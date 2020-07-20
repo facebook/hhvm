@@ -850,7 +850,7 @@ void print_cls(Output& out, const PreClass* cls) {
   out.nl();
 }
 
-void print_alias(Output& out, const TypeAlias& alias) {
+void print_alias(Output& out, const PreTypeAlias& alias) {
   auto flags = TypeConstraint::NoFlags;
   if (alias.nullable) flags = flags | TypeConstraint::Nullable;
   TypeConstraint constraint(alias.value, flags);

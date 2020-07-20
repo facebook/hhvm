@@ -295,11 +295,11 @@ template<class Fn> void Unit::forEachFunc(Fn fn) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Type aliases
 
-inline folly::Range<TypeAlias*> Unit::typeAliases() {
+inline folly::Range<PreTypeAlias*> Unit::typeAliases() {
   return { m_typeAliases.begin(), m_typeAliases.end() };
 }
 
-inline folly::Range<const TypeAlias*> Unit::typeAliases() const {
+inline folly::Range<const PreTypeAlias*> Unit::typeAliases() const {
   return { m_typeAliases.begin(), m_typeAliases.end() };
 }
 

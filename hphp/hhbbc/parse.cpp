@@ -1101,7 +1101,7 @@ std::unique_ptr<php::Constant> parse_constant(const Constant& c, php::Unit* unit
   });
 }
 
-std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAlias& ta, php::Unit* unit) {
+std::unique_ptr<php::TypeAlias> parse_type_alias(const PreTypeAlias& ta, php::Unit* unit) {
   return std::unique_ptr<php::TypeAlias>(new php::TypeAlias{
     unit,
     php::SrcInfo { ta.getLocation() },

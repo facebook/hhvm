@@ -32,7 +32,7 @@ struct Func;
 struct StringData;
 struct ArrayData;
 struct SrcKey;
-struct TypeAliasReq;
+struct TypeAlias;
 
 namespace jit {
 //////////////////////////////////////////////////////////////////////

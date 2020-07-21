@@ -118,7 +118,7 @@ pub fn hash1(dep_type: DepType, name1: &[u8]) -> i32 {
 /// do not spawn threads in our OCaml code, so the pointed-to value will not be
 /// concurrently modified.
 #[no_mangle]
-pub unsafe extern "C" fn hash1_ocaml(dep_type_tag: usize, name1: usize) -> usize {
+unsafe extern "C" fn hash1_ocaml(dep_type_tag: usize, name1: usize) -> usize {
     fn do_hash(dep_type_tag: Value<'_>, name1: Value<'_>) -> Value<'static> {
         let dep_type_tag = dep_type_tag
             .as_int()
@@ -163,7 +163,7 @@ pub fn hash2(dep_type: DepType, name1: &[u8], name2: &[u8]) -> i32 {
 /// do not spawn threads in our OCaml code, so the pointed-to value will not be
 /// concurrently modified.
 #[no_mangle]
-pub unsafe extern "C" fn hash2_ocaml(dep_type_tag: usize, name1: usize, name2: usize) -> usize {
+unsafe extern "C" fn hash2_ocaml(dep_type_tag: usize, name1: usize, name2: usize) -> usize {
     fn do_hash(dep_type_tag: Value<'_>, name1: Value<'_>, name2: Value<'_>) -> Value<'static> {
         let dep_type_tag = dep_type_tag
             .as_int()

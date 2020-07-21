@@ -8,8 +8,8 @@ mod decl_mode_smart_constructors_generated;
 
 use ocaml::core::mlvalues::Value;
 use parser_core_types::{
-    lexable_token::LexableToken, parser_env::ParserEnv, source_text::SourceText, syntax::*,
-    token_kind::TokenKind,
+    lexable_token::LexableToken, lexable_trivia::LexableTrivia, parser_env::ParserEnv,
+    source_text::SourceText, syntax::*, token_kind::TokenKind,
 };
 use rust_to_ocaml::{SerializationContext, ToOcaml};
 use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
@@ -214,7 +214,14 @@ where
     match body.syntax {
         SyntaxVariant::CompoundStatement(children) => {
             let stmts = if saw_yield {
-                let token = Token::make(TokenKind::Yield, &st.source, 0, 0, vec![], vec![]);
+                let token = Token::make(
+                    TokenKind::Yield,
+                    &st.source,
+                    0,
+                    0,
+                    Token::Trivia::new(),
+                    Token::Trivia::new(),
+                );
                 let yield_ = Syntax::<Token, Value>::make_token(token);
                 Syntax::make_list(st, vec![yield_], 0)
             } else {

@@ -20,15 +20,16 @@
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
 #[derive(Debug, Copy, Clone, FromOcamlRep, ToOcamlRep, PartialEq)]
+#[repr(u8)]
 pub enum TriviaKind {
-    WhiteSpace,
-    EndOfLine,
-    DelimitedComment,
-    SingleLineComment,
-    FixMe,
-    IgnoreError,
-    FallThrough,
-    ExtraTokenError,
+    WhiteSpace = 0,
+    EndOfLine = 1,
+    DelimitedComment = 2,
+    SingleLineComment = 3,
+    FixMe = 4,
+    IgnoreError = 5,
+    FallThrough = 6,
+    ExtraTokenError = 7,
 }
 
 impl TriviaKind {
@@ -45,16 +46,7 @@ impl TriviaKind {
         }
     }
 
-    pub fn ocaml_tag(self) -> u8 {
-        match self {
-            TriviaKind::WhiteSpace => 0,
-            TriviaKind::EndOfLine => 1,
-            TriviaKind::DelimitedComment => 2,
-            TriviaKind::SingleLineComment => 3,
-            TriviaKind::FixMe => 4,
-            TriviaKind::IgnoreError => 5,
-            TriviaKind::FallThrough => 6,
-            TriviaKind::ExtraTokenError => 7,
-        }
+    pub const fn ocaml_tag(self) -> u8 {
+        self as u8
     }
 }

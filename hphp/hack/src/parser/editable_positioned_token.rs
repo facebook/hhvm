@@ -40,8 +40,8 @@ impl<'a> LexableToken<'a> for EditablePositionedToken<'a> {
         _source_text: &SourceText,
         _offset: usize,
         _width: usize,
-        _leading: Vec<Self::Trivia>,
-        _trailing: Vec<Self::Trivia>,
+        _leading: Self::Trivia,
+        _trailing: Self::Trivia,
     ) -> Self {
         panic!("TODO")
     }
@@ -70,19 +70,27 @@ impl<'a> LexableToken<'a> for EditablePositionedToken<'a> {
         panic!("TODO")
     }
 
-    fn leading(&self) -> &[Self::Trivia] {
+    fn clone_leading(&self) -> PositionedTrivia {
         panic!("TODO")
     }
 
-    fn trailing(&self) -> &[Self::Trivia] {
+    fn clone_trailing(&self) -> PositionedTrivia {
         panic!("TODO")
     }
 
-    fn with_leading(self, _leading: Vec<Self::Trivia>) -> Self {
+    fn leading_is_empty(&self) -> bool {
         panic!("TODO")
     }
 
-    fn with_trailing(self, _trailing: Vec<Self::Trivia>) -> Self {
+    fn trailing_is_empty(&self) -> bool {
+        panic!("TODO")
+    }
+
+    fn with_leading(self, _leading: Self::Trivia) -> Self {
+        panic!("TODO")
+    }
+
+    fn with_trailing(self, _trailing: Self::Trivia) -> Self {
         panic!("TODO")
     }
 
@@ -90,7 +98,15 @@ impl<'a> LexableToken<'a> for EditablePositionedToken<'a> {
         panic!("TODO")
     }
 
-    fn has_trivia_kind(&self, _kind: TriviaKind) -> bool {
+    fn has_leading_trivia_kind(&self, _kind: TriviaKind) -> bool {
+        panic!("TODO")
+    }
+
+    fn has_trailing_trivia_kind(&self, _kind: TriviaKind) -> bool {
+        panic!("TODO")
+    }
+
+    fn into_trivia_and_width(self) -> (Self::Trivia, usize, Self::Trivia) {
         panic!("TODO")
     }
 }

@@ -18,7 +18,7 @@
  */
 use flatten_smart_constructors::*;
 use smart_constructors::SmartConstructors;
-use parser_core_types::positioned_token::PositionedToken;
+use parser_core_types::compact_token::CompactToken;
 
 use crate::{State, Node};
 
@@ -27,7 +27,7 @@ pub struct DirectDeclSmartConstructors<'src> {
     pub state: State<'src>,
 }
 impl<'src> SmartConstructors<'src, State<'src>> for DirectDeclSmartConstructors<'src> {
-    type Token = PositionedToken;
+    type Token = CompactToken;
     type R = Node<'src>;
 
     fn state_mut(&mut self) -> &mut State<'src> {

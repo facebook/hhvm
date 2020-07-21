@@ -6,17 +6,44 @@
 
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
-use crate::lexable_trivia::LexableTrivia;
+use crate::lexable_trivia::{LexableTrivia, LexableTrivium};
 use crate::source_text::SourceText;
 use crate::trivia_kind::TriviaKind;
 
 #[derive(Debug, Clone, FromOcamlRep, ToOcamlRep, PartialEq)]
-pub struct MinimalTrivia {
+pub struct MinimalTrivium {
     pub kind: TriviaKind,
     pub width: usize,
 }
 
+pub type MinimalTrivia = Vec<MinimalTrivium>;
+
 impl LexableTrivia for MinimalTrivia {
+    type Trivium = MinimalTrivium;
+
+    fn new() -> Self {
+        Vec::new()
+    }
+    fn from_slice(trivia: &[Self::Trivium]) -> Self {
+        trivia.to_vec()
+    }
+    fn is_empty(&self) -> bool {
+        self.is_empty()
+    }
+    fn has_kind(&self, kind: TriviaKind) -> bool {
+        self.iter().any(|t| t.kind == kind)
+    }
+    fn push(&mut self, trivium: Self::Trivium) {
+        self.push(trivium)
+    }
+    fn extend(&mut self, other: Self) {
+        for trivium in other {
+            self.push(trivium)
+        }
+    }
+}
+
+impl LexableTrivium for MinimalTrivium {
     fn kind(&self) -> TriviaKind {
         self.kind
     }

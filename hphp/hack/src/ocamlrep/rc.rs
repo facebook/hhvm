@@ -130,6 +130,19 @@ impl<T> RcOc<T> {
     pub fn ptr_eq(this: &Self, other: &Self) -> bool {
         Rc::ptr_eq(&this.ptr, &other.ptr)
     }
+
+    /// Returns the inner value, if the `Rc` has exactly one strong reference.
+    ///
+    /// Otherwise, an `Err` is returned with the same `Rc` that was passed in.
+    ///
+    /// This will succeed even if there are outstanding weak references.
+    #[inline(always)]
+    pub fn try_unwrap(this: Self) -> Result<T, Self> {
+        match Rc::try_unwrap(this.ptr) {
+            Ok(cache) => Ok(cache.value),
+            Err(ptr) => Err(Self { ptr }),
+        }
+    }
 }
 
 impl<T: Clone> RcOc<T> {

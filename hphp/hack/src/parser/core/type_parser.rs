@@ -110,8 +110,8 @@ where
         &mut self.sc
     }
 
-    fn skipped_tokens_mut(&mut self) -> &mut Vec<S::Token> {
-        &mut self.context.skipped_tokens
+    fn drain_skipped_tokens(&mut self) -> std::vec::Drain<S::Token> {
+        self.context.skipped_tokens.drain(..)
     }
 
     fn skipped_tokens(&self) -> &[S::Token] {

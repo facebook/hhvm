@@ -13,7 +13,7 @@ use ocamlrep_ocamlpool::add_to_ambient_pool;
 use parser_core_types::{
     lexable_token::LexableToken, minimal_syntax::MinimalValue, minimal_token::MinimalToken,
     minimal_trivia::MinimalTrivia, positioned_syntax::PositionedValue,
-    positioned_token::PositionedToken, positioned_trivia::PositionedTrivia,
+    positioned_token::PositionedToken, positioned_trivia::PositionedTrivium,
     source_text::SourceText, syntax::*, syntax_error::SyntaxError, syntax_kind::SyntaxKind,
     token_kind::TokenKind, trivia_kind::TriviaKind,
 };
@@ -136,7 +136,7 @@ where
     }
 }
 
-impl ToOcaml for PositionedTrivia {
+impl ToOcaml for PositionedTrivium {
     unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
         // From full_fidelity_positioned_trivia.ml:
         // type t = {
@@ -161,7 +161,7 @@ fn trivia_kind_mask(kind: TriviaKind) -> usize {
     1 << (62 - (kind.ocaml_tag()))
 }
 
-fn build_lazy_trivia(trivia_list: &[PositionedTrivia], acc: Option<usize>) -> Option<usize> {
+fn build_lazy_trivia(trivia_list: &[PositionedTrivium], acc: Option<usize>) -> Option<usize> {
     trivia_list
         .iter()
         .fold(acc, |acc, trivia| match (acc, trivia.kind) {
@@ -194,15 +194,15 @@ impl ToOcaml for PositionedToken {
         let trailing_width = usize_to_ocaml(self.trailing_width());
 
         let lazy_trivia_mask = Some(0);
-        let lazy_trivia_mask = build_lazy_trivia(&self.leading(), lazy_trivia_mask);
-        let lazy_trivia_mask = build_lazy_trivia(&self.trailing(), lazy_trivia_mask);
+        let lazy_trivia_mask = build_lazy_trivia(&self.leading, lazy_trivia_mask);
+        let lazy_trivia_mask = build_lazy_trivia(&self.trailing, lazy_trivia_mask);
 
         let trivia = match lazy_trivia_mask {
             Some(mask) => usize_to_ocaml(mask),
             None => {
                 //( Trivia.t list * Trivia.t list)
-                let leading = to_list(self.leading(), context);
-                let trailing = to_list(self.trailing(), context);
+                let leading = to_list(&self.leading, context);
+                let trailing = to_list(&self.trailing, context);
                 let block = reserve_block(0.into(), 2);
                 caml_set_field(block, 0, leading);
                 caml_set_field(block, 1, trailing);

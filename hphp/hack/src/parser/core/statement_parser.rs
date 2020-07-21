@@ -12,7 +12,6 @@ use crate::parser_trait::{Context, ExpectedTokens, ParserTrait};
 use crate::smart_constructors::{NodeType, SmartConstructors};
 use crate::type_parser::TypeParser;
 use parser_core_types::lexable_token::LexableToken;
-use parser_core_types::lexable_trivia::LexableTrivia;
 use parser_core_types::syntax_error::{self as Errors, SyntaxError};
 use parser_core_types::token_kind::TokenKind;
 use parser_core_types::trivia_kind::TriviaKind;
@@ -108,8 +107,8 @@ where
         &mut self.sc
     }
 
-    fn skipped_tokens_mut(&mut self) -> &mut Vec<S::Token> {
-        &mut self.context.skipped_tokens
+    fn drain_skipped_tokens(&mut self) -> std::vec::Drain<S::Token> {
+        self.context.skipped_tokens.drain(..)
     }
 
     fn skipped_tokens(&self) -> &[S::Token] {
@@ -766,10 +765,7 @@ where
             // that `fallthrough;` statement, we construct a `switch_fallthrough`, but
             // fill it with `missing`.
             let next = self.peek_token();
-            let commented_fallthrough = next
-                .leading()
-                .iter()
-                .any(|x| x.kind() == TriviaKind::FallThrough);
+            let commented_fallthrough = next.has_leading_trivia_kind(TriviaKind::FallThrough);
             let missing = S!(make_missing, self, self.pos());
             if commented_fallthrough {
                 let missing1 = S!(make_missing, self, self.pos());

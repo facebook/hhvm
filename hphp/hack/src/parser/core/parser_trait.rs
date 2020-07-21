@@ -143,7 +143,7 @@ where
     fn sc_mut(&mut self) -> &mut S;
 
     fn skipped_tokens(&self) -> &[S::Token];
-    fn skipped_tokens_mut(&mut self) -> &mut Vec<S::Token>;
+    fn drain_skipped_tokens(&mut self) -> std::vec::Drain<S::Token>;
 
     fn context_mut(&mut self) -> &mut Context<'a, S::Token>;
     fn context(&self) -> &Context<'a, S::Token>;
@@ -198,20 +198,19 @@ where
     {
         let token = tokenizer(self.lexer_mut());
         if !self.skipped_tokens().is_empty() {
-            let mut leading = vec![];
-            for t in self.skipped_tokens().iter() {
-                leading.extend(t.leading().iter().rev().cloned());
-                leading.push(
-                    <S::Token as LexableToken<'a>>::Trivia::make_extra_token_error(
-                        self.lexer().source(),
-                        self.lexer().start(),
-                        t.width(),
-                    ),
-                );
-                leading.extend(t.trailing().iter().rev().cloned());
+            // SourceText is just an Rc, so this clone is just a refcount bump.
+            let source = self.lexer().source().clone();
+            let start = self.lexer().start();
+            let mut leading = <S::Token as LexableToken>::Trivia::new();
+            for t in self.drain_skipped_tokens() {
+                let (t_leading, t_width, t_trailing) = t.into_trivia_and_width();
+                leading.extend(t_leading);
+                leading.push(<S::Token as LexableToken>::Trivia::make_extra_token_error(
+                    &source, start, t_width,
+                ));
+                leading.extend(t_trailing);
             }
-            leading.extend(token.leading().to_vec());
-            self.skipped_tokens_mut().clear();
+            leading.extend(token.clone_leading());
             token.with_leading(leading)
         } else {
             token
@@ -302,8 +301,8 @@ where
                 lexer.source(),
                 lexer.start(),
                 1,
-                vec![],
-                vec![],
+                <S::Token as LexableToken>::Trivia::new(),
+                <S::Token as LexableToken>::Trivia::new(),
             );
             S!(make_token, self, token)
         } else {

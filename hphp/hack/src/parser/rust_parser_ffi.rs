@@ -14,7 +14,7 @@ use smart_constructors::{NodeType, SmartConstructors};
 
 use parser_core_types::syntax_tree::SyntaxTree;
 use parser_core_types::{
-    minimal_trivia::MinimalTrivia, parser_env::ParserEnv, source_text::SourceText,
+    minimal_trivia::MinimalTrivium, parser_env::ParserEnv, source_text::SourceText,
     syntax_error::SyntaxError, token_kind::TokenKind,
 };
 use rust_to_ocaml::{SerializationContext, ToOcaml};
@@ -203,16 +203,16 @@ ocaml_ffi! {
         parse_mode(&source_text)
     }
 
-    fn scan_leading_xhp_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivia> {
+    fn scan_leading_xhp_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivium> {
         minimal_parser::scan_leading_xhp_trivia(source_text, offset)
     }
-    fn scan_trailing_xhp_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivia> {
+    fn scan_trailing_xhp_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivium> {
         minimal_parser::scan_trailing_xhp_trivia(source_text, offset)
     }
-    fn scan_leading_php_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivia> {
+    fn scan_leading_php_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivium> {
         minimal_parser::scan_leading_php_trivia(source_text, offset)
     }
-    fn scan_trailing_php_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivia> {
+    fn scan_trailing_php_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivium> {
         minimal_parser::scan_trailing_php_trivia(source_text, offset)
     }
 

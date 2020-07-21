@@ -16,6 +16,7 @@ use naming_special_names_rust as naming_special_names;
 
 use arena_collections::{AssocListMut, MultiSetMut};
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
+use minimal_parser::RescanTrivia;
 use oxidized_by_ref::{
     aast, aast_defs,
     ast_defs::{Bop, ClassKind, ConstraintKind, FunKind, Id, ShapeFieldName, Uop, Variance},
@@ -38,10 +39,8 @@ use oxidized_by_ref::{
     typing_reason::Reason,
 };
 use parser_core_types::{
-    indexed_source_text::IndexedSourceText, lexable_token::LexableToken,
-    lexable_trivia::LexablePositionedTrivia, positioned_token::PositionedToken,
-    source_text::SourceText, syntax_kind::SyntaxKind, token_kind::TokenKind,
-    trivia_kind::TriviaKind,
+    compact_token::CompactToken, indexed_source_text::IndexedSourceText, source_text::SourceText,
+    syntax_kind::SyntaxKind, token_kind::TokenKind, trivia_kind::TriviaKind,
 };
 
 mod direct_decl_smart_constructors_generated;
@@ -908,12 +907,16 @@ struct Attributes<'a> {
 }
 
 impl<'a> DirectDeclSmartConstructors<'a> {
-    fn set_mode(&mut self, token: &PositionedToken) {
-        for trivia in &token.trailing {
-            if trivia.kind == TriviaKind::SingleLineComment {
-                if let Ok(text) =
-                    std::str::from_utf8(trivia.text_raw(self.state.source_text.source_text()))
-                {
+    fn set_mode(&mut self, token: &CompactToken) {
+        let mut offset = token.trailing_start_offset();
+        for trivium in token.scan_trailing(self.state.source_text.source_text()) {
+            if trivium.kind == TriviaKind::SingleLineComment {
+                if let Ok(text) = std::str::from_utf8(
+                    self.state
+                        .source_text
+                        .source_text()
+                        .sub(offset, trivium.width),
+                ) {
                     match text.trim_start_matches('/').trim() {
                         "decl" => self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mdecl),
                         "partial" => {
@@ -926,6 +929,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     }
                 }
             }
+            offset += trivium.width;
         }
     }
 
@@ -934,11 +938,11 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         concat(self.state.arena, str1, str2)
     }
 
-    fn token_bytes(&self, token: &PositionedToken) -> &'a [u8] {
-        self.state.source_text.source_text().sub(
-            token.leading_start_offset().unwrap_or(0) + token.leading_width(),
-            token.width(),
-        )
+    fn token_bytes(&self, token: &CompactToken) -> &'a [u8] {
+        self.state
+            .source_text
+            .source_text()
+            .sub(token.start_offset(), token.width())
     }
 
     // Check that the slice is valid UTF-8. If it is, return a &str referencing
@@ -1571,7 +1575,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             let end = this
                 .state
                 .source_text
-                .offset_to_file_pos_triple(token.end_offset() + 1);
+                .offset_to_file_pos_triple(token.end_offset());
             Pos::from_lnum_bol_cnum(this.state.arena, this.state.filename, start, end)
         };
         let kind = token.kind();

@@ -1845,7 +1845,7 @@ module GenerateRustDirectDeclSmartConstructors = struct
     ^ "
 use flatten_smart_constructors::*;
 use smart_constructors::SmartConstructors;
-use parser_core_types::positioned_token::PositionedToken;
+use parser_core_types::compact_token::CompactToken;
 
 use crate::{State, Node};
 
@@ -1854,7 +1854,7 @@ pub struct DirectDeclSmartConstructors<'src> {
     pub state: State<'src>,
 }
 impl<'src> SmartConstructors<'src, State<'src>> for DirectDeclSmartConstructors<'src> {
-    type Token = PositionedToken;
+    type Token = CompactToken;
     type R = Node<'src>;
 
     fn state_mut(&mut self) -> &mut State<'src> {
@@ -2506,17 +2506,14 @@ end
 (* GenerateFFSyntaxKind *)
 
 module GenerateFFRustTriviaKind = struct
+  let ocaml_tag = ref (-1)
+
   let to_trivia { trivia_kind; trivia_text = _ } =
-    sprintf "    %s,\n" trivia_kind
+    incr ocaml_tag;
+    sprintf "    %s = %d,\n" trivia_kind !ocaml_tag
 
   let to_to_string { trivia_kind; trivia_text } =
     sprintf "            TriviaKind::%s => \"%s\",\n" trivia_kind trivia_text
-
-  let ocaml_tag = ref (-1)
-
-  let to_ocaml_tag { trivia_kind; trivia_text = _ } =
-    incr ocaml_tag;
-    sprintf "            TriviaKind::%s => %d,\n" trivia_kind !ocaml_tag
 
   let full_fidelity_trivia_kind_template =
     make_header CStyle ""
@@ -2525,6 +2522,7 @@ module GenerateFFRustTriviaKind = struct
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
 #[derive(Debug, Copy, Clone, FromOcamlRep, ToOcamlRep, PartialEq)]
+#[repr(u8)]
 pub enum TriviaKind {
 TRIVIA}
 
@@ -2534,9 +2532,8 @@ impl TriviaKind {
 TO_STRING        }
     }
 
-    pub fn ocaml_tag(self) -> u8 {
-        match self {
-OCAML_TAG        }
+    pub const fn ocaml_tag(self) -> u8 {
+        self as u8
     }
 }
 "
@@ -2549,10 +2546,6 @@ OCAML_TAG        }
           {
             trivia_pattern = "TO_STRING";
             trivia_func = map_and_concat to_to_string;
-          };
-          {
-            trivia_pattern = "OCAML_TAG";
-            trivia_func = map_and_concat to_ocaml_tag;
           };
         ]
       ~filename:(full_fidelity_path_prefix ^ "trivia_kind.rs")

@@ -5,7 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use parser_core_types::lexable_token::LexableToken;
-use parser_core_types::lexable_trivia::LexableTrivia;
+use parser_core_types::lexable_trivia::{LexableTrivia, LexableTrivium};
 use parser_core_types::source_text::{SourceText, INVALID};
 use parser_core_types::syntax_error::{self as Errors, Error, SyntaxError};
 use parser_core_types::token_kind::TokenKind;
@@ -1699,7 +1699,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         }
     }
 
-    fn scan_end_of_line(&mut self) -> Token::Trivia {
+    fn scan_end_of_line(&mut self) -> <Token::Trivia as LexableTrivia>::Trivium {
         match self.peek_char(0) {
             '\r' => {
                 let w = if self.peek_char(1) == '\n' { 2 } else { 1 };
@@ -1714,12 +1714,12 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         }
     }
 
-    fn scan_hash_comment(&mut self) -> Token::Trivia {
+    fn scan_hash_comment(&mut self) -> <Token::Trivia as LexableTrivia>::Trivium {
         self.skip_to_end_of_line();
         Token::Trivia::make_single_line_comment(self.source(), self.start, self.width())
     }
 
-    fn scan_single_line_comment(&mut self) -> Token::Trivia {
+    fn scan_single_line_comment(&mut self) -> <Token::Trivia as LexableTrivia>::Trivium {
         // A fallthrough comment is two slashes, any amount of whitespace,
         // FALLTHROUGH, and any characters may follow.
         // TODO: Consider allowing lowercase fallthrough.
@@ -1758,7 +1758,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         }
     }
 
-    fn scan_delimited_comment(&mut self) -> Token::Trivia {
+    fn scan_delimited_comment(&mut self) -> <Token::Trivia as LexableTrivia>::Trivium {
         // The original lexer lexes a fixme / ignore error as:
         //
         // slash star [whitespace]* HH_FIXME [whitespace or newline]* leftbracket
@@ -1786,7 +1786,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         }
     }
 
-    fn scan_php_trivia(&mut self) -> Option<Token::Trivia> {
+    fn scan_php_trivium(&mut self) -> Option<<Token::Trivia as LexableTrivia>::Trivium> {
         match self.peek_char(0) {
             '#' => {
                 self.start_new_lexeme();
@@ -1820,7 +1820,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         }
     }
 
-    fn scan_xhp_trivia(&mut self) -> Option<Token::Trivia> {
+    fn scan_xhp_trivium(&mut self) -> Option<<Token::Trivia as LexableTrivia>::Trivium> {
         // TODO: Should XHP comments <!-- --> be their own thing, or a kind of
         // trivia associated with a token? Right now they are the former.
         let i = self.offset;
@@ -1857,28 +1857,28 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
     //   always a leading trivia.
     fn scan_leading_trivia(
         &mut self,
-        scanner: impl Fn(&mut Self) -> Option<Token::Trivia>,
-    ) -> Vec<Token::Trivia> {
-        let mut acc = vec![];
+        scanner: impl Fn(&mut Self) -> Option<<Token::Trivia as LexableTrivia>::Trivium>,
+    ) -> Token::Trivia {
+        let mut acc = Token::Trivia::new();
         while let Some(t) = scanner(self) {
             acc.push(t)
         }
         acc
     }
 
-    pub fn scan_leading_php_trivia(&mut self) -> Vec<Token::Trivia> {
-        self.scan_leading_trivia(&Self::scan_php_trivia)
+    pub fn scan_leading_php_trivia(&mut self) -> Token::Trivia {
+        self.scan_leading_trivia(&Self::scan_php_trivium)
     }
 
-    pub fn scan_leading_xhp_trivia(&mut self) -> Vec<Token::Trivia> {
-        self.scan_leading_trivia(&Self::scan_xhp_trivia)
+    pub fn scan_leading_xhp_trivia(&mut self) -> Token::Trivia {
+        self.scan_leading_trivia(&Self::scan_xhp_trivium)
     }
 
     fn scan_trailing_trivia(
         &mut self,
-        scanner: impl Fn(&mut Self) -> Option<Token::Trivia>,
-    ) -> Vec<Token::Trivia> {
-        let mut acc = vec![];
+        scanner: impl Fn(&mut Self) -> Option<<Token::Trivia as LexableTrivia>::Trivium>,
+    ) -> Token::Trivia {
+        let mut acc = Token::Trivia::new();
         loop {
             let mut lexer1 = self.clone();
             match scanner(&mut lexer1) {
@@ -1904,12 +1904,12 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         }
     }
 
-    pub fn scan_trailing_php_trivia(&mut self) -> Vec<Token::Trivia> {
-        self.scan_trailing_trivia(&Self::scan_php_trivia)
+    pub fn scan_trailing_php_trivia(&mut self) -> Token::Trivia {
+        self.scan_trailing_trivia(&Self::scan_php_trivium)
     }
 
-    pub fn scan_trailing_xhp_trivia(&mut self) -> Vec<Token::Trivia> {
-        self.scan_trailing_trivia(&Self::scan_xhp_trivia)
+    pub fn scan_trailing_xhp_trivia(&mut self) -> Token::Trivia {
+        self.scan_trailing_trivia(&Self::scan_xhp_trivium)
     }
 
     pub fn is_next_name(&self) -> bool {
@@ -1976,7 +1976,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         &mut self,
         scanner: impl Fn(&mut Self) -> TokenKind,
         as_name: KwSet,
-    ) -> (TokenKind, usize, Vec<Token::Trivia>) {
+    ) -> (TokenKind, usize, Token::Trivia) {
         // Get past the leading trivia
         let leading = self.scan_leading_php_trivia();
         // Remember where we were when we started this token
@@ -2000,7 +2000,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
 
         let (kind, w, leading) = self.scan_token_and_leading_trivia(scanner, as_name);
         let trailing = match kind {
-            TokenKind::DoubleQuotedStringLiteralHead => vec![],
+            TokenKind::DoubleQuotedStringLiteralHead => Token::Trivia::new(),
             _ => self.scan_trailing_php_trivia(),
         };
         Token::make(kind, self.source(), token_start, w, leading, trailing)
@@ -2103,7 +2103,14 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             let token_start = x.offset;
             let (kind, w, leading) =
                 x.scan_token_and_leading_trivia(&Self::scan_token_outside_type, KwSet::NoKeywords);
-            Token::make(kind, x.source(), token_start, w, leading, vec![])
+            Token::make(
+                kind,
+                x.source(),
+                token_start,
+                w,
+                leading,
+                Token::Trivia::new(),
+            )
         };
         self.scan_assert_progress(&tokenizer)
     }
@@ -2119,9 +2126,16 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             TokenKind::DoubleQuotedStringLiteralTail | TokenKind::HeredocStringLiteralTail => {
                 self.scan_trailing_php_trivia()
             }
-            _ => vec![],
+            _ => Token::Trivia::new(),
         };
-        Token::make(kind, self.source(), token_start, w, vec![], trailing)
+        Token::make(
+            kind,
+            self.source(),
+            token_start,
+            w,
+            Token::Trivia::new(),
+            trailing,
+        )
     }
 
     pub fn next_docstring_header(&mut self) -> (Token, &'a [u8]) {
@@ -2138,7 +2152,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             token_start,
             w,
             leading,
-            vec![],
+            Token::Trivia::new(),
         );
         (token, name)
     }
@@ -2161,9 +2175,14 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             // an XHP body then we want any whitespace or newlines to be leading trivia
             // of the body token.
             match kind {
-                TokenKind::GreaterThan | TokenKind::SlashGreaterThan if no_trailing => {
-                    Token::make(kind, lexer.source(), token_start, w, leading, vec![])
-                }
+                TokenKind::GreaterThan | TokenKind::SlashGreaterThan if no_trailing => Token::make(
+                    kind,
+                    lexer.source(),
+                    token_start,
+                    w,
+                    leading,
+                    Token::Trivia::new(),
+                ),
                 _ => {
                     let trailing = lexer.scan_trailing_php_trivia();
                     Token::make(kind, lexer.source(), token_start, w, leading, trailing)
@@ -2193,7 +2212,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
              // keep it trailing if this is an XHPBody token.
              if kind == TokenKind::XHPBody
              { lexer.scan_trailing_xhp_trivia() }
-             else  { vec!() };
+             else  { Token::Trivia::new() };
             Token::make(kind, lexer.source(), token_start, w, leading, trailing)
         };
         self.scan_assert_progress(&scanner)
@@ -2224,8 +2243,8 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             self.source(),
             self.start,
             self.width(),
-            vec![],
-            vec![],
+            Token::Trivia::new(),
+            Token::Trivia::new(),
         )
     }
 
@@ -2247,7 +2266,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             self.source(),
             name_token_offset,
             size,
-            vec![],
+            Token::Trivia::new(),
             trailing,
         );
         (markup_text, Some((less_than_question_token, Some(name))))
@@ -2260,8 +2279,8 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             self.source(),
             self.offset,
             2,
-            vec![],
-            vec![],
+            Token::Trivia::new(),
+            Token::Trivia::new(),
         );
         // skip <?
         self.advance(2);

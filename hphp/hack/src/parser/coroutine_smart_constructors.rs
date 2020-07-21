@@ -7,8 +7,8 @@ mod coroutine_smart_constructors_generated;
 
 use ocaml::core::mlvalues::Value;
 use parser_core_types::{
-    lexable_token::LexableToken, parser_env::ParserEnv, source_text::SourceText, syntax::*,
-    token_kind::TokenKind,
+    lexable_token::LexableToken, lexable_trivia::LexableTrivia, parser_env::ParserEnv,
+    source_text::SourceText, syntax::*, token_kind::TokenKind,
 };
 use rust_to_ocaml::{SerializationContext, ToOcaml};
 use std::marker::PhantomData;
@@ -139,7 +139,9 @@ where
 {
     fn make_token(&mut self, token: Self::Token) -> Self::R {
         let token = if self.state.is_codegen() {
-            token.with_leading(vec![]).with_trailing(vec![])
+            token
+                .with_leading(<Self::Token as LexableToken>::Trivia::new())
+                .with_trailing(<Self::Token as LexableToken>::Trivia::new())
         } else {
             token
         };

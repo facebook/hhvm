@@ -12,7 +12,6 @@ use crate::smart_constructors::{NodeType, SmartConstructors};
 use crate::statement_parser::StatementParser;
 use crate::type_parser::TypeParser;
 use parser_core_types::lexable_token::LexableToken;
-use parser_core_types::lexable_trivia::LexableTrivia;
 use parser_core_types::syntax_error::{self as Errors, SyntaxError};
 use parser_core_types::token_kind::TokenKind;
 use parser_core_types::trivia_kind::TriviaKind;
@@ -109,8 +108,8 @@ where
         &mut self.sc
     }
 
-    fn skipped_tokens_mut(&mut self) -> &mut Vec<S::Token> {
-        &mut self.context.skipped_tokens
+    fn drain_skipped_tokens(&mut self) -> std::vec::Drain<S::Token> {
+        self.context.skipped_tokens.drain(..)
     }
 
     fn skipped_tokens(&self) -> &[S::Token] {
@@ -1163,10 +1162,6 @@ where
         }
     }
 
-    fn has_leading_trivia(token: &S::Token, kind: TriviaKind) -> bool {
-        token.leading().iter().any(|x| x.kind() == kind)
-    }
-
     fn parse_methodish_or_property_or_pu_enum(&mut self, attribute_spec: S::R) -> S::R {
         let modifiers = self.parse_modifiers();
         // ERROR RECOVERY: match against two tokens, because if one token is
@@ -1187,7 +1182,7 @@ where
             // we should be parsing a methodish. Throw an error, process the token
             // as an extra, and keep going.
             (_, TokenKind::Async) | (_, TokenKind::Coroutine) | (_, TokenKind::Function)
-                if !(Self::has_leading_trivia(&next_token, TriviaKind::EndOfLine)) =>
+                if !(next_token.has_leading_trivia_kind(TriviaKind::EndOfLine)) =>
             {
                 self.with_error_on_whole_token(Errors::error1056);
                 self.skip_and_log_unexpected_token(false);

@@ -4,21 +4,23 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{
-    lexable_trivia::LexableTrivia, source_text::SourceText, token_kind::TokenKind,
-    trivia_kind::TriviaKind,
-};
 use std::fmt::Debug;
+
+use crate::{
+    lexable_trivia::LexableTrivia, positioned_trivia::PositionedTrivium, source_text::SourceText,
+    token_kind::TokenKind, trivia_kind::TriviaKind,
+};
 
 pub trait LexableToken<'a>: Clone {
     type Trivia: LexableTrivia;
+
     fn make(
         kind: TokenKind,
         source_text: &SourceText<'a>,
         offset: usize,
         width: usize,
-        leading: Vec<Self::Trivia>,
-        trailing: Vec<Self::Trivia>,
+        leading: Self::Trivia,
+        trailing: Self::Trivia,
     ) -> Self;
     fn kind(&self) -> TokenKind;
 
@@ -31,14 +33,23 @@ pub trait LexableToken<'a>: Clone {
     fn trailing_width(&self) -> usize;
     fn full_width(&self) -> usize;
 
-    fn leading(&self) -> &[Self::Trivia];
-    fn trailing(&self) -> &[Self::Trivia];
+    fn clone_leading(&self) -> Self::Trivia;
+    fn clone_trailing(&self) -> Self::Trivia;
 
-    fn with_leading(self, trailing: Vec<Self::Trivia>) -> Self;
-    fn with_trailing(self, trailing: Vec<Self::Trivia>) -> Self;
+    fn leading_is_empty(&self) -> bool;
+    fn trailing_is_empty(&self) -> bool;
+
+    fn with_leading(self, trailing: Self::Trivia) -> Self;
+    fn with_trailing(self, trailing: Self::Trivia) -> Self;
     fn with_kind(self, kind: TokenKind) -> Self;
 
-    fn has_trivia_kind(&self, kind: TriviaKind) -> bool;
+    fn has_leading_trivia_kind(&self, kind: TriviaKind) -> bool;
+    fn has_trailing_trivia_kind(&self, kind: TriviaKind) -> bool;
+    fn has_trivia_kind(&self, kind: TriviaKind) -> bool {
+        self.has_leading_trivia_kind(kind) || self.has_trailing_trivia_kind(kind)
+    }
+
+    fn into_trivia_and_width(self) -> (Self::Trivia, usize, Self::Trivia);
 }
 
 pub trait LexablePositionedToken<'a>: LexableToken<'a>
@@ -51,4 +62,6 @@ where
     fn trim_left(&mut self, n: usize) -> Result<(), String>;
     fn trim_right(&mut self, n: usize) -> Result<(), String>;
     fn concatenate(s: &Self, e: &Self) -> Result<Self, String>;
+    fn positioned_leading(&self) -> &[PositionedTrivium];
+    fn positioned_trailing(&self) -> &[PositionedTrivium];
 }

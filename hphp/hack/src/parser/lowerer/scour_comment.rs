@@ -5,14 +5,10 @@
 
 use oxidized::{i_set::ISet, pos::Pos, prim_defs::Comment, scoured_comments::ScouredComments};
 use parser_core_types::{
-    indexed_source_text::IndexedSourceText,
-    lexable_token::LexablePositionedToken,
-    lexable_trivia::{LexablePositionedTrivia, LexableTrivia},
-    positioned_syntax::PositionedSyntaxTrait,
-    source_text::SourceText,
-    syntax::SyntaxVariant::*,
-    syntax::*,
-    trivia_kind::TriviaKind,
+    indexed_source_text::IndexedSourceText, lexable_token::LexablePositionedToken,
+    lexable_trivia::LexableTrivium, positioned_syntax::PositionedSyntaxTrait,
+    positioned_trivia::PositionedTrivium, source_text::SourceText, syntax::SyntaxVariant::*,
+    syntax::*, trivia_kind::TriviaKind,
 };
 use regex::bytes::Regex;
 
@@ -36,7 +32,6 @@ pub struct ScourComment<'a, T, V> {
 impl<'src, T, V> ScourComment<'src, T, V>
 where
     T: LexablePositionedToken<'src>,
-    T::Trivia: LexablePositionedTrivia,
     V: SyntaxValueType<T>,
     Syntax<T, V>: PositionedSyntaxTrait,
 {
@@ -56,7 +51,12 @@ where
                                 || (t.has_trivia_kind(TriviaKind::IgnoreError)
                                     && !self.disable_hh_ignore_error)))
                     {
-                        for tr in t.leading().iter().chain(t.trailing().iter()) {
+                        for tr in t
+                            .positioned_leading()
+                            .as_ref()
+                            .iter()
+                            .chain(t.positioned_trailing().as_ref().iter())
+                        {
                             self.on_trivia(in_block, node, tr, &mut acc);
                         }
                     }
@@ -76,7 +76,7 @@ where
         &self,
         in_block: bool,
         node: &Syntax<T, V>,
-        t: &T::Trivia,
+        t: &PositionedTrivium,
         acc: &mut ScouredComments,
     ) {
         use oxidized::relative_path::Prefix;
@@ -143,7 +143,7 @@ where
         }
     }
 
-    fn source_text(&self) -> &SourceText {
+    fn source_text(&self) -> &'src SourceText<'src> {
         self.indexed_source_text.source_text()
     }
 

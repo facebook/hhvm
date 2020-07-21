@@ -7,16 +7,16 @@
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
 use crate::{
-    lexable_token::LexableToken, minimal_trivia::MinimalTrivia, source_text::SourceText,
-    token_kind::TokenKind, trivia_kind::TriviaKind,
+    lexable_token::LexableToken, lexable_trivia::LexableTrivia, minimal_trivia::MinimalTrivia,
+    source_text::SourceText, token_kind::TokenKind, trivia_kind::TriviaKind,
 };
 
 #[derive(Debug, Clone, PartialEq, FromOcamlRep, ToOcamlRep)]
 pub struct MinimalToken {
     pub kind: TokenKind,
     pub width: usize,
-    pub leading: Vec<MinimalTrivia>,
-    pub trailing: Vec<MinimalTrivia>,
+    pub leading: MinimalTrivia,
+    pub trailing: MinimalTrivia,
 }
 
 impl<'a> LexableToken<'a> for MinimalToken {
@@ -31,8 +31,8 @@ impl<'a> LexableToken<'a> for MinimalToken {
         _source: &SourceText,
         _offset: usize,
         width: usize,
-        leading: Vec<Self::Trivia>,
-        trailing: Vec<Self::Trivia>,
+        leading: Self::Trivia,
+        trailing: Self::Trivia,
     ) -> Self {
         Self {
             kind,
@@ -62,20 +62,28 @@ impl<'a> LexableToken<'a> for MinimalToken {
         None // Not available
     }
 
-    fn leading(&self) -> &[Self::Trivia] {
-        &self.leading
+    fn clone_leading(&self) -> MinimalTrivia {
+        self.leading.clone()
     }
 
-    fn trailing(&self) -> &[Self::Trivia] {
-        &self.trailing
+    fn clone_trailing(&self) -> MinimalTrivia {
+        self.trailing.clone()
     }
 
-    fn with_trailing(mut self, trailing: Vec<Self::Trivia>) -> Self {
+    fn leading_is_empty(&self) -> bool {
+        self.leading.is_empty()
+    }
+
+    fn trailing_is_empty(&self) -> bool {
+        self.trailing.is_empty()
+    }
+
+    fn with_trailing(mut self, trailing: Self::Trivia) -> Self {
         self.trailing = trailing;
         self
     }
 
-    fn with_leading(mut self, leading: Vec<Self::Trivia>) -> Self {
+    fn with_leading(mut self, leading: Self::Trivia) -> Self {
         self.leading = leading;
         self
     }
@@ -85,7 +93,15 @@ impl<'a> LexableToken<'a> for MinimalToken {
         self
     }
 
-    fn has_trivia_kind(&self, kind: TriviaKind) -> bool {
-        self.leading.iter().any(|t| t.kind == kind) || self.trailing.iter().any(|t| t.kind == kind)
+    fn has_leading_trivia_kind(&self, kind: TriviaKind) -> bool {
+        self.leading.has_kind(kind)
+    }
+
+    fn has_trailing_trivia_kind(&self, kind: TriviaKind) -> bool {
+        self.trailing.has_kind(kind)
+    }
+
+    fn into_trivia_and_width(self) -> (Self::Trivia, usize, Self::Trivia) {
+        (self.leading, self.width, self.trailing)
     }
 }

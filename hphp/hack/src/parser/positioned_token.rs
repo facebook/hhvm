@@ -8,7 +8,8 @@ use ocamlrep::rc::RcOc;
 
 use crate::{
     lexable_token::{LexablePositionedToken, LexableToken},
-    positioned_trivia::PositionedTrivia,
+    lexable_trivia::LexableTrivia,
+    positioned_trivia::{PositionedTrivia, PositionedTrivium},
     source_text::SourceText,
     token_kind::TokenKind,
     trivia_kind::TriviaKind,
@@ -22,8 +23,8 @@ pub struct PositionedTokenImpl {
     pub width: usize, // Width of actual token, not counting trivia
     pub trailing_width: usize,
     // TODO (kasper): implement LazyTrivia
-    pub leading: Vec<PositionedTrivia>,
-    pub trailing: Vec<PositionedTrivia>,
+    pub leading: PositionedTrivia,
+    pub trailing: PositionedTrivia,
 }
 
 // Positioned tokens, when used as part of positioned syntax are shared - same leaf token can be
@@ -41,8 +42,8 @@ impl<'a> LexableToken<'a> for PositionedToken {
         _source: &SourceText,
         offset: usize,
         width: usize,
-        leading: Vec<Self::Trivia>,
-        trailing: Vec<Self::Trivia>,
+        leading: Self::Trivia,
+        trailing: Self::Trivia,
     ) -> Self {
         let leading_width = leading.iter().map(|x| x.width).sum();
         let trailing_width = trailing.iter().map(|x| x.width).sum();
@@ -82,24 +83,33 @@ impl<'a> LexableToken<'a> for PositionedToken {
         self.leading_width() + self.width() + self.trailing_width()
     }
 
-    fn leading(&self) -> &[Self::Trivia] {
-        &self.leading
+    fn clone_leading(&self) -> PositionedTrivia {
+        self.leading.clone()
     }
-    fn trailing(&self) -> &[Self::Trivia] {
-        &self.trailing
+
+    fn clone_trailing(&self) -> PositionedTrivia {
+        self.trailing.clone()
+    }
+
+    fn leading_is_empty(&self) -> bool {
+        self.leading.is_empty()
+    }
+
+    fn trailing_is_empty(&self) -> bool {
+        self.trailing.is_empty()
     }
 
     // Tricky: the with_ functions that modify tokens can be very cheap (when ref count is 1), or
     // possibly expensive (when make_mut has to perform a clone of underlying token that is shared).
     // Fortunately, they are used only in lexer/parser BEFORE the tokens are embedded in syntax, so
     // before any sharing occurs
-    fn with_leading(mut self, leading: Vec<Self::Trivia>) -> Self {
+    fn with_leading(mut self, leading: Self::Trivia) -> Self {
         let mut token = RcOc::make_mut(&mut self);
         token.leading = leading;
         self
     }
 
-    fn with_trailing(mut self, trailing: Vec<Self::Trivia>) -> Self {
+    fn with_trailing(mut self, trailing: Self::Trivia) -> Self {
         let mut token = RcOc::make_mut(&mut self);
         token.trailing = trailing;
         self
@@ -111,9 +121,19 @@ impl<'a> LexableToken<'a> for PositionedToken {
         self
     }
 
-    fn has_trivia_kind(&self, kind: TriviaKind) -> bool {
-        self.leading().iter().any(|t| t.kind == kind)
-            || self.trailing().iter().any(|t| t.kind == kind)
+    fn has_leading_trivia_kind(&self, kind: TriviaKind) -> bool {
+        self.leading.has_kind(kind)
+    }
+
+    fn has_trailing_trivia_kind(&self, kind: TriviaKind) -> bool {
+        self.trailing.has_kind(kind)
+    }
+
+    fn into_trivia_and_width(self) -> (Self::Trivia, usize, Self::Trivia) {
+        match RcOc::try_unwrap(self) {
+            Ok(t) => (t.leading, t.width, t.trailing),
+            Err(t_ptr) => (t_ptr.leading.clone(), t_ptr.width, t_ptr.trailing.clone()),
+        }
     }
 }
 
@@ -178,7 +198,15 @@ impl<'a> LexablePositionedToken<'a> for PositionedToken {
         let inner = RcOc::get_mut(&mut t).ok_or("could not get mutable")?;
         inner.width = e.end_offset() + 1 - s.start_offset();
         inner.trailing_width = e.trailing_width();
-        inner.trailing = e.trailing().to_vec();
+        inner.trailing = e.trailing.to_vec();
         Ok(t)
+    }
+
+    fn positioned_leading(&self) -> &[PositionedTrivium] {
+        &self.leading
+    }
+
+    fn positioned_trailing(&self) -> &[PositionedTrivium] {
+        &self.trailing
     }
 }

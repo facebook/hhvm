@@ -19,8 +19,8 @@ pub struct SourceData<'a> {
     pub leading_width: usize,
     pub width: usize, // Width of actual token, not counting trivia
     pub trailing_width: usize,
-    pub leading: Vec<PositionedTrivia>,
-    pub trailing: Vec<PositionedTrivia>,
+    pub leading: PositionedTrivia,
+    pub trailing: PositionedTrivia,
 }
 
 impl<'a> SourceData<'a> {
@@ -34,8 +34,8 @@ impl<'a> SourceData<'a> {
             leading_width: positioned_token.leading_width(),
             width: positioned_token.width(),
             trailing_width: positioned_token.trailing_width(),
-            leading: positioned_token.leading().to_vec(),
-            trailing: positioned_token.trailing().to_vec(),
+            leading: positioned_token.leading.to_vec(),
+            trailing: positioned_token.trailing.to_vec(),
         }
     }
 

@@ -13,6 +13,7 @@ arena_collections = { path = "../../arena_collections" }
 escaper = { path = "../../utils/escaper" }
 flatten_smart_constructors = { path = "../../parser/cargo/flatten_smart_constructors" }
 hh_autoimport_rust = { path = "../../parser/cargo/hh_autoimport" }
+minimal_parser = { path = "../../parser/api/cargo/minimal_parser" }
 naming_special_names_rust = { path = "../../naming" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 parser_core_types = { path = "../../parser/cargo/core_types" }

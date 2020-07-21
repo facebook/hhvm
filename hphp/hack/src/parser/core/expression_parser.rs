@@ -136,8 +136,8 @@ where
         &mut self.sc
     }
 
-    fn skipped_tokens_mut(&mut self) -> &mut Vec<S::Token> {
-        &mut self.context.skipped_tokens
+    fn drain_skipped_tokens(&mut self) -> std::vec::Drain<S::Token> {
+        self.context.skipped_tokens.drain(..)
     }
 
     fn skipped_tokens(&self) -> &[S::Token] {
@@ -606,7 +606,7 @@ where
 
         let is_assignment_op = |token| Operator::trailing_from_token(token).is_assignment();
 
-        let left_brace_trailing_is_empty = left_brace.trailing().is_empty();
+        let left_brace_trailing_is_empty = left_brace.trailing_is_empty();
         let left_brace = S!(make_token, self, left_brace);
         let mut parser1 = self.clone();
         let name_or_keyword_as_name = parser1.next_token_as_name();
@@ -621,8 +621,8 @@ where
             (TokenKind::Name, TokenKind::LeftBracket)
                 if !dollar_inside_braces
                     && left_brace_trailing_is_empty
-                    && name_or_keyword_as_name.leading().is_empty()
-                    && name_or_keyword_as_name.trailing().is_empty() =>
+                    && name_or_keyword_as_name.leading_is_empty()
+                    && name_or_keyword_as_name.trailing_is_empty() =>
             {
                 // The case of "${x}" should be treated as if we were interpolating $x
                 // (rather than interpolating the constant `x`).
@@ -850,8 +850,8 @@ where
                     // this is incorrect for minimal tokens
                     let o = head.leading_start_offset().unwrap_or(0);
                     let w = head.width() + token.width();
-                    let l = head.leading().to_vec();
-                    let t = token.trailing().to_vec();
+                    let (l, _, _) = head.into_trivia_and_width();
+                    let (_, _, t) = token.into_trivia_and_width();
                     // TODO: Make a "position" type that is a tuple of source and offset.
                     Some(S::Token::make(k, source, o, w, l, t))
                 }

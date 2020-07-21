@@ -49,6 +49,7 @@ struct Unit;
  * For the per-request struct, see TypeAlias below.
  */
 struct PreTypeAlias {
+  Unit* unit;
   LowStringPtr name;
   LowStringPtr value;
   Attr attrs;
@@ -77,9 +78,9 @@ struct TypeAlias {
   /////////////////////////////////////////////////////////////////////////////
   // Static constructors.
 
-  static TypeAlias Invalid(Unit* unit);
-  static TypeAlias From(Unit* unit, const PreTypeAlias& alias);
-  static TypeAlias From(Unit* unit, TypeAlias req,
+  static TypeAlias Invalid(const PreTypeAlias& alias);
+  static TypeAlias From(const PreTypeAlias& alias);
+  static TypeAlias From(TypeAlias req,
                            const PreTypeAlias& alias);
 
 

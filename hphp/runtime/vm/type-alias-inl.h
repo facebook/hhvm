@@ -27,20 +27,18 @@ struct ArrayData;
 ///////////////////////////////////////////////////////////////////////////////
 // Static constructors.
 
-inline TypeAlias TypeAlias::Invalid(Unit* unit) {
-  assertx(unit);
+inline TypeAlias TypeAlias::Invalid(const PreTypeAlias& alias) {
   TypeAlias req;
-  req.unit = unit;
+  req.unit = alias.unit;
   req.invalid = true;
   return req;
 }
 
-inline TypeAlias TypeAlias::From(Unit* unit, const PreTypeAlias& alias) {
+inline TypeAlias TypeAlias::From(const PreTypeAlias& alias) {
   assertx(alias.type != AnnotType::Object);
-  assertx(unit);
 
   TypeAlias req;
-  req.unit = unit;
+  req.unit = alias.unit;
   req.name = alias.name;
   req.type = alias.type;
   req.nullable = alias.nullable;
@@ -50,12 +48,10 @@ inline TypeAlias TypeAlias::From(Unit* unit, const PreTypeAlias& alias) {
   return req;
 }
 
-inline TypeAlias TypeAlias::From(Unit* unit, TypeAlias req,
-                                       const PreTypeAlias& alias) {
+inline TypeAlias TypeAlias::From(TypeAlias req, const PreTypeAlias& alias) {
   assertx(alias.type == AnnotType::Object);
-  assertx(unit);
 
-  req.unit = unit;
+  req.unit = alias.unit;
   if (req.invalid) {
     return req; // Do nothing.
   }

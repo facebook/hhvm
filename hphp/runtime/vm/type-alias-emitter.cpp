@@ -45,7 +45,7 @@ void TypeAliasEmitter::init(int line0, int line1, Attr attrs,
 
 PreTypeAlias TypeAliasEmitter::create(Unit& unit) const {
   return PreTypeAlias {
-      m_name, m_value, m_attrs, m_type, m_line0, m_line1, m_nullable, m_userAttributes, m_typeStructure };
+      &unit, m_name, m_value, m_attrs, m_type, m_line0, m_line1, m_nullable, m_userAttributes, m_typeStructure };
 }
 
 template<class SerDe> void TypeAliasEmitter::serdeMetaData(SerDe& sd) {

@@ -1362,11 +1362,10 @@ bool Unit::defNativeConstantCallback(const StringData* cnsName,
 
 namespace {
 
-TypeAlias typeAliasFromRecordDesc(Unit* unit, const PreTypeAlias* thisType,
+TypeAlias typeAliasFromRecordDesc(const PreTypeAlias* thisType,
                                   RecordDesc* rec) {
-  assertx(unit);
   TypeAlias req;
-  req.unit = unit;
+  req.unit = thisType->unit;
   req.name = thisType->name;
   req.nullable = thisType->nullable;
   req.type = AnnotType::Record;
@@ -1377,11 +1376,10 @@ TypeAlias typeAliasFromRecordDesc(Unit* unit, const PreTypeAlias* thisType,
   return req;
 }
 
-TypeAlias typeAliasFromClass(Unit* unit, const PreTypeAlias* thisType,
+TypeAlias typeAliasFromClass(const PreTypeAlias* thisType,
                              Class *klass) {
-  assertx(unit);
   TypeAlias req;
-  req.unit = unit;
+  req.unit = thisType->unit;
   req.name = thisType->name;
   req.nullable = thisType->nullable;
   if (isEnum(klass)) {
@@ -1414,7 +1412,7 @@ TypeAlias resolveTypeAlias(Unit* unit, const PreTypeAlias* thisType) {
    * ensure it exists at this point.
    */
   if (thisType->type != AnnotType::Object) {
-    return TypeAlias::From(unit, *thisType);
+    return TypeAlias::From(*thisType);
   }
 
   /*
@@ -1435,32 +1433,32 @@ TypeAlias resolveTypeAlias(Unit* unit, const PreTypeAlias* thisType) {
   auto targetNE = NamedEntity::get(typeName);
 
   if (auto klass = Unit::lookupClass(targetNE)) {
-    return typeAliasFromClass(unit, thisType, klass);
+    return typeAliasFromClass(thisType, klass);
   }
 
   if (auto targetTd = targetNE->getCachedTypeAlias()) {
-    return TypeAlias::From(unit, *targetTd, *thisType);
+    return TypeAlias::From(*targetTd, *thisType);
   }
 
   if (auto rec = Unit::lookupRecordDesc(targetNE)) {
-    return typeAliasFromRecordDesc(unit, thisType, rec);
+    return typeAliasFromRecordDesc(thisType, rec);
   }
 
   if (AutoloadHandler::s_instance->autoloadNamedType(
         StrNR(const_cast<StringData*>(typeName))
       )) {
     if (auto klass = Unit::lookupClass(targetNE)) {
-      return typeAliasFromClass(unit, thisType, klass);
+      return typeAliasFromClass(thisType, klass);
     }
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
-      return TypeAlias::From(unit, *targetTd, *thisType);
+      return TypeAlias::From(*targetTd, *thisType);
     }
     if (auto rec = Unit::lookupRecordDesc(targetNE)) {
-      return typeAliasFromRecordDesc(unit, thisType, rec);
+      return typeAliasFromRecordDesc(thisType, rec);
     }
   }
 
-  return TypeAlias::Invalid(unit);
+  return TypeAlias::Invalid(*thisType);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

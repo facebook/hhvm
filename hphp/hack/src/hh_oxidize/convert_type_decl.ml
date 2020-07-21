@@ -120,6 +120,9 @@ let derived_traits ty =
 let blacklisted_types =
   [
     ("decl_defs", "Linearization");
+    ("errors", "Marker");
+    ("errors", "MarkedMessage");
+    ("errors", "PositionGroup");
     ("typing_defs", "ExpandEnv");
     ("typing_defs", "PhaseTy");
   ]

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<acc5c17c9568ba4c4acdcb1cceca648f>>
+// @generated SignedSource<<b45b8574715b232f97ae7e9913328138>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -829,6 +829,7 @@ pub struct Typedef<'a, Ex, Fb, En, Hi> {
     pub mode: oxidized::file_info::Mode,
     pub vis: oxidized::aast::TypedefVisibility,
     pub namespace: Nsenv<'a>,
+    pub span: &'a Pos<'a>,
     pub emit_id: Option<oxidized::aast::EmitId>,
 }
 impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop

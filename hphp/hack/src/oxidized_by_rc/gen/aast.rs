@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<99cf80fb2633d461ffc59db5c0596cb3>>
+// @generated SignedSource<<f092ce2d09d613f0913a31d3ae543484>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_rc/regen.sh
@@ -664,6 +664,7 @@ pub struct Typedef<Ex, Fb, En, Hi> {
     pub mode: oxidized::file_info::Mode,
     pub vis: oxidized::aast::TypedefVisibility,
     pub namespace: Nsenv,
+    pub span: std::rc::Rc<Pos>,
     pub emit_id: Option<oxidized::aast::EmitId>,
 }
 

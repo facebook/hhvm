@@ -6,6 +6,14 @@
  *
  *)
 
+let clowder_download ?(timeout : float option) (handle : string) =
+  ignore (timeout, handle);
+  failwith "not implemented in this build"
+
+let clowder_upload_and_get_handle ?(timeout : float option) (input : string) =
+  ignore (timeout, input);
+  failwith "not implemented in this build"
+
 let clowder_upload_and_get_url ?(timeout : float option) (input : string) =
   ignore (timeout, input);
   failwith "not implemented in this build"

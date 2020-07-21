@@ -14,6 +14,8 @@ type env = {
   root: Path.t;
   from: string;
   saved_state_type: saved_state_type;
+  should_save_replay: bool;
+  replay_token: string option;
 }
 
 val main : env -> Exit_status.t Lwt.t

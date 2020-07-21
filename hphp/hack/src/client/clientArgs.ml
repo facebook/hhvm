@@ -1054,6 +1054,8 @@ invocations of `hh` faster.|}
 
   let from = ref "" in
   let saved_state_type = ref None in
+  let should_save_replay = ref false in
+  let replay_token = ref None in
   let options =
     Arg.align
       [
@@ -1061,8 +1063,16 @@ invocations of `hh` faster.|}
         ( "--type",
           Arg.String (fun arg -> saved_state_type := Some arg),
           Printf.sprintf
-            "The type of saved-state to download. %s"
+            " The type of saved-state to download. %s"
             valid_types_message );
+        ( "--save-replay",
+          Arg.Set should_save_replay,
+          " Produce a token that can be later consumed by --replay-token to replay the same saved-state download."
+        );
+        ( "--replay-token",
+          Arg.String (fun arg -> replay_token := Some arg),
+          " A token produced from a previous invocation of this command with --save-replay."
+        );
       ]
   in
   let args = parse_without_command options usage "download-saved-state" in
@@ -1095,7 +1105,14 @@ invocations of `hh` faster.|}
         valid_types_message;
       exit 2
   in
-  CDownloadSavedState { ClientDownloadSavedState.root; from; saved_state_type }
+  CDownloadSavedState
+    {
+      ClientDownloadSavedState.root;
+      from;
+      saved_state_type;
+      should_save_replay = !should_save_replay;
+      replay_token = !replay_token;
+    }
 
 let parse_args ~(init_id : string) =
   match parse_command () with

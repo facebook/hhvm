@@ -299,7 +299,6 @@ bool opcodeMayRaise(Opcode opc) {
   case AKExistsObj:
   case AllocObj:
   case AllocObjReified:
-  case ArrayAdd:
   case ArrayGet:
   case ArraySet:
   case BaseG:

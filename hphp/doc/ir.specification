@@ -2295,10 +2295,6 @@ To string conversions:
   in the IR because many eval stack slots are not entirely typed wrt initness
   right now.)
 
-| ArrayAdd, D(Arr), S(Arr) S(Arr), CRc|PRc
-
-  Has the effects of the php + operator on the two source arrays.
-
 | AKExistsArr, D(Bool), S(Arr) S(Int,Str), NF
 
   Has the effects of array_key_exists(S0, S1).

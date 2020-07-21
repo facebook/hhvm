@@ -2100,7 +2100,12 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
   } else if (data->m_type == SOAP_CLASS) {
     class_name = data->m_soap_class.name;
   } else if (data->m_soap_functions.functions_all) {
-    return (Unit::getSystemFunctions() + Unit::getUserFunctions()).toVArray();
+    auto funcs1 = Unit::getSystemFunctions();
+    auto funcs2 = Unit::getUserFunctions();
+    VArrayInit init(funcs1.size() + funcs2.size());
+    IterateV(funcs1.get(), [&](TypedValue tv) { init.append(tv); });
+    IterateV(funcs2.get(), [&](TypedValue tv) { init.append(tv); });
+    return init.toArray();
   } else if (!data->m_soap_functions.ft.empty()) {
     return Variant::attach(
       HHVM_FN(array_keys)(

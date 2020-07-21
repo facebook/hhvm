@@ -1917,7 +1917,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LookupFuncCached: // autoload
   case StringGet:      // raise_notice
   case OrdStrIdx:      // raise_notice
-  case ArrayAdd:       // decrefs source
   case AddNewElem:         // can re-enter
   case AddNewElemKeyset:   // can re-enter
   case ArrayGet:       // kVPackedKind warnings

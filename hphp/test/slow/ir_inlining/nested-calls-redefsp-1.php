@@ -28,7 +28,7 @@ class MyThing {
   function doThings() {
     for ($i = 0; $i < 10; ++$i) mt_rand();
     $params = darray['duration' => $this->duration];
-    return $this->getModeQueryData() + $params;
+    return array_merge($this->getModeQueryData(), $params);
   }
 
   function c() {

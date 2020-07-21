@@ -88,32 +88,6 @@ ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
   return r;
 }
 
-TypedValue arrayAdd(ArrayData* a1, ArrayData* a2) {
-  assertx(a1->isPHPArrayType());
-  assertx(a2->isPHPArrayType());
-
-  if (checkHACArrayPlus()) raiseHackArrCompatAdd();
-
-  if (!a2->empty()) {
-    if (a1->empty()) {
-      // We consume refs on a2 and also produce references, so there's
-      // no need to inc/dec a2.
-      decRefArr(a1);
-      return make_array_like_tv(a2);
-    }
-    if (a1 != a2) {
-      auto const escalated = a1->plusEq(a2);
-      if (escalated != a1) {
-        decRefArr(a2);
-        decRefArr(a1);
-        return make_array_like_tv(escalated);
-      }
-    }
-  }
-  decRefArr(a2);
-  return make_array_like_tv(a1);
-}
-
 ArrayData* convArrToVecHelper(ArrayData* adIn) {
   assertx(adIn->isPHPArrayType());
   auto a = adIn->toVec(adIn->cowCheck());

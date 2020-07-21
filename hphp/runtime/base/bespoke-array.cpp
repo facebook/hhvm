@@ -205,11 +205,8 @@ ArrayData* BespokeArray::Append(ArrayData* ad, TypedValue v) {
 ArrayData* BespokeArray::Prepend(ArrayData* ad, TypedValue v) {
   return asBespoke(ad)->layout()->prepend(ad, v);
 }
-ArrayData* BespokeArray::PlusEq(ArrayData* ad, const ArrayData* other) {
-  return asBespoke(ad)->layout()->plusEq(ad, other);
-}
 ArrayData* BespokeArray::Merge(ArrayData* ad, const ArrayData* elems) {
-  return asBespoke(ad)->layout()->plusEq(ad, elems);
+  return asBespoke(ad)->layout()->merge(ad, elems);
 }
 ArrayData* BespokeArray::Pop(ArrayData* ad, Variant& out) {
   return asBespoke(ad)->layout()->pop(ad, out);

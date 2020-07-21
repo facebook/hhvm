@@ -743,29 +743,6 @@ ArrayData* PackedArray::AppendInPlace(ArrayData* adIn, TypedValue v) {
   return AppendImpl(adIn, v, false);
 }
 
-ArrayData* PackedArray::PlusEq(ArrayData* adIn, const ArrayData* elems) {
-  assertx(checkInvariants(adIn));
-  assertx(adIn->isPackedKind());
-  if (!elems->isPHPArrayType()) throwInvalidAdditionException(elems);
-  auto const neededSize = adIn->size() + elems->size();
-  auto const mixed = ToMixedCopyReserve(adIn, neededSize);
-  try {
-    auto const ret = MixedArray::PlusEq(mixed, elems);
-    assertx(ret == mixed);
-    assertx(mixed->hasExactlyOneRef());
-    return ret;
-  } catch (...) {
-    MixedArray::Release(mixed);
-    throw;
-  }
-}
-
-ArrayData* PackedArray::PlusEqVec(ArrayData* adIn, const ArrayData* /*elems*/) {
-  assertx(checkInvariants(adIn));
-  assertx(adIn->isVecKind());
-  throwInvalidAdditionException(adIn);
-}
-
 ArrayData* PackedArray::Merge(ArrayData* adIn, const ArrayData* elems) {
   assertx(checkInvariants(adIn));
   auto const neededSize = adIn->m_size + elems->size();

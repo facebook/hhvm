@@ -51,7 +51,6 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,
 ArrayData* dictAddElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
 ArrayData* dictAddElemStringKeyHelper(ArrayData* ad, StringData* key,
                                       TypedValue val);
-TypedValue arrayAdd(ArrayData* a1, ArrayData* a2);
 /* Helper functions for conversion instructions that are too
  * complicated to inline
  */

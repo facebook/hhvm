@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function do_add($a, $b) {
-  var_dump($a + $b);
+  try { var_dump($a + $b); } catch (Exception $e) { print($e->getMessage()."\n"); }
 }
 
 function main() {

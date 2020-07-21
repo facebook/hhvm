@@ -13,8 +13,8 @@ if ($apcdata !== darray["a" => "test", "b" => 3]) echo "no\n";
 unset($apcdata);
 
 $apcdata = __hhvm_intrinsics\apc_fetch_no_check("apcdata");
-$apcdata += darray["b" => 4]; // problem
-if ($apcdata !== darray["a" => "test", "b" => 1]) echo "no\n";
+$apcdata["b"] = 4;
+if ($apcdata !== darray["a" => "test", "b" => 4]) echo "no\n";
 unset($apcdata);
 
 $apcdata = __hhvm_intrinsics\apc_fetch_no_check(varray["apcdata", "nah"]);

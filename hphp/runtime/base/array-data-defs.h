@@ -235,10 +235,6 @@ inline bool ArrayData::uasort(const Variant& compare) {
   return g_array_funcs.uasort[kind()](this, compare);
 }
 
-inline ArrayData* ArrayData::plusEq(const ArrayData* elms) {
-  return g_array_funcs.plusEq[kind()](this, elms);
-}
-
 inline ArrayData* ArrayData::merge(const ArrayData* elms) {
   auto ret = g_array_funcs.merge[kind()](this, elms);
   assertx(ret->isHAMSafeDArray());

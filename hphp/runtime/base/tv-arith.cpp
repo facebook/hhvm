@@ -216,12 +216,7 @@ struct Add {
   }
 
   ArrayData* operator()(ArrayData* a1, ArrayData* a2) const {
-    if (UNLIKELY(a1->isHackArrayType())) throwInvalidAdditionException(a1);
-    if (UNLIKELY(a2->isHackArrayType())) throwInvalidAdditionException(a2);
-    if (checkHACArrayPlus()) raiseHackArrCompatAdd();
-    a1->incRefCount(); // force COW
-    SCOPE_EXIT { a1->decRefCount(); };
-    return a1->plusEq(a2);
+    throwInvalidAdditionException(a1);
   }
 };
 
@@ -350,15 +345,7 @@ struct AddEq {
   double  operator()(double  a, double  b) const { return a + b; }
 
   ArrayData* operator()(ArrayData* ad1, ArrayData* ad2) const {
-    if (UNLIKELY(ad1->isHackArrayType())) throwInvalidAdditionException(ad1);
-    if (UNLIKELY(ad2->isHackArrayType())) throwInvalidAdditionException(ad2);
-    if (checkHACArrayPlus()) raiseHackArrCompatAdd();
-    if (ad2->empty() || ad1 == ad2) return ad1;
-    if (ad1->empty()) {
-      ad2->incRefCount();
-      return ad2;
-    }
-    return ad1->plusEq(ad2);
+    throwInvalidAdditionException(ad1);
   }
 };
 

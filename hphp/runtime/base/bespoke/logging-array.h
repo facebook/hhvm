@@ -80,7 +80,6 @@ struct LoggingLayout : public Layout {
 
   ArrayData* append(ArrayData*, TypedValue v) const final;
   ArrayData* prepend(ArrayData*, TypedValue v) const final;
-  ArrayData* plusEq(ArrayData*, const ArrayData*) const final;
   ArrayData* merge(ArrayData*, const ArrayData*) const final;
   ArrayData* pop(ArrayData*, Variant&) const final;
   ArrayData* dequeue(ArrayData*, Variant&) const final;

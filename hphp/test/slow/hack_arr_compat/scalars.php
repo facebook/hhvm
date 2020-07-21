@@ -23,11 +23,6 @@ function test_cmp() {
   wrap(() ==> true <=> __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3]), __LINE__);
 }
 
-function test_add() {
-  var_dump(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3]) + __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3, 4, 5]));
-  var_dump(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3, 4, 5]) + __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3]));
-}
-
 function test_intlike_keys() {
   var_dump(__hhvm_intrinsics\dummy_cast_to_kindofarray(dict['0' => 1]));
   var_dump(__hhvm_intrinsics\dummy_cast_to_kindofarray(dict['0' => 1, 1 => 2, 2 => 3, 3 => 4]));
@@ -54,6 +49,5 @@ function wrap($cmp, $lineno) {
 <<__EntryPoint>>
 function main_scalars() {
   test_cmp();
-  test_add();
   test_intlike_keys();
 }

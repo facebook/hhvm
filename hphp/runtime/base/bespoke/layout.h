@@ -67,7 +67,6 @@ struct Layout {
 
   virtual ArrayData* append(ArrayData*, TypedValue v) const = 0;
   virtual ArrayData* prepend(ArrayData*, TypedValue v)  const = 0;
-  virtual ArrayData* plusEq(ArrayData*, const ArrayData*)  const = 0;
   virtual ArrayData* merge(ArrayData*, const ArrayData*)  const = 0;
   virtual ArrayData* pop(ArrayData*, Variant&)  const = 0;
   virtual ArrayData* dequeue(ArrayData*, Variant&)  const = 0;

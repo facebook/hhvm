@@ -27,7 +27,7 @@ function b() {
 function c() {
   $array1 = varray[];
   $array2 = darray[1 => "data"];
-  $result = $array1 + $array2;
+  $result = array_merge($array1, $array2);
   var_dump($result);
 }
 

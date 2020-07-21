@@ -501,23 +501,13 @@ TEST(ARRAY, Membership) {
 
 TEST(ARRAY, Merge) {
   {
-    Array arr = make_varray(0) + make_varray(1);
-    EXPECT_TRUE(same_arrays(arr, make_varray(0).toDArray()));
-    arr += make_varray(0, 1);
-    EXPECT_TRUE(same_arrays(arr, make_varray(0, 1).toDArray()));
-
-    arr = make_varray(0).merge(make_varray(1));
+    Array arr = make_varray(0).merge(make_varray(1));
     EXPECT_TRUE(same_arrays(arr, make_varray(0, 1).toDArray()));
     arr = arr.merge(make_varray(0, 1));
     EXPECT_TRUE(same_arrays(arr, make_varray(0, 1, 0, 1).toDArray()));
 
     arr = make_varray("s0").merge(make_varray("s1"));
     EXPECT_TRUE(same_arrays(arr, make_varray("s0", "s1").toDArray()));
-
-    arr = make_map_array("n0", "s0") + make_map_array("n1", "s1");
-    EXPECT_TRUE(same_arrays(arr, make_map_array("n0", "s0", "n1", "s1")));
-    arr += make_map_array("n0", "s0", "n1", "s1");
-    EXPECT_TRUE(same_arrays(arr, make_map_array("n0", "s0", "n1", "s1")));
 
     arr = make_map_array("n0", "s0").merge(make_map_array("n1", "s1"));
     EXPECT_TRUE(same_arrays(arr, make_darray("n0", "s0", "n1", "s1")));

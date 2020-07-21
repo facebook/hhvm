@@ -114,7 +114,6 @@ public:
   // high-level ops
   static ArrayData* Append(ArrayData* ad, TypedValue v);
   static ArrayData* Prepend(ArrayData* ad, TypedValue v);
-  static ArrayData* PlusEq(ArrayData* ad, const ArrayData* other);
   static ArrayData* Merge(ArrayData* ad, const ArrayData* elems);
   static ArrayData* Pop(ArrayData* ad, Variant& out);
   static ArrayData* Dequeue(ArrayData* ad, Variant& out);

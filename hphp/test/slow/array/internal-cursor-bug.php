@@ -6,8 +6,6 @@ function f() {
   reset(inout $arr1);
   reset(inout $arr2);
   var_dump(current($arr1));
-  $arr1 += $arr2;
-  var_dump(current($arr1));
 }
 
 

@@ -333,7 +333,6 @@ public:
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, TypedValue v);
-  static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
@@ -394,7 +393,6 @@ public:
   static constexpr auto CopyDict = &Copy;
   static constexpr auto CopyStaticDict = &CopyStatic;
   static constexpr auto AppendDict = &Append;
-  static constexpr auto PlusEqDict = &PlusEq;
   static constexpr auto MergeDict = &Merge;
   static constexpr auto PopDict = &Pop;
   static constexpr auto DequeueDict = &Dequeue;
@@ -561,8 +559,6 @@ private:
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort(bool resetKeys);
 
-  static ArrayData* ArrayPlusEqGeneric(ArrayData*, MixedArray*,
-                                       const ArrayData*, size_t);
   static ArrayData* ArrayMergeGeneric(MixedArray*, const ArrayData*);
 
   // Assert a bunch of invariants about this array then return true.

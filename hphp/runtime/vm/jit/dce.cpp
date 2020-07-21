@@ -561,7 +561,6 @@ bool canDCE(IRInstruction* inst) {
   case PrintStr:
   case PrintInt:
   case PrintBool:
-  case ArrayAdd:
   case GetMemoKey:
   case LdSwitchObjIndex:
   case LdSSwitchDestSlow:

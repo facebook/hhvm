@@ -87,8 +87,6 @@ void cgCheckPackedArrayDataBounds(IRLS& env, const IRInstruction* inst) {
   v << jcc{CC_BE, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 
-IMPL_OPCODE_CALL(ArrayAdd);
-
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace {

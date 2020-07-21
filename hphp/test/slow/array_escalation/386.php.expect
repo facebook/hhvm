@@ -1,6 +1,0 @@
-array(2) {
-  [0]=>
-  string(4) "test"
-  ["c"]=>
-  int(20)
-}

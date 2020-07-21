@@ -1553,14 +1553,6 @@ void implCmp(IRGS& env, Op op) {
 }
 
 void implAdd(IRGS& env, Op op) {
-  if (topC(env, BCSPRelOffset{0})->type() <= TArr &&
-      topC(env, BCSPRelOffset{1})->type() <= TArr) {
-    auto const tr = popC(env);
-    auto const tl = popC(env);
-    // The ArrayAdd helper decrefs its args, so don't decref pop'ed values.
-    push(env, gen(env, ArrayAdd, tl, tr));
-    return;
-  }
   binaryArith(env, op);
 }
 
@@ -1680,27 +1672,6 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
 
   // Null guard block for globals because we always punt on pseudomains
   auto const ldPMExit = nullptr;
-
-  /*
-   * Handle array addition first because we don't want to bother with
-   * boxed locals.
-   */
-  bool const isAdd = (*subOpc == Op::Add || *subOpc == Op::AddO);
-  if (isAdd && (env.irb->local(id, DataTypeSpecific).type <= TArr) &&
-      topC(env)->isA(TArr)) {
-    /*
-     * ArrayAdd decrefs its sources and returns a new array with
-     * refcount == 1. That covers the local, so incref once more for
-     * the stack.
-     */
-    auto const loc    = ldLoc(env, id, ldPMExit, DataTypeSpecific);
-    auto const val    = popC(env);
-    auto const result = gen(env, ArrayAdd, loc, val);
-    stLocRaw(env, id, fp(env), result);
-    pushIncRef(env, result);
-    return;
-  }
-
   auto loc = ldLoc(env, id, ldPMExit, DataTypeGeneric);
 
   if (*subOpc == Op::Concat) {

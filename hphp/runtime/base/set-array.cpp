@@ -664,11 +664,6 @@ ArrayData* SetArray::Append(ArrayData* ad, TypedValue v) {
   return AppendImpl(ad, v, ad->cowCheck());
 }
 
-ArrayData* SetArray::PlusEq(ArrayData* ad, const ArrayData*) {
-  assertx(asSet(ad)->checkInvariants());
-  throwInvalidAdditionException(ad);
-}
-
 ArrayData* SetArray::Merge(ArrayData*, const ArrayData*) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (merge)"

@@ -282,9 +282,6 @@ ArrayData* LoggingLayout::append(ArrayData* ad, TypedValue v) const {
 ArrayData* LoggingLayout::prepend(ArrayData* ad, TypedValue v) const {
   return mutate(ad, [&](ArrayData* w) { return w->prepend(v); });
 }
-ArrayData* LoggingLayout::plusEq(ArrayData* ad, const ArrayData* arr) const {
-  return mutate(ad, [&](ArrayData* w) { return w->plusEq(arr); });
-}
 ArrayData* LoggingLayout::merge(ArrayData* ad, const ArrayData* arr) const {
   return mutate(ad, [&](ArrayData* w) { return w->merge(arr); });
 }

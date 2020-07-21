@@ -405,7 +405,6 @@ public:
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, TypedValue);
-  static ArrayData* PlusEq(ArrayData*, const ArrayData*);
   static ArrayData* Merge(ArrayData*, const ArrayData*);
   static ArrayData* Pop(ArrayData*, Variant&);
   static ArrayData* Dequeue(ArrayData*, Variant&);

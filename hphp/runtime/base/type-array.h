@@ -260,12 +260,12 @@ public:
   /*
    * PHP array union operator.
    */
-  Array  operator+(ArrayData* data) const;
-  Array  operator+(const Array& v) const;
+  Array  operator+(ArrayData* data) const = delete;
+  Array  operator+(const Array& v) const = delete;
   Array  operator+(const Variant& v) const = delete;
-  Array& operator+=(ArrayData* data);
-  Array& operator+=(const Array& v);
-  Array& operator+=(const Variant& v);
+  Array& operator+=(ArrayData* data) = delete;
+  Array& operator+=(const Array& v) = delete;
+  Array& operator+=(const Variant& v) = delete;
 
   /*
    * Implementation of array_merge().
@@ -509,7 +509,6 @@ public:
 private:
   Array(ArrayData* ad, NoIncRef) : m_arr(ad, NoIncRef{}) {}
 
-  Array& plusImpl(ArrayData* data);
   Array& mergeImpl(ArrayData* data);
   Array diffImpl(const Array& array, bool by_key, bool by_value, bool match,
                  PFUNC_CMP key_cmp_function, const void* key_data,

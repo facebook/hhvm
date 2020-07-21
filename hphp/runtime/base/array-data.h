@@ -549,9 +549,8 @@ public:
   bool uasort(const Variant& cmp_function);
 
   /*
-   * PHP += and array_merge() implementations.
+   * PHP array_merge() implementations.
    */
-  ArrayData* plusEq(const ArrayData* elems);
   ArrayData* merge(const ArrayData* elems);
 
   /*
@@ -849,7 +848,6 @@ struct ArrayFunctions {
   ArrayData* (*copy[NK])(const ArrayData*);
   ArrayData* (*copyStatic[NK])(const ArrayData*);
   ArrayData* (*append[NK])(ArrayData*, TypedValue v);
-  ArrayData* (*plusEq[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);
   ArrayData* (*dequeue[NK])(ArrayData*, Variant& value);
@@ -888,8 +886,6 @@ extern const ArrayFunctions g_array_funcs;
 [[noreturn]] void throwVarrayUnsetException();
 [[noreturn]] void throwVecUnsetException();
 
-void raiseHackArrCompatAdd();
-
 void raiseHackArrCompatArrHackArrCmp();
 void raiseHackArrCompatDVArrCmp(const ArrayData*, const ArrayData*, bool);
 
@@ -898,7 +894,6 @@ std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key);
 StringData* getHackArrCompatNullHackArrayKeyMsg();
 
 bool checkHACCompare();
-bool checkHACArrayPlus();
 
 /*
  * Add a provenance tag for the current vmpc to `ad`, copying instead from

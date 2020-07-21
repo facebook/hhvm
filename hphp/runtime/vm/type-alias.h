@@ -62,41 +62,6 @@ struct PreTypeAlias {
   std::pair<int,int> getLocation() const {
     return std::make_pair(line0, line1);
   }
-
-  template<class SerDe>
-  typename std::enable_if<!SerDe::deserializing>::type
-  serde(SerDe& sd) {
-    sd(value)
-      (type)
-      (line0)
-      (line1)
-      (nullable)
-      (userAttrs)
-      (attrs)
-      ;
-    // Can't use make_array_like_tv because of include ordering issues
-    auto tv = make_array_like_tv(typeStructure.get());
-    sd(tv);
-  }
-
-  template<class SerDe>
-  typename std::enable_if<SerDe::deserializing>::type
-  serde(SerDe& sd) {
-    sd(value)
-      (type)
-      (line0)
-      (line1)
-      (nullable)
-      (userAttrs)
-      (attrs)
-      ;
-
-    TypedValue tv;
-    sd(tv);
-    assertx(tvIsPlausible(tv));
-    assertx(tvIsHAMSafeDArray(tv));
-    typeStructure = tv.m_data.parr;
-  }
 };
 
 

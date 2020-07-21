@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/constant.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
-#include "hphp/runtime/vm/type-alias.h"
+#include "hphp/runtime/vm/type-alias-emitter.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -46,8 +46,8 @@ void RepoAutoloadMapBuilder::addUnit(const UnitEmitter& ue) {
       m_funcs.insert(std::make_pair(fe->name, unitSn));
     }
   }
-  for (auto& ta : ue.typeAliases()) {
-    m_typeAliases.insert(std::make_pair(ta.name, unitSn));
+  for (auto& te : ue.typeAliases()) {
+    m_typeAliases.insert(std::make_pair(te->name(), unitSn));
   }
 
   for (auto& c : ue.constants()) {

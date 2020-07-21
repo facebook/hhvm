@@ -44,6 +44,7 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
 #include "hphp/runtime/vm/repo-helpers.h"
+#include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/verifier/check.h"
 
@@ -297,10 +298,10 @@ Id UnitEmitter::pceId(folly::StringPiece clsName) {
 ///////////////////////////////////////////////////////////////////////////////
 // Type aliases.
 
-Id UnitEmitter::addTypeAlias(const PreTypeAlias& td) {
-  Id id = m_typeAliases.size();
-  m_typeAliases.push_back(td);
-  return id;
+TypeAliasEmitter* UnitEmitter::newTypeAliasEmitter(const std::string& name) {
+  auto te = std::make_unique<TypeAliasEmitter>(*this, m_typeAliases.size(), name);
+  m_typeAliases.push_back(std::move(te));
+  return m_typeAliases.back().get();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -458,7 +459,7 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn,
     }
     for (unsigned i = 0; i < m_typeAliases.size(); ++i) {
       urp.insertUnitTypeAlias[repoId].insert(*this, txn, usn, i,
-                                             m_typeAliases[i]);
+                                             *m_typeAliases[i]);
     }
     for (unsigned i = 0; i < m_constants.size(); ++i) {
       urp.insertUnitConstant[repoId].insert(*this, txn, usn, i, m_constants[i]);
@@ -637,7 +638,9 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   for (auto const& re : m_reVec) {
     u->m_preRecords.push_back(PreRecordDescPtr(re->create(*u)));
   }
-  u->m_typeAliases = m_typeAliases;
+  for (auto const& te : m_typeAliases) {
+    u->m_typeAliases.push_back(te->create(*u));
+  }
   u->m_constants = m_constants;
   u->m_metaData = m_metaData;
   u->m_fileAttributes = m_fileAttributes;
@@ -898,15 +901,15 @@ void UnitEmitter::serde(SerDe& sd) {
   seq(
     m_typeAliases,
     [&] (auto& sd, size_t i) {
-      PreTypeAlias ta;
-      sd(ta.name);
-      sd(ta);
-      auto const id UNUSED = addTypeAlias(ta);
-      assertx(id == i);
+      std::string name;
+      sd(name);
+      auto te = newTypeAliasEmitter(name);
+      te->serdeMetaData(sd);
+      assertx(te->id() == i);
     },
-    [&] (auto& sd, const PreTypeAlias& ta) {
-      sd(ta.name);
-      sd(ta);
+    [&] (auto& sd, const std::unique_ptr<TypeAliasEmitter>& te) {
+      sd(te->name()->toCppString());
+      te->serdeMetaData(sd);
     }
   );
 
@@ -1523,7 +1526,7 @@ void UnitRepoProxy::InsertUnitTypeAliasStmt
                            RepoTxn& txn,
                            int64_t unitSn,
                            Id typeAliasId,
-                           const PreTypeAlias& typeAlias) {
+                           const TypeAliasEmitter& te) {
   if (!prepared()) {
     auto insertQuery = folly::sformat(
       "INSERT INTO {} VALUES (@unitSn, @typeAliasId, @name, @data);",
@@ -1535,9 +1538,8 @@ void UnitRepoProxy::InsertUnitTypeAliasStmt
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
   query.bindInt64("@typeAliasId", typeAliasId);
-  query.bindStaticString("@name", typeAlias.name);
-
-  dataBlob(typeAlias);
+  query.bindStaticString("@name", te.name());
+  const_cast<TypeAliasEmitter&>(te).serdeMetaData(dataBlob);
   query.bindBlob("@data", dataBlob, /* static */ true);
   query.exec();
 }
@@ -1556,14 +1558,14 @@ void UnitRepoProxy::GetUnitTypeAliasesStmt::get(UnitEmitter& ue) {
   do {
     query.step();
     if (query.row()) {
-      PreTypeAlias ta;
       Id typeAliasId;        /**/ query.getId(0, typeAliasId);
-      StringData *name;      /**/ query.getStaticString(1, name);
-      ta.name = makeStaticString(name);
+      std::string name;      /**/ query.getStdString(1, name);
       BlobDecoder dataBlob = /**/ query.getBlob(2, ue.useGlobalIds());
-      dataBlob(ta);
-      Id id UNUSED = ue.addTypeAlias(ta);
-      assertx(id == typeAliasId);
+
+      TypeAliasEmitter* te = ue.newTypeAliasEmitter(name);
+      te->serdeMetaData(dataBlob);
+
+      assertx(te->id() == typeAliasId);
     }
   } while (!query.done());
   txn.commit();

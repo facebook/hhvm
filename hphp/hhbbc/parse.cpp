@@ -40,6 +40,7 @@
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
+#include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
 #include "hphp/hhbbc/cfg.h"
@@ -1101,17 +1102,20 @@ std::unique_ptr<php::Constant> parse_constant(const Constant& c, php::Unit* unit
   });
 }
 
-std::unique_ptr<php::TypeAlias> parse_type_alias(const PreTypeAlias& ta, php::Unit* unit) {
-  return std::unique_ptr<php::TypeAlias>(new php::TypeAlias{
+std::unique_ptr<php::TypeAlias> parse_type_alias(php::Unit* unit,
+                                                 const TypeAliasEmitter& te) {
+  FTRACE(2, "  type alias: {}\n", te.name()->data());
+
+  return std::unique_ptr<php::TypeAlias>(new php::TypeAlias {
     unit,
-    php::SrcInfo { ta.getLocation() },
-    ta.name,
-    ta.value,
-    ta.attrs,
-    ta.type,
-    ta.nullable,
-    ta.userAttrs,
-    ta.typeStructure,
+    php::SrcInfo { te.getLocation() },
+    te.name(),
+    te.value(),
+    te.attrs(),
+    te.type(),
+    te.nullable(),
+    te.userAttributes(),
+    te.typeStructure()
   });
 }
 
@@ -1175,9 +1179,9 @@ void parse_unit(php::Program& prog, const UnitEmitter* uep) {
     ret->srcLocs[srcInfo.second] = srcInfo.first;
   }
 
-  for (auto& ta : ue.typeAliases()) {
+  for (auto& te : ue.typeAliases()) {
     ret->typeAliases.push_back(
-      parse_type_alias(ta, ret.get())
+      parse_type_alias(ret.get(), *te)
     );
   }
 

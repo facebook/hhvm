@@ -338,7 +338,7 @@ public:
   >;
 
   using PreClassPtrVec = VMCompactVector<PreClassPtr>;
-  using TypeAliasVec = VMFixedVector<PreTypeAlias>;
+  using TypeAliasVec = VMCompactVector<PreTypeAlias>;
   using ConstantVec = VMFixedVector<Constant>;
 
   /////////////////////////////////////////////////////////////////////////////

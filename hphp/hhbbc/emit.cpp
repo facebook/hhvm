@@ -46,6 +46,7 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/record-emitter.h"
+#include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
 namespace HPHP { namespace HHBBC {
@@ -1436,18 +1437,19 @@ void emit_class(EmitUnitState& state,
 
 void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias,
                     const EmitUnitState& state) {
-  PreTypeAlias t {
-    alias.name,
-    alias.value,
-    alias.attrs,
-    alias.type,
-    (int)std::get<0>(alias.srcInfo.loc),
-    (int)std::get<1>(alias.srcInfo.loc),
-    alias.nullable,
-    alias.userAttrs,
-    alias.typeStructure,
-  };
-  auto const id = ue.addTypeAlias(t);
+  auto const te = ue.newTypeAliasEmitter(alias.name->toCppString());
+  te->init(
+      std::get<0>(alias.srcInfo.loc),
+      std::get<1>(alias.srcInfo.loc),
+      alias.attrs,
+      alias.value,
+      alias.type,
+      alias.nullable
+  );
+  te->setUserAttributes(alias.userAttrs);
+  te->setTypeStructure(alias.typeStructure);
+
+  auto const id = te->id();
   if (state.processedTypeAlias.find(id) == state.processedTypeAlias.end()) {
     ue.pushMergeableId(Unit::MergeKind::TypeAlias, id);
   }

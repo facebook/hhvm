@@ -103,6 +103,7 @@
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/record-emitter.h"
 #include "hphp/runtime/vm/rx.h"
+#include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/system/systemlib.h"
@@ -3448,8 +3449,8 @@ void parse_adata(AsmState& as) {
 void parse_alias(AsmState& as) {
   as.in.skipWhitespace();
 
-  PreTypeAlias record;
-  Attr attrs = parse_attribute_list(as, AttrContext::Alias, &record.userAttrs);
+  UserAttributeMap userAttrs;
+  Attr attrs = parse_attribute_list(as, AttrContext::Alias, &userAttrs);
   if (!SystemLib::s_inited) {
     attrs |= AttrPersistent;
   }
@@ -3479,18 +3480,22 @@ void parse_alias(AsmState& as) {
   as.ue->mergeLitstr(sname);
   as.ue->mergeLitstr(typeName);
 
-  record.name = sname;
-  record.value = typeName;
-  record.type = typeName->empty() ? AnnotType::Mixed : ty.type();
-  record.nullable = (ty.flags() & TypeConstraint::Nullable) != 0;
-  record.attrs = attrs;
-  record.line0 = line0;
-  record.line1 = line1;
+  auto te = as.ue->newTypeAliasEmitter(name);
+  te->init(
+    line0,
+    line1,
+    attrs,
+    typeName,
+    typeName->empty() ? AnnotType::Mixed : ty.type(),
+    (ty.flags() & TypeConstraint::Nullable) != 0
+  );
+  te->setUserAttributes(userAttrs);
+
   if (ts.isInitialized()) {
-    record.typeStructure = ArrNR(ArrayData::GetScalarArray(std::move(ts)));
+    te->setTypeStructure(ArrNR(ArrayData::GetScalarArray(std::move(ts))));
   }
-  auto aliasId = as.ue->addTypeAlias(record);
-  as.ue->pushMergeableId(Unit::MergeKind::TypeAlias, aliasId);
+
+  as.ue->pushMergeableId(Unit::MergeKind::TypeAlias, te->id());
 
   as.in.expectWs(';');
 }

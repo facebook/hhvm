@@ -47,6 +47,7 @@ struct FuncEmitter;
 struct PreClassEmitter;
 struct RecordEmitter;
 struct StringData;
+struct TypeAliasEmitter;
 
 namespace Native {
 struct FuncTable;
@@ -298,12 +299,12 @@ struct UnitEmitter {
   /*
    * Const reference to all of the Unit's type aliases.
    */
-  const std::vector<PreTypeAlias>& typeAliases() const;
+  auto const& typeAliases() const;
 
   /*
    * Add a new type alias to the Unit.
    */
-  Id addTypeAlias(const PreTypeAlias& td);
+  TypeAliasEmitter* newTypeAliasEmitter(const std::string& name);
 
   /////////////////////////////////////////////////////////////////////////////
   // Constants.
@@ -468,7 +469,7 @@ private:
   /*
    * Type alias table.
    */
-  std::vector<PreTypeAlias> m_typeAliases;
+  std::vector<std::unique_ptr<TypeAliasEmitter>> m_typeAliases;
 
   /*
    * Constants table.
@@ -555,7 +556,7 @@ struct UnitRepoProxy : public RepoProxy {
                 RepoTxn& txn,
                 int64_t unitSn,
                 Id typeAliasId,
-                const PreTypeAlias& typeAlias); // throws(RepoExc)
+                const TypeAliasEmitter& te); // throws(RepoExc)
   };
   struct GetUnitTypeAliasesStmt : public RepoProxy::Stmt {
     GetUnitTypeAliasesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}

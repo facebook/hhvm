@@ -381,9 +381,12 @@ let rage_saved_state (env : env) : (string * string) list Lwt.t =
       in
       match result_or_timeout with
       | Error () -> Lwt.return_error "timeout"
-      | Ok (Ok (result, changed_files, telemetry)) ->
+      | Ok
+          (Ok
+            ( { Saved_state_loader.saved_state_info; changed_files; _ },
+              telemetry )) ->
         Lwt.return_ok
-          ( result,
+          ( saved_state_info,
             Printf.sprintf
               "%s\n\n%s\n"
               ( List.map changed_files ~f:Relative_path.suffix

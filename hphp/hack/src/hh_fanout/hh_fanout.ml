@@ -94,7 +94,7 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
           (Printf.sprintf
              "Failed to load naming-table saved-state, and saved-state files were not manually provided on command-line: %s"
              (Saved_state_loader.debug_details_of_error load_error))
-      | Ok (saved_state_info, changed_files) ->
+      | Ok { Saved_state_loader.saved_state_info; changed_files; _ } ->
         Lwt.return
           ( saved_state_info
               .Saved_state_loader.Naming_table_info.naming_table_path,
@@ -126,7 +126,7 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
           (Printf.sprintf
              "Failed to load dep-table saved-state, and saved-state files were not manually provided on command-line: %s"
              (Saved_state_loader.debug_details_of_error load_error))
-      | Ok (saved_state_info, changed_files) ->
+      | Ok { Saved_state_loader.saved_state_info; changed_files; _ } ->
         Lwt.return
           ( saved_state_info
               .Saved_state_loader.Naming_and_dep_table_info.dep_table_path,

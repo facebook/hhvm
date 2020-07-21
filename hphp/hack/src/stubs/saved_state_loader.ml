@@ -57,6 +57,12 @@ include files other than Hack files, so the caller should filter the given list
 as necessary. *)
 type changed_files = Relative_path.t list
 
+type 'info load_result = {
+  saved_state_info: 'info;
+  manifold_path: string;
+  changed_files: changed_files;
+}
+
 type load_error
 
 (* Please do not throw an exception here; it breaks hack for open source users *)

@@ -248,11 +248,15 @@ let load_saved_state
           let changed_files = [] in
           (* Test hook, for tests that want to get messages in before init *)
           Lwt.return_ok
-            ( {
-                Saved_state_loader.Naming_table_info.naming_table_path =
-                  naming_table_load_info.path;
-              },
-              changed_files )
+            {
+              Saved_state_loader.saved_state_info =
+                {
+                  Saved_state_loader.Naming_table_info.naming_table_path =
+                    naming_table_load_info.path;
+                };
+              changed_files;
+              manifold_path = "<not provided>";
+            }
         | None ->
           let%lwt result =
             State_loader_lwt.load
@@ -264,7 +268,7 @@ let load_saved_state
           Lwt.return result
       in
       match result with
-      | Ok (saved_state_info, changed_files) ->
+      | Ok { Saved_state_loader.saved_state_info; changed_files; _ } ->
         let path =
           Path.to_string
             saved_state_info

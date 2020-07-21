@@ -54,24 +54,29 @@ let main (env : env) : Exit_status.t Lwt.t =
     | Error load_error ->
       print_load_error load_error;
       Lwt.return Exit_status.Failed_to_load_should_abort
-    | Ok (info, changed_files) ->
+    | Ok
+        {
+          Saved_state_loader.saved_state_info =
+            {
+              Saved_state_loader.Naming_and_dep_table_info.naming_table_path;
+              dep_table_path;
+              hot_decls_path;
+              errors_path;
+            };
+          changed_files;
+          manifold_path = _ (* TODO: use *);
+        } ->
       let json =
         Hh_json.JSON_Object
           [
             ("changed_files", changed_files_to_json changed_files);
             ( "naming_table_path",
-              info
-                .Saved_state_loader.Naming_and_dep_table_info.naming_table_path
-              |> Path.to_string
-              |> Hh_json.string_ );
+              naming_table_path |> Path.to_string |> Hh_json.string_ );
             ( "dep_table_path",
-              info.Saved_state_loader.Naming_and_dep_table_info.dep_table_path
-              |> Path.to_string
-              |> Hh_json.string_ );
+              dep_table_path |> Path.to_string |> Hh_json.string_ );
             ( "hot_decls_path",
-              info.Saved_state_loader.Naming_and_dep_table_info.hot_decls_path
-              |> Path.to_string
-              |> Hh_json.string_ );
+              hot_decls_path |> Path.to_string |> Hh_json.string_ );
+            ("errors_path", errors_path |> Path.to_string |> Hh_json.string_);
           ]
       in
       Hh_json.json_to_multiline_output stdout json;
@@ -87,15 +92,19 @@ let main (env : env) : Exit_status.t Lwt.t =
     | Error load_error ->
       print_load_error load_error;
       Lwt.return Exit_status.Failed_to_load_should_abort
-    | Ok (info, changed_files) ->
+    | Ok
+        {
+          Saved_state_loader.saved_state_info =
+            { Saved_state_loader.Naming_table_info.naming_table_path };
+          changed_files;
+          manifold_path = _ (* TODO: use *);
+        } ->
       let json =
         Hh_json.JSON_Object
           [
             ("changed_files", changed_files_to_json changed_files);
             ( "naming_table_path",
-              info.Saved_state_loader.Naming_table_info.naming_table_path
-              |> Path.to_string
-              |> Hh_json.string_ );
+              naming_table_path |> Path.to_string |> Hh_json.string_ );
           ]
       in
       Hh_json.json_to_multiline_output stdout json;

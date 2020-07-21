@@ -63,7 +63,8 @@ let merge_saved_state_futures
     (dependency_table_saved_state_future :
       (State_loader.native_load_result, State_loader.error) result Future.t)
     (naming_table_saved_state_future :
-      ( (Saved_state_loader.Naming_table_info.t * Relative_path.t list) option,
+      ( Saved_state_loader.Naming_table_info.t Saved_state_loader.load_result
+        option,
         string )
       result
       Future.t) : (loaded_info, load_state_error) result =
@@ -85,12 +86,15 @@ let merge_saved_state_futures
       let (downloaded_naming_table_path, dirty_naming_files) =
         match naming_table_saved_state_result with
         | Ok (Ok None) -> (None, [])
-        | Ok (Ok (Some (naming_table_info, changed_files))) ->
+        | Ok
+            (Ok
+              (Some { Saved_state_loader.saved_state_info; changed_files; _ }))
+          ->
           let (_ : float) =
             Hh_logger.log_duration "Finished downloading naming table." t
           in
           let path =
-            naming_table_info
+            saved_state_info
               .Saved_state_loader.Naming_table_info.naming_table_path
           in
           (Some (Path.to_string path), changed_files)
@@ -655,14 +659,16 @@ let load_naming_table (genv : ServerEnv.genv) (env : ServerEnv.env) :
   match
     State_loader_futures.wait_for_finish_with_debug_details loader_future
   with
-  | Ok (info, fnl) ->
-    let { Saved_state_loader.Naming_table_info.naming_table_path } = info in
+  | Ok { Saved_state_loader.saved_state_info; changed_files; _ } ->
+    let { Saved_state_loader.Naming_table_info.naming_table_path } =
+      saved_state_info
+    in
     let ctx = Provider_utils.ctx_from_server_env env in
     let naming_table_path = Path.to_string naming_table_path in
     let naming_table = Naming_table.load_from_sqlite ctx naming_table_path in
     let (env, t) =
       initialize_naming_table
-        ~fnl:(Some fnl)
+        ~fnl:(Some changed_files)
         ~do_naming:true
         "full initialization (with loaded naming table)"
         genv
@@ -672,7 +678,7 @@ let load_naming_table (genv : ServerEnv.genv) (env : ServerEnv.env) :
       naming_from_saved_state
         ctx
         env.naming_table
-        (Relative_path.set_of_list fnl)
+        (Relative_path.set_of_list changed_files)
         (Some naming_table_path)
         t
     in

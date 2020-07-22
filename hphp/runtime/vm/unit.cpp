@@ -96,6 +96,7 @@
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+TRACE_SET_MOD(hhbc);
 
 namespace {
 
@@ -972,6 +973,8 @@ void setupClass(Class* newClass, NamedEntity* nameList) {
 
 Class* Unit::defClass(const PreClass* preClass,
                       bool failIsFatal /* = true */) {
+  FTRACE(3, "  Defining cls {} failIsFatal {}\n",
+         preClass->name()->data(), failIsFatal);
   NamedEntity* const nameList = preClass->namedEntity();
   Class* top = nameList->clsList();
 
@@ -1029,7 +1032,6 @@ Class* Unit::defClass(const PreClass* preClass,
       assertx(avail == Class::Avail::False);
     }
 
-    // Create a new class.
     if (!parent && preClass->parent()->size() != 0) {
       parent = Unit::getClass(preClass->parent(), failIsFatal);
       if (parent == nullptr) {
@@ -1041,6 +1043,28 @@ Class* Unit::defClass(const PreClass* preClass,
       }
     }
 
+    if (!failIsFatal) {
+      // Check interfaces
+      for (auto it = preClass->interfaces().begin();
+                 it != preClass->interfaces().end(); ++it) {
+        if (!Unit::getClass(*it, false)) return nullptr;
+      }
+      // traits
+      for (auto const& traitName : preClass->usedTraits()) {
+        if (!Unit::getClass(traitName, false)) return nullptr;
+      }
+      // enum
+      if (preClass->attrs() & AttrEnum) {
+        auto const enumBaseTy =
+          preClass->enumBaseTy().underlyingDataTypeResolved();
+        if (!enumBaseTy ||
+            (!isIntType(*enumBaseTy) && !isStringType(*enumBaseTy))) {
+          return nullptr;
+        }
+      }
+    }
+
+    // Create a new class.
     ClassPtr newClass;
     {
       FrameRestore fr(preClass);
@@ -1313,6 +1337,7 @@ void Unit::defCns(Id id) {
   assertx(id < m_constants.size());
   auto constant = &m_constants[id];
   auto const cnsName = constant->name;
+  FTRACE(3, "  Defining def {}\n", cnsName->data());
   auto const cnsVal = constant->val;
 
   if (constant->attrs & Attr::AttrPersistent &&
@@ -1490,9 +1515,10 @@ const TypeAlias* Unit::loadTypeAlias(const StringData* name,
   return target;
 }
 
-bool Unit::defTypeAlias(Id id) {
+Unit::DefTypeAliasResult Unit::defTypeAlias(Id id, bool failIsFatal) {
   assertx(id < m_typeAliases.size());
   auto thisType = &m_typeAliases[id];
+  FTRACE(3, "  Defining type alias {}\n", thisType->name->data());
   auto nameList = NamedEntity::get(thisType->name);
   const StringData* typeName = thisType->value;
 
@@ -1509,19 +1535,22 @@ bool Unit::defTypeAlias(Id id) {
     if (nameList->isPersistentTypeAlias()) {
       // We may have cached the fully resolved type in a previous request.
       if (resolveTypeAlias(this, thisType) != *current) {
+        if (!failIsFatal) return Unit::DefTypeAliasResult::Fail;
         raiseIncompatible();
       }
-      return true;
+      return Unit::DefTypeAliasResult::Persistent;
     }
     if (!current->compat(*thisType)) {
+      if (!failIsFatal) return Unit::DefTypeAliasResult::Fail;
       raiseIncompatible();
     }
-    return false;
+    return Unit::DefTypeAliasResult::Normal;
   }
 
   // There might also be a class or record with this name already.
   auto existingKind = checkSameName<PreTypeAlias>(nameList);
   if (existingKind) {
+    if (!failIsFatal) return Unit::DefTypeAliasResult::Fail;
     FrameRestore _(this, Op::DefTypeAlias, id);
     raise_error("The name %s is already defined as a %s",
                 thisType->name->data(), existingKind);
@@ -1530,6 +1559,7 @@ bool Unit::defTypeAlias(Id id) {
 
   auto resolved = resolveTypeAlias(this, thisType);
   if (resolved.invalid) {
+    if (!failIsFatal) return Unit::DefTypeAliasResult::Fail;
     FrameRestore _(this, Op::DefTypeAlias, id);
     raise_error("Unknown type or class %s", typeName->data());
     not_reached();
@@ -1544,10 +1574,12 @@ bool Unit::defTypeAlias(Id id) {
     rds::LinkName{"TypeAlias", thisType->value},
     &resolved
   );
-  if (nameList->m_cachedTypeAlias.isPersistent()) return true;
+  if (nameList->m_cachedTypeAlias.isPersistent()) {
+    return Unit::DefTypeAliasResult::Persistent;
+  }
 
   nameList->setCachedTypeAlias(resolved);
-  return false;
+  return Unit::DefTypeAliasResult::Normal;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1852,6 +1884,9 @@ void Unit::mergeImpl(MergeInfo* mi) {
   assertx(m_mergeState.load(std::memory_order_relaxed) & MergeState::Merged);
   autoTypecheck(this);
 
+  FTRACE(1, "Merging unit {} ({} elements to define)\n",
+         this->m_filepath->data(), mi->m_mergeablesSize);
+
   Func** it = mi->funcBegin();
   Func** fend = mi->funcEnd();
   if (it != fend) {
@@ -1888,117 +1923,140 @@ void Unit::mergeImpl(MergeInfo* mi) {
     }
   }
 
-  bool redoHoistable = false;
-  int ix = mi->m_firstHoistablePreClass;
+  int first = mi->m_firstHoistablePreClass;
   int end = mi->m_firstMergeablePreClass;
-  // iterate over all the potentially hoistable classes
-  // with no fatals on failure
-  if (ix < end) {
-    do {
-      // The first time this unit is merged, if the classes turn out to be all
-      // unique and defined, we replace the PreClass*'s with the corresponding
-      // Class*'s, with the low-order bit marked.
-      PreClass* pre = (PreClass*)mi->mergeableObj(ix);
-      if (LIKELY(uintptr_t(pre) & 1)) {
-        Stats::inc(Stats::UnitMerge_hoistable);
-        Class* cls = (Class*)(uintptr_t(pre) & ~1);
-        auto const handle = cls->classHandle();
-        auto const handle_persistent = rds::isPersistentHandle(handle);
-        if (cls->isPersistent()) {
-          Stats::inc(Stats::UnitMerge_hoistable_persistent);
-        }
-        if (Stats::enabled() && handle_persistent) {
-          Stats::inc(Stats::UnitMerge_hoistable_persistent_cache);
-        }
-        if (Class* parent = cls->parent()) {
-          auto const parent_handle = parent->classHandle();
-          auto const parent_handle_persistent =
-            rds::isPersistentHandle(parent_handle);
-          if (parent->isPersistent()) {
-            Stats::inc(Stats::UnitMerge_hoistable_persistent_parent);
-          }
-          if (Stats::enabled() && parent_handle_persistent) {
-            Stats::inc(Stats::UnitMerge_hoistable_persistent_parent_cache);
-          }
-          auto const parent_cls_present =
-            rds::isHandleInit(parent_handle) &&
-            rds::handleToRef<LowPtr<Class>, rds::Mode::NonLocal>(parent_handle);
-          if (UNLIKELY(!parent_cls_present)) {
-            redoHoistable = true;
-            continue;
-          }
-        }
-        if (handle_persistent) {
-          rds::handleToRef<LowPtr<Class>, rds::Mode::Persistent>(handle) = cls;
-        } else {
-          assertx(rds::isNormalHandle(handle));
-          rds::handleToRef<LowPtr<Class>, rds::Mode::Normal>(handle) = cls;
-          rds::initHandle(handle);
-        }
-        if (debugger) phpDebuggerDefClassHook(cls);
-      } else {
-        if (UNLIKELY(!defClass(pre, false))) {
-          redoHoistable = true;
-        }
-      }
-    } while (++ix < end);
 
-    if (UNLIKELY(redoHoistable)) {
-      // if this unit isnt mergeOnly, we're done
-      if (!isMergeOnly()) return;
+  int ix = first;
 
-      // As a special case, if all the classes are potentially hoistable, we
-      // don't list them twice, but instead iterate over them again.
-      //
-      // At first glance, it may seem like we could leave the maybe-hoistable
-      // classes out of the second list and then always reset ix to 0; but that
-      // gets this case wrong if there's an autoloader for C, and C extends B:
-      //
-      // class A {}
-      // class B implements I {}
-      // class D extends C {}
-      //
-      // because now A and D go on the maybe-hoistable list B goes on the never
-      // hoistable list, and we fatal trying to instantiate D before B
-      Stats::inc(Stats::UnitMerge_redo_hoistable);
-      if (end == (int)mi->m_mergeablesSize) {
-        ix = mi->m_firstHoistablePreClass;
-        do {
-          void* obj = mi->mergeableObj(ix);
-          if (UNLIKELY(uintptr_t(obj) & 1)) {
-            Class* cls = (Class*)(uintptr_t(obj) & ~1);
-            defClass(cls->preClass(), true);
-          } else {
-            defClass((PreClass*)obj, true);
-          }
-        } while (++ix < end);
-        return;
-      }
+  FTRACE(3, "ix: {}, end: {}, total: {}\n", ix, end, mi->m_mergeablesSize);
+
+  // Lets handle the common cases first
+  // 1) Unit will all functions
+  if (ix == mi->m_mergeablesSize) {
+    FTRACE(3, "  Unit with only free functions\n");
+    return;
+  }
+  // 2) Unit with a single class (and possibly some free functions)
+  if (ix == mi->m_mergeablesSize - 1) {
+    void* obj = mi->mergeableObj(ix);
+    auto k = MergeKind(uintptr_t(obj) & 7);
+    if (k == MergeKind::Class && !(uintptr_t(obj) & 1)) {
+      FTRACE(3, "  Unit with a single class (and possibly some free functions\n");
+      defClass((PreClass*)obj, true);
+      return;
     }
   }
 
-  // iterate over all but the guaranteed hoistable classes
-  // fataling if we fail.
-  void* obj = mi->mergeableObj(ix);
-  auto k = MergeKind(uintptr_t(obj) & 7);
-  do {
-    switch (k) {
-      case MergeKind::Class:
-        do {
+  boost::dynamic_bitset<> define(mi->m_mergeablesSize - first);
+  // iterate over all the potentially hoistable classes
+  // with no fatals on failure
+  for (; ix < end; ++ix) {
+    // The first time this unit is merged, if the classes turn out to be all
+    // unique and defined, we replace the PreClass*'s with the corresponding
+    // Class*'s, with the low-order bit marked.
+    PreClass* pre = (PreClass*)mi->mergeableObj(ix);
+    if (LIKELY(uintptr_t(pre) & 1)) {
+      Stats::inc(Stats::UnitMerge_hoistable);
+      Class* cls = (Class*)(uintptr_t(pre) & ~1);
+      FTRACE(3, "  Merging cls {}\n", cls->name()->data());
+      auto const handle = cls->classHandle();
+      auto const handle_persistent = rds::isPersistentHandle(handle);
+      if (cls->isPersistent()) {
+        Stats::inc(Stats::UnitMerge_hoistable_persistent);
+      }
+      if (Stats::enabled() && handle_persistent) {
+        Stats::inc(Stats::UnitMerge_hoistable_persistent_cache);
+      }
+      if (Class* parent = cls->parent()) {
+        auto const parent_handle = parent->classHandle();
+        auto const parent_handle_persistent =
+          rds::isPersistentHandle(parent_handle);
+        if (parent->isPersistent()) {
+          Stats::inc(Stats::UnitMerge_hoistable_persistent_parent);
+        }
+        if (Stats::enabled() && parent_handle_persistent) {
+          Stats::inc(Stats::UnitMerge_hoistable_persistent_parent_cache);
+        }
+        auto const parent_cls_present =
+          rds::isHandleInit(parent_handle) &&
+          rds::handleToRef<LowPtr<Class>, rds::Mode::NonLocal>(parent_handle);
+        if (UNLIKELY(!parent_cls_present)) {
+          define.set(ix - first);
+          continue;
+        }
+      }
+      if (handle_persistent) {
+        rds::handleToRef<LowPtr<Class>, rds::Mode::Persistent>(handle) = cls;
+      } else {
+        assertx(rds::isNormalHandle(handle));
+        rds::handleToRef<LowPtr<Class>, rds::Mode::Normal>(handle) = cls;
+        rds::initHandle(handle);
+      }
+      if (debugger) phpDebuggerDefClassHook(cls);
+    } else {
+      if (UNLIKELY(!defClass(pre, false))) define.set(ix - first);
+    }
+  }
+  // everything is hoistable and already defined
+  if (end == (int)mi->m_mergeablesSize && define.none()) return;
+  bool hoistablesAllDefined = define.none();
+
+  // iterate over everything else and add to define set
+  assertx(ix == end);
+  while (ix < mi->m_mergeablesSize) {
+    void* obj = mi->mergeableObj(ix);
+    auto k = MergeKind(uintptr_t(obj) & 7);
+    if (k == MergeKind::Done) break;
+    define.set(ix - first);
+    ix++;
+  }
+
+  FTRACE(4, "  {} top level entities left to define\n", define.count());
+
+  // iterate over the define set until we can make no progress
+  // if there are still things left to be define, at that point just fatal.
+  bool failIsFatal = false;
+  // We'll exit this while loop either by defining everything or fataling
+  while (!define.none()) {
+    bool madeProgress = false;
+    auto i = define.find_first();
+    if (failIsFatal) {
+      // If we are about to fail, we need to give the error message of first
+      // non hoistable in order maintain backwards compat
+      while (i != define.npos && i < end - first) i = define.find_next(i);
+      if (i == define.npos) i = define.find_first();
+    }
+    for (; i != define.npos; i = define.find_next(i)) {
+      void* obj = mi->mergeableObj(i + first);
+
+      // Consider the above optimization
+      if (i < end - first && UNLIKELY(uintptr_t(obj) & 1)) {
+        Class* cls = (Class*)(uintptr_t(obj) & ~1);
+        if (defClass(cls->preClass(), failIsFatal)) {
+          madeProgress = true;
+          define.reset(i);
+        }
+        continue;
+      }
+
+      auto k = MergeKind(uintptr_t(obj) & 7);
+      switch (k) {
+        case MergeKind::Class: {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_class);
-          defClass((PreClass*)obj, true);
-          obj = mi->mergeableObj(++ix);
-          k = MergeKind(uintptr_t(obj) & 7);
-        } while (k == MergeKind::Class);
-        continue;
+          if (defClass((PreClass*)obj, failIsFatal)) {
+            madeProgress = true;
+            define.reset(i);
+          }
+          continue;
+        }
 
-      case MergeKind::UniqueDefinedClass:
-        do {
+        case MergeKind::UniqueDefinedClass: {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_unique);
           Class* other = nullptr;
           Class* cls = (Class*)((char*)obj - (int)k);
+          FTRACE(3, "  Merging cls {}\n", cls->name()->data());
           auto const handle = cls->classHandle();
           auto const handle_persistent = rds::isPersistentHandle(handle);
           if (cls->isPersistent()) {
@@ -2009,8 +2067,11 @@ void Unit::mergeImpl(MergeInfo* mi) {
           }
           Class::Avail avail = cls->avail(other, true);
           if (UNLIKELY(avail == Class::Avail::Fail)) {
+            if (!failIsFatal) continue;
             raise_error("unknown class %s", other->name()->data());
           }
+          madeProgress = true;
+          define.reset(i);
           assertx(avail == Class::Avail::True);
           if (handle_persistent) {
             rds::handleToRef<LowPtr<Class>,
@@ -2022,105 +2083,104 @@ void Unit::mergeImpl(MergeInfo* mi) {
             rds::initHandle(handle);
           }
           if (debugger) phpDebuggerDefClassHook(cls);
-          obj = mi->mergeableObj(++ix);
-          k = MergeKind(uintptr_t(obj) & 7);
-        } while (k == MergeKind::UniqueDefinedClass);
-        continue;
+          continue;
+        }
 
-      case MergeKind::Define:
-        do {
+        case MergeKind::Define: {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_define);
           auto const constantId = static_cast<Id>(intptr_t(obj)) >> 3;
           defCns(constantId);
-          obj = mi->mergeableObj(++ix);
-          k = MergeKind(uintptr_t(obj) & 7);
-        } while (k == MergeKind::Define);
-        continue;
+          madeProgress = true;
+          define.reset(i);
+          continue;
+        }
 
-      case MergeKind::TypeAlias:
-        do {
+        case MergeKind::TypeAlias: {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_typealias);
           auto const aliasId = static_cast<Id>(intptr_t(obj)) >> 3;
-          if (!defTypeAlias(aliasId)) {
+          auto const def = defTypeAlias(aliasId, failIsFatal);
+          if (def == Unit::DefTypeAliasResult::Fail) continue;
+          if (def == Unit::DefTypeAliasResult::Normal) {
             auto& attrs = m_typeAliases[aliasId].attrs;
             if (attrs & AttrPersistent) {
               attrs = static_cast<Attr>(attrs & ~AttrPersistent);
             }
           }
-          obj = mi->mergeableObj(++ix);
-          k = MergeKind(uintptr_t(obj) & 7);
-        } while (k == MergeKind::TypeAlias);
-        continue;
+          madeProgress = true;
+          define.reset(i);
+          continue;
+        }
 
-      case MergeKind::Record:
-        do {
+        case MergeKind::Record: {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_record);
           auto const recordId = static_cast<Id>(intptr_t(obj)) >> 3;
           auto const r = lookupPreRecordId(recordId);
-          defRecordDesc(r, true /*failIsFatal*/);
-          obj = mi->mergeableObj(++ix);
-          k = MergeKind(uintptr_t(obj) & 7);
-        } while (k == MergeKind::Record);
-        continue;
-
-      case MergeKind::Done:
-        assertx((unsigned)ix == mi->m_mergeablesSize);
-        if (UNLIKELY(m_mergeState.load(std::memory_order_relaxed) &
-                     MergeState::NeedsCompact)) {
-          SimpleLock lock(unitInitLock);
-          if (!(m_mergeState.load(std::memory_order_relaxed) &
-                MergeState::NeedsCompact)) {
-            return;
+          if (defRecordDesc(r, failIsFatal)) {
+            madeProgress = true;
+            define.reset(i);
           }
-          if (!redoHoistable) {
-            /*
-             * All the classes are known to be unique, and we just got
-             * here, so all were successfully defined. We can now go
-             * back and convert all MergeKind::Class entries to
-             * MergeKind::UniqueDefinedClass, and all hoistable
-             * classes to their Class*'s instead of PreClass*'s.
-             *
-             * We can also remove any Persistent Class/Func*'s,
-             * and any requires of modules that are (now) empty
-             */
-            size_t delta = compactMergeInfo(mi, nullptr, m_typeAliases,
-                                            m_constants);
-            MergeInfo* newMi = mi;
-            if (delta) {
-              newMi = MergeInfo::alloc(mi->m_mergeablesSize - delta);
-            }
-            /*
-             * In the case where mi == newMi, there's an apparent
-             * race here. Although we have a lock, so we're the only
-             * ones modifying this, there could be any number of
-             * readers. But thats ok, because it doesnt matter
-             * whether they see the old contents or the new.
-             */
-            compactMergeInfo(mi, newMi, m_typeAliases, m_constants);
-            if (newMi != mi) {
-              this->m_mergeInfo.store(newMi, std::memory_order_release);
-              Treadmill::deferredFree(mi);
-              if (isMergeOnly() && newMi->m_mergeablesSize == 1) {
-                assertx(newMi->funcBegin()[0]->isPseudoMain());
-                m_mergeState.fetch_or(MergeState::Empty,
-                                      std::memory_order_relaxed);
-              }
-            }
-            assertx(newMi->m_firstMergeablePreClass
-                      == newMi->m_mergeablesSize ||
-                   isMergeOnly());
-          }
-          m_mergeState.fetch_and(~MergeState::NeedsCompact,
-                                 std::memory_order_relaxed);
+          continue;
         }
-        return;
+
+        case MergeKind::Done:
+          not_reached();
+          return;
+      }
     }
-    // Normal cases should continue, KindDone returns
-    not_reached();
-  } while (true);
+    if (!madeProgress) failIsFatal = true;
+  }
+
+  if (UNLIKELY(m_mergeState.load(std::memory_order_relaxed) &
+               MergeState::NeedsCompact)) {
+    SimpleLock lock(unitInitLock);
+    if (!(m_mergeState.load(std::memory_order_relaxed) &
+          MergeState::NeedsCompact)) {
+      return;
+    }
+    if (hoistablesAllDefined) {
+      /*
+       * All the classes are known to be unique, and we just got
+       * here, so all were successfully defined. We can now go
+       * back and convert all MergeKind::Class entries to
+       * MergeKind::UniqueDefinedClass, and all hoistable
+       * classes to their Class*'s instead of PreClass*'s.
+       *
+       * We can also remove any Persistent Class/Func*'s,
+       * and any requires of modules that are (now) empty
+       */
+      size_t delta = compactMergeInfo(mi, nullptr, m_typeAliases,
+                                      m_constants);
+      MergeInfo* newMi = mi;
+      if (delta) {
+        newMi = MergeInfo::alloc(mi->m_mergeablesSize - delta);
+      }
+      /*
+       * In the case where mi == newMi, there's an apparent
+       * race here. Although we have a lock, so we're the only
+       * ones modifying this, there could be any number of
+       * readers. But thats ok, because it doesnt matter
+       * whether they see the old contents or the new.
+       */
+      compactMergeInfo(mi, newMi, m_typeAliases, m_constants);
+      if (newMi != mi) {
+        this->m_mergeInfo.store(newMi, std::memory_order_release);
+        Treadmill::deferredFree(mi);
+        if (isMergeOnly() && newMi->m_mergeablesSize == 1) {
+          assertx(newMi->funcBegin()[0]->isPseudoMain());
+          m_mergeState.fetch_or(MergeState::Empty,
+                                std::memory_order_relaxed);
+        }
+      }
+      assertx(newMi->m_firstMergeablePreClass
+                == newMi->m_mergeablesSize ||
+             isMergeOnly());
+    }
+    m_mergeState.fetch_and(~MergeState::NeedsCompact,
+                           std::memory_order_relaxed);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

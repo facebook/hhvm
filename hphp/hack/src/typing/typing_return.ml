@@ -90,7 +90,7 @@ let wrap_awaitable env p rty =
   | Ast_defs.FSync ->
     rty
   | Ast_defs.FGenerator
-  (* Is an error, but caught in NastCheck. *)
+  (* Is an error, but caught in Nast_check. *)
   | Ast_defs.FAsyncGenerator ->
     TUtils.terr env Reason.Rnone
   | Ast_defs.FAsync ->

@@ -356,7 +356,7 @@ let rec fun_def ctx f :
       let mut = TUtils.fun_mutable f.f_user_attributes in
       let env = Env.set_env_reactive env reactive in
       let env = Env.set_fun_mutable env mut in
-      NastCheck.fun_ env f;
+      Typing_check_decls.fun_ env f;
       let env =
         Phase.localize_and_add_ast_generic_parameters_and_where_constraints
           pos
@@ -741,7 +741,7 @@ let rec class_def ctx c =
   let env = Env.set_env_pessimize env in
   Typing_helpers.add_decl_errors
     Option.(map tc (fun tc -> value_exn (Cls.decl_errors tc)));
-  NastCheck.class_ env c;
+  Typing_check_decls.class_ env c;
   NastInitCheck.class_ env c;
   match tc with
   | None ->
@@ -1163,7 +1163,7 @@ and pu_enum_def
       - all values are defined one and only one times in pum_types, and
         are correctly typed according to pum_types instances.
       - all types satisfy their case type constraints. This is actually
-        done in NastCheck
+        done in Typing_check_decls
 
     Note: Structural correctness (mostly uniqueness and exhaustivity)
     is checked during Nast check.
@@ -1216,7 +1216,7 @@ and pu_enum_def
     let process_member env pum =
       (* As mentioned above, we only check that the expressions have the
        * right type. Types constraints have already been validated in
-       * NastCheck
+       * Typing_check_decls
        *)
       (* Check that case expression are correctly typed *)
       let make_aast_tparam (sid, hint) =

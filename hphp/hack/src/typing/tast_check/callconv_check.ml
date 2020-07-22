@@ -47,7 +47,7 @@ let check_types env ((p, _), te) =
         let ty_str = Env.print_error_ty env ty1 in
         let msgl = Reason.to_string ("This is " ^ ty_str) (get_reason ty1) in
         Errors.inout_argument_bad_type p msgl
-    (* Other invalid expressions are caught in NastCheck. *)
+    (* Other invalid expressions are caught in Nast_check. *)
     | _ -> ()
   in
   check_types_helper te

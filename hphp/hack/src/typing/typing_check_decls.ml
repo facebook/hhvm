@@ -7,17 +7,11 @@
  *
  *)
 
-(* This module performs checks after the naming has been done.
-   Basically any check that doesn't fall in the typing category. *)
-(* Check of type application arity *)
-(* Check no `new AbstractClass` (or trait, or interface) *)
-(* Check no top-level break / continue *)
-
-(* NOTE: since the typing environment does not generally contain
-   information about non-Hack code, some of these checks can
-   only be done in strict (i.e. "everything is Hack") mode. Use
-   `if Env.is_strict env.tenv` style checks accordingly.
-*)
+(* This module performs some "validity" checks on declared types in
+ * function and member signatures, extends, implements, uses, etc.
+ * - trivial syntactic errors (e.g. writing ?nonnull instead of mixed)
+ * - unsatisfied constraints (e.g. C<bool> where C requires T as arraykey)
+ *)
 
 open Hh_prelude
 open Aast

@@ -39,7 +39,7 @@ let is_some_reactivity_attribute { ua_name = (_, name); _ } =
   || String.equal name SN.UserAttributes.uaLocalReactive
   || String.equal name SN.UserAttributes.uaShallowReactive
 
-(* During NastCheck, all reactivity kinds are the same *)
+(* During Nast_check, all reactivity kinds are the same *)
 let fun_is_reactive user_attributes =
   List.exists user_attributes ~f:is_some_reactivity_attribute
 

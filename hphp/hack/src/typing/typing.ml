@@ -2503,7 +2503,7 @@ and expr_
     let rty =
       match Env.get_fn_kind env with
       | Ast_defs.FCoroutine ->
-        (* yield in coroutine is already reported as error in NastCheck *)
+        (* yield in coroutine is already reported as error in Nast_check *)
         let (_, _, ty) = expr_error env (Reason.Rwitness p) outer in
         ty
       | Ast_defs.FGenerator ->
@@ -5671,7 +5671,7 @@ and trait_most_concrete_req_class trait env =
           | Some c when Ast_defs.(equal_class_kind (Cls.kind c) Cinterface) ->
             acc
           | Some c when Ast_defs.(equal_class_kind (Cls.kind c) Ctrait) ->
-            (* this is an error case for which the nastCheck spits out
+            (* this is an error case for which Typing_check_decls spits out
              * an error, but does *not* currently remove the offending
              * 'require extends' or 'require implements' *)
             acc
@@ -6988,7 +6988,7 @@ and typedef_def ctx typedef =
       typedef.t_tparams
       []
   in
-  NastCheck.typedef env typedef;
+  Typing_check_decls.typedef env typedef;
   let {
     t_annotation = ();
     t_name = (t_pos, t_name);

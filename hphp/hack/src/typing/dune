@@ -137,7 +137,6 @@
   (name typing)
   (wrapped false)
   (modules
-    nastCheck
     nastInitCheck
     typing
     typing_alias
@@ -145,6 +144,7 @@
     typing_arithmetic
     typing_array_access
     typing_attributes
+    typing_check_decls
     typing_debug
     typing_disposable
     typing_extends

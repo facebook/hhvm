@@ -1840,6 +1840,10 @@ and expr_
       (* Create a class type for the given object instantiated with unresolved
        * types for its type parameters.
        *)
+      let () =
+        if Ast_defs.is_c_trait (Cls.kind class_) then
+          Errors.meth_caller_trait pos class_name
+      in
       let (env, tvarl) =
         List.map_env env (Cls.tparams class_) (fun env _ ->
             Env.fresh_type env p)

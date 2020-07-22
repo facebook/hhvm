@@ -5622,6 +5622,14 @@ let redundant_covariant pos msg suggest =
     ^ suggest
     ^ "` or specifying <<__Explicit>> on the generic parameter" )
 
+let meth_caller_trait pos trait_name =
+  add
+    (Typing.err_code Typing.MethCallerTrait)
+    pos
+    ( strip_ns trait_name
+    ^ " is a trait which cannot be used with meth_caller. Use a class instead."
+    )
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

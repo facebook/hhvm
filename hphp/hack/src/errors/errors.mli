@@ -1379,3 +1379,5 @@ val static_meth_with_class_reified_generic : Pos.t -> Pos.t -> unit
 val exception_occurred : Pos.t -> unit
 
 val redundant_covariant : Pos.t -> string -> string -> unit
+
+val meth_caller_trait : Pos.t -> string -> unit

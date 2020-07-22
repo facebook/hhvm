@@ -629,4 +629,5 @@ InvalidArrayKeyWrite = 4371
 NullMemberWrite = 4372
 NonObjectMemberWrite = 4373
 ConcreteConstInterfaceOverride = 4374
+MethCallerTrait = 4375
   |}]

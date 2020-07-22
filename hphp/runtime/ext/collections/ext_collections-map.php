@@ -274,7 +274,7 @@ final class Map implements \MutableMap {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
   public function map(<<__AtMostRxAsFunc>> mixed $callback): \HH\Map {
     $res = new \HH\Map($this);
     foreach ($this as $k => $v) {
@@ -288,7 +288,7 @@ final class Map implements \MutableMap {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
   public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\Map {
     $res = new \HH\Map($this);
     foreach ($this as $k => $v) {
@@ -654,7 +654,7 @@ final class ImmMap implements \ConstMap {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
   public function map(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmMap {
     $res = $this->toMap();
     foreach ($this as $k => $v) {
@@ -668,7 +668,7 @@ final class ImmMap implements \ConstMap {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
   public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmMap {
     $res = $this->toMap();
     foreach ($this as $k => $v) {

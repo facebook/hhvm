@@ -315,7 +315,7 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
   public function map(<<__AtMostRxAsFunc>> mixed $callback): \HH\Vector {
     $ret = vec[];
     foreach ($this as $v) {
@@ -329,7 +329,7 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
   public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\Vector {
     $ret = vec[];
     foreach ($this as $k => $v) {
@@ -626,7 +626,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
   public function map(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmVector {
     $ret = vec[];
     foreach ($this as $v) {
@@ -640,7 +640,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable, __ProvenanceSkipFrame>>
   public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): \HH\ImmVector {
     $ret = vec[];
     foreach ($this as $k => $v) {

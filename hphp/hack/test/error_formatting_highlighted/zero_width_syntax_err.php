@@ -1,3 +1,3 @@
 <?hh // strict
 
-class Foo extends {}
+class Foo extends    {}

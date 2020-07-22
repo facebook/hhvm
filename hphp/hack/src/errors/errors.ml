@@ -690,11 +690,17 @@ let line_num_highlighted line_num =
   background_highlighted (string_of_int line_num)
 
 let marked_messages (position_group : position_group) (line_num : int) =
-  let mml = position_group.messages in
-  List.filter mml ~f:(fun (_, (pos, _)) ->
+  List.filter position_group.messages ~f:(fun (_, (pos, _)) ->
       let begin_line = Pos.line pos in
-      let end_line = Pos.end_line pos in
-      begin_line <= line_num && line_num <= end_line)
+      let (end_line, end_col) = Pos.end_line_column pos in
+      if line_num = end_line then
+        (* Since (end_line, end_col) is technically an exclusive bound, only mark
+          this line if we're supposed to mark at least one character *)
+        end_col > 0
+      else
+        (* Otherwise just compare inclusive line numbers,
+           which handles zero-width positions *)
+        begin_line <= line_num && line_num <= end_line)
 
 let markers (position_group : position_group) (line_num : int) =
   marked_messages position_group line_num |> List.map ~f:fst
@@ -753,30 +759,48 @@ let line_margin_highlighted position_group line_num col_width_raw : string =
   in
   prefix
 
+(* Checks if a line/col pair is inside a position; handles
+   the case where the position is empty, which occurs e.g.
+
+    0         1         2
+    01234567890123456789012
+    class Foo extends    {}
+
+  where a type specifier is expected before '{'. Given a
+  position with length 0 and line_column 21, it will consider
+  the '{' as being inside the position, and highlight it.
+*)
+let line_and_col_inside_pos pos line_num col_num =
+  let (ln, cn) = Pos.line_column pos in
+  (Pos.length pos = 0 && ln = line_num && cn = col_num)
+  (* +1 because Pos.inside expects 1-indexed *)
+  || Pos.inside pos line_num (col_num + 1)
+
 (* line_num is 1-based *)
 let line_highlighted position_group line_num line =
   match marked_messages position_group line_num with
   | [] -> default_highlighted line
   | ms ->
     let get_markers_at_col col_num =
-      (* +1 because Pos.inside expects 1-indexed *)
       List.filter ms ~f:(fun (_, (pos, _)) ->
-          Pos.inside pos line_num (col_num + 1))
+          line_and_col_inside_pos pos line_num col_num)
       |> List.map ~f:fst
+    in
+    let color_column ms c =
+      (* For multiple marked messages for same position, highlight with
+          color of lower-numbered (i.e. more important) message *)
+      let sorted =
+        List.sort ms ~compare:(fun (m, _) (n, _) -> Int.compare m n)
+      in
+      let (_, color) = List.hd_exn sorted in
+      Tty.apply_color (Tty.Normal color) (Char.to_string c)
     in
     let highlighted_columns : string list =
       (* Not String.mapi because we don't want to return a char from each element *)
       List.mapi (String.to_list line) ~f:(fun i c ->
           match get_markers_at_col i with
           | [] -> default_highlighted (Char.to_string c)
-          | ms ->
-            (* For multiple marked messages for same position, highlight with
-               color of lower-numbered (i.e. more important) message *)
-            let sorted =
-              List.sort ms ~compare:(fun (m, _) (n, _) -> Int.compare m n)
-            in
-            let (_, color) = List.hd_exn sorted in
-            Tty.apply_color (Tty.Normal color) (Char.to_string c))
+          | ms -> color_column ms c)
     in
     String.concat highlighted_columns
 
@@ -946,11 +970,11 @@ let format_all_contexts_highlighted (marker_and_msgs : marked_message list) =
       (background_highlighted ":")
   in
   let contexts =
-    List.map position_groups (fun spnl ->
-        (* Each position_groups list (spnl) is for a single file, so separate each with ':' *)
+    List.map position_groups (fun pgl ->
+        (* Each position_groups list (pgl) is for a single file, so separate each with ':' *)
         let ctx_strs =
-          List.mapi spnl ~f:(fun i spn ->
-              format_context_highlighted spn col_width ~is_first:(i = 0))
+          List.mapi pgl ~f:(fun i pg ->
+              format_context_highlighted pg col_width ~is_first:(i = 0))
         in
         String.concat ~sep ctx_strs)
   in
@@ -1010,7 +1034,7 @@ let make_marker n error_code : marker =
     if n <= 1 then
       claim_color
     else
-      let ix = (n - 1) mod List.length color_wheel in
+      let ix = (n - 2) mod List.length color_wheel in
       List.nth_exn color_wheel ix
   in
   (n, color)

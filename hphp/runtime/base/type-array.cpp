@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"

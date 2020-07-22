@@ -114,7 +114,7 @@ let create_root_from_type_constant
       raise_error (fun () ->
           Errors.smember_not_found
             `class_typeconst
-            (get_pos root)
+            id_pos
             (Cls.pos class_, class_name)
             id_name
             `no_hint

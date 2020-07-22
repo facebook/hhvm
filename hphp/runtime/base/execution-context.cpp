@@ -1249,7 +1249,7 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
     throw PhpNotSupportedException(unit->filepath()->data());
   }
 
-  auto ret = invokePseudoMain(unit->getMain(nullptr, false));
+  const_cast<Unit*>(unit)->merge();
 
   auto it = unit->getCachedEntryPoint();
   if (callByHPHPInvoke && it != nullptr) {
@@ -1263,7 +1263,7 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
       invokeFunc(it, init_null_variant, nullptr, nullptr, false);
     }
   }
-  return ret;
+  return make_tv<KindOfInt64>(1);
 }
 
 void ExecutionContext::syncGdbState() {
@@ -1575,13 +1575,6 @@ static inline void enterVMCustomHandler(ActRec* ar, Action action) {
   }
 }
 
-TypedValue ExecutionContext::invokePseudoMain(const Func* f) {
-  assertx(f->isPseudoMain());
-  auto toMerge = f->unit();
-  toMerge->merge();
-  return make_tv<KindOfInt64>(1);
-}
-
 TypedValue ExecutionContext::invokeFunc(const Func* f,
                                         const Variant& args_,
                                         ObjectData* thiz /* = NULL */,
@@ -1830,20 +1823,6 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
   return prevFp;
 }
 
-/*
-  Instantiate hoistable classes and functions.
-  If there is any more work left to do, setup a
-  new frame ready to execute the pseudomain.
-
-  return true iff the pseudomain needs to be executed.
-*/
-bool ExecutionContext::evalUnit(Unit* unit, PC callPC) {
-  vmpc() = callPC;
-  unit->merge();
-  *vmStack().allocTV() = make_tv<KindOfInt64>(1);
-  return false;
-}
-
 Variant ExecutionContext::getEvaledArg(const StringData* val,
                                        const String& namespacedName,
                                        const Unit* funcUnit) {
@@ -2012,19 +1991,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
   if (fp && !fp->hasVarEnv()) {
     fp->setVarEnv(VarEnv::createLocal(fp));
   }
-  ObjectData *this_ = nullptr;
-  // NB: the ActRec and function within the AR may have different classes. The
-  // class in the ActRec is the type used when invoking the function (i.e.,
-  // Derived in Derived::Foo()) while the class obtained from the function is
-  // the type that declared the function Foo, which may be Base. We need both
-  // the class to match any object that this function may have been invoked on,
-  // and we need the class from the function execution is stopped in.
-  Class *functionClass = nullptr;
-  if (fp) {
-    functionClass = fp->m_func->cls();
-    if (functionClass && fp->hasThis()) this_ = fp->getThis();
-    phpDebuggerEvalHook(fp->m_func);
-  }
+  if (fp) phpDebuggerEvalHook(fp->m_func);
 
   const static StaticString s_cppException("Hit an exception");
   const static StaticString s_phpException("Hit a php exception");
@@ -2071,7 +2038,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     }
     SCOPE_EXIT { vmpc() = savedPC; vmfp() = savedFP; };
 
-    invokePseudoMain(unit->getMain(functionClass, this_));
+    unit->merge();
 
     enum VarAction { StoreFrame, StoreVV, StoreEnv };
 

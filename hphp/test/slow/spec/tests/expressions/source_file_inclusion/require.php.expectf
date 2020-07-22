@@ -1,19 +1,19 @@
 Inside file >%s/expressions/source_file_inclusion/require.php< at line >11< with namespace ><
-int(1)
+bool(true)
 Inside file >%s/expressions/source_file_inclusion/require.php< at line >29< with namespace ><
-int(1)
+bool(true)
 Inside file >%s/expressions/source_file_inclusion/require.php< at line >37< with namespace ><
 ----------------------------------
 MY_MIN is not defined
 ----------------------------------
-int(1)
-int(1)
-int(1)
+bool(true)
+bool(true)
+bool(true)
 ----------------------------------
 ----------------------------------
 Inside file >%s/expressions/source_file_inclusion/require.php< at line >84<
 ----------------------------------
-int(1)
+bool(true)
 ----------------------------------
 Inside file >%s/expressions/source_file_inclusion/require.php< at line >93<
 Inside test() in %s/expressions/source_file_inclusion/test.php

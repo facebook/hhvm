@@ -4822,11 +4822,10 @@ OPTBLD_INLINE void inclOp(PC origpc, PC& pc, InclOpFlags flags,
   }
 
   if (!(flags & InclOpFlags::Once) || initial) {
-    g_context->evalUnit(unit, origpc);
-  } else {
-    Stats::inc(Stats::PseudoMain_Guarded);
-    vmStack().pushBool(true);
+    vmpc() = origpc;
+    unit->merge();
   }
+  vmStack().pushBool(true);
 }
 
 OPTBLD_INLINE void iopIncl(PC origpc, PC& pc) {
@@ -4900,7 +4899,9 @@ OPTBLD_INLINE void iopEval(PC origpc, PC& pc) {
     vmStack().pushBool(false);
     return;
   }
-  vm->evalUnit(unit, origpc);
+  vmpc() = origpc;
+  unit->merge();
+  vmStack().pushBool(true);
 }
 
 OPTBLD_INLINE void iopDefCls(uint32_t cid) {

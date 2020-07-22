@@ -247,14 +247,11 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
   try {
     VMRegAnchor _;
     bool initial;
-    auto const ec = g_context.getNoCheck();
     auto const unit = lookupUnit(fName.get(), "", &initial,
                                  Native::s_noNativeFuncs,
                                  RuntimeOption::TrustAutoloaderPath);
     if (unit) {
-      if (initial) {
-        tvDecRefGen(ec->invokePseudoMain(unit->getMain(nullptr, false)));
-      }
+      if (initial) unit->merge();
       ok = true;
     }
   } catch (ExitException&) {

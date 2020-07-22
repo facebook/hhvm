@@ -172,7 +172,7 @@
     (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name clowder_paste)
+  (name clowder_paste_stubs)
   (wrapped false)
   (modules clowder_paste)
   (preprocess

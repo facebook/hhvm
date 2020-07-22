@@ -184,8 +184,7 @@ Unit::MergeInfo* Unit::MergeInfo::alloc(size_t size) {
 // Construction and destruction.
 
 Unit::Unit()
-  : m_mergeOnly(false)
-  , m_interpretOnly(false)
+  : m_interpretOnly(false)
   , m_isHHFile(false)
   , m_extended(false)
   , m_serialized(false)
@@ -1699,40 +1698,38 @@ void Unit::initialMerge() {
       }
     }
 
-    if (isMergeOnly()) {
-      ix = mi->m_firstMergeablePreClass;
-      end = mi->m_mergeablesSize;
-      while (ix < end) {
-        void *obj = mi->mergeableObj(ix);
-        auto k = MergeKind(uintptr_t(obj) & 7);
-        switch (k) {
-          case MergeKind::UniqueDefinedClass:
-          case MergeKind::Done:
-            not_reached();
-          case MergeKind::TypeAlias: {
-            auto const aliasId = static_cast<Id>(intptr_t(obj)) >> 3;
-            if (m_typeAliases[aliasId].attrs & AttrPersistent) {
-              needsCompact = true;
-            }
-            break;
+    ix = mi->m_firstMergeablePreClass;
+    end = mi->m_mergeablesSize;
+    while (ix < end) {
+      void *obj = mi->mergeableObj(ix);
+      auto k = MergeKind(uintptr_t(obj) & 7);
+      switch (k) {
+        case MergeKind::UniqueDefinedClass:
+        case MergeKind::Done:
+          not_reached();
+        case MergeKind::TypeAlias: {
+          auto const aliasId = static_cast<Id>(intptr_t(obj)) >> 3;
+          if (m_typeAliases[aliasId].attrs & AttrPersistent) {
+            needsCompact = true;
           }
-          case MergeKind::Class:
-            if (static_cast<PreClass*>(obj)->attrs() & AttrUnique) {
-              needsCompact = true;
-            }
-            break;
-          case MergeKind::Record:
-            break;
-          case MergeKind::Define: {
-            auto const constantId = static_cast<Id>(intptr_t(obj)) >> 3;
-            if (m_constants[constantId].attrs & AttrPersistent) {
-              needsCompact = true;
-            }
-            break;
-          }
+          break;
         }
-        ix++;
+        case MergeKind::Class:
+          if (static_cast<PreClass*>(obj)->attrs() & AttrUnique) {
+            needsCompact = true;
+          }
+          break;
+        case MergeKind::Record:
+          break;
+        case MergeKind::Define: {
+          auto const constantId = static_cast<Id>(intptr_t(obj)) >> 3;
+          if (m_constants[constantId].attrs & AttrPersistent) {
+            needsCompact = true;
+          }
+          break;
+        }
       }
+      ix++;
     }
     if (needsCompact) state |= MergeState::NeedsCompact;
   }
@@ -2168,15 +2165,12 @@ void Unit::mergeImpl(MergeInfo* mi) {
       if (newMi != mi) {
         this->m_mergeInfo.store(newMi, std::memory_order_release);
         Treadmill::deferredFree(mi);
-        if (isMergeOnly() && newMi->m_mergeablesSize == 1) {
+        if (newMi->m_mergeablesSize == 1) {
           assertx(newMi->funcBegin()[0]->isPseudoMain());
           m_mergeState.fetch_or(MergeState::Empty,
                                 std::memory_order_relaxed);
         }
       }
-      assertx(newMi->m_firstMergeablePreClass
-                == newMi->m_mergeablesSize ||
-             isMergeOnly());
     }
     m_mergeState.fetch_and(~MergeState::NeedsCompact,
                            std::memory_order_relaxed);

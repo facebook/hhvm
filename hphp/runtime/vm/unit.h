@@ -833,11 +833,6 @@ public:
   void merge();
 
   /*
-   * Is it sufficient to merge the Unit, and skip invoking its pseudomain?
-   */
-  bool isMergeOnly() const;
-
-  /*
    * Is this Unit empty---i.e., does it define nothing and have no
    * side-effects?
    */
@@ -972,7 +967,6 @@ private:
    * unitInitLock (see unit.cpp).
    */
   std::atomic<uint8_t> m_mergeState{MergeState::Unmerged};
-  bool m_mergeOnly: 1;
   bool m_interpretOnly : 1;
   bool m_isHHFile : 1;
   bool m_extended : 1;

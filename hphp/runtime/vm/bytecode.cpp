@@ -1169,40 +1169,6 @@ void checkImplicitContextErrors(const ActRec* ar) {
 
 static void dispatch();
 
-void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv) {
-  assertx(enterFnAr);
-  assertx(enterFnAr->func()->isPseudoMain());
-  assertx(!isResumed(enterFnAr));
-  ARRPROV_USE_VMPC();
-  Stats::inc(Stats::VMEnter);
-
-  enterFnAr->setVarEnv(varEnv);
-  pushFrameSlots(enterFnAr->func());
-  if (varEnv != nullptr) {
-    auto oldFp = vmfp();
-    if (UNLIKELY(oldFp && oldFp->skipFrame())) {
-      oldFp = g_context->getPrevVMStateSkipFrame(oldFp);
-    }
-    varEnv->enterFP(oldFp, enterFnAr);
-  }
-  vmfp() = enterFnAr;
-  vmpc() = enterFnAr->func()->getEntry();
-
-  if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
-  checkStack(vmStack(), enterFnAr->m_func, 0);
-  assertx(vmfp()->func()->contains(vmpc()));
-
-  if (RID().getJit() && !RID().getJitFolding()) {
-    jit::TCA start = enterFnAr->m_func->getFuncBody();
-    assert_flog(jit::tc::isValidCodeAddress(start),
-                "start = {} ; func = {} ({})\n",
-                start, enterFnAr->m_func, enterFnAr->m_func->fullName());
-    jit::enterTC(start);
-  } else {
-    dispatch();
-  }
-}
-
 void enterVMAtFunc(ActRec* enterFnAr, Array&& generics, bool hasInOut,
                    bool dynamicCall, bool allowDynCallNoPointer) {
   assertx(enterFnAr);
@@ -4856,7 +4822,7 @@ OPTBLD_INLINE void inclOp(PC origpc, PC& pc, InclOpFlags flags,
   }
 
   if (!(flags & InclOpFlags::Once) || initial) {
-    g_context->evalUnit(unit, origpc, pc, EventHook::PseudoMain);
+    g_context->evalUnit(unit, origpc);
   } else {
     Stats::inc(Stats::PseudoMain_Guarded);
     vmStack().pushBool(true);
@@ -4934,7 +4900,7 @@ OPTBLD_INLINE void iopEval(PC origpc, PC& pc) {
     vmStack().pushBool(false);
     return;
   }
-  vm->evalUnit(unit, origpc, pc, EventHook::Eval);
+  vm->evalUnit(unit, origpc);
 }
 
 OPTBLD_INLINE void iopDefCls(uint32_t cid) {

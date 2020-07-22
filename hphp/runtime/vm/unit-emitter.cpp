@@ -204,7 +204,6 @@ void UnitEmitter::addTrivialPseudoMain() {
   emitOp(OpRetC);
   mfe->maxStackCells = 1;
   mfe->finish(bcPos());
-  m_mergeOnly = true;
 }
 
 FuncEmitter* UnitEmitter::newFuncEmitter(const StringData* name) {
@@ -626,7 +625,6 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_bc = allocateBCRegion(m_bc, m_bclen);
   u->m_bclen = m_bclen;
   u->m_filepath = m_filepath;
-  u->m_mergeOnly = m_mergeOnly;
   u->m_isHHFile = m_isHHFile;
   u->m_dirpath = makeStaticString(FileUtil::dirname(StrNR{m_filepath}));
   u->m_sha1 = m_sha1;
@@ -647,7 +645,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_ICE = m_ICE;
 
   size_t ix = m_fes.size() + m_hoistablePceIdList.size();
-  if (m_mergeOnly && !m_allClassesHoistable) ix += m_mergeableStmts.size();
+  if (!m_allClassesHoistable) ix += m_mergeableStmts.size();
   Unit::MergeInfo *mi = Unit::MergeInfo::alloc(ix);
   u->m_mergeInfo.store(mi, std::memory_order_relaxed);
   ix = 0;
@@ -663,7 +661,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
     mi->mergeableObj(ix++) = u->m_preClasses[id].get();
   }
   mi->m_firstMergeablePreClass = ix;
-  if (u->m_mergeOnly && !m_allClassesHoistable) {
+  if (!m_allClassesHoistable) {
     for (auto& mergeable : m_mergeableStmts) {
       switch (mergeable.first) {
         case MergeKind::Class:
@@ -756,8 +754,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
 
 template<class SerDe>
 void UnitEmitter::serdeMetaData(SerDe& sd) {
-  sd(m_mergeOnly)
-    (m_isHHFile)
+  sd(m_isHHFile)
     (m_metaData)
     (m_fileAttributes)
     (m_symbol_refs)

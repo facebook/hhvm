@@ -1278,7 +1278,6 @@ void emit_pseudomain(EmitUnitState& state,
   auto const fe = ue.getMain();
   auto const func = php::ConstFunc(&pm);
   auto const info = emit_bytecode(state, ue, func);
-  ue.m_mergeOnly = true;
 
   emit_finish_func(state, func, *fe, info);
 }

@@ -394,10 +394,6 @@ inline Class* Unit::getClass(const StringData* name, bool tryAutoload) {
 ///////////////////////////////////////////////////////////////////////////////
 // Merge.
 
-inline bool Unit::isMergeOnly() const {
-  return m_mergeOnly;
-}
-
 inline bool Unit::isEmpty() const {
   return m_mergeState.load(std::memory_order_relaxed) & MergeState::Empty;
 }

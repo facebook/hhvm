@@ -1249,7 +1249,7 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
     throw PhpNotSupportedException(unit->filepath()->data());
   }
 
-  auto ret = invokePseudoMain(unit->getMain(nullptr, false), m_globalVarEnv);
+  auto ret = invokePseudoMain(unit->getMain(nullptr, false));
 
   auto it = unit->getCachedEntryPoint();
   if (callByHPHPInvoke && it != nullptr) {
@@ -1575,42 +1575,11 @@ static inline void enterVMCustomHandler(ActRec* ar, Action action) {
   }
 }
 
-TypedValue ExecutionContext::invokePseudoMain(const Func* f,
-                                              VarEnv* varEnv /* = NULL */,
-                                              ObjectData* thiz /* = NULL */,
-                                              Class* cls /* = NULL */) {
+TypedValue ExecutionContext::invokePseudoMain(const Func* f) {
   assertx(f->isPseudoMain());
   auto toMerge = f->unit();
   toMerge->merge();
-  if (toMerge->isMergeOnly()) {
-    Stats::inc(Stats::PseudoMain_Skipped);
-    return make_tv<KindOfInt64>(1);
-  }
-
-  Stats::inc(Stats::PseudoMain_Executed);
-  VMRegAnchor _;
-
-  // We must do a stack overflow check for leaf functions on re-entry,
-  // because we won't have checked that the stack is deep enough for a
-  // leaf function /after/ re-entry, and the prologue for the leaf
-  // function will not make a check.
-  if (f->isPhpLeafFn()) {
-    // Check both the native stack and VM stack for overflow.
-    checkStack(vmStack(), f, kNumActRecCells);
-  } else {
-    // invokePseudoMain() must always check the native stack for overflow no
-    // matter what.
-    checkNativeStack();
-  }
-
-  // Reserve space for ActRec.
-  for (auto i = kNumActRecCells; i > 0; --i) vmStack().pushUninit();
-
-  auto const doEnterVM = [&] (ActRec* ar) {
-    enterVMAtPseudoMain(ar, varEnv);
-  };
-
-  return invokeFuncImpl(f, thiz, cls, 0, doEnterVM);
+  return make_tv<KindOfInt64>(1);
 }
 
 TypedValue ExecutionContext::invokeFunc(const Func* f,
@@ -1868,53 +1837,11 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
 
   return true iff the pseudomain needs to be executed.
 */
-bool ExecutionContext::evalUnit(Unit* unit, PC callPC, PC& pc, int funcType) {
+bool ExecutionContext::evalUnit(Unit* unit, PC callPC) {
   vmpc() = callPC;
   unit->merge();
-  if (unit->isMergeOnly()) {
-    Stats::inc(Stats::PseudoMain_Skipped);
-    *vmStack().allocTV() = make_tv<KindOfInt64>(1);
-    return false;
-  }
-
-  Stats::inc(Stats::PseudoMain_Executed);
-
-  ActRec* ar = vmStack().allocA();
-  auto const cls = vmfp()->func()->cls();
-  auto const hasThis = cls && !vmfp()->func()->isStatic();
-  auto const func = unit->getMain(cls, hasThis);
-  assertx(!func->isCPPBuiltin());
-  ar->m_func = func;
-  if (cls) {
-    ar->setThisOrClass(vmfp()->getThisOrClass());
-    if (hasThis) ar->getThis()->incRefCount();
-  } else {
-    ar->trashThis();
-  }
-  ar->setNumArgs(0);
-  assertx(vmfp());
-  ar->setReturn(vmfp(), callPC, jit::tc::ustubs().retHelper, false);
-  pushFrameSlots(func);
-
-  auto prevFp = vmfp();
-  if (UNLIKELY(prevFp->skipFrame())) {
-    prevFp = g_context->getPrevVMStateSkipFrame(prevFp);
-  }
-  assertx(prevFp);
-  assertx(prevFp->func()->attrs() & AttrMayUseVV);
-  if (!prevFp->hasVarEnv()) {
-    prevFp->setVarEnv(VarEnv::createLocal(prevFp));
-  }
-  ar->m_varEnv = prevFp->m_varEnv;
-  ar->m_varEnv->enterFP(prevFp, ar);
-
-  vmfp() = ar;
-  pc = func->getEntry();
-  vmpc() = pc;
-  bool ret = EventHook::FunctionCall(vmfp(), funcType);
-  pc = vmpc();
-  checkStack(vmStack(), func, 0);
-  return ret;
+  *vmStack().allocTV() = make_tv<KindOfInt64>(1);
+  return false;
 }
 
 Variant ExecutionContext::getEvaledArg(const StringData* val,
@@ -2092,17 +2019,10 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
   // the type that declared the function Foo, which may be Base. We need both
   // the class to match any object that this function may have been invoked on,
   // and we need the class from the function execution is stopped in.
-  Class *frameClass = nullptr;
   Class *functionClass = nullptr;
   if (fp) {
     functionClass = fp->m_func->cls();
-    if (functionClass) {
-      if (fp->hasThis()) {
-        this_ = fp->getThis();
-      } else if (fp->hasClass()) {
-        frameClass = fp->getClass();
-      }
-    }
+    if (functionClass && fp->hasThis()) this_ = fp->getThis();
     phpDebuggerEvalHook(fp->m_func);
   }
 
@@ -2151,12 +2071,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     }
     SCOPE_EXIT { vmpc() = savedPC; vmfp() = savedFP; };
 
-    invokePseudoMain(
-      unit->getMain(functionClass, this_),
-      fp ? fp->m_varEnv : nullptr,
-      this_,
-      frameClass
-    );
+    invokePseudoMain(unit->getMain(functionClass, this_));
 
     enum VarAction { StoreFrame, StoreVV, StoreEnv };
 

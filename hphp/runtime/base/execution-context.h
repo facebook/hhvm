@@ -392,7 +392,7 @@ public:
   ObjectData* getThis();
   StringData* getContainingFileName();
   int getLine();
-  bool evalUnit(Unit* unit, PC callPC, PC& pc, int funcType);
+  bool evalUnit(Unit* unit, PC callPC);
   TypedValue invokeUnit(const Unit* unit, bool callByHPHPInvoke = false);
   Unit* compileEvalString(StringData* code,
                                 const char* evalFilename = nullptr);
@@ -463,10 +463,7 @@ private:
 public:
   void syncGdbState();
 
-  TypedValue invokePseudoMain(const Func* f,
-                              VarEnv* varEnv = nullptr,
-                              ObjectData* this_ = nullptr,
-                              Class* class_ = nullptr);
+  TypedValue invokePseudoMain(const Func* f);
 
   using ThisOrClass = Either<ObjectData*, Class*>;
 

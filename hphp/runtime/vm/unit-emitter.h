@@ -420,7 +420,6 @@ public:
   int64_t m_sn{-1};
   const StringData* m_filepath{nullptr};
 
-  bool m_mergeOnly{false};
   bool m_isHHFile{false};
   bool m_ICE{false}; // internal compiler error
   bool m_useGlobalIds{0};

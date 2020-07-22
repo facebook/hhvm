@@ -3740,7 +3740,6 @@ std::unique_ptr<UnitEmitter> assemble_string(
   ARRPROV_USE_RUNTIME_LOCATION();
   auto const bcSha1 = SHA1{string_sha1(folly::StringPiece(code, codeLen))};
   auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs, false);
-  ue->m_mergeOnly = true;
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
 

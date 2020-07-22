@@ -358,6 +358,15 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
   BTContext ctx;
 
+  if (g_context->m_parserFrame) {
+    bt.append(
+      make_darray(
+        s_file, VarNR(g_context->m_parserFrame->filename.get()),
+        s_line, g_context->m_parserFrame->lineNumber
+      )
+    );
+  }
+
   // If there is a parser frame, put it at the beginning of the backtrace.
   if (btArgs.m_parserFrame) {
     bt.append(

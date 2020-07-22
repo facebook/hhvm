@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_BACKTRACE_H_
 #define incl_HPHP_BACKTRACE_H_
 
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/types.h"
 
@@ -189,6 +190,12 @@ struct BacktraceArgs {
     return *this;
   }
 
+  static VMParserFrame* setGlobalParserFrame(VMParserFrame* parserFrame) {
+    auto oldParserFrame = g_context->m_parserFrame;
+    g_context->m_parserFrame = parserFrame;
+    return oldParserFrame;
+  }
+
   /**
    * Include the pseudo main in the backtrace.
    */
@@ -233,6 +240,7 @@ struct BacktraceArgs {
       !m_withArgNames &&
       !m_limit &&
       !m_parserFrame &&
+      !g_context->m_parserFrame &&
       !m_fromWaitHandle;
   }
 

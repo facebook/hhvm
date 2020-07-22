@@ -837,72 +837,26 @@ void Unit::bindFunc(Func *func) {
 namespace {
 struct FrameRestore : private VMRegAnchor {
   explicit FrameRestore(const PreClass* preClass) :
-      FrameRestore(preClass->unit(), preClass->getOffset()) {}
-  explicit FrameRestore(const Unit* unit, Op op, Id id) :
-      FrameRestore(unit, (static_cast<size_t>(op) << 32) | id) {}
-  explicit NEVER_INLINE FrameRestore(const Unit* unit, size_t offsetOrOp) {
-    ActRec* fp = vmfp();
+    FrameRestore(VMParserFrame { preClass->unit()->filepath(), preClass->line1() }) {}
 
-    if (vmsp() && (!fp || fp->m_func->unit() != unit)) {
-      m_top = vmsp();
-      m_fp = fp;
-      m_pc = vmpc();
+  explicit FrameRestore(const PreRecordDesc* pr) :
+    FrameRestore(VMParserFrame { pr->unit()->filepath(), pr->line1() }) {}
 
-      /*
-        we can be called from Unit::merge, which hasnt yet setup
-        the frame (because often it doesnt need to).
-        Set up a fake frame here, in case of errors.
-        But note that mergeUnit is called for systemlib etc before the
-        stack has been setup. So dont do anything if m_stack.top()
-        is NULL
-      */
-      ActRec &tmp = *vmStack().allocA();
-      tmp.m_sfp = fp;
-      tmp.m_savedRip = 0;
-      tmp.m_func = unit->getMain(nullptr, false);
-      tmp.initCallOffset(!fp
-        ? 0
-        : fp->m_func->unit()->offsetOf(m_pc) - fp->m_func->base()
-      );
-      tmp.trashThis();
-      tmp.m_varEnv = 0;
-      tmp.setNumArgs(0);
-      vmfp() = &tmp;
-      auto const offset = [&] {
-        if (offsetOrOp < kInvalidOffset) return static_cast<Offset>(offsetOrOp);
-        auto const op = Op(offsetOrOp >> 32);
-        auto const id = Id(offsetOrOp & 0xffffffff);
-        auto pc = unit->at(tmp.m_func->base());
-        auto const past = unit->at(tmp.m_func->past());
-        while (pc < past) {
-          if (peek_op(pc) == op) {
-            auto tpc = pc;
-            decode_op(tpc);
-            if (decode_iva(tpc) == id) return unit->offsetOf(pc);
-          }
-          pc += instrLen(pc);
-        }
-        return tmp.m_func->base();
-      }();
-      vmpc() = unit->at(offset);
-      pushFrameSlots(tmp.m_func);
-    } else {
-      m_top = nullptr;
-      m_fp = nullptr;
-      m_pc = nullptr;
-    }
+  explicit FrameRestore(const PreTypeAlias* ta) :
+    FrameRestore(VMParserFrame { ta->unit->filepath(), ta->line1 }) {}
+
+  explicit NEVER_INLINE FrameRestore(const VMParserFrame& parserframe) :
+    m_parserframe(parserframe) {
+    m_oldParserframe = BacktraceArgs::setGlobalParserFrame(&m_parserframe);
   }
+
   ~FrameRestore() {
-    if (m_top) {
-      vmsp() = m_top;
-      vmfp() = m_fp;
-      vmpc() = m_pc;
-    }
+    BacktraceArgs::setGlobalParserFrame(m_oldParserframe);
   }
+
  private:
-  TypedValue*   m_top;
-  ActRec* m_fp;
-  PC      m_pc;
+  VMParserFrame m_parserframe;
+  VMParserFrame* m_oldParserframe;
 };
 
 template<class T>
@@ -1158,7 +1112,7 @@ RecordDesc* Unit::defRecordDesc(PreRecordDesc* preRecord,
   // with the same name in the request
   auto existingKind = checkSameName<RecordDesc>(nameList);
   if (existingKind) {
-    FrameRestore fr(preRecord->unit(), Op::DefRecord, preRecord->id());
+    FrameRestore fr(preRecord);
     raise_error("Cannot declare record with the same (%s) as an "
                 "existing %s", preRecord->name()->data(), existingKind);
     return nullptr;
@@ -1169,7 +1123,7 @@ RecordDesc* Unit::defRecordDesc(PreRecordDesc* preRecord,
   if (auto cachedRec = nameList->getCachedRecordDesc()) {
     if (cachedRec->preRecordDesc() != preRecord) {
       if (failIsFatal) {
-        FrameRestore fr(preRecord->unit(), Op::DefRecord, preRecord->id());
+        FrameRestore fr(preRecord);
         raise_error("Record already declared: %s", preRecord->name()->data());
       }
       return nullptr;
@@ -1193,7 +1147,7 @@ RecordDesc* Unit::defRecordDesc(PreRecordDesc* preRecord,
       if (avail == RecordDesc::Avail::Fail) {
         // parent is not available and cannot be autoloaded
         if (failIsFatal) {
-          FrameRestore fr(preRecord->unit(), Op::DefRecord, preRecord->id());
+          FrameRestore fr(preRecord);
           raise_error("unknown record %s", parent->name()->data());
         }
         return nullptr;
@@ -1207,7 +1161,7 @@ RecordDesc* Unit::defRecordDesc(PreRecordDesc* preRecord,
       parent = Unit::getRecordDesc(preRecord->parentName(), failIsFatal);
       if (parent == nullptr) {
         if (failIsFatal) {
-          FrameRestore fr(preRecord->unit(), Op::DefRecord, preRecord->id());
+          FrameRestore fr(preRecord);
           raise_error("unknown record %s", preRecord->parentName()->data());
         }
         return nullptr;
@@ -1216,7 +1170,7 @@ RecordDesc* Unit::defRecordDesc(PreRecordDesc* preRecord,
 
     RecordDescPtr newRecord;
     {
-      FrameRestore fr(preRecord->unit(), Op::DefRecord, preRecord->id());
+      FrameRestore fr(preRecord);
       newRecord = RecordDesc::newRecordDesc(
           const_cast<PreRecordDesc*>(preRecord), parent);
     }
@@ -1527,7 +1481,7 @@ Unit::DefTypeAliasResult Unit::defTypeAlias(Id id, bool failIsFatal) {
    */
   if (auto current = nameList->getCachedTypeAlias()) {
     auto raiseIncompatible = [&] {
-      FrameRestore _(this, Op::DefTypeAlias, id);
+      FrameRestore _(thisType);
       raise_error("The type %s is already defined to an incompatible type",
                   thisType->name->data());
     };
@@ -1550,7 +1504,7 @@ Unit::DefTypeAliasResult Unit::defTypeAlias(Id id, bool failIsFatal) {
   auto existingKind = checkSameName<PreTypeAlias>(nameList);
   if (existingKind) {
     if (!failIsFatal) return Unit::DefTypeAliasResult::Fail;
-    FrameRestore _(this, Op::DefTypeAlias, id);
+    FrameRestore _(thisType);
     raise_error("The name %s is already defined as a %s",
                 thisType->name->data(), existingKind);
     not_reached();
@@ -1559,7 +1513,7 @@ Unit::DefTypeAliasResult Unit::defTypeAlias(Id id, bool failIsFatal) {
   auto resolved = resolveTypeAlias(this, thisType);
   if (resolved.invalid) {
     if (!failIsFatal) return Unit::DefTypeAliasResult::Fail;
-    FrameRestore _(this, Op::DefTypeAlias, id);
+    FrameRestore _(thisType);
     raise_error("Unknown type or class %s", typeName->data());
     not_reached();
   }

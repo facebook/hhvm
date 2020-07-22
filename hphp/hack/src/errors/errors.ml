@@ -682,6 +682,9 @@ type position_group = {
 
 let n_extra_lines_hl = 2
 
+(* 'char' because this is intended to be a string of length 1 *)
+let out_of_bounds_char = "_"
+
 let background_highlighted = Tty.apply_color (Tty.Dim Tty.Default)
 
 let default_highlighted = Tty.apply_color (Tty.Normal Tty.Default)
@@ -689,21 +692,63 @@ let default_highlighted = Tty.apply_color (Tty.Normal Tty.Default)
 let line_num_highlighted line_num =
   background_highlighted (string_of_int line_num)
 
+(* Checks if a line (or line/col pair) is inside a position,
+   taking care to handle zero-width positions and positions
+   spanning multiple lines.
+
+   Some examples:
+                  0         1         2
+                  01234567890123456789012
+     Example 1: 1 class Foo extends    {}
+
+     Example 2: 1 function }
+
+     Example 3: 1 function {
+                2   return 3;
+                3 }
+
+   In example 1, the error position is [1,21] - [1,21) with length 1;
+    column 21 of line 1 is within that error position.
+   In example 2, error position is [1,0] - [1,0) with length 0;
+    column 0 of line 1 is within that error position.
+   In Example 2, the error position is [1,10] - [2,0) with length 1;
+    column 10 of line 1 (but nothing in line 2) is within that error position.
+*)
+let pos_contains (pos : Pos.absolute) ?(col_num : int option) (line_num : int) :
+    bool =
+  let (first_line, first_col) = Pos.line_column pos in
+  let (last_line, last_col) = Pos.end_line_column pos in
+  let is_col_okay = Option.value_map col_num ~default:true in
+  let last_col =
+    match Pos.length pos with
+    | 0 -> last_col + 1
+    | _ -> last_col
+  in
+  (* A position's first line, first column, and last line
+     are all checked inclusively. The position's last column
+     is checked inclusively if the length of the position is zero,
+     and exclusively otherwise, in order to correctly highlight
+     zero-width positions. Line_num is 1-indexed, col_num is 0-indexed. *)
+  if first_line = last_line then
+    first_line = line_num
+    && is_col_okay (fun cn -> first_col <= cn && cn < last_col)
+  else if line_num = first_line then
+    is_col_okay (fun cn -> first_col <= cn)
+  else if line_num = last_line then
+    (* When only checking for a line's inclusion in a position
+      (i.e. when col_num = None), special care must be taken when
+      the line we're checking is the last line of the position:
+      since the end_column is exclusive, the end_column's value
+      must be non-zero signifying there is at least one character
+      on it to be highlighted. *)
+    last_col > 0 && is_col_okay (fun cn -> cn < last_col)
+  else
+    first_line < line_num && line_num < last_line
+
+(* Gets the list of marked messages associated with a line *)
 let marked_messages (position_group : position_group) (line_num : int) =
   List.filter position_group.messages ~f:(fun (_, (pos, _)) ->
-      let begin_line = Pos.line pos in
-      let (end_line, end_col) = Pos.end_line_column pos in
-      if line_num = end_line then
-        (* Since (end_line, end_col) is technically an exclusive bound, only mark
-          this line if we're supposed to mark at least one character *)
-        end_col > 0
-      else
-        (* Otherwise just compare inclusive line numbers,
-           which handles zero-width positions *)
-        begin_line <= line_num && line_num <= end_line)
-
-let markers (position_group : position_group) (line_num : int) =
-  marked_messages position_group line_num |> List.map ~f:fst
+      pos_contains pos line_num)
 
 (* Gets the string containing the markers that should be displayed next to this line,
    e.g. something like "[1,4,5]" *)
@@ -715,8 +760,8 @@ let markers_string
     else
       s
   in
-  let msl = markers position_group line_num in
-  match msl with
+  let markers = marked_messages position_group line_num |> List.map ~f:fst in
+  match markers with
   | [] -> ""
   | markers ->
     let ms =
@@ -726,8 +771,9 @@ let markers_string
     in
     let lbracket = add_color background_highlighted "[" in
     let rbracket = add_color background_highlighted "]" in
+    let comma = add_color background_highlighted "," in
     let prefix =
-      Printf.sprintf "%s%s%s" lbracket (String.concat ~sep:"," ms) rbracket
+      Printf.sprintf "%s%s%s" lbracket (String.concat ~sep:comma ms) rbracket
     in
     prefix
 
@@ -759,31 +805,14 @@ let line_margin_highlighted position_group line_num col_width_raw : string =
   in
   prefix
 
-(* Checks if a line/col pair is inside a position; handles
-   the case where the position is empty, which occurs e.g.
-
-    0         1         2
-    01234567890123456789012
-    class Foo extends    {}
-
-  where a type specifier is expected before '{'. Given a
-  position with length 0 and line_column 21, it will consider
-  the '{' as being inside the position, and highlight it.
-*)
-let line_and_col_inside_pos pos line_num col_num =
-  let (ln, cn) = Pos.line_column pos in
-  (Pos.length pos = 0 && ln = line_num && cn = col_num)
-  (* +1 because Pos.inside expects 1-indexed *)
-  || Pos.inside pos line_num (col_num + 1)
-
 (* line_num is 1-based *)
-let line_highlighted position_group line_num line =
+let line_highlighted position_group ~(line_num : int) ~(line : string) =
   match marked_messages position_group line_num with
   | [] -> default_highlighted line
   | ms ->
     let get_markers_at_col col_num =
       List.filter ms ~f:(fun (_, (pos, _)) ->
-          line_and_col_inside_pos pos line_num col_num)
+          pos_contains pos ~col_num line_num)
       |> List.map ~f:fst
     in
     let color_column ms c =
@@ -793,16 +822,29 @@ let line_highlighted position_group line_num line =
         List.sort ms ~compare:(fun (m, _) (n, _) -> Int.compare m n)
       in
       let (_, color) = List.hd_exn sorted in
-      Tty.apply_color (Tty.Normal color) (Char.to_string c)
+      Tty.apply_color (Tty.Normal color) c
     in
     let highlighted_columns : string list =
       (* Not String.mapi because we don't want to return a char from each element *)
       List.mapi (String.to_list line) ~f:(fun i c ->
           match get_markers_at_col i with
           | [] -> default_highlighted (Char.to_string c)
-          | ms -> color_column ms c)
+          | ms -> color_column ms (Char.to_string c))
     in
-    String.concat highlighted_columns
+    (* Add extra column when position spans multiple lines and we're on the last line. Handles
+       the case where a position exists for after file but there is no character to highlight *)
+    let extra_column =
+      let (end_line, end_col) =
+        Pos.end_line_column position_group.aggregate_position
+      in
+      if line_num = end_line || (line_num + 1 = end_line && end_col = 0) then
+        match get_markers_at_col (String.length line) with
+        | [] -> ""
+        | ms -> color_column ms out_of_bounds_char
+      else
+        ""
+    in
+    String.concat highlighted_columns ^ extra_column
 
 (* Prefixes each line with its corresponding formatted margin *)
 let format_context_lines_highlighted
@@ -818,22 +860,41 @@ let format_context_lines_highlighted
     Printf.sprintf
       "%s %s"
       (line_margin_highlighted position_group line_num col_width)
-      (line_highlighted position_group line_num line)
+      (line_highlighted position_group ~line_num ~line)
   in
   let formatted_lines = List.map ~f:format_line lines in
   String.concat ~sep:"\n" formatted_lines
 
 (* Gets lines from a position, including additional before/after
-   lines from the current position; line numbers are 1-indexed. *)
+   lines from the current position; line numbers are 1-indexed.
+   If the position references one extra line than actually
+   in the file, we append a line with a sentinel character ('_')
+   so that we have a line to highlight later. *)
 let load_context_lines_highlighted ~before ~after ~(pos : Pos.absolute) :
     (int * string) list =
   let path = Pos.filename pos in
-  let start_line = Pos.line pos in
-  let end_line = Pos.end_line pos in
+  let (start_line, _start_col) = Pos.line_column pos in
+  let (end_line, end_col) = Pos.end_line_column pos in
   let lines = (try read_lines path with Sys_error _ -> []) in
   let numbered_lines = List.mapi lines ~f:(fun i l -> (i + 1, l)) in
-  List.filter numbered_lines (fun (i, _) ->
-      i >= start_line - before && i <= end_line + after)
+  let original_lines =
+    List.filter numbered_lines (fun (i, _) ->
+        i >= start_line - before && i <= end_line + after)
+  in
+  let additional_line =
+    let last_line =
+      match List.last original_lines with
+      | Some (last_line, _) -> last_line
+      | None -> 0
+    in
+    if end_line > last_line && end_col > 0 then
+      Some (end_line, out_of_bounds_char)
+    else
+      None
+  in
+  match additional_line with
+  | None -> original_lines
+  | Some additional -> original_lines @ [additional]
 
 let format_context_highlighted
     (position_group : position_group) (col_width : int) ~(is_first : bool) =
@@ -862,11 +923,11 @@ let format_context_highlighted
         background_highlighted (Filename.dirname filename ^ "/")
     in
     let filename = default_highlighted (Filename.basename filename) in
-    let filename_ppt = Printf.sprintf "%s%s" dirname filename in
-    let position_ppt =
+    let pretty_filename = Printf.sprintf "%s%s" dirname filename in
+    let pretty_position =
       Printf.sprintf ":%d:%d" line col |> background_highlighted
     in
-    let line_info = Printf.sprintf "%s%s" filename_ppt position_ppt in
+    let line_info = Printf.sprintf "%s%s" pretty_filename pretty_position in
     line_info ^ "\n" ^ pretty_ctx
   else
     pretty_ctx

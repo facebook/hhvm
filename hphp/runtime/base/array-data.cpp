@@ -1238,19 +1238,10 @@ ArrayData* ArrayData::toPHPArrayIntishCast(bool copy) {
 
 bool ArrayData::intishCastKey(const StringData* key, int64_t& i) const {
   if (key->isStrictlyInteger(i)) {
-    if (isPHPArrayType()) {
-      if (RO::EvalHackArrCompatIntishCastNotices) {
-        raise_hackarr_compat_notice("triggered array-based IntishCast");
-      }
-      return true;
+    if (RO::EvalHackArrCompatIntishCastNotices) {
+      raise_hackarr_compat_notice("triggered array-based IntishCast");
     }
-    auto const t = [&]{
-      if (isVecType())  return "vec";
-      if (isDictType()) return "dict";
-      assertx(isKeysetType());
-      return "keyset";
-    }();
-    raise_hackarr_compat_notice(folly::sformat("missed IntishCast for {}", t));
+    return true;
   }
   return false;
 }

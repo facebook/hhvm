@@ -6,15 +6,15 @@ array(1) {
   [0]=>
   int(6)
 }
-
-Notice: Hack Array Compat: missed IntishCast for vec in %s/intish-cast.php on line 7
-array(0) {
+array(1) {
+  [0]=>
+  int(6)
 }
-
-Notice: Hack Array Compat: missed IntishCast for dict in %s/intish-cast.php on line 8
-array(0) {
+array(1) {
+  [0]=>
+  int(6)
 }
-
-Notice: Hack Array Compat: missed IntishCast for keyset in %s/intish-cast.php on line 9
-array(0) {
+array(1) {
+  [0]=>
+  int(2)
 }

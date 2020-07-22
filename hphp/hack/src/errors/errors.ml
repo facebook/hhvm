@@ -386,6 +386,10 @@ let to_absolute error =
   let msg_l = List.map msg_l (fun (p, s) -> (Pos.to_absolute p, s)) in
   (code, msg_l)
 
+let make_absolute_error code (x : (Pos.absolute * string) list) :
+    Pos.absolute error_ =
+  (code, x)
+
 let read_lines path = In_channel.read_lines path
 
 let line_margin (line_num : int option) col_width : string =
@@ -1050,18 +1054,10 @@ let single_marker_highlighted marker =
 
 let format_claim_highlighted
     (error_code : error_code)
-    ?(marker : (error_code * Tty.raw_color) option)
+    (marker : error_code * Tty.raw_color)
     (msg : string) : string =
-  let suffix =
-    match marker with
-    | None -> ""
-    | Some marker -> single_marker_highlighted marker
-  in
-  let color =
-    match marker with
-    | None -> Tty.Default
-    | Some (_, color) -> color
-  in
+  let suffix = single_marker_highlighted marker in
+  let (_, color) = marker in
   let pretty_error_code =
     Tty.apply_color (Tty.Bold color) (error_code_to_string error_code)
   in
@@ -1114,7 +1110,7 @@ let to_highlighted_string (error : Pos.absolute error_) : string =
   let (claim, reasons) =
     match marker_and_msgs with
     | (marker, (_, msg)) :: msgs ->
-      ( format_claim_highlighted error_code ~marker msg,
+      ( format_claim_highlighted error_code marker msg,
         List.map msgs format_reason_highlighted )
     | [] ->
       failwith "Impossible: an error always has non-empty list of messages"

@@ -97,6 +97,9 @@ val get_severity : 'a error_ -> severity
 
 val make_error : int -> (Pos.t * string) list -> error
 
+val make_absolute_error :
+  int -> (Pos.absolute * string) list -> Pos.absolute error_
+
 val error_code_to_string : int -> string
 
 val phase_to_string : phase -> string
@@ -887,9 +890,6 @@ val convert_errors_to_string :
 val to_string : ?indent:bool -> Pos.absolute error_ -> string
 
 val to_contextual_string : Pos.absolute error_ -> string
-
-val format_claim_highlighted :
-  int -> ?marker:int * Tty.raw_color -> string -> string
 
 val to_highlighted_string : Pos.absolute error_ -> string
 

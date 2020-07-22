@@ -85,9 +85,9 @@ let to_contextual_string lint =
   in
   Printf.sprintf "%s\n%s\n%s\n%s\n" heading fn ctx msg
 
-let to_highlighted_string lint =
-  let heading = Errors.format_claim_highlighted lint.code lint.message in
-  heading
+let to_highlighted_string (lint : string t) =
+  Errors.make_absolute_error lint.code [(lint.pos, lint.message)]
+  |> Errors.to_highlighted_string
 
 let to_json
     {

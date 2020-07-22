@@ -1,7 +1,7 @@
 Typing[4105] Too many arguments (expected 0 but got 1) [1]
- -> Definition is here [2]
+-> Definition is here [2]
 
-big_file.php:3:9
+big_file.php:3:10
        1 | <?hh // strict
        2 | 
 [2]    3 | function foo(): void {}
@@ -15,7 +15,7 @@ big_file.php:3:9
 
 Typing[4030] Was expecting a return type hint [1]
 
-big_file.php:1008:9
+big_file.php:1008:10
     1006 | */
     1007 | 
 [1] 1008 | function bar() {

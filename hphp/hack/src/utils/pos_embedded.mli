@@ -97,7 +97,7 @@ val btw_nocheck : 'a pos -> 'a pos -> 'a pos
 val btw : t -> t -> t
 
 (* Symmetric version of above: order doesn't matter *)
-val merge : t -> t -> t
+val merge : 'a pos -> 'a pos -> 'a pos
 
 val last_char : t -> t
 

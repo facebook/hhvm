@@ -1,0 +1,26 @@
+Typing[4341] The method f has the wrong type [1]
+-> Expected string [2]
+-> But got int [3]
+
+long_directory_name.php--child.php:3:19
+[1,2] 3 | _
+
+long_directory_name.php--long/directory/name/class_def.php:3:21
+[3]   3 | _
+
+Typing[4340] Class TBothTraits does not correctly implement all required members  [1]
+-> Some members are incompatible with those declared in type TReqExtChild [2]
+-> The method f has the wrong type [3]
+-> Expected int [4]
+-> But got string [5]
+
+long_directory_name.php--long/directory/name/again/tboth_traits.php:2:7
+[2]   3 | _
+
+long_directory_name.php--long/directory/name/class_def.php:3:19
+[3,4] 3 | _
+
+long_directory_name.php--child.php:3:21
+[5]   3 | _
+
+2 errors found.

@@ -902,7 +902,6 @@ let load_context_lines_highlighted ~before ~after ~(pos : Pos.absolute) :
 
 let format_context_highlighted
     (position_group : position_group) (col_width : int) ~(is_first : bool) =
-  let pos = position_group.aggregate_position in
   let relative_path path =
     let cwd = Filename.concat (Sys.getcwd ()) "" in
     lstrip path cwd
@@ -911,14 +910,21 @@ let format_context_highlighted
     load_context_lines_highlighted
       ~before:n_extra_lines_hl
       ~after:n_extra_lines_hl
-      ~pos
+      ~pos:position_group.aggregate_position
   in
   let pretty_ctx =
     format_context_lines_highlighted ~position_group ~lines ~col_width
   in
   if is_first then
-    let filename = relative_path (Pos.filename pos) in
-    let (line, col) = Pos.line_column pos in
+    (* Main message is the one with the lowest-numbered marker *)
+    let (_, (main_pos, _)) =
+      List.sort
+        position_group.messages
+        ~compare:(fun ((mk1, _), _) ((mk2, _), _) -> Int.compare mk1 mk2)
+      |> List.hd_exn
+    in
+    let filename = relative_path (Pos.filename main_pos) in
+    let (line, col) = Pos.line_column main_pos in
     let dirname =
       let dn = Filename.dirname filename in
       if String.equal Filename.current_dir_name dn then
@@ -929,15 +935,12 @@ let format_context_highlighted
     let filename = default_highlighted (Filename.basename filename) in
     let pretty_filename = Printf.sprintf "%s%s" dirname filename in
     let pretty_position =
-      Printf.sprintf ":%d:%d" line col |> background_highlighted
+      Printf.sprintf ":%d:%d" line (col + 1) |> background_highlighted
     in
     let line_info = Printf.sprintf "%s%s" pretty_filename pretty_position in
     line_info ^ "\n" ^ pretty_ctx
   else
     pretty_ctx
-
-let merge_abs_pos (pos1 : Pos.absolute) (pos2 : Pos.absolute) =
-  Pos.merge (Pos.to_relative pos1) (Pos.to_relative pos2) |> Pos.to_absolute
 
 (* The column width will be the length of the largest prefix before
    the " |", which is composed of the list of markers, a space, and
@@ -946,7 +949,7 @@ let merge_abs_pos (pos1 : Pos.absolute) (pos2 : Pos.absolute) =
    Returns the length of the raw (uncolored) prefix string.
 
    For example:
-    overlap_pos.php:4:10
+    overlap_pos.php:11:10
            8 |
            9 |
     [2]   10 | function returns_int(): int {
@@ -987,7 +990,10 @@ let col_width_for_highlighted (position_groups : position_group list) =
   let col_width = max_marker_prefix_length + 1 + largest_line_length in
   col_width
 
-(* Each list of position_groups in the returned list is from a different file *)
+(* Each list of position_groups in the returned list is from a different file.
+   The first position_group in the list will contain _at least_ the first (i.e. main)
+   message. The list of marked_messages in each position group is ordered by increasing
+   line number (so the main message isn't necessarily first). *)
 let position_groups_by_file marker_and_msgs : position_group list list =
   let msgs_by_file : marked_message list list =
     List.group marker_and_msgs ~break:(fun (_, msg1) (_, msg2) ->
@@ -1020,7 +1026,7 @@ let position_groups_by_file marker_and_msgs : position_group list list =
              {
                aggregate_position =
                  List.map ~f:(fun (_, (pos, _)) -> pos) messages
-                 |> List.reduce_exn ~f:merge_abs_pos;
+                 |> List.reduce_exn ~f:Pos.merge;
                messages;
              }))
 
@@ -1043,7 +1049,7 @@ let format_all_contexts_highlighted (marker_and_msgs : marked_message list) =
         in
         String.concat ~sep ctx_strs)
   in
-  String.concat ~sep:"\n" contexts ^ "\n\n"
+  String.concat ~sep:"\n\n" contexts ^ "\n\n"
 
 let single_marker_highlighted marker =
   let (n, color) = marker in
@@ -1110,6 +1116,7 @@ let to_highlighted_string (error : Pos.absolute error_) : string =
   let (claim, reasons) =
     match marker_and_msgs with
     | (marker, (_, msg)) :: msgs ->
+      (* This very vitally assumes that the first message in the error is the main one *)
       ( format_claim_highlighted error_code marker msg,
         List.map msgs format_reason_highlighted )
     | [] ->

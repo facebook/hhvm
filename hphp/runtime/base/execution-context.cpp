@@ -1988,9 +1988,6 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     fp = getPrevVMStateSkipFrame(fp);
   }
 
-  if (fp && !fp->hasVarEnv()) {
-    fp->setVarEnv(VarEnv::createLocal(fp));
-  }
   if (fp) phpDebuggerEvalHook(fp->m_func);
 
   const static StaticString s_cppException("Hit an exception");
@@ -2021,23 +2018,15 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
   };
 
   try {
-    // Start with the correct parent FP so that VarEnv can properly exitFP().
-    // Note that if the same VarEnv is used across multiple frames, the most
-    // recent FP must be used. This can happen if we are trying to debug
-    // an eval() call or a call issued by debugger itself.
-    //
     // We also need to change vmpc() to match, since we assert in a few places
     // that the vmpc() lies within vmfp()'s code.
     auto savedFP = vmfp();
     auto savedPC = vmpc();
     if (fp) {
-      auto newFp = fp->m_varEnv->getFP();
-      assertx(!newFp->skipFrame());
-      vmpc() = findSuitablePC(newFp);
-      vmfp() = newFp;
+      vmpc() = findSuitablePC(fp);
+      vmfp() = fp;
     }
     SCOPE_EXIT { vmpc() = savedPC; vmfp() = savedFP; };
-
     unit->merge();
 
     enum VarAction { StoreFrame, StoreVV, StoreEnv };
@@ -2046,11 +2035,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
 
     auto globals = Array();
     auto const global = fp && fp->m_varEnv && fp->m_varEnv->isGlobalScope();
-    auto& env = [&] () -> Array& {
-      if (global) return globals;
-      if (m_debuggerEnv.isNull()) m_debuggerEnv = Array::CreateDArray();
-      return m_debuggerEnv;
-    }();
+    auto& env = m_debuggerEnv;
 
     auto const ctx = fp ? fp->func()->cls() : nullptr;
     auto const f = [&] () -> Func* {
@@ -2206,6 +2191,8 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
   return {true, init_null_variant, errorStr};
 }
 
+const StaticString s_include("include");
+
 void ExecutionContext::enterDebuggerDummyEnv() {
   static Unit* s_debuggerDummy = compile_debugger_string(
     "<?hh", 4, RepoOptions::defaults()
@@ -2217,8 +2204,10 @@ void ExecutionContext::enterDebuggerDummyEnv() {
   assertx(m_nesting == 0);
   assertx(vmStack().count() == 0);
   ActRec* ar = vmStack().allocA();
-  ar->m_func = s_debuggerDummy->getMain(nullptr, false);
+  ar->m_func = s_debuggerDummy->lookupFuncId(1);
+  assertx(ar->m_func && ar->m_func->name()->equal(s_include.get()));
   ar->setNumArgs(0);
+  for (int i = 0; i < ar->m_func->numLocals(); ++i) vmStack().pushInt(1);
   ar->trashThis();
   ar->setReturnVMExit();
   vmfp() = ar;

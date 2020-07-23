@@ -23,13 +23,15 @@ Hit a php exception : exception 'Exception' with message 'don't want to see this
 Stack trace:
 #0 (1): throwSomething()
 #1 (1): include()
-#2 {main}
+#2 (): include()
+#3 {main}
 p $_
 "don't want to see this"
 = bad syntax
 Hit fatal : Encountered unexpected token 'syntax'.
     #0 at [:1]
     #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 = printSomething()
 don't want to see this

@@ -541,13 +541,6 @@ void ObjectData::o_getArray(Array& props,
   );
 }
 
-// a constant for ArrayIterators that changes the way the
-// object is converted to an array
-const int64_t ARRAY_OBJ_ITERATOR_STD_PROP_LIST = 1;
-
-const StaticString s_flags("flags"),
-                   s_storage("storage");
-
 template <IntishCast IC /* = IntishCast::None */>
 Array ObjectData::toArray(bool pubOnly /* = false */,
                           bool ignoreLateInit /* = false */) const {
@@ -566,20 +559,10 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
     }
     return SimpleXMLElement_darrayCast(this);
   } else if (UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
-    auto const flags = getProp(SystemLib::s_ArrayIteratorClass, s_flags.get());
-    assertx(flags.is_set());
-    if (UNLIKELY(flags.type() == KindOfInt64 &&
-                 flags.val().num == ARRAY_OBJ_ITERATOR_STD_PROP_LIST)) {
-      auto ret = Array::CreateDArray();
-      o_getArray(ret, true, ignoreLateInit);
-      return ret;
-    }
-
-    check_recursion_throw();
-
-    auto const storage = getProp(SystemLib::s_ArrayIteratorClass, s_storage.get());
-    assertx(storage.is_set());
-    return tvCastToArrayLike(storage.tv());
+    SystemLib::throwInvalidOperationExceptionObject(
+      "ArrayIterator to array cast"
+    );
+    not_reached();
   } else if (UNLIKELY(instanceof(c_Closure::classof()))) {
     return make_varray(Object(const_cast<ObjectData*>(this)));
   } else if (UNLIKELY(instanceof(DateTimeData::getClass()))) {

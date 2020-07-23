@@ -7,7 +7,7 @@ class myArrayIterator extends ArrayIterator {
 }
 <<__EntryPoint>> function main(): void {
 try {
-    $it = new myArrayIterator();
+    $it = new myArrayIterator(dict[]);
 } catch (InvalidArgumentException $e) {
     echo 'InvalidArgumentException thrown';
 }

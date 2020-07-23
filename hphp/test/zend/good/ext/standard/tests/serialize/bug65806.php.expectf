@@ -1,6 +1,4 @@
-SCRIPT START
-check successful
-start serialize/unserialize
-finish serialize/unserialize
-check successful
-SCRIPT END
+
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'ArrayIterator to array cast' in %s/bug65806.php:4
+Stack trace:
+%A

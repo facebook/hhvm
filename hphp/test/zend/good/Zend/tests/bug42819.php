@@ -10,7 +10,7 @@ class foo {
 }
 
 namespace foo;
-use \ArrayIterator;
+use \MultipleIterator;
 
 const C = "foo\\C\n";
 const I = 11;
@@ -23,7 +23,7 @@ class foo {
     const C3 = foo\foo::C;
     const C4 = \foo\C;
     const C5 = \foo\foo::C;
-    const C6 = ArrayIterator::STD_PROP_LIST;
+    const C6 = MultipleIterator::MIT_NEED_ALL;
     const C7 = \E_ERROR;
 }
 
@@ -33,7 +33,7 @@ class bar1 {
     static $a3 = darray[foo\foo::I => 0];
     static $a4 = darray[\foo\I => 0];
     static $a5 = darray[\foo\foo::I => 0];
-    static $a6 = darray[ArrayIterator::STD_PROP_LIST => 0];
+    static $a6 = darray[MultipleIterator::MIT_NEED_ALL => 0];
     static $a7 = darray[\E_ERROR => 0];
 }
 
@@ -43,7 +43,7 @@ class bar2 {
     static $a3 = darray[foo\foo::I => I];
     static $a4 = darray[\foo\I => I];
     static $a5 = darray[\foo\foo::I => I];
-    static $a6 = darray[ArrayIterator::STD_PROP_LIST => I];
+    static $a6 = darray[MultipleIterator::MIT_NEED_ALL => I];
     static $a7 = darray[\E_ERROR => I];
 }
 
@@ -53,18 +53,18 @@ class bar3 {
     static $a3 = darray[foo\foo::I => foo\I];
     static $a4 = darray[\foo\I => foo\I];
     static $a5 = darray[\foo\foo::I => foo\I];
-    static $a6 = darray[ArrayIterator::STD_PROP_LIST => foo\I];
+    static $a6 = darray[MultipleIterator::MIT_NEED_ALL => foo\I];
     static $a7 = darray[\E_ERROR => foo\I];
 }
 
 class bar4 {
-    static $a1 = darray[I => ArrayIterator::STD_PROP_LIST];
-    static $a2 = darray[foo\I => ArrayIterator::STD_PROP_LIST];
-    static $a3 = darray[foo\foo::I => ArrayIterator::STD_PROP_LIST];
-    static $a4 = darray[\foo\I => ArrayIterator::STD_PROP_LIST];
-    static $a5 = darray[\foo\foo::I => ArrayIterator::STD_PROP_LIST];
-    static $a6 = darray[ArrayIterator::STD_PROP_LIST => ArrayIterator::STD_PROP_LIST];
-    static $a7 = darray[\E_ERROR => ArrayIterator::STD_PROP_LIST];
+    static $a1 = darray[I => MultipleIterator::MIT_NEED_ALL];
+    static $a2 = darray[foo\I => MultipleIterator::MIT_NEED_ALL];
+    static $a3 = darray[foo\foo::I => MultipleIterator::MIT_NEED_ALL];
+    static $a4 = darray[\foo\I => MultipleIterator::MIT_NEED_ALL];
+    static $a5 = darray[\foo\foo::I => MultipleIterator::MIT_NEED_ALL];
+    static $a6 = darray[MultipleIterator::MIT_NEED_ALL => MultipleIterator::MIT_NEED_ALL];
+    static $a7 = darray[\E_ERROR => MultipleIterator::MIT_NEED_ALL];
 }
 
 class bar5 {
@@ -73,7 +73,7 @@ class bar5 {
     static $a3 = darray[foo\foo::I => \E_ERROR];
     static $a4 = darray[\foo\I => \E_ERROR];
     static $a5 = darray[\foo\foo::I => \E_ERROR];
-    static $a6 = darray[ArrayIterator::STD_PROP_LIST => \E_ERROR];
+    static $a6 = darray[MultipleIterator::MIT_NEED_ALL => \E_ERROR];
     static $a7 = darray[\E_ERROR => \E_ERROR];
 }
 
@@ -86,7 +86,7 @@ echo foo\C;
 echo foo\foo::C;
 echo foo::C;
 echo \foo\foo::C;
-echo ArrayIterator::STD_PROP_LIST . "\n";
+echo MultipleIterator::MIT_NEED_ALL . "\n";
 echo \E_ERROR . "\n";
 echo "second\n";
 echo \foo\foo::C1;

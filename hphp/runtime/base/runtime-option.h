@@ -743,7 +743,7 @@ struct RuntimeOption {
          will not allow execution to resume normally; if the user
          error handler returns something other than boolean false,
          the runtime will throw a fatal error. */                       \
-  F(int32_t, CheckReturnTypeHints,     2)                               \
+  F(int32_t, CheckReturnTypeHints,     3)                               \
   /*
     CheckPropTypeHints:
     0 - No checks or enforcement of property type hints.

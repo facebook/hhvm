@@ -2189,9 +2189,6 @@ std::unique_ptr<php::Func> clone_meth_helper(
           updates[bid][ix] = clsId;
           break;
         }
-        case Op::DefCls:
-        case Op::DefClsNop:
-          return nullptr;
         default:
           break;
       }

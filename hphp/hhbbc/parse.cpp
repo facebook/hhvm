@@ -83,15 +83,6 @@ struct ParseUnitState {
                 > srcLocInfo;
 
   /*
-   * Map from class id to the function containing its DefCls
-   * instruction.  We use this to compute whether classes are defined
-   * at top-level.
-   *
-   * TODO_4: if we don't end up with a use for this, remove it.
-   */
-  std::vector<php::Func*> defClsMap;
-
-  /*
    * Map from Closure index to the function(s) containing their
    * associated CreateCl opcode(s).
    */
@@ -320,15 +311,6 @@ void populate_block(ParseUnitState& puState,
     return ret;
   };
 
-  auto defcns = [&] () {
-    puState.constPassFuncs.insert(&func);
-  };
-  auto defcls = [&] (const Bytecode& b) {
-    puState.defClsMap[b.DefCls.arg1] = &func;
-  };
-  auto defclsnop = [&] (const Bytecode& b) {
-    puState.defClsMap[b.DefClsNop.arg1] = &func;
-  };
   auto createcl = [&] (const Bytecode& b) {
     puState.createClMap[b.CreateCl.arg2].insert(&func);
   };
@@ -442,9 +424,6 @@ void populate_block(ParseUnitState& puState,
         return bc::opcode { IMM_ARG_##imms FLAGS_ARG_##flags };    \
       }();                                                         \
       b.srcLoc = srcLocIx;                                         \
-      if (Op::opcode == Op::DefCns)      defcns();                 \
-      if (Op::opcode == Op::DefCls)      defcls(b);                \
-      if (Op::opcode == Op::DefClsNop)   defclsnop(b);             \
       if (Op::opcode == Op::CreateCl)    createcl(b);              \
       blk.hhbcs.push_back(std::move(b));                           \
       assert(pc == next);                                          \
@@ -1152,7 +1131,6 @@ void parse_unit(php::Program& prog, const UnitEmitter* uep) {
   } else {
     puState.srcLocInfo = ue.lineTable();
   }
-  puState.defClsMap.resize(ue.numPreClasses(), nullptr);
 
   for (size_t i = 0; i < ue.numPreClasses(); ++i) {
     auto cls = parse_class(puState, ret.get(), *ue.pce(i));

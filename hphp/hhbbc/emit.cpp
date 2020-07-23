@@ -94,14 +94,7 @@ struct EmitUnitState {
  */
 template<typename T>
 struct OpInfoHelper {
-  static constexpr bool by_value =
-    T::op == Op::DefCls      ||
-    T::op == Op::DefClsNop   ||
-    T::op == Op::CreateCl    ||
-    T::op == Op::DefCns      ||
-    T::op == Op::DefTypeAlias;
-
-
+  static constexpr bool by_value = T::op == Op::CreateCl;
   using type = typename std::conditional<by_value, T, const T&>::type;
 };
 

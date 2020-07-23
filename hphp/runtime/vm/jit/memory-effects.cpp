@@ -1903,7 +1903,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvObjToVArr:  // can invoke PHP
   case ConvObjToDArr:  // can invoke PHP
   case OODeclExists:
-  case DefCls:         // autoload
   case LdCls:          // autoload
   case LdClsCached:    // autoload
   case LdFunc:         // autoload

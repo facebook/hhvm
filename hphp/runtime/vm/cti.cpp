@@ -116,7 +116,6 @@ inline bool isNop(Op opcode) {
          opcode == OpEntryNop ||
          opcode == OpCGetCUNop ||
          opcode == OpUGetCUNop ||
-         opcode == OpDefClsNop ||
          (!debug && isTypeAssert(opcode)) ||
          opcode == OpBreakTraceHint;
 }

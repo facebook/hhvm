@@ -33,10 +33,7 @@
  *      Using this module, you can emit pretty much any sort of not
  *      trivially-illegal bytecode stream, and many trivially-illegal
  *      ones as well.  You can also easily create Units with illegal
- *      metadata.  Generally this will crash the VM.  In other cases
- *      (especially if you don't bother to DefCls your classes in your
- *      .main) you'll just get mysterious "class not defined" errors
- *      or weird behavior.
+ *      metadata.  Generally this will crash the VM.
  *
  *    - Whitespace is not normally significant, but newlines may not
  *      be in the middle of a list of opcode arguments.  (After the
@@ -55,8 +52,6 @@
  *
  *   - It might be nice if you could refer to iterators by name
  *     instead of by index.
- *
- *   - DefCls by name would be nice.
  *
  * Missing features (partial list):
  *
@@ -784,7 +779,6 @@ struct AsmState {
   int minStackDepth{0};
   int maxUnnamed{-1};
   std::set<std::string,stdltistr> hoistables;
-  std::unordered_map<uint32_t,Offset> defClsOffsets;
   Location::Range srcLoc{-1,-1,-1,-1};
   hphp_fast_map<SymbolRef,
                 CompactVector<std::string>,
@@ -1617,10 +1611,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
                                                                        \
     /* Record source location. */                                      \
     as.ue->recordSourceLocation(as.srcLoc, curOpcodeOff);              \
-                                                                       \
-    if (Op##name == OpDefCls || Op##name == OpDefClsNop) {             \
-      as.defClsOffsets.emplace(immIVA[0], curOpcodeOff);               \
-    }                                                                  \
                                                                        \
     /* Retain stack depth after calls to exit */                       \
     if ((instrFlags(thisOpcode) & InstrFlags::TF) &&                   \
@@ -3295,13 +3285,10 @@ void parse_class(AsmState& as) {
     as.in.expect(')');
   }
 
-  auto off = folly::get_default(as.defClsOffsets, as.ue->numPreClasses(),
-                                as.ue->bcPos());
-
   as.pce = as.ue->newBarePreClassEmitter(name, PreClass::MaybeHoistable);
   as.pce->init(line0,
                line1,
-               off,
+               as.ue->bcPos(),
                attrs,
                makeStaticString(parentName),
                staticEmptyString());

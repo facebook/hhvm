@@ -1114,23 +1114,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       }
       break;
     }
-    case Op::DefCls:
-    case Op::DefClsNop: {
-      auto const id = getImm(pc, 0).u_IVA;
-      if (id >= unit()->numPreClasses()) {
-        ferror("{} references nonexistent class ({})\n", opcodeToName(op), id);
-        return false;
-      }
-      break;
-    }
-    case Op::DefRecord: {
-      auto const id = getImm(pc, 0).u_IVA;
-      if (id >= unit()->numRecords()) {
-        ferror("{} references nonexistent record ({})\n", opcodeToName(op), id);
-        return false;
-      }
-      break;
-    }
     case Op::CreateCl: {
       auto const id = getImm(pc, 1).u_IVA;
       if (id >= unit()->numPreClasses()) {
@@ -1157,15 +1140,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
                  preCls->name(), m_func->pce() ? "static method" : "function");
           return false;
         }
-      }
-      break;
-    }
-    case Op::DefTypeAlias: {
-      auto id = getImm(pc, 0).u_IVA;
-      if (id >= unit()->typeAliases().size()) {
-        ferror("{} references nonexistent type alias ({})\n",
-                opcodeToName(op), id);
-        return false;
       }
       break;
     }
@@ -1834,11 +1808,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
       return RuntimeOption::EvalRxVerifyBody < 2;
 
     // unsafe: defines and includes
-    case Op::DefCls:
-    case Op::DefClsNop:
-    case Op::DefRecord:
-    case Op::DefCns:
-    case Op::DefTypeAlias:
     case Op::Incl:
     case Op::InclOnce:
     case Op::Req:

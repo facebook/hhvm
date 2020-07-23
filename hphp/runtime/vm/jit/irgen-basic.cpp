@@ -626,7 +626,6 @@ void emitCGetCUNop(IRGS& env) {
 void emitUGetCUNop(IRGS& env) {
   assertTypeStack(env, BCSPRelOffset{0}, TUninit);
 }
-void emitDefClsNop(IRGS&, uint32_t){}
 void emitBreakTraceHint(IRGS&)     {}
 
 //////////////////////////////////////////////////////////////////////

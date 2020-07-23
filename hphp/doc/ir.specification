@@ -1104,10 +1104,6 @@ To string conversions:
   Loads the record whose name is recName out of the RDS. If the record is not
   defined, branch to B.
 
-| DefCls, D(Cls), S(Int), NF
-
-  Define the class corresponding to PreClass S0 in the current unit.
-
 | DefConst<T>, DParam(Top), NA, NF
 
   Define a constant value of type T. D is presumed to be globally available and

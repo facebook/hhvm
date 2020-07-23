@@ -4694,12 +4694,6 @@ void in(ISS& env, const bc::ReqOnce&)   { inclOpImpl(env); }
 void in(ISS& env, const bc::ReqDoc&)    { inclOpImpl(env); }
 void in(ISS& env, const bc::Eval&)      { inclOpImpl(env); }
 
-void in(ISS& /*env*/, const bc::DefCls&) {}
-void in(ISS& /*env*/, const bc::DefRecord&) {}
-void in(ISS& /*env*/, const bc::DefClsNop&) {}
-void in(ISS& /*env*/, const bc::DefCns&) {}
-void in(ISS& /*env*/, const bc::DefTypeAlias&) {}
-
 void in(ISS& env, const bc::This&) {
   if (thisAvailable(env)) {
     return reduce(env, bc::BareThis { BareThisOp::NeverNull });

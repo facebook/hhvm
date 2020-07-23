@@ -353,7 +353,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvVecToKeyset:
   case Count:
   case CreateAAWH:
-  case DefCls:
   case DictGet:
   case DictSet:
   case ElemArrayD:

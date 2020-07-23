@@ -4904,22 +4904,6 @@ OPTBLD_INLINE void iopEval(PC origpc, PC& pc) {
   vmStack().pushBool(true);
 }
 
-OPTBLD_INLINE void iopDefCls(uint32_t cid) {
-  PreClass* c = vmfp()->m_func->unit()->lookupPreClassId(cid);
-  Unit::defClass(c);
-}
-
-OPTBLD_INLINE void iopDefRecord(uint32_t cid) {
-  auto const r = vmfp()->m_func->unit()->lookupPreRecordId(cid);
-  Unit::defRecordDesc(r);
-}
-
-OPTBLD_INLINE void iopDefClsNop(uint32_t /*cid*/) {}
-
-OPTBLD_INLINE void iopDefTypeAlias(uint32_t tid) {
-  vmfp()->func()->unit()->defTypeAlias(tid);
-}
-
 OPTBLD_INLINE void iopThis() {
   checkThis(vmfp());
   ObjectData* this_ = vmfp()->getThis();

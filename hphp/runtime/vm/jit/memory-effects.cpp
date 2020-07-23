@@ -21,7 +21,6 @@
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/jit/analysis.h"
-#include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"

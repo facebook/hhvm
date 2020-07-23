@@ -25,7 +25,6 @@
 #include "hphp/util/safe-cast.h"
 
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/analysis.h"

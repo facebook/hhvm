@@ -33,7 +33,6 @@
 #include "hphp/runtime/vm/jit/stub-alloc.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 
-#include "hphp/tools/hfsort/jitsort.h"
 
 #include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"

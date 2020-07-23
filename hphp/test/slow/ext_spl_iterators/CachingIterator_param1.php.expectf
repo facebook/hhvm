@@ -1,1 +1,0 @@
-Catchable fatal error: Argument 1 passed to CachingIterator::__construct() must implement interface HH\Iterator, HH\Vector given in %s/ext_spl_iterators/CachingIterator_param1.php on line 5

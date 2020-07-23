@@ -15,6 +15,4 @@ $ai = new ArrayIterator(new test());
 foreach ($ai as $key=>$val) {
   echo $key;
 }
-
-echo $ai->count();
 }

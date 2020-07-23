@@ -1,3 +1,0 @@
-RecursiveCachingIterator::__construct() expects parameter 1 to be RecursiveIterator, object given
-
-Catchable fatal error: Argument 1 passed to RecursiveCachingIterator::__construct() must implement interface HH\Iterator, HH\Vector given in %s/ext_spl_iterators/RecursiveCachingIterator_param1.php on line 12

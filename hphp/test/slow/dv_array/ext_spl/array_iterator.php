@@ -11,9 +11,9 @@ function main() {
   foreach ($inputs as $arr) {
     $i = new ArrayIterator($arr);
     while ($i->valid()) {
-      var_dump($i->key(), $i->offsetGet($i->key()));
+      var_dump($i->key(), $i->current());
       $i->next();
     }
-    var_dump($i->getArrayCopy());
+    var_dump($arr);
   }
 }

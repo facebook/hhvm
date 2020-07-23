@@ -1952,11 +1952,6 @@ fn print_include_eval_define<W: Write>(
         ReqOnce => w.write("ReqOnce"),
         ReqDoc => w.write("ReqDoc"),
         Eval => w.write("Eval"),
-        DefCls(n) => concat_str_by(w, " ", ["DefCls", n.to_string().as_str()]),
-        DefClsNop(n) => concat_str_by(w, " ", ["DefClsNop", n.to_string().as_str()]),
-        DefRecord(n) => concat_str_by(w, " ", ["DefRecord", n.to_string().as_str()]),
-        DefCns(n) => concat_str_by(w, " ", ["DefCns", n.to_string().as_str()]),
-        DefTypeAlias(id) => write!(w, "DefTypeAlias {}", id),
     }
 }
 

@@ -13,16 +13,6 @@
 .adata A_7 = """v:2:{s:8:\"MyTraitA\";s:8:\"MyTraitB\";}""";
 
 .main (1,1) {
-  .srcloc 4:7,4:14;
-  DefCls 0
-  .srcloc 13:7,13:14;
-  DefCls 1
-  .srcloc 23:7,23:14;
-  DefCls 2
-  .srcloc 32:7,32:7;
-  DefCls 3
-  .srcloc 46:7,46:7;
-  DefCls 4
   Int 1
   RetC
 }

@@ -8,8 +8,6 @@
 .adata A_2 = """k:4:{s:2:\"A0\";s:2:\"A1\";s:2:\"A2\";s:2:\"A3\";}""";
 
 .main (1,1) {
-  .srcloc 3:7,3:7;
-  DefCls 0
   Int 1
   RetC
 }

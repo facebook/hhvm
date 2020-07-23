@@ -7,8 +7,6 @@
 .adata A_1 = """k:2:{s:1:\"A\";s:1:\"B\";}""";
 
 .main (1,1) {
-  .srcloc 3:7,3:7;
-  DefCls 0
   Int 1
   RetC
 }

@@ -304,6 +304,8 @@ module UserAttributes = struct
 
   let uaAlwaysInline = "__ALWAYS_INLINE"
 
+  let uaPu = "__Pu"
+
   let as_map =
     AttributeKinds.(
       SMap.of_list
@@ -348,6 +350,7 @@ module UserAttributes = struct
           (uaReifiable, [typeconst]);
           (uaNeverInline, [fn; mthd]);
           (uaDisableTypecheckerInternal, [fn; mthd]);
+          (uaPu, [cls]);
         ])
 
   (* These are names which are allowed in the systemlib but not in normal programs *)

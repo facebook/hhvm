@@ -47,6 +47,11 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
+    method! at_user_attribute env { ua_name = (pos, name); _ } =
+      if String.equal name Naming_special_names.UserAttributes.uaPu then
+        if not (inside_allowed_directory env (Pos.filename pos)) then
+          Errors.pu_reserved_syntax pos
+
     method! at_hint env (pos, hint_) =
       match hint_ with
       | Hpu_access _ (* (_,_,_) *) ->

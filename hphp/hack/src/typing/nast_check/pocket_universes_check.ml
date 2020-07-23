@@ -383,23 +383,209 @@ let get_parent_name_and_pos = function
   | (p, Happly ((_, name), _)) -> Some (p, name)
   | _ -> None
 
-let check_class env c =
-  let c_name = snd c.c_name in
-  (* trait check: only instances are allowed *)
-  let () =
-    match c.c_kind with
-    | Ast_defs.Ctrait ->
-      List.iter
-        ~f:(fun pu ->
-          (match pu.pu_case_types with
-          | [] -> ()
-          | { tp_name; _ } :: _ -> Errors.pu_case_in_trait (fst tp_name) "type");
-          match pu.pu_case_values with
-          | [] -> ()
-          | (name, _) :: _ -> Errors.pu_case_in_trait (fst name) "value")
-        c.c_pu_enums
-    | _ -> ()
+(* We only allow instances in traits, no `case type` or `case` statements *)
+let check_if_trait c =
+  match c.c_kind with
+  | Ast_defs.Ctrait ->
+    List.iter
+      ~f:(fun pu ->
+        (match pu.pu_case_types with
+        | [] -> ()
+        | { tp_name; _ } :: _ -> Errors.pu_case_in_trait (fst tp_name) "type");
+        match pu.pu_case_values with
+        | [] -> ()
+        | (name, _) :: _ -> Errors.pu_case_in_trait (fst name) "value")
+      c.c_pu_enums
+  | _ -> ()
+
+(* Because we are compiling without time information, we have to deal
+ * with a special case where a class inherits from PU via traits, but
+ * don't declare anything locally. To correctly fix the possible ambiguity
+ * we rely on a user annotation to give us the missing pieces.
+ *
+ * This will be removed/simplified when types in compilation will be a thing.
+ *
+ * Here we just check if an annotation is necessary and missing, so we can
+ * suggest it to the user, or if it is present but useless
+ *
+ * The attribute format is the following:
+ * <<__Pu("enum_name:field0, ..., fieldn", "enum_name:field0,...,fieldp"...)>>
+ *)
+
+let process_user_attributes attrs =
+  let split_enum s = String.split ~on:':' s in
+  let split_fields pos s =
+    let fields = String.split ~on:',' s in
+    let fields =
+      List.fold
+        ~init:SSet.empty
+        ~f:(fun fields s ->
+          let s = String.strip s in
+          if String.length s = 0 then
+            fields
+          else if SSet.mem s fields then (
+            Errors.pu_attribute_dup pos "field" s;
+            fields
+          ) else
+            SSet.add s fields)
+        fields
+    in
+    fields
   in
+  let get = function
+    | (pos, String s) ->
+      begin
+        match split_enum s with
+        | [enum; fields] ->
+          let enum = String.strip enum in
+          let fields = split_fields pos fields in
+          Some (pos, enum, fields)
+        | _ -> None
+      end
+    | _ -> None
+  in
+  List.fold
+    ~init:SMap.empty
+    ~f:(fun acc { ua_name; ua_params } ->
+      let (pos, ua_name) = ua_name in
+      if String.equal ua_name SN.UserAttributes.uaPu then
+        List.fold
+          ~init:acc
+          ~f:(fun acc expr ->
+            match get expr with
+            | None ->
+              Errors.pu_attribute_invalid pos;
+              acc
+            | Some (pos, enum, fields) ->
+              if SMap.mem enum acc then (
+                Errors.pu_attribute_dup pos "attribute" enum;
+                acc
+              ) else
+                SMap.add enum (pos, fields) acc)
+          ua_params
+      else
+        acc)
+    attrs
+
+type attribute_info = {
+  pos: Pos.t;
+  missing: SSet.t;
+  unknown: SSet.t;
+  useless: SSet.t;
+}
+
+(* Check if a Pu attribute is needed or not, to help compilation involving
+ * traits.
+ *
+ * If it is missing, returns the necessary attribute to be added.
+ * If it is present and valid, ok
+ * If it is present and mentions useless/unknown fields, report that
+ *)
+let validate_attributes pu_members npu attribute =
+  (* fields used by the local code *)
+  let local_fields =
+    List.fold
+      ~init:SSet.empty
+      ~f:(fun fields { pum_exprs; _ } ->
+        List.fold
+          ~init:fields
+          ~f:(fun fields ((_, name), _) -> SSet.add name fields)
+          pum_exprs)
+      pu_members
+  in
+  (* fields gathered from the context (from traits parents) *)
+  let context_fields =
+    match npu with
+    | None -> SSet.empty
+    | Some npu -> SSet.of_list @@ SMap.keys npu.npu_case_values
+  in
+  (* fields mentionned in the attribute, if any *)
+  let (pos, attribute_fields) =
+    match attribute with
+    | None -> (Pos.none, SSet.empty)
+    | Some (pos, fields) -> (pos, fields)
+  in
+  let useless = SSet.inter attribute_fields local_fields in
+  let unknown = SSet.diff attribute_fields context_fields in
+  let missing = SSet.diff context_fields local_fields in
+  let missing = SSet.diff missing attribute_fields in
+  { pos; missing; unknown; useless }
+
+let generate_attribute enum missing =
+  let fields = SSet.elements missing in
+  let fields = String.concat ~sep:", " fields in
+  sprintf "\"%s: %s\"" enum fields
+
+let check_attributes c_pos c_name c_pu_enums attributes pu_context =
+  (* Check every pu_member structure against the attributes to see
+   * if they are in sync. Gather the one that are ok, so we can
+   * display the correct attribute that is necessary on the class
+   *)
+  let validate_attributes name pu_members npu attribute =
+    let { pos; missing; unknown; useless } =
+      validate_attributes pu_members npu attribute
+    in
+    SSet.iter
+      (fun s -> Errors.pu_attribute_err pos "useless" c_name name s)
+      useless;
+    SSet.iter
+      (fun s -> Errors.pu_attribute_err pos "unknown" c_name name s)
+      unknown;
+    missing
+  in
+  let update_missings name missing missings =
+    if SSet.is_empty missing then
+      missings
+    else
+      generate_attribute name missing :: missings
+  in
+  (* Here, we collect the name of all Pu blocks that are in the current
+   * class, and any missing information returned byt `validate_attributes`.
+   * Unknown and useless attributes are directly reported as errors.
+   *)
+  let (seen, missing) =
+    List.fold
+      ~init:(SSet.empty, [])
+      ~f:(fun (seen, missings) pu_enum ->
+        let name = snd pu_enum.pu_name in
+        let npu = SMap.find_opt name pu_context in
+        let attribute = SMap.find_opt name attributes in
+        let missing =
+          validate_attributes name pu_enum.pu_members npu attribute
+        in
+        let missings = update_missings name missing missings in
+        let seen = SSet.add name seen in
+        (seen, missings))
+      c_pu_enums
+  in
+  (* Now, we check the more general pu definition (`pu_context`) to
+   * gather more missing information. We use the `seen` set to
+   * avoid looking twice at local information, and only focus on what
+   * comes from the extended definition.
+   *
+   * Since pu_enum duplication is already caught by the nast check, we don't
+   * need to update the `seen` set in this case.
+   *)
+  let missing =
+    SMap.fold
+      (fun name npu missings ->
+        if SSet.mem name seen then
+          missings
+        else
+          let attribute = SMap.find_opt name attributes in
+          let missing = validate_attributes name [] (Some npu) attribute in
+          update_missings name missing missings)
+      pu_context
+      missing
+  in
+  if not (List.is_empty missing) then
+    let s = String.concat missing ~sep:", " in
+    Errors.pu_attribute_suggestion c_pos c_name s
+
+let check_class env c =
+  let (c_pos, c_name) = c.c_name in
+  (* trait check: only instances are allowed *)
+  let () = check_if_trait c in
   (* Scan all direct parents (but interfaces) to collect PU info and
    * build a vision of the current universe.
    * If some illegal duplication is spotted, report it (extension is allowed,
@@ -420,10 +606,22 @@ let check_class env c =
     in
     Option.value ~default:init res
   in
-  let pu_context = List.fold ~init:SMap.empty ~f c.c_extends in
-  let pu_context = List.fold ~init:pu_context ~f c.c_uses in
+  let pu_context = List.fold ~init:SMap.empty ~f c.c_uses in
+  let pu_from_traits = not (SMap.is_empty pu_context) in
+  let pu_context = List.fold ~init:pu_context ~f c.c_extends in
   let pu_context =
     List.fold ~init:pu_context ~f:(fun acc (h, _) -> f acc h) c.c_reqs
+  in
+  (* Attribute checking: see T65158651 for why we need to check this
+   * annotated attributes
+   *)
+  let () =
+    (* Process attributes in the file *)
+    let attributes = process_user_attributes c.c_user_attributes in
+    if pu_from_traits then
+      check_attributes c_pos c_name c.c_pu_enums attributes pu_context
+    else if not (SMap.is_empty attributes) then
+      Errors.pu_attribute_not_necessary c_pos c_name
   in
   (* Now, scan the local PU information, and check for duplication too *)
   let (pu_context : nast_pu_type SMap.t) =

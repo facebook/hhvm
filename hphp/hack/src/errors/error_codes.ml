@@ -638,7 +638,8 @@ module Typing = struct
     | NullMemberWrite
     | NonObjectMemberWrite
     | ConcreteConstInterfaceOverride
-    | MethCallerTrait (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | MethCallerTrait
+    | PocketUniversesAttributes (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

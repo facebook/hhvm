@@ -21,6 +21,7 @@ trait myTrait1 {
   }
 }
 
+<<__Pu("E: val")>>
 class C extends Base {
   use myTrait0;
   use myTrait1;

@@ -1072,6 +1072,16 @@ val pu_reserved_syntax : Pos.t -> unit
 
 val pu_case_in_trait : Pos.t -> string -> unit
 
+val pu_attribute_invalid : Pos.t -> unit
+
+val pu_attribute_err : Pos.t -> string -> string -> string -> string -> unit
+
+val pu_attribute_dup : Pos.t -> string -> string -> unit
+
+val pu_attribute_suggestion : Pos.t -> string -> string -> unit
+
+val pu_attribute_not_necessary : Pos.t -> string -> unit
+
 val lvar_in_obj_get : Pos.t -> unit
 
 val invalid_freeze_target : Pos.t -> Pos.t -> string -> unit

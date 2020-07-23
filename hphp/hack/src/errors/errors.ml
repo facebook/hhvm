@@ -2285,11 +2285,53 @@ let pu_invalid_access pos msg =
     pos
     ("Invalid Pocket Universe invocation" ^ msg)
 
+let pu_attribute_invalid pos =
+  add
+    (Typing.err_code Typing.PocketUniversesAttributes)
+    pos
+    "Invalid __Pu attribute"
+
+let pu_attribute_dup pos kind s =
+  let s = strip_ns s in
+  add
+    (Typing.err_code Typing.PocketUniversesAttributes)
+    pos
+    (sprintf "Duplicated %s '%s' in __Pu attribute" kind s)
+
+let pu_attribute_err pos kind class_name enum_name attr_name =
+  let class_name = strip_ns class_name in
+  add
+    (Typing.err_code Typing.PocketUniversesAttributes)
+    pos
+    (sprintf
+       "Class/Trait %s has a %s attribute '%s' for enumeration %s"
+       class_name
+       kind
+       attr_name
+       enum_name)
+
+let pu_attribute_suggestion pos class_name content =
+  let class_name = strip_ns class_name in
+  add
+    (Typing.err_code Typing.PocketUniversesAttributes)
+    pos
+    (sprintf
+       "Class/Trait %s should have the attribute:\n__Pu(%s)"
+       class_name
+       content)
+
+let pu_attribute_not_necessary pos class_name =
+  let class_name = strip_ns class_name in
+  add
+    (Typing.err_code Typing.PocketUniversesAttributes)
+    pos
+    (sprintf "Class/Trait %s does not need any __Pu attribute" class_name)
+
 let pu_reserved_syntax pos =
   add
     (Typing.err_code Typing.PocketUniversesReservedSyntax)
     pos
-    ( sprintf "This syntax is reserved for the Pocket Universes prototype.\n"
+    ( "This syntax is reserved for the Pocket Universes prototype.\n"
     ^ "It can only be used in the directories specified by the\n"
     ^ "  pocket_universe_enabled_paths = nowhere|everywhere|dir1,..,dirn\noption in .hhconfig"
     )

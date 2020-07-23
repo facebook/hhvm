@@ -3,8 +3,6 @@
 # if A was marked as hoistable.
 
 .main {
-  DefCls 0
-  DefCls 1
   Int 1
   RetC
 }

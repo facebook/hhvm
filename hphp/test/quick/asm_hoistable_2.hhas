@@ -2,8 +2,6 @@
 # Test that things can get marked AlwaysHoistable
 
 .main {
-  DefClsNop 0
-  DefClsNop 1
 
   Int 1
   RetC

@@ -4,7 +4,6 @@
 .adata A_0 = """Y:0:{}""";
 
 .main {
-  DefCls 0
 
   Int 1
   RetC

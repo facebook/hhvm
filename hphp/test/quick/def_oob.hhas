@@ -1,13 +1,6 @@
 .hh_file 1;
-#Checks that arguments to DefCls/DefTypeAlias exist
 
 .main {
-  DefCls 0
-  DefClsNop 1
-  DefCls 3
-  DefClsNop 4
-  DefTypeAlias 0
-  DefTypeAlias 1
 
   Int 1
   RetC

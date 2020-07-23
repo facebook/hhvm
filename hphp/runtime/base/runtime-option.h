@@ -1206,15 +1206,6 @@ struct RuntimeOption {
   /* Toggles logging for expressions of type $var::name() */            \
   F(bool, LogKnownMethodsAsDynamicCalls, true)                          \
   /*                                                                    \
-   * Control handling of out-of-range integer values in the compact     \
-   * Thrift serializer.                                                 \
-   *                                                                    \
-   * 0 - Nothing                                                        \
-   * 1 - Warn                                                           \
-   * 2 - Throw exception                                                \
-   */                                                                   \
-  F(int32_t, ForbidThriftIntegerValuesOutOfRange, 2)                    \
-  /*                                                                    \
    * Don't allow unserializing to __PHP_Incomplete_Class                \
    * 0 - Nothing                                                        \
    * 1 - Warn                                                           \

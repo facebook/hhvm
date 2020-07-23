@@ -562,9 +562,7 @@ struct CompactWriter {
       static_assert(std::is_integral<T>::value, "not an integral type");
       auto n = value.toInt64();
       using limits = std::numeric_limits<T>;
-      auto forbidInvalid =
-        RuntimeOption::EvalForbidThriftIntegerValuesOutOfRange;
-      if (forbidInvalid != 0 && (n < limits::min() || n > limits::max())) {
+      if ((n < limits::min() || n > limits::max())) {
         const auto& structName = fieldInfo.cls->nameStr();
         std::string message = folly::sformat(
             "Value {} is out of range in field {} of {}",
@@ -579,8 +577,6 @@ struct CompactWriter {
         };
         if (hasSkipChecksAttr()) {
           raise_warning("[Suppressed] " + message);
-        } else if (forbidInvalid == 1) {
-          raise_warning("[Unsuppressed] " + message);
         } else {
           thrift_error(message, ERR_INVALID_DATA);
         }

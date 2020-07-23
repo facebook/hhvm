@@ -1,6 +1,0 @@
-Warning: [Unsuppressed] Value 2147483648 is out of range in field 1 of TestStruct in %s/slow/thrift/range_check.php on line 71
-
-Warning: [Unsuppressed] Value 32768 is out of range in field 2 of TestStruct in %s/slow/thrift/range_check.php on line 71
-
-Warning: [Unsuppressed] Value 32768 is out of range in field 3 of TestStruct in %s/slow/thrift/range_check.php on line 71
-

@@ -66,19 +66,19 @@ class DynamicClass {}
 // TEST: async handle
 async function myAsyncFunc(): Awaitable<int> { return 42; }
 class SharedStringClass {
-  public string $val_ref = null;
+  public ?string $val_ref = null;
   public function __construct(string $str) {
     $this->val_ref = $str; // inc 2 + inc 3
   }
 }
 class SharedArrayClass {
-  public varray_or_darray $val_ref = null;
+  public ?varray_or_darray $val_ref = null;
   public function __construct(varray_or_darray $arr) {
     $this->val_ref = $arr;
   }
 }
 class NestedArrayClass {
-  public varray_or_darray $val_ref = null;
+  public ?varray_or_darray $val_ref = null;
   public function __construct(varray_or_darray $arr) {
     $this->val_ref = $arr;
   }

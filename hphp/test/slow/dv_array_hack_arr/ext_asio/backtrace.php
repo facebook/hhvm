@@ -3,7 +3,7 @@
 
 class CatWrapper {
   private resource $proc;
-  private varray<resource> $pipes;
+  private dict<arraykey, resource> $pipes;
 
   public function __construct() {
     $descriptorspec = darray[

@@ -1,9 +1,9 @@
 <?hh
 
 class A {
-  public static int $a = Vector{5};
+  public static Vector<int> $a = Vector{5};
   <<__Const>>
-  public static int $ca = vec[Vector{6}];
+  public static vec<Vector<int>> $ca = vec[Vector{6}];
 }
 
 <<__EntryPoint>>

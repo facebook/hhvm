@@ -757,11 +757,11 @@ struct RuntimeOption {
         returns something other than boolean false, the runtime will throw a
         fatal error.
   */                                                                    \
-  F(int32_t, CheckPropTypeHints,       0)                               \
+  F(int32_t, CheckPropTypeHints,       1)                               \
   /* Enables enforcing upper-bounds for generic types
      1 => warning, 2 => error
   */                                                                    \
-  F(int32_t, EnforceGenericsUB,        0)                               \
+  F(int32_t, EnforceGenericsUB,        1)                               \
   /* WarnOnTooManyArguments:
    * 0 -> no warning, 1 -> warning, 2 -> exception
    */                                                                   \

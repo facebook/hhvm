@@ -2,7 +2,7 @@
 
 final class Data {
   public static string $vsDebugData = "";
-  public static bool $client = false;
+  public static mixed $client = false;
   public static int $seq = 0;
 }
 

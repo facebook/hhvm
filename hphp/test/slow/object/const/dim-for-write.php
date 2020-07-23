@@ -2,8 +2,8 @@
 
 <<__Const>>
 class C {
-  public int $cv = Vector{0};
-  public int $cvv = vec[Vector{1}];
+  public Vector<int> $cv = Vector{0};
+  public vec<Vector<int>> $cvv = vec[Vector{1}];
 
   public function __construct() {
     echo "-- at constructor entry --\n";

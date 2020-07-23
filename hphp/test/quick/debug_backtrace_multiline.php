@@ -50,11 +50,11 @@ function main(): void {
 
   // handled exception
   try {
-    throw new Exception(__LINE__);
+    throw new Exception((string)__LINE__);
   } catch (Exception $e) {
     compare_lines($e->getMessage(), $e->getLine());
   }
 
   // unhandled exception
-  throw new Exception(__LINE__);
+  throw new Exception((string)__LINE__);
 }

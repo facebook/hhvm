@@ -4,7 +4,7 @@ abstract final class FStatics {
   public static $count = 1;
 }
 function f() {
-  throw new Exception(FStatics::$count);
+  throw new Exception((string)FStatics::$count);
 }
 
 

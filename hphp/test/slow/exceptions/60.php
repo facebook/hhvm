@@ -19,7 +19,7 @@ function main_60() {
     include '60.inc';
   }
   try {
-    throw(new b(1, 2));
+    throw(new b('1', 2));
   } catch (b $e) {
     $e->dump();
   }

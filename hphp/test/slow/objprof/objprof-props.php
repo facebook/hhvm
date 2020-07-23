@@ -63,7 +63,7 @@ class SimpleArrays {
 // TEST: sizes of dynamic props
 class DynamicClass {}
 class SharedStringClass {
-  public string $val_ref = null;
+  public ?string $val_ref = null;
   public function __construct(string $str) {
     $this->val_ref = $str; // inc 2 + inc 3
   }

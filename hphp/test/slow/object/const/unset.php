@@ -2,11 +2,11 @@
 
 class C {
   <<__Const>>
-  public int $ci = 0;
-  public int $i = 1;
+  public $ci = 0;
+  public $i = 1;
   <<__Const>>
   public int $ci2 = 2;
-  public int $i2 = 3;
+  public $i2 = 3;
 
   public function __construct() {
     echo "-- at constructor entry --\n";

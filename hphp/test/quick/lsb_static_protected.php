@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-    <<__LSB>> protected static string $x = null;
+    <<__LSB>> protected static ?string $x = null;
 
     static function init() {
         if (static::$x === null) static::$x = static::class;

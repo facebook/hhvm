@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-    <<__LSB>> private static string $x = null;
+    <<__LSB>> private static ?string $x = null;
 
     static function foo($v) {
         if (static::$x === null) static::$x = $v;

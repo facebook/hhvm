@@ -6,11 +6,6 @@
 .adata A_0 = """Y:2:{s:4:\"kind\";i:21;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
 .adata A_1 = """k:2:{s:1:\"A\";s:1:\"B\";}""";
 
-.main (1,1) {
-  Int 1
-  RetC
-}
-
 .class {} C (3,37) {
   .property [private sys_initial_val] <"HH\\int" "HH\\int" extended_hint> x =
     """N;""";

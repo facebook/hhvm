@@ -199,6 +199,7 @@ void UnitEmitter::initMain(int line1, int line2) {
 void UnitEmitter::addTrivialPseudoMain() {
   initMain(0, 0);
   auto const mfe = getMain();
+  recordSourceLocation({1,0,1,0}, 0);
   emitOp(OpInt);
   emitInt64(1);
   emitOp(OpRetC);

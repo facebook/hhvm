@@ -9,11 +9,6 @@
 .adata A_3 = """k:2:{s:1:\"S\";s:2:\"S2\";}""";
 .adata A_4 = """k:1:{s:1:\"X\";}""";
 
-.main (1,1) {
-  Int 1
-  RetC
-}
-
 .function {} ["__EntryPoint"("""y:0:{}""")] (51,83) <"HH\\void" N > main() {
   .numiters 1;
   .declvars $k;

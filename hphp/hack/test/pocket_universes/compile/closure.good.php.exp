@@ -6,11 +6,6 @@
 .adata A_0 = """Y:2:{s:4:\"kind\";i:21;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
 .adata A_1 = """k:0:{}""";
 
-.main (1,1) {
-  Int 1
-  RetC
-}
-
 .class {} C (4,13) {
   .method {}{(TE as <"HH\\mixed" N upper_bound>)} [public static] (10,12) <"HH\\void" N > derive(<"TE" "TE" extended_hint type_var> $field) {
     .declvars $_;

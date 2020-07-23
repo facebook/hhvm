@@ -12,11 +12,6 @@
 .adata A_6 = """k:1:{s:1:\"Y\";}""";
 .adata A_7 = """v:2:{s:8:\"MyTraitA\";s:8:\"MyTraitB\";}""";
 
-.main (1,1) {
-  Int 1
-  RetC
-}
-
 .function {} ["__EntryPoint"("""y:0:{}""")] (58,65) <"HH\\void" N > main() {
   .numiters 1;
   .declvars $member;

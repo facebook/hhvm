@@ -244,8 +244,6 @@ fn print_program_<W: Write>(
 
     newline(w)?;
     concat(w, &prog.adata, |w, a| print_adata_region(ctx, w, a))?;
-    newline(w)?;
-    print_main(ctx, w, &prog.main)?;
     concat(w, &prog.functions, |w, f| print_fun_def(ctx, w, f))?;
     concat(w, &prog.classes, |w, cd| print_class_def(ctx, w, cd))?;
     concat(w, &prog.record_defs, |w, rd| print_record_def(ctx, w, rd))?;
@@ -1119,16 +1117,6 @@ fn print_file_attributes<W: Write>(
     w.write(".file_attributes [")?;
     print_attributes(ctx, w, al)?;
     w.write("] ;")?;
-    newline(w)
-}
-
-fn print_main<W: Write>(ctx: &mut Context, w: &mut W, body: &HhasBody) -> Result<(), W::Error> {
-    w.write(".main ")?;
-    w.write("(1,1) ")?;
-    braces(w, |w| {
-        ctx.block(w, |c, w| print_body(c, w, body))?;
-        newline(w)
-    })?;
     newline(w)
 }
 

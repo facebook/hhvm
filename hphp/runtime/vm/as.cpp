@@ -2568,28 +2568,13 @@ bool parse_line_range(AsmState& as, int& line0, int& line1) {
 }
 
 /*
- * If we haven't seen a pseudomain and we are compiling systemlib,
- * add a pseudomain and return true
- * If we haven't seen a pseudomain and we are not compiling systemlib,
- * return false so that the caller can give an assembler error
- * Otherwise, return true
+ * If we haven't seen a pseudomain, add it
  */
-bool ensure_pseudomain(AsmState& as) {
+void ensure_pseudomain(AsmState& as) {
   if (!as.emittedPseudoMain) {
-    if (!SystemLib::s_inited) {
-      /*
-       * The SystemLib::s_hhas_unit is required to be merge-only,
-       * and we create the source by concatenating separate .hhas files
-       * Rather than choosing one to have the .main directive, we just
-       * generate a trivial pseudoMain automatically.
-       */
-      as.ue->addTrivialPseudoMain();
-      as.emittedPseudoMain = true;
-    } else {
-      return false;
-    }
+    as.ue->addTrivialPseudoMain();
+    as.emittedPseudoMain = true;
   }
-  return true;
 }
 
 static StaticString s_native("__Native");
@@ -2666,9 +2651,7 @@ void check_native(AsmState& as, bool is_construct) {
  *                    ;
  */
 void parse_function(AsmState& as) {
-  if (!ensure_pseudomain(as)) {
-    as.error(".function blocks must all follow the .main block");
-  }
+  ensure_pseudomain(as);
 
   as.in.skipWhitespace();
 
@@ -3145,9 +3128,7 @@ void parse_cls_doccomment(AsmState& as) {
  */
 void parse_class_body(AsmState& as, bool class_is_const,
                       const UpperBoundMap& class_ubs) {
-  if (!ensure_pseudomain(as)) {
-    as.error(".class blocks must all follow the .main block");
-  }
+  ensure_pseudomain(as);
 
   std::string directive;
   while (as.in.readword(directive)) {
@@ -3176,9 +3157,7 @@ void parse_class_body(AsmState& as, bool class_is_const,
  *                  ;
  */
 void parse_record_body(AsmState& as) {
-  if (!ensure_pseudomain(as)) {
-    as.error(".record blocks must all follow the .main block");
-  }
+  ensure_pseudomain(as);
 
   std::string directive;
   while (as.in.readword(directive)) {
@@ -3684,9 +3663,7 @@ void parse(AsmState& as) {
     as.error("unrecognized top-level directive `" + directive + "'");
   }
 
-  if (!ensure_pseudomain(as)) {
-    as.error("no .main found in hhas unit");
-  }
+  ensure_pseudomain(as);
 
   if (as.symbol_refs.size()) {
     for (auto& ent : as.symbol_refs) {

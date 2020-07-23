@@ -93,7 +93,7 @@ struct RepoOptions {
   H(bool,           DisableXHPElementMangling,      false)            \
   H(bool,           DisableArray,                   true)             \
   H(bool,           DisableArrayCast,               true)             \
-  H(bool,           DisableArrayTypehint,           false)            \
+  H(bool,           DisableArrayTypehint,           true)             \
   /**/
 
   /**/

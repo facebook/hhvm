@@ -15,31 +15,14 @@
  */
 
 class ArrayIterator<T> implements KeyedIterator<arraykey, T>,
-                                  KeyedTraversable<arraykey, T>,
-                                  ArrayAccess<arraykey, T>,
-                                  SeekableIterator<T>,
-                                  Countable
+                                  KeyedTraversable<arraykey, T>
                                   /* Serializable - not implemented */ {
   public function __construct (mixed $array);
-  public function append(mixed $value): void;
-  public function asort(): void;
-  public function count(): int;
   public function current(): T;
-  public function getArrayCopy(): varray_or_darray<T>;
   public function getFlags(): void;
   public function key(): arraykey;
-  public function ksort(): void;
-  public function natcasesort(): void;
-  public function natsort(): void;
   public function next(): void;
-  public function offsetExists(arraykey $index): bool;
-  public function offsetGet(arraykey $index): T;
-  public function offsetSet(arraykey $index, T $newval): void;
-  public function offsetUnset(arraykey $index): void;
   public function rewind(): void;
-  public function seek(int $position): void;
   public function setFlags(string $flags): void;
-  public function uasort(string $cmp_function): void;
-  public function uksort(string $cmp_function): void;
   public function valid(): bool;
 }

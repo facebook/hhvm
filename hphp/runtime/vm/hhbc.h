@@ -326,7 +326,8 @@ inline bool isIncDecO(IncDecOp op) {
   ISTYPE_OP(DArray)                            \
   ISTYPE_OP(ClsMeth)                           \
   ISTYPE_OP(Func)                              \
-  ISTYPE_OP(PHPArr)
+  ISTYPE_OP(PHPArr)                            \
+  ISTYPE_OP(Class)
 
 enum class IsTypeOp : uint8_t {
 #define ISTYPE_OP(op) op,
@@ -684,6 +685,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(ResolveRClsMethodS,                                                 \
                      TWO(OA(SpecialClsRef),SA),                         \
                                        ONE(CV),         ONE(CV),    NF) \
+  O(ResolveClass,    ONE(SA),          NOV,             ONE(CV),    NF) \
   O(NewObj,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(NewObjR,         NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(NewObjD,         ONE(SA),          NOV,             ONE(CV),    NF) \

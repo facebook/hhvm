@@ -1159,7 +1159,8 @@ fn emit_collection(
         e,
         &env.namespace,
         expr,
-        true, /*allow_map*/
+        true,  /*allow_map*/
+        false, /*force_class_const*/
     ) {
         Ok(tv) => emit_static_collection(e, env, transform_to_collection, pos, tv),
         Err(_) => emit_dynamic_collection(e, env, expr, fields),
@@ -2954,6 +2955,7 @@ fn istype_op(opts: &Options, id: impl AsRef<str>) -> Option<IstypeOp> {
         "HH\\is_class_meth" => Some(OpClsMeth),
         "HH\\is_fun" => Some(OpFunc),
         "HH\\is_php_array" => Some(OpPHPArr),
+        "HH\\is_class" => Some(OpClass),
         _ => None,
     }
 }
@@ -3917,7 +3919,15 @@ fn emit_class_const(
             let cid = class::Type::from_ast_name_and_mangle(&name);
             let cname = cid.to_raw_string();
             Ok(if string_utils::is_class(&id.1) {
-                emit_pos_then(&pos, instr::string(cname))
+                if e.options()
+                    .hhvm
+                    .flags
+                    .contains(HhvmFlags::EMIT_CLASS_POINTERS)
+                {
+                    emit_pos_then(&pos, instr::resolveclass(cid))
+                } else {
+                    emit_pos_then(&pos, instr::string(cname))
+                }
             } else {
                 emit_symbol_refs::State::add_class(e, cid.clone());
                 // TODO(hrust) enabel `let const_id = r#const::Type::from_ast_name(&id.1);`,
@@ -3937,10 +3947,19 @@ fn emit_class_const(
                     string_utils::strip_global_ns(&id.1).to_string().into();
                 instr::clscns(const_id)
             };
-            Ok(InstrSeq::gather(vec![
-                emit_load_class_ref(e, env, pos, cexpr)?,
-                load_const,
-            ]))
+            if string_utils::is_class(&id.1)
+                && e.options()
+                    .hhvm
+                    .flags
+                    .contains(HhvmFlags::EMIT_CLASS_POINTERS)
+            {
+                emit_load_class_ref(e, env, pos, cexpr)
+            } else {
+                Ok(InstrSeq::gather(vec![
+                    emit_load_class_ref(e, env, pos, cexpr)?,
+                    load_const,
+                ]))
+            }
         }
     }
 }

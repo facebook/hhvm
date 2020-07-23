@@ -10,7 +10,7 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
-notice(%s): Class to string conversion
+notice(bar): Class to string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
@@ -31,8 +31,8 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
+notice(Closure$main): Implicit Class to string conversion for type-hint
+notice(Closure$main#2): Implicit Class to string conversion for type-hint
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
@@ -65,7 +65,7 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
-notice(%s): Class to string conversion
+notice(bar): Class to string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
@@ -86,8 +86,8 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
+notice(Closure$main): Implicit Class to string conversion for type-hint
+notice(Closure$main#2): Implicit Class to string conversion for type-hint
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
@@ -120,7 +120,7 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
-notice(%s): Class to string conversion
+notice(bar): Class to string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
@@ -141,8 +141,8 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
+notice(Closure$main): Implicit Class to string conversion for type-hint
+notice(Closure$main#2): Implicit Class to string conversion for type-hint
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
@@ -175,7 +175,7 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
-notice(%s): Class to string conversion
+notice(bar): Class to string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
@@ -196,8 +196,8 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
+notice(Closure$main): Implicit Class to string conversion for type-hint
+notice(Closure$main#2): Implicit Class to string conversion for type-hint
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
@@ -230,7 +230,7 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
-notice(%s): Class to string conversion
+notice(bar): Class to string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
@@ -251,8 +251,8 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
+notice(Closure$main): Implicit Class to string conversion for type-hint
+notice(Closure$main#2): Implicit Class to string conversion for type-hint
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
@@ -285,7 +285,7 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
-notice(%s): Class to string conversion
+notice(bar): Class to string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
@@ -306,8 +306,8 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
+notice(Closure$main): Implicit Class to string conversion for type-hint
+notice(Closure$main#2): Implicit Class to string conversion for type-hint
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
@@ -340,7 +340,7 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
-notice(%s): Class to string conversion
+notice(bar): Class to string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
@@ -361,8 +361,8 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
+notice(Closure$main): Implicit Class to string conversion for type-hint
+notice(Closure$main#2): Implicit Class to string conversion for type-hint
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
@@ -395,7 +395,7 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
-notice(%s): Class to string conversion
+notice(bar): Class to string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
@@ -416,8 +416,8 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
+notice(Closure$main): Implicit Class to string conversion for type-hint
+notice(Closure$main#2): Implicit Class to string conversion for type-hint
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
@@ -450,7 +450,7 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
-notice(%s): Class to string conversion
+notice(bar): Class to string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
@@ -471,8 +471,8 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
+notice(Closure$main): Implicit Class to string conversion for type-hint
+notice(Closure$main#2): Implicit Class to string conversion for type-hint
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)
@@ -505,7 +505,7 @@ string(5) "hello"
 bool(true)
 int(5)
 class(bar)
-notice(%s): Class to string conversion
+notice(bar): Class to string conversion
 string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
@@ -526,8 +526,8 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
+notice(Closure$main): Implicit Class to string conversion for type-hint
+notice(Closure$main#2): Implicit Class to string conversion for type-hint
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
 class(foo)

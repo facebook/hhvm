@@ -52,4 +52,6 @@ function class_meth_get_method(mixed $class_meth): string;
 function meth_caller_get_class(mixed $meth_caller): string;
 <<__Pure>>
 function meth_caller_get_method(mixed $meth_caller): string;
+<<__Pure>>
+function class_get_class_name(mixed $class): string;
 }

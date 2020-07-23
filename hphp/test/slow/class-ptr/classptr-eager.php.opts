@@ -1,0 +1,4 @@
+-vEval.EmitClassPointers=true
+-vEval.CheckPropTypeHints=3
+-vEval.RaiseClassConversionWarning=true
+-vEval.StringHintNotices=true

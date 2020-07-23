@@ -311,7 +311,10 @@ pub fn expr_to_typed_value(
     ns: &Namespace,
     expr: &tast::Expr,
 ) -> Result<TypedValue, Error> {
-    expr_to_typed_value_(e, ns, expr, false /*allow_maps*/)
+    expr_to_typed_value_(
+        e, ns, expr, false, /*allow_maps*/
+        false, /*force_class_const*/
+    )
 }
 
 pub fn expr_to_typed_value_(
@@ -319,6 +322,7 @@ pub fn expr_to_typed_value_(
     ns: &Namespace,
     expr: &tast::Expr,
     allow_maps: bool,
+    force_class_const: bool,
 ) -> Result<TypedValue, Error> {
     use aast::Expr_::*;
     // TODO: ML equivalent has this as an implicit parameter that defaults to false.
@@ -452,10 +456,22 @@ pub fn expr_to_typed_value_(
         }
 
         Shape(fields) => shape_to_typed_value(emitter, ns, fields, pos),
-        ClassConst(x) => class_const_to_typed_value(emitter, &x.0, &x.1),
-        BracedExpr(x) => expr_to_typed_value_(emitter, ns, x, allow_maps),
+        ClassConst(x) => {
+            if emitter
+                .options()
+                .hhvm
+                .flags
+                .contains(HhvmFlags::EMIT_CLASS_POINTERS)
+                && !force_class_const
+            {
+                Err(Error::NotLiteral)
+            } else {
+                class_const_to_typed_value(emitter, &x.0, &x.1)
+            }
+        }
+        BracedExpr(x) => expr_to_typed_value_(emitter, ns, x, allow_maps, false),
         ClassGet(_) => Err(Error::UserDefinedConstant),
-        As(x) if (x.1).1.is_hlike() => expr_to_typed_value_(emitter, ns, &x.0, allow_maps),
+        As(x) if (x.1).1.is_hlike() => expr_to_typed_value_(emitter, ns, &x.0, allow_maps, false),
         _ => Err(Error::NotLiteral),
     }
 }
@@ -631,7 +647,7 @@ pub fn literals_from_exprs(
     }
     let ret = exprs
         .iter()
-        .map(|expr| expr_to_typed_value(e, ns, expr))
+        .map(|expr| expr_to_typed_value_(e, ns, expr, false, true))
         .collect();
     if let Err(Error::NotLiteral) = ret {
         Err(Error::unrecoverable("literals_from_exprs: not literal"))

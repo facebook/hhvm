@@ -373,6 +373,8 @@ void emitEval(IRGS& env)                      { interpOne(env); }
 void emitDefRecord(IRGS& env, uint32_t)       { interpOne(env); }
 void emitChainFaults(IRGS& env)               { interpOne(env); }
 void emitContGetReturn(IRGS& env)             { interpOne(env); }
+void emitResolveClass(IRGS& env, const StringData*)
+                                              { interpOne(env); }
 
 //////////////////////////////////////////////////////////////////////
 

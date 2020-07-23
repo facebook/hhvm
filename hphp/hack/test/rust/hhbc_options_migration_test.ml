@@ -73,6 +73,9 @@ let assert_opts_equal caml rust =
     Hhbc_options.(emit_meth_caller_func_pointers caml)
     Hhbc_options.(emit_meth_caller_func_pointers rust);
   assert_equal
+    Hhbc_options.(emit_class_pointers caml)
+    Hhbc_options.(emit_class_pointers rust);
+  assert_equal
     Hhbc_options.(rx_is_enabled caml)
     Hhbc_options.(rx_is_enabled rust);
   assert_equal
@@ -296,6 +299,9 @@ let test_all_overrides_json_only _ =
   \"hhvm.emit_meth_caller_func_pointers\": {
     \"global_value\": false
   },
+  \"hhvm.emit_class_pointers\": {
+    \"global_value\": false
+  },
   \"hhvm.enable_intrinsics_extension\": {
     \"global_value\": true
   },
@@ -420,6 +426,8 @@ module CliArgOverrides = struct
   let hhvm'emit_meth_caller_func_pointers =
     "-vhhvm.emit_meth_caller_func_pointers=0"
 
+  let hhvm'emit_class_pointers = "-vhhvm.emit_class_pointers=0"
+
   let hhvm'enable_intrinsics_extension = "-veval.enableintrinsicsextension=true"
 
   let hhvm'hack'lang'abstract_static_props =
@@ -512,6 +520,7 @@ let test_all_overrides_cli_only _ =
       hhvm'emit_func_pointers;
       hhvm'emit_inst_meth_pointers;
       hhvm'emit_meth_caller_func_pointers;
+      hhvm'emit_class_pointers;
       hhvm'enable_intrinsics_extension;
       hhvm'hack'lang'abstract_static_props;
       hhvm'hack'lang'allow_new_attribute_syntax;

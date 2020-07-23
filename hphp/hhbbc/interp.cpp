@@ -3002,6 +3002,7 @@ bool isValidTypeOpForIsAs(const IsTypeOp& op) {
     case IsTypeOp::ClsMeth:
     case IsTypeOp::Func:
     case IsTypeOp::PHPArr:
+    case IsTypeOp::Class:
       return false;
   }
   not_reached();
@@ -4009,6 +4010,18 @@ void in(ISS& env, const bc::ResolveRClsMethodD&) {
 
 void in(ISS& env, const bc::ResolveRClsMethodS& op) {
   resolveClsMethodSImpl<true>(env, op.subop1, op.str2);
+}
+
+void in(ISS& env, const bc::ResolveClass& op) {
+  // TODO (T61651936)
+  auto cls = env.index.resolve_class(env.ctx, op.str1);
+  if (cls && cls->resolved()) {
+    push(env, clsExact(*cls));
+  } else {
+    // If the class is not resolved,
+    // it might not be unique or it might not be a valid classname.
+    push(env, TInitCell);
+  }
 }
 
 namespace {

@@ -40,12 +40,14 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className);
 Variant HHVM_FUNCTION(get_class, const Variant& object = uninit_variant);
 Variant HHVM_FUNCTION(get_called_class);
 Variant HHVM_FUNCTION(get_parent_class, const Variant& object = uninit_variant);
+// If allow_str_cls is true, class_or_object can be a class or a classname.
+// Otherwise, it must be an object.
 bool HHVM_FUNCTION(is_a, const Variant& class_or_object,
                          const String& class_name,
-                         bool allow_string = false);
+                         bool allow_str_cls = false);
 bool HHVM_FUNCTION(is_subclass_of, const Variant& class_or_object,
                                    const String& class_name,
-                                   bool allow_string = true);
+                                   bool allow_str_cls = true);
 bool HHVM_FUNCTION(method_exists, const Variant& class_or_object,
                                   const String& method_name);
 Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
@@ -58,6 +60,7 @@ String HHVM_FUNCTION(HH_class_meth_get_class, TypedValue v);
 String HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v);
 String HHVM_FUNCTION(HH_meth_caller_get_class, TypedValue v);
 String HHVM_FUNCTION(HH_meth_caller_get_method, TypedValue v);
+String HHVM_FUNCTION(HH_class_get_class_name, TypedValue v);
 ///////////////////////////////////////////////////////////////////////////////
 }
 

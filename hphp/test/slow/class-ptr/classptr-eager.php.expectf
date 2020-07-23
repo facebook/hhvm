@@ -1,0 +1,23 @@
+vec(2) {
+  class(Foo)
+  class(Bar)
+}
+int(100)
+int(10)
+int(24)
+
+Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 27
+string(3) "Foo"
+
+Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 26
+string(3) "Bar"
+
+Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 19
+
+Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 39
+string(3) "Bar"
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager.php on line 41
+string(1) "T"
+
+Fatal error: Class undefined: T in %s/test/slow/class-ptr/classptr-eager.php on line 43

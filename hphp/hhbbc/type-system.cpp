@@ -3897,6 +3897,7 @@ Type type_of_istype(IsTypeOp op) {
     assertx(!RO::EvalHackArrDVArrs);
     return TDArr;
   case IsTypeOp::ClsMeth: return TClsMeth;
+  case IsTypeOp::Class: return TCls;
   case IsTypeOp::Func:
     return RO::EvalEnableFuncStringInterop ? TFunc : TFuncS;
   case IsTypeOp::Arr:
@@ -3930,6 +3931,7 @@ folly::Optional<IsTypeOp> type_to_istypeop(const Type& t) {
     return IsTypeOp::DArray;
   }
   if (t.subtypeOf(BClsMeth)) return IsTypeOp::ClsMeth;
+  if (t.subtypeOf(BCls)) return IsTypeOp::Class;
   if (t.subtypeOf(BFunc|BFuncS)) return IsTypeOp::Func;
   return folly::none;
 }
@@ -5172,9 +5174,12 @@ folly::Optional<ArrKey> maybe_class_func_key(const Type& keyTy, bool strict) {
   if (keyTy.subtypeOf(BOptCls | BOptFunc)) {
     ret.mayThrow = true;
     if (keyTy.subtypeOf(BCls | BFunc)) {
-      ret.type = TStr;
       if (keyTy.strictSubtypeOf(TCls)) {
-        ret.s = dcls_of(keyTy).cls.name();
+        auto cname = dcls_of(keyTy).cls.name();
+        ret.s = cname;
+        ret.type = sval(cname);
+      } else {
+        ret.type = TStr;
       }
       return ret;
     }

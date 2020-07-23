@@ -20,8 +20,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -58,8 +56,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -96,8 +92,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -134,8 +128,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -172,8 +164,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -210,8 +200,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -248,8 +236,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -286,8 +272,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -324,8 +308,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
 string(3) "foo"
 class(foo)
 string(3) "foo"
@@ -362,8 +344,6 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-caught: Property 'Props::a' declared as type string, class assigned
-caught: Static property 'Props::b' declared as type string, class assigned
 string(3) "foo"
 class(foo)
 string(3) "foo"

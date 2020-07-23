@@ -367,6 +367,8 @@ static const struct {
   { OpResolveRClsMethodS,
                    {Stack1,           Stack1,       OutClsMethLike  }},
 
+  // TODO (T61651936): ResolveClass may return a classptr or a string
+  { OpResolveClass,{None,             Stack1,       OutUnknown       }},
 
   /*** 14. Generator instructions ***/
 
@@ -935,6 +937,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::ResolveRClsMethodD:
   case Op::ResolveRClsMethodS:
   case Op::ResolveObjMethod:
+  case Op::ResolveClass:
   case Op::False:
   case Op::File:
   case Op::FuncCred:

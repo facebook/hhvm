@@ -234,6 +234,14 @@ namespace HH {
 function class_meth_get_class(mixed $class_meth): string;
 
 /**
+ * Get class name from class
+ * @param mixed $class
+ * @return class name
+ */
+<<__Native, __Pure>>
+function class_get_class_name(mixed $class): string;
+
+/**
  * Get method name from class_meth
  * @param mixed $class_meth
  * @return method name

@@ -50,7 +50,9 @@ static StrNR ctxClassName() {
 
 static const Class* get_cls(const Variant& class_or_object) {
   Class* cls = nullptr;
-  if (class_or_object.is(KindOfObject)) {
+  if (class_or_object.is(KindOfClass)) {
+    cls = class_or_object.toClassVal();
+  } else if (class_or_object.is(KindOfObject)) {
     ObjectData* obj = class_or_object.asCObjRef().get();
     cls = obj->getVMClass();
   } else if (class_or_object.isArray()) {
@@ -249,6 +251,8 @@ Variant HHVM_FUNCTION(get_parent_class,
     } else if (object.isString()) {
       cls = Unit::loadClass(object.asCStrRef().get());
       if (!cls) return false;
+    } else if (object.isClass()) {
+      cls = object.toClassVal();
     } else {
       logOrThrow(object);
       return false;
@@ -261,11 +265,14 @@ Variant HHVM_FUNCTION(get_parent_class,
 }
 
 static bool is_a_impl(const Variant& class_or_object, const String& class_name,
-                      bool allow_string, bool subclass_only) {
-  if (class_or_object.isString() && !allow_string) {
+                      bool allow_str_cls, bool subclass_only) {
+  if ((class_or_object.isString() || class_or_object.isClass()) &&
+      !allow_str_cls) {
     return false;
   }
-  if (!(class_or_object.isString() || class_or_object.isObject())) {
+  if (!(class_or_object.isString() ||
+        class_or_object.isObject() ||
+        class_or_object.isClass())) {
     return false;
   }
 
@@ -281,14 +288,14 @@ static bool is_a_impl(const Variant& class_or_object, const String& class_name,
 
 bool HHVM_FUNCTION(is_a, const Variant& class_or_object,
                          const String& class_name,
-                         bool allow_string /* = false */) {
-  return is_a_impl(class_or_object, class_name, allow_string, false);
+                         bool allow_str_cls /* = false */) {
+  return is_a_impl(class_or_object, class_name, allow_str_cls, false);
 }
 
 bool HHVM_FUNCTION(is_subclass_of, const Variant& class_or_object,
                                    const String& class_name,
-                                   bool allow_string /* = true */) {
-  return is_a_impl(class_or_object, class_name, allow_string, true);
+                                   bool allow_str_cls /* = true */) {
+  return is_a_impl(class_or_object, class_name, allow_str_cls, true);
 }
 
 bool HHVM_FUNCTION(method_exists, const Variant& class_or_object,
@@ -361,6 +368,15 @@ String HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v) {
       __FUNCTION__+5));
   }
   return val(v).pclsmeth->getFunc()->nameStr();
+}
+
+String HHVM_FUNCTION(HH_class_get_class_name, TypedValue v) {
+  if (!tvIsClass(v)) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      folly::sformat("Argument 1 passed to {}() must be a class",
+      __FUNCTION__+5));
+  }
+  return val(v).pclass->nameStr();
 }
 
 namespace {
@@ -438,6 +454,7 @@ void StandardExtension::initClassobj() {
   HHVM_FALIAS(HH\\class_meth_get_method, HH_class_meth_get_method);
   HHVM_FALIAS(HH\\meth_caller_get_class, HH_meth_caller_get_class);
   HHVM_FALIAS(HH\\meth_caller_get_method, HH_meth_caller_get_method);
+  HHVM_FALIAS(HH\\class_get_class_name, HH_class_get_class_name);
 
   loadSystemlib("std_classobj");
 }

@@ -925,6 +925,17 @@ std::string describe_actual_type(tv_rval val) {
   not_reached();
 }
 
+bool TypeConstraint::checkStringCompatible() const {
+  if (isString() || (isObject() && interface_supports_string(m_typeName))) {
+    return true;
+  }
+  if (!isObject()) return false;
+  if (auto alias = getTypeAliasWithAutoload(m_namedEntity, m_typeName)) {
+    return alias->type == AnnotType::String;
+  }
+  return false;
+}
+
 bool TypeConstraint::convertClsMethToArrLike() const {
   auto const result = annotCompat(KindOfClsMeth, type(), typeName());
   return result == AnnotAction::ClsMethCheck;
@@ -960,22 +971,25 @@ void castClsMeth(tv_lval c, F make) {
 void TypeConstraint::verifyOutParamFail(const Func* func,
                                         TypedValue* c,
                                         int paramNum) const {
-  if ((RO::EvalEnableFuncStringInterop && isFuncType(c->m_type)) ||
-      isClassType(c->m_type)) {
+
+  if (RO::EvalEnableFuncStringInterop && isFuncType(c->m_type)) {
     if (isString() || (isObject() && interface_supports_string(m_typeName))) {
       if (RuntimeOption::EvalStringHintNotices) {
-        if (isFuncType(c->m_type)) {
-          raise_notice(Strings::FUNC_TO_STRING_IMPLICIT);
-        } else {
-          raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
-        }
+        raise_notice(Strings::FUNC_TO_STRING_IMPLICIT);
       }
-      c->m_data.pstr = isFuncType(c->m_type)
-        ? const_cast<StringData*>(c->m_data.pfunc->name())
-        : const_cast<StringData*>(c->m_data.pclass->name());
+      c->m_data.pstr = const_cast<StringData*>(c->m_data.pfunc->name());
       c->m_type = KindOfPersistentString;
       return;
     }
+  }
+
+  if (isClassType(c->m_type) && checkStringCompatible()) {
+    if (RuntimeOption::EvalStringHintNotices) {
+      raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
+    }
+    c->m_data.pstr = const_cast<StringData*>(c->m_data.pclass->name());
+    c->m_type = KindOfPersistentString;
+    return;
   }
 
   if (isClsMethType(c->m_type) && convertClsMethToArrLike()) {
@@ -1041,6 +1055,15 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
     }
   }
 
+  if (isClassType(val.type()) && checkStringCompatible()) {
+    if (RuntimeOption::EvalStringHintNotices) {
+      raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
+    }
+    val.val().pstr = const_cast<StringData*>(val.val().pclass->name());
+    val.type() = KindOfPersistentString;
+    return;
+  }
+
   if (isClsMethType(val.type()) && convertClsMethToArrLike()) {
     if (RuntimeOption::EvalVecHintNotices) {
       raise_clsmeth_compat_type_hint_property_notice(
@@ -1087,22 +1110,25 @@ void TypeConstraint::verifyFail(const Func* func, tv_lval c,
     }
   }
 
-  if ((RO::EvalEnableFuncStringInterop && isFuncType(c.type())) ||
-      isClassType(c.type())) {
+  if (RO::EvalEnableFuncStringInterop && isFuncType(c.type())) {
     if (isString() || (isObject() && interface_supports_string(m_typeName))) {
       if (RuntimeOption::EvalStringHintNotices) {
-        if (isFuncType(c.type())) {
-          raise_notice(Strings::FUNC_TO_STRING_IMPLICIT);
-        } else {
-          raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
-        }
+        raise_notice(Strings::FUNC_TO_STRING_IMPLICIT);
       }
-      val(c).pstr = isFuncType(c.type())
-        ? const_cast<StringData*>(val(c).pfunc->name())
-        : const_cast<StringData*>(val(c).pclass->name());
+      val(c).pstr = const_cast<StringData*>(val(c).pfunc->name());
       c.type() = KindOfPersistentString;
       return;
     }
+  }
+
+  if (isClassType(c.type()) && checkStringCompatible()) {
+    if (RuntimeOption::EvalStringHintNotices) {
+      raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
+    }
+    val(c).pstr =
+      const_cast<StringData*>(val(c).pclass->name()); // TODO (T61651936)
+    c.type() = KindOfPersistentString;
+    return;
   }
 
   if (isClsMethType(c.type()) && convertClsMethToArrLike()) {

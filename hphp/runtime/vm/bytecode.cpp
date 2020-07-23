@@ -2626,6 +2626,21 @@ OPTBLD_INLINE void iopThrowNonExhaustiveSwitch() {
   not_reached();
 }
 
+OPTBLD_INLINE void iopResolveClass(Id id) {
+  auto const cname = vmfp()->unit()->lookupLitstrId(id);
+  auto const class_ = Unit::loadClass(cname);
+  // TODO (T61651936): Disallow implicit conversion to string
+  if (class_ == nullptr) {
+    if (RuntimeOption::EvalRaiseClassConversionWarning) {
+      raise_warning(Strings::CLASS_TO_STRING);
+    }
+    vmStack().pushStaticString(cname);
+  }
+  else {
+    vmStack().pushClass(class_);
+  }
+}
+
 OPTBLD_INLINE void iopClassGetC() {
   auto const cell = vmStack().topC();
   if (isStringType(cell->m_type)) {
@@ -3430,6 +3445,7 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue val, IsTypeOp op) {
     return is_any_array(&val, /* logOnHackArrays = */ false);
   case IsTypeOp::ClsMeth: return is_clsmeth(&val);
   case IsTypeOp::Func: return is_fun(&val);
+  case IsTypeOp::Class: return is_class(&val);
   }
   not_reached();
 }

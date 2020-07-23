@@ -1666,6 +1666,7 @@ fn print_istype_op<W: Write>(w: &mut W, op: &IstypeOp) -> Result<(), W::Error> {
         Op::OpClsMeth => w.write("ClsMeth"),
         Op::OpFunc => w.write("Func"),
         Op::OpPHPArr => w.write("PHPArr"),
+        Op::OpClass => w.write("Class"),
     }
 }
 
@@ -2216,6 +2217,10 @@ fn print_op<W: Write>(w: &mut W, op: &InstructOperator) -> Result<(), W::Error> 
             print_special_cls_ref(w, r)?;
             w.write(" ")?;
             print_method_id(w, mid)
+        }
+        I::ResolveClass(id) => {
+            w.write("ResolveClass ")?;
+            print_class_id(w, id)
         }
         I::Fatal(fatal_op) => print_fatal_op(w, fatal_op),
     }

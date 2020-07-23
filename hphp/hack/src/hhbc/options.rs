@@ -165,6 +165,7 @@ prefixed_flags!(
     EMIT_FUNC_POINTERS,
     EMIT_INST_METH_POINTERS,
     EMIT_METH_CALLER_FUNC_POINTERS,
+    EMIT_CLASS_POINTERS,
     ENABLE_INTRINSICS_EXTENSION,
     HACK_ARR_COMPAT_NOTICES,
     HACK_ARR_DV_ARR_MARK,
@@ -650,6 +651,9 @@ mod tests {
   },
   "hhvm.dynamic_invoke_functions": {
     "global_value": []
+  },
+  "hhvm.emit_class_pointers": {
+    "global_value": false
   },
   "hhvm.emit_cls_meth_pointers": {
     "global_value": false
@@ -1154,5 +1158,6 @@ bitflags! {
         const DISABLE_ARRAY_CAST = 1 << 52;
         const DISABLE_ARRAY_TYPEHINT = 1 << 53;
         const HACK_ARR_DV_ARR_MARK = 1 << 54;
+        const EMIT_CLASS_POINTERS = 1 << 55;
     }
 }

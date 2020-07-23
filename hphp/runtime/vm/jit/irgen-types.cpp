@@ -409,6 +409,7 @@ Type typeOpToType(IsTypeOp op) {
   case IsTypeOp::Res:     return TRes;
   case IsTypeOp::ClsMeth: return TClsMeth;
   case IsTypeOp::Func:    return TFunc;
+  case IsTypeOp::Class:   return TCls;
   case IsTypeOp::Vec:
   case IsTypeOp::Dict:
   case IsTypeOp::VArray:
@@ -1523,7 +1524,12 @@ void verifyPropType(IRGS& env,
         return val;
       },
       [&] (SSATmp*) { return false; }, // No func to string automatic conversions
-      [&] (SSATmp*) { return false; }, // No class to string automatic conversions
+      [&] (SSATmp*) {  // class to string automatic conversions
+        if (!coerce) return false;
+        if (RO::EvalCheckPropTypeHints < 3) return false;
+        *coerce = gen(env, LdClsName, val);
+        return true;
+      },
       [&] (SSATmp* val) {
         if (!coerce) return false;
         // If we're not hard enforcing property type mismatches don't coerce

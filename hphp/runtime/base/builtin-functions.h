@@ -318,6 +318,11 @@ inline bool is_clsmeth(const TypedValue* c) {
   return tvIsClsMeth(c);
 }
 
+inline bool is_class(const TypedValue* c) {
+  assertx(tvIsPlausible(*c));
+  return tvIsClass(c);
+}
+
 inline bool is_fun(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
   return tvIsFunc(c);

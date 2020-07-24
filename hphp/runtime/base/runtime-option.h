@@ -1306,7 +1306,7 @@ struct RuntimeOption {
   F(bool, EnablePerFileCoverage, false)                                 \
   /* Should we use the autoload map from the repo */                    \
   F(bool, UseRepoAutoloadMap, true)                                     \
-  /* */
+  F(bool, LogOnIsArrayFunction, false)                                  \
 
 private:
   using string = std::string;

@@ -1,0 +1,16 @@
+--- Direct is_array call --- 
+ --- Indirect is_array call --- 
+
+Notice: call to deprecated builtin is_array() in %s/test/slow/is_array_deprecated.php on line 17
+ --- Direct is_array call --- 
+ --- Indirect is_array call --- 
+
+Notice: call to deprecated builtin is_array() in %s/test/slow/is_array_deprecated.php on line 17
+ --- Direct is_array call --- 
+ --- Indirect is_array call --- 
+
+Notice: call to deprecated builtin is_array() in %s/test/slow/is_array_deprecated.php on line 17
+ --- Direct is_array call --- 
+ --- Indirect is_array call --- 
+
+Notice: call to deprecated builtin is_array() in %s/test/slow/is_array_deprecated.php on line 17

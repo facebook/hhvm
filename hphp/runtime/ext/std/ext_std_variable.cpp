@@ -131,6 +131,9 @@ bool HHVM_FUNCTION(HH_is_php_array, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(is_array, const Variant& v) {
+  if (RuntimeOption::EvalLogOnIsArrayFunction) {
+    raise_notice("call to deprecated builtin is_array()");
+  }
   if (UNLIKELY(RuntimeOption::EvalWidenIsArray)) {
     return is_any_array(v.asTypedValue(), /* logOnHackArrays = */ true);
   }

@@ -32,14 +32,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-PreClass::PreClass(Unit* unit, int line1, int line2, Offset o,
-                   const StringData* n, Attr attrs, const StringData* parent,
-                   const StringData* docComment, Id id, Hoistable hoistable)
+PreClass::PreClass(Unit* unit, int line1, int line2, const StringData* n,
+                   Attr attrs, const StringData* parent, const StringData* docComment,
+                   Id id, Hoistable hoistable)
   : m_unit(unit)
   , m_namedEntity(NamedEntity::get(n))
   , m_line1(line1)
   , m_line2(line2)
-  , m_offset(o)
   , m_id(id)
   , m_attrs(attrs)
   , m_hoistable(hoistable)
@@ -94,7 +93,7 @@ void PreClass::prettyPrint(std::ostream &out) const {
   if (m_attrs & AttrAbstract) { out << "abstract "; }
   if (m_attrs & AttrFinal) { out << "final "; }
   if (m_attrs & AttrInterface) { out << "interface "; }
-  out << m_name->data() << " at " << m_offset;
+  out << m_name->data();
   if (m_hoistable == MaybeHoistable) {
     out << " (maybe-hoistable)";
   } else if (m_hoistable == AlwaysHoistable) {

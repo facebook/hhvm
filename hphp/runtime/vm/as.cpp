@@ -3267,7 +3267,6 @@ void parse_class(AsmState& as) {
   as.pce = as.ue->newBarePreClassEmitter(name, PreClass::MaybeHoistable);
   as.pce->init(line0,
                line1,
-               as.ue->bcPos(),
                attrs,
                makeStaticString(parentName),
                staticEmptyString());

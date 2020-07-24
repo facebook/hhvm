@@ -177,7 +177,7 @@ struct PreClassEmitter {
 
 
 
-  void init(int line1, int line2, Offset offset, Attr attrs,
+  void init(int line1, int line2, Attr attrs,
             const StringData* parent, const StringData* docComment);
 
   UnitEmitter& ue() const { return m_ue; }
@@ -187,7 +187,6 @@ struct PreClassEmitter {
   void setAttrs(Attr attrs) { m_attrs = attrs; }
   void setHoistable(PreClass::Hoistable h) { m_hoistable = h; }
   PreClass::Hoistable hoistability() const { return m_hoistable; }
-  void setOffset(Offset off) { m_offset = off; }
   void setEnumBaseTy(TypeConstraint ty) { m_enumBaseTy = ty; }
   const TypeConstraint& enumBaseTy() const { return m_enumBaseTy; }
   Id id() const { return m_id; }
@@ -285,7 +284,6 @@ struct PreClassEmitter {
   UnitEmitter& m_ue;
   int m_line1;
   int m_line2;
-  Offset m_offset;  // offset of the DefCls for this class
   LowStringPtr m_name;
   Attr m_attrs;
   LowStringPtr m_parent;

@@ -298,7 +298,7 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Construction and destruction.
 
-  PreClass(Unit* unit, int line1, int line2, Offset o, const StringData* n,
+  PreClass(Unit* unit, int line1, int line2, const StringData* n,
            Attr attrs, const StringData* parent, const StringData* docComment,
            Id id, Hoistable hoistable);
   ~PreClass();
@@ -316,7 +316,6 @@ public:
   NamedEntity*      namedEntity()  const { return m_namedEntity; }
   int               line1()        const { return m_line1; }
   int               line2()        const { return m_line2; }
-  Offset            getOffset()    const { return m_offset; }
   Id                id()           const { return m_id; }
   Attr              attrs()        const { return m_attrs; }
   const StringData* name()         const { return m_name; }
@@ -459,7 +458,6 @@ private:
   LowPtr<NamedEntity> m_namedEntity;
   int m_line1;
   int m_line2;
-  Offset m_offset;
   Id m_id;
   Attr m_attrs;
   Hoistable m_hoistable;

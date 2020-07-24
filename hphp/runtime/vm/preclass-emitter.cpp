@@ -114,12 +114,11 @@ PreClassEmitter::PreClassEmitter(UnitEmitter& ue,
   , m_id(id)
   , m_hoistable(hoistable) {}
 
-void PreClassEmitter::init(int line1, int line2, Offset offset, Attr attrs,
+void PreClassEmitter::init(int line1, int line2, Attr attrs,
                            const StringData* parent,
                            const StringData* docComment) {
   m_line1 = line1;
   m_line2 = line2;
-  m_offset = offset;
   m_attrs = attrs;
   m_parent = parent;
   m_docComment = docComment;
@@ -279,7 +278,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   assertx(attrs & AttrPersistent || SystemLib::s_inited);
 
   auto pc = std::make_unique<PreClass>(
-    &unit, m_line1, m_line2, m_offset, m_name,
+    &unit, m_line1, m_line2, m_name,
     attrs, m_parent, m_docComment, m_id,
     m_hoistable);
   pc->m_interfaces = m_interfaces;
@@ -387,7 +386,6 @@ template<class SerDe> void PreClassEmitter::serdeMetaData(SerDe& sd) {
   // serialized outside of this.
   sd(m_line1)
     (m_line2)
-    (m_offset)
     (m_attrs)
     (m_parent)
     (m_docComment)

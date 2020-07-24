@@ -1263,7 +1263,6 @@ void emit_class(EmitUnitState& state,
   pce->init(
     std::get<0>(cls.srcInfo.loc),
     std::get<1>(cls.srcInfo.loc),
-    offset == kInvalidOffset ? ue.bcPos() : offset,
     cls.attrs |
       (cls.sampleDynamicConstruct ? AttrDynamicallyConstructible : AttrNone),
     cls.parentName ? cls.parentName : staticEmptyString(),

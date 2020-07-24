@@ -1,10 +1,5 @@
 .hh_file 1;
 
-.main {
-  Int 1
-  RetC
-}
-
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   .numiters 2;
   NewDArray 3

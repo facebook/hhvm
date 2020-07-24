@@ -3,11 +3,6 @@
 # Some tests of property/constant initializers.
 #
 
-.main {
-  Int 1
-  RetC
-}
-
 .class Init {
   .default_ctor;
   .const BAR = """s:4:"1242";""";

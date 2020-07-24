@@ -3,11 +3,6 @@
 # Basic test of classes for hip hop assembler.
 #
 
-.main {
-
-  Int 1
-  RetC
-}
 
 .class Base {
   .method [public] __construct {

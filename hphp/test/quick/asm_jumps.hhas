@@ -3,11 +3,6 @@
 # Test some jumps
 #
 
-.main {
-  Int 1
-  RetC
-}
-
 .function ["__EntryPoint"("""y:0:{}""")] main {
 
   Jmp real_function

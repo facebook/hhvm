@@ -2,11 +2,6 @@
 # Test that we can specify hoistability. Loading here would fail
 # if A was marked as hoistable.
 
-.main {
-  Int 1
-  RetC
-}
-
 .class [final trait] A {
   .use B;
   .default_ctor;

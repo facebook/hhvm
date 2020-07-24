@@ -1,10 +1,5 @@
 .hh_file 1;
 
-.main (1,1) {
-  Int 1
-  RetC
-}
-
 .function ["__EntryPoint"("""y:0:{}""")] (8,8) <"" N  > main() {
   String "FAIL: this file should not run\n"
   Print

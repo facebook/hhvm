@@ -1,11 +1,6 @@
 .hh_file 1;
 # Check that BareThis NeverNull fails to verify if $this can be null
 
-.main {
-  Int 1
-  RetC
-}
-
 .function bar() {
   Int 1
   JmpZ chk    # b1

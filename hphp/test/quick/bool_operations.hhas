@@ -3,11 +3,6 @@
 # Test boolean binary operations which cannot be generated directly via PHP
 #
 
-.main {
-  Int 1
-  RetC
-}
-
 .function print_bool_result($res) {
   CGetL $res
   String "\n"

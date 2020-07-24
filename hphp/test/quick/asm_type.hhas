@@ -1,11 +1,6 @@
 .hh_file 1;
 # just testing istype opcodes
 
-.main {
-  Int 1
-  RetC
-}
-
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   Int 1
   IsTypeC Int

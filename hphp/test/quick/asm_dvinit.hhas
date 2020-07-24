@@ -3,11 +3,6 @@
 # Try out dv initializers in the assembler
 #
 
-.main {
-  Int 1
-  RetC
-}
-
 .function foo($x, $y = y_init) {
   entry:
           CGetL $x

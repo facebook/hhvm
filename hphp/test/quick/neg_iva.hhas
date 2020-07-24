@@ -1,11 +1,6 @@
 .hh_file 1;
 #tests that files with negative IVA values fail assembly
 
-.main {
-  Int 1
-  RetC
-}
-
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   .declvars $foo $baz $t;
   Null

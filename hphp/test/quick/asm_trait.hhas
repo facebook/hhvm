@@ -3,11 +3,6 @@
 # Try making some traits
 #
 
-.main {
-
-  Int 1
-  RetC
-}
 
 .class [trait] Frobbable {
   .default_ctor;

@@ -3,11 +3,6 @@
 
 .adata A_0 = """Y:0:{}""";
 
-.main {
-  Int 1
-  RetC
-}
-
 .function <"HH\\int" "HH\\int" extended_hint> fail() {
   Array @A_0
   VerifyRetTypeC

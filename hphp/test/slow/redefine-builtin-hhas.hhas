@@ -3,11 +3,6 @@
 # Can't redefine builtins, even if you bypass the parser
 #
 
-.main {
-  Int 1
-  RetC
-}
-
 .function parse_str {
   String "Fake parse_str!\n"
   Print

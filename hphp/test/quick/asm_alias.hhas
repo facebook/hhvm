@@ -1,11 +1,6 @@
 .hh_file 1;
 # Test declaring type aliases
 
-.main {
-
-  Int 1
-  RetC
-}
 
 .function foo(<"@Foo" "Foo" extended_hint soft > $x) {
   VerifyParamType $x

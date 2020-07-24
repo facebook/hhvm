@@ -1,9 +1,4 @@
 .hh_file 1;
-.main (1,1) {
-  Int 1
-  RetC
-}
-
 .class Clojure extends CLOSURE {
   .method [public static] (3,3) <"" N  > __invoke() isClosureBody {
     Null

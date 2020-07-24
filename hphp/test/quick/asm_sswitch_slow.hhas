@@ -2,11 +2,6 @@
 # SSwitch with integer-like strings uses a different translator
 # implementation.
 
-.main {
-  Int 1
-  RetC
-}
-
 .function get_three() {
   String "3"
   RetC

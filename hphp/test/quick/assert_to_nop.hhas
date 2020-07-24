@@ -1,11 +1,6 @@
 .hh_file 1;
 # tests that AssertRATStk is properly replaced with a nop
 
-.main {
-  Int 1
-  RetC
-}
-
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   Int 1
   NullUninit

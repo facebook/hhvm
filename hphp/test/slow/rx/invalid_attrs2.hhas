@@ -1,9 +1,4 @@
 .hh_file 1;
-.main {
-  Int 1
-  RetC
-}
-
 .function [rx_shallow rx_shallow] foo() {
   Null
   RetC

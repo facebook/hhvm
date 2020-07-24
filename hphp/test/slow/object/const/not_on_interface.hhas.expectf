@@ -1,1 +1,1 @@
-Fatal error: Assembler Error: line 16: interfaces, traits and enums may not be const in %s/not_on_interface.hhas on line -1
+Fatal error: Assembler Error: line 11: interfaces, traits and enums may not be const in %s/not_on_interface.hhas on line -1

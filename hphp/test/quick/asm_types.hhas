@@ -3,11 +3,6 @@
 
 .adata A_0 = """Y:0:{}""";
 
-.main {
-
-  Int 1
-  RetC
-}
 
 .function use_class(<"@C" "C" extended_hint soft> $x) {
   VerifyParamType $x

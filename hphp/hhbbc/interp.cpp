@@ -2297,7 +2297,7 @@ void in(ISS& env, const bc::CGetL& op) {
     }
   }
   if (auto const last = last_op(env)) {
-    if (!is_pseudomain(env.ctx.func) && last->op == Op::PopL &&
+    if (last->op == Op::PopL &&
         op.nloc1.id == last->PopL.loc1) {
       reprocess(env);
       rewind(env, 1);
@@ -2319,7 +2319,7 @@ void in(ISS& env, const bc::CGetQuietL& op) {
     return reduce(env, bc::BareThis { BareThisOp::NoNotice });
   }
   if (auto const last = last_op(env)) {
-    if (!is_pseudomain(env.ctx.func) && last->op == Op::PopL &&
+    if (last->op == Op::PopL &&
         op.loc1 == last->PopL.loc1) {
       reprocess(env);
       rewind(env, 1);

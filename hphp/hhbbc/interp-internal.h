@@ -348,9 +348,8 @@ void discardAR(ISS& env, uint32_t idx) {
 
 void setThisAvailable(ISS& env) {
   FTRACE(2, "    setThisAvailable\n");
-  if (env.ctx.cls ?
-      is_unused_trait(*env.ctx.cls) || (env.ctx.func->attrs & AttrStatic) :
-      !is_pseudomain(env.ctx.func)) {
+  if (!env.ctx.cls || is_unused_trait(*env.ctx.cls) ||
+      (env.ctx.func->attrs & AttrStatic)) {
     return unreachable(env);
   }
   if (!env.state.thisType.couldBe(BObj) ||

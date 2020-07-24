@@ -69,11 +69,6 @@ const StaticString s_Awaitable("HH\\Awaitable");
 void add_test_unit(php::Program& program) {
   assert(SystemLib::s_inited);
   std::string const hhas = R"(
-    .main {
-      Int 1
-      RetC
-    }
-
     # Technically this should be provided by systemlib, but it's the
     # only one we have to make sure the type system can see for unit
     # test purposes, so we can just define it here.  We don't need to

@@ -552,14 +552,6 @@ public:
   folly::Range<PreRecordDescPtr*> prerecords();
   folly::Range<const PreRecordDescPtr*> prerecords() const;
 
-  /*
-   * Get a pseudomain for the Unit with the context class `cls'.
-   *
-   * We clone the toplevel pseudomain for each context class and cache the
-   * results in m_pseudoMainCache.
-   */
-  Func* getMain(Class* cls, bool hasThis) const;
-
   // Return the cached EntryPoint
   Func* getCachedEntryPoint() const;
 
@@ -992,7 +984,6 @@ private:
   SHA1 m_sha1;
   SHA1 m_bcSha1;
   VMFixedVector<const ArrayData*> m_arrays;
-  mutable PseudoMainCacheMap* m_pseudoMainCache{nullptr};
   mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;

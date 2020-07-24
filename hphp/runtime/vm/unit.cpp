@@ -250,13 +250,6 @@ Unit::~Unit() {
   }
 
   free(mi);
-
-  if (m_pseudoMainCache) {
-    for (auto& kv : *m_pseudoMainCache) {
-      Func::destroy(kv.second);
-    }
-    delete m_pseudoMainCache;
-  }
 }
 
 void* Unit::operator new(size_t sz) {
@@ -688,27 +681,6 @@ rds::Handle Unit::coverageDataHandle() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Funcs and PreClasses.
-
-Func* Unit::getMain(Class* cls, bool hasThis) const {
-  auto const mi = mergeInfo();
-  if (!cls) return *mi->funcBegin();
-  Lock lock(g_classesMutex);
-  if (!m_pseudoMainCache) {
-    m_pseudoMainCache = new PseudoMainCacheMap;
-  }
-  auto const key = reinterpret_cast<Class*>(intptr_t(cls)|hasThis);
-  auto it = m_pseudoMainCache->find(key);
-  if (it != m_pseudoMainCache->end()) {
-    return it->second;
-  }
-  Func* f = (*mi->funcBegin())->clone(cls);
-  auto const attrs = f->attrs();
-  f->setNewFuncId();
-  f->setBaseCls(cls);
-  f->setAttrs(Attr(hasThis ? (attrs & ~AttrStatic) : (attrs | AttrStatic)));
-  (*m_pseudoMainCache)[key] = f;
-  return f;
-}
 
 Func* Unit::getCachedEntryPoint() const {
   return m_cachedEntryPoint;
@@ -2119,8 +2091,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
       if (newMi != mi) {
         this->m_mergeInfo.store(newMi, std::memory_order_release);
         Treadmill::deferredFree(mi);
-        if (newMi->m_mergeablesSize == 1) {
-          assertx(newMi->funcBegin()[0]->isPseudoMain());
+        if (newMi->m_mergeablesSize == 0) {
           m_mergeState.fetch_or(MergeState::Empty,
                                 std::memory_order_relaxed);
         }

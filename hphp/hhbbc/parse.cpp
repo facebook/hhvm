@@ -1145,11 +1145,7 @@ void parse_unit(php::Program& prog, const UnitEmitter* uep) {
   for (auto& fe : ue.fevec()) {
     auto func = parse_func(puState, ret.get(), nullptr, *fe);
     assert(!fe->pce());
-    if (fe->isPseudoMain()) {
-      ret->pseudomain = std::move(func);
-    } else {
-      ret->funcs.push_back(std::move(func));
-    }
+    ret->funcs.push_back(std::move(func));
   }
 
   ret->srcLocs.resize(puState.srcLocs.size());

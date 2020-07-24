@@ -836,7 +836,6 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
   }
 
   attrSetter(func->attrs,
-             is_pseudomain(func) ||
              func->attrs & AttrInterceptable ||
              ainfo.mayUseVV,
              AttrMayUseVV);

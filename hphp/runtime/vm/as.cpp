@@ -735,7 +735,6 @@ struct AsmState {
 
   UnitEmitter* ue;
   Input in;
-  bool emittedPseudoMain{false};
 
   /*
    * Map of adata identifiers to their serialized contents
@@ -2567,16 +2566,6 @@ bool parse_line_range(AsmState& as, int& line0, int& line1) {
   return true;
 }
 
-/*
- * If we haven't seen a pseudomain, add it
- */
-void ensure_pseudomain(AsmState& as) {
-  if (!as.emittedPseudoMain) {
-    as.ue->addTrivialPseudoMain();
-    as.emittedPseudoMain = true;
-  }
-}
-
 static StaticString s_native("__Native");
 
 MaybeDataType type_constraint_to_data_type(
@@ -2651,8 +2640,6 @@ void check_native(AsmState& as, bool is_construct) {
  *                    ;
  */
 void parse_function(AsmState& as) {
-  ensure_pseudomain(as);
-
   as.in.skipWhitespace();
 
   auto const ubs = parse_ubs(as);
@@ -3128,8 +3115,6 @@ void parse_cls_doccomment(AsmState& as) {
  */
 void parse_class_body(AsmState& as, bool class_is_const,
                       const UpperBoundMap& class_ubs) {
-  ensure_pseudomain(as);
-
   std::string directive;
   while (as.in.readword(directive)) {
     if (directive == ".property") {
@@ -3157,8 +3142,6 @@ void parse_class_body(AsmState& as, bool class_is_const,
  *                  ;
  */
 void parse_record_body(AsmState& as) {
-  ensure_pseudomain(as);
-
   std::string directive;
   while (as.in.readword(directive)) {
     if (directive == ".property") { parse_record_field(as); continue; }
@@ -3351,32 +3334,6 @@ void parse_filepath(AsmState& as) {
     as.ue->m_filepath = str;
   }
   as.in.expectWs(';');
-}
-
-/*
- * directive-main : ?line-range '{' function-body
- *                ;
- */
-void parse_main(AsmState& as) {
-  if (as.emittedPseudoMain) {
-    as.error("Multiple .main directives found");
-  }
-
-  int line0;
-  int line1;
-  bool fromSrcLoc = parse_line_range(as, line0, line1);
-
-  as.in.expectWs('{');
-
-  as.ue->initMain(line0, line1);
-  as.fe = as.ue->getMain();
-  as.emittedPseudoMain = true;
-  if (fromSrcLoc) {
-    as.srcLoc = Location::Range{line0,0,line1,0};
-  } else {
-    as.srcLoc = Location::Range{-1,-1,-1,-1};
-  }
-  parse_function_body(as);
 }
 
 /*
@@ -3643,7 +3600,6 @@ void parse(AsmState& as) {
 
   while (as.in.readword(directive)) {
     if (directive == ".filepath")      { parse_filepath(as)      ; continue; }
-    if (directive == ".main")          { parse_main(as)          ; continue; }
     if (directive == ".function")      { parse_function(as)      ; continue; }
     if (directive == ".adata")         { parse_adata(as)         ; continue; }
     if (directive == ".class")         { parse_class(as)         ; continue; }
@@ -3661,8 +3617,6 @@ void parse(AsmState& as) {
 
     as.error("unrecognized top-level directive `" + directive + "'");
   }
-
-  ensure_pseudomain(as);
 
   if (as.symbol_refs.size()) {
     for (auto& ent : as.symbol_refs) {

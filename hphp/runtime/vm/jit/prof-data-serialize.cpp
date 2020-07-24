@@ -1385,14 +1385,6 @@ void write_func(ProfDataSerializer& ser, const Func* func) {
     return write_string(ser, func->name());
   }
   write_raw(ser, fid);
-  if (func->isPseudoMain()) {
-    const uint32_t zero = 0;
-    auto const isStatic = func->isStatic();
-    write_raw(ser, zero);
-    write_unit(ser, func->unit());
-    write_raw(ser, isStatic);
-    return write_class(ser, func->cls());
-  }
 
   if (func->isMethod()) {
     auto const* cls = func->implCls();
@@ -1415,7 +1407,7 @@ void write_func(ProfDataSerializer& ser, const Func* func) {
   // Ideally we'd write the func's index in its Unit; but we may not
   // have that after Unit::initial_merge
   const uint32_t off = func->base();
-  assertx(off && !(off & 0x80000000));
+  assertx(!(off & 0x80000000));
   write_raw(ser, off);
   write_unit(ser, func->unit());
 }
@@ -1435,12 +1427,6 @@ Func* read_func(ProfDataDeserializer& ser) {
           return Unit::lookupFunc(name);
         }
         auto const id = read_raw<uint32_t>(ser);
-        if (!id) {
-          bool isStatic = false;
-          auto const unit = read_unit(ser);
-          read_raw(ser, isStatic);
-          return unit->getMain(read_class(ser), !isStatic);
-        }
         if (id & 0x80000000) {
           auto const cls = read_class(ser);
           if (id == k86pinitSlot) return cls->get86pinit();

@@ -2204,7 +2204,7 @@ void ExecutionContext::enterDebuggerDummyEnv() {
   assertx(m_nesting == 0);
   assertx(vmStack().count() == 0);
   ActRec* ar = vmStack().allocA();
-  ar->m_func = s_debuggerDummy->lookupFuncId(1);
+  ar->m_func = s_debuggerDummy->lookupFuncId(0);
   assertx(ar->m_func && ar->m_func->name()->equal(s_include.get()));
   ar->setNumArgs(0);
   for (int i = 0; i < ar->m_func->numLocals(); ++i) vmStack().pushInt(1);

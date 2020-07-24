@@ -123,7 +123,7 @@ void UnitEmitter::setBc(const unsigned char* bc, size_t bclen) {
   }
   m_bc = (unsigned char*)malloc(bclen);
   m_bcmax = bclen;
-  memcpy(m_bc, bc, bclen);
+  if (bclen) memcpy(m_bc, bc, bclen);
   m_bclen = bclen;
 }
 
@@ -188,29 +188,7 @@ Id UnitEmitter::mergeArray(const ArrayData* a) {
 ///////////////////////////////////////////////////////////////////////////////
 // FuncEmitters.
 
-void UnitEmitter::initMain(int line1, int line2) {
-  assertx(m_fes.size() == 0);
-  StringData* name = staticEmptyString();
-  FuncEmitter* pseudomain = newFuncEmitter(name);
-  Attr attrs = AttrMayUseVV;
-  pseudomain->init(line1, line2, 0, attrs, name);
-}
-
-void UnitEmitter::addTrivialPseudoMain() {
-  initMain(0, 0);
-  auto const mfe = getMain();
-  recordSourceLocation({1,0,1,0}, 0);
-  emitOp(OpInt);
-  emitInt64(1);
-  emitOp(OpRetC);
-  mfe->maxStackCells = 1;
-  mfe->finish(bcPos());
-}
-
 FuncEmitter* UnitEmitter::newFuncEmitter(const StringData* name) {
-  // The pseudomain comes first.
-  assertx(m_fes.size() > 0 || !strcmp(name->data(), ""));
-
   auto fe = std::make_unique<FuncEmitter>(*this, m_nextFuncSn++, m_fes.size(),
                                           name);
   m_fes.push_back(std::move(fe));
@@ -655,9 +633,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
     assertx(ix == fe->id());
     mi->mergeableObj(ix++) = func;
   }
-  assertx(u->getMain(nullptr, false)->isPseudoMain());
   mi->m_firstHoistablePreClass = ix;
-  assertx(m_fes.size());
   for (auto& id : m_hoistablePceIdList) {
     mi->mergeableObj(ix++) = u->m_preClasses[id].get();
   }
@@ -1669,7 +1645,6 @@ createFatalUnit(const StringData* filename, const SHA1& sha1, FatalOp op,
   ue->m_fatalOp = op;
   ue->m_fatalMsg = err;
 
-  ue->addTrivialPseudoMain();
   return ue;
 }
 

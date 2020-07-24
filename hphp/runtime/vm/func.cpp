@@ -67,8 +67,10 @@ std::atomic<bool> Func::s_treadmill;
 
 /*
  * FuncId high water mark and FuncId -> Func* table.
+ * We can't start with 0 since that's used for special sentinel value
+ * in TreadHashMap
  */
-static std::atomic<FuncId> s_nextFuncId{0};
+static std::atomic<FuncId> s_nextFuncId{1};
 static AtomicVector<const Func*> s_funcVec{0, nullptr};
 static InitFiniNode s_funcVecReinit([]{
   UnsafeReinitEmptyAtomicVector(

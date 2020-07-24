@@ -380,9 +380,9 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     auto emit_srcloc = [&] {
       auto const sl = srcLoc(*func, inst.srcLoc);
-      if (!sl.isValid()) return;
-      Location::Range loc(sl.start.line, sl.start.col,
-                          sl.past.line, sl.past.col);
+      auto const loc = sl.isValid() ?
+        Location::Range(sl.start.line, sl.start.col, sl.past.line, sl.past.col)
+        : Location::Range(-1,-1,-1,-1);
       ue.recordSourceLocation(loc, startOffset);
     };
 
@@ -1213,21 +1213,6 @@ void emit_func(EmitUnitState& state, UnitEmitter& ue,
   emit_finish_func(state, func, *fe, info);
 }
 
-void emit_pseudomain(EmitUnitState& state,
-                     UnitEmitter& ue,
-                     const php::Unit& unit) {
-  FTRACE(2,  "    pseudomain\n");
-  auto& pm = *unit.pseudomain;
-  renumber_locals(pm);
-  ue.initMain(std::get<0>(pm.srcInfo.loc),
-              std::get<1>(pm.srcInfo.loc));
-  auto const fe = ue.getMain();
-  auto const func = php::ConstFunc(&pm);
-  auto const info = emit_bytecode(state, ue, func);
-
-  emit_finish_func(state, func, *fe, info);
-}
-
 void emit_record(UnitEmitter& ue, const php::Record& rec) {
   auto const re = ue.newRecordEmitter(rec.name->toCppString());
   re->init(
@@ -1440,8 +1425,6 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   EmitUnitState state { index, &unit };
   state.classOffsets.resize(unit.classes.size(), kInvalidOffset);
 
-  emit_pseudomain(state, *ue, unit);
-
   // Go thought all constant and see if they still need their matching 86cinit
   // func. In repo mode we are able to optimize away most of them away. And if
   // the const don't need them anymore we should not emit them.
@@ -1464,7 +1447,6 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   std::vector<std::unique_ptr<FuncEmitter> > top_fes;
   for (size_t id = 0; id < unit.funcs.size(); ++id) {
     auto const f = unit.funcs[id].get();
-    assertx(f != unit.pseudomain.get());
     if (const_86cinit_funcs.find(f->name) != const_86cinit_funcs.end()) {
       continue;
     }

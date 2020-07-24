@@ -1,55 +1,53 @@
-0xXX+0: Int 1
-0xXX+9: RetC
-0xXX+10: NewDArray 3
-0xXX+12: String hello
-0xXX+17: String world
-0xXX+22: AddElemC
-0xXX+23: String this
-0xXX+28: String is
-0xXX+33: AddElemC
-0xXX+34: String a
-0xXX+39: String test
-0xXX+44: AddElemC
-0xXX+45: SetL 0
-0xXX+47: PopC
-0xXX+48: CGetL 0 (name: 0)
-0xXX+51: IterInit 0 k:1 v:2 108
-0xXX+60: String
+0xXX+0: NewDArray 3
+0xXX+2: String hello
+0xXX+7: String world
+0xXX+12: AddElemC
+0xXX+13: String this
+0xXX+18: String is
+0xXX+23: AddElemC
+0xXX+24: String a
+0xXX+29: String test
+0xXX+34: AddElemC
+0xXX+35: SetL 0
+0xXX+37: PopC
+0xXX+38: CGetL 0 (name: 0)
+0xXX+41: IterInit 0 k:1 v:2 108
+0xXX+50: String
 
-0xXX+65: CGetL2 2 (name: 2)
-0xXX+68: Concat
-0xXX+69: Print
-0xXX+70: PopC
-0xXX+71: String
+0xXX+55: CGetL2 2 (name: 2)
+0xXX+58: Concat
+0xXX+59: Print
+0xXX+60: PopC
+0xXX+61: String
 
-0xXX+76: CGetL2 1 (name: 1)
-0xXX+79: Concat
-0xXX+80: Print
-0xXX+81: PopC
-0xXX+82: CGetL 0 (name: 0)
-0xXX+85: IterInit 1 k:3 v:4 57
-0xXX+94: String
+0xXX+66: CGetL2 1 (name: 1)
+0xXX+69: Concat
+0xXX+70: Print
+0xXX+71: PopC
+0xXX+72: CGetL 0 (name: 0)
+0xXX+75: IterInit 1 k:3 v:4 57
+0xXX+84: String
 
-0xXX+99: CGetL2 4 (name: 4)
-0xXX+102: Concat
-0xXX+103: Print
-0xXX+104: PopC
-0xXX+105: String
+0xXX+89: CGetL2 4 (name: 4)
+0xXX+92: Concat
+0xXX+93: Print
+0xXX+94: PopC
+0xXX+95: String
 
-0xXX+110: CGetL2 3 (name: 3)
-0xXX+113: Concat
-0xXX+114: Print
-0xXX+115: PopC
-0xXX+116: IterFree 1
-0xXX+118: IterFree 0
-0xXX+120: Jmp 39
-0xXX+125: IterNext 1 k:3 v:4 -31
-0xXX+134: Jmp 8
-0xXX+139: IterFree 1
-0xXX+141: Throw
-0xXX+142: IterNext 0 k:1 v:2 -82
-0xXX+151: Jmp 8
-0xXX+156: IterFree 0
-0xXX+158: Throw
-0xXX+159: Int 1
-0xXX+168: RetC
+0xXX+100: CGetL2 3 (name: 3)
+0xXX+103: Concat
+0xXX+104: Print
+0xXX+105: PopC
+0xXX+106: IterFree 1
+0xXX+108: IterFree 0
+0xXX+110: Jmp 39
+0xXX+115: IterNext 1 k:3 v:4 -31
+0xXX+124: Jmp 8
+0xXX+129: IterFree 1
+0xXX+131: Throw
+0xXX+132: IterNext 0 k:1 v:2 -82
+0xXX+141: Jmp 8
+0xXX+146: IterFree 0
+0xXX+148: Throw
+0xXX+149: Int 1
+0xXX+158: RetC

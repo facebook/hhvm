@@ -185,28 +185,9 @@ struct UnitEmitter {
   // FuncEmitters.
 
   /*
-   * The Unit's pseudomain emitter.
-   */
-  FuncEmitter* getMain() const;
-
-  /*
    * Const reference to all of the Unit's FuncEmitters.
    */
   auto const& fevec() const;
-
-  /*
-   * Create the pseudomain emitter for the Unit.
-   *
-   * @requires: fevec().size() == 0
-   */
-  void initMain(int line1, int line2);
-
-  /*
-   * Create a trivial (i.e., Int 1; RetC) pseudomain emitter for the Unit.
-   *
-   * @requires: fevec().size() == 0
-   */
-  void addTrivialPseudoMain();
 
   /*
    * Create a new FuncEmitter and add it to the FE vector.

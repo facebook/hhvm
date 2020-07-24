@@ -128,7 +128,7 @@ struct WatchmanThreadEventBase : folly::Executor {
   // (PHP)
   void add(folly::Func f) override {
     m_eventBase.add([f = std::move(f)] () mutable { // (ASYNC entry-point)
-      std::lock_guard<std::mutex> g(HPHP::s_sharedDataMutex);
+      std::lock_guard<std::mutex> g(s_sharedDataMutex);
       f();
     });
   }
@@ -824,7 +824,7 @@ struct WatchmanExtension final : Extension {
   void moduleShutdown() override {
     std::vector<folly::Future<std::string>> unsub_futures;
     {
-      std::lock_guard<std::mutex> g(HPHP::s_sharedDataMutex);
+      std::lock_guard<std::mutex> g(s_sharedDataMutex);
       if (!WatchmanThreadEventBase::Exists()) {
         return;
       }

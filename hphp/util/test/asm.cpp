@@ -357,10 +357,8 @@ typedef void (Asm::*OpIR32)(Immed, Reg32);
 typedef void (Asm::*OpIR8)(Immed, Reg8);
 typedef void (Asm::*OpIM64)(Immed, MemoryRef);
 typedef void (Asm::*OpIM32)(Immed, MemoryRef);
-typedef void (Asm::*OpIM16)(Immed, MemoryRef);
 typedef void (Asm::*OpISM64)(Immed, MemoryRef);
 typedef void (Asm::*OpISM32)(Immed, MemoryRef);
-typedef void (Asm::*OpISM16)(Immed, MemoryRef);
 
 //////////////////////////////////////////////////////////////////////
 

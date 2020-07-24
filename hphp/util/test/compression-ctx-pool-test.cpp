@@ -20,7 +20,6 @@
 
 #include "hphp/util/compression-ctx-pool.h"
 
-using namespace testing;
 
 namespace HPHP {
 

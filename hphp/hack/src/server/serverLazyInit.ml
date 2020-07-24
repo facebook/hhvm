@@ -566,8 +566,7 @@ let type_check_dirty
          [
            ( "recheck_files",
              Hh_json.JSON_Array
-               ( to_recheck
-               |> Relative_path.Set.elements
+               ( files_to_check
                |> List.map ~f:Relative_path.to_absolute
                |> List.map ~f:Hh_json.string_ ) );
          ]);

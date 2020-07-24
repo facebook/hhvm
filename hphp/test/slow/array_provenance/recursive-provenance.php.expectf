@@ -54,8 +54,6 @@ $x[2][1][0]: <not an array>
 $x[2][2]: %s/recursive-provenance.php:32
 $x[2][2][0]: <not an array>
 
-Notice: tag_provenance_here called on object: C in %s/recursive-provenance.php on line 37
-
 Printing provenance for $y:
 array(3) {
   [0]=>
@@ -145,8 +143,6 @@ $y[0][2]: <not an array>
 ==============================================
 test_cow_optimizations:
 
-Notice: tag_provenance_here called on object: C in %s/recursive-provenance.php on line 55
-
 Printing provenance for $x:
 array(1) {
   [0]=>
@@ -162,8 +158,6 @@ $x[0][0]: <not an array>
 
 ==============================================
 test_unable_to_cow:
-
-Notice: tag_provenance_here called on object: C in %s/recursive-provenance.php on line 64
 
 Printing provenance for $x:
 array(1) {
@@ -198,8 +192,3 @@ $y: %s/recursive-provenance.php:64
 $y[0]: %s/recursive-provenance.php:64
 $y[0][b]: %s/recursive-provenance.php:64
 $y[0][b][0]: <not an array>
-
-==============================================
-test_object_notice:
-
-Notice: tag_provenance_here called on object: C in %s/recursive-provenance.php on line 72

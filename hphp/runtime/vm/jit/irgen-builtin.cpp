@@ -1122,7 +1122,7 @@ SSATmp* opt_tag_provenance_here(IRGS& env, const ParamPrep& params) {
     return emit_noop();
   }
 
-  if (!result->type().maybe(TArrLike) && !result->type().maybe(TObj)) {
+  if (!result->type().maybe(TArrLike)) {
     return emit_noop();
   }
 

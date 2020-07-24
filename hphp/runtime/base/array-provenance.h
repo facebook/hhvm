@@ -371,7 +371,6 @@ ArrayData* tagStaticArr(ArrayData* ad, Tag tag = {});
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace TagTVFlags {
-constexpr int64_t DONT_WARN_ON_OBJECTS = 1 << 0;
 }
 
 /*

@@ -66,17 +66,9 @@ function test_unable_to_cow() {
   print_recursive_provenance($y, '$y');
 }
 
-function test_object_notice() {
-  print("\n==============================================\n");
-  print("test_object_notice:\n");
-  HH\tag_provenance_here(new C());
-  HH\tag_provenance_here(new C(), TAG_PROVENANCE_HERE_DONT_WARN_ON_OBJECTS);
-}
-
 <<__EntryPoint>>
 function main() {
   test_recursive_provenance();
   test_cow_optimizations();
   test_unable_to_cow();
-  test_object_notice();
 }

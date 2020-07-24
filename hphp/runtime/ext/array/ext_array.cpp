@@ -3397,7 +3397,7 @@ struct ArrayExtension final : Extension {
 
     HHVM_RC_INT(
         TAG_PROVENANCE_HERE_DONT_WARN_ON_OBJECTS,
-        arrprov::TagTVFlags::DONT_WARN_ON_OBJECTS
+        1
     );
 
     HHVM_FE(array_change_key_case);

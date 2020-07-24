@@ -542,9 +542,8 @@ TypedValue tagTvImpl(TypedValue in, int64_t flags) {
   };
 
   auto state = MutationState<decltype(tag_tv)>{tag_tv, "tag_provenance_here"};
-  if (flags & TagTVFlags::DONT_WARN_ON_OBJECTS) {
-    state.raised_object_notice = true;
-  }
+  // don't raise notice on objects in tag_provenance_here
+  state.raised_object_notice = true;
   auto const ad = apply_mutation(in, state);
   return ad ? make_array_like_tv(ad) : tvReturn(tvAsCVarRef(&in));
 }

@@ -1585,7 +1585,6 @@ void Unit::initialMerge() {
   auto const mi = m_mergeInfo.load(std::memory_order_relaxed);
   bool allFuncsUnique = RuntimeOption::RepoAuthoritative;
   for (auto& func : mi->mutableFuncs()) {
-    if (func->isPseudoMain()) continue;
     if (allFuncsUnique) {
       allFuncsUnique = (func->attrs() & AttrUnique);
     }
@@ -1708,7 +1707,7 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
   size_t delta = 0;
   while (it != fend) {
     Func* func = *it++;
-    if (!func->isPseudoMain() && rds::isPersistentHandle(func->funcHandle())) {
+    if (rds::isPersistentHandle(func->funcHandle())) {
       delta++;
     } else if (iout) {
       *iout++ = func;
@@ -1817,7 +1816,6 @@ void Unit::mergeImpl(MergeInfo* mi) {
                 MergeState::UniqueFuncs) != 0)) {
       do {
         Func* func = *it;
-        if (func->isPseudoMain()) continue;
         assertx(func->isUnique());
         auto const handle = func->funcHandle();
         if (rds::isNormalHandle(handle)) {
@@ -1840,7 +1838,6 @@ void Unit::mergeImpl(MergeInfo* mi) {
     } else {
       do {
         Func* func = *it;
-        if (func->isPseudoMain()) continue;
         defFunc(func, debugger);
       } while (++it != fend);
     }

@@ -594,9 +594,7 @@ void Func::print_attrs(std::ostream& out, Attr attrs) {
 }
 
 void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
-  if (isPseudoMain()) {
-    out << "Pseudo-main";
-  } else if (preClass() != nullptr) {
+  if (preClass() != nullptr) {
     out << "Method";
     print_attrs(out, m_attrs);
     if (isPhpLeafFn()) out << " (leaf)";

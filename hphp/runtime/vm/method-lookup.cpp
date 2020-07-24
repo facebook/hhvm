@@ -348,7 +348,6 @@ ImmutableFuncLookup lookupImmutableFunc(const Unit* unit,
 
   Func* found = nullptr;
   for (auto& f : unit->funcs()) {
-    if (f->isPseudoMain()) continue;
     if (!f->name()->isame(name)) continue;
     if (found) {
       // Function with duplicate name

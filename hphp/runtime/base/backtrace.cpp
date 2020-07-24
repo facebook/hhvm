@@ -472,13 +472,6 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       funcname = fullName.substr(0, fullName.find(';'));
     }
 
-    // Check for pseudomain.
-    if (funcname.empty()) {
-      if (!prev.fp && !btArgs.m_withPseudoMain) continue;
-      else if (!prev.fp) funcname = s_main;
-      else funcname = s_include;
-    }
-
     if (RuntimeOption::EnableArgsInBacktraces &&
         !fp->localsDecRefd() &&
         fp->func()->hasReifiedGenerics()) {

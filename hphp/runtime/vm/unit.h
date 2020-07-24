@@ -329,14 +329,6 @@ public:
    */
   using FuncRange = MergeInfo::FuncRange;
   using MutableFuncRange = MergeInfo::MutableFuncRange;
-
-  /*
-   * Cache for pseudomains for this unit, keyed by Class context.
-   */
-  using PseudoMainCacheMap = hphp_hash_map<
-    const Class*, Func*, pointer_hash<Class>
-  >;
-
   using PreClassPtrVec = VMCompactVector<PreClassPtr>;
   using TypeAliasVec = VMCompactVector<PreTypeAlias>;
   using ConstantVec = VMFixedVector<Constant>;

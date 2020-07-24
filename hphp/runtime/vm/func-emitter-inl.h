@@ -104,12 +104,8 @@ inline const Func::NamedLocalsMap::Builder& FuncEmitter::localNameMap() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Helper accessors.
 
-inline bool FuncEmitter::isPseudoMain() const {
-  return name->empty();
-}
-
 inline bool FuncEmitter::isMethod() const {
-  return !isPseudoMain() && pce();
+  return pce();
 }
 
 inline bool FuncEmitter::isVariadic() const {

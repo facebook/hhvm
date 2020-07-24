@@ -34,9 +34,7 @@ namespace HPHP {
 static const Class* clsFromCallerSkipBuiltins() {
   return fromCaller(
     [] (const ActRec* fp, Offset) { return fp->func()->cls(); },
-    [] (const ActRec* fp) {
-      return !fp->func()->isBuiltin() && !fp->func()->isPseudoMain();
-    }
+    [] (const ActRec* fp) { return !fp->func()->isBuiltin(); }
   );
 }
 

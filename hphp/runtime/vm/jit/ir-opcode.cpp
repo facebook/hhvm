@@ -798,7 +798,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdIterEnd:
   case LdLoc:
   case LdLocAddr:
-  case LdLocPseudoMain:
   case LdMBase:
   case LdMem:
   case LdMethCallerName:
@@ -944,7 +943,6 @@ bool opcodeMayRaise(Opcode opc) {
   case StIterPos:
   case StIterEnd:
   case StLoc:
-  case StLocPseudoMain:
   case StLocRange:
   case StMBase:
   case StMem:

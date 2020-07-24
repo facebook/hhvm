@@ -1413,8 +1413,7 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
       false,
       nullptr,
       [&] { // Get value to test
-        auto const ldPMExit = makePseudoMainExit(env);
-        return ldLoc(env, id, ldPMExit, DataTypeSpecific);
+        return ldLoc(env, id, nullptr, DataTypeSpecific);
       },
       [&] (SSATmp* val) { // func to string conversions
         auto const str = gen(env, LdFuncName, val);
@@ -1672,8 +1671,7 @@ void emitVerifyParamType(IRGS& env, int32_t paramId) {
 void emitVerifyParamTypeTS(IRGS& env, int32_t paramId) {
   verifyParamTypeImpl(env, paramId);
   auto const ts = popC(env);
-  auto const ldPMExit = makePseudoMainExit(env);
-  auto const cell = ldLoc(env, paramId, ldPMExit, DataTypeSpecific);
+  auto const cell = ldLoc(env, paramId, nullptr, DataTypeSpecific);
   auto const reified = tcCouldBeReified(curFunc(env), paramId);
   if (cell->isA(TObj) || reified) {
     gen(env, VerifyReifiedLocalType, ParamData { paramId }, ts);
@@ -1711,8 +1709,7 @@ void emitOODeclExists(IRGS& env, OODeclExistsOp subop) {
 }
 
 void emitIssetL(IRGS& env, int32_t id) {
-  auto const ldPMExit = makePseudoMainExit(env);
-  auto const ld = ldLoc(env, id, ldPMExit, DataTypeSpecific);
+  auto const ld = ldLoc(env, id, nullptr, DataTypeSpecific);
   if (ld->isA(TClsMeth)) {
     PUNT(IssetL_is_ClsMeth);
   }
@@ -1720,8 +1717,7 @@ void emitIssetL(IRGS& env, int32_t id) {
 }
 
 void emitIsUnsetL(IRGS& env, int32_t id) {
-  auto const ldPMExit = makePseudoMainExit(env);
-  auto const ld = ldLoc(env, id, ldPMExit, DataTypeSpecific);
+  auto const ld = ldLoc(env, id, nullptr, DataTypeSpecific);
   push(env, gen(env, IsType, TUninit, ld));
 }
 
@@ -1755,8 +1751,7 @@ void emitIsTypeC(IRGS& env, IsTypeOp subop) {
 }
 
 void emitIsTypeL(IRGS& env, NamedLocal loc, IsTypeOp subop) {
-  auto const ldPMExit = makePseudoMainExit(env);
-  auto const val = ldLocWarn(env, loc, ldPMExit, DataTypeSpecific);
+  auto const val = ldLocWarn(env, loc, nullptr, DataTypeSpecific);
   push(env, isTypeHelper(env, subop, val));
 }
 

@@ -1375,7 +1375,7 @@ void write_func(ProfDataSerializer& ser, const Func* func) {
   uint32_t fid = func->getFuncId();
   assertx(!(fid & 0x80000000));
   if (func == SystemLib::s_nullCtor ||
-      (!func->isMethod() && !func->isPseudoMain() && func->isBuiltin() &&
+      (!func->isMethod() && func->isBuiltin() &&
       !func->isMethCaller())) {
     if (func == SystemLib::s_nullCtor) {
       assertx(func->name()->isame(s_86ctor.get()));

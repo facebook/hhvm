@@ -985,18 +985,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureLoad { ALocal { inst.src(0), inst.extra<LocalId>()->locId } };
 
   case CheckLoc:
-  case LdLocPseudoMain:
-    // Note: LdLocPseudoMain is both a guard and a load, so it must not be a
-    // PureLoad.
     return may_load_store(
       ALocal { inst.src(0), inst.extra<LocalId>()->locId },
       AEmpty
     );
-
-  case StLocPseudoMain:
-    // This can store to globals or locals, but we don't have globals supported
-    // in AliasClass yet.
-    return PureStore { AUnknown, inst.src(1), nullptr };
 
   //////////////////////////////////////////////////////////////////////
   // Pointer-based loads and stores

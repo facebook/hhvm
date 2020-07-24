@@ -426,7 +426,6 @@ bool canDCE(IRInstruction* inst) {
   case Unreachable:
   case Jmp:
   case DefLabel:
-  case LdLocPseudoMain:
   case LdPairElem:
   case LdClsCtor:
   case LdCls:
@@ -503,7 +502,6 @@ bool canDCE(IRInstruction* inst) {
   case StIterEnd:
   case StIterPos:
   case StLoc:
-  case StLocPseudoMain:
   case StLocRange:
   case EagerSyncVMRegs:
   case ReqBindJmp:

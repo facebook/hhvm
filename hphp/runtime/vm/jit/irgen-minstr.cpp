@@ -1488,10 +1488,6 @@ void handleStrTestResult(IRGS& env, uint32_t nDiscard, SSATmp* strTestResult) {
 }
 
 SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
-  // We need to store to a local after doing some user-visible operations, so
-  // don't go down this path for pseudomains.
-  if (curFunc(env)->isPseudoMain()) return nullptr;
-
   auto const baseType = env.irb->fs().mbase().type;
   auto const base = extractBase(env);
   assertx(baseType <= TArrLike);
@@ -1688,8 +1684,7 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
     case MW:
       return nullptr;
     case MEL: case MPL:
-      return ldLocWarn(env, mk.local, makePseudoMainExit(env),
-                       DataTypeSpecific);
+      return ldLocWarn(env, mk.local, nullptr, DataTypeSpecific);
     case MEC: case MPC:
       return topC(env, BCSPRelOffset{int32_t(mk.iva)});
     case MEI:
@@ -1726,7 +1721,7 @@ void emitBaseGC(IRGS& env, uint32_t idx, MOpMode mode) {
 }
 
 void emitBaseGL(IRGS& env, int32_t locId, MOpMode mode) {
-  auto name = ldLoc(env, locId, makePseudoMainExit(env), DataTypeSpecific);
+  auto name = ldLoc(env, locId, nullptr, DataTypeSpecific);
   baseGImpl(env, name, mode);
 }
 
@@ -1748,7 +1743,7 @@ void emitBaseSC(IRGS& env, uint32_t propIdx, uint32_t clsIdx, MOpMode mode) {
 void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode) {
   stMBase(env, ldLocAddr(env, loc.id));
 
-  auto base = ldLoc(env, loc.id, makePseudoMainExit(env), DataTypeGeneric);
+  auto base = ldLoc(env, loc.id, nullptr, DataTypeGeneric);
 
   if (!base->type().isKnownDataType()) PUNT(unknown-BaseL);
 

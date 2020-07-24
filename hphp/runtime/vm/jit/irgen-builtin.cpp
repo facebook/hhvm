@@ -2940,10 +2940,6 @@ void emitMemoSetEager(IRGS& env, LocalRange keys) {
 //////////////////////////////////////////////////////////////////////
 
 void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
-  // We can't generate direct StLoc and LdLocs in pseudomains (violates an IR
-  // invariant).
-  if (curFunc(env)->isPseudoMain()) PUNT(PseudoMain-Silence);
-
   switch (subop) {
   case SilenceOp::Start:
     // We assume that whatever is in the local is dead and doesn't need to be

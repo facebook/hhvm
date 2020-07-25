@@ -60,7 +60,6 @@ hphp/system/php/spl/datastructures/SplStack.php
 hphp/system/php/spl/interfaces/OuterIterator.php
 hphp/system/php/spl/iterators/IteratorIterator.php
 hphp/system/php/spl/iterators/FilterIterator.php
-hphp/system/php/spl/iterators/MultipleIterator.php
 hphp/system/php/spl/iterators/RecursiveFilterIterator.php
 hphp/system/php/spl/iterators/RegexIterator.php
 hphp/system/php/spl/iterators/RecursiveRegexIterator.php
@@ -106,8 +105,6 @@ hphp/system/php/misc/idx.php
 hphp/system/php/pdo/PDOException.php
 hphp/system/php/rx/mutable.php
 hphp/system/php/soap/SoapFault.php
-hphp/system/php/spl/datastructures/SplFixedArray.php
-hphp/system/php/spl/datastructures/SplObjectStorage.php
 hphp/system/php/spl/datastructures/SplPriorityQueue.php
 hphp/system/php/spl/interfaces/SplObserver.php
 hphp/system/php/spl/interfaces/SplSubject.php

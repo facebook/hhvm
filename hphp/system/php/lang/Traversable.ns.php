@@ -11,7 +11,6 @@ namespace HH {
   \HH\KeyedTraversable::class,
   \ResourceBundle::class,
   \SplHeap::class,
-  \SplObjectStorage::class,
   \HH\Rx\Traversable::class,
   \SimpleXMLElement::class
 )>>

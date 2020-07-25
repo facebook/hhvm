@@ -810,56 +810,54 @@ let line_margin_highlighted position_group line_num col_width_raw : string =
   prefix
 
 (* line_num is 1-based *)
-let line_highlighted position_group ~(line_num : int) ~(line : string) =
-  match marked_messages position_group line_num with
-  | [] -> default_highlighted line
-  | ms ->
-    let get_markers_at_col col_num =
-      List.filter ms ~f:(fun (_, (pos, _)) ->
-          pos_contains pos ~col_num line_num)
-      |> List.map ~f:fst
-    in
-    let color_column ms c =
-      (* For multiple marked messages for same position, highlight with
-          color of lower-numbered (i.e. more important) message *)
-      let sorted =
-        List.sort ms ~compare:(fun (m, _) (n, _) -> Int.compare m n)
+let line_highlighted position_group ~(line_num : int) ~(line : string option) =
+  match line with
+  | None -> Tty.apply_color (Tty.Dim Tty.Default) "No source found"
+  | Some line ->
+    (match marked_messages position_group line_num with
+    | [] -> default_highlighted line
+    | ms ->
+      let get_markers_at_col col_num =
+        List.filter ms ~f:(fun (_, (pos, _)) ->
+            pos_contains pos ~col_num line_num)
+        |> List.map ~f:fst
       in
-      let (_, color) = List.hd_exn sorted in
-      Tty.apply_color (Tty.Normal color) c
-    in
-    let highlighted_columns : string list =
-      (* Not String.mapi because we don't want to return a char from each element *)
-      List.mapi (String.to_list line) ~f:(fun i c ->
-          match get_markers_at_col i with
-          | [] -> default_highlighted (Char.to_string c)
-          | ms -> color_column ms (Char.to_string c))
-    in
-    (* Add extra column when position spans multiple lines and we're on the last line. Handles
-       the case where a position exists for after file but there is no character to highlight *)
-    let extra_column =
-      let (end_line, end_col) =
-        Pos.end_line_column position_group.aggregate_position
+      let color_column ms c =
+        (* For multiple marked messages for same position, highlight with
+            color of lower-numbered (i.e. more important) message *)
+        let sorted =
+          List.sort ms ~compare:(fun (m, _) (n, _) -> Int.compare m n)
+        in
+        let (_, color) = List.hd_exn sorted in
+        Tty.apply_color (Tty.Normal color) c
       in
-      if line_num = end_line || (line_num + 1 = end_line && end_col = 0) then
-        match get_markers_at_col (String.length line) with
-        | [] -> ""
-        | ms -> color_column ms out_of_bounds_char
-      else
-        ""
-    in
-    String.concat highlighted_columns ^ extra_column
+      let highlighted_columns : string list =
+        (* Not String.mapi because we don't want to return a char from each element *)
+        List.mapi (String.to_list line) ~f:(fun i c ->
+            match get_markers_at_col i with
+            | [] -> default_highlighted (Char.to_string c)
+            | ms -> color_column ms (Char.to_string c))
+      in
+      (* Add extra column when position spans multiple lines and we're on the last line. Handles
+        the case where a position exists for after file but there is no character to highlight *)
+      let extra_column =
+        let (end_line, end_col) =
+          Pos.end_line_column position_group.aggregate_position
+        in
+        if line_num = end_line || (line_num + 1 = end_line && end_col = 0) then
+          match get_markers_at_col (String.length line) with
+          | [] -> ""
+          | ms -> color_column ms out_of_bounds_char
+        else
+          ""
+      in
+      String.concat highlighted_columns ^ extra_column)
 
 (* Prefixes each line with its corresponding formatted margin *)
 let format_context_lines_highlighted
     ~(position_group : position_group)
-    ~(lines : (int * string) list)
+    ~(lines : (int * string option) list)
     ~(col_width : int) : string =
-  let lines =
-    match lines with
-    | [] -> [(1, "No source found")]
-    | ls -> ls
-  in
   let format_line (line_num, line) =
     Printf.sprintf
       "%s %s"
@@ -874,31 +872,37 @@ let format_context_lines_highlighted
    If the position references one extra line than actually
    in the file, we append a line with a sentinel character ('_')
    so that we have a line to highlight later. *)
-let load_context_lines_highlighted ~before ~after ~(pos : Pos.absolute) :
-    (int * string) list =
+let load_context_lines_for_highlighted ~before ~after ~(pos : Pos.absolute) :
+    (int * string option) list =
   let path = Pos.filename pos in
   let (start_line, _start_col) = Pos.line_column pos in
   let (end_line, end_col) = Pos.end_line_column pos in
   let lines = (try read_lines path with Sys_error _ -> []) in
-  let numbered_lines = List.mapi lines ~f:(fun i l -> (i + 1, l)) in
-  let original_lines =
-    List.filter numbered_lines (fun (i, _) ->
-        i >= start_line - before && i <= end_line + after)
-  in
-  let additional_line =
-    let last_line =
-      match List.last original_lines with
-      | Some (last_line, _) -> last_line
-      | None -> 0
+  match lines with
+  | [] ->
+    List.range ~start:`inclusive ~stop:`inclusive start_line end_line
+    |> List.map ~f:(fun line_num -> (line_num, None))
+  | lines ->
+    let numbered_lines = List.mapi lines ~f:(fun i l -> (i + 1, Some l)) in
+    let original_lines =
+      List.filter numbered_lines (fun (i, _) ->
+          i >= start_line - before && i <= end_line + after)
     in
-    if end_line > last_line && end_col > 0 then
-      Some (end_line, out_of_bounds_char)
-    else
-      None
-  in
-  match additional_line with
-  | None -> original_lines
-  | Some additional -> original_lines @ [additional]
+    let additional_line =
+      let last_line =
+        match List.last original_lines with
+        | Some (last_line, _) -> last_line
+        | None -> 0
+      in
+      if end_line > last_line && end_col > 0 then
+        Some (end_line, out_of_bounds_char)
+      else
+        None
+    in
+    (match additional_line with
+    | None -> original_lines
+    | Some (line_num, additional) ->
+      original_lines @ [(line_num, Some additional)])
 
 let format_context_highlighted
     (position_group : position_group) (col_width : int) ~(is_first : bool) =
@@ -907,7 +911,7 @@ let format_context_highlighted
     lstrip path cwd
   in
   let lines =
-    load_context_lines_highlighted
+    load_context_lines_for_highlighted
       ~before:n_extra_lines_hl
       ~after:n_extra_lines_hl
       ~pos:position_group.aggregate_position

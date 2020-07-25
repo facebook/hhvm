@@ -3,10 +3,10 @@ Typing[4341] The method f has the wrong type [1]
 -> But got int [3]
 
 long_directory_name.php--child.php:3:19
-[1,2] 3 | _
+[1,2] 3 | No source found
 
 long_directory_name.php--long/directory/name/class_def.php:3:21
-[3]   3 | _
+[3]   3 | No source found
 
 Typing[4340] Class TBothTraits does not correctly implement all required members  [1]
 -> Some members are incompatible with those declared in type TReqExtChild [2]
@@ -15,12 +15,13 @@ Typing[4340] Class TBothTraits does not correctly implement all required members
 -> But got string [5]
 
 long_directory_name.php--long/directory/name/again/tboth_traits.php:2:7
-[2]   3 | _
+[1]   2 | No source found
+[2]   3 | No source found
 
 long_directory_name.php--long/directory/name/class_def.php:3:19
-[3,4] 3 | _
+[3,4] 3 | No source found
 
 long_directory_name.php--child.php:3:21
-[5]   3 | _
+[5]   3 | No source found
 
 2 errors found.

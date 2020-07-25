@@ -14,7 +14,7 @@ array_map_explicitly_typed_error.php:8:5
        10 |   return $x[0];
 
 stdlib/builtins_array.hhi:118:31
-[4]   118 | _
+[4]   118 | No source found
 
 Typing[4110] Some elements in this collection are incompatible [1]
 -> Expected string [2]
@@ -32,7 +32,7 @@ array_map_explicitly_typed_error.php:8:5
        10 |   return $x[0];
 
 stdlib/builtins_array.hhi:118:31
-[4]   118 | _
+[4]   118 | No source found
 
 Typing[4110] Typing error [1]
 -> Expected num because this is used in an arithmetic operation [2]

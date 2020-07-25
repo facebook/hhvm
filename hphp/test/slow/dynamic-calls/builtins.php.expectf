@@ -24,23 +24,7 @@ Notice: 'DateTime::createFromFormat' called dynamically without using a function
 
 Notice: 'DateTime::getTimezone' called dynamically without using a function pointer in %s/builtins.php on line 9
 
-Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 28
-
-Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 29
-
-Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 30
-
-Notice: 'SplFixedArray::toArray' called dynamically without using a function pointer in %s/builtins.php on line 31
-
-Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 32
-
-Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 33
-
-Notice: 'SplFixedArray::toArray' called dynamically without using a function pointer in %s/builtins.php on line 35
-
-Notice: 'SplFixedArray' constructed dynamically in %s/builtins.php on line 36
-
-Notice: 'array_map' called dynamically without using a function pointer in %s/builtins.php on line 38
+Notice: 'array_map' called dynamically without using a function pointer in %s/builtins.php on line 28
 ======================================================
 
 Notice: 'count' called dynamically without using a function pointer in %s/builtins.php on line 14
@@ -69,20 +53,4 @@ Notice: 'DateTime::createFromFormat' called dynamically without using a function
 
 Notice: 'DateTime::getTimezone' called dynamically without using a function pointer in %s/builtins.php on line 9
 
-Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 28
-
-Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 29
-
-Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 30
-
-Notice: 'SplFixedArray::toArray' called dynamically without using a function pointer in %s/builtins.php on line 31
-
-Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 32
-
-Notice: 'SplFixedArray::fromArray' called dynamically without using a function pointer in %s/builtins.php on line 33
-
-Notice: 'SplFixedArray::toArray' called dynamically without using a function pointer in %s/builtins.php on line 35
-
-Notice: 'SplFixedArray' constructed dynamically in %s/builtins.php on line 36
-
-Notice: 'array_map' called dynamically without using a function pointer in %s/builtins.php on line 38
+Notice: 'array_map' called dynamically without using a function pointer in %s/builtins.php on line 28

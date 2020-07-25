@@ -25,16 +25,6 @@ function test() {
 
   $obj = new A; $obj->test();
 
-  $x = 'SplFixedArray::fromArray'; $x(varray[1, 2, 3]);
-  $x = varray['SplFixedArray', 'fromArray']; $x(varray[1, 2, 3]);
-  $x = varray[new SplFixedArray, 'fromArray']; $x(varray[1, 2, 3]);
-  $x = varray[new SplFixedArray, 'toArray']; $x();
-  $x = 'SplFixedArray'; $x::fromArray(varray[1, 2, 3]);
-  $x = 'fromArray'; SplFixedArray::$x(varray[1, 2, 3]);
-
-  $x = 'toArray'; $obj = new SplFixedArray; $obj->$x();
-  $x = 'SplFixedArray'; new $x();
-
   $x = 'array_map'; $x($a ==> $a, varray[]);
 
   $x = null; $x?->foo();

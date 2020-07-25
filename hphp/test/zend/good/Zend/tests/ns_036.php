@@ -1,26 +1,26 @@
 <?hh
 namespace A;
 use A as B;
-class MultipleIterator {
-    const MIT_NEED_ALL = 2;
+class RegexIterator {
+    const GET_MATCH = 2;
 }
-function f1($x = MultipleIterator::MIT_NEED_ALL) {
+function f1($x = RegexIterator::GET_MATCH) {
     \var_dump($x);
 }
-function f2($x = \MultipleIterator::MIT_NEED_ALL) {
+function f2($x = \RegexIterator::GET_MATCH) {
     \var_dump($x);
 }
-function f3($x = \A\MultipleIterator::MIT_NEED_ALL) {
+function f3($x = \A\RegexIterator::GET_MATCH) {
     \var_dump($x);
 }
-function f4($x = B\MultipleIterator::MIT_NEED_ALL) {
+function f4($x = B\RegexIterator::GET_MATCH) {
     \var_dump($x);
 }
 <<__EntryPoint>> function main(): void {
-\var_dump(MultipleIterator::MIT_NEED_ALL);
-\var_dump(\MultipleIterator::MIT_NEED_ALL);
-\var_dump(B\MultipleIterator::MIT_NEED_ALL);
-\var_dump(\A\MultipleIterator::MIT_NEED_ALL);
+\var_dump(RegexIterator::GET_MATCH);
+\var_dump(\RegexIterator::GET_MATCH);
+\var_dump(B\RegexIterator::GET_MATCH);
+\var_dump(\A\RegexIterator::GET_MATCH);
 f1();
 f2();
 f3();

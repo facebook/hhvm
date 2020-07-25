@@ -645,10 +645,6 @@ TEST(Type, Prim) {
     { TDbl,      TInitPrim },
     { dval(0.0), TInitPrim },
     { ival(0),   TInitPrim },
-    { TFunc,     TInitPrim },
-    { TFuncS,    TInitPrim },
-    { TCls,      TInitPrim },
-    { TFuncOrCls, TInitPrim },
   };
 
   const std::initializer_list<std::pair<Type, Type>> subtype_false{
@@ -675,6 +671,10 @@ TEST(Type, Prim) {
     { TArrCompat, TPrim },
     { TStrLike, TPrim },
     { TFuncLike, TPrim },
+    { TCls, TInitPrim },
+    { TFunc,     TInitPrim },
+    { TFuncS,    TInitPrim },
+    { TFuncOrCls, TInitPrim },
   };
 
   const std::initializer_list<std::pair<Type, Type>> couldbe_true{
@@ -687,12 +687,6 @@ TEST(Type, Prim) {
     { TPrim, TOptObj },
     { TPrim, TOptRecord },
     { TPrim, TOptFalse },
-    { TPrim, TFunc },
-    { TPrim, TFuncS },
-    { TPrim, TCls },
-    { TPrim, TFuncLike },
-    { TPrim, TFuncOrCls },
-    { TPrim, TStrLike },
   };
 
   const std::initializer_list<std::pair<Type, Type>> couldbe_false{
@@ -705,6 +699,11 @@ TEST(Type, Prim) {
     { TPrim, TRecord },
     { TPrim, TRes },
     { TPrim, TRFunc },
+    { TPrim, TFunc },
+    { TPrim, TFuncS },
+    { TPrim, TFuncLike },
+    { TPrim, TFuncOrCls },
+    { TPrim, TStrLike },
   };
 
   for (auto kv : subtype_true) {
@@ -731,19 +730,11 @@ TEST(Type, Prim) {
       << show(kv.first) << " !couldbe " << show(kv.second);
   }
 
-  if (use_lowptr) {
-    EXPECT_TRUE(TClsMeth.subtypeOf(TInitPrim));
-    EXPECT_TRUE(TPrim.couldBe(TClsMeth));
-    EXPECT_TRUE(TPrim.couldBe(TVArrCompat));
-    EXPECT_TRUE(TPrim.couldBe(TVecCompat));
-    EXPECT_TRUE(TPrim.couldBe(TArrCompat));
-  } else {
-    EXPECT_FALSE(TClsMeth.subtypeOf(TInitPrim));
-    EXPECT_FALSE(TPrim.couldBe(TClsMeth));
-    EXPECT_FALSE(TPrim.couldBe(TVArrCompat));
-    EXPECT_FALSE(TPrim.couldBe(TVecCompat));
-    EXPECT_FALSE(TPrim.couldBe(TArrCompat));
-  }
+  EXPECT_FALSE(TClsMeth.subtypeOf(TInitPrim));
+  EXPECT_FALSE(TPrim.couldBe(TClsMeth));
+  EXPECT_FALSE(TPrim.couldBe(TVArrCompat));
+  EXPECT_FALSE(TPrim.couldBe(TVecCompat));
+  EXPECT_FALSE(TPrim.couldBe(TArrCompat));
 }
 
 TEST(Type, CouldBeValues) {

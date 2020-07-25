@@ -423,8 +423,7 @@ enum trep : uint64_t {
   BOptArrCompat   = BInitNull | BArrCompat,
   BOptArrCompatSA = BInitNull | BArrCompatSA,
 
-  BInitPrim = BInitNull | BBool | BNum | BFunc | BCls | BFuncS |
-              (use_lowptr ? BClsMeth : 0),
+  BInitPrim = BInitNull | BBool | BNum,
 
   BSArrLikeE = BSArrE | BSVecE | BSDictE | BSKeysetE,
   BCArrLikeE = BCArrE | BCVecE | BCDictE | BCKeysetE,
@@ -453,7 +452,8 @@ enum trep : uint64_t {
   BOptArrLikeCompatSA = BInitNull | BArrLikeCompatSA,
 
   BPrim     = BInitPrim | BUninit,
-  BInitUnc  = BInitPrim | BSStr | BSArr | BSVec | BSDict | BSKeyset,
+  BInitUnc  = BInitPrim | BSStr | BSArr | BSVec | BSDict | BSKeyset |
+              BCls | BFunc | BFuncS | (use_lowptr ? BClsMeth : 0),
   BUnc      = BInitUnc | BUninit,
   BInitCell = BInitNull | BBool | BInt | BDbl | BStr | BArr | BObj | BRes |
               BVec | BDict | BKeyset | BFunc | BFuncS | BCls | BClsMeth |

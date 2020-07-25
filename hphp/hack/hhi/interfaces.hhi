@@ -40,7 +40,6 @@ namespace HH {
   KeyedTraversable::class,
   \ResourceBundle::class,
   \SplHeap::class,
-  \SplObjectStorage::class,
   \HH\Rx\Traversable::class
 )>>
 interface Traversable<+Tv> {}

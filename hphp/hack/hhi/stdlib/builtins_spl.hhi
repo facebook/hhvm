@@ -220,25 +220,6 @@ class SplPriorityQueue<T> implements Iterator<T>, Countable {
   public function valid() {}
 }
 
-class SplFixedArray<Tk, Tv> implements Iterator<Tv>, ArrayAccess<Tk, Tv>, Countable {
-  public function __construct($size = null) {}
-  public function __wakeup() {}
-  public function count() {}
-  public function current() {}
-  public static function fromArray($data, $save_indexes = null) {}
-  public function getSize() {}
-  public function key() {}
-  public function next() {}
-  public function offsetExists($index) {}
-  public function offsetGet($index) {}
-  public function offsetSet($index, $newval) {}
-  public function offsetUnset($index) {}
-  public function rewind() {}
-  public function setSize($value) {}
-  public function toArray() {}
-  public function valid() {}
-}
-
 interface SplObserver {
   public function update(SplSubject $SplSubject) {}
 }
@@ -247,25 +228,6 @@ interface SplSubject {
   public function attach(SplObserver $SplObserver) {}
   public function detach(SplObserver $SplObserver) {}
   public function notify() {}
-}
-
-class MultipleIterator<T> implements Iterator<T> {
-  const int MIT_NEED_ANY = 0;
-  const int MIT_NEED_ALL = 1;
-  const int MIT_KEYS_NUMERIC = 0;
-  const int MIT_KEYS_ASSOC = 2;
-  public function __construct($flags) {}
-  public function attachIterator(Iterator<T> $iterator, $infos = null) {}
-  public function containsIterator(Iterator<T> $iterator) {}
-  public function countIterators() {}
-  public function current() {}
-  public function detachIterator(Iterator<T> $iterator) {}
-  public function getFlags() {}
-  public function key() {}
-  public function next() {}
-  public function rewind() {}
-  public function setFlags($flags) {}
-  public function valid() {}
 }
 
 class SplType {

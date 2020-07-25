@@ -112,13 +112,14 @@ let create_root_from_type_constant
     | Some tc -> tc
     | None ->
       raise_error (fun () ->
-          Errors.smember_not_found
-            `class_typeconst
-            id_pos
-            (Cls.pos class_, class_name)
-            id_name
-            `no_hint
-            ctx.on_error)
+          if not ctx.ety_env.quiet then
+            Errors.smember_not_found
+              `class_typeconst
+              id_pos
+              (Cls.pos class_, class_name)
+              id_name
+              `no_hint
+              ctx.on_error)
   in
   let name = tp_name class_name id in
   let type_expansions = (false, id_pos, name) :: ctx.ety_env.type_expansions in

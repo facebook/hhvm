@@ -6,9 +6,3 @@ File "generic_self_type_access_failure.php", line 11, characters 38-40:
 Expected Box
 File "generic_self_type_access_failure.php", line 18, characters 52-52:
 But got T
-File "generic_self_type_access_failure.php", line 20, characters 11-11:
-Typing error (Typing[4090])
-File "generic_self_type_access_failure.php", line 13, characters 13-13:
-No type constant 'T' in Intf
-File "generic_self_type_access_failure.php", line 5, characters 11-14:
-Declaration of Intf is here

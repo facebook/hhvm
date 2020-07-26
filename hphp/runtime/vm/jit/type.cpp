@@ -951,6 +951,12 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
     case T::OptStrLike:
       return (RO::EvalEnableFuncStringInterop ? TFunc : TBottom) |
              TCls | TStr | TInitNull;
+    case T::OptArrKeyCompat:
+      return TInt | TStr | TCls | TInitNull |
+             (RO::EvalEnableFuncStringInterop ? TFunc : TBottom);
+    case T::OptUncArrKeyCompat:
+      return TInt | TPersistentStr | TCls | TInitNull |
+             (RO::EvalEnableFuncStringInterop ? TFunc : TBottom);
 
     case T::Uninit:         return TUninit;
     case T::InitNull:       return TInitNull;
@@ -977,6 +983,12 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
     case T::StrLike:
       return (RO::EvalEnableFuncStringInterop ? TFunc : TBottom) |
              TCls | TStr;
+    case T::UncArrKeyCompat:
+      return TInt | TPersistentStr | TCls |
+             (RO::EvalEnableFuncStringInterop ? TFunc : TBottom);
+    case T::ArrKeyCompat:
+      return TInt | TStr | TCls |
+             (RO::EvalEnableFuncStringInterop ? TFunc : TBottom);
     case T::InitUnc:        return TUncountedInit;
     case T::Unc:            return TUncounted;
     case T::InitCell:       return TInitCell;

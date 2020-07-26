@@ -2545,7 +2545,7 @@ void in(ISS& env, const bc::AKExists& /*op*/) {
         assertx(key.couldBe(validKey));
         return finish(
           elem.first.subtypeOf(BBottom) ? TFalse : TBool,
-          !key.subtypeOf(BArrKey)
+          !key.subtypeOf(BArrKeyCompat)
         );
       case ThrowMode::BadOperation:
         assertx(!key.couldBe(validKey));
@@ -2565,7 +2565,7 @@ void in(ISS& env, const bc::AKExists& /*op*/) {
     auto const elem = base.subtypeOrNull(BDict)
       ? dict_elem(base, key, TBottom)
       : keyset_elem(base, key, TBottom);
-    return hackArr(elem, TArrKey, TBottom);
+    return hackArr(elem, TArrKeyCompat, TBottom);
   }
 
   if (base.subtypeOrNull(BArr)) {
@@ -4020,7 +4020,7 @@ void in(ISS& env, const bc::ResolveClass& op) {
   } else {
     // If the class is not resolved,
     // it might not be unique or it might not be a valid classname.
-    push(env, TInitCell);
+    push(env, TArrKeyCompat);
   }
 }
 
@@ -5255,7 +5255,7 @@ void idxImpl(ISS& env, bool arraysOnly) {
       case ThrowMode::MaybeBadKey:
         assertx(key.couldBe(validKey));
         if (key.couldBe(silentKey)) elem.first |= def;
-        return finish(elem.first, !key.subtypeOf(BOptArrKey));
+        return finish(elem.first, !key.subtypeOf(BOptArrKeyCompat));
       case ThrowMode::BadOperation:
         assertx(!key.couldBe(validKey));
         return finish(key.couldBe(silentKey) ? def : TBottom, true);
@@ -5275,7 +5275,7 @@ void idxImpl(ISS& env, bool arraysOnly) {
     auto const elem = base.subtypeOrNull(BDict)
       ? dict_elem(base, key, def)
       : keyset_elem(base, key, def);
-    return hackArr(elem, TArrKey, TInitNull);
+    return hackArr(elem, TArrKeyCompat, TInitNull);
   }
 
   if (base.subtypeOrNull(BArr)) {

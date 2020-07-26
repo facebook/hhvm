@@ -104,7 +104,9 @@ ArrayData* SetArray::MakeReserveSet(uint32_t size) {
 ArrayData* SetArray::MakeSet(uint32_t size, const TypedValue* values) {
   for (uint32_t i = 0; i < size; ++i) {
     auto& tv = values[i];
-    if (!isIntType(tv.m_type) && !isStringType(tv.m_type)) {
+    if (!isIntType(tv.m_type) &&
+        !isStringType(tv.m_type) &&
+        !isClassType(tv.m_type))  {
       throwInvalidArrayKeyException(&tv, ArrayData::CreateKeyset());
     }
   }
@@ -117,9 +119,14 @@ ArrayData* SetArray::MakeSet(uint32_t size, const TypedValue* values) {
      */
     if (isIntType(tv.m_type)) {
       ad->insert(tv.m_data.num);
-    } else {
+    } else if (isStringType(tv.m_type)) {
       ad->insert(tv.m_data.pstr);
       decRefStr(tv.m_data.pstr); // FIXME
+    } else {
+      assertx(isClassType(tv.m_type));
+      auto const keyStr =
+        const_cast<StringData*>(classToStringHelper(tv.m_data.pclass));
+      ad->insert(keyStr);
     }
   }
   return ad;
@@ -661,7 +668,7 @@ ArrayData* SetArray::AppendImpl(ArrayData* ad, TypedValue v, bool copy) {
 }
 
 ArrayData* SetArray::Append(ArrayData* ad, TypedValue v) {
-  return AppendImpl(ad, v, ad->cowCheck());
+  return AppendImpl(ad, tvClassToString(v), ad->cowCheck());
 }
 
 ArrayData* SetArray::Merge(ArrayData*, const ArrayData*) {

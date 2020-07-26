@@ -20,7 +20,9 @@ namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_FATAL_NULL_THIS(Strings::FATAL_NULL_THIS);
+const StaticString
+  s_FATAL_NULL_THIS(Strings::FATAL_NULL_THIS),
+  s_clsToStringWarning(Strings::CLASS_TO_STRING);
 
 SSATmp* checkAndLoadThis(IRGS& env) {
   if (!hasThis(env)) {
@@ -43,4 +45,13 @@ SSATmp* convertClsMethToVec(IRGS& env, SSATmp* clsMeth) {
   return vec;
 }
 
+SSATmp* convertClassKey(IRGS& env, SSATmp* key) {
+  if (key->isA(TCls)) {
+    if (RuntimeOption::EvalRaiseClassConversionWarning) {
+      gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
+    }
+    return gen(env, LdClsName, key);
+  }
+  return key;
+}
 }}}

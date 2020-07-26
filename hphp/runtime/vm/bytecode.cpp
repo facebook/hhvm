@@ -1532,12 +1532,12 @@ OPTBLD_INLINE void iopNewRecord(const StringData* s, imm_array<int32_t> ids) {
 
 OPTBLD_INLINE void iopAddElemC() {
   TypedValue* c1 = vmStack().topC();
-  TypedValue* c2 = vmStack().indC(1);
+  auto key = tvClassToString(*vmStack().indC(1));
   TypedValue* c3 = vmStack().indC(2);
   if (!tvIsArray(c3) && !tvIsDict(c3)) {
     raise_error("AddElemC: $3 must be an array or dict");
   }
-  tvAsVariant(*c3).asArrRef().set(tvAsCVarRef(c2), tvAsCVarRef(c1));
+  tvAsVariant(*c3).asArrRef().set(tvAsCVarRef(key), tvAsCVarRef(c1));
   assertx(tvIsPlausible(*c3));
   vmStack().popC();
   vmStack().popC();
@@ -2962,10 +2962,10 @@ static inline TypedValue key_tv(MemberKey key) {
         raise_undefined_local(vmfp(), key.local.name);
         return make_tv<KindOfNull>();
       }
-      return *local;
+      return tvClassToString(*local);
     }
     case MEC: case MPC:
-      return *vmStack().indTV(key.iva);
+      return tvClassToString(*vmStack().indTV(key.iva));
     case MEI:
       return make_tv<KindOfInt64>(key.int64);
     case MET: case MPT: case MQT:
@@ -3003,7 +3003,6 @@ static OPTBLD_INLINE void mFinal(MInstrState& mstate,
 
 static OPTBLD_INLINE
 void queryMImpl(MemberKey mk, int32_t nDiscard, QueryMOp op) {
-  auto const key = key_tv(mk);
   auto& mstate = vmMInstrState();
   TypedValue result;
   switch (op) {
@@ -3020,6 +3019,7 @@ void queryMImpl(MemberKey mk, int32_t nDiscard, QueryMOp op) {
 
     case QueryMOp::Isset:
       result.m_type = KindOfBoolean;
+      auto const key = key_tv(mk);
       if (mcodeIsProp(mk.mcode)) {
         auto const ctx = arGetContextClass(vmfp());
         result.m_data.num = IssetProp(ctx, mstate.base, key);
@@ -3504,7 +3504,7 @@ OPTBLD_INLINE void iopBreakTraceHint() {
 
 OPTBLD_INLINE void iopAKExists() {
   TypedValue* arr = vmStack().topTV();
-  TypedValue* key = arr + 1;
+  auto key = tvClassToString(*(arr + 1));
   bool result = HHVM_FN(array_key_exists)(tvAsCVarRef(key), tvAsCVarRef(arr));
   vmStack().popTV();
   vmStack().replaceTV<KindOfBoolean>(result);
@@ -3535,10 +3535,10 @@ OPTBLD_INLINE void iopGetMemoKeyL(named_local_var loc) {
 
 OPTBLD_INLINE void iopIdx() {
   TypedValue* def = vmStack().topTV();
-  TypedValue* key = vmStack().indTV(1);
+  auto const  key = tvClassToString(*vmStack().indTV(1));
   TypedValue* arr = vmStack().indTV(2);
 
-  if (isNullType(key->m_type)) {
+  if (isNullType(key.m_type)) {
     tvDecRefGen(arr);
     *arr = *def;
     vmStack().ndiscard(2);
@@ -3548,13 +3548,13 @@ OPTBLD_INLINE void iopIdx() {
   TypedValue result;
   if (isArrayLikeType(arr->m_type)) {
     result = HHVM_FN(hphp_array_idx)(tvAsCVarRef(arr),
-                                     tvAsCVarRef(key),
+                                     tvAsCVarRef(&key),
                                      tvAsCVarRef(def));
     vmStack().popTV();
   } else if (arr->m_type == KindOfObject) {
     auto obj = arr->m_data.pobj;
-    if (obj->isCollection() && collections::contains(obj, tvAsCVarRef(key))) {
-      result = collections::at(obj, key).tv();
+    if (obj->isCollection() && collections::contains(obj, tvAsCVarRef(&key))) {
+      result = collections::at(obj, &key).tv();
       tvIncRefGen(result);
       vmStack().popTV();
     } else {
@@ -3565,8 +3565,8 @@ OPTBLD_INLINE void iopIdx() {
     // This replicates the behavior of the hack implementation of idx, which
     // first checks isset($arr[$idx]), then returns $arr[(int)$idx]
     auto str = arr->m_data.pstr;
-    if (IssetElemString<KeyType::Any>(str, *key)) {
-      auto idx = tvCastToInt64(*key);
+    if (IssetElemString<KeyType::Any>(str, key)) {
+      auto idx = tvCastToInt64(key);
       assertx(idx >= 0 && idx < str->size());
       result = make_tv<KindOfPersistentString>(str->getChar(idx));
       vmStack().popTV();
@@ -3585,7 +3585,7 @@ OPTBLD_INLINE void iopIdx() {
 
 OPTBLD_INLINE void iopArrayIdx() {
   TypedValue* def = vmStack().topTV();
-  TypedValue* key = vmStack().indTV(1);
+  auto const  key = tvClassToString(*vmStack().indTV(1));
   TypedValue* arr = vmStack().indTV(2);
   if (isClsMethType(type(arr))) {
     if (RuntimeOption::EvalHackArrDVArrs) {
@@ -3595,7 +3595,7 @@ OPTBLD_INLINE void iopArrayIdx() {
     }
   }
   auto const result = HHVM_FN(hphp_array_idx)(tvAsCVarRef(arr),
-                                              tvAsCVarRef(key),
+                                              tvAsCVarRef(&key),
                                               tvAsCVarRef(def));
   vmStack().popTV();
   vmStack().popTV();

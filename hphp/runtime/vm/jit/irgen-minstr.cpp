@@ -1590,7 +1590,7 @@ void setNewElemPackedArrayDataImpl(IRGS& env, uint32_t nDiscard,
 }
 
 SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
-  auto const value = topC(env);
+  auto value = topC(env);
   auto const baseType = env.irb->fs().mbase().type;
 
   // We load the member base pointer before calling makeCatchSet() to avoid
@@ -1604,6 +1604,7 @@ SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
     gen(env, SetNewElemArray, makeCatchSet(env, nDiscard), basePtr, value);
   } else if (baseType <= TKeyset) {
     constrainBase(env);
+    value = convertClassKey(env, value);
     if (!value->isA(TInt | TStr)) {
       auto const base = extractBase(env);
       gen(env, ThrowInvalidArrayKey, makeCatchSet(env, nDiscard), base, value);
@@ -1685,8 +1686,12 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
       return nullptr;
     case MEL: case MPL:
       return ldLocWarn(env, mk.local, nullptr, DataTypeSpecific);
+      return convertClassKey(
+          env,
+          ldLocWarn(env, mk.local, nullptr, DataTypeSpecific)
+      );
     case MEC: case MPC:
-      return topC(env, BCSPRelOffset{int32_t(mk.iva)});
+      return convertClassKey(env, topC(env, BCSPRelOffset{int32_t(mk.iva)}));
     case MEI:
       return cns(env, mk.int64);
     case MET: case MPT: case MQT:
@@ -1793,12 +1798,11 @@ void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
 
 void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
   if (mk.mcode == MW) PUNT(QueryNewElem);
-
+  auto key = memberKey(env, mk);
   auto const baseType = env.irb->fs().mbase().type;
   if (baseType <= TClsMeth) {
     PUNT(QueryM_is_ClsMeth);
   }
-  auto key = memberKey(env, mk);
   auto simpleOp = SimpleOp::None;
 
   if (mcodeIsElem(mk.mcode)) {
@@ -1860,12 +1864,11 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
 }
 
 void emitSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
+  auto const key = memberKey(env, mk);
   auto const baseType = env.irb->fs().mbase().type;
   if (baseType <= TClsMeth) {
     PUNT(SetM_is_ClsMeth);
   }
-
-  auto const key = memberKey(env, mk);
   auto const result =
     mk.mcode == MW        ? setNewElemImpl(env, nDiscard) :
     mcodeIsElem(mk.mcode) ? setElemImpl(env, nDiscard, key) :

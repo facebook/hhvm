@@ -2378,7 +2378,7 @@ void implDictKeysetIdx(IRGS& env,
                        bool is_dict,
                        SSATmp* loaded_collection_dict) {
   auto const def = topC(env, BCSPRelOffset{0});
-  auto const key = topC(env, BCSPRelOffset{1});
+  auto const key = convertClassKey(env, topC(env, BCSPRelOffset{1}));
   auto const stack_base = topC(env, BCSPRelOffset{2});
 
   auto const finish = [&](SSATmp* elem) {
@@ -2521,8 +2521,8 @@ void emitIdx(IRGS& env) {
 
 void emitAKExists(IRGS& env) {
   auto const arr = popC(env);
-  auto key = popC(env);
-  if (key->isA(TFunc) || key->isA(TCls)) PUNT(AKExists_func_cls_key);
+  auto key = convertClassKey(env, popC(env));
+  if (key->isA(TFunc)) PUNT(AKExists_func_key);
 
   auto throwBadKey = [&] {
     // TODO(T11019533): Fix the underlying issue with unreachable code rather

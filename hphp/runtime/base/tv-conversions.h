@@ -121,6 +121,8 @@ TypedValue tvToKey(TypedValue cell, const ArrayData* ad);
  */
 TypedNum stringToNumeric(const StringData*);
 
+TypedValue tvClassToString(TypedValue key);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

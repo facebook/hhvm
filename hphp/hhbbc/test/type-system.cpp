@@ -326,7 +326,9 @@ auto const optionals = folly::lazy([] {
     TOptDbl,
     TOptNum,
     TOptUncArrKey,
+    TOptUncArrKeyCompat,
     TOptArrKey,
+    TOptArrKeyCompat,
     TOptSStr,
     TOptStr,
     TOptSPArrE,
@@ -417,7 +419,9 @@ auto const non_opt_unions = folly::lazy([] {
     TInitUnc,
     TUnc,
     TUncArrKey,
+    TUncArrKeyCompat,
     TArrKey,
+    TArrKeyCompat,
     TArrCompat,
     TArrCompatSA,
     TVArrCompat,
@@ -534,7 +538,6 @@ TEST(Type, Prims) {
 TEST(Type, Relations) {
   auto const program = make_test_program();
   Index index { program.get() };
-
   // couldBe is symmetric and reflexive
   for (auto& t1 : all_with_waithandles(index)) {
     for (auto& t2 : all_with_waithandles(index)) {
@@ -601,11 +604,9 @@ TEST(Type, Relations) {
       }
     }
   }
-
   for (auto const& t1 : all_with_waithandles(index)) {
     for (auto const& t2 : all_with_waithandles(index)) {
       EXPECT_EQ(intersection_of(t1, t2), intersection_of(t2, t1));
-
       if (t1.subtypeOf(t2)) {
         EXPECT_EQ(intersection_of(t1, t2), t1);
       } else if (t2.subtypeOf(t1)) {
@@ -799,6 +800,7 @@ TEST(Type, Unc) {
     { TNum, TUnc, true },
     { TNum, TInitUnc, true },
     { TUncArrKey, TInitUnc, true },
+    { TUncArrKeyCompat, TUncArrKey, true },
     { TStrLike, TInitUnc, true },
     { TUncStrLike, TInitUnc, true },
     { TFuncOrCls, TInitUnc, true },
@@ -904,6 +906,10 @@ TEST(Type, Option) {
   EXPECT_TRUE(TArrKey.subtypeOf(BOptArrKey));
   EXPECT_TRUE(TInitNull.subtypeOf(BOptArrKey));
   EXPECT_TRUE(!TUninit.subtypeOf(BOptArrKey));
+
+  EXPECT_TRUE(TArrKeyCompat.subtypeOf(BOptArrKeyCompat));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptArrKeyCompat));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptArrKeyCompat));
 
   for (auto& t : optionals()) EXPECT_EQ(t, opt(unopt(t)));
   for (auto& t : optionals()) EXPECT_TRUE(is_opt(t));
@@ -2520,6 +2526,11 @@ TEST(Type, ArrKey) {
   EXPECT_TRUE(opt(TUncArrKey) == TOptUncArrKey);
   EXPECT_TRUE(unopt(TOptArrKey) == TArrKey);
   EXPECT_TRUE(unopt(TOptUncArrKey) == TUncArrKey);
+
+  EXPECT_TRUE(union_of(TArrKey, TCls) == TArrKeyCompat);
+  EXPECT_TRUE(union_of(TUncArrKey, TCls) == TUncArrKeyCompat);
+  EXPECT_TRUE(union_of(TArrKeyCompat, TInitNull) == TOptArrKeyCompat);
+  EXPECT_TRUE(union_of(TUncArrKeyCompat, TInitNull) == TOptUncArrKeyCompat);
 }
 
 TEST(Type, LoosenStaticness) {
@@ -2528,6 +2539,7 @@ TEST(Type, LoosenStaticness) {
 
   for (auto const& t : all()) {
     if (t == TUncArrKey || t == TOptUncArrKey ||
+        t == TUncArrKeyCompat || t == TOptUncArrKeyCompat ||
         t == TInitUnc || t == TUnc ||
         (t.subtypeOfAny(TOptArr,
                         TOptVec,
@@ -2579,6 +2591,7 @@ TEST(Type, LoosenStaticness) {
     { TSKeysetN, TKeysetN },
     { TSKeyset, TKeyset },
     { TUncArrKey, TArrKey },
+    { TUncArrKeyCompat, TArrKeyCompat },
     { TUnc, TCell },
     { TInitUnc, TInitCell },
     { sval(s_test.get()), sval_nonstatic(s_test.get()) },
@@ -3107,6 +3120,8 @@ TEST(Type, MustBeCounted) {
     { TSDictN, false },
     { TArrKey, false },
     { TUncArrKey, false },
+    { TArrKeyCompat, false },
+    { TUncArrKeyCompat, false },
     { TStrLike, false },
     { TUncStrLike, false },
     { TInitCell, false },

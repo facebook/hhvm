@@ -217,6 +217,14 @@ bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
   if (ty.couldBe(BNum | BBool | BRes)) {
     retTy |= TInt;
   }
+  if (ty.couldBe(BCls)) {
+    if (ty.strictSubtypeOf(TCls)) {
+      auto cname = dcls_of(ty).cls.name();
+      retTy |= sval(cname);
+    } else {
+      retTy |= TStr;
+    }
+  }
   if (ty.couldBe(BStr)) {
     retTy |= [&] {
       if (ty.subtypeOf(BSStr)) {
@@ -415,13 +423,13 @@ bool builtin_shapes_idx(ISS& env, const bc::FCallBuiltin& op) {
   const auto optDArr = RuntimeOption::EvalHackArrDVArrs ? BOptDict : BOptArr;
 
   if (!base.couldBe(optDArr) ||
-      !key.couldBe(BArrKey)) {
+      !key.couldBe(BArrKeyCompat)) {
     unreachable(env);
     discard(env, 3);
     push(env, TBottom);
     return true;
   }
-  if (!base.subtypeOf(optDArr) || !key.subtypeOf(BOptArrKey)) {
+  if (!base.subtypeOf(optDArr) || !key.subtypeOf(BOptArrKeyCompat)) {
     return false;
   }
 

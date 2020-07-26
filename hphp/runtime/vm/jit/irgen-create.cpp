@@ -516,7 +516,7 @@ void emitAddElemC(IRGS& env) {
 
   if (!at.subtypeOfAny(TArr, TDict)) {
     PUNT(AddElemC-BadArr);
-  } else if (!kt.subtypeOfAny(TInt, TStr)) {
+  } else if (!kt.subtypeOfAny(TInt, TStr, TCls)) {
     auto const type = (at <= TArr) ? TArr : TDict;
     interpOne(env, type, 3);
     return;
@@ -527,7 +527,7 @@ void emitAddElemC(IRGS& env) {
   // to do refcount ops on the key.
   auto const op = (at <= TArr) ? ArraySet : DictSet;
   auto const val = popC(env, DataTypeGeneric);
-  auto const key = popC(env);
+  auto const key = convertClassKey(env, popC(env));
   auto const arr = popC(env);
   push(env, gen(env, op, arr, key, val));
   decRef(env, key);

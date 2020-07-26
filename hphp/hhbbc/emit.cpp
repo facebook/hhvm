@@ -1004,6 +1004,8 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptRecord:
   case T::OptUncArrKey:
   case T::OptArrKey:
+  case T::OptUncArrKeyCompat:
+  case T::OptArrKeyCompat:
   case T::OptUncStrLike:
   case T::OptStrLike:
   case T::Null:
@@ -1012,6 +1014,8 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::Unc:
   case T::UncArrKey:
   case T::ArrKey:
+  case T::UncArrKeyCompat:
+  case T::ArrKeyCompat:
   case T::UncStrLike:
   case T::StrLike:
   case T::InitCell:

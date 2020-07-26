@@ -1058,6 +1058,10 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   X("?StrLike",T::OptStrLike);
   X("UncStrLike",T::UncStrLike);
   X("StrLike",T::StrLike);
+  X("?UncArrKeyCompat", T::OptUncArrKeyCompat);
+  X("?ArrKeyCompat",  T::OptArrKeyCompat);
+  X("UncArrKeyCompat",T::UncArrKeyCompat);
+  X("ArrKeyCompat",   T::ArrKeyCompat);
   X("VecCompat",T::VecCompat);
   X("VArrCompat",T::VArrCompat);
   X("ArrCompat",T::ArrCompat);
@@ -1133,6 +1137,10 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::OptStrLike:
   case T::UncStrLike:
   case T::StrLike:
+  case T::OptUncArrKeyCompat:
+  case T::OptArrKeyCompat:
+  case T::UncArrKeyCompat:
+  case T::ArrKeyCompat:
   case T::OptVArrCompat:
   case T::OptVecCompat:
   case T::OptArrCompat:

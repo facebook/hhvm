@@ -881,8 +881,13 @@ SSATmp* checkAndLoadThis(IRGS& env);
 /*
  * clsmeth helpers.
  */
- SSATmp* convertClsMethToVec(IRGS& env, SSATmp* clsMeth);
+SSATmp* convertClsMethToVec(IRGS& env, SSATmp* clsMeth);
 
+//////////////////////////////////////////////////////////////////////
+/*
+ * class type helpers.
+ */
+SSATmp* convertClassKey(IRGS& env, SSATmp* key);
 }}}
 
 #endif

@@ -119,6 +119,8 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::OptUncArrKey:
   case T::OptStrLike:
   case T::OptUncStrLike:
+  case T::OptArrKeyCompat:
+  case T::OptUncArrKeyCompat:
   case T::Null:
   case T::Cell:
   case T::InitUnc:
@@ -127,6 +129,8 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::UncArrKey:
   case T::StrLike:
   case T::UncStrLike:
+  case T::ArrKeyCompat:
+  case T::UncArrKeyCompat:
   case T::InitCell:
   case T::Uninit:
   case T::InitNull:
@@ -518,6 +522,23 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
       (RO::EvalEnableFuncStringInterop && tv.m_type == KindOfFunc) ||
       tv.m_type == KindOfClass;
 
+  case T::OptArrKeyCompat:
+    if (initNull) return true;
+    // fallthrough
+  case T::ArrKeyCompat:
+    return isStringType(tv.m_type) ||
+           tv.m_type == KindOfInt64 ||
+           isClassType(tv.m_type) ||
+           (RO::EvalEnableFuncStringInterop && tv.m_type == KindOfFunc);
+
+  case T::OptUncArrKeyCompat:
+    if (initNull) return true;
+    // fallthrough
+  case T::UncArrKeyCompat:
+    return (isStringType(tv.m_type) && !tv.m_data.pstr->isRefCounted()) ||
+           tv.m_type == KindOfInt64 || isClassType(tv.m_type) ||
+           (RO::EvalEnableFuncStringInterop && tv.m_type == KindOfFunc);
+
   case T::InitCell:
     if (tv.m_type == KindOfUninit) return false;
     // fallthrough
@@ -547,6 +568,8 @@ std::string show(RepoAuthType rat) {
   case T::OptArrKey:     return "?ArrKey";
   case T::OptUncStrLike: return "?UncStrLike";
   case T::OptStrLike:    return "?StrLike";
+  case T::OptUncArrKeyCompat: return "?UncArrKeyCompat";
+  case T::OptArrKeyCompat: return "?ArrKeyCompat";
   case T::Null:          return "Null";
   case T::Cell:          return "Cell";
   case T::InitUnc:       return "InitUnc";
@@ -555,6 +578,8 @@ std::string show(RepoAuthType rat) {
   case T::ArrKey:        return "ArrKey";
   case T::UncStrLike:    return "UncStrLike";
   case T::StrLike:       return "StrLike";
+  case T::UncArrKeyCompat: return "UncArrKeyCompat";
+  case T::ArrKeyCompat:    return "ArrKeyCompat";
   case T::InitCell:      return "InitCell";
   case T::Uninit:        return "Uninit";
   case T::InitNull:      return "InitNull";

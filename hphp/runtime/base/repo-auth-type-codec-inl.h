@@ -81,6 +81,10 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::StrLike:
   case T::OptUncStrLike:
   case T::OptStrLike:
+  case T::UncArrKeyCompat:
+  case T::ArrKeyCompat:
+  case T::OptUncArrKeyCompat:
+  case T::OptArrKeyCompat:
   case T::InitUnc:
   case T::Unc:
   case T::InitCell:

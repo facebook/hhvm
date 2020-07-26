@@ -193,6 +193,8 @@ bool mayHaveData(trep bits) {
   case BOptFuncOrCls:
   case BStrLike:
   case BUncStrLike:
+  case BArrKeyCompat:
+  case BUncArrKeyCompat:
   case BOptTrue:
   case BOptFalse:
   case BOptBool:
@@ -212,6 +214,8 @@ bool mayHaveData(trep bits) {
   case BOptUncArrKey:
   case BOptStrLike:
   case BOptUncStrLike:
+  case BOptArrKeyCompat:
+  case BOptUncArrKeyCompat:
   case BOptFunc:
   case BOptFuncS:
   case BOptCls:
@@ -295,6 +299,8 @@ bool canBeOptional(trep bits) {
   case BFuncOrCls:
   case BUncStrLike:
   case BStrLike:
+  case BUncArrKeyCompat:
+  case BArrKeyCompat:
   case BArrCompatSA:
   case BArrCompat:
   case BVArrCompatSA:
@@ -384,6 +390,8 @@ bool canBeOptional(trep bits) {
   case BOptFuncOrCls:
   case BOptUncStrLike:
   case BOptStrLike:
+  case BOptUncArrKeyCompat:
+  case BOptArrKeyCompat:
   case BOptArrCompatSA:
   case BOptArrCompat:
   case BOptVArrCompatSA:
@@ -2686,8 +2694,8 @@ bool Type::checkInvariants() const {
   DEBUG_ONLY auto const isDict = subtypeOrNull(BDict);
 
   DEBUG_ONLY auto const keyBits =
-    subtypeOrNull(BSArrLike) ? BUncArrKey : BArrKey;
-  DEBUG_ONLY auto const valBits = isKeyset ? BArrKey : BInitCell;
+    subtypeOrNull(BSArrLike) ? BUncArrKeyCompat : BArrKeyCompat;
+  DEBUG_ONLY auto const valBits = isKeyset ? BArrKeyCompat : BInitCell;
 
   /*
    * TODO(#3696042): for static arrays, we could enforce that all
@@ -3313,7 +3321,7 @@ Type sarr_map(MapElems m, Type k, Type v) {
 }
 
 Type mapn_impl(trep bits, Type k, Type v, ProvTag tag) {
-  assert(k.subtypeOf(BArrKey));
+  assert(k.subtypeOf(BArrKeyCompat));
 
   // A MapN cannot have a constant key (because that can actually make it be a
   // subtype of Map sometimes), so if it does, make it a Map instead.
@@ -4581,6 +4589,9 @@ Type union_of(Type a, Type b) {
   Y(UncStrLike)
   Y(StrLike)
 
+  Y(UncArrKeyCompat)
+  Y(ArrKeyCompat)
+
   Y(VArrCompatSA)
   Y(VArrCompat)
 
@@ -5689,7 +5700,7 @@ std::pair<Type, ThrowMode> array_like_elem(const Type& arr,
       auto const val = [&]{
         if (arr.subtypeOrNull(BVArr) && !key.type.couldBe(BInt)) return TBottom;
         if (arr.subtypeOrNull(BKeyset)) {
-          return mustBeStatic ? TUncArrKey : TArrKey;
+          return mustBeStatic ? TUncArrKeyCompat : TArrKeyCompat;
         }
         return mustBeStatic ? TInitUnc : TInitCell;
       }();
@@ -6730,6 +6741,10 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   X(StrLike)
   X(OptUncStrLike)
   X(OptStrLike)
+  X(UncArrKeyCompat)
+  X(ArrKeyCompat)
+  X(OptUncArrKeyCompat)
+  X(OptArrKeyCompat)
   X(VArrCompat)
   X(VecCompat)
   X(OptVArrCompat)

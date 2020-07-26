@@ -135,8 +135,6 @@ inline TypedValue tvToKey(TypedValue cell, const ArrayData* ad) {
     return cell;
   } else if (isFuncType(cell.m_type) && RO::EvalEnableFuncStringInterop) {
     return coerceKey(funcToStringHelper(cell.m_data.pfunc));
-  } else if (isClassType(cell.m_type)) {
-    return coerceKey(classToStringHelper(cell.m_data.pclass));
   }
 
   if (LIKELY(isIntType(cell.m_type))) return cell;
@@ -153,6 +151,14 @@ inline TypedNum stringToNumeric(const StringData* sd) {
   return dt == KindOfInt64 ? make_tv<KindOfInt64>(ival) :
          dt == KindOfDouble ? make_tv<KindOfDouble>(dval) :
          make_tv<KindOfInt64>(0);
+}
+
+inline TypedValue tvClassToString(TypedValue key) {
+  if (isClassType(type(key))) {
+    auto const keyStr = classToStringHelper(val(key).pclass);
+    return make_tv<KindOfPersistentString>(keyStr);
+  }
+  return key;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

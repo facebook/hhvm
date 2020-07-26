@@ -405,6 +405,11 @@ enum trep : uint64_t {
   BOptStrLike    = BInitNull | BStrLike,
   BOptUncStrLike = BInitNull | BUncStrLike,
 
+  BUncArrKeyCompat = BUncArrKey | BCls | BFunc,
+  BArrKeyCompat    = BArrKey | BCls | BFunc,
+  BOptUncArrKeyCompat = BInitNull | BUncArrKeyCompat,
+  BOptArrKeyCompat = BInitNull | BArrKeyCompat,
+
   BVArrCompat   = BClsMeth | BVArr,
   BVArrCompatSA = BClsMeth | BSVArr,
 
@@ -1067,6 +1072,8 @@ X(FuncOrCls)                                    \
 X(ClsMethLike)                                  \
 X(UncStrLike)                                   \
 X(StrLike)                                      \
+X(UncArrKeyCompat)                              \
+X(ArrKeyCompat)                                 \
 X(ArrCompatSA)                                  \
 X(ArrCompat)                                    \
 X(VArrCompatSA)                                 \
@@ -1142,6 +1149,8 @@ X(OptFuncOrCls)                                 \
 X(OptClsMethLike)                               \
 X(OptUncStrLike)                                \
 X(OptStrLike)                                   \
+X(OptUncArrKeyCompat)                           \
+X(OptArrKeyCompat)                              \
 X(OptArrCompatSA)                               \
 X(OptArrCompat)                                 \
 X(OptVArrCompatSA)                              \

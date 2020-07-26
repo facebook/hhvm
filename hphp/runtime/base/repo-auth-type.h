@@ -93,6 +93,10 @@ struct RepoAuthType {
     TAG(StrLike)                                  \
     TAG(OptUncStrLike)                            \
     TAG(OptStrLike)                               \
+    TAG(UncArrKeyCompat)                          \
+    TAG(ArrKeyCompat)                             \
+    TAG(OptUncArrKeyCompat)                       \
+    TAG(OptArrKeyCompat)                          \
     TAG(InitCell)                                 \
     TAG(Cell)                                     \
     /* Types where array() may be non-null. */    \

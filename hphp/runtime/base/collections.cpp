@@ -435,7 +435,7 @@ void append(ObjectData* obj, TypedValue* val) {
       SystemLib::throwInvalidArgumentExceptionObject("Cannot append to Map");
       break;
     case CollectionType::Set:
-      static_cast<c_Set*>(obj)->add(*val);
+      static_cast<c_Set*>(obj)->add(tvClassToString(*val));
       break;
     case CollectionType::ImmVector:
     case CollectionType::ImmMap:

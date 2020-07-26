@@ -1,4 +1,4 @@
--vRuntime.Eval.EmitClassPointers=true
+-vRuntime.Eval.EmitClassPointers=1
 -vRuntime.Eval.CheckPropTypeHints=3
 -vRuntime.Eval.RaiseClassConversionWarning=true
 -vRuntime.Eval.StringHintNotices=true

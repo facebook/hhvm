@@ -457,13 +457,7 @@ pub fn expr_to_typed_value_(
 
         Shape(fields) => shape_to_typed_value(emitter, ns, fields, pos),
         ClassConst(x) => {
-            if emitter
-                .options()
-                .hhvm
-                .flags
-                .contains(HhvmFlags::EMIT_CLASS_POINTERS)
-                && !force_class_const
-            {
+            if emitter.options().emit_class_pointers() == 1 && !force_class_const {
                 Err(Error::NotLiteral)
             } else {
                 class_const_to_typed_value(emitter, &x.0, &x.1)

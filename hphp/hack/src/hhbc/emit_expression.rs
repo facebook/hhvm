@@ -3919,11 +3919,7 @@ fn emit_class_const(
             let cid = class::Type::from_ast_name_and_mangle(&name);
             let cname = cid.to_raw_string();
             Ok(if string_utils::is_class(&id.1) {
-                if e.options()
-                    .hhvm
-                    .flags
-                    .contains(HhvmFlags::EMIT_CLASS_POINTERS)
-                {
+                if e.options().emit_class_pointers() == 1 {
                     emit_pos_then(&pos, instr::resolveclass(cid))
                 } else {
                     emit_pos_then(&pos, instr::string(cname))
@@ -3947,12 +3943,7 @@ fn emit_class_const(
                     string_utils::strip_global_ns(&id.1).to_string().into();
                 instr::clscns(const_id)
             };
-            if string_utils::is_class(&id.1)
-                && e.options()
-                    .hhvm
-                    .flags
-                    .contains(HhvmFlags::EMIT_CLASS_POINTERS)
-            {
+            if string_utils::is_class(&id.1) && e.options().emit_class_pointers() == 1 {
                 emit_load_class_ref(e, env, pos, cexpr)
             } else {
                 Ok(InstrSeq::gather(vec![

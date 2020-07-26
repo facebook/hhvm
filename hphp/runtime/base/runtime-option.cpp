@@ -127,6 +127,9 @@ std::string mangleForKey(std::string s) { return s; }
 void hdfExtract(const Hdf& hdf, const char* name, bool& val, bool dv) {
   val = hdf[name].configGetBool(dv);
 }
+void hdfExtract(const Hdf& hdf, const char* name, uint16_t& val, uint16_t dv) {
+  val = hdf[name].configGetUInt16(dv);
+}
 void hdfExtract(
   const Hdf& hdf,
   const char* name,

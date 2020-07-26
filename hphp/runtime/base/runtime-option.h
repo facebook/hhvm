@@ -88,7 +88,6 @@ struct RepoOptions {
   H(bool,           DisallowFuncPtrsInConstants,    false)            \
   E(bool,           EmitFuncPointers,               true)             \
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
-  E(bool,           EmitClassPointers,              false)            \
   H(bool,           EnableXHPClassModifier,         false)            \
   H(bool,           DisableXHPElementMangling,      false)            \
   H(bool,           DisableArray,                   true)             \
@@ -1167,6 +1166,11 @@ struct RuntimeOption {
   /* Raise warning when class pointers are used as strings. */          \
   F(bool, RaiseClassConversionWarning, false)                           \
   F(bool, EmitClsMethPointers, false)                                   \
+  /* EmitClassPointers:
+   * 0 => convert Foo::class to string "Foo"
+   * 1 => convert Foo::class to class pointer
+   * 2 => convert Foo::class to lazy class */                           \
+  F(uint16_t, EmitClassPointers, 0)                                     \
   /* false to skip type refinement for ClsMeth type at HHBBC. */        \
   F(bool, IsCompatibleClsMethType, false)                               \
   /* Raise warning if a ClsMeth type is compared to other types. */     \

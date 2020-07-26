@@ -37,7 +37,7 @@ type t = {
   option_emit_cls_meth_pointers: bool;
   option_emit_inst_meth_pointers: bool;
   option_emit_meth_caller_func_pointers: bool;
-  option_emit_class_pointers: bool;
+  option_emit_class_pointers: int;
   option_rx_is_enabled: bool;
   option_disable_lval_as_an_expression: bool;
   option_array_provenance: bool;
@@ -91,7 +91,7 @@ let default =
     option_emit_cls_meth_pointers = true;
     option_emit_inst_meth_pointers = true;
     option_emit_meth_caller_func_pointers = true;
-    option_emit_class_pointers = false;
+    option_emit_class_pointers = 0;
     option_rx_is_enabled = false;
     option_disable_lval_as_an_expression = false;
     option_array_provenance = false;
@@ -265,7 +265,7 @@ let to_string o =
       Printf.sprintf "emit_inst_meth_pointers: %B" @@ emit_inst_meth_pointers o;
       Printf.sprintf "emit_meth_caller_func_pointers: %B"
       @@ emit_meth_caller_func_pointers o;
-      Printf.sprintf "emit_class_pointers: %B" @@ emit_class_pointers o;
+      Printf.sprintf "emit_class_pointers: %d" @@ emit_class_pointers o;
       Printf.sprintf "rx_is_enabled: %B" @@ rx_is_enabled o;
       Printf.sprintf "disable_lval_as_an_expression: %B"
       @@ disable_lval_as_an_expression o;
@@ -356,7 +356,7 @@ let set_option options name value =
       option_emit_meth_caller_func_pointers = int_of_string value > 0;
     }
   | "hhvm.emit_class_pointers" ->
-    { options with option_emit_class_pointers = as_bool value }
+    { options with option_emit_class_pointers = int_of_string value }
   | "hhvm.rx_is_enabled" ->
     { options with option_rx_is_enabled = int_of_string value > 0 }
   | "hack.lang.disable_lval_as_an_expression" ->
@@ -547,7 +547,7 @@ let value_setters =
     ( set_value "hhvm.emit_inst_meth_pointers" get_value_from_config_int
     @@ fun opts v -> { opts with option_emit_inst_meth_pointers = v = 1 } );
     ( set_value "hhvm.emit_class_pointers" get_value_from_config_int
-    @@ fun opts v -> { opts with option_emit_class_pointers = v > 0 } );
+    @@ fun opts v -> { opts with option_emit_class_pointers = v } );
     ( set_value "hhvm.rx_is_enabled" get_value_from_config_int @@ fun opts v ->
       { opts with option_rx_is_enabled = v = 1 } );
     ( set_value "hhvm.array_provenance" get_value_from_config_int

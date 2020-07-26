@@ -165,7 +165,6 @@ prefixed_flags!(
     EMIT_FUNC_POINTERS,
     EMIT_INST_METH_POINTERS,
     EMIT_METH_CALLER_FUNC_POINTERS,
-    EMIT_CLASS_POINTERS,
     ENABLE_INTRINSICS_EXTENSION,
     HACK_ARR_COMPAT_NOTICES,
     HACK_ARR_DV_ARR_MARK,
@@ -184,7 +183,7 @@ impl Default for HhvmFlags {
 }
 
 #[prefix_all("hhvm.")]
-#[derive(Clone, Serialize, Deserialize, Debug, Default, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 pub struct Hhvm {
     #[serde(default)]
     pub aliased_namespaces: Arg<BTreeMapOrEmptyVec<String, String>>,
@@ -195,6 +194,9 @@ pub struct Hhvm {
     #[serde(default)]
     pub include_roots: Arg<BTreeMap<String, String>>, // TODO(leoo) change to HashMap if order doesn't matter
 
+    #[serde(default = "defaults::emit_class_pointers")]
+    pub emit_class_pointers: Arg<String>,
+
     #[serde(
         flatten,
         serialize_with = "serialize_flags",
@@ -204,6 +206,19 @@ pub struct Hhvm {
 
     #[serde(flatten, default)]
     pub hack_lang: HackLang,
+}
+
+impl Default for Hhvm {
+    fn default() -> Self {
+        Self {
+            aliased_namespaces: Default::default(),
+            dynamic_invoke_functions: Default::default(),
+            include_roots: Default::default(),
+            emit_class_pointers: defaults::emit_class_pointers(),
+            flags: Default::default(),
+            hack_lang: Default::default(),
+        }
+    }
 }
 
 impl Hhvm {
@@ -385,6 +400,10 @@ mod defaults {
     pub fn max_array_elem_size_on_the_stack() -> Arg<isize> {
         Arg::new(64)
     }
+
+    pub fn emit_class_pointers() -> Arg<String> {
+        Arg::new("0".to_string())
+    }
 }
 
 thread_local! {
@@ -502,6 +521,10 @@ impl Options {
             .get()
             .parse::<i32>()
             .map_or(false, |x| x.is_positive())
+    }
+
+    pub fn emit_class_pointers(&self) -> i32 {
+        self.hhvm.emit_class_pointers.get().parse::<i32>().unwrap()
     }
 }
 
@@ -653,7 +676,7 @@ mod tests {
     "global_value": []
   },
   "hhvm.emit_class_pointers": {
-    "global_value": false
+    "global_value": "0"
   },
   "hhvm.emit_cls_meth_pointers": {
     "global_value": false
@@ -1158,6 +1181,5 @@ bitflags! {
         const DISABLE_ARRAY_CAST = 1 << 52;
         const DISABLE_ARRAY_TYPEHINT = 1 << 53;
         const HACK_ARR_DV_ARR_MARK = 1 << 54;
-        const EMIT_CLASS_POINTERS = 1 << 55;
     }
 }

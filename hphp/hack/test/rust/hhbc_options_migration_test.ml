@@ -300,7 +300,7 @@ let test_all_overrides_json_only _ =
     \"global_value\": false
   },
   \"hhvm.emit_class_pointers\": {
-    \"global_value\": false
+    \"global_value\": \"0\"
   },
   \"hhvm.enable_intrinsics_extension\": {
     \"global_value\": true

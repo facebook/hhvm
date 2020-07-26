@@ -1,1 +1,1 @@
--vEval.EmitClassPointers=true
+-vEval.EmitClassPointers=1

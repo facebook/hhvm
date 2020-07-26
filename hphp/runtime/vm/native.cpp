@@ -390,7 +390,7 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
     if (tvIsClass(tv) && isStringType(*targetType)) {
       val(tv).pstr = const_cast<StringData*>(val(tv).pclass->name());
       type(tv) = KindOfPersistentString;
-      if (RuntimeOption::EvalStringHintNotices) {
+      if (RuntimeOption::EvalClassStringHintNotices) {
         raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
       }
       continue;

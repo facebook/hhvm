@@ -285,7 +285,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       ? AnnotAction::WarnFunc : AnnotAction::ConvertFunc;
   }
   if (at == AnnotType::String && dt == KindOfClass) {
-    return RuntimeOption::EvalStringHintNotices
+    return RuntimeOption::EvalClassStringHintNotices
       ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
   }
   if (isClsMethType(dt)) {
@@ -347,7 +347,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         return AnnotAction::Fail;
       case KindOfClass:
         if (interface_supports_string(annotClsName)) {
-          return RuntimeOption::EvalStringHintNotices
+          return RuntimeOption::EvalClassStringHintNotices
             ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
         }
         return AnnotAction::Fail;

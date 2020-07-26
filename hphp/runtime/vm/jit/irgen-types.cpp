@@ -457,7 +457,7 @@ SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
   }
 
   mc.ifTypeThen(src, TCls, [&](SSATmp*) {
-    if (RuntimeOption::EvalIsStringNotices) {
+    if (RuntimeOption::EvalClassIsStringNotices) {
       gen(env, RaiseNotice, cns(env, s_CLASS_IS_STRING.get()));
     }
     return cns(env, true);
@@ -670,14 +670,17 @@ SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
     if (src->isA(TCls) ||
         (RO::EvalEnableFuncStringInterop && src->isA(TFunc))) {
       if (!interface_supports_string(className)) return cns(env, false);
-      if (RuntimeOption::EvalIsStringNotices) {
+      if (RuntimeOption::EvalIsStringNotices && src->isA(TFunc)) {
         gen(
           env,
           RaiseNotice,
-          cns(
-            env,
-            src->isA(TFunc) ? s_FUNC_IS_STRING.get() : s_CLASS_IS_STRING.get()
-          )
+          cns(env, s_FUNC_IS_STRING.get())
+        );
+      } else if (RuntimeOption::EvalClassIsStringNotices && src->isA(TCls)) {
+        gen(
+          env,
+          RaiseNotice,
+          cns(env, s_CLASS_IS_STRING.get())
         );
       }
       return cns(env, true);

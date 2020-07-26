@@ -1604,16 +1604,22 @@ SSATmp* maybeCoerceValue(
     if (!val->type().maybe(allowedTy)) return bail();
 
     auto castW = [&] (SSATmp* val, bool isCls){
-      if (RuntimeOption::EvalStringHintNotices) {
+      if (RuntimeOption::EvalStringHintNotices && !isCls) {
         gen(
           env,
           RaiseNotice,
           cns(
             env,
-            makeStaticString(
-              isCls ? Strings::CLASS_TO_STRING_IMPLICIT
-                    : Strings::FUNC_TO_STRING_IMPLICIT
-            )
+            makeStaticString(Strings::FUNC_TO_STRING_IMPLICIT)
+          )
+        );
+      } else if (RuntimeOption::EvalClassStringHintNotices && isCls) {
+        gen(
+          env,
+          RaiseNotice,
+          cns(
+            env,
+            makeStaticString(Strings::CLASS_TO_STRING_IMPLICIT)
           )
         );
       }

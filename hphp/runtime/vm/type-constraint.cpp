@@ -984,7 +984,7 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
   }
 
   if (isClassType(c->m_type) && checkStringCompatible()) {
-    if (RuntimeOption::EvalStringHintNotices) {
+    if (RuntimeOption::EvalClassStringHintNotices) {
       raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
     }
     c->m_data.pstr = const_cast<StringData*>(c->m_data.pclass->name());
@@ -1056,7 +1056,7 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
   }
 
   if (isClassType(val.type()) && checkStringCompatible()) {
-    if (RuntimeOption::EvalStringHintNotices) {
+    if (RuntimeOption::EvalClassStringHintNotices) {
       raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
     }
     val.val().pstr = const_cast<StringData*>(val.val().pclass->name());
@@ -1122,7 +1122,7 @@ void TypeConstraint::verifyFail(const Func* func, tv_lval c,
   }
 
   if (isClassType(c.type()) && checkStringCompatible()) {
-    if (RuntimeOption::EvalStringHintNotices) {
+    if (RuntimeOption::EvalClassStringHintNotices) {
       raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
     }
     val(c).pstr =

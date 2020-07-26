@@ -603,7 +603,7 @@ bool checkTypeStructureMatchesTVImpl(
         return true;
       }
       if (isClassType(type)) {
-        if (RO::EvalIsStringNotices) {
+        if (RO::EvalClassIsStringNotices) {
           raise_notice("Class used in is_string");
         }
         return true;

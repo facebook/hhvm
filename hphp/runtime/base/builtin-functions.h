@@ -98,7 +98,7 @@ inline bool is_string(const TypedValue* c) {
     return true;
   }
   if (tvIsClass(c)) {
-    if (RuntimeOption::EvalIsStringNotices) {
+    if (RuntimeOption::EvalClassIsStringNotices) {
       raise_notice("Class used in is_string");
     }
     return true;

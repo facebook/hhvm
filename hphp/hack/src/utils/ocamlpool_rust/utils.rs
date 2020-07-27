@@ -10,8 +10,6 @@ use ocaml::core::mlvalues::{Size, Tag, Value};
 extern "C" {
     fn ocamlpool_reserve_block(tag: Tag, size: Size) -> Value;
     fn ocamlpool_reserve_string(size: Size) -> Value;
-    static ocamlpool_limit: *mut Value;
-    static ocamlpool_bound: *mut Value;
     static mut ocamlpool_generation: usize;
 }
 
@@ -24,13 +22,7 @@ pub unsafe fn reserve_block(tag: Tag, size: Size) -> Value {
 }
 
 pub unsafe fn caml_set_field(obj: Value, index: usize, val: Value) {
-    if (val & 1 == 1)
-        || ((val as *const Value) >= ocamlpool_limit && (val as *const Value) <= ocamlpool_bound)
-    {
-        *(obj as *mut Value).offset(index as isize) = val;
-    } else {
-        memory::caml_initialize((obj as *mut Value).offset(index as isize), val);
-    }
+    memory::caml_initialize((obj as *mut Value).add(index), val);
 }
 
 // Not implementing Ocamlvalue for integer types, because Value itself is an integer too and it makes

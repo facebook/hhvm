@@ -45,7 +45,7 @@ pub fn str_to_ocaml(s: &[u8]) -> Value {
 }
 
 pub fn ocaml_to_isize(i: Value) -> isize {
-    ((i >> 1) | (std::isize::MIN as usize & i)) as isize
+    (i as isize) >> 1
 }
 
 pub unsafe fn block_field(block: &ocaml::Value, field: usize) -> ocaml::Value {

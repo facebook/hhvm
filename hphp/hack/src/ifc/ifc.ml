@@ -588,15 +588,44 @@ let rec stmt renv env ((_pos, s) : Tast.stmt) =
             && subtype te renv.re_ret)
     end
   | A.Throw e ->
-    let (env, _ty) = expr renv env e in
+    let (env, ty) = expr renv env e in
     let union env t1 t2 = (env, mk_union t1 t2) in
-    Env.merge_conts_into ~union env [K.Next] K.Catch
+    let env = Env.merge_conts_into ~union env [K.Next] K.Catch in
+    Env.acc env @@ subtype ty renv.re_exn
+  | A.Try (try_blk, [((_, exn), (_, exn_var), catch_blk)], []) ->
+    (* NOTE: for now we only support try with a single catch block and no finally
+     * block. Only \Exception is allowed to be caught
+     *)
+    let union env t1 t2 = (env, mk_union t1 t2) in
+    let base_cenv = Env.get_cenv env in
+    let base_pc = Env.get_lpc_policy env K.Next in
+    let env = Env.drop_conts env [K.Catch] in
+
+    (* Create a fresh exception for the try block since none of the outer
+     * exceptions are catchable inside the block
+     *)
+    let try_renv =
+      let fresh_exn = class_ptype None renv.re_proto [] Decl.exception_id in
+      { renv with re_exn = fresh_exn }
+    in
+    let env = block try_renv env try_blk in
+
+    if not @@ String.equal exn Decl.exception_id then
+      fail "catch is only supported for \\Exception, got '%s'" exn;
+    (* The catch block should begin with the catch continuation replacing Next *)
+    let env = Env.drop_conts env [K.Next] in
+    let env = Env.move_conts_into ~union env [K.Catch] K.Next in
+    let env = Env.set_local_type env exn_var try_renv.re_exn in
+    let env = block renv env catch_blk in
+
+    let env = Env.merge_conts_from ~union env base_cenv [K.Catch] in
+    Env.set_pc env K.Next base_pc
   | _ -> env
 
 and block renv env (blk : Tast.block) =
   let seq env s =
-    let env = Env.merge_pcs_into env [K.Exit; K.Catch] K.Next in
-    stmt renv env s
+    let env = stmt renv env s in
+    Env.merge_pcs_into env [K.Exit; K.Catch] K.Next
   in
   List.fold_left ~f:seq ~init:env blk
 
@@ -607,12 +636,14 @@ let callable opts decl_env class_name_opt name saved_env params body lrty =
     let proto_renv = Env.new_proto_renv saved_env scope decl_env in
 
     let global_pc = Env.new_policy_var proto_renv "pc" in
+    let exn = class_ptype None proto_renv [] Decl.exception_id in
+
     (* Here, we ignore the type parameters of this because at the moment we
      * lack Tgeneric policy type. This will be fixed (T68414656) in the future.
      *)
     let this_ty = Option.map class_name_opt (class_ptype None proto_renv []) in
     let ret_ty = ptype ~prefix:"ret" None proto_renv lrty in
-    let renv = Env.new_renv proto_renv this_ty ret_ty global_pc in
+    let renv = Env.new_renv proto_renv this_ty ret_ty global_pc exn in
 
     (* Initialise the mutable environment *)
     let env = Env.new_env in

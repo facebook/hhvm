@@ -37,12 +37,13 @@ let new_proto_renv saved_tenv scope decl_env =
     pre_tenv = saved_tenv;
   }
 
-let new_renv proto_renv this_ty ret_ty global_pc =
+let new_renv proto_renv this_ty ret_ty global_pc exn =
   {
     re_proto = proto_renv;
     re_this = this_ty;
     re_ret = ret_ty;
     re_gpc = global_pc;
+    re_exn = exn;
   }
 
 let empty_lenv = { le_vars = LMap.empty; le_pc = PCSet.empty }
@@ -136,6 +137,23 @@ let merge_conts_into ~union env ks k_to =
   match lenv with
   | None -> env
   | Some lenv -> merge_lenv_into ~union env lenv k_to
+
+let merge_conts_from ~union env from_cenv =
+  let f env k =
+    match KMap.find_opt k from_cenv with
+    | None -> env
+    | Some lenv -> merge_lenv_into ~union env lenv k
+  in
+  List.fold ~f ~init:env
+
+let drop_conts env ks =
+  let f m k = KMap.remove k m in
+  set_cenv env @@ List.fold ~f ~init:env.e_cont ks
+
+(* Merge conts and then clear them *)
+let move_conts_into ~union env ks k_to =
+  let env = merge_conts_into ~union env ks k_to in
+  drop_conts env ks
 
 let merge_pcs_into env ks k_to =
   let f pc k = PCSet.union (get_lpc_policy env k) pc in

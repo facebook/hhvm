@@ -9,7 +9,7 @@ Decls:
   
 Analyzing __construct:
 * pc: pc
-* This: \PublicData<\PublicData, lump, data=<PUBLIC>>
+* This: \PublicData<\PublicData, lump'1, data=<PUBLIC>>
 * Return: <ret>
 * Params:
   lvars: { $data -> <$data> }
@@ -22,7 +22,7 @@ Constraints:
 
 Analyzing __construct:
 * pc: pc
-* This: \PoliciedData<\PoliciedData, lump, data=<SECRET>>
+* This: \PoliciedData<\PoliciedData, lump'1, data=<SECRET>>
 * Return: <ret>
 * Params:
   lvars: { $data -> <$data> }
@@ -39,14 +39,14 @@ Analyzing \earlyReturn:
 * Return: <ret>
 * Params:
   lvars:
-    { $x -> \PoliciedData<\PoliciedData, lump, data=<SECRET>>;
-      $y -> \PublicData<\PublicData, lump'1, data=<PUBLIC>> }
+    { $x -> \PoliciedData<\PoliciedData, lump'1, data=<SECRET>>;
+      $y -> \PublicData<\PublicData, lump'2, data=<PUBLIC>> }
 * Final environment:
   Deps: {}
   Locals:
     lvars:
-      { $x -> \PoliciedData<\PoliciedData, lump, data=<SECRET>>;
-        $y -> \PublicData<\PublicData, lump'1, data=<PUBLIC>> }
+      { $x -> \PoliciedData<\PoliciedData, lump'1, data=<SECRET>>;
+        $y -> \PublicData<\PublicData, lump'2, data=<PUBLIC>> }
     pc: .data
 Constraints:
   [SECRET < .data, \PoliciedData < .data, \PublicData = PUBLIC,

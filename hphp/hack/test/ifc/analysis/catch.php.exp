@@ -1,0 +1,131 @@
+Decls:
+  class \Exception: { policied_props = [] }
+  class \HH\vec: { policied_props = [] }
+  class \X: { policied_props = [a:A, b:B] }
+  function \do_not_leak_pc_after_catch: { kind = public }
+  function \leak_pc_in_catch: { kind = public }
+  function \nested_try: { kind = public }
+  function \throw_in_catch: { kind = public }
+  
+Analyzing \leak_pc_in_catch:
+* pc: pc
+* This: None
+* Return: <ret>
+* Params:
+  lvars:
+    { $e -> \Exception<\Exception'1, lump'2>;
+      $x -> \X<\X, lump'1, a=<A>, b=<B>> }
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars:
+      { $e -> \Exception<\Exception'1, lump'2>;
+        $exn -> \Exception<\Exception'2, lump'3>;
+        $x -> \X<\X, lump'1, a=<A>, b=<B>> }
+Constraints:
+  [A < .a, \X < .a, lump'2 = lump'3, \Exception'1 < \Exception'2, \X < B,
+   PUBLIC < B, .a < B, pc < B]
+
+Analyzing \do_not_leak_pc_after_catch:
+* pc: pc
+* This: None
+* Return: <ret>
+* Params:
+  lvars:
+    { $e -> \Exception<\Exception'1, lump'2>;
+      $x -> \X<\X, lump'1, a=<A>, b=<B>> }
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars:
+      { $_ -> \Exception<\Exception'2, lump'3>;
+        $e -> \Exception<\Exception'1, lump'2>;
+        $x -> \X<\X, lump'1, a=<A>, b=<B>> }
+Constraints:
+  [A < .a, \X < .a, lump'2 = lump'3, \Exception'1 < \Exception'2, \X < B,
+   PUBLIC < B, pc < B]
+
+Analyzing \nested_try:
+* pc: pc
+* This: None
+* Return: <ret>
+* Params:
+  lvars:
+    { $e -> \Exception<\Exception'1, lump'2>;
+      $x -> \X<\X, lump'1, a=<A>, b=<B>> }
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars:
+      { $_ -> \Exception<\Exception'2, lump'3>;
+        $e -> \Exception<\Exception'1, lump'2>;
+        $x -> \X<\X, lump'1, a=<A>, b=<B>> }
+Constraints:
+  [A < .a, \X < .a, lump'2 = lump'3, \Exception'1 < \Exception'2, \X < B,
+   PUBLIC < B, .a < B, pc < B]
+
+Analyzing \throw_in_catch:
+* pc: pc
+* This: None
+* Return: <ret>
+* Params:
+  lvars:
+    { $e -> \Exception<\Exception'1, lump'2>;
+      $x -> \X<\X, lump'1, a=<A>, b=<B>> }
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars:
+      { $_ -> \Exception<\Exception'2, lump'3>;
+        $e -> \Exception<\Exception'1, lump'2>;
+        $x -> \X<\X, lump'1, a=<A>, b=<B>> }
+    pc: .a
+Constraints:
+  [lump'2 = lump'3, \Exception'1 < \Exception'2, A < .a, \X < .a,
+   lump'2 = lump, \Exception'1 < \Exception, \X < B, PUBLIC < B, .a < B,
+   pc < B]
+
+Flow constraints for \do_not_leak_pc_after_catch:
+  
+  Simplified: PUBLIC < B
+  Raw:
+  [A < .a, \X < .a, lump'2 = lump'3, \Exception'1 < \Exception'2, \X < B,
+   PUBLIC < B, pc < B]
+
+Flow constraints for \leak_pc_in_catch:
+  
+  Simplified: [PUBLIC < B, A < B]
+  Raw:
+  [A < .a, \X < .a, lump'2 = lump'3, \Exception'1 < \Exception'2, \X < B,
+   PUBLIC < B, .a < B, pc < B]
+
+Flow constraints for \nested_try:
+  
+  Simplified: [PUBLIC < B, A < B]
+  Raw:
+  [A < .a, \X < .a, lump'2 = lump'3, \Exception'1 < \Exception'2, \X < B,
+   PUBLIC < B, .a < B, pc < B]
+
+Flow constraints for \throw_in_catch:
+  
+  Simplified: [PUBLIC < B, A < B]
+  Raw:
+  [lump'2 = lump'3, \Exception'1 < \Exception'2, A < .a, \X < .a,
+   lump'2 = lump, \Exception'1 < \Exception, \X < B, PUBLIC < B, .a < B,
+   pc < B]
+
+There are privacy policy errors in \do_not_leak_pc_after_catch:
+  Data with policy PUBLIC appears in context B.
+  
+There are privacy policy errors in \leak_pc_in_catch:
+  Data with policy PUBLIC appears in context B.
+  Data with policy A appears in context B.
+  
+There are privacy policy errors in \nested_try:
+  Data with policy PUBLIC appears in context B.
+  Data with policy A appears in context B.
+  
+There are privacy policy errors in \throw_in_catch:
+  Data with policy PUBLIC appears in context B.
+  Data with policy A appears in context B.
+  

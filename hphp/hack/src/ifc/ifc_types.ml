@@ -172,6 +172,8 @@ type renv = {
   re_ret: ptype;
   (* The initial program counter for the function *)
   re_gpc: policy;
+  (* Exception thrown from the callable *)
+  re_exn: ptype;
 }
 
 (* The analysis result for a callable *)

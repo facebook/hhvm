@@ -11,22 +11,22 @@ Decls:
   
 Analyzing __construct:
 * pc: pc
-* This: \C<\C, lump, cx=<.cx>>
+* This: \C<\C, lump'1, cx=<.cx>>
 * Return: <ret>
 * Params:
-  lvars: { $cd -> \D<\D, lump'1>; $cx -> <$cx>; $cy -> <$cy> }
+  lvars: { $cd -> \D<\D, lump'2>; $cx -> <$cx>; $cy -> <$cy> }
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $cd -> \D<\D, lump'1>; $cx -> <$cx>; $cy -> <$cy> }
+    lvars: { $cd -> \D<\D, lump'2>; $cx -> <$cx>; $cy -> <$cy> }
 Constraints:
-  [\C < .cx, $cx < .cx, pc < .cx, \C < lump, $cy < lump, pc < lump,
-   \C < lump, lump'1 = lump, \D < lump, pc < lump]
+  [\C < .cx, $cx < .cx, pc < .cx, \C < lump'1, $cy < lump'1, pc < lump'1,
+   \C < lump'1, lump'2 = lump'1, \D < lump'1, pc < lump'1]
 
 Analyzing testGetUnpolicied:
 * pc: pc
-* This: \C<\C, lump, cx=?thunk>
-* Return: \D<\D, lump'1>
+* This: \C<\C, lump'1, cx=?thunk>
+* Return: \D<\D, lump'2>
 * Params:
   lvars: {}
 * Final environment:
@@ -34,25 +34,25 @@ Analyzing testGetUnpolicied:
   Locals:
     lvars: {}
 Constraints:
-  [lump < .cd, \C < .cd, lump = lump'1, .cd < \D]
+  [lump'1 < .cd, \C < .cd, lump'1 = lump'2, .cd < \D]
 
 Analyzing testSetMultipleUnpolicied:
 * pc: pc
-* This: \C<\C, lump, cx=?thunk>
+* This: \C<\C, lump'1, cx=?thunk>
 * Return: <ret>
 * Params:
-  lvars: { $d -> \D<\D, lump'1> }
+  lvars: { $d -> \D<\D, lump'2> }
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $d -> \D<\D, lump'1> }
+    lvars: { $d -> \D<\D, lump'2> }
 Constraints:
-  [\C < lump, PUBLIC < lump, pc < lump, \C < lump, lump'1 = lump, \D < lump,
-   pc < lump]
+  [\C < lump'1, PUBLIC < lump'1, pc < lump'1, \C < lump'1, lump'2 = lump'1,
+   \D < lump'1, pc < lump'1]
 
 Analyzing testSetDeep:
 * pc: pc
-* This: \C<\C, lump, cx=?thunk>
+* This: \C<\C, lump'1, cx=?thunk>
 * Return: <ret>
 * Params:
   lvars: { $i -> <$i> }
@@ -61,11 +61,11 @@ Analyzing testSetDeep:
   Locals:
     lvars: { $i -> <$i> }
 Constraints:
-  [lump < .cd, \C < .cd, .cd < lump, $i < lump, pc < lump]
+  [lump'1 < .cd, \C < .cd, .cd < lump'1, $i < lump'1, pc < lump'1]
 
 Analyzing __construct:
 * pc: pc
-* This: \D<\D, lump>
+* This: \D<\D, lump'1>
 * Return: <ret>
 * Params:
   lvars: { $di -> <$di> }
@@ -74,34 +74,35 @@ Analyzing __construct:
   Locals:
     lvars: { $di -> <$di> }
 Constraints:
-  [\D < lump, $di < lump, pc < lump]
+  [\D < lump'1, $di < lump'1, pc < lump'1]
 
 Flow constraints for \C#__construct:
   
   Simplified: True
   Raw:
-  [\C < .cx, $cx < .cx, pc < .cx, \C < lump, $cy < lump, pc < lump,
-   \C < lump, lump'1 = lump, \D < lump, pc < lump]
+  [\C < .cx, $cx < .cx, pc < .cx, \C < lump'1, $cy < lump'1, pc < lump'1,
+   \C < lump'1, lump'2 = lump'1, \D < lump'1, pc < lump'1]
 
 Flow constraints for \C#testGetUnpolicied:
   
   Simplified: True
-  Raw: [lump < .cd, \C < .cd, lump = lump'1, .cd < \D]
+  Raw: [lump'1 < .cd, \C < .cd, lump'1 = lump'2, .cd < \D]
 
 Flow constraints for \C#testSetDeep:
   
   Simplified: True
-  Raw: [lump < .cd, \C < .cd, .cd < lump, $i < lump, pc < lump]
+  Raw: [lump'1 < .cd, \C < .cd, .cd < lump'1, $i < lump'1, pc < lump'1]
+
 
 Flow constraints for \C#testSetMultipleUnpolicied:
   
   Simplified: True
   Raw:
-  [\C < lump, PUBLIC < lump, pc < lump, \C < lump, lump'1 = lump, \D < lump,
-   pc < lump]
+  [\C < lump'1, PUBLIC < lump'1, pc < lump'1, \C < lump'1, lump'2 = lump'1,
+   \D < lump'1, pc < lump'1]
 
 Flow constraints for \D#__construct:
   
   Simplified: True
-  Raw: [\D < lump, $di < lump, pc < lump]
+  Raw: [\D < lump'1, $di < lump'1, pc < lump'1]
 

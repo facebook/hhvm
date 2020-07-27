@@ -15,29 +15,30 @@ Decls:
 Analyzing \empty:
 * pc: pc
 * This: None
-* Return: \HH\vec<<tp>><\HH\vec, lump>
+* Return: \HH\vec<<tp>><\HH\vec, lump'1>
 * Params:
   lvars: {}
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $vec -> \HH\vec<nothing><\HH\vec'2, lump'2> }
+    lvars: { $vec -> \HH\vec<nothing><\HH\vec'2, lump'3> }
 Constraints:
-  [lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, lump'2 = lump, \HH\vec'2 < \HH\vec]
+  [lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, lump'3 = lump'1,
+   \HH\vec'2 < \HH\vec]
 
 Analyzing \testCollection:
 * pc: pc
 * This: None
-* Return: \HH\vec<<tp>><\HH\vec, lump>
+* Return: \HH\vec<<tp>><\HH\vec, lump'1>
 * Params:
   lvars: {}
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $there -> <$there>; $vec -> \HH\vec<<tp'2>><\HH\vec'2, lump'2> }
+    lvars: { $there -> <$there>; $vec -> \HH\vec<<tp'2>><\HH\vec'2, lump'3> }
 Constraints:
   [PUBLIC < $there, PUBLIC < tp'1, $there < tp'1, tp'1 < tp'2,
-   lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, tp'2 < tp, lump'2 = lump,
+   lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, tp'2 < tp, lump'3 = lump'1,
    \HH\vec'2 < \HH\vec]
 
 Analyzing \testAdd1:
@@ -45,13 +46,13 @@ Analyzing \testAdd1:
 * This: None
 * Return: <ret>
 * Params:
-  lvars: { $vec -> \HH\vec<<tp>><\HH\vec, lump> }
+  lvars: { $vec -> \HH\vec<<tp>><\HH\vec, lump'1> }
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $vec -> \HH\vec<<tp'1>><\HH\vec'1, lump'1> }
+    lvars: { $vec -> \HH\vec<<tp'1>><\HH\vec'1, lump'2> }
 Constraints:
-  [tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1, PUBLIC < tp'1]
+  [tp < tp'1, lump'1 = lump'2, \HH\vec < \HH\vec'1, PUBLIC < tp'1]
 
 Analyzing \testAdd2:
 * pc: pc
@@ -62,10 +63,10 @@ Analyzing \testAdd2:
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $vec -> \HH\vec<<tp'2>><\HH\vec'2, lump'2> }
+    lvars: { $vec -> \HH\vec<<tp'2>><\HH\vec'2, lump'3> }
 Constraints:
-  [PUBLIC < tp, PUBLIC < tp, tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1,
-   tp'1 < tp'2, lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, PUBLIC < tp'2]
+  [PUBLIC < tp, PUBLIC < tp, tp < tp'1, lump'1 = lump'2, \HH\vec < \HH\vec'1,
+   tp'1 < tp'2, lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, PUBLIC < tp'2]
 
 Analyzing \retElem:
 * pc: pc
@@ -76,14 +77,14 @@ Analyzing \retElem:
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $vec -> \HH\vec<<tp'1>><\HH\vec'1, lump'1> }
+    lvars: { $vec -> \HH\vec<<tp'1>><\HH\vec'1, lump'2> }
 Constraints:
-  [PUBLIC < tp, PUBLIC < tp, PUBLIC < tp, tp < tp'1, lump = lump'1,
+  [PUBLIC < tp, PUBLIC < tp, PUBLIC < tp, tp < tp'1, lump'1 = lump'2,
    \HH\vec < \HH\vec'1, tp'1 < ret]
 
 Analyzing set:
 * pc: pc
-* This: \C<\C, lump, i=<INT>, v=\HH\vec<<VEC>><VEC, VEC>>
+* This: \C<\C, lump'1, i=<INT>, v=\HH\vec<<VEC>><VEC, VEC>>
 * Return: <ret>
 * Params:
   lvars: {}
@@ -97,25 +98,25 @@ Constraints:
 
 Analyzing nested:
 * pc: pc
-* This: \C<\C, lump, i=<INT>, v=\HH\vec<<VEC>><VEC, VEC>>
+* This: \C<\C, lump'1, i=<INT>, v=\HH\vec<<VEC>><VEC, VEC>>
 * Return: <ret>
 * Params:
   lvars:
-    { $vv -> \HH\vec<\HH\vec<<tp>><\HH\vec, lump'2>><\HH\vec'1, lump'1> }
+    { $vv -> \HH\vec<\HH\vec<<tp>><\HH\vec, lump'3>><\HH\vec'1, lump'2> }
 * Final environment:
   Deps: {}
   Locals:
     lvars:
-      { $vv -> \HH\vec<\HH\vec<<tp'1>><\HH\vec'2, lump'4>><\HH\vec'3, lump'3> }
+      { $vv -> \HH\vec<\HH\vec<<tp'1>><\HH\vec'2, lump'5>><\HH\vec'3, lump'4> }
 Constraints:
-  [VEC < .v, VEC < .v'1, \C < .v, tp < tp'1, lump'2 = lump'4,
-   \HH\vec < \HH\vec'2, lump'1 = lump'3, \HH\vec'1 < \HH\vec'3, tp < tp'1,
-   lump'2 = lump'4, \HH\vec < \HH\vec'2, .v'1 < tp'1, \C < INT, tp'1 < INT,
+  [VEC < .v, VEC < .v'1, \C < .v, tp < tp'1, lump'3 = lump'5,
+   \HH\vec < \HH\vec'2, lump'2 = lump'4, \HH\vec'1 < \HH\vec'3, tp < tp'1,
+   lump'3 = lump'5, \HH\vec < \HH\vec'2, .v'1 < tp'1, \C < INT, tp'1 < INT,
    pc < INT]
 
 Analyzing mutation:
 * pc: pc
-* This: \C<\C, lump, i=<INT>, v=\HH\vec<<VEC>><VEC, VEC>>
+* This: \C<\C, lump'1, i=<INT>, v=\HH\vec<<VEC>><VEC, VEC>>
 * Return: <ret>
 * Params:
   lvars: {}
@@ -133,18 +134,18 @@ Analyzing \copyOnWrite:
 * This: None
 * Return: <ret>
 * Params:
-  lvars: { $v -> \HH\vec<<tp>><\HH\vec, lump>; $x -> <$x>; $y -> <$y> }
+  lvars: { $v -> \HH\vec<<tp>><\HH\vec, lump'1>; $x -> <$x>; $y -> <$y> }
 * Final environment:
   Deps: {}
   Locals:
     lvars:
-      { $v -> \HH\vec<<tp'3>><\HH\vec'3, lump'3>;
-        $vx -> \HH\vec<<tp'2>><\HH\vec'2, lump'2>;
+      { $v -> \HH\vec<<tp'3>><\HH\vec'3, lump'4>;
+        $vx -> \HH\vec<<tp'2>><\HH\vec'2, lump'3>;
         $x -> <$x>;
         $y -> <$y> }
 Constraints:
-  [tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1, $x < tp'1, tp'1 < tp'2,
-   lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, tp'1 < tp'3, lump'1 = lump'3,
+  [tp < tp'1, lump'1 = lump'2, \HH\vec < \HH\vec'1, $x < tp'1, tp'1 < tp'2,
+   lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, tp'1 < tp'3, lump'2 = lump'4,
    \HH\vec'1 < \HH\vec'3, $y < tp'3]
 
 Flow constraints for \C#mutation:
@@ -159,9 +160,9 @@ Flow constraints for \C#nested:
   
   Simplified: VEC < INT
   Raw:
-  [VEC < .v, VEC < .v'1, \C < .v, tp < tp'1, lump'2 = lump'4,
-   \HH\vec < \HH\vec'2, lump'1 = lump'3, \HH\vec'1 < \HH\vec'3, tp < tp'1,
-   lump'2 = lump'4, \HH\vec < \HH\vec'2, .v'1 < tp'1, \C < INT, tp'1 < INT,
+  [VEC < .v, VEC < .v'1, \C < .v, tp < tp'1, lump'3 = lump'5,
+   \HH\vec < \HH\vec'2, lump'2 = lump'4, \HH\vec'1 < \HH\vec'3, tp < tp'1,
+   lump'3 = lump'5, \HH\vec < \HH\vec'2, .v'1 < tp'1, \C < INT, tp'1 < INT,
    pc < INT]
 
 Flow constraints for \C#set:
@@ -175,36 +176,36 @@ Flow constraints for \copyOnWrite:
   
   Simplified: True
   Raw:
-  [tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1, $x < tp'1, tp'1 < tp'2,
-   lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, tp'1 < tp'3, lump'1 = lump'3,
+  [tp < tp'1, lump'1 = lump'2, \HH\vec < \HH\vec'1, $x < tp'1, tp'1 < tp'2,
+   lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, tp'1 < tp'3, lump'2 = lump'4,
    \HH\vec'1 < \HH\vec'3, $y < tp'3]
 
 Flow constraints for \empty:
   
   Simplified: True
   Raw:
-  [lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, lump'2 = lump, \HH\vec'2 < \HH\vec]
-
+  [lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, lump'3 = lump'1,
+   \HH\vec'2 < \HH\vec]
 
 Flow constraints for \retElem:
   
   Simplified: True
   Raw:
-  [PUBLIC < tp, PUBLIC < tp, PUBLIC < tp, tp < tp'1, lump = lump'1,
+  [PUBLIC < tp, PUBLIC < tp, PUBLIC < tp, tp < tp'1, lump'1 = lump'2,
    \HH\vec < \HH\vec'1, tp'1 < ret]
 
 Flow constraints for \testAdd1:
   
   Simplified: True
-  Raw: [tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1, PUBLIC < tp'1]
+  Raw: [tp < tp'1, lump'1 = lump'2, \HH\vec < \HH\vec'1, PUBLIC < tp'1]
 
 
 Flow constraints for \testAdd2:
   
   Simplified: True
   Raw:
-  [PUBLIC < tp, PUBLIC < tp, tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1,
-   tp'1 < tp'2, lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, PUBLIC < tp'2]
+  [PUBLIC < tp, PUBLIC < tp, tp < tp'1, lump'1 = lump'2, \HH\vec < \HH\vec'1,
+   tp'1 < tp'2, lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, PUBLIC < tp'2]
 
 
 Flow constraints for \testCollection:
@@ -212,7 +213,7 @@ Flow constraints for \testCollection:
   Simplified: True
   Raw:
   [PUBLIC < $there, PUBLIC < tp'1, $there < tp'1, tp'1 < tp'2,
-   lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, tp'2 < tp, lump'2 = lump,
+   lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, tp'2 < tp, lump'3 = lump'1,
    \HH\vec'2 < \HH\vec]
 
 There are privacy policy errors in \C#mutation:

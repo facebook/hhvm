@@ -9,9 +9,7 @@ class Y {
   public function __construct(<<Policied("PUBLIC")>> public int $valuey) {}
 }
 
-class E extends Exception {}
-
-function f(X $x, Y $y, E $e): void {
+function f(X $x, Y $y, Exception $e): void {
   if ($x->valuex > 10) {
     throw $e;
   }

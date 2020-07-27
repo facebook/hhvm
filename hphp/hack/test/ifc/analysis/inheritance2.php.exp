@@ -11,11 +11,11 @@ Analyzing \test:
 * This: None
 * Return: <ret>
 * Params:
-  lvars: { $b -> \B<\B, lump, i=<P1>, j=<P2>, k=<P3>> }
+  lvars: { $b -> \B<\B, lump'1, i=<P1>, j=<P2>, k=<P3>> }
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $b -> \B<\B, lump, i=<P1>, j=<P2>, k=<P3>> }
+    lvars: { $b -> \B<\B, lump'1, i=<P1>, j=<P2>, k=<P3>> }
 Constraints:
   [P3 < .k, \B < .k, \B < P1, .k < P1, pc < P1, P3 < .k'1, \B < .k'1,
    \B < P2, .k'1 < P2, pc < P2]

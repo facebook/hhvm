@@ -7,19 +7,21 @@ Decls:
 Analyzing \test:
 * pc: pc
 * This: None
-* Return: \G<<tp>, <tp'1>, <tp'2>><\G, lump>
+* Return: \G<<tp>, <tp'1>, <tp'2>><\G, lump'1>
 * Params:
-  lvars: { $g -> \G<<tp'3>, <tp'4>, <tp'5>><\G'1, lump'1> }
+  lvars: { $g -> \G<<tp'3>, <tp'4>, <tp'5>><\G'1, lump'2> }
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $g -> \G<<tp'3>, <tp'4>, <tp'5>><\G'1, lump'1> }
+    lvars: { $g -> \G<<tp'3>, <tp'4>, <tp'5>><\G'1, lump'2> }
 Constraints:
-  [tp'3 < tp, tp'1 < tp'4, tp'2 < tp'5, tp'5 < tp'2, lump'1 = lump, \G'1 < \G]
+  [tp'3 < tp, tp'1 < tp'4, tp'2 < tp'5, tp'5 < tp'2, lump'2 = lump'1,
+   \G'1 < \G]
 
 Flow constraints for \test:
   
   Simplified: True
   Raw:
-  [tp'3 < tp, tp'1 < tp'4, tp'2 < tp'5, tp'5 < tp'2, lump'1 = lump, \G'1 < \G]
+  [tp'3 < tp, tp'1 < tp'4, tp'2 < tp'5, tp'5 < tp'2, lump'2 = lump'1,
+   \G'1 < \G]
 

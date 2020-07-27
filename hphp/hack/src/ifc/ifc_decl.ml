@@ -24,6 +24,8 @@ let policied_id = "\\Policied"
 
 let infer_flows_id = "\\InferFlows"
 
+let exception_id = "\\Exception"
+
 let make_callable_name cls_name_opt name =
   match cls_name_opt with
   | None -> name
@@ -159,7 +161,7 @@ let magic_class_decls =
           cd_policied_properties = [];
           cd_tparam_variance = [Ast_defs.Covariant];
         } );
-      ("\\Exception", { cd_policied_properties = []; cd_tparam_variance = [] });
+      (exception_id, { cd_policied_properties = []; cd_tparam_variance = [] });
     ]
 
 let topsort_classes classes =

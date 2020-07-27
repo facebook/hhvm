@@ -9,7 +9,6 @@ use ocaml::core::mlvalues::{Size, Tag, Value};
 
 extern "C" {
     fn ocamlpool_reserve_block(tag: Tag, size: Size) -> Value;
-    fn ocamlpool_reserve_string(size: Size) -> Value;
     static mut ocamlpool_generation: usize;
 }
 
@@ -33,15 +32,6 @@ pub fn usize_to_ocaml(x: usize) -> Value {
 
 pub fn u8_to_ocaml(x: u8) -> Value {
     usize_to_ocaml(x as usize)
-}
-
-pub fn str_to_ocaml(s: &[u8]) -> Value {
-    unsafe {
-        let value = ocamlpool_reserve_string(s.len());
-        let mut str_ = ocaml::Str::from(ocaml::Value::new(value));
-        str_.data_mut().copy_from_slice(s);
-        value
-    }
 }
 
 pub fn ocaml_to_isize(i: Value) -> isize {

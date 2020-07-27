@@ -65,7 +65,8 @@ type Slab<'a> = [OpaqueValue<'a>];
 // but we can define trait methods instead).
 trait SlabTrait {
     fn from_bytes(bytes: &[u8]) -> &Self;
-    fn from_bytes_mut(bytes: &mut [MaybeUninit<u8>]) -> &mut Self;
+    fn from_bytes_mut(bytes: &mut [u8]) -> &mut Self;
+    fn from_uninit_bytes_mut(bytes: &mut [MaybeUninit<u8>]) -> &mut Self;
 
     // metadata accessors
     fn base(&self) -> usize;
@@ -104,7 +105,13 @@ impl<'a> SlabTrait for Slab<'a> {
         unsafe { std::slice::from_raw_parts(ptr, bytes.len() / WORD_SIZE) }
     }
 
-    fn from_bytes_mut(bytes: &mut [MaybeUninit<u8>]) -> &mut Self {
+    fn from_bytes_mut(bytes: &mut [u8]) -> &mut Self {
+        let padding = leading_padding(bytes);
+        let ptr = bytes[padding..].as_mut_ptr() as *mut OpaqueValue<'a>;
+        unsafe { std::slice::from_raw_parts_mut(ptr, bytes.len() / WORD_SIZE) }
+    }
+
+    fn from_uninit_bytes_mut(bytes: &mut [MaybeUninit<u8>]) -> &mut Self {
         let padding = leading_padding(bytes);
         let ptr = bytes[padding..].as_mut_ptr() as *mut OpaqueValue<'a>;
         unsafe { std::slice::from_raw_parts_mut(ptr, bytes.len() / WORD_SIZE) }
@@ -426,7 +433,7 @@ pub fn copy_slab(
     let new_base = dest_addr + leading_padding(dest);
 
     let src_slab = Slab::from_bytes(src);
-    let dest_slab = Slab::from_bytes_mut(dest);
+    let dest_slab = Slab::from_uninit_bytes_mut(dest);
 
     // TODO: Do a less expensive sanity check once we're confident in correctness
     src_slab.check_integrity()?;
@@ -459,11 +466,9 @@ impl OwnedSlab {
         // it makes life easier until we have a Vec-based Arena.
         let padding = WORD_SIZE - 1;
         let size_in_bytes = size_in_words * WORD_SIZE + padding;
-        let mut vec = vec![MaybeUninit::new(0u8); size_in_bytes];
+        let mut vec = vec![0u8; size_in_bytes];
         let slab = Slab::from_bytes_mut(&mut vec);
         unsafe { SlabBuilder::build_from_value(slab, value) };
-        // Slab has been initialized.
-        let vec = unsafe { mem::transmute::<Vec<MaybeUninit<u8>>, Vec<u8>>(vec) };
         Some(OwnedSlab(vec))
     }
 
@@ -574,7 +579,7 @@ mod test_integrity_check {
 
     #[test]
     fn bad_root_value() {
-        let mut bytes = vec![MaybeUninit::new(0u8); TUPLE_42_A_SIZE_IN_BYTES];
+        let mut bytes = vec![0u8; TUPLE_42_A_SIZE_IN_BYTES];
         let mut slab = Slab::from_bytes_mut(&mut bytes);
         write_tuple_42_a(&mut slab);
         let tuple_offset = slab.root_value_offset();
@@ -594,7 +599,7 @@ mod test_integrity_check {
 
     #[test]
     fn bad_base_ptr() {
-        let mut bytes = vec![MaybeUninit::new(0u8); TUPLE_42_A_SIZE_IN_BYTES];
+        let mut bytes = vec![0u8; TUPLE_42_A_SIZE_IN_BYTES];
         let mut slab = Slab::from_bytes_mut(&mut bytes);
         write_tuple_42_a(&mut slab);
         assert!(slab.check_integrity().is_ok());

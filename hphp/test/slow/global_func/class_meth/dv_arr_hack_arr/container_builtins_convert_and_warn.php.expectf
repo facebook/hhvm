@@ -75,18 +75,18 @@ NULL
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 38
 vec(2) {
-  array(1) {
+  dict(1) {
     [0]=>
     string(1) "A"
   }
-  array(1) {
+  dict(1) {
     [0]=>
     string(5) "func1"
   }
 }
 
 Notice: Implicit clsmeth to array conversion in %s/container_builtins_convert_and_warn.php on line 39
-array(0) {
+dict(0) {
 }
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 40
@@ -95,7 +95,7 @@ vec(1) {
 }
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 41
-array(2) {
+dict(2) {
   ["A"]=>
   int(1)
   ["func1"]=>
@@ -110,7 +110,7 @@ vec(3) {
 }
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 44
-array(2) {
+dict(2) {
   ["A"]=>
   int(0)
   ["func1"]=>

@@ -773,20 +773,15 @@ void SetArray::OnSetEvalScalar(ArrayData* ad) {
   }
 }
 
-template <typename Init>
-ALWAYS_INLINE
-ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {
-  auto a = asSet(ad);
-  auto size = a->size();
+ArrayData* SetArray::ToDArrayImpl(const SetArray* ad) {
+  auto const size = ad->size();
+  if (!size) return ArrayData::CreateDArray();
+  DArrayInit init{size};
 
-  if (!size) return toDArray ? ArrayData::CreateDArray() : ArrayData::Create();
-
-  Init init{size};
-
-  auto const elms = a->data();
-  auto const used = a->m_used;
+  auto const elms = ad->data();
+  auto const used = ad->m_used;
   for (uint32_t i = 0; i < used; ++i) {
-    auto& elm = elms[i];
+    auto const& elm = elms[i];
     if (UNLIKELY(elm.isTombstone())) continue;
     if (elm.hasIntKey()) {
       init.set(elm.intKey(), tvAsCVarRef(&elm.tv));
@@ -795,20 +790,14 @@ ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {
     }
   }
 
-  auto out = init.create();
+  auto const out = init.create();
   assertx(MixedArray::asMixed(out));
-  return out;
-}
-
-ArrayData* SetArray::ToPHPArray(ArrayData* ad, bool) {
-  auto out = ToArrayImpl<MixedArrayInit>(ad, false);
-  assertx(out->isNotDVArray());
   return out;
 }
 
 ArrayData* SetArray::ToDArray(ArrayData* ad, bool copy) {
   if (RuntimeOption::EvalHackArrDVArrs) return ToDict(ad, copy);
-  auto out = ToArrayImpl<DArrayInit>(ad, true);
+  auto out = ToDArrayImpl(SetArray::asSet(ad));
   assertx(out->isDArray());
   return out;
 }

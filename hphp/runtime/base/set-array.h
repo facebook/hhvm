@@ -211,8 +211,7 @@ private:
   static SetArray* CopySet(const SetArray& other, AllocMode);
   SetArray* copySet() const { return CopySet(*this, AllocMode::Request); }
 
-  template <typename Init>
-  static ArrayData* ToArrayImpl(ArrayData*, bool);
+  static ArrayData* ToDArrayImpl(const SetArray*);
 
 private:
   SetArray() = delete;
@@ -413,7 +412,6 @@ public:
   static void OnSetEvalScalar(ArrayData*);
   static constexpr auto ToDict = &ArrayCommon::ToDict;
   static constexpr auto ToVec = &ArrayCommon::ToVec;
-  static ArrayData* ToPHPArray(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);
   static constexpr auto ToVArray = &ArrayCommon::ToVArray;
   static ArrayData* ToDArray(ArrayData*, bool);

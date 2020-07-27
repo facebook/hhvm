@@ -740,13 +740,11 @@ TEST(Type, Const) {
   auto const arrData = ArrayData::GetScalarArray(make_map_array(1, 2, 3, 4));
   auto const constArray = Type::cns(arrData);
 
-  EXPECT_EQ(constArray, constArray & TPArr);
+  EXPECT_EQ(constArray, constArray & TDArr);
   EXPECT_TRUE(constArray <= constArray);
-  EXPECT_TRUE(constArray <= TPArr);
-  EXPECT_TRUE(constArray < TPArr);
+  EXPECT_TRUE(constArray <= TDArr);
+  EXPECT_TRUE(constArray < TDArr);
   EXPECT_FALSE(TDArr <= constArray);
-  EXPECT_FALSE(constArray <= TDArr);
-  EXPECT_FALSE(TVArr <= TDArr);
   EXPECT_FALSE(TDArr <= TVArr);
 
   ArrayTypeTable::Builder ratBuilder;

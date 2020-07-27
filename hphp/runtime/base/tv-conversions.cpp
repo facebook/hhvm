@@ -755,12 +755,9 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
     not_reached();
   } while (0);
 
-  assertx(a->isPHPArrayType());
-  assertx(a->isNotDVArray());
-
-  val(tv).parr = a;
-  type(tv) = KindOfArray;
+  *tv = make_array_like_tv(a);
   assertx(tvIsPlausible(*tv));
+  assertx(a->isHAMSafeDArray());
 }
 
 template<typename T>

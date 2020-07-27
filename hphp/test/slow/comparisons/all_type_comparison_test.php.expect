@@ -30760,9 +30760,9 @@ F       T       T       T       F       T       F       F       -1
 ArrayIterator 2 cmp ArrayIterator 1:
 F       T       F       F       F       T       T       T       1
 SimpleXMLElement 1 cmp SimpleXMLElement 2:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 SimpleXMLElement 2 cmp SimpleXMLElement 1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 object aa1 cmp object aa2:
 F       T       T       T       F       T       F       F       -1
 object aa2 cmp object aa1:

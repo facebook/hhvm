@@ -311,9 +311,6 @@ ArrayData* LoggingLayout::copy(const ArrayData* ad) const {
   auto const lad = LoggingArray::asLogging(ad);
   return LoggingArray::MakeFromVanilla(lad->wrapped->copy(), lad->srckey);
 }
-ArrayData* LoggingLayout::toPHPArray(ArrayData* ad, bool copy) const {
-  return conv(ad, [=](ArrayData* w) { return w->toPHPArray(copy); });
-}
 ArrayData* LoggingLayout::toVArray(ArrayData* ad, bool copy) const {
   return conv(ad, [=](ArrayData* w) { return w->toVArray(copy); });
 }

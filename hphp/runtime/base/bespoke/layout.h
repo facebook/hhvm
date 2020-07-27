@@ -73,7 +73,6 @@ struct Layout {
   virtual ArrayData* renumber(ArrayData*)  const = 0;
 
   virtual ArrayData* copy(const ArrayData*) const = 0;
-  virtual ArrayData* toPHPArray(ArrayData*, bool copy) const = 0;
   virtual ArrayData* toVArray(ArrayData*, bool copy) const = 0;
   virtual ArrayData* toDArray(ArrayData*, bool copy) const = 0;
   virtual ArrayData* toVec(ArrayData*, bool copy) const = 0;

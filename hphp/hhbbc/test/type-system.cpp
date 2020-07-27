@@ -1970,8 +1970,8 @@ TEST(Type, ArrPacked2) {
   }
 
   {
-    auto const a1 = arr_packed({TInt, TInt, TInt});
-    auto const s1 = sarr_packed({TInt, TInt, TInt});
+    auto const a1 = arr_packed_darray({TInt, TInt, TInt});
+    auto const s1 = sarr_packed_darray({TInt, TInt, TInt});
     auto const s2 = aval(test_array_vector_value());
     EXPECT_TRUE(s2.subtypeOf(a1));
     EXPECT_TRUE(s2.subtypeOf(s1));
@@ -1980,11 +1980,11 @@ TEST(Type, ArrPacked2) {
   }
 
   {
-    auto const s1 = sarr_packed({ival(42), ival(23), ival(12)});
+    auto const s1 = sarr_packed_darray({ival(42), ival(23), ival(12)});
     auto const s2 = aval(test_array_vector_value());
-    auto const s3 = sarr_packed({TInt});
-    auto const a4 = sarr_packed({TInt});
-    auto const a5 = arr_packed({ival(42), ival(23), ival(12)});
+    auto const s3 = sarr_packed_darray({TInt});
+    auto const a4 = sarr_packed_darray({TInt});
+    auto const a5 = arr_packed_darray({ival(42), ival(23), ival(12)});
     EXPECT_TRUE(s1.subtypeOf(s2));
     EXPECT_EQ(s1, s2);
     EXPECT_FALSE(s2.subtypeOf(s3));
@@ -2020,8 +2020,8 @@ TEST(Type, ArrPackedUnion) {
 
   {
     auto const s1 = aval(test_array_vector_value());
-    auto const s2 = sarr_packed({TInt, TInt, TInt});
-    auto const s3 = sarr_packed({TInt, TNum, TInt});
+    auto const s2 = sarr_packed_darray({TInt, TInt, TInt});
+    auto const s3 = sarr_packed_darray({TInt, TNum, TInt});
     EXPECT_EQ(union_of(s1, s2), s2);
     EXPECT_EQ(union_of(s1, s3), s3);
   }
@@ -2044,15 +2044,16 @@ TEST(Type, ArrPackedUnion) {
   {
     auto const s1 = aval(test_array_vector_value());
     auto const s2 = aval(test_array_vector_value2());
-    EXPECT_EQ(union_of(s1, s2), sarr_packed({ival(42), TNum, ival(12)}));
+    EXPECT_EQ(union_of(s1, s2), sarr_packed_darray({ival(42), TNum, ival(12)}));
   }
 }
 
 TEST(Type, ArrPackedN) {
-  auto const s1 = aval(test_array_vector_value());
-  auto const s2 = sarr_packed({TInt, TInt});
-  EXPECT_EQ(union_of(s1, s2), sarr_packedn(TInt));
+  auto const a1 = aval(test_array_vector_value());
+  auto const a2 = sarr_packed_darray({TInt, TInt});
+  EXPECT_EQ(union_of(a1, a2), sarr_packedn_darray(TInt));
 
+  auto const s2 = sarr_packed({TInt, TInt});
   EXPECT_TRUE(s2.subtypeOf(sarr_packedn(TInt)));
   EXPECT_FALSE(s2.subtypeOf(sarr_packedn(TDbl)));
   EXPECT_TRUE(s2.subtypeOf(sarr_packedn(TNum)));
@@ -2131,13 +2132,13 @@ TEST(Type, ArrStruct) {
   auto test_map_d          = MapElems{};
   test_map_d[tv(s_A)]      = sval(s_B.get());
   test_map_d[tv(s_test)]   = ival(12);
-  auto const sd = sarr_map(test_map_d);
+  auto const sd = sarr_map_darray(test_map_d);
   EXPECT_EQ(sd, aval(test_array_map_value()));
 
   auto test_map_e          = MapElems{};
   test_map_e[tv(s_A)]      = TSStr;
   test_map_e[tv(s_test)]   = TNum;
-  auto const se = sarr_map(test_map_e);
+  auto const se = sarr_map_darray(test_map_e);
   EXPECT_TRUE(aval(test_array_map_value()).subtypeOf(se));
   EXPECT_TRUE(se.couldBe(aval(test_array_map_value())));
 }
@@ -2145,8 +2146,8 @@ TEST(Type, ArrStruct) {
 TEST(Type, ArrMapN) {
   auto const test_map = aval(test_array_map_value());
   EXPECT_TRUE(test_map != arr_mapn(TSStr, TInitUnc));
-  EXPECT_TRUE(test_map.subtypeOf(arr_mapn(TSStr, TInitUnc)));
-  EXPECT_TRUE(test_map.subtypeOf(sarr_mapn(TSStr, TInitUnc)));
+  EXPECT_TRUE(test_map.subtypeOf(arr_mapn_darray(TSStr, TInitUnc)));
+  EXPECT_TRUE(test_map.subtypeOf(sarr_mapn_darray(TSStr, TInitUnc)));
   EXPECT_TRUE(sarr_packedn({TInt}).subtypeOf(arr_mapn(TInt, TInt)));
   EXPECT_TRUE(sarr_packed({TInt}).subtypeOf(arr_mapn(TInt, TInt)));
 
@@ -2159,12 +2160,12 @@ TEST(Type, ArrMapN) {
   EXPECT_TRUE(tstruct.subtypeOf(sarr_mapn(TSStr, TInt)));
   EXPECT_TRUE(tstruct.subtypeOf(arr_mapn(TStr, TInt)));
 
-  EXPECT_TRUE(test_map.couldBe(arr_mapn(TSStr, TInitCell)));
-  EXPECT_FALSE(test_map.couldBe(arr_mapn(TSStr, TStr)));
-  EXPECT_FALSE(test_map.couldBe(arr_mapn(TSStr, TObj)));
+  EXPECT_TRUE(test_map.couldBe(arr_mapn_darray(TSStr, TInitCell)));
+  EXPECT_FALSE(test_map.couldBe(arr_mapn_darray(TSStr, TStr)));
+  EXPECT_FALSE(test_map.couldBe(arr_mapn_darray(TSStr, TObj)));
 
   EXPECT_FALSE(test_map.couldBe(aval(test_empty_array())));
-  EXPECT_FALSE(arr_mapn(TSStr, TInt).couldBe(aval(test_empty_array())));
+  EXPECT_FALSE(arr_mapn_darray(TSStr, TInt).couldBe(aval(test_empty_array())));
 
   EXPECT_TRUE(sarr_packedn(TInt).couldBe(sarr_mapn(TInt, TInt)));
   EXPECT_FALSE(sarr_packedn(TInt).couldBe(sarr_mapn(TInt, TObj)));
@@ -2176,7 +2177,7 @@ TEST(Type, ArrMapN) {
 TEST(Type, ArrEquivalentRepresentations) {
   {
     auto const simple = aval(test_array_vector_value());
-    auto const bulky  = sarr_packed({ival(42), ival(23), ival(12)});
+    auto const bulky  = sarr_packed_darray({ival(42), ival(23), ival(12)});
     EXPECT_EQ(simple, bulky);
   }
 
@@ -2186,7 +2187,7 @@ TEST(Type, ArrEquivalentRepresentations) {
     auto map          = MapElems{};
     map[tv(s_A)]      = sval(s_B.get());
     map[tv(s_test)]   = ival(12);
-    auto const bulky  = sarr_map(map);
+    auto const bulky  = sarr_map_darray(map);
 
     EXPECT_EQ(simple, bulky);
   }
@@ -2228,7 +2229,7 @@ TEST(Type, ArrUnions) {
 
   auto const aval1 = aval(test_array_vector_value());
   auto const aval2 = aval(test_array_vector_value3());
-  EXPECT_EQ(union_of(aval1, aval2), sarr_packedn(TInt));
+  EXPECT_EQ(union_of(aval1, aval2), sarr_packedn_darray(TInt));
 }
 
 TEST(Type, ArrIntersections) {
@@ -2710,7 +2711,7 @@ TEST(Type, LoosenValues) {
     { dval(3.14), TDbl },
     { sval(s_test.get()), TSStr },
     { sval_nonstatic(s_test.get()), TStr },
-    { aval(test_array_vector_value()), TSPArrN },
+    { aval(test_array_vector_value()), TSDArrN },
     { arr_packedn(TInt), TPArrN },
     { arr_packed({TInt, TBool}), TPArrN },
     { arr_packed_varray({TInt, TBool}), TVArrN },

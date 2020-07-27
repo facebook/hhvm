@@ -228,9 +228,6 @@ ArrayData* BespokeArray::Copy(const ArrayData* ad) {
 ArrayData* BespokeArray::CopyStatic(const ArrayData*) {
   always_assert(false);
 }
-ArrayData* BespokeArray::ToPHPArray(ArrayData* ad, bool copy) {
-  return asBespoke(ad)->layout()->toPHPArray(ad, copy);
-}
 ArrayData* BespokeArray::ToVArray(ArrayData* ad, bool copy) {
   return asBespoke(ad)->layout()->toVArray(ad, copy);
 }

@@ -86,7 +86,6 @@ struct LoggingLayout : public Layout {
   ArrayData* renumber(ArrayData*) const final;
 
   ArrayData* copy(const ArrayData*) const final;
-  ArrayData* toPHPArray(ArrayData*, bool copy) const final;
   ArrayData* toVArray(ArrayData*, bool copy) const final;
   ArrayData* toDArray(ArrayData*, bool copy) const final;
   ArrayData* toVec(ArrayData*, bool copy) const final;

@@ -120,7 +120,7 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
   auto const oldSize = old->m_size;
   auto const scale   = MixedArray::computeScaleFromSize(neededSize);
   auto const ad      = MixedArray::reqAlloc(scale);
-  auto const kind    = old->isVArray() ? HeaderKind::Mixed : HeaderKind::Plain;
+  auto const kind    = old->isVArray() ? HeaderKind::Mixed : HeaderKind::Dict;
   ad->m_sizeAndPos   = oldSize | int64_t{old->m_pos} << 32;
   ad->initHeader_16(kind, OneReference, MixedArrayKeys::packIntsForAux());
   ad->m_scale_used   = scale | uint64_t{oldSize} << 32; // used=oldSize
@@ -802,17 +802,6 @@ ArrayData* PackedArray::Prepend(ArrayData* adIn, TypedValue v) {
   return ad;
 }
 
-ArrayData* PackedArray::ToPHPArray(ArrayData* adIn, bool copy) {
-  assertx(checkInvariants(adIn));
-  if (adIn->empty()) return ArrayData::Create();
-  auto ad = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-  ad->m_kind = HeaderKind::Plain;
-  if (RO::EvalArrayProvenance) arrprov::clearTag(ad);
-  assertx(MixedArray::asMixed(ad));
-  assertx(!ad->isLegacyArray());
-  return ad;
-}
-
 ArrayData* PackedArray::ToVArray(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isPackedKind());
@@ -834,7 +823,7 @@ ArrayData* PackedArray::ToVArrayVec(ArrayData* adIn, bool copy) {
   assertx(adIn->isVecKind());
   if (RuntimeOption::EvalHackArrDVArrs) return adIn;
   if (adIn->getSize() == 0) return ArrayData::CreateVArray();
-  ArrayData* ad = copy ? Copy(adIn) : adIn;
+  auto const ad = copy ? Copy(adIn) : adIn;
   ad->m_kind = HeaderKind::Packed;
   ad->setLegacyArray(false);
   if (RO::EvalArrayProvenance) arrprov::reassignTag(ad);
@@ -844,9 +833,12 @@ ArrayData* PackedArray::ToVArrayVec(ArrayData* adIn, bool copy) {
 
 ArrayData* PackedArray::ToDict(ArrayData* ad, bool copy) {
   assertx(checkInvariants(ad));
+  assertx(ad->hasVanillaPackedLayout());
   if (ad->empty()) return ArrayData::CreateDict();
   auto const mixed = copy ? ToMixedCopy(ad) : ToMixed(ad);
-  return MixedArray::ToDictInPlace(mixed);
+  mixed->m_kind = HeaderKind::Dict;
+  assertx(mixed->checkInvariants());
+  return mixed;
 }
 
 ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {

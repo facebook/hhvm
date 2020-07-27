@@ -198,13 +198,6 @@ struct MixedArray final : ArrayData,
   static constexpr auto MakeReserve = &MakeReserveMixed;
 
   /*
-   * Convert mixed-layout array to dict in-place. This function doesn't check
-   * whether the input array contains references or not, so only use this when
-   * you already know that they do not.
-   */
-  static MixedArray* ToDictInPlace(ArrayData*);
-
-  /*
    * Allocates a new request-local array with given key,value,key,value,... in
    * natural order. Returns nullptr if there are duplicate keys. Does not check
    * for integer-like keys. Takes ownership of keys and values iff successful.
@@ -337,7 +330,6 @@ public:
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, TypedValue v);
-  static ArrayData* ToPHPArray(ArrayData*, bool);
   static ArrayData* ToDict(ArrayData*, bool);
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
@@ -399,7 +391,6 @@ public:
   static constexpr auto PrependDict = &Prepend;
   static constexpr auto RenumberDict = &Renumber;
   static constexpr auto OnSetEvalScalarDict = &OnSetEvalScalar;
-  static ArrayData* ToPHPArrayDict(ArrayData*, bool);
   static ArrayData* ToDictDict(ArrayData*, bool);
   static constexpr auto ToVecDict = &ArrayCommon::ToVec;
   static constexpr auto ToKeysetDict = &ArrayCommon::ToKeyset;
@@ -432,9 +423,6 @@ private:
   static MixedArray* MakeStructImpl(uint32_t, const StringData* const*,
                                     const TypedValue*, HeaderKind);
   static MixedArray* AllocStructImpl(uint32_t, const int32_t*, HeaderKind);
-
-  // Returns a plain array or darray given the dict input.
-  static ArrayData* FromDictImpl(ArrayData*, bool copy, bool toDArray);
 
   static bool DictEqualHelper(const ArrayData*, const ArrayData*, bool);
 
@@ -553,7 +541,7 @@ private:
   //
   // There are subtleties which make it tricky, though; this method clears the
   // m_nextKI and m_pos fields in the result array, which CopyMixed does not.
-  static ArrayData* copyToPHPArray(MixedArray* adIn, bool asDArray = false);
+  static ArrayData* ToDArrayImpl(const MixedArray* adIn);
 
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
@@ -645,9 +633,6 @@ private:
 
   struct DArrayInitializer;
   static DArrayInitializer s_darr_initializer;
-
-  struct ArrayInitializer;
-  static ArrayInitializer s_arr_initializer;
 
   int64_t  m_nextKI;        // Next integer key to use for append.
 };

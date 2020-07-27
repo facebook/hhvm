@@ -617,15 +617,6 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(OnSetEvalScalar)
 
    /*
-   * ArrayData* ToPHPArray(ArrayData*, bool)
-   *
-   *   Convert to a PHP array. If already a PHP array, it will be returned
-   *   unchanged (without copying). If copy is false, it may be converted in
-   *   place.
-   */
-  DISPATCH(ToPHPArray)
-
-   /*
    * ArrayData* ToDict(ArrayData*, bool)
    *
    *   Convert to a dict. If already a dict, it will be returned unchange

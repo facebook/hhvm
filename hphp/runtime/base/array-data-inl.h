@@ -39,8 +39,7 @@ inline ArrayData::ArrayData(ArrayKind kind, RefCount initial_count)
 ///////////////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE ArrayData* staticEmptyArray() {
-  void* vp = &s_theEmptyArray;
-  return static_cast<ArrayData*>(vp);
+  return staticEmptyDArray();
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyVArray() {
@@ -74,7 +73,7 @@ ALWAYS_INLINE ArrayData* staticEmptyKeysetArray() {
 // Creation and destruction.
 
 ALWAYS_INLINE ArrayData* ArrayData::Create() {
-  return staticEmptyArray();
+  return ArrayData::CreateDArray();
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateVArray(arrprov::Tag tag /* = {} */) {

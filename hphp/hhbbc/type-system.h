@@ -1307,7 +1307,9 @@ Type subRecord(res::Record);
  */
 Type arr_packed(std::vector<Type> v);
 Type arr_packed_varray(std::vector<Type> v, ProvTag = ProvTag::Top);
+Type arr_packed_darray(std::vector<Type> v);
 Type sarr_packed(std::vector<Type> v);
+Type sarr_packed_darray(std::vector<Type> v);
 
 /*
  * Packed array types of unknown size.
@@ -1316,6 +1318,7 @@ Type sarr_packed(std::vector<Type> v);
  */
 Type arr_packedn(Type);
 Type sarr_packedn(Type);
+Type sarr_packedn_darray(Type);
 
 /*
  * Struct-like arrays.
@@ -1325,12 +1328,15 @@ Type sarr_packedn(Type);
 Type arr_map(MapElems m, Type optKey = TBottom, Type optVal = TBottom);
 Type arr_map_darray(MapElems m, ProvTag = ProvTag::Top);
 Type sarr_map(MapElems m, Type optKey = TBottom, Type optVal = TBottom);
+Type sarr_map_darray(MapElems m, Type optKey = TBottom, Type optVal = TBottom);
 
 /*
  * Map-like arrays.
  */
 Type arr_mapn(Type k, Type v);
+Type arr_mapn_darray(Type k, Type v);
 Type sarr_mapn(Type k, Type v);
+Type sarr_mapn_darray(Type k, Type v);
 
 /*
  * vec types with known size.

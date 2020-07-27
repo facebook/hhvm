@@ -72,7 +72,8 @@ enum class CheckAllocation {};
  * Takes two template parameters:
  *  - TArray is a bag of static class functions, such as MixedArray.  See the
  *    `detail' namespace below for the requirements.
- *  - DT is the DataType for the arrays created by the ArrayInit.
+ *  - DT is the DataType for the arrays created by the ArrayInit. If DT is
+ *    the sentinel KindOfUninit, we won't make assumptions about the type.
  */
 template<typename TArray, DataType DT>
 struct ArrayInitBase {
@@ -93,7 +94,7 @@ struct ArrayInitBase {
     , m_expectedCount(other.m_expectedCount)
 #endif
   {
-    assertx(!m_arr || m_arr->toDataType() == DT);
+    assertx(!m_arr || DT == KindOfUninit || m_arr->toDataType() == DT);
     other.m_arr = nullptr;
 #ifndef NDEBUG
     other.m_expectedCount = 0;
@@ -105,8 +106,8 @@ struct ArrayInitBase {
 
   ~ArrayInitBase() {
     // In case an exception interrupts the initialization.
-    assertx(!m_arr || (m_arr->hasExactlyOneRef() &&
-                      m_arr->toDataType() == DT));
+    assertx(!m_arr || DT == KindOfUninit ||
+            (m_arr->hasExactlyOneRef() && m_arr->toDataType() == DT));
     if (m_arr) TArray::Release(m_arr);
   }
 
@@ -117,6 +118,9 @@ struct ArrayInitBase {
    * These all invalidate the ArrayInit and return the initialized array.
    */
   Variant toVariant() {
+    if (DT == KindOfUninit) {
+      return Array(create(), Array::ArrayInitCtor::Tag);
+    }
     return Variant(create(), DT, Variant::ArrayInitCtor{});
   }
   Array toArray() {
@@ -125,7 +129,7 @@ struct ArrayInitBase {
 
   ArrayData* create() {
     assertx(m_arr->hasExactlyOneRef());
-    assertx(m_arr->toDataType() == DT);
+    assertx(DT == KindOfUninit || m_arr->toDataType() == DT);
     auto const ptr = m_arr;
     m_arr = nullptr;
 #ifndef NDEBUG
@@ -202,7 +206,7 @@ struct DictArray {
  * Initializer for a MixedArray.
  */
 template <typename TArray>
-struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
+struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfUninit> {
   enum class Map {};
   // This is the same as map right now, but is here for documentation
   // so we can find them later.
@@ -217,11 +221,11 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
    * throw if the allocation would OOM the request.
    */
   MixedPHPArrayInitBase(size_t n, Map)
-    : ArrayInitBase<TArray, KindOfArray>(n) {}
+    : ArrayInitBase<TArray, KindOfUninit>(n) {}
   MixedPHPArrayInitBase(size_t n, Map, CheckAllocation);
 
   MixedPHPArrayInitBase(MixedPHPArrayInitBase&& o) noexcept
-    : ArrayInitBase<TArray, KindOfArray>(std::move(o)) {}
+    : ArrayInitBase<TArray, KindOfUninit>(std::move(o)) {}
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -997,7 +1001,7 @@ MixedPHPArrayInitBase<TArray>::MixedPHPArrayInitBase(size_t n,
                                                      Map,
                                                      CheckAllocation)
   // TODO(T58820726): Remove by migrating remaining callers.
-  : ArrayInitBase<TArray, KindOfArray>(n, CheckAllocation{})
+  : ArrayInitBase<TArray, KindOfUninit>(n, CheckAllocation{})
 {
   if (n > std::numeric_limits<int>::max()) {
     tl_heap->forceOOM();

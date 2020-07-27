@@ -148,7 +148,7 @@ impl Allocator for Arena {
     }
 
     #[inline(always)]
-    fn set_field<'a>(block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>) {
+    fn set_field<'a>(&self, block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>) {
         block.0[index] = value;
     }
 
@@ -181,9 +181,9 @@ mod tests {
         let arena = Arena::with_capacity(1000);
 
         let mut block = arena.block_with_size(3);
-        Arena::set_field(&mut block, 0, OpaqueValue::int(1));
-        Arena::set_field(&mut block, 1, OpaqueValue::int(2));
-        Arena::set_field(&mut block, 2, OpaqueValue::int(3));
+        arena.set_field(&mut block, 0, OpaqueValue::int(1));
+        arena.set_field(&mut block, 1, OpaqueValue::int(2));
+        arena.set_field(&mut block, 2, OpaqueValue::int(3));
         let block = block.build();
         // SAFETY: The block was allocated by an `Arena`.
         let block = unsafe { Arena::make_transparent(block) }

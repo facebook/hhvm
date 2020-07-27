@@ -154,7 +154,7 @@ impl FromOcamlRep for char {
 impl ToOcamlRep for f64 {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size_and_tag(1, block::DOUBLE_TAG);
-        A::set_field(&mut block, 0, unsafe {
+        alloc.set_field(&mut block, 0, unsafe {
             OpaqueValue::from_bits(self.to_bits() as usize)
         });
         block.build()
@@ -210,7 +210,7 @@ impl<T: FromOcamlRep> FromOcamlRep for Rc<T> {
 impl<T: ToOcamlRep> ToOcamlRep for RefCell<T> {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size(1);
-        A::set_field(&mut block, 0, alloc.add(&*self.borrow()));
+        alloc.set_field(&mut block, 0, alloc.add(&*self.borrow()));
         block.build()
     }
 }
@@ -229,7 +229,7 @@ impl<T: ToOcamlRep> ToOcamlRep for Option<T> {
             None => OpaqueValue::int(0),
             Some(val) => {
                 let mut block = alloc.block_with_size(1);
-                A::set_field(&mut block, 0, alloc.add(val));
+                alloc.set_field(&mut block, 0, alloc.add(val));
                 block.build()
             }
         }
@@ -253,12 +253,12 @@ impl<T: ToOcamlRep, E: ToOcamlRep> ToOcamlRep for Result<T, E> {
         match self {
             Ok(val) => {
                 let mut block = alloc.block_with_size(1);
-                A::set_field(&mut block, 0, alloc.add(val));
+                alloc.set_field(&mut block, 0, alloc.add(val));
                 block.build()
             }
             Err(val) => {
                 let mut block = alloc.block_with_size_and_tag(1, 1);
-                A::set_field(&mut block, 0, alloc.add(val));
+                alloc.set_field(&mut block, 0, alloc.add(val));
                 block.build()
             }
         }
@@ -281,8 +281,8 @@ impl<T: ToOcamlRep> ToOcamlRep for [T] {
         let mut hd = alloc.add(&());
         for val in self.iter().rev() {
             let mut block = alloc.block_with_size(2);
-            A::set_field(&mut block, 0, alloc.add(val));
-            A::set_field(&mut block, 1, hd);
+            alloc.set_field(&mut block, 0, alloc.add(val));
+            alloc.set_field(&mut block, 1, hd);
             hd = block.build();
         }
         hd
@@ -359,11 +359,11 @@ pub fn sorted_iter_to_ocaml_map<'a, 'i, A: Allocator, K: ToOcamlRep + 'i, V: ToO
     let (right, right_height) = sorted_iter_to_ocaml_map(iter, alloc, size - 1 - size / 2);
     let height = std::cmp::max(left_height, right_height) + 1;
     let mut block = alloc.block_with_size(5);
-    A::set_field(&mut block, 0, left);
-    A::set_field(&mut block, 1, alloc.add(key));
-    A::set_field(&mut block, 2, alloc.add(val));
-    A::set_field(&mut block, 3, right);
-    A::set_field(&mut block, 4, alloc.add(&height));
+    alloc.set_field(&mut block, 0, left);
+    alloc.set_field(&mut block, 1, alloc.add(key));
+    alloc.set_field(&mut block, 2, alloc.add(val));
+    alloc.set_field(&mut block, 3, right);
+    alloc.set_field(&mut block, 4, alloc.add(&height));
     (block.build(), height)
 }
 
@@ -420,10 +420,10 @@ pub fn sorted_iter_to_ocaml_set<'a, 'i, A: Allocator, T: ToOcamlRep + 'i>(
     let (right, right_height) = sorted_iter_to_ocaml_set(iter, alloc, size - 1 - size / 2);
     let height = std::cmp::max(left_height, right_height) + 1;
     let mut block = alloc.block_with_size(4);
-    A::set_field(&mut block, 0, left);
-    A::set_field(&mut block, 1, alloc.add(val));
-    A::set_field(&mut block, 2, right);
-    A::set_field(&mut block, 3, alloc.add(&height));
+    alloc.set_field(&mut block, 0, left);
+    alloc.set_field(&mut block, 1, alloc.add(val));
+    alloc.set_field(&mut block, 2, right);
+    alloc.set_field(&mut block, 3, alloc.add(&height));
     (block.build(), height)
 }
 
@@ -615,8 +615,8 @@ where
 {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size(2);
-        A::set_field(&mut block, 0, alloc.add(&self.0));
-        A::set_field(&mut block, 1, alloc.add(&self.1));
+        alloc.set_field(&mut block, 0, alloc.add(&self.0));
+        alloc.set_field(&mut block, 1, alloc.add(&self.1));
         block.build()
     }
 }
@@ -642,9 +642,9 @@ where
 {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size(3);
-        A::set_field(&mut block, 0, alloc.add(&self.0));
-        A::set_field(&mut block, 1, alloc.add(&self.1));
-        A::set_field(&mut block, 2, alloc.add(&self.2));
+        alloc.set_field(&mut block, 0, alloc.add(&self.0));
+        alloc.set_field(&mut block, 1, alloc.add(&self.1));
+        alloc.set_field(&mut block, 2, alloc.add(&self.2));
         block.build()
     }
 }
@@ -673,10 +673,10 @@ where
 {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size(4);
-        A::set_field(&mut block, 0, alloc.add(&self.0));
-        A::set_field(&mut block, 1, alloc.add(&self.1));
-        A::set_field(&mut block, 2, alloc.add(&self.2));
-        A::set_field(&mut block, 3, alloc.add(&self.3));
+        alloc.set_field(&mut block, 0, alloc.add(&self.0));
+        alloc.set_field(&mut block, 1, alloc.add(&self.1));
+        alloc.set_field(&mut block, 2, alloc.add(&self.2));
+        alloc.set_field(&mut block, 3, alloc.add(&self.3));
         block.build()
     }
 }
@@ -708,11 +708,11 @@ where
 {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size(5);
-        A::set_field(&mut block, 0, alloc.add(&self.0));
-        A::set_field(&mut block, 1, alloc.add(&self.1));
-        A::set_field(&mut block, 2, alloc.add(&self.2));
-        A::set_field(&mut block, 3, alloc.add(&self.3));
-        A::set_field(&mut block, 4, alloc.add(&self.4));
+        alloc.set_field(&mut block, 0, alloc.add(&self.0));
+        alloc.set_field(&mut block, 1, alloc.add(&self.1));
+        alloc.set_field(&mut block, 2, alloc.add(&self.2));
+        alloc.set_field(&mut block, 3, alloc.add(&self.3));
+        alloc.set_field(&mut block, 4, alloc.add(&self.4));
         block.build()
     }
 }
@@ -747,12 +747,12 @@ where
 {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size(6);
-        A::set_field(&mut block, 0, alloc.add(&self.0));
-        A::set_field(&mut block, 1, alloc.add(&self.1));
-        A::set_field(&mut block, 2, alloc.add(&self.2));
-        A::set_field(&mut block, 3, alloc.add(&self.3));
-        A::set_field(&mut block, 4, alloc.add(&self.4));
-        A::set_field(&mut block, 5, alloc.add(&self.5));
+        alloc.set_field(&mut block, 0, alloc.add(&self.0));
+        alloc.set_field(&mut block, 1, alloc.add(&self.1));
+        alloc.set_field(&mut block, 2, alloc.add(&self.2));
+        alloc.set_field(&mut block, 3, alloc.add(&self.3));
+        alloc.set_field(&mut block, 4, alloc.add(&self.4));
+        alloc.set_field(&mut block, 5, alloc.add(&self.5));
         block.build()
     }
 }
@@ -790,13 +790,13 @@ where
 {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size(7);
-        A::set_field(&mut block, 0, alloc.add(&self.0));
-        A::set_field(&mut block, 1, alloc.add(&self.1));
-        A::set_field(&mut block, 2, alloc.add(&self.2));
-        A::set_field(&mut block, 3, alloc.add(&self.3));
-        A::set_field(&mut block, 4, alloc.add(&self.4));
-        A::set_field(&mut block, 5, alloc.add(&self.5));
-        A::set_field(&mut block, 6, alloc.add(&self.6));
+        alloc.set_field(&mut block, 0, alloc.add(&self.0));
+        alloc.set_field(&mut block, 1, alloc.add(&self.1));
+        alloc.set_field(&mut block, 2, alloc.add(&self.2));
+        alloc.set_field(&mut block, 3, alloc.add(&self.3));
+        alloc.set_field(&mut block, 4, alloc.add(&self.4));
+        alloc.set_field(&mut block, 5, alloc.add(&self.5));
+        alloc.set_field(&mut block, 6, alloc.add(&self.6));
         block.build()
     }
 }
@@ -837,14 +837,14 @@ where
 {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         let mut block = alloc.block_with_size(8);
-        A::set_field(&mut block, 0, alloc.add(&self.0));
-        A::set_field(&mut block, 1, alloc.add(&self.1));
-        A::set_field(&mut block, 2, alloc.add(&self.2));
-        A::set_field(&mut block, 3, alloc.add(&self.3));
-        A::set_field(&mut block, 4, alloc.add(&self.4));
-        A::set_field(&mut block, 5, alloc.add(&self.5));
-        A::set_field(&mut block, 6, alloc.add(&self.6));
-        A::set_field(&mut block, 7, alloc.add(&self.7));
+        alloc.set_field(&mut block, 0, alloc.add(&self.0));
+        alloc.set_field(&mut block, 1, alloc.add(&self.1));
+        alloc.set_field(&mut block, 2, alloc.add(&self.2));
+        alloc.set_field(&mut block, 3, alloc.add(&self.3));
+        alloc.set_field(&mut block, 4, alloc.add(&self.4));
+        alloc.set_field(&mut block, 5, alloc.add(&self.5));
+        alloc.set_field(&mut block, 6, alloc.add(&self.6));
+        alloc.set_field(&mut block, 7, alloc.add(&self.7));
         block.build()
     }
 }

@@ -92,7 +92,7 @@ impl<'a> Block<'a> {
             Some(fields) => {
                 for (i, field) in fields.into_iter().enumerate() {
                     let field = field.clone_with(alloc, seen);
-                    A::set_field(&mut block, i, field)
+                    alloc.set_field(&mut block, i, field)
                 }
             }
             None => {

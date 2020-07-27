@@ -367,7 +367,7 @@ pub trait Allocator: Sized {
     ///
     /// Panics if `index` is out of bounds for `block` (i.e., greater than or
     /// equal to the block's size).
-    fn set_field<'a>(block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>);
+    fn set_field<'a>(&self, block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>);
 
     #[inline(always)]
     fn block_with_size(&self, size: usize) -> BlockBuilder<'_> {

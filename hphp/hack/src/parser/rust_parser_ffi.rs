@@ -97,14 +97,14 @@ where
                 let ocaml_tree = pool.add(&tree);
 
                 let mut res = pool.block_with_size(4);
-                Pool::set_field(&mut res, 0, unsafe {
+                pool.set_field(&mut res, 0, unsafe {
                     ocamlrep::OpaqueValue::from_bits(ocaml_state)
                 });
-                Pool::set_field(&mut res, 1, unsafe {
+                pool.set_field(&mut res, 1, unsafe {
                     ocamlrep::OpaqueValue::from_bits(ocaml_root)
                 });
-                Pool::set_field(&mut res, 2, ocaml_errors);
-                Pool::set_field(&mut res, 3, ocaml_tree);
+                pool.set_field(&mut res, 2, ocaml_errors);
+                pool.set_field(&mut res, 3, ocaml_tree);
                 // Safety: The UnsafeOcamlPtr must point to the first field in
                 // the block. It must be handed back to OCaml before the garbage
                 // collector is given an opportunity to run.

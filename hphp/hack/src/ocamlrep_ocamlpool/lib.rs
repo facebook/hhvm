@@ -68,7 +68,7 @@ impl Allocator for Pool {
     }
 
     #[inline(always)]
-    fn set_field<'a>(block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>) {
+    fn set_field<'a>(&self, block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>) {
         assert!(index < block.size());
         unsafe { caml_set_field(block.as_mut_ptr() as usize, index, value.to_bits()) };
     }

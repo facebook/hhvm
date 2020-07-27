@@ -239,7 +239,7 @@ fn allocate_block(variant: &VariantInfo, tag: u8) -> TokenStream {
     let mut fields = TokenStream::new();
     for (i, bi) in variant.bindings().iter().enumerate() {
         fields.extend(quote! {
-            Alloc::set_field(&mut block, #i, arena.add(#bi));
+            arena.set_field(&mut block, #i, arena.add(#bi));
         });
     }
     quote! {
@@ -254,7 +254,7 @@ fn boxed_tuple_variant_to_block(bi: &BindingInfo, tag: u8, len: usize) -> TokenS
     for i in 0..len {
         let idx = syn::Index::from(i);
         fields.extend(quote! {
-            Alloc::set_field(&mut block, #i, arena.add(&#bi.#idx));
+            arena.set_field(&mut block, #i, arena.add(&#bi.#idx));
         });
     }
     quote! {

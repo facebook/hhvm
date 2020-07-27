@@ -76,8 +76,8 @@ fn bad_struct_field() {
     let arena = Arena::new();
     let value = {
         let mut foo = arena.block_with_size_and_tag(2, 0);
-        Arena::set_field(&mut foo, 0, OpaqueValue::int(0));
-        Arena::set_field(&mut foo, 1, OpaqueValue::int(42));
+        arena.set_field(&mut foo, 0, OpaqueValue::int(0));
+        arena.set_field(&mut foo, 1, OpaqueValue::int(42));
         // SAFETY: `foo` was allocated by an `Arena`.
         unsafe { Arena::make_transparent(foo.build()) }
     };
@@ -97,15 +97,15 @@ fn bad_nested_struct_field() {
 
     let foo = {
         let mut foo = arena.block_with_size_and_tag(2, 0);
-        Arena::set_field(&mut foo, 0, OpaqueValue::int(0));
-        Arena::set_field(&mut foo, 1, OpaqueValue::int(42));
+        arena.set_field(&mut foo, 0, OpaqueValue::int(0));
+        arena.set_field(&mut foo, 1, OpaqueValue::int(42));
         foo.build()
     };
 
     let bar = {
         let mut bar = arena.block_with_size_and_tag(2, 0);
-        Arena::set_field(&mut bar, 0, foo);
-        Arena::set_field(&mut bar, 1, OpaqueValue::int(0));
+        arena.set_field(&mut bar, 0, foo);
+        arena.set_field(&mut bar, 1, OpaqueValue::int(0));
         // SAFETY: `bar` was allocated by an `Arena`.
         unsafe { Arena::make_transparent(bar.build()) }
     };
@@ -197,7 +197,7 @@ fn bad_tuple_variant_value() {
     let arena = Arena::new();
     let orange = {
         let mut orange = arena.block_with_size_and_tag(1, 0);
-        Arena::set_field(&mut orange, 0, OpaqueValue::int(42));
+        arena.set_field(&mut orange, 0, OpaqueValue::int(42));
         // SAFETY: `orange` was allocated by an `Arena`.
         unsafe { Arena::make_transparent(orange.build()) }
     };
@@ -210,7 +210,7 @@ fn bad_struct_variant_value() {
     let arena = Arena::new();
     let pear = {
         let mut pear = arena.block_with_size_and_tag(1, 1);
-        Arena::set_field(&mut pear, 0, OpaqueValue::int(42));
+        arena.set_field(&mut pear, 0, OpaqueValue::int(42));
         // SAFETY: `pear` was allocated by an `Arena`.
         unsafe { Arena::make_transparent(pear.build()) }
     };
@@ -223,8 +223,8 @@ fn good_boxed_tuple_variant() {
     let arena = Arena::new();
     let peach = {
         let mut peach = arena.block_with_size_and_tag(2, 2);
-        Arena::set_field(&mut peach, 0, OpaqueValue::int(42));
-        Arena::set_field(&mut peach, 1, OpaqueValue::int(1));
+        arena.set_field(&mut peach, 0, OpaqueValue::int(42));
+        arena.set_field(&mut peach, 1, OpaqueValue::int(1));
         // SAFETY: `peach` was allocated by an `Arena`.
         unsafe { Arena::make_transparent(peach.build()) }
     };

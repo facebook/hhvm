@@ -5,15 +5,13 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ocaml::core::memory;
-use ocaml::core::mlvalues::{Color, Size, Tag, Value};
+use ocaml::core::mlvalues::{Size, Tag, Value};
 
 extern "C" {
     fn ocamlpool_reserve_block(tag: Tag, size: Size) -> Value;
     fn ocamlpool_reserve_string(size: Size) -> Value;
     static ocamlpool_limit: *mut Value;
     static ocamlpool_bound: *mut Value;
-    static mut ocamlpool_cursor: *mut Value;
-    static ocamlpool_color: Color;
     static mut ocamlpool_generation: usize;
 }
 
@@ -22,13 +20,7 @@ extern "C" {
 // - between ocamlpool_enter / ocamlpool_leave invocations
 
 pub unsafe fn reserve_block(tag: Tag, size: Size) -> Value {
-    let result = ocamlpool_cursor.offset(-(size as isize) - 1);
-    if result < ocamlpool_limit || result >= ocamlpool_bound {
-        return ocamlpool_reserve_block(tag, size);
-    }
-    ocamlpool_cursor = result;
-    *result = (tag as usize) | ocamlpool_color | (size << 10);
-    return result.offset(1) as Value;
+    ocamlpool_reserve_block(tag, size)
 }
 
 pub unsafe fn caml_set_field(obj: Value, index: usize, val: Value) {

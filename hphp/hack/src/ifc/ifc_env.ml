@@ -6,6 +6,7 @@
  *
  *)
 
+open Hh_prelude
 open Ifc_types
 module Logic = Ifc_logic
 module Utils = Ifc_utils
@@ -18,12 +19,12 @@ module K = Typing_cont_key
 
 let new_policy_var { pre_scope; pre_pvar_counters; _ } prefix =
   let suffix =
-    match Hashtbl.find_opt pre_pvar_counters prefix with
+    match Caml.Hashtbl.find_opt pre_pvar_counters prefix with
     | Some counter ->
       incr counter;
       "'" ^ string_of_int !counter
     | None ->
-      Hashtbl.add pre_pvar_counters prefix (ref 0);
+      Caml.Hashtbl.add pre_pvar_counters prefix (ref 0);
       ""
   in
   Pfree_var (prefix ^ suffix, pre_scope)
@@ -32,7 +33,7 @@ let new_proto_renv saved_tenv scope decl_env =
   {
     pre_scope = scope;
     pre_decl = decl_env;
-    pre_pvar_counters = Hashtbl.create 10;
+    pre_pvar_counters = Caml.Hashtbl.create 10;
     pre_tenv = saved_tenv;
   }
 
@@ -131,14 +132,14 @@ let merge_conts_into ~union env ks k_to =
       let (env, merged_lenv) = merge_lenv ~union env l1 l2 in
       (env, Some merged_lenv)
   in
-  let (env, lenv) = List.fold_left f (env, None) ks in
+  let (env, lenv) = List.fold ~f ~init:(env, None) ks in
   match lenv with
   | None -> env
   | Some lenv -> merge_lenv_into ~union env lenv k_to
 
 let merge_pcs_into env ks k_to =
   let f pc k = PCSet.union (get_lpc_policy env k) pc in
-  let pc = List.fold_left f PCSet.empty ks in
+  let pc = List.fold ~f ~init:PCSet.empty ks in
   match get_lenv_opt env k_to with
   | None -> env
   | Some lenv ->

@@ -32,7 +32,6 @@ type parser =
   | POSITIONED
   | COROUTINE
   | DECL_MODE
-  | PPL_REWRITER
   | LOWERER
   | COROUTINE_ERRORS
   | CLOSURE_CONVERT
@@ -381,7 +380,6 @@ let parse_args () =
             parser := DECL_MODE;
             check_json_equal_only := true),
         "" );
-      ("--ppl-rewriter", Arg.Unit (fun () -> parser := PPL_REWRITER), "");
       ("--lower", Arg.Unit (fun () -> parser := LOWERER), "");
       ("--closure-convert", Arg.Unit (fun () -> parser := CLOSURE_CONVERT), "");
       ("--codegen", Arg.Set codegen, "");
@@ -454,29 +452,6 @@ module DeclModeSC = DeclModeSmartConstructors.WithSyntax (PositionedSyntax)
 module DeclModeTest = Runner (DeclModeTest_.WithSmartConstructors (DeclModeSC))
 module EditablePositionedSyntaxSC =
   SyntaxSmartConstructors.WithSyntax (EditablePositionedSyntax)
-module PPLRewriterTest___ = WithSyntax (EditablePositionedSyntax)
-module PPLRewriterTest__ =
-  PPLRewriterTest___.WithSmartConstructors (EditablePositionedSyntaxSC)
-
-module PPLRewriterTest_ = PPLRewriterTest__.WithTreeBuilder (struct
-  module EditableSyntaxTree = PPLRewriterTest__.SyntaxTree
-
-  type t = EditableSyntaxTree.t
-
-  let make ~env source_text =
-    let root =
-      if Env.rust env then
-        Ppl_class_rewriter_ffi.parse_and_rewrite_ppl_classes source_text
-      else
-        PositionedTest_.SyntaxTree.(make source_text |> root)
-        |> EditablePositionedSyntax.from_positioned_syntax
-        |> Ppl_class_rewriter.rewrite_ppl_classes
-    in
-    (* We don't care about errors / mode / state here *)
-    EditableSyntaxTree.build source_text root None [] None ()
-end)
-
-module PPLRewriterTest = Runner (PPLRewriterTest_)
 
 module LowererTest_ = struct
   module Lowerer = Full_fidelity_ast
@@ -709,9 +684,8 @@ module ClosureConvertTest_ = struct
            ~empty_namespace
            ~for_debugger_eval:false
       |> fun x ->
-      x.Closure_convert.ast_defs
-      |> Full_fidelity_ast.tast_to_aast
-      |> fun y -> (y, x.Closure_convert.global_state)
+      x.Closure_convert.ast_defs |> Full_fidelity_ast.tast_to_aast |> fun y ->
+      (y, x.Closure_convert.global_state)
     in
 
     let (rust_tast, rust_state) = rust_closure_convert_from_text source_text in
@@ -782,7 +756,6 @@ let () =
     | COROUTINE_ERRORS ->
       CoroutineErrorsTest.test_batch args ~ocaml_env ~rust_env
     | DECL_MODE -> DeclModeTest.test_batch args ~ocaml_env ~rust_env
-    | PPL_REWRITER -> PPLRewriterTest.test_batch args ~ocaml_env ~rust_env
     | LOWERER -> LowererTest.test_batch args ~ocaml_env ~rust_env
     | CLOSURE_CONVERT -> ClosureConvertTest.test_batch args ~ocaml_env ~rust_env
   in

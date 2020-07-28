@@ -18,6 +18,7 @@ Analyzing __construct:
     \My<\My, lump'1, mInt=<.mInt>,
           other=\Other<\Other'1, lump'3, oBool=<.oBool>>>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars:
     { $mBool -> <$mBool>;
@@ -39,6 +40,7 @@ Analyzing getMInt:
 * pc: pc
 * This: \My<\My, lump'1, mInt=<.mInt>, other=?thunk>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: {}
 * Final environment:
@@ -52,6 +54,7 @@ Analyzing setMInt:
 * pc: pc
 * This: \My<\My, lump'1, mInt=<.mInt>, other=?thunk>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $candidate -> <$candidate> }
 * Final environment:
@@ -65,6 +68,7 @@ Analyzing \tlGetMyInt:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $obj -> \My<\My, lump'1, mInt=<.mInt>, other=?thunk> }
 * Final environment:
@@ -78,6 +82,7 @@ Analyzing \tlSetMyInt:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars:
     { $obj -> \My<\My, lump'1, mInt=<.mInt>, other=?thunk>; $val -> <$val> }
@@ -94,6 +99,7 @@ Analyzing \tlGetOther:
 * pc: pc
 * This: None
 * Return: \Other<\Other, lump'1, oBool=<.oBool>>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars:
     { $obj ->
@@ -114,6 +120,7 @@ Analyzing \tlGetOtherBool:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars:
     { $obj ->
@@ -134,6 +141,7 @@ Analyzing \tlSetOtherBool:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars:
     { $bool -> <$bool>;

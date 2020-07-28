@@ -13,6 +13,7 @@ Analyzing __construct:
 * pc: pc
 * This: \C<\C, lump'1, cx=<.cx>>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $cd -> \D<\D, lump'2>; $cx -> <$cx>; $cy -> <$cy> }
 * Final environment:
@@ -27,6 +28,7 @@ Analyzing testGetUnpolicied:
 * pc: pc
 * This: \C<\C, lump'1, cx=?thunk>
 * Return: \D<\D, lump'2>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: {}
 * Final environment:
@@ -40,6 +42,7 @@ Analyzing testSetMultipleUnpolicied:
 * pc: pc
 * This: \C<\C, lump'1, cx=?thunk>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $d -> \D<\D, lump'2> }
 * Final environment:
@@ -54,6 +57,7 @@ Analyzing testSetDeep:
 * pc: pc
 * This: \C<\C, lump'1, cx=?thunk>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $i -> <$i> }
 * Final environment:
@@ -67,6 +71,7 @@ Analyzing __construct:
 * pc: pc
 * This: \D<\D, lump'1>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $di -> <$di> }
 * Final environment:

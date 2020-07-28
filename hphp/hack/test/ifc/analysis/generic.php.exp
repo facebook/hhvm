@@ -8,6 +8,7 @@ Analyzing \test:
 * pc: pc
 * This: None
 * Return: \G<<tp>, <tp'1>, <tp'2>><\G, lump'1>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $g -> \G<<tp'3>, <tp'4>, <tp'5>><\G'1, lump'2> }
 * Final environment:

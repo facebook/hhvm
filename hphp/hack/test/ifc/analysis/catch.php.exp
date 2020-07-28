@@ -11,6 +11,7 @@ Analyzing \leak_pc_in_catch:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars:
     { $e -> \Exception<\Exception'1, lump'2>;
@@ -30,6 +31,7 @@ Analyzing \do_not_leak_pc_after_catch:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars:
     { $e -> \Exception<\Exception'1, lump'2>;
@@ -49,6 +51,7 @@ Analyzing \nested_try:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars:
     { $e -> \Exception<\Exception'1, lump'2>;
@@ -68,6 +71,7 @@ Analyzing \throw_in_catch:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars:
     { $e -> \Exception<\Exception'1, lump'2>;

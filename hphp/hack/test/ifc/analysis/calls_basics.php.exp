@@ -15,6 +15,7 @@ Analyzing setb:
 * pc: pc
 * This: \C<\C, lump'1, a=?thunk, b=<B>>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $n -> <$n> }
 * Final environment:
@@ -28,6 +29,7 @@ Analyzing is_a_pos:
 * pc: pc
 * This: \C<\C, lump'1, a=<A>, b=?thunk>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: {}
 * Final environment:
@@ -42,6 +44,7 @@ Analyzing \dbl:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $x -> <$x> }
 * Final environment:
@@ -55,6 +58,7 @@ Analyzing \flow_a_to_b:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $c -> \C<\C, lump'1, a=<A>, b=?thunk> }
 * Final environment:
@@ -69,6 +73,7 @@ Analyzing \flow_b_to_b:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $c -> \C<\C, lump'1, a=?thunk, b=<B>> }
 * Final environment:
@@ -83,6 +88,7 @@ Analyzing \flow_bot_to_b:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $c -> \C<\C, lump'1, a=?thunk, b=?thunk> }
 * Final environment:
@@ -97,6 +103,7 @@ Analyzing \indirect_flow_a_to_b:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $c -> \C<\C, lump'1, a=<A>, b=?thunk> }
 * Final environment:
@@ -111,6 +118,7 @@ Analyzing \indirect_flow_a_to_b_bis:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars:
     { $c1 -> \C<\C, lump'1, a=?thunk, b=?thunk>;

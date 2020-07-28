@@ -16,6 +16,7 @@ Analyzing \empty:
 * pc: pc
 * This: None
 * Return: \HH\vec<<tp>><\HH\vec, lump'1>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: {}
 * Final environment:
@@ -30,6 +31,7 @@ Analyzing \testCollection:
 * pc: pc
 * This: None
 * Return: \HH\vec<<tp>><\HH\vec, lump'1>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: {}
 * Final environment:
@@ -45,6 +47,7 @@ Analyzing \testAdd1:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $vec -> \HH\vec<<tp>><\HH\vec, lump'1> }
 * Final environment:
@@ -58,6 +61,7 @@ Analyzing \testAdd2:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: {}
 * Final environment:
@@ -72,6 +76,7 @@ Analyzing \retElem:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: {}
 * Final environment:
@@ -86,6 +91,7 @@ Analyzing set:
 * pc: pc
 * This: \C<\C, lump'1, i=<INT>, v=\HH\vec<<VEC>><VEC, VEC>>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: {}
 * Final environment:
@@ -100,6 +106,7 @@ Analyzing nested:
 * pc: pc
 * This: \C<\C, lump'1, i=<INT>, v=\HH\vec<<VEC>><VEC, VEC>>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars:
     { $vv -> \HH\vec<\HH\vec<<tp>><\HH\vec, lump'3>><\HH\vec'1, lump'2> }
@@ -118,6 +125,7 @@ Analyzing mutation:
 * pc: pc
 * This: \C<\C, lump'1, i=<INT>, v=\HH\vec<<VEC>><VEC, VEC>>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: {}
 * Final environment:
@@ -133,6 +141,7 @@ Analyzing \copyOnWrite:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $v -> \HH\vec<<tp>><\HH\vec, lump'1>; $x -> <$x>; $y -> <$y> }
 * Final environment:

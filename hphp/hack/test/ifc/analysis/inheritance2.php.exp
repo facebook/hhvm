@@ -10,6 +10,7 @@ Analyzing \test:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $b -> \B<\B, lump'1, i=<P1>, j=<P2>, k=<P3>> }
 * Final environment:

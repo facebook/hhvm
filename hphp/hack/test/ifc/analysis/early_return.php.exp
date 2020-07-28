@@ -11,6 +11,7 @@ Analyzing __construct:
 * pc: pc
 * This: \PublicData<\PublicData, lump'1, data=<PUBLIC>>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $data -> <$data> }
 * Final environment:
@@ -24,6 +25,7 @@ Analyzing __construct:
 * pc: pc
 * This: \PoliciedData<\PoliciedData, lump'1, data=<SECRET>>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $data -> <$data> }
 * Final environment:
@@ -37,6 +39,7 @@ Analyzing \earlyReturn:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars:
     { $x -> \PoliciedData<\PoliciedData, lump'1, data=<SECRET>>;

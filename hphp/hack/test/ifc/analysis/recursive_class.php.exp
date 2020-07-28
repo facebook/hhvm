@@ -10,6 +10,7 @@ Analyzing __construct:
 * pc: pc
 * This: \R<\R, lump'1>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $prop -> <$prop>; $r -> \R<\R'1, lump'2> }
 * Final environment:
@@ -24,6 +25,7 @@ Analyzing recursiveGet:
 * pc: pc
 * This: \R<\R, lump'1>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: {}
 * Final environment:
@@ -38,6 +40,7 @@ Analyzing recursiveWrite:
 * pc: pc
 * This: \R<\R, lump'1>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: {}
 * Final environment:

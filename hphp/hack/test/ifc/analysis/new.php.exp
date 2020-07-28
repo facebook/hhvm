@@ -11,6 +11,7 @@ Analyzing __construct:
 * pc: pc
 * This: \X<\X, lump'1, valuex=<PRIVATE>>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $valuex -> <$valuex> }
 * Final environment:
@@ -24,6 +25,7 @@ Analyzing __construct:
 * pc: pc
 * This: \Y<\Y, lump'1, valuey=<PUBLIC>>
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $valuey -> <$valuey> }
 * Final environment:
@@ -37,6 +39,7 @@ Analyzing \f:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: {}
 * Final environment:

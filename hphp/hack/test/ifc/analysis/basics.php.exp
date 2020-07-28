@@ -10,6 +10,7 @@ Analyzing \binop:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $x -> <$x>; $y -> <$y> }
 * Final environment:
@@ -23,6 +24,7 @@ Analyzing \assign0:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $arg -> <$arg> }
 * Final environment:
@@ -36,6 +38,7 @@ Analyzing \assign1:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $arg -> <$arg> }
 * Final environment:
@@ -49,6 +52,7 @@ Analyzing \condition:
 * pc: pc
 * This: None
 * Return: <ret>
+* Exception: \Exception<\Exception, lump>
 * Params:
   lvars: { $a0 -> <$a0>; $a1 -> <$a1>; $a2 -> <$a2> }
 * Final environment:

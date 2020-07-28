@@ -139,9 +139,7 @@ let locals fmt env =
       (LMap.make_pp Local_id.pp ptype)
       lenv.le_vars;
     let policy_set fmt s = list comma_sep policy fmt (PCSet.elements s) in
-    if PCSet.is_empty lenv.le_pc then
-      ()
-    else
+    if not (PCSet.is_empty lenv.le_pc) then
       fprintf fmt "@,@[<hov2>pc: @[<hov>%a@]@]" policy_set lenv.le_pc;
     pp_close_box fmt ()
   in
@@ -156,6 +154,7 @@ let renv fmt renv =
   fprintf fmt "* @[<hov2>pc: @[<hov>%a@]@]" policy renv.re_gpc;
   fprintf fmt "@,* @[<hov2>This:@ @[<hov>%a@]@]" (option ptype) renv.re_this;
   fprintf fmt "@,* @[<hov2>Return:@ @[<hov>%a@]@]" ptype renv.re_ret;
+  fprintf fmt "@,* @[<hov2>Exception: @[<hov>%a@]@]" ptype renv.re_exn;
   pp_close_box fmt ()
 
 let env fmt env =

@@ -1,0 +1,11 @@
+Typing[4118] This expression is always false [1]
+-> This is a string [2]
+-> This is an int [3]
+
+two_pos_embedded_in_larger_pos.php:4:10
+        2 | 
+        3 | function f(): bool {
+[1,2,3] 4 |   return "5" === 5;
+        5 | }
+
+1 error found.

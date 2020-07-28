@@ -826,15 +826,18 @@ let line_highlighted position_group ~(line_num : int) ~(line : string option) =
     | ms ->
       let get_markers_at_col col_num =
         List.filter ms ~f:(fun (_, pos) -> pos_contains pos ~col_num line_num)
-        |> List.map ~f:fst
       in
       let color_column ms c =
-        (* For multiple marked messages for same position, highlight with
-            color of lower-numbered (i.e. more important) message *)
-        let sorted =
-          List.sort ms ~compare:(fun (m, _) (n, _) -> Int.compare m n)
+        (* Prefer shorter smaller positions so the boundaries between overlapping
+          positions are visible. Take the lowest-number (presumably more important)
+          to break ties. *)
+        let ((_, color), _) =
+          List.stable_sort ms ~compare:(fun ((m1, _), p1) ((m2, _), p2) ->
+              match Int.compare (Pos.length p1) (Pos.length p2) with
+              | 0 -> Int.compare m1 m2
+              | v -> v)
+          |> List.hd_exn
         in
-        let (_, color) = List.hd_exn sorted in
         Tty.apply_color (Tty.Normal color) c
       in
       let highlighted_columns : string list =

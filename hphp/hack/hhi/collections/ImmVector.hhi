@@ -119,16 +119,6 @@ final class ImmVector<+Tv> implements \ConstVector<Tv> {
   /**
    * Returns an `array` containing the values from the current `ImmVector`.
    *
-   * This method is interchangeable with `toValuesArray()`.
-   *
-   * @return - An `array` containing the values from the current `ImmVector`.
-   */
-  <<__Pure, __MaybeMutable, __PHPStdLib>>
-  public function toArray(): array<Tv>;
-
-  /**
-   * Returns an `array` containing the values from the current `ImmVector`.
-   *
    * This method is interchangeable with `toArray()`.
    *
    * @return - An `array` containing the values from the current `ImmVector`.

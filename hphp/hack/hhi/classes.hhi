@@ -150,10 +150,6 @@ abstract class ResumableWaitHandle<+T> extends WaitableWaitHandle<T> {
 }
 
 final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
-  <<__PHPStdLib>>
-  public static function fromArray(
-    array<Awaitable<mixed>> $deps
-  ): Awaitable<void>;
   public static function fromVArray(
     varray<Awaitable<mixed>> $deps
   ): Awaitable<void>;

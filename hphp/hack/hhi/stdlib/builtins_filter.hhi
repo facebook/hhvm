@@ -65,8 +65,8 @@ function filter_input_array(int $type, mixed $definition = null, bool $add_empty
 <<__PHPStdLib, __Deprecated('will be removed in a future version of hack')>>
 function filter_input(int $type, string $variable_name, int $filter = FILTER_DEFAULT, mixed $options = null) {}
 <<__PHPStdLib, __Pure>>
-function filter_list(): array<string> {}
+function filter_list(): varray<string> {}
 <<__PHPStdLib, __Pure>>
-function filter_var_array(array $data, mixed $definition = null, bool $add_empty = true) {}
+function filter_var_array(Container<mixed> $data, mixed $definition = null, bool $add_empty = true) {}
 <<__PHPStdLib, __Pure>>
 function filter_var(mixed $value, int $filter = FILTER_DEFAULT, mixed $options = null) {}

@@ -57,16 +57,6 @@ final class Vector<Tv> implements \MutableVector<Tv> {
   /**
    * Returns an `array` containing the values from the current `Vector`.
    *
-   * This method is interchangeable with `toValuesArray()`.
-   *
-   * @return - An `array` containing the values from the current `Vector`.
-   */
-  <<__Pure, __MaybeMutable, __PHPStdLib>>
-  public function toArray(): array<Tv>;
-
-  /**
-   * Returns an `array` containing the values from the current `Vector`.
-   *
    * This method is interchangeable with `toArray()`.
    *
    * @return - An `array` containing the values from the current `Vector`.

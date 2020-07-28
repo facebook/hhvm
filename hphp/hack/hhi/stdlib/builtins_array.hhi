@@ -53,19 +53,19 @@ const int UCOL_NUMERIC_COLLATION = 0;
 const int TAG_PROVENANCE_HERE_DONT_WARN_ON_OBJECTS = 0;
 
 <<__PHPStdLib, __Pure>>
-function array_change_key_case($input, int $upper = CASE_LOWER);
+function array_change_key_case<Tv>(KeyedContainer<arraykey, Tv> $input, int $upper = CASE_LOWER): darray<arraykey, Tv>;
+/** inner container will be a varray or darray depending on $preserve_keys */
 <<__PHPStdLib, __Pure>>
-function array_chunk($input, int $size, bool $preserve_keys = false);
+function array_chunk<Tv>(Container<Tv> $input, int $size, bool $preserve_keys = false): varray<Container<int>>;
 <<__PHPStdLib, __Pure>>
-function array_combine($keys, $values);
+function array_combine<Tv1 as arraykey, Tv2>(Container<Tv1> $keys, Container<Tv2> $values): darray<Tv1, Tv2>;
 <<__PHPStdLib, __Pure>>
-function array_count_values($input);
+function array_count_values<Tv as arraykey>(Container<Tv> $input): darray<Tv, int>;
 <<__PHPStdLib, __Pure>>
-function array_column(
-  array<array<arraykey, mixed>> $array,
+function array_column<Tv>(
+  Container<KeyedContainer<arraykey, Tv>> $array,
   ?arraykey $column_key,
-  ?arraykey $index_key = null,
-): array;
+): varray_or_darray<Tv>;
 <<__PHPStdLib, __Pure>>
 function array_fill_keys($keys, $value);
 /*
@@ -226,7 +226,7 @@ function array_unique($array, int $sort_flags = 2);
 <<__PHPStdLib>>
 function array_unshift(inout $array, $var, ...$args);
 <<__PHPStdLib, __Pure>>
-function array_values<Tv>(Container<Tv> $input): array<Tv>;
+function array_values<Tv>(Container<Tv> $input): varray<Tv>;
 <<__PHPStdLib>>
 function shuffle(inout $array);
 <<__Deprecated('Use count(), it does the same thing as sizeof() in PHP and '.

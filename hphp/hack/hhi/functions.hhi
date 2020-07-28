@@ -23,7 +23,7 @@ function isset(<<__MaybeMutable>> $x): bool;
 function unset(<<__MaybeMutable>> $x): void;
 //
 <<__PHPStdLib, __Pure>>
-function array_fill<T>(int $start_index, int $num, T $value): array<T>;
+function array_fill<T>(int $start_index, int $num, T $value): varray_or_darray<T>;
 // TODO make non-nullable once Thrift files are fixed
 <<__PHPStdLib, __Pure>>
 function chr(int $ascii): string;
@@ -34,7 +34,7 @@ function dechex(int $number): string;
 <<__PHPStdLib, __Pure>>
 function implode(string $glue, <<__MaybeMutable>> $pieces): string; // could be Container<Stringish>
 <<__PHPStdLib, __Pure>>
-function explode(string $delimiter, string $str, int $limit = 0x7FFFFFFF): array; // : array<string> & false for '' delimiter
+function explode(string $delimiter, string $str, int $limit = 0x7FFFFFFF): varray<string>; // : array<string> & false for '' delimiter
 <<__Pure>>
 function is_array(<<__MaybeMutable>> mixed $arg): bool;
 }
@@ -68,7 +68,7 @@ function strval($v): string;
 function boolval($v): bool;
 
 <<__PHPStdLib>>
-function get_class_constants(string $class_name): array;
+function get_class_constants(string $class_name): darray<string, mixed>;
 
 // the return value is an instance with class $class
 // do **not** use this in your code, call newv() instead

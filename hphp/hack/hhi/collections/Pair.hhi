@@ -54,16 +54,6 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
   /**
    * Returns an `array` containing the values from the current `Pair`.
    *
-   * This method is interchangeable with `toValuesArray()`.
-   *
-   * @return - an `array` containing the values from the current `Pair`.
-   */
-  <<__Pure, __MaybeMutable, __PHPStdLib>>
-  public function toArray(): array;
-
-  /**
-   * Returns an `array` containing the values from the current `Pair`.
-   *
    * This method is interchangeable with `toArray()`.
    *
    * @return - an `array` containing the values from the current `Pair`.

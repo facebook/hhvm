@@ -281,7 +281,7 @@ class DOMDocumentType extends DOMNode {
   /* readonly */ public string $internalSubset;
 
   // Methods
-  <<__PHPStdLib>> public function __debuginfo(): array;
+  <<__PHPStdLib>> public function __debuginfo(): darray<arraykey, mixed>;
 
 }
 

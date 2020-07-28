@@ -15,10 +15,6 @@
  */
 
 trait StrictIterable<+Tv> implements Iterable<Tv> {
-
-  <<__PHPStdLib>>
-  public function toArray(): array;
-
   public function toValuesArray(): varray<Tv>;
 
   public function toImmVector(): ImmVector<Tv>;
@@ -55,9 +51,6 @@ trait StrictIterable<+Tv> implements Iterable<Tv> {
 
 
 trait StrictKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
-  <<__PHPStdLib>>
-  public function toArray(): array;
-
   public function toValuesArray(): varray<Tv>;
 
   public function toKeysArray(): varray<Tk>;
@@ -114,9 +107,6 @@ trait StrictKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
 
 
 trait LazyIterable<+Tv> implements Iterable<Tv> {
-  <<__PHPStdLib>>
-  public function toArray(): array;
-
   public function toValuesArray(): varray<Tv>;
 
   public function toImmVector(): ImmVector<Tv>;
@@ -153,9 +143,6 @@ trait LazyIterable<+Tv> implements Iterable<Tv> {
 
 
 trait LazyKeyedIterable<Tk,+Tv> implements KeyedIterable<Tk,Tv> {
-  <<__PHPStdLib>>
-  public function toArray(): array;
-
   public function toValuesArray(): varray<Tv>;
 
   public function toKeysArray(): varray<Tk>;

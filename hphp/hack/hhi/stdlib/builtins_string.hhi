@@ -90,7 +90,7 @@ function strtok(string $str, $token = null);
  *  )
  */
 <<__PHPStdLib>>
-function str_getcsv(string $input, string $delimiter = ",", string $enclosure = "\"", string $escape = "\\"): array<?string>;
+function str_getcsv(string $input, string $delimiter = ",", string $enclosure = "\"", string $escape = "\\"): varray<?string>;
 <<__PHPStdLib>>
 function str_replace($search, $replace, $subject);
 <<__PHPStdLib>>

@@ -63,15 +63,6 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
   public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<Tk, Tv> $it);
 
   /**
-   * Returns an `array` containing the key/value pairs from the current `Map`.
-   *
-   * @return - an `array` containing the key and value pairs from the current
-   *           `Map`.
-   */
-  <<__Pure, __MaybeMutable, __PHPStdLib>>
-  public function toArray(): array<Tk, Tv>;
-
-  /**
    * Returns an `array` containing the values from the current `Map`.
    *
    * @return - an integer-indexed `array` containing the values from the

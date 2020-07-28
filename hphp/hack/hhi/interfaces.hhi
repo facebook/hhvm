@@ -291,13 +291,6 @@ interface Iterable<+Tv> extends \IteratorAggregate<Tv> {
    */
   public function getIterator(): Iterator<Tv>;
   /**
-   * Returns an `array` converted from the current `Iterable`.
-   *
-   * @return - an array converted from the current `Iterable`.
-   */
-  <<__PHPStdLib>>
-  public function toArray(): array;
-  /**
    * Returns an `array` with the values from the current `Iterable`.
    *
    * The keys in the current `Iterable` are discarded and replaced with integer

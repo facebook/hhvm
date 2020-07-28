@@ -604,6 +604,7 @@ let parse_options () =
   in
   let tcopt =
     GlobalOptions.make
+      ?po_disable_array_typehint:(Some false)
       ?tco_unsafe_rx:!unsafe_rx
       ?po_deregister_php_stdlib:!deregister_attributes
       ?tco_disallow_array_typehint:!disallow_array_typehint

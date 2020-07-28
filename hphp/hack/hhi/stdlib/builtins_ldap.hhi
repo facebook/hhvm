@@ -27,7 +27,7 @@ function ldap_mod_replace(resource $link, string $dn, $entry);
 <<__PHPStdLib>>
 function ldap_modify(resource $link, string $dn, $entry);
 <<__PHPStdLib>>
-function ldap_modify_batch(resource $link, string $dn, array $modifs);
+function ldap_modify_batch(resource $link, string $dn, varray<darray<string, mixed>> $modifs);
 <<__PHPStdLib>>
 function ldap_bind(resource $link, $bind_rdn = null, $bind_password = null);
 <<__PHPStdLib>>

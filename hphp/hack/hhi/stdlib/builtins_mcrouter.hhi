@@ -15,14 +15,14 @@ class MCRouterException extends Exception {
 
 <<__PHPStdLib>>
 class MCRouterOptionException extends Exception {
-  public function getErrors(): array<array<string,string>>;
-  public function __construct(protected array<array<string,string>> $errors);
+  public function getErrors(): varray<darray<string,string>>;
+  public function __construct(protected varray<darray<string,string>> $errors);
 }
 
 <<__PHPStdLib>>
 class MCRouter {
   public function __construct(
-    array<string,mixed> $options,
+    darray<string,mixed> $options,
     string $pid = "",
   ): void;
   public static function createSimple(ConstVector<string> $servers): MCRouter;

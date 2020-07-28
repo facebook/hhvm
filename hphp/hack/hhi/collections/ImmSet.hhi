@@ -83,17 +83,6 @@ final class ImmSet<+Tv as arraykey> implements \ConstSet<Tv> {
   /**
    * Returns an `array` containing the values from the current `ImmSet`.
    *
-   * For the returned `array`, each key is the same as its associated value.
-   *
-   * @return - an `array` containing the values from the current `ImmSet`,
-   *           where each key of the `array` are the same as each value.
-   */
-  <<__Pure, __MaybeMutable, __PHPStdLib>>
-  public function toArray(): array<Tv, Tv>;
-
-  /**
-   * Returns an `array` containing the values from the current `ImmSet`.
-   *
    * `Set`s don't have keys. So this method just returns the values.
    *
    * This method is interchangeable with `toValuesArray()`.

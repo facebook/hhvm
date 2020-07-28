@@ -139,13 +139,6 @@ interface Iterable<+Tv>
   <<__Pure, __MutableReturn, __MaybeMutable>>
   public function getIterator(): namespace\Iterator<Tv>;
   /**
-   * Returns an `array` converted from the current `Iterable`.
-   *
-   * @return - an array converted from the current `Iterable`.
-   */
-  <<__Pure, __MaybeMutable, __PHPStdLib>>
-  public function toArray(): array;
-  /**
    * Returns an `array` with the values from the current `Iterable`.
    *
    * The keys in the current `Iterable` are discarded and replaced with integer

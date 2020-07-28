@@ -83,8 +83,8 @@ class Memcached {
   public function decrement(string $key, int $offset = 1);
   public function delete(string $key, int $time = 0);
   public function deleteByKey(string $server_key, string $key, int $time = 0);
-  public function deleteMulti(array $keys, int $time = 0): mixed;
-  public function deleteMultiByKey(string $server_key, array $keys, int $time = 0): mixed;
+  public function deleteMulti(varray<string> $keys, int $time = 0): mixed;
+  public function deleteMultiByKey(string $server_key, varray<string> $keys, int $time = 0): mixed;
   public function fetch();
   public function fetchAll();
   public function flush(int $delay = 0);

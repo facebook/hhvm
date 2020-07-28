@@ -110,7 +110,7 @@ function openssl_public_decrypt(string $data, inout $decrypted, $key, int $paddi
 function openssl_public_encrypt(string $data, inout $crypted, $key, int $padding = OPENSSL_PKCS1_PADDING);
 <<__PHPStdLib>>
 function openssl_seal(string $data, inout $sealed_data, inout $env_keys,
-                      array $pub_key_ids, string $method, inout $iv);
+                      varray<mixed> $pub_key_ids, string $method, inout $iv);
 <<__PHPStdLib>>
 function openssl_sign(string $data, inout $signature, $priv_key_id, $signature_alg = OPENSSL_ALGO_SHA1);
 <<__PHPStdLib>>

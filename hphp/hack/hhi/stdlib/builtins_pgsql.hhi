@@ -72,7 +72,7 @@ function pg_connect(string $connection_string, int $connection_type = 0);
 <<__PHPStdLib>>
 function pg_pconnect(string $connection_string, int $connection_type = 0);
 <<__PHPStdLib>>
-function pg_connection_pool_stat(): array<array>;
+function pg_connection_pool_stat(): varray<mixed>;
 <<__PHPStdLib>>
 function pg_connection_pool_sweep_free(): void;
 <<__PHPStdLib>>
@@ -95,13 +95,13 @@ function pg_escape_string(resource $connection, string $data): ?string;
 function pg_execute(
   resource $connection,
   string $stmtname,
-  array<mixed> $params,
+  varray<mixed> $params,
 );
 <<__PHPStdLib>>
 function pg_exec(
   resource $connection,
   string $stmtname,
-  array<mixed> $params,
+  varray<mixed> $params,
 ): ?resource;
 <<__PHPStdLib>>
 function pg_fetch_all_columns(resource $result, int $column = 0);
@@ -195,7 +195,7 @@ function pg_prepare(resource $connection, string $stmtname, string $query);
 function pg_query_params(
   resource $connection,
   string $query,
-  array<mixed> $params,
+  varray<mixed> $params,
 );
 <<__PHPStdLib>>
 function pg_query(resource $connection, string $query);
@@ -211,7 +211,7 @@ function pg_result_status(resource $result, int $type = 1): arraykey;
 function pg_send_execute(
   resource $connection,
   string $stmtname,
-  array<mixed> $params,
+  varray<mixed> $params,
 ): bool;
 <<__PHPStdLib>>
 function pg_send_prepare(
@@ -223,7 +223,7 @@ function pg_send_prepare(
 function pg_send_query_params(
   resource $connection,
   string $query,
-  array<mixed> $params,
+  varray<mixed> $params,
 ): bool;
 <<__PHPStdLib>>
 function pg_send_query(resource $connection, string $query): bool;

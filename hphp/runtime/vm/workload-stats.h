@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_WORKLOAD_STATS_H_
 #define incl_HPHP_WORKLOAD_STATS_H_
 
+#include <cstdint>
+
 namespace HPHP {
 
 // WorkloadStats is used to track per request timing for different states
@@ -52,6 +54,8 @@ struct WorkloadStats final {
 
   WorkloadStats (const WorkloadStats&) = delete;
   WorkloadStats& operator=(const WorkloadStats&) = delete;
+
+  static int64_t GetAndResetAvgRelativeInterp();
 };
 
 }

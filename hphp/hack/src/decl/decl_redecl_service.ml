@@ -156,7 +156,10 @@ let compute_gconsts_deps
 (*****************************************************************************)
 
 let redeclare_files ctx filel =
-  List.fold_left filel ~f:(on_the_fly_decl_file ctx) ~init:Errors.empty
+  let errors =
+    List.fold_left filel ~f:(on_the_fly_decl_file ctx) ~init:Errors.empty
+  in
+  (List.length filel, errors)
 
 let on_the_fly_decl_files filel =
   SharedMem.invalidate_caches ();
@@ -164,7 +167,7 @@ let on_the_fly_decl_files filel =
   (* Redeclaring the files *)
   redeclare_files filel
 
-let compute_deps ctx ~conservative_redecl fast filel =
+let compute_deps ctx ~conservative_redecl fast (filel : Relative_path.t list) =
   let infol = List.map filel (fun fn -> Relative_path.Map.find fast fn) in
   let names =
     List.fold_left infol ~f:FileInfo.merge_names ~init:FileInfo.empty_names
@@ -216,10 +219,15 @@ let load_and_on_the_fly_decl_files ctx _ filel =
     Out_channel.flush stdout;
     raise e
 
-let load_and_compute_deps ctx ~conservative_redecl _acc filel =
+let load_and_compute_deps
+    ctx ~conservative_redecl _acc (filel : Relative_path.t list) :
+    DepSet.t * DepSet.t * DepSet.t * int =
   try
     let fast = OnTheFlyStore.load () in
-    compute_deps ctx ~conservative_redecl fast filel
+    let (changed, to_redecl, to_recheck) =
+      compute_deps ctx ~conservative_redecl fast filel
+    in
+    (changed, to_redecl, to_recheck, List.length filel)
   with e ->
     Printf.printf "Error: %s\n" (Exn.to_string e);
     Out_channel.flush stdout;
@@ -229,13 +237,39 @@ let load_and_compute_deps ctx ~conservative_redecl _acc filel =
 (* Merges the results coming back from the different workers *)
 (*****************************************************************************)
 
-let merge_on_the_fly errorl1 errorl2 = Errors.merge errorl1 errorl2
+let merge_on_the_fly
+    files_initial_count files_declared_count (count, errorl1) errorl2 =
+  files_declared_count := !files_declared_count + count;
+  ServerProgress.send_percentage_progress_to_monitor
+    ~operation:"declaring"
+    ~done_count:!files_declared_count
+    ~total_count:files_initial_count
+    ~unit:"files"
+    ~extra:None;
+
+  Errors.merge errorl1 errorl2
 
 let merge_compute_deps
-    (changed1, to_redecl1, to_recheck1) (changed2, to_redecl2, to_recheck2) =
-  ( DepSet.union changed1 changed2,
-    DepSet.union to_redecl1 to_redecl2,
-    DepSet.union to_recheck1 to_recheck2 )
+    files_initial_count
+    files_computed_count
+    (changed1, to_redecl1, to_recheck1, computed_count)
+    (changed2, to_redecl2, to_recheck2) =
+  files_computed_count := !files_computed_count + computed_count;
+
+  let (changed, to_redecl, to_recheck) =
+    ( DepSet.union changed1 changed2,
+      DepSet.union to_redecl1 to_redecl2,
+      DepSet.union to_recheck1 to_recheck2 )
+  in
+
+  ServerProgress.send_percentage_progress_to_monitor
+    ~operation:"computing dependencies of"
+    ~done_count:!files_computed_count
+    ~total_count:files_initial_count
+    ~unit:"files"
+    ~extra:None;
+
+  (changed, to_redecl, to_recheck)
 
 (*****************************************************************************)
 (* The parallel worker *)
@@ -249,21 +283,43 @@ let parallel_on_the_fly_decl
     (fnl : Relative_path.t list) : Errors.t * DepSet.t * DepSet.t * DepSet.t =
   try
     OnTheFlyStore.store fast;
+    let files_initial_count = List.length fnl in
+    let files_declared_count = ref 0 in
+    let t = Unix.gettimeofday () in
+    Hh_logger.log "Declaring on-the-fly %d files" files_initial_count;
+    ServerProgress.send_percentage_progress_to_monitor
+      ~operation:"declaring"
+      ~done_count:!files_declared_count
+      ~total_count:files_initial_count
+      ~unit:"files"
+      ~extra:None;
     let errors =
       MultiWorker.call
         workers
         ~job:(load_and_on_the_fly_decl_files ctx)
         ~neutral:on_the_fly_neutral
-        ~merge:merge_on_the_fly
+        ~merge:(merge_on_the_fly files_initial_count files_declared_count)
         ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
     in
+    let t = Hh_logger.log_duration "Finished declaring on-the-fly" t in
+    Hh_logger.log "Computing dependencies of %d files" files_initial_count;
+    let files_computed_count = ref 0 in
+    ServerProgress.send_percentage_progress_to_monitor
+      ~operation:"computing dependencies of"
+      ~done_count:!files_computed_count
+      ~total_count:files_initial_count
+      ~unit:"files"
+      ~extra:None;
     let (changed, to_redecl, to_recheck) =
       MultiWorker.call
         workers
         ~job:(load_and_compute_deps ctx ~conservative_redecl)
         ~neutral:compute_deps_neutral
-        ~merge:merge_compute_deps
+        ~merge:(merge_compute_deps files_initial_count files_computed_count)
         ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
+    in
+    let (_t : float) =
+      Hh_logger.log_duration "Finished computing dependencies" t
     in
     OnTheFlyStore.clear ();
     (errors, changed, to_redecl, to_recheck)
@@ -372,9 +428,24 @@ end)
 
 let load_and_filter_dependent_classes
     (ctx : Provider_context.t) (maybe_dependent_classes : string list) :
-    string list =
+    string list * int =
   let classes = ClassSetStore.load () in
-  filter_dependent_classes ctx classes maybe_dependent_classes
+  ( filter_dependent_classes ctx classes maybe_dependent_classes,
+    List.length maybe_dependent_classes )
+
+let merge_dependent_classes
+    classes_initial_count
+    classes_filtered_count
+    (dependent_classes, filtered)
+    acc =
+  classes_filtered_count := !classes_filtered_count + filtered;
+  ServerProgress.send_percentage_progress_to_monitor
+    ~operation:"filtering"
+    ~done_count:!classes_filtered_count
+    ~total_count:classes_initial_count
+    ~unit:"classes"
+    ~extra:None;
+  dependent_classes @ acc
 
 let filter_dependent_classes_parallel
     (ctx : Provider_context.t)
@@ -386,17 +457,31 @@ let filter_dependent_classes_parallel
     filter_dependent_classes ctx classes maybe_dependent_classes
   else (
     ClassSetStore.store classes;
+    let classes_initial_count = List.length maybe_dependent_classes in
+    let classes_filtered_count = ref 0 in
+    let t = Unix.gettimeofday () in
+    Hh_logger.log "Filtering %d dependent classes" classes_initial_count;
+    ServerProgress.send_percentage_progress_to_monitor
+      ~operation:"filtering"
+      ~done_count:!classes_filtered_count
+      ~total_count:classes_initial_count
+      ~unit:"classes"
+      ~extra:None;
     let res =
       MultiWorker.call
         workers
         ~job:(fun _ c -> load_and_filter_dependent_classes ctx c)
-        ~merge:( @ )
+        ~merge:
+          (merge_dependent_classes classes_initial_count classes_filtered_count)
         ~neutral:[]
         ~next:
           (MultiWorker.next
              ~max_size:bucket_size
              workers
              maybe_dependent_classes)
+    in
+    let (_t : float) =
+      Hh_logger.log_duration "Finished filtering dependent classes" t
     in
     ClassSetStore.clear ();
     res
@@ -412,6 +497,19 @@ let get_dependent_classes
   |> get_maybe_dependent_classes get_classes classes
   |> filter_dependent_classes_parallel ctx workers ~bucket_size classes
   |> SSet.of_list
+
+let merge_elements
+    classes_initial_count classes_processed_count (elements, count) acc =
+  classes_processed_count := !classes_processed_count + count;
+
+  let acc = SMap.union elements acc in
+  ServerProgress.send_percentage_progress_to_monitor
+    ~operation:"getting members of"
+    ~done_count:!classes_processed_count
+    ~total_count:classes_initial_count
+    ~unit:"classes"
+    ~extra:(Some (Printf.sprintf "%d elements" (SMap.cardinal acc)));
+  acc
 
 (**
  * Get the [Decl_class_elements.t]s corresponding to the classes contained in
@@ -431,15 +529,31 @@ let get_elems
      * to be performed on the master process triggering the GC and slowing down
      * redeclaration. Using the workers prevents this from occurring
      *)
-    if List.length classes < 10 then
-      Decl_class_elements.get_for_classes ~old classes
-    else
-      MultiWorker.call
-        workers
-        ~job:(fun _ c -> Decl_class_elements.get_for_classes ~old c)
-        ~merge:SMap.union
-        ~neutral:SMap.empty
-        ~next:(MultiWorker.next ~max_size:bucket_size workers classes)
+    let classes_initial_count = List.length classes in
+    let t = Unix.gettimeofday () in
+    Hh_logger.log "Getting elements of %d classes" classes_initial_count;
+    let elements =
+      if classes_initial_count < 10 then
+        Decl_class_elements.get_for_classes ~old classes
+      else
+        let classes_processed_count = ref 0 in
+        ServerProgress.send_percentage_progress_to_monitor
+          ~operation:"getting members of"
+          ~done_count:!classes_processed_count
+          ~total_count:classes_initial_count
+          ~unit:"classes"
+          ~extra:None;
+        MultiWorker.call
+          workers
+          ~job:(fun _ c ->
+            (Decl_class_elements.get_for_classes ~old c, List.length c))
+          ~merge:(merge_elements classes_initial_count classes_processed_count)
+          ~neutral:SMap.empty
+          ~next:(MultiWorker.next ~max_size:bucket_size workers classes)
+    in
+
+    let (_t : float) = Hh_logger.log_duration "Finished getting elements" t in
+    elements
 
 (*****************************************************************************)
 (* The main entry point *)
@@ -474,7 +588,7 @@ let redo_type_decl
   (* If there aren't enough files, let's do this ourselves ... it's faster! *)
   let (errors, changed, to_redecl, to_recheck) =
     if List.length fnl < 10 then
-      let errors = on_the_fly_decl_files ctx fnl in
+      let ((_declared : int), errors) = on_the_fly_decl_files ctx fnl in
       let (changed, to_redecl, to_recheck) =
         compute_deps ctx ~conservative_redecl defs fnl
       in

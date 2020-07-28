@@ -244,6 +244,7 @@
     heap_global_storage
     naming
     procs_procs
+    server_monitor
     shallow_decl_compare
     typing_deps
     utils_core)

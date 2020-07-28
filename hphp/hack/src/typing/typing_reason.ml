@@ -23,7 +23,6 @@ type t =
   | Rforeach of Pos.t  (** Because it is iterated in a foreach loop *)
   | Rasyncforeach of Pos.t  (** Because it is iterated "await as" in foreach *)
   | Rarith of Pos.t
-  | Rarith_int of Pos.t
   | Rarith_ret of Pos.t
   | Rarith_ret_float of Pos.t * t * arg_position
       (** pos, arg float typing reason, arg position *)
@@ -53,8 +52,6 @@ type t =
   | Rformat of Pos.t * string * t
   | Rclass_class of Pos.t * string
   | Runknown_class of Pos.t
-  | Rdynamic_yield of Pos.t * Pos.t * string * string
-  | Rmap_append of Pos.t
   | Rvar_param of Pos.t
   | Runpack_param of Pos.t * Pos.t * int
       (** splat pos, fun def pos, number of args before splat *)
@@ -80,7 +77,6 @@ type t =
   | Rcontravariant_generic of t * string
   | Rinvariant_generic of t * string
   | Rregex of Pos.t
-  | Rlambda_use of Pos.t
   | Rimplicit_upper_bound of Pos.t * string
   | Rtype_variable of Pos.t
   | Rtype_variable_generics of Pos.t * string * string
@@ -154,8 +150,6 @@ let rec to_string prefix r =
     ]
   | Rarith _ ->
     [(p, prefix ^ " because this is used in an arithmetic operation")]
-  | Rarith_int _ ->
-    [(p, prefix ^ " because this is used in integer arithmetic operation")]
   | Rarith_ret _ ->
     [(p, prefix ^ " because this is the result of an arithmetic operation")]
   | Rarith_ret_float (_, r, s) ->
@@ -302,23 +296,6 @@ let rec to_string prefix r =
         ^ strip_ns s );
     ]
   | Runknown_class _ -> [(p, prefix ^ "; this class name is unknown to Hack")]
-  | Rdynamic_yield (_, yield_pos, implicit_name, yield_name) ->
-    [
-      ( p,
-        prefix
-        ^ Printf.sprintf
-            "\n%s\nDynamicYield implicitly defines %s() from the definition of %s()"
-            (Pos.string (Pos.to_absolute yield_pos))
-            implicit_name
-            yield_name );
-    ]
-  | Rmap_append _ ->
-    [
-      ( p,
-        prefix
-        ^ " because you can only append a Pair<Tkey, Tvalue> to an Map<Tkey, Tvalue>"
-      );
-    ]
   | Rinstantiate (r_orig, generic_name, r_inst) ->
     to_string prefix r_orig
     @ to_string ("  via this generic " ^ generic_name) r_inst
@@ -431,8 +408,6 @@ let rec to_string prefix r =
           ^ strip_ns class_name );
       ]
   | Rregex _ -> [(p, prefix ^ " resulting from this regex pattern")]
-  | Rlambda_use p ->
-    [(p, prefix ^ " because the lambda function was used here")]
   | Rimplicit_upper_bound (_, cstr) ->
     [
       ( p,
@@ -496,8 +471,6 @@ and to_pos = function
   | Rformat (p, _, _) -> p
   | Rclass_class (p, _) -> p
   | Runknown_class p -> p
-  | Rdynamic_yield (p, _, _, _) -> p
-  | Rmap_append p -> p
   | Rvar_param p -> p
   | Runpack_param (p, _, _) -> p
   | Rinout_param p -> p
@@ -525,9 +498,7 @@ and to_pos = function
   | Rcontravariant_generic (r, _) -> to_pos r
   | Rinvariant_generic (r, _) -> to_pos r
   | Rregex p -> p
-  | Rlambda_use p -> p
   | Rimplicit_upper_bound (p, _) -> p
-  | Rarith_int p -> p
   | Rarith_ret_float (p, _, _) -> p
   | Rarith_ret_num (p, _, _) -> p
   | Rarith_ret_int p -> p
@@ -607,8 +578,6 @@ let to_constructor_string r =
   | Rformat _ -> "Rformat"
   | Rclass_class _ -> "Rclass_class"
   | Runknown_class _ -> "Runknown_class"
-  | Rdynamic_yield _ -> "Rdynamic_yield"
-  | Rmap_append _ -> "Rmap_append"
   | Rvar_param _ -> "Rvar_param"
   | Runpack_param _ -> "Runpack_param"
   | Rinout_param _ -> "Rinout_param"
@@ -633,9 +602,7 @@ let to_constructor_string r =
   | Rcontravariant_generic _ -> "Rcontravariant_generic"
   | Rinvariant_generic _ -> "Rinvariant_generic"
   | Rregex _ -> "Rregex"
-  | Rlambda_use _ -> "Rlambda_use"
   | Rimplicit_upper_bound _ -> "Rimplicit_upper_bound"
-  | Rarith_int _ -> "Rarith_int"
   | Rarith_ret_num _ -> "Rarith_ret_num"
   | Rarith_ret_float _ -> "Rarith_ret_float"
   | Rarith_ret_int _ -> "Rarith_ret_int"

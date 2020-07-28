@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<939701ce3c08186d0fdbbeb4e975b45d>>
+// @generated SignedSource<<5e9db9c0d5fb70a763e3913f46cdc6ed>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -34,7 +34,6 @@ pub enum Reason<'a> {
     /// Because it is iterated "await as" in foreach
     Rasyncforeach(&'a pos::Pos<'a>),
     Rarith(&'a pos::Pos<'a>),
-    RarithInt(&'a pos::Pos<'a>),
     RarithRet(&'a pos::Pos<'a>),
     /// pos, arg float typing reason, arg position
     RarithRetFloat(&'a pos::Pos<'a>, &'a Reason<'a>, ArgPosition),
@@ -64,8 +63,6 @@ pub enum Reason<'a> {
     Rformat(&'a pos::Pos<'a>, &'a str, &'a Reason<'a>),
     RclassClass(&'a pos::Pos<'a>, &'a str),
     RunknownClass(&'a pos::Pos<'a>),
-    RdynamicYield(&'a pos::Pos<'a>, &'a pos::Pos<'a>, &'a str, &'a str),
-    RmapAppend(&'a pos::Pos<'a>),
     RvarParam(&'a pos::Pos<'a>),
     /// splat pos, fun def pos, number of args before splat
     RunpackParam(&'a pos::Pos<'a>, &'a pos::Pos<'a>, isize),
@@ -97,7 +94,6 @@ pub enum Reason<'a> {
     RcontravariantGeneric(&'a Reason<'a>, &'a str),
     RinvariantGeneric(&'a Reason<'a>, &'a str),
     Rregex(&'a pos::Pos<'a>),
-    RlambdaUse(&'a pos::Pos<'a>),
     RimplicitUpperBound(&'a pos::Pos<'a>, &'a str),
     RtypeVariable(&'a pos::Pos<'a>),
     RtypeVariableGenerics(&'a pos::Pos<'a>, &'a str, &'a str),

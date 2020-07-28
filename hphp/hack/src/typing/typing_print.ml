@@ -238,9 +238,6 @@ module Full = struct
         text "function";
         fun_type ~ty to_doc st env ft;
         text ")";
-        (match get_reason ft.ft_ret.et_type with
-        | Reason.Rdynamic_yield _ -> Space ^^ text "[DynamicYield]"
-        | _ -> Nothing);
       ]
 
   let ttuple k tyl = list "(" k tyl ")"

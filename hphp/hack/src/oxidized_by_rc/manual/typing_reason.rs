@@ -31,7 +31,6 @@ pub enum Reason_ {
     /// Because it is iterated "await as" in foreach
     Rasyncforeach,
     Rarith,
-    RarithInt,
     RarithRet,
     /// arg float typing reason, arg position
     RarithRetFloat(Rc<Reason>, ArgPosition),
@@ -62,8 +61,6 @@ pub enum Reason_ {
     Rformat(String, Rc<Reason>),
     RclassClass(String),
     RunknownClass,
-    RdynamicYield(Rc<Pos>, String, String),
-    RmapAppend,
     RvarParam,
     /// fun def pos, number of args before splat
     RunpackParam(Rc<Pos>, isize),
@@ -90,7 +87,6 @@ pub enum Reason_ {
     RcontravariantGeneric(Rc<Reason>, String),
     RinvariantGeneric(Rc<Reason>, String),
     Rregex,
-    RlambdaUse,
     RimplicitUpperBound(String),
     RtypeVariable,
     RtypeVariableGenerics(String, String),

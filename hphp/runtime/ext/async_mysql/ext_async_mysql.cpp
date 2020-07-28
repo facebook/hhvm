@@ -1277,6 +1277,8 @@ static String HHVM_METHOD(AsyncMysqlQueryResult, recvGtid) {
 static Object HHVM_METHOD(AsyncMysqlQueryResult, responseAttributes) {
   auto ret = req::make<c_Map>();
 
+  // #ifdef FACEBOOK until Open Source squangle pin is updated - needed as of
+  // Squangle 2020-07-26
   #ifdef FACEBOOK
   auto* data = Native::data<AsyncMysqlQueryResult>(this_);
   const auto& responseAttributes = data->m_query_result->responseAttributes();

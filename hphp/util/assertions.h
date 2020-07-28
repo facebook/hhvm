@@ -37,14 +37,14 @@
 #if defined(__INTEL_COMPILER)
 #define not_reached()                                                \
   do {                                                               \
-    assert(false);                                                   \
+    assertx(false);                                                  \
   } while (true)
 #elif defined(_MSC_VER)
 #define not_reached() __assume(0)
 #else
 #define not_reached() /* gcc-4.5 supports __builtin_unreachable() */  \
   do {                                                                \
-    assert(false);                                                    \
+    assertx(false);                                                   \
     __builtin_unreachable();                                          \
   } while (true)
 #endif
@@ -62,16 +62,6 @@
 } while(0)
 
 namespace HPHP {
-
-/*
- * assert_not_null() exists to help the compiler along when we know that a
- * pointer can't be null, and knowing this results in better codegen.
- */
-template<typename T>
-T* assert_not_null(T* ptr) {
-  if (ptr == nullptr) not_reached();
-  return ptr;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -210,6 +200,16 @@ private:
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * assert_not_null() exists to help the compiler along when we know that a
+ * pointer can't be null, and knowing this results in better codegen.
+ */
+template<typename T>
+T* assert_not_null(T* ptr) {
+  if (ptr == nullptr) not_reached();
+  return ptr;
+}
 
 }
 

@@ -8,3 +8,9 @@ File "array_map7.php", line 37, characters 32-49:
 Expected darray<mixed, bool>
 File "array_map7.php", line 13, characters 3-15:
 But got varray<[unresolved]>
+File "array_map7.php", line 29, characters 25-52:
+Invalid argument (Typing[4110])
+File "array_map7.php", line 37, characters 32-49:
+Expected darray<mixed, bool>
+File "array_map7.php", line 13, characters 3-15:
+But got varray<bool>

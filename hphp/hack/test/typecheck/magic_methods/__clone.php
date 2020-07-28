@@ -3,6 +3,7 @@
 class Example {
   public function __clone(): string {
     echo("Clone was called");
+    return "A";
   }
 }
 

@@ -88,14 +88,7 @@ let handle_exn_as_error : type res. Pos.t -> (unit -> res option) -> res option
  fun pos f ->
   try f ()
   with e ->
-    let e = Exception.wrap e in
-    let pos_str = pos |> Pos.to_absolute |> Pos.string in
-    HackEventLogger.type_check_exn_bug ~path:(Pos.filename pos) ~pos:pos_str ~e;
-    Hh_logger.error
-      "Exception while typechecking at position %s\n%s"
-      pos_str
-      (Exception.to_string e);
-    Errors.exception_occurred pos;
+    Errors.exception_occurred pos (Exception.wrap e);
     None
 
 let type_fun (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :

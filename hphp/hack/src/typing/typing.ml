@@ -1150,15 +1150,7 @@ and expr
       e
   with Inf.InconsistentTypeVarState _ as e ->
     (* we don't want to catch unwanted exceptions here, eg Timeouts *)
-    let stack = Caml.Printexc.get_raw_backtrace () in
-    let pos = Pos.string (Pos.to_absolute p) in
-    prerr_endline
-      (Printf.sprintf
-         "Exception while typechecking expression at position %s"
-         pos);
-    prerr_endline (Caml.Printexc.to_string e);
-    Caml.Printexc.print_raw_backtrace stderr stack;
-    Errors.exception_occurred p;
+    Errors.exception_occurred p (Exception.wrap e);
     make_result env p Aast.Any @@ err_witness env p
 
 and raw_expr

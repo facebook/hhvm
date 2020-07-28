@@ -5678,7 +5678,13 @@ let invalid_arraykey_constraint pos t =
     ^ t
     ^ ", which cannot be used as an arraykey (string | int)" )
 
-let exception_occurred pos =
+let exception_occurred pos e =
+  let pos_str = pos |> Pos.to_absolute |> Pos.string in
+  HackEventLogger.type_check_exn_bug ~path:(Pos.filename pos) ~pos:pos_str ~e;
+  Hh_logger.error
+    "Exception while typechecking at position %s\n%s"
+    pos_str
+    (Exception.to_string e);
   add
     (Typing.err_code Typing.ExceptionOccurred)
     pos

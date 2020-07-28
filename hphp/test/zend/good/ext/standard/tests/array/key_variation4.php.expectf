@@ -1,7 +1,0 @@
-*** Testing key() : usage variations ***
-
--- Two Dimensional Array --
-Initial Position: int(0)
-Next Position:    int(1)
-End Position:     int(2)
-===DONE===

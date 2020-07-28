@@ -1340,16 +1340,6 @@ static Variant iter_op_impl(Variant& refParam, OpPtr op,
 
 }
 
-Variant HHVM_FUNCTION(each,
-                      Variant& refParam) {
-  return iter_op_impl(
-    refParam,
-    &ArrayData::each,
-    Variant::NullInit(),
-    "each"
-  );
-}
-
 Variant HHVM_FUNCTION(current,
                       const Variant& refParam) {
   return iter_op_impl<NoCow>(
@@ -1371,26 +1361,6 @@ Variant HHVM_FUNCTION(key,
     &ArrayData::key,
     false,
     "key"
-  );
-}
-
-Variant HHVM_FUNCTION(next,
-                      Variant& refParam) {
-  return iter_op_impl(
-    refParam,
-    &ArrayData::next,
-    false,
-    "next"
-  );
-}
-
-Variant HHVM_FUNCTION(prev,
-                      Variant& refParam) {
-  return iter_op_impl(
-    refParam,
-    &ArrayData::prev,
-    false,
-    "prev"
   );
 }
 
@@ -3433,10 +3403,7 @@ struct ArrayExtension final : Extension {
     HHVM_FE(shuffle);
     HHVM_FE(count);
     HHVM_FE(sizeof);
-    HHVM_FE(each);
     HHVM_FE(current);
-    HHVM_FE(next);
-    HHVM_FE(prev);
     HHVM_FE(reset);
     HHVM_FE(end);
     HHVM_FE(key);

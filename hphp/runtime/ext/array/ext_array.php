@@ -643,25 +643,6 @@ function sizeof(
 ): int;
 
 /**
- * Return the current key and value pair from an array and advance the array
- *   cursor. After each() has executed, the array cursor will be left on the
- *   next element of the array, or past the last element if it hits the end of
- *   the array. You have to use reset() if you want to traverse the array again
- *   using each.
- *
- * @param mixed $array - The input array.
- *
- * @return mixed - Returns the current key and value pair from the array
- *   array. This pair is returned in a four-element array, with the keys 0, 1,
- *   key, and value. Elements 0 and key contain the key name of the array
- *   element, and 1 and value contain the data. If the internal pointer for the
- *   array points past the end of the array contents, each() returns FALSE.
- *
- */
-<<__Native>>
-function each(inout mixed $array): mixed;
-
-/**
  * Every array has an internal pointer to its "current" element, which is
  *   initialized to the first element inserted into the array.
  *
@@ -679,39 +660,6 @@ function each(inout mixed $array): mixed;
  */
 <<__Native>>
 function current(mixed $array): mixed;
-
-/**
- * next() behaves like current(), with one difference. It advances the
- *   internal array pointer one place forward before returning the element
- *   value. That means it returns the next array value and advances the internal
- *   array pointer by one.
- *
- * @param mixed $array - The array being affected.
- *
- * @return mixed - Returns the array value in the next place that's pointed to
- *   by the internal array pointer, or FALSE if there are no more elements.
- *   WarningThis function may return Boolean FALSE, but may also return a
- *   non-Boolean value which evaluates to FALSE, such as 0 or "". Please read
- *   the section on Booleans for more information. Use the === operator for
- *   testing the return value of this function.
- *
- */
-<<__Native>>
-function next(inout mixed $array): mixed;
-
-/**
- * Rewind the internal array pointer. prev() behaves just like next(), except
- *   it rewinds the internal array pointer one place instead of advancing it.
- *
- * @param mixed $array - The input array.
- *
- * @return mixed - Returns the array value in the previous place that's
- *   pointed to by the internal array pointer, or FALSE if there are no more
- *   elements.
- *
- */
-<<__Native>>
-function prev(inout mixed $array): mixed;
 
 /**
  * reset() rewinds array's internal pointer to the first element and returns

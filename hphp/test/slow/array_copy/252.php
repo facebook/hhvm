@@ -2,7 +2,7 @@
 
 function h3() {
   $x = varray[1,2,3,4];
-  next(inout $x);
+  end(inout $x);
   $y = $x;
   array_pop(inout $y);
   var_dump(current($x));

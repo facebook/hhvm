@@ -104,16 +104,10 @@ int64_t HHVM_FUNCTION(count,
                       int64_t mode = 0);
 int64_t HHVM_FUNCTION(sizeof,
                       const Variant& var);
-Variant HHVM_FUNCTION(each,
-                      Variant& array);
 Variant HHVM_FUNCTION(current,
                       const Variant& array);
 Variant HHVM_FUNCTION(key,
                       const Variant& array);
-Variant HHVM_FUNCTION(next,
-                      Variant& array);
-Variant HHVM_FUNCTION(prev,
-                      Variant& array);
 Variant HHVM_FUNCTION(reset,
                       Variant& array);
 Variant HHVM_FUNCTION(end,

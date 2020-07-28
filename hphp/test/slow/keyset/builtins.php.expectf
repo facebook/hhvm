@@ -316,18 +316,8 @@ keyset(4) {
 }
 array_sum: float(0)
 current 1: string(1) "u"
-each: array(4) {
-  [1]=>
-  string(1) "u"
-  ["value"]=>
-  string(1) "u"
-  [0]=>
-  string(1) "u"
-  ["key"]=>
-  string(1) "u"
-}
-current 2: string(1) "e"
 end: string(1) "t"
+current 2: string(1) "t"
 in_array: array(2) {
   [0]=>
   bool(false)
@@ -335,9 +325,6 @@ in_array: array(2) {
   bool(true)
 }
 key: string(1) "t"
-next: bool(false)
-prev 1: bool(false)
-prev 2: string(1) "n"
 reset: string(1) "u"
 count: int(6)
 array_pad 1: array(7) {
@@ -619,18 +606,8 @@ keyset(2) {
 }
 array_sum: int(30)
 current 1: int(7)
-each: array(4) {
-  [1]=>
-  int(7)
-  ["value"]=>
-  int(7)
-  [0]=>
-  int(7)
-  ["key"]=>
-  int(7)
-}
-current 2: int(8)
 end: int(8)
+current 2: int(8)
 in_array: array(2) {
   [0]=>
   bool(false)
@@ -638,9 +615,6 @@ in_array: array(2) {
   bool(false)
 }
 key: int(8)
-next: bool(false)
-prev 1: bool(false)
-prev 2: int(7)
 reset: int(7)
 count: int(4)
 array_pad 1: array(7) {
@@ -906,18 +880,8 @@ keyset(2) {
 }
 array_sum: int(30)
 current 1: string(1) "7"
-each: array(4) {
-  [1]=>
-  string(1) "7"
-  ["value"]=>
-  string(1) "7"
-  [0]=>
-  string(1) "7"
-  ["key"]=>
-  string(1) "7"
-}
-current 2: string(1) "8"
 end: string(1) "8"
+current 2: string(1) "8"
 in_array: array(2) {
   [0]=>
   bool(false)
@@ -925,9 +889,6 @@ in_array: array(2) {
   bool(false)
 }
 key: string(1) "8"
-next: bool(false)
-prev 1: bool(false)
-prev 2: string(1) "7"
 reset: string(1) "7"
 count: int(4)
 array_pad 1: array(7) {
@@ -1094,9 +1055,8 @@ keyset(0) {
 }
 array_sum: int(0)
 current 1: bool(false)
-each: bool(false)
-current 2: bool(false)
 end: bool(false)
+current 2: bool(false)
 in_array: array(2) {
   [0]=>
   bool(false)
@@ -1104,9 +1064,6 @@ in_array: array(2) {
   bool(false)
 }
 key: NULL
-next: bool(false)
-prev 1: bool(false)
-prev 2: bool(false)
 reset: bool(false)
 count: int(0)
 array_pad 1: array(7) {

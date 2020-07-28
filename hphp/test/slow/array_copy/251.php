@@ -2,7 +2,7 @@
 
 function h2() {
   $x = varray[1,2,3,4];
-  next(inout $x);
+  end(inout $x);
   $y = $x;
   $y[] = 4;
   var_dump(current($x));

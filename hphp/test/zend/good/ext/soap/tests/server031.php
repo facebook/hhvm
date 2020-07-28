@@ -1,17 +1,4 @@
 <?hh
-class ItemArray implements Iterator {
-
-
-    public function __construct(private varray $arr) {
-
-    }
-
-    public function rewind()  { $arr = $this->arr; reset(inout $arr); $this->arr = $arr;  }
-    public function current() { $arr = $this->arr; $x = current($arr); $this->arr = $arr; return $x; }
-    public function key()     { $arr = $this->arr; $key = key($arr); $this->arr = $arr; return $key; }
-    public function next()    { $arr = $this->arr; $n = next(inout $arr); $this->arr = $arr; return $n; }
-    public function valid()   { $arr = $this->arr; $current = current($arr); $this->arr = $arr; return $current !== false; }
-}
 
 class Item {
     public $text;
@@ -24,7 +11,7 @@ class Item {
 class handlerClass {
     public function getItems()
     {
-        return new ItemArray(varray[
+        return varray[
                 new Item(0),
                 new Item(1),
                 new Item(2),
@@ -35,7 +22,7 @@ class handlerClass {
                 new Item(7),
                 new Item(8),
                 new Item(9)
-            ]);
+            ];
     }
 }
 <<__EntryPoint>> function main(): void {

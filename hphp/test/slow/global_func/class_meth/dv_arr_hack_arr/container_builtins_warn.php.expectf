@@ -8,16 +8,7 @@ bool(false)
 Warning: Invalid operand type was used: reset() expects array, was clsmeth in %s/container_builtins_warn.php on line %d
 bool(false)
 
-Warning: Invalid operand type was used: each() expects array, was clsmeth in %s/container_builtins_warn.php on line %d
-NULL
-
 Warning: Invalid operand type was used: current() expects array, was clsmeth in %s/container_builtins_warn.php on line %d
-bool(false)
-
-Warning: Invalid operand type was used: next() expects array, was clsmeth in %s/container_builtins_warn.php on line %d
-bool(false)
-
-Warning: Invalid operand type was used: prev() expects array, was clsmeth in %s/container_builtins_warn.php on line %d
 bool(false)
 
 Warning: Invalid operand type was used: end() expects array, was clsmeth in %s/container_builtins_warn.php on line %d

@@ -1,5 +1,0 @@
-*** Test by calling method or function with incorrect numbers of arguments ***
-
-Warning: key_exists() expects exactly 2 parameters, 0 given in %s/key_exists_error.php on line 6
-
-Warning: key_exists() expects exactly 2 parameters, 3 given in %s/key_exists_error.php on line 7

@@ -877,27 +877,6 @@ Variant ArrayData::reset() {
   return cur_pos != iter_end() ? getValue(cur_pos) : Variant(false);
 }
 
-Variant ArrayData::next() {
-  // iter_advance must handle the case where the pos is iter_end already.
-  setPosition(iter_advance(getPosition()));
-  auto const cur_pos = getPosition();
-  return cur_pos != iter_end() ? getValue(cur_pos) : Variant(false);
-}
-
-Variant ArrayData::prev() {
-  // iter_rewind can assume pos is already a valid position.
-  auto pos_limit = iter_end();
-  auto const old_pos = getPosition();
-  if (old_pos != pos_limit) {
-    setPosition(iter_rewind(old_pos));
-    auto const cur_pos = getPosition();
-    if (cur_pos != pos_limit) {
-      return getValue(cur_pos);
-    }
-  }
-  return Variant(false);
-}
-
 Variant ArrayData::end() {
   setPosition(iter_last());
   auto const cur_pos = getPosition();
@@ -906,33 +885,23 @@ Variant ArrayData::end() {
 
 Variant ArrayData::key() const {
   auto const cur_pos = getPosition();
+  if (RO::EvalHackArrCompatNotices && cur_pos != iter_begin()) {
+    raise_hackarr_compat_notice("key() called for position != begin");
+  }
   return cur_pos != iter_end() ? getKey(cur_pos) : uninit_null();
 }
 
 Variant ArrayData::current() const {
   auto const cur_pos = getPosition();
+  if (RO::EvalHackArrCompatNotices && cur_pos != iter_begin()) {
+    raise_hackarr_compat_notice("current() called for position != begin");
+  }
   return cur_pos != iter_end() ? getValue(cur_pos) : Variant(false);
 }
 
 const StaticString
   s_value("value"),
   s_key("key");
-
-Variant ArrayData::each() {
-  auto const cur_pos = getPosition();
-  if (cur_pos != iter_end()) {
-    ArrayInit ret(4, ArrayInit::Mixed{});
-    Variant key(getKey(cur_pos));
-    Variant value(getValue(cur_pos));
-    ret.set(1, value);
-    ret.set(s_value, value);
-    ret.set(0, key);
-    ret.set(s_key, key);
-    setPosition(iter_advance(cur_pos));
-    return ret.toVariant();
-  }
-  return Variant(false);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers

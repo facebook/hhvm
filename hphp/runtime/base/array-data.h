@@ -496,27 +496,10 @@ public:
   Variant end();
 
   /*
-   * Rewind or advance the array's internal cursor, then return the value it
-   * points to.
-   *
-   * Return false if the cursor is or becomes invalid.
-   */
-  Variant prev();
-  Variant next();
-
-  /*
    * Like getValue(), except if `pos' is specifically the canonical invalid
    * position (i.e., iter_end()), return false.
    */
   Variant value(int32_t pos) const;
-
-  /*
-   * Return a 4-element array with keys 0 and "key" set to key() and keys 1 and
-   * "value" set to current(), then advance the array's internal cursor.
-   *
-   * If the cursor is invalid, return false.
-   */
-  Variant each();
 
   /*
    * Is the array's internal cursor pointing to...

@@ -4,7 +4,7 @@
 <<__EntryPoint>>
 function main_1415() {
 $arr = varray['one', 'two', 'three', 'four', 'stop', 'five'];
-while (list(, $val) = each(inout $arr)) {
+foreach ($arr as $val) {
   if ($val == 'stop') {
     break;
   }

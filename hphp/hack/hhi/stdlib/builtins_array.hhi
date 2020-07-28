@@ -233,13 +233,7 @@ function shuffle(inout $array);
   'doesn\'t suggest that it\'s counting bytes.'), __PHPStdLib, __Pure>>
 function sizeof($var);
 <<__PHPStdLib>>
-function each(inout $array);
-<<__PHPStdLib>>
 function current($array);
-<<__PHPStdLib>>
-function next(inout $array);
-<<__PHPStdLib>>
-function prev(inout $array);
 <<__PHPStdLib>>
 function reset(inout $array);
 <<__PHPStdLib>>

@@ -15,8 +15,8 @@ $array = darray[0 => 'zero', 1 => 'one', 200 => 'two'];
 echo "\n-- Initial Position: --\n";
 echo key($array) . " => " . current($array) . "\n";
 
-echo "\n-- Call to next() --\n";
-var_dump(next(inout $array));
+echo "\n-- Call to end() --\n";
+var_dump(end(inout $array));
 
 echo "\n-- Current Position: --\n";
 echo key($array) . " => " . current($array) . "\n";

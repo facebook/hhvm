@@ -63,11 +63,8 @@ echo"\n*** Checking for internal array pointer being reset when shift is called 
 echo "\nCurrent Element is : ";
 var_dump( current($mixed_array1) );
 
-echo "\nNext Element is : ";
-var_dump( next(inout $mixed_array1) );
-
-echo "\nNext Element is : ";
-var_dump( next(inout $mixed_array1) );
+echo "\nEnd Element is : ";
+var_dump( end(inout $mixed_array1) );
 
 echo "\nshifted Element is : ";
 var_dump( array_shift(inout $mixed_array1) );

@@ -197,9 +197,7 @@ int(2)
 
 Current Element is : int(1)
 
-Next Element is : int(2)
-
-Next Element is : int(3)
+End Element is : int(9)
 
 shifted Element is : int(1)
 

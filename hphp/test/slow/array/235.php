@@ -2,31 +2,29 @@
 
 function test_varray($a) {
   var_dump(current($a));
-  while (next(inout $a)) echo '.';
+  end(inout $a);
   $a[] = 2;
   $a[] = 3;
   var_dump(current($a));
-  var_dump(next(inout $a));
-  var_dump(next(inout $a));
+  end(inout $a);
   var_dump(current($a));
 }
 
 function test_darray($a) {
   var_dump(current($a));
-  while (next(inout $a)) echo '.';
+  end(inout $a);
   $a[] = 2;
   $a[] = 3;
   var_dump(current($a));
-  var_dump(next(inout $a));
-  var_dump(next(inout $a));
+  end(inout $a);
   var_dump(current($a));
   $a[17] = 4;
   var_dump(current($a));
   $a[18] = 5;
   var_dump(current($a));
-  while(next(inout $a)) echo '.';
+  end(inout $a);
   var_dump(current($a));
-  $a[1] = 5;
+  $a[1] = 6;
   var_dump(current($a));
 }
 

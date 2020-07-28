@@ -3,11 +3,11 @@
 -- Initial Position: --
 0 => zero
 
--- Call to next() --
-string(3) "one"
+-- Call to end() --
+string(3) "two"
 
 -- Current Position: --
-1 => one
+200 => two
 
 -- Call to reset() --
 string(4) "zero"

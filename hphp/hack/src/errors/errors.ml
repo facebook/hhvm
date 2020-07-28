@@ -749,10 +749,15 @@ let pos_contains (pos : Pos.absolute) ?(col_num : int option) (line_num : int) :
   else
     first_line < line_num && line_num < last_line
 
-(* Gets the list of marked messages associated with a line *)
-let marked_messages (position_group : position_group) (line_num : int) =
+(* Gets the list of unique marker/position tuples associated with a line. *)
+let markers_and_positions_for_line
+    (position_group : position_group) (line_num : int) :
+    (marker * Pos.absolute) sexp_list =
   List.filter position_group.messages ~f:(fun (_, (pos, _)) ->
       pos_contains pos line_num)
+  |> List.dedup_and_sort ~compare:(fun ((m, _), _) ((n, _), _) ->
+         Int.compare m n)
+  |> List.map ~f:(fun (marker, (pos, _)) -> (marker, pos))
 
 (* Gets the string containing the markers that should be displayed next to this line,
    e.g. something like "[1,4,5]" *)
@@ -764,7 +769,9 @@ let markers_string
     else
       s
   in
-  let markers = marked_messages position_group line_num |> List.map ~f:fst in
+  let markers =
+    markers_and_positions_for_line position_group line_num |> List.map ~f:fst
+  in
   match markers with
   | [] -> ""
   | markers ->
@@ -814,12 +821,11 @@ let line_highlighted position_group ~(line_num : int) ~(line : string option) =
   match line with
   | None -> Tty.apply_color (Tty.Dim Tty.Default) "No source found"
   | Some line ->
-    (match marked_messages position_group line_num with
+    (match markers_and_positions_for_line position_group line_num with
     | [] -> default_highlighted line
     | ms ->
       let get_markers_at_col col_num =
-        List.filter ms ~f:(fun (_, (pos, _)) ->
-            pos_contains pos ~col_num line_num)
+        List.filter ms ~f:(fun (_, pos) -> pos_contains pos ~col_num line_num)
         |> List.map ~f:fst
       in
       let color_column ms c =
@@ -1106,12 +1112,31 @@ let make_marker n error_code : marker =
   in
   (n, color)
 
+let marked_messages (error_code : error_code) (msgl : Pos.absolute message list)
+    : marked_message list =
+  (* If any position (meaning exact location and size) already has a marker and color,
+     use that position's marker and color instead of creating a new one. *)
+  List.folding_map
+    msgl
+    ~init:(1, [])
+    ~f:(fun (next_marker_n, existing_markers) msg ->
+      let (next_marker_n, existing_markers, marker) =
+        let curr_msg_pos = fst msg in
+        match
+          List.find existing_markers ~f:(fun (_, pos) ->
+              Pos.equal_absolute curr_msg_pos pos)
+        with
+        | None ->
+          let marker = make_marker next_marker_n error_code in
+          (next_marker_n + 1, (marker, curr_msg_pos) :: existing_markers, marker)
+        | Some (marker, _) -> (next_marker_n, existing_markers, marker)
+      in
+      ((next_marker_n, existing_markers), (marker, msg)))
+
 let to_highlighted_string (error : Pos.absolute error_) : string =
   let (error_code, msgl) = (get_code error, to_list error |> group_by_file) in
   let buf = Buffer.create 50 in
-  let marker_and_msgs =
-    List.mapi msgl ~f:(fun i m -> (make_marker (i + 1) error_code, m))
-  in
+  let marker_and_msgs = marked_messages error_code msgl in
 
   (* Typing[4110] Invalid return type [1]   <claim>
       -> Expected int [2]                   <reasons>

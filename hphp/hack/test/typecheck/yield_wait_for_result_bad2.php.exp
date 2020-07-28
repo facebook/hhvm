@@ -1,6 +1,0 @@
-File "yield_wait_for_result_bad2.php", line 13, characters 3-11:
-Invalid yield (Typing[4110])
-File "yield_wait_for_result_bad2.php", line 12, characters 17-30:
-Expected Awaitable<int>
-File "yield_wait_for_result_bad2.php", line 13, characters 3-11:
-But got Generator<int, int, [unresolved]> (result of function with 'yield' in the body)

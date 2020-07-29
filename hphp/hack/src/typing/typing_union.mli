@@ -23,12 +23,18 @@ We have seen cases where it would otherwise generate unions involving all
 the subsets of a set of types. *)
 val union : env -> locl_ty -> locl_ty -> env * locl_ty
 
-(** Computes the union of a list of types by union types two by two.
-This is quadratic, so if this requires more than 20 two by two unions,
-fall back to simply flatten the unions, bubble up the option and remove
-duplicates. *)
+(** Computes the union of a list of types by unioning types two by two.
+This has quadratic complexity, but in practice we benefit from aggressively
+simplified unions. *)
 val union_list : env -> Reason.t -> locl_ty list -> env * locl_ty
 
+(** Simplify the unions within a type.
+Return the result in a flattened, "normalized" form, with options and like types being
+"pushed out" of the result.
+E.g. transforms `(int | (int | null | X))` into `?(int | X)`
+
+This has quadratic complexity, but in practice we benefit from aggressively
+simplified unions. *)
 val simplify_unions :
   env ->
   ?on_tyvar:(env -> Reason.t -> Ident.t -> env * locl_ty) ->

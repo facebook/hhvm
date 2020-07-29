@@ -119,7 +119,10 @@ let ty_equiv env ty1 ty2 ~are_ty_param =
   (env, ty)
 
 (** Constructor for unions and options, taking a list of types and whether the
-result should be nullable. Simplify things like singleton unions or nullable nothing. *)
+result should be nullable. Simplify things like singleton unions or nullable nothing.
+This allows the result of any unioning function from this module to be flattened and normalized,
+with options being "pushed out" of the union (e.g. we return ?(A|B) instead of (A | ?B)
+or (A | null | B), and similarly with like types). *)
 let make_union env r tyl reason_nullable_opt reason_dyn_opt =
   let ty =
     match tyl with
@@ -342,6 +345,10 @@ and simplify_union_ env ty1 ty2 r =
       ty_equiv env ty1 ty2 ~are_ty_param:false
   with Dont_simplify -> (env, None)
 
+(** Union two lists of types together.
+This has complexity N*M where N, M are the sized of the two lists.
+The two lists are first flattened and null and dynamic are extracted from them,
+then we attempt to simplify each pair of types. *)
 and union_lists env tyl1 tyl2 r =
   let orr r_opt r = Some (Option.value r_opt ~default:r) in
   let rec decompose env ty tyl tyl_res r_null r_union r_dyn =
@@ -502,7 +509,18 @@ and union_reason r1 r2 =
   else
     r2
 
-let normalize_union env ?on_tyvar tyl =
+(** Takes a list of types, possibly including unions, and flattens it.
+Returns a set of types.
+If null is encountered (possibly in an option), get its reason and return it
+in a separate optional reason (do not add null in the resulting set of types).
+Do the same if dynamic is encountered.
+This is because options and dynamic have to be "pushed out" of the resulting union. *)
+let normalize_union env ?on_tyvar tyl :
+    Typing_env_types.env
+    * Reason.t option
+    * Reason.t option
+    * Reason.t option
+    * TySet.t =
   let orr r_opt r = Some (Option.value r_opt ~default:r) in
   let rec normalize_union env tyl r_null r_union r_dyn =
     match tyl with
@@ -543,6 +561,8 @@ let normalize_union env ?on_tyvar tyl =
   in
   normalize_union env tyl None None None
 
+(** Quadratically union types in a list two by two, attempting to simplify
+each pair. *)
 let union_list_2_by_2 env r tyl =
   let (env, tyl) =
     List.fold tyl ~init:(env, []) ~f:(fun (env, res_tyl) ty ->
@@ -569,6 +589,7 @@ let union_list env r tyl =
 let fold_union env r tyl =
   List.fold_left_env env tyl ~init:(MakeType.nothing r) ~f:union
 
+(* See documentation in mli file *)
 let simplify_unions env ?on_tyvar ty =
   let r = get_reason ty in
   Log.log_simplify_unions r ty

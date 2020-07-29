@@ -712,6 +712,30 @@ and check_parents_sealed env child_def child_type =
         end
       | _ -> ())
 
+(* Reject multiple instantiations of the same generic interface
+ * in extends and implements clauses.
+ * e.g. disallow class C implements I<string>, I<int>
+ *
+ * O(n^2) but we don't expect number of instantiated interfaces to be large
+ *)
+and check_implements_or_extends_unique impl =
+  match impl with
+  | [] -> ()
+  | ty :: rest ->
+    (match get_node ty with
+    | Tapply ((pos, name), _ :: _) ->
+      let (pos_list, rest) =
+        List.partition_map rest (fun ty ->
+            match get_node ty with
+            | Tapply ((pos', name'), _) when String.equal name name' ->
+              `Fst pos'
+            | _ -> `Snd ty)
+      in
+      if not (List.is_empty pos_list) then
+        Errors.duplicate_interface pos name pos_list;
+      check_implements_or_extends_unique rest
+    | _ -> check_implements_or_extends_unique rest)
+
 and check_const_trait_members pos env use_list =
   let (_, trait, _) = Decl_utils.unwrap_class_hint use_list in
   match Env.get_class env trait with
@@ -810,11 +834,12 @@ and class_def_ env c tc =
     }
   in
   let (pc, _) = c.c_name in
-  let impl =
-    List.map
-      (c.c_extends @ c.c_implements @ c.c_uses)
-      (Decl_hint.hint env.decl_env)
-  in
+  let extends = List.map c.c_extends (Decl_hint.hint env.decl_env) in
+  let implements = List.map c.c_implements (Decl_hint.hint env.decl_env) in
+  let uses = List.map c.c_uses (Decl_hint.hint env.decl_env) in
+  check_implements_or_extends_unique implements;
+  check_implements_or_extends_unique extends;
+  let impl = extends @ implements @ uses in
   let env =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       (fst c.c_name)

@@ -631,4 +631,5 @@ NonObjectMemberWrite = 4373
 ConcreteConstInterfaceOverride = 4374
 MethCallerTrait = 4375
 PocketUniversesAttributes = 4376
+DuplicateInterface = 4377
   |}]

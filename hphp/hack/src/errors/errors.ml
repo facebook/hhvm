@@ -5710,6 +5710,15 @@ let meth_caller_trait pos trait_name =
     ^ " is a trait which cannot be used with meth_caller. Use a class instead."
     )
 
+let duplicate_interface pos name others =
+  add_list
+    (Typing.err_code Typing.DuplicateInterface)
+    ( ( pos,
+        Printf.sprintf
+          "Interface %s is used more than once in this declaration."
+          (strip_ns name) )
+    :: List.map others (fun pos -> (pos, "Here is another occurrence")) )
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

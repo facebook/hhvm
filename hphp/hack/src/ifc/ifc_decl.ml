@@ -106,62 +106,66 @@ let resolve_duplicate_policied_properties policied_properties =
   List.iter ~f:go policied_properties;
   Caml.Hashtbl.fold (fun _ pprop acc -> pprop :: acc) prop_table []
 
-let class_ class_decl_env class_ =
-  let { A.c_name = (_, name); c_vars = properties; _ } = class_ in
+let is_visible pp = not @@ A.equal_visibility A.Private pp.pp_visibility
+
+let add_super class_decl_env class_decl_acc super =
+  match SMap.find_opt super class_decl_env with
+  | Some { cd_policied_properties } ->
+    let super_props = List.filter ~f:is_visible cd_policied_properties in
+    let props = super_props @ class_decl_acc.cd_policied_properties in
+    { cd_policied_properties = props }
+  | None -> fail @@ super ^ " wasn't found in the inheritance hierarchy"
+
+let mk_policied_prop
+    {
+      A.cv_id = (_, pp_name);
+      cv_type = (pp_type, _);
+      cv_visibility = pp_visibility;
+      cv_user_attributes = attrs;
+      _;
+    } =
   let find_policy attributes =
     match get_attr policied_id attributes with
     | None -> `No_policy
     | Some attr ->
       (match attr.A.ua_params with
-      | [] -> `Policy
-      | [(_, A.String purpose)] -> `Purpose purpose
+      | [] -> `Policy None
+      | [(_, A.String purpose)] -> `Policy (Some purpose)
       | _ -> fail "expected a string literal as a purpose argument.")
   in
-  let mk_policied_prop
-      {
-        A.cv_id = (_, pp_name);
-        cv_type = (pp_type, _);
-        cv_visibility = pp_visibility;
-        cv_user_attributes = attrs;
-        _;
-      } =
-    match find_policy attrs with
-    | `No_policy -> None
-    | `Policy -> Some { pp_name; pp_type; pp_visibility; pp_purpose = None }
-    | `Purpose purpose ->
-      Some { pp_name; pp_type; pp_visibility; pp_purpose = Some purpose }
-  in
-  let is_visible pp = not @@ A.equal_visibility A.Private pp.pp_visibility in
-  let add_super_property policied_prop_acc super =
-    match SMap.find_opt super class_decl_env with
-    | Some { cd_policied_properties; _ } ->
-      let super_props = List.filter ~f:is_visible cd_policied_properties in
-      super_props @ policied_prop_acc
-    | None -> fail @@ super ^ " wasn't found in the inheritance hierarchy"
+  match find_policy attrs with
+  | `No_policy -> None
+  | `Policy pp_purpose -> Some { pp_name; pp_type; pp_visibility; pp_purpose }
+
+let class_ class_decl_env class_ =
+  let { A.c_name = (_, name); c_vars = properties; _ } = class_ in
+
+  (* Class decl using the immediately available information of the base class *)
+  let cd_policied_properties = List.filter_map ~f:mk_policied_prop properties in
+  let base_class_decl = { cd_policied_properties } in
+
+  (* Class decl extended with inherited policied properties *)
+  let supers = immediate_supers class_ in
+  let class_decl =
+    let f = add_super class_decl_env in
+    List.fold ~f ~init:base_class_decl supers
   in
   let cd_policied_properties =
-    let native_properties = List.filter_map ~f:mk_policied_prop properties in
-    let supers = immediate_supers class_ in
-    List.fold ~f:add_super_property ~init:native_properties supers
-    |> resolve_duplicate_policied_properties
+    resolve_duplicate_policied_properties class_decl.cd_policied_properties
     |> List.sort ~compare:(fun p1 p2 -> String.compare p1.pp_name p2.pp_name)
   in
-  let cd_tparam_variance =
-    List.map ~f:(fun tp -> tp.A.tp_variance) class_.A.c_tparams.A.c_tparam_list
-  in
-  let class_decl = { cd_policied_properties; cd_tparam_variance } in
+  let class_decl = { cd_policied_properties } in
+
+  (* Function declarations out of methods *)
   let fun_decls = List.map ~f:(meth name) class_.A.c_methods in
+
   (name, class_decl, fun_decls)
 
 let magic_class_decls =
   SMap.of_list
     [
-      ( "\\HH\\vec",
-        {
-          cd_policied_properties = [];
-          cd_tparam_variance = [Ast_defs.Covariant];
-        } );
-      (exception_id, { cd_policied_properties = []; cd_tparam_variance = [] });
+      ("\\HH\\vec", { cd_policied_properties = [] });
+      (exception_id, { cd_policied_properties = [] });
     ]
 
 let topsort_classes classes =

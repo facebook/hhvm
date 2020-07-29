@@ -45,6 +45,7 @@ type quant =
 (* Types with policies *)
 type ptype =
   | Tprim of policy
+  | Tgeneric of policy
   | Ttuple of ptype list
   | Tunion of ptype list
   | Tinter of ptype list
@@ -55,7 +56,7 @@ and class_ = {
   c_self: policy;
   c_lump: policy;
   c_property_map: ptype Lazy.t SMap.t;
-  c_tparams: (ptype * Ast_defs.variance) list;
+  c_tparams: ptype list SMap.t;
 }
 
 type fun_proto = {
@@ -131,7 +132,12 @@ type policied_property = {
 type class_decl = {
   (* the list of policied properties in the class *)
   cd_policied_properties: policied_property list;
-  cd_tparam_variance: Ast_defs.variance list;
+}
+
+type magic_decl = {
+  ma_class_decl: class_decl;
+  ma_tparams: Type.locl_ty list;
+  ma_variances: Ast_defs.variance list;
 }
 
 type fun_decl_kind =
@@ -148,6 +154,27 @@ type decl_env = {
   de_fun: fun_decl SMap.t;
 }
 
+type options = {
+  (* Verbosity level for the IFC output.
+   * Each level includes everything below it as well.
+   * 0: What the user is meant to see
+   * 1: Details constraints after solving
+   * 2: Results of IFC analysis on functions/methods
+   * 3: Declaration analysis results
+   *)
+  verbosity: int;
+  (* String representation of a security lattice. *)
+  security_lattice: string;
+}
+
+type meta = {
+  m_opts: options;
+  (* Relative path to the file being checked *)
+  m_path: Relative_path.t;
+  (* Typechecker context *)
+  m_ctx: Provider_context.t;
+}
+
 (* Read-only environment containing just enough information to compute flow
    types from Hack types *)
 type proto_renv = {
@@ -159,6 +186,8 @@ type proto_renv = {
   pre_decl: decl_env;
   (* Hack type environment *)
   pre_tenv: Tast.saved_env;
+  (* Metadata *)
+  pre_meta: meta;
 }
 
 (* Read-only environment information managed following a stack discipline
@@ -191,15 +220,6 @@ type callable_result = {
   res_deps: SSet.t;
 }
 
-type options = {
-  (* Verbosity level for the IFC output.
-   * Each level includes everything below it as well.
-   * 0: What the user is meant to see
-   * 1: Details constraints after solving
-   * 2: Results of IFC analysis on functions/methods
-   * 3: Declaration analysis results
-   *)
-  verbosity: int;
-  (* String representation of a security lattice. *)
-  security_lattice: string;
-}
+type adjustment =
+  | Astrengthen
+  | Aweaken

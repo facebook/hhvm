@@ -15,32 +15,62 @@ Decls:
 Analyzing \empty:
 * pc: pc
 * This: None
-* Return: \HH\vec<<tp>><\HH\vec, lump'1>
+* Return:
+    \HH\vec<\HH\Container=[<tp>], \HH\KeyedContainer=[<tp'1>, <tp'2>],
+              \HH\KeyedTraversable=[<tp'3>, <tp'4>],
+              \HH\Rx\KeyedTraversable=[<tp'5>, <tp'6>],
+              \HH\Rx\Traversable=[<tp'7>], \HH\Traversable=[<tp'8>],
+              \HH\vec=[<tp'9>]><\HH\vec, lump'1>
 * Exception: \Exception<\Exception, lump>
 * Params:
   lvars: {}
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $vec -> \HH\vec<nothing><\HH\vec'2, lump'3> }
+    lvars:
+      { $vec ->
+        \HH\vec<\HH\Container=[nothing],
+                  \HH\KeyedContainer=[<tp'13>, nothing],
+                  \HH\KeyedTraversable=[<tp'14>, nothing],
+                  \HH\Rx\KeyedTraversable=[<tp'15>, nothing],
+                  \HH\Rx\Traversable=[nothing], \HH\Traversable=[nothing],
+                  \HH\vec=[nothing]><\HH\vec'2, lump'3> }
 Constraints:
-  [lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, lump'3 = lump'1,
-   \HH\vec'2 < \HH\vec]
+  [tp'10 < tp'13, tp'11 < tp'14, tp'12 < tp'15, lump'2 = lump'3,
+   \HH\vec'1 < \HH\vec'2, tp'13 < tp'1, tp'14 < tp'3, tp'15 < tp'5,
+   lump'3 = lump'1, \HH\vec'2 < \HH\vec]
 
 Analyzing \testCollection:
 * pc: pc
 * This: None
-* Return: \HH\vec<<tp>><\HH\vec, lump'1>
+* Return:
+    \HH\vec<\HH\Container=[<tp>], \HH\KeyedContainer=[<tp'1>, <tp'2>],
+              \HH\KeyedTraversable=[<tp'3>, <tp'4>],
+              \HH\Rx\KeyedTraversable=[<tp'5>, <tp'6>],
+              \HH\Rx\Traversable=[<tp'7>], \HH\Traversable=[<tp'8>],
+              \HH\vec=[<tp'9>]><\HH\vec, lump'1>
 * Exception: \Exception<\Exception, lump>
 * Params:
   lvars: {}
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $there -> <$there>; $vec -> \HH\vec<<tp'2>><\HH\vec'2, lump'3> }
+    lvars:
+      { $there -> <$there>;
+        $vec ->
+        \HH\vec<\HH\Container=[<tp'20>],
+                  \HH\KeyedContainer=[<tp'21>, <tp'22>],
+                  \HH\KeyedTraversable=[<tp'23>, <tp'24>],
+                  \HH\Rx\KeyedTraversable=[<tp'25>, <tp'26>],
+                  \HH\Rx\Traversable=[<tp'27>], \HH\Traversable=[<tp'28>],
+                  \HH\vec=[<tp'29>]><\HH\vec'2, lump'3> }
 Constraints:
-  [PUBLIC < $there, PUBLIC < tp'1, $there < tp'1, tp'1 < tp'2,
-   lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, tp'2 < tp, lump'3 = lump'1,
+  [PUBLIC < $there, PUBLIC < tp'19, $there < tp'19, tp'10 < tp'20,
+   tp'12 < tp'22, tp'11 < tp'21, tp'14 < tp'24, tp'13 < tp'23, tp'16 < tp'26,
+   tp'15 < tp'25, tp'17 < tp'27, tp'18 < tp'28, tp'19 < tp'29,
+   lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, tp'20 < tp, tp'22 < tp'2,
+   tp'21 < tp'1, tp'24 < tp'4, tp'23 < tp'3, tp'26 < tp'6, tp'25 < tp'5,
+   tp'27 < tp'7, tp'28 < tp'8, tp'29 < tp'9, lump'3 = lump'1,
    \HH\vec'2 < \HH\vec]
 
 Analyzing \testAdd1:
@@ -49,13 +79,28 @@ Analyzing \testAdd1:
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:
-  lvars: { $vec -> \HH\vec<<tp>><\HH\vec, lump'1> }
+  lvars:
+    { $vec ->
+      \HH\vec<\HH\Container=[<tp>], \HH\KeyedContainer=[<tp'1>, <tp'2>],
+                \HH\KeyedTraversable=[<tp'3>, <tp'4>],
+                \HH\Rx\KeyedTraversable=[<tp'5>, <tp'6>],
+                \HH\Rx\Traversable=[<tp'7>], \HH\Traversable=[<tp'8>],
+                \HH\vec=[<tp'9>]><\HH\vec, lump'1> }
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $vec -> \HH\vec<<tp'1>><\HH\vec'1, lump'2> }
+    lvars:
+      { $vec ->
+        \HH\vec<\HH\Container=[<tp'10>],
+                  \HH\KeyedContainer=[<tp'11>, <tp'12>],
+                  \HH\KeyedTraversable=[<tp'13>, <tp'14>],
+                  \HH\Rx\KeyedTraversable=[<tp'15>, <tp'16>],
+                  \HH\Rx\Traversable=[<tp'17>], \HH\Traversable=[<tp'18>],
+                  \HH\vec=[<tp'19>]><\HH\vec'1, lump'2> }
 Constraints:
-  [tp < tp'1, lump'1 = lump'2, \HH\vec < \HH\vec'1, PUBLIC < tp'1]
+  [tp < tp'10, tp'2 < tp'12, tp'1 < tp'11, tp'4 < tp'14, tp'3 < tp'13,
+   tp'6 < tp'16, tp'5 < tp'15, tp'7 < tp'17, tp'8 < tp'18, tp'9 < tp'19,
+   lump'1 = lump'2, \HH\vec < \HH\vec'1, PUBLIC < tp'19]
 
 Analyzing \testAdd2:
 * pc: pc
@@ -67,10 +112,21 @@ Analyzing \testAdd2:
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $vec -> \HH\vec<<tp'2>><\HH\vec'2, lump'3> }
+    lvars:
+      { $vec ->
+        \HH\vec<\HH\Container=[<tp'20>],
+                  \HH\KeyedContainer=[<tp'21>, <tp'22>],
+                  \HH\KeyedTraversable=[<tp'23>, <tp'24>],
+                  \HH\Rx\KeyedTraversable=[<tp'25>, <tp'26>],
+                  \HH\Rx\Traversable=[<tp'27>], \HH\Traversable=[<tp'28>],
+                  \HH\vec=[<tp'29>]><\HH\vec'2, lump'3> }
 Constraints:
-  [PUBLIC < tp, PUBLIC < tp, tp < tp'1, lump'1 = lump'2, \HH\vec < \HH\vec'1,
-   tp'1 < tp'2, lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, PUBLIC < tp'2]
+  [PUBLIC < tp'9, PUBLIC < tp'9, tp < tp'10, tp'2 < tp'12, tp'1 < tp'11,
+   tp'4 < tp'14, tp'3 < tp'13, tp'6 < tp'16, tp'5 < tp'15, tp'7 < tp'17,
+   tp'8 < tp'18, tp'9 < tp'19, lump'1 = lump'2, \HH\vec < \HH\vec'1,
+   tp'10 < tp'20, tp'12 < tp'22, tp'11 < tp'21, tp'14 < tp'24, tp'13 < tp'23,
+   tp'16 < tp'26, tp'15 < tp'25, tp'17 < tp'27, tp'18 < tp'28, tp'19 < tp'29,
+   lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, PUBLIC < tp'29]
 
 Analyzing \retElem:
 * pc: pc
@@ -82,14 +138,29 @@ Analyzing \retElem:
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $vec -> \HH\vec<<tp'1>><\HH\vec'1, lump'2> }
+    lvars:
+      { $vec ->
+        \HH\vec<\HH\Container=[<tp'10>],
+                  \HH\KeyedContainer=[<tp'11>, <tp'12>],
+                  \HH\KeyedTraversable=[<tp'13>, <tp'14>],
+                  \HH\Rx\KeyedTraversable=[<tp'15>, <tp'16>],
+                  \HH\Rx\Traversable=[<tp'17>], \HH\Traversable=[<tp'18>],
+                  \HH\vec=[<tp'19>]><\HH\vec'1, lump'2> }
 Constraints:
-  [PUBLIC < tp, PUBLIC < tp, PUBLIC < tp, tp < tp'1, lump'1 = lump'2,
-   \HH\vec < \HH\vec'1, tp'1 < ret]
+  [PUBLIC < tp'9, PUBLIC < tp'9, PUBLIC < tp'9, tp < tp'10, tp'2 < tp'12,
+   tp'1 < tp'11, tp'4 < tp'14, tp'3 < tp'13, tp'6 < tp'16, tp'5 < tp'15,
+   tp'7 < tp'17, tp'8 < tp'18, tp'9 < tp'19, lump'1 = lump'2,
+   \HH\vec < \HH\vec'1, tp'19 < ret]
 
 Analyzing set:
 * pc: pc
-* This: \C<\C, lump'1, i=<INT>, v=\HH\vec<<VEC>><VEC, VEC>>
+* This:
+    \C<\C, lump'1, i=<INT>,
+         v=\HH\vec<\HH\Container=[<VEC>], \HH\KeyedContainer=[<VEC>, <VEC>],
+                     \HH\KeyedTraversable=[<VEC>, <VEC>],
+                     \HH\Rx\KeyedTraversable=[<VEC>, <VEC>],
+                     \HH\Rx\Traversable=[<VEC>], \HH\Traversable=[<VEC>],
+                     \HH\vec=[<VEC>]><VEC, VEC>>
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:
@@ -99,31 +170,229 @@ Analyzing set:
   Locals:
     lvars: {}
 Constraints:
-  [INT < .i, \C < .i, VEC < .v, VEC < .v'1, \C < .v, \C < VEC, .v'1 < VEC,
-   VEC = VEC, .v < VEC, .i < VEC, pc < VEC]
+  [INT < .i, \C < .i, VEC < .v, VEC < .v'1, VEC < .v'2, VEC < .v'3,
+   VEC < .v'4, VEC < .v'5, VEC < .v'6, VEC < .v'7, VEC < .v'8, VEC < .v'9,
+   VEC < .v'10, \C < .v, \C < VEC, .v'1 < VEC, .v'3 < VEC, .v'2 < VEC,
+   .v'5 < VEC, .v'4 < VEC, .v'7 < VEC, .v'6 < VEC, .v'8 < VEC, .v'9 < VEC,
+   .v'10 < VEC, VEC = VEC, .v < VEC, .i < VEC, pc < VEC]
 
 Analyzing nested:
 * pc: pc
-* This: \C<\C, lump'1, i=<INT>, v=\HH\vec<<VEC>><VEC, VEC>>
+* This:
+    \C<\C, lump'1, i=<INT>,
+         v=\HH\vec<\HH\Container=[<VEC>], \HH\KeyedContainer=[<VEC>, <VEC>],
+                     \HH\KeyedTraversable=[<VEC>, <VEC>],
+                     \HH\Rx\KeyedTraversable=[<VEC>, <VEC>],
+                     \HH\Rx\Traversable=[<VEC>], \HH\Traversable=[<VEC>],
+                     \HH\vec=[<VEC>]><VEC, VEC>>
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:
   lvars:
-    { $vv -> \HH\vec<\HH\vec<<tp>><\HH\vec, lump'3>><\HH\vec'1, lump'2> }
+    { $vv ->
+      \HH\vec<\HH\Container=[\HH\vec<\HH\Container=[<tp>],
+                                       \HH\KeyedContainer=[<tp'1>, <tp'2>],
+                                       \HH\KeyedTraversable=[<tp'3>, <tp'4>],
+                                       \HH\Rx\KeyedTraversable=[<tp'5>,
+                                                                  <tp'6>],
+                                       \HH\Rx\Traversable=[<tp'7>],
+                                       \HH\Traversable=[<tp'8>],
+                                       \HH\vec=[<tp'9>]><\HH\vec, lump'3>],
+                \HH\KeyedContainer=[<tp'10>,
+                                      \HH\vec<\HH\Container=[<tp'11>],
+                                                \HH\KeyedContainer=[<tp'12>,
+                                                                    <tp'13>],
+                                                \HH\KeyedTraversable=[
+                                                <tp'14>, <tp'15>],
+                                                \HH\Rx\KeyedTraversable=[
+                                                <tp'16>, <tp'17>],
+                                                \HH\Rx\Traversable=[<tp'18>],
+                                                \HH\Traversable=[<tp'19>],
+                                                \HH\vec=[<tp'20>]><\HH\vec'1,
+                                                                    lump'4>],
+                \HH\KeyedTraversable=[<tp'21>,
+                                        \HH\vec<\HH\Container=[<tp'22>],
+                                                  \HH\KeyedContainer=[
+                                                  <tp'23>, <tp'24>],
+                                                  \HH\KeyedTraversable=[
+                                                  <tp'25>, <tp'26>],
+                                                  \HH\Rx\KeyedTraversable=[
+                                                  <tp'27>, <tp'28>],
+                                                  \HH\Rx\Traversable=[
+                                                  <tp'29>],
+                                                  \HH\Traversable=[<tp'30>],
+                                                  \HH\vec=[<tp'31>]><
+                                        \HH\vec'2, lump'5>],
+                \HH\Rx\KeyedTraversable=[<tp'32>,
+                                           \HH\vec<\HH\Container=[<tp'33>],
+                                                     \HH\KeyedContainer=[
+                                                     <tp'34>, <tp'35>],
+                                                     \HH\KeyedTraversable=[
+                                                     <tp'36>, <tp'37>],
+                                                     \HH\Rx\KeyedTraversable=[
+                                                     <tp'38>, <tp'39>],
+                                                     \HH\Rx\Traversable=[
+                                                     <tp'40>],
+                                                     \HH\Traversable=[
+                                                     <tp'41>],
+                                                     \HH\vec=[<tp'42>]><
+                                           \HH\vec'3, lump'6>],
+                \HH\Rx\Traversable=[\HH\vec<\HH\Container=[<tp'43>],
+                                              \HH\KeyedContainer=[<tp'44>,
+                                                                    <tp'45>],
+                                              \HH\KeyedTraversable=[<tp'46>,
+                                                                    <tp'47>],
+                                              \HH\Rx\KeyedTraversable=[
+                                              <tp'48>, <tp'49>],
+                                              \HH\Rx\Traversable=[<tp'50>],
+                                              \HH\Traversable=[<tp'51>],
+                                              \HH\vec=[<tp'52>]><\HH\vec'4,
+                                                                   lump'7>],
+                \HH\Traversable=[\HH\vec<\HH\Container=[<tp'53>],
+                                           \HH\KeyedContainer=[<tp'54>,
+                                                                 <tp'55>],
+                                           \HH\KeyedTraversable=[<tp'56>,
+                                                                   <tp'57>],
+                                           \HH\Rx\KeyedTraversable=[<tp'58>,
+                                                                    <tp'59>],
+                                           \HH\Rx\Traversable=[<tp'60>],
+                                           \HH\Traversable=[<tp'61>],
+                                           \HH\vec=[<tp'62>]><\HH\vec'5,
+                                                                lump'8>],
+                \HH\vec=[\HH\vec<\HH\Container=[<tp'63>],
+                                   \HH\KeyedContainer=[<tp'64>, <tp'65>],
+                                   \HH\KeyedTraversable=[<tp'66>, <tp'67>],
+                                   \HH\Rx\KeyedTraversable=[<tp'68>, <tp'69>],
+                                   \HH\Rx\Traversable=[<tp'70>],
+                                   \HH\Traversable=[<tp'71>],
+                                   \HH\vec=[<tp'72>]><\HH\vec'6, lump'9>]><
+      \HH\vec'7, lump'2> }
 * Final environment:
   Deps: {}
   Locals:
     lvars:
-      { $vv -> \HH\vec<\HH\vec<<tp'1>><\HH\vec'2, lump'5>><\HH\vec'3, lump'4> }
+      { $vv ->
+        \HH\vec<\HH\Container=[\HH\vec<\HH\Container=[<tp'73>],
+                                         \HH\KeyedContainer=[<tp'74>, <tp'75>],
+                                         \HH\KeyedTraversable=[<tp'76>,
+                                                                 <tp'77>],
+                                         \HH\Rx\KeyedTraversable=[<tp'78>,
+                                                                    <tp'79>],
+                                         \HH\Rx\Traversable=[<tp'80>],
+                                         \HH\Traversable=[<tp'81>],
+                                         \HH\vec=[<tp'82>]><\HH\vec'8,
+                                                              lump'11>],
+                  \HH\KeyedContainer=[<tp'83>,
+                                        \HH\vec<\HH\Container=[<tp'84>],
+                                                  \HH\KeyedContainer=[
+                                                  <tp'85>, <tp'86>],
+                                                  \HH\KeyedTraversable=[
+                                                  <tp'87>, <tp'88>],
+                                                  \HH\Rx\KeyedTraversable=[
+                                                  <tp'89>, <tp'90>],
+                                                  \HH\Rx\Traversable=[
+                                                  <tp'91>],
+                                                  \HH\Traversable=[<tp'92>],
+                                                  \HH\vec=[<tp'93>]><
+                                        \HH\vec'9, lump'12>],
+                  \HH\KeyedTraversable=[<tp'94>,
+                                          \HH\vec<\HH\Container=[<tp'95>],
+                                                    \HH\KeyedContainer=[
+                                                    <tp'96>, <tp'97>],
+                                                    \HH\KeyedTraversable=[
+                                                    <tp'98>, <tp'99>],
+                                                    \HH\Rx\KeyedTraversable=[
+                                                    <tp'100>, <tp'101>],
+                                                    \HH\Rx\Traversable=[
+                                                    <tp'102>],
+                                                    \HH\Traversable=[
+                                                    <tp'103>],
+                                                    \HH\vec=[<tp'104>]><
+                                          \HH\vec'10, lump'13>],
+                  \HH\Rx\KeyedTraversable=[<tp'105>,
+                                             \HH\vec<\HH\Container=[<tp'106>],
+                                                       \HH\KeyedContainer=[
+                                                       <tp'107>, <tp'108>],
+                                                       \HH\KeyedTraversable=[
+                                                       <tp'109>, <tp'110>],
+                                                       \HH\Rx\KeyedTraversable=[
+                                                       <tp'111>, <tp'112>],
+                                                       \HH\Rx\Traversable=[
+                                                       <tp'113>],
+                                                       \HH\Traversable=[
+                                                       <tp'114>],
+                                                       \HH\vec=[<tp'115>]><
+                                             \HH\vec'11, lump'14>],
+                  \HH\Rx\Traversable=[\HH\vec<\HH\Container=[<tp'116>],
+                                                \HH\KeyedContainer=[<tp'117>,
+                                                                    <tp'118>],
+                                                \HH\KeyedTraversable=[
+                                                <tp'119>, <tp'120>],
+                                                \HH\Rx\KeyedTraversable=[
+                                                <tp'121>, <tp'122>],
+                                                \HH\Rx\Traversable=[<tp'123>],
+                                                \HH\Traversable=[<tp'124>],
+                                                \HH\vec=[<tp'125>]><\HH\vec'12,
+                                                                    lump'15>],
+                  \HH\Traversable=[\HH\vec<\HH\Container=[<tp'126>],
+                                             \HH\KeyedContainer=[<tp'127>,
+                                                                   <tp'128>],
+                                             \HH\KeyedTraversable=[<tp'129>,
+                                                                    <tp'130>],
+                                             \HH\Rx\KeyedTraversable=[
+                                             <tp'131>, <tp'132>],
+                                             \HH\Rx\Traversable=[<tp'133>],
+                                             \HH\Traversable=[<tp'134>],
+                                             \HH\vec=[<tp'135>]><\HH\vec'13,
+                                                                   lump'16>],
+                  \HH\vec=[\HH\vec<\HH\Container=[<tp'136>],
+                                     \HH\KeyedContainer=[<tp'137>, <tp'138>],
+                                     \HH\KeyedTraversable=[<tp'139>, <tp'140>],
+                                     \HH\Rx\KeyedTraversable=[<tp'141>,
+                                                                <tp'142>],
+                                     \HH\Rx\Traversable=[<tp'143>],
+                                     \HH\Traversable=[<tp'144>],
+                                     \HH\vec=[<tp'145>]><\HH\vec'14, lump'17>]><
+        \HH\vec'15, lump'10> }
 Constraints:
-  [VEC < .v, VEC < .v'1, \C < .v, tp < tp'1, lump'3 = lump'5,
-   \HH\vec < \HH\vec'2, lump'2 = lump'4, \HH\vec'1 < \HH\vec'3, tp < tp'1,
-   lump'3 = lump'5, \HH\vec < \HH\vec'2, .v'1 < tp'1, \C < INT, tp'1 < INT,
-   pc < INT]
+  [VEC < .v, VEC < .v'1, VEC < .v'2, VEC < .v'3, VEC < .v'4, VEC < .v'5,
+   VEC < .v'6, VEC < .v'7, VEC < .v'8, VEC < .v'9, VEC < .v'10, \C < .v,
+   tp < tp'73, tp'2 < tp'75, tp'1 < tp'74, tp'4 < tp'77, tp'3 < tp'76,
+   tp'6 < tp'79, tp'5 < tp'78, tp'7 < tp'80, tp'8 < tp'81, tp'9 < tp'82,
+   lump'3 = lump'11, \HH\vec < \HH\vec'8, tp'11 < tp'84, tp'13 < tp'86,
+   tp'12 < tp'85, tp'15 < tp'88, tp'14 < tp'87, tp'17 < tp'90, tp'16 < tp'89,
+   tp'18 < tp'91, tp'19 < tp'92, tp'20 < tp'93, lump'4 = lump'12,
+   \HH\vec'1 < \HH\vec'9, tp'10 < tp'83, tp'22 < tp'95, tp'24 < tp'97,
+   tp'23 < tp'96, tp'26 < tp'99, tp'25 < tp'98, tp'28 < tp'101,
+   tp'27 < tp'100, tp'29 < tp'102, tp'30 < tp'103, tp'31 < tp'104,
+   lump'5 = lump'13, \HH\vec'2 < \HH\vec'10, tp'21 < tp'94, tp'33 < tp'106,
+   tp'35 < tp'108, tp'34 < tp'107, tp'37 < tp'110, tp'36 < tp'109,
+   tp'39 < tp'112, tp'38 < tp'111, tp'40 < tp'113, tp'41 < tp'114,
+   tp'42 < tp'115, lump'6 = lump'14, \HH\vec'3 < \HH\vec'11, tp'32 < tp'105,
+   tp'43 < tp'116, tp'45 < tp'118, tp'44 < tp'117, tp'47 < tp'120,
+   tp'46 < tp'119, tp'49 < tp'122, tp'48 < tp'121, tp'50 < tp'123,
+   tp'51 < tp'124, tp'52 < tp'125, lump'7 = lump'15, \HH\vec'4 < \HH\vec'12,
+   tp'53 < tp'126, tp'55 < tp'128, tp'54 < tp'127, tp'57 < tp'130,
+   tp'56 < tp'129, tp'59 < tp'132, tp'58 < tp'131, tp'60 < tp'133,
+   tp'61 < tp'134, tp'62 < tp'135, lump'8 = lump'16, \HH\vec'5 < \HH\vec'13,
+   tp'63 < tp'136, tp'65 < tp'138, tp'64 < tp'137, tp'67 < tp'140,
+   tp'66 < tp'139, tp'69 < tp'142, tp'68 < tp'141, tp'70 < tp'143,
+   tp'71 < tp'144, tp'72 < tp'145, lump'9 = lump'17, \HH\vec'6 < \HH\vec'14,
+   lump'2 = lump'10, \HH\vec'7 < \HH\vec'15, tp'63 < tp'136, tp'65 < tp'138,
+   tp'64 < tp'137, tp'67 < tp'140, tp'66 < tp'139, tp'69 < tp'142,
+   tp'68 < tp'141, tp'70 < tp'143, tp'71 < tp'144, tp'72 < tp'145,
+   lump'9 = lump'17, \HH\vec'6 < \HH\vec'14, .v'10 < tp'145, \C < INT,
+   tp'145 < INT, pc < INT]
 
 Analyzing mutation:
 * pc: pc
-* This: \C<\C, lump'1, i=<INT>, v=\HH\vec<<VEC>><VEC, VEC>>
+* This:
+    \C<\C, lump'1, i=<INT>,
+         v=\HH\vec<\HH\Container=[<VEC>], \HH\KeyedContainer=[<VEC>, <VEC>],
+                     \HH\KeyedTraversable=[<VEC>, <VEC>],
+                     \HH\Rx\KeyedTraversable=[<VEC>, <VEC>],
+                     \HH\Rx\Traversable=[<VEC>], \HH\Traversable=[<VEC>],
+                     \HH\vec=[<VEC>]><VEC, VEC>>
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:
@@ -133,9 +402,14 @@ Analyzing mutation:
   Locals:
     lvars: {}
 Constraints:
-  [VEC < .v, VEC < .v'1, \C < .v, INT < .i, \C < .i, .v'1 < bop, .i < bop,
-   VEC < .v'2, VEC < .v'3, \C < .v'2, \C < VEC, .v'3 < VEC, VEC = VEC,
-   .v'2 < VEC, bop < VEC, pc < VEC]
+  [VEC < .v, VEC < .v'1, VEC < .v'2, VEC < .v'3, VEC < .v'4, VEC < .v'5,
+   VEC < .v'6, VEC < .v'7, VEC < .v'8, VEC < .v'9, VEC < .v'10, \C < .v,
+   INT < .i, \C < .i, .v'10 < bop, .i < bop, VEC < .v'11, VEC < .v'12,
+   VEC < .v'13, VEC < .v'14, VEC < .v'15, VEC < .v'16, VEC < .v'17,
+   VEC < .v'18, VEC < .v'19, VEC < .v'20, VEC < .v'21, \C < .v'11, \C < VEC,
+   .v'12 < VEC, .v'14 < VEC, .v'13 < VEC, .v'16 < VEC, .v'15 < VEC,
+   .v'18 < VEC, .v'17 < VEC, .v'19 < VEC, .v'20 < VEC, .v'21 < VEC,
+   VEC = VEC, .v'11 < VEC, bop < VEC, pc < VEC]
 
 Analyzing \copyOnWrite:
 * pc: pc
@@ -143,86 +417,162 @@ Analyzing \copyOnWrite:
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:
-  lvars: { $v -> \HH\vec<<tp>><\HH\vec, lump'1>; $x -> <$x>; $y -> <$y> }
+  lvars:
+    { $v ->
+      \HH\vec<\HH\Container=[<tp>], \HH\KeyedContainer=[<tp'1>, <tp'2>],
+                \HH\KeyedTraversable=[<tp'3>, <tp'4>],
+                \HH\Rx\KeyedTraversable=[<tp'5>, <tp'6>],
+                \HH\Rx\Traversable=[<tp'7>], \HH\Traversable=[<tp'8>],
+                \HH\vec=[<tp'9>]><\HH\vec, lump'1>;
+      $x -> <$x>;
+      $y -> <$y> }
 * Final environment:
   Deps: {}
   Locals:
     lvars:
-      { $v -> \HH\vec<<tp'3>><\HH\vec'3, lump'4>;
-        $vx -> \HH\vec<<tp'2>><\HH\vec'2, lump'3>;
+      { $v ->
+        \HH\vec<\HH\Container=[<tp'30>],
+                  \HH\KeyedContainer=[<tp'31>, <tp'32>],
+                  \HH\KeyedTraversable=[<tp'33>, <tp'34>],
+                  \HH\Rx\KeyedTraversable=[<tp'35>, <tp'36>],
+                  \HH\Rx\Traversable=[<tp'37>], \HH\Traversable=[<tp'38>],
+                  \HH\vec=[<tp'39>]><\HH\vec'3, lump'4>;
+        $vx ->
+        \HH\vec<\HH\Container=[<tp'20>],
+                  \HH\KeyedContainer=[<tp'21>, <tp'22>],
+                  \HH\KeyedTraversable=[<tp'23>, <tp'24>],
+                  \HH\Rx\KeyedTraversable=[<tp'25>, <tp'26>],
+                  \HH\Rx\Traversable=[<tp'27>], \HH\Traversable=[<tp'28>],
+                  \HH\vec=[<tp'29>]><\HH\vec'2, lump'3>;
         $x -> <$x>;
         $y -> <$y> }
 Constraints:
-  [tp < tp'1, lump'1 = lump'2, \HH\vec < \HH\vec'1, $x < tp'1, tp'1 < tp'2,
-   lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, tp'1 < tp'3, lump'2 = lump'4,
-   \HH\vec'1 < \HH\vec'3, $y < tp'3]
+  [tp < tp'10, tp'2 < tp'12, tp'1 < tp'11, tp'4 < tp'14, tp'3 < tp'13,
+   tp'6 < tp'16, tp'5 < tp'15, tp'7 < tp'17, tp'8 < tp'18, tp'9 < tp'19,
+   lump'1 = lump'2, \HH\vec < \HH\vec'1, $x < tp'19, tp'10 < tp'20,
+   tp'12 < tp'22, tp'11 < tp'21, tp'14 < tp'24, tp'13 < tp'23, tp'16 < tp'26,
+   tp'15 < tp'25, tp'17 < tp'27, tp'18 < tp'28, tp'19 < tp'29,
+   lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, tp'10 < tp'30, tp'12 < tp'32,
+   tp'11 < tp'31, tp'14 < tp'34, tp'13 < tp'33, tp'16 < tp'36, tp'15 < tp'35,
+   tp'17 < tp'37, tp'18 < tp'38, tp'19 < tp'39, lump'2 = lump'4,
+   \HH\vec'1 < \HH\vec'3, $y < tp'39]
 
 Flow constraints for \C#mutation:
   
   Simplified: INT < VEC
   Raw:
-  [VEC < .v, VEC < .v'1, \C < .v, INT < .i, \C < .i, .v'1 < bop, .i < bop,
-   VEC < .v'2, VEC < .v'3, \C < .v'2, \C < VEC, .v'3 < VEC, VEC = VEC,
-   .v'2 < VEC, bop < VEC, pc < VEC]
+  [VEC < .v, VEC < .v'1, VEC < .v'2, VEC < .v'3, VEC < .v'4, VEC < .v'5,
+   VEC < .v'6, VEC < .v'7, VEC < .v'8, VEC < .v'9, VEC < .v'10, \C < .v,
+   INT < .i, \C < .i, .v'10 < bop, .i < bop, VEC < .v'11, VEC < .v'12,
+   VEC < .v'13, VEC < .v'14, VEC < .v'15, VEC < .v'16, VEC < .v'17,
+   VEC < .v'18, VEC < .v'19, VEC < .v'20, VEC < .v'21, \C < .v'11, \C < VEC,
+   .v'12 < VEC, .v'14 < VEC, .v'13 < VEC, .v'16 < VEC, .v'15 < VEC,
+   .v'18 < VEC, .v'17 < VEC, .v'19 < VEC, .v'20 < VEC, .v'21 < VEC,
+   VEC = VEC, .v'11 < VEC, bop < VEC, pc < VEC]
 
 Flow constraints for \C#nested:
   
   Simplified: VEC < INT
   Raw:
-  [VEC < .v, VEC < .v'1, \C < .v, tp < tp'1, lump'3 = lump'5,
-   \HH\vec < \HH\vec'2, lump'2 = lump'4, \HH\vec'1 < \HH\vec'3, tp < tp'1,
-   lump'3 = lump'5, \HH\vec < \HH\vec'2, .v'1 < tp'1, \C < INT, tp'1 < INT,
-   pc < INT]
+  [VEC < .v, VEC < .v'1, VEC < .v'2, VEC < .v'3, VEC < .v'4, VEC < .v'5,
+   VEC < .v'6, VEC < .v'7, VEC < .v'8, VEC < .v'9, VEC < .v'10, \C < .v,
+   tp < tp'73, tp'2 < tp'75, tp'1 < tp'74, tp'4 < tp'77, tp'3 < tp'76,
+   tp'6 < tp'79, tp'5 < tp'78, tp'7 < tp'80, tp'8 < tp'81, tp'9 < tp'82,
+   lump'3 = lump'11, \HH\vec < \HH\vec'8, tp'11 < tp'84, tp'13 < tp'86,
+   tp'12 < tp'85, tp'15 < tp'88, tp'14 < tp'87, tp'17 < tp'90, tp'16 < tp'89,
+   tp'18 < tp'91, tp'19 < tp'92, tp'20 < tp'93, lump'4 = lump'12,
+   \HH\vec'1 < \HH\vec'9, tp'10 < tp'83, tp'22 < tp'95, tp'24 < tp'97,
+   tp'23 < tp'96, tp'26 < tp'99, tp'25 < tp'98, tp'28 < tp'101,
+   tp'27 < tp'100, tp'29 < tp'102, tp'30 < tp'103, tp'31 < tp'104,
+   lump'5 = lump'13, \HH\vec'2 < \HH\vec'10, tp'21 < tp'94, tp'33 < tp'106,
+   tp'35 < tp'108, tp'34 < tp'107, tp'37 < tp'110, tp'36 < tp'109,
+   tp'39 < tp'112, tp'38 < tp'111, tp'40 < tp'113, tp'41 < tp'114,
+   tp'42 < tp'115, lump'6 = lump'14, \HH\vec'3 < \HH\vec'11, tp'32 < tp'105,
+   tp'43 < tp'116, tp'45 < tp'118, tp'44 < tp'117, tp'47 < tp'120,
+   tp'46 < tp'119, tp'49 < tp'122, tp'48 < tp'121, tp'50 < tp'123,
+   tp'51 < tp'124, tp'52 < tp'125, lump'7 = lump'15, \HH\vec'4 < \HH\vec'12,
+   tp'53 < tp'126, tp'55 < tp'128, tp'54 < tp'127, tp'57 < tp'130,
+   tp'56 < tp'129, tp'59 < tp'132, tp'58 < tp'131, tp'60 < tp'133,
+   tp'61 < tp'134, tp'62 < tp'135, lump'8 = lump'16, \HH\vec'5 < \HH\vec'13,
+   tp'63 < tp'136, tp'65 < tp'138, tp'64 < tp'137, tp'67 < tp'140,
+   tp'66 < tp'139, tp'69 < tp'142, tp'68 < tp'141, tp'70 < tp'143,
+   tp'71 < tp'144, tp'72 < tp'145, lump'9 = lump'17, \HH\vec'6 < \HH\vec'14,
+   lump'2 = lump'10, \HH\vec'7 < \HH\vec'15, tp'63 < tp'136, tp'65 < tp'138,
+   tp'64 < tp'137, tp'67 < tp'140, tp'66 < tp'139, tp'69 < tp'142,
+   tp'68 < tp'141, tp'70 < tp'143, tp'71 < tp'144, tp'72 < tp'145,
+   lump'9 = lump'17, \HH\vec'6 < \HH\vec'14, .v'10 < tp'145, \C < INT,
+   tp'145 < INT, pc < INT]
 
 Flow constraints for \C#set:
   
   Simplified: INT < VEC
   Raw:
-  [INT < .i, \C < .i, VEC < .v, VEC < .v'1, \C < .v, \C < VEC, .v'1 < VEC,
-   VEC = VEC, .v < VEC, .i < VEC, pc < VEC]
+  [INT < .i, \C < .i, VEC < .v, VEC < .v'1, VEC < .v'2, VEC < .v'3,
+   VEC < .v'4, VEC < .v'5, VEC < .v'6, VEC < .v'7, VEC < .v'8, VEC < .v'9,
+   VEC < .v'10, \C < .v, \C < VEC, .v'1 < VEC, .v'3 < VEC, .v'2 < VEC,
+   .v'5 < VEC, .v'4 < VEC, .v'7 < VEC, .v'6 < VEC, .v'8 < VEC, .v'9 < VEC,
+   .v'10 < VEC, VEC = VEC, .v < VEC, .i < VEC, pc < VEC]
 
 Flow constraints for \copyOnWrite:
   
   Simplified: True
   Raw:
-  [tp < tp'1, lump'1 = lump'2, \HH\vec < \HH\vec'1, $x < tp'1, tp'1 < tp'2,
-   lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, tp'1 < tp'3, lump'2 = lump'4,
-   \HH\vec'1 < \HH\vec'3, $y < tp'3]
+  [tp < tp'10, tp'2 < tp'12, tp'1 < tp'11, tp'4 < tp'14, tp'3 < tp'13,
+   tp'6 < tp'16, tp'5 < tp'15, tp'7 < tp'17, tp'8 < tp'18, tp'9 < tp'19,
+   lump'1 = lump'2, \HH\vec < \HH\vec'1, $x < tp'19, tp'10 < tp'20,
+   tp'12 < tp'22, tp'11 < tp'21, tp'14 < tp'24, tp'13 < tp'23, tp'16 < tp'26,
+   tp'15 < tp'25, tp'17 < tp'27, tp'18 < tp'28, tp'19 < tp'29,
+   lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, tp'10 < tp'30, tp'12 < tp'32,
+   tp'11 < tp'31, tp'14 < tp'34, tp'13 < tp'33, tp'16 < tp'36, tp'15 < tp'35,
+   tp'17 < tp'37, tp'18 < tp'38, tp'19 < tp'39, lump'2 = lump'4,
+   \HH\vec'1 < \HH\vec'3, $y < tp'39]
 
 Flow constraints for \empty:
   
   Simplified: True
   Raw:
-  [lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, lump'3 = lump'1,
-   \HH\vec'2 < \HH\vec]
+  [tp'10 < tp'13, tp'11 < tp'14, tp'12 < tp'15, lump'2 = lump'3,
+   \HH\vec'1 < \HH\vec'2, tp'13 < tp'1, tp'14 < tp'3, tp'15 < tp'5,
+   lump'3 = lump'1, \HH\vec'2 < \HH\vec]
 
 Flow constraints for \retElem:
   
   Simplified: True
   Raw:
-  [PUBLIC < tp, PUBLIC < tp, PUBLIC < tp, tp < tp'1, lump'1 = lump'2,
-   \HH\vec < \HH\vec'1, tp'1 < ret]
+  [PUBLIC < tp'9, PUBLIC < tp'9, PUBLIC < tp'9, tp < tp'10, tp'2 < tp'12,
+   tp'1 < tp'11, tp'4 < tp'14, tp'3 < tp'13, tp'6 < tp'16, tp'5 < tp'15,
+   tp'7 < tp'17, tp'8 < tp'18, tp'9 < tp'19, lump'1 = lump'2,
+   \HH\vec < \HH\vec'1, tp'19 < ret]
 
 Flow constraints for \testAdd1:
   
   Simplified: True
-  Raw: [tp < tp'1, lump'1 = lump'2, \HH\vec < \HH\vec'1, PUBLIC < tp'1]
-
+  Raw:
+  [tp < tp'10, tp'2 < tp'12, tp'1 < tp'11, tp'4 < tp'14, tp'3 < tp'13,
+   tp'6 < tp'16, tp'5 < tp'15, tp'7 < tp'17, tp'8 < tp'18, tp'9 < tp'19,
+   lump'1 = lump'2, \HH\vec < \HH\vec'1, PUBLIC < tp'19]
 
 Flow constraints for \testAdd2:
   
   Simplified: True
   Raw:
-  [PUBLIC < tp, PUBLIC < tp, tp < tp'1, lump'1 = lump'2, \HH\vec < \HH\vec'1,
-   tp'1 < tp'2, lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, PUBLIC < tp'2]
-
+  [PUBLIC < tp'9, PUBLIC < tp'9, tp < tp'10, tp'2 < tp'12, tp'1 < tp'11,
+   tp'4 < tp'14, tp'3 < tp'13, tp'6 < tp'16, tp'5 < tp'15, tp'7 < tp'17,
+   tp'8 < tp'18, tp'9 < tp'19, lump'1 = lump'2, \HH\vec < \HH\vec'1,
+   tp'10 < tp'20, tp'12 < tp'22, tp'11 < tp'21, tp'14 < tp'24, tp'13 < tp'23,
+   tp'16 < tp'26, tp'15 < tp'25, tp'17 < tp'27, tp'18 < tp'28, tp'19 < tp'29,
+   lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, PUBLIC < tp'29]
 
 Flow constraints for \testCollection:
   
   Simplified: True
   Raw:
-  [PUBLIC < $there, PUBLIC < tp'1, $there < tp'1, tp'1 < tp'2,
-   lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, tp'2 < tp, lump'3 = lump'1,
+  [PUBLIC < $there, PUBLIC < tp'19, $there < tp'19, tp'10 < tp'20,
+   tp'12 < tp'22, tp'11 < tp'21, tp'14 < tp'24, tp'13 < tp'23, tp'16 < tp'26,
+   tp'15 < tp'25, tp'17 < tp'27, tp'18 < tp'28, tp'19 < tp'29,
+   lump'2 = lump'3, \HH\vec'1 < \HH\vec'2, tp'20 < tp, tp'22 < tp'2,
+   tp'21 < tp'1, tp'24 < tp'4, tp'23 < tp'3, tp'26 < tp'6, tp'25 < tp'5,
+   tp'27 < tp'7, tp'28 < tp'8, tp'29 < tp'9, lump'3 = lump'1,
    \HH\vec'2 < \HH\vec]
 
 There are privacy policy errors in \C#mutation:

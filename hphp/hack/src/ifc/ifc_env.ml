@@ -29,12 +29,13 @@ let new_policy_var { pre_scope; pre_pvar_counters; _ } prefix =
   in
   Pfree_var (prefix ^ suffix, pre_scope)
 
-let new_proto_renv saved_tenv scope decl_env =
+let new_proto_renv meta saved_tenv scope decl_env =
   {
     pre_scope = scope;
     pre_decl = decl_env;
     pre_pvar_counters = Caml.Hashtbl.create 10;
     pre_tenv = saved_tenv;
+    pre_meta = meta;
   }
 
 let new_renv proto_renv this_ty ret_ty global_pc exn =

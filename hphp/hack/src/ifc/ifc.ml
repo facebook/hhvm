@@ -20,16 +20,81 @@ module A = Aast
 module T = Typing_defs
 module L = Logic.Infix
 module K = Typing_cont_key
+module TClass = Decl_provider.Class
+module TReason = Typing_reason
+module TPhase = Typing_phase
+module TEnv = Typing_env
+module TUtils = Typing_utils
 
 exception FlowInference of string
 
 let fail fmt = Format.kasprintf (fun s -> raise (FlowInference s)) fmt
 
+let empty_tenv meta = TEnv.empty meta.m_ctx meta.m_path None
+
+let find_class_decl meta class_name =
+  match Decl_provider.get_class meta.m_ctx class_name with
+  | Some class_decl -> class_decl
+  | None -> fail "couldn't find the decl for %s" class_name
+
+let find_variances meta class_name =
+  let class_decl = find_class_decl meta class_name in
+  let tparams = TClass.tparams class_decl in
+  List.map ~f:(fun tparam -> tparam.T.tp_variance) tparams
+
+let find_ancestor_tparams proto_renv class_name (targs : T.locl_ty list) =
+  let class_decl = find_class_decl proto_renv.pre_meta class_name in
+  let tparam_names =
+    let tp_name tparam = snd tparam.T.tp_name in
+    List.map ~f:tp_name @@ TClass.tparams class_decl
+  in
+  let substitution =
+    match List.zip tparam_names targs with
+    | Some zipped -> SMap.of_list zipped
+    | None ->
+      fail "%s has uneven number of type parameters and arguments" class_name
+  in
+  let extract_tparams (ancestor_name, ancestor) =
+    let tenv = empty_tenv proto_renv.pre_meta in
+    (* Type localisation configuration. We use it for instantiating type parameters. *)
+    let ety_env =
+      let this_ty = T.mk (TReason.none, TUtils.this_of @@ TEnv.get_self tenv) in
+      {
+        T.type_expansions = [];
+        substs = substitution;
+        quiet = false;
+        on_error =
+          (fun ?code:_ _ ->
+            fail "something went wrong during generic substitution");
+        this_ty;
+        from_class = None;
+      }
+    in
+    let (_, ty) = TPhase.localize ~ety_env tenv ancestor in
+    match T.get_node ty with
+    | T.Tclass (_, _, targs) ->
+      if List.is_empty targs then
+        None
+      else
+        Some (ancestor_name, targs)
+    | _ ->
+      fail
+        "Tried to extract type parameters of %s, but it is not a class"
+        ancestor_name
+  in
+  TClass.all_ancestors class_decl
+  |> List.filter_map ~f:extract_tparams
+  |> SMap.of_list
+
 (* A constraint accumulator that registers a subtyping
    requirement t1 <: t2 *)
-let rec subtype t1 t2 acc =
+let rec subtype meta t1 t2 acc =
+  let subtype = subtype meta in
+  let equivalent = equivalent meta in
   match (t1, t2) with
-  | (Tprim p1, Tprim p2) -> L.(p1 < p2) acc
+  | (Tprim p1, Tprim p2)
+  | (Tgeneric p1, Tgeneric p2) ->
+    L.(p1 < p2) acc
   | (Ttuple tl1, Ttuple tl2) ->
     (match List.zip tl1 tl2 with
     | Some zip ->
@@ -46,18 +111,27 @@ let rec subtype t1 t2 acc =
       | None -> fail "same class with differing policied properties"
     in
     let tparams_subtype acc =
-      let tparam_subtype acc (pty1, variance1) (pty2, variance2) =
-        assert (Ast_defs.equal_variance variance1 variance2);
-        match variance1 with
+      let tparam_subtype acc pty1 pty2 variance =
+        match variance with
         | Ast_defs.Invariant -> equivalent pty1 pty2 acc
         | Ast_defs.Covariant -> subtype pty1 pty2 acc
         | Ast_defs.Contravariant -> subtype pty2 pty1 acc
       in
-      match
-        List.fold2 ~init:acc ~f:tparam_subtype cl1.c_tparams cl2.c_tparams
-      with
-      | List.Or_unequal_lengths.Ok acc -> acc
-      | _ -> fail "unequal number of type parameters during subtyping"
+      let tparams_subtype acc class_name tparams_opt1 tparams_opt2 =
+        let variances = find_variances meta class_name in
+        match (tparams_opt1, tparams_opt2) with
+        | (Some tparams1, Some tparams2) ->
+          let init = acc in
+          let f = tparam_subtype in
+          begin
+            match Utils.fold3 ~init ~f tparams1 tparams2 variances with
+            | List.Or_unequal_lengths.Ok acc -> (acc, Some ())
+            | _ -> fail "unequal number of type parameters during subtyping"
+          end
+        | _ -> (acc, None)
+      in
+      let combine = tparams_subtype in
+      fst @@ SMap.merge_env acc ~combine cl1.c_tparams cl2.c_tparams
     in
     (* Invariant in property policies *)
     (* When forcing an unevaluated ptype thunk, only policied properties
@@ -80,36 +154,54 @@ let rec subtype t1 t2 acc =
     fail "unhandled subtyping query for %a <: %a" Pp.ptype pty1 Pp.ptype pty2
 
 (* A constraint accumulator that registers that t1 = t2 *)
-and equivalent t1 t2 acc = subtype t1 t2 (subtype t2 t1 acc)
+and equivalent meta t1 t2 acc = subtype meta t1 t2 (subtype meta t2 t1 acc)
 
 (* Generates a fresh supertype of the argument type *)
-let weaken ?(prefix = "weak") renv env ty =
-  let rec freshen acc ty =
+let adjust ?(prefix = "weak") ~adjustment renv env ty =
+  let flip = function
+    | Astrengthen -> Aweaken
+    | Aweaken -> Astrengthen
+  in
+  let simple_freshen mk acc policy =
+    let new_policy = Env.new_policy_var renv.re_proto prefix in
+    let prop =
+      match adjustment with
+      | Astrengthen -> L.(new_policy < policy)
+      | Aweaken -> L.(policy < new_policy)
+    in
+    (prop acc, mk new_policy)
+  in
+  let rec freshen ~adjustment acc ty =
     let on_list mk tl =
-      let (acc, tl') = List.map_env acc tl ~f:freshen in
+      let (acc, tl') = List.map_env acc tl ~f:(freshen ~adjustment) in
       (acc, mk tl')
     in
     match ty with
-    | Tprim p ->
-      let p' = Env.new_policy_var renv.re_proto prefix in
-      (L.(p < p') acc, Tprim p')
+    | Tprim policy -> simple_freshen (fun p -> Tprim p) acc policy
+    | Tgeneric policy -> simple_freshen (fun p -> Tgeneric p) acc policy
     | Ttuple tl -> on_list (fun l -> Ttuple l) tl
     | Tunion tl -> on_list (fun l -> Tunion l) tl
     | Tinter tl -> on_list (fun l -> Tinter l) tl
     | Tclass class_ ->
-      let weaken_tparam acc ((pty, variance) as tparam) =
+      let adjust_tparam acc variance pty =
         match variance with
-        | Ast_defs.Covariant ->
-          let (acc, pty) = freshen acc pty in
-          (acc, (pty, variance))
-        | _ -> (acc, tparam)
+        | Ast_defs.Covariant -> freshen ~adjustment acc pty
+        | Ast_defs.Invariant -> (acc, pty)
+        | Ast_defs.Contravariant ->
+          freshen ~adjustment:(flip adjustment) acc pty
       in
       let super_pol = Env.new_policy_var renv.re_proto prefix in
       let acc = L.(class_.c_self < super_pol) acc in
-      let (acc, tparams) = List.map_env ~f:weaken_tparam acc class_.c_tparams in
+      let (acc, tparams) =
+        let adjust_tparams acc class_name =
+          let variances = find_variances renv.re_proto.pre_meta class_name in
+          List.map2_env ~f:adjust_tparam acc variances
+        in
+        SMap.map_env adjust_tparams acc class_.c_tparams
+      in
       (acc, Tclass { class_ with c_self = super_pol; c_tparams = tparams })
   in
-  let (acc, ty') = freshen env.e_acc ty in
+  let (acc, ty') = freshen ~adjustment env.e_acc ty in
   (Env.acc env (fun _ -> acc), ty')
 
 (* A constraint accumulator registering that the type t depends on
@@ -124,6 +216,7 @@ let rec add_dependencies pl t acc =
        have mixed carry a policy (preferable). *)
     L.(pl <* [Pbot]) acc
   | Tprim pol
+  | Tgeneric pol
   (* For classes, we only add a dependency to the class policy and not to its
      properties *)
   | Tclass { c_self = pol; _ } ->
@@ -172,8 +265,8 @@ let get_policy ?prefix lump_pol_opt proto_renv =
     let prefix = Option.value prefix ~default:"v" in
     Env.new_policy_var proto_renv prefix
 
-let rec class_ptype lump_pol_opt proto_renv tparams name =
-  let { cd_policied_properties; cd_tparam_variance } =
+let rec class_ptype lump_pol_opt proto_renv targs name =
+  let { cd_policied_properties } =
     match SMap.find_opt name proto_renv.pre_decl.de_class with
     | Some class_sig -> class_sig
     | None -> fail "could not found a class policy signature for %s" name
@@ -192,10 +285,15 @@ let rec class_ptype lump_pol_opt proto_renv tparams name =
   let lump_pol = get_policy lump_pol_opt proto_renv ~prefix:"lump" in
   let c_tparams =
     let prefix = "tp" in
-    let pair_tparam tp var = (ptype ~prefix lump_pol_opt proto_renv tp, var) in
-    match List.map2 ~f:pair_tparam tparams cd_tparam_variance with
-    | List.Or_unequal_lengths.Ok zip -> zip
-    | _ -> fail "unequal number of type parameters and variance spec"
+    let ptype_tparam = ptype ~prefix lump_pol_opt proto_renv in
+    let tparams = find_ancestor_tparams proto_renv name targs in
+    let tparams =
+      if List.is_empty targs then
+        tparams
+      else
+        SMap.add name targs tparams
+    in
+    SMap.map (List.map ~f:ptype_tparam) tparams
   in
   Tclass
     {
@@ -213,6 +311,7 @@ and ptype ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
   let ptype = ptype ?prefix lump_pol_opt proto_renv in
   match T.get_node t with
   | T.Tprim _ -> Tprim (get_policy lump_pol_opt proto_renv ?prefix)
+  | T.Tgeneric _ -> Tgeneric (get_policy lump_pol_opt proto_renv ?prefix)
   | T.Ttuple tyl -> Ttuple (List.map ~f:ptype tyl)
   | T.Tunion tyl -> Tunion (List.map ~f:ptype tyl)
   | T.Tintersection tyl -> Tinter (List.map ~f:ptype tyl)
@@ -242,7 +341,6 @@ and ptype ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
   | T.Toption _ty -> fail "Toption"
   | T.Tfun _fun_ty -> fail "Tfun"
   | T.Tshape (_sh_kind, _sh_type_map) -> fail "Tshape"
-  | T.Tgeneric _name -> fail "Tgeneric"
   | T.Tnewtype (_name, _ty_list, _as_bound) -> fail "Tnewtype"
   | T.Tobject -> fail "Tobject"
   | T.Tpu (_locl_ty, _sid) -> fail "Tpu"
@@ -266,7 +364,7 @@ let refresh_lvar_type renv env lid (ety : T.locl_ty) =
   else
     let prefix = Local_id.to_string lid in
     let new_pty = ptype None renv.re_proto ety ~prefix in
-    let env = Env.acc env (subtype pty new_pty) in
+    let env = Env.acc env (subtype renv.re_proto.pre_meta pty new_pty) in
     let env = Env.set_local_type env lid new_pty in
     (env, new_pty)
 
@@ -336,8 +434,8 @@ let vec_element_pty vec_pty =
     | Tclass cls when String.equal cls.c_name "\\HH\\vec" -> cls
     | _ -> fail "expected a vector"
   in
-  match class_.c_tparams with
-  | [(element_pty, _)] -> element_pty
+  match SMap.find_opt "\\HH\\vec" class_.c_tparams with
+  | Some [element_pty] -> element_pty
   | _ -> fail "expected one type parameter from a vector object"
 
 (* Finds what we flow into in an assignment.
@@ -374,7 +472,8 @@ let rec flux_target renv env ((_, lhs_ty), lhs_exp) =
     in
     let (env, old_vec_pty) = expr renv env vec in
     let (env, vec_pty, pc) = flux_target renv env vec in
-    let env = Env.acc env (subtype old_vec_pty vec_pty) in
+    let meta = renv.re_proto.pre_meta in
+    let env = Env.acc env @@ subtype meta old_vec_pty vec_pty in
     let element_pty = vec_element_pty vec_pty in
     (* Even though the runtime updates the entire vector, we treat
      * the mutation as if it were happening on a single element.
@@ -396,7 +495,7 @@ and assign renv env op lhs_exp rhs_exp =
       binop renv env lhs_pty rhs_pty
   in
   let (env, lhs_pty, pc) = flux_target renv env lhs_exp in
-  let env = Env.acc env (subtype rhs_pty lhs_pty) in
+  let env = Env.acc env (subtype renv.re_proto.pre_meta rhs_pty lhs_pty) in
   let env = Env.acc env (add_dependencies (PCSet.elements pc) lhs_pty) in
   (env, lhs_pty)
 
@@ -421,7 +520,7 @@ and expr renv env (((_epos, ety), e) : Tast.expr) =
     let (env, obj_ptype) = expr env obj in
     let prop_ptype = property_ptype renv.re_proto obj_ptype property ety in
     let (env, super_ptype) =
-      weaken ~prefix:("." ^ property) renv env prop_ptype
+      adjust ~adjustment:Aweaken ~prefix:("." ^ property) renv env prop_ptype
     in
     let obj_class = receiver_of_obj_get obj_ptype property in
     let env = Env.acc env (add_dependencies [obj_class.c_self] super_ptype) in
@@ -452,7 +551,7 @@ and expr renv env (((_epos, ety), e) : Tast.expr) =
     let element_pty = vec_element_pty vec_pty in
     let mk_element_subtype env exp =
       let (env, pty) = expr env exp in
-      Env.acc env (subtype pty element_pty)
+      Env.acc env (subtype renv.re_proto.pre_meta pty element_pty)
     in
     let env = List.fold ~f:mk_element_subtype ~init:env exprs in
     (env, vec_pty)
@@ -545,6 +644,7 @@ and expr renv env (((_epos, ety), e) : Tast.expr) =
     fail "expr"
 
 let rec stmt renv env ((_pos, s) : Tast.stmt) =
+  let subtype = subtype renv.re_proto.pre_meta in
   match s with
   | A.Expr e ->
     let (env, _ty) = expr renv env e in
@@ -629,11 +729,11 @@ and block renv env (blk : Tast.block) =
   in
   List.fold_left ~f:seq ~init:env blk
 
-let callable opts decl_env class_name_opt name saved_env params body lrty =
+let callable meta decl_env class_name_opt name saved_env params body lrty =
   try
     (* Setup the read-only environment *)
     let scope = Scope.alloc () in
-    let proto_renv = Env.new_proto_renv saved_env scope decl_env in
+    let proto_renv = Env.new_proto_renv meta saved_env scope decl_env in
 
     let global_pc = Env.new_policy_var proto_renv "pc" in
     let exn = class_ptype None proto_renv [] Decl.exception_id in
@@ -655,7 +755,7 @@ let callable opts decl_env class_name_opt name saved_env params body lrty =
     let end_env = env in
 
     (* Display the analysis results *)
-    if opts.verbosity >= 2 then begin
+    if meta.m_opts.verbosity >= 2 then begin
       Format.printf "Analyzing %s:@." name;
       Format.printf "%a@." Pp.renv renv;
       Format.printf "* Params:@,  %a@." Pp.locals beg_env;
@@ -686,7 +786,7 @@ let callable opts decl_env class_name_opt name saved_env params body lrty =
     Format.printf "Analyzing %s:@.  Failure: %s@.@." name s;
     None
 
-let walk_tast opts decl_env =
+let walk_tast meta decl_env =
   let def = function
     | A.Fun
         {
@@ -699,7 +799,7 @@ let walk_tast opts decl_env =
         } ->
       Option.map
         ~f:(fun x -> [x])
-        (callable opts decl_env None name saved_env params body lrty)
+        (callable meta decl_env None name saved_env params body lrty)
     | A.Class { A.c_name = (_, class_name); c_methods = methods; _ } ->
       let handle_method
           {
@@ -710,7 +810,8 @@ let walk_tast opts decl_env =
             m_ret = (lrty, _);
             _;
           } =
-        callable opts decl_env (Some class_name) name saved_env params body lrty
+        let c_name = Some class_name in
+        callable meta decl_env c_name name saved_env params body lrty
       in
       Some (List.filter_map ~f:handle_method methods)
     | _ -> None
@@ -723,16 +824,17 @@ let do_ opts files_info ctx =
       match i.FileInfo.file_mode with
       | Some FileInfo.Mstrict ->
         let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+        let meta = { m_opts = opts; m_path = path; m_ctx = ctx } in
         let { Tast_provider.Compute_tast.tast; _ } =
           Tast_provider.compute_tast_unquarantined ~ctx ~entry
         in
         let decl_env = Decl.collect_sigs tast in
         if opts.verbosity >= 3 then Format.printf "%a@." Pp.decl_env decl_env;
 
-        let results = walk_tast opts decl_env tast in
+        let results = walk_tast meta decl_env tast in
 
         let results =
-          try Solver.global_exn ~subtype results with
+          try Solver.global_exn ~subtype:(subtype meta) results with
           | Solver.Error Solver.RecursiveCycle ->
             fail "solver error: cyclic call graph"
           | Solver.Error (Solver.MissingResults callable) ->

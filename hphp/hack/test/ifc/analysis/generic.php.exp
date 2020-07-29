@@ -2,27 +2,47 @@ Decls:
   class \Exception: { policied_props = [] }
   class \G: { policied_props = [] }
   class \HH\vec: { policied_props = [] }
-  function \test: { kind = public }
+  function \id: { kind = public }
+  function \testVariance: { kind = public }
   
-Analyzing \test:
+Analyzing \testVariance:
 * pc: pc
 * This: None
-* Return: \G<<tp>, <tp'1>, <tp'2>><\G, lump'1>
+* Return: \G<\G=[<tp>, <tp'1>, <tp'2>]><\G, lump'1>
 * Exception: \Exception<\Exception, lump>
 * Params:
-  lvars: { $g -> \G<<tp'3>, <tp'4>, <tp'5>><\G'1, lump'2> }
+  lvars: { $g -> \G<\G=[<tp'3>, <tp'4>, <tp'5>]><\G'1, lump'2> }
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $g -> \G<<tp'3>, <tp'4>, <tp'5>><\G'1, lump'2> }
+    lvars: { $g -> \G<\G=[<tp'3>, <tp'4>, <tp'5>]><\G'1, lump'2> }
 Constraints:
-  [tp'3 < tp, tp'1 < tp'4, tp'2 < tp'5, tp'5 < tp'2, lump'2 = lump'1,
+  [tp'2 < tp'5, tp'5 < tp'2, tp'1 < tp'4, tp'3 < tp, lump'2 = lump'1,
    \G'1 < \G]
 
-Flow constraints for \test:
+Analyzing \id:
+* pc: pc
+* This: None
+* Return: <ret>
+* Exception: \Exception<\Exception, lump>
+* Params:
+  lvars: { $t -> <$t> }
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars: { $t -> <$t> }
+Constraints:
+  $t < ret
+
+Flow constraints for \id:
+  
+  Simplified: True
+  Raw: $t < ret
+
+Flow constraints for \testVariance:
   
   Simplified: True
   Raw:
-  [tp'3 < tp, tp'1 < tp'4, tp'2 < tp'5, tp'5 < tp'2, lump'2 = lump'1,
+  [tp'2 < tp'5, tp'5 < tp'2, tp'1 < tp'4, tp'3 < tp, lump'2 = lump'1,
    \G'1 < \G]
 

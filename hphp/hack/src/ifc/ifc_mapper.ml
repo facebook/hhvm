@@ -12,22 +12,24 @@ open Ifc_types
 
 (* Shallow mappers *)
 
-let ptype fty fpol = function
+let rec ptype fty fpol = function
   | Tprim pol -> Tprim (fpol pol)
+  | Tgeneric pol -> Tgeneric (fpol pol)
   | Ttuple tl -> Ttuple (List.map ~f:fty tl)
   | Tunion tl -> Tunion (List.map ~f:fty tl)
   | Tinter tl -> Tinter (List.map ~f:fty tl)
   | Tclass cls ->
-    let prop_map =
-      SMap.map (fun lpty -> lazy (fty (Lazy.force lpty))) cls.c_property_map
-    in
+    let lazy_fty lpty = lazy (fty (Lazy.force lpty)) in
+    let prop_map = SMap.map lazy_fty cls.c_property_map in
+    let ptype = ptype fty fpol in
+    let c_tparams = SMap.map (List.map ~f:ptype) cls.c_tparams in
     Tclass
       {
         c_name = cls.c_name;
         c_self = fpol cls.c_self;
         c_lump = fpol cls.c_lump;
         c_property_map = prop_map;
-        c_tparams = List.map ~f:(fun (pty, var) -> (fty pty, var)) cls.c_tparams;
+        c_tparams;
       }
 
 (* "fprop: int -> prop -> prop" takes as first argument the

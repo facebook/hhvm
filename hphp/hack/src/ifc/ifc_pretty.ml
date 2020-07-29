@@ -45,17 +45,20 @@ let rec ptype fmt ty =
     let pp_sep fmt () = fprintf fmt "%s@ " sep in
     fprintf fmt "(@[<hov2>%a@])" (list pp_sep ptype) l
   in
+  let tparam fmt pty = ptype fmt pty in
+  let tparams fmt = fprintf fmt "[@[<hov2>%a@]]" (list comma_sep tparam) in
   match ty with
-  | Tprim p -> fprintf fmt "<%a>" policy p
+  | Tprim p
+  | Tgeneric p ->
+    fprintf fmt "<%a>" policy p
   | Ttuple tl -> list' "," tl
   | Tunion [] -> fprintf fmt "nothing"
   | Tunion tl -> list' " |" tl
   | Tinter tl -> list' " &" tl
   | Tclass { c_name; c_self; c_lump; c_property_map; c_tparams } ->
     fprintf fmt "%s" c_name;
-    ( if not @@ List.is_empty c_tparams then
-      let tparams = List.map ~f:fst c_tparams in
-      fprintf fmt "<@[<hov2>%a@]>" (list comma_sep ptype) tparams );
+    if not @@ SMap.is_empty c_tparams then
+      fprintf fmt "<@[<hov2>%a@]>" (smap comma_sep tparams) c_tparams;
     fprintf fmt "<@[<hov2>%a,@ %a" policy c_self policy c_lump;
     if not (SMap.is_empty c_property_map) then
       fprintf fmt ",@ %a" (smap comma_sep lazy_ptype) c_property_map;

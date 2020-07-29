@@ -79,7 +79,6 @@ void getBaseType(Opcode rawOp, bool predict,
      * to CountedArr/CountedStr. */
     baseValChanged = true;
 
-    if (baseType.maybe(TPArr)) baseType |= TCountedPArr;
     if (baseType.maybe(TVArr)) baseType |= TCountedVArr;
     if (baseType.maybe(TDArr)) baseType |= TCountedDArr;
     if (baseType.maybe(TVec)) baseType |= TCountedVec;

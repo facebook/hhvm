@@ -828,7 +828,7 @@ TEST(Type, DVArray) {
   EXPECT_FALSE(TArr <= TVArr);
   EXPECT_FALSE(TVArr.arrSpec().type());
 
-  EXPECT_EQ(TArr, TPArr | TVArr | TDArr);
+  EXPECT_EQ(TArr, TVArr | TDArr);
   EXPECT_EQ(TBottom, TVArr & TDArr);
 }
 

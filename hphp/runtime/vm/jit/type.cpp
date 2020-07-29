@@ -605,7 +605,6 @@ Type Type::specialize(TypeSpec spec) const {
 
 Type Type::modified() const {
   auto t = unspecialize();
-  if (t.maybe(TPArr))   t |= TPArr;
   if (t.maybe(TVArr))   t |= TVArr;
   if (t.maybe(TDArr))   t |= TDArr;
   if (t.maybe(TVec))    t |= TVec;
@@ -1222,7 +1221,6 @@ Type negativeCheckType(Type srcType, Type typeParam) {
   auto tmp = srcType - typeParam;
   if (typeParam.maybe(TPersistent)) {
     if (tmp.maybe(TCountedStr)) tmp |= TStr;
-    if (tmp.maybe(TCountedPArr)) tmp |= TPArr;
     if (tmp.maybe(TCountedVArr)) tmp |= TVArr;
     if (tmp.maybe(TCountedDArr)) tmp |= TDArr;
     if (tmp.maybe(TCountedVec)) tmp |= TVec;
@@ -1281,7 +1279,6 @@ Type relaxToGuardable(Type ty) {
 
   // We don't support guarding on counted-ness or static-ness, so widen
   // subtypes of any maybe-countable types to the full type.
-  if (ty <= TPArr) return TPArr;
   if (ty <= TVArr) return TVArr;
   if (ty <= TDArr) return TDArr;
   if (ty <= TVec) return TVec;

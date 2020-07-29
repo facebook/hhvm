@@ -134,7 +134,6 @@ inline Type for_const(const ArrayData* ad) {
   assertx(ad->isStatic());
   if (ad->isVArray()) return TStaticVArr;
   if (ad->isDArray()) return TStaticDArr;
-  if (ad->isPHPArrayType()) return TStaticPArr;
   if (ad->isVecType()) return TStaticVec;
   if (ad->isDictType()) return TStaticDict;
   if (ad->isKeysetType()) return TStaticKeyset;

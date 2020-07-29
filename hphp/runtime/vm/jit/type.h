@@ -265,33 +265,30 @@ constexpr bool operator>(Mem a, Mem b) {
   c(StaticStr,       bits_t::bit<5>())                                  \
   c(UncountedStr,    bits_t::bit<6>())                                  \
   c(CountedStr,      bits_t::bit<7>())                                  \
-  c(StaticPArr,      bits_t::bit<8>())                                  \
-  c(UncountedPArr,   bits_t::bit<9>())                                  \
-  c(CountedPArr,     bits_t::bit<10>())                                 \
-  c(StaticVec,       bits_t::bit<11>())                                 \
-  c(UncountedVec,    bits_t::bit<12>())                                 \
-  c(CountedVec,      bits_t::bit<13>())                                 \
-  c(StaticDict,      bits_t::bit<14>())                                 \
-  c(UncountedDict,   bits_t::bit<15>())                                 \
-  c(CountedDict,     bits_t::bit<16>())                                 \
-  c(StaticKeyset,    bits_t::bit<17>())                                 \
-  c(UncountedKeyset, bits_t::bit<18>())                                 \
-  c(CountedKeyset,   bits_t::bit<19>())                                 \
-  c(Obj,             bits_t::bit<20>())                                 \
-  c(Res,             bits_t::bit<21>())                                 \
-  c(Func,            bits_t::bit<22>())                                 \
-  c(Cls,             bits_t::bit<23>())                                 \
-  c(ClsMeth,         bits_t::bit<24>())                                 \
-  c(Record,          bits_t::bit<25>())                                 \
-  c(RecDesc,         bits_t::bit<26>())                                 \
-  c(RFunc,           bits_t::bit<27>())                                 \
-  c(StaticVArr,      bits_t::bit<28>())                                 \
-  c(UncountedVArr,   bits_t::bit<29>())                                 \
-  c(CountedVArr,     bits_t::bit<30>())                                 \
-  c(StaticDArr,      bits_t::bit<31>())                                 \
-  c(UncountedDArr,   bits_t::bit<32>())                                 \
-  c(CountedDArr,     bits_t::bit<33>())                                 \
-  c(RClsMeth,        bits_t::bit<34>())                                 \
+  c(StaticVec,       bits_t::bit<8>())                                  \
+  c(UncountedVec,    bits_t::bit<9>())                                  \
+  c(CountedVec,      bits_t::bit<10>())                                 \
+  c(StaticDict,      bits_t::bit<11>())                                 \
+  c(UncountedDict,   bits_t::bit<12>())                                 \
+  c(CountedDict,     bits_t::bit<13>())                                 \
+  c(StaticKeyset,    bits_t::bit<14>())                                 \
+  c(UncountedKeyset, bits_t::bit<15>())                                 \
+  c(CountedKeyset,   bits_t::bit<16>())                                 \
+  c(Obj,             bits_t::bit<17>())                                 \
+  c(Res,             bits_t::bit<18>())                                 \
+  c(Func,            bits_t::bit<19>())                                 \
+  c(Cls,             bits_t::bit<20>())                                 \
+  c(ClsMeth,         bits_t::bit<21>())                                 \
+  c(Record,          bits_t::bit<22>())                                 \
+  c(RecDesc,         bits_t::bit<23>())                                 \
+  c(RFunc,           bits_t::bit<24>())                                 \
+  c(StaticVArr,      bits_t::bit<25>())                                 \
+  c(UncountedVArr,   bits_t::bit<26>())                                 \
+  c(CountedVArr,     bits_t::bit<27>())                                 \
+  c(StaticDArr,      bits_t::bit<28>())                                 \
+  c(UncountedDArr,   bits_t::bit<29>())                                 \
+  c(CountedDArr,     bits_t::bit<30>())                                 \
+  c(RClsMeth,        bits_t::bit<31>())                                 \
 /**/
 
 /*
@@ -317,15 +314,13 @@ constexpr bool operator>(Mem a, Mem b) {
   c(Null,                kUninit|kInitNull)                             \
   c(PersistentStr,       kStaticStr|kUncountedStr)                      \
   c(Str,                 kPersistentStr|kCountedStr)                    \
-  c(PersistentPArr,      kStaticPArr|kUncountedPArr)                    \
-  c(PArr,                kPersistentPArr|kCountedPArr)                  \
   c(PersistentVArr,      kStaticVArr|kUncountedVArr)                    \
   c(VArr,                kPersistentVArr|kCountedVArr)                  \
   c(PersistentDArr,      kStaticDArr|kUncountedDArr)                    \
   c(DArr,                kPersistentDArr|kCountedDArr)                  \
-  c(StaticArr,           kStaticPArr|kStaticVArr|kStaticDArr)           \
-  c(UncountedArr,        kUncountedPArr|kUncountedVArr|kUncountedDArr)  \
-  c(CountedArr,          kCountedPArr|kCountedVArr|kCountedDArr)        \
+  c(StaticArr,           kStaticVArr|kStaticDArr)                       \
+  c(UncountedArr,        kUncountedVArr|kUncountedDArr)                 \
+  c(CountedArr,          kCountedVArr|kCountedDArr)                     \
   c(PersistentArr,       kStaticArr|kUncountedArr)                      \
   c(Arr,                 kPersistentArr|kCountedArr)                    \
   c(PersistentVec,       kStaticVec|kUncountedVec)                      \
@@ -335,7 +330,7 @@ constexpr bool operator>(Mem a, Mem b) {
   c(PersistentKeyset,    kStaticKeyset|kUncountedKeyset)                \
   c(Keyset,              kPersistentKeyset|kCountedKeyset)              \
   c(PersistentArrLike,   kPersistentArr|kPersistentVec|kPersistentDict|kPersistentKeyset) \
-  c(ArrLike,             kArr|kVec|kDict|kKeyset)                \
+  c(ArrLike,             kArr|kVec|kDict|kKeyset)                       \
   c(NullableObj,         kObj|kInitNull|kUninit)                        \
   c(Persistent,          kPersistentStr|kPersistentArrLike)             \
   c(UncountedInit,       UNCCOUNTED_INIT_UNION)                         \
@@ -418,7 +413,7 @@ constexpr bool operator>(Mem a, Mem b) {
  */
 struct Type {
 private:
-  static constexpr size_t kRuntime = 35;
+  static constexpr size_t kRuntime = 32;
   static constexpr size_t numRuntime = 10;
   using bits_t = BitSet<kRuntime + numRuntime>;
 

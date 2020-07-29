@@ -112,6 +112,12 @@ inline size_t ArrayData::vsize() const {
   return g_array_funcs.vsize[kind()](this);
 }
 
+inline void ArrayData::release() noexcept {
+  assertx(!hasMultipleRefs());
+  g_array_funcs.release[kind()](this);
+  AARCH64_WALKABLE_FRAME();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Introspection.
 

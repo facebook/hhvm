@@ -91,12 +91,6 @@ inline bool ArrayData::isVectorData() const {
   return g_array_funcs.isVectorData[kind()](this);
 }
 
-inline void ArrayData::release() noexcept {
-  assertx(!hasMultipleRefs());
-  g_array_funcs.release[kind()](this);
-  AARCH64_WALKABLE_FRAME();
-}
-
 inline bool ArrayData::exists(int64_t k) const {
   return g_array_funcs.existsInt[kind()](this, k);
 }

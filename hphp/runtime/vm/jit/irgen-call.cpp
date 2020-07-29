@@ -405,7 +405,6 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
         if (unpack->isA(TDict)) return doConvertAndCall(ConvDictToVec);
         if (unpack->isA(TKeyset)) return doConvertAndCall(ConvKeysetToVec);
       } else {
-        if (unpack->isA(TPArr)) return doConvertAndCall(ConvArrToVArr);
         if (unpack->isA(TVArr)) return doCall(fca);
         if (unpack->isA(TDArr)) return doConvertAndCall(ConvArrToVArr);
         if (unpack->isA(TArr)) return doConvertAndCall(ConvArrToVArr);

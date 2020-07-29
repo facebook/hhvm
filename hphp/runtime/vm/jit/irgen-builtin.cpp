@@ -1896,7 +1896,6 @@ SSATmp* builtinCall(IRGS& env,
         decRef(env, realized[i + aoff]);
         realized[i + aoff] = iv;
         ty = iv->type();
-        if (ty->maybe(TPersistentPArr)) *ty |= TPArr;
         if (ty->maybe(TPersistentVArr)) *ty |= TVArr;
         if (ty->maybe(TPersistentDArr)) *ty |= TDArr;
         if (ty->maybe(TPersistentVec)) *ty |= TVec;

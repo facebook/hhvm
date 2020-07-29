@@ -1780,8 +1780,8 @@ SSATmp* doDVArrChecks(IRGS& env, SSATmp* arr, Block* taken,
   auto const type = [&]{
     if (tc.isVArray()) return TVArr;
     if (tc.isDArray()) return TDArr;
-    if (tc.isVArrayOrDArray()) return TVArr|TDArr;
-    return TPArr;
+    assertx(tc.isVArrayOrDArray());
+    return TVArr|TDArr;
   }();
   return gen(env, CheckType, type, taken, arr);
 }

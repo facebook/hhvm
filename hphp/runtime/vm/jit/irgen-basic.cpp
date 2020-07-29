@@ -330,7 +330,6 @@ void emitCastVArray(IRGS& env) {
   push(
     env,
     [&] {
-      if (src->isA(TPArr))   return gen(env, ConvArrToVArr, src);
       if (src->isA(TVArr))   return src;
       if (src->isA(TDArr))   return gen(env, ConvArrToVArr, src);
       if (src->isA(TVec))    return gen(env, ConvVecToVArr, src);
@@ -371,7 +370,6 @@ void emitCastDArray(IRGS& env) {
   push(
     env,
     [&] {
-      if (src->isA(TPArr))   return gen(env, ConvArrToDArr, src);
       if (src->isA(TVArr))   return gen(env, ConvArrToDArr, src);
       if (src->isA(TDArr))   return src;
       if (src->isA(TVec))    return gen(env, ConvVecToDArr, src);

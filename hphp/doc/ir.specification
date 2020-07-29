@@ -3093,7 +3093,7 @@ fields of that struct for holding intermediate values.
 
   Initialize the memoization instance slots for object S0 of the given class.
 
-| ArraySet, DArrSet, S(PArr,VArr,DArr) S(Int,Str) S(Cell), PRc|CRc
+| ArraySet, DArrSet, S(VArr,DArr) S(Int,Str) S(Cell), PRc|CRc
 
   Set element with key S1 in S0 to S2. The dest will be a new Array that should
   replace S0, which may be further constrained by the type of S0.

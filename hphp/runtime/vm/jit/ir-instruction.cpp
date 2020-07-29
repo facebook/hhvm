@@ -311,7 +311,7 @@ Type allocObjReturn(const IRInstruction* inst) {
 
 Type arrSetReturn(const IRInstruction* inst) {
   assertx(inst->is(AddNewElem, ArraySet));
-  assertx(inst->src(0)->type().subtypeOfAny(TPArr, TVArr, TDArr));
+  assertx(inst->src(0)->type().subtypeOfAny(TVArr, TDArr));
   return inst->src(0)->type().modified();
 }
 

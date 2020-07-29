@@ -60,20 +60,6 @@ HACK_OPAM_NAME=${HACK_OPAM_NAME:-$HACK_OPAM_DEFAULT_NAME}
 SKIP_MINI_REPO=${SKIP_MINI_REPO:-0}
 OCAML_PATCH=${OCAML_PATCH:-""}
 
-# building the right compiler name, depending on the version.
-# It might be ocaml-base-compiler.VERSION
-# or ocaml-variants.VERSION+OPTION
-OCAML_COMPILER_NAME="ocaml"
-OCAML_BASE_NAME="ocaml"
-
-if [[ "$HACK_OCAML_VERSION" == *"+"* ]]; then
-  OCAML_BASE_NAME="$OCAML_BASE_NAME-variants"
-  OCAML_COMPILER_NAME="$OCAML_BASE_NAME.$HACK_OCAML_VERSION"
-else 
-  OCAML_BASE_NAME="$OCAML_BASE_NAME-base-compiler"
-  OCAML_COMPILER_NAME="$OCAML_BASE_NAME.$HACK_OCAML_VERSION"
-fi
-
 if [[ "${SKIP_MINI_REPO}" -eq 1 ]]; then
   echo "SKIP_MINI_REPO is set."
   echo "This setup will fetch from the internet."

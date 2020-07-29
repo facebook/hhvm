@@ -218,6 +218,8 @@ function password_needs_rehash(string $hash,
         return true;
       }
       break;
+    default:
+      break;
   }
   return false;
 }

@@ -51,6 +51,7 @@ class UConverter implements IDisposable {
       case self::REASON_IRREGULAR:
         $error = U_ZERO_ERROR;
         return $this->getDestinationSubstChars();
+      default: break;
     }
     return null;
   }
@@ -256,6 +257,7 @@ class UConverter implements IDisposable {
       case self::REASON_IRREGULAR:
         $error = U_ZERO_ERROR;
         return $this->getSourceSubstChars();
+      default: break;
     }
     return null;
   }

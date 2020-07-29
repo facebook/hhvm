@@ -39,6 +39,7 @@ for ($i = 10; $i <= 40; $i +=10)
         case 10: echo "ten"; break;
         case 20: echo "twenty"; break;
         case 30: echo "thirty"; break;
+        default: break;
     }
     echo "\nJust beyond the switch";
 }
@@ -53,6 +54,7 @@ for ($i = 10; $i <= 40; $i +=10)
         case 10: echo "ten"; break;
         case 20: echo "twenty"; $break_after_switch = true; break;
         case 30: echo "thirty"; break;
+        default: break;
     }
     if ($break_after_switch) break;
     echo "\nJust beyond the switch";
@@ -67,6 +69,7 @@ for ($i = 10; $i <= 40; $i +=10)
         case 10: echo "ten"; break;
         case 20: echo "twenty"; continue;
         case 30: echo "thirty"; break;
+        default: break;
     }
     echo "\nJust beyond the switch";
 }
@@ -81,6 +84,7 @@ for ($i = 10; $i <= 40; $i +=10)
         case 10: echo "ten"; break;
         case 20: echo "twenty"; $continue_after_switch = true; continue;
         case 30: echo "thirty"; break;
+        default: break;
     }
     if ($continue_after_switch) continue;
     echo "\nJust beyond the switch";

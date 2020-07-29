@@ -12,6 +12,7 @@ for ($i1 = 0;
     switch ($i2 % 2) {
       case 0:        continue;
         break;
+      default: break;
     }
     print "[" . $i2 . "]\n";
   }

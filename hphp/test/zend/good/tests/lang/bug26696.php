@@ -7,11 +7,12 @@ for ($i = 0; $i < $len; $i++) {
 		case '?':
 			echo "OK\n";
 			break;
+		default: break;
 	}
 }
 
 $str = '*';
-switch ($str[0]) { 
+switch ($str[0]) {
 	case '*';
 		echo "OK\n";
 		break;

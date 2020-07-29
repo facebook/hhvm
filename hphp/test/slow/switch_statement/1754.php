@@ -119,6 +119,7 @@ function st($x) {
   switch ($y = $x) {
   case 0:
     print '0';
+  default: break;
   }
   switch (fcn(true)) {
   case 3:
@@ -128,10 +129,12 @@ function st($x) {
   case 5:
     print '5 or 7';
     break;
+  default: break;
   }
   switch (++$x) {
   case 1:
     print '1';
+  default: break;
   }
   switch ($x + $y + f(true)) {
   case -30:

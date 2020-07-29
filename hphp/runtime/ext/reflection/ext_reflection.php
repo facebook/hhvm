@@ -73,6 +73,7 @@ class Reflection {
       case ReflectionMethod::IS_PUBLIC:     $ret[] = 'public'; break;
       case ReflectionMethod::IS_PRIVATE:    $ret[] = 'private'; break;
       case ReflectionMethod::IS_PROTECTED:  $ret[] = 'protected'; break;
+      default: break;
     }
     if ($modifiers & ReflectionMethod::IS_STATIC) {
       $ret[] = 'static';

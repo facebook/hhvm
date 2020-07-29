@@ -39,6 +39,7 @@ function do_case(<<__Soft>> Bar $x): int {
       return 1;
     case Bar::BAZ:
       return 2;
+    default: break;
   }
   return -1;
 }

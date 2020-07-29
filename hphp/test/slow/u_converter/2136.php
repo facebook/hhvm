@@ -8,6 +8,7 @@ class MyConverter extends UConverter {
       case "\x81": return 'a';
       case "\x82": return ord('b');
       case "\x83": return varray['c'];
+      default: break;
     }
   }
   public function fromUCallback($reason, $source, $codePoint, inout $error) {
@@ -17,6 +18,7 @@ class MyConverter extends UConverter {
       case 0x00F2: return ord("B");
       case 0x00F3: return varray["C"];
       case 0x00F4: return NULL;
+      default: break;
     }
   }
 }

@@ -730,7 +730,7 @@ struct RuntimeOption {
    *  1 - Raise Warning
    * >1 - Throw Exception
    */                                                                   \
-  F(uint32_t, ThrowOnNonExhaustiveSwitch, 0)                            \
+  F(uint32_t, ThrowOnNonExhaustiveSwitch, 1)                            \
   /* CheckReturnTypeHints:
      <2 - Raises E_WARNING if a return type hint fails.
      2 - Raises E_RECOVERABLE_ERROR if regular return type hint fails,

@@ -5,8 +5,8 @@
       c_tparams =
       { c_tparam_list =
         [{ tp_variance = Contravariant; tp_name = ([4:14-15], "T");
-           tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
-           }
+           tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+           tp_user_attributes = [] }
           ];
         c_tparam_constraints = { "T" -> (Erased, []) } };
       c_extends = []; c_uses = []; c_use_as_alias = [];
@@ -29,8 +29,8 @@
        c_tparams =
        { c_tparam_list =
          [{ tp_variance = Invariant; tp_name = ([6:9-10], "T");
-            tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
-            }
+            tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+            tp_user_attributes = [] }
            ];
          c_tparam_constraints = { "T" -> (Erased, []) } };
        c_extends = []; c_uses = []; c_use_as_alias = [];
@@ -58,7 +58,8 @@
        f_name = ([8:10-11], "\\f");
        f_tparams =
        [{ tp_variance = Invariant; tp_name = ([8:12-13], "T");
-          tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }
+          tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+          tp_user_attributes = [] }
          ];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =
@@ -108,7 +109,8 @@
        f_name = ([12:10-11], "\\g");
        f_tparams =
        [{ tp_variance = Invariant; tp_name = ([12:12-13], "T");
-          tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }
+          tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+          tp_user_attributes = [] }
          ];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =

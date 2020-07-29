@@ -210,7 +210,8 @@ let handler =
         (match get_node ty with
         | Tgeneric ci when String.equal ci class_id ->
           if not (Env.get_newable env ci) then Errors.new_without_newable pos ci;
-          if not (List.is_empty targs) then Errors.tparam_with_tparam pos ci
+          if not (List.is_empty targs) then
+            Errors.typaram_applied_to_type pos ci
         | _ ->
           (match Env.get_class env class_id with
           | Some cls ->

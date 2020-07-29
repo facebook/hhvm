@@ -2218,8 +2218,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         reify: Self::R,
         variance: Self::R,
         name: Self::R,
+        _param_params: Self::R,
         constraints: Self::R,
     ) -> Self::R {
+        // TODO(T69662957) We ignore param_params for now, because they have no
+        // counterpart in Typing_defs_core.tparam, yet
         let constraints =
             unwrap_or_return!(self.filter_map_to_slice(constraints, |node| match node {
                 Node::TypeConstraint(&constraint) => Some(constraint),

@@ -1927,14 +1927,29 @@ let classname_param pos =
     ( "Missing type parameter to classname; classname is entirely"
     ^ " meaningless without one" )
 
-let tparam_with_tparam pos x =
+(** Used if higher-kinded types are disabled *)
+let typaram_applied_to_type pos x =
   add
-    (Naming.err_code Naming.TparamWithTparam)
+    (Naming.err_code Naming.HigherKindedTypesUnsupportedFeature)
     pos
     (Printf.sprintf
-       "%s is a type parameter. Type parameters cannot themselves take type parameters (e.g. %s<int> doesn't make sense)"
+       "%s is a type parameter. Type parameters cannot take type arguments (e.g. %s<int> isn't allowed)"
        x
        x)
+
+(** Used if higher-kinded types are disabled *)
+let tparam_with_tparam pos x =
+  let param_desc =
+    match x with
+    | "_" -> ""
+    | _ -> x ^ " is a type parameter. "
+  in
+  add
+    (Naming.err_code Naming.HigherKindedTypesUnsupportedFeature)
+    pos
+    (Printf.sprintf
+       "%sType parameters cannot themselves have type parameters"
+       param_desc)
 
 let shadowed_type_param p pos name =
   add_list

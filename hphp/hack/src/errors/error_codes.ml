@@ -98,7 +98,7 @@ module Naming = struct
     | ThisNoArgument
     | ThisHintOutsideClass
     | ThisReserved
-    | TparamWithTparam
+    | HigherKindedTypesUnsupportedFeature
     | TypedefConstraintDEPRECATED
     | UnboundName
     | Undefined

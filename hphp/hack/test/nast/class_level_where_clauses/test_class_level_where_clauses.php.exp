@@ -5,8 +5,8 @@
       c_tparams =
       { c_tparam_list =
         [{ tp_variance = Invariant; tp_name = ([12:21-22], "T");
-           tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
-           }
+           tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+           tp_user_attributes = [] }
           ];
         c_tparam_constraints = { "T" -> (Erased, []) } };
       c_extends = []; c_uses = []; c_use_as_alias = [];
@@ -35,8 +35,8 @@
        c_tparams =
        { c_tparam_list =
          [{ tp_variance = Invariant; tp_name = ([14:20-21], "T");
-            tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
-            }
+            tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+            tp_user_attributes = [] }
            ];
          c_tparam_constraints = { "T" -> (Erased, []) } };
        c_extends = []; c_uses = []; c_use_as_alias = [];
@@ -65,10 +65,10 @@
        c_tparams =
        { c_tparam_list =
          [{ tp_variance = Invariant; tp_name = ([16:21-22], "T");
-            tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
-            };
+            tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+            tp_user_attributes = [] };
            { tp_variance = Invariant; tp_name = ([16:24-26], "Tu");
-             tp_constraints = []; tp_reified = Erased;
+             tp_parameters = []; tp_constraints = []; tp_reified = Erased;
              tp_user_attributes = [] }
            ];
          c_tparam_constraints = { "T" -> (Erased, []); "Tu" -> (Erased, []) }
@@ -101,8 +101,8 @@
        c_tparams =
        { c_tparam_list =
          [{ tp_variance = Invariant; tp_name = ([18:17-18], "T");
-            tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
-            }
+            tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+            tp_user_attributes = [] }
            ];
          c_tparam_constraints = { "T" -> (Erased, []) } };
        c_extends = []; c_uses = []; c_use_as_alias = [];
@@ -128,8 +128,8 @@
        c_tparams =
        { c_tparam_list =
          [{ tp_variance = Invariant; tp_name = ([20:20-21], "T");
-            tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
-            }
+            tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+            tp_user_attributes = [] }
            ];
          c_tparam_constraints = { "T" -> (Erased, []) } };
        c_extends = []; c_uses = []; c_use_as_alias = [];

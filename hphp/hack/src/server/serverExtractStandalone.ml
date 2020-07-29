@@ -506,11 +506,19 @@ let string_of_constraint (kind, hint) =
   in
   keyword ^ " " ^ string_of_hint hint
 
-let string_of_tparam
+let rec string_of_tparam
     Aast.
-      { tp_variance; tp_name; tp_constraints; tp_reified; tp_user_attributes } =
+      {
+        tp_variance;
+        tp_name;
+        tp_parameters;
+        tp_constraints;
+        tp_reified;
+        tp_user_attributes;
+      } =
   let variance = string_of_variance tp_variance in
   let name = snd tp_name in
+  let parameters = string_of_tparams tp_parameters in
   let constraints = List.map tp_constraints ~f:string_of_constraint in
   let user_attributes = string_of_user_attributes tp_user_attributes in
   let reified =
@@ -522,9 +530,13 @@ let string_of_tparam
   in
   String.concat
     ~sep:" "
-    (user_attributes :: reified :: (variance ^ name) :: constraints)
+    ( user_attributes
+    :: reified
+    :: (variance ^ name)
+    :: parameters
+    :: constraints )
 
-let string_of_tparams tparams =
+and string_of_tparams tparams =
   match tparams with
   | [] -> ""
   | _ ->

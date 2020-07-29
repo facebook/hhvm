@@ -6967,6 +6967,7 @@ and type_param env t =
     {
       Aast.tp_variance = t.tp_variance;
       Aast.tp_name = t.tp_name;
+      Aast.tp_parameters = [];
       Aast.tp_constraints = t.tp_constraints;
       Aast.tp_reified = reify_kind t.tp_reified;
       Aast.tp_user_attributes = user_attributes;

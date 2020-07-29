@@ -5,8 +5,8 @@
       c_tparams =
       { c_tparam_list =
         [{ tp_variance = Invariant; tp_name = ([12:21-22], "T");
-           tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
-           }
+           tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+           tp_user_attributes = [] }
           ];
         c_tparam_constraints = { "T" -> (Erased, []) } };
       c_extends = []; c_uses = []; c_use_as_alias = [];

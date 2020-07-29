@@ -8,11 +8,11 @@ Errors:
       c_tparams =
       { c_tparam_list =
         [{ tp_variance = Covariant; tp_name = ([3:10-12], "Tu");
-           tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
-           };
+           tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+           tp_user_attributes = [] };
           { tp_variance = Contravariant; tp_name = ([3:15-17], "Tv");
-            tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
-            }
+            tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+            tp_user_attributes = [] }
           ];
         c_tparam_constraints = { "Tu" -> (Erased, []); "Tv" -> (Erased, []) }
         };

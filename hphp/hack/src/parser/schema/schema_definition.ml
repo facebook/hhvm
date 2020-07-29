@@ -1984,6 +1984,7 @@ let schema : schema_node list =
           ("reified", ZeroOrOne Token);
           ("variance", ZeroOrOne Token);
           ("name", Token);
+          ("param_params", ZeroOrOne (Just "TypeParameters"));
           ("constraints", ZeroOrMore (Just "TypeConstraint"));
         ];
     };

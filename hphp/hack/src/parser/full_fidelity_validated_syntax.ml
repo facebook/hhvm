@@ -3170,6 +3170,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_type_parameter : type_parameter validator = function
   | { Syntax.syntax = Syntax.TypeParameter x; value = v } -> v,
     { type_constraints = validate_list_with (validate_type_constraint) x.type_constraints
+    ; type_param_params = validate_option_with (validate_type_parameters) x.type_param_params
     ; type_name = validate_token x.type_name
     ; type_variance = validate_option_with (validate_token) x.type_variance
     ; type_reified = validate_option_with (validate_token) x.type_reified
@@ -3183,6 +3184,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; type_reified = invalidate_option_with (invalidate_token) x.type_reified
       ; type_variance = invalidate_option_with (invalidate_token) x.type_variance
       ; type_name = invalidate_token x.type_name
+      ; type_param_params = invalidate_option_with (invalidate_type_parameters) x.type_param_params
       ; type_constraints = invalidate_list_with (invalidate_type_constraint) x.type_constraints
       }
     ; Syntax.value = v

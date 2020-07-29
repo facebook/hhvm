@@ -230,6 +230,7 @@
                               "line_number":5
                             }
                           },
+                          "type_param_params":{"kind":"missing"},
                           "type_constraints":{"kind":"missing"}
                         },
                         "pocket_field_type_semicolon":{
@@ -483,6 +484,7 @@
                                   "line_number":10
                                 }
                               },
+                              "type_param_params":{"kind":"missing"},
                               "type_constraints":{
                                 "kind":"list",
                                 "elements":[
@@ -1001,6 +1003,7 @@
                                   "line_number":14
                                 }
                               },
+                              "type_param_params":{"kind":"missing"},
                               "type_constraints":{
                                 "kind":"list",
                                 "elements":[
@@ -2861,6 +2864,7 @@
                               "line_number":42
                             }
                           },
+                          "type_param_params":{"kind":"missing"},
                           "type_constraints":{"kind":"missing"}
                         },
                         "pocket_field_type_semicolon":{

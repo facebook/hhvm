@@ -330,6 +330,7 @@ and ('ex, 'fb, 'en, 'hi) file_attribute = {
 and ('ex, 'fb, 'en, 'hi) tparam = {
   tp_variance: Ast_defs.variance;
   tp_name: sid;
+  tp_parameters: ('ex, 'fb, 'en, 'hi) tparam list;
   tp_constraints: (Ast_defs.constraint_kind * hint) list;
   tp_reified: reify_kind;
   tp_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;

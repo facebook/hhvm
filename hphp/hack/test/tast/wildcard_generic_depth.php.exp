@@ -5,10 +5,10 @@
       c_tparams =
       { c_tparam_list =
         [{ tp_variance = Invariant; tp_name = ([4:9-11], "Ta");
-           tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
-           };
+           tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+           tp_user_attributes = [] };
           { tp_variance = Invariant; tp_name = ([4:19-21], "Tb");
-            tp_constraints = []; tp_reified = Reified;
+            tp_parameters = []; tp_constraints = []; tp_reified = Reified;
             tp_user_attributes = [] }
           ];
         c_tparam_constraints =

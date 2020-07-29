@@ -25,7 +25,8 @@ Errors:
        f_name = ([6:10-11], "\\f");
        f_tparams =
        [{ tp_variance = Invariant; tp_name = ([6:12-16], "Tcat");
-          tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }
+          tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+          tp_user_attributes = [] }
          ];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =

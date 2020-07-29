@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b45b8574715b232f97ae7e9913328138>>
+// @generated SignedSource<<16e7ac71f5384842a979f0155d78cf4c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -538,6 +538,7 @@ impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> Tri
 pub struct Tparam<'a, Ex, Fb, En, Hi> {
     pub variance: oxidized::ast_defs::Variance,
     pub name: Sid<'a>,
+    pub parameters: &'a [Tparam<'a, Ex, Fb, En, Hi>],
     pub constraints: &'a [(oxidized::ast_defs::ConstraintKind, Hint<'a>)],
     pub reified: oxidized::aast::ReifyKind,
     pub user_attributes: &'a [UserAttribute<'a, Ex, Fb, En, Hi>],

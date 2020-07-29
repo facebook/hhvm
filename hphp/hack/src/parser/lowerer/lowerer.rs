@@ -3487,9 +3487,11 @@ where
                     (true, false) => ast::ReifyKind::Reified,
                     _ => ast::ReifyKind::Erased,
                 };
+                let parameters = Self::p_tparam_l(is_class, &c.type_param_params, env)?;
                 Ok(ast::Tparam {
                     variance,
                     name: Self::pos_name(&c.type_name, env)?,
+                    parameters,
                     constraints: Self::could_map(Self::p_tconstraint, &c.type_constraints, env)?,
                     reified,
                     user_attributes,

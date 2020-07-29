@@ -963,6 +963,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_reified                                       : t
     ; type_variance                                      : t
     ; type_name                                          : t
+    ; type_param_params                                  : t
     ; type_constraints                                   : t
     }
   | TypeConstraint                    of
@@ -2253,6 +2254,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; type_reified: Token.t option value
     ; type_variance: Token.t option value
     ; type_name: Token.t value
+    ; type_param_params: type_parameters option value
     ; type_constraints: type_constraint listesque value
     }
   and type_constraint =

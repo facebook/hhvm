@@ -1998,12 +1998,14 @@ module WithToken(Token: TokenType) = struct
         type_reified;
         type_variance;
         type_name;
+        type_param_params;
         type_constraints;
       } ->
          let acc = f acc type_attribute_spec in
          let acc = f acc type_reified in
          let acc = f acc type_variance in
          let acc = f acc type_name in
+         let acc = f acc type_param_params in
          let acc = f acc type_constraints in
          acc
       | TypeConstraint {
@@ -3845,12 +3847,14 @@ module WithToken(Token: TokenType) = struct
         type_reified;
         type_variance;
         type_name;
+        type_param_params;
         type_constraints;
       } -> [
         type_attribute_spec;
         type_reified;
         type_variance;
         type_name;
+        type_param_params;
         type_constraints;
       ]
       | TypeConstraint {
@@ -5693,12 +5697,14 @@ module WithToken(Token: TokenType) = struct
         type_reified;
         type_variance;
         type_name;
+        type_param_params;
         type_constraints;
       } -> [
         "type_attribute_spec";
         "type_reified";
         "type_variance";
         "type_name";
+        "type_param_params";
         "type_constraints";
       ]
       | TypeConstraint {
@@ -7736,6 +7742,7 @@ module WithToken(Token: TokenType) = struct
           type_reified;
           type_variance;
           type_name;
+          type_param_params;
           type_constraints;
         ]) ->
         TypeParameter {
@@ -7743,6 +7750,7 @@ module WithToken(Token: TokenType) = struct
           type_reified;
           type_variance;
           type_name;
+          type_param_params;
           type_constraints;
         }
       | (SyntaxKind.TypeConstraint, [
@@ -10217,6 +10225,7 @@ module WithToken(Token: TokenType) = struct
         type_reified
         type_variance
         type_name
+        type_param_params
         type_constraints
       =
         let syntax = TypeParameter {
@@ -10224,6 +10233,7 @@ module WithToken(Token: TokenType) = struct
           type_reified;
           type_variance;
           type_name;
+          type_param_params;
           type_constraints;
         } in
         let value = ValueBuilder.value_from_syntax syntax in

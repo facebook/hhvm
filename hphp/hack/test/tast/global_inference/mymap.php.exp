@@ -57,11 +57,11 @@
       c_tparams =
       { c_tparam_list =
         [{ tp_variance = Invariant; tp_name = ([3:13-15], "Tk");
-           tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
-           };
+           tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+           tp_user_attributes = [] };
           { tp_variance = Invariant; tp_name = ([3:17-19], "Tv");
-            tp_constraints = []; tp_reified = Erased; tp_user_attributes = []
-            }
+            tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+            tp_user_attributes = [] }
           ];
         c_tparam_constraints = { "Tk" -> (Erased, []); "Tv" -> (Erased, []) }
         };

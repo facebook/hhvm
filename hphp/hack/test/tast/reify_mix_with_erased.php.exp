@@ -9,9 +9,11 @@ Errors:
       f_name = ([3:10-11], "\\f");
       f_tparams =
       [{ tp_variance = Invariant; tp_name = ([3:18-19], "T");
-         tp_constraints = []; tp_reified = Reified; tp_user_attributes = [] };
+         tp_parameters = []; tp_constraints = []; tp_reified = Reified;
+         tp_user_attributes = [] };
         { tp_variance = Invariant; tp_name = ([3:21-23], "Tu");
-          tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }
+          tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+          tp_user_attributes = [] }
         ];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =

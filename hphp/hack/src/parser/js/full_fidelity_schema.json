@@ -1821,6 +1821,7 @@
         { "field_name" : "reified" },
         { "field_name" : "variance" },
         { "field_name" : "name" },
+        { "field_name" : "param_params" },
         { "field_name" : "constraints" }
       ] },
     { "kind_name" : "TypeConstraint",

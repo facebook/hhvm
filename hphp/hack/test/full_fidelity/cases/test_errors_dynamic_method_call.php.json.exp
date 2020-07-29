@@ -202,6 +202,7 @@
                                   "line_number":4
                                 }
                               },
+                              "type_param_params":{"kind":"missing"},
                               "type_constraints":{"kind":"missing"}
                             },
                             "list_separator":{"kind":"missing"}
@@ -472,6 +473,7 @@
                                   "line_number":7
                                 }
                               },
+                              "type_param_params":{"kind":"missing"},
                               "type_constraints":{"kind":"missing"}
                             },
                             "list_separator":{"kind":"missing"}

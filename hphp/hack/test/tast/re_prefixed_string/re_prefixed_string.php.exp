@@ -79,6 +79,7 @@ Errors:
        f_name = ([18:10-17], "\\goodbye");
        f_tparams =
        [{ tp_variance = Invariant; tp_name = ([18:18-19], "T");
+          tp_parameters = [];
           tp_constraints =
           [(Constraint_as,
             ([18:23-41],

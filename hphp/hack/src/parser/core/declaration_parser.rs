@@ -563,7 +563,9 @@ where
         } else {
             self.require_class_name()
         };
-        let generic_type_parameter_list = self.parse_generic_type_parameter_list_opt();
+        let generic_type_parameter_list = self.with_type_parser(|p: &mut TypeParser<'a, S, T>| {
+            p.parse_generic_type_parameter_list_opt()
+        });
         let (classish_extends, classish_extends_list) = self.parse_extends_opt();
         let (classish_implements, classish_implements_list) = self.parse_classish_implements_opt();
         let classish_where_clause = self.parse_classish_where_clause_opt();
@@ -1456,7 +1458,9 @@ where
     ) -> S::R {
         let type_token = self.assert_token(TokenKind::Type);
         let name = self.require_name_allow_non_reserved();
-        let generic_type_parameter_list = self.parse_generic_type_parameter_list_opt();
+        let generic_type_parameter_list = self.with_type_parser(|p: &mut TypeParser<'a, S, T>| {
+            p.parse_generic_type_parameter_list_opt()
+        });
         let type_constraint = self.parse_type_constraint_opt();
         let (equal_token, type_specifier) = if self.peek_token_kind() == TokenKind::Equal {
             let equal_token = self.assert_token(TokenKind::Equal);
@@ -1830,7 +1834,9 @@ where
         // at parse time but rather by a later pass.
         let function_token = self.require_function();
         let label = self.parse_function_label_opt(is_methodish);
-        let generic_type_parameter_list = self.parse_generic_type_parameter_list_opt();
+        let generic_type_parameter_list = self.with_type_parser(|p: &mut TypeParser<'a, S, T>| {
+            p.parse_generic_type_parameter_list_opt()
+        });
         let (left_paren_token, parameter_list, right_paren_token) = self.parse_parameter_list_opt();
         let (colon_token, return_type) = self.parse_return_type_hint_opt();
         let where_clause = self.parse_where_clause_opt();
@@ -2234,15 +2240,6 @@ where
         }
     }
 
-    fn parse_generic_type_parameter_list_opt(&mut self) -> S::R {
-        match self.peek_token_kind_with_possible_attributized_type_list() {
-            TokenKind::LessThan => self.with_type_parser(|p: &mut TypeParser<'a, S, T>| {
-                p.parse_generic_type_parameter_list()
-            }),
-            _ => S!(make_missing, self, self.pos()),
-        }
-    }
-
     fn parse_type_constraint_opt(&mut self) -> S::R {
         self.with_type_parser(|p: &mut TypeParser<'a, S, T>| p.parse_type_constraint_opt())
     }
@@ -2260,7 +2257,9 @@ where
         // must allow keywords in the place of identifiers; at least to parse .hhi
         // files.
         let name = self.require_name_allow_non_reserved();
-        let generic = self.parse_generic_type_parameter_list_opt();
+        let generic = self.with_type_parser(|p: &mut TypeParser<'a, S, T>| {
+            p.parse_generic_type_parameter_list_opt()
+        });
         let constr = self.parse_type_constraint_opt();
         let equal = self.require_equal();
         let ty = self.parse_type_specifier(false /* allow_var */, true /* allow_attr */);

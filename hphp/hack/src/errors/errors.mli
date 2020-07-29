@@ -237,6 +237,8 @@ val lowercase_this : Pos.t -> string -> unit
 
 val classname_param : Pos.t -> unit
 
+val typaram_applied_to_type : Pos.t -> string -> unit
+
 val tparam_with_tparam : Pos.t -> string -> unit
 
 val shadowed_type_param : Pos.t -> Pos.t -> string -> unit

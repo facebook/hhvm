@@ -703,7 +703,7 @@ and hint_id
       | x when String.equal x SN.Typehints.wildcard ->
         if allow_wildcard && tp_depth >= 1 (* prevents 3 as _ *) then
           if not (List.is_empty hl) then (
-            Errors.tparam_with_tparam p x;
+            Errors.typaram_applied_to_type p x;
             N.Herr
           ) else
             N.Happly (id, [])
@@ -765,7 +765,7 @@ and hint_id
         Errors.lowercase_this p x;
         N.Herr
       | _ when SMap.mem x params ->
-        if not (List.is_empty hl) then Errors.tparam_with_tparam p x;
+        if not (List.is_empty hl) then Errors.typaram_applied_to_type p x;
         N.Habstr x
       | _ ->
         let () = check_name id in
@@ -1177,9 +1177,18 @@ and type_param ~forbid_this ((genv, _) as env) t =
           Errors.error_name_already_bound name canonical pos def_pos
         | None -> ())
   end;
+  ( if
+    (not
+       (TypecheckerOptions.higher_kinded_types
+          (Provider_context.get_tcopt genv.ctx)))
+    && (not @@ List.is_empty t.Aast.tp_parameters)
+  then
+    let (pos, name) = t.Aast.tp_name in
+    Errors.tparam_with_tparam pos name );
   {
     N.tp_variance = t.Aast.tp_variance;
     tp_name = t.Aast.tp_name;
+    tp_parameters = [];
     tp_constraints =
       List.map t.Aast.tp_constraints (constraint_ ~forbid_this env);
     tp_reified = t.Aast.tp_reified;
@@ -2507,6 +2516,7 @@ and class_pu_enum env pu_enum =
           {
             tp_variance = Ast_defs.Invariant;
             tp_name = sid;
+            tp_parameters = [];
             tp_constraints = [(Ast_defs.Constraint_eq, hint)];
             tp_reified = Erased;
             tp_user_attributes = [];

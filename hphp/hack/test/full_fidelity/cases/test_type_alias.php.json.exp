@@ -127,6 +127,7 @@
                         "line_number":3
                       }
                     },
+                    "type_param_params":{"kind":"missing"},
                     "type_constraints":{"kind":"missing"}
                   },
                   "list_separator":{"kind":"missing"}
@@ -345,6 +346,7 @@
                         "line_number":5
                       }
                     },
+                    "type_param_params":{"kind":"missing"},
                     "type_constraints":{"kind":"missing"}
                   },
                   "list_separator":{"kind":"missing"}
@@ -484,6 +486,7 @@
                         "line_number":6
                       }
                     },
+                    "type_param_params":{"kind":"missing"},
                     "type_constraints":{"kind":"missing"}
                   },
                   "list_separator":{
@@ -522,6 +525,7 @@
                         "line_number":6
                       }
                     },
+                    "type_param_params":{"kind":"missing"},
                     "type_constraints":{"kind":"missing"}
                   },
                   "list_separator":{"kind":"missing"}
@@ -661,6 +665,7 @@
                         "line_number":7
                       }
                     },
+                    "type_param_params":{"kind":"missing"},
                     "type_constraints":{"kind":"missing"}
                   },
                   "list_separator":{
@@ -699,6 +704,7 @@
                         "line_number":7
                       }
                     },
+                    "type_param_params":{"kind":"missing"},
                     "type_constraints":{"kind":"missing"}
                   },
                   "list_separator":{"kind":"missing"}

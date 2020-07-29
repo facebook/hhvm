@@ -4,7 +4,8 @@ Errors:
     { t_annotation = (); t_name = ([2:6-27], "\\UNSAFE_TYPE_HH_FIXME_");
       t_tparams =
       [{ tp_variance = Invariant; tp_name = ([2:28-29], "T");
-         tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }
+         tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+         tp_user_attributes = [] }
         ];
       t_constraint = None; t_kind = ([2:33-34], (Habstr "T"));
       t_user_attributes = []; t_mode = Mstrict; t_vis = Transparent;

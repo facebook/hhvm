@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<99862cb92fa048d1811485f6787d7d63>>
+// @generated SignedSource<<5206b52bf24ad8af4b67d9f9db4f3d94>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1874,6 +1874,7 @@ impl<P: Params> NodeMut<P> for Tparam<P::Ex, P::Fb, P::En, P::Hi> {
     ) -> Result<(), P::Error> {
         self.variance.accept(c, v)?;
         self.name.accept(c, v)?;
+        self.parameters.accept(c, v)?;
         self.constraints.accept(c, v)?;
         self.reified.accept(c, v)?;
         self.user_attributes.accept(c, v)?;

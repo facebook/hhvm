@@ -42,6 +42,7 @@
       c_tparams =
       { c_tparam_list =
         [{ tp_variance = Invariant; tp_name = ([3:9-10], "T");
+           tp_parameters = [];
            tp_constraints =
            [(Constraint_super, ([3:17-23], (Hprim Tstring)))];
            tp_reified = Erased; tp_user_attributes = [] }

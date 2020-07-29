@@ -1,6 +1,6 @@
 bool(true)
 int(10)
-array(4) {
+darray(4) {
   ["r"]=>
   int(255)
   ["g"]=>
@@ -14,7 +14,7 @@ array(4) {
 bool(true)
 bool(true)
 bool(false)
-array(4) {
+darray(4) {
   ["r"]=>
   int(240)
   ["g"]=>
@@ -24,12 +24,9 @@ array(4) {
   ["a"]=>
   float(1)
 }
-array(3) {
-  [0]=>
+varray(3) {
   float(1)
-  [1]=>
   float(2)
-  [2]=>
   float(3)
 }
 float(-1)
@@ -42,7 +39,7 @@ bool(true)
 bool(false)
 bool(true)
 string(5) "UTF-8"
-array(4) {
+darray(4) {
   ["r"]=>
   int(0)
   ["g"]=>

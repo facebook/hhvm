@@ -1,51 +1,43 @@
 *** Testing array_merge_recursive() : associative arrays ***
 -- With default argument --
-array(2) {
+darray(2) {
   [0]=>
   string(3) "one"
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(1)
-    [1]=>
     int(2)
   }
 }
 -- With more arguments --
-array(4) {
+darray(4) {
   [0]=>
   string(3) "one"
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(1)
-    [1]=>
     int(2)
   }
   [2]=>
   string(5) "three"
   ["four"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(5) "hello"
-    [1]=>
     string(5) "world"
   }
 }
-array(5) {
+darray(5) {
   [0]=>
   string(3) "one"
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(1)
-    [1]=>
     int(2)
   }
   [2]=>
   string(5) "three"
   ["four"]=>
-  array(4) {
+  darray(4) {
     [0]=>
     string(5) "hello"
     [1]=>
@@ -56,10 +48,8 @@ array(5) {
     string(4) "str2"
   }
   [3]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(6)
-    [1]=>
     int(7)
   }
 }

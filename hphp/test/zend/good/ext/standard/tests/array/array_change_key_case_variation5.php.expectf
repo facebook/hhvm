@@ -1,7 +1,7 @@
 *** Testing array_change_key_case() : usage variations ***
 
 -- Call array_change_key_case() --
-array(3) {
+darray(3) {
   ["ONE"]=>
   string(2) "un"
   ["TWO"]=>

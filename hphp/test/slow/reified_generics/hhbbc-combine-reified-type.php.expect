@@ -1,13 +1,13 @@
 bool(true)
 bool(true)
 bool(false)
-array(2) {
+darray(2) {
   ["kind"]=>
   int(1)
   ["nullable"]=>
   bool(true)
 }
-array(3) {
+darray(3) {
   ["kind"]=>
   int(1)
   ["nullable"]=>

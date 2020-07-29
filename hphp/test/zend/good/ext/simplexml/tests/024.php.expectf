@@ -1,138 +1,122 @@
 ===elem/@attr2===
-array(3) {
-  [0]=>
+varray(3) {
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    array(1) {
+    darray(1) {
       ["attr2"]=>
       string(2) "12"
     }
   }
-  [1]=>
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    array(1) {
+    darray(1) {
       ["attr2"]=>
       string(2) "22"
     }
   }
-  [2]=>
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    array(1) {
+    darray(1) {
       ["attr2"]=>
       string(2) "32"
     }
   }
 }
 ===//@attr2===
-array(3) {
-  [0]=>
+varray(3) {
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    array(1) {
+    darray(1) {
       ["attr2"]=>
       string(2) "12"
     }
   }
-  [1]=>
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    array(1) {
+    darray(1) {
       ["attr2"]=>
       string(2) "22"
     }
   }
-  [2]=>
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    array(1) {
+    darray(1) {
       ["attr2"]=>
       string(2) "32"
     }
   }
 }
 ===//@*===
-array(9) {
-  [0]=>
+varray(9) {
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    array(1) {
+    darray(1) {
       ["attr1"]=>
       string(2) "11"
     }
   }
-  [1]=>
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    array(1) {
+    darray(1) {
       ["attr2"]=>
       string(2) "12"
     }
   }
-  [2]=>
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    array(1) {
+    darray(1) {
       ["attr3"]=>
       string(2) "13"
     }
   }
-  [3]=>
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    array(1) {
+    darray(1) {
       ["attr1"]=>
       string(2) "21"
     }
   }
-  [4]=>
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    array(1) {
+    darray(1) {
       ["attr2"]=>
       string(2) "22"
     }
   }
-  [5]=>
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    array(1) {
+    darray(1) {
       ["attr3"]=>
       string(2) "23"
     }
   }
-  [6]=>
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    array(1) {
+    darray(1) {
       ["attr1"]=>
       string(2) "31"
     }
   }
-  [7]=>
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    array(1) {
+    darray(1) {
       ["attr2"]=>
       string(2) "32"
     }
   }
-  [8]=>
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    array(1) {
+    darray(1) {
       ["attr3"]=>
       string(2) "33"
     }
   }
 }
 ===elem[2]/@attr2===
-array(1) {
-  [0]=>
+varray(1) {
   object(SimpleXMLElement) (1) {
     ["@attributes"]=>
-    array(1) {
+    darray(1) {
       ["attr2"]=>
       string(2) "22"
     }

@@ -1,20 +1,19 @@
-
 Warning: Empty regular expression in %s/match_flags3.php on line %d
 bool(false)
 int(1)
-array(1) {
+darray(1) {
   [0]=>
   string(3) "789"
 }
 int(1)
-array(1) {
+darray(1) {
   [0]=>
   string(3) "123"
 }
 int(2)
-array(1) {
+darray(1) {
   [0]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(3) "789"
     [1]=>

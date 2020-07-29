@@ -1,7 +1,7 @@
 *** Testing array_diff_assoc() : usage variations ***
 
 -- Iteration 1 --
-array(4) {
+darray(4) {
   [0]=>
   string(4) "zero"
   [1]=>
@@ -13,13 +13,13 @@ array(4) {
 }
 
 -- Iteration 2 --
-array(1) {
+darray(1) {
   [""]=>
   string(6) "emptys"
 }
 
 -- Iteration 3 --
-array(2) {
+darray(2) {
   ["string"]=>
   string(7) "strings"
   ["hello world"]=>
@@ -27,7 +27,7 @@ array(2) {
 }
 
 -- Iteration 4 --
-array(2) {
+darray(2) {
   ["binary1"]=>
   string(8) "binary 1"
   ["binary2"]=>

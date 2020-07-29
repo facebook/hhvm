@@ -1,9 +1,9 @@
 Calling main
-array(1) {
+darray(1) {
   ["0"]=>
   string(5) "hello"
 }
-array(1) {
+darray(1) {
   ["0"]=>
   string(5) "hello"
 }

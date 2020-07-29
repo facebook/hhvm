@@ -62,7 +62,7 @@ int(3)
 ----
 
 toDArray...
-array(3) {
+darray(3) {
   [1]=>
   int(1)
   [2]=>
@@ -72,22 +72,16 @@ array(3) {
 }
 
 toKeysArray...
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 
 toValuesArray...
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 

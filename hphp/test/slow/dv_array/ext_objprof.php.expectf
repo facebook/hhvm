@@ -1,6 +1,6 @@
-array(2) {
+darray(2) {
   ["LeafClass"]=>
-  array(4) {
+  darray(4) {
     ["instances"]=>
     int(1)
     ["bytes"]=>
@@ -11,7 +11,7 @@ array(2) {
     NULL
   }
   ["NodeClass"]=>
-  array(4) {
+  darray(4) {
     ["instances"]=>
     int(1)
     ["bytes"]=>
@@ -22,9 +22,9 @@ array(2) {
     NULL
   }
 }
-array(2) {
+darray(2) {
   ["LeafClass"]=>
-  array(4) {
+  darray(4) {
     ["instances"]=>
     int(1)
     ["bytes"]=>
@@ -32,16 +32,16 @@ array(2) {
     ["bytes_normalized"]=>
     float(%d)
     ["paths"]=>
-    array(1) {
+    darray(1) {
       ["Object:NodeClass->Property:child->Object:LeafClass"]=>
-      array(1) {
+      darray(1) {
         ["refs"]=>
         int(1)
       }
     }
   }
   ["NodeClass"]=>
-  array(4) {
+  darray(4) {
     ["instances"]=>
     int(1)
     ["bytes"]=>
@@ -49,13 +49,13 @@ array(2) {
     ["bytes_normalized"]=>
     float(%d)
     ["paths"]=>
-    array(0) {
+    darray(0) {
     }
   }
 }
-array(1) {
+darray(1) {
   ["NodeClass"]=>
-  array(4) {
+  darray(4) {
     ["instances"]=>
     int(1)
     ["bytes"]=>
@@ -66,9 +66,9 @@ array(1) {
     NULL
   }
 }
-array(1) {
+darray(1) {
   ["NodeClass"]=>
-  array(4) {
+  darray(4) {
     ["instances"]=>
     int(1)
     ["bytes"]=>
@@ -76,13 +76,13 @@ array(1) {
     ["bytes_normalized"]=>
     float(%d)
     ["paths"]=>
-    array(0) {
+    darray(0) {
     }
   }
 }
-array(1) {
+darray(1) {
   ["%d"]=>
-  array(4) {
+  darray(4) {
     ["dups"]=>
     int(1)
     ["refs"]=>

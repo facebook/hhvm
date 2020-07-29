@@ -1,8 +1,8 @@
-array(1) {
+darray(1) {
   ["42"]=>
   int(10)
 }
-array(2) {
+darray(2) {
   ["42"]=>
   int(10)
   ["10"]=>
@@ -10,7 +10,7 @@ array(2) {
 }
 Undefined index: 42
 int(10)
-array(2) {
+darray(2) {
   ["42"]=>
   string(6) "string"
   [42]=>

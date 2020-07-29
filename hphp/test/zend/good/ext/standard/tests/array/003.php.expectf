@@ -1,12 +1,10 @@
 -- Testing uasort() -- 
-array(8) {
+darray(8) {
   [16777216]=>
   float(-0.33333333333333)
   ["-1000"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(6) "banana"
-    [1]=>
     string(6) "orange"
   }
   ["test"]=>
@@ -24,12 +22,10 @@ array(8) {
 }
 
  -- Testing uksort() -- 
-array(8) {
+darray(8) {
   ["-1000"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(6) "banana"
-    [1]=>
     string(6) "orange"
   }
   [0]=>
@@ -49,14 +45,12 @@ array(8) {
 }
 
  -- Testing usort() -- 
-array(8) {
+darray(8) {
   [0]=>
   float(-0.33333333333333)
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(6) "banana"
-    [1]=>
     string(6) "orange"
   }
   [2]=>

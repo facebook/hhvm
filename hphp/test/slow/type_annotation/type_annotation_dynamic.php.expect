@@ -1,5 +1,5 @@
 string(10) "HH\dynamic"
-array(1) {
+darray(1) {
   ["kind"]=>
   int(30)
 }

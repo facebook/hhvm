@@ -6,7 +6,7 @@ object(Closure%s) (0) {
 string(%d) "Closure%s"
 object(Closure%s) (1) {
   ["static"]=>
-  array(1) {
+  darray(1) {
     ["ext_var"]=>
     int(1)
   }
@@ -14,7 +14,7 @@ object(Closure%s) (1) {
 string(%d) "Closure%s"
 object(Closure%s) (1) {
   ["parameter"]=>
-  array(1) {
+  darray(1) {
     ["$param"]=>
     string(10) "<required>"
   }
@@ -22,7 +22,7 @@ object(Closure%s) (1) {
 string(%d) "Closure%s"
 object(Closure%s) (2) {
   ["static"]=>
-  array(2) {
+  darray(2) {
     ["ext_var"]=>
     int(1)
     ["another_ext"]=>
@@ -30,7 +30,7 @@ object(Closure%s) (2) {
     }
   }
   ["parameter"]=>
-  array(1) {
+  darray(1) {
     ["$param"]=>
     string(10) "<required>"
   }
@@ -38,7 +38,7 @@ object(Closure%s) (2) {
 string(%d) "Closure%s"
 object(Closure%s) (1) {
   ["parameter"]=>
-  array(1) {
+  darray(1) {
     ["$param"]=>
     string(10) "<optional>"
   }

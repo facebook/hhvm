@@ -1,8 +1,8 @@
 *** Testing class_uses() : variation ***
 --- testing no traits ---
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 --- testing autoload ---

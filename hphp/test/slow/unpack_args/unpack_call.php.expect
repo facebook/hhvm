@@ -1,10 +1,7 @@
 = test_call_array_equivalent =
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 
@@ -14,10 +11,8 @@ string(1) "b"
 string(1) "c"
 * variadic
 string(1) "a"
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "b"
-  [1]=>
   string(1) "c"
 }
 * C::stRegular
@@ -26,10 +21,8 @@ string(1) "b"
 string(1) "c"
 * C::stVariadic
 string(1) "a"
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "b"
-  [1]=>
   string(1) "c"
 }
 * C::__construct
@@ -42,10 +35,8 @@ string(1) "b"
 string(1) "c"
 * C::variadic
 string(1) "a"
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "b"
-  [1]=>
   string(1) "c"
 }
 
@@ -65,10 +56,8 @@ string(1) "b"
 string(1) "c"
 * variadic
 string(1) "a"
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "b"
-  [1]=>
   string(1) "c"
 }
 * C::stRegular
@@ -77,10 +66,8 @@ string(1) "b"
 string(1) "c"
 * C::stVariadic
 string(1) "a"
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "b"
-  [1]=>
   string(1) "c"
 }
 * C::__construct
@@ -93,20 +80,15 @@ string(1) "b"
 string(1) "c"
 * C::variadic
 string(1) "a"
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "b"
-  [1]=>
   string(1) "c"
 }
 
 = test_param_mix =
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 
@@ -116,12 +98,9 @@ string(1) "a"
 string(1) "b"
 * variadic
 string(16) "passed regularly"
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 * C::stRegular
@@ -130,12 +109,9 @@ string(1) "a"
 string(1) "b"
 * C::stVariadic
 string(16) "passed regularly"
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 * C::__construct
@@ -148,40 +124,27 @@ string(1) "a"
 string(1) "b"
 * C::variadic
 string(16) "passed regularly"
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 
 * variadic
 string(16) "passed regularly"
-array(5) {
-  [0]=>
+varray(5) {
   string(21) "also passed regularly"
-  [1]=>
   string(47) "arg that ensures more args passed than declared"
-  [2]=>
   string(1) "a"
-  [3]=>
   string(1) "b"
-  [4]=>
   string(1) "c"
 }
 * variadic_with_func_get_args
-array(5) {
-  [0]=>
+varray(5) {
   string(16) "passed regularly"
-  [1]=>
   string(21) "also passed regularly"
-  [2]=>
   string(1) "a"
-  [3]=>
   string(1) "b"
-  [4]=>
   string(1) "c"
 }
 * regular
@@ -194,14 +157,10 @@ string(21) "also passed regularly"
 string(1) "a"
 * variadic
 string(16) "passed regularly"
-array(4) {
-  [0]=>
+varray(4) {
   string(21) "also passed regularly"
-  [1]=>
   string(1) "a"
-  [2]=>
   string(1) "b"
-  [3]=>
   string(1) "c"
 }
 * C::stRegular
@@ -210,14 +169,10 @@ string(21) "also passed regularly"
 string(1) "a"
 * C::stVariadic
 string(16) "passed regularly"
-array(4) {
-  [0]=>
+varray(4) {
   string(21) "also passed regularly"
-  [1]=>
   string(1) "a"
-  [2]=>
   string(1) "b"
-  [3]=>
   string(1) "c"
 }
 * C::__construct
@@ -230,14 +185,10 @@ string(21) "also passed regularly"
 string(1) "a"
 * C::variadic
 string(16) "passed regularly"
-array(4) {
-  [0]=>
+varray(4) {
   string(21) "also passed regularly"
-  [1]=>
   string(1) "a"
-  [2]=>
   string(1) "b"
-  [3]=>
   string(1) "c"
 }
 
@@ -257,12 +208,9 @@ string(1) "a"
 string(1) "b"
 * variadic
 string(16) "passed regularly"
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 * C::stRegular
@@ -271,12 +219,9 @@ string(1) "a"
 string(1) "b"
 * C::stVariadic
 string(16) "passed regularly"
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 * C::__construct
@@ -289,40 +234,27 @@ string(1) "a"
 string(1) "b"
 * C::variadic
 string(16) "passed regularly"
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
 
 * variadic
 string(16) "passed regularly"
-array(5) {
-  [0]=>
+varray(5) {
   string(21) "also passed regularly"
-  [1]=>
   string(47) "arg that ensures more args passed than declared"
-  [2]=>
   string(1) "a"
-  [3]=>
   string(1) "b"
-  [4]=>
   string(1) "c"
 }
 * variadic_with_func_get_args
-array(5) {
-  [0]=>
+varray(5) {
   string(16) "passed regularly"
-  [1]=>
   string(21) "also passed regularly"
-  [2]=>
   string(1) "a"
-  [3]=>
   string(1) "b"
-  [4]=>
   string(1) "c"
 }
 * regular
@@ -335,14 +267,10 @@ string(21) "also passed regularly"
 string(1) "a"
 * variadic
 string(16) "passed regularly"
-array(4) {
-  [0]=>
+varray(4) {
   string(21) "also passed regularly"
-  [1]=>
   string(1) "a"
-  [2]=>
   string(1) "b"
-  [3]=>
   string(1) "c"
 }
 * C::stRegular
@@ -351,14 +279,10 @@ string(21) "also passed regularly"
 string(1) "a"
 * C::stVariadic
 string(16) "passed regularly"
-array(4) {
-  [0]=>
+varray(4) {
   string(21) "also passed regularly"
-  [1]=>
   string(1) "a"
-  [2]=>
   string(1) "b"
-  [3]=>
   string(1) "c"
 }
 * C::__construct
@@ -371,14 +295,10 @@ string(21) "also passed regularly"
 string(1) "a"
 * C::variadic
 string(16) "passed regularly"
-array(4) {
-  [0]=>
+varray(4) {
   string(21) "also passed regularly"
-  [1]=>
   string(1) "a"
-  [2]=>
   string(1) "b"
-  [3]=>
   string(1) "c"
 }
 

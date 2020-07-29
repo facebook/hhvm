@@ -1,7 +1,7 @@
 *** Testing date_sun_info() : usage variations ***
 
 -- Iteration 1 --
-array(9) {
+darray(9) {
   ["sunrise"]=>
   int(16748)
   ["sunset"]=>
@@ -23,7 +23,7 @@ array(9) {
 }
 
 -- Iteration 2 --
-array(9) {
+darray(9) {
   ["sunrise"]=>
   int(16748)
   ["sunset"]=>
@@ -45,7 +45,7 @@ array(9) {
 }
 
 -- Iteration 3 --
-array(9) {
+darray(9) {
   ["sunrise"]=>
   int(16748)
   ["sunset"]=>
@@ -67,7 +67,7 @@ array(9) {
 }
 
 -- Iteration 4 --
-array(9) {
+darray(9) {
   ["sunrise"]=>
   int(-69665)
   ["sunset"]=>
@@ -142,7 +142,7 @@ Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/z
 
 -- Iteration 18 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, %rv?%rarray given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line 72
+Warning: date_sun_info() expects parameter 1 to be integer, varray given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line 72
 
 -- Iteration 19 --
 

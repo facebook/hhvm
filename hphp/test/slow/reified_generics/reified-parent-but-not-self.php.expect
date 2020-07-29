@@ -1,26 +1,22 @@
-array(2) {
+darray(2) {
   ["kind"]=>
   int(10)
   ["elem_types"]=>
-  array(2) {
-    [0]=>
-    array(1) {
+  varray(2) {
+    darray(1) {
       ["kind"]=>
       int(1)
     }
-    [1]=>
-    array(2) {
+    darray(2) {
       ["kind"]=>
       int(10)
       ["elem_types"]=>
-      array(2) {
-        [0]=>
-        array(1) {
+      varray(2) {
+        darray(1) {
           ["kind"]=>
           int(1)
         }
-        [1]=>
-        array(1) {
+        darray(1) {
           ["kind"]=>
           int(4)
         }
@@ -28,39 +24,34 @@ array(2) {
     }
   }
 }
-array(1) {
+darray(1) {
   ["kind"]=>
   int(1)
 }
-array(2) {
+darray(2) {
   ["kind"]=>
   int(10)
   ["elem_types"]=>
-  array(2) {
-    [0]=>
-    array(2) {
+  varray(2) {
+    darray(2) {
       ["kind"]=>
       int(10)
       ["elem_types"]=>
-      array(2) {
-        [0]=>
-        array(1) {
+      varray(2) {
+        darray(1) {
           ["kind"]=>
           int(1)
         }
-        [1]=>
-        array(2) {
+        darray(2) {
           ["kind"]=>
           int(10)
           ["elem_types"]=>
-          array(2) {
-            [0]=>
-            array(1) {
+          varray(2) {
+            darray(1) {
               ["kind"]=>
               int(1)
             }
-            [1]=>
-            array(1) {
+            darray(1) {
               ["kind"]=>
               int(4)
             }
@@ -68,30 +59,25 @@ array(2) {
         }
       }
     }
-    [1]=>
-    array(2) {
+    darray(2) {
       ["kind"]=>
       int(10)
       ["elem_types"]=>
-      array(2) {
-        [0]=>
-        array(1) {
+      varray(2) {
+        darray(1) {
           ["kind"]=>
           int(1)
         }
-        [1]=>
-        array(2) {
+        darray(2) {
           ["kind"]=>
           int(10)
           ["elem_types"]=>
-          array(2) {
-            [0]=>
-            array(1) {
+          varray(2) {
+            darray(1) {
               ["kind"]=>
               int(1)
             }
-            [1]=>
-            array(1) {
+            darray(1) {
               ["kind"]=>
               int(4)
             }
@@ -101,7 +87,7 @@ array(2) {
     }
   }
 }
-array(1) {
+darray(1) {
   ["kind"]=>
   int(1)
 }

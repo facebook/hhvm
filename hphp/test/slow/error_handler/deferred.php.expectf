@@ -14,16 +14,14 @@ vec(1) {
     ["error-line"]=>
     int(4)
     ["error-backtrace"]=>
-    array(5) {
-      [0]=>
-      array(2) {
+    varray(5) {
+      darray(2) {
         ["file"]=>
         string(%d) "%s/deferred.php"
         ["line"]=>
         int(4)
       }
-      [1]=>
-      array(3) {
+      darray(3) {
         ["file"]=>
         string(%d) "%s/deferred.php"
         ["line"]=>
@@ -31,8 +29,7 @@ vec(1) {
         ["function"]=>
         string(10) "make_error"
       }
-      [2]=>
-      array(3) {
+      darray(3) {
         ["file"]=>
         string(%d) "%s/deferred.php"
         ["line"]=>
@@ -40,8 +37,7 @@ vec(1) {
         ["function"]=>
         string(14) "error_handler1"
       }
-      [3]=>
-      array(3) {
+      darray(3) {
         ["file"]=>
         string(%d) "%s/deferred.php"
         ["line"]=>
@@ -49,8 +45,7 @@ vec(1) {
         ["function"]=>
         string(10) "make_error"
       }
-      [4]=>
-      array(1) {
+      darray(1) {
         ["function"]=>
         string(4) "main"
       }

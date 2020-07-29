@@ -1,7 +1,7 @@
 *** Testing array_change_key_case() : usage variations ***
 
 -- Iteration 1 --
-array(3) {
+darray(3) {
   ["one"]=>
   int(1)
   ["two"]=>
@@ -11,7 +11,7 @@ array(3) {
 }
 
 -- Iteration 2 --
-array(3) {
+darray(3) {
   ["ONE"]=>
   int(1)
   ["TWO"]=>
@@ -21,7 +21,7 @@ array(3) {
 }
 
 -- Iteration 3 --
-array(3) {
+darray(3) {
   ["ONE"]=>
   int(1)
   ["TWO"]=>
@@ -31,7 +31,7 @@ array(3) {
 }
 
 -- Iteration 4 --
-array(3) {
+darray(3) {
   ["ONE"]=>
   int(1)
   ["TWO"]=>
@@ -94,7 +94,7 @@ Warning: array_change_key_case() expects parameter 2 to be integer, string given
 
 -- Iteration 18 --
 
-Warning: array_change_key_case() expects parameter 2 to be integer, %rv?%rarray given in %s/zend/good/ext/standard/tests/array/array_change_key_case_variation2.php on line 76
+Warning: array_change_key_case() expects parameter 2 to be integer, varray given in %s/zend/good/ext/standard/tests/array/array_change_key_case_variation2.php on line 76
 
 -- Iteration 19 --
 

@@ -1,11 +1,11 @@
 *** Testing array_diff_ukey() : usage variation ***
 
 -- Testing array_diff_ukey() function with float indexed array --
-array(1) {
+darray(1) {
   [-30]=>
   string(5) "-30.5"
 }
-array(2) {
+darray(2) {
   [-10]=>
   string(3) "-10"
   [20]=>

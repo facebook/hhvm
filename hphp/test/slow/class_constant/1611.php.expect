@@ -1,22 +1,16 @@
-array(2) {
+darray(2) {
   ["a_ids"]=>
-  array(3) {
+  darray(3) {
     ["aaa"]=>
     bool(true)
     ["ccc"]=>
-    array(2) {
-      [0]=>
-      array(2) {
-        [0]=>
+    varray(2) {
+      varray(2) {
         string(4) "tcks"
-        [1]=>
         string(4) "none"
       }
-      [1]=>
-      array(2) {
-        [0]=>
+      varray(2) {
         string(4) "tcks"
-        [1]=>
         string(3) "ids"
       }
     }
@@ -24,23 +18,17 @@ array(2) {
     string(4) "aaaa"
   }
   ["user_id"]=>
-  array(3) {
+  darray(3) {
     ["aaa"]=>
     bool(true)
     ["ccc"]=>
-    array(2) {
-      [0]=>
-      array(2) {
-        [0]=>
+    varray(2) {
+      varray(2) {
         string(4) "tcks"
-        [1]=>
         string(4) "none"
       }
-      [1]=>
-      array(2) {
-        [0]=>
+      varray(2) {
         string(4) "tcks"
-        [1]=>
         string(2) "id"
       }
     }

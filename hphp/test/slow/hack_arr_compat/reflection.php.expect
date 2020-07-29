@@ -1,5 +1,4 @@
-array(4) {
-  [0]=>
+varray(4) {
   object(ReflectionProperty) (3) {
     ["name"]=>
     string(5) "prop1"
@@ -8,7 +7,6 @@ array(4) {
     ["forceAccessible":"ReflectionProperty":private]=>
     bool(false)
   }
-  [1]=>
   object(ReflectionProperty) (3) {
     ["name"]=>
     string(5) "prop2"
@@ -17,7 +15,6 @@ array(4) {
     ["forceAccessible":"ReflectionProperty":private]=>
     bool(false)
   }
-  [2]=>
   object(ReflectionProperty) (3) {
     ["name"]=>
     string(5) "prop3"
@@ -26,7 +23,6 @@ array(4) {
     ["forceAccessible":"ReflectionProperty":private]=>
     bool(false)
   }
-  [3]=>
   object(ReflectionProperty) (3) {
     ["name"]=>
     string(5) "prop4"

@@ -1,8 +1,5 @@
-array(3) {
-  [0]=>
+varray(3) {
   %unicode|string%(1) ","
-  [1]=>
   %unicode|string%(1) """
-  [2]=>
   %unicode|string%(1) "\"
 }

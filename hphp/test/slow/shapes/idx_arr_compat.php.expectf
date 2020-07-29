@@ -1,17 +1,15 @@
-array(1) {
+darray(1) {
   ["x"]=>
   int(1)
 }
 int(1)
-array(1) {
+darray(1) {
   ["x"]=>
   int(1)
 }
 int(1)
-array(2) {
-  [0]=>
+varray(2) {
   bool(true)
-  [1]=>
   bool(false)
 }
 string(52) "idx() expects parameter 1 to be darray, varray given"

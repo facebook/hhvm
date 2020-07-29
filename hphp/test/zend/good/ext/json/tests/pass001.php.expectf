@@ -57,13 +57,13 @@ Testing:
 ,"rosebud"]
 
 DECODE: AS OBJECT
-array(14) {
+darray(14) {
   [0]=>
   string(23) "JSON Test Pattern pass1"
   [1]=>
   object(stdClass) (1) {
     ["object with 1 member"]=>
-    array(1) {
+    darray(1) {
       [0]=>
       string(20) "array with 1 element"
     }
@@ -72,7 +72,7 @@ array(14) {
   object(stdClass) (0) {
   }
   [3]=>
-  array(0) {
+  darray(0) {
   }
   [4]=>
   int(-42)
@@ -127,7 +127,7 @@ array(14) {
     ["null"]=>
     NULL
     ["array"]=>
-    array(0) {
+    darray(0) {
     }
     ["object"]=>
     object(stdClass) (0) {
@@ -141,7 +141,7 @@ array(14) {
     ["# -- --> */"]=>
     string(1) " "
     [" s p a c e d "]=>
-    array(7) {
+    darray(7) {
       [0]=>
       int(1)
       [1]=>
@@ -158,7 +158,7 @@ array(14) {
       int(7)
     }
     ["compact"]=>
-    array(7) {
+    darray(7) {
       [0]=>
       int(1)
       [1]=>
@@ -195,22 +195,22 @@ array(14) {
   string(7) "rosebud"
 }
 DECODE: AS ARRAY
-array(14) {
+darray(14) {
   [0]=>
   string(23) "JSON Test Pattern pass1"
   [1]=>
-  array(1) {
+  darray(1) {
     ["object with 1 member"]=>
-    array(1) {
+    darray(1) {
       [0]=>
       string(20) "array with 1 element"
     }
   }
   [2]=>
-  array(0) {
+  darray(0) {
   }
   [3]=>
-  array(0) {
+  darray(0) {
   }
   [4]=>
   int(-42)
@@ -221,7 +221,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  array(31) {
+  darray(31) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -265,10 +265,10 @@ array(14) {
     ["null"]=>
     NULL
     ["array"]=>
-    array(0) {
+    darray(0) {
     }
     ["object"]=>
-    array(0) {
+    darray(0) {
     }
     ["address"]=>
     string(19) "50 St. James Street"
@@ -279,7 +279,7 @@ array(14) {
     ["# -- --> */"]=>
     string(1) " "
     [" s p a c e d "]=>
-    array(7) {
+    darray(7) {
       [0]=>
       int(1)
       [1]=>
@@ -296,7 +296,7 @@ array(14) {
       int(7)
     }
     ["compact"]=>
-    array(7) {
+    darray(7) {
       [0]=>
       int(1)
       [1]=>
@@ -337,13 +337,13 @@ ENCODE: FROM OBJECT
 ENCODE: FROM ARRAY
 ["JSON Test Pattern pass1",{"object with 1 member":["array with 1 element"]},[],[],-42,true,false,null,{"integer":1234567890,"real":-9876.54321,"e":1.23456789e-13,"E":1.23456789e+34,"":0,"zero":0,"one":1,"space":" ","quote":"\"","backslash":"\\","controls":"\b\f\n\r\t","slash":"\/ & \/","alpha":"abcdefghijklmnopqrstuvwyz","ALPHA":"ABCDEFGHIJKLMNOPQRSTUVWYZ","digit":"0123456789","special":"`1~!@#$%^&*()_+-={':[,]}|;.<\/>?","hex":"\u0123\u4567\u89ab\ucdef\uabcd\uef4a","true":true,"false":false,"null":null,"array":[],"object":[],"address":"50 St. James Street","url":"http:\/\/www.JSON.org\/","comment":"\/\/ \/* <!-- --","# -- --> *\/":" "," s p a c e d ":[1,2,3,4,5,6,7],"compact":[1,2,3,4,5,6,7],"jsontext":"{\"object with 1 member\":[\"array with 1 element\"]}","quotes":"&#34; \" %22 0x22 034 &#x22;","\/\\\"\ucafe\ubabe\uab98\ufcde\ubcda\uef4a\b\f\n\r\t`1~!@#$%^&*()_+-=[]{}|;:',.\/<>?":"A key can be any string"},0.5,98.6,99.44,1066,"rosebud"]
 DECODE AGAIN: AS OBJECT
-array(14) {
+darray(14) {
   [0]=>
   string(23) "JSON Test Pattern pass1"
   [1]=>
   object(stdClass) (1) {
     ["object with 1 member"]=>
-    array(1) {
+    darray(1) {
       [0]=>
       string(20) "array with 1 element"
     }
@@ -352,7 +352,7 @@ array(14) {
   object(stdClass) (0) {
   }
   [3]=>
-  array(0) {
+  darray(0) {
   }
   [4]=>
   int(-42)
@@ -407,7 +407,7 @@ array(14) {
     ["null"]=>
     NULL
     ["array"]=>
-    array(0) {
+    darray(0) {
     }
     ["object"]=>
     object(stdClass) (0) {
@@ -421,7 +421,7 @@ array(14) {
     ["# -- --> */"]=>
     string(1) " "
     [" s p a c e d "]=>
-    array(7) {
+    darray(7) {
       [0]=>
       int(1)
       [1]=>
@@ -438,7 +438,7 @@ array(14) {
       int(7)
     }
     ["compact"]=>
-    array(7) {
+    darray(7) {
       [0]=>
       int(1)
       [1]=>
@@ -475,22 +475,22 @@ array(14) {
   string(7) "rosebud"
 }
 DECODE AGAIN: AS ARRAY
-array(14) {
+darray(14) {
   [0]=>
   string(23) "JSON Test Pattern pass1"
   [1]=>
-  array(1) {
+  darray(1) {
     ["object with 1 member"]=>
-    array(1) {
+    darray(1) {
       [0]=>
       string(20) "array with 1 element"
     }
   }
   [2]=>
-  array(0) {
+  darray(0) {
   }
   [3]=>
-  array(0) {
+  darray(0) {
   }
   [4]=>
   int(-42)
@@ -501,7 +501,7 @@ array(14) {
   [7]=>
   NULL
   [8]=>
-  array(31) {
+  darray(31) {
     ["integer"]=>
     int(1234567890)
     ["real"]=>
@@ -545,10 +545,10 @@ array(14) {
     ["null"]=>
     NULL
     ["array"]=>
-    array(0) {
+    darray(0) {
     }
     ["object"]=>
-    array(0) {
+    darray(0) {
     }
     ["address"]=>
     string(19) "50 St. James Street"
@@ -559,7 +559,7 @@ array(14) {
     ["# -- --> */"]=>
     string(1) " "
     [" s p a c e d "]=>
-    array(7) {
+    darray(7) {
       [0]=>
       int(1)
       [1]=>
@@ -576,7 +576,7 @@ array(14) {
       int(7)
     }
     ["compact"]=>
-    array(7) {
+    darray(7) {
       [0]=>
       int(1)
       [1]=>

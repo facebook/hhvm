@@ -3,16 +3,14 @@ Exception: Func to varray conversion
 Exception: Func to dict conversion
 Exception: Func to vec conversion
 Exception: Func to keyset conversion
-array(2) {
+darray(2) {
   [0]=>
   string(1) "A"
   [1]=>
   string(4) "meth"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "A"
-  [1]=>
   string(4) "meth"
 }
 dict(2) {

@@ -1,22 +1,19 @@
-array(1) {
-  [0]=>
-  array(2) {
+varray(1) {
+  darray(2) {
     ["a"]=>
     int(2)
     ["b"]=>
     int(3)
   }
 }
-array(2) {
+darray(2) {
   ["a"]=>
   int(2)
   ["b"]=>
   int(3)
 }
-array(2) {
-  [0]=>
+varray(2) {
   int(2)
-  [1]=>
   int(3)
 }
 dict(2) {

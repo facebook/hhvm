@@ -1,4 +1,4 @@
-array(3) {
+darray(3) {
   [1]=>
   string(3) "比"
   [2]=>
@@ -6,16 +6,7 @@ array(3) {
   [0]=>
   string(3) "诶"
 }
-array(3) {
-  [1]=>
-  string(3) "比"
-  [2]=>
-  string(3) "西"
-  [0]=>
-  string(3) "诶"
-}
-string(10) "zh_CN.utf8"
-array(3) {
+darray(3) {
   [1]=>
   string(3) "比"
   [2]=>
@@ -24,7 +15,16 @@ array(3) {
   string(3) "诶"
 }
 string(10) "zh_CN.utf8"
-array(3) {
+darray(3) {
+  [1]=>
+  string(3) "比"
+  [2]=>
+  string(3) "西"
+  [0]=>
+  string(3) "诶"
+}
+string(10) "zh_CN.utf8"
+darray(3) {
   [0]=>
   string(3) "诶"
   [1]=>

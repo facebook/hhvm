@@ -1,4 +1,4 @@
-array(4) {
+darray(4) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -8,7 +8,7 @@ array(4) {
   ["pass"]=>
   string(4) "pass"
 }
-array(3) {
+darray(3) {
   ["host"]=>
   string(4) "host"
   ["user"]=>
@@ -16,7 +16,7 @@ array(3) {
   ["pass"]=>
   string(4) "pass"
 }
-array(2) {
+darray(2) {
   ["host"]=>
   string(4) "host"
   ["user"]=>

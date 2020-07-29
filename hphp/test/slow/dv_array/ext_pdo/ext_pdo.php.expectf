@@ -7,37 +7,35 @@ bool(true)
 bool(true)
 bool(true)
 int(0)
-array(2) {
+darray(2) {
   ["bar"]=>
   string(3) "ABC"
   [0]=>
   string(3) "ABC"
 }
 int(1)
-array(2) {
+darray(2) {
   ["bar"]=>
   string(3) "DEF"
   [0]=>
   string(3) "DEF"
 }
 int(0)
-array(2) {
+darray(2) {
   ["bar"]=>
   string(3) "ABC"
   [0]=>
   string(3) "ABC"
 }
 int(1)
-array(2) {
+darray(2) {
   ["bar"]=>
   string(3) "DEF"
   [0]=>
   string(3) "DEF"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "ABC"
-  [1]=>
   string(3) "DEF"
 }
 object(MyShadyObject) (1) {
@@ -48,10 +46,8 @@ object(MyShadyObject) (1) {
   ["bar"]=>
   string(3) "DEF"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(10) "ABC_foobar"
-  [1]=>
   string(10) "DEF_foobar"
 }
 

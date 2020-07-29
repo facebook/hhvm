@@ -118,21 +118,15 @@ dict(2) {
   string(6) "value2"
 }
 get() called....
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "value"
-  [1]=>
   string(6) "value2"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "value"
-  [1]=>
   string(6) "value2"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "value"
-  [1]=>
   string(6) "value2"
 }

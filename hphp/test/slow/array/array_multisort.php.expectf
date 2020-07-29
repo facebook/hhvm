@@ -1,4 +1,4 @@
-array(5) {
+darray(5) {
   [0]=>
   string(8) "img1.jpg"
   [1]=>
@@ -10,7 +10,7 @@ array(5) {
   [4]=>
   string(9) "img99.jpg"
 }
-array(5) {
+darray(5) {
   [0]=>
   string(8) "img1.jpg"
   [1]=>
@@ -22,7 +22,7 @@ array(5) {
   [4]=>
   string(9) "img99.jpg"
 }
-array(5) {
+darray(5) {
   [0]=>
   string(9) "img99.jpg"
   [1]=>

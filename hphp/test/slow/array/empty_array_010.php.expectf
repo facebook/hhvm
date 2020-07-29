@@ -1,4 +1,4 @@
-array(2) {
+darray(2) {
   [42]=>
   int(2)
   [43]=>
@@ -6,7 +6,7 @@ array(2) {
 }
 
 Warning: Cannot add element to the array as the next element is already occupied in %s on line 11
-array(1) {
+darray(1) {
   [9223372036854775807]=>
   int(2)
 }

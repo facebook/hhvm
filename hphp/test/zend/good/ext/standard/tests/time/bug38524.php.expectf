@@ -1,4 +1,4 @@
-array(9) {
+darray(9) {
   ["tm_sec"]=>
   int(0)
   ["tm_min"]=>
@@ -14,7 +14,7 @@ array(9) {
   ["tm_wday"]=>
   int(0)
   ["tm_yday"]=>
-  int(%d)
+  int(231)
   ["unparsed"]=>
   string(0) ""
 }

@@ -1,10 +1,9 @@
-array(2) {
+darray(2) {
   ["kind"]=>
   int(20)
   ["generic_types"]=>
-  array(1) {
-    [0]=>
-    array(2) {
+  varray(1) {
+    darray(2) {
       ["kind"]=>
       int(1)
       ["alias"]=>

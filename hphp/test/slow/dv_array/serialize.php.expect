@@ -53,18 +53,18 @@ string(50) "Y:2:{i:0;y:3:{i:1;i:2;i:3;}i:1;y:3:{i:4;i:5;i:6;}}"
 string(74) "a:2:{i:0;a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}i:1;a:3:{i:0;i:4;i:1;i:5;i:2;i:6;}}"
 ====================================================
 unserialize_test("a:0:{}")
-array(0) {
+darray(0) {
 }
 bool(false)
 bool(true)
 ----------------------------------------------------
-array(0) {
+darray(0) {
 }
 bool(false)
 bool(true)
 ====================================================
 unserialize_test("a:3:{i:100;i:123;i:200;i:456;i:300;i:789;}")
-array(3) {
+darray(3) {
   [100]=>
   int(123)
   [200]=>
@@ -75,7 +75,7 @@ array(3) {
 bool(false)
 bool(true)
 ----------------------------------------------------
-array(3) {
+darray(3) {
   [100]=>
   int(123)
   [200]=>
@@ -87,7 +87,7 @@ bool(false)
 bool(true)
 ====================================================
 unserialize_test("a:3:{i:100;s:3:"abc";i:200;s:3:"def";i:300;s:3:"ghi";}")
-array(3) {
+darray(3) {
   [100]=>
   string(3) "abc"
   [200]=>
@@ -98,7 +98,7 @@ array(3) {
 bool(false)
 bool(true)
 ----------------------------------------------------
-array(3) {
+darray(3) {
   [100]=>
   string(3) "abc"
   [200]=>
@@ -110,7 +110,7 @@ bool(false)
 bool(true)
 ====================================================
 unserialize_test("a:3:{i:0;s:3:"abc";i:1;s:3:"def";i:2;s:3:"ghi";}")
-array(3) {
+darray(3) {
   [0]=>
   string(3) "abc"
   [1]=>
@@ -121,7 +121,7 @@ array(3) {
 bool(false)
 bool(true)
 ----------------------------------------------------
-array(3) {
+darray(3) {
   [0]=>
   string(3) "abc"
   [1]=>
@@ -133,7 +133,7 @@ bool(false)
 bool(true)
 ====================================================
 unserialize_test("a:3:{s:3:"abc";i:100;s:3:"def";i:200;s:3:"ghi";i:300;}")
-array(3) {
+darray(3) {
   ["abc"]=>
   int(100)
   ["def"]=>
@@ -144,7 +144,7 @@ array(3) {
 bool(false)
 bool(true)
 ----------------------------------------------------
-array(3) {
+darray(3) {
   ["abc"]=>
   int(100)
   ["def"]=>
@@ -156,29 +156,26 @@ bool(false)
 bool(true)
 ====================================================
 unserialize_test("y:0:{}")
-array(0) {
+varray(0) {
 }
 bool(true)
 bool(false)
 ----------------------------------------------------
-array(0) {
+darray(0) {
 }
 bool(false)
 bool(true)
 ====================================================
 unserialize_test("y:3:{i:123;i:456;i:789;}")
-array(3) {
-  [0]=>
+varray(3) {
   int(123)
-  [1]=>
   int(456)
-  [2]=>
   int(789)
 }
 bool(true)
 bool(false)
 ----------------------------------------------------
-array(3) {
+darray(3) {
   [0]=>
   int(123)
   [1]=>
@@ -190,18 +187,15 @@ bool(false)
 bool(true)
 ====================================================
 unserialize_test("y:3:{s:3:"abc";s:3:"def";s:3:"ghi";}")
-array(3) {
-  [0]=>
+varray(3) {
   string(3) "abc"
-  [1]=>
   string(3) "def"
-  [2]=>
   string(3) "ghi"
 }
 bool(true)
 bool(false)
 ----------------------------------------------------
-array(3) {
+darray(3) {
   [0]=>
   string(3) "abc"
   [1]=>
@@ -213,32 +207,24 @@ bool(false)
 bool(true)
 ====================================================
 unserialize_test("y:2:{y:3:{i:1;i:2;i:3;}y:3:{i:4;i:5;i:6;}}")
-array(2) {
-  [0]=>
-  array(3) {
-    [0]=>
+varray(2) {
+  varray(3) {
     int(1)
-    [1]=>
     int(2)
-    [2]=>
     int(3)
   }
-  [1]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(4)
-    [1]=>
     int(5)
-    [2]=>
     int(6)
   }
 }
 bool(true)
 bool(false)
 ----------------------------------------------------
-array(2) {
+darray(2) {
   [0]=>
-  array(3) {
+  darray(3) {
     [0]=>
     int(1)
     [1]=>
@@ -247,7 +233,7 @@ array(2) {
     int(3)
   }
   [1]=>
-  array(3) {
+  darray(3) {
     [0]=>
     int(4)
     [1]=>
@@ -260,32 +246,26 @@ bool(false)
 bool(true)
 ====================================================
 unserialize_test("a:2:{i:0;y:3:{i:1;i:2;i:3;}i:1;y:3:{i:4;i:5;i:6;}}")
-array(2) {
+darray(2) {
   [0]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(1)
-    [1]=>
     int(2)
-    [2]=>
     int(3)
   }
   [1]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(4)
-    [1]=>
     int(5)
-    [2]=>
     int(6)
   }
 }
 bool(false)
 bool(true)
 ----------------------------------------------------
-array(2) {
+darray(2) {
   [0]=>
-  array(3) {
+  darray(3) {
     [0]=>
     int(1)
     [1]=>
@@ -294,7 +274,7 @@ array(2) {
     int(3)
   }
   [1]=>
-  array(3) {
+  darray(3) {
     [0]=>
     int(4)
     [1]=>
@@ -307,18 +287,18 @@ bool(false)
 bool(true)
 ====================================================
 unserialize_test("Y:0:{}")
-array(0) {
+darray(0) {
 }
 bool(false)
 bool(true)
 ----------------------------------------------------
-array(0) {
+darray(0) {
 }
 bool(false)
 bool(true)
 ====================================================
 unserialize_test("Y:3:{i:100;i:123;i:200;i:456;i:300;i:789;}")
-array(3) {
+darray(3) {
   [100]=>
   int(123)
   [200]=>
@@ -329,7 +309,7 @@ array(3) {
 bool(false)
 bool(true)
 ----------------------------------------------------
-array(3) {
+darray(3) {
   [100]=>
   int(123)
   [200]=>
@@ -341,7 +321,7 @@ bool(false)
 bool(true)
 ====================================================
 unserialize_test("Y:3:{i:100;s:3:"abc";i:200;s:3:"def";i:300;s:3:"ghi";}")
-array(3) {
+darray(3) {
   [100]=>
   string(3) "abc"
   [200]=>
@@ -352,7 +332,7 @@ array(3) {
 bool(false)
 bool(true)
 ----------------------------------------------------
-array(3) {
+darray(3) {
   [100]=>
   string(3) "abc"
   [200]=>
@@ -364,7 +344,7 @@ bool(false)
 bool(true)
 ====================================================
 unserialize_test("Y:3:{i:0;s:3:"abc";i:1;s:3:"def";i:2;s:3:"ghi";}")
-array(3) {
+darray(3) {
   [0]=>
   string(3) "abc"
   [1]=>
@@ -375,7 +355,7 @@ array(3) {
 bool(false)
 bool(true)
 ----------------------------------------------------
-array(3) {
+darray(3) {
   [0]=>
   string(3) "abc"
   [1]=>
@@ -387,7 +367,7 @@ bool(false)
 bool(true)
 ====================================================
 unserialize_test("Y:3:{s:3:"abc";i:100;s:3:"def";i:200;s:3:"ghi";i:300;}")
-array(3) {
+darray(3) {
   ["abc"]=>
   int(100)
   ["def"]=>
@@ -398,7 +378,7 @@ array(3) {
 bool(false)
 bool(true)
 ----------------------------------------------------
-array(3) {
+darray(3) {
   ["abc"]=>
   int(100)
   ["def"]=>
@@ -410,14 +390,14 @@ bool(false)
 bool(true)
 ====================================================
 unserialize_test("Y:2:{i:1;Y:1:{i:2;i:3;}i:4;Y:1:{i:5;i:6;}}")
-array(2) {
+darray(2) {
   [1]=>
-  array(1) {
+  darray(1) {
     [2]=>
     int(3)
   }
   [4]=>
-  array(1) {
+  darray(1) {
     [5]=>
     int(6)
   }
@@ -425,14 +405,14 @@ array(2) {
 bool(false)
 bool(true)
 ----------------------------------------------------
-array(2) {
+darray(2) {
   [1]=>
-  array(1) {
+  darray(1) {
     [2]=>
     int(3)
   }
   [4]=>
-  array(1) {
+  darray(1) {
     [5]=>
     int(6)
   }
@@ -441,14 +421,14 @@ bool(false)
 bool(true)
 ====================================================
 unserialize_test("a:2:{i:1;Y:1:{i:2;i:3;}i:4;Y:1:{i:5;i:6;}}")
-array(2) {
+darray(2) {
   [1]=>
-  array(1) {
+  darray(1) {
     [2]=>
     int(3)
   }
   [4]=>
-  array(1) {
+  darray(1) {
     [5]=>
     int(6)
   }
@@ -456,14 +436,14 @@ array(2) {
 bool(false)
 bool(true)
 ----------------------------------------------------
-array(2) {
+darray(2) {
   [1]=>
-  array(1) {
+  darray(1) {
     [2]=>
     int(3)
   }
   [4]=>
-  array(1) {
+  darray(1) {
     [5]=>
     int(6)
   }
@@ -472,19 +452,16 @@ bool(false)
 bool(true)
 ====================================================
 unserialize_test("y:3:{Y:1:{i:0;s:1:"a";}Y:1:{i:1;s:1:"b";}Y:1:{i:2;s:1:"c";}}")
-array(3) {
-  [0]=>
-  array(1) {
+varray(3) {
+  darray(1) {
     [0]=>
     string(1) "a"
   }
-  [1]=>
-  array(1) {
+  darray(1) {
     [1]=>
     string(1) "b"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     [2]=>
     string(1) "c"
   }
@@ -492,19 +469,19 @@ array(3) {
 bool(true)
 bool(false)
 ----------------------------------------------------
-array(3) {
+darray(3) {
   [0]=>
-  array(1) {
+  darray(1) {
     [0]=>
     string(1) "a"
   }
   [1]=>
-  array(1) {
+  darray(1) {
     [1]=>
     string(1) "b"
   }
   [2]=>
-  array(1) {
+  darray(1) {
     [2]=>
     string(1) "c"
   }
@@ -513,32 +490,26 @@ bool(false)
 bool(true)
 ====================================================
 unserialize_test("Y:2:{i:0;y:3:{i:1;i:2;i:3;}i:1;y:3:{i:4;i:5;i:6;}}")
-array(2) {
+darray(2) {
   [0]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(1)
-    [1]=>
     int(2)
-    [2]=>
     int(3)
   }
   [1]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(4)
-    [1]=>
     int(5)
-    [2]=>
     int(6)
   }
 }
 bool(false)
 bool(true)
 ----------------------------------------------------
-array(2) {
+darray(2) {
   [0]=>
-  array(3) {
+  darray(3) {
     [0]=>
     int(1)
     [1]=>
@@ -547,7 +518,7 @@ array(2) {
     int(3)
   }
   [1]=>
-  array(3) {
+  darray(3) {
     [0]=>
     int(4)
     [1]=>

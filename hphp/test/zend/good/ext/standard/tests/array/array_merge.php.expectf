@@ -554,7 +554,7 @@ Array
 )
 
 *** Testing array_merge() with three or more arrays ***
-array(13) {
+darray(13) {
   [0]=>
   int(1)
   [1]=>
@@ -580,7 +580,7 @@ array(13) {
   ["string"]=>
   string(5) "hello"
   [5]=>
-  array(3) {
+  darray(3) {
     [""]=>
     string(5) "World"
     ["-2.34"]=>
@@ -589,7 +589,7 @@ array(13) {
     string(1) "b"
   }
 }
-array(7) {
+darray(7) {
   [0]=>
   int(1)
   [1]=>
@@ -603,14 +603,14 @@ array(7) {
   [3]=>
   string(12) "array on fly"
   ["nullarray"]=>
-  array(0) {
+  varray(0) {
   }
 }
 
 *** Testing single array argument ***
-array(0) {
+darray(0) {
 }
-array(4) {
+darray(4) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -620,7 +620,7 @@ array(4) {
   ["d"]=>
   float(-2.344)
 }
-array(4) {
+darray(4) {
   [0]=>
   int(1)
   [1]=>
@@ -630,7 +630,7 @@ array(4) {
   [3]=>
   float(-2.344)
 }
-array(4) {
+darray(4) {
   [0]=>
   NULL
   [1]=>
@@ -638,7 +638,7 @@ array(4) {
   ["string"]=>
   string(5) "hello"
   [2]=>
-  array(3) {
+  darray(3) {
     [""]=>
     string(5) "World"
     ["-2.34"]=>

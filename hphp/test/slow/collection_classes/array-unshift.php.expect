@@ -1,24 +1,16 @@
 int(1)
 int(3)
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "b"
-  [1]=>
   string(1) "c"
-  [2]=>
   int(1)
 }
 int(5)
-array(5) {
-  [0]=>
+varray(5) {
   string(1) "e"
-  [1]=>
   string(1) "f"
-  [2]=>
   int(2)
-  [3]=>
   string(1) "f"
-  [4]=>
   string(1) "d"
 }
 int(1)

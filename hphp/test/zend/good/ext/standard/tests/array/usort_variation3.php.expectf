@@ -2,7 +2,7 @@
 bool(true)
 
 -- Sorted array after usort() function call --
-array(15) {
+darray(15) {
   [0]=>
   int(200)
   [1]=>

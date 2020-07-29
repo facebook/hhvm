@@ -1,4 +1,4 @@
- === Single Array ===
+=== Single Array ===
 int(7)
 int(1)
 int(5)
@@ -25,26 +25,18 @@ string(5) "hello"
 bool(true)
 int(-1)
 bool(true)
-array(3) {
-  [0]=>
-  array(1) {
-    [0]=>
+varray(3) {
+  varray(1) {
     int(2)
   }
-  [1]=>
   int(4)
-  [2]=>
   int(8)
 }
 bool(true)
-array(1) {
-  [0]=>
-  array(3) {
-    [0]=>
+varray(1) {
+  varray(3) {
     int(2)
-    [1]=>
     int(5)
-    [2]=>
     int(1)
   }
 }

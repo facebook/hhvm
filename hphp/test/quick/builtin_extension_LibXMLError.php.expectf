@@ -28,7 +28,7 @@ object(LibXMLError) (6) {
   ["line"]=>
   NULL
 }
-array(0) {
+varray(0) {
 }
 ================
 A_LibXMLError
@@ -65,5 +65,5 @@ object(A_LibXMLError) (7) {
   ["line"]=>
   NULL
 }
-array(0) {
+varray(0) {
 }

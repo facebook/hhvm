@@ -88,12 +88,9 @@ Testing for is_dict: object(stdClass) (0) {
 }
 NO
 ====================================================
-Testing for is_dict: array(3) {
-  [0]=>
+Testing for is_dict: varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 NO

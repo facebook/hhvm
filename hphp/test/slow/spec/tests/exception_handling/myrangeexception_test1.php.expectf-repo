@@ -16,7 +16,7 @@ object(MyRangeException) (11) {
   ["line":protected]=>
   int(15)
   ["trace":"Exception":private]=>
-  array(1) {%a}
+  varray(1) {%a}
   ["previous":"Exception":private]=>
   NULL
   ["userMetadata":protected]=>

@@ -1,10 +1,10 @@
-array(2) {
+darray(2) {
   ["hey"]=>
   string(16) "foobar0123456789"
   [0]=>
   string(16) "foobar0123456789"
 }
-array(2) {
+darray(2) {
   ["hey"]=>
   string(16) "foobar0123456789"
   [0]=>

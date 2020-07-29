@@ -105,7 +105,7 @@ Notice: Unable to unserialize: [k:2:{i:123;r:1;}]. Keysets can only contain inte
 bool(false)
 ====================================================
 string(54) "a:3:{i:123;s:3:"abc";i:456;i:101;i:456;k:2:{r:2;r:3;}}"
-array(2) {
+darray(2) {
   [123]=>
   string(3) "abc"
   [456]=>
@@ -121,7 +121,7 @@ Notice: Unable to unserialize: [k:1:{R:1;}]. Keysets can only contain integers a
 bool(false)
 ====================================================
 string(38) "a:2:{i:123;s:3:"abc";i:456;k:1:{R:2;}}"
-array(2) {
+darray(2) {
   [123]=>
   string(3) "abc"
   [456]=>

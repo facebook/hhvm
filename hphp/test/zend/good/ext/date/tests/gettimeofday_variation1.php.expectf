@@ -38,19 +38,19 @@ Warning: gettimeofday() expects parameter 1 to be boolean, double given in %s/ze
 
 --empty array--
 
-Warning: gettimeofday() expects parameter 1 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gettimeofday_variation1.php on line 94
+Warning: gettimeofday() expects parameter 1 to be boolean, varray given in %s/zend/good/ext/date/tests/gettimeofday_variation1.php on line 94
 
 --int indexed array--
 
-Warning: gettimeofday() expects parameter 1 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gettimeofday_variation1.php on line 94
+Warning: gettimeofday() expects parameter 1 to be boolean, varray given in %s/zend/good/ext/date/tests/gettimeofday_variation1.php on line 94
 
 --associative array--
 
-Warning: gettimeofday() expects parameter 1 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gettimeofday_variation1.php on line 94
+Warning: gettimeofday() expects parameter 1 to be boolean, darray given in %s/zend/good/ext/date/tests/gettimeofday_variation1.php on line 94
 
 --nested arrays--
 
-Warning: gettimeofday() expects parameter 1 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gettimeofday_variation1.php on line 94
+Warning: gettimeofday() expects parameter 1 to be boolean, varray given in %s/zend/good/ext/date/tests/gettimeofday_variation1.php on line 94
 
 --uppercase NULL--
 
@@ -64,7 +64,7 @@ Warning: gettimeofday() expects parameter 1 to be boolean, null given in %s/zend
 float(%f)
 
 --lowercase false--
-array(4) {
+darray(4) {
   ["sec"]=>
   int(%d)
   ["usec"]=>
@@ -79,7 +79,7 @@ array(4) {
 float(%f)
 
 --uppercase FALSE--
-array(4) {
+darray(4) {
   ["sec"]=>
   int(%d)
   ["usec"]=>

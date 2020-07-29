@@ -1,4 +1,4 @@
-array(3) {
+darray(3) {
   [0]=>
   string(1) "b"
   ["a"]=>
@@ -7,7 +7,7 @@ array(3) {
   string(1) "b"
 }
 bool(true)
-array(3) {
+darray(3) {
   [0]=>
   string(0) ""
   ["a"]=>

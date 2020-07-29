@@ -1,9 +1,8 @@
-array(6) {
+darray(6) {
   ["product_id"]=>
   string(17) "libgd%3Cscript%3E"
   ["component"]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     string(17) "10dhsajkkdhk <do>"
   }
   ["versions"]=>
@@ -13,8 +12,7 @@ array(6) {
   ["testscalar"]=>
   bool(false)
   ["testarray"]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(2)
   }
 }

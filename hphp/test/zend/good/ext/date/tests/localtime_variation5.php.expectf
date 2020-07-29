@@ -1,27 +1,18 @@
 *** Testing localtime() : usage variation ***
 
 --Hexa-decimal 0--
-array(9) {
-  [0]=>
+varray(9) {
   int(0)
-  [1]=>
   int(0)
-  [2]=>
   int(0)
-  [3]=>
   int(1)
-  [4]=>
   int(0)
-  [5]=>
   int(70)
-  [6]=>
   int(4)
-  [7]=>
   int(0)
-  [8]=>
   int(0)
 }
-array(9) {
+darray(9) {
   ["tm_sec"]=>
   int(0)
   ["tm_min"]=>
@@ -43,27 +34,18 @@ array(9) {
 }
 
 --Hexa-decimal 10--
-array(9) {
-  [0]=>
+varray(9) {
   int(10)
-  [1]=>
   int(0)
-  [2]=>
   int(0)
-  [3]=>
   int(1)
-  [4]=>
   int(0)
-  [5]=>
   int(70)
-  [6]=>
   int(4)
-  [7]=>
   int(0)
-  [8]=>
   int(0)
 }
-array(9) {
+darray(9) {
   ["tm_sec"]=>
   int(10)
   ["tm_min"]=>
@@ -85,27 +67,18 @@ array(9) {
 }
 
 --Hexa-decimal -10--
-array(9) {
-  [0]=>
+varray(9) {
   int(50)
-  [1]=>
   int(59)
-  [2]=>
   int(23)
-  [3]=>
   int(31)
-  [4]=>
   int(11)
-  [5]=>
   int(69)
-  [6]=>
   int(3)
-  [7]=>
   int(364)
-  [8]=>
   int(0)
 }
-array(9) {
+darray(9) {
   ["tm_sec"]=>
   int(50)
   ["tm_min"]=>

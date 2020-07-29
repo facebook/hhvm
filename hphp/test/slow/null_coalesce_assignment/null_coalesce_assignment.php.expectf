@@ -38,7 +38,7 @@ bool(true)
 bool(true)
 test_array_get() $arr:
 n_dump from line %d:
-array(8) {
+darray(8) {
   [0]=>
   int(42)
   [1]=>
@@ -65,14 +65,14 @@ test_object_get() CounterArray $obj:
 n_dump from line %d:
 object(CounterArray) (5) {
   ["container":"CounterArray":private]=>
-  array(0) {
+  varray(0) {
   }
   ["counter"]=>
   int(0)
   ["addme"]=>
   string(5) "added"
   ["addmetoo"]=>
-  object(Closure$test_object_get;%d) (0) {
+  object(Closure$test_object_get;9) (0) {
   }
   ["42"]=>
   string(10) "addmethree"
@@ -86,11 +86,11 @@ bool(true)
 test_multi_dim_basic()
 bool(true)
 n_dump from line %d:
-array(1) {
+darray(1) {
   [4]=>
-  array(1) {
+  darray(1) {
     [2]=>
-    array(1) {
+    darray(1) {
       ["I am a constant"]=>
       int(42)
     }
@@ -140,11 +140,11 @@ bool(true)
 test_multi_dim_lvars()
 bool(true)
 n_dump from line %d:
-array(1) {
+darray(1) {
   [4]=>
-  array(1) {
+  darray(1) {
     [2]=>
-    array(1) {
+    darray(1) {
       [0]=>
       int(2)
     }
@@ -152,19 +152,19 @@ array(1) {
 }
 bool(true)
 n_dump from line %d:
-array(2) {
+darray(2) {
   [4]=>
-  array(1) {
+  darray(1) {
     [2]=>
-    array(1) {
+    darray(1) {
       [0]=>
       int(2)
     }
   }
   [2]=>
-  array(1) {
+  darray(1) {
     [2]=>
-    array(1) {
+    darray(1) {
       [1]=>
       int(3)
     }
@@ -172,19 +172,19 @@ array(2) {
 }
 bool(true)
 n_dump from line %d:
-array(2) {
+darray(2) {
   [4]=>
-  array(1) {
+  darray(1) {
     [2]=>
-    array(1) {
+    darray(1) {
       [0]=>
       int(2)
     }
   }
   [2]=>
-  array(1) {
+  darray(1) {
     [2]=>
-    array(2) {
+    darray(2) {
       [1]=>
       int(3)
       [3]=>
@@ -194,19 +194,19 @@ array(2) {
 }
 bool(true)
 n_dump from line %d:
-array(2) {
+darray(2) {
   [4]=>
-  array(1) {
+  darray(1) {
     [2]=>
-    array(1) {
+    darray(1) {
       [0]=>
       int(2)
     }
   }
   [2]=>
-  array(1) {
+  darray(1) {
     [2]=>
-    array(3) {
+    darray(3) {
       [1]=>
       int(3)
       [3]=>
@@ -218,19 +218,19 @@ array(2) {
 }
 bool(true)
 n_dump from line %d:
-array(2) {
+darray(2) {
   [4]=>
-  array(1) {
+  darray(1) {
     [2]=>
-    array(1) {
+    darray(1) {
       [0]=>
       int(2)
     }
   }
   [2]=>
-  array(1) {
+  darray(1) {
     [2]=>
-    array(4) {
+    darray(4) {
       [1]=>
       int(3)
       [3]=>
@@ -270,11 +270,11 @@ a
 c
 bool(true)
 n_dump from line %d:
-array(1) {
+darray(1) {
   ["a"]=>
   object(Shoo) (1) {
     ["b"]=>
-    array(1) {
+    darray(1) {
       ["c"]=>
       int(42)
     }

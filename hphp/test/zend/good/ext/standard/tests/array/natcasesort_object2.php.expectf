@@ -2,7 +2,7 @@
 
 -- Testing natcasesort() by supplying object arrays --
 bool(true)
-array(4) {
+darray(4) {
   [0]=>
   object(for_string_natcasesort) (3) {
     ["public_class_value"]=>

@@ -18,7 +18,7 @@ Warning: preg_replace_callback_array() expects exactly 4 parameters, 5 given in 
 string(0) ""
 
 Warning: Not a valid callback function notValid%d in %s on line %d
-array(0) {
+darray(0) {
 }
 int(0)
 

@@ -85,15 +85,13 @@ NULL
 
 -- Iteration 18 --
 int(3)
-array(1) {
-  [0]=>
+varray(1) {
   string(3) "str"
 }
 
 -- Iteration 19 --
 int(3)
-array(1) {
-  [0]=>
+varray(1) {
   string(3) "str"
 }
 

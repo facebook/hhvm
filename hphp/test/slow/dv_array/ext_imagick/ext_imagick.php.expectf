@@ -1,68 +1,64 @@
-array(2) {
-  [0]=>
+varray(2) {
   object(Imagick) (3) {
     ["wand":"Imagick":private]=>
-    resource(%d) of type (WandResource)
+    resource(5) of type (WandResource)
     ["nextOutOfBound":"Imagick":private]=>
     bool(false)
     ["imagePending":"Imagick":private]=>
     bool(false)
   }
-  [1]=>
   float(0)
 }
-array(2) {
-  [0]=>
+varray(2) {
   object(Imagick) (3) {
     ["wand":"Imagick":private]=>
-    resource(%d) of type (WandResource)
+    resource(5) of type (WandResource)
     ["nextOutOfBound":"Imagick":private]=>
     bool(false)
     ["imagePending":"Imagick":private]=>
     bool(false)
   }
-  [1]=>
   float(0)
 }
 Unable to distort the image
 
-Deprecated: Imagick::recolorImage method is deprecated and it's use should be avoided in %s/ext_imagick.php on line %d
+Deprecated: Imagick::recolorImage method is deprecated and it's use should be avoided in %s/ext_imagick/ext_imagick.php on line 25
 Unable to sparse color image
-array(2) {
+darray(2) {
   ["x"]=>
   float(0.15000000596046)
   ["y"]=>
   float(0.059999998658895)
 }
 
-Deprecated: Imagick::getImageChannelExtrema method is deprecated and it's use should be avoided in %s/ext_imagick.php on line %d
-array(2) {
+Deprecated: Imagick::getImageChannelExtrema method is deprecated and it's use should be avoided in %s/ext_imagick/ext_imagick.php on line 35
+darray(2) {
   ["minima"]=>
   int(9352)
   ["maxima"]=>
   int(9352)
 }
-array(2) {
+darray(2) {
   ["kurtosis"]=>
   float(0)
   ["skewness"]=>
   float(0)
 }
-array(2) {
+darray(2) {
   ["mean"]=>
   float(9352)
   ["standardDeviation"]=>
   float(0)
 }
-array(2) {
+darray(2) {
   ["minima"]=>
   float(9352)
   ["maxima"]=>
   float(9352)
 }
-array(6) {
+darray(6) {
   [0]=>
-  array(5) {
+  darray(5) {
     ["mean"]=>
     float(0)
     ["minima"]=>
@@ -75,7 +71,7 @@ array(6) {
     int(1)
   }
   [1]=>
-  array(5) {
+  darray(5) {
     ["mean"]=>
     float(9352)
     ["minima"]=>
@@ -88,7 +84,7 @@ array(6) {
     int(14)
   }
   [2]=>
-  array(5) {
+  darray(5) {
     ["mean"]=>
     float(9352)
     ["minima"]=>
@@ -101,7 +97,7 @@ array(6) {
     int(14)
   }
   [4]=>
-  array(5) {
+  darray(5) {
     ["mean"]=>
     float(9352)
     ["minima"]=>
@@ -114,7 +110,7 @@ array(6) {
     int(14)
   }
   [8]=>
-  array(5) {
+  darray(5) {
     ["mean"]=>
     float(0)
     ["minima"]=>
@@ -127,7 +123,7 @@ array(6) {
     int(1)
   }
   [32]=>
-  array(5) {
+  darray(5) {
     ["mean"]=>
     float(0)
     ["minima"]=>
@@ -141,27 +137,26 @@ array(6) {
   }
 }
 
-Deprecated: Imagick::getImageExtrema method is deprecated and it's use should be avoided in %s/ext_imagick.php on line %d
-array(2) {
+Deprecated: Imagick::getImageExtrema method is deprecated and it's use should be avoided in %s/ext_imagick/ext_imagick.php on line 40
+darray(2) {
   ["min"]=>
   int(9352)
   ["max"]=>
   int(9352)
 }
-array(2) {
+darray(2) {
   ["x"]=>
   float(0.30000001192093)
   ["y"]=>
   float(0.60000002384186)
 }
-array(1) {
-  [0]=>
+varray(1) {
   object(ImagickPixel) (1) {
     ["wand":"ImagickPixel":private]=>
-    resource(%d) of type (WandResource)
+    resource(7) of type (WandResource)
   }
 }
-array(4) {
+darray(4) {
   ["width"]=>
   int(0)
   ["height"]=>
@@ -171,31 +166,31 @@ array(4) {
   ["y"]=>
   int(0)
 }
-array(0) {
+darray(0) {
 }
-array(1) {
+darray(1) {
   ["distortion"]=>
   string(1) "0"
 }
-array(2) {
+darray(2) {
   ["x"]=>
   float(0.63999998569489)
   ["y"]=>
   float(0.33000001311302)
 }
-array(2) {
+darray(2) {
   ["x"]=>
   float(0)
   ["y"]=>
   float(0)
 }
-array(2) {
+darray(2) {
   ["x"]=>
   float(0.31270000338554)
   ["y"]=>
   float(0.3289999961853)
 }
-array(4) {
+darray(4) {
   ["width"]=>
   int(0)
   ["height"]=>
@@ -205,52 +200,49 @@ array(4) {
   ["y"]=>
   int(0)
 }
-array(2) {
+darray(2) {
   ["quantumDepthLong"]=>
   int(16)
   ["quantumDepthString"]=>
   string(3) "Q16"
 }
-array(2) {
+darray(2) {
   ["quantumRangeLong"]=>
   int(65535)
   ["quantumRangeString"]=>
   string(5) "65535"
 }
-array(3) {
-  [0]=>
+varray(3) {
   float(1)
-  [1]=>
   float(1)
-  [2]=>
   float(1)
 }
-array(2) {
+darray(2) {
   ["columns"]=>
   int(0)
   ["rows"]=>
   int(0)
 }
-array(2) {
+darray(2) {
   ["versionNumber"]=>
   int(%d)
   ["versionString"]=>
   string(%d) "ImageMagick %d.%d.%d-%d Q16 %s %d-%d-%d https://www.imagemagick.org"
 }
-array(5) {
+darray(5) {
   ["imageName"]=>
   string(0) ""
   ["mimetype"]=>
   string(7) "unknown"
   ["geometry"]=>
-  array(2) {
+  darray(2) {
     ["width"]=>
     int(100)
     ["height"]=>
     int(100)
   }
   ["resolution"]=>
-  array(2) {
+  darray(2) {
     ["x"]=>
     float(0)
     ["y"]=>
@@ -260,471 +252,238 @@ array(5) {
   string(64) "23c7c842938a4b437992269d593583a0f852571f0191bc55108830cc808eab61"
 }
 bool(true)
-array(233) {
-  [0]=>
+varray(233) {
   string(3) "3FR"
-  [1]=>
   string(3) "3G2"
-  [2]=>
   string(3) "3GP"
-  [3]=>
   string(1) "A"
-  [4]=>
   string(3) "AAI"
-  [5]=>
   string(2) "AI"
-  [6]=>
   string(3) "ART"
-  [7]=>
   string(3) "ARW"
-  [8]=>
   string(3) "AVI"
-  [9]=>
   string(3) "AVS"
-  [10]=>
   string(1) "B"
-  [11]=>
   string(3) "BGR"
-  [12]=>
   string(4) "BGRA"
-  [13]=>
   string(4) "BGRO"
-  [14]=>
   string(3) "BMP"
-  [15]=>
   string(4) "BMP2"
-  [16]=>
   string(4) "BMP3"
-  [17]=>
   string(3) "BRF"
-  [18]=>
   string(1) "C"
-  [19]=>
   string(3) "CAL"
-  [20]=>
   string(4) "CALS"
-  [21]=>
   string(6) "CANVAS"
-  [22]=>
   string(7) "CAPTION"
-  [23]=>
   string(3) "CIN"
-  [24]=>
   string(3) "CIP"
-  [25]=>
   string(4) "CLIP"
-  [26]=>
   string(4) "CMYK"
-  [27]=>
   string(5) "CMYKA"
-  [28]=>
   string(3) "CR2"
-  [29]=>
   string(3) "CRW"
-  [30]=>
   string(3) "CUR"
-  [31]=>
   string(3) "CUT"
-  [32]=>
   string(4) "DATA"
-  [33]=>
   string(3) "DCM"
-  [34]=>
   string(3) "DCR"
-  [35]=>
   string(3) "DCX"
-  [36]=>
   string(3) "DDS"
-  [37]=>
   string(5) "DFONT"
-  [38]=>
   string(3) "DNG"
-  [39]=>
   string(3) "DPX"
-  [40]=>
   string(4) "DXT1"
-  [41]=>
   string(4) "DXT5"
-  [42]=>
   string(4) "EPDF"
-  [43]=>
   string(3) "EPI"
-  [44]=>
   string(3) "EPS"
-  [45]=>
   string(4) "EPS2"
-  [46]=>
   string(4) "EPS3"
-  [47]=>
   string(4) "EPSF"
-  [48]=>
   string(4) "EPSI"
-  [49]=>
   string(3) "EPT"
-  [50]=>
   string(4) "EPT2"
-  [51]=>
   string(4) "EPT3"
-  [52]=>
   string(3) "ERF"
-  [53]=>
   string(3) "FAX"
-  [54]=>
   string(4) "FILE"
-  [55]=>
   string(4) "FITS"
-  [56]=>
   string(7) "FRACTAL"
-  [57]=>
   string(3) "FTP"
-  [58]=>
   string(3) "FTS"
-  [59]=>
   string(1) "G"
-  [60]=>
   string(2) "G3"
-  [61]=>
   string(2) "G4"
-  [62]=>
   string(3) "GIF"
-  [63]=>
   string(5) "GIF87"
-  [64]=>
   string(8) "GRADIENT"
-  [65]=>
   string(4) "GRAY"
-  [66]=>
   string(5) "GRAYA"
-  [67]=>
   string(6) "GROUP4"
-  [68]=>
   string(1) "H"
-  [69]=>
   string(4) "HALD"
-  [70]=>
   string(3) "HDR"
-  [71]=>
   string(9) "HISTOGRAM"
-  [72]=>
   string(3) "HRZ"
-  [73]=>
   string(3) "HTM"
-  [74]=>
   string(4) "HTML"
-  [75]=>
   string(4) "HTTP"
-  [76]=>
   string(5) "HTTPS"
-  [77]=>
   string(3) "ICB"
-  [78]=>
   string(3) "ICO"
-  [79]=>
   string(4) "ICON"
-  [80]=>
   string(3) "IIQ"
-  [81]=>
   string(4) "INFO"
-  [82]=>
   string(6) "INLINE"
-  [83]=>
   string(3) "IPL"
-  [84]=>
   string(6) "ISOBRL"
-  [85]=>
   string(7) "ISOBRL6"
-  [86]=>
   string(3) "JNG"
-  [87]=>
   string(3) "JNX"
-  [88]=>
   string(3) "JPE"
-  [89]=>
   string(4) "JPEG"
-  [90]=>
   string(3) "JPG"
-  [91]=>
   string(3) "JPS"
-  [92]=>
   string(4) "JSON"
-  [93]=>
   string(1) "K"
-  [94]=>
   string(3) "K25"
-  [95]=>
   string(3) "KDC"
-  [96]=>
   string(5) "LABEL"
-  [97]=>
   string(1) "M"
-  [98]=>
   string(3) "M2V"
-  [99]=>
   string(3) "M4V"
-  [100]=>
   string(3) "MAC"
-  [101]=>
   string(6) "MAGICK"
-  [102]=>
   string(3) "MAP"
-  [103]=>
   string(4) "MASK"
-  [104]=>
   string(3) "MAT"
-  [105]=>
   string(5) "MATTE"
-  [106]=>
   string(3) "MEF"
-  [107]=>
   string(4) "MIFF"
-  [108]=>
   string(3) "MKV"
-  [109]=>
   string(3) "MNG"
-  [110]=>
   string(4) "MONO"
-  [111]=>
   string(3) "MOV"
-  [112]=>
   string(3) "MP4"
-  [113]=>
   string(3) "MPC"
-  [114]=>
   string(4) "MPEG"
-  [115]=>
   string(3) "MPG"
-  [116]=>
   string(3) "MRW"
-  [117]=>
   string(3) "MSL"
-  [118]=>
   string(4) "MSVG"
-  [119]=>
   string(3) "MTV"
-  [120]=>
   string(3) "MVG"
-  [121]=>
   string(3) "NEF"
-  [122]=>
   string(3) "NRW"
-  [123]=>
   string(4) "NULL"
-  [124]=>
   string(1) "O"
-  [125]=>
   string(3) "ORF"
-  [126]=>
   string(3) "OTB"
-  [127]=>
   string(3) "OTF"
-  [128]=>
   string(3) "PAL"
-  [129]=>
   string(4) "PALM"
-  [130]=>
   string(3) "PAM"
-  [131]=>
   string(5) "PANGO"
-  [132]=>
   string(7) "PATTERN"
-  [133]=>
   string(3) "PBM"
-  [134]=>
   string(3) "PCD"
-  [135]=>
   string(4) "PCDS"
-  [136]=>
   string(3) "PCL"
-  [137]=>
   string(3) "PCT"
-  [138]=>
   string(3) "PCX"
-  [139]=>
   string(3) "PDB"
-  [140]=>
   string(3) "PDF"
-  [141]=>
   string(4) "PDFA"
-  [142]=>
   string(3) "PEF"
-  [143]=>
   string(3) "PES"
-  [144]=>
   string(3) "PFA"
-  [145]=>
   string(3) "PFB"
-  [146]=>
   string(3) "PFM"
-  [147]=>
   string(3) "PGM"
-  [148]=>
   string(3) "PGX"
-  [149]=>
   string(5) "PICON"
-  [150]=>
   string(4) "PICT"
-  [151]=>
   string(3) "PIX"
-  [152]=>
   string(5) "PJPEG"
-  [153]=>
   string(6) "PLASMA"
-  [154]=>
   string(3) "PNG"
-  [155]=>
   string(5) "PNG00"
-  [156]=>
   string(5) "PNG24"
-  [157]=>
   string(5) "PNG32"
-  [158]=>
   string(5) "PNG48"
-  [159]=>
   string(5) "PNG64"
-  [160]=>
   string(4) "PNG8"
-  [161]=>
   string(3) "PNM"
-  [162]=>
   string(3) "PPM"
-  [163]=>
   string(2) "PS"
-  [164]=>
   string(3) "PS2"
-  [165]=>
   string(3) "PS3"
-  [166]=>
   string(3) "PSB"
-  [167]=>
   string(3) "PSD"
-  [168]=>
   string(4) "PTIF"
-  [169]=>
   string(3) "PWP"
-  [170]=>
   string(1) "R"
-  [171]=>
   string(15) "RADIAL-GRADIENT"
-  [172]=>
   string(3) "RAF"
-  [173]=>
   string(3) "RAS"
-  [174]=>
   string(3) "RAW"
-  [175]=>
   string(3) "RGB"
-  [176]=>
   string(4) "RGBA"
-  [177]=>
   string(4) "RGBO"
-  [178]=>
   string(3) "RGF"
-  [179]=>
   string(3) "RLA"
-  [180]=>
   string(3) "RLE"
-  [181]=>
   string(3) "RMF"
-  [182]=>
   string(3) "RW2"
-  [183]=>
   string(3) "SCR"
-  [184]=>
   string(10) "SCREENSHOT"
-  [185]=>
   string(3) "SCT"
-  [186]=>
   string(3) "SFW"
-  [187]=>
   string(3) "SGI"
-  [188]=>
   string(5) "SHTML"
-  [189]=>
   string(3) "SIX"
-  [190]=>
   string(5) "SIXEL"
-  [191]=>
   string(12) "SPARSE-COLOR"
-  [192]=>
   string(3) "SR2"
-  [193]=>
   string(3) "SRF"
-  [194]=>
   string(7) "STEGANO"
-  [195]=>
   string(3) "SUN"
-  [196]=>
   string(3) "SVG"
-  [197]=>
   string(4) "SVGZ"
-  [198]=>
   string(4) "TEXT"
-  [199]=>
   string(3) "TGA"
-  [200]=>
   string(9) "THUMBNAIL"
-  [201]=>
   string(4) "TIFF"
-  [202]=>
   string(6) "TIFF64"
-  [203]=>
   string(4) "TILE"
-  [204]=>
   string(3) "TIM"
-  [205]=>
   string(3) "TTC"
-  [206]=>
   string(3) "TTF"
-  [207]=>
   string(3) "TXT"
-  [208]=>
   string(4) "UBRL"
-  [209]=>
   string(5) "UBRL6"
-  [210]=>
   string(3) "UIL"
-  [211]=>
   string(4) "UYVY"
-  [212]=>
   string(3) "VDA"
-  [213]=>
   string(5) "VICAR"
-  [214]=>
   string(3) "VID"
-  [215]=>
   string(4) "VIFF"
-  [216]=>
   string(4) "VIPS"
-  [217]=>
   string(3) "VST"
-  [218]=>
   string(4) "WBMP"
-  [219]=>
   string(4) "WEBP"
-  [220]=>
   string(3) "WMV"
-  [221]=>
   string(3) "WPG"
-  [222]=>
   string(3) "X3F"
-  [223]=>
   string(3) "XBM"
-  [224]=>
   string(2) "XC"
-  [225]=>
   string(3) "XCF"
-  [226]=>
   string(3) "XPM"
-  [227]=>
   string(3) "XPS"
-  [228]=>
   string(2) "XV"
-  [229]=>
   string(1) "Y"
-  [230]=>
   string(5) "YCbCr"
-  [231]=>
   string(6) "YCbCrA"
-  [232]=>
   string(3) "YUV"
 }

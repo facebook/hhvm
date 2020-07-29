@@ -1,59 +1,64 @@
 ====================================================
-array(0) {
+varray(0) {
 }
-array(0) {
-}
-bool(true)
-bool(false)
-bool(false)
-bool(true)
-====================================================
-array(0) {
-}
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
 bool(false)
 bool(true)
 ====================================================
-array(0) {
+varray(0) {
 }
-array(0) {
-}
-bool(true)
-bool(false)
-bool(false)
-bool(true)
-====================================================
-array(0) {
-}
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
 bool(false)
 bool(true)
 ====================================================
-array(0) {
+varray(0) {
 }
-array(0) {
-}
-bool(true)
-bool(false)
-bool(false)
-bool(true)
-====================================================
-array(0) {
-}
-array(0) {
+darray(0) {
 }
 bool(true)
 bool(false)
 bool(false)
 bool(true)
 ====================================================
-array(3) {
+varray(0) {
+}
+darray(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+varray(0) {
+}
+darray(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+varray(0) {
+}
+darray(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+varray(3) {
+  int(100)
+  int(200)
+  int(300)
+}
+darray(3) {
   [0]=>
   int(100)
   [1]=>
@@ -61,26 +66,16 @@ array(3) {
   [2]=>
   int(300)
 }
-array(3) {
-  [0]=>
-  int(100)
-  [1]=>
-  int(200)
-  [2]=>
-  int(300)
-}
 bool(true)
 bool(false)
 bool(false)
 bool(true)
 ====================================================
-array(2) {
-  [0]=>
+varray(2) {
   int(100)
-  [1]=>
   int(200)
 }
-array(2) {
+darray(2) {
   ["a"]=>
   int(100)
   ["b"]=>
@@ -91,15 +86,12 @@ bool(false)
 bool(false)
 bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   ["a"]=>
   string(1) "a"
   ["b"]=>
@@ -112,13 +104,11 @@ bool(false)
 bool(false)
 bool(true)
 ====================================================
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "abc"
-  [1]=>
   string(3) "def"
 }
-array(2) {
+darray(2) {
   [0]=>
   string(3) "abc"
   [1]=>
@@ -129,15 +119,12 @@ bool(false)
 bool(false)
 bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   int(100)
-  [1]=>
   int(200)
-  [2]=>
   int(300)
 }
-array(3) {
+darray(3) {
   [0]=>
   int(100)
   [1]=>
@@ -150,13 +137,11 @@ bool(false)
 bool(false)
 bool(true)
 ====================================================
-array(2) {
-  [0]=>
+varray(2) {
   int(100)
-  [1]=>
   int(200)
 }
-array(2) {
+darray(2) {
   ["a"]=>
   int(100)
   ["b"]=>
@@ -167,15 +152,12 @@ bool(false)
 bool(false)
 bool(true)
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }
-array(3) {
+darray(3) {
   ["a"]=>
   string(1) "a"
   ["b"]=>

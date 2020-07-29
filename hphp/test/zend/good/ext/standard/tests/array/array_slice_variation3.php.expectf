@@ -1,17 +1,17 @@
 *** Testing array_slice() : usage variations ***
 
 -- Iteration 1 --
-array(0) {
+darray(0) {
 }
 
 -- Iteration 2 --
-array(1) {
+darray(1) {
   ["three"]=>
   int(3)
 }
 
 -- Iteration 3 --
-array(2) {
+darray(2) {
   ["three"]=>
   int(3)
   [0]=>
@@ -19,11 +19,11 @@ array(2) {
 }
 
 -- Iteration 4 --
-array(0) {
+darray(0) {
 }
 
 -- Iteration 5 --
-array(2) {
+darray(2) {
   ["three"]=>
   int(3)
   [0]=>
@@ -31,11 +31,11 @@ array(2) {
 }
 
 -- Iteration 6 --
-array(0) {
+darray(0) {
 }
 
 -- Iteration 7 --
-array(2) {
+darray(2) {
   ["three"]=>
   int(3)
   [0]=>
@@ -43,15 +43,15 @@ array(2) {
 }
 
 -- Iteration 8 --
-array(0) {
+darray(0) {
 }
 
 -- Iteration 9 --
-array(0) {
+darray(0) {
 }
 
 -- Iteration 10 --
-array(2) {
+darray(2) {
   ["three"]=>
   int(3)
   [0]=>
@@ -59,7 +59,7 @@ array(2) {
 }
 
 -- Iteration 11 --
-array(2) {
+darray(2) {
   ["three"]=>
   int(3)
   [0]=>
@@ -67,51 +67,51 @@ array(2) {
 }
 
 -- Iteration 12 --
-array(1) {
+darray(1) {
   ["three"]=>
   int(3)
 }
 
 -- Iteration 13 --
-array(0) {
+darray(0) {
 }
 
 -- Iteration 14 --
-array(1) {
+darray(1) {
   ["three"]=>
   int(3)
 }
 
 -- Iteration 15 --
-array(0) {
+darray(0) {
 }
 
 -- Iteration 16 --
-array(0) {
+darray(0) {
 }
 
 -- Iteration 17 --
-array(0) {
+darray(0) {
 }
 
 -- Iteration 18 --
-array(0) {
+darray(0) {
 }
 
 -- Iteration 19 --
-array(0) {
+darray(0) {
 }
 
 -- Iteration 20 --
-array(0) {
+darray(0) {
 }
 
 -- Iteration 21 --
-array(0) {
+darray(0) {
 }
 
 -- Iteration 22 --
-array(2) {
+darray(2) {
   ["three"]=>
   int(3)
   [0]=>
@@ -119,7 +119,7 @@ array(2) {
 }
 
 -- Iteration 23 --
-array(2) {
+darray(2) {
   ["three"]=>
   int(3)
   [0]=>

@@ -1,4 +1,4 @@
-array(3) {
+darray(3) {
   ["a"]=>
   string(1) "1"
   [2]=>
@@ -6,7 +6,7 @@ array(3) {
   ["c"]=>
   string(1) "3"
 }
-array(4) {
+darray(4) {
   ["a"]=>
   string(1) "1"
   [2]=>
@@ -14,7 +14,7 @@ array(4) {
   ["c"]=>
   string(1) "3"
   ["d"]=>
-  array(3) {
+  darray(3) {
     ["a"]=>
     string(1) "1"
     [2]=>

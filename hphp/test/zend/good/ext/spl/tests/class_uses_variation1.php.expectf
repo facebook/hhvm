@@ -85,11 +85,11 @@ Error: 2 - class_uses(): Class  does not exist and could not be loaded, %s(%d)
 bool(false)
 
 --instance of classWithToString--
-array(0) {
+darray(0) {
 }
 
 --instance of classWithoutToString--
-array(0) {
+darray(0) {
 }
 
 --undefined var--

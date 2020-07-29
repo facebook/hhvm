@@ -1,26 +1,21 @@
-array(1) {
-  [0]=>
+varray(1) {
   object(stdClass) (1) {
     ["foo"]=>
     int(1)
   }
 }
-array(1) {
-  [0]=>
+varray(1) {
   bool(false)
 }
-array(1) {
-  [0]=>
-  array(1) {
+varray(1) {
+  darray(1) {
     [1]=>
     int(1)
   }
 }
-array(1) {
-  [0]=>
+varray(1) {
   bool(false)
 }
-array(1) {
-  [0]=>
+varray(1) {
   bool(false)
 }

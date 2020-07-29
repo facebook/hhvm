@@ -13,10 +13,9 @@ keyset(4) {
 keyset(1) {
   string(3) "bar"
 }
-array(1) {
+darray(1) {
   ["TestAttr"]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     keyset(2) {
       int(1)
       string(1) "1"

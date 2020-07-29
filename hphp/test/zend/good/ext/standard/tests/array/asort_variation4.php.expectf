@@ -2,7 +2,7 @@
 
 -- Testing asort() 'flag' value is defualt --
 bool(true)
-array(3) {
+darray(3) {
   [2]=>
   int(33)
   [1]=>
@@ -13,7 +13,7 @@ array(3) {
 
 -- Testing asort() 'flag' = SORT_REGULAR --
 bool(true)
-array(3) {
+darray(3) {
   [2]=>
   int(33)
   [1]=>
@@ -24,7 +24,7 @@ array(3) {
 
 -- Testing asort() 'flag' = SORT_NUMERIC --
 bool(true)
-array(3) {
+darray(3) {
   [2]=>
   int(33)
   [1]=>

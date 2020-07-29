@@ -1,4 +1,4 @@
-array(4) {
+darray(4) {
   [0]=>
   int(0)
   [1]=>
@@ -8,7 +8,7 @@ array(4) {
   [3]=>
   int(100)
 }
-array(4) {
+darray(4) {
   [0]=>
   int(4)
   [1]=>
@@ -18,9 +18,8 @@ array(4) {
   [3]=>
   int(3)
 }
-array(2) {
-  [0]=>
-  array(5) {
+varray(2) {
+  darray(5) {
     [0]=>
     string(2) "10"
     [1]=>
@@ -32,8 +31,7 @@ array(2) {
     [4]=>
     string(1) "a"
   }
-  [1]=>
-  array(5) {
+  darray(5) {
     [0]=>
     int(1)
     [1]=>
@@ -46,7 +44,7 @@ array(2) {
     int(1)
   }
 }
-array(4) {
+darray(4) {
   [0]=>
   string(5) "Alpha"
   [1]=>

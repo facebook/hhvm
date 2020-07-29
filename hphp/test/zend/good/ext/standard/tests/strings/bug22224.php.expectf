@@ -1,5 +1,5 @@
 string(13) "Object,Object"
-array(2) {
+darray(2) {
   [0]=>
   object(foo) (0) {
   }

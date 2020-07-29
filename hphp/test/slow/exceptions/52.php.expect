@@ -1,6 +1,5 @@
-array(2) {
-  [0]=>
-  array(4) {
+varray(2) {
+  darray(4) {
     ["file"]=>
     string(6) "string"
     ["line"]=>
@@ -8,15 +7,14 @@ array(2) {
     ["function"]=>
     string(3) "foo"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
-  [1]=>
-  array(3) {
+  darray(3) {
     ["function"]=>
     string(3) "bar"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
     ["file"]=>
     string(6) "string"

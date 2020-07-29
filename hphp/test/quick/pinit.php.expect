@@ -1,14 +1,12 @@
-array(1) {
+darray(1) {
   ["flub"]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(123)
   }
 }
-array(1) {
+darray(1) {
   ["flub"]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(123)
   }
 }

@@ -1,4 +1,3 @@
-
 Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
 
 Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
@@ -14,25 +13,15 @@ Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/i
 Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
 
 Warning: is_subclass_of() expects parameter 2 to be string, object given in %s/is-subclass-of-opt.php on line %d
-array(10) {
-  [0]=>
+varray(10) {
   bool(true)
-  [1]=>
   bool(false)
-  [2]=>
   bool(false)
-  [3]=>
   bool(false)
-  [4]=>
   bool(true)
-  [5]=>
   bool(true)
-  [6]=>
   bool(false)
-  [7]=>
   bool(false)
-  [8]=>
   bool(false)
-  [9]=>
   bool(false)
 }

@@ -86,7 +86,7 @@ Warning: Invalid operand type was used: array_slice expects an array or collecti
 NULL
 
 -- Iteration 18 --
-array(0) {
+darray(0) {
 }
 
 -- Iteration 19 --

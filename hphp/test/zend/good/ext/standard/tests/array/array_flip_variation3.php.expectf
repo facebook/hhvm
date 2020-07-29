@@ -1,5 +1,5 @@
 *** Testing array_flip() : different valid values in 'input' array argument ***
-array(24) {
+darray(24) {
   [1]=>
   string(9) "int_value"
   [-2]=>

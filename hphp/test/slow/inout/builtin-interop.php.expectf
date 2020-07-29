@@ -1,18 +1,12 @@
-
 Warning: Sort comparators should not return a boolean because it may result in a different sort order than expected. The comparator should return an integer (negative if left is less than right, positive if left is greater than right, zero if they are equal). in %s/builtin-interop.php on line 9
-array(5) {
-  [0]=>
+varray(5) {
   int(8)
-  [1]=>
   int(17)
-  [2]=>
   int(19)
-  [3]=>
   int(23)
-  [4]=>
   int(32)
 }
-array(5) {
+darray(5) {
   [1]=>
   int(8)
   [3]=>
@@ -24,21 +18,16 @@ array(5) {
   [0]=>
   int(32)
 }
-array(5) {
-  [0]=>
+varray(5) {
   int(32)
-  [1]=>
   int(23)
-  [2]=>
   int(19)
-  [3]=>
   int(17)
-  [4]=>
   int(8)
 }
 
 Warning: Sort comparators should not return a boolean because it may result in a different sort order than expected. The comparator should return an integer (negative if left is less than right, positive if left is greater than right, zero if they are equal). in %s/builtin-interop.php on line 14
-array(3) {
+darray(3) {
   ["apple"]=>
   int(0)
   ["banana"]=>
@@ -46,7 +35,7 @@ array(3) {
   ["orange"]=>
   int(12)
 }
-array(3) {
+darray(3) {
   ["apple"]=>
   int(0)
   ["banana"]=>
@@ -54,7 +43,7 @@ array(3) {
   ["orange"]=>
   int(12)
 }
-array(3) {
+darray(3) {
   [0]=>
   int(12)
   [1]=>

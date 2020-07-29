@@ -27,10 +27,8 @@ handle_error(): [8]: is_tuple() called on clsmeth
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 handle_error(): [8]: is_any_array() called on clsmeth
@@ -62,10 +60,8 @@ handle_error(): [8]: is_tuple() called on clsmeth
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 handle_error(): [8]: is_any_array() called on clsmeth
@@ -97,10 +93,8 @@ handle_error(): [8]: is_tuple() called on clsmeth
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 handle_error(): [8]: is_any_array() called on clsmeth
@@ -132,10 +126,8 @@ handle_error(): [8]: is_tuple() called on clsmeth
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 handle_error(): [8]: is_any_array() called on clsmeth
@@ -167,10 +159,8 @@ handle_error(): [8]: is_tuple() called on clsmeth
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 handle_error(): [8]: is_any_array() called on clsmeth
@@ -202,10 +192,8 @@ handle_error(): [8]: is_tuple() called on clsmeth
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
 handle_error(): [8]: Implicit clsmeth to varray conversion
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 handle_error(): [8]: is_array() called on clsmeth

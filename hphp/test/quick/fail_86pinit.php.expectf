@@ -1,28 +1,19 @@
-
 Fatal error: Class undefined: Y in %s on line 4
-array(6) {
-  [0]=>
+varray(6) {
   int(16777217)
-  [1]=>
   string(18) "Class undefined: Y"
-  [2]=>
   string(%d) "%s"
-  [3]=>
   int(4)
-  [4]=>
-  array(0) {
+  darray(0) {
   }
-  [5]=>
-  array(3) {
-    [0]=>
-    array(2) {
+  varray(3) {
+    darray(2) {
       ["file"]=>
       string(%d) "%s"
       ["line"]=>
       int(4)
     }
-    [1]=>
-    array(4) {
+    darray(4) {
       ["file"]=>
       string(%d) "%s"
       ["line"]=>
@@ -30,15 +21,14 @@ array(6) {
       ["function"]=>
       string(4) "test"
       ["args"]=>
-      array(0) {
+      varray(0) {
       }
     }
-    [2]=>
-    array(2) {
+    darray(2) {
       ["function"]=>
       string(23) "entrypoint_fail_86pinit"
       ["args"]=>
-      array(0) {
+      varray(0) {
       }
     }
   }

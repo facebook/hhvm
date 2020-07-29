@@ -1,27 +1,17 @@
-array(3) {
-  [0]=>
+varray(3) {
   float(1.5)
-  [1]=>
   float(2.5)
-  [2]=>
   float(3.5)
 }
-array(4) {
-  [0]=>
+varray(4) {
   float(1.5)
-  [1]=>
   float(2.5)
-  [2]=>
   float(3.5)
-  [3]=>
   float(4.5)
 }
-array(3) {
-  [0]=>
+varray(3) {
   float(1.5)
-  [1]=>
   float(2.5)
-  [2]=>
   float(3.5)
 }
 float(3.5)

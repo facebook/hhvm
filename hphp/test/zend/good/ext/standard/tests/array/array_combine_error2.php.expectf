@@ -1,7 +1,7 @@
 *** Testing array_combine() : error conditions specific to array_combine() ***
 
 -- Testing array_combine() function with empty arrays --
-array(0) {
+darray(0) {
 }
 
 -- Testing array_combine() function with empty array for $keys argument --

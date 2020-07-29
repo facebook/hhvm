@@ -2,8 +2,7 @@
 
 -- Testing sort() by supplying various object arrays, 'flag' value is defualt --
 bool(true)
-array(4) {
-  [0]=>
+varray(4) {
   object(for_integer_sort) (3) {
     ["public_class_value"]=>
     int(-88)
@@ -12,7 +11,6 @@ array(4) {
     ["protected_class_value":protected]=>
     int(5)
   }
-  [1]=>
   object(for_integer_sort) (3) {
     ["public_class_value"]=>
     float(0.001)
@@ -21,7 +19,6 @@ array(4) {
     ["protected_class_value":protected]=>
     float(0.1)
   }
-  [2]=>
   object(for_integer_sort) (3) {
     ["public_class_value"]=>
     int(11)
@@ -30,7 +27,6 @@ array(4) {
     ["protected_class_value":protected]=>
     int(30)
   }
-  [3]=>
   object(for_integer_sort) (3) {
     ["public_class_value"]=>
     int(66)
@@ -41,8 +37,7 @@ array(4) {
   }
 }
 bool(true)
-array(4) {
-  [0]=>
+varray(4) {
   object(for_string_sort) (3) {
     ["public_class_value"]=>
     string(3) "axx"
@@ -51,7 +46,6 @@ array(4) {
     ["protected_class_value":protected]=>
     string(3) "ass"
   }
-  [1]=>
   object(for_string_sort) (3) {
     ["public_class_value"]=>
     string(2) "py"
@@ -60,7 +54,6 @@ array(4) {
     ["protected_class_value":protected]=>
     string(2) "pt"
   }
-  [2]=>
   object(for_string_sort) (3) {
     ["public_class_value"]=>
     string(1) "t"
@@ -69,7 +62,6 @@ array(4) {
     ["protected_class_value":protected]=>
     string(3) "abb"
   }
-  [3]=>
   object(for_string_sort) (3) {
     ["public_class_value"]=>
     string(1) "w"
@@ -82,8 +74,7 @@ array(4) {
 
 -- Testing sort() by supplying various object arrays, 'flag' value is SORT_REGULAR --
 bool(true)
-array(4) {
-  [0]=>
+varray(4) {
   object(for_integer_sort) (3) {
     ["public_class_value"]=>
     int(-88)
@@ -92,7 +83,6 @@ array(4) {
     ["protected_class_value":protected]=>
     int(5)
   }
-  [1]=>
   object(for_integer_sort) (3) {
     ["public_class_value"]=>
     float(0.001)
@@ -101,7 +91,6 @@ array(4) {
     ["protected_class_value":protected]=>
     float(0.1)
   }
-  [2]=>
   object(for_integer_sort) (3) {
     ["public_class_value"]=>
     int(11)
@@ -110,7 +99,6 @@ array(4) {
     ["protected_class_value":protected]=>
     int(30)
   }
-  [3]=>
   object(for_integer_sort) (3) {
     ["public_class_value"]=>
     int(66)
@@ -121,8 +109,7 @@ array(4) {
   }
 }
 bool(true)
-array(4) {
-  [0]=>
+varray(4) {
   object(for_string_sort) (3) {
     ["public_class_value"]=>
     string(3) "axx"
@@ -131,7 +118,6 @@ array(4) {
     ["protected_class_value":protected]=>
     string(3) "ass"
   }
-  [1]=>
   object(for_string_sort) (3) {
     ["public_class_value"]=>
     string(2) "py"
@@ -140,7 +126,6 @@ array(4) {
     ["protected_class_value":protected]=>
     string(2) "pt"
   }
-  [2]=>
   object(for_string_sort) (3) {
     ["public_class_value"]=>
     string(1) "t"
@@ -149,7 +134,6 @@ array(4) {
     ["protected_class_value":protected]=>
     string(3) "abb"
   }
-  [3]=>
   object(for_string_sort) (3) {
     ["public_class_value"]=>
     string(1) "w"

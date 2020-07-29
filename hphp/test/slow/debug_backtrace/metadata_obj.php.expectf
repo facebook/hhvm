@@ -1,6 +1,5 @@
-array(3) {
-  [0]=>
-  array(7) {
+varray(3) {
+  darray(7) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -15,13 +14,11 @@ array(3) {
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       int(1)
     }
   }
-  [1]=>
-  array(7) {
+  darray(7) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -36,23 +33,20 @@ array(3) {
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       int(1)
     }
   }
-  [2]=>
-  array(2) {
+  darray(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }
-array(3) {
-  [0]=>
-  array(7) {
+varray(3) {
+  darray(7) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -67,13 +61,11 @@ array(3) {
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       int(65537)
     }
   }
-  [1]=>
-  array(8) {
+  darray(8) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -88,19 +80,17 @@ array(3) {
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       int(65537)
     }
     ["metadata"]=>
     string(8) "I am foo"
   }
-  [2]=>
-  array(2) {
+  darray(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }

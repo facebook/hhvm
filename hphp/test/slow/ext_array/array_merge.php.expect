@@ -1,4 +1,4 @@
-array(4) {
+darray(4) {
   ["color"]=>
   string(3) "red"
   [0]=>
@@ -6,7 +6,7 @@ array(4) {
   [1]=>
   int(4)
   [2]=>
-  array(5) {
+  darray(5) {
     [0]=>
     string(1) "a"
     [1]=>
@@ -19,40 +19,40 @@ array(4) {
     int(4)
   }
 }
-array(1) {
+darray(1) {
   [0]=>
-  array(1) {
+  darray(1) {
     [1]=>
     string(4) "data"
   }
 }
-array(1) {
+darray(1) {
   [0]=>
   string(4) "data"
 }
-array(2) {
+darray(2) {
   [0]=>
   string(3) "foo"
   [1]=>
-  array(1) {
+  darray(1) {
     [1]=>
     string(3) "bar"
   }
 }
-array(2) {
+darray(2) {
   ["one"]=>
   int(1)
   [0]=>
-  array(1) {
+  darray(1) {
     ["two"]=>
     int(2)
   }
 }
-array(2) {
+darray(2) {
   [0]=>
   int(1)
   [1]=>
-  array(1) {
+  darray(1) {
     [100000000000022]=>
     int(2)
   }

@@ -239,210 +239,146 @@ clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 clsmeth
 NULL
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 NULL
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 NULL
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 NULL
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 NULL
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 NULL
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 NULL
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 NULL
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 NULL
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 NULL
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 NULL
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 NULL
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 NULL
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 NULL
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 NULL
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 NULL
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }

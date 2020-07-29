@@ -21,161 +21,123 @@ Warning: Invalid operand type was used: array_slice expects an array or collecti
 *** Iteration 1 ***
 
 *** Variation with first two Arguments ***
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Variation with first three Arguments ***
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Iteration 2 ***
 
 *** Variation with first two Arguments ***
-array(8) {
-  [0]=>
+varray(8) {
   int(2)
-  [1]=>
   int(3)
-  [2]=>
   int(4)
-  [3]=>
   int(5)
-  [4]=>
   int(6)
-  [5]=>
   int(7)
-  [6]=>
   int(8)
-  [7]=>
   int(9)
 }
-array(9) {
-  [0]=>
+varray(9) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
-  [3]=>
   int(4)
-  [4]=>
   int(5)
-  [5]=>
   int(6)
-  [6]=>
   int(7)
-  [7]=>
   int(8)
-  [8]=>
   int(9)
 }
-array(2) {
-  [0]=>
+varray(2) {
   int(8)
-  [1]=>
   int(9)
 }
 
 *** Variation with first three Arguments ***
-array(3) {
-  [0]=>
+varray(3) {
   int(2)
-  [1]=>
   int(3)
-  [2]=>
   int(4)
 }
-array(0) {
+darray(0) {
 }
-array(5) {
-  [0]=>
+varray(5) {
   int(2)
-  [1]=>
   int(3)
-  [2]=>
   int(4)
-  [3]=>
   int(5)
-  [4]=>
   int(6)
 }
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
-array(0) {
+darray(0) {
 }
-array(6) {
-  [0]=>
+varray(6) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
-  [3]=>
   int(4)
-  [4]=>
   int(5)
-  [5]=>
   int(6)
 }
-array(2) {
-  [0]=>
+varray(2) {
   int(8)
-  [1]=>
   int(9)
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-array(3) {
+darray(3) {
   [1]=>
   int(2)
   [2]=>
@@ -183,33 +145,9 @@ array(3) {
   [3]=>
   int(4)
 }
-array(0) {
+darray(0) {
 }
-array(5) {
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  int(4)
-  [4]=>
-  int(5)
-  [5]=>
-  int(6)
-}
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
-array(0) {
-}
-array(6) {
-  [0]=>
-  int(1)
+darray(5) {
   [1]=>
   int(2)
   [2]=>
@@ -221,93 +159,86 @@ array(6) {
   [5]=>
   int(6)
 }
-array(2) {
+varray(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+darray(0) {
+}
+varray(6) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+  int(6)
+}
+darray(2) {
   [7]=>
   int(8)
   [8]=>
   int(9)
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Iteration 3 ***
 
 *** Variation with first two Arguments ***
-array(4) {
-  [0]=>
+varray(4) {
   string(3) "Two"
-  [1]=>
   string(5) "Three"
-  [2]=>
   string(4) "Four"
-  [3]=>
   string(4) "Five"
 }
-array(5) {
-  [0]=>
+varray(5) {
   string(3) "One"
-  [1]=>
   string(3) "Two"
-  [2]=>
   string(5) "Three"
-  [3]=>
   string(4) "Four"
-  [4]=>
   string(4) "Five"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(4) "Four"
-  [1]=>
   string(4) "Five"
 }
 
 *** Variation with first three Arguments ***
-array(3) {
-  [0]=>
+varray(3) {
   string(3) "Two"
-  [1]=>
   string(5) "Three"
-  [2]=>
   string(4) "Four"
 }
-array(0) {
+darray(0) {
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(3) "Two"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(3) "One"
-  [1]=>
   string(3) "Two"
-  [2]=>
   string(5) "Three"
 }
-array(0) {
+darray(0) {
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "One"
-  [1]=>
   string(3) "Two"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(4) "Four"
-  [1]=>
   string(4) "Five"
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-array(3) {
+darray(3) {
   [1]=>
   string(3) "Two"
   [2]=>
@@ -315,139 +246,100 @@ array(3) {
   [3]=>
   string(4) "Four"
 }
-array(0) {
+darray(0) {
 }
-array(1) {
+darray(1) {
   [1]=>
   string(3) "Two"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(3) "One"
-  [1]=>
   string(3) "Two"
-  [2]=>
   string(5) "Three"
 }
-array(0) {
+darray(0) {
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "One"
-  [1]=>
   string(3) "Two"
 }
-array(2) {
+darray(2) {
   [3]=>
   string(4) "Four"
   [4]=>
   string(4) "Five"
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Iteration 4 ***
 
 *** Variation with first two Arguments ***
-array(7) {
-  [0]=>
+varray(7) {
   string(3) "six"
-  [1]=>
   int(7)
-  [2]=>
   string(5) "seven"
-  [3]=>
   int(8)
-  [4]=>
   string(5) "eight"
-  [5]=>
   int(9)
-  [6]=>
   string(4) "nine"
 }
-array(8) {
-  [0]=>
+varray(8) {
   int(6)
-  [1]=>
   string(3) "six"
-  [2]=>
   int(7)
-  [3]=>
   string(5) "seven"
-  [4]=>
   int(8)
-  [5]=>
   string(5) "eight"
-  [6]=>
   int(9)
-  [7]=>
   string(4) "nine"
 }
-array(2) {
-  [0]=>
+varray(2) {
   int(9)
-  [1]=>
   string(4) "nine"
 }
 
 *** Variation with first three Arguments ***
-array(3) {
-  [0]=>
+varray(3) {
   string(3) "six"
-  [1]=>
   int(7)
-  [2]=>
   string(5) "seven"
 }
-array(0) {
+darray(0) {
 }
-array(4) {
-  [0]=>
+varray(4) {
   string(3) "six"
-  [1]=>
   int(7)
-  [2]=>
   string(5) "seven"
-  [3]=>
   int(8)
 }
-array(3) {
-  [0]=>
+varray(3) {
   int(6)
-  [1]=>
   string(3) "six"
-  [2]=>
   int(7)
 }
-array(0) {
+darray(0) {
 }
-array(5) {
-  [0]=>
+varray(5) {
   int(6)
-  [1]=>
   string(3) "six"
-  [2]=>
   int(7)
-  [3]=>
   string(5) "seven"
-  [4]=>
   int(8)
 }
-array(2) {
-  [0]=>
+varray(2) {
   int(9)
-  [1]=>
   string(4) "nine"
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-array(3) {
+darray(3) {
   [1]=>
   string(3) "six"
   [2]=>
@@ -455,31 +347,9 @@ array(3) {
   [3]=>
   string(5) "seven"
 }
-array(0) {
+darray(0) {
 }
-array(4) {
-  [1]=>
-  string(3) "six"
-  [2]=>
-  int(7)
-  [3]=>
-  string(5) "seven"
-  [4]=>
-  int(8)
-}
-array(3) {
-  [0]=>
-  int(6)
-  [1]=>
-  string(3) "six"
-  [2]=>
-  int(7)
-}
-array(0) {
-}
-array(5) {
-  [0]=>
-  int(6)
+darray(4) {
   [1]=>
   string(3) "six"
   [2]=>
@@ -489,21 +359,35 @@ array(5) {
   [4]=>
   int(8)
 }
-array(2) {
+varray(3) {
+  int(6)
+  string(3) "six"
+  int(7)
+}
+darray(0) {
+}
+varray(5) {
+  int(6)
+  string(3) "six"
+  int(7)
+  string(5) "seven"
+  int(8)
+}
+darray(2) {
   [6]=>
   int(9)
   [7]=>
   string(4) "nine"
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Iteration 5 ***
 
 *** Variation with first two Arguments ***
-array(4) {
+darray(4) {
   ["A"]=>
   string(3) "AAA"
   ["c"]=>
@@ -513,7 +397,7 @@ array(4) {
   ["e"]=>
   string(3) "eee"
 }
-array(5) {
+darray(5) {
   ["a"]=>
   string(3) "aaa"
   ["A"]=>
@@ -525,7 +409,7 @@ array(5) {
   ["e"]=>
   string(3) "eee"
 }
-array(2) {
+darray(2) {
   ["d"]=>
   string(3) "ddd"
   ["e"]=>
@@ -533,7 +417,7 @@ array(2) {
 }
 
 *** Variation with first three Arguments ***
-array(3) {
+darray(3) {
   ["A"]=>
   string(3) "AAA"
   ["c"]=>
@@ -541,13 +425,13 @@ array(3) {
   ["d"]=>
   string(3) "ddd"
 }
-array(0) {
+darray(0) {
 }
-array(1) {
+darray(1) {
   ["A"]=>
   string(3) "AAA"
 }
-array(3) {
+darray(3) {
   ["a"]=>
   string(3) "aaa"
   ["A"]=>
@@ -555,27 +439,27 @@ array(3) {
   ["c"]=>
   string(3) "ccc"
 }
-array(0) {
+darray(0) {
 }
-array(2) {
+darray(2) {
   ["a"]=>
   string(3) "aaa"
   ["A"]=>
   string(3) "AAA"
 }
-array(2) {
+darray(2) {
   ["d"]=>
   string(3) "ddd"
   ["e"]=>
   string(3) "eee"
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-array(3) {
+darray(3) {
   ["A"]=>
   string(3) "AAA"
   ["c"]=>
@@ -583,13 +467,13 @@ array(3) {
   ["d"]=>
   string(3) "ddd"
 }
-array(0) {
+darray(0) {
 }
-array(1) {
+darray(1) {
   ["A"]=>
   string(3) "AAA"
 }
-array(3) {
+darray(3) {
   ["a"]=>
   string(3) "aaa"
   ["A"]=>
@@ -597,29 +481,29 @@ array(3) {
   ["c"]=>
   string(3) "ccc"
 }
-array(0) {
+darray(0) {
 }
-array(2) {
+darray(2) {
   ["a"]=>
   string(3) "aaa"
   ["A"]=>
   string(3) "AAA"
 }
-array(2) {
+darray(2) {
   ["d"]=>
   string(3) "ddd"
   ["e"]=>
   string(3) "eee"
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Iteration 6 ***
 
 *** Variation with first two Arguments ***
-array(4) {
+darray(4) {
   ["2"]=>
   string(3) "two"
   ["3"]=>
@@ -629,7 +513,7 @@ array(4) {
   ["5"]=>
   string(4) "five"
 }
-array(5) {
+darray(5) {
   ["1"]=>
   string(3) "one"
   ["2"]=>
@@ -641,7 +525,7 @@ array(5) {
   ["5"]=>
   string(4) "five"
 }
-array(2) {
+darray(2) {
   ["4"]=>
   string(4) "four"
   ["5"]=>
@@ -649,7 +533,7 @@ array(2) {
 }
 
 *** Variation with first three Arguments ***
-array(3) {
+darray(3) {
   ["2"]=>
   string(3) "two"
   ["3"]=>
@@ -657,13 +541,13 @@ array(3) {
   ["4"]=>
   string(4) "four"
 }
-array(0) {
+darray(0) {
 }
-array(1) {
+darray(1) {
   ["2"]=>
   string(3) "two"
 }
-array(3) {
+darray(3) {
   ["1"]=>
   string(3) "one"
   ["2"]=>
@@ -671,27 +555,27 @@ array(3) {
   ["3"]=>
   string(5) "three"
 }
-array(0) {
+darray(0) {
 }
-array(2) {
+darray(2) {
   ["1"]=>
   string(3) "one"
   ["2"]=>
   string(3) "two"
 }
-array(2) {
+darray(2) {
   ["4"]=>
   string(4) "four"
   ["5"]=>
   string(4) "five"
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-array(3) {
+darray(3) {
   ["2"]=>
   string(3) "two"
   ["3"]=>
@@ -699,13 +583,13 @@ array(3) {
   ["4"]=>
   string(4) "four"
 }
-array(0) {
+darray(0) {
 }
-array(1) {
+darray(1) {
   ["2"]=>
   string(3) "two"
 }
-array(3) {
+darray(3) {
   ["1"]=>
   string(3) "one"
   ["2"]=>
@@ -713,29 +597,29 @@ array(3) {
   ["3"]=>
   string(5) "three"
 }
-array(0) {
+darray(0) {
 }
-array(2) {
+darray(2) {
   ["1"]=>
   string(3) "one"
   ["2"]=>
   string(3) "two"
 }
-array(2) {
+darray(2) {
   ["4"]=>
   string(4) "four"
   ["5"]=>
   string(4) "five"
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Iteration 7 ***
 
 *** Variation with first two Arguments ***
-array(4) {
+darray(4) {
   [0]=>
   string(3) "two"
   [1]=>
@@ -745,7 +629,7 @@ array(4) {
   [3]=>
   string(4) "five"
 }
-array(5) {
+darray(5) {
   [0]=>
   string(3) "one"
   [1]=>
@@ -757,7 +641,7 @@ array(5) {
   [4]=>
   string(4) "five"
 }
-array(2) {
+darray(2) {
   [0]=>
   string(4) "four"
   [1]=>
@@ -765,7 +649,7 @@ array(2) {
 }
 
 *** Variation with first three Arguments ***
-array(3) {
+darray(3) {
   [0]=>
   string(3) "two"
   [1]=>
@@ -773,13 +657,13 @@ array(3) {
   [2]=>
   string(4) "four"
 }
-array(0) {
+darray(0) {
 }
-array(1) {
+darray(1) {
   [0]=>
   string(3) "two"
 }
-array(3) {
+darray(3) {
   [0]=>
   string(3) "one"
   [1]=>
@@ -787,27 +671,27 @@ array(3) {
   [2]=>
   int(7)
 }
-array(0) {
+darray(0) {
 }
-array(2) {
+darray(2) {
   [0]=>
   string(3) "one"
   [1]=>
   string(3) "two"
 }
-array(2) {
+darray(2) {
   [0]=>
   string(4) "four"
   [1]=>
   string(4) "five"
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-array(3) {
+darray(3) {
   [2]=>
   string(3) "two"
   [3]=>
@@ -815,13 +699,13 @@ array(3) {
   [4]=>
   string(4) "four"
 }
-array(0) {
+darray(0) {
 }
-array(1) {
+darray(1) {
   [2]=>
   string(3) "two"
 }
-array(3) {
+darray(3) {
   [1]=>
   string(3) "one"
   [2]=>
@@ -829,29 +713,29 @@ array(3) {
   [3]=>
   int(7)
 }
-array(0) {
+darray(0) {
 }
-array(2) {
+darray(2) {
   [1]=>
   string(3) "one"
   [2]=>
   string(3) "two"
 }
-array(2) {
+darray(2) {
   [4]=>
   string(4) "four"
   [5]=>
   string(4) "five"
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Iteration 8 ***
 
 *** Variation with first two Arguments ***
-array(10) {
+darray(10) {
   ["1"]=>
   string(3) "one"
   [0]=>
@@ -873,7 +757,7 @@ array(10) {
   ["5"]=>
   string(4) "Five"
 }
-array(11) {
+darray(11) {
   ["f"]=>
   string(3) "fff"
   ["1"]=>
@@ -897,7 +781,7 @@ array(11) {
   ["5"]=>
   string(4) "Five"
 }
-array(2) {
+darray(2) {
   [0]=>
   float(8.6)
   ["5"]=>
@@ -905,7 +789,7 @@ array(2) {
 }
 
 *** Variation with first three Arguments ***
-array(3) {
+darray(3) {
   ["1"]=>
   string(3) "one"
   [0]=>
@@ -913,37 +797,9 @@ array(3) {
   [""]=>
   string(5) "blank"
 }
-array(0) {
+darray(0) {
 }
-array(7) {
-  ["1"]=>
-  string(3) "one"
-  [0]=>
-  int(6)
-  [""]=>
-  string(5) "blank"
-  [1]=>
-  string(5) "float"
-  ["F"]=>
-  string(3) "FFF"
-  ["blank"]=>
-  string(0) ""
-  [2]=>
-  float(3.7)
-}
-array(3) {
-  ["f"]=>
-  string(3) "fff"
-  ["1"]=>
-  string(3) "one"
-  [0]=>
-  int(6)
-}
-array(0) {
-}
-array(8) {
-  ["f"]=>
-  string(3) "fff"
+darray(7) {
   ["1"]=>
   string(3) "one"
   [0]=>
@@ -959,19 +815,47 @@ array(8) {
   [2]=>
   float(3.7)
 }
-array(2) {
+darray(3) {
+  ["f"]=>
+  string(3) "fff"
+  ["1"]=>
+  string(3) "one"
+  [0]=>
+  int(6)
+}
+darray(0) {
+}
+darray(8) {
+  ["f"]=>
+  string(3) "fff"
+  ["1"]=>
+  string(3) "one"
+  [0]=>
+  int(6)
+  [""]=>
+  string(5) "blank"
+  [1]=>
+  string(5) "float"
+  ["F"]=>
+  string(3) "FFF"
+  ["blank"]=>
+  string(0) ""
+  [2]=>
+  float(3.7)
+}
+darray(2) {
   [0]=>
   float(8.6)
   ["5"]=>
   string(4) "Five"
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-array(3) {
+darray(3) {
   ["1"]=>
   string(3) "one"
   [4]=>
@@ -979,37 +863,9 @@ array(3) {
   [""]=>
   string(5) "blank"
 }
-array(0) {
+darray(0) {
 }
-array(7) {
-  ["1"]=>
-  string(3) "one"
-  [4]=>
-  int(6)
-  [""]=>
-  string(5) "blank"
-  [2]=>
-  string(5) "float"
-  ["F"]=>
-  string(3) "FFF"
-  ["blank"]=>
-  string(0) ""
-  [3]=>
-  float(3.7)
-}
-array(3) {
-  ["f"]=>
-  string(3) "fff"
-  ["1"]=>
-  string(3) "one"
-  [4]=>
-  int(6)
-}
-array(0) {
-}
-array(8) {
-  ["f"]=>
-  string(3) "fff"
+darray(7) {
   ["1"]=>
   string(3) "one"
   [4]=>
@@ -1025,85 +881,95 @@ array(8) {
   [3]=>
   float(3.7)
 }
-array(2) {
+darray(3) {
+  ["f"]=>
+  string(3) "fff"
+  ["1"]=>
+  string(3) "one"
+  [4]=>
+  int(6)
+}
+darray(0) {
+}
+darray(8) {
+  ["f"]=>
+  string(3) "fff"
+  ["1"]=>
+  string(3) "one"
+  [4]=>
+  int(6)
+  [""]=>
+  string(5) "blank"
+  [2]=>
+  string(5) "float"
+  ["F"]=>
+  string(3) "FFF"
+  ["blank"]=>
+  string(0) ""
+  [3]=>
+  float(3.7)
+}
+darray(2) {
   [6]=>
   float(8.6)
   ["5"]=>
   string(4) "Five"
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Iteration 9 ***
 
 *** Variation with first two Arguments ***
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "name"
-  [1]=>
   string(3) "age"
-  [2]=>
   string(2) "45"
 }
-array(4) {
-  [0]=>
+varray(4) {
   int(12)
-  [1]=>
   string(4) "name"
-  [2]=>
   string(3) "age"
-  [3]=>
   string(2) "45"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "age"
-  [1]=>
   string(2) "45"
 }
 
 *** Variation with first three Arguments ***
-array(3) {
-  [0]=>
+varray(3) {
   string(4) "name"
-  [1]=>
   string(3) "age"
-  [2]=>
   string(2) "45"
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(3) {
-  [0]=>
+varray(3) {
   int(12)
-  [1]=>
   string(4) "name"
-  [2]=>
   string(3) "age"
 }
-array(0) {
+darray(0) {
 }
-array(1) {
-  [0]=>
+varray(1) {
   int(12)
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "age"
-  [1]=>
   string(2) "45"
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-array(3) {
+darray(3) {
   [1]=>
   string(4) "name"
   [2]=>
@@ -1111,270 +977,193 @@ array(3) {
   [3]=>
   string(2) "45"
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(3) {
-  [0]=>
+varray(3) {
   int(12)
-  [1]=>
   string(4) "name"
-  [2]=>
   string(3) "age"
 }
-array(0) {
+darray(0) {
 }
-array(1) {
-  [0]=>
+varray(1) {
   int(12)
 }
-array(2) {
+darray(2) {
   [2]=>
   string(3) "age"
   [3]=>
   string(2) "45"
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Iteration 10 ***
 
 *** Variation with first two Arguments ***
-array(2) {
-  [0]=>
-  array(5) {
-    [0]=>
+varray(2) {
+  varray(5) {
     int(10)
-    [1]=>
     int(20)
-    [2]=>
     int(30)
-    [3]=>
     int(40)
-    [4]=>
     int(50)
   }
-  [1]=>
-  array(0) {
+  varray(0) {
   }
 }
-array(3) {
-  [0]=>
-  array(3) {
-    [0]=>
+varray(3) {
+  varray(3) {
     string(3) "oNe"
-    [1]=>
     string(3) "tWo"
-    [2]=>
     int(4)
   }
-  [1]=>
-  array(5) {
-    [0]=>
+  varray(5) {
     int(10)
-    [1]=>
     int(20)
-    [2]=>
     int(30)
-    [3]=>
     int(40)
-    [4]=>
     int(50)
   }
-  [2]=>
-  array(0) {
+  varray(0) {
   }
 }
-array(2) {
-  [0]=>
-  array(5) {
-    [0]=>
+varray(2) {
+  varray(5) {
     int(10)
-    [1]=>
     int(20)
-    [2]=>
     int(30)
-    [3]=>
     int(40)
-    [4]=>
     int(50)
   }
-  [1]=>
-  array(0) {
+  varray(0) {
   }
 }
 
 *** Variation with first three Arguments ***
-array(2) {
-  [0]=>
-  array(5) {
-    [0]=>
+varray(2) {
+  varray(5) {
     int(10)
-    [1]=>
     int(20)
-    [2]=>
     int(30)
-    [3]=>
     int(40)
-    [4]=>
     int(50)
   }
-  [1]=>
-  array(0) {
+  varray(0) {
   }
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(3) {
-  [0]=>
-  array(3) {
-    [0]=>
+varray(3) {
+  varray(3) {
     string(3) "oNe"
-    [1]=>
     string(3) "tWo"
-    [2]=>
     int(4)
   }
-  [1]=>
-  array(5) {
-    [0]=>
+  varray(5) {
     int(10)
-    [1]=>
     int(20)
-    [2]=>
     int(30)
-    [3]=>
     int(40)
-    [4]=>
     int(50)
   }
-  [2]=>
-  array(0) {
+  varray(0) {
   }
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(2) {
-  [0]=>
-  array(5) {
-    [0]=>
+varray(2) {
+  varray(5) {
     int(10)
-    [1]=>
     int(20)
-    [2]=>
     int(30)
-    [3]=>
     int(40)
-    [4]=>
     int(50)
   }
-  [1]=>
-  array(0) {
+  varray(0) {
   }
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 
 *** Variation with first two arguments with preserve_key value TRUE ***
-array(2) {
+darray(2) {
   [1]=>
-  array(5) {
-    [0]=>
+  varray(5) {
     int(10)
-    [1]=>
     int(20)
-    [2]=>
     int(30)
-    [3]=>
     int(40)
-    [4]=>
     int(50)
   }
   [2]=>
-  array(0) {
+  varray(0) {
   }
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(3) {
-  [0]=>
-  array(3) {
-    [0]=>
+varray(3) {
+  varray(3) {
     string(3) "oNe"
-    [1]=>
     string(3) "tWo"
-    [2]=>
     int(4)
   }
-  [1]=>
-  array(5) {
-    [0]=>
+  varray(5) {
     int(10)
-    [1]=>
     int(20)
-    [2]=>
     int(30)
-    [3]=>
     int(40)
-    [4]=>
+    int(50)
+  }
+  varray(0) {
+  }
+}
+darray(0) {
+}
+darray(0) {
+}
+darray(2) {
+  [1]=>
+  varray(5) {
+    int(10)
+    int(20)
+    int(30)
+    int(40)
     int(50)
   }
   [2]=>
-  array(0) {
+  varray(0) {
   }
 }
-array(0) {
+darray(0) {
 }
-array(0) {
-}
-array(2) {
-  [1]=>
-  array(5) {
-    [0]=>
-    int(10)
-    [1]=>
-    int(20)
-    [2]=>
-    int(30)
-    [3]=>
-    int(40)
-    [4]=>
-    int(50)
-  }
-  [2]=>
-  array(0) {
-  }
-}
-array(0) {
-}
-array(0) {
+darray(0) {
 }
 
 *** Typical Variation of offset and length  Arguments ***
-array(1) {
+darray(1) {
   [1]=>
   string(3) "Two"
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(3) "Two"
 }
-array(1) {
+darray(1) {
   [2]=>
   string(5) "Three"
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(5) "Three"
 }

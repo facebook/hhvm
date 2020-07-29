@@ -1,6 +1,6 @@
 *** Testing get_html_translation_table() : basic functionality/Windows-1252 ***
 -- with table = HTML_ENTITIES --
-array(125) {
+darray(125) {
   ["Æ"]=>
   string(7) "&AElig;"
   ["Á"]=>
@@ -253,7 +253,7 @@ array(125) {
   string(6) "&yuml;"
 }
 -- with table = HTML_SPECIALCHARS --
-array(4) {
+darray(4) {
   ["&"]=>
   string(5) "&amp;"
   [">"]=>

@@ -1,642 +1,504 @@
 *** Testing fgetcsv() : with default enclosure & length as 0 ***
 
 -- Testing fgetcsv() with file opened using r mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(12)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
 }
 int(16)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(3) "air"
 }
 int(20)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(3) "air"
 }
 int(20)
 bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(3) "air"
 }
 int(20)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(3) "air"
 }
 int(20)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(3) "air"
 }
 int(20)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(3) "air"
 }
 int(20)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(3) "air"
 }
 int(20)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(3) "air"
 }
 int(20)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(3) "air"
 }
 int(20)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(3) "air"
 }
 int(20)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(3) "air"
 }
 int(20)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(3) "air"
 }
 int(20)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(3) "air"
 }
 int(20)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(3) "air"
 }
 int(20)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(3) "air"
 }
 int(20)
 bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(43) ""
 This is line of text without csv fields
 
@@ -646,12 +508,9 @@ int(61)
 bool(true)
 
 -- Testing fgetcsv() with file opened using rb mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(43) ""
 This is line of text without csv fields
 
@@ -661,12 +520,9 @@ int(61)
 bool(true)
 
 -- Testing fgetcsv() with file opened using rt mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(43) ""
 This is line of text without csv fields
 
@@ -676,12 +532,9 @@ int(61)
 bool(true)
 
 -- Testing fgetcsv() with file opened using r+ mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(43) ""
 This is line of text without csv fields
 
@@ -691,12 +544,9 @@ int(61)
 bool(true)
 
 -- Testing fgetcsv() with file opened using r+b mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(43) ""
 This is line of text without csv fields
 
@@ -706,12 +556,9 @@ int(61)
 bool(true)
 
 -- Testing fgetcsv() with file opened using r+t mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(43) ""
 This is line of text without csv fields
 
@@ -721,12 +568,9 @@ int(61)
 bool(true)
 
 -- Testing fgetcsv() with file opened using a+ mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(43) ""
 This is line of text without csv fields
 
@@ -736,12 +580,9 @@ int(61)
 bool(true)
 
 -- Testing fgetcsv() with file opened using a+b mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(43) ""
 This is line of text without csv fields
 
@@ -751,12 +592,9 @@ int(61)
 bool(true)
 
 -- Testing fgetcsv() with file opened using a+t mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(43) ""
 This is line of text without csv fields
 
@@ -766,12 +604,9 @@ int(61)
 bool(true)
 
 -- Testing fgetcsv() with file opened using w+ mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(43) ""
 This is line of text without csv fields
 
@@ -781,12 +616,9 @@ int(61)
 bool(true)
 
 -- Testing fgetcsv() with file opened using w+b mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(43) ""
 This is line of text without csv fields
 
@@ -796,12 +628,9 @@ int(61)
 bool(true)
 
 -- Testing fgetcsv() with file opened using w+t mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(43) ""
 This is line of text without csv fields
 
@@ -811,12 +640,9 @@ int(61)
 bool(true)
 
 -- Testing fgetcsv() with file opened using x+ mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(43) ""
 This is line of text without csv fields
 
@@ -826,12 +652,9 @@ int(61)
 bool(true)
 
 -- Testing fgetcsv() with file opened using x+b mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(43) ""
 This is line of text without csv fields
 
@@ -841,12 +664,9 @@ int(61)
 bool(true)
 
 -- Testing fgetcsv() with file opened using x+t mode --
-array(3) {
-  [0]=>
+varray(3) {
   string(5) "water"
-  [1]=>
   string(5) "fruit"
-  [2]=>
   string(43) ""
 This is line of text without csv fields
 

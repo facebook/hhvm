@@ -1,22 +1,18 @@
 NULL
 NULL
-array(1) {
-  [0]=>
+varray(1) {
   int(5)
 }
-array(1) {
-  [0]=>
+varray(1) {
   int(6)
 }
-array(2) {
+darray(2) {
   ["Y"]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(5)
   }
   ["Z"]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(6)
   }
 }

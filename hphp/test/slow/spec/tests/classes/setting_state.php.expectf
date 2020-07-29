@@ -1,6 +1,6 @@
 ---------------- start -------------------
 ---------------- calling var_export -------------------
-string(%d) "Point::__set_state(darray[
+string(90) "Point::__set_state(darray[
 %w 'x' => 3,
 %w 'y' => 5,
 %w 'proti' => NULL,
@@ -8,7 +8,7 @@ string(%d) "Point::__set_state(darray[
 ])"
 ---------------- calling eval -------------------
 Inside Point::__set_state
-array(4) {
+darray(4) {
   ["x"]=>
   int(3)
   ["y"]=>
@@ -35,7 +35,7 @@ string(%d) "B::__set_state(darray[
 %w 'bprop' => 10,
 ])"
 Inside B::__set_state
-array(1) {
+darray(1) {
   ["bprop"]=>
   int(10)
 }
@@ -54,14 +54,14 @@ string(%d) "D::__set_state(darray[
 %w 'bprop' => 20,
 ])"
 Inside D::__set_state
-array(2) {
+darray(2) {
   ["dprop"]=>
   int(30)
   ["bprop"]=>
   int(20)
 }
 Inside B::__set_state
-array(2) {
+darray(2) {
   ["dprop"]=>
   int(30)
   ["bprop"]=>

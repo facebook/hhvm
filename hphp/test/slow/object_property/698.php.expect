@@ -1,6 +1,6 @@
 bool(true)
 int(5)
-array(3) {
+darray(3) {
   [0]=>
   int(1)
   [1]=>
@@ -15,7 +15,7 @@ object(X) (4) {
   ["i":"X":private]=>
   int(5)
   ["a":"X":private]=>
-  array(3) {
+  darray(3) {
     [0]=>
     int(1)
     [1]=>

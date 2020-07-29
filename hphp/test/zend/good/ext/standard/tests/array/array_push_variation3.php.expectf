@@ -2,18 +2,12 @@
 
 -- Pass array as $var argument --
 int(4)
-array(4) {
-  [0]=>
+varray(4) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
-  [3]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "one"
-    [1]=>
     string(3) "two"
   }
 }

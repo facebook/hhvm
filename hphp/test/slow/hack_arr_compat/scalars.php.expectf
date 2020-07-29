@@ -41,11 +41,11 @@ Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compar
 Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 22
 
 Caught: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array on line 23
-array(1) {
+darray(1) {
   ["0"]=>
   int(1)
 }
-array(4) {
+darray(4) {
   ["0"]=>
   int(1)
   [1]=>
@@ -55,7 +55,7 @@ array(4) {
   [3]=>
   int(4)
 }
-array(4) {
+darray(4) {
   [0]=>
   int(1)
   [1]=>
@@ -65,7 +65,7 @@ array(4) {
   [3]=>
   int(4)
 }
-array(4) {
+darray(4) {
   [0]=>
   int(1)
   [1]=>
@@ -75,11 +75,11 @@ array(4) {
   ["3"]=>
   int(4)
 }
-array(1) {
+darray(1) {
   ["10"]=>
   int(10)
 }
-array(3) {
+darray(3) {
   ["10"]=>
   int(10)
   [20]=>
@@ -87,7 +87,7 @@ array(3) {
   [30]=>
   int(30)
 }
-array(3) {
+darray(3) {
   [10]=>
   int(10)
   ["20"]=>
@@ -95,7 +95,7 @@ array(3) {
   [30]=>
   int(30)
 }
-array(3) {
+darray(3) {
   [10]=>
   int(10)
   [20]=>

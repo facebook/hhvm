@@ -1,33 +1,32 @@
-array(0) {
+darray(0) {
 }
-array(1) {
+darray(1) {
   ["Attr1"]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(1337)
   }
 }
-array(2) {
+darray(2) {
   ["Attr2"]=>
-  array(0) {
+  varray(0) {
   }
   ["Attr3"]=>
-  array(0) {
+  varray(0) {
   }
 }
-array(2) {
+darray(2) {
   ["Attr2"]=>
-  array(0) {
+  varray(0) {
   }
   ["Attr3"]=>
-  array(0) {
+  varray(0) {
   }
 }
-array(2) {
+darray(2) {
   ["Attr2"]=>
-  array(0) {
+  varray(0) {
   }
   ["Attr3"]=>
-  array(0) {
+  varray(0) {
   }
 }

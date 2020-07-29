@@ -1,8 +1,7 @@
-array(1) {
-  [0]=>
+varray(1) {
   object(ReflectionParameter) (3) {
     ["info"]=>
-    array(12) {
+    darray(12) {
       ["index"]=>
       int(0)
       ["name"]=>
@@ -27,7 +26,7 @@ classMeth{
       ["defaultText"]=>
       string(24) "HH\class_meth("A", "f1")"
       ["attributes"]=>
-      array(0) {
+      darray(0) {
       }
       ["is_optional"]=>
       bool(true)
@@ -35,7 +34,7 @@ classMeth{
     ["name"]=>
     string(2) "p0"
     ["paramTypeInfo"]=>
-    array(3) {
+    darray(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>

@@ -1,8 +1,8 @@
 bool(true)
 bool(true)
-array(1) {
+darray(1) {
   ["http"]=>
-  array(3) {
+  darray(3) {
     ["method"]=>
     string(4) "POST"
     ["protocol_version"]=>

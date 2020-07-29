@@ -1,8 +1,6 @@
 int(33)
-array(2) {
-  [0]=>
+varray(2) {
   int(11)
-  [1]=>
   int(22)
 }
 int(33)
@@ -64,7 +62,7 @@ object(HH\Pair) (2) {
   int(22)
 }
 NULL
-array(0) {
+varray(0) {
 }
 NULL
 object(HH\Vector) (0) {

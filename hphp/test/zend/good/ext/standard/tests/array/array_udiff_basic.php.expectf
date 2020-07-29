@@ -1,4 +1,4 @@
-array(2) {
+darray(2) {
   ["0.5"]=>
   object(cr) (1) {
     ["priv_member":"cr":private]=>

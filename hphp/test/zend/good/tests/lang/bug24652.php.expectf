@@ -1,11 +1,11 @@
-array(1) {
+darray(1) {
   ["7"]=>
   int(0)
 }
 bool(false)
 bool(true)
 ----------
-array(1) {
+darray(1) {
   [7]=>
   int(0)
 }

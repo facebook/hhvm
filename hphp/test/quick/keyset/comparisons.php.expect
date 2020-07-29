@@ -391,7 +391,7 @@ keyset(0) {
 Comparing:
 keyset(0) {
 }
-array(0) {
+varray(0) {
 }
 	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
@@ -403,7 +403,7 @@ array(0) {
 	!== : bool(true)
 	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Comparing:
-array(0) {
+varray(0) {
 }
 keyset(0) {
 }

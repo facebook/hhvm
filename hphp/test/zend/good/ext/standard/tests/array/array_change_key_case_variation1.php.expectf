@@ -86,7 +86,7 @@ Warning: Invalid operand type was used: %S expects array(s) or collection(s) in 
 NULL
 
 -- Iteration 18 --
-array(0) {
+darray(0) {
 }
 
 -- Iteration 19 --

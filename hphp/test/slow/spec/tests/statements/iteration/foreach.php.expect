@@ -15,38 +15,29 @@ white
 black
 blue
 black
-array(3) {
-  [0]=>
+varray(3) {
   string(3) "red"
-  [1]=>
   string(5) "white"
-  [2]=>
   string(4) "blue"
 }
   abc  ij
   mnop  xyz
 ------
 int(0)
-array(2) {
-  [0]=>
+varray(2) {
   int(10)
-  [1]=>
   int(20)
 }
 ------
 int(1)
-array(2) {
-  [0]=>
+varray(2) {
   float(1.2)
-  [1]=>
   float(4.5)
 }
 ------
 int(2)
-array(2) {
-  [0]=>
+varray(2) {
   bool(true)
-  [1]=>
   string(3) "abc"
 }
 ------

@@ -1,21 +1,18 @@
-array(1) {
-  [0]=>
+varray(1) {
   string(4) "Quux"
 }
 string(%d) "%s/reflection-attr.php:23"
 ---------
-array(1) {
-  [0]=>
+varray(1) {
   string(4) "Quux"
 }
 string(%d) "%s/reflection-attr.php:25"
 ---------
-array(0) {
+varray(0) {
 }
 string(%d) "%s/reflection-attr.php:33"
 ---------
-array(1) {
-  [0]=>
+varray(1) {
   int(42)
 }
 string(%d) "%s/reflection-attr.php:33"

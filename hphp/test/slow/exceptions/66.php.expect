@@ -1,6 +1,5 @@
-array(3) {
-  [0]=>
-  array(3) {
+varray(3) {
+  darray(3) {
     ["class"]=>
     string(1) "C"
     ["function"]=>
@@ -8,8 +7,7 @@ array(3) {
     ["type"]=>
     string(2) "->"
   }
-  [1]=>
-  array(3) {
+  darray(3) {
     ["class"]=>
     string(1) "C"
     ["function"]=>
@@ -17,16 +15,14 @@ array(3) {
     ["type"]=>
     string(2) "->"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     ["function"]=>
     string(4) "main"
   }
 }
 ------------------------
-array(3) {
-  [0]=>
-  array(4) {
+varray(3) {
+  darray(4) {
     ["class"]=>
     string(1) "C"
     ["function"]=>
@@ -37,8 +33,7 @@ array(3) {
     ["type"]=>
     string(2) "->"
   }
-  [1]=>
-  array(4) {
+  darray(4) {
     ["class"]=>
     string(1) "C"
     ["function"]=>
@@ -49,8 +44,7 @@ array(3) {
     ["type"]=>
     string(2) "->"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     ["function"]=>
     string(4) "main"
   }

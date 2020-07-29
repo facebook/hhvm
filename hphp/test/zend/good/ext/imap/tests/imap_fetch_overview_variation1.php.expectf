@@ -68,10 +68,10 @@ Warning: imap_fetch_overview() expects parameter 1 to be resource, string given 
 
 Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s/imap_fetch_overview_variation1.php on line 85
 
--- Testing with first argument value: array(0) {
+-- Testing with first argument value: varray(0) {
 }
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, %rv?%rarray given in %s/imap_fetch_overview_variation1.php on line 85
+Warning: imap_fetch_overview() expects parameter 1 to be resource, varray given in %s/imap_fetch_overview_variation1.php on line 85
 
 -- Testing with first argument value: string(6) "string"
 

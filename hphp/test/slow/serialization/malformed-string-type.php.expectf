@@ -2,13 +2,13 @@ string(5) "Hello"
 string(5) "Hello"
 string(5) "Hello"
 string(5) "Hello"
-array(2) {
+darray(2) {
   [0]=>
   string(5) "hello"
   [1]=>
   string(5) "world"
 }
-array(2) {
+darray(2) {
   [0]=>
   string(5) "hello"
   [1]=>

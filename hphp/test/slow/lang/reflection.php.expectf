@@ -23,11 +23,10 @@ int(4)
 int(2)
 
 --- getParameters("f") ---
-array(4) {
-  [0]=>
+varray(4) {
   object(ReflectionParameter) (3) {
     ["info"]=>
-    array(10) {
+    darray(10) {
       ["index"]=>
       int(0)
       ["name"]=>
@@ -45,7 +44,7 @@ array(4) {
       ["type_hint_nullable"]=>
       bool(true)
       ["attributes"]=>
-      array(0) {
+      darray(0) {
       }
       ["is_optional"]=>
       bool(false)
@@ -53,7 +52,7 @@ array(4) {
     ["name"]=>
     string(1) "a"
     ["paramTypeInfo"]=>
-    array(3) {
+    darray(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -62,10 +61,9 @@ array(4) {
       bool(false)
     }
   }
-  [1]=>
   object(ReflectionParameter) (3) {
     ["info"]=>
-    array(11) {
+    darray(11) {
       ["index"]=>
       int(1)
       ["name"]=>
@@ -85,7 +83,7 @@ array(4) {
       ["inout"]=>
       bool(true)
       ["attributes"]=>
-      array(0) {
+      darray(0) {
       }
       ["is_optional"]=>
       bool(false)
@@ -93,7 +91,7 @@ array(4) {
     ["name"]=>
     string(1) "b"
     ["paramTypeInfo"]=>
-    array(3) {
+    darray(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -102,10 +100,9 @@ array(4) {
       bool(false)
     }
   }
-  [2]=>
   object(ReflectionParameter) (3) {
     ["info"]=>
-    array(12) {
+    darray(12) {
       ["index"]=>
       int(2)
       ["name"]=>
@@ -127,7 +124,7 @@ array(4) {
       ["defaultText"]=>
       string(4) "NULL"
       ["attributes"]=>
-      array(0) {
+      darray(0) {
       }
       ["is_optional"]=>
       bool(true)
@@ -135,7 +132,7 @@ array(4) {
     ["name"]=>
     string(1) "c"
     ["paramTypeInfo"]=>
-    array(3) {
+    darray(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -144,10 +141,9 @@ array(4) {
       bool(false)
     }
   }
-  [3]=>
   object(ReflectionParameter) (3) {
     ["info"]=>
-    array(12) {
+    darray(12) {
       ["index"]=>
       int(3)
       ["name"]=>
@@ -165,18 +161,15 @@ array(4) {
       ["type_hint_nullable"]=>
       bool(true)
       ["default"]=>
-      array(3) {
-        [0]=>
+      varray(3) {
         int(1)
-        [1]=>
         int(2)
-        [2]=>
         string(11) "some string"
       }
       ["defaultText"]=>
       string(27) "varray[1, 2, SOME_CONSTANT]"
       ["attributes"]=>
-      array(0) {
+      darray(0) {
       }
       ["is_optional"]=>
       bool(true)
@@ -184,7 +177,7 @@ array(4) {
     ["name"]=>
     string(1) "d"
     ["paramTypeInfo"]=>
-    array(3) {
+    darray(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -308,7 +301,7 @@ string(5) "B::C0"
 string(5) "B::C1"
 
 --- getConstants() ---
-array(2) {
+darray(2) {
   ["C0"]=>
   string(5) "B::C0"
   ["C1"]=>
@@ -333,14 +326,10 @@ int(80)
 string(%d) "%s/test/slow/lang/reflection.php"
 
 --- getInterfaceNames() ---
-array(4) {
-  [0]=>
+varray(4) {
   string(1) "I"
-  [1]=>
   string(1) "K"
-  [2]=>
   string(1) "H"
-  [3]=>
   string(1) "J"
 }
 
@@ -448,12 +437,9 @@ object(B) (4) {
 }
 
 --- get_defined_functions() ---
-array(3) {
-  [0]=>
+varray(3) {
   string(21) "entrypoint_reflection"
-  [1]=>
   string(1) "f"
-  [2]=>
   string(1) "g"
 }
 --- get_defined_constants() ---

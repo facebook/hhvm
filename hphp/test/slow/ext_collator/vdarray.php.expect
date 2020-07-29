@@ -1,14 +1,12 @@
-array(2) {
+darray(2) {
   ["y"]=>
   string(5) "apple"
   ["x"]=>
   string(4) "pear"
 }
 bool(true)
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "apple"
-  [1]=>
   string(4) "pear"
 }
 bool(true)

@@ -1,20 +1,14 @@
 string(8) "Foo::bar"
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   bool(true)
-  [2]=>
   string(1) "c"
 }
 string(10) "inside bar"
 string(4) "meep"
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   bool(true)
-  [2]=>
   string(1) "c"
 }
 string(11) "inside meep"

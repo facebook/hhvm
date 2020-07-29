@@ -1,17 +1,17 @@
 == empty array ==
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 == APC local array ==
 bool(true)
-array(2) {
+darray(2) {
   [1]=>
   int(2)
   ["1"]=>
   string(1) "2"
 }
-array(2) {
+darray(2) {
   [1]=>
   int(2)
   ["1"]=>

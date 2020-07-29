@@ -1,14 +1,13 @@
-array(2) {
+darray(2) {
   ["SoIsThis"]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     string(3) "ABC"
   }
   ["ThisIsAnAttribute"]=>
-  array(0) {
+  varray(0) {
   }
 }
-array(2) {
+darray(2) {
   ["foo"]=>
   int(2)
   ["main"]=>

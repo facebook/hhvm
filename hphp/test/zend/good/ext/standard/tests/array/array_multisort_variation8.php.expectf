@@ -1,6 +1,6 @@
 *** Testing array_multisort() : usage variation  - test sort order of all types***
 bool(true)
-array(10) {
+darray(10) {
   ["empty string DQ"]=>
   string(0) ""
   ["uppercase NULL"]=>

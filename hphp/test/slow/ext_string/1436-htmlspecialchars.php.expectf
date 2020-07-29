@@ -5,7 +5,7 @@ string(%d) ""
 NULL
 
 Warning: htmlspecialchars() expects parameter 1 to be string, null given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20
-array(1) {
+darray(1) {
   ["str"]=>
   string(%d) "aaa"
 }

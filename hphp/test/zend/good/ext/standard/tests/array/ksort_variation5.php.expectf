@@ -5,25 +5,23 @@
 -- Iteration 1 --
 - With defualt sort flag -
 bool(true)
-array(11) {
+darray(11) {
   [""]=>
   NULL
-  ["%r\x09%r"]=>
-  string(1) "%r\x09%r"
+  ["	"]=>
+  string(1) "	"
   ["
 "]=>
   string(1) "
 "
-  ["%r\x0b%r"]=>
-  string(1) "%r\x0b%r"
-  ["%r\x0c%r"]=>
-  string(1) "%r\x0c%r"
-  ["
-"]=>
-  string(1) "
-"
-  ["%r\x1b%r"]=>
-  string(1) "%r\x1b%r"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
   ["\a"]=>
   string(2) "\a"
   ["\cx"]=>
@@ -35,25 +33,23 @@ array(11) {
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-array(11) {
+darray(11) {
   [""]=>
   NULL
-  ["%r\x09%r"]=>
-  string(1) "%r\x09%r"
+  ["	"]=>
+  string(1) "	"
   ["
 "]=>
   string(1) "
 "
-  ["%r\x0b%r"]=>
-  string(1) "%r\x0b%r"
-  ["%r\x0c%r"]=>
-  string(1) "%r\x0c%r"
-  ["
-"]=>
-  string(1) "
-"
-  ["%r\x1b%r"]=>
-  string(1) "%r\x1b%r"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
   ["\a"]=>
   string(2) "\a"
   ["\cx"]=>
@@ -65,25 +61,23 @@ array(11) {
 }
 - Sort flag = SORT_STRING -
 bool(true)
-array(11) {
+darray(11) {
   [""]=>
   NULL
-  ["%r\x09%r"]=>
-  string(1) "%r\x09%r"
+  ["	"]=>
+  string(1) "	"
   ["
 "]=>
   string(1) "
 "
-  ["%r\x0b%r"]=>
-  string(1) "%r\x0b%r"
-  ["%r\x0c%r"]=>
-  string(1) "%r\x0c%r"
-  ["
-"]=>
-  string(1) "
-"
-  ["%r\x1b%r"]=>
-  string(1) "%r\x1b%r"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
   ["\a"]=>
   string(2) "\a"
   ["\cx"]=>
@@ -97,7 +91,7 @@ array(11) {
 -- Iteration 2 --
 - With defualt sort flag -
 bool(true)
-array(11) {
+darray(11) {
   ["Apple"]=>
   string(5) "apple"
   ["B"]=>
@@ -123,7 +117,7 @@ array(11) {
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-array(11) {
+darray(11) {
   ["Apple"]=>
   string(5) "apple"
   ["B"]=>
@@ -149,7 +143,7 @@ array(11) {
 }
 - Sort flag = SORT_STRING -
 bool(true)
-array(11) {
+darray(11) {
   ["Apple"]=>
   string(5) "apple"
   ["B"]=>

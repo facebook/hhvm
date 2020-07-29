@@ -1,4 +1,4 @@
-array(7) {
+darray(7) {
   ["FileName"]=>
   string(12) "bug34704.jpg"
   ["FileDateTime"]=>
@@ -12,7 +12,7 @@ array(7) {
   ["SectionsFound"]=>
   string(4) "IFD0"
   ["COMPUTED"]=>
-  array(5) {
+  darray(5) {
     ["html"]=>
     string(24) "width="386" height="488""
     ["Height"]=>

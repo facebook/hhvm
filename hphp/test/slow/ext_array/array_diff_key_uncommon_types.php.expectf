@@ -5,11 +5,11 @@ dict(2) {
   ["1"]=>
   string(1) "2"
 }
-array(0) {
+darray(0) {
 }
 == APC local array ==
 bool(true)
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }

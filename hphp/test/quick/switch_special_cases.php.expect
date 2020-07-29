@@ -36,14 +36,12 @@ string(0) ""
 int(4)
 2 or 4: 4
 --------------------------------
-array(0) {
+varray(0) {
 }
 default
 --------------------------------
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "foo"
-  [1]=>
   string(4) "floo"
 }
 default

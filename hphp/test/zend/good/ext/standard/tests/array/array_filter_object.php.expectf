@@ -1,5 +1,5 @@
 *** Testing array_filter() : object functionality ***
-array(5) {
+darray(5) {
   [0]=>
   object(SimpleClass) (1) {
     ["var1"]=>
@@ -24,7 +24,7 @@ array(5) {
   object(StaticClass) (0) {
   }
 }
-array(5) {
+darray(5) {
   [0]=>
   object(SimpleClass) (1) {
     ["var1"]=>
@@ -49,6 +49,6 @@ array(5) {
   object(StaticClass) (0) {
   }
 }
-array(0) {
+darray(0) {
 }
 Done

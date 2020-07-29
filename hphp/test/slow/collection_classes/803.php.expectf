@@ -1,15 +1,14 @@
 === Vector ===
-array(1) {
-  [0]=>
+varray(1) {
   int(123)
 }
 int(123)
-array(0) {
+varray(0) {
 }
 === Set ===
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [123]=>
   int(123)
   ["123"]=>
@@ -18,7 +17,7 @@ array(3) {
   string(3) "foo"
 }
 bool(true)
-array(2) {
+darray(2) {
   [123]=>
   int(123)
   ["foo"]=>

@@ -2,108 +2,78 @@
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray_or_darray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST: clsmeth -> varray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
 ** CAST: clsmeth -> varray
 string(3) "Foo"
 string(3) "bar"
-array(2) {
+darray(2) {
   [0]=>
   int(42)
   [1]=>
@@ -113,108 +83,78 @@ array(2) {
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray_or_darray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST: clsmeth -> varray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
 ** CAST: clsmeth -> varray
 string(3) "Foo"
 string(3) "bar"
-array(2) {
+darray(2) {
   [0]=>
   int(42)
   [1]=>
@@ -224,108 +164,78 @@ array(2) {
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray_or_darray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST: clsmeth -> varray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
 ** CAST: clsmeth -> varray
 string(3) "Foo"
 string(3) "bar"
-array(2) {
+darray(2) {
   [0]=>
   int(42)
   [1]=>
@@ -335,108 +245,78 @@ array(2) {
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray_or_darray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST: clsmeth -> varray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
 ** CAST: clsmeth -> varray
 string(3) "Foo"
 string(3) "bar"
-array(2) {
+darray(2) {
   [0]=>
   int(42)
   [1]=>
@@ -446,108 +326,78 @@ array(2) {
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray_or_darray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST: clsmeth -> varray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
 ** CAST: clsmeth -> varray
 string(3) "Foo"
 string(3) "bar"
-array(2) {
+darray(2) {
   [0]=>
   int(42)
   [1]=>
@@ -557,108 +407,78 @@ array(2) {
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST RET: clsmeth -> HH\varray_or_darray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST: clsmeth -> varray
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 ** CAST: clsmeth -> HH\KeyedTraversable
 ** CAST: clsmeth -> varray
 string(3) "Foo"
 string(3) "bar"
-array(2) {
+darray(2) {
   [0]=>
   int(42)
   [1]=>

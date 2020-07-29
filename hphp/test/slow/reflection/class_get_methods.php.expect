@@ -1,12 +1,11 @@
-array(1) {
+darray(1) {
   [0]=>
   string(11) "A::fetchAll"
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(8) "fetchAll"
 }
-array(24) {
+darray(24) {
   [0]=>
   string(21) "PDOStatement::execute"
   [1]=>
@@ -56,53 +55,29 @@ array(24) {
   [23]=>
   string(21) "PDOStatement::__sleep"
 }
-array(24) {
-  [0]=>
+varray(24) {
   string(7) "execute"
-  [1]=>
   string(5) "fetch"
-  [2]=>
   string(11) "fetchObject"
-  [3]=>
   string(11) "fetchColumn"
-  [4]=>
   string(8) "fetchAll"
-  [5]=>
   string(9) "bindValue"
-  [6]=>
   string(8) "rowCount"
-  [7]=>
   string(9) "errorCode"
-  [8]=>
   string(9) "errorInfo"
-  [9]=>
   string(12) "setAttribute"
-  [10]=>
   string(12) "getAttribute"
-  [11]=>
   string(11) "columnCount"
-  [12]=>
   string(13) "getColumnMeta"
-  [13]=>
   string(12) "setFetchMode"
-  [14]=>
   string(10) "nextRowset"
-  [15]=>
   string(11) "closeCursor"
-  [16]=>
   string(15) "debugDumpParams"
-  [17]=>
   string(7) "current"
-  [18]=>
   string(3) "key"
-  [19]=>
   string(4) "next"
-  [20]=>
   string(6) "rewind"
-  [21]=>
   string(5) "valid"
-  [22]=>
   string(8) "__wakeup"
-  [23]=>
   string(7) "__sleep"
 }

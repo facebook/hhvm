@@ -6,15 +6,13 @@ object(ext_heap) (4) {
   [%u|b%"isCorrupted":%u|b%"SplHeap":private]=>
   bool(true)
   [%u|b%"heap":%u|b%"SplHeap":private]=>
-  array(2) {
+  darray(2) {
     [0]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       %unicode|string%(7) "foobar2"
     }
     [1]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       %unicode|string%(7) "foobar1"
     }
   }

@@ -1,6 +1,6 @@
-array(3) {
+darray(3) {
   ["error_reporting values"]=>
-  array(6) {
+  darray(6) {
     ["foo"]=>
     string(7) "32767 8"
     ["error_reporting"]=>
@@ -15,7 +15,7 @@ array(3) {
     string(5) "32759"
   }
   ["true or false"]=>
-  array(8) {
+  darray(8) {
     ["bool_true"]=>
     string(1) "1"
     ["bool_yes"]=>
@@ -34,7 +34,7 @@ array(3) {
     string(0) ""
   }
   ["strings"]=>
-  array(8) {
+  darray(8) {
     ["string_true"]=>
     string(4) "true"
     ["string_yes"]=>

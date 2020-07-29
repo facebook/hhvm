@@ -1,4 +1,4 @@
-array(12) {
+darray(12) {
   ["year"]=>
   int(2010)
   ["month"]=>
@@ -16,12 +16,12 @@ array(12) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  array(0) {
+  darray(0) {
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  array(0) {
+  darray(0) {
   }
   ["is_localtime"]=>
   bool(false)

@@ -1,6 +1,6 @@
 *** Testing array_merge_recursive() : array with reference variables for $arr1 argument ***
 -- With default argument --
-array(6) {
+darray(6) {
   [0]=>
   int(0)
   [1]=>
@@ -15,7 +15,7 @@ array(6) {
   string(5) "hello"
 }
 -- With more arguments --
-array(7) {
+darray(7) {
   [0]=>
   int(0)
   [1]=>
@@ -27,7 +27,7 @@ array(7) {
   [4]=>
   int(0)
   ["hello"]=>
-  array(2) {
+  darray(2) {
     [0]=>
     string(5) "hello"
     [1]=>

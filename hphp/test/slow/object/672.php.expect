@@ -2,7 +2,7 @@ FOo::exclAIM
 FOo::teST
 FOo::__FUNcTION__
 FOo::__CLAsS__
-array(4) {
+darray(4) {
   ["ExclAim"]=>
   int(1)
   ["TesT"]=>

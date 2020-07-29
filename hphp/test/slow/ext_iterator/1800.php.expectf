@@ -1,17 +1,12 @@
-array(5) {
-  [0]=>
+varray(5) {
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/dir => %d
 "
-  [1]=>
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/empty => 0
 "
-  [2]=>
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/file => 3
 "
-  [3]=>
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/fix_mtimes.inc => 489
 "
-  [4]=>
   string(%d) "%s/test/slow/ext_iterator/../../sample_dir/symlink => 3
 "
 }

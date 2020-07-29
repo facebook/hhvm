@@ -54,148 +54,100 @@ string(25) "varray [
 ]"
 string(19) "varray[\C::A, 1, 2]"
 ======================================================
-array(2) {
-  [0]=>
+varray(2) {
   int(1)
-  [1]=>
   int(1)
 }
-array(3) {
-  [0]=>
+varray(3) {
   int(2)
-  [1]=>
   int(1)
-  [2]=>
   int(3)
 }
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
-array(3) {
-  [0]=>
-  array(0) {
+varray(3) {
+  varray(0) {
   }
-  [1]=>
-  array(2) {
-    [0]=>
-    array(3) {
-      [0]=>
+  varray(2) {
+    varray(3) {
       int(1)
-      [1]=>
       int(2)
-      [2]=>
       int(3)
     }
-    [1]=>
-    array(0) {
+    varray(0) {
     }
   }
-  [2]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(1)
-    [1]=>
     int(2)
-    [2]=>
     int(3)
   }
 }
-array(3) {
-  [0]=>
-  array(0) {
+varray(3) {
+  varray(0) {
   }
-  [1]=>
-  array(2) {
-    [0]=>
-    array(3) {
-      [0]=>
+  varray(2) {
+    varray(3) {
       int(1)
-      [1]=>
       int(1)
-      [2]=>
       int(3)
     }
-    [1]=>
-    array(0) {
+    varray(0) {
     }
   }
-  [2]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(1)
-    [1]=>
     int(2)
-    [2]=>
     int(3)
   }
 }
-array(3) {
-  [0]=>
-  array(0) {
+varray(3) {
+  varray(0) {
   }
-  [1]=>
   vec(2) {
-    array(3) {
-      [0]=>
+    varray(3) {
       int(1)
-      [1]=>
       int(2)
-      [2]=>
       int(3)
     }
     vec(0) {
     }
   }
-  [2]=>
   vec(3) {
     int(1)
     int(2)
     int(3)
   }
 }
-array(3) {
-  [0]=>
-  array(0) {
+varray(3) {
+  varray(0) {
   }
-  [1]=>
   vec(2) {
-    array(3) {
-      [0]=>
+    varray(3) {
       int(1)
-      [1]=>
       int(1)
-      [2]=>
       int(3)
     }
     vec(0) {
     }
   }
-  [2]=>
   vec(3) {
     int(1)
     int(2)
     int(3)
   }
 }
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(1)
-  [2]=>
   int(2)
 }
 bool(true)
@@ -293,13 +245,13 @@ string(34) "darray [
 ]"
 string(30) "darray["a" => \C::A, "b" => 2]"
 ======================================================
-array(2) {
+darray(2) {
   [1]=>
   int(1)
   [2]=>
   int(1)
 }
-array(3) {
+darray(3) {
   [1]=>
   int(2)
   [4]=>
@@ -307,7 +259,7 @@ array(3) {
   [3]=>
   int(3)
 }
-array(3) {
+darray(3) {
   [1]=>
   int(1)
   ["hi"]=>
@@ -315,56 +267,52 @@ array(3) {
   [5]=>
   int(3)
 }
-array(3) {
+darray(3) {
   [1]=>
-  array(0) {
+  darray(0) {
   }
   ["hi"]=>
-  array(2) {
-    [0]=>
-    array(2) {
+  varray(2) {
+    darray(2) {
       ["key1"]=>
       int(123)
       ["key2"]=>
-      array(0) {
+      darray(0) {
       }
     }
-    [1]=>
     int(456)
   }
   [5]=>
-  array(0) {
+  darray(0) {
   }
 }
-array(3) {
+darray(3) {
   [1]=>
-  array(0) {
+  darray(0) {
   }
   ["hi"]=>
-  array(2) {
-    [0]=>
-    array(2) {
+  varray(2) {
+    darray(2) {
       ["key1"]=>
       int(1)
       ["key2"]=>
-      array(0) {
+      darray(0) {
       }
     }
-    [1]=>
     int(456)
   }
   [5]=>
-  array(0) {
+  darray(0) {
   }
 }
-array(3) {
+darray(3) {
   [1]=>
-  array(0) {
+  darray(0) {
   }
   ["hi"]=>
   dict(2) {
     [2]=>
-    array(2) {
+    darray(2) {
       ["key1"]=>
       int(123)
       ["key2"]=>
@@ -378,14 +326,14 @@ array(3) {
   dict(0) {
   }
 }
-array(3) {
+darray(3) {
   [1]=>
-  array(0) {
+  darray(0) {
   }
   ["hi"]=>
   dict(2) {
     [2]=>
-    array(2) {
+    darray(2) {
       ["key1"]=>
       int(1)
       ["key2"]=>
@@ -399,13 +347,13 @@ array(3) {
   dict(0) {
   }
 }
-array(2) {
+darray(2) {
   ["a"]=>
   int(1)
   ["b"]=>
   int(2)
 }
-array(2) {
+darray(2) {
   ["a"]=>
   int(1)
   ["b"]=>
@@ -450,25 +398,20 @@ string(9) "HH\darray"
 string(9) "HH\darray"
 string(9) "HH\darray"
 ======================================================
-array(3) {
-  [0]=>
+varray(3) {
   int(2)
-  [1]=>
   int(1)
-  [2]=>
   int(3)
 }
 bool(true)
 string(9) "HH\varray"
-array(2) {
-  [0]=>
+varray(2) {
   int(1)
-  [1]=>
   int(1)
 }
 bool(true)
 string(17) "HH\varray<HH\int>"
-array(3) {
+darray(3) {
   ["a"]=>
   int(2)
   ["b"]=>
@@ -478,7 +421,7 @@ array(3) {
 }
 bool(true)
 string(9) "HH\darray"
-array(2) {
+darray(2) {
   ["a"]=>
   int(1)
   ["b"]=>

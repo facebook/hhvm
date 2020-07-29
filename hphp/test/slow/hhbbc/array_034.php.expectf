@@ -4,8 +4,8 @@ bool(true)
 bool(true)
 bool(false)
 bool(true)
-array(1) {
+darray(1) {
   ["z"]=>
-  array(0) {
+  darray(0) {
   }
 }

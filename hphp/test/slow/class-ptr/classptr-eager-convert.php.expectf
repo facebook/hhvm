@@ -79,29 +79,25 @@ object(HH\Vector) (3) {
 }
 ===dvarray:===
 Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 77
-vec(2) {
+varray(2) {
   class(Baz)
   string(4) "Fizz"
 }
-array(2) {
-  [0]=>
+varray(2) {
   int(0)
-  [1]=>
   int(1)
 }
 
 Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 80
 
 Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 81
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "Baz"
 }
 ===shape===
 Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 87
-array(3) {
+darray(3) {
   ["Foo"]=>
   int(3)
   ["Bar"]=>

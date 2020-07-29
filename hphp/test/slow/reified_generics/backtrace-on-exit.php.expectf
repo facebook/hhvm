@@ -1,14 +1,12 @@
-array(3) {
-  [0]=>
-  array(2) {
+varray(3) {
+  darray(2) {
     ["function"]=>
     string(8) "profiler"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
-  [1]=>
-  array(4) {
+  darray(4) {
     ["file"]=>
     %s
     ["line"]=>
@@ -16,21 +14,19 @@ array(3) {
     ["function"]=>
     string(13) "fb_setprofile"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
-  [2]=>
-  array(2) {
+  darray(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }
-array(3) {
-  [0]=>
-  array(4) {
+varray(3) {
+  darray(4) {
     ["file"]=>
     %s
     ["line"]=>
@@ -38,11 +34,10 @@ array(3) {
     ["function"]=>
     string(8) "profiler"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
-  [1]=>
-  array(7) {
+  darray(7) {
     ["file"]=>
     %s
     ["line"]=>
@@ -57,21 +52,19 @@ array(3) {
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
-  [2]=>
-  array(2) {
+  darray(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }
-array(3) {
-  [0]=>
-  array(4) {
+varray(3) {
+  darray(4) {
     ["file"]=>
     %s
     ["line"]=>
@@ -79,11 +72,10 @@ array(3) {
     ["function"]=>
     string(8) "profiler"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
-  [1]=>
-  array(6) {
+  darray(6) {
     ["file"]=>
     %s
     ["line"]=>
@@ -95,21 +87,19 @@ array(3) {
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
-  [2]=>
-  array(2) {
+  darray(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }
-array(2) {
-  [0]=>
-  array(4) {
+varray(2) {
+  darray(4) {
     ["file"]=>
     %s
     ["line"]=>
@@ -117,15 +107,14 @@ array(2) {
     ["function"]=>
     string(8) "profiler"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
-  [1]=>
-  array(2) {
+  darray(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }

@@ -1,10 +1,10 @@
-array(2) {
+darray(2) {
   [0]=>
   int(10)
   ["bye"]=>
   string(3) "BYE"
 }
-array(3) {
+darray(3) {
   [0]=>
   int(10)
   ["bye"]=>
@@ -12,11 +12,11 @@ array(3) {
   ["foo"]=>
   int(29311)
 }
-array(2) {
+darray(2) {
   [0]=>
   int(10)
   ["bye"]=>
   string(3) "BYE"
 }
-array(0) {
+darray(0) {
 }

@@ -1,6 +1,5 @@
-
 Warning: Cannot add element to the array as the next element is already occupied in %s/bug47836.php on line 4
-array(1) {
+darray(1) {
   [%d]=>
   int(1)
 }

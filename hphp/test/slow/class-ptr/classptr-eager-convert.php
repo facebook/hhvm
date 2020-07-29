@@ -72,7 +72,7 @@ function vec_fun() {
 
 function dvarray_fun() {
   echo '===dvarray:===';
-  $a = vec[];
+  $a = varray[];
   $a[] = Baz::class;
   $a[] = Fizz::class;
   var_dump($a);

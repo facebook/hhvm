@@ -2,19 +2,19 @@ getDocNamespaces
 
 Backwards Compatibility:
 recursion:
-array(2) {
+darray(2) {
   ["p"]=>
   string(20) "http://example.org/p"
   ["t"]=>
   string(20) "http://example.org/t"
 }
-array(2) {
+darray(2) {
   ["p"]=>
   string(20) "http://example.org/p"
   ["t"]=>
   string(20) "http://example.org/t"
 }
-array(2) {
+darray(2) {
   ["p"]=>
   string(20) "http://example.org/p"
   ["t"]=>
@@ -22,15 +22,15 @@ array(2) {
 }
 
 non recursive:
-array(1) {
+darray(1) {
   ["p"]=>
   string(20) "http://example.org/p"
 }
-array(1) {
+darray(1) {
   ["p"]=>
   string(20) "http://example.org/p"
 }
-array(1) {
+darray(1) {
   ["p"]=>
   string(20) "http://example.org/p"
 }
@@ -38,28 +38,28 @@ array(1) {
 
 Using new 'from_root' bool set to false:
 recursion:
-array(2) {
+darray(2) {
   ["p"]=>
   string(20) "http://example.org/p"
   ["t"]=>
   string(20) "http://example.org/t"
 }
-array(1) {
+darray(1) {
   ["t"]=>
   string(20) "http://example.org/t"
 }
-array(0) {
+darray(0) {
 }
 
 non recursive:
-array(1) {
+darray(1) {
   ["p"]=>
   string(20) "http://example.org/p"
 }
-array(1) {
+darray(1) {
   ["t"]=>
   string(20) "http://example.org/t"
 }
-array(0) {
+darray(0) {
 }
 ===DONE===

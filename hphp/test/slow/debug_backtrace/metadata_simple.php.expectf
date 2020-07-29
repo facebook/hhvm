@@ -1,6 +1,5 @@
-array(3) {
-  [0]=>
-  array(3) {
+varray(3) {
+  darray(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -8,8 +7,7 @@ array(3) {
     ["function"]=>
     string(3) "bar"
   }
-  [1]=>
-  array(3) {
+  darray(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -17,15 +15,13 @@ array(3) {
     ["function"]=>
     string(3) "foo"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     ["function"]=>
     string(4) "main"
   }
 }
-array(3) {
-  [0]=>
-  array(3) {
+varray(3) {
+  darray(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -33,8 +29,7 @@ array(3) {
     ["function"]=>
     string(3) "bar"
   }
-  [1]=>
-  array(4) {
+  darray(4) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -44,8 +39,7 @@ array(3) {
     ["metadata"]=>
     string(8) "I am foo"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     ["function"]=>
     string(4) "main"
   }

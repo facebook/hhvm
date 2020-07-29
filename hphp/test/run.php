@@ -849,6 +849,7 @@ function hhvm_cmd_impl(
       '-vEval.EnableIntrinsicsExtension=true',
       '-vEval.HHIRInliningIgnoreHints=false',
       '-vEval.HHIRAlwaysInterpIgnoreHint=false',
+      '-vEval.HackArrDVArrVarDump=true',
       $mode,
       isset($options['wholecfg']) ? '-vEval.JitPGORegionSelector=wholecfg' : '',
 

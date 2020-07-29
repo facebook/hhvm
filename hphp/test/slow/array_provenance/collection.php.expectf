@@ -1,10 +1,10 @@
-array(2) {
+darray(2) {
   ["outer"]=>
   string(0) ""
   ["inner"]=>
   string(%d) "%s/collection.php:26"
 }
-array(2) {
+darray(2) {
   ["outer"]=>
   string(0) ""
   ["inner"]=>

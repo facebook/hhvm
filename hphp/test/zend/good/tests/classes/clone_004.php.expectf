@@ -1,34 +1,26 @@
 Original
 object(test) (2) {
   ["b"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(3)
-    [1]=>
     int(4)
   }
   ["a"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(1)
-    [1]=>
     int(2)
   }
 }
 Clone
 object(test) (2) {
   ["b"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(3)
-    [1]=>
     int(4)
   }
   ["a"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(1)
-    [1]=>
     int(2)
   }
 }

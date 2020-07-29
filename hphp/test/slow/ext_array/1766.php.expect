@@ -1,67 +1,50 @@
-array(1) {
-  [0]=>
+varray(1) {
   int(0)
 }
-array(1) {
-  [0]=>
+varray(1) {
   int(0)
 }
-array(2) {
-  [0]=>
+varray(2) {
   int(9)
-  [1]=>
   int(10)
 }
-array(2) {
-  [0]=>
+varray(2) {
   int(9)
-  [1]=>
   int(10)
 }
 bool(false)
 bool(false)
 bool(false)
-array(3) {
-  [0]=>
+varray(3) {
   int(9223372036854775807)
-  [1]=>
   int(9223372036854775806)
-  [2]=>
   int(9223372036854775805)
 }
 bool(false)
 bool(false)
 bool(false)
 bool(false)
-array(2) {
-  [0]=>
+varray(2) {
   int(9)
-  [1]=>
   int(10)
 }
 bool(false)
 bool(false)
 bool(false)
-array(3) {
-  [0]=>
+varray(3) {
   int(9223372036854775807)
-  [1]=>
   int(9223372036854775806)
-  [2]=>
   int(9223372036854775805)
 }
 bool(false)
 bool(false)
-array(1) {
-  [0]=>
+varray(1) {
   float(0)
 }
-array(1) {
-  [0]=>
+varray(1) {
   float(0)
 }
-array(1) {
-  [0]=>
+varray(1) {
   int(0)
 }
 bool(false)

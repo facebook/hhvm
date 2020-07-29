@@ -1,4 +1,4 @@
-array(9) {
+darray(9) {
   ["%s/resources/dir.zip"]=>
   string(15) "application/zip"
   ["%s/resources/test.awk"]=>

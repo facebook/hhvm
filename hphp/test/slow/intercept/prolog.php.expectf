@@ -1,7 +1,6 @@
 intercept1 DONE
-array(4) {
-  [0]=>
-  array(6) {
+varray(4) {
+  darray(6) {
     ["file"]=>
     string(%d) "%s/intercept/prolog.php"
     ["line"]=>
@@ -13,23 +12,17 @@ array(4) {
     ["type"]=>
     string(2) "::"
     ["args"]=>
-    array(5) {
-      [0]=>
+    varray(5) {
       string(9) "Cls::func"
-      [1]=>
       object(Cls) (0) {
       }
-      [2]=>
-      array(0) {
+      varray(0) {
       }
-      [3]=>
       NULL
-      [4]=>
       bool(true)
     }
   }
-  [1]=>
-  array(7) {
+  darray(7) {
     ["file"]=>
     string(%d) "%s/intercept/prolog.php"
     ["line"]=>
@@ -44,11 +37,10 @@ array(4) {
     ["type"]=>
     string(2) "->"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
-  [2]=>
-  array(4) {
+  darray(4) {
     ["file"]=>
     string(%d) "%s/intercept/prolog.php"
     ["line"]=>
@@ -56,17 +48,15 @@ array(4) {
     ["function"]=>
     string(4) "test"
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       string(10) "intercept2"
     }
   }
-  [3]=>
-  array(2) {
+  darray(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
 }

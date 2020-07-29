@@ -36,7 +36,7 @@ int(9223372036854775807)
 *** Trying NULL
 *** Caught Argument 1 passed to {closure}() must be of the type integer, null given, called in %s/test/slow/php7_backported/scalar-types/scalar_basic.php on line 48
 
-*** Trying array(0) {
+*** Trying varray(0) {
 }
 *** Caught Argument 1 passed to {closure}() must be of the type integer, %rv?%rarray given, called in %s/test/slow/php7_backported/scalar-types/scalar_basic.php on line 48
 
@@ -89,7 +89,7 @@ float(NAN)
 *** Trying NULL
 *** Caught Argument 1 passed to {closure}() must be of the type float, null given, called in %s/test/slow/php7_backported/scalar-types/scalar_basic.php on line 48
 
-*** Trying array(0) {
+*** Trying varray(0) {
 }
 *** Caught Argument 1 passed to {closure}() must be of the type float, %rv?%rarray given, called in %s/test/slow/php7_backported/scalar-types/scalar_basic.php on line 48
 
@@ -110,7 +110,7 @@ Testing 'string' typehint:
 *** Caught Argument 1 passed to {closure}() must be of the type string, integer given, called in %s/test/slow/php7_backported/scalar-types/scalar_basic.php on line 48
 
 *** Trying string(%d) "1"
-string(%d) "1"
+string(1) "1"
 
 *** Trying float(1)
 *** Caught Argument 1 passed to {closure}() must be of the type string, float given, called in %s/test/slow/php7_backported/scalar-types/scalar_basic.php on line 48
@@ -119,13 +119,13 @@ string(%d) "1"
 *** Caught Argument 1 passed to {closure}() must be of the type string, float given, called in %s/test/slow/php7_backported/scalar-types/scalar_basic.php on line 48
 
 *** Trying string(%d) "1a"
-string(%d) "1a"
+string(2) "1a"
 
 *** Trying string(%d) "a"
-string(%d) "a"
+string(1) "a"
 
 *** Trying string(%d) ""
-string(%d) ""
+string(0) ""
 
 *** Trying int(9223372036854775807)
 *** Caught Argument 1 passed to {closure}() must be of the type string, integer given, called in %s/test/slow/php7_backported/scalar-types/scalar_basic.php on line 48
@@ -142,7 +142,7 @@ string(%d) ""
 *** Trying NULL
 *** Caught Argument 1 passed to {closure}() must be of the type string, null given, called in %s/test/slow/php7_backported/scalar-types/scalar_basic.php on line 48
 
-*** Trying array(0) {
+*** Trying varray(0) {
 }
 *** Caught Argument 1 passed to {closure}() must be of the type string, %rv?%rarray given, called in %s/test/slow/php7_backported/scalar-types/scalar_basic.php on line 48
 
@@ -195,7 +195,7 @@ bool(false)
 *** Trying NULL
 *** Caught Argument 1 passed to {closure}() must be of the type boolean, null given, called in %s/test/slow/php7_backported/scalar-types/scalar_basic.php on line 48
 
-*** Trying array(0) {
+*** Trying varray(0) {
 }
 *** Caught Argument 1 passed to {closure}() must be of the type boolean, %rv?%rarray given, called in %s/test/slow/php7_backported/scalar-types/scalar_basic.php on line 48
 

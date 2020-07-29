@@ -13,9 +13,8 @@ object(Exception) (8) {
   ["line":protected]=>
   int(15)
   ["trace":"Exception":private]=>
-  array(2) {
-    [0]=>
-    array(4) {
+  varray(2) {
+    darray(4) {
       ["file"]=>
       string(%d) "%s/test/slow/exceptions/chain-fault.php"
       ["line"]=>
@@ -23,15 +22,14 @@ object(Exception) (8) {
       ["function"]=>
       string(7) "thrower"
       ["args"]=>
-      array(0) {
+      varray(0) {
       }
     }
-    [1]=>
-    array(2) {
+    darray(2) {
       ["function"]=>
       string(4) "main"
       ["args"]=>
-      array(0) {
+      varray(0) {
       }
     }
   }
@@ -48,9 +46,8 @@ object(Exception) (8) {
     ["line":protected]=>
     int(13)
     ["trace":"Exception":private]=>
-    array(2) {
-      [0]=>
-      array(4) {
+    varray(2) {
+      darray(4) {
         ["file"]=>
         string(%d) "%s/test/slow/exceptions/chain-fault.php"
         ["line"]=>
@@ -58,15 +55,14 @@ object(Exception) (8) {
         ["function"]=>
         string(7) "thrower"
         ["args"]=>
-        array(0) {
+        varray(0) {
         }
       }
-      [1]=>
-      array(2) {
+      darray(2) {
         ["function"]=>
         string(4) "main"
         ["args"]=>
-        array(0) {
+        varray(0) {
         }
       }
     }

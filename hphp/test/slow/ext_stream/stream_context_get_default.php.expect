@@ -1,31 +1,31 @@
-array(0) {
+darray(0) {
 }
-array(1) {
+darray(1) {
   ["http"]=>
-  array(1) {
+  darray(1) {
     ["header"]=>
     string(14) "X-Hello: world"
   }
 }
-array(1) {
+darray(1) {
   ["http"]=>
-  array(1) {
+  darray(1) {
     ["header"]=>
     string(14) "X-Hello: world"
   }
 }
-array(1) {
+darray(1) {
   ["http"]=>
-  array(2) {
+  darray(2) {
     ["header"]=>
     string(14) "X-Hello: world"
     ["method"]=>
     string(4) "POST"
   }
 }
-array(1) {
+darray(1) {
   ["http"]=>
-  array(2) {
+  darray(2) {
     ["header"]=>
     string(14) "X-Hello: world"
     ["method"]=>

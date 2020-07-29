@@ -1,4 +1,4 @@
-array(3) {
+darray(3) {
   ["kind"]=>
   int(1)
   ["opaque"]=>
@@ -6,7 +6,7 @@ array(3) {
   ["alias"]=>
   string(4) "FBID"
 }
-array(1) {
+darray(1) {
   ["kind"]=>
   int(1)
 }

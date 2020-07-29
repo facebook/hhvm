@@ -1,5 +1,5 @@
 *** Testing array_diff_assoc() : variation ***
-array(4) {
+darray(4) {
   [0]=>
   string(1) "d"
   [1]=>
@@ -9,7 +9,7 @@ array(4) {
   [3]=>
   string(1) "b"
 }
-array(5) {
+darray(5) {
   ["2"]=>
   string(1) "c"
   ["1"]=>

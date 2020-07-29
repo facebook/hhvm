@@ -1,75 +1,69 @@
-array(0) {
+varray(0) {
 }
-array(1) {
-  [0]=>
-  array(0) {
+varray(1) {
+  varray(0) {
   }
 }
-array(1) {
+darray(1) {
   [0]=>
-  array(0) {
+  varray(0) {
   }
 }
 object(P) (1) {
   ["m"]=>
-  array(0) {
+  varray(0) {
   }
 }
-array(0) {
+varray(0) {
 }
-array(1) {
-  [0]=>
-  array(0) {
+varray(1) {
+  varray(0) {
   }
 }
-array(1) {
+darray(1) {
   [0]=>
-  array(0) {
+  varray(0) {
   }
 }
 object(P) (1) {
   ["m"]=>
-  array(0) {
+  varray(0) {
   }
 }
-array(0) {
+varray(0) {
 }
-array(1) {
-  [0]=>
-  array(0) {
+varray(1) {
+  varray(0) {
   }
 }
-array(1) {
+darray(1) {
   [0]=>
-  array(0) {
+  varray(0) {
   }
 }
 object(P) (1) {
   ["m"]=>
-  array(0) {
+  varray(0) {
   }
 }
-array(0) {
+varray(0) {
 }
-array(1) {
-  [0]=>
-  array(0) {
+varray(1) {
+  varray(0) {
   }
 }
-array(1) {
+darray(1) {
   [0]=>
-  array(0) {
+  varray(0) {
   }
 }
 object(P) (1) {
   ["m"]=>
-  array(0) {
+  varray(0) {
   }
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 

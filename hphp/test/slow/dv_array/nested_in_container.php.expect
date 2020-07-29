@@ -1,12 +1,10 @@
 object(HH\Pair) (2) {
   [0]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(123)
   }
   [1]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(456)
   }
 }

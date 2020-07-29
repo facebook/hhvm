@@ -86,31 +86,28 @@ is_varray => FALSE
 is_darray => FALSE
 gettype => keyset
 ============= direct_test_dv_arrays ================
-value => array(0) {
+value => varray(0) {
 }
 is_varray => TRUE
 is_darray => FALSE
 gettype => array
 ============= direct_test_dv_arrays ================
-value => array(3) {
-  [0]=>
+value => varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 is_varray => TRUE
 is_darray => FALSE
 gettype => array
 ============= direct_test_dv_arrays ================
-value => array(0) {
+value => darray(0) {
 }
 is_varray => FALSE
 is_darray => TRUE
 gettype => array
 ============= direct_test_dv_arrays ================
-value => array(2) {
+value => darray(2) {
   [100]=>
   string(3) "abc"
   ["def"]=>
@@ -120,7 +117,7 @@ is_varray => FALSE
 is_darray => TRUE
 gettype => array
 ============= direct_test_dv_arrays ================
-value => array(3) {
+value => darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -132,19 +129,16 @@ is_varray => FALSE
 is_darray => TRUE
 gettype => array
 ============= direct_test_dv_arrays ================
-value => array(3) {
-  [0]=>
+value => varray(3) {
   string(1) "x"
-  [1]=>
   string(1) "y"
-  [2]=>
   string(1) "z"
 }
 is_varray => TRUE
 is_darray => FALSE
 gettype => array
 ============= direct_test_dv_arrays ================
-value => array(3) {
+value => darray(3) {
   [0]=>
   int(123)
   [1]=>
@@ -156,7 +150,7 @@ is_varray => FALSE
 is_darray => TRUE
 gettype => array
 ============= direct_test_dv_arrays ================
-value => array(3) {
+value => darray(3) {
   ["x"]=>
   int(123)
   ["y"]=>
@@ -168,7 +162,7 @@ is_varray => FALSE
 is_darray => TRUE
 gettype => array
 ============= direct_test_dv_arrays ================
-value => array(3) {
+value => darray(3) {
   [66]=>
   int(11)
   [55]=>
@@ -267,31 +261,28 @@ HH\is_varray => FALSE
 HH\is_darray => FALSE
 gettype => keyset
 ============= indirect_test_dv_arrays ==============
-value => array(0) {
+value => varray(0) {
 }
 HH\is_varray => TRUE
 HH\is_darray => FALSE
 gettype => array
 ============= indirect_test_dv_arrays ==============
-value => array(3) {
-  [0]=>
+value => varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 HH\is_varray => TRUE
 HH\is_darray => FALSE
 gettype => array
 ============= indirect_test_dv_arrays ==============
-value => array(0) {
+value => darray(0) {
 }
 HH\is_varray => FALSE
 HH\is_darray => TRUE
 gettype => array
 ============= indirect_test_dv_arrays ==============
-value => array(2) {
+value => darray(2) {
   [100]=>
   string(3) "abc"
   ["def"]=>
@@ -301,7 +292,7 @@ HH\is_varray => FALSE
 HH\is_darray => TRUE
 gettype => array
 ============= indirect_test_dv_arrays ==============
-value => array(3) {
+value => darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -313,19 +304,16 @@ HH\is_varray => FALSE
 HH\is_darray => TRUE
 gettype => array
 ============= indirect_test_dv_arrays ==============
-value => array(3) {
-  [0]=>
+value => varray(3) {
   string(1) "x"
-  [1]=>
   string(1) "y"
-  [2]=>
   string(1) "z"
 }
 HH\is_varray => TRUE
 HH\is_darray => FALSE
 gettype => array
 ============= indirect_test_dv_arrays ==============
-value => array(3) {
+value => darray(3) {
   [0]=>
   int(123)
   [1]=>
@@ -337,7 +325,7 @@ HH\is_varray => FALSE
 HH\is_darray => TRUE
 gettype => array
 ============= indirect_test_dv_arrays ==============
-value => array(3) {
+value => darray(3) {
   ["x"]=>
   int(123)
   ["y"]=>
@@ -349,7 +337,7 @@ HH\is_varray => FALSE
 HH\is_darray => TRUE
 gettype => array
 ============= indirect_test_dv_arrays ==============
-value => array(3) {
+value => darray(3) {
   [66]=>
   int(11)
   [55]=>
@@ -361,7 +349,7 @@ HH\is_varray => FALSE
 HH\is_darray => TRUE
 gettype => array
 ============= direct_test_others ===================
-value => array(0) {
+value => varray(0) {
 }
 is_null => FALSE
 is_bool => FALSE
@@ -376,12 +364,9 @@ is_dict => FALSE
 is_keyset => FALSE
 is_scalar => FALSE
 ============= direct_test_others ===================
-value => array(3) {
-  [0]=>
+value => varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 is_null => FALSE
@@ -397,7 +382,7 @@ is_dict => FALSE
 is_keyset => FALSE
 is_scalar => FALSE
 ============= direct_test_others ===================
-value => array(0) {
+value => darray(0) {
 }
 is_null => FALSE
 is_bool => FALSE
@@ -412,7 +397,7 @@ is_dict => FALSE
 is_keyset => FALSE
 is_scalar => FALSE
 ============= direct_test_others ===================
-value => array(2) {
+value => darray(2) {
   [100]=>
   string(3) "abc"
   ["def"]=>
@@ -431,7 +416,7 @@ is_dict => FALSE
 is_keyset => FALSE
 is_scalar => FALSE
 ============= direct_test_others ===================
-value => array(3) {
+value => darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -452,12 +437,9 @@ is_dict => FALSE
 is_keyset => FALSE
 is_scalar => FALSE
 ============= direct_test_others ===================
-value => array(3) {
-  [0]=>
+value => varray(3) {
   string(1) "x"
-  [1]=>
   string(1) "y"
-  [2]=>
   string(1) "z"
 }
 is_null => FALSE
@@ -473,7 +455,7 @@ is_dict => FALSE
 is_keyset => FALSE
 is_scalar => FALSE
 ============= direct_test_others ===================
-value => array(3) {
+value => darray(3) {
   [0]=>
   int(123)
   [1]=>
@@ -494,7 +476,7 @@ is_dict => FALSE
 is_keyset => FALSE
 is_scalar => FALSE
 ============= direct_test_others ===================
-value => array(3) {
+value => darray(3) {
   ["x"]=>
   int(123)
   ["y"]=>
@@ -515,7 +497,7 @@ is_dict => FALSE
 is_keyset => FALSE
 is_scalar => FALSE
 ============= direct_test_others ===================
-value => array(3) {
+value => darray(3) {
   [66]=>
   int(11)
   [55]=>
@@ -536,7 +518,7 @@ is_dict => FALSE
 is_keyset => FALSE
 is_scalar => FALSE
 ============= indirect_test_others =================
-value => array(0) {
+value => varray(0) {
 }
 is_null => FALSE
 is_bool => FALSE
@@ -551,12 +533,9 @@ HH\is_dict => FALSE
 HH\is_keyset => FALSE
 is_scalar => FALSE
 ============= indirect_test_others =================
-value => array(3) {
-  [0]=>
+value => varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 is_null => FALSE
@@ -572,7 +551,7 @@ HH\is_dict => FALSE
 HH\is_keyset => FALSE
 is_scalar => FALSE
 ============= indirect_test_others =================
-value => array(0) {
+value => darray(0) {
 }
 is_null => FALSE
 is_bool => FALSE
@@ -587,7 +566,7 @@ HH\is_dict => FALSE
 HH\is_keyset => FALSE
 is_scalar => FALSE
 ============= indirect_test_others =================
-value => array(2) {
+value => darray(2) {
   [100]=>
   string(3) "abc"
   ["def"]=>
@@ -606,7 +585,7 @@ HH\is_dict => FALSE
 HH\is_keyset => FALSE
 is_scalar => FALSE
 ============= indirect_test_others =================
-value => array(3) {
+value => darray(3) {
   [0]=>
   string(1) "a"
   [1]=>
@@ -627,12 +606,9 @@ HH\is_dict => FALSE
 HH\is_keyset => FALSE
 is_scalar => FALSE
 ============= indirect_test_others =================
-value => array(3) {
-  [0]=>
+value => varray(3) {
   string(1) "x"
-  [1]=>
   string(1) "y"
-  [2]=>
   string(1) "z"
 }
 is_null => FALSE
@@ -648,7 +624,7 @@ HH\is_dict => FALSE
 HH\is_keyset => FALSE
 is_scalar => FALSE
 ============= indirect_test_others =================
-value => array(3) {
+value => darray(3) {
   [0]=>
   int(123)
   [1]=>
@@ -669,7 +645,7 @@ HH\is_dict => FALSE
 HH\is_keyset => FALSE
 is_scalar => FALSE
 ============= indirect_test_others =================
-value => array(3) {
+value => darray(3) {
   ["x"]=>
   int(123)
   ["y"]=>
@@ -690,7 +666,7 @@ HH\is_dict => FALSE
 HH\is_keyset => FALSE
 is_scalar => FALSE
 ============= indirect_test_others =================
-value => array(3) {
+value => darray(3) {
   [66]=>
   int(11)
   [55]=>

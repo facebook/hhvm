@@ -5,7 +5,7 @@
 
 -- Call natcasesort() --
 bool(true)
-array(4) {
+darray(4) {
   [3]=>
   string(4) "img1"
   [2]=>

@@ -33,7 +33,7 @@ vec(3) {
 ====================================================
 Exception: "Invalid keyset key: expected a key of type int or string, Dtor given"
 ====================================================
-array(3) {
+darray(3) {
   [10]=>
   object(Dtor) (1) {
     ["id"]=>
@@ -93,5 +93,5 @@ object(HH\Map) (3) {
   }
 }
 ====================================================
-array(0) {
+darray(0) {
 }

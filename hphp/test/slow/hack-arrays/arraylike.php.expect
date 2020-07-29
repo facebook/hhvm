@@ -1,12 +1,11 @@
-array(1) {
+darray(1) {
   [42]=>
   string(3) "lol"
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(3) "lol"
 }
-array(1) {
+darray(1) {
   [42]=>
   string(3) "lol"
 }
@@ -20,15 +19,14 @@ dict(1) {
 keyset(1) {
   string(3) "lol"
 }
-array(1) {
+darray(1) {
   [42]=>
   string(3) "lol"
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(3) "lol"
 }
-array(1) {
+darray(1) {
   [42]=>
   string(3) "lol"
 }

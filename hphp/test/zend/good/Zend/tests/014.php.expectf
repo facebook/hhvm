@@ -1,27 +1,20 @@
-array(1) {
-  [0]=>
+varray(1) {
   string(%d) "%s/014.php"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(%d) "%s/014.php"
-  [1]=>
   string(%d) "%s/014.inc"
 }
 
 Warning: get_included_files() expects exactly 0 parameters, 2 given in %s/014.php on line 10
-array(2) {
-  [0]=>
+varray(2) {
   string(%d) "%s/014.php"
-  [1]=>
   string(%d) "%s/014.inc"
 }
 
 Warning: get_included_files() expects exactly 0 parameters, 1 given in %s/014.php on line 15
-array(2) {
-  [0]=>
+varray(2) {
   string(%d) "%s/014.php"
-  [1]=>
   string(%d) "%s/014.inc"
 }
 Done

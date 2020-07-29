@@ -1,22 +1,15 @@
 A=hello B=bye
-array(2) {
-  [0]=>
+varray(2) {
   int(10)
-  [1]=>
   int(10)
 }
-array(2) {
-  [0]=>
+varray(2) {
   int(30)
-  [1]=>
   int(30)
 }
-array(3) {
-  [0]=>
+varray(3) {
   int(1000)
-  [1]=>
   int(2000)
-  [2]=>
   int(3000)
 }
 L=100 M=200 N=300

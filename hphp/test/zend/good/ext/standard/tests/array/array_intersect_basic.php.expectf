@@ -1,5 +1,5 @@
 *** Testing array_intersect() : basic functionality ***
-array(4) {
+darray(4) {
   [0]=>
   int(1)
   [1]=>
@@ -9,29 +9,29 @@ array(4) {
   [3]=>
   string(5) "world"
 }
-array(2) {
+darray(2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-array(2) {
+darray(2) {
   ["one"]=>
   int(1)
   ["two"]=>
   int(2)
 }
-array(2) {
+darray(2) {
   ["one"]=>
   int(1)
   ["two"]=>
   int(2)
 }
-array(1) {
+darray(1) {
   [1]=>
   int(2)
 }
-array(1) {
+darray(1) {
   ["two"]=>
   int(2)
 }

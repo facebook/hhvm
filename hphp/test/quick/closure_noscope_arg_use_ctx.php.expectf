@@ -2,9 +2,9 @@ object(foo) (2) {
   ["test":"foo":private]=>
   int(3)
   ["a"]=>
-  object(Closure$%s) (1) {
+  object(Closure%s) (1) {
     ["static"]=>
-    array(1) {
+    darray(1) {
       ["foo"]=>
       *RECURSION*
     }

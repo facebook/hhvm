@@ -1,8 +1,7 @@
-array(0) {
+varray(0) {
 }
-array(3) {
-  [0]=>
-  array(3) {
+varray(3) {
+  darray(3) {
     ["is_reified"]=>
     bool(true)
     ["is_soft"]=>
@@ -10,8 +9,7 @@ array(3) {
     ["is_warn"]=>
     bool(false)
   }
-  [1]=>
-  array(3) {
+  darray(3) {
     ["is_reified"]=>
     bool(false)
     ["is_soft"]=>
@@ -19,8 +17,7 @@ array(3) {
     ["is_warn"]=>
     bool(false)
   }
-  [2]=>
-  array(3) {
+  darray(3) {
     ["is_reified"]=>
     bool(true)
     ["is_soft"]=>
@@ -29,9 +26,8 @@ array(3) {
     bool(true)
   }
 }
-array(3) {
-  [0]=>
-  array(3) {
+varray(3) {
+  darray(3) {
     ["is_reified"]=>
     bool(true)
     ["is_soft"]=>
@@ -39,8 +35,7 @@ array(3) {
     ["is_warn"]=>
     bool(false)
   }
-  [1]=>
-  array(3) {
+  darray(3) {
     ["is_reified"]=>
     bool(false)
     ["is_soft"]=>
@@ -48,8 +43,7 @@ array(3) {
     ["is_warn"]=>
     bool(false)
   }
-  [2]=>
-  array(3) {
+  darray(3) {
     ["is_reified"]=>
     bool(true)
     ["is_soft"]=>

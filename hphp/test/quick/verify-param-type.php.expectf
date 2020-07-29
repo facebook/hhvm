@@ -1,26 +1,18 @@
-array(6) {
-  [0]=>
+varray(6) {
   int(2)
-  [1]=>
   string(59) "Argument 1 to test_soft() must be of type @int, float given"
-  [2]=>
   string(%d) "%s"
-  [3]=>
   int(13)
-  [4]=>
-  array(0) {
+  darray(0) {
   }
-  [5]=>
-  array(3) {
-    [0]=>
-    array(2) {
+  varray(3) {
+    darray(2) {
       ["file"]=>
       string(%d) "%s"
       ["line"]=>
       int(13)
     }
-    [1]=>
-    array(4) {
+    darray(4) {
       ["file"]=>
       string(%d) "%s"
       ["line"]=>
@@ -28,50 +20,40 @@ array(6) {
       ["function"]=>
       string(9) "test_soft"
       ["args"]=>
-      array(1) {
-        [0]=>
+      varray(1) {
         float(0)
       }
     }
-    [2]=>
-    array(2) {
+    darray(2) {
       ["function"]=>
       string(4) "main"
       ["args"]=>
-      array(0) {
+      varray(0) {
       }
     }
   }
 }
 in test_soft
 bool(false)
-array(6) {
-  [0]=>
+varray(6) {
   int(4096)
-  [1]=>
   string(72) "Argument 1 passed to test_hard() must be an instance of int, float given"
-  [2]=>
   string(%d) "%s"
-  [3]=>
   int(23)
-  [4]=>
-  array(0) {
+  darray(0) {
   }
-  [5]=>
-  array(2) {
-    [0]=>
-    array(2) {
+  varray(2) {
+    darray(2) {
       ["file"]=>
       string(%d) "%s"
       ["line"]=>
       int(23)
     }
-    [1]=>
-    array(2) {
+    darray(2) {
       ["function"]=>
       string(4) "main"
       ["args"]=>
-      array(0) {
+      varray(0) {
       }
     }
   }

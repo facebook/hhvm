@@ -1,5 +1,5 @@
 *** Testing parse_url() : error conditions: url component specifier out of range ***
---> Below range:array(8) {
+--> Below range:darray(8) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>

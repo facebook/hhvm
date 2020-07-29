@@ -2,17 +2,15 @@ string(26) "Array to string conversion"
 bool(true)
 float(1)
 int(1)
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "A"
-  [1]=>
   string(4) "meth"
 }
 vec(2) {
   string(1) "A"
   string(4) "meth"
 }
-array(2) {
+darray(2) {
   [0]=>
   string(1) "A"
   [1]=>
@@ -38,10 +36,8 @@ Notice: Implicit clsmeth to int conversion in %s/test/slow/global_func/class_met
 int(1)
 
 Notice: Implicit clsmeth to varray conversion in %s/test/slow/global_func/class_meth/cast.php on line 17
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "A"
-  [1]=>
   string(4) "meth"
 }
 
@@ -52,7 +48,7 @@ vec(2) {
 }
 
 Notice: Implicit clsmeth to darray conversion in %s/test/slow/global_func/class_meth/cast.php on line 19
-array(2) {
+darray(2) {
   [0]=>
   string(1) "A"
   [1]=>

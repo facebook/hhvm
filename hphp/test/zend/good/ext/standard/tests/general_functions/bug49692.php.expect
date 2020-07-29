@@ -1,6 +1,6 @@
-array(1) {
+darray(1) {
   ["sitemap"]=>
-  array(2) {
+  darray(2) {
     ["/home"]=>
     string(13) "default:index"
     ["/info"]=>

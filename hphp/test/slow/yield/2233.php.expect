@@ -1,11 +1,8 @@
 float(1)
 string(5) "hello"
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 string(5) "world"

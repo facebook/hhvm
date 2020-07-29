@@ -1,10 +1,8 @@
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }
 int(5)
-array(1) {
-  [0]=>
+varray(1) {
   int(2)
 }
 int(5)

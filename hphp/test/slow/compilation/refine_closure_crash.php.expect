@@ -1,4 +1,4 @@
-array(2) {
+darray(2) {
   ["thing1_id"]=>
   string(1) "x"
   ["thing2_id"]=>

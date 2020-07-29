@@ -1,23 +1,23 @@
 NULL
 bool(false)
-array(0) {
+varray(0) {
 }
 
-Warning: Cannot modify header information - headers already sent in %s/head.php on line 10
+Warning: Cannot modify header information - headers already sent in %s/test/zend/good/ext/standard/tests/general_functions/head.php on line 10
 NULL
 
-Warning: Cannot modify header information - headers already sent in %s/head.php on line 11
+Warning: Cannot modify header information - headers already sent in %s/test/zend/good/ext/standard/tests/general_functions/head.php on line 11
 NULL
 bool(true)
-array(0) {
+varray(0) {
 }
 
-Warning: Cannot modify header information - headers already sent in %s/head.php on line 14
+Warning: Cannot modify header information - headers already sent in %s/test/zend/good/ext/standard/tests/general_functions/head.php on line 14
 NULL
 
-Warning: Cannot modify header information - headers already sent in %s/head.php on line 15
+Warning: Cannot modify header information - headers already sent in %s/test/zend/good/ext/standard/tests/general_functions/head.php on line 15
 NULL
 bool(true)
-array(0) {
+varray(0) {
 }
 Done

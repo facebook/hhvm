@@ -1,4 +1,4 @@
-array(6) {
+darray(6) {
   ["0"]=>
   float(1)
   ["1"]=>
@@ -12,7 +12,7 @@ array(6) {
   ["5"]=>
   float(0)
 }
-array(6) {
+darray(6) {
   ["0"]=>
   float(1)
   ["1"]=>
@@ -26,7 +26,7 @@ array(6) {
   ["5"]=>
   float(0)
 }
-array(6) {
+darray(6) {
   ["0"]=>
   float(1)
   ["1"]=>
@@ -40,7 +40,7 @@ array(6) {
   ["5"]=>
   float(-20)
 }
-array(6) {
+darray(6) {
   ["0"]=>
   float(1)
   ["1"]=>
@@ -54,7 +54,7 @@ array(6) {
   ["5"]=>
   float(0)
 }
-array(6) {
+darray(6) {
   ["0"]=>
   float(1)
   ["1"]=>
@@ -74,7 +74,7 @@ bool(false)
 
 Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 19
 bool(false)
-array(6) {
+darray(6) {
   ["0"]=>
   float(0)
   ["1"]=>
@@ -88,7 +88,7 @@ array(6) {
   ["5"]=>
   float(0)
 }
-array(6) {
+darray(6) {
   ["0"]=>
   float(0)
   ["1"]=>
@@ -102,7 +102,7 @@ array(6) {
   ["5"]=>
   float(0)
 }
-array(6) {
+darray(6) {
   ["0"]=>
   float(-20)
   ["1"]=>
@@ -116,7 +116,7 @@ array(6) {
   ["5"]=>
   float(0)
 }
-array(6) {
+darray(6) {
   ["0"]=>
   float(2147483392)
   ["1"]=>
@@ -130,7 +130,7 @@ array(6) {
   ["5"]=>
   float(0)
 }
-array(6) {
+darray(6) {
   ["0"]=>
   float(0)
   ["1"]=>
@@ -150,7 +150,7 @@ bool(false)
 
 Warning: imageaffinematrixget(): Missing x position in %s/ext_gd/imageaffinematrixget.php on line 33
 bool(false)
-array(6) {
+darray(6) {
   ["0"]=>
   float(0.99984769515639)
   ["1"]=>
@@ -164,7 +164,7 @@ array(6) {
   ["5"]=>
   float(0)
 }
-array(6) {
+darray(6) {
   ["0"]=>
   float(1)
   ["1"]=>
@@ -178,7 +178,7 @@ array(6) {
   ["5"]=>
   float(0)
 }
-array(6) {
+darray(6) {
   ["0"]=>
   float(1)
   ["1"]=>

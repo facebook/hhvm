@@ -1,6 +1,6 @@
 object(C) (3) {
   ["foo"]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(42)
   }

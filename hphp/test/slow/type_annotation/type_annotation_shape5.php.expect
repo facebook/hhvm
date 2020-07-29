@@ -1,29 +1,29 @@
 string(70) "HH\shape(D::O=>HH\shape(D::L=>HH\string, D::N=>HH\int), D::M=>HH\bool)"
-array(2) {
+darray(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  array(2) {
+  darray(2) {
     ["bar"]=>
-    array(2) {
+    darray(2) {
       ["kind"]=>
       int(14)
       ["fields"]=>
-      array(2) {
+      darray(2) {
         [123]=>
-        array(1) {
+        darray(1) {
           ["kind"]=>
           int(4)
         }
         [456]=>
-        array(1) {
+        darray(1) {
           ["kind"]=>
           int(1)
         }
       }
     }
     ["foo"]=>
-    array(1) {
+    darray(1) {
       ["kind"]=>
       int(2)
     }

@@ -4,7 +4,7 @@ Notice: Undefined variable: foo in %s/test/slow/object_property_expression/798.p
 string(3) "foo"
 object(X) (4) {
   ["a"]=>
-  array(1) {
+  darray(1) {
     ["x"]=>
     object(Y) (1) {
       ["y"]=>
@@ -21,6 +21,6 @@ object(X) (4) {
   ["y"]=>
   NULL
 }
-array(0) {
+varray(0) {
 }
 bool(false)

@@ -5,24 +5,15 @@ object(SoapServer) (0) {
 Warning: Attempted to serialize unserializable builtin class SoapServer in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(9) {
-  [0]=>
+varray(9) {
   string(11) "__construct"
-  [1]=>
   string(8) "setclass"
-  [2]=>
   string(9) "setobject"
-  [3]=>
   string(11) "addfunction"
-  [4]=>
   string(12) "getfunctions"
-  [5]=>
   string(6) "handle"
-  [6]=>
   string(14) "setpersistence"
-  [7]=>
   string(5) "fault"
-  [8]=>
   string(13) "addsoapheader"
 }
 ================
@@ -35,23 +26,14 @@ object(A_SoapServer) (1) {
 Warning: Attempted to serialize unserializable builtin class A_SoapServer in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(9) {
-  [0]=>
+varray(9) {
   string(11) "__construct"
-  [1]=>
   string(8) "setclass"
-  [2]=>
   string(9) "setobject"
-  [3]=>
   string(11) "addfunction"
-  [4]=>
   string(12) "getfunctions"
-  [5]=>
   string(6) "handle"
-  [6]=>
   string(14) "setpersistence"
-  [7]=>
   string(5) "fault"
-  [8]=>
   string(13) "addsoapheader"
 }

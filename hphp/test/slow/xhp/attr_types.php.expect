@@ -1,4 +1,4 @@
-array(10) {
+darray(10) {
   ["some_callable"]=>
   int(9)
   ["some_float"]=>

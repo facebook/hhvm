@@ -1,7 +1,7 @@
 Program %s/hphpd_debugger_info.php loaded. Type '[r]un' or '[c]ontinue' to go.
 continue
 bool(true)
-array(2) {
+darray(2) {
   ["clientIP"]=>
   string(0) ""
   ["clientPort"]=>

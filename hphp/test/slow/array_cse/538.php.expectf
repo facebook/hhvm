@@ -1,18 +1,13 @@
-array(1) {
-  [0]=>
-  array(3) {
-    [0]=>
+varray(1) {
+  varray(3) {
     int(0)
-    [1]=>
     int(1)
-    [2]=>
     int(2)
   }
 }
 string(3) "abc"
 Undefined index: 0
-array(1) {
-  [0]=>
+varray(1) {
   int(10)
 }
 int(10)

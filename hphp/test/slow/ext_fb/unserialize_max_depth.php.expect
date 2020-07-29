@@ -73,25 +73,25 @@ vec(1) {
   }
 }
 bool(true)
-array(1) {
+darray(1) {
   [1]=>
-  array(1) {
+  darray(1) {
     [1]=>
-    array(1) {
+    darray(1) {
       [1]=>
-      array(1) {
+      darray(1) {
         [1]=>
-        array(1) {
+        darray(1) {
           [1]=>
-          array(1) {
+          darray(1) {
             [1]=>
-            array(1) {
+            darray(1) {
               [1]=>
-              array(1) {
+              darray(1) {
                 [1]=>
-                array(1) {
+                darray(1) {
                   [1]=>
-                  array(0) {
+                  darray(0) {
                   }
                 }
               }
@@ -103,25 +103,25 @@ array(1) {
   }
 }
 bool(true)
-array(1) {
+darray(1) {
   [1]=>
-  array(1) {
+  darray(1) {
     [1]=>
-    array(1) {
+    darray(1) {
       [1]=>
-      array(1) {
+      darray(1) {
         [1]=>
-        array(1) {
+        darray(1) {
           [1]=>
-          array(1) {
+          darray(1) {
             [1]=>
-            array(1) {
+            darray(1) {
               [1]=>
-              array(1) {
+              darray(1) {
                 [1]=>
-                array(1) {
+                darray(1) {
                   [1]=>
-                  array(1) {
+                  darray(1) {
                     [1]=>
                     int(1)
                   }
@@ -135,25 +135,16 @@ array(1) {
   }
 }
 bool(true)
-array(1) {
-  [0]=>
-  array(1) {
-    [0]=>
-    array(1) {
-      [0]=>
-      array(1) {
-        [0]=>
-        array(1) {
-          [0]=>
-          array(1) {
-            [0]=>
-            array(1) {
-              [0]=>
-              array(1) {
-                [0]=>
-                array(1) {
-                  [0]=>
-                  array(0) {
+varray(1) {
+  varray(1) {
+    varray(1) {
+      varray(1) {
+        varray(1) {
+          varray(1) {
+            varray(1) {
+              varray(1) {
+                varray(1) {
+                  varray(0) {
                   }
                 }
               }

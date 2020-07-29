@@ -5,15 +5,12 @@ bool(false)
 resource(%d) of type (stream)
 object(stdClass) (0) {
 }
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
-array(2) {
+darray(2) {
   ["a"]=>
   int(1)
   ["b"]=>

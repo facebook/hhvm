@@ -54,15 +54,13 @@ classMeth{
     class(Foo)
     function(bar)
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 string(3) "Foo"
 string(3) "bar"
-array(2) {
+darray(2) {
   [0]=>
   int(42)
   [1]=>
@@ -124,15 +122,13 @@ classMeth{
     class(Foo)
     function(bar)
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 string(3) "Foo"
 string(3) "bar"
-array(2) {
+darray(2) {
   [0]=>
   int(42)
   [1]=>
@@ -194,15 +190,13 @@ classMeth{
     class(Foo)
     function(bar)
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 string(3) "Foo"
 string(3) "bar"
-array(2) {
+darray(2) {
   [0]=>
   int(42)
   [1]=>
@@ -264,15 +258,13 @@ classMeth{
     class(Foo)
     function(bar)
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 string(3) "Foo"
 string(3) "bar"
-array(2) {
+darray(2) {
   [0]=>
   int(42)
   [1]=>
@@ -334,15 +326,13 @@ classMeth{
     class(Foo)
     function(bar)
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 string(3) "Foo"
 string(3) "bar"
-array(2) {
+darray(2) {
   [0]=>
   int(42)
   [1]=>
@@ -404,15 +394,13 @@ classMeth{
     class(Foo)
     function(bar)
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 string(3) "Foo"
 string(3) "bar"
-array(2) {
+darray(2) {
   [0]=>
   int(42)
   [1]=>

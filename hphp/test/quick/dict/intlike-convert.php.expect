@@ -1,24 +1,24 @@
-array(1) {
+darray(1) {
   ["1"]=>
   NULL
 }
-array(1) {
+darray(1) {
   ["100"]=>
   bool(false)
 }
-array(2) {
+darray(2) {
   ["123"]=>
   bool(true)
   [123]=>
   bool(false)
 }
-array(2) {
+darray(2) {
   [123]=>
   bool(false)
   ["123"]=>
   bool(true)
 }
-array(4) {
+darray(4) {
   [123]=>
   string(1) "a"
   ["456"]=>

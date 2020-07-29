@@ -1,18 +1,16 @@
 string(28) "?HH\darray<HH\int, @HH\bool>"
-array(3) {
+darray(3) {
   ["nullable"]=>
   bool(true)
   ["kind"]=>
   int(24)
   ["generic_types"]=>
-  array(2) {
-    [0]=>
-    array(1) {
+  varray(2) {
+    darray(1) {
       ["kind"]=>
       int(1)
     }
-    [1]=>
-    array(2) {
+    darray(2) {
       ["soft"]=>
       bool(true)
       ["kind"]=>
@@ -21,34 +19,30 @@ array(3) {
   }
 }
 string(49) "HH\Map<HH\arraykey, HH\Vector<HH\varray<HH\int>>>"
-array(3) {
+darray(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(6) "HH\Map"
   ["generic_types"]=>
-  array(2) {
-    [0]=>
-    array(1) {
+  varray(2) {
+    darray(1) {
       ["kind"]=>
       int(7)
     }
-    [1]=>
-    array(3) {
+    darray(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(9) "HH\Vector"
       ["generic_types"]=>
-      array(1) {
-        [0]=>
-        array(2) {
+      varray(1) {
+        darray(2) {
           ["kind"]=>
           int(25)
           ["generic_types"]=>
-          array(1) {
-            [0]=>
-            array(1) {
+          varray(1) {
+            darray(1) {
               ["kind"]=>
               int(1)
             }
@@ -59,61 +53,56 @@ array(3) {
   }
 }
 string(28) "(HH\int, ?HH\float, HH\bool)"
-array(2) {
+darray(2) {
   ["kind"]=>
   int(10)
   ["elem_types"]=>
-  array(3) {
-    [0]=>
-    array(1) {
+  varray(3) {
+    darray(1) {
       ["kind"]=>
       int(1)
     }
-    [1]=>
-    array(2) {
+    darray(2) {
       ["nullable"]=>
       bool(true)
       ["kind"]=>
       int(3)
     }
-    [2]=>
-    array(1) {
+    darray(1) {
       ["kind"]=>
       int(2)
     }
   }
 }
 string(22) "(function (): HH\void)"
-array(3) {
+darray(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  array(1) {
+  darray(1) {
     ["kind"]=>
     int(0)
   }
   ["param_types"]=>
-  array(0) {
+  varray(0) {
   }
 }
 string(48) "(function (HH\mixed, HH\resource): HH\arraylike)"
-array(3) {
+darray(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  array(1) {
+  darray(1) {
     ["kind"]=>
     int(27)
   }
   ["param_types"]=>
-  array(2) {
-    [0]=>
-    array(1) {
+  varray(2) {
+    darray(1) {
       ["kind"]=>
       int(9)
     }
-    [1]=>
-    array(1) {
+    darray(1) {
       ["kind"]=>
       int(5)
     }

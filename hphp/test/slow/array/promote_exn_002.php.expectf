@@ -3,7 +3,7 @@ after a throw:
 string(72) "Invalid darray key: expected a key of type int or string, stdClass given"
 object(bar) (1) {
   ["x"]=>
-  array(0) {
+  darray(0) {
   }
 }
 ----
@@ -11,6 +11,6 @@ after a throw:
 string(72) "Invalid darray key: expected a key of type int or string, stdClass given"
 object(bar) (1) {
   ["x"]=>
-  array(0) {
+  darray(0) {
   }
 }

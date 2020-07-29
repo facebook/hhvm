@@ -1,31 +1,29 @@
-array(1) {
+darray(1) {
   ["ONE"]=>
   NULL
 }
-array(1) {
+darray(1) {
   ["TWO"]=>
   string(3) "TWO"
 }
-array(1) {
+darray(1) {
   ["TFoo"]=>
   string(4) "TFoo"
 }
-array(1) {
-  [0]=>
+varray(1) {
   object(ReflectionTypeConstant) (0) {
   }
 }
-array(2) {
+darray(2) {
   ["prop"]=>
   NULL
   ["static_prop"]=>
   NULL
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(3) "Foo"
 }
-array(1) {
+darray(1) {
   ["Foo"]=>
   object(ReflectionClass) (2) {
     ["name"]=>
@@ -34,24 +32,20 @@ array(1) {
     NULL
   }
 }
-array(1) {
+darray(1) {
   ["__Attr1"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(3)
-    [1]=>
     int(4)
   }
 }
-array(2) {
-  [0]=>
+varray(2) {
   object(ReflectionMethod) (2) {
     ["name"]=>
     string(3) "baz"
     ["class"]=>
     string(1) "A"
   }
-  [1]=>
   object(ReflectionMethod) (2) {
     ["name"]=>
     string(3) "bar"
@@ -59,8 +53,7 @@ array(2) {
     string(3) "Foo"
   }
 }
-array(2) {
-  [0]=>
+varray(2) {
   object(ReflectionProperty) (3) {
     ["name"]=>
     string(4) "prop"
@@ -69,7 +62,6 @@ array(2) {
     ["forceAccessible":"ReflectionProperty":private]=>
     bool(false)
   }
-  [1]=>
   object(ReflectionProperty) (3) {
     ["name"]=>
     string(11) "static_prop"
@@ -79,7 +71,7 @@ array(2) {
     bool(false)
   }
 }
-array(1) {
+darray(1) {
   ["static_prop"]=>
   NULL
 }
@@ -87,13 +79,12 @@ object(B) (1) {
   ["prop":protected]=>
   NULL
 }
-array(0) {
+darray(0) {
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(5) "TBing"
 }
-array(1) {
+darray(1) {
   ["TBing"]=>
   object(ReflectionClass) (2) {
     ["name"]=>
@@ -102,11 +93,10 @@ array(1) {
     NULL
   }
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(1) "A"
 }
-array(1) {
+darray(1) {
   ["A"]=>
   object(ReflectionClass) (2) {
     ["name"]=>

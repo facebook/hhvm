@@ -1,76 +1,84 @@
 ================= array of zero elements is possible =================
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 ================= array of 1 element is possible =================
-array(1) {
+varray(1) {
+  bool(true)
+}
+varray(1) {
+  bool(true)
+}
+darray(1) {
   [0]=>
   bool(true)
 }
-array(1) {
-  [0]=>
-  bool(true)
-}
-array(1) {
-  [0]=>
-  bool(true)
-}
-array(1) {
+darray(1) {
   [0]=>
   bool(true)
 }
 ================= array of 2 elements each having the same type =================
-array(2) {
+varray(2) {
+  int(123)
+  int(-56)
+}
+varray(2) {
+  int(123)
+  int(-56)
+}
+darray(2) {
   [0]=>
   int(123)
   [1]=>
   int(-56)
 }
-array(2) {
+darray(2) {
   [0]=>
   int(123)
   [1]=>
   int(-56)
 }
-array(2) {
+darray(2) {
   [0]=>
   int(123)
   [1]=>
   int(-56)
 }
-array(2) {
+darray(2) {
   [0]=>
   int(123)
   [1]=>
   int(-56)
 }
-array(2) {
+darray(2) {
   [0]=>
   int(123)
   [1]=>
   int(-56)
 }
-array(2) {
-  [0]=>
-  int(123)
-  [1]=>
-  int(-56)
-}
-array(2) {
-  [0]=>
-  int(123)
-  [1]=>
-  int(-56)
-}
-array(2) {
+darray(2) {
   [0]=>
   int(123)
   [1]=>
   int(-56)
 }
 ================= array of 5 elements each having different type =================
-array(5) {
+varray(5) {
+  NULL
+  bool(false)
+  int(123)
+  float(34000000000000)
+  string(5) "Hello"
+}
+varray(5) {
+  NULL
+  bool(false)
+  int(123)
+  float(34000000000000)
+  string(5) "Hello"
+}
+darray(5) {
   [0]=>
   NULL
   [1]=>
@@ -82,7 +90,7 @@ array(5) {
   [4]=>
   string(5) "Hello"
 }
-array(5) {
+darray(5) {
   [0]=>
   NULL
   [1]=>
@@ -94,7 +102,7 @@ array(5) {
   [4]=>
   string(5) "Hello"
 }
-array(5) {
+darray(5) {
   [0]=>
   NULL
   [1]=>
@@ -106,31 +114,7 @@ array(5) {
   [4]=>
   string(5) "Hello"
 }
-array(5) {
-  [0]=>
-  NULL
-  [1]=>
-  bool(false)
-  [2]=>
-  int(123)
-  [3]=>
-  float(34000000000000)
-  [4]=>
-  string(5) "Hello"
-}
-array(5) {
-  [0]=>
-  NULL
-  [1]=>
-  bool(false)
-  [2]=>
-  int(123)
-  [3]=>
-  float(34000000000000)
-  [4]=>
-  string(5) "Hello"
-}
-array(5) {
+darray(5) {
   [0]=>
   NULL
   [1]=>
@@ -143,48 +127,42 @@ array(5) {
   string(5) "Hello"
 }
 ================= trailing comma permitted if list has at least one entry =================
-array(1) {
+varray(1) {
+  bool(true)
+}
+varray(1) {
+  bool(true)
+}
+darray(1) {
   [0]=>
   bool(true)
 }
-array(1) {
+darray(1) {
   [0]=>
   bool(true)
 }
-array(1) {
-  [0]=>
-  bool(true)
+varray(2) {
+  int(123)
+  int(-56)
 }
-array(1) {
-  [0]=>
-  bool(true)
+varray(2) {
+  int(123)
+  int(-56)
 }
-array(2) {
+darray(2) {
   [0]=>
   int(123)
   [1]=>
   int(-56)
 }
-array(2) {
-  [0]=>
-  int(123)
-  [1]=>
-  int(-56)
-}
-array(2) {
-  [0]=>
-  int(123)
-  [1]=>
-  int(-56)
-}
-array(2) {
+darray(2) {
   [0]=>
   int(123)
   [1]=>
   int(-56)
 }
 ================= specify keys in arbitrary order, initial values of runtime expressions, leave gaps =================
-array(3) {
+darray(3) {
   [7]=>
   int(123)
   [3]=>
@@ -192,7 +170,7 @@ array(3) {
   [6]=>
   int(13)
 }
-array(3) {
+darray(3) {
   [7]=>
   int(123)
   [3]=>
@@ -209,7 +187,7 @@ Undefined index: 4
 
 Notice: Undefined variable: v1 in %s on line 112
 NULL
-array(5) {
+darray(5) {
   [7]=>
   int(123)
   [3]=>
@@ -223,80 +201,55 @@ array(5) {
 }
 123,6,13,1,99,
 ================= duplicate keys allowed, but lexically final one used =================
-array(1) {
+darray(1) {
   [2]=>
   int(6)
 }
 ================= string keys can be expressions too =================
-array(2) {
+darray(2) {
   ["color"]=>
   string(3) "red"
   ["shape"]=>
   string(6) "square"
 }
 ================= arrays some of whose elements are arrays, and so on =================
-array(4) {
-  [0]=>
+varray(4) {
   int(10)
-  [1]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(3) "red"
-    [1]=>
     string(5) "white"
-    [2]=>
     string(4) "blue"
   }
-  [2]=>
   NULL
-  [3]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     bool(false)
-    [1]=>
     NULL
-    [2]=>
-    array(3) {
-      [0]=>
+    varray(3) {
       string(3) "red"
-      [1]=>
       string(5) "white"
-      [2]=>
       string(4) "blue"
     }
   }
 }
-array(3) {
-  [0]=>
-  array(4) {
-    [0]=>
+varray(3) {
+  varray(4) {
     int(2)
-    [1]=>
     int(4)
-    [2]=>
     int(6)
-    [3]=>
     int(8)
   }
-  [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(5)
-    [1]=>
     int(10)
   }
-  [2]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(100)
-    [1]=>
     int(200)
-    [2]=>
     int(300)
   }
 }
 ================= see if int keys can be specified in any base. =================
-array(4) {
+darray(4) {
   [12]=>
   int(10)
   [16]=>
@@ -307,7 +260,7 @@ array(4) {
   int(2)
 }
 ================= what about int-looking strings? It appears not. =================
-array(4) {
+darray(4) {
   ["12"]=>
   int(10)
   ["0x10"]=>
@@ -318,7 +271,7 @@ array(4) {
   int(2)
 }
 ================= iterate using foreach and compare with for loop =================
-array(4) {
+darray(4) {
   [2]=>
   bool(true)
   [0]=>
@@ -331,7 +284,7 @@ array(4) {
 1,123,34.5,red,
 red,123,34.5,1,
 ================= remove some elements from an array =================
-array(4) {
+darray(4) {
   ["red"]=>
   bool(true)
   [0]=>
@@ -341,7 +294,7 @@ array(4) {
   [10]=>
   string(5) "Hello"
 }
-array(2) {
+darray(2) {
   [9]=>
   float(34000000000000)
   [10]=>

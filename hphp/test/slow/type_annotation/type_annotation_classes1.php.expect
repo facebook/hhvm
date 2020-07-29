@@ -1,36 +1,35 @@
-array(2) {
+darray(2) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(7) "MyClass"
 }
-array(2) {
+darray(2) {
   ["kind"]=>
   int(16)
   ["classname"]=>
   string(11) "MyInterface"
 }
-array(2) {
+darray(2) {
   ["kind"]=>
   int(17)
   ["classname"]=>
   string(7) "MyTrait"
 }
-array(2) {
+darray(2) {
   ["kind"]=>
   int(18)
   ["classname"]=>
   string(6) "MyEnum"
 }
-array(3) {
+darray(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(7) "MyClass"
   ["generic_types"]=>
-  array(1) {
-    [0]=>
-    array(2) {
+  varray(1) {
+    darray(2) {
       ["kind"]=>
       int(18)
       ["classname"]=>
@@ -38,15 +37,14 @@ array(3) {
     }
   }
 }
-array(3) {
+darray(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(7) "MyClass"
   ["generic_types"]=>
-  array(1) {
-    [0]=>
-    array(3) {
+  varray(1) {
+    darray(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>

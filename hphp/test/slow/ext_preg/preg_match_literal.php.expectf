@@ -46,38 +46,32 @@ bool(false)
 int(1)
 int(1)
 int(1)
-array(1) {
+darray(1) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "def"
-    [1]=>
     int(3)
   }
 }
 int(0)
-array(0) {
+darray(0) {
 }
 int(1)
-array(1) {
+darray(1) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(0) ""
-    [1]=>
     int(3)
   }
 }
 int(0)
-array(0) {
+darray(0) {
 }
 int(1)
-array(1) {
+darray(1) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "def"
-    [1]=>
     int(3)
   }
 }

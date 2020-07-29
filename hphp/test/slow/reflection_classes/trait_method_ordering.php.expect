@@ -1,4 +1,4 @@
-array(7) {
+darray(7) {
   [0]=>
   string(11) "B1::bmethod"
   [1]=>
@@ -14,7 +14,7 @@ array(7) {
   [6]=>
   string(12) "A1::t3method"
 }
-array(8) {
+darray(8) {
   [0]=>
   string(11) "B2::zmethod"
   [1]=>
@@ -32,7 +32,7 @@ array(8) {
   [7]=>
   string(12) "A1::t3method"
 }
-array(6) {
+darray(6) {
   [0]=>
   string(11) "B3::zmethod"
   [1]=>
@@ -46,7 +46,7 @@ array(6) {
   [5]=>
   string(12) "B3::t3method"
 }
-array(8) {
+darray(8) {
   [0]=>
   string(11) "B4::zmethod"
   [1]=>

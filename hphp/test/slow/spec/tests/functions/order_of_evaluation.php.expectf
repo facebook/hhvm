@@ -1,10 +1,7 @@
 f: $p1 = 0, $p2 = 1, $p3 = 1, $p4 = 12, $p5 = 11
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "f"
-  [1]=>
   string(1) "g"
-  [2]=>
   string(1) "h"
 }
 string(1) "f"

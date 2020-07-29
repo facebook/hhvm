@@ -1,9 +1,6 @@
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 int(-1)
@@ -17,7 +14,7 @@ bool(true)
 bool(false)
 object(stdClass) (0) {
 }
-array(0) {
+varray(0) {
 }
 int(9223372036854775807)
 int(9223372036854775807)

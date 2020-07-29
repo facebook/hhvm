@@ -1,66 +1,66 @@
 *** Testing parse_ini_file() : variation ***
 
 -- Iteration 1 --
-array(1) {
+darray(1) {
   ["a"]=>
   string(4) "test"
 }
 
 -- Iteration 2 --
-array(1) {
+darray(1) {
   ["a"]=>
   string(4) "test"
 }
 
 -- Iteration 3 --
-array(1) {
+darray(1) {
   ["a"]=>
   string(4) "test"
 }
 
 -- Iteration 4 --
-array(1) {
+darray(1) {
   ["a"]=>
   string(4) "test"
 }
 
 -- Iteration 5 --
 
-Warning: No such file or directory in %s/parse_ini_file_variation6.php on line 48
+Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/file/parse_ini_file_variation6.php on line 48
 bool(false)
 
 -- Iteration 6 --
 
-Warning: No such file or directory in %s/parse_ini_file_variation6.php on line 48
+Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/file/parse_ini_file_variation6.php on line 48
 bool(false)
 
 -- Iteration 7 --
-array(1) {
+darray(1) {
   ["a"]=>
   string(4) "test"
 }
 
 -- Iteration 8 --
-array(1) {
+darray(1) {
   ["a"]=>
   string(4) "test"
 }
 
 -- Iteration 9 --
-array(1) {
+darray(1) {
   ["a"]=>
   string(4) "test"
 }
 
 -- Iteration 10 --
-array(1) {
+darray(1) {
   ["a"]=>
   string(4) "test"
 }
 
 -- Iteration 11 --
 
-Warning: No such file or directory in %s/parse_ini_file_variation6.php on line 48
+Warning: No such file or directory in %s/test/zend/good/ext/standard/tests/file/parse_ini_file_variation6.php on line 48
 bool(false)
 
 *** Done ***

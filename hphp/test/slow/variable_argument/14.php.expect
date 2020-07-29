@@ -1,6 +1,5 @@
 int(2)
 string(2) "ok"
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }

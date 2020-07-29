@@ -1,8 +1,8 @@
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   string(3) "bar"
   [1]=>
@@ -10,13 +10,13 @@ array(3) {
   [2]=>
   string(3) "baz"
 }
-array(1) {
+darray(1) {
   [0]=>
   string(3) "foo"
 }
-array(0) {
+darray(0) {
 }
-array(1) {
+darray(1) {
   [0]=>
   string(4) "bing"
 }

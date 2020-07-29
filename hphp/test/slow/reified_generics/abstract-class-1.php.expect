@@ -1,6 +1,5 @@
-array(1) {
-  [0]=>
-  array(1) {
+varray(1) {
+  darray(1) {
     ["kind"]=>
     int(1)
   }

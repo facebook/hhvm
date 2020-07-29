@@ -1,18 +1,16 @@
-array(2) {
+darray(2) {
   ["kind"]=>
   int(10)
   ["elem_types"]=>
-  array(3) {
-    [0]=>
-    array(3) {
+  varray(3) {
+    darray(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(1) "A"
       ["generic_types"]=>
-      array(1) {
-        [0]=>
-        array(2) {
+      varray(1) {
+        darray(2) {
           ["kind"]=>
           int(15)
           ["classname"]=>
@@ -20,16 +18,14 @@ array(2) {
         }
       }
     }
-    [1]=>
-    array(3) {
+    darray(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(1) "A"
       ["generic_types"]=>
-      array(1) {
-        [0]=>
-        array(2) {
+      varray(1) {
+        darray(2) {
           ["kind"]=>
           int(15)
           ["classname"]=>
@@ -37,16 +33,14 @@ array(2) {
         }
       }
     }
-    [2]=>
-    array(3) {
+    darray(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(1) "A"
       ["generic_types"]=>
-      array(1) {
-        [0]=>
-        array(2) {
+      varray(1) {
+        darray(2) {
           ["kind"]=>
           int(15)
           ["classname"]=>

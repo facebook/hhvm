@@ -1,18 +1,13 @@
-array(3) {
-  [0]=>
-  array(1) {
-    [0]=>
+varray(3) {
+  varray(1) {
     int(987)
   }
-  [1]=>
   int(456)
-  [2]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(987)
   }
 }
-array(2) {
+darray(2) {
   [1]=>
   int(123)
   [2]=>

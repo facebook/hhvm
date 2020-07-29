@@ -1,4 +1,4 @@
-array(4) {
+darray(4) {
   ["dirname"]=>
   string(%d) "%s/test/slow/ext_file"
   ["basename"]=>

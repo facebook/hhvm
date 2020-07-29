@@ -1,11 +1,11 @@
-array(2) {
+darray(2) {
   ["a1"]=>
-  array(1) {
+  darray(1) {
     ["x"]=>
     string(1) "y"
   }
   ["a2"]=>
-  array(3) {
+  darray(3) {
     ["x"]=>
     string(1) "y"
     [0]=>

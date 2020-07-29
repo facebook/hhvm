@@ -61,32 +61,27 @@ Warning: mb_split() expects parameter 2 to be string, boolean given in %s/zend/g
 Warning: mb_split() expects parameter 2 to be string, boolean given in %s/zend/good/ext/mbstring/tests/mb_split_variation2.php on line 88
 
 -- Iteration 16 --
-array(1) {
-  [0]=>
+varray(1) {
   string(0) ""
 }
 
 -- Iteration 17 --
-array(1) {
-  [0]=>
+varray(1) {
   string(0) ""
 }
 
 -- Iteration 18 --
-array(1) {
-  [0]=>
+varray(1) {
   string(5) "UTF-8"
 }
 
 -- Iteration 19 --
-array(1) {
-  [0]=>
+varray(1) {
   string(5) "UTF-8"
 }
 
 -- Iteration 20 --
-array(1) {
-  [0]=>
+varray(1) {
   string(5) "UTF-8"
 }
 

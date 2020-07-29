@@ -2,7 +2,7 @@
 
 -- Testing asort() by supplying various object arrays, 'flag' value is defualt --
 bool(true)
-array(6) {
+darray(6) {
   [4]=>
   object(for_integer_asort) (1) {
     ["class_value"]=>
@@ -35,7 +35,7 @@ array(6) {
   }
 }
 bool(true)
-array(8) {
+darray(8) {
   ["g"]=>
   object(for_string_asort) (1) {
     ["class_value"]=>
@@ -80,7 +80,7 @@ array(8) {
 
 -- Testing asort() by supplying various object arrays, 'flag' value is SORT_REGULAR --
 bool(true)
-array(6) {
+darray(6) {
   [4]=>
   object(for_integer_asort) (1) {
     ["class_value"]=>
@@ -113,7 +113,7 @@ array(6) {
   }
 }
 bool(true)
-array(8) {
+darray(8) {
   ["g"]=>
   object(for_string_asort) (1) {
     ["class_value"]=>

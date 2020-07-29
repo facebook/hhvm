@@ -1,7 +1,7 @@
 *** Testing array_udiff_assoc() : usage variation - differing comparison functions***
 
 -- comparison function with an incorrect return value --
-array(1) {
+darray(1) {
   [0]=>
   int(1)
 }
@@ -10,7 +10,7 @@ array(1) {
 string(59) "too_many_parameters() expects exactly 3 parameters, 2 given"
 
 -- comparison function taking too few parameters --
-array(1) {
+darray(1) {
   [0]=>
   int(1)
 }

@@ -1,8 +1,15 @@
 *** Testing get_declared_traits() : basic functionality ***
 
 -- Testing get_declared_traits() function with Zero arguments --
-array(%d) {
-%a
+varray(8) {
+  string(24) "ReflectionTypedAttribute"
+  string(19) "StrictKeyedIterable"
+  string(14) "StrictIterable"
+  string(17) "LazyKeyedIterable"
+  string(25) "ReflectionLegacyAttribute"
+  string(25) "__SystemLib\BaseException"
+  string(12) "LazyIterable"
+  string(7) "MyTrait"
 }
 
 -- Ensure trait is listed --

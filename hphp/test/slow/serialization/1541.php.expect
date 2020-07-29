@@ -1,70 +1,60 @@
 object(Big) (6) {
   ["groupAll"]=>
-  array(10) {
-    [0]=>
+  varray(10) {
     object(Small) (2) {
       ["name"]=>
       string(4) "foo0"
       ["num"]=>
       int(0)
     }
-    [1]=>
     object(Small) (2) {
       ["name"]=>
       string(4) "foo1"
       ["num"]=>
       int(3)
     }
-    [2]=>
     object(Small) (2) {
       ["name"]=>
       string(4) "foo2"
       ["num"]=>
       int(6)
     }
-    [3]=>
     object(Small) (2) {
       ["name"]=>
       string(4) "foo3"
       ["num"]=>
       int(9)
     }
-    [4]=>
     object(Small) (2) {
       ["name"]=>
       string(4) "foo4"
       ["num"]=>
       int(12)
     }
-    [5]=>
     object(Small) (2) {
       ["name"]=>
       string(4) "foo5"
       ["num"]=>
       int(15)
     }
-    [6]=>
     object(Small) (2) {
       ["name"]=>
       string(4) "foo6"
       ["num"]=>
       int(18)
     }
-    [7]=>
     object(Small) (2) {
       ["name"]=>
       string(4) "foo7"
       ["num"]=>
       int(21)
     }
-    [8]=>
     object(Small) (2) {
       ["name"]=>
       string(4) "foo8"
       ["num"]=>
       int(24)
     }
-    [9]=>
     object(Small) (2) {
       ["name"]=>
       string(4) "foo9"
@@ -73,12 +63,9 @@ object(Big) (6) {
     }
   }
   ["group1"]=>
-  array(5) {
-    [0]=>
-    array(2) {
-      [0]=>
+  varray(5) {
+    varray(2) {
       string(4) "foo0"
-      [1]=>
       object(Small) (2) {
         ["name"]=>
         string(4) "foo0"
@@ -86,11 +73,8 @@ object(Big) (6) {
         int(0)
       }
     }
-    [1]=>
-    array(2) {
-      [0]=>
+    varray(2) {
       string(4) "foo2"
-      [1]=>
       object(Small) (2) {
         ["name"]=>
         string(4) "foo2"
@@ -98,11 +82,8 @@ object(Big) (6) {
         int(6)
       }
     }
-    [2]=>
-    array(2) {
-      [0]=>
+    varray(2) {
       string(4) "foo4"
-      [1]=>
       object(Small) (2) {
         ["name"]=>
         string(4) "foo4"
@@ -110,11 +91,8 @@ object(Big) (6) {
         int(12)
       }
     }
-    [3]=>
-    array(2) {
-      [0]=>
+    varray(2) {
       string(4) "foo6"
-      [1]=>
       object(Small) (2) {
         ["name"]=>
         string(4) "foo6"
@@ -122,11 +100,8 @@ object(Big) (6) {
         int(18)
       }
     }
-    [4]=>
-    array(2) {
-      [0]=>
+    varray(2) {
       string(4) "foo8"
-      [1]=>
       object(Small) (2) {
         ["name"]=>
         string(4) "foo8"
@@ -136,12 +111,9 @@ object(Big) (6) {
     }
   }
   ["group2"]=>
-  array(5) {
-    [0]=>
-    array(2) {
-      [0]=>
+  varray(5) {
+    varray(2) {
       string(4) "foo1"
-      [1]=>
       object(Small) (2) {
         ["name"]=>
         string(4) "foo1"
@@ -149,11 +121,8 @@ object(Big) (6) {
         int(3)
       }
     }
-    [1]=>
-    array(2) {
-      [0]=>
+    varray(2) {
       string(4) "foo3"
-      [1]=>
       object(Small) (2) {
         ["name"]=>
         string(4) "foo3"
@@ -161,11 +130,8 @@ object(Big) (6) {
         int(9)
       }
     }
-    [2]=>
-    array(2) {
-      [0]=>
+    varray(2) {
       string(4) "foo5"
-      [1]=>
       object(Small) (2) {
         ["name"]=>
         string(4) "foo5"
@@ -173,11 +139,8 @@ object(Big) (6) {
         int(15)
       }
     }
-    [3]=>
-    array(2) {
-      [0]=>
+    varray(2) {
       string(4) "foo7"
-      [1]=>
       object(Small) (2) {
         ["name"]=>
         string(4) "foo7"
@@ -185,11 +148,8 @@ object(Big) (6) {
         int(21)
       }
     }
-    [4]=>
-    array(2) {
-      [0]=>
+    varray(2) {
       string(4) "foo9"
-      [1]=>
       object(Small) (2) {
         ["name"]=>
         string(4) "foo9"
@@ -199,31 +159,26 @@ object(Big) (6) {
     }
   }
   ["wacky"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(10)
-    [1]=>
     int(10)
   }
   ["nothing"]=>
   NULL
   ["unrelated"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     object(Small) (2) {
       ["name"]=>
       string(5) "foo10"
       ["num"]=>
       int(30)
     }
-    [1]=>
     object(Small) (2) {
       ["name"]=>
       string(5) "foo10"
       ["num"]=>
       int(30)
     }
-    [2]=>
     object(Small) (2) {
       ["name"]=>
       string(5) "foo10"
@@ -235,7 +190,7 @@ object(Big) (6) {
 string(1127) "O:3:"Big":6:{s:8:"groupAll";a:10:{i:0;O:5:"Small":2:{s:4:"name";s:4:"foo0";s:3:"num";i:0;}i:1;O:5:"Small":2:{s:4:"name";s:4:"foo1";s:3:"num";i:3;}i:2;O:5:"Small":2:{s:4:"name";s:4:"foo2";s:3:"num";i:6;}i:3;O:5:"Small":2:{s:4:"name";s:4:"foo3";s:3:"num";i:9;}i:4;O:5:"Small":2:{s:4:"name";s:4:"foo4";s:3:"num";i:12;}i:5;O:5:"Small":2:{s:4:"name";s:4:"foo5";s:3:"num";i:15;}i:6;O:5:"Small":2:{s:4:"name";s:4:"foo6";s:3:"num";i:18;}i:7;O:5:"Small":2:{s:4:"name";s:4:"foo7";s:3:"num";i:21;}i:8;O:5:"Small":2:{s:4:"name";s:4:"foo8";s:3:"num";i:24;}i:9;O:5:"Small":2:{s:4:"name";s:4:"foo9";s:3:"num";i:27;}}s:6:"group1";a:5:{i:0;a:2:{i:0;s:4:"foo0";i:1;r:3;}i:1;a:2:{i:0;s:4:"foo2";i:1;r:9;}i:2;a:2:{i:0;s:4:"foo4";i:1;r:15;}i:3;a:2:{i:0;s:4:"foo6";i:1;r:21;}i:4;a:2:{i:0;s:4:"foo8";i:1;r:27;}}s:6:"group2";a:5:{i:0;a:2:{i:0;s:4:"foo1";i:1;r:6;}i:1;a:2:{i:0;s:4:"foo3";i:1;r:12;}i:2;a:2:{i:0;s:4:"foo5";i:1;r:18;}i:3;a:2:{i:0;s:4:"foo7";i:1;r:24;}i:4;a:2:{i:0;s:4:"foo9";i:1;r:30;}}s:5:"wacky";a:2:{i:0;i:10;i:1;i:10;}s:7:"nothing";N;s:9:"unrelated";a:3:{i:0;O:5:"Small":2:{s:4:"name";s:5:"foo10";s:3:"num";i:30;}i:1;r:70;i:2;r:70;}}"
 object(Big) (6) {
   ["groupAll"]=>
-  array(10) {
+  darray(10) {
     [0]=>
     object(Small) (2) {
       ["name"]=>
@@ -308,9 +263,9 @@ object(Big) (6) {
     }
   }
   ["group1"]=>
-  array(5) {
+  darray(5) {
     [0]=>
-    array(2) {
+    darray(2) {
       [0]=>
       string(4) "foo0"
       [1]=>
@@ -322,7 +277,7 @@ object(Big) (6) {
       }
     }
     [1]=>
-    array(2) {
+    darray(2) {
       [0]=>
       string(4) "foo2"
       [1]=>
@@ -334,7 +289,7 @@ object(Big) (6) {
       }
     }
     [2]=>
-    array(2) {
+    darray(2) {
       [0]=>
       string(4) "foo4"
       [1]=>
@@ -346,7 +301,7 @@ object(Big) (6) {
       }
     }
     [3]=>
-    array(2) {
+    darray(2) {
       [0]=>
       string(4) "foo6"
       [1]=>
@@ -358,7 +313,7 @@ object(Big) (6) {
       }
     }
     [4]=>
-    array(2) {
+    darray(2) {
       [0]=>
       string(4) "foo8"
       [1]=>
@@ -371,9 +326,9 @@ object(Big) (6) {
     }
   }
   ["group2"]=>
-  array(5) {
+  darray(5) {
     [0]=>
-    array(2) {
+    darray(2) {
       [0]=>
       string(4) "foo1"
       [1]=>
@@ -385,7 +340,7 @@ object(Big) (6) {
       }
     }
     [1]=>
-    array(2) {
+    darray(2) {
       [0]=>
       string(4) "foo3"
       [1]=>
@@ -397,7 +352,7 @@ object(Big) (6) {
       }
     }
     [2]=>
-    array(2) {
+    darray(2) {
       [0]=>
       string(4) "foo5"
       [1]=>
@@ -409,7 +364,7 @@ object(Big) (6) {
       }
     }
     [3]=>
-    array(2) {
+    darray(2) {
       [0]=>
       string(4) "foo7"
       [1]=>
@@ -421,7 +376,7 @@ object(Big) (6) {
       }
     }
     [4]=>
-    array(2) {
+    darray(2) {
       [0]=>
       string(4) "foo9"
       [1]=>
@@ -434,7 +389,7 @@ object(Big) (6) {
     }
   }
   ["wacky"]=>
-  array(2) {
+  darray(2) {
     [0]=>
     int(10)
     [1]=>
@@ -443,7 +398,7 @@ object(Big) (6) {
   ["nothing"]=>
   NULL
   ["unrelated"]=>
-  array(3) {
+  darray(3) {
     [0]=>
     object(Small) (2) {
       ["name"]=>

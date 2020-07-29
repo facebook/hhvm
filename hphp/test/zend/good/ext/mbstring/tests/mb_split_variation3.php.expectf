@@ -1,62 +1,40 @@
 *** Testing mb_split() : usage variations ***
 
 -- Iteration 1 --
-array(1) {
-  [0]=>
+varray(1) {
   string(10) "string_val"
 }
 
 -- Iteration 2 --
-array(1) {
-  [0]=>
+varray(1) {
   string(10) "string_val"
 }
 
 -- Iteration 3 --
-array(10) {
-  [0]=>
+varray(10) {
   string(0) ""
-  [1]=>
   string(0) ""
-  [2]=>
   string(0) ""
-  [3]=>
   string(0) ""
-  [4]=>
   string(0) ""
-  [5]=>
   string(0) ""
-  [6]=>
   string(1) "_"
-  [7]=>
   string(0) ""
-  [8]=>
   string(0) ""
-  [9]=>
   string(0) ""
 }
 
 -- Iteration 4 --
-array(10) {
-  [0]=>
+varray(10) {
   string(0) ""
-  [1]=>
   string(0) ""
-  [2]=>
   string(0) ""
-  [3]=>
   string(0) ""
-  [4]=>
   string(0) ""
-  [5]=>
   string(0) ""
-  [6]=>
   string(1) "_"
-  [7]=>
   string(0) ""
-  [8]=>
   string(0) ""
-  [9]=>
   string(0) ""
 }
 

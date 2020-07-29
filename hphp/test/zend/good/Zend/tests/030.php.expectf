@@ -6,17 +6,16 @@ object(Exception) (8) {
   ["code":protected]=>
   int(0)
   ["file":protected]=>
-  string(%d) "%s030.php"
+  string(%d) "%s/030.php"
   ["line":protected]=>
-  int(%d)
+  int(10)
   ["trace":"Exception":private]=>
-  array(2) {
-    [0]=>
-    array(6) {
+  varray(2) {
+    darray(6) {
       ["file"]=>
-      string(%d) "%s030.php"
+      string(%d) "%s/030.php"
       ["line"]=>
-      int(%d)
+      int(27)
       ["function"]=>
       string(3) "bar"
       ["class"]=>
@@ -24,15 +23,14 @@ object(Exception) (8) {
       ["type"]=>
       string(2) "->"
       ["args"]=>
-      array(0) {
+      varray(0) {
       }
     }
-    [1]=>
-    array(2) {
+    darray(2) {
       ["function"]=>
       string(4) "main"
       ["args"]=>
-      array(0) {
+      varray(0) {
       }
     }
   }

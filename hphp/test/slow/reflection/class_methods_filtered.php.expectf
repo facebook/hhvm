@@ -1,12 +1,10 @@
-array(2) {
-  [0]=>
+varray(2) {
   object(ReflectionMethod) (2) {
     ["name"]=>
     string(1) "i"
     ["class"]=>
     string(1) "I"
   }
-  [1]=>
   object(ReflectionMethod) (2) {
     ["name"]=>
     string(1) "s"
@@ -14,8 +12,7 @@ array(2) {
     string(1) "I"
   }
 }
-array(1) {
-  [0]=>
+varray(1) {
   object(ReflectionMethod) (2) {
     ["name"]=>
     string(1) "s"

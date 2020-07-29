@@ -1,6 +1,5 @@
 Test begin
-array(1) {
-  [0]=>
+varray(1) {
   int(23)
 }
 object(T) (2) {
@@ -9,8 +8,7 @@ object(T) (2) {
   ["int"]=>
   int(3)
 }
-array(1) {
-  [0]=>
+varray(1) {
   int(6)
 }
 OutOfBoundsException: Lval on missing array element

@@ -1,8 +1,8 @@
-array(1) {
+darray(1) {
   ["xhtml"]=>
   string(31) "http://www.w3.org/TR/REC-html40"
 }
-array(3) {
+darray(3) {
   ["xhtml"]=>
   string(31) "http://www.w3.org/TR/REC-html40"
   ["html"]=>
@@ -10,13 +10,13 @@ array(3) {
   ["foo"]=>
   string(6) "foobar"
 }
-array(2) {
+darray(2) {
   ["html"]=>
   string(28) "http://www.w3.org/1999/xhtml"
   ["xhtml"]=>
   string(31) "http://www.w3.org/TR/REC-html40"
 }
-array(4) {
+darray(4) {
   ["html"]=>
   string(28) "http://www.w3.org/1999/xhtml"
   ["xhtml"]=>
@@ -26,16 +26,16 @@ array(4) {
   ["baz"]=>
   string(9) "foobarbaz"
 }
-array(1) {
+darray(1) {
   [""]=>
   string(28) "http://www.w3.org/1999/xhtml"
 }
-array(1) {
+darray(1) {
   [""]=>
   string(28) "http://www.w3.org/1999/xhtml"
 }
-array(0) {
+darray(0) {
 }
-array(0) {
+darray(0) {
 }
 ===DONE===

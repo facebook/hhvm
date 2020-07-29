@@ -1,6 +1,6 @@
 === A ===
 string(7) "~HH\int"
-array(2) {
+darray(2) {
   ["like"]=>
   bool(true)
   ["kind"]=>
@@ -8,13 +8,12 @@ array(2) {
 }
 === B ===
 string(15) "HH\vec<~HH\int>"
-array(2) {
+darray(2) {
   ["kind"]=>
   int(20)
   ["generic_types"]=>
-  array(1) {
-    [0]=>
-    array(2) {
+  varray(1) {
+    darray(2) {
       ["like"]=>
       bool(true)
       ["kind"]=>
@@ -24,20 +23,18 @@ array(2) {
 }
 === C ===
 string(27) "~HH\dict<HH\string, HH\int>"
-array(3) {
+darray(3) {
   ["like"]=>
   bool(true)
   ["kind"]=>
   int(19)
   ["generic_types"]=>
-  array(2) {
-    [0]=>
-    array(1) {
+  varray(2) {
+    darray(1) {
       ["kind"]=>
       int(4)
     }
-    [1]=>
-    array(1) {
+    darray(1) {
       ["kind"]=>
       int(1)
     }
@@ -45,25 +42,22 @@ array(3) {
 }
 === D ===
 string(28) "(HH\int, ~HH\float, HH\bool)"
-array(2) {
+darray(2) {
   ["kind"]=>
   int(10)
   ["elem_types"]=>
-  array(3) {
-    [0]=>
-    array(1) {
+  varray(3) {
+    darray(1) {
       ["kind"]=>
       int(1)
     }
-    [1]=>
-    array(2) {
+    darray(2) {
       ["like"]=>
       bool(true)
       ["kind"]=>
       int(3)
     }
-    [2]=>
-    array(1) {
+    darray(1) {
       ["kind"]=>
       int(2)
     }
@@ -71,24 +65,23 @@ array(2) {
 }
 === E ===
 string(46) "HH\shape('x'=>HH\string, 'y'=>HH\vec<~HH\int>)"
-array(2) {
+darray(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  array(2) {
+  darray(2) {
     ["x"]=>
-    array(1) {
+    darray(1) {
       ["kind"]=>
       int(4)
     }
     ["y"]=>
-    array(2) {
+    darray(2) {
       ["kind"]=>
       int(20)
       ["generic_types"]=>
-      array(1) {
-        [0]=>
-        array(2) {
+      varray(1) {
+        darray(2) {
           ["like"]=>
           bool(true)
           ["kind"]=>
@@ -100,41 +93,41 @@ array(2) {
 }
 === F ===
 string(22) "(function (): ~HH\int)"
-array(3) {
+darray(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  array(2) {
+  darray(2) {
     ["like"]=>
     bool(true)
     ["kind"]=>
     int(1)
   }
   ["param_types"]=>
-  array(0) {
+  varray(0) {
   }
 }
 === G ===
 string(11) "~HH\this::F"
-array(4) {
+darray(4) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  array(2) {
+  darray(2) {
     ["like"]=>
     bool(true)
     ["kind"]=>
     int(1)
   }
   ["param_types"]=>
-  array(0) {
+  varray(0) {
   }
   ["like"]=>
   bool(true)
 }
 === H ===
 string(8) "~?HH\int"
-array(3) {
+darray(3) {
   ["nullable"]=>
   bool(true)
   ["like"]=>
@@ -144,7 +137,7 @@ array(3) {
 }
 === I ===
 string(2) "~C"
-array(3) {
+darray(3) {
   ["like"]=>
   bool(true)
   ["kind"]=>
@@ -154,7 +147,7 @@ array(3) {
 }
 === J ===
 string(7) "~HH\int"
-array(2) {
+darray(2) {
   ["like"]=>
   bool(true)
   ["kind"]=>

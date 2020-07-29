@@ -11,7 +11,7 @@ Exception: "Invalid vec key: expected a key of type int, bool given"
 ======= base_define ================================
 vec(3) {
   NULL
-  array(1) {
+  darray(1) {
     ["a"]=>
     int(200)
   }
@@ -20,7 +20,7 @@ vec(3) {
 Exception: "Out of bounds vec access: invalid index 3"
 vec(3) {
   NULL
-  array(1) {
+  darray(1) {
     ["a"]=>
     int(100)
   }
@@ -29,7 +29,7 @@ vec(3) {
 Exception: "Invalid vec key: expected a key of type int, string given"
 vec(3) {
   NULL
-  array(1) {
+  darray(1) {
     ["a"]=>
     int(100)
   }
@@ -38,7 +38,7 @@ vec(3) {
 Exception: "Invalid vec key: expected a key of type int, bool given"
 vec(3) {
   NULL
-  array(1) {
+  darray(1) {
     ["a"]=>
     int(100)
   }
@@ -47,13 +47,13 @@ vec(3) {
 ======= base_unset =================================
 vec(3) {
   NULL
-  array(0) {
+  darray(0) {
   }
   string(0) ""
 }
 vec(3) {
   NULL
-  array(1) {
+  darray(1) {
     ["a"]=>
     int(100)
   }
@@ -61,7 +61,7 @@ vec(3) {
 }
 vec(3) {
   NULL
-  array(1) {
+  darray(1) {
     ["a"]=>
     int(100)
   }
@@ -70,7 +70,7 @@ vec(3) {
 Exception: "Invalid vec key: expected a key of type int, bool given"
 vec(3) {
   NULL
-  array(1) {
+  darray(1) {
     ["a"]=>
     int(100)
   }
@@ -80,14 +80,14 @@ vec(3) {
 Exception: "Cannot use [] with vecs for reading in an lvalue context"
 ======= base_prop_get ==============================
 
-Notice: Cannot access property on non-object in %s/test/quick/vec/member-ops.php on line %d
+Notice: Cannot access property on non-object in %s/member-ops.php on line %d
 NULL
 ======= base_prop_set ==============================
 
 Warning: Cannot access property on non-object in %s/member-ops.php on line %d
 vec(3) {
   NULL
-  array(1) {
+  darray(1) {
     ["a"]=>
     int(100)
   }
@@ -104,13 +104,11 @@ string(7) "MISSING"
 string(7) "MISSING"
 Exception: "Invalid vec key: expected a key of type int, bool given"
 ======= dim_define =================================
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
-    array(1) {
+    darray(1) {
       ["a"]=>
       int(200)
     }
@@ -118,13 +116,11 @@ array(2) {
   }
 }
 Exception: "Out of bounds vec access: invalid index 3"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
-    array(1) {
+    darray(1) {
       ["a"]=>
       int(100)
     }
@@ -132,13 +128,11 @@ array(2) {
   }
 }
 Exception: "Invalid vec key: expected a key of type int, string given"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
-    array(1) {
+    darray(1) {
       ["a"]=>
       int(100)
     }
@@ -146,13 +140,11 @@ array(2) {
   }
 }
 Exception: "Invalid vec key: expected a key of type int, bool given"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
-    array(1) {
+    darray(1) {
       ["a"]=>
       int(100)
     }
@@ -160,37 +152,31 @@ array(2) {
   }
 }
 ======= dim_unset ==================================
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
-    array(0) {
+    darray(0) {
     }
     string(0) ""
   }
 }
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
-    array(1) {
+    darray(1) {
       ["a"]=>
       int(100)
     }
     string(0) ""
   }
 }
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
-    array(1) {
+    darray(1) {
       ["a"]=>
       int(100)
     }
@@ -198,13 +184,11 @@ array(2) {
   }
 }
 Exception: "Invalid vec key: expected a key of type int, bool given"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
-    array(1) {
+    darray(1) {
       ["a"]=>
       int(100)
     }
@@ -215,18 +199,16 @@ array(2) {
 Exception: "Cannot use [] with vecs for reading in an lvalue context"
 ======= dim_prop_get ===============================
 
-Notice: Cannot access property on non-object in %s/test/quick/vec/member-ops.php on line %d
+Notice: Cannot access property on non-object in %s/member-ops.php on line %d
 NULL
 ======= dim_prop_set ===============================
 
 Warning: Cannot access property on non-object in %s/member-ops.php on line %d
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
-    array(1) {
+    darray(1) {
       ["a"]=>
       int(100)
     }
@@ -254,10 +236,8 @@ bool(false)
 bool(false)
 Exception: "Invalid vec key: expected a key of type int, bool given"
 ======= fini_set ===================================
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
     int(123)
@@ -265,10 +245,8 @@ array(2) {
   }
 }
 Exception: "Out of bounds vec access: invalid index 3"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
     string(3) "abc"
@@ -276,10 +254,8 @@ array(2) {
   }
 }
 Exception: "Invalid vec key: expected a key of type int, string given"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
     string(3) "abc"
@@ -287,10 +263,8 @@ array(2) {
   }
 }
 Exception: "Invalid vec key: expected a key of type int, bool given"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
     string(3) "abc"
@@ -298,10 +272,8 @@ array(2) {
   }
 }
 ======= fini_set_new_elem ==========================
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(4) {
     NULL
     string(3) "abc"
@@ -311,11 +283,9 @@ array(2) {
 }
 ======= fini_incdec ================================
 
-Notice: Increment on string 'abc' in %s/test/quick/vec/member-ops.php on line %d
-array(2) {
-  [0]=>
+Notice: Increment on string 'abc' in %s/member-ops.php on line %d
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
     string(3) "abd"
@@ -323,10 +293,8 @@ array(2) {
   }
 }
 Exception: "Out of bounds vec access: invalid index 3"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
     string(3) "abc"
@@ -334,10 +302,8 @@ array(2) {
   }
 }
 Exception: "Invalid vec key: expected a key of type int, string given"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
     string(3) "abc"
@@ -345,10 +311,8 @@ array(2) {
   }
 }
 Exception: "Invalid vec key: expected a key of type int, bool given"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
     string(3) "abc"
@@ -358,10 +322,8 @@ array(2) {
 ======= fini_incdec_new_elem =======================
 Exception: "Cannot use [] with vecs for reading in an lvalue context"
 ======= fini_setop =================================
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
     string(11) "abcsome-str"
@@ -369,10 +331,8 @@ array(2) {
   }
 }
 Exception: "Out of bounds vec access: invalid index 3"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
     string(3) "abc"
@@ -380,10 +340,8 @@ array(2) {
   }
 }
 Exception: "Invalid vec key: expected a key of type int, string given"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
     string(3) "abc"
@@ -391,10 +349,8 @@ array(2) {
   }
 }
 Exception: "Invalid vec key: expected a key of type int, bool given"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
     string(3) "abc"
@@ -405,30 +361,24 @@ array(2) {
 Exception: "Cannot use [] with vecs for reading in an lvalue context"
 ======= fini_unset =================================
 Exception: "Vecs do not support unsetting non-end elements"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
     string(3) "abc"
     string(0) ""
   }
 }
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
     string(3) "abc"
     string(0) ""
   }
 }
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
     string(3) "abc"
@@ -436,10 +386,8 @@ array(2) {
   }
 }
 Exception: "Invalid vec key: expected a key of type int, bool given"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
     string(3) "abc"
@@ -448,15 +396,13 @@ array(2) {
 }
 ======= fini_prop_get ===============================
 
-Notice: Cannot access property on non-object in %s/test/quick/vec/member-ops.php on line %d
+Notice: Cannot access property on non-object in %s/member-ops.php on line %d
 NULL
 ======= fini_prop_set ===============================
 
-Warning: Cannot access property on non-object in %s/test/quick/vec/member-ops.php on line %d
-array(2) {
-  [0]=>
+Warning: Cannot access property on non-object in %s/member-ops.php on line %d
+varray(2) {
   NULL
-  [1]=>
   vec(3) {
     NULL
     string(3) "abc"

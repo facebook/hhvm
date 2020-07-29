@@ -1,26 +1,26 @@
-array(3) {
+darray(3) {
   ["file"]=>
-  string(%d) "%shphp_debug_caller_info.php"
+  string(%d) "%s/hphp_debug_caller_info.php"
   ["function"]=>
   string(3) "bar"
   ["line"]=>
   int(8)
 }
-array(4) {
+darray(4) {
   ["class"]=>
   string(3) "Baz"
   ["file"]=>
-  string(%d) "%shphp_debug_caller_info.php"
+  string(%d) "%s/hphp_debug_caller_info.php"
   ["function"]=>
   string(5) "smeth"
   ["line"]=>
   int(13)
 }
-array(4) {
+darray(4) {
   ["class"]=>
   string(3) "Baz"
   ["file"]=>
-  string(%d) "%shphp_debug_caller_info.php"
+  string(%d) "%s/hphp_debug_caller_info.php"
   ["function"]=>
   string(5) "imeth"
   ["line"]=>

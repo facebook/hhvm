@@ -1,7 +1,6 @@
 object(A) (1) {
   ["a":"A":private]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     string(5) "apple"
   }
 }

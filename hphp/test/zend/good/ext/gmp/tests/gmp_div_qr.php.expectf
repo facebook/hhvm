@@ -1,14 +1,11 @@
-
 Warning: gmp_div_qr() expects at least 2 parameters, 0 given in %s/gmp_div_qr.php on line 3
 
 Warning: gmp_div_qr() expects at least 2 parameters, 1 given in %s/gmp_div_qr.php on line 4
-array(2) {
-  [0]=>
+varray(2) {
   object(GMP) (1) {
     ["num"]=>
     string(1) "0"
   }
-  [1]=>
   object(GMP) (1) {
     ["num"]=>
     string(1) "0"
@@ -20,13 +17,11 @@ bool(false)
 
 Warning: gmp_div_qr(): Zero operand not allowed in %s/gmp_div_qr.php on line 8
 bool(false)
-array(2) {
-  [0]=>
+varray(2) {
   object(GMP) (1) {
     ["num"]=>
     string(1) "0"
   }
-  [1]=>
   object(GMP) (1) {
     ["num"]=>
     string(5) "12653"
@@ -35,85 +30,71 @@ array(2) {
 
 Warning: gmp_div_qr(): Invalid rounding mode in %s/gmp_div_qr.php on line 10
 bool(false)
-array(2) {
-  [0]=>
+varray(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
   }
-  [1]=>
   object(GMP) (1) {
     ["num"]=>
     string(2) "10"
   }
 }
-array(2) {
-  [0]=>
+varray(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9132"
   }
-  [1]=>
   object(GMP) (1) {
     ["num"]=>
     string(4) "-113"
   }
 }
-array(2) {
-  [0]=>
+varray(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
   }
-  [1]=>
   object(GMP) (1) {
     ["num"]=>
     string(2) "10"
   }
 }
-array(2) {
-  [0]=>
+varray(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
   }
-  [1]=>
   object(GMP) (1) {
     ["num"]=>
     string(2) "10"
   }
 }
-array(2) {
-  [0]=>
+varray(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
   }
-  [1]=>
   object(GMP) (1) {
     ["num"]=>
     string(2) "10"
   }
 }
-array(2) {
-  [0]=>
+varray(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9132"
   }
-  [1]=>
   object(GMP) (1) {
     ["num"]=>
     string(4) "-113"
   }
 }
-array(2) {
-  [0]=>
+varray(2) {
   object(GMP) (1) {
     ["num"]=>
     string(4) "9131"
   }
-  [1]=>
   object(GMP) (1) {
     ["num"]=>
     string(2) "10"

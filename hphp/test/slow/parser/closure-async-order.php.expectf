@@ -1,8 +1,7 @@
-array(1) {
-  [0]=>
+varray(1) {
   object(ReflectionParameter) (3) {
     ["info"]=>
-    array(12) {
+    darray(12) {
       ["index"]=>
       int(0)
       ["name"]=>
@@ -22,7 +21,7 @@ array(1) {
       ["default"]=>
       object(Closure$%s;%s) (1) {
         ["parameter"]=>
-        array(1) {
+        darray(1) {
           ["$x"]=>
           string(10) "<required>"
         }
@@ -32,7 +31,7 @@ array(1) {
 }
 "
       ["attributes"]=>
-      array(0) {
+      darray(0) {
       }
       ["is_optional"]=>
       bool(true)
@@ -40,7 +39,7 @@ array(1) {
     ["name"]=>
     string(1) "a"
     ["paramTypeInfo"]=>
-    array(3) {
+    darray(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>

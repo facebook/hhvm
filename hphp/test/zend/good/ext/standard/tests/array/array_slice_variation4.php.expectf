@@ -45,7 +45,7 @@ Warning: array_slice() expects parameter 4 to be boolean, null given in %s/zend/
 Warning: array_slice() expects parameter 4 to be boolean, null given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 85
 
 -- Iteration 12 --
-array(3) {
+darray(3) {
   ["one"]=>
   int(1)
   [0]=>
@@ -55,7 +55,7 @@ array(3) {
 }
 
 -- Iteration 13 --
-array(3) {
+darray(3) {
   ["one"]=>
   int(1)
   [0]=>
@@ -65,7 +65,7 @@ array(3) {
 }
 
 -- Iteration 14 --
-array(3) {
+darray(3) {
   ["one"]=>
   int(1)
   [0]=>
@@ -75,7 +75,7 @@ array(3) {
 }
 
 -- Iteration 15 --
-array(3) {
+darray(3) {
   ["one"]=>
   int(1)
   [0]=>

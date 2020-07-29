@@ -1,21 +1,15 @@
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   bool(true)
-  [2]=>
   string(1) "c"
 }
 bool(true)
 int(1)
 string(5) "green"
 string(4) "blue"
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   bool(true)
-  [2]=>
   string(1) "c"
 }
 bool(true)

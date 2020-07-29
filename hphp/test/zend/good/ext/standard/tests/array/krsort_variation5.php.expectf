@@ -5,7 +5,7 @@
 -- Iteration 1 --
 - With defualt sort flag -
 bool(true)
-array(11) {
+darray(11) {
   ["\xhh"]=>
   string(4) "\xhh"
   ["\ddd"]=>
@@ -14,28 +14,26 @@ array(11) {
   string(3) "\cx"
   ["\a"]=>
   string(2) "\a"
-  ["%r\x1b%r"]=>
-  string(1) "%r\x1b%r"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
   ["
 "]=>
   string(1) "
 "
-  ["%r\x0c%r"]=>
-  string(1) "%r\x0c%r"
-  ["%r\x0b%r"]=>
-  string(1) "%r\x0b%r"
-  ["
-"]=>
-  string(1) "
-"
-  ["%r\x09%r"]=>
-  string(1) "%r\x09%r"
+  ["	"]=>
+  string(1) "	"
   [""]=>
   NULL
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-array(11) {
+darray(11) {
   ["\xhh"]=>
   string(4) "\xhh"
   ["\ddd"]=>
@@ -44,28 +42,26 @@ array(11) {
   string(3) "\cx"
   ["\a"]=>
   string(2) "\a"
-  ["%r\x1b%r"]=>
-  string(1) "%r\x1b%r"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
   ["
 "]=>
   string(1) "
 "
-  ["%r\x0c%r"]=>
-  string(1) "%r\x0c%r"
-  ["%r\x0b%r"]=>
-  string(1) "%r\x0b%r"
-  ["
-"]=>
-  string(1) "
-"
-  ["%r\x09%r"]=>
-  string(1) "%r\x09%r"
+  ["	"]=>
+  string(1) "	"
   [""]=>
   NULL
 }
 - Sort flag = SORT_STRING -
 bool(true)
-array(11) {
+darray(11) {
   ["\xhh"]=>
   string(4) "\xhh"
   ["\ddd"]=>
@@ -74,22 +70,20 @@ array(11) {
   string(3) "\cx"
   ["\a"]=>
   string(2) "\a"
-  ["%r\x1b%r"]=>
-  string(1) "%r\x1b%r"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
   ["
 "]=>
   string(1) "
 "
-  ["%r\x0c%r"]=>
-  string(1) "%r\x0c%r"
-  ["%r\x0b%r"]=>
-  string(1) "%r\x0b%r"
-  ["
-"]=>
-  string(1) "
-"
-  ["%r\x09%r"]=>
-  string(1) "%r\x09%r"
+  ["	"]=>
+  string(1) "	"
   [""]=>
   NULL
 }
@@ -97,7 +91,7 @@ array(11) {
 -- Iteration 2 --
 - With defualt sort flag -
 bool(true)
-array(11) {
+darray(11) {
   ["x"]=>
   string(1) "X"
   ["te"]=>
@@ -123,7 +117,7 @@ array(11) {
 }
 - Sort flag = SORT_REGULAR -
 bool(true)
-array(11) {
+darray(11) {
   ["x"]=>
   string(1) "X"
   ["te"]=>
@@ -149,7 +143,7 @@ array(11) {
 }
 - Sort flag = SORT_STRING -
 bool(true)
-array(11) {
+darray(11) {
   ["x"]=>
   string(1) "X"
   ["te"]=>

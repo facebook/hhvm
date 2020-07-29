@@ -1,7 +1,5 @@
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Sub"
-  [1]=>
   string(3) "Add"
 }
 ok

@@ -123,7 +123,7 @@ ERROR: string(%d) "Value returned from function takes_keyset4() must be of type 
 object(stdClass) (0) {
 }
 ====================================================
-array(0) {
+varray(0) {
 }
 ERROR: string(%d) "Argument 1 to takes_keyset1() must be of type @HH\keyset, %rv?%rarray given"
 ERROR: string(%d) "Value returned from function takes_keyset1() must be of type HH\keyset, %rv?%rarray given"
@@ -133,15 +133,12 @@ ERROR: string(%d) "Argument 1 to takes_keyset3() must be of type @HH\keyset, %rv
 ERROR: string(%d) "Value returned from function takes_keyset3() must be of type HH\keyset, %rv?%rarray given"
 ERROR: string(%d) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, %rv?%rarray given"
 ERROR: string(%d) "Value returned from function takes_keyset4() must be of type ?HH\keyset, %rv?%rarray given"
-array(0) {
+varray(0) {
 }
 ====================================================
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 ERROR: string(%d) "Argument 1 to takes_keyset1() must be of type @HH\keyset, %rv?%rarray given"
@@ -152,12 +149,9 @@ ERROR: string(%d) "Argument 1 to takes_keyset3() must be of type @HH\keyset, %rv
 ERROR: string(%d) "Value returned from function takes_keyset3() must be of type HH\keyset, %rv?%rarray given"
 ERROR: string(%d) "Argument 1 to takes_keyset4() must be of type @?HH\keyset, %rv?%rarray given"
 ERROR: string(%d) "Value returned from function takes_keyset4() must be of type ?HH\keyset, %rv?%rarray given"
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 ====================================================

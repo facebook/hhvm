@@ -3,9 +3,9 @@ bool(false)
 bool(false)
 bool(false)
 bool(true)
-array(0) {
+varray(0) {
 }
-array(0) {
+varray(0) {
 }
 Undefined index: 0
 string(0) ""
@@ -13,14 +13,11 @@ string(0) ""
 NULL
 varrays do not support unsetting non-end elements
 varrays do not support unsetting non-end elements
-array(1) {
+darray(1) {
   ["foo"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(0)
-    [1]=>
     int(1)
-    [2]=>
     int(2)
   }
 }

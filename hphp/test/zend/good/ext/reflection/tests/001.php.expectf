@@ -1,9 +1,7 @@
-array(0) {
+varray(0) {
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "bla"
-  [1]=>
   string(4) "name"
 }
 string(17) "ReflectionClassEx"

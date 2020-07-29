@@ -4,10 +4,8 @@ NULL
 
 Decoding: {'Organization': 'PHP Documentation Team'}
 4: Syntax error
-array(2) {
-  [0]=>
+varray(2) {
   int(4)
-  [1]=>
   string(12) "Syntax error"
 }
 
@@ -25,9 +23,7 @@ NULL
 
 Encoding: Ÿ
 5: Malformed UTF-8 characters, possibly incorrectly encoded
-array(2) {
-  [0]=>
+varray(2) {
   int(5)
-  [1]=>
   string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
 }

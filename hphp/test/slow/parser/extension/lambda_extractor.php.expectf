@@ -1,49 +1,31 @@
 bool(true)
-array(2) {
-  [0]=>
-  array(2) {
-    [0]=>
+varray(2) {
+  varray(2) {
     int(7)
-    [1]=>
     int(100)
   }
-  [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(9)
-    [1]=>
     int(131)
   }
 }
-array(2) {
-  [0]=>
-  array(2) {
-    [0]=>
+varray(2) {
+  varray(2) {
     int(12)
-    [1]=>
     int(219)
   }
-  [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(12)
-    [1]=>
     int(220)
   }
 }
-array(2) {
-  [0]=>
-  array(2) {
-    [0]=>
+varray(2) {
+  varray(2) {
     int(13)
-    [1]=>
     int(269)
   }
-  [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(13)
-    [1]=>
     int(282)
   }
 }

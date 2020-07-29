@@ -3,12 +3,12 @@ Matches Only:
 RE: /foo(bar)?/
 In: foo
 PHP:
-array(1) {
+darray(1) {
   [0]=>
   string(3) "foo"
 }
 HSL:
-array(2) {
+darray(2) {
   [0]=>
   string(3) "foo"
   [1]=>
@@ -18,12 +18,12 @@ array(2) {
 RE: /foo(?<bar>bar)?/
 In: foo
 PHP:
-array(1) {
+darray(1) {
   [0]=>
   string(3) "foo"
 }
 HSL:
-array(3) {
+darray(3) {
   [0]=>
   string(3) "foo"
   ["bar"]=>
@@ -35,12 +35,12 @@ array(3) {
 RE: /foo(?<bar>bar)?(baz)?/
 In: foo
 PHP:
-array(1) {
+darray(1) {
   [0]=>
   string(3) "foo"
 }
 HSL:
-array(4) {
+darray(4) {
   [0]=>
   string(3) "foo"
   ["bar"]=>
@@ -54,7 +54,7 @@ array(4) {
 RE: /foo(?<bar>bar)?(baz)?/
 In: foobar
 PHP:
-array(3) {
+darray(3) {
   [0]=>
   string(6) "foobar"
   ["bar"]=>
@@ -63,7 +63,7 @@ array(3) {
   string(3) "bar"
 }
 HSL:
-array(4) {
+darray(4) {
   [0]=>
   string(6) "foobar"
   ["bar"]=>
@@ -77,7 +77,7 @@ array(4) {
 RE: /foo(?<bar>bar)?(baz)?/
 In: foobaz
 PHP:
-array(4) {
+darray(4) {
   [0]=>
   string(6) "foobaz"
   ["bar"]=>
@@ -88,7 +88,7 @@ array(4) {
   string(3) "baz"
 }
 HSL:
-array(4) {
+darray(4) {
   [0]=>
   string(6) "foobaz"
   ["bar"]=>
@@ -102,7 +102,7 @@ array(4) {
 RE: /foo(?<bar>bar)?(baz)?/
 In: foobarbaz
 PHP:
-array(4) {
+darray(4) {
   [0]=>
   string(9) "foobarbaz"
   ["bar"]=>
@@ -113,7 +113,7 @@ array(4) {
   string(3) "baz"
 }
 HSL:
-array(4) {
+darray(4) {
   [0]=>
   string(9) "foobarbaz"
   ["bar"]=>
@@ -128,29 +128,23 @@ Matches with Offsets:
 RE: /foo(bar)?/
 In: foo
 PHP:
-array(1) {
+darray(1) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "foo"
-    [1]=>
     int(0)
   }
 }
 HSL:
-array(2) {
+darray(2) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "foo"
-    [1]=>
     int(0)
   }
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(0) ""
-    [1]=>
     int(-1)
   }
 }
@@ -158,36 +152,28 @@ array(2) {
 RE: /foo(?<bar>bar)?/
 In: foo
 PHP:
-array(1) {
+darray(1) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "foo"
-    [1]=>
     int(0)
   }
 }
 HSL:
-array(3) {
+darray(3) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "foo"
-    [1]=>
     int(0)
   }
   ["bar"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(0) ""
-    [1]=>
     int(-1)
   }
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(0) ""
-    [1]=>
     int(-1)
   }
 }
@@ -195,43 +181,33 @@ array(3) {
 RE: /foo(?<bar>bar)?(baz)?/
 In: foo
 PHP:
-array(1) {
+darray(1) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "foo"
-    [1]=>
     int(0)
   }
 }
 HSL:
-array(4) {
+darray(4) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "foo"
-    [1]=>
     int(0)
   }
   ["bar"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(0) ""
-    [1]=>
     int(-1)
   }
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(0) ""
-    [1]=>
     int(-1)
   }
   [2]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(0) ""
-    [1]=>
     int(-1)
   }
 }
@@ -239,57 +215,43 @@ array(4) {
 RE: /foo(?<bar>bar)?(baz)?/
 In: foobar
 PHP:
-array(3) {
+darray(3) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(6) "foobar"
-    [1]=>
     int(0)
   }
   ["bar"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "bar"
-    [1]=>
     int(3)
   }
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "bar"
-    [1]=>
     int(3)
   }
 }
 HSL:
-array(4) {
+darray(4) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(6) "foobar"
-    [1]=>
     int(0)
   }
   ["bar"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "bar"
-    [1]=>
     int(3)
   }
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "bar"
-    [1]=>
     int(3)
   }
   [2]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(0) ""
-    [1]=>
     int(-1)
   }
 }
@@ -297,64 +259,48 @@ array(4) {
 RE: /foo(?<bar>bar)?(baz)?/
 In: foobaz
 PHP:
-array(4) {
+darray(4) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(6) "foobaz"
-    [1]=>
     int(0)
   }
   ["bar"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(0) ""
-    [1]=>
     int(-1)
   }
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(0) ""
-    [1]=>
     int(-1)
   }
   [2]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "baz"
-    [1]=>
     int(3)
   }
 }
 HSL:
-array(4) {
+darray(4) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(6) "foobaz"
-    [1]=>
     int(0)
   }
   ["bar"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(0) ""
-    [1]=>
     int(-1)
   }
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(0) ""
-    [1]=>
     int(-1)
   }
   [2]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "baz"
-    [1]=>
     int(3)
   }
 }
@@ -362,64 +308,48 @@ array(4) {
 RE: /foo(?<bar>bar)?(baz)?/
 In: foobarbaz
 PHP:
-array(4) {
+darray(4) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(9) "foobarbaz"
-    [1]=>
     int(0)
   }
   ["bar"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "bar"
-    [1]=>
     int(3)
   }
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "bar"
-    [1]=>
     int(3)
   }
   [2]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "baz"
-    [1]=>
     int(6)
   }
 }
 HSL:
-array(4) {
+darray(4) {
   [0]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(9) "foobarbaz"
-    [1]=>
     int(0)
   }
   ["bar"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "bar"
-    [1]=>
     int(3)
   }
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "bar"
-    [1]=>
     int(3)
   }
   [2]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(3) "baz"
-    [1]=>
     int(6)
   }
 }

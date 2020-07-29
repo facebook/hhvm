@@ -1,10 +1,10 @@
-array(2) {
+darray(2) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(1) "B"
 }
-array(2) {
+darray(2) {
   ["kind"]=>
   int(15)
   ["classname"]=>

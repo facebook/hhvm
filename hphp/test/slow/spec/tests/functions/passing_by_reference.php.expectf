@@ -1,18 +1,12 @@
 float(1.23E+27)
-array(3) {
-  [0]=>
+varray(3) {
   int(10)
-  [1]=>
   bool(true)
-  [2]=>
   NULL
 }
-array(3) {
-  [0]=>
+varray(3) {
   int(10)
-  [1]=>
   bool(true)
-  [2]=>
   NULL
 }
 float(1.23E+27)

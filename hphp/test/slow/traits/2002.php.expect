@@ -1,10 +1,10 @@
-array(0) {
+darray(0) {
 }
-array(1) {
+darray(1) {
   ["T2"]=>
   string(2) "T2"
 }
-array(2) {
+darray(2) {
   ["T3"]=>
   string(2) "T3"
   ["T1"]=>

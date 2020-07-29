@@ -1,19 +1,14 @@
-array(1) {
-  [0]=>
+varray(1) {
   string(3) "foo"
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(3) "foo"
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(3) "foo"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "foo"
-  [1]=>
   string(3) "bar"
 }
 string(6) "foobar"

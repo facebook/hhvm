@@ -2,11 +2,10 @@
 
 -- Testing fgetcsv() with file opened using r mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(13) ""water",fruit"
 }
 int(14)
@@ -14,11 +13,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(13) ""water",fruit"
 }
 int(14)
@@ -26,11 +24,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(13) ""water",fruit"
 }
 int(14)
@@ -38,11 +35,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(13) ""water",fruit"
 }
 int(14)
@@ -50,11 +46,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(13) ""water",fruit"
 }
 int(14)
@@ -62,11 +57,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(13) ""water",fruit"
 }
 int(14)
@@ -74,11 +68,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(13) ""water",fruit"
 }
 int(14)
@@ -86,11 +79,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(13) ""water",fruit"
 }
 int(14)
@@ -98,11 +90,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(13) ""water",fruit"
 }
 int(14)
@@ -110,11 +101,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) ""water","fruit""
 }
 int(16)
@@ -122,11 +112,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) ""water","fruit""
 }
 int(16)
@@ -134,11 +123,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) ""water","fruit""
 }
 int(16)
@@ -146,11 +134,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) ""water","fruit""
 }
 int(16)
@@ -158,11 +145,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) ""water","fruit""
 }
 int(16)
@@ -170,11 +156,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) ""water","fruit""
 }
 int(16)
@@ -182,11 +167,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) ""water","fruit""
 }
 int(16)
@@ -194,11 +178,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) ""water","fruit""
 }
 int(16)
@@ -206,11 +189,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) ""water","fruit""
 }
 int(16)
@@ -218,11 +200,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "^water^ ^fruit^"
 }
 int(16)
@@ -230,11 +211,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "^water^ ^fruit^"
 }
 int(16)
@@ -242,11 +222,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "^water^ ^fruit^"
 }
 int(16)
@@ -254,11 +233,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "^water^ ^fruit^"
 }
 int(16)
@@ -266,11 +244,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "^water^ ^fruit^"
 }
 int(16)
@@ -278,11 +255,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "^water^ ^fruit^"
 }
 int(16)
@@ -290,11 +266,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "^water^ ^fruit^"
 }
 int(16)
@@ -302,11 +277,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "^water^ ^fruit^"
 }
 int(16)
@@ -314,11 +288,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "^water^ ^fruit^"
 }
 int(16)
@@ -326,11 +299,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "&water&:&fruit&"
 }
 int(16)
@@ -338,11 +310,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "&water&:&fruit&"
 }
 int(16)
@@ -350,11 +321,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "&water&:&fruit&"
 }
 int(16)
@@ -362,11 +332,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "&water&:&fruit&"
 }
 int(16)
@@ -374,11 +343,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "&water&:&fruit&"
 }
 int(16)
@@ -386,11 +354,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "&water&:&fruit&"
 }
 int(16)
@@ -398,11 +365,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "&water&:&fruit&"
 }
 int(16)
@@ -410,11 +376,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "&water&:&fruit&"
 }
 int(16)
@@ -422,11 +387,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "&water&:&fruit&"
 }
 int(16)
@@ -434,11 +398,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "=water===fruit="
 }
 int(16)
@@ -446,11 +409,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "=water===fruit="
 }
 int(16)
@@ -458,11 +420,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "=water===fruit="
 }
 int(16)
@@ -470,11 +431,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "=water===fruit="
 }
 int(16)
@@ -482,11 +442,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "=water===fruit="
 }
 int(16)
@@ -494,11 +453,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "=water===fruit="
 }
 int(16)
@@ -506,11 +464,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "=water===fruit="
 }
 int(16)
@@ -518,11 +475,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "=water===fruit="
 }
 int(16)
@@ -530,11 +486,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(15) "=water===fruit="
 }
 int(16)
@@ -542,11 +497,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(17) "-water--fruit-air"
 }
 int(18)
@@ -554,11 +508,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(17) "-water--fruit-air"
 }
 int(18)
@@ -566,11 +519,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(17) "-water--fruit-air"
 }
 int(18)
@@ -578,11 +530,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(17) "-water--fruit-air"
 }
 int(18)
@@ -590,11 +541,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(17) "-water--fruit-air"
 }
 int(18)
@@ -602,11 +552,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(17) "-water--fruit-air"
 }
 int(18)
@@ -614,11 +563,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(17) "-water--fruit-air"
 }
 int(18)
@@ -626,11 +574,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(17) "-water--fruit-air"
 }
 int(18)
@@ -638,11 +585,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(17) "-water--fruit-air"
 }
 int(18)
@@ -650,11 +596,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(21) "-water---fruit---air-"
 }
 int(22)
@@ -662,11 +607,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(21) "-water---fruit---air-"
 }
 int(22)
@@ -674,11 +618,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(21) "-water---fruit---air-"
 }
 int(22)
@@ -686,11 +629,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(21) "-water---fruit---air-"
 }
 int(22)
@@ -698,11 +640,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(21) "-water---fruit---air-"
 }
 int(22)
@@ -710,11 +651,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(21) "-water---fruit---air-"
 }
 int(22)
@@ -722,11 +662,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(21) "-water---fruit---air-"
 }
 int(22)
@@ -734,11 +673,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(21) "-water---fruit---air-"
 }
 int(22)
@@ -746,11 +684,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(21) "-water---fruit---air-"
 }
 int(22)
@@ -758,11 +695,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(23) "&""""&:&"&:,:":&,&:,,,,"
 }
 int(24)
@@ -770,11 +706,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rb mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(23) "&""""&:&"&:,:":&,&:,,,,"
 }
 int(24)
@@ -782,11 +717,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using rt mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(23) "&""""&:&"&:,:":&,&:,,,,"
 }
 int(24)
@@ -794,11 +728,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+ mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(23) "&""""&:&"&:,:":&,&:,,,,"
 }
 int(24)
@@ -806,11 +739,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+b mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(23) "&""""&:&"&:,:":&,&:,,,,"
 }
 int(24)
@@ -818,11 +750,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using r+t mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(23) "&""""&:&"&:,:":&,&:,,,,"
 }
 int(24)
@@ -830,11 +761,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+ mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(23) "&""""&:&"&:,:":&,&:,,,,"
 }
 int(24)
@@ -842,11 +772,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+b mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(23) "&""""&:&"&:,:":&,&:,,,,"
 }
 int(24)
@@ -854,11 +783,10 @@ bool(false)
 
 -- Testing fgetcsv() with file opened using a+t mode --
 
-Notice: %s
+Notice: delimiter must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
 
-Notice: %s
-array(1) {
-  [0]=>
+Notice: enclosure must be a single character in %s/test/zend/good/ext/standard/tests/file/fgetcsv_variation12.php on line 74
+varray(1) {
   string(23) "&""""&:&"&:,:":&,&:,,,,"
 }
 int(24)

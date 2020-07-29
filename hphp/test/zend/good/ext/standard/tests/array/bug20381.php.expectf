@@ -1,51 +1,39 @@
-array(3) {
+darray(3) {
   ["a1"]=>
   int(1)
   ["a2"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(1)
-    [1]=>
     int(2)
-    [2]=>
     int(3)
   }
   ["a3"]=>
-  array(2) {
+  darray(2) {
     ["a"]=>
-    array(3) {
-      [0]=>
+    varray(3) {
       int(10)
-      [1]=>
       int(20)
-      [2]=>
       int(30)
     }
     ["b"]=>
     string(1) "b"
   }
 }
-array(3) {
+darray(3) {
   ["a1"]=>
   int(1)
   ["a2"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(1)
-    [1]=>
     int(2)
-    [2]=>
     int(3)
   }
   ["a3"]=>
-  array(2) {
+  darray(2) {
     ["a"]=>
-    array(3) {
-      [0]=>
+    varray(3) {
       int(10)
-      [1]=>
       int(20)
-      [2]=>
       int(30)
     }
     ["b"]=>

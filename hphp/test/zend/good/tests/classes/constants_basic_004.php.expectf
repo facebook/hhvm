@@ -1,21 +1,21 @@
 Static properties:
-array(1) {
+darray(1) {
   ["key"]=>
   string(5) "value"
 }
-array(1) {
+darray(1) {
   ["key"]=>
   string(5) "value"
 }
-array(1) {
+darray(1) {
   ["key"]=>
   string(5) "value"
 }
-array(1) {
+darray(1) {
   ["key"]=>
   string(5) "value"
 }
-array(1) {
+darray(1) {
   ["key"]=>
   string(5) "value"
 }
@@ -23,31 +23,31 @@ array(1) {
 Instance properties:
 object(X) (1) {
   ["a_x"]=>
-  array(1) {
+  darray(1) {
     ["key"]=>
     string(5) "value"
   }
 }
 object(B) (1) {
   ["a_b"]=>
-  array(1) {
+  darray(1) {
     ["key"]=>
     string(5) "value"
   }
 }
 object(C) (3) {
   ["a_c_parent"]=>
-  array(1) {
+  darray(1) {
     ["key"]=>
     string(5) "value"
   }
   ["a_c_self"]=>
-  array(1) {
+  darray(1) {
     ["key"]=>
     string(5) "value"
   }
   ["a_b"]=>
-  array(1) {
+  darray(1) {
     ["key"]=>
     string(5) "value"
   }

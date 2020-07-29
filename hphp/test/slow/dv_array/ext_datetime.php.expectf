@@ -1,4 +1,4 @@
-array(4) {
+darray(4) {
   ["country_code"]=>
   string(2) "US"
   ["latitude"]=>
@@ -8,18 +8,18 @@ array(4) {
   ["comments"]=>
   string(20) "Eastern (most areas)"
 }
-array(4) {
+darray(4) {
   ["warning_count"]=>
   int(1)
   ["warnings"]=>
-  array(1) {
+  darray(1) {
     [4]=>
     string(29) "Double timezone specification"
   }
   ["error_count"]=>
   int(7)
   ["errors"]=>
-  array(7) {
+  darray(7) {
     [0]=>
     string(20) "Unexpected character"
     [1]=>

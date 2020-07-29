@@ -1,7 +1,7 @@
 Order with array assignment:
 in f()
 in g()
-array(1) {
+darray(1) {
   [%u|b%"name"]=>
   %string|unicode%(14) "assigned value"
 }
@@ -10,7 +10,7 @@ array(1) {
 Order with static array property assignment:
 in f()
 in g()
-array(1) {
+darray(1) {
   [%u|b%"name"]=>
   %string|unicode%(14) "assigned value"
 }

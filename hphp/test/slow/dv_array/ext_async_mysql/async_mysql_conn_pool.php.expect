@@ -1,4 +1,4 @@
-array(5) {
+darray(5) {
   ["created_pool_connections"]=>
   int(0)
   ["destroyed_pool_connections"]=>

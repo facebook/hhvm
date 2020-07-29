@@ -1,8 +1,8 @@
-array(1) {
+darray(1) {
   ["test"]=>
-  array(1) {
+  darray(1) {
     ["sub_test"]=>
-    array(0) {
+    darray(0) {
     }
   }
 }

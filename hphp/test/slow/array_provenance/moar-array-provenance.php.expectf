@@ -1,38 +1,35 @@
-array(2) {
-  [0]=>
+varray(2) {
   int(%d)
-  [1]=>
   string(5) "hello"
 }
 string(%d) "%s/moar-array-provenance.php:45"
-array(2) {
+darray(2) {
   ["trash"]=>
   int(%d)
   [0]=>
   string(5) "hello"
 }
 string(%d) "%s/moar-array-provenance.php:48"
-array(2) {
+darray(2) {
   ["trash"]=>
   int(%d)
   [42]=>
   string(5) "hello"
 }
 string(%d) "%s/moar-array-provenance.php:51"
-array(2) {
+darray(2) {
   ["trash"]=>
   int(%d)
   ["blargh!"]=>
   string(7) "goodbye"
 }
 string(%d) "%s/moar-array-provenance.php:54"
-array(1) {
+darray(1) {
   [0]=>
   int(%d)
 }
 string(%d) "%s/moar-array-provenance.php:57"
-array(1) {
-  [0]=>
+varray(1) {
   int(%d)
 }
 string(%d) "%s/moar-array-provenance.php:60"

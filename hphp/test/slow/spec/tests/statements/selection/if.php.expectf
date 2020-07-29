@@ -11,12 +11,9 @@ Line 2
 >< is FALSE	NULL
 >xx< is TRUE	string(2) "xx"
 >< is FALSE	string(0) ""
->Array< is TRUE	array(3) {
-  [0]=>
+>Array< is TRUE	varray(3) {
   string(3) "red"
-  [1]=>
   string(5) "white"
-  [2]=>
   string(4) "blue"
 }
 object(Name) (2) {

@@ -152,7 +152,7 @@ Array
 )
 
 Output after Pop is :
-array(0) {
+varray(0) {
 }
 
 -- Input Array for Iteration 11 is --

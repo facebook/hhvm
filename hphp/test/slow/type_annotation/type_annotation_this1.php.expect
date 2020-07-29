@@ -1,4 +1,4 @@
-array(3) {
+darray(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
@@ -6,7 +6,7 @@ array(3) {
   ["exact"]=>
   bool(true)
 }
-array(3) {
+darray(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
@@ -14,11 +14,11 @@ array(3) {
   ["exact"]=>
   bool(true)
 }
-array(3) {
+darray(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  array(3) {
+  darray(3) {
     ["kind"]=>
     int(15)
     ["classname"]=>
@@ -27,9 +27,8 @@ array(3) {
     bool(true)
   }
   ["param_types"]=>
-  array(1) {
-    [0]=>
-    array(3) {
+  varray(1) {
+    darray(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
@@ -39,11 +38,11 @@ array(3) {
     }
   }
 }
-array(3) {
+darray(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  array(3) {
+  darray(3) {
     ["kind"]=>
     int(15)
     ["classname"]=>
@@ -52,9 +51,8 @@ array(3) {
     bool(true)
   }
   ["param_types"]=>
-  array(1) {
-    [0]=>
-    array(3) {
+  varray(1) {
+    darray(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
@@ -64,11 +62,11 @@ array(3) {
     }
   }
 }
-array(3) {
+darray(3) {
   ["kind"]=>
   int(11)
   ["return_type"]=>
-  array(3) {
+  darray(3) {
     ["kind"]=>
     int(15)
     ["classname"]=>
@@ -77,9 +75,8 @@ array(3) {
     bool(true)
   }
   ["param_types"]=>
-  array(1) {
-    [0]=>
-    array(3) {
+  varray(1) {
+    darray(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
@@ -89,13 +86,13 @@ array(3) {
     }
   }
 }
-array(2) {
+darray(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  array(2) {
+  darray(2) {
     ["foo"]=>
-    array(3) {
+    darray(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
@@ -104,20 +101,18 @@ array(2) {
       bool(true)
     }
     ["bar"]=>
-    array(3) {
+    darray(3) {
       ["kind"]=>
       int(15)
       ["classname"]=>
       string(6) "HH\Map"
       ["generic_types"]=>
-      array(2) {
-        [0]=>
-        array(1) {
+      varray(2) {
+        darray(1) {
           ["kind"]=>
           int(4)
         }
-        [1]=>
-        array(3) {
+        darray(3) {
           ["kind"]=>
           int(15)
           ["classname"]=>

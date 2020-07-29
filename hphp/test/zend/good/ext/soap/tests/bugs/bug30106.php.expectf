@@ -1,18 +1,14 @@
-array(1) {
-  [0]=>
+varray(1) {
   string(71) "getContinentListResponse getContinentList(getContinentList $parameters)"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(64) "struct getContinentList {
  int AFFILIATE_ID;
  string PASSWORD;
 }"
-  [1]=>
   string(83) "struct getContinentListResponse {
  getContinentListResult getContinentListResult;
 }"
-  [2]=>
   string(66) "struct getContinentListResult {
  <anyXML> schema;
  <anyXML> any;

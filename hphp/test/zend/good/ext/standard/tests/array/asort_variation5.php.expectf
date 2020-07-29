@@ -5,27 +5,25 @@
 -- Iteration 1 --
 - With default sort_flag -
 bool(true)
-array(12) {
+darray(12) {
   ["null"]=>
   NULL
   ["NULL"]=>
   NULL
-  ["%r\x09%r"]=>
-  string(1) "%r\x09%r"
+  ["	"]=>
+  string(1) "	"
   ["
 "]=>
   string(1) "
 "
-  ["%r\x0b%r"]=>
-  string(1) "%r\x0b%r"
-  ["%r\x0c%r"]=>
-  string(1) "%r\x0c%r"
-  ["
-"]=>
-  string(1) "
-"
-  ["%r\x1b%r"]=>
-  string(1) "%r\x1b%r"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
   ["\a"]=>
   string(2) "\a"
   ["\cx"]=>
@@ -37,27 +35,25 @@ array(12) {
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
-array(12) {
+darray(12) {
   ["null"]=>
   NULL
   ["NULL"]=>
   NULL
-  ["%r\x09%r"]=>
-  string(1) "%r\x09%r"
+  ["	"]=>
+  string(1) "	"
   ["
 "]=>
   string(1) "
 "
-  ["%r\x0b%r"]=>
-  string(1) "%r\x0b%r"
-  ["%r\x0c%r"]=>
-  string(1) "%r\x0c%r"
-  ["
-"]=>
-  string(1) "
-"
-  ["%r\x1b%r"]=>
-  string(1) "%r\x1b%r"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
   ["\a"]=>
   string(2) "\a"
   ["\cx"]=>
@@ -69,27 +65,25 @@ array(12) {
 }
 - Sort_flag = SORT_STRING -
 bool(true)
-array(12) {
+darray(12) {
   ["null"]=>
   NULL
   ["NULL"]=>
   NULL
-  ["%r\x09%r"]=>
-  string(1) "%r\x09%r"
+  ["	"]=>
+  string(1) "	"
   ["
 "]=>
   string(1) "
 "
-  ["%r\x0b%r"]=>
-  string(1) "%r\x0b%r"
-  ["%r\x0c%r"]=>
-  string(1) "%r\x0c%r"
-  ["
-"]=>
-  string(1) "
-"
-  ["%r\x1b%r"]=>
-  string(1) "%r\x1b%r"
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
+  [""]=>
+  string(1) ""
   ["\a"]=>
   string(2) "\a"
   ["\cx"]=>
@@ -103,7 +97,7 @@ array(12) {
 -- Iteration 2 --
 - With default sort_flag -
 bool(true)
-array(12) {
+darray(12) {
   ["B"]=>
   string(6) "BANANA"
   ["O"]=>
@@ -131,7 +125,7 @@ array(12) {
 }
 - Sort_flag = SORT_REGULAR -
 bool(true)
-array(12) {
+darray(12) {
   ["B"]=>
   string(6) "BANANA"
   ["O"]=>
@@ -159,7 +153,7 @@ array(12) {
 }
 - Sort_flag = SORT_STRING -
 bool(true)
-array(12) {
+darray(12) {
   ["B"]=>
   string(6) "BANANA"
   ["O"]=>

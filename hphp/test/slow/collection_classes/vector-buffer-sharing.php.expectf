@@ -27,21 +27,19 @@ object(HH\ImmVector) (1) {
 }
 object(HH\ImmVector) (1) {
   [0]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(1)
   }
 }
 object(HH\ImmVector) (1) {
   [0]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(1)
   }
 }
 object(HH\ImmVector) (1) {
   [0]=>
-  array(1) {
+  darray(1) {
     [0]=>
     int(1)
   }

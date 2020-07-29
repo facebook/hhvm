@@ -55,7 +55,7 @@ $c=array (
   5 => 17,
 );
 array_intersect($a,$b,$c);
-array(3) {
+darray(3) {
   ["big"]=>
   int(2)
   [1]=>
@@ -64,12 +64,12 @@ array(3) {
   int(17)
 }
 array_intersect_assoc($a,$b,$c);
-array(1) {
+darray(1) {
   [1]=>
   int(2)
 }
 array_intersect($a,$b);
-array(15) {
+darray(15) {
   ["big"]=>
   int(2)
   [1]=>
@@ -102,7 +102,7 @@ array(15) {
   int(17)
 }
 array_intersect_assoc($a,$b);
-array(10) {
+darray(10) {
   [1]=>
   int(2)
   [3]=>
@@ -167,7 +167,7 @@ $c=array (
 Results:
 
 array_intersect($a,$b,$c);
-array(6) {
+darray(6) {
   ["b"]=>
   string(4) "some"
   ["z"]=>
@@ -182,12 +182,12 @@ array(6) {
   string(4) "some"
 }
 array_intersect_assoc($a,$b,$c);
-array(1) {
+darray(1) {
   ["gate"]=>
   string(3) "web"
 }
 array_intersect($a,$b);
-array(11) {
+darray(11) {
   ["b"]=>
   string(4) "some"
   ["z"]=>
@@ -212,7 +212,7 @@ array(11) {
   string(4) "some"
 }
 array_intersect_assoc($a,$b);
-array(5) {
+darray(5) {
   ["f"]=>
   int(5)
   ["gate"]=>

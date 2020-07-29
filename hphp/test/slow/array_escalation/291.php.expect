@@ -1,10 +1,10 @@
-array(2) {
+darray(2) {
   [0]=>
   int(10)
   ["test"]=>
   string(4) "test"
 }
-array(2) {
+darray(2) {
   [0]=>
   int(10)
   ["test"]=>

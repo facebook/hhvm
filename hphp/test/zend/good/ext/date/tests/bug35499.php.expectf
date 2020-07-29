@@ -1,6 +1,6 @@
 2005-11-20T08:00:00+0000
 2005-11-20T08:00:00+0000
-array(16) {
+darray(16) {
   ["year"]=>
   bool(false)
   ["month"]=>
@@ -18,12 +18,12 @@ array(16) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  array(0) {
+  darray(0) {
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  array(0) {
+  darray(0) {
   }
   ["is_localtime"]=>
   bool(true)
@@ -36,7 +36,7 @@ array(16) {
   ["tz_abbr"]=>
   string(1) "A"
 }
-array(12) {
+darray(12) {
   ["year"]=>
   bool(false)
   ["month"]=>
@@ -54,12 +54,12 @@ array(12) {
   ["warning_count"]=>
   int(0)
   ["warnings"]=>
-  array(0) {
+  darray(0) {
   }
   ["error_count"]=>
   int(0)
   ["errors"]=>
-  array(0) {
+  darray(0) {
   }
   ["is_localtime"]=>
   bool(false)

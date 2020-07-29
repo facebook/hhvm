@@ -1,22 +1,22 @@
-array(2) {
+darray(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  array(1) {
+  darray(1) {
     ["foo"]=>
-    array(1) {
+    darray(1) {
       ["kind"]=>
       int(4)
     }
   }
 }
-array(2) {
+darray(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  array(1) {
+  darray(1) {
     ["foo"]=>
-    array(2) {
+    darray(2) {
       ["kind"]=>
       int(4)
       ["optional_shape_field"]=>
@@ -24,13 +24,13 @@ array(2) {
     }
   }
 }
-array(2) {
+darray(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  array(1) {
+  darray(1) {
     ["A"]=>
-    array(1) {
+    darray(1) {
       ["kind"]=>
       int(4)
     }

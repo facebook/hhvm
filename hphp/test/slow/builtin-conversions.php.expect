@@ -1,8 +1,6 @@
 string(1) "t"
 class(X)
-array(2) {
-  [0]=>
+varray(2) {
   string(1) "X"
-  [1]=>
   string(1) "y"
 }

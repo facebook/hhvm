@@ -1,14 +1,10 @@
 ====================================================
-array(1) {
+darray(1) {
   ["checkme"]=>
-  array(4) {
-    [0]=>
+  varray(4) {
     int(6)
-    [1]=>
     NULL
-    [2]=>
     NULL
-    [3]=>
     int(0)
   }
 }
@@ -18,27 +14,19 @@ bool(true)
 bool(false)
 bool(false)
 ====================================================
-array(2) {
+darray(2) {
   ["e"]=>
-  array(4) {
-    [0]=>
+  varray(4) {
     int(5)
-    [1]=>
     string(9) "Exception"
-    [2]=>
     NULL
-    [3]=>
     int(0)
   }
   ["checkme"]=>
-  array(4) {
-    [0]=>
+  varray(4) {
     int(6)
-    [1]=>
     NULL
-    [2]=>
     NULL
-    [3]=>
     int(0)
   }
 }
@@ -48,49 +36,33 @@ bool(true)
 bool(false)
 bool(false)
 ====================================================
-array(4) {
+darray(4) {
   ["num"]=>
-  array(4) {
-    [0]=>
+  varray(4) {
     int(3)
-    [1]=>
     NULL
-    [2]=>
     NULL
-    [3]=>
     int(0)
   }
   ["checkme"]=>
-  array(4) {
-    [0]=>
+  varray(4) {
     int(6)
-    [1]=>
     NULL
-    [2]=>
     NULL
-    [3]=>
     int(0)
   }
   ["beans"]=>
-  array(4) {
-    [0]=>
+  varray(4) {
     int(6)
-    [1]=>
     NULL
-    [2]=>
     NULL
-    [3]=>
     int(0)
   }
   ["cheese"]=>
-  array(4) {
-    [0]=>
+  varray(4) {
     int(1)
-    [1]=>
     NULL
-    [2]=>
     NULL
-    [3]=>
     int(0)
   }
 }
@@ -100,49 +72,33 @@ bool(true)
 bool(false)
 bool(false)
 ====================================================
-array(4) {
+darray(4) {
   ["num"]=>
-  array(4) {
-    [0]=>
+  varray(4) {
     int(3)
-    [1]=>
     NULL
-    [2]=>
     int(2)
-    [3]=>
     int(0)
   }
   ["checkme"]=>
-  array(4) {
-    [0]=>
+  varray(4) {
     int(6)
-    [1]=>
     NULL
-    [2]=>
     NULL
-    [3]=>
     int(0)
   }
   ["beans"]=>
-  array(4) {
-    [0]=>
+  varray(4) {
     int(6)
-    [1]=>
     NULL
-    [2]=>
     NULL
-    [3]=>
     int(0)
   }
   ["cheese"]=>
-  array(4) {
-    [0]=>
+  varray(4) {
     int(1)
-    [1]=>
     NULL
-    [2]=>
     string(2) "hi"
-    [3]=>
     int(0)
   }
 }

@@ -1,5 +1,5 @@
 int(5)
-array(7) {
+darray(7) {
   ["name"]=>
   string(%d) "%s/test/slow/ext_zlib/hack_array/test_files/foo"
   ["index"]=>
@@ -15,7 +15,7 @@ array(7) {
   ["comp_method"]=>
   int(0)
 }
-array(7) {
+darray(7) {
   ["name"]=>
   string(%d) "%s/test/slow/ext_zlib/hack_array/test_files/foobar"
   ["index"]=>
@@ -31,7 +31,7 @@ array(7) {
   ["comp_method"]=>
   int(0)
 }
-array(7) {
+darray(7) {
   ["name"]=>
   string(%d) "%s/test/slow/ext_zlib/hack_array/test_files/foobaz"
   ["index"]=>
@@ -47,7 +47,7 @@ array(7) {
   ["comp_method"]=>
   int(0)
 }
-array(7) {
+darray(7) {
   ["name"]=>
   string(4) "bing"
   ["index"]=>
@@ -63,7 +63,7 @@ array(7) {
   ["comp_method"]=>
   int(0)
 }
-array(7) {
+darray(7) {
   ["name"]=>
   string(4) "bong"
   ["index"]=>
@@ -79,7 +79,7 @@ array(7) {
   ["comp_method"]=>
   int(0)
 }
-array(7) {
+darray(7) {
   ["name"]=>
   string(4) "bing"
   ["index"]=>
@@ -95,7 +95,7 @@ array(7) {
   ["comp_method"]=>
   int(0)
 }
-array(7) {
+darray(7) {
   ["name"]=>
   string(4) "bong"
   ["index"]=>
@@ -111,13 +111,9 @@ array(7) {
   ["comp_method"]=>
   int(0)
 }
-array(4) {
-  [0]=>
+varray(4) {
   string(1) "."
-  [1]=>
   string(2) ".."
-  [2]=>
   string(4) "bing"
-  [3]=>
   string(4) "bong"
 }

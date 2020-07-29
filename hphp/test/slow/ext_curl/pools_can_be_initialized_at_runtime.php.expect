@@ -1,9 +1,9 @@
-array(0) {
+darray(0) {
 }
 bool(true)
-array(1) {
+darray(1) {
   ["unittest"]=>
-  array(4) {
+  darray(4) {
     ["size"]=>
     int(10)
     ["connGetTimeout"]=>
@@ -11,7 +11,7 @@ array(1) {
     ["reuseLimit"]=>
     int(30)
     ["stats"]=>
-    array(3) {
+    darray(3) {
       ["fetches"]=>
       int(0)
       ["empty"]=>
@@ -23,6 +23,6 @@ array(1) {
 }
 bool(true)
 bool(true)
-array(0) {
+darray(0) {
 }
 bool(true)

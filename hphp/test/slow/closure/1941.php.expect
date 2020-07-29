@@ -1,6 +1,6 @@
 object(A) (0) {
 }
-array(3) {
+darray(3) {
   [0]=>
   int(1)
   [1]=>

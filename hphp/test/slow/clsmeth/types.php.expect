@@ -8,10 +8,8 @@ $m[0] is string: True
 $m[1] is string: True
 shape!
 shape!
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 $m is arraylike: True
@@ -24,10 +22,8 @@ $m[0] is string: True
 $m[1] is string: True
 shape!
 shape!
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 $m is arraylike: True
@@ -40,10 +36,8 @@ $m[0] is string: True
 $m[1] is string: True
 shape!
 shape!
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 $m is arraylike: True
@@ -56,10 +50,8 @@ $m[0] is string: True
 $m[1] is string: True
 shape!
 shape!
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 $m is arraylike: True
@@ -72,10 +64,8 @@ $m[0] is string: True
 $m[1] is string: True
 shape!
 shape!
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 $m is arraylike: True
@@ -88,10 +78,8 @@ $m[0] is string: True
 $m[1] is string: True
 shape!
 shape!
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "Foo"
-  [1]=>
   string(3) "bar"
 }
 $m === varray($m): True

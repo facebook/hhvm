@@ -1,11 +1,8 @@
 *** Testing array_map() : built-in function ***
 -- with built-in function 'pow' and two parameters --
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(16)
-  [2]=>
   int(243)
 }
 -- with built-in function 'pow' and one parameter --

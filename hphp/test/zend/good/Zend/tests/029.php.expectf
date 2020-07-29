@@ -1,13 +1,11 @@
-array(1) {
-  [0]=>
+varray(1) {
   object(stdClass) (1) {
     ["a"]=>
     object(stdClass) (0) {
     }
   }
 }
-array(1) {
-  [0]=>
+varray(1) {
   object(stdClass) (2) {
     ["a"]=>
     object(stdClass) (0) {
@@ -17,8 +15,7 @@ array(1) {
     }
   }
 }
-array(1) {
-  [0]=>
+varray(1) {
   object(stdClass) (3) {
     ["a"]=>
     object(stdClass) (0) {

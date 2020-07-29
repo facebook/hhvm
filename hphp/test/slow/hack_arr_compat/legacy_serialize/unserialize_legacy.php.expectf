@@ -1,14 +1,14 @@
 === a:0:{} ===
 true
-array(0) {
+darray(0) {
 }
 === y:0:{} ===
 true
-array(0) {
+varray(0) {
 }
 === Y:0:{} ===
 true
-array(0) {
+darray(0) {
 }
 === v:0:{} ===
 false

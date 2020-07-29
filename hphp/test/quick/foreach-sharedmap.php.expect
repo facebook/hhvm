@@ -1,17 +1,11 @@
 bool(true)
-array(3) {
-  [0]=>
+varray(3) {
   int(2)
-  [1]=>
   int(3)
-  [2]=>
   int(4)
 }
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }

@@ -1,4 +1,4 @@
-array(0) {
+darray(0) {
 }
 int(0)
 int(1)
@@ -6,12 +6,9 @@ int(1)
 int(2)
 int(2)
 int(3)
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 string(3) "foo"
@@ -20,7 +17,7 @@ string(3) "bar"
 int(3)
 string(3) "baz"
 int(5)
-array(3) {
+darray(3) {
   ["foo"]=>
   int(1)
   ["bar"]=>

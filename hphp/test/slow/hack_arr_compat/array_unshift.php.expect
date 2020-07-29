@@ -8,7 +8,7 @@ dict(2) {
 }
 Unshift darray
 int(2)
-array(2) {
+darray(2) {
   [0]=>
   int(2)
   [1]=>
@@ -23,10 +23,8 @@ vec(2) {
 }
 Unshift varray
 int(2)
-array(2) {
-  [0]=>
+varray(2) {
   int(2)
-  [1]=>
   int(42)
 }
 bool(true)

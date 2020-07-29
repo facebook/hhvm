@@ -1,13 +1,11 @@
-array(2) {
+darray(2) {
   ["bar"]=>
   string(3) "baz"
   ["a"]=>
   string(1) "a"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(3) "bar"
-  [1]=>
   string(1) "a"
 }
 bool(false)

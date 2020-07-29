@@ -123,19 +123,19 @@ bool(false)
 Warning: Invalid argument: charlist: Invalid '..'-range, missing left of '..' in %s/test/slow/invalid_argument/1381.php on line %d
 
 Warning: Invalid argument: charlist: Invalid '..'-range, missing right of '..' in %s/test/slow/invalid_argument/1381.php on line %d
-array(1) {
+darray(1) {
   [0]=>
   string(3) "abc"
 }
 
 Warning: Invalid argument: charlist: '..'-range needs to be incrementing in %s/test/slow/invalid_argument/1381.php on line %d
-array(1) {
+darray(1) {
   [0]=>
   string(3) "abc"
 }
 
 Warning: Invalid argument: charlist: Invalid '..'-range in %s/test/slow/invalid_argument/1381.php on line %d
-array(1) {
+darray(1) {
   [0]=>
   string(3) "abc"
 }

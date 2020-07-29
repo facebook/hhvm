@@ -6,7 +6,7 @@ bool(true)
 bool(true)
 bool(false)
 bool(false)
-array(3) {
+darray(3) {
   ["kind"]=>
   int(1)
   ["opaque"]=>
@@ -14,19 +14,18 @@ array(3) {
   ["alias"]=>
   string(1) "A"
 }
-array(2) {
+darray(2) {
   ["kind"]=>
   int(1)
   ["alias"]=>
   string(1) "B"
 }
-array(3) {
+darray(3) {
   ["kind"]=>
   int(10)
   ["elem_types"]=>
-  array(2) {
-    [0]=>
-    array(3) {
+  varray(2) {
+    darray(3) {
       ["kind"]=>
       int(1)
       ["opaque"]=>
@@ -34,8 +33,7 @@ array(3) {
       ["alias"]=>
       string(1) "A"
     }
-    [1]=>
-    array(3) {
+    darray(3) {
       ["kind"]=>
       int(1)
       ["opaque"]=>

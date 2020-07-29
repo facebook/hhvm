@@ -1,6 +1,5 @@
-array(6) {
-  [0]=>
-  array(4) {
+varray(6) {
+  darray(4) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -8,66 +7,56 @@ array(6) {
     ["function"]=>
     string(3) "bar"
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       int(0)
     }
   }
-  [1]=>
-  array(4) {
+  darray(4) {
     ["file"]=>
-    string(%d) "%s/metadata_async_block.php"
+    string(%d) "%s"
     ["line"]=>
     int(15)
     ["function"]=>
     string(3) "foo"
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       int(0)
     }
   }
-  [2]=>
-  array(2) {
+  darray(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
-  [3]=>
-  array(2) {
+  darray(2) {
     ["function"]=>
     string(43) "Closure$__SystemLib\enter_async_entry_point"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
-  [4]=>
-  array(2) {
+  darray(2) {
     ["function"]=>
     string(12) "HH\Asio\join"
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       object(HH\AsyncFunctionWaitHandle) (0) {
       }
     }
   }
-  [5]=>
-  array(2) {
+  darray(2) {
     ["function"]=>
     string(35) "__SystemLib\enter_async_entry_point"
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       function(main)
     }
   }
 }
-array(6) {
-  [0]=>
-  array(4) {
+varray(6) {
+  darray(4) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -75,61 +64,52 @@ array(6) {
     ["function"]=>
     string(3) "bar"
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       int(65536)
     }
   }
-  [1]=>
-  array(5) {
+  darray(5) {
     ["file"]=>
-    string(%d) "%s/metadata_async_block.php"
+    string(%d) "%s"
     ["line"]=>
     int(16)
     ["function"]=>
     string(3) "foo"
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       int(65536)
     }
     ["metadata"]=>
     string(8) "I am foo"
   }
-  [2]=>
-  array(2) {
+  darray(2) {
     ["function"]=>
     string(4) "main"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
-  [3]=>
-  array(2) {
+  darray(2) {
     ["function"]=>
     string(43) "Closure$__SystemLib\enter_async_entry_point"
     ["args"]=>
-    array(0) {
+    varray(0) {
     }
   }
-  [4]=>
-  array(2) {
+  darray(2) {
     ["function"]=>
     string(12) "HH\Asio\join"
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       object(HH\AsyncFunctionWaitHandle) (0) {
       }
     }
   }
-  [5]=>
-  array(2) {
+  darray(2) {
     ["function"]=>
     string(35) "__SystemLib\enter_async_entry_point"
     ["args"]=>
-    array(1) {
-      [0]=>
+    varray(1) {
       function(main)
     }
   }

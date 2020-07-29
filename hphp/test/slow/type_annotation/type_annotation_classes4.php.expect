@@ -1,10 +1,10 @@
-array(2) {
+darray(2) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(5) "Foo\D"
 }
-array(3) {
+darray(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
@@ -12,19 +12,19 @@ array(3) {
   ["exact"]=>
   bool(true)
 }
-array(2) {
+darray(2) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(1) "C"
 }
-array(2) {
+darray(2) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(5) "Foo\E"
 }
-array(2) {
+darray(2) {
   ["kind"]=>
   int(15)
   ["classname"]=>

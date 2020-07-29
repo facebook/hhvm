@@ -1,222 +1,159 @@
 ================== variadic ======================
-array(3) {
-  [0]=>
+varray(3) {
   int(2)
-  [1]=>
   int(3)
-  [2]=>
   int(4)
 }
 bool(true)
 ================== variadic ======================
-array(1) {
-  [0]=>
+varray(1) {
   int(2)
 }
 bool(true)
 ================== variadic ======================
-array(3) {
-  [0]=>
+varray(3) {
   int(2)
-  [1]=>
   int(3)
-  [2]=>
   int(4)
 }
 bool(true)
 ================== variadic ======================
-array(4) {
-  [0]=>
+varray(4) {
   int(2)
-  [1]=>
   int(3)
-  [2]=>
   int(4)
-  [3]=>
   int(5)
 }
 bool(true)
 ================== variadic ======================
-array(2) {
-  [0]=>
+varray(2) {
   int(4)
-  [1]=>
   int(5)
 }
 bool(true)
 ================== variadic ======================
-array(2) {
-  [0]=>
+varray(2) {
   int(4)
-  [1]=>
   int(5)
 }
 bool(true)
 ================== variadic ======================
-array(3) {
-  [0]=>
+varray(3) {
   int(2)
-  [1]=>
   int(3)
-  [2]=>
   int(4)
 }
 bool(true)
 ================== variadic ======================
-array(1) {
-  [0]=>
+varray(1) {
   int(2)
 }
 bool(true)
 ================== variadic ======================
-array(3) {
-  [0]=>
+varray(3) {
   int(2)
-  [1]=>
   int(3)
-  [2]=>
   int(4)
 }
 bool(true)
 ================== variadic ======================
-array(4) {
-  [0]=>
+varray(4) {
   int(2)
-  [1]=>
   int(3)
-  [2]=>
   int(4)
-  [3]=>
   int(5)
 }
 bool(true)
 ================== variadic ======================
-array(2) {
-  [0]=>
+varray(2) {
   int(4)
-  [1]=>
   int(5)
 }
 bool(true)
 ================== variadic ======================
-array(2) {
-  [0]=>
+varray(2) {
   int(4)
-  [1]=>
   int(5)
 }
 bool(true)
 ================== variadic ======================
-array(3) {
-  [0]=>
+varray(3) {
   int(2)
-  [1]=>
   int(3)
-  [2]=>
   int(4)
 }
 bool(true)
 ================== variadic ======================
-array(4) {
-  [0]=>
+varray(4) {
   int(2)
-  [1]=>
   int(3)
-  [2]=>
   int(4)
-  [3]=>
   int(5)
 }
 bool(true)
 ================== variadic ======================
-array(2) {
-  [0]=>
+varray(2) {
   int(4)
-  [1]=>
   int(5)
 }
 bool(true)
 ================== variadic ======================
-array(2) {
-  [0]=>
+varray(2) {
   int(4)
-  [1]=>
   int(5)
 }
 bool(true)
 ================== variadic ======================
-array(3) {
-  [0]=>
+varray(3) {
   int(2)
-  [1]=>
   int(3)
-  [2]=>
   int(4)
 }
 bool(true)
 ================== variadic ======================
-array(4) {
-  [0]=>
+varray(4) {
   int(2)
-  [1]=>
   int(3)
-  [2]=>
   int(4)
-  [3]=>
   int(5)
 }
 bool(true)
 ================== variadic ======================
-array(2) {
-  [0]=>
+varray(2) {
   int(4)
-  [1]=>
   int(5)
 }
 bool(true)
 ================== variadic ======================
-array(2) {
-  [0]=>
+varray(2) {
   int(4)
-  [1]=>
   int(5)
 }
 bool(true)
 ================== variadic ======================
-array(3) {
-  [0]=>
+varray(3) {
   int(2)
-  [1]=>
   int(3)
-  [2]=>
   int(4)
 }
 bool(true)
 ================== variadic ======================
-array(4) {
-  [0]=>
+varray(4) {
   int(2)
-  [1]=>
   int(3)
-  [2]=>
   int(4)
-  [3]=>
   int(5)
 }
 bool(true)
 ================== variadic ======================
-array(2) {
-  [0]=>
+varray(2) {
   int(4)
-  [1]=>
   int(5)
 }
 bool(true)
 ================== variadic ======================
-array(2) {
-  [0]=>
+varray(2) {
   int(4)
-  [1]=>
   int(5)
 }
 bool(true)

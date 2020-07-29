@@ -1,35 +1,35 @@
 *** Testing array_combine() : Passing different types of arrays to both $keys and $values argument ***
 -- Iteration 1 --
-array(2) {
+darray(2) {
   [1]=>
   int(1)
   [2]=>
   int(2)
 }
 -- Iteration 2 --
-array(2) {
+darray(2) {
   ["1.1"]=>
   float(1.1)
   ["2.2"]=>
   float(2.2)
 }
 -- Iteration 3 --
-array(2) {
+darray(2) {
   [""]=>
   bool(false)
   [1]=>
   bool(true)
 }
 -- Iteration 4 --
-array(0) {
+darray(0) {
 }
 -- Iteration 5 --
-array(1) {
+darray(1) {
   [""]=>
   NULL
 }
 -- Iteration 6 --
-array(6) {
+darray(6) {
   ["a%r\x0b\x0c%r"]=>
   string(3) "a%r\x0b\x0c%r"
   ["aaaa
@@ -46,7 +46,7 @@ array(6) {
   string(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
 }
 -- Iteration 7 --
-array(6) {
+darray(6) {
   ["a\v\f"]=>
   string(5) "a\v\f"
   ["aaaa\r"]=>
@@ -61,7 +61,7 @@ array(6) {
   string(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
 }
 -- Iteration 8 --
-array(4) {
+darray(4) {
   ["
 "]=>
   string(1) "
@@ -96,7 +96,7 @@ double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
 "
 }
 -- Iteration 9 --
-array(3) {
+darray(3) {
   ["one"]=>
   string(3) "one"
   ["two"]=>
@@ -105,7 +105,7 @@ array(3) {
   string(5) "three"
 }
 -- Iteration 10 --
-array(3) {
+darray(3) {
   [1]=>
   int(1)
   [2]=>
@@ -114,7 +114,7 @@ array(3) {
   int(3)
 }
 -- Iteration 11 --
-array(4) {
+darray(4) {
   [10]=>
   int(10)
   [20]=>
@@ -125,7 +125,7 @@ array(4) {
   int(30)
 }
 -- Iteration 12 --
-array(3) {
+darray(3) {
   ["ten"]=>
   string(3) "ten"
   ["twenty"]=>
@@ -134,7 +134,7 @@ array(3) {
   string(6) "thirty"
 }
 -- Iteration 13 --
-array(3) {
+darray(3) {
   [1]=>
   int(1)
   ["two"]=>
@@ -143,7 +143,7 @@ array(3) {
   string(4) "four"
 }
 -- Iteration 14 --
-array(3) {
+darray(3) {
   [10]=>
   int(10)
   [20]=>

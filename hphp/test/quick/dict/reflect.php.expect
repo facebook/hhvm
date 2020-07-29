@@ -15,18 +15,16 @@ bool(false)
 string(25) "HH\dict<HH\arraykey, Foo>"
 
 Foo::TDict type_structure:
-array(2) {
+darray(2) {
   ["kind"]=>
   int(19)
   ["generic_types"]=>
-  array(2) {
-    [0]=>
-    array(1) {
+  varray(2) {
+    darray(1) {
       ["kind"]=>
       int(1)
     }
-    [1]=>
-    array(1) {
+    darray(1) {
       ["kind"]=>
       int(1)
     }
@@ -35,18 +33,16 @@ array(2) {
 string(4) "dict"
 
 CDictWithUnsafeType::TDict type_structure:
-array(2) {
+darray(2) {
   ["kind"]=>
   int(19)
   ["generic_types"]=>
-  array(2) {
-    [0]=>
-    array(1) {
+  varray(2) {
+    darray(1) {
       ["kind"]=>
       int(4)
     }
-    [1]=>
-    array(2) {
+    darray(2) {
       ["kind"]=>
       int(9)
       ["alias"]=>
@@ -56,18 +52,16 @@ array(2) {
 }
 
 ADictType type_structure:
-array(3) {
+darray(3) {
   ["kind"]=>
   int(19)
   ["generic_types"]=>
-  array(2) {
-    [0]=>
-    array(1) {
+  varray(2) {
+    darray(1) {
       ["kind"]=>
       int(4)
     }
-    [1]=>
-    array(2) {
+    darray(2) {
       ["kind"]=>
       int(9)
       ["alias"]=>

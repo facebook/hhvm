@@ -76,11 +76,11 @@ Exception: "Cannot use [] with keysets for reading in an lvalue context"
 Exception: "Invalid operation on keyset"
 ======= base_prop_get ==============================
 
-Notice: Cannot access property on non-object in %s on line %d
+Notice: Cannot access property on non-object in %s/test/quick/keyset/member-ops.php on line %d
 NULL
 ======= base_prop_set ==============================
 
-Warning: Cannot access property on non-object in %s/member-ops.php on line %d
+Warning: Cannot access property on non-object in %s/test/quick/keyset/member-ops.php on line %d
 keyset(3) {
   int(1)
   int(2)
@@ -98,10 +98,8 @@ string(7) "MISSING"
 Exception: "Invalid keyset key: expected a key of type int or string, bool given"
 ======= dim_define =================================
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -110,10 +108,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -122,10 +118,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -134,10 +128,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -146,10 +138,8 @@ array(2) {
   }
 }
 Exception: "Invalid keyset key: expected a key of type int or string, bool given"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -159,10 +149,8 @@ array(2) {
 }
 ======= dim_unset ==================================
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -171,10 +159,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -183,10 +169,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -195,10 +179,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -207,10 +189,8 @@ array(2) {
   }
 }
 Exception: "Invalid keyset key: expected a key of type int or string, bool given"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -224,15 +204,13 @@ Exception: "Cannot use [] with keysets for reading in an lvalue context"
 Exception: "Invalid operation on keyset"
 ======= dim_prop_get ===============================
 
-Notice: Cannot access property on non-object in %s on line %d
+Notice: Cannot access property on non-object in %s/test/quick/keyset/member-ops.php on line %d
 NULL
 ======= dim_prop_set ===============================
 
-Warning: Cannot access property on non-object in %s/member-ops.php on line %d
-array(2) {
-  [0]=>
+Warning: Cannot access property on non-object in %s/test/quick/keyset/member-ops.php on line %d
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -266,10 +244,8 @@ bool(false)
 Exception: "Invalid keyset key: expected a key of type int or string, bool given"
 ======= fini_set ===================================
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -278,10 +254,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -290,10 +264,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -302,10 +274,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -314,10 +284,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -326,10 +294,8 @@ array(2) {
   }
 }
 ======= fini_set_new_elem ==========================
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(5) {
     int(1)
     int(2)
@@ -340,10 +306,8 @@ array(2) {
 }
 ======= fini_incdec ================================
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -352,10 +316,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -364,10 +326,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -376,10 +336,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -388,10 +346,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -403,10 +359,8 @@ array(2) {
 Exception: "Cannot use [] with keysets for reading in an lvalue context"
 ======= fini_setop =================================
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -415,10 +369,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -427,10 +379,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -439,10 +389,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -451,10 +399,8 @@ array(2) {
   }
 }
 Exception: "Invalid operation on keyset"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -465,20 +411,16 @@ array(2) {
 ======= fini_setop_new_elem =======================
 Exception: "Cannot use [] with keysets for reading in an lvalue context"
 ======= fini_unset =================================
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(3) {
     int(2)
     string(1) "1"
     string(0) ""
   }
 }
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -486,20 +428,16 @@ array(2) {
     string(0) ""
   }
 }
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(3) {
     int(1)
     int(2)
     string(0) ""
   }
 }
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -508,10 +446,8 @@ array(2) {
   }
 }
 Exception: "Invalid keyset key: expected a key of type int or string, bool given"
-array(2) {
-  [0]=>
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)
@@ -523,15 +459,13 @@ array(2) {
 Exception: "Invalid operation on keyset"
 ======= fini_prop_get ===============================
 
-Notice: Cannot access property on non-object in %s on line %d
+Notice: Cannot access property on non-object in %s/test/quick/keyset/member-ops.php on line %d
 NULL
 ======= fini_prop_set ===============================
 
-Warning: Cannot access property on non-object in %s on line %d
-array(2) {
-  [0]=>
+Warning: Cannot access property on non-object in %s/test/quick/keyset/member-ops.php on line %d
+varray(2) {
   NULL
-  [1]=>
   keyset(4) {
     int(1)
     int(2)

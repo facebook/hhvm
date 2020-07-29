@@ -1,15 +1,14 @@
-
 Warning: Invalid operand type was used: array_fill_keys expects an array or collection in %s/array_fill_keys.php on line 2
 NULL
-array(0) {
+darray(0) {
 }
-array(2) {
+darray(2) {
   ["foo"]=>
   NULL
   ["bar"]=>
   NULL
 }
-array(4) {
+darray(4) {
   [5]=>
   int(123)
   ["foo"]=>
@@ -19,7 +18,7 @@ array(4) {
   ["1.23"]=>
   int(123)
 }
-array(3) {
+darray(3) {
   ["test"]=>
   string(0) ""
   [10]=>

@@ -1,10 +1,9 @@
 bool(false)
 suppressing
-array(0) {
+varray(0) {
 }
 unsuppressing
-array(1) {
-  [0]=>
+varray(1) {
   object(LibXMLError) (6) {
     ["level"]=>
     int(3)

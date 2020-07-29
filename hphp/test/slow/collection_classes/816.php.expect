@@ -6,12 +6,9 @@ object(HH\Vector) (4) {
   [2]=>
   string(4) "blah"
   [3]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(3)
-    [1]=>
     int(5)
-    [2]=>
     int(7)
   }
 }

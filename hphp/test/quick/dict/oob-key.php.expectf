@@ -29,7 +29,7 @@ Caught Out of bounds dict access: invalid index "bar"
 string(5) "hello"
 Caught Out of bounds dict access: invalid index 2
 Undefined index: 256
-array(1) {
+darray(1) {
   ["foo"]=>
   dict(3) {
     [1]=>
@@ -37,12 +37,11 @@ array(1) {
     ["2"]=>
     string(5) "world"
     [3]=>
-    array(2) {
+    darray(2) {
       [0]=>
       int(5)
       ["bar"]=>
-      array(1) {
-        [0]=>
+      varray(1) {
         int(12)
       }
     }

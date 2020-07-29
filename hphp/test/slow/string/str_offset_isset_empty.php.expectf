@@ -131,15 +131,14 @@ string(4) " 1e1"
 string(1) "B"
 bool(false)
 
-array(0) {
+varray(0) {
 }
 
 Notice: String offset cast occurred in %s/test/slow/string/str_offset_isset_empty.php on line 9
 string(1) "A"
 bool(false)
 
-array(1) {
-  [0]=>
+varray(1) {
   int(1)
 }
 

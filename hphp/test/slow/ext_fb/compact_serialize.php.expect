@@ -22148,12 +22148,9 @@ HH\is_varray: fb_u(fb_cs(type:array)) === false
 
 ====
 ==== testing vector code
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 bool(false)

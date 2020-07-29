@@ -1,144 +1,105 @@
-array(0) {
+varray(0) {
 }
-array(1) {
-  [0]=>
+varray(1) {
   NULL
 }
-array(1) {
-  [0]=>
+varray(1) {
   bool(true)
 }
-array(1) {
-  [0]=>
+varray(1) {
   int(42)
 }
-array(1) {
-  [0]=>
+varray(1) {
   float(12.34)
 }
-array(1) {
-  [0]=>
+varray(1) {
   string(5) "hello"
 }
-array(1) {
-  [0]=>
-  array(0) {
+varray(1) {
+  varray(0) {
   }
 }
-array(6) {
-  [0]=>
+varray(6) {
   NULL
-  [1]=>
   bool(true)
-  [2]=>
   int(42)
-  [3]=>
   float(12.34)
-  [4]=>
   string(5) "hello"
-  [5]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(1)
-    [1]=>
-    array(2) {
-      [0]=>
+    varray(2) {
       int(2)
-      [1]=>
-      array(1) {
-        [0]=>
+      varray(1) {
         int(3)
       }
     }
   }
 }
-array(6) {
-  [0]=>
+varray(6) {
   NULL
-  [1]=>
   bool(true)
-  [2]=>
   int(42)
-  [3]=>
   float(12.34)
-  [4]=>
   string(5) "hello"
-  [5]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(1)
-    [1]=>
-    array(2) {
-      [0]=>
+    varray(2) {
       int(2)
-      [1]=>
-      array(1) {
-        [0]=>
+      varray(1) {
         int(3)
       }
     }
   }
 }
-array(1) {
+darray(1) {
   [0]=>
   string(1) "0"
 }
-array(1) {
+darray(1) {
   [42]=>
   string(2) "42"
 }
-array(1) {
+darray(1) {
   ["hello"]=>
   string(5) "world"
 }
-array(1) {
-  [0]=>
+varray(1) {
   NULL
 }
-array(1) {
+darray(1) {
   [0]=>
   string(1) "0"
 }
-array(1) {
+darray(1) {
   [0]=>
   string(1) "0"
 }
-array(1) {
+darray(1) {
   ["hello"]=>
   string(5) "world"
 }
-array(1) {
+darray(1) {
   ["hello"]=>
   string(5) "world"
 }
-array(1) {
-  [0]=>
-  array(1) {
-    [0]=>
+varray(1) {
+  varray(1) {
     int(0)
   }
 }
-array(2) {
-  [0]=>
-  array(1) {
-    [0]=>
+varray(2) {
+  varray(1) {
     int(0)
   }
-  [1]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(0)
   }
 }
-array(2) {
-  [0]=>
-  array(1) {
-    [0]=>
+varray(2) {
+  varray(1) {
     int(0)
   }
-  [1]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     int(0)
   }
 }

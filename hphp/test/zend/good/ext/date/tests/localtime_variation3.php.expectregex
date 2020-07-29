@@ -1,27 +1,18 @@
 \*\*\* Testing localtime\(\) : usage variation \*\*\*
 
 -- Testing localtime\(\) function with int 123456789000 to timestamp --
-array\(9\) {
-  \[0\]=>
+varray\(9\) {
   int\((16|0)\)
-  \[1\]=>
   int\((50|30)\)
-  \[2\]=>
   int\((4|0)\)
-  \[3\]=>
   int\((26|11)\)
-  \[4\]=>
   int\(2\)
-  \[5\]=>
   int\((35|3982)\)
-  \[6\]=>
   int\((2|6)\)
-  \[7\]=>
   int\((84|69)\)
-  \[8\]=>
   int\(0\)
 }
-array\(9\) {
+darray\(9\) {
   \["tm_sec"\]=>
   int\((16|0)\)
   \["tm_min"\]=>
@@ -43,27 +34,18 @@ array\(9\) {
 }
 
 -- Testing localtime\(\) function with int -123456789000 to timestamp --
-array\(9\) {
-  \[0\]=>
+varray\(9\) {
   int\((44|52|0)\)
-  \[1\]=>
   int\((9|45|30)\)
-  \[2\]=>
   int\((19|20|23)\)
-  \[3\]=>
   int\((8|13|22)\)
-  \[4\]=>
   int\((9|11)\)
-  \[5\]=>
   int\((104|1|-3843)\)
-  \[6\]=>
   int\((5|6)\)
-  \[7\]=>
   int\((281|346|294)\)
-  \[8\]=>
   int\(0\)
 }
-array\(9\) {
+darray\(9\) {
   \["tm_sec"\]=>
   int\((44|52|0)\)
   \["tm_min"\]=>

@@ -2,19 +2,16 @@ ret = 1
 
 string(3) "one"
 string(3) "two"
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 string(5) "hello"
 string(5) "world"
 int(10)
 int(12)
-array(8) {
+darray(8) {
   [0]=>
   string(5) "hello"
   [1]=>
@@ -41,13 +38,10 @@ string(9) "Exception"
 string(6) "string"
 string(6) "object"
 bool(true)
-array(3) {
-  [0]=>
+varray(3) {
   bool(false)
-  [1]=>
-  array(0) {
+  varray(0) {
   }
-  [2]=>
   NULL
 }
 object(stdClass) (0) {
@@ -57,19 +51,16 @@ ret =
 
 string(3) "one"
 string(3) "two"
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 string(5) "hello"
 string(5) "world"
 int(10)
 int(12)
-array(0) {
+darray(0) {
 }
 string(5) "hello"
 string(19) "world;; IN ="hello""
@@ -80,7 +71,7 @@ string(9) "Exception"
 string(6) "string"
 string(6) "string"
 bool(true)
-array(0) {
+varray(0) {
 }
 object(stdClass) (0) {
 }
@@ -89,19 +80,16 @@ ret = 1
 
 string(3) "one"
 string(3) "two"
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 string(5) "hello"
 string(5) "world"
 int(10)
 int(12)
-array(8) {
+darray(8) {
   [0]=>
   string(5) "hello"
   [1]=>
@@ -128,13 +116,10 @@ string(9) "Exception"
 string(6) "string"
 string(6) "object"
 bool(true)
-array(3) {
-  [0]=>
+varray(3) {
   bool(false)
-  [1]=>
-  array(0) {
+  varray(0) {
   }
-  [2]=>
   NULL
 }
 object(stdClass) (0) {
@@ -144,19 +129,16 @@ ret = 1
 
 string(3) "one"
 string(3) "two"
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 string(5) "hello"
 string(5) "world"
 int(10)
 int(12)
-array(8) {
+darray(8) {
   [0]=>
   string(5) "hello"
   [1]=>
@@ -183,13 +165,10 @@ string(9) "Exception"
 string(6) "string"
 string(6) "object"
 bool(true)
-array(3) {
-  [0]=>
+varray(3) {
   bool(false)
-  [1]=>
-  array(0) {
+  varray(0) {
   }
-  [2]=>
   NULL
 }
 object(stdClass) (0) {
@@ -199,19 +178,16 @@ ret =
 
 string(3) "one"
 string(3) "two"
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 string(5) "hello"
 string(5) "world"
 int(10)
 int(12)
-array(0) {
+darray(0) {
 }
 string(5) "hello"
 string(19) "world;; IN ="hello""
@@ -222,7 +198,7 @@ string(9) "Exception"
 string(6) "string"
 string(6) "string"
 bool(true)
-array(0) {
+varray(0) {
 }
 object(stdClass) (0) {
 }
@@ -231,19 +207,16 @@ ret = 1
 
 string(3) "one"
 string(3) "two"
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
   int(2)
-  [2]=>
   int(3)
 }
 string(5) "hello"
 string(5) "world"
 int(10)
 int(12)
-array(8) {
+darray(8) {
   [0]=>
   string(5) "hello"
   [1]=>
@@ -270,13 +243,10 @@ string(9) "Exception"
 string(6) "string"
 string(6) "object"
 bool(true)
-array(3) {
-  [0]=>
+varray(3) {
   bool(false)
-  [1]=>
-  array(0) {
+  varray(0) {
   }
-  [2]=>
   NULL
 }
 object(stdClass) (0) {

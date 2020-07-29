@@ -1,15 +1,15 @@
-array(2) {
+darray(2) {
   ["kind"]=>
   int(14)
   ["fields"]=>
-  array(2) {
+  darray(2) {
     ["a"]=>
-    array(1) {
+    darray(1) {
       ["kind"]=>
       int(1)
     }
     ["b"]=>
-    array(1) {
+    darray(1) {
       ["kind"]=>
       int(1)
     }

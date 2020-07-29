@@ -1,8 +1,7 @@
-
-Warning: Parameter mismatch, pattern is a string while replacement is an array in %s/preg_replace2.php on line 3
+Warning: Parameter mismatch, pattern is a string while replacement is an array in %s/test/zend/good/ext/pcre/tests/preg_replace2.php on line 3
 bool(false)
 string(1) "c"
-array(3) {
+darray(3) {
   [0]=>
   string(1) "x"
   [1]=>
@@ -10,13 +9,13 @@ array(3) {
   [2]=>
   string(2) "vb"
 }
-array(2) {
+darray(2) {
   [0]=>
   string(1) "$"
   [1]=>
   string(1) "$"
 }
-array(2) {
+darray(2) {
   [0]=>
   string(3) "x$y"
   [1]=>

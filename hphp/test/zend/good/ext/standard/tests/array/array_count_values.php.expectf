@@ -1,39 +1,39 @@
-array(0) {
+darray(0) {
 }
 
-array(1) {
+darray(1) {
   [0]=>
   int(1)
 }
 
-array(1) {
+darray(1) {
   [1]=>
   int(1)
 }
 
-array(1) {
+darray(1) {
   [-1]=>
   int(1)
 }
 
-array(1) {
+darray(1) {
   [0]=>
   int(2)
 }
 
-array(2) {
+darray(2) {
   [0]=>
   int(1)
   [1]=>
   int(1)
 }
 
-array(1) {
+darray(1) {
   [1]=>
   int(2)
 }
 
-array(3) {
+darray(3) {
   [1]=>
   int(2)
   ["hello"]=>
@@ -42,14 +42,14 @@ array(3) {
   int(1)
 }
 
-array(2) {
+darray(2) {
   ["hello"]=>
   int(2)
   ["world"]=>
   int(1)
 }
 
-array(3) {
+darray(3) {
   [""]=>
   int(2)
   ["world"]=>
@@ -58,12 +58,12 @@ array(3) {
   int(4)
 }
 
-array(1) {
+darray(1) {
   [0]=>
   int(1)
 }
 
-array(1) {
+darray(1) {
   [1]=>
   int(1)
 }

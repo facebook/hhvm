@@ -6,9 +6,9 @@ Caught: Undefined index on inout parameter: 10
 Caught: Undefined index on inout parameter: banana
 int(5)
 Caught: Undefined index on inout parameter: 50
-array(1) {
+darray(1) {
   ["apple"]=>
-  array(1) {
+  darray(1) {
     ["orange"]=>
     int(12)
   }
@@ -19,7 +19,7 @@ int(5)
 Caught: Out of bounds dict access: invalid index 50
 dict(1) {
   ["apple"]=>
-  array(1) {
+  darray(1) {
     ["orange"]=>
     int(12)
   }

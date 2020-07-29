@@ -11,13 +11,11 @@
 1
 0
 -1
-array(2) {
-  [0]=>
+varray(2) {
   object(GMP) (1) {
     ["num"]=>
     string(7) "4920955"
   }
-  [1]=>
   object(GMP) (1) {
     ["num"]=>
     string(7) "3189694"

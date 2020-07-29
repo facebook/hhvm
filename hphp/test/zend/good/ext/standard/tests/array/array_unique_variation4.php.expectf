@@ -1,23 +1,23 @@
 *** Testing array_unique() : assoc. array with diff. values to $input argument ***
 -- Iteration 1 --
-array(1) {
+darray(1) {
   [0]=>
   int(0)
 }
 -- Iteration 2 --
-array(2) {
+darray(2) {
   ["one"]=>
   int(1)
   ["two"]=>
   int(2)
 }
 -- Iteration 3 --
-array(1) {
+darray(1) {
   ["float1"]=>
   float(2.3333)
 }
 -- Iteration 4 --
-array(3) {
+darray(3) {
   ["f1"]=>
   float(1.2)
   ["f2"]=>
@@ -26,16 +26,16 @@ array(3) {
   float(4.8999992284)
 }
 -- Iteration 5 --
-array(3) {
+darray(3) {
   [111]=>
-  string(6) "%r\x09%rHello"
+  string(6) "	Hello"
   ["red"]=>
-  string(6) "col%r\x09%ror"
+  string(6) "col	or"
   [2]=>
-  string(7) "%r\x0b\x0c%rworld"
+  string(7) "world"
 }
 -- Iteration 6 --
-array(3) {
+darray(3) {
   [111]=>
   string(7) "\tHello"
   ["red"]=>
@@ -44,20 +44,20 @@ array(3) {
   string(9) "\v\fworld"
 }
 -- Iteration 7 --
-array(2) {
+darray(2) {
   [1]=>
   string(5) "hello"
   ["heredoc"]=>
   string(11) "Hello world"
 }
 -- Iteration 8 --
-array(3) {
+darray(3) {
   [11]=>
   object(classA) (0) {
   }
   ["unset"]=>
   NULL
   ["resource"]=>
-  resource(%d) of type (stream)
+  resource(4) of type (stream)
 }
 Done

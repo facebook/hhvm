@@ -1,14 +1,14 @@
 *** Testing array_merge_recursive() : Passing different arrays to $arr1 argument ***
 -- Iteration 1 --
 -- With default argument --
-array(2) {
+darray(2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
 -- With more arguments --
-array(6) {
+darray(6) {
   [0]=>
   int(1)
   [1]=>
@@ -20,25 +20,22 @@ array(6) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 2 --
 -- With default argument --
-array(2) {
+darray(2) {
   [0]=>
   float(1.1)
   [1]=>
   float(2.2)
 }
 -- With more arguments --
-array(6) {
+darray(6) {
   [0]=>
   float(1.1)
   [1]=>
@@ -50,25 +47,22 @@ array(6) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 3 --
 -- With default argument --
-array(2) {
+darray(2) {
   [0]=>
   bool(false)
   [1]=>
   bool(true)
 }
 -- With more arguments --
-array(6) {
+darray(6) {
   [0]=>
   bool(false)
   [1]=>
@@ -80,21 +74,18 @@ array(6) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 4 --
 -- With default argument --
-array(0) {
+darray(0) {
 }
 -- With more arguments --
-array(4) {
+darray(4) {
   [0]=>
   string(3) "one"
   [1]=>
@@ -102,23 +93,20 @@ array(4) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 5 --
 -- With default argument --
-array(1) {
+darray(1) {
   [0]=>
   NULL
 }
 -- With more arguments --
-array(5) {
+darray(5) {
   [0]=>
   NULL
   [1]=>
@@ -128,18 +116,15 @@ array(5) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 6 --
 -- With default argument --
-array(4) {
+darray(4) {
   [0]=>
   string(3) "a%r\x0b\x0c%r"
   [1]=>
@@ -151,7 +136,7 @@ array(4) {
   string(27) "\[\]\!\@\#$\%\^\&\*\(\)\{\}"
 }
 -- With more arguments --
-array(8) {
+darray(8) {
   [0]=>
   string(3) "a%r\x0b\x0c%r"
   [1]=>
@@ -168,18 +153,15 @@ array(8) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 7 --
 -- With default argument --
-array(4) {
+darray(4) {
   [0]=>
   string(5) "a\v\f"
   [1]=>
@@ -190,7 +172,7 @@ array(4) {
   string(28) "\[\]\!\@\#\$\%\^\&\*\(\)\{\}"
 }
 -- With more arguments --
-array(8) {
+darray(8) {
   [0]=>
   string(5) "a\v\f"
   [1]=>
@@ -206,18 +188,15 @@ array(8) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 8 --
 -- With default argument --
-array(3) {
+darray(3) {
   ["h1"]=>
   string(1) "
 "
@@ -234,7 +213,7 @@ heredoc
 double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
 }
 -- With more arguments --
-array(7) {
+darray(7) {
   ["h1"]=>
   string(1) "
 "
@@ -256,25 +235,22 @@ double quoted string. with%r\x0b%rdifferent%r\x0c%rwhite%r\x0b%rspaces"
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 9 --
 -- With default argument --
-array(2) {
+darray(2) {
   [0]=>
   string(3) "one"
   [1]=>
   string(3) "two"
 }
 -- With more arguments --
-array(6) {
+darray(6) {
   [0]=>
   string(3) "one"
   [1]=>
@@ -286,18 +262,15 @@ array(6) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 10 --
 -- With default argument --
-array(3) {
+darray(3) {
   ["one"]=>
   int(1)
   ["two"]=>
@@ -306,7 +279,7 @@ array(3) {
   int(1)
 }
 -- With more arguments --
-array(7) {
+darray(7) {
   ["one"]=>
   int(1)
   ["two"]=>
@@ -320,18 +293,15 @@ array(7) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 11 --
 -- With default argument --
-array(3) {
+darray(3) {
   [0]=>
   int(10)
   [1]=>
@@ -340,7 +310,7 @@ array(3) {
   int(40)
 }
 -- With more arguments --
-array(7) {
+darray(7) {
   [0]=>
   int(10)
   [1]=>
@@ -354,25 +324,22 @@ array(7) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 12 --
 -- With default argument --
-array(2) {
+darray(2) {
   ["one"]=>
   string(3) "ten"
   ["two"]=>
   string(6) "twenty"
 }
 -- With more arguments --
-array(6) {
+darray(6) {
   ["one"]=>
   string(3) "ten"
   ["two"]=>
@@ -384,18 +351,15 @@ array(6) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 13 --
 -- With default argument --
-array(3) {
+darray(3) {
   ["one"]=>
   int(1)
   [0]=>
@@ -404,7 +368,7 @@ array(3) {
   string(4) "four"
 }
 -- With more arguments --
-array(7) {
+darray(7) {
   ["one"]=>
   int(1)
   [0]=>
@@ -418,18 +382,15 @@ array(7) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 14 --
 -- With default argument --
-array(3) {
+darray(3) {
   [""]=>
   string(4) "null"
   ["NULL"]=>
@@ -438,7 +399,7 @@ array(3) {
   NULL
 }
 -- With more arguments --
-array(7) {
+darray(7) {
   [""]=>
   string(4) "null"
   ["NULL"]=>
@@ -452,18 +413,15 @@ array(7) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 15 --
 -- With default argument --
-array(4) {
+darray(4) {
   [0]=>
   string(4) "true"
   [1]=>
@@ -474,7 +432,7 @@ array(4) {
   bool(true)
 }
 -- With more arguments --
-array(8) {
+darray(8) {
   [0]=>
   string(4) "true"
   [1]=>
@@ -490,18 +448,15 @@ array(8) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 16 --
 -- With default argument --
-array(3) {
+darray(3) {
   [""]=>
   string(6) "emptys"
   ["emptyd"]=>
@@ -510,7 +465,7 @@ array(3) {
   string(0) ""
 }
 -- With more arguments --
-array(7) {
+darray(7) {
   [""]=>
   string(6) "emptys"
   ["emptyd"]=>
@@ -524,18 +479,15 @@ array(7) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 17 --
 -- With default argument --
-array(6) {
+darray(6) {
   [0]=>
   string(0) ""
   [1]=>
@@ -550,7 +502,7 @@ array(6) {
   bool(true)
 }
 -- With more arguments --
-array(10) {
+darray(10) {
   [0]=>
   string(0) ""
   [1]=>
@@ -570,18 +522,15 @@ array(10) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 18 --
 -- With default argument --
-array(3) {
+darray(3) {
   [""]=>
   int(4)
   [0]=>
@@ -590,7 +539,7 @@ array(3) {
   int(6)
 }
 -- With more arguments --
-array(7) {
+darray(7) {
   [""]=>
   int(4)
   [0]=>
@@ -604,41 +553,34 @@ array(7) {
   ["string"]=>
   string(5) "hello"
   ["array"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     string(1) "a"
-    [1]=>
     string(1) "b"
-    [2]=>
     string(1) "c"
   }
 }
 -- Iteration 19 --
 -- With default argument --
-array(3) {
+darray(3) {
   [0]=>
   string(4) "str1"
   ["array"]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     string(5) "hello"
-    [1]=>
     string(5) "world"
   }
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(1)
-    [1]=>
     int(2)
   }
 }
 -- With more arguments --
-array(6) {
+darray(6) {
   [0]=>
   string(4) "str1"
   ["array"]=>
-  array(5) {
+  darray(5) {
     [0]=>
     string(5) "hello"
     [1]=>
@@ -651,10 +593,8 @@ array(6) {
     string(1) "c"
   }
   [1]=>
-  array(2) {
-    [0]=>
+  varray(2) {
     int(1)
-    [1]=>
     int(2)
   }
   [2]=>

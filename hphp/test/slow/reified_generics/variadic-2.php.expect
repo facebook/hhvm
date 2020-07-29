@@ -1,8 +1,7 @@
-array(1) {
-  [0]=>
+varray(1) {
   string(3) "foo"
 }
-array(1) {
+darray(1) {
   ["kind"]=>
   int(1)
 }

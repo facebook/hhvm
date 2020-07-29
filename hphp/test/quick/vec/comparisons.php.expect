@@ -479,7 +479,7 @@ vec(0) {
 Comparing:
 vec(0) {
 }
-array(0) {
+varray(0) {
 }
 	<   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
@@ -491,7 +491,7 @@ array(0) {
 	!== : bool(true)
 	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a vec with a non-vec
 Comparing:
-array(0) {
+varray(0) {
 }
 vec(0) {
 }

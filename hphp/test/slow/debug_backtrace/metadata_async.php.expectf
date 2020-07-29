@@ -1,6 +1,5 @@
-array(6) {
-  [0]=>
-  array(3) {
+varray(6) {
+  darray(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -8,8 +7,7 @@ array(6) {
     ["function"]=>
     string(3) "bar"
   }
-  [1]=>
-  array(3) {
+  darray(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -17,30 +15,25 @@ array(6) {
     ["function"]=>
     string(3) "foo"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     ["function"]=>
     string(4) "main"
   }
-  [3]=>
-  array(1) {
+  darray(1) {
     ["function"]=>
     string(43) "Closure$__SystemLib\enter_async_entry_point"
   }
-  [4]=>
-  array(1) {
+  darray(1) {
     ["function"]=>
     string(12) "HH\Asio\join"
   }
-  [5]=>
-  array(1) {
+  darray(1) {
     ["function"]=>
     string(35) "__SystemLib\enter_async_entry_point"
   }
 }
-array(6) {
-  [0]=>
-  array(3) {
+varray(6) {
+  darray(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -48,8 +41,7 @@ array(6) {
     ["function"]=>
     string(3) "bar"
   }
-  [1]=>
-  array(4) {
+  darray(4) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
@@ -59,23 +51,19 @@ array(6) {
     ["metadata"]=>
     string(8) "I am foo"
   }
-  [2]=>
-  array(1) {
+  darray(1) {
     ["function"]=>
     string(4) "main"
   }
-  [3]=>
-  array(1) {
+  darray(1) {
     ["function"]=>
     string(43) "Closure$__SystemLib\enter_async_entry_point"
   }
-  [4]=>
-  array(1) {
+  darray(1) {
     ["function"]=>
     string(12) "HH\Asio\join"
   }
-  [5]=>
-  array(1) {
+  darray(1) {
     ["function"]=>
     string(35) "__SystemLib\enter_async_entry_point"
   }

@@ -1,13 +1,10 @@
 --------------------
-input: array(3) {
-  [0]=>
+input: varray(3) {
   string(3) "foo"
-  [1]=>
   string(3) "bar"
-  [2]=>
   string(3) "baz"
 }
-reverse discard keys: array(3) {
+reverse discard keys: darray(3) {
   [0]=>
   string(3) "baz"
   [1]=>
@@ -16,7 +13,7 @@ reverse discard keys: array(3) {
   string(3) "foo"
 }
 bool(true)
-reverse preserve keys: array(3) {
+reverse preserve keys: darray(3) {
   [2]=>
   string(3) "baz"
   [1]=>
@@ -26,7 +23,7 @@ reverse preserve keys: array(3) {
 }
 bool(true)
 --------------------
-input: array(3) {
+input: darray(3) {
   ["a"]=>
   string(3) "foo"
   ["b"]=>
@@ -34,7 +31,7 @@ input: array(3) {
   ["c"]=>
   string(3) "baz"
 }
-reverse discard keys: array(3) {
+reverse discard keys: darray(3) {
   ["c"]=>
   string(3) "baz"
   ["b"]=>
@@ -43,7 +40,7 @@ reverse discard keys: array(3) {
   string(3) "foo"
 }
 bool(true)
-reverse preserve keys: array(3) {
+reverse preserve keys: darray(3) {
   ["c"]=>
   string(3) "baz"
   ["b"]=>
@@ -53,7 +50,7 @@ reverse preserve keys: array(3) {
 }
 bool(true)
 --------------------
-input: array(3) {
+input: darray(3) {
   [10]=>
   string(3) "foo"
   [20]=>
@@ -61,7 +58,7 @@ input: array(3) {
   [30]=>
   string(3) "baz"
 }
-reverse discard keys: array(3) {
+reverse discard keys: darray(3) {
   [0]=>
   string(3) "baz"
   [1]=>
@@ -70,7 +67,7 @@ reverse discard keys: array(3) {
   string(3) "foo"
 }
 bool(true)
-reverse preserve keys: array(3) {
+reverse preserve keys: darray(3) {
   [30]=>
   string(3) "baz"
   [20]=>
@@ -88,7 +85,7 @@ input: object(HH\Vector) (3) {
   [2]=>
   string(3) "baz"
 }
-reverse discard keys: array(3) {
+reverse discard keys: darray(3) {
   [0]=>
   string(3) "baz"
   [1]=>
@@ -97,7 +94,7 @@ reverse discard keys: array(3) {
   string(3) "foo"
 }
 bool(true)
-reverse preserve keys: array(3) {
+reverse preserve keys: darray(3) {
   [2]=>
   string(3) "baz"
   [1]=>
@@ -112,7 +109,7 @@ input: object(HH\Set) (3) {
   string(3) "bar"
   string(3) "baz"
 }
-reverse discard keys: array(3) {
+reverse discard keys: darray(3) {
   ["baz"]=>
   string(3) "baz"
   ["bar"]=>
@@ -121,7 +118,7 @@ reverse discard keys: array(3) {
   string(3) "foo"
 }
 bool(true)
-reverse preserve keys: array(3) {
+reverse preserve keys: darray(3) {
   ["baz"]=>
   string(3) "baz"
   ["bar"]=>
@@ -139,7 +136,7 @@ input: object(HH\Map) (3) {
   ["c"]=>
   string(3) "baz"
 }
-reverse discard keys: array(3) {
+reverse discard keys: darray(3) {
   ["c"]=>
   string(3) "baz"
   ["b"]=>
@@ -148,7 +145,7 @@ reverse discard keys: array(3) {
   string(3) "foo"
 }
 bool(true)
-reverse preserve keys: array(3) {
+reverse preserve keys: darray(3) {
   ["c"]=>
   string(3) "baz"
   ["b"]=>
@@ -166,7 +163,7 @@ input: object(HH\Map) (3) {
   [30]=>
   string(3) "baz"
 }
-reverse discard keys: array(3) {
+reverse discard keys: darray(3) {
   [0]=>
   string(3) "baz"
   [1]=>
@@ -175,7 +172,7 @@ reverse discard keys: array(3) {
   string(3) "foo"
 }
 bool(true)
-reverse preserve keys: array(3) {
+reverse preserve keys: darray(3) {
   [30]=>
   string(3) "baz"
   [20]=>
@@ -193,7 +190,7 @@ input: object(HH\ImmVector) (3) {
   [2]=>
   string(3) "baz"
 }
-reverse discard keys: array(3) {
+reverse discard keys: darray(3) {
   [0]=>
   string(3) "baz"
   [1]=>
@@ -202,7 +199,7 @@ reverse discard keys: array(3) {
   string(3) "foo"
 }
 bool(true)
-reverse preserve keys: array(3) {
+reverse preserve keys: darray(3) {
   [2]=>
   string(3) "baz"
   [1]=>
@@ -217,7 +214,7 @@ input: object(HH\ImmSet) (3) {
   string(3) "bar"
   string(3) "baz"
 }
-reverse discard keys: array(3) {
+reverse discard keys: darray(3) {
   ["baz"]=>
   string(3) "baz"
   ["bar"]=>
@@ -226,7 +223,7 @@ reverse discard keys: array(3) {
   string(3) "foo"
 }
 bool(true)
-reverse preserve keys: array(3) {
+reverse preserve keys: darray(3) {
   ["baz"]=>
   string(3) "baz"
   ["bar"]=>
@@ -244,7 +241,7 @@ input: object(HH\ImmMap) (3) {
   ["c"]=>
   string(3) "baz"
 }
-reverse discard keys: array(3) {
+reverse discard keys: darray(3) {
   ["c"]=>
   string(3) "baz"
   ["b"]=>
@@ -253,7 +250,7 @@ reverse discard keys: array(3) {
   string(3) "foo"
 }
 bool(true)
-reverse preserve keys: array(3) {
+reverse preserve keys: darray(3) {
   ["c"]=>
   string(3) "baz"
   ["b"]=>
@@ -271,7 +268,7 @@ input: object(HH\ImmMap) (3) {
   [30]=>
   string(3) "baz"
 }
-reverse discard keys: array(3) {
+reverse discard keys: darray(3) {
   [0]=>
   string(3) "baz"
   [1]=>
@@ -280,7 +277,7 @@ reverse discard keys: array(3) {
   string(3) "foo"
 }
 bool(true)
-reverse preserve keys: array(3) {
+reverse preserve keys: darray(3) {
   [30]=>
   string(3) "baz"
   [20]=>

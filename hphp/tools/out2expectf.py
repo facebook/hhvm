@@ -13,14 +13,14 @@ self = os.path.abspath(inspect.getfile(inspect.currentframe()))
 root = os.path.dirname(os.path.dirname(os.path.dirname(self)))
 root_re = re.escape(root)
 
-for test in sys.argv[1:]:
+for test in sys.argv[2:]:
     if (not test.endswith('.php')) and (not test.endswith('.hack')):
         print("%s doesn\'t end in .php. Pass the .php file to this script." %
                test)
         sys.exit(1)
 
     try:
-        data = open(test + '.out').read()
+        data = open(sys.argv[1] + '/' + test + '.out').read()
     except IOError:
         print("%s.out doesn't exist, skipping" % test)
         continue

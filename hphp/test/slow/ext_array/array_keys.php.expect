@@ -1,20 +1,13 @@
-array(2) {
-  [0]=>
+varray(2) {
   int(0)
-  [1]=>
   string(5) "color"
 }
-array(2) {
-  [0]=>
+varray(2) {
   string(5) "color"
-  [1]=>
   string(4) "size"
 }
-array(3) {
-  [0]=>
+varray(3) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
 }

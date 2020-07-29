@@ -1,21 +1,16 @@
 bool(true)
-array(0) {
+varray(0) {
 }
 bool(true)
-array(5) {
-  [0]=>
+varray(5) {
   int(3)
-  [1]=>
   int(4)
-  [2]=>
   int(5)
-  [3]=>
   int(1)
-  [4]=>
   int(2)
 }
 bool(true)
-array(3) {
+darray(3) {
   [0]=>
   string(1) "c"
   [1]=>
@@ -79,40 +74,40 @@ keyset(3) {
   string(1) "c"
 }
 
-Warning: Invalid operand type was used: shuffle expects array(s) in %s/shuffle.php on line 5
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
 bool(false)
 NULL
 
-Warning: Invalid operand type was used: shuffle expects array(s) in %s/shuffle.php on line 5
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
 bool(false)
 bool(true)
 
-Warning: Invalid operand type was used: shuffle expects array(s) in %s/shuffle.php on line 5
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
 bool(false)
 bool(false)
 
-Warning: Invalid operand type was used: shuffle expects array(s) in %s/shuffle.php on line 5
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
 bool(false)
 int(123)
 
-Warning: Invalid operand type was used: shuffle expects array(s) in %s/shuffle.php on line 5
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
 bool(false)
 string(3) "abc"
 
-Warning: Invalid operand type was used: shuffle expects array(s) in %s/shuffle.php on line 5
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
 bool(false)
 float(3.14)
 
-Warning: Invalid operand type was used: shuffle expects array(s) in %s/shuffle.php on line 5
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
 bool(false)
-resource(%d) of type (stream)
+resource(4) of type (stream)
 
-Warning: Invalid operand type was used: shuffle expects array(s) in %s/shuffle.php on line 5
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
 bool(false)
 object(stdClass) (0) {
 }
 
-Warning: Invalid operand type was used: shuffle expects array(s) in %s/shuffle.php on line 5
+Warning: Invalid operand type was used: shuffle expects array(s) in %s/test/slow/shuffle.php on line 5
 bool(false)
 object(HH\Vector) (4) {
   [0]=>

@@ -2,7 +2,7 @@
 
 -- Iteration 1 : int data --
 string(4) "zero"
-array(3) {
+darray(3) {
   [0]=>
   string(3) "one"
   [1]=>
@@ -13,17 +13,17 @@ array(3) {
 
 -- Iteration 2 : empty double quotes data --
 string(6) "emptyd"
-array(0) {
+darray(0) {
 }
 
 -- Iteration 3 : empty single quotes data --
 string(6) "emptys"
-array(0) {
+darray(0) {
 }
 
 -- Iteration 4 : string data --
 string(7) "stringd"
-array(2) {
+darray(2) {
   ["strings"]=>
   string(7) "strings"
   ["hello world"]=>

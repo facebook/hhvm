@@ -1,4 +1,4 @@
-array(8) {
+darray(8) {
   ["command"]=>
   string(14) "/bin/sleep 120"
   ["pid"]=>

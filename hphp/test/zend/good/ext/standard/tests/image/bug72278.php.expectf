@@ -1,5 +1,5 @@
-Warning: corrupt JPEG data: 3 extraneous bytes before marker in %s%ebug72278.php on line %d
-array(7) {
+Warning: corrupt JPEG data: 3 extraneous bytes before marker in %s/test/zend/good/ext/standard/tests/image/bug72278.php on line 4
+darray(7) {
   [0]=>
   int(300)
   [1]=>

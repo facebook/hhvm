@@ -1,6 +1,6 @@
 = reflection_class =
 Enum [ <user> enum TestEnum extends HH\BuiltinEnum ] {
-  @@ %s/enum.php %d-%d
+  @@ %s/test/slow/reflection/enum.php 3-6
 
   - Constants [2] {
     Constant [ integer FOO {2} ]
@@ -81,7 +81,7 @@ bool(false)
 bool(false)
 bool(false)
 bool(true)
-array(2) {
+darray(2) {
   ["FOO"]=>
   int(2)
   ["BAR"]=>
@@ -92,7 +92,7 @@ bool(true)
 bool(true)
 bool(false)
 bool(false)
-array(2) {
+darray(2) {
   ["FOO"]=>
   int(2)
   ["BAR"]=>

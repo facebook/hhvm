@@ -1,6 +1,6 @@
 Warning: class_uses(): Class A does not exist in %s on line %d
 bool(false)
-array(1) {
+darray(1) {
   ["T"]=>
   string(1) "T"
 }

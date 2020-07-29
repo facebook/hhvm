@@ -1,26 +1,18 @@
 reflection:
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     string(2) "42"
   }
-  [2]=>
   string(3) "foo"
 }
 string(68) "varray[\SORT_NUMERIC, varray[\Foo\Derived::NUM], \Foo\Bar\Base::STR]"
 NULL
 call:
-array(3) {
-  [0]=>
+varray(3) {
   int(1)
-  [1]=>
-  array(1) {
-    [0]=>
+  varray(1) {
     string(2) "42"
   }
-  [2]=>
   string(3) "foo"
 }

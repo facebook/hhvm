@@ -1,23 +1,17 @@
-array(1) {
+darray(1) {
   ["args"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(1)
-    [1]=>
     int(2)
-    [2]=>
     int(3)
   }
 }
 not folding
-array(1) {
+darray(1) {
   ["args"]=>
-  array(3) {
-    [0]=>
+  varray(3) {
     int(4)
-    [1]=>
     int(5)
-    [2]=>
     int(6)
   }
 }

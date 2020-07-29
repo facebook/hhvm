@@ -1,6 +1,6 @@
 object(Closure%s) (1) {
   ["static"]=>
-  array(1) {
+  darray(1) {
     ["x"]=>
     object(C) (1) {
       ["a"]=>

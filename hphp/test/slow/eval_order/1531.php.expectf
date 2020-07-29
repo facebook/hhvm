@@ -1,6 +1,6 @@
 Warning: class_parents(): Class A does not exist in %s
 bool(false)
-array(1) {
+darray(1) {
   ["B"]=>
   string(1) "B"
 }

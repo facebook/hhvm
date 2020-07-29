@@ -1,10 +1,9 @@
-
 Warning: json_encode(): type is unsupported, encoded as false in %s/heapgraph.php on line 14
 Capturing two snapshots...
 resource(%d) of type (HeapGraphContext)
 resource(%d) of type (HeapGraphContext)
 Stats for first capture:
-array(5) {
+darray(5) {
   ["nodes"]=>
   int(%d)
   ["edges"]=>

@@ -3,14 +3,10 @@ int(0)
 int(1)
 int(2)
 int(3)
-array(4) {
-  [0]=>
+varray(4) {
   int(0)
-  [1]=>
   int(1)
-  [2]=>
   int(2)
-  [3]=>
   int(3)
 }
 bool(true)
@@ -18,14 +14,10 @@ int(0)
 int(1)
 int(2)
 int(3)
-array(4) {
-  [0]=>
+varray(4) {
   int(0)
-  [1]=>
   int(1)
-  [2]=>
   int(2)
-  [3]=>
   int(3)
 }
 bool(true)
@@ -33,14 +25,10 @@ int(0)
 int(1)
 int(2)
 int(3)
-array(4) {
-  [0]=>
+varray(4) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
-  [3]=>
   string(1) "d"
 }
 bool(true)
@@ -48,14 +36,10 @@ int(0)
 int(1)
 int(2)
 int(3)
-array(4) {
-  [0]=>
+varray(4) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
-  [3]=>
   string(1) "d"
 }
 bool(true)
@@ -63,14 +47,10 @@ int(0)
 int(1)
 int(2)
 int(3)
-array(4) {
-  [0]=>
+varray(4) {
   int(11)
-  [1]=>
   int(22)
-  [2]=>
   int(33)
-  [3]=>
   string(2) "22"
 }
 bool(true)
@@ -78,31 +58,23 @@ int(0)
 int(1)
 int(2)
 int(3)
-array(4) {
-  [0]=>
+varray(4) {
   int(11)
-  [1]=>
   int(22)
-  [2]=>
   int(33)
-  [3]=>
   string(2) "22"
 }
 bool(true)
 int(0)
 int(1)
-array(2) {
-  [0]=>
+varray(2) {
   int(0)
-  [1]=>
   int(1)
 }
 bool(true)
 int(0)
 int(1)
-array(2) {
-  [0]=>
+varray(2) {
   int(0)
-  [1]=>
   int(1)
 }

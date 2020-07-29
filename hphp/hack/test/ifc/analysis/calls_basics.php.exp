@@ -201,6 +201,9 @@ Flow constraints for \indirect_flow_a_to_b_bis:
      [d < B, a < B, b < B, .b < a, pcjoin < b, B < B, B < B, A < A, A < A,
       lump'2 = c, \C'1 < d, e < \C#setb_ret]]
 
+Lattice:
+ {PUBLIC < PRIVATE}
+
 There are privacy policy errors in \flow_a_to_b:
   Data with policy A appears in context B.
   

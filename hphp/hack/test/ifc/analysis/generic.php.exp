@@ -46,3 +46,6 @@ Flow constraints for \testVariance:
   [tp'2 < tp'5, tp'5 < tp'2, tp'1 < tp'4, tp'3 < tp, lump'2 = lump'1,
    \G'1 < \G]
 
+Lattice:
+ {PUBLIC < PRIVATE}
+

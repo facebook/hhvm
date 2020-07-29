@@ -164,3 +164,6 @@ Flow constraints for \trait_:
   Simplified: True
   Raw: [tp'1 < tp, lump'2 = lump'1, \L'1 < \L]
 
+Lattice:
+ {PUBLIC < PRIVATE}
+

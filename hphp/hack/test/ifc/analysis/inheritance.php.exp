@@ -10,3 +10,6 @@ Decls:
   class \Z: { policied_props = [replicaPP, replicaPU, replicaUP] }
   class \ZTrait: { policied_props = [replicaPP, replicaPU] }
   
+Lattice:
+ {PUBLIC < PRIVATE}
+

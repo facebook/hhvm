@@ -85,3 +85,6 @@ Flow constraints for \condition:
   [$a0 < $x, $a2 < $x, $a1 < $x'1, $a2 < $x'1, $x < $x'2, $x'1 < $x'2,
    $x'2 < ret]
 
+Lattice:
+ {PUBLIC < PRIVATE}
+

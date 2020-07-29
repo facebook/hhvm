@@ -872,6 +872,10 @@ let do_ opts files_info ctx =
             fail
               "lattice parsing error: lattice specification should be `;` basic flux constraints, e.g., `A < B`"
         in
+
+        if opts.verbosity >= 3 then
+          Format.printf "@[Lattice:@. %a@]\n\n" Pp.security_lattice lattice;
+
         let log_checking name (_, simple) =
           let violations =
             try Ifc_security_lattice.check_exn lattice simple

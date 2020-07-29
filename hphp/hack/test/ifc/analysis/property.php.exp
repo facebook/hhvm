@@ -209,3 +209,6 @@ Flow constraints for \tlSetOtherBool:
   [\Other < .other, \My < .other, .other < .oBool, $bool < .oBool,
    pc < .oBool]
 
+Lattice:
+ {PUBLIC < PRIVATE}
+

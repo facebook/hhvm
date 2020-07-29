@@ -118,6 +118,9 @@ Flow constraints for \throw_in_catch:
    lump'2 = lump, \Exception'1 < \Exception, \X < B, PUBLIC < B, .a < B,
    pc < B]
 
+Lattice:
+ {PUBLIC < PRIVATE}
+
 There are privacy policy errors in \do_not_leak_pc_after_catch:
   Data with policy PUBLIC appears in context B.
   

@@ -575,6 +575,9 @@ Flow constraints for \testCollection:
    tp'27 < tp'7, tp'28 < tp'8, tp'29 < tp'9, lump'3 = lump'1,
    \HH\vec'2 < \HH\vec]
 
+Lattice:
+ {PUBLIC < PRIVATE}
+
 There are privacy policy errors in \C#mutation:
   Data with policy INT appears in context VEC.
   

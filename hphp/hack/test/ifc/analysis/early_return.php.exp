@@ -72,6 +72,9 @@ Flow constraints for \earlyReturn:
   [SECRET < .data, \PoliciedData < .data, \PublicData = PUBLIC,
    PUBLIC = PUBLIC, .data = PUBLIC, pc = PUBLIC]
 
+Lattice:
+ {PUBLIC < PRIVATE}
+
 There are privacy policy errors in \earlyReturn:
   Data with policy SECRET appears in context PUBLIC.
   

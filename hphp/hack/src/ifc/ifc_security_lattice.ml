@@ -18,10 +18,11 @@ exception Invalid_security_lattice
 
 exception Checking_error
 
-let parse_policy = function
+let parse_policy purpose_str =
+  match String.uppercase purpose_str with
   | "PUBLIC" -> Pbot
   | "PRIVATE" -> Ptop
-  | pur -> Ppurpose (String.uppercase pur)
+  | purpose -> Ppurpose purpose
 
 (* Parses a Hasse diagram written in a ';' separated format,
  * e.g., "A < B; B < C; A < D"

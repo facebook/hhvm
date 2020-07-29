@@ -74,6 +74,9 @@ Flow constraints for \f:
   [.valuex = PRIVATE, \X < .valuex, lump'3 = lump, \Exception'1 < \Exception,
    \Y = PUBLIC, PUBLIC = PUBLIC, .valuex = PUBLIC, pc = PUBLIC]
 
+Lattice:
+ {PUBLIC < PRIVATE}
+
 There are privacy policy errors in \f:
   Data with policy PRIVATE appears in context PUBLIC.
   

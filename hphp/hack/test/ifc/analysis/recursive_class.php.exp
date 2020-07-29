@@ -72,3 +72,6 @@ Flow constraints for \R#recursiveWrite:
   [lump'1 < .r, \R < .r, lump'1 < .r'1, .r < .r'1, lump'1 < .r'2,
    .r'1 < .r'2, .r'2 < lump'1, PUBLIC < lump'1, pc < lump'1]
 
+Lattice:
+ {PUBLIC < PRIVATE}
+

@@ -80,6 +80,9 @@ Flow constraints for \f:
       e < \Y#__construct_ret], PUBLIC = PUBLIC, PUBLIC = PUBLIC,
    lump'5 = lump'6, \Y'1 < \Y'2, .valuex < \Y'2]
 
+Lattice:
+ {PUBLIC < PRIVATE}
+
 There are privacy policy errors in \f:
   Data with policy PRIVATE appears in context PUBLIC.
   

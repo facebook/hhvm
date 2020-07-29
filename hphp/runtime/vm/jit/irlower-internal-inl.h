@@ -224,10 +224,9 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
 
     // Type-tests of union types that may be specialized.
     auto const base = type.unspecialize();
-    if (base == TPArr)      return persistent_type(KindOfPersistentArray);
     if (base == TVArr)      return persistent_type(KindOfPersistentVArray);
     if (base == TDArr)      return cmp(KindOfDArray, CC_LE);
-    if (base == TArr)       return cmp(KindOfArray, CC_LE);
+    if (base == TArr)       return cmp(KindOfVArray, CC_LE);
     if (base == TVec)       return persistent_type(KindOfPersistentVec);
     if (base == TDict)      return persistent_type(KindOfPersistentDict);
     if (base == TKeyset)    return persistent_type(KindOfPersistentKeyset);

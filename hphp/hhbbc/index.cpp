@@ -4777,8 +4777,6 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       case KindOfDArray:       return TDArr;
       case KindOfPersistentVArray:
       case KindOfVArray:       return TVArr;
-      case KindOfPersistentArray:
-      case KindOfArray:        return TPArr;
       case KindOfResource:     return TRes;
       case KindOfClsMeth:      return TClsMeth;
       case KindOfRecord:       // fallthrough

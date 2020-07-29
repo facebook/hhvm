@@ -96,9 +96,7 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
-    case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray: {
+    case KindOfVArray: {
       auto const cls = lookupClass();
       return cls && interface_supports_arrlike(cls->name());
     }

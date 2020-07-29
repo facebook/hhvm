@@ -43,8 +43,8 @@ struct Unit;
  * allowed when HipHop extensions are enabled.
  *
  * The `type' field is Object whenever the type alias is basically just a
- * name.  At runtime we still might resolve this name to another type alias,
- * becoming a type alias for KindOfArray or something in that request.
+ * name. At runtime we still might resolve this name to another type alias,
+ * becoming a type alias for some other type or something in that request.
  *
  * For the per-request struct, see TypeAlias below.
  */

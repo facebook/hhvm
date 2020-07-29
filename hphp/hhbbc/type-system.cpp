@@ -4158,8 +4158,6 @@ Type from_cell(TypedValue cell) {
   case KindOfDArray:
   case KindOfPersistentVArray:
   case KindOfVArray:
-  case KindOfPersistentArray:
-  case KindOfArray:
     always_assert(cell.m_data.parr->isStatic());
     always_assert(cell.m_data.parr->isPHPArrayType());
     return aval(cell.m_data.parr);
@@ -4198,8 +4196,6 @@ Type from_DataType(DataType dt) {
   case KindOfDArray:   return TDArr;
   case KindOfPersistentVArray:
   case KindOfVArray:   return TVArr;
-  case KindOfPersistentArray:
-  case KindOfArray:    return TArr;
   case KindOfObject:   return TObj;
   case KindOfResource: return TRes;
   case KindOfRFunc:    return TRFunc;

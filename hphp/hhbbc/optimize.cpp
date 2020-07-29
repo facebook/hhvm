@@ -903,13 +903,11 @@ Bytecode gen_constant(const TypedValue& cell) {
     case KindOfPersistentKeyset:
       assert(cell.m_data.parr->isKeysetType());
       return bc::Keyset { cell.m_data.parr };
-    case KindOfVArray:
     case KindOfDArray:
-    case KindOfArray:
+    case KindOfVArray:
       assert(cell.m_data.parr->isStatic());
-    case KindOfPersistentVArray:
     case KindOfPersistentDArray:
-    case KindOfPersistentArray:
+    case KindOfPersistentVArray:
       assert(cell.m_data.parr->isPHPArrayType());
       return bc::Array { cell.m_data.parr };
 

@@ -664,52 +664,30 @@ folly::dynamic VariablesCommand::serializeVariable(
 
 const char* VariablesCommand::getTypeName(const Variant& variable) {
   switch (variable.getType()) {
+    // Could we use getDataTypeString for these, too?
+    case KindOfBoolean: return "bool";
+    case KindOfInt64:   return "int";
+
+    // Same for these - let's distinguish array types.
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+      return "array";
+
     case KindOfUninit:
     case KindOfNull:
-      return "null";
-
-    case KindOfBoolean:
-      return "bool";
-
-    case KindOfInt64:
-      return "int";
-
     case KindOfDouble:
-      return "double";
-
     case KindOfPersistentString:
     case KindOfString:
-      return "string";
-
     case KindOfResource:
-      return "resource";
-
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray: {
-      if (variable.isVec()) {
-        return "vec";
-      }
-
-      if (variable.isDict()) {
-        return "dict";
-      }
-
-      if (variable.isKeyset()) {
-        return "keyset";
-      }
-
-      return "array";
-    }
+      return getDataTypeString(variable.getType()).data();
 
     case KindOfObject:
       return variable.asCObjRef()->getClassName().c_str();
@@ -778,30 +756,17 @@ const VariablesCommand::VariableValue VariablesCommand::getVariableValue(
 
     case KindOfPersistentVec:
     case KindOfVec:
-      return VariableValue{format("vec[{}]", variable.toArray().size()).str()};
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfPersistentDArray:
-    case KindOfDArray: {
-      auto arr = variable.toArray();
-      if (arr.get()->isVArray()) {
-        return VariableValue{format("varray[{}]", arr.size()).str()};
-      }
-      if (arr.get()->isDArray()) {
-        return VariableValue{format("darray[{}]", arr.size()).str()};
-      }
-      return VariableValue{format("array[{}]", arr.size()).str()};
-    }
+    case KindOfDArray:
     case KindOfPersistentDict:
-    case KindOfDict: {
-      return VariableValue{format("dict[{}]", variable.toArray().size()).str()};
-    }
-
+    case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
-      return VariableValue{format("keyset[{}]", variable.toArray().size()).str()};
+      auto const type = getDataTypeString(variable.getType());
+      auto const size = variable.toArray().size();
+      return VariableValue{format("{}[{}]", type.data(), size).str()};
     }
 
     case KindOfObject:

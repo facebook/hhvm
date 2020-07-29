@@ -134,8 +134,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, int64_t val) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
       return op.phpArrVsNonArr();
 
     case KindOfObject:
@@ -213,8 +211,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, double val) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
       return op.phpArrVsNonArr();
 
     case KindOfObject:
@@ -300,8 +296,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const StringData* val) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
       return op.phpArrVsNonArr();
 
     case KindOfObject: {
@@ -395,8 +389,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ArrayData* ad) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
       return op(cell.m_data.parr, ad);
 
     case KindOfObject: {
@@ -474,8 +466,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ObjectData* od) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
       return od->isCollection() ? op.collectionVsNonObj() : op.phpArrVsNonArr();
 
     case KindOfObject:
@@ -561,8 +551,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ResourceData* rd) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
       return op.phpArrVsNonArr();
 
     case KindOfObject:
@@ -741,9 +729,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, ClsMethDataRef clsMeth) {
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
-    case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray: {
+    case KindOfVArray: {
       if (RuntimeOption::EvalHackArrDVArrs) {
         return op.clsmethVsNonClsMeth();
       } else {
@@ -811,8 +797,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, RClsMethData* rclsmeth) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfObject:
@@ -850,8 +834,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, RFuncData* rfunc) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfObject:
@@ -915,8 +897,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Func* val) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
       funcToStringHelper(val); // warn
       return op.phpArrVsNonArr();
 
@@ -1011,8 +991,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Class* val) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
       classToStringHelper(val); // warn
       return op.phpArrVsNonArr();
 
@@ -1088,9 +1066,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue c1, TypedValue c2) {
   case KindOfPersistentDArray:
   case KindOfDArray:
   case KindOfPersistentVArray:
-  case KindOfVArray:
-  case KindOfPersistentArray:
-  case KindOfArray:        return tvRelOp(op, c1, c2.m_data.parr);
+  case KindOfVArray:       return tvRelOp(op, c1, c2.m_data.parr);
   case KindOfObject:       return tvRelOp(op, c1, c2.m_data.pobj);
   case KindOfResource:     return tvRelOp(op, c1, c2.m_data.pres);
   case KindOfRFunc:        return tvRelOp(op, c1, c2.m_data.prfunc);
@@ -1612,8 +1588,6 @@ bool tvSame(TypedValue c1, TypedValue c2) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
       if (isClsMethType(c2.m_type)) {
         if (RuntimeOption::EvalHackArrDVArrs) return false;
         raiseClsMethToVecWarningHelper();

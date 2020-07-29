@@ -2788,8 +2788,6 @@ bool Class::compatibleTraitPropInit(const TypedValue& tv1,
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfObject:
     case KindOfResource:
     case KindOfRFunc:

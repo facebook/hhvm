@@ -141,7 +141,6 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
       case AnnotType::Int:      str = "int";  break;
       case AnnotType::Float:    str = "float"; break;
       case AnnotType::String:   str = "string"; break;
-      case AnnotType::Array:    str = "array"; break;
       case AnnotType::Resource: str = "resource"; break;
       case AnnotType::Dict:     str = "dict"; break;
       case AnnotType::Vec:      str = "vec"; break;
@@ -902,8 +901,6 @@ std::string describe_actual_type(tv_rval val) {
     case KindOfDArray:        return "darray";
     case KindOfPersistentVArray:
     case KindOfVArray:        return "varray";
-    case KindOfPersistentArray:
-    case KindOfArray:         return "array";
     case KindOfResource:
       return val.val().pres->data()->o_getClassName().c_str();
     case KindOfRFunc:         return "reified function";
@@ -1270,8 +1267,6 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
         case KindOfDArray:
         case KindOfPersistentVArray:
         case KindOfVArray:
-        case KindOfPersistentArray:
-        case KindOfArray:
         case KindOfClsMeth:
         case KindOfResource:
         case KindOfRecord:

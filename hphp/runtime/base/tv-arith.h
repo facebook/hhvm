@@ -34,8 +34,7 @@ namespace HPHP {
 /*
  * PHP operator +
  *
- * Returns a TypedNum, unless both arguments are KindOfArray, in which
- * case it returns an TypedValue that contains an Array.
+ * Returns a num (an int or double).
  */
 TypedValue tvAdd(TypedValue, TypedValue);
 
@@ -98,8 +97,7 @@ TypedValue tvShr(TypedValue, TypedValue);
  * Mutates the first argument in place, by adding the second argument
  * to it in the sense of php's operator +=.
  *
- * Post: c1 is a KindOfInt or KindOfDouble, unless both arguments are
- * KindOfArray, in which case it will contain a TypedValue of KindOfArray.
+ * Post: c1 is a KindOfInt or KindOfDouble
  */
 void tvAddEq(tv_lval c1, TypedValue);
 

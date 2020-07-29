@@ -540,9 +540,7 @@ static int fb_compact_serialize_variant(
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
-    case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray: {
+    case KindOfVArray: {
       Array arr = var.toArray();
       assertx(arr->isPHPArrayType());
       int64_t index_limit;

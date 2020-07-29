@@ -360,8 +360,6 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfObject:
     case KindOfResource:
     case KindOfRecord:
@@ -744,8 +742,6 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfDArray:
       case KindOfPersistentVArray:
       case KindOfVArray:
-      case KindOfPersistentArray:
-      case KindOfArray:
       case KindOfObject:
       case KindOfResource:
       case KindOfRFunc:
@@ -774,7 +770,6 @@ DOUBLE:
       case KindOfKeyset:
       case KindOfDArray:
       case KindOfVArray:
-      case KindOfArray:
       case KindOfClsMeth:
       case KindOfRClsMeth:
       case KindOfObject:
@@ -1031,8 +1026,6 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfDArray:
       case KindOfPersistentVArray:
       case KindOfVArray:
-      case KindOfPersistentArray:
-      case KindOfArray:
       case KindOfObject:
       case KindOfResource:
       case KindOfRFunc:
@@ -1061,7 +1054,6 @@ DOUBLE:
       case KindOfKeyset:
       case KindOfDArray:
       case KindOfVArray:
-      case KindOfArray:
       case KindOfClsMeth:
       case KindOfRClsMeth:
       case KindOfObject:
@@ -1269,8 +1261,6 @@ int64_t HHVM_FUNCTION(count,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray:
       if ((CountMode)mode == CountMode::RECURSIVE) {
         const Array& arr_var = var.asCArrRef();
         return php_count_recursive(arr_var);
@@ -3244,8 +3234,6 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
       SystemLib::throwInvalidArgumentExceptionObject(
         "Arrays cannot be cast to an array-key"
       );

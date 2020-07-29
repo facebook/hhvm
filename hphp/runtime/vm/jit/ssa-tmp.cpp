@@ -100,7 +100,6 @@ Variant SSATmp::variantVal() const {
     case KindOfPersistentVec:
     case KindOfPersistentDict:
     case KindOfPersistentKeyset:
-    case KindOfPersistentArray:
       return Variant{arrLikeVal(), dt, Variant::PersistentArrInit{}};
     case KindOfClass:
       return Variant{const_cast<Class*>(clsVal())};
@@ -116,7 +115,6 @@ Variant SSATmp::variantVal() const {
     case KindOfKeyset:
     case KindOfDArray:
     case KindOfVArray:
-    case KindOfArray:
     case KindOfObject:
     case KindOfResource:
     case KindOfRFunc:

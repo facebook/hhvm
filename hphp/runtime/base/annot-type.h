@@ -58,7 +58,6 @@ enum class AnnotType : uint16_t {
   Int      = (uint8_t)KindOfInt64    | (uint16_t)AnnotMetaType::Precise << 8,
   Float    = (uint8_t)KindOfDouble   | (uint16_t)AnnotMetaType::Precise << 8,
   String   = (uint8_t)KindOfString   | (uint16_t)AnnotMetaType::Precise << 8,
-  Array    = (uint8_t)KindOfArray    | (uint16_t)AnnotMetaType::Precise << 8,
   VArray   = (uint8_t)KindOfVArray   | (uint16_t)AnnotMetaType::Precise << 8,
   DArray   = (uint8_t)KindOfDArray   | (uint16_t)AnnotMetaType::Precise << 8,
   Object   = (uint8_t)KindOfObject   | (uint16_t)AnnotMetaType::Precise << 8,

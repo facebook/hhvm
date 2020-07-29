@@ -285,8 +285,6 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromContainer,
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
       return AwaitAllWaitHandleFromPHPArray(self_, dependencies.asCArrRef());
     case KindOfObject: {
       auto obj = dependencies.getObjectData();

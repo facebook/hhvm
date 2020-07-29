@@ -184,8 +184,7 @@ void deepCopy(tv_lval lval) {
     case KindOfVec:
     case KindOfDict:
     case KindOfDArray:
-    case KindOfVArray:
-    case KindOfArray: {
+    case KindOfVArray: {
       auto& original = val(lval).parr;
       if (!original->isRefCounted()) return;
       auto arr = deepCopyArrayLike(original);

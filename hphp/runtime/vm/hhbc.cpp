@@ -677,8 +677,6 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray:
       staticArrayStreamer(tv->m_data.parr, out);
       return;
     case KindOfClsMeth:

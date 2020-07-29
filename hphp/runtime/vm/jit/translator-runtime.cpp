@@ -621,8 +621,6 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
       case KindOfDArray:
       case KindOfPersistentVArray:
       case KindOfVArray:
-      case KindOfPersistentArray:
-      case KindOfArray:
       case KindOfObject:
       case KindOfResource:
       case KindOfRFunc:

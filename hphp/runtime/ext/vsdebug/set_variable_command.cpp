@@ -395,8 +395,6 @@ void SetVariableCommand::setVariableValue(
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:

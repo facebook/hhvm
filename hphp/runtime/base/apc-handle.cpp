@@ -134,9 +134,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
-    case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray: {
+    case KindOfVArray: {
       auto const ad = val(cell).parr;
       assertx(ad->isPHPArrayType());
       return APCArray::MakeSharedArray(ad, level, unserializeObj);

@@ -1306,7 +1306,7 @@ struct RuntimeOption {
   F(bool, APCSerializeFuncs, true)                                      \
   /* When set:
    * - `is_array` becomes equivalent to `is_any_array` or
-   *  `isTvArrayLike` instead of being a strict KindOfArray check.
+   *  `isTvArrayLike` instead of being a strict PHP array check.
    * - For safety, we still log when these calls receive Hack arrays.
    *   See `SuppressWidenIsArrayLogs`.
    */                                                                   \

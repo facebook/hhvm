@@ -129,8 +129,6 @@ TypedNum numericConvHelper(TypedValue cell) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray:
       throw_bad_array_operand(cell.m_data.parr);
     case KindOfClsMeth:
       throw ExtendedException("Invalid operand type was used: cannot perform "
@@ -528,8 +526,6 @@ void tvIncDecOp(Op op, tv_lval cell) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfObject:
     case KindOfResource:
     case KindOfClsMeth:
@@ -838,8 +834,6 @@ void tvBitNot(TypedValue& cell) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfObject:
     case KindOfResource:
     case KindOfClsMeth:

@@ -787,8 +787,6 @@ bool StringData::isNumeric() const {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfObject:
     case KindOfResource:
     case KindOfRFunc:
@@ -826,8 +824,6 @@ bool StringData::isInteger() const {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfObject:
     case KindOfResource:
     case KindOfRFunc:

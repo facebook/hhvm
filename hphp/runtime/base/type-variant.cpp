@@ -117,27 +117,25 @@ void objReleaseWrapper(ObjectData* obj) noexcept {
 
 static_assert(typeToDestrIdx(KindOfDArray)   == 0, "Array destruct index");
 static_assert(typeToDestrIdx(KindOfVArray)   == 1, "Array destruct index");
-static_assert(typeToDestrIdx(KindOfArray)    == 2, "Array destruct index");
-static_assert(typeToDestrIdx(KindOfKeyset)   == 3, "Keyset destruct index");
-static_assert(typeToDestrIdx(KindOfDict)     == 4, "Dict destruct index");
-static_assert(typeToDestrIdx(KindOfVec)      == 5, "Vec destruct index");
-static_assert(typeToDestrIdx(KindOfRecord)   == 6, "Record destruct index");
-static_assert(typeToDestrIdx(KindOfString)   == 7, "String destruct index");
-static_assert(typeToDestrIdx(KindOfObject)   == 9, "Object destruct index");
-static_assert(typeToDestrIdx(KindOfResource) == 10, "Resource destruct index");
+static_assert(typeToDestrIdx(KindOfKeyset)   == 2, "Keyset destruct index");
+static_assert(typeToDestrIdx(KindOfDict)     == 3, "Dict destruct index");
+static_assert(typeToDestrIdx(KindOfVec)      == 4, "Vec destruct index");
+static_assert(typeToDestrIdx(KindOfRecord)   == 5, "Record destruct index");
+static_assert(typeToDestrIdx(KindOfString)   == 6, "String destruct index");
+static_assert(typeToDestrIdx(KindOfObject)   == 8, "Object destruct index");
+static_assert(typeToDestrIdx(KindOfResource) == 9, "Resource destruct index");
 #ifndef USE_LOWPTR
-static_assert(typeToDestrIdx(KindOfClsMeth)  == 11, "ClsMeth destruct index");
+static_assert(typeToDestrIdx(KindOfClsMeth)  == 10, "ClsMeth destruct index");
 #endif
-static_assert(typeToDestrIdx(KindOfRFunc)    == 12, "RFunc destruct index");
-static_assert(typeToDestrIdx(KindOfRClsMeth) == 13, "RFunc destruct index");
+static_assert(typeToDestrIdx(KindOfRFunc)    == 11, "RFunc destruct index");
+static_assert(typeToDestrIdx(KindOfRClsMeth) == 12, "RFunc destruct index");
 
-static_assert(kDestrTableSize == 14,
+static_assert(kDestrTableSize == 13,
               "size of g_destructors[] must be kDestrTableSize");
 
 RawDestructor g_destructors[] = {
   (RawDestructor)&mixedReleaseWrapper,                // KindOfDArray
   (RawDestructor)&packedReleaseWrapper,               // KindOfVArray
-  (RawDestructor)getMethodPtr(&ArrayData::release),   // KindOfArray
   (RawDestructor)&keysetReleaseWrapper,               // KindOfKeyset
   (RawDestructor)&mixedReleaseWrapper,                // KindOfDict
   (RawDestructor)&packedReleaseWrapper,               // KindOfVec
@@ -290,8 +288,6 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfObject:
     case KindOfRecord:
     case KindOfResource:
@@ -331,8 +327,6 @@ bool Variant::isScalar() const noexcept {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfObject:
     case KindOfResource:
     case KindOfClsMeth:
@@ -367,7 +361,6 @@ static bool isAllowedAsConstantValueImpl(TypedValue tv) {
     case KindOfKeyset:
     case KindOfPersistentDArray:
     case KindOfPersistentVArray:
-    case KindOfPersistentArray:
     case KindOfResource:
     case KindOfFunc:
     case KindOfClsMeth:
@@ -376,8 +369,7 @@ static bool isAllowedAsConstantValueImpl(TypedValue tv) {
     case KindOfDArray:
     case KindOfVArray:
     case KindOfVec:
-    case KindOfDict:
-    case KindOfArray: {
+    case KindOfDict: {
       auto allowed = true;
       IterateV(tv.m_data.parr, [&] (TypedValue v) {
         if (!isAllowedAsConstantValueImpl(v)) allowed = false;
@@ -430,9 +422,7 @@ bool Variant::toBooleanHelper() const {
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray:         return !m_data.parr->empty();
+    case KindOfKeyset:        return !m_data.parr->empty();
     case KindOfObject:        return m_data.pobj->toBoolean();
     case KindOfResource:      return m_data.pres->data()->o_toBoolean();
     case KindOfRFunc:
@@ -467,9 +457,7 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray:         return m_data.parr->empty() ? 0 : 1;
+    case KindOfKeyset:        return m_data.parr->empty() ? 0 : 1;
     case KindOfObject:        return m_data.pobj->toInt64();
     case KindOfResource:      return m_data.pres->data()->o_toInt64();
     case KindOfRFunc:
@@ -516,9 +504,7 @@ Array Variant::toPHPArrayHelper() const {
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
-    case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:         return Array(m_data.parr);
+    case KindOfVArray:        return Array(m_data.parr);
     case KindOfObject:        return m_data.pobj->toArray().toPHPArray();
     case KindOfResource:      return m_data.pres->data()->o_toArray();
     case KindOfRFunc:
@@ -567,8 +553,6 @@ Resource Variant::toResourceHelper() const {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfObject:
     case KindOfRFunc:
     case KindOfFunc:
@@ -662,12 +646,6 @@ void Variant::setEvalScalar() {
     case KindOfVArray:
       m_type = KindOfPersistentVArray;
     case KindOfPersistentVArray:
-      do_array();
-      return;
-
-    case KindOfArray:
-      m_type = KindOfPersistentArray;
-    case KindOfPersistentArray:
       do_array();
       return;
 

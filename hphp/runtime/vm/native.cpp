@@ -287,8 +287,6 @@ void callFunc(const Func* const func,
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfClsMeth:
     case KindOfObject:
     case KindOfResource:
@@ -590,8 +588,6 @@ static folly::Optional<TypedValue> builtinInValue(
   case KindOfDArray:  return make_array_like_tv(ArrayData::CreateDArray());
   case KindOfPersistentVArray:
   case KindOfVArray:  return make_array_like_tv(ArrayData::CreateVArray());
-  case KindOfPersistentArray:
-  case KindOfArray:   return make_array_like_tv(ArrayData::Create());
   case KindOfUninit:
   case KindOfObject:
   case KindOfResource:
@@ -640,9 +636,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
-    case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:        return ty == T::Array    || ty == T::ArrayArg;
+    case KindOfVArray:       return ty == T::Array    || ty == T::ArrayArg;
     case KindOfResource:     return ty == T::Resource || ty == T::ResourceArg;
     case KindOfUninit:
     case KindOfNull:         return ty == T::Void;
@@ -676,11 +670,9 @@ static bool tcCheckNativeIO(
       case KindOfPersistentKeyset:
       case KindOfKeyset:       return ty == T::ArrayIO;
       case KindOfPersistentDArray:
-      case KindOfDArray:
+      case KindOfDArray:       return ty == T::ArrayIO;
       case KindOfPersistentVArray:
-      case KindOfVArray:
-      case KindOfPersistentArray:
-      case KindOfArray:        return ty == T::ArrayIO;
+      case KindOfVArray:       return ty == T::ArrayIO;
       case KindOfResource:     return ty == T::ResourceIO;
       case KindOfUninit:
       case KindOfNull:         return false;

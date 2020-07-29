@@ -284,8 +284,6 @@ X(KindOfDArray,       ArrayData*);
 X(KindOfPersistentDArray,  const ArrayData*);
 X(KindOfVArray,       ArrayData*);
 X(KindOfPersistentVArray,  const ArrayData*);
-X(KindOfArray,        ArrayData*);
-X(KindOfPersistentArray,  const ArrayData*);
 X(KindOfVec,          ArrayData*);
 X(KindOfPersistentVec, const ArrayData*);
 X(KindOfDict,         ArrayData*);
@@ -339,10 +337,7 @@ inline Value make_value(ClsMethDataRef clsMeth) {
  */
 template<DataType DType>
 typename std::enable_if<
-  !std::is_same<typename DataTypeCPPType<DType>::type,void>::value &&
-  DType != KindOfDArray && DType != KindOfPersistentDArray &&
-  DType != KindOfVArray && DType != KindOfPersistentVArray &&
-  DType != KindOfArray && DType != KindOfPersistentArray,
+  !std::is_same<typename DataTypeCPPType<DType>::type,void>::value,
   TypedValue
 >::type make_tv(typename DataTypeCPPType<DType>::type val) {
   TypedValue ret;

@@ -74,7 +74,6 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       { "HH\\int",      AnnotType::Int },
       { "HH\\float",    AnnotType::Float },
       { "HH\\string",   AnnotType::String },
-      { "array",        AnnotType::Array },
       { "HH\\resource", AnnotType::Resource },
       { "HH\\mixed",    AnnotType::Mixed },
       { "HH\\nonnull",  AnnotType::Nonnull },
@@ -212,8 +211,6 @@ TypedValue annotDefaultValue(AnnotType at) {
       return make_tv<KindOfPersistentVec>(staticEmptyVec());
     case AnnotType::String:
       return make_tv<KindOfPersistentString>(staticEmptyString());
-    case AnnotType::Array:
-      return make_persistent_array_like_tv(staticEmptyArray());
     case AnnotType::Dict:
       return make_tv<KindOfPersistentDict>(staticEmptyDictArray());
     case AnnotType::Keyset:
@@ -294,7 +291,6 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     };
     if (at == AnnotType::Vec)       return resolve(RO::EvalHackArrDVArrs);
     if (at == AnnotType::VArray)    return resolve(!RO::EvalHackArrDVArrs);
-    if (at == AnnotType::Array)     return resolve(false);
     if (at == AnnotType::ArrayLike) return resolve(true);
   }
 
@@ -328,8 +324,6 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfDArray:
       case KindOfPersistentVArray:
       case KindOfVArray:
-      case KindOfPersistentArray:
-      case KindOfArray:
       case KindOfPersistentVec:
       case KindOfVec:
       case KindOfPersistentDict:

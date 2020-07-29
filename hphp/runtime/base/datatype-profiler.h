@@ -34,7 +34,6 @@ private:
                      m_persistent_string, m_string,
                      m_persistent_darray, m_darray,
                      m_persistent_varray, m_varray,
-                     m_persistent_array, m_array,
                      m_persistent_vec, m_vec,
                      m_persistent_dict, m_dict,
                      m_persistent_keyset, m_keyset,

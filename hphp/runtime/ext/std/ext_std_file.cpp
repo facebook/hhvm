@@ -676,8 +676,6 @@ Variant HHVM_FUNCTION(file_put_contents,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfClsMeth: {
       Array arr = data.toArray();
       for (ArrayIter iter(arr); iter; ++iter) {

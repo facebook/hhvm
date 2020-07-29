@@ -32,8 +32,6 @@ DataTypeProfiler::DataTypeProfiler(std::string name)
   , m_darray(name + "=KindOfDArray")
   , m_persistent_varray(name + "=KindOfPersistentVArray")
   , m_varray(name + "=KindOfVArray")
-  , m_persistent_array(name + "=KindOfPersistentArray")
-  , m_array(name + "=KindOfArray")
   , m_persistent_vec(name + "=KindOfPersistentVec")
   , m_vec(name + "=KindOfVec")
   , m_persistent_dict(name + "=KindOfPersistentDict")
@@ -69,8 +67,6 @@ DataType DataTypeProfiler::operator()(DataType type) {
     case KindOfDArray:        m_darray.count(); break;
     case KindOfPersistentVArray: m_persistent_varray.count(); break;
     case KindOfVArray:        m_varray.count(); break;
-    case KindOfPersistentArray:  m_persistent_array.count(); break;
-    case KindOfArray:         m_array.count(); break;
     case KindOfObject:        m_object.count(); break;
     case KindOfResource:      m_resource.count(); break;
     case KindOfRFunc:         m_rfunc.count(); break;
@@ -102,8 +98,6 @@ DataTypeProfiler::~DataTypeProfiler() {
                m_darray.hits() +
                m_persistent_varray.hits() +
                m_varray.hits() +
-               m_persistent_array.hits() +
-               m_array.hits() +
                m_object.hits() +
                m_resource.hits() +
                m_func.hits() +
@@ -124,8 +118,6 @@ DataTypeProfiler::~DataTypeProfiler() {
                   "KindOfDArray=%.1f%% "
                   "KindOfPersistentVArray=%.1f%% "
                   "KindOfVArray=%.1f%% "
-                  "KindOfPersistentArray=%.1f%% "
-                  "KindOfArray=%.1f%% "
                   "KindOfPersistentVec=%.1f%% "
                   "KindOfVec=%.1f%% "
                   "KindOfPersistentDict=%.1f%% "
@@ -152,8 +144,6 @@ DataTypeProfiler::~DataTypeProfiler() {
           100.0 * m_darray.hits() / total,
           100.0 * m_persistent_varray.hits() / total,
           100.0 * m_varray.hits() / total,
-          100.0 * m_persistent_array.hits() / total,
-          100.0 * m_array.hits() / total,
           100.0 * m_persistent_vec.hits() / total,
           100.0 * m_vec.hits() / total,
           100.0 * m_persistent_dict.hits() / total,

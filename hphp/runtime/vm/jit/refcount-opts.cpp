@@ -474,7 +474,7 @@ through this unknown pointer won't think it is removing the last reference.
 
 Also worth discussing is that there are several runtime objects in the VM with
 operations that have behavioral differences based on whether the reference count
-is greater than one.  For instance, types like KindOfString and KindOfArray do
+is greater than one.  For instance, types like KindOfString and KindOfDict do
 in place updates when they have a refcount of one. Making sure we don't change
 these situations is actually the same condition as discussed above: by the above
 scheme for not changing whether pointers we don't know about constitute the last

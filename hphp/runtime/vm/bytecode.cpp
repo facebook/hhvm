@@ -712,15 +712,6 @@ static std::string toStringElm(TypedValue tv) {
       print_count();
       os << ":varray";
       continue;
-    case KindOfPersistentArray:
-    case KindOfArray:
-      assertx(!tv.m_data.parr->isDVArray());
-      assertx(tv.m_data.parr->isPHPArrayType());
-      assertx(tv.m_data.parr->checkCount());
-      os << tv.m_data.parr;
-      print_count();
-      os << ":Array";
-      continue;
     case KindOfObject:
       assertx(tv.m_data.pobj->checkCount());
       os << tv.m_data.pobj;
@@ -2252,8 +2243,6 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
             case KindOfDArray:
             case KindOfPersistentVArray:
             case KindOfVArray:
-            case KindOfPersistentArray:
-            case KindOfArray:
             case KindOfObject:
             case KindOfResource:
             case KindOfRFunc:
@@ -2269,30 +2258,16 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
         }
 
         case KindOfVec:
-          tvDecRefArr(val);
-        case KindOfPersistentVec:
-          match = SwitchMatch::DEFAULT;
-          return;
-
         case KindOfDict:
-          tvDecRefArr(val);
-        case KindOfPersistentDict:
-          match = SwitchMatch::DEFAULT;
-          return;
-
         case KindOfKeyset:
-          tvDecRefArr(val);
-        case KindOfPersistentKeyset:
-          match = SwitchMatch::DEFAULT;
-          return;
-
         case KindOfDArray:
         case KindOfVArray:
-        case KindOfArray:
           tvDecRefArr(val);
+        case KindOfPersistentVec:
+        case KindOfPersistentDict:
+        case KindOfPersistentKeyset:
         case KindOfPersistentDArray:
         case KindOfPersistentVArray:
-        case KindOfPersistentArray:
           match = SwitchMatch::DEFAULT;
           return;
 

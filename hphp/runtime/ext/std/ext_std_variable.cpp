@@ -522,20 +522,18 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
-    case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray: {
+    case KindOfVArray: {
       ArrayData *arr = value.getArrayData();
       assertx(arr->isPHPArrayType());
-      assertx(!RuntimeOption::EvalHackArrDVArrs || arr->isNotDVArray());
+      assertx(!RO::EvalHackArrDVArrs);
       if (arr->empty()) {
         if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices &&
                      phpWarn)) {
           raise_hack_arr_compat_serialize_notice(arr);
         }
         if (keepDVArrays && !forcePHPArrays) {
-          if (arr->isVArray()) return s_EmptyVArray;
-          if (arr->isDArray()) return s_EmptyDArray;
+          assertx(arr->isDVArray());
+          return arr->isVArray() ? s_EmptyVArray : s_EmptyDArray;
         }
         return s_EmptyArray;
       }

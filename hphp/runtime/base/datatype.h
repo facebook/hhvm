@@ -42,8 +42,6 @@ namespace HPHP {
  *   a fast implementation of isNullType().
  * - The Array and String types are positioned to allow for fast array/string
  *   checks, ignoring persistence (see isArrayType and isStringType).
- * - We use the fact that KindOfDArray and KindOfVArray are the two smallest
- *   values to implement a fast test for TVArr|TDArr in emitTypeTest.
  * - Refcounted types are odd, and uncounted types are even, to allow fast
  *   countness checks.
  * - Types with persistent and non-persistent versions must be negative, for
@@ -58,12 +56,10 @@ namespace HPHP {
  * - Audit jit::emitTypeTest().
  */
 #define DATATYPES \
-  DT(PersistentDArray, -16) \
-  DT(DArray,           -15) \
-  DT(PersistentVArray, -14) \
-  DT(VArray,           -13) \
-  DT(PersistentArray,  -12) \
-  DT(Array,            -11) \
+  DT(PersistentDArray, -14) \
+  DT(DArray,           -13) \
+  DT(PersistentVArray, -12) \
+  DT(VArray,           -11) \
   DT(PersistentKeyset, -10) \
   DT(Keyset,            -9) \
   DT(PersistentDict,    -8) \
@@ -300,21 +296,20 @@ inline bool isArrayLikeType(MaybeDataType t) {
 }
 
 /*
- * When any PHP (d|v|)array will do.
+ * When any dvarray will do.
  */
 constexpr bool isPHPArrayType(DataType t) {
-  return t <= KindOfArray;
+  return t <= KindOfVArray;
 }
 inline bool isPHPArrayType(MaybeDataType t) {
   return t && isPHPArrayType(*t);
 }
 
 /*
- * Currently matches any PHP (d|v|)array.
- * Eventually will only match arrays without dvarray-ness.
+ * Currently matches any PHP dvarray. This method will go away.
  */
 constexpr bool isArrayType(DataType t) {
-  return t <= KindOfArray;
+  return t <= KindOfVArray;
 }
 inline bool isArrayType(MaybeDataType t) {
   return t && isArrayType(*t);
@@ -407,7 +402,6 @@ bool operator>=(DataType, DataType) = delete;
   case KindOfPersistentString:  \
   case KindOfPersistentVArray:  \
   case KindOfPersistentDArray:  \
-  case KindOfPersistentArray:   \
   case KindOfPersistentVec: \
   case KindOfPersistentDict: \
   case KindOfPersistentKeyset: \

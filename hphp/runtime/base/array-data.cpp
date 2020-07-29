@@ -100,7 +100,6 @@ struct ScalarHash {
           case KindOfPersistentString:
           case KindOfPersistentDArray:
           case KindOfPersistentVArray:
-          case KindOfPersistentArray:
           case KindOfPersistentVec:
           case KindOfPersistentDict:
           case KindOfPersistentKeyset:
@@ -110,7 +109,6 @@ struct ScalarHash {
           case KindOfString:
           case KindOfDArray:
           case KindOfVArray:
-          case KindOfArray:
           case KindOfVec:
           case KindOfDict:
           case KindOfKeyset:
@@ -955,12 +953,13 @@ std::string describeKeyType(const TypedValue* tv) {
   case KindOfDict:             return "dict";
   case KindOfPersistentKeyset:
   case KindOfKeyset:           return "keyset";
+
+  // TODO(kshaunak): Fix the messages for dvarrays here.
   case KindOfPersistentDArray:
   case KindOfDArray:           return "array";
   case KindOfPersistentVArray:
   case KindOfVArray:           return "array";
-  case KindOfPersistentArray:
-  case KindOfArray:            return "array";
+
   case KindOfResource:
     return tv->m_data.pres->data()->o_getClassName().toCppString();
 
@@ -1000,8 +999,6 @@ std::string describeKeyValue(TypedValue tv) {
   case KindOfDArray:
   case KindOfPersistentVArray:
   case KindOfVArray:
-  case KindOfPersistentArray:
-  case KindOfArray:
   case KindOfResource:
   case KindOfObject:
   case KindOfRFunc:

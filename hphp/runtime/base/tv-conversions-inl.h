@@ -58,9 +58,7 @@ inline bool tvToBool(TypedValue cell) {
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray:         return !cell.m_data.parr->empty();
+    case KindOfKeyset:        return !cell.m_data.parr->empty();
     case KindOfObject:        return cell.m_data.pobj->toBoolean();
     case KindOfResource:      return cell.m_data.pres->data()->o_toBoolean();
     case KindOfRecord:        raise_convert_record_to_type("bool"); break;
@@ -93,9 +91,7 @@ inline int64_t tvToInt(TypedValue cell) {
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray:         return cell.m_data.parr->empty() ? 0 : 1;
+    case KindOfKeyset:        return cell.m_data.parr->empty() ? 0 : 1;
     case KindOfObject:        return cell.m_data.pobj->toInt64();
     case KindOfResource:      return cell.m_data.pres->data()->o_toInt64();
     case KindOfRecord:        raise_convert_record_to_type("int"); break;

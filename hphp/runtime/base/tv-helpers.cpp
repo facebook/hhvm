@@ -106,9 +106,6 @@ bool tvIsPlausible(const TypedValue cell) {
         assertx(val(cell).parr->isVArray());
         assertx(val(cell).parr->isPHPArrayType());
         return;
-      case KindOfPersistentArray:
-        assertx(false);
-        return;
       case KindOfDArray:
         assertPtr(val(cell).parr);
         assertx(val(cell).parr->kindIsValid());
@@ -122,9 +119,6 @@ bool tvIsPlausible(const TypedValue cell) {
         assertx(val(cell).parr->checkCountZ());
         assertx(val(cell).parr->isVArray());
         assertx(val(cell).parr->isPHPArrayType());
-        return;
-      case KindOfArray:
-        assertx(false);
         return;
       case KindOfObject:
         assertPtr(cell.m_data.pobj);

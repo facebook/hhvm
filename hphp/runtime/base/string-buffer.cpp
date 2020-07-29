@@ -193,8 +193,6 @@ void StringBuffer::append(const Variant& v) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfObject:
     case KindOfResource:
     case KindOfRFunc:

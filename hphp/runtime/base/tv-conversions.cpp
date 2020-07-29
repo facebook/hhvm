@@ -88,7 +88,6 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
       case KindOfPersistentVec:
       case KindOfPersistentDict:
       case KindOfPersistentKeyset:
-      case KindOfPersistentArray:
         b = !val(tv).parr->empty();
         continue;
 
@@ -97,7 +96,6 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
       case KindOfKeyset:
       case KindOfDArray:
       case KindOfVArray:
-      case KindOfArray:
         b = !val(tv).parr->empty();
         tvDecRefArr(tv);
         continue;
@@ -183,7 +181,6 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
       case KindOfPersistentVec:
       case KindOfPersistentDict:
       case KindOfPersistentKeyset:
-      case KindOfPersistentArray:
         d = val(tv).parr->empty() ? 0 : 1;
         continue;
 
@@ -192,7 +189,6 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
       case KindOfKeyset:
       case KindOfDArray:
       case KindOfVArray:
-      case KindOfArray:
         d = val(tv).parr->empty() ? 0 : 1;
         tvDecRefArr(tv);
         continue;
@@ -277,7 +273,6 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
       case KindOfPersistentVec:
       case KindOfPersistentDict:
       case KindOfPersistentKeyset:
-      case KindOfPersistentArray:
         i = val(tv).parr->empty() ? 0 : 1;
         continue;
 
@@ -286,7 +281,6 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
       case KindOfKeyset:
       case KindOfDArray:
       case KindOfVArray:
-      case KindOfArray:
         i = val(tv).parr->empty() ? 0 : 1;
         tvDecRefArr(tv);
         continue;
@@ -367,8 +361,6 @@ double tvCastToDouble(TypedValue tv) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray:
       return tv.m_data.parr->empty() ? 0.0 : 1.0;
 
     case KindOfObject:
@@ -460,8 +452,6 @@ enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfArray:
-    case KindOfPersistentArray:
       SystemLib::throwInvalidOperationExceptionObject(
         "Array to string conversion"
       );
@@ -556,8 +546,6 @@ StringData* tvCastToStringData(TypedValue tv) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
       SystemLib::throwInvalidOperationExceptionObject(
         "Array to string conversion"
       );
@@ -627,9 +615,7 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray: {
+    case KindOfKeyset: {
       auto const ad = tv.m_data.parr;
       ad->incRefCount();
       return ad;
@@ -703,9 +689,7 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
       case KindOfPersistentDArray:
       case KindOfDArray:
       case KindOfPersistentVArray:
-      case KindOfVArray:
-      case KindOfPersistentArray:
-      case KindOfArray: {
+      case KindOfVArray: {
         auto* adIn = val(tv).parr;
         a = [&]{
           assertx(IC == IntishCast::Cast || IC == IntishCast::None);
@@ -806,9 +790,7 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
       case KindOfPersistentDArray:
       case KindOfDArray:
       case KindOfPersistentVArray:
-      case KindOfVArray:
-      case KindOfPersistentArray:
-      case KindOfArray: {
+      case KindOfVArray: {
         auto* adIn = val(tv).parr;
         a = adIn->toVec(adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
@@ -908,9 +890,7 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
       case KindOfPersistentDArray:
       case KindOfDArray:
       case KindOfPersistentVArray:
-      case KindOfVArray:
-      case KindOfPersistentArray:
-      case KindOfArray: {
+      case KindOfVArray: {
         auto* adIn = val(tv).parr;
         a = adIn->toDict(adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
@@ -1010,9 +990,7 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
       case KindOfPersistentDArray:
       case KindOfDArray:
       case KindOfPersistentVArray:
-      case KindOfVArray:
-      case KindOfPersistentArray:
-      case KindOfArray: {
+      case KindOfVArray: {
         auto* adIn = val(tv).parr;
         a = adIn->toKeyset(adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
@@ -1116,9 +1094,7 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
       case KindOfPersistentDArray:
       case KindOfDArray:
       case KindOfPersistentVArray:
-      case KindOfVArray:
-      case KindOfPersistentArray:
-      case KindOfArray: {
+      case KindOfVArray: {
         auto* adIn = val(tv).parr;
         a = adIn->toVArray(adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
@@ -1219,9 +1195,7 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
       case KindOfPersistentDArray:
       case KindOfDArray:
       case KindOfPersistentVArray:
-      case KindOfVArray:
-      case KindOfPersistentArray:
-      case KindOfArray: {
+      case KindOfVArray: {
         auto* adIn = val(tv).parr;
         a = adIn->toDArray(adIn->cowCheck());
         if (a != adIn) decRefArr(adIn);
@@ -1304,8 +1278,6 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
       return ObjectData::FromArray(tv.m_data.parr).detach();
 
     case KindOfObject:
@@ -1346,7 +1318,6 @@ enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
       case KindOfKeyset:
       case KindOfDArray:
       case KindOfVArray:
-      case KindOfArray:
       case KindOfObject:
       case KindOfRecord:
       case KindOfRClsMeth:

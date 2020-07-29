@@ -966,8 +966,6 @@ static void json_create_zval(Variant &z, UncheckedBuffer &buf, DataType type,
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:

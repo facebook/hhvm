@@ -515,21 +515,18 @@ Type::bits_t Type::bitsFromDataType(DataType outer) {
     case KindOfDouble           : return kDbl;
     case KindOfPersistentString : return kPersistentStr;
     case KindOfString           : return kStr;
+
     case KindOfPersistentVec    : return kPersistentVec;
     case KindOfPersistentDict   : return kPersistentDict;
     case KindOfPersistentKeyset : return kPersistentKeyset;
-
     case KindOfPersistentDArray : return kPersistentDArr;
     case KindOfPersistentVArray : return kPersistentVArr;
-    case KindOfPersistentArray  : return kPersistentPArr;
 
     case KindOfVec              : return kVec;
     case KindOfDict             : return kDict;
     case KindOfKeyset           : return kKeyset;
-
     case KindOfDArray           : return kDArr;
     case KindOfVArray           : return kVArr;
-    case KindOfArray            : return kPArr;
 
     case KindOfResource         : return kRes;
     case KindOfObject           : return kObj;
@@ -556,8 +553,6 @@ DataType Type::toDataType() const {
   if (*this <= TDbl)         return KindOfDouble;
   if (*this <= TPersistentStr) return KindOfPersistentString;
   if (*this <= TStr)         return KindOfString;
-  if (*this <= TPersistentPArr) return KindOfPersistentArray;
-  if (*this <= TPArr)         return KindOfArray;
   if (*this <= TPersistentVArr) return KindOfPersistentVArray;
   if (*this <= TVArr)         return KindOfVArray;
   if (*this <= TPersistentDArr) return KindOfPersistentDArray;
@@ -1144,7 +1139,6 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       case A::Int:        return TInt;
       case A::Float:      return TDbl;
       case A::String:     return TStr;
-      case A::Array:      return TPArr;
       case A::Record:     return TRecord;
       // We only call this once we've attempted resolving the
       // type-constraint. If we successfully resolved it, we'll never get here,

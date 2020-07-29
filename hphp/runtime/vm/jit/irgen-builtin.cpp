@@ -716,32 +716,19 @@ SSATmp* opt_foldable(IRGS& env,
         return cns(env, makeStaticString(retVal.m_data.pstr));
       case KindOfPersistentVec:
       case KindOfVec:
-        return cns(
-          env,
-          make_tv<KindOfPersistentVec>(scalar_array())
-        );
+        return cns(env, make_tv<KindOfPersistentVec>(scalar_array()));
       case KindOfPersistentDict:
       case KindOfDict:
-        return cns(
-          env,
-          make_tv<KindOfPersistentDict>(scalar_array())
-        );
+        return cns(env, make_tv<KindOfPersistentDict>(scalar_array()));
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-        return cns(
-          env,
-          make_tv<KindOfPersistentKeyset>(scalar_array())
-        );
+        return cns(env, make_tv<KindOfPersistentKeyset>(scalar_array()));
       case KindOfPersistentDArray:
       case KindOfDArray:
+        return cns(env, make_tv<KindOfPersistentDArray>(scalar_array()));
       case KindOfPersistentVArray:
       case KindOfVArray:
-      case KindOfPersistentArray:
-      case KindOfArray:
-        return cns(
-          env,
-          make_persistent_array_like_tv(scalar_array())
-        );
+        return cns(env, make_tv<KindOfPersistentVArray>(scalar_array()));
       case KindOfUninit:
       case KindOfObject:
       case KindOfResource:

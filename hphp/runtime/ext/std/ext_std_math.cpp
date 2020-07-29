@@ -280,8 +280,6 @@ static MaybeDataType convert_for_pow(const Variant& val,
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRFunc:

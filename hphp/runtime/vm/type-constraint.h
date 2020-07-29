@@ -254,8 +254,7 @@ struct TypeConstraint {
   bool isArrayLike() const { return m_type == Type::ArrayLike; }
 
   bool isArray() const {
-    return m_type == Type::Array ||
-      isVArray() || isDArray() || isVArrayOrDArray();
+    return isVArray() || isDArray() || isVArrayOrDArray();
   }
   bool isDict() const {
     assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::DArray));

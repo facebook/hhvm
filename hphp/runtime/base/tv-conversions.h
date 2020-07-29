@@ -67,24 +67,6 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv);
 template<typename T>
 enable_if_lval_t<T, void> tvCastToStringInPlace(T tv);
 
-template<typename T> ALWAYS_INLINE
-enable_if_lval_t<T, void> tvCastInPlace(T tv, DataType DType) {
-#define X(kind) \
-  if (DType == KindOf##kind) { tvCastTo##kind##InPlace(tv); return; }
-  X(Boolean)
-  X(Int64)
-  X(Double)
-  X(String)
-  X(Vec)
-  X(Dict)
-  X(Keyset)
-  X(Array)
-  X(Object)
-  X(Resource)
-#undef X
-  not_reached();
-}
-
 /*
  * Non-in-place casts.
  */

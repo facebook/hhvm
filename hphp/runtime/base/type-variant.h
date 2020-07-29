@@ -800,8 +800,6 @@ struct Variant : private TypedValue {
       case KindOfDArray:
       case KindOfPersistentVArray:
       case KindOfVArray:
-      case KindOfPersistentArray:
-      case KindOfArray:
       case KindOfRFunc:
       case KindOfFunc:
       case KindOfClass:
@@ -1436,7 +1434,6 @@ private:
       case KindOfVec:
       case KindOfDict:
       case KindOfKeyset:
-      case KindOfArray:
       case KindOfDArray:
       case KindOfVArray:
         assertx(m_data.parr->checkCount());

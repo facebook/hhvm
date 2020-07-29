@@ -253,7 +253,7 @@ namespace {
 
 /*
  * Make an ArgGroup for elem instructions that takes:
- *    1/ the pointer to a KindOfArray TV
+ *    1/ the pointer to an array-like TV
  *    2/ the index key, as a raw value or a TypedValue depending on whether
  *       the type is known
  */

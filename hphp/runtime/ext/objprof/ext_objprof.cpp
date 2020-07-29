@@ -284,7 +284,6 @@ std::pair<int, double> sizeOfArray(
         case KindOfBoolean:
         case KindOfPersistentDict:
         case KindOfDouble:
-        case KindOfPersistentArray:
         case KindOfPersistentKeyset:
         case KindOfObject:
         case KindOfResource:
@@ -294,7 +293,6 @@ std::pair<int, double> sizeOfArray(
         case KindOfDArray:
         case KindOfPersistentVArray:
         case KindOfVArray:
-        case KindOfArray:
         case KindOfKeyset:
         case KindOfRFunc:
         case KindOfFunc:
@@ -388,7 +386,6 @@ void stringsOfArray(
         case KindOfBoolean:
         case KindOfPersistentDict:
         case KindOfDouble:
-        case KindOfPersistentArray:
         case KindOfPersistentKeyset:
         case KindOfObject:
         case KindOfResource:
@@ -398,7 +395,6 @@ void stringsOfArray(
         case KindOfDArray:
         case KindOfPersistentVArray:
         case KindOfVArray:
-        case KindOfArray:
         case KindOfKeyset:
         case KindOfRFunc:
         case KindOfFunc:
@@ -548,9 +544,7 @@ std::pair<int, double> tvGetSize(
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray: {
+    case KindOfKeyset: {
       ArrayData* arr = tv.m_data.parr;
       add_array_size(arr);
       break;
@@ -680,9 +674,7 @@ void tvGetStrings(
     case HPHP::KindOfPersistentDict:
     case HPHP::KindOfDict:
     case HPHP::KindOfPersistentKeyset:
-    case HPHP::KindOfKeyset:
-    case HPHP::KindOfPersistentArray:
-    case HPHP::KindOfArray: {
+    case HPHP::KindOfKeyset: {
       auto* arr = tv.m_data.parr;
       stringsOfArray(arr, metrics, path, pointers, val_stack);
       break;

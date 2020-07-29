@@ -420,8 +420,6 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
     case KindOfVec:
     case KindOfPersistentDict:
     case KindOfDict:
-    case KindOfPersistentArray:
-    case KindOfArray:
       serialize_memoize_array(sb, depth, tv.m_data.parr);
       break;
 

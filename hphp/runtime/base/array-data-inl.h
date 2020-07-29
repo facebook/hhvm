@@ -264,7 +264,7 @@ DataType ArrayData::toDataType() const {
 
     case kPlainKind:
     case kBespokeArrayKind:
-      return KindOfArray;
+      always_assert(false);
 
     case kVecKind:
     case kBespokeVecKind:
@@ -296,7 +296,7 @@ DataType ArrayData::toPersistentDataType() const {
 
     case kPlainKind:
     case kBespokeArrayKind:
-      return KindOfPersistentArray;
+      always_assert(false);
 
     case kVecKind:
     case kBespokeVecKind:

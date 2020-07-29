@@ -369,69 +369,6 @@ bool buildSwitches(php::MutFunc func,
 
 }
 
-bool rebuild_exn_tree(const FuncAnalysis& ainfo) {
-  auto const func = ainfo.ctx.func;
-  Trace::Bump bumper{
-    Trace::hhbbc_cfg, kSystemLibBump, is_systemlib_part(*func->unit)
-  };
-  FTRACE(4, "Rebuild exn tree: {}\n", func->name);
-
-  auto reachable = [&](BlockId id) {
-    if (is_dead(func.blocks()[id].get())) return false;
-    auto const& state = ainfo.bdata[id].stateIn;
-    return state.initialized && !state.unreachable;
-  };
-  hphp_fast_set<ExnNodeId> seenNodes;
-
-  for (auto const bid : ainfo.rpoBlocks) {
-    if (!reachable(bid)) {
-      FTRACE(4, "Unreachable: {}\n", bid);
-      continue;
-    }
-    auto idx = func.blocks()[bid]->exnNodeId;
-    while (idx != NoExnNodeId) {
-      if (!seenNodes.insert(idx).second) break;
-      idx = func->exnNodes[idx].parent;
-    }
-  }
-
-  auto changed = false;
-  for (auto& n : func->exnNodes) {
-    if (n.idx == NoExnNodeId) continue;
-    if (!seenNodes.count(n.idx)) {
-      n.idx = NoExnNodeId;
-      n.depth = 0;
-      n.children.clear();
-      n.parent = NoExnNodeId;
-      changed = true;
-    } else {
-      auto it = std::remove_if(n.children.begin(), n.children.end(),
-                               [&] (ExnNodeId c) {
-                                 if (seenNodes.count(c)) return false;
-                                 FTRACE(2, "Stripping ExnNode {}\n", c);
-                                 return true;
-                               });
-      if (it != n.children.end()) {
-        n.children.erase(it, n.children.end());
-        changed = true;
-      }
-    }
-  }
-
-  if (!changed) return false;
-
-  for (auto bid : func.blockRange()) {
-    if (!reachable(bid)) {
-      auto const blk = func.blocks_mut()[bid].mutate();
-      blk->exnNodeId = NoExnNodeId;
-      blk->throwExit = NoBlockId;
-      continue;
-    }
-  }
-
-  return true;
-}
-
 bool control_flow_opts(const FuncAnalysis& ainfo) {
   auto const func = ainfo.ctx.func;
   FTRACE(2, "control_flow_opts: {}\n", func->name);

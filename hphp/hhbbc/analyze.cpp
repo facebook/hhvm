@@ -573,10 +573,7 @@ FuncAnalysis::FuncAnalysis(AnalysisContext ctx)
 
 FuncAnalysis analyze_func(const Index& index, Context const ctx,
                           CollectionOpts opts) {
-  while (true) {
-    auto ret = do_analyze(index, ctx, nullptr, nullptr, opts);
-    if (!rebuild_exn_tree(ret)) return ret;
-  }
+  return do_analyze(index, ctx, nullptr, nullptr, opts);
 }
 
 FuncAnalysis analyze_func_collect(const Index& index,
@@ -790,21 +787,9 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       }
     }
 
-    auto noExceptionalChanges = [&] {
-      auto changes = false;
-      for (auto& fa : methodResults) {
-        if (rebuild_exn_tree(fa)) changes = true;
-      }
-      for (auto& fa : closureResults) {
-        if (rebuild_exn_tree(fa)) changes = true;
-      }
-      return !changes;
-    };
-
     // Check if we've reached a fixed point yet.
     if (previousProps   == clsAnalysis.privateProperties &&
-        previousStatics == clsAnalysis.privateStatics &&
-        noExceptionalChanges()) {
+        previousStatics == clsAnalysis.privateStatics) {
       clsAnalysis.methods.reserve(initResults.size() + methodResults.size());
       for (auto& m : initResults) {
         clsAnalysis.methods.push_back(std::move(m));

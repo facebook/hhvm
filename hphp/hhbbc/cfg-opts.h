@@ -62,11 +62,6 @@ bool control_flow_opts(const FuncAnalysis&);
  */
 void split_critical_edges(const Index&, FuncAnalysis&);
 
-/*
- * Simplify the exception tree.
- */
-bool rebuild_exn_tree(const FuncAnalysis& ainfo);
-
 //////////////////////////////////////////////////////////////////////
 
 }}

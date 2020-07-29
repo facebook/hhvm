@@ -576,7 +576,7 @@ Flow constraints for \testCollection:
    \HH\vec'2 < \HH\vec]
 
 Lattice:
- {PUBLIC < PRIVATE}
+ {}
 
 There are privacy policy errors in \C#mutation:
   Data with policy INT appears in context VEC.

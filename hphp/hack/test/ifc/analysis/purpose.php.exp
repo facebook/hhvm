@@ -129,8 +129,5 @@ Flow constraints for \D#__construct:
   Raw: [\D < lump'1, $di < lump'1, pc < lump'1]
 
 Lattice:
- {PUBLIC < PRIVATE}
+ {}
 
-There are privacy policy errors in \C#writeDeep:
-  Data with policy PUBLIC appears in context SECRET.
-  

@@ -47,5 +47,5 @@ Flow constraints for \testVariance:
    \G'1 < \G]
 
 Lattice:
- {PUBLIC < PRIVATE}
+ {}
 

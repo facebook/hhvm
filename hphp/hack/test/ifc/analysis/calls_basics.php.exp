@@ -202,19 +202,14 @@ Flow constraints for \indirect_flow_a_to_b_bis:
       lump'2 = c, \C'1 < d, e < \C#setb_ret]]
 
 Lattice:
- {PUBLIC < PRIVATE}
+ {}
 
 There are privacy policy errors in \flow_a_to_b:
   Data with policy A appears in context B.
   
-There are privacy policy errors in \flow_bot_to_b:
-  Data with policy PUBLIC appears in context B.
-  
 There are privacy policy errors in \indirect_flow_a_to_b:
-  Data with policy PUBLIC appears in context B.
   Data with policy A appears in context B.
   
 There are privacy policy errors in \indirect_flow_a_to_b_bis:
-  Data with policy PUBLIC appears in context B.
   Data with policy A appears in context B.
   

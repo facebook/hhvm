@@ -29,7 +29,7 @@ Flow constraints for \test:
    \B < P2, .k'1 < P2, pc < P2]
 
 Lattice:
- {PUBLIC < PRIVATE}
+ {}
 
 There are privacy policy errors in \test:
   Data with policy P3 appears in context P2.

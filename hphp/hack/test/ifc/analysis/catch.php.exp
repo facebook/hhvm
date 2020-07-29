@@ -119,20 +119,14 @@ Flow constraints for \throw_in_catch:
    pc < B]
 
 Lattice:
- {PUBLIC < PRIVATE}
+ {}
 
-There are privacy policy errors in \do_not_leak_pc_after_catch:
-  Data with policy PUBLIC appears in context B.
-  
 There are privacy policy errors in \leak_pc_in_catch:
-  Data with policy PUBLIC appears in context B.
   Data with policy A appears in context B.
   
 There are privacy policy errors in \nested_try:
-  Data with policy PUBLIC appears in context B.
   Data with policy A appears in context B.
   
 There are privacy policy errors in \throw_in_catch:
-  Data with policy PUBLIC appears in context B.
   Data with policy A appears in context B.
   

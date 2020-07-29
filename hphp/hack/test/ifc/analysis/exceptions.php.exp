@@ -75,7 +75,7 @@ Flow constraints for \f:
    \Y = PUBLIC, PUBLIC = PUBLIC, .valuex = PUBLIC, pc = PUBLIC]
 
 Lattice:
- {PUBLIC < PRIVATE}
+ {}
 
 There are privacy policy errors in \f:
   Data with policy PRIVATE appears in context PUBLIC.

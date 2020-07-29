@@ -86,5 +86,5 @@ Flow constraints for \condition:
    $x'2 < ret]
 
 Lattice:
- {PUBLIC < PRIVATE}
+ {}
 

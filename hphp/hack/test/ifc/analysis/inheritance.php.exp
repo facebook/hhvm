@@ -11,5 +11,5 @@ Decls:
   class \ZTrait: { policied_props = [replicaPP, replicaPU] }
   
 Lattice:
- {PUBLIC < PRIVATE}
+ {}
 

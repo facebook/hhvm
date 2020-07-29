@@ -210,5 +210,5 @@ Flow constraints for \tlSetOtherBool:
    pc < .oBool]
 
 Lattice:
- {PUBLIC < PRIVATE}
+ {}
 

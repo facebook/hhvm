@@ -63,12 +63,10 @@ HeaderKind getBespokeKind(ArrayData::ArrayKind kind) {
   switch (kind) {
     case ArrayData::kPackedKind: return HeaderKind::BespokeVArray;
     case ArrayData::kMixedKind:  return HeaderKind::BespokeDArray;
-    case ArrayData::kPlainKind:  return HeaderKind::BespokeArray;
     case ArrayData::kVecKind:    return HeaderKind::BespokeVec;
     case ArrayData::kDictKind:   return HeaderKind::BespokeDict;
     case ArrayData::kKeysetKind: return HeaderKind::BespokeKeyset;
 
-    case ArrayData::kBespokeArrayKind:
     case ArrayData::kBespokeVArrayKind:
     case ArrayData::kBespokeDArrayKind:
     case ArrayData::kBespokeVecKind:

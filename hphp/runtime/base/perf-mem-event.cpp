@@ -304,7 +304,6 @@ bool record_request_heap_mem_event(const void* addr,
       break;
 
     case HeaderKind::Mixed:
-    case HeaderKind::Plain:
     case HeaderKind::Dict:
       fill_record(static_cast<const MixedArray*>(hdr), addr, record);
       break;
@@ -313,7 +312,6 @@ bool record_request_heap_mem_event(const void* addr,
       try_member(static_cast<const SetArray*>(hdr), addr, record);
       break;
 
-    case HeaderKind::BespokeArray:
     case HeaderKind::BespokeVArray:
     case HeaderKind::BespokeDArray:
     case HeaderKind::BespokeVec:

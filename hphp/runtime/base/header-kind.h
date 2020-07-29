@@ -55,10 +55,8 @@ enum class HeaderKind : uint8_t {
 
   // dvarrays, with bespoke counterparts
   Mixed, BespokeDArray, Packed, BespokeVArray,
-  // Plain PHP arrays.
-  Plain, BespokeArray,
   // Hack arrays, with bespoke counterparts
-  Keyset, BespokeKeyset, Dict, BespokeDict, Vec, BespokeVec,
+  Dict, BespokeDict, Vec, BespokeVec, Keyset, BespokeKeyset,
 
   // Other ordinary refcounted heap objects
   String, Resource, ClsMeth, RClsMeth, Record, RFunc,
@@ -282,7 +280,7 @@ inline constexpr bool isObjectKind(HeaderKind k) {
 }
 
 inline constexpr bool isArrayKind(HeaderKind k) {
-  return k >= HeaderKind::Mixed && k <= HeaderKind::BespokeVec;
+  return k >= HeaderKind::Mixed && k <= HeaderKind::BespokeKeyset;
 }
 
 inline constexpr bool isFreeKind(HeaderKind k) {

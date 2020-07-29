@@ -145,16 +145,15 @@ inline ArrayData::ArrayKind ArrayData::kind() const {
 
 inline bool ArrayData::isPackedKind() const { return kind() == kPackedKind; }
 inline bool ArrayData::isMixedKind() const { return kind() == kMixedKind; }
-inline bool ArrayData::isPlainKind() const { return kind() == kPlainKind; }
 inline bool ArrayData::isVecKind() const { return kind() == kVecKind; }
 inline bool ArrayData::isDictKind() const { return kind() == kDictKind; }
 inline bool ArrayData::isKeysetKind() const { return kind() == kKeysetKind; }
 
 inline bool ArrayData::isPHPArrayType() const {
-  return kind() < kKeysetKind;
+  return kind() < kDictKind;
 }
 inline bool ArrayData::isHackArrayType() const {
-  return kind() >= kKeysetKind;
+  return kind() >= kDictKind;
 }
 
 inline bool ArrayData::isVecType() const {
@@ -168,19 +167,10 @@ inline bool ArrayData::isKeysetType() const {
 }
 
 inline bool ArrayData::hasVanillaPackedLayout() const {
-  static_assert(kNumKinds == 12);
-  static_assert(kPackedKind == 2);
-  static_assert(kVecKind == 10);
-  // Equivalent to: isPackedKind() || isVecKind()
-  return kind() % 8 == kPackedKind;
+  return isPackedKind() || isVecKind();
 }
 inline bool ArrayData::hasVanillaMixedLayout() const {
-  static_assert(kNumKinds == 12);
-  static_assert(kMixedKind == 0);
-  static_assert(kPlainKind == 4);
-  static_assert(kDictKind == 8);
-  // Equivalent to: isMixedKind() || isPlainKind() || isDictKind()
-  return kind() % 4 == kMixedKind;
+  return isMixedKind() || isDictKind();
 }
 
 inline bool ArrayData::isVanilla() const {
@@ -268,10 +258,6 @@ DataType ArrayData::toDataType() const {
     case kBespokeDArrayKind:
       return KindOfDArray;
 
-    case kPlainKind:
-    case kBespokeArrayKind:
-      always_assert(false);
-
     case kVecKind:
     case kBespokeVecKind:
       return KindOfVec;
@@ -299,10 +285,6 @@ DataType ArrayData::toPersistentDataType() const {
     case kMixedKind:
     case kBespokeDArrayKind:
       return KindOfPersistentDArray;
-
-    case kPlainKind:
-    case kBespokeArrayKind:
-      always_assert(false);
 
     case kVecKind:
     case kBespokeVecKind:

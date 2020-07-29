@@ -87,14 +87,12 @@ struct ArrayData : MaybeCountable {
     kBespokeDArrayKind,
     kPackedKind,        // varray: vec-like array with keys in range [0..size)
     kBespokeVArrayKind,
-    kPlainKind,         // Plain PHP array (backed by MixedArray)
-    kBespokeArrayKind,
-    kKeysetKind,
-    kBespokeKeysetKind,
     kDictKind,
     kBespokeDictKind,
     kVecKind,
     kBespokeVecKind,
+    kKeysetKind,
+    kBespokeKeysetKind,
     kNumKinds           // Insert new values before kNumKinds.
   };
 
@@ -740,7 +738,6 @@ protected:
 
 static_assert(ArrayData::kPackedKind == uint8_t(HeaderKind::Packed), "");
 static_assert(ArrayData::kMixedKind == uint8_t(HeaderKind::Mixed), "");
-static_assert(ArrayData::kPlainKind == uint8_t(HeaderKind::Plain), "");
 static_assert(ArrayData::kDictKind == uint8_t(HeaderKind::Dict), "");
 static_assert(ArrayData::kVecKind == uint8_t(HeaderKind::Vec), "");
 

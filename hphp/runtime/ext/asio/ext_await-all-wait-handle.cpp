@@ -191,7 +191,6 @@ Object AwaitAllWaitHandleFromPHPArray(
       });
 
     case ArrayData::kMixedKind:
-    case ArrayData::kPlainKind:
       return c_AwaitAllWaitHandle::Create([=](auto fn) {
         MixedArray::IterateV(MixedArray::asMixed(ad), fn);
       });
@@ -205,7 +204,6 @@ Object AwaitAllWaitHandleFromPHPArray(
       // Shouldn't get Hack arrays
       not_reached();
 
-    case ArrayData::kBespokeArrayKind:
     case ArrayData::kBespokeVArrayKind:
     case ArrayData::kBespokeDArrayKind:
       return c_AwaitAllWaitHandle::fromArrLike(ad);

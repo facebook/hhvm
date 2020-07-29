@@ -271,14 +271,12 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
     BespokeArray::entry,     /* bespoke darray */ \
     PackedArray::entry,      /* varray */         \
     BespokeArray::entry,     /* bespoke varray */ \
-    MixedArray::entry,       /* plain array */    \
-    BespokeArray::entry,     /* bespoke array */  \
-    SetArray::entry,         /* keyset */         \
-    BespokeArray::entry,     /* bespoke keyset */ \
     MixedArray::entry##Dict, /* dict */           \
     BespokeArray::entry,     /* bespoke dict */   \
     PackedArray::entry##Vec, /* vec */            \
     BespokeArray::entry,     /* bespoke vec */    \
+    SetArray::entry,         /* keyset */         \
+    BespokeArray::entry,     /* bespoke keyset */ \
   },
 
 /*
@@ -916,19 +914,17 @@ void ArrayData::getNotFound(const StringData* k) const {
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  std::array<const char*, 12> names = {{
+  std::array<const char*, 10> names = {{
     "MixedKind",
     "BespokeDArrayKind",
     "PackedKind",
     "BespokeVArrayKind",
-    "PlainKind",
-    "BespokeArrayKind",
-    "KeysetKind",
-    "BespokeKeysetKind",
     "DictKind",
     "BespokeDictKind",
     "VecKind",
     "BespokeVecKind",
+    "KeysetKind",
+    "BespokeKeysetKind",
   }};
   static_assert(names.size() == kNumKinds, "add new kinds here");
   return names[kind];

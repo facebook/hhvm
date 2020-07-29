@@ -262,14 +262,12 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* BespokeDArray */
     0, /* Packed */
     0, /* BespokeVArray */
-    0, /* Plain */
-    0, /* BespokeArray */
-    0, /* Keyset */
-    0, /* BespokeKeyset */
     0, /* Dict */
     0, /* BespokeDict */
     0, /* Vec */
     0, /* BespokeVec */
+    0, /* Keyset */
+    0, /* BespokeKeyset */
     0, /* String */
     0, /* Resource */
     sizeClass<ClsMethData>(),
@@ -319,11 +317,9 @@ inline size_t allocSize(const HeapObject* h) {
   static_assert(kind_sizes[(int)HeaderKind::knd] == 0, #knd);
   CHECKSIZE(Packed)
   CHECKSIZE(Mixed)
-  CHECKSIZE(Plain)
   CHECKSIZE(Dict)
   CHECKSIZE(Vec)
   CHECKSIZE(Keyset)
-  CHECKSIZE(BespokeArray)
   CHECKSIZE(String)
   CHECKSIZE(Resource)
   CHECKSIZE(Record)
@@ -360,7 +356,6 @@ inline size_t allocSize(const HeapObject* h) {
       assertx(size == MemoryManager::sizeClass(size));
       return size;
     case HeaderKind::Mixed:
-    case HeaderKind::Plain:
     case HeaderKind::Dict:
       // size = fn of h->m_scale
       size = static_cast<const MixedArray*>(h)->heapSize();
@@ -369,7 +364,6 @@ inline size_t allocSize(const HeapObject* h) {
       // size = fn of h->m_scale
       size = static_cast<const SetArray*>(h)->heapSize();
       break;
-    case HeaderKind::BespokeArray:
     case HeaderKind::BespokeVArray:
     case HeaderKind::BespokeDArray:
     case HeaderKind::BespokeVec:

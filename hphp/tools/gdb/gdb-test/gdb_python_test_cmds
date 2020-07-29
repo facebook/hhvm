@@ -1,9 +1,9 @@
-break HPHP::ExecutionContext::invokeUnit
+break HPHP::Unit::getCachedEntryPoint
 run
-unit unit
+unit this
 set logging on
 set pagination off
-hhx unit->m_bc unit->m_bc+unit->m_bclen
+hhx this->m_bc this->m_bc+this->m_bclen
 set logging off
 kill
 quit

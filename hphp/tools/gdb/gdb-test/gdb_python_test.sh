@@ -6,10 +6,15 @@ gdblib="$3"
 hhas="$4"
 expect="$5"
 is_clang="$6"
-hhx="$7"
-extra=("${@:8}")
+is_opt="$7"
+hhx="$8"
+extra=("${@:9}")
 
 if [[ $is_clang = "1" ]]; then
+    exit 0
+fi
+
+if [[ $is_opt = "1" ]]; then
     exit 0
 fi
 

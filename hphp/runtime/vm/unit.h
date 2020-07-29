@@ -337,7 +337,7 @@ public:
   // Construction and destruction.
 
   Unit();
-  ~Unit();
+  virtual ~Unit();
 
   /*
    * New and delete using low memory.

@@ -183,7 +183,7 @@ let parse_options () =
   let ifc_mode = ref "" in
   let set_ifc lattice = set_mode (Ifc (!ifc_mode, lattice)) () in
   let set_ai x = set_mode (Ai (Ai_options.prepare ~server:false x)) () in
-  let error_format = ref Errors.Context in
+  let error_format = ref Errors.Highlighted in
   let forbid_nullable_cast = ref false in
   let deregister_attributes = ref None in
   let disallow_array_typehint = ref None in
@@ -295,7 +295,7 @@ let parse_options () =
             | "context" -> error_format := Errors.Context
             | "highlighted" -> error_format := Errors.Highlighted
             | _ -> print_string "Warning: unrecognized error format.\n"),
-        "<raw|context> Error formatting style" );
+        "<raw|context|highlighted> Error formatting style" );
       ("--lint", Arg.Unit (set_mode Lint), " Produce lint errors");
       ( "--no-builtins",
         Arg.Set no_builtins,

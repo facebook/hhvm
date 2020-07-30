@@ -206,8 +206,7 @@ enum trep : uint64_t {
   BDbl      = 1ULL << 5,
   BSStr     = 1ULL << 6,  // static string
   BCStr     = 1ULL << 7,  // counted string
-  BFuncS    = 1ULL << 8,  // KindOfFunc with strict enforcement
-                          // (no string interop)
+  BFunc     = 1ULL << 8,
 
   BSPArrE   = 1ULL << 9,  // static empty "plain" array
   BCPArrE   = 1ULL << 10, // counted empty "plain" array
@@ -320,7 +319,7 @@ enum trep : uint64_t {
   BOptArr      = BInitNull | BArr,       // may have value / data
   BOptObj      = BInitNull | BObj,       // may have data
   BOptRes      = BInitNull | BRes,
-  BOptFuncS    = BInitNull | BFuncS,
+  BOptFunc     = BInitNull | BFunc,
   BOptCls      = BInitNull | BCls,
   BOptClsMeth  = BInitNull | BClsMeth,
   BOptSVecE    = BInitNull | BSVecE,
@@ -389,9 +388,9 @@ enum trep : uint64_t {
   BOptUncArrKey = BInitNull | BUncArrKey,
   BOptArrKey    = BInitNull | BArrKey,
 
-  BFuncLike     = BFuncS | BRFunc,
+  BFuncLike     = BFunc | BRFunc,
   BOptFuncLike  = BInitNull | BFuncLike,
-  BFuncOrCls    = BFuncS | BCls,
+  BFuncOrCls    = BFunc | BCls,
   BOptFuncOrCls = BInitNull | BFuncOrCls,
 
   BClsMethLike    = BClsMeth | BRClsMeth,
@@ -456,10 +455,10 @@ enum trep : uint64_t {
 
   BPrim     = BInitPrim | BUninit,
   BInitUnc  = BInitPrim | BSStr | BSArr | BSVec | BSDict | BSKeyset |
-              BCls | BFuncS | (use_lowptr ? BClsMeth : 0),
+              BCls | BFunc | (use_lowptr ? BClsMeth : 0),
   BUnc      = BInitUnc | BUninit,
   BInitCell = BInitNull | BBool | BInt | BDbl | BStr | BArr | BObj | BRes |
-              BVec | BDict | BKeyset | BFuncS | BCls | BClsMeth |
+              BVec | BDict | BKeyset | BFunc | BCls | BClsMeth |
               BRecord | BRFunc | BRClsMeth,
   BCell     = BUninit | BInitCell,
 
@@ -1013,7 +1012,7 @@ X(SArrN)                                        \
 X(Obj)                                          \
 X(Res)                                          \
 X(Cls)                                          \
-X(FuncS)                                        \
+X(Func)                                        \
 X(RFunc)                                        \
 X(ClsMeth)                                      \
 X(RClsMeth)                                     \
@@ -1097,7 +1096,7 @@ X(OptArrN)                                      \
 X(OptArr)                                       \
 X(OptObj)                                       \
 X(OptRes)                                       \
-X(OptFuncS)                                     \
+X(OptFunc)                                     \
 X(OptCls)                                       \
 X(OptClsMeth)                                   \
 X(OptRClsMeth)                                  \

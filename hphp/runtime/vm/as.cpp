@@ -1115,8 +1115,8 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::OptKeyset:
   case T::Obj:
   case T::OptObj:
-  case T::FuncS:
-  case T::OptFuncS:
+  case T::Func:
+  case T::OptFunc:
   case T::Cls:
   case T::OptCls:
   case T::ClsMeth:

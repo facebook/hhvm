@@ -92,7 +92,7 @@ bool mayHaveData(trep bits) {
   case BArrN:    case BSArrN:    case BCArrN:
   case BOptArr:  case BOptSArr:  case BOptCArr:
   case BOptArrN: case BOptSArrN: case BOptCArrN:
-  case BFuncS:
+  case BFunc:
   case BRFunc:   case BOptRFunc:
   case BFuncLike: case BOptFuncLike:
   case BVec:      case BSVec:      case BCVec:
@@ -216,7 +216,7 @@ bool mayHaveData(trep bits) {
   case BOptUncStrLike:
   case BOptArrKeyCompat:
   case BOptUncArrKeyCompat:
-  case BOptFuncS:
+  case BOptFunc:
   case BOptCls:
   case BClsMeth:
   case BOptClsMeth:
@@ -259,7 +259,7 @@ bool canBeOptional(trep bits) {
   case BSKeysetN:
   case BObj:
   case BRes:
-  case BFuncS:
+  case BFunc:
   case BCls:
   case BClsMeth:
   case BRClsMeth:
@@ -396,7 +396,7 @@ bool canBeOptional(trep bits) {
   case BOptVArrCompat:
   case BOptVecCompatSA:
   case BOptVecCompat:
-  case BOptFuncS:
+  case BOptFunc:
   case BOptCls:
   case BOptClsMeth:
   case BOptRClsMeth:
@@ -3930,7 +3930,7 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::ClsMeth: return TClsMeth;
   case IsTypeOp::Class: return TCls;
   case IsTypeOp::Func:
-    return TFuncS;
+    return TFunc;
   case IsTypeOp::Arr:
     if (!RO::EvalWidenIsArray) return php_arr;
     /* fallthrough */
@@ -3963,7 +3963,7 @@ folly::Optional<IsTypeOp> type_to_istypeop(const Type& t) {
   }
   if (t.subtypeOf(BClsMeth)) return IsTypeOp::ClsMeth;
   if (t.subtypeOf(BCls)) return IsTypeOp::Class;
-  if (t.subtypeOf(BFuncS)) return IsTypeOp::Func;
+  if (t.subtypeOf(BFunc)) return IsTypeOp::Func;
   return folly::none;
 }
 
@@ -4196,7 +4196,7 @@ Type from_DataType(DataType dt) {
   case KindOfObject:   return TObj;
   case KindOfResource: return TRes;
   case KindOfRFunc:    return TRFunc;
-  case KindOfFunc:     return TFuncS;
+  case KindOfFunc:     return TFunc;
   case KindOfClass:    return TCls;
   case KindOfClsMeth:  return TClsMeth;
   case KindOfRClsMeth: return TRClsMeth;
@@ -6744,8 +6744,8 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   X(OptKeyset)
   X(Obj)
   X(OptObj)
-  X(FuncS)
-  X(OptFuncS)
+  X(Func)
+  X(OptFunc)
   X(Cls)
   X(OptCls)
   X(ClsMeth)

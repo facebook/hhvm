@@ -3872,7 +3872,7 @@ void fcallFuncClsMeth(ISS& env, const bc::FCallFunc& op) {
 }
 
 void fcallFuncFunc(ISS& env, const bc::FCallFunc& op) {
-  assertx(topC(env).subtypeOf(BFuncS));
+  assertx(topC(env).subtypeOf(BFunc));
 
   // TODO: optimize me
   fcallFuncUnknown(env, op);
@@ -3912,7 +3912,7 @@ void fcallFuncStr(ISS& env, const bc::FCallFunc& op) {
 
 void in(ISS& env, const bc::FCallFunc& op) {
   auto const callable = topC(env);
-  if (callable.subtypeOf(BFuncS)) return fcallFuncFunc(env, op);
+  if (callable.subtypeOf(BFunc)) return fcallFuncFunc(env, op);
   if (callable.subtypeOf(BClsMeth)) return fcallFuncClsMeth(env, op);
   if (callable.subtypeOf(BObj)) return fcallFuncObj(env, op);
   if (callable.subtypeOf(BStr)) return fcallFuncStr(env, op);
@@ -3920,12 +3920,12 @@ void in(ISS& env, const bc::FCallFunc& op) {
 }
 
 void in(ISS& env, const bc::ResolveFunc& op) {
-  push(env, TFuncS);
+  push(env, TFunc);
 }
 
 void in(ISS& env, const bc::ResolveMethCaller& op) {
   // TODO (T29639296)
-  push(env, TFuncS);
+  push(env, TFunc);
 }
 
 void in(ISS& env, const bc::ResolveRFunc& op) {

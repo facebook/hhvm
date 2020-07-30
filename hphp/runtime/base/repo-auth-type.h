@@ -73,8 +73,8 @@ struct RepoAuthType {
     TAG(OptStr)                                   \
     TAG(Obj)                                      \
     TAG(OptObj)                                   \
-    TAG(FuncS)                                    \
-    TAG(OptFuncS)                                 \
+    TAG(Func)                                    \
+    TAG(OptFunc)                                 \
     TAG(Cls)                                      \
     TAG(OptCls)                                   \
     TAG(ClsMeth)                                  \

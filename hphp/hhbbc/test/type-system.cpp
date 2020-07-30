@@ -311,7 +311,7 @@ auto const primitives = folly::lazy([] {
     TCls,
     TClsMeth,
     TRClsMeth,
-    TFuncS,
+    TFunc,
     TRFunc,
   };
 });
@@ -671,7 +671,7 @@ TEST(Type, Prim) {
     { TStrLike, TPrim },
     { TFuncLike, TPrim },
     { TCls, TInitPrim },
-    { TFuncS,    TInitPrim },
+    { TFunc,    TInitPrim },
     { TFuncOrCls, TInitPrim },
   };
 
@@ -697,7 +697,7 @@ TEST(Type, Prim) {
     { TPrim, TRecord },
     { TPrim, TRes },
     { TPrim, TRFunc },
-    { TPrim, TFuncS },
+    { TPrim, TFunc },
     { TPrim, TFuncLike },
     { TPrim, TFuncOrCls },
     { TPrim, TStrLike },
@@ -982,11 +982,11 @@ TEST(Type, OptUnionOf) {
   EXPECT_EQ(TOptClsMethLike, union_of(TInitNull, TClsMethLike));
 
   EXPECT_EQ(TOptFuncLike, union_of(TInitNull, TFuncLike));
-  EXPECT_EQ(TOptFuncLike, union_of(TFuncS, TOptRFunc));
-  EXPECT_EQ(TOptFuncLike, union_of(TRFunc, TOptFuncS));
+  EXPECT_EQ(TOptFuncLike, union_of(TFunc, TOptRFunc));
+  EXPECT_EQ(TOptFuncLike, union_of(TRFunc, TOptFunc));
 
   EXPECT_EQ(TOptFuncOrCls, union_of(TInitNull, TFuncOrCls));
-  EXPECT_EQ(TOptFuncOrCls, union_of(TFuncS, TOptCls));
+  EXPECT_EQ(TOptFuncOrCls, union_of(TFunc, TOptCls));
 
   EXPECT_EQ(TOptStrLike, union_of(TOptCls, TStr));
   EXPECT_EQ(TOptUncStrLike, union_of(TOptCls, TSStr));
@@ -2933,7 +2933,7 @@ TEST(Type, RemoveCounted) {
     { TInt, TInt },
     { TDbl, TDbl },
     { TSStr, TSStr },
-    { TFuncS, TFuncS },
+    { TFunc, TFunc },
     { TSArr, TSArr },
     { TSDict, TSDict },
     { TSVec, TSVec },
@@ -3105,7 +3105,7 @@ TEST(Type, MustBeCounted) {
     { TTrue, false },
     { TInt, false },
     { TDbl, false },
-    { TFuncS, false },
+    { TFunc, false },
     { TRFunc, true },
     { TSArr, false },
     { TCls, false },

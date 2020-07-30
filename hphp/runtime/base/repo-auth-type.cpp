@@ -110,7 +110,7 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::OptDbl:
   case T::OptRes:
   case T::OptObj:
-  case T::OptFuncS:
+  case T::OptFunc:
   case T::OptCls:
   case T::OptClsMeth:
   case T::OptRecord:
@@ -140,7 +140,7 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::SStr:
   case T::Str:
   case T::Obj:
-  case T::FuncS:
+  case T::Func:
   case T::Cls:
   case T::ClsMeth:
   case T::Record:
@@ -237,9 +237,9 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
   case T::OptObj:       if (initNull) return true;
                         // fallthrough
   case T::Obj:          return tv.m_type == KindOfObject;
-  case T::OptFuncS:     if (initNull) return true;
+  case T::OptFunc:      if (initNull) return true;
                         // fallthrough
-  case T::FuncS:        return tv.m_type == KindOfFunc;
+  case T::Func:         return tv.m_type == KindOfFunc;
   case T::OptCls:       if (initNull) return true;
                         // fallthrough
   case T::Cls:          return tv.m_type == KindOfClass;
@@ -551,7 +551,7 @@ std::string show(RepoAuthType rat) {
   case T::OptDbl:        return "?Dbl";
   case T::OptRes:        return "?Res";
   case T::OptObj:        return "?Obj";
-  case T::OptFuncS:      return "?Func";
+  case T::OptFunc:       return "?Func";
   case T::OptCls:        return "?Cls";
   case T::OptClsMeth:    return "?ClsMeth";
   case T::OptRecord:     return "?Record";
@@ -581,7 +581,7 @@ std::string show(RepoAuthType rat) {
   case T::SStr:          return "SStr";
   case T::Str:           return "Str";
   case T::Obj:           return "Obj";
-  case T::FuncS:         return "Func";
+  case T::Func:          return "Func";
   case T::Cls:           return "Cls";
   case T::ClsMeth:       return "ClsMeth";
   case T::Record:        return "Record";

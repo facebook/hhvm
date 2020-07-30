@@ -261,7 +261,7 @@ bool builtin_is_callable(ISS& env, const bc::FCallBuiltin& op) {
   auto const ty = topC(env, 1);
   if (ty == TInitCell) return false;
   auto const res = [&]() -> folly::Optional<bool> {
-    auto constexpr BFuncPtr = BClsMeth | BFuncS;
+    auto constexpr BFuncPtr = BClsMeth | BFunc;
     if (ty.subtypeOf(BFuncPtr)) return true;
     if (ty.subtypeOf(BArrLikeE) ||
         ty.subtypeOf(BKeyset) ||

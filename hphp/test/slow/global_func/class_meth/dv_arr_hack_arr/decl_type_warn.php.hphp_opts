@@ -3,6 +3,5 @@
 -vRuntime.Eval.IsCompatibleClsMethType=1
 
 -vCheckPropTypeHints=2
--vCheckReturnTypeHints=2
 
 -vHackArrDVArrs=1

@@ -43,15 +43,6 @@ struct Repo::GlobalData {
   uint32_t InitialStaticStringTableSize = 0;
 
   /*
-   * Indicates whether a repo was compiled with HardReturnTypeHints.
-   *
-   * If so, we disallow recovering from the E_RECOVERABLE_ERROR we
-   * raise if you violate a return typehint, because doing so would
-   * allow violating assumptions from the optimizer.
-   */
-  bool HardReturnTypeHints = false;
-
-  /*
    * Indicates whether the repo was compiled with CheckPropTypeHints.
    */
   int32_t CheckPropTypeHints = 0;
@@ -188,7 +179,6 @@ struct Repo::GlobalData {
     sd(InitialNamedEntityTableSize)
       (InitialStaticStringTableSize)
       (HardGenericsUB)
-      (HardReturnTypeHints)
       (CheckPropTypeHints)
       (HardPrivatePropInference)
       (PHP7_NoHexNumerics)

@@ -183,25 +183,8 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     AutoloadRoot = Config::GetString(ini, config, "AutoloadMap.root");
   }
 
-  static bool HardReturnTypeHints;
-  Config::Bind(HardReturnTypeHints, ini, config, "HardReturnTypeHints", true);
-
-  Config::Bind(RuntimeOption::EvalCheckPropTypeHints, ini, config,
+ Config::Bind(RuntimeOption::EvalCheckPropTypeHints, ini, config,
                "CheckPropTypeHints", RuntimeOption::EvalCheckPropTypeHints);
-
-  // This option takes precedence over RuntimeOption. We test to see if the
-  // option has been set (by the user) or not.
-  auto is_set = [&](const std::string& key) {
-    auto a = Config::GetBool(ini, config, key, true);
-    auto b = Config::GetBool(ini, config, key, false);
-    return a == b;
-  };
-
-  if (!is_set("CheckReturnTypeHints") || is_set("HardReturnTypeHints")) {
-    // Note that the actual value does not matter, since HHBBC only cares about
-    // whether the value is 3 or not.
-    RuntimeOption::EvalCheckReturnTypeHints = HardReturnTypeHints ? 3 : 2;
-  }
 
   Config::Bind(APCProfile, ini, config, "APCProfile");
 

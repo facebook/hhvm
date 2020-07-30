@@ -3839,21 +3839,19 @@ Index::Index(php::Program* program)
 
   mark_no_override_classes(*m_data);    // uses AttrUnique
 
-  if (RuntimeOption::EvalCheckReturnTypeHints == 3) {
-    trace_time tracer("initialize return types");
-    std::vector<const php::Func*> all_funcs;
-    all_funcs.reserve(m_data->funcs.size() + m_data->methods.size());
-    for (auto const fn : m_data->funcs) {
-      all_funcs.push_back(fn.second);
-    }
-    for (auto const fn : m_data->methods) {
-      all_funcs.push_back(fn.second);
-    }
-
-    parallel::for_each(all_funcs, [&] (const php::Func* f) {
-      init_return_type(f);
-    });
+  trace_time tracer_2("initialize return types");
+  std::vector<const php::Func*> all_funcs;
+  all_funcs.reserve(m_data->funcs.size() + m_data->methods.size());
+  for (auto const fn : m_data->funcs) {
+    all_funcs.push_back(fn.second);
   }
+  for (auto const fn : m_data->methods) {
+    all_funcs.push_back(fn.second);
+  }
+
+  parallel::for_each(all_funcs, [&] (const php::Func* f) {
+    init_return_type(f);
+  });
 }
 
 // Defined here so IndexData is a complete type for the unique_ptr

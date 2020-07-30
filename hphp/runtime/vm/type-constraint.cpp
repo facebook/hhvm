@@ -1012,8 +1012,7 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
       describe_actual_type(c)
   );
 
-  if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()
-      && (!isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2)) {
+  if (!isSoft() && (!isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2)) {
     raise_return_typehint_error(msg);
   } else {
     raise_warning_unsampled(msg);
@@ -1164,8 +1163,7 @@ void TypeConstraint::verifyFail(const Func* func, tv_lval c,
           givenType
         ).str();
     }
-    if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()
-        && (!isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2)) {
+    if (!isSoft() && (!isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2)) {
       raise_return_typehint_error(msg);
     } else {
       raise_warning_unsampled(msg);

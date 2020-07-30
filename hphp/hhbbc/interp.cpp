@@ -4930,7 +4930,7 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
   auto dont_reduce = false;
 
   for (auto const& constraint : tcs) {
-    // For CheckReturnTypeHints >= 3 AND the constraint is not soft.
+    // When the constraint is not soft.
     // We can safely assume that either VerifyRetTypeC will
     // throw or it will produce a value whose type is compatible with the
     // return type constraint.
@@ -4962,10 +4962,9 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
       }
     }
 
-    // If CheckReturnTypeHints < 3 OR if the constraint is soft,
-    // then there are no optimizations we can safely do here, so
-    // just leave the top of stack as is.
-    if (RuntimeOption::EvalCheckReturnTypeHints < 3 || constraint->isSoft() ||
+    // If the constraint is soft, then there are no optimizations we can safely
+    // do here, so just leave the top of stack as is.
+    if (constraint->isSoft() ||
         (RuntimeOption::EvalEnforceGenericsUB < 2 &&
          constraint->isUpperBound()))
     {
@@ -5066,7 +5065,7 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
 
 void in(ISS& env, const bc::VerifyRetNonNullC& /*op*/) {
   auto const constraint = env.ctx.func->retTypeConstraint;
-  if (RuntimeOption::EvalCheckReturnTypeHints < 3 || constraint.isSoft()) {
+  if (constraint.isSoft()) {
     return;
   }
 

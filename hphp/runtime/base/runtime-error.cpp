@@ -109,10 +109,8 @@ void raise_return_typehint_error(const std::string& msg) {
     SystemLib::throwTypeErrorObject(msg);
   }
   raise_recoverable_error(msg);
-  if (RuntimeOption::EvalCheckReturnTypeHints >= 3) {
-    raise_error("Error handler tried to recover from a return typehint "
-                "violation");
-  }
+  raise_error("Error handler tried to recover from a return typehint "
+              "violation");
 }
 
 void raise_property_typehint_error(const std::string& msg,

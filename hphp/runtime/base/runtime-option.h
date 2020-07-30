@@ -731,18 +731,6 @@ struct RuntimeOption {
    * >1 - Throw Exception
    */                                                                   \
   F(uint32_t, ThrowOnNonExhaustiveSwitch, 1)                            \
-  /* CheckReturnTypeHints:
-     <2 - Raises E_WARNING if a return type hint fails.
-     2 - Raises E_RECOVERABLE_ERROR if regular return type hint fails,
-         raises E_WARNING if soft return type hint fails. If a regular
-         return type hint fails, it's possible for execution to resume
-         normally if the user error handler doesn't throw and returns
-         something other than boolean false.
-     3 - Same as 2, except if a regular type hint fails the runtime
-         will not allow execution to resume normally; if the user
-         error handler returns something other than boolean false,
-         the runtime will throw a fatal error. */                       \
-  F(int32_t, CheckReturnTypeHints,     3)                               \
   /*
     CheckPropTypeHints:
     0 - No checks or enforcement of property type hints.

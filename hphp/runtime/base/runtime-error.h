@@ -137,8 +137,7 @@ void raise_reified_typehint_error(const std::string& msg, bool warn);
 
 /*
  * raise_return_typehint_error() is the same as raise_recoverable_error(),
- * except when compiled in RepoAuthoritative mode with CheckReturnTypeHints >= 3
- * the error handler is not allowed to recover.
+ * except the error handler is not allowed to recover.
  */
 void raise_return_typehint_error(const std::string& msg);
 

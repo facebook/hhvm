@@ -3,7 +3,6 @@
 -vEval.IsCompatibleClsMethType=1
 
 -vEval.CheckPropTypeHints=2
--vEval.CheckReturnTypeHints=2
 
 -vEval.VecHintNotices=1
 

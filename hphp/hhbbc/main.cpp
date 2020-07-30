@@ -377,7 +377,6 @@ void write_global_data(
   auto gd                        = Repo::GlobalData{};
   gd.Signature                   = nanos.count();
   gd.HardGenericsUB              = RuntimeOption::EvalEnforceGenericsUB >= 2;
-  gd.HardReturnTypeHints         = RuntimeOption::EvalCheckReturnTypeHints >= 3;
   gd.CheckPropTypeHints          = RuntimeOption::EvalCheckPropTypeHints;
   gd.HardPrivatePropInference    = options.HardPrivatePropInference;
   gd.PHP7_NoHexNumerics          = RuntimeOption::PHP7_NoHexNumerics;

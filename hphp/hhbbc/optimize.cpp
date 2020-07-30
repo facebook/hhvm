@@ -856,10 +856,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
   }
 
   for (auto& p : func->params) fixTypeConstraint(index, p.typeConstraint);
-
-  if (RuntimeOption::EvalCheckReturnTypeHints >= 3) {
-    fixTypeConstraint(index, func->retTypeConstraint);
-  }
+  fixTypeConstraint(index, func->retTypeConstraint);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -1338,11 +1338,9 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
       [&] (Type, bool hard) { // Check failure
         updateMarker(env);
         env.irb->exceptionStackBoundary();
-        auto const failHard =
-          hard && RuntimeOption::EvalCheckReturnTypeHints >= 3;
         gen(
           env,
-          failHard ? VerifyRetFailHard : VerifyRetFail,
+          hard ? VerifyRetFailHard : VerifyRetFail,
           ParamWithTCData { id, &tc },
           ldStkAddr(env, BCSPRelOffset { ind })
         );

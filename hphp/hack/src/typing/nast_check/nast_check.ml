@@ -34,7 +34,10 @@ let visitor =
     ]
 
 let stateful_visitor ctx =
-  Stateful_aast_visitor.checker (Unbound_name_check.handler ctx)
+  Stateful_aast_visitor.checker
+    (Stateful_aast_visitor.combine_visitors
+       (Unbound_name_check.handler ctx)
+       Function_pointer_check.handler)
 
 let program ctx p =
   let () = visitor#go ctx p in

@@ -162,7 +162,9 @@ module Naming = struct
     | PocketUniversesAtomMissing
     | PocketUniversesAtomUnknown
     | PocketUniversesLocalization
-    | ClassMethNonFinalSelf (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | ClassMethNonFinalSelf
+    | ParentInFunctionPointer
+    | SelfInNonFinalFunctionPointer (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

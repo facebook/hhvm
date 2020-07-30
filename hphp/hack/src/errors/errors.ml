@@ -1670,6 +1670,30 @@ let illegal_use_of_dynamically_callable attr_pos meth_pos visibility =
       (meth_pos, sprintf "But this method is %s" visibility);
     ]
 
+let parent_in_function_pointer pos parento meth_name =
+  let suggestion =
+    match parento with
+    | None -> "Consider using the name of the parent class explicitly."
+    | Some id -> "Consider using " ^ strip_ns id ^ "::" ^ meth_name ^ " instead"
+  in
+  add
+    (Naming.err_code Naming.ParentInFunctionPointer)
+    pos
+    ( "Cannot use parent:: in a function pointer due to class context ambiguity. "
+    ^ suggestion )
+
+let self_in_non_final_function_pointer pos cido meth_name =
+  let suggestion =
+    match cido with
+    | None -> ""
+    | Some id -> "Consider using " ^ strip_ns id ^ "::" ^ meth_name ^ " instead"
+  in
+  add
+    (Naming.err_code Naming.SelfInNonFinalFunctionPointer)
+    pos
+    ( "Cannot use self:: in a function pointer in a non-final class due to class context ambiguity. "
+    ^ suggestion )
+
 (*****************************************************************************)
 (* Init check errors *)
 (*****************************************************************************)

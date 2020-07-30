@@ -1190,6 +1190,11 @@ val pu_not_in_class : Pos.t -> string -> string -> unit
 
 val illegal_use_of_dynamically_callable : Pos.t -> Pos.t -> string -> unit
 
+val parent_in_function_pointer : Pos.t -> string option -> string -> unit
+
+val self_in_non_final_function_pointer :
+  Pos.t -> string option -> string -> unit
+
 val invalid_type_for_atmost_rx_as_rxfunc_parameter : Pos.t -> string -> unit
 
 val missing_annotation_for_atmost_rx_as_rxfunc_parameter : Pos.t -> unit

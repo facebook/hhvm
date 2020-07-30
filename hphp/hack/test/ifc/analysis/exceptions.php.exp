@@ -1,3 +1,6 @@
+Lattice:
+ {}
+
 Decls:
   class \Exception: { policied_props = [] }
   class \HH\vec: { policied_props = [] }
@@ -73,9 +76,6 @@ Flow constraints for \f:
   Raw:
   [.valuex = PRIVATE, \X < .valuex, lump'3 = lump, \Exception'1 < \Exception,
    \Y = PUBLIC, PUBLIC = PUBLIC, .valuex = PUBLIC, pc = PUBLIC]
-
-Lattice:
- {}
 
 There are privacy policy errors in \f:
   Data with policy PRIVATE appears in context PUBLIC.

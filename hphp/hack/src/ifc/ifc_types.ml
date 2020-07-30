@@ -154,17 +154,38 @@ type decl_env = {
   de_fun: fun_decl SMap.t;
 }
 
+(* Mode of operation.
+ * The constructors should be topologically sorted with respect to the
+ * dependency partial order between different modes. *)
+type mode =
+  (* Constructs the security lattice. *)
+  | Mlattice
+  (* Performs declaration analysis *)
+  | Mdecl
+  (* Analyses function/method bodies for flux constraints *)
+  | Manalyse
+  (* Invokes the constraint solver simplifying constraints *)
+  | Msolve
+  (* Checks simplified constraints against a security lattice *)
+  | Mcheck
+  (* Run and print everything for debugging *)
+  | Mdebug
+[@@deriving eq]
+
+(* Raw fields for options. All the fields have a counter part in `options`
+ * without the leading `r` in the field name. *)
+type raw_options = {
+  ropt_mode: string;
+  ropt_security_lattice: string;
+}
+
+(* Structured/parsed/sanitised options. *)
 type options = {
-  (* Verbosity level for the IFC output.
-   * Each level includes everything below it as well.
-   * 0: What the user is meant to see
-   * 1: Details constraints after solving
-   * 2: Results of IFC analysis on functions/methods
-   * 3: Declaration analysis results
-   *)
-  verbosity: int;
-  (* String representation of a security lattice. *)
-  security_lattice: string;
+  (* Mode of operation that determines how much of the analysis is executed
+   * and what to printout. *)
+  opt_mode: mode;
+  (* Security lattice to check results against. *)
+  opt_security_lattice: security_lattice;
 }
 
 type meta = {

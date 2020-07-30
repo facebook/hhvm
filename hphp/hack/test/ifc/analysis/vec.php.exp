@@ -1,3 +1,6 @@
+Lattice:
+ {}
+
 Decls:
   class \C: { policied_props = [i:INT, v:VEC] }
   class \Exception: { policied_props = [] }
@@ -574,9 +577,6 @@ Flow constraints for \testCollection:
    tp'21 < tp'1, tp'24 < tp'4, tp'23 < tp'3, tp'26 < tp'6, tp'25 < tp'5,
    tp'27 < tp'7, tp'28 < tp'8, tp'29 < tp'9, lump'3 = lump'1,
    \HH\vec'2 < \HH\vec]
-
-Lattice:
- {}
 
 There are privacy policy errors in \C#mutation:
   Data with policy INT appears in context VEC.

@@ -1,3 +1,6 @@
+Lattice:
+ {}
+
 Decls:
   class \C: { policied_props = [cx] }
   class \D: { policied_props = [] }
@@ -110,7 +113,4 @@ Flow constraints for \D#__construct:
   
   Simplified: True
   Raw: [\D < lump'1, $di < lump'1, pc < lump'1]
-
-Lattice:
- {}
 

@@ -1,3 +1,6 @@
+Lattice:
+ {}
+
 Decls:
   class \Exception: { policied_props = [] }
   class \HH\vec: { policied_props = [] }
@@ -117,9 +120,6 @@ Flow constraints for \throw_in_catch:
   [lump'2 = lump'3, \Exception'1 < \Exception'2, A < .a, \X < .a,
    lump'2 = lump, \Exception'1 < \Exception, \X < B, PUBLIC < B, .a < B,
    pc < B]
-
-Lattice:
- {}
 
 There are privacy policy errors in \leak_pc_in_catch:
   Data with policy A appears in context B.

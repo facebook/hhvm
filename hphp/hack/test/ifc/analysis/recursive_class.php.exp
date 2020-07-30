@@ -1,3 +1,6 @@
+Lattice:
+ {}
+
 Decls:
   class \Exception: { policied_props = [] }
   class \HH\vec: { policied_props = [] }
@@ -71,7 +74,4 @@ Flow constraints for \R#recursiveWrite:
   Raw:
   [lump'1 < .r, \R < .r, lump'1 < .r'1, .r < .r'1, lump'1 < .r'2,
    .r'1 < .r'2, .r'2 < lump'1, PUBLIC < lump'1, pc < lump'1]
-
-Lattice:
- {}
 

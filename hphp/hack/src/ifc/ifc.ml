@@ -13,7 +13,9 @@ open Ifc_types
 module Decl = Ifc_decl
 module Env = Ifc_env
 module Logic = Ifc_logic
+module Opts = Ifc_options
 module Pp = Ifc_pretty
+module Lattice = Ifc_security_lattice
 module Solver = Ifc_solver
 module Utils = Ifc_utils
 module A = Aast
@@ -27,6 +29,9 @@ module TEnv = Typing_env
 module TUtils = Typing_utils
 
 exception FlowInference of string
+
+let should_print ~user_mode ~phase =
+  equal_mode user_mode Mdebug || equal_mode user_mode phase
 
 let fail fmt = Format.kasprintf (fun s -> raise (FlowInference s)) fmt
 
@@ -275,7 +280,7 @@ let rec class_ptype lump_pol_opt proto_renv targs name =
     (* Purpose of the property takes precedence over any lump policy. *)
     let lump_pol_opt =
       Option.merge
-        (Option.map ~f:Ifc_security_lattice.parse_policy pp_purpose)
+        (Option.map ~f:Lattice.parse_policy pp_purpose)
         lump_pol_opt
         ~f:(fun a _ -> a)
     in
@@ -755,7 +760,7 @@ let callable meta decl_env class_name_opt name saved_env params body lrty =
     let end_env = env in
 
     (* Display the analysis results *)
-    if meta.m_opts.verbosity >= 2 then begin
+    if should_print meta.m_opts.opt_mode Manalyse then begin
       Format.printf "Analyzing %s:@." name;
       Format.printf "%a@." Pp.renv renv;
       Format.printf "* Params:@,  %a@." Pp.locals beg_env;
@@ -818,7 +823,27 @@ let walk_tast meta decl_env =
   in
   (fun tast -> List.concat (List.filter_map ~f:def tast))
 
-let do_ opts files_info ctx =
+let opts_of_raw_opts raw_opts =
+  let opt_mode =
+    try Opts.parse_mode_exn raw_opts.ropt_mode
+    with Opts.Invalid_ifc_mode mode ->
+      fail "option error: %s is not a recognised mode" mode
+  in
+  let opt_security_lattice =
+    try Lattice.mk_exn raw_opts.ropt_security_lattice
+    with Lattice.Invalid_security_lattice ->
+      fail
+        "option error: lattice specification should be basic flux constraints, e.g., `A < B` separated by `;`"
+  in
+  { opt_mode; opt_security_lattice }
+
+let do_ raw_opts files_info ctx =
+  let opts = opts_of_raw_opts raw_opts in
+
+  ( if should_print ~user_mode:opts.opt_mode ~phase:Mlattice then
+    let lattice = opts.opt_security_lattice in
+    Format.printf "@[Lattice:@. %a@]\n\n" Pp.security_lattice lattice );
+
   Relative_path.Map.iter files_info ~f:(fun path i ->
       (* skip decls and partial *)
       match i.FileInfo.file_mode with
@@ -828,11 +853,16 @@ let do_ opts files_info ctx =
         let { Tast_provider.Compute_tast.tast; _ } =
           Tast_provider.compute_tast_unquarantined ~ctx ~entry
         in
-        let decl_env = Decl.collect_sigs tast in
-        if opts.verbosity >= 3 then Format.printf "%a@." Pp.decl_env decl_env;
 
+        (* Declaration phase *)
+        let decl_env = Decl.collect_sigs tast in
+        if should_print ~user_mode:opts.opt_mode ~phase:Mdecl then
+          Format.printf "%a@." Pp.decl_env decl_env;
+
+        (* Flow analysis phase *)
         let results = walk_tast meta decl_env tast in
 
+        (* Solver phase *)
         let results =
           try Solver.global_exn ~subtype:(subtype meta) results with
           | Solver.Error Solver.RecursiveCycle ->
@@ -864,30 +894,25 @@ let do_ opts files_info ctx =
           Format.printf "@]";
           Format.printf "@]\n\n"
         in
-        if opts.verbosity >= 1 then SMap.iter log_solver simplified_results;
+        if should_print ~user_mode:opts.opt_mode ~phase:Msolve then
+          SMap.iter log_solver simplified_results;
 
-        let lattice =
-          try Ifc_security_lattice.mk_exn opts.security_lattice
-          with Ifc_security_lattice.Invalid_security_lattice ->
-            fail
-              "lattice parsing error: lattice specification should be `;` basic flux constraints, e.g., `A < B`"
-        in
-
-        if opts.verbosity >= 3 then
-          Format.printf "@[Lattice:@. %a@]\n\n" Pp.security_lattice lattice;
-
+        (* Checking phase *)
         let log_checking name (_, simple) =
           let violations =
-            try Ifc_security_lattice.check_exn lattice simple
-            with Ifc_security_lattice.Checking_error ->
+            try Lattice.check_exn opts.opt_security_lattice simple
+            with Lattice.Checking_error ->
               fail
                 "lattice checking error: something went wrong while checking %a against %s"
                 Pp.prop
                 simple
-                opts.security_lattice
+                raw_opts.ropt_security_lattice
           in
 
-          if not @@ List.is_empty violations then begin
+          if
+            should_print ~user_mode:opts.opt_mode ~phase:Mcheck
+            && not (List.is_empty violations)
+          then begin
             Format.printf "There are privacy policy errors in %s:@.  @[<v>" name;
             List.iter ~f:(Format.printf "%a@," Pp.violation) violations;
             Format.printf "@]\n"

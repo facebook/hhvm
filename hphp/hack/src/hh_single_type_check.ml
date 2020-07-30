@@ -28,7 +28,7 @@ module PositionedTree = Full_fidelity_syntax_tree.WithSyntax (PS)
 (*****************************************************************************)
 
 type mode =
-  | Ifc of int * string
+  | Ifc of string * string
   | Ai of Ai_options.t
   | Autocomplete
   | Autocomplete_manually_invoked
@@ -180,8 +180,8 @@ let parse_options () =
     else
       mode := x
   in
-  let ifc_verbosity = ref 0 in
-  let set_ifc lattice = set_mode (Ifc (!ifc_verbosity, lattice)) () in
+  let ifc_mode = ref "" in
+  let set_ifc lattice = set_mode (Ifc (!ifc_mode, lattice)) () in
   let set_ai x = set_mode (Ai (Ai_options.prepare ~server:false x)) () in
   let error_format = ref Errors.Context in
   let forbid_nullable_cast = ref false in
@@ -253,7 +253,7 @@ let parse_options () =
   let options =
     [
       ( "--ifc",
-        Arg.Tuple [Arg.Int (fun v -> ifc_verbosity := v); Arg.String set_ifc],
+        Arg.Tuple [Arg.String (fun m -> ifc_mode := m); Arg.String set_ifc],
         " Run the flow analysis" );
       ("--ai", Arg.String set_ai, " Run the abstract interpreter (Zoncolan)");
       ( "--deregister-attributes",
@@ -1292,7 +1292,7 @@ let handle_mode
   in
   let iter_over_files f : unit = List.iter filenames f in
   match mode with
-  | Ifc (ifc_verbosity, security_lattice) ->
+  | Ifc (ropt_mode, ropt_security_lattice) ->
     let print_errors errors = List.iter ~f:(print_error error_format) errors in
     if not (List.is_empty parse_errors) then
       print_errors parse_errors
@@ -1303,8 +1303,8 @@ let handle_mode
       if not (List.is_empty errors) then
         print_errors errors
       else
-        let opts = { Ifc_types.verbosity = ifc_verbosity; security_lattice } in
-        Ifc.do_ opts files_info ctx
+        let raw_opts = { Ifc_types.ropt_mode; ropt_security_lattice } in
+        Ifc.do_ raw_opts files_info ctx
   | Ai ai_options ->
     if not (List.is_empty parse_errors) then
       List.iter ~f:(print_error error_format) parse_errors

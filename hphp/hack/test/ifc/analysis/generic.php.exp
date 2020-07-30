@@ -1,3 +1,6 @@
+Lattice:
+ {}
+
 Decls:
   class \Exception: { policied_props = [] }
   class \G: { policied_props = [] }
@@ -45,7 +48,4 @@ Flow constraints for \testVariance:
   Raw:
   [tp'2 < tp'5, tp'5 < tp'2, tp'1 < tp'4, tp'3 < tp, lump'2 = lump'1,
    \G'1 < \G]
-
-Lattice:
- {}
 

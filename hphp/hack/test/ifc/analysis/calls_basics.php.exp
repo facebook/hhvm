@@ -1,3 +1,6 @@
+Lattice:
+ {}
+
 Decls:
   class \C: { policied_props = [a:A, b:B] }
   class \Exception: { policied_props = [] }
@@ -200,9 +203,6 @@ Flow constraints for \indirect_flow_a_to_b_bis:
    exists a b c d e.
      [d < B, a < B, b < B, .b < a, pcjoin < b, B < B, B < B, A < A, A < A,
       lump'2 = c, \C'1 < d, e < \C#setb_ret]]
-
-Lattice:
- {}
 
 There are privacy policy errors in \flow_a_to_b:
   Data with policy A appears in context B.

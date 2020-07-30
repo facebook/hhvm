@@ -1,3 +1,6 @@
+Lattice:
+ {}
+
 Decls:
   class \A: { policied_props = [i:P1] }
   class \B: { policied_props = [i:P1, j:P2, k:P3] }
@@ -27,9 +30,6 @@ Flow constraints for \test:
   Raw:
   [P3 < .k, \B < .k, \B < P1, .k < P1, pc < P1, P3 < .k'1, \B < .k'1,
    \B < P2, .k'1 < P2, pc < P2]
-
-Lattice:
- {}
 
 There are privacy policy errors in \test:
   Data with policy P3 appears in context P2.

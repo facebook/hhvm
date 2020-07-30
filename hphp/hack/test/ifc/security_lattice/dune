@@ -9,7 +9,7 @@
     --program %{exe:../../../src/hh_single_type_check.exe}
     --in-extension .php
     --flags
-    --ifc 0 "A < B; B < C; A < D"
+    --ifc check "A < B; B < C; A < D"
     )))
 
 (alias

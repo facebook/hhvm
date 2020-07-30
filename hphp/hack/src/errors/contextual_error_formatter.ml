@@ -186,10 +186,13 @@ let format_error (error : Pos.absolute Errors.error_) : string =
   in
   String.concat ~sep:"\n" (aux sorted_msgs None) ^ "\n"
 
-let to_string (error : Pos.absolute Errors.error_) : string =
+let to_string
+    ?(claim_color : Tty.raw_color option) (error : Pos.absolute Errors.error_) :
+    string =
   let error_code = Errors.get_code error in
   let msgl = Errors.to_list error in
   let buf = Buffer.create 50 in
+  let color = Option.value claim_color ~default:Tty.Red in
   (match msgl with
   | [] -> failwith "Impossible: an error always has non-empty list of messages"
   | (_, msg) :: _ ->
@@ -198,7 +201,7 @@ let to_string (error : Pos.absolute Errors.error_) : string =
       (Printf.sprintf
          "%s %s\n"
          (Tty.apply_color
-            (Tty.Bold Tty.Red)
+            (Tty.Bold color)
             (Errors.error_code_to_string error_code))
          (Tty.apply_color (Tty.Bold Tty.Default) msg)));
   (try Buffer.add_string buf (format_error error)
@@ -208,14 +211,3 @@ let to_string (error : Pos.absolute Errors.error_) : string =
        "Error could not be pretty-printed. Please file a bug.");
   Buffer.add_string buf "\n";
   Buffer.contents buf
-
-let to_lint_string ~color ~code ~pos ~message =
-  let heading =
-    Printf.sprintf
-      "%s %s"
-      (color (Errors.error_code_to_string code))
-      (Tty.apply_color (Tty.Bold Tty.White) message)
-  in
-  let fn = format_filename pos in
-  let (ctx, msg) = format_message "" pos ~is_first:true ~col_width:None in
-  Printf.sprintf "%s\n%s\n%s\n%s\n" heading fn ctx msg

@@ -6,11 +6,5 @@
  *
  *)
 
-val to_string : Pos.absolute Errors.error_ -> string
-
-val to_lint_string :
-  color:(string -> string) ->
-  code:int ->
-  pos:Pos.absolute ->
-  message:string ->
-  string
+val to_string :
+  ?claim_color:Tty.raw_color -> Pos.absolute Errors.error_ -> string

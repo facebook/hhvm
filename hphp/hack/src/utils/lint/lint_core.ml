@@ -67,17 +67,14 @@ let to_string lint =
   Printf.sprintf "%s\n%s (%s)" (Pos.string lint.pos) lint.message code
 
 let to_contextual_string lint =
-  let color =
+  let claim_color =
     match lint.severity with
-    | Lint_error -> Tty.apply_color (Tty.Bold Tty.Red)
-    | Lint_warning -> Tty.apply_color (Tty.Bold Tty.Yellow)
-    | Lint_advice -> Tty.apply_color (Tty.Bold Tty.White)
+    | Lint_error -> Tty.Red
+    | Lint_warning -> Tty.Yellow
+    | Lint_advice -> Tty.Default
   in
-  Contextual_error_formatter.to_lint_string
-    ~color
-    ~code:lint.code
-    ~pos:lint.pos
-    ~message:lint.message
+  Errors.make_absolute_error lint.code [(lint.pos, lint.message)]
+  |> Contextual_error_formatter.to_string ~claim_color
 
 let to_highlighted_string (lint : string t) =
   Errors.make_absolute_error lint.code [(lint.pos, lint.message)]

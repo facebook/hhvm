@@ -106,7 +106,7 @@ let die str =
 let print_error format ?(oc = stderr) l =
   let formatter =
     match format with
-    | Errors.Context -> Contextual_error_formatter.to_string
+    | Errors.Context -> (fun e -> Contextual_error_formatter.to_string e)
     | Errors.Raw -> (fun e -> Errors.to_string ~indent:false e)
     | Errors.Highlighted -> Highlighted_error_formatter.to_string
   in

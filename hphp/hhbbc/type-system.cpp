@@ -92,7 +92,7 @@ bool mayHaveData(trep bits) {
   case BArrN:    case BSArrN:    case BCArrN:
   case BOptArr:  case BOptSArr:  case BOptCArr:
   case BOptArrN: case BOptSArrN: case BOptCArrN:
-  case BFunc:    case BFuncS:
+  case BFuncS:
   case BRFunc:   case BOptRFunc:
   case BFuncLike: case BOptFuncLike:
   case BVec:      case BSVec:      case BCVec:
@@ -216,7 +216,6 @@ bool mayHaveData(trep bits) {
   case BOptUncStrLike:
   case BOptArrKeyCompat:
   case BOptUncArrKeyCompat:
-  case BOptFunc:
   case BOptFuncS:
   case BOptCls:
   case BClsMeth:
@@ -260,7 +259,6 @@ bool canBeOptional(trep bits) {
   case BSKeysetN:
   case BObj:
   case BRes:
-  case BFunc:
   case BFuncS:
   case BCls:
   case BClsMeth:
@@ -398,7 +396,6 @@ bool canBeOptional(trep bits) {
   case BOptVArrCompat:
   case BOptVecCompatSA:
   case BOptVecCompat:
-  case BOptFunc:
   case BOptFuncS:
   case BOptCls:
   case BOptClsMeth:
@@ -3966,7 +3963,7 @@ folly::Optional<IsTypeOp> type_to_istypeop(const Type& t) {
   }
   if (t.subtypeOf(BClsMeth)) return IsTypeOp::ClsMeth;
   if (t.subtypeOf(BCls)) return IsTypeOp::Class;
-  if (t.subtypeOf(BFunc|BFuncS)) return IsTypeOp::Func;
+  if (t.subtypeOf(BFuncS)) return IsTypeOp::Func;
   return folly::none;
 }
 
@@ -5023,7 +5020,7 @@ Type loosen_likeness(Type t) {
     }
   }
 
-  if (t.couldBe(BFunc | BCls)) t = union_of(std::move(t), TUncStrLike);
+  if (t.couldBe(BCls)) t = union_of(std::move(t), TUncStrLike);
 
   switch (t.m_dataTag) {
   case DataTag::None:
@@ -5204,9 +5201,9 @@ folly::Optional<ArrKey> maybe_class_func_key(const Type& keyTy, bool strict) {
 
   auto ret = ArrKey{};
 
-  if (keyTy.subtypeOf(BOptCls | BOptFunc)) {
+  if (keyTy.subtypeOf(BOptCls)) {
     ret.mayThrow = true;
-    if (keyTy.subtypeOf(BCls | BFunc)) {
+    if (keyTy.subtypeOf(BCls)) {
       if (keyTy.strictSubtypeOf(TCls)) {
         auto cname = dcls_of(keyTy).cls.name();
         ret.s = cname;
@@ -5218,7 +5215,7 @@ folly::Optional<ArrKey> maybe_class_func_key(const Type& keyTy, bool strict) {
     }
     ret.type = TUncArrKey;
     return ret;
-  } else if (keyTy.couldBe(BOptCls | BOptFunc)) {
+  } else if (keyTy.couldBe(BOptCls)) {
     ret.mayThrow = true;
     if (strict) ret.type = keyTy.couldBe(BCStr) ? TArrKey : TUncArrKey;
     else        ret.type = TInitCell;
@@ -6278,7 +6275,7 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
 
   if (is_opt(testTy)) return is_type_might_raise(unopt(testTy), valTy);
   if (testTy == TStrLike) {
-    return valTy.couldBe(BFunc | BCls);
+    return valTy.couldBe(BCls);
   } else if (testTy == TArr || testTy == TArrCompat) {
     return mayLogProv ||
            (RO::EvalIsVecNotices && !hackarr && valTy.couldBe(BClsMeth)) ||
@@ -6747,8 +6744,6 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   X(OptKeyset)
   X(Obj)
   X(OptObj)
-  X(Func)
-  X(OptFunc)
   X(FuncS)
   X(OptFuncS)
   X(Cls)

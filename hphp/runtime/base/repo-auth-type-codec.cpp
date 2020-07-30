@@ -58,8 +58,6 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
   case T::OptStr:
   case T::Obj:
   case T::OptObj:
-  case T::Func:
-  case T::OptFunc:
   case T::FuncS:
   case T::OptFuncS:
   case T::Cls:
@@ -197,8 +195,6 @@ void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptStr:
   case T::Obj:
   case T::OptObj:
-  case T::Func:
-  case T::OptFunc:
   case T::FuncS:
   case T::OptFuncS:
   case T::Cls:

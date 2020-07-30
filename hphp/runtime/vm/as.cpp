@@ -1023,8 +1023,6 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   X("Null",     T::Null);
   X("Obj",      T::Obj);
   X("?Obj",     T::OptObj);
-  X("Func",     T::Func);
-  X("?Func",    T::OptFunc);
   X("Cls",      T::Cls);
   X("?Cls",     T::OptCls);
   X("ClsMeth",  T::ClsMeth);
@@ -1117,8 +1115,6 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::OptKeyset:
   case T::Obj:
   case T::OptObj:
-  case T::Func:
-  case T::OptFunc:
   case T::FuncS:
   case T::OptFuncS:
   case T::Cls:

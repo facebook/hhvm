@@ -206,47 +206,46 @@ enum trep : uint64_t {
   BDbl      = 1ULL << 5,
   BSStr     = 1ULL << 6,  // static string
   BCStr     = 1ULL << 7,  // counted string
-  BFunc     = 1ULL << 8,  // KindOfFunc with implicit string interop
-  BFuncS    = 1ULL << 9,  // KindOfFunc with strict enforcement
+  BFuncS    = 1ULL << 8,  // KindOfFunc with strict enforcement
                           // (no string interop)
 
-  BSPArrE   = 1ULL << 10, // static empty "plain" array
-  BCPArrE   = 1ULL << 11, // counted empty "plain" array
-  BSPArrN   = 1ULL << 12, // static non-empty "plain" array
-  BCPArrN   = 1ULL << 13, // counted non-empty "plain array"
+  BSPArrE   = 1ULL << 9,  // static empty "plain" array
+  BCPArrE   = 1ULL << 10, // counted empty "plain" array
+  BSPArrN   = 1ULL << 11, // static non-empty "plain" array
+  BCPArrN   = 1ULL << 12, // counted non-empty "plain array"
 
-  BSVArrE   = 1ULL << 14, // static empty varray
-  BCVArrE   = 1ULL << 15, // counted empty varray
-  BSVArrN   = 1ULL << 16, // static non-empty varray
-  BCVArrN   = 1ULL << 17, // counted non-empty varray
+  BSVArrE   = 1ULL << 13, // static empty varray
+  BCVArrE   = 1ULL << 14, // counted empty varray
+  BSVArrN   = 1ULL << 15, // static non-empty varray
+  BCVArrN   = 1ULL << 16, // counted non-empty varray
 
-  BSDArrE   = 1ULL << 18, // static empty darray
-  BCDArrE   = 1ULL << 19, // counted empty darray
-  BSDArrN   = 1ULL << 20, // static non-empty darray
-  BCDArrN   = 1ULL << 21, // counted non-empty darray
+  BSDArrE   = 1ULL << 17, // static empty darray
+  BCDArrE   = 1ULL << 18, // counted empty darray
+  BSDArrN   = 1ULL << 19, // static non-empty darray
+  BCDArrN   = 1ULL << 20, // counted non-empty darray
 
-  BClsMeth  = 1ULL << 22,
+  BClsMeth  = 1ULL << 21,
 
-  BObj      = 1ULL << 23,
-  BRes      = 1ULL << 24,
-  BCls      = 1ULL << 25,
+  BObj      = 1ULL << 22,
+  BRes      = 1ULL << 23,
+  BCls      = 1ULL << 24,
 
-  BSVecE    = 1ULL << 26, // static empty vec
-  BCVecE    = 1ULL << 27, // counted empty vec
-  BSVecN    = 1ULL << 28, // static non-empty vec
-  BCVecN    = 1ULL << 29, // counted non-empty vec
-  BSDictE   = 1ULL << 30, // static empty dict
-  BCDictE   = 1ULL << 31, // counted empty dict
-  BSDictN   = 1ULL << 32, // static non-empty dict
-  BCDictN   = 1ULL << 33, // counted non-empty dict
-  BSKeysetE = 1ULL << 34, // static empty keyset
-  BCKeysetE = 1ULL << 35, // counted empty keyset
-  BSKeysetN = 1ULL << 36, // static non-empty keyset
-  BCKeysetN = 1ULL << 37, // counted non-empty keyset
+  BSVecE    = 1ULL << 25, // static empty vec
+  BCVecE    = 1ULL << 26, // counted empty vec
+  BSVecN    = 1ULL << 27, // static non-empty vec
+  BCVecN    = 1ULL << 28, // counted non-empty vec
+  BSDictE   = 1ULL << 29, // static empty dict
+  BCDictE   = 1ULL << 30, // counted empty dict
+  BSDictN   = 1ULL << 31, // static non-empty dict
+  BCDictN   = 1ULL << 32, // counted non-empty dict
+  BSKeysetE = 1ULL << 33, // static empty keyset
+  BCKeysetE = 1ULL << 34, // counted empty keyset
+  BSKeysetN = 1ULL << 35, // static non-empty keyset
+  BCKeysetN = 1ULL << 36, // counted non-empty keyset
 
-  BRecord   = 1ULL << 38,
-  BRFunc    = 1ULL << 39, // Reified function
-  BRClsMeth = 1ULL << 40, // Reified class method
+  BRecord   = 1ULL << 37,
+  BRFunc    = 1ULL << 38, // Reified function
+  BRClsMeth = 1ULL << 39, // Reified class method
 
   // NOTE: We only have kTRepBitsStored = 48 bits available.
   // We can bump that to 56 bits, at the cost of a taking a few
@@ -321,7 +320,6 @@ enum trep : uint64_t {
   BOptArr      = BInitNull | BArr,       // may have value / data
   BOptObj      = BInitNull | BObj,       // may have data
   BOptRes      = BInitNull | BRes,
-  BOptFunc     = BInitNull | BFunc,
   BOptFuncS    = BInitNull | BFuncS,
   BOptCls      = BInitNull | BCls,
   BOptClsMeth  = BInitNull | BClsMeth,
@@ -391,22 +389,22 @@ enum trep : uint64_t {
   BOptUncArrKey = BInitNull | BUncArrKey,
   BOptArrKey    = BInitNull | BArrKey,
 
-  BFuncLike     = BFunc | BRFunc,
+  BFuncLike     = BFuncS | BRFunc,
   BOptFuncLike  = BInitNull | BFuncLike,
-  BFuncOrCls    = BFunc | BCls,
+  BFuncOrCls    = BFuncS | BCls,
   BOptFuncOrCls = BInitNull | BFuncOrCls,
 
   BClsMethLike    = BClsMeth | BRClsMeth,
   BOptClsMethLike = BInitNull | BClsMethLike,
 
-  BStrLike    = BFuncOrCls | BStr,
-  BUncStrLike = BFuncOrCls | BSStr,
+  BStrLike    = BCls | BStr,
+  BUncStrLike = BCls | BSStr,
 
   BOptStrLike    = BInitNull | BStrLike,
   BOptUncStrLike = BInitNull | BUncStrLike,
 
-  BUncArrKeyCompat = BUncArrKey | BCls | BFunc,
-  BArrKeyCompat    = BArrKey | BCls | BFunc,
+  BUncArrKeyCompat = BUncArrKey | BCls,
+  BArrKeyCompat    = BArrKey | BCls,
   BOptUncArrKeyCompat = BInitNull | BUncArrKeyCompat,
   BOptArrKeyCompat = BInitNull | BArrKeyCompat,
 
@@ -458,10 +456,10 @@ enum trep : uint64_t {
 
   BPrim     = BInitPrim | BUninit,
   BInitUnc  = BInitPrim | BSStr | BSArr | BSVec | BSDict | BSKeyset |
-              BCls | BFunc | BFuncS | (use_lowptr ? BClsMeth : 0),
+              BCls | BFuncS | (use_lowptr ? BClsMeth : 0),
   BUnc      = BInitUnc | BUninit,
   BInitCell = BInitNull | BBool | BInt | BDbl | BStr | BArr | BObj | BRes |
-              BVec | BDict | BKeyset | BFunc | BFuncS | BCls | BClsMeth |
+              BVec | BDict | BKeyset | BFuncS | BCls | BClsMeth |
               BRecord | BRFunc | BRClsMeth,
   BCell     = BUninit | BInitCell,
 
@@ -1015,7 +1013,6 @@ X(SArrN)                                        \
 X(Obj)                                          \
 X(Res)                                          \
 X(Cls)                                          \
-X(Func)                                         \
 X(FuncS)                                        \
 X(RFunc)                                        \
 X(ClsMeth)                                      \
@@ -1100,7 +1097,6 @@ X(OptArrN)                                      \
 X(OptArr)                                       \
 X(OptObj)                                       \
 X(OptRes)                                       \
-X(OptFunc)                                      \
 X(OptFuncS)                                     \
 X(OptCls)                                       \
 X(OptClsMeth)                                   \

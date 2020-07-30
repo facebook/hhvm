@@ -1,2 +1,2 @@
 -vEval.EmitFuncPointers=1
--vEval.CheckPropTypeHints=3 -vEval.StringHintNotices=1
+-vEval.CheckPropTypeHints=3

@@ -1,3 +1,2 @@
 -vEval.EmitClassPointers=1
--vEval.StringHintNotices=true
 -vEval.RaiseClassConversionWarning=true

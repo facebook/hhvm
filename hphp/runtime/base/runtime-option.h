@@ -1126,9 +1126,6 @@ struct RuntimeOption {
   F(bool, IsExprEnableUnresolvedWarning, false)                         \
   /* Raise a notice if a Class type is passed to is_string */           \
   F(bool, ClassIsStringNotices, false)                                  \
-  /* Raise a notice if a Func type is passed to function that expects a
-     string */                                                          \
-  F(bool, StringHintNotices, false)                                     \
   /* Raise a notice if a Class type is passed to function that expects a
      string */                                                          \
   F(bool, ClassStringHintNotices, false)                                \

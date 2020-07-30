@@ -1,7 +1,6 @@
 -vEval.EmitFuncPointers=1
 -vEval.EmitClsMethPointers=1
 -vEval.IsCompatibleClsMethType=1
--vEval.StringHintNotices=1
 -vEval.IsVecNotices=1
 -vEval.VecHintNotices=1
 -vEval.RaiseClassConversionWarning=1

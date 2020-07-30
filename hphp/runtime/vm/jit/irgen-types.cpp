@@ -243,25 +243,6 @@ void verifyTypeImpl(IRGS& env,
       return callable(val);
     case AnnotAction::ObjectCheck:
       break;
-    case AnnotAction::WarnFunc:
-      assertx(valType <= TFunc);
-      assertx(RO::EvalEnableFuncStringInterop);
-      if (!funcToStr(val)) return genFail();
-      gen(
-        env,
-        RaiseNotice,
-        cns(
-          env,
-          makeStaticString(Strings::FUNC_TO_STRING_IMPLICIT)
-        )
-      );
-      return;
-
-    case AnnotAction::ConvertFunc:
-      assertx(valType <= TFunc);
-      assertx(RO::EvalEnableFuncStringInterop);
-      if (!funcToStr(val)) return genFail();
-      return;
 
     case AnnotAction::WarnClass:
       assertx(valType <= TCls);
@@ -446,15 +427,6 @@ SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
   MultiCond mc{env};
 
   mc.ifTypeThen(src, TStr, [&](SSATmp*) { return cns(env, true); });
-
-  if (RO::EvalEnableFuncStringInterop) {
-    mc.ifTypeThen(src, TFunc, [&](SSATmp*) {
-      if (RuntimeOption::EvalIsStringNotices) {
-        gen(env, RaiseNotice, cns(env, s_FUNC_IS_STRING.get()));
-      }
-      return cns(env, true);
-    });
-  }
 
   mc.ifTypeThen(src, TCls, [&](SSATmp*) {
     if (RuntimeOption::EvalClassIsStringNotices) {
@@ -667,16 +639,9 @@ SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
     PUNT(InstanceOfD_MaybeObj);
   }
   if (!src->isA(TObj)) {
-    if (src->isA(TCls) ||
-        (RO::EvalEnableFuncStringInterop && src->isA(TFunc))) {
+    if (src->isA(TCls)) {
       if (!interface_supports_string(className)) return cns(env, false);
-      if (RuntimeOption::EvalIsStringNotices && src->isA(TFunc)) {
-        gen(
-          env,
-          RaiseNotice,
-          cns(env, s_FUNC_IS_STRING.get())
-        );
-      } else if (RuntimeOption::EvalClassIsStringNotices && src->isA(TCls)) {
+      if (RuntimeOption::EvalClassIsStringNotices && src->isA(TCls)) {
         gen(
           env,
           RaiseNotice,
@@ -763,20 +728,17 @@ void emitInstanceOf(IRGS& env) {
     if (t2->isA(TInt))    return gen(env, InterfaceSupportsInt, t1);
     if (t2->isA(TStr))    return gen(env, InterfaceSupportsStr, t1);
     if (t2->isA(TDbl))    return gen(env, InterfaceSupportsDbl, t1);
-    if ((RO::EvalEnableFuncStringInterop && t2->isA(TFunc)) || t2->isA(TCls)) {
-      auto const warn =
-        (t2->isA(TCls) && RuntimeOption::EvalRaiseClassConversionWarning) ||
-        (t2->isA(TFunc) && RuntimeOption::EvalRaiseFuncConversionWarning);
-
-      if (!warn) return gen(env, InterfaceSupportsStr, t1);
+    if (t2->isA(TCls)) {
+      if (!RO::EvalRaiseClassConversionWarning) {
+        return gen(env, InterfaceSupportsStr, t1);
+      }
       return cond(
         env,
         [&] (Block* taken) {
           gen(env, JmpZero, taken, gen(env, InterfaceSupportsStr, t1));
         },
         [&] {
-          auto const m = t2->isA(TCls) ? s_CLASS_CONVERSION : s_FUNC_CONVERSION;
-          gen(env, RaiseNotice, cns(env, m.get()));
+          gen(env, RaiseNotice, cns(env, s_CLASS_CONVERSION.get()));
           return cns(env, true);
         },
         [&] { return cns(env, false); }
@@ -995,18 +957,6 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_bool:        return primitive(TBool);
     case TypeStructure::Kind::T_float:       return primitive(TDbl);
     case TypeStructure::Kind::T_string: {
-      if (t->type().maybe(TFunc) &&
-          RO::EvalEnableFuncStringInterop &&
-          RuntimeOption::EvalRaiseFuncConversionWarning) {
-        ifElse(env,
-          [&] (Block* taken) {
-            gen(env, CheckType, TFunc, taken, t);
-          },
-          [&] {
-            gen(env, RaiseWarning, cns(env, s_FUNC_IS_STRING.get()));
-          }
-        );
-      }
       if (t->type().maybe(TCls) &&
           RuntimeOption::EvalRaiseClassConversionWarning) {
         ifElse(env,
@@ -1018,9 +968,7 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
           }
         );
       }
-      return RO::EvalEnableFuncStringInterop
-        ? unionOf(TStr, TFunc, TCls)
-        : unionOf(TStr, TCls);
+      return unionOf(TStr, TCls);
     }
     case TypeStructure::Kind::T_null:        return primitive(TNull);
     case TypeStructure::Kind::T_void:        return primitive(TNull);

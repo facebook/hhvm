@@ -364,13 +364,8 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfResource:
     case KindOfRecord:
     case KindOfRFunc:
-      throwInvalidArrayKeyException(cell, ad);
-
     case KindOfFunc:
-      if (!RO::EvalEnableFuncStringInterop) {
-        throwInvalidArrayKeyException(cell, ad);
-      }
-      return ad->exists(StrNR(funcToStringHelper(cell->m_data.pfunc)));
+      throwInvalidArrayKeyException(cell, ad);
 
     case KindOfClass:
       return ad->exists(StrNR(classToStringHelper(cell->m_data.pclass)));
@@ -3195,12 +3190,9 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
     }
 
     case KindOfFunc:
-      if (!RO::EvalEnableFuncStringInterop) {
-        SystemLib::throwInvalidArgumentExceptionObject(
-          "Funcs cannot be cast to an array-key"
-        );
-      }
-      return tvReturn(StrNR(funcToStringHelper(input.toFuncVal())));
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Funcs cannot be cast to an array-key"
+      );
 
     case KindOfClass:
       return tvReturn(StrNR(classToStringHelper(input.toClassVal())));

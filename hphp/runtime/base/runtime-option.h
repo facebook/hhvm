@@ -1146,9 +1146,6 @@ struct RuntimeOption {
   F(bool, FatalOnConvertObjectToString, false)                          \
   F(bool, NoticeOnBuiltinDynamicCalls, false)                           \
   F(bool, RxPretendIsEnabled, false)                                    \
-  /* When true function pointers will pass string typehints and checks,
-     while optionally raising notices. */                               \
-  F(bool, EnableFuncStringInterop, true)                                \
   /* Raise warning when function pointers are used as strings. */       \
   F(bool, RaiseFuncConversionWarning, false)                            \
   /* Raise warning when class pointers are used as strings. */          \

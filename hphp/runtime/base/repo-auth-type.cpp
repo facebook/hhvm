@@ -511,7 +511,6 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     // fallthrough
   case T::StrLike:
     return isStringType(tv.m_type) ||
-      (RO::EvalEnableFuncStringInterop && tv.m_type == KindOfFunc) ||
       tv.m_type == KindOfClass;
 
   case T::OptUncStrLike:
@@ -519,7 +518,6 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     // fallthrough
   case T::UncStrLike:
     return (isStringType(tv.m_type) && !tv.m_data.pstr->isRefCounted()) ||
-      (RO::EvalEnableFuncStringInterop && tv.m_type == KindOfFunc) ||
       tv.m_type == KindOfClass;
 
   case T::OptArrKeyCompat:
@@ -528,16 +526,14 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
   case T::ArrKeyCompat:
     return isStringType(tv.m_type) ||
            tv.m_type == KindOfInt64 ||
-           isClassType(tv.m_type) ||
-           (RO::EvalEnableFuncStringInterop && tv.m_type == KindOfFunc);
+           isClassType(tv.m_type);
 
   case T::OptUncArrKeyCompat:
     if (initNull) return true;
     // fallthrough
   case T::UncArrKeyCompat:
     return (isStringType(tv.m_type) && !tv.m_data.pstr->isRefCounted()) ||
-           tv.m_type == KindOfInt64 || isClassType(tv.m_type) ||
-           (RO::EvalEnableFuncStringInterop && tv.m_type == KindOfFunc);
+           tv.m_type == KindOfInt64 || isClassType(tv.m_type);
 
   case T::InitCell:
     if (tv.m_type == KindOfUninit) return false;

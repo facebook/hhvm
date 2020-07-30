@@ -1,4 +1,3 @@
-Warning: Implicit Func to string conversion for type-hint
 string(1) "t"
 Warning: Implicit Class to string conversion for type-hint
 class(X)

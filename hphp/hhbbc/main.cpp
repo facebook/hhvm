@@ -309,7 +309,6 @@ std::vector<SString> load_input(F&& fun) {
   RO::EvalIsCompatibleClsMethType = gd.IsCompatibleClsMethType;
   RO::EvalArrayProvenance = gd.ArrayProvenance;
   RO::StrictArrayFillKeys = gd.StrictArrayFillKeys;
-  RO::EvalEnableFuncStringInterop = gd.EnableFuncStringInterop;
   if (gd.HardGenericsUB) {
     RO::EvalEnforceGenericsUB = 2;
   } else {
@@ -416,7 +415,6 @@ void write_global_data(
   gd.IsCompatibleClsMethType = RuntimeOption::EvalIsCompatibleClsMethType;
   gd.ArrayProvenance = RuntimeOption::EvalArrayProvenance;
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;
-  gd.EnableFuncStringInterop = RO::EvalEnableFuncStringInterop;
   gd.WidenIsArray = RO::EvalWidenIsArray;
   gd.WidenIsArrayLogs = RO::EvalWidenIsArrayLogs;
 

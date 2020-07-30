@@ -276,11 +276,6 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
   }
 
   assertx(metatype == AnnotMetaType::Precise);
-  if (at == AnnotType::String && dt == KindOfFunc &&
-      RO::EvalEnableFuncStringInterop) {
-    return RuntimeOption::EvalStringHintNotices
-      ? AnnotAction::WarnFunc : AnnotAction::ConvertFunc;
-  }
   if (at == AnnotType::String && dt == KindOfClass) {
     return RuntimeOption::EvalClassStringHintNotices
       ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
@@ -332,13 +327,6 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfKeyset:
         return interface_supports_arrlike(annotClsName)
           ? AnnotAction::Pass : AnnotAction::Fail;
-      case KindOfFunc:
-        if (interface_supports_string(annotClsName) &&
-            RO::EvalEnableFuncStringInterop) {
-          return RuntimeOption::EvalStringHintNotices
-            ? AnnotAction::WarnFunc : AnnotAction::ConvertFunc;
-        }
-        return AnnotAction::Fail;
       case KindOfClass:
         if (interface_supports_string(annotClsName)) {
           return RuntimeOption::EvalClassStringHintNotices
@@ -348,6 +336,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfClsMeth:
         return interface_supports_arrlike(annotClsName) ?
           AnnotAction::ClsMethCheck : AnnotAction::Fail;
+      case KindOfFunc:
       case KindOfRClsMeth:
       case KindOfRFunc:
       case KindOfUninit:

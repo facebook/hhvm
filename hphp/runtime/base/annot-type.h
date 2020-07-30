@@ -120,8 +120,6 @@ enum class AnnotAction {
   Fail,
   ObjectCheck,
   CallableCheck,
-  WarnFunc,
-  ConvertFunc,
   WarnClass,
   ConvertClass,
   ClsMethCheck,

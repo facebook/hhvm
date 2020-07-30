@@ -13,7 +13,7 @@ function main() {
   require_once 'call_user_func.inc';
 
   test('afunc');
-  test(HH\fun('afunc'));
+  test('afunc');
   test(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec['C', 'cfunc']));
   test(HH\class_meth('C', 'cfunc'));
   \var_dump(is_callable(HH\class_meth('C', 'cfunc')));

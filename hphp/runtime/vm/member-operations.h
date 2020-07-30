@@ -514,12 +514,8 @@ NEVER_INLINE TypedValue ElemSlow(tv_rval base, key_type<keyType> key) {
     case KindOfResource:
     case KindOfRFunc:
     case KindOfRClsMeth:
-      return ElemScalar();
     case KindOfFunc:
-      if (!RO::EvalEnableFuncStringInterop) return ElemScalar();
-      return ElemString<mode, keyType>(
-        funcToStringHelper(base.val().pfunc), key
-      );
+      return ElemScalar();
     case KindOfClass:
       return ElemString<mode, keyType>(
         classToStringHelper(base.val().pclass), key
@@ -2736,13 +2732,8 @@ NEVER_INLINE bool IssetElemSlow(tv_rval base, key_type<keyType> key) {
     case KindOfResource:
     case KindOfRFunc:
     case KindOfRClsMeth:
-      return false;
-
     case KindOfFunc:
-      if (!RO::EvalEnableFuncStringInterop) return false;
-      return IssetElemString<keyType>(
-        funcToStringHelper(val(base).pfunc), key
-      );
+      return false;
 
     case KindOfClass:
       return IssetElemString<keyType>(

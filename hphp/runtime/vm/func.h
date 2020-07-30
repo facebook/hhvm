@@ -1511,8 +1511,7 @@ const StringData* funcToStringHelper(const Func* func);
 int64_t funcToInt64Helper(const Func* func);
 
 /*
- * When Eval.EnableFuncStringInterop = false, throw an exception that func
- * cannot be converted to type.
+ * Throw an exception that func cannot be converted to type.
  */
 void invalidFuncConversion(const char* type);
 

@@ -69,7 +69,7 @@ async function run_tests(): Awaitable<void> {
       '{"fields": ["name"], "expression": ["exists"]}',
       $wminst->getRepoRoot(),
       SUB_NAME,
-      fun('callback'),
+      'callback',
       $sock,
     );
     // echo "Subscribed\n";

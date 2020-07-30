@@ -185,8 +185,6 @@ inline int64_t funcToInt64Helper(const Func* func) {
 }
 
 inline void invalidFuncConversion(const char* type) {
-  if (RO::EvalEnableFuncStringInterop) return;
-
   SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
     "Cannot convert func to {}", type
   ));

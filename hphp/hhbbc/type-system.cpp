@@ -3933,7 +3933,7 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::ClsMeth: return TClsMeth;
   case IsTypeOp::Class: return TCls;
   case IsTypeOp::Func:
-    return RO::EvalEnableFuncStringInterop ? TFunc : TFuncS;
+    return TFuncS;
   case IsTypeOp::Arr:
     if (!RO::EvalWidenIsArray) return php_arr;
     /* fallthrough */
@@ -4199,7 +4199,7 @@ Type from_DataType(DataType dt) {
   case KindOfObject:   return TObj;
   case KindOfResource: return TRes;
   case KindOfRFunc:    return TRFunc;
-  case KindOfFunc:     return RO::EvalEnableFuncStringInterop ? TFunc : TFuncS;
+  case KindOfFunc:     return TFuncS;
   case KindOfClass:    return TCls;
   case KindOfClsMeth:  return TClsMeth;
   case KindOfRClsMeth: return TRClsMeth;

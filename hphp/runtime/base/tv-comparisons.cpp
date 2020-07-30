@@ -76,8 +76,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, bool val) {
     }
   } else if (UNLIKELY(isArrayType(cell.m_type))) {
     return op(cell.m_data.parr, val);
-  } else if (UNLIKELY(!RO::EvalEnableFuncStringInterop &&
-                      isFuncType(type(cell)))) {
+  } else if (UNLIKELY(isFuncType(type(cell)))) {
     return op.funcVsNonFunc();
   } else if (UNLIKELY(isRFuncType(cell.m_type))) {
     return op(cell.m_data.prfunc, val);
@@ -145,8 +144,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, int64_t val) {
       return op(cell.m_data.pres->data()->o_toInt64(), val);
 
     case KindOfFunc:
-      if (!RO::EvalEnableFuncStringInterop) return op.funcVsNonFunc();
-      return strRelOp(op, cell, val, funcToStringHelper(cell.m_data.pfunc));
+      return op.funcVsNonFunc();
 
     case KindOfClass:
       return strRelOp(op, cell, val, classToStringHelper(cell.m_data.pclass));
@@ -222,8 +220,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, double val) {
       return op(cell.m_data.pres->data()->o_toDouble(), val);
 
     case KindOfFunc:
-      if (!RO::EvalEnableFuncStringInterop) return op.funcVsNonFunc();
-      return strRelOp(op, cell, val, funcToStringHelper(cell.m_data.pfunc));
+      return op.funcVsNonFunc();
 
     case KindOfClass:
       return strRelOp(op, cell, val, classToStringHelper(cell.m_data.pclass));
@@ -314,8 +311,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const StringData* val) {
     }
 
     case KindOfFunc:
-      if (!RO::EvalEnableFuncStringInterop) return op.funcVsNonFunc();
-      return op(funcToStringHelper(cell.m_data.pfunc), val);
+      return op.funcVsNonFunc();
 
     case KindOfClass:
       return op(classToStringHelper(cell.m_data.pclass), val);
@@ -475,8 +471,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ObjectData* od) {
       return op(false, true);
 
     case KindOfFunc:
-      if (!RO::EvalEnableFuncStringInterop) return op.funcVsNonFunc();
-      return strRelOp(funcToStringHelper(cell.m_data.pfunc));
+      return op.funcVsNonFunc();
 
     case KindOfClass:
       return strRelOp(classToStringHelper(cell.m_data.pclass));
@@ -560,9 +555,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ResourceData* rd) {
       return op(cell.m_data.pres->data(), rd);
 
     case KindOfFunc: {
-      if (!RO::EvalEnableFuncStringInterop) return op.funcVsNonFunc();
-      auto const str = funcToStringHelper(cell.m_data.pfunc);
-      return op(str->toDouble(), rd->o_toDouble());
+      return op.funcVsNonFunc();
     }
 
     case KindOfClass: {
@@ -677,7 +670,6 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, ClsMethDataRef clsMeth) {
     case KindOfDouble:
     case KindOfPersistentString:
     case KindOfString:
-    case KindOfFunc:
     case KindOfClass:
     case KindOfResource:
       if (RuntimeOption::EvalHackArrDVArrs) {
@@ -769,6 +761,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, ClsMethDataRef clsMeth) {
 
     case KindOfRecord:
       return op.recordVsNonRecord();
+
+    case KindOfFunc:
+      return op.funcVsNonFunc();
   }
   not_reached();
 }
@@ -852,97 +847,11 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Func* val) {
   assertx(tvIsPlausible(cell));
   assertx(val != nullptr);
 
-  if (!RO::EvalEnableFuncStringInterop && !isFuncType(type(cell))) {
+  if (!isFuncType(type(cell))) {
     return op.funcVsNonFunc();
   }
 
-  switch (cell.m_type) {
-    case KindOfUninit:
-    case KindOfNull:
-      return op(staticEmptyString(), funcToStringHelper(val));
-
-    case KindOfInt64: {
-      auto const num = stringToNumeric(funcToStringHelper(val));
-      return num.m_type == KindOfInt64  ? op(cell.m_data.num, num.m_data.num) :
-             num.m_type == KindOfDouble ? op(cell.m_data.num, num.m_data.dbl) :
-             op(cell.m_data.num, 0);
-    }
-    case KindOfBoolean:
-      return op(!!cell.m_data.num, true);
-
-    case KindOfDouble: {
-      auto const num = stringToNumeric(funcToStringHelper(val));
-      return num.m_type == KindOfInt64  ? op(cell.m_data.dbl, num.m_data.num) :
-             num.m_type == KindOfDouble ? op(cell.m_data.dbl, num.m_data.dbl) :
-             op(cell.m_data.dbl, 0);
-    }
-
-    case KindOfPersistentString:
-    case KindOfString:
-      return op(cell.m_data.pstr, funcToStringHelper(val));
-
-    case KindOfPersistentVec:
-    case KindOfVec:
-      return op.vecVsNonVec();
-
-    case KindOfPersistentDict:
-    case KindOfDict:
-      return op.dictVsNonDict();
-
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-      return op.keysetVsNonKeyset();
-
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
-      funcToStringHelper(val); // warn
-      return op.phpArrVsNonArr();
-
-    case KindOfObject: {
-      auto od = cell.m_data.pobj;
-      if (od->isCollection()) return op.collectionVsNonObj();
-      if (od->hasToString()) {
-        String str(od->invokeToString());
-        return op(str.get(), funcToStringHelper(val));
-      }
-      return op(true, false);
-    }
-
-    case KindOfResource: {
-      auto const rd = cell.m_data.pres;
-      return op(rd->data()->o_toDouble(), funcToStringHelper(val)->toDouble());
-    }
-
-    case KindOfFunc:
-      return op(cell.m_data.pfunc, val);
-
-    case KindOfClass:
-      return op(
-        classToStringHelper(cell.m_data.pclass), funcToStringHelper(val));
-
-    case KindOfClsMeth:
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        return op.clsmethVsNonClsMeth();
-      } else {
-        if (UNLIKELY(op.warnOnClsMethNonClsMeth())) {
-          raiseClsMethNonClsMethRelCompareWarning();
-        }
-        funcToStringHelper(val); // warn
-        return op(true, false);
-      }
-
-    case KindOfRClsMeth:
-      return op.rclsMethVsNonRClsMeth();
-
-    case KindOfRFunc:
-      return op.rfuncVsNonRFunc();
-
-    case KindOfRecord:
-      return op.recordVsNonRecord();
-  }
-  not_reached();
+  return op(cell.m_data.pfunc, val);
 }
 
 template<class Op>
@@ -1010,9 +919,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Class* val) {
     }
 
     case KindOfFunc:
-      if (!RO::EvalEnableFuncStringInterop) return op.funcVsNonFunc();
-      return op(
-        funcToStringHelper(cell.m_data.pfunc), classToStringHelper(val));
+      return op.funcVsNonFunc();
 
     case KindOfClass:
       return op(cell.m_data.pclass, val);
@@ -1287,8 +1194,7 @@ struct CompareBase {
   }
 
   bool operator()(const Func* f1, const Func* f2) const {
-    if (!RO::EvalEnableFuncStringInterop) throw_func_compare_exception();
-    return operator()(funcToStringHelper(f1), funcToStringHelper(f2));
+    throw_func_compare_exception();
   }
 
   bool operator()(const Class* c1, const Class* c2) const {
@@ -1498,9 +1404,6 @@ bool tvSame(TypedValue c1, TypedValue c2) {
 
     case KindOfPersistentString:
     case KindOfString:
-      if (RO::EvalEnableFuncStringInterop && isFuncType(c2.m_type)) {
-        return c1.m_data.pstr->same(funcToStringHelper(c2.m_data.pfunc));
-      }
       if (isClassType(c2.m_type)) {
         return c1.m_data.pstr->same(classToStringHelper(c2.m_data.pclass));
       }
@@ -1512,27 +1415,12 @@ bool tvSame(TypedValue c1, TypedValue c2) {
         RFuncData::Same(c1.m_data.prfunc, c2.m_data.prfunc);
 
     case KindOfFunc:
-      if (RO::EvalEnableFuncStringInterop) {
-        if (isStringType(c2.m_type)) {
-          return funcToStringHelper(c1.m_data.pfunc)->same(c2.m_data.pstr);
-        }
-        if (isClassType(c2.m_type)) {
-          return
-            funcToStringHelper(c1.m_data.pfunc)
-              ->same(classToStringHelper(c2.m_data.pclass));
-        }
-      }
       if (c2.m_type != KindOfFunc) return false;
       return c1.m_data.pfunc == c2.m_data.pfunc;
 
     case KindOfClass:
       if (isStringType(c2.m_type)) {
         return classToStringHelper(c1.m_data.pclass)->same(c2.m_data.pstr);
-      }
-      if (RO::EvalEnableFuncStringInterop && isFuncType(c2.m_type)) {
-        return
-          classToStringHelper(c1.m_data.pclass)
-            ->same(funcToStringHelper(c2.m_data.pfunc));
       }
       if (c2.m_type != KindOfClass) return false;
       return c1.m_data.pclass == c2.m_data.pclass;

@@ -1,8 +1,0 @@
-int(1)
-classMeth{
-    class(A)
-    function(f1)
-}
-int(3)
-
-Fatal error: Call to undefined function f1() in %s/test/slow/func-ptr/bad-func.php on line 15

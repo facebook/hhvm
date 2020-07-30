@@ -940,17 +940,13 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
     case T::OptArrKey:      return TInt | TStr | TInitNull;
     case T::OptUncArrKey:   return TInt | TPersistentStr | TInitNull;
     case T::OptUncStrLike:
-      return (RO::EvalEnableFuncStringInterop ? TFunc : TBottom) |
-             TCls | TPersistentStr | TInitNull;
+      return TCls | TPersistentStr | TInitNull;
     case T::OptStrLike:
-      return (RO::EvalEnableFuncStringInterop ? TFunc : TBottom) |
-             TCls | TStr | TInitNull;
+      return TCls | TStr | TInitNull;
     case T::OptArrKeyCompat:
-      return TInt | TStr | TCls | TInitNull |
-             (RO::EvalEnableFuncStringInterop ? TFunc : TBottom);
+      return TInt | TStr | TCls | TInitNull;
     case T::OptUncArrKeyCompat:
-      return TInt | TPersistentStr | TCls | TInitNull |
-             (RO::EvalEnableFuncStringInterop ? TFunc : TBottom);
+      return TInt | TPersistentStr | TCls | TInitNull;
 
     case T::Uninit:         return TUninit;
     case T::InitNull:       return TInitNull;
@@ -972,17 +968,13 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
     case T::UncArrKey:      return TInt | TPersistentStr;
     case T::ArrKey:         return TInt | TStr;
     case T::UncStrLike:
-      return (RO::EvalEnableFuncStringInterop ? TFunc : TBottom) |
-             TCls | TPersistentStr;
+      return TCls | TPersistentStr;
     case T::StrLike:
-      return (RO::EvalEnableFuncStringInterop ? TFunc : TBottom) |
-             TCls | TStr;
+      return TCls | TStr;
     case T::UncArrKeyCompat:
-      return TInt | TPersistentStr | TCls |
-             (RO::EvalEnableFuncStringInterop ? TFunc : TBottom);
+      return TInt | TPersistentStr | TCls;
     case T::ArrKeyCompat:
-      return TInt | TStr | TCls |
-             (RO::EvalEnableFuncStringInterop ? TFunc : TBottom);
+      return TInt | TStr | TCls;
     case T::InitUnc:        return TUncountedInit;
     case T::Unc:            return TUncounted;
     case T::InitCell:       return TInitCell;

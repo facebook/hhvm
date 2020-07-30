@@ -278,10 +278,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalUseHHBBC, ini, config, "UseHHBBC",
                RuntimeOption::EvalUseHHBBC);
 
-  Config::Bind(RuntimeOption::EvalEnableFuncStringInterop, ini, config,
-               "EnableFuncStringInterop",
-               RuntimeOption::EvalEnableFuncStringInterop);
-
   Config::Bind(RuntimeOption::EvalWidenIsArray, ini, config,
                "WidenIsArray",
                RuntimeOption::EvalWidenIsArray);

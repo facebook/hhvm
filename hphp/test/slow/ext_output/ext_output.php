@@ -20,7 +20,7 @@ function VS($x, $y) {
 <<__EntryPoint>>
 function main_ext_output() {
 ob_start();
-ob_start(fun("mytolower"));
+ob_start("mytolower");
 echo "TEst";
 ob_end_flush();
 VS(ob_get_clean(), "test");
@@ -31,20 +31,20 @@ ob_clean();
 VS(ob_get_clean(), "");
 
 ob_start();
-ob_start(fun("mytolower"));
+ob_start("mytolower");
 echo "TEst";
 ob_flush();
 VS(ob_get_clean(), "");
 VS(ob_get_clean(), "test");
 
 ob_start();
-ob_start(fun("mytolower"));
+ob_start("mytolower");
 echo "TEst";
 ob_end_clean();
 VS(ob_get_clean(), "");
 
 ob_start();
-ob_start(fun("mytolower"));
+ob_start("mytolower");
 echo "TEst";
 ob_end_flush();
 VS(ob_get_clean(), "test");
@@ -85,7 +85,7 @@ VS(ob_get_level(), 0);
 ob_get_status();
 
 ob_start();
-ob_start(fun("mytolower"));
+ob_start("mytolower");
 $handlers = ob_list_handlers();
 ob_end_clean();
 ob_end_clean();

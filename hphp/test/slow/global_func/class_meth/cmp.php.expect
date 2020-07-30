@@ -121,10 +121,10 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP 
 Test 8
 bool(false)
 bool(false)
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a PHP array with a non-array
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 
 bool(false)
 bool(false)
@@ -347,17 +347,17 @@ bool(false)
 Test 8
 bool(false)
 bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 
 bool(false)
 bool(false)
-bool(true)
-bool(true)
-bool(false)
-bool(false)
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare funcs
 
 Test 9
 bool(false)
@@ -448,3 +448,4 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keyset
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
+

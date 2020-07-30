@@ -1,1 +1,0 @@
---count=4 -vEval.EmitFuncPointers=1 -vEval.EmitClsMethPointers=1 -vHack.Lang.DisallowFuncPtrsInConstants=true

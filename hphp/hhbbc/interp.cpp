@@ -3920,14 +3920,12 @@ void in(ISS& env, const bc::FCallFunc& op) {
 }
 
 void in(ISS& env, const bc::ResolveFunc& op) {
-  if (RO::EvalEnableFuncStringInterop) push(env, TFunc);
-  else                                 push(env, TFuncS);
+  push(env, TFuncS);
 }
 
 void in(ISS& env, const bc::ResolveMethCaller& op) {
   // TODO (T29639296)
-  if (RO::EvalEnableFuncStringInterop) push(env, TFunc);
-  else                                 push(env, TFuncS);
+  push(env, TFuncS);
 }
 
 void in(ISS& env, const bc::ResolveRFunc& op) {

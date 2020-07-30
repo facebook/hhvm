@@ -466,9 +466,7 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
         assertx(td->type == AnnotType::Object);
         c = td->klass;
         break;
-      case AnnotAction::WarnFunc:
       case AnnotAction::WarnClass:
-      case AnnotAction::ConvertFunc:
       case AnnotAction::ConvertClass:
         return false; // verifyFail will deal with the conversion/warning
       case AnnotAction::ClsMethCheck:
@@ -689,9 +687,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
     case AnnotAction::ObjectCheck:
       assertx(isObject());
       return !isPasses && checkNamedTypeNonObj<isAssert, isProp>(val);
-    case AnnotAction::WarnFunc:
     case AnnotAction::WarnClass:
-    case AnnotAction::ConvertFunc:
     case AnnotAction::ConvertClass:
       return false; // verifyFail will handle the conversion/warning
     case AnnotAction::ClsMethCheck:
@@ -745,8 +741,6 @@ bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
       case AnnotAction::CallableCheck:
       case AnnotAction::ObjectCheck:
         return false;
-      case AnnotAction::WarnFunc:
-      case AnnotAction::ConvertFunc:
       case AnnotAction::WarnClass:
       case AnnotAction::ConvertClass:
       case AnnotAction::ClsMethCheck:
@@ -795,8 +789,6 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
     case AnnotAction::Fail:
     case AnnotAction::CallableCheck:
     case AnnotAction::ObjectCheck:
-    case AnnotAction::WarnFunc:
-    case AnnotAction::ConvertFunc:
     case AnnotAction::WarnClass:
     case AnnotAction::ConvertClass:
     case AnnotAction::ClsMethCheck:
@@ -968,18 +960,6 @@ void castClsMeth(tv_lval c, F make) {
 void TypeConstraint::verifyOutParamFail(const Func* func,
                                         TypedValue* c,
                                         int paramNum) const {
-
-  if (RO::EvalEnableFuncStringInterop && isFuncType(c->m_type)) {
-    if (isString() || (isObject() && interface_supports_string(m_typeName))) {
-      if (RuntimeOption::EvalStringHintNotices) {
-        raise_notice(Strings::FUNC_TO_STRING_IMPLICIT);
-      }
-      c->m_data.pstr = const_cast<StringData*>(c->m_data.pfunc->name());
-      c->m_type = KindOfPersistentString;
-      return;
-    }
-  }
-
   if (isClassType(c->m_type) && checkStringCompatible()) {
     if (RuntimeOption::EvalClassStringHintNotices) {
       raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
@@ -1102,17 +1082,6 @@ void TypeConstraint::verifyFail(const Func* func, tv_lval c,
     auto const thisClass = getThis();
     if (cls->preClass()->userAttributes().count(s___MockClass.get()) &&
         cls->parent() == thisClass) {
-      return;
-    }
-  }
-
-  if (RO::EvalEnableFuncStringInterop && isFuncType(c.type())) {
-    if (isString() || (isObject() && interface_supports_string(m_typeName))) {
-      if (RuntimeOption::EvalStringHintNotices) {
-        raise_notice(Strings::FUNC_TO_STRING_IMPLICIT);
-      }
-      val(c).pstr = const_cast<StringData*>(val(c).pfunc->name());
-      c.type() = KindOfPersistentString;
       return;
     }
   }

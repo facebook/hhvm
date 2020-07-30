@@ -115,22 +115,12 @@ template <IntishCast IC>
 inline TypedValue tvToKey(TypedValue cell, const ArrayData* ad) {
   assertx(tvIsPlausible(cell));
 
-  auto coerceKey = [&] (const StringData* str) {
-    int64_t n;
-    if (IC == IntishCast::Cast && ad->intishCastKey(str, n)) {
-      return make_tv<KindOfInt64>(n);
-    }
-    return make_tv<KindOfString>(const_cast<StringData*>(str));
-  };
-
   if (isStringType(cell.m_type)) {
     int64_t n;
     if (IC == IntishCast::Cast && ad->intishCastKey(cell.m_data.pstr, n)) {
       return make_tv<KindOfInt64>(n);
     }
     return cell;
-  } else if (isFuncType(cell.m_type) && RO::EvalEnableFuncStringInterop) {
-    return coerceKey(funcToStringHelper(cell.m_data.pfunc));
   }
 
   if (LIKELY(isIntType(cell.m_type))) return cell;

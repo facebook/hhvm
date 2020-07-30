@@ -20,7 +20,7 @@ function main() {
   foreach ($dicts as list($name, $d)) {
     echo "$name:\n";
     foreach ($dfuncs as $f) {
-      echo "\t$f: ".var_export($f($d), true)."\n";
+      echo "\t".hh\fun_get_function($f).": ".var_export($f($d), true)."\n";
     }
   }
 }

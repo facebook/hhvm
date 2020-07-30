@@ -91,12 +91,6 @@ inline bool is_double(const TypedValue* c) {
 
 inline bool is_string(const TypedValue* c) {
   if (tvIsString(c)) return true;
-  if (tvIsFunc(c)) {
-    if (RuntimeOption::EvalIsStringNotices) {
-      raise_notice("Func used in is_string");
-    }
-    return true;
-  }
   if (tvIsClass(c)) {
     if (RuntimeOption::EvalClassIsStringNotices) {
       raise_notice("Class used in is_string");

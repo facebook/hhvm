@@ -1124,8 +1124,6 @@ struct RuntimeOption {
   /* Warn if is expression are used with type aliases that cannot be    |
    * resolved */                                                        \
   F(bool, IsExprEnableUnresolvedWarning, false)                         \
-  /* Raise a notice if a Func type is passed to is_string */            \
-  F(bool, IsStringNotices, false)                                       \
   /* Raise a notice if a Class type is passed to is_string */           \
   F(bool, ClassIsStringNotices, false)                                  \
   /* Raise a notice if a Func type is passed to function that expects a

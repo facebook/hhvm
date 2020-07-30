@@ -3533,7 +3533,8 @@ let require_generic_explicit (def_pos, def_name) arg_pos =
       (def_pos, "Definition is here");
     ]
 
-let invalid_reified_argument (def_pos, def_name) hint_pos arg_pos arg_kind =
+let invalid_reified_argument (def_pos, def_name) hint_pos arg_info =
+  let (arg_pos, arg_kind) = List.hd_exn arg_info in
   add_list
     (Typing.err_code Typing.InvalidReifiedArgument)
     [
@@ -4278,15 +4279,16 @@ let trait_reuse_inside_class class_name trait occurrences =
     (Typing.err_code Typing.TraitReuseInsideClass)
     ([(c_pos, err)] @ List.map ~f:(fun p -> (p, "used here")) occurrences)
 
-let invalid_is_as_expression_hint op hint_pos ty_pos ty_str =
+let invalid_is_as_expression_hint op hint_pos reasons =
   add_list
     (Typing.err_code Typing.InvalidIsAsExpressionHint)
-    [
-      (hint_pos, "Invalid \"" ^ op ^ "\" expression hint");
-      (ty_pos, "The \"" ^ op ^ "\" operator cannot be used with " ^ ty_str);
-    ]
+    ( (hint_pos, "Invalid \"" ^ op ^ "\" expression hint")
+    :: List.map reasons ~f:(fun (ty_pos, ty_str) ->
+           (ty_pos, "The \"" ^ op ^ "\" operator cannot be used with " ^ ty_str))
+    )
 
-let invalid_enforceable_type kind_str (tp_pos, tp_name) targ_pos ty_pos ty_str =
+let invalid_enforceable_type kind_str (tp_pos, tp_name) targ_pos ty_info =
+  let (ty_pos, ty_str) = List.hd_exn ty_info in
   add_list
     (Typing.err_code Typing.InvalidEnforceableTypeArgument)
     [
@@ -4297,7 +4299,8 @@ let invalid_enforceable_type kind_str (tp_pos, tp_name) targ_pos ty_pos ty_str =
       (ty_pos, "This type is not enforceable because it has " ^ ty_str);
     ]
 
-let reifiable_attr attr_pos decl_kind decl_pos ty_pos ty_msg =
+let reifiable_attr attr_pos decl_kind decl_pos ty_info =
+  let (ty_pos, ty_msg) = List.hd_exn ty_info in
   add_list
     (Typing.err_code Typing.DisallowPHPArraysAttr)
     [

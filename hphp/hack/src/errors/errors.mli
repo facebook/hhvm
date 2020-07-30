@@ -644,12 +644,13 @@ val trait_reuse : Pos.t -> string -> Pos.t * string -> string -> unit
 
 val trait_reuse_inside_class : Pos.t * string -> string -> Pos.t list -> unit
 
-val invalid_is_as_expression_hint : string -> Pos.t -> Pos.t -> string -> unit
+val invalid_is_as_expression_hint :
+  string -> Pos.t -> (Pos.t * string) list -> unit
 
 val invalid_enforceable_type :
-  string -> Pos.t * string -> Pos.t -> Pos.t -> string -> unit
+  string -> Pos.t * string -> Pos.t -> (Pos.t * string) list -> unit
 
-val reifiable_attr : Pos.t -> string -> Pos.t -> Pos.t -> string -> unit
+val reifiable_attr : Pos.t -> string -> Pos.t -> (Pos.t * string) list -> unit
 
 val invalid_newable_type_argument : Pos.t * string -> Pos.t -> unit
 
@@ -1332,7 +1333,7 @@ val require_args_reify : Pos.t -> Pos.t -> unit
 val require_generic_explicit : Pos.t * string -> Pos.t -> unit
 
 val invalid_reified_argument :
-  Pos.t * string -> Pos.t -> Pos.t -> string -> unit
+  Pos.t * string -> Pos.t -> (Pos.t * string) list -> unit
 
 val invalid_reified_argument_reifiable :
   Pos.t * string -> Pos.t -> Pos.t -> string -> unit

@@ -14,7 +14,7 @@ module Reason = Typing_reason
 
 type validity =
   | Valid
-  | Invalid : Reason.t * string -> validity
+  | Invalid : (Reason.t * string) list -> validity
 
 (* In hint positions, reified types are not resolved *)
 type reification =
@@ -164,15 +164,29 @@ class virtual type_validator =
           root_ty
       in
       match state.validity with
-      | Invalid (r, msg) -> emit_error use_pos (Reason.to_pos r) msg
+      | Invalid reasons ->
+        emit_error
+          use_pos
+          (List.map reasons ~f:(fun (r, msg) -> (Reason.to_pos r, msg)))
       | Valid -> ()
 
-    method validate_hint env hint ?(reification = Unresolved) emit_error =
+    method validate_hint
+        (env : Env.env)
+        (hint : Aast.hint)
+        ?(reification : reification = Unresolved)
+        (emit_error : Pos.t -> (Pos.t * string) list -> unit) =
       let hint_ty = Env.hint_to_ty env hint in
       this#validate_type env (fst hint) hint_ty ~reification emit_error
 
+    (* Takes in and accumulates a list of reasons *)
+    method invalid_list state reasons =
+      match state.validity with
+      | Valid -> { state with validity = Invalid reasons }
+      | Invalid prev_reasons ->
+        { state with validity = Invalid (prev_reasons @ reasons) }
+
     method invalid state r msg =
       match state.validity with
-      | Valid -> { state with validity = Invalid (r, msg) }
+      | Valid -> { state with validity = Invalid [(r, msg)] }
       | Invalid _ -> state
   end

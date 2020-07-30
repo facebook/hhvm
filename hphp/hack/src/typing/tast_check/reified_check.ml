@@ -188,20 +188,18 @@ let handler =
       | ((call_pos, _), Class_get ((_, CI (_, t)), _)) ->
         if equal_reify_kind (Env.get_reified env t) Reified then
           Errors.class_get_reified call_pos
-      | ((pos, fun_ty), FunctionPointer (_, _targs)) ->
+      | ((pos, fun_ty), FunctionPointer (_, targs)) ->
         begin
           match get_node fun_ty with
           | Tfun { ft_tparams; _ } ->
-            (* Once we support reified generics in function pointers,
-             * we can let this case fall through to the next *)
-            if tparams_has_reified ft_tparams then
-              Errors.reified_generics_not_allowed pos
+            verify_call_targs env pos (get_pos fun_ty) ft_tparams targs
           | _ -> ()
         end
       | ((pos, _), Call (_, ((_, fun_ty), _), targs, _, _)) ->
         begin
           match get_node fun_ty with
-          | Tfun { ft_tparams; _ } ->
+          | Tfun ({ ft_tparams; _ } as ty)
+            when not @@ get_ft_is_function_pointer ty ->
             verify_call_targs env pos (get_pos fun_ty) ft_tparams targs
           | _ -> ()
         end

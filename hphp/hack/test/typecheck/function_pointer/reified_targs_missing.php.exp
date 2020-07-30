@@ -1,0 +1,4 @@
+File "reified_targs_missing.php", line 7, characters 8-12:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+File "reified_targs_missing.php", line 3, characters 10-12:
+Definition is here

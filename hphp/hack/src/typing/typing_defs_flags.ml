@@ -51,6 +51,8 @@ let mutable_flags_mask          = Int.bit_or mutable_flags_owned mutable_flags_b
 
 let ft_flags_instantiated_targs = 1 lsl 8
 
+let ft_flags_is_function_pointer = 1 lsl 9
+
 (* Class element flags *)
 let ce_flags_abstract            = 1 lsl 0
 

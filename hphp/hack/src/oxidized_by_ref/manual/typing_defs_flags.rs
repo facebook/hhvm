@@ -25,6 +25,7 @@ bitflags! {
         const MUTABLE_FLAGS_MASK     = Self::MUTABLE_FLAGS_OWNED.bits | Self::MUTABLE_FLAGS_BORROWED.bits;
 
         const INSTANTIATED_TARGS     = 1 << 8;
+        const IS_FUNCTION_POINTER    = 1 << 9;
     }
 }
 

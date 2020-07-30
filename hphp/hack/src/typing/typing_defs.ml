@@ -42,6 +42,12 @@ let set_ft_ftk ft ftk =
         ft.ft_flags;
   }
 
+let set_ft_is_function_pointer ft is_fp =
+  { ft with ft_flags = set_bit ft_flags_is_function_pointer is_fp ft.ft_flags }
+
+let get_ft_is_function_pointer ft =
+  is_set ft.ft_flags ft_flags_is_function_pointer
+
 let get_ft_fun_kind ft =
   if get_ft_is_coroutine ft then
     Ast_defs.FCoroutine

@@ -1290,6 +1290,13 @@ and localize_targ env ta =
   let (env, targ) = Phase.localize_targ env ta in
   (env, targ, ExpectedTy.make pos Reason.URhint (fst targ))
 
+and set_function_pointer ty =
+  match get_node ty with
+  | Tfun ft ->
+    let ft = set_ft_is_function_pointer ft true in
+    mk (get_reason ty, Tfun ft)
+  | _ -> ty
+
 and expr_
     ?(expected : ExpectedTy.t option)
     ?(accept_using_var = false)
@@ -1873,6 +1880,7 @@ and expr_
         cid
     in
     let env = Env.set_tyvar_variance env fpty in
+    let fpty = set_function_pointer fpty in
     make_result
       env
       p
@@ -2131,6 +2139,7 @@ and expr_
   | FunctionPointer (FP_id fid, targs) ->
     let (env, fty, targs) = fun_type_of_id env fid targs [] in
     let e = Aast.FunctionPointer (FP_id fid, targs) in
+    let fty = set_function_pointer fty in
     make_result env p e fty
   | Binop (Ast_defs.QuestionQuestion, e1, e2) ->
     let (env, te1, ty1) = raw_expr ~lhs_of_null_coalesce:true env e1 in

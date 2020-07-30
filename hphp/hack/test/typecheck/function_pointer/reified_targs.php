@@ -1,9 +1,13 @@
 <?hh
 
-function foo<reify T>(T $a): void {
+function foo<reify T>(T $x): T {
+  return $x;
 }
 
-function test(): void {
-  // This should be an error. Expect reified types to be expected
-  $x = foo<>;
+function test(): (function(int): int) {
+  $y = foo<int>;
+
+  $y(4);
+
+  return $y;
 }

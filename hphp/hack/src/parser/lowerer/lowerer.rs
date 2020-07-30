@@ -1119,28 +1119,6 @@ where
         }
     }
 
-    fn verify_function_pointer_recv(node: &Syntax<T, V>, env: &mut Env, recv: &ast::Expr) {
-        use aast::Expr_::*;
-        match &recv.1 {
-            Id(_) => {
-                return;
-            }
-            ClassConst(c) => {
-                if let aast::ClassId_::CIexpr(aast::Expr(_, Id(_))) = (c.0).1 {
-                    return;
-                }
-            }
-            ObjGet(c) => {
-                if let Id(_) = (c.1).1 {
-                    return;
-                }
-            }
-            _ => {}
-        }
-        Self::raise_parsing_error(node, env, &syntax_error::function_pointer_bad_recv);
-        return;
-    }
-
     fn p_import_flavor(node: &Syntax<T, V>, env: &mut Env) -> Result<ast::ImportFlavor> {
         use ast::ImportFlavor::*;
         match Self::token_kind(node) {
@@ -1840,9 +1818,38 @@ where
                     }
                     _ => vec![],
                 };
+
                 let recv = Self::p_expr(&c.function_pointer_receiver, env)?;
-                Self::verify_function_pointer_recv(&c.function_pointer_receiver, env, &recv);
-                Ok(E_::mk_function_pointer(recv, targs))
+
+                match &recv.1 {
+                    aast::Expr_::Id(id) => Ok(E_::mk_function_pointer(
+                        aast::FunctionPtrId::FPId(*(id.to_owned())),
+                        targs,
+                    )),
+                    aast::Expr_::ClassConst(c) => {
+                        if let aast::ClassId_::CIexpr(aast::Expr(_, aast::Expr_::Id(_))) = (c.0).1 {
+                            Ok(E_::mk_function_pointer(
+                                aast::FunctionPtrId::FPClassConst(c.0.to_owned(), c.1.to_owned()),
+                                targs,
+                            ))
+                        } else {
+                            Self::raise_parsing_error(
+                                node,
+                                env,
+                                &syntax_error::function_pointer_bad_recv,
+                            );
+                            Self::missing_syntax("function or static method", node, env)
+                        }
+                    }
+                    _ => {
+                        Self::raise_parsing_error(
+                            node,
+                            env,
+                            &syntax_error::function_pointer_bad_recv,
+                        );
+                        Self::missing_syntax("function or static method", node, env)
+                    }
+                }
             }
             QualifiedName(_) => {
                 if location.in_string() {

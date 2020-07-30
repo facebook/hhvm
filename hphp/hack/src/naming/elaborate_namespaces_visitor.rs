@@ -283,16 +283,25 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                 }
             }
             Expr_::FunctionPointer(fp) => {
-                let (name, targs) = (&mut fp.0, &mut fp.1);
-                if let Some(sid) = name.1.as_id_mut() {
+                let (fpid, targs) = (&mut fp.0, &mut fp.1);
+                if let Some(sid) = fpid.as_fpid_mut() {
                     sid.1 = namespaces::elaborate_id(
                         &env.namespace,
                         namespaces::ElaborateKind::Fun,
                         sid,
                     )
                     .1;
+                } else if let Some(cc) = fpid.as_fpclass_const_mut() {
+                    let type_ = cc.0;
+                    if let Some(e) = type_.1.as_ciexpr_mut() {
+                        if let Some(sid) = e.1.as_id_mut() {
+                            env.elaborate_type_name(sid);
+                        } else {
+                            e.accept(env, self.object())?;
+                        }
+                    }
                 } else {
-                    name.accept(env, self.object())?;
+                    fpid.accept(env, self.object())?;
                 }
                 targs.accept(env, self.object())?;
             }

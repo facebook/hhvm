@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b6c27f9db9ca6dec66e04078a097f4cf>>
+// @generated SignedSource<<80669df17c9256861c00299ef2f9fb6f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1147,6 +1147,32 @@ impl<P: Params> Node<P> for FuncReactive {
             FuncReactive::FLocal => Ok(()),
             FuncReactive::FShallow => Ok(()),
             FuncReactive::FNonreactive => Ok(()),
+        }
+    }
+}
+impl<P: Params> Node<P> for FunctionPtrId<P::Ex, P::Fb, P::En, P::Hi> {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_function_ptr_id(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            FunctionPtrId::FPId(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
+            FunctionPtrId::FPClassConst(a0, a1) => {
+                a0.accept(c, v)?;
+                a1.accept(c, v)?;
+                Ok(())
+            }
         }
     }
 }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<70e02e908792594eb9e563020cf09760>>
+// @generated SignedSource<<be5ecf9f03808f2fc90d5347f54889fe>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -851,6 +851,62 @@ impl<Hi> CollectionTarg<Hi> {
         }
     }
 }
+impl<Ex, Fb, En, Hi> FunctionPtrId<Ex, Fb, En, Hi> {
+    pub fn mk_fpid(p0: Sid) -> Self {
+        FunctionPtrId::FPId(p0)
+    }
+    pub fn mk_fpclass_const(p0: ClassId<Ex, Fb, En, Hi>, p1: Pstring) -> Self {
+        FunctionPtrId::FPClassConst(p0, p1)
+    }
+    pub fn is_fpid(&self) -> bool {
+        match self {
+            FunctionPtrId::FPId(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_fpclass_const(&self) -> bool {
+        match self {
+            FunctionPtrId::FPClassConst(..) => true,
+            _ => false,
+        }
+    }
+    pub fn as_fpid(&self) -> Option<&Sid> {
+        match self {
+            FunctionPtrId::FPId(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_fpclass_const(&self) -> Option<(&ClassId<Ex, Fb, En, Hi>, &Pstring)> {
+        match self {
+            FunctionPtrId::FPClassConst(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+    pub fn as_fpid_mut(&mut self) -> Option<&mut Sid> {
+        match self {
+            FunctionPtrId::FPId(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_fpclass_const_mut(&mut self) -> Option<(&mut ClassId<Ex, Fb, En, Hi>, &mut Pstring)> {
+        match self {
+            FunctionPtrId::FPClassConst(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+    pub fn as_fpid_into(self) -> Option<Sid> {
+        match self {
+            FunctionPtrId::FPId(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_fpclass_const_into(self) -> Option<(ClassId<Ex, Fb, En, Hi>, Pstring)> {
+        match self {
+            FunctionPtrId::FPClassConst(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+}
 impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_array(p0: Vec<Afield<Ex, Fb, En, Hi>>) -> Self {
         Expr_::Array(p0)
@@ -933,7 +989,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     ) -> Self {
         Expr_::Call(Box::new((p0, p1, p2, p3, p4)))
     }
-    pub fn mk_function_pointer(p0: Expr<Ex, Fb, En, Hi>, p1: Vec<Targ<Hi>>) -> Self {
+    pub fn mk_function_pointer(p0: FunctionPtrId<Ex, Fb, En, Hi>, p1: Vec<Targ<Hi>>) -> Self {
         Expr_::FunctionPointer(Box::new((p0, p1)))
     }
     pub fn mk_int(p0: String) -> Self {
@@ -1541,7 +1597,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_function_pointer(&self) -> Option<(&Expr<Ex, Fb, En, Hi>, &Vec<Targ<Hi>>)> {
+    pub fn as_function_pointer(&self) -> Option<(&FunctionPtrId<Ex, Fb, En, Hi>, &Vec<Targ<Hi>>)> {
         match self {
             Expr_::FunctionPointer(p0) => Some((&p0.0, &p0.1)),
             _ => None,
@@ -1931,7 +1987,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     }
     pub fn as_function_pointer_mut(
         &mut self,
-    ) -> Option<(&mut Expr<Ex, Fb, En, Hi>, &mut Vec<Targ<Hi>>)> {
+    ) -> Option<(&mut FunctionPtrId<Ex, Fb, En, Hi>, &mut Vec<Targ<Hi>>)> {
         match self {
             Expr_::FunctionPointer(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -2321,7 +2377,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_function_pointer_into(self) -> Option<(Expr<Ex, Fb, En, Hi>, Vec<Targ<Hi>>)> {
+    pub fn as_function_pointer_into(
+        self,
+    ) -> Option<(FunctionPtrId<Ex, Fb, En, Hi>, Vec<Targ<Hi>>)> {
         match self {
             Expr_::FunctionPointer(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,

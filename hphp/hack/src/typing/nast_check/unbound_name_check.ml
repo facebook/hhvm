@@ -306,7 +306,7 @@ let handler ctx =
       | Aast.Call (_, (_, Aast.Id (p, name)), _, _, _)
         when env.in_ppl && Naming_special_names.PPLFunctions.is_reserved name ->
         { env with seen_names = SMap.add name p env.seen_names }
-      | Aast.FunctionPointer ((_, Aast.Id ((p, name) as id)), _)
+      | Aast.FunctionPointer (Aast.FP_id ((p, name) as id), _)
       | Aast.Call (_, (_, Aast.Id ((p, name) as id)), _, _, _) ->
         let () = check_fun_name env id in
         { env with seen_names = SMap.add name p env.seen_names }

@@ -524,7 +524,6 @@ and expr_ env acc p e =
     let acc = List.fold_left ~f:expr ~init:acc el in
     let acc = Option.value_map ~f:(expr acc) ~default:acc unpacked_element in
     expr acc e
-  | FunctionPointer (e, _targs) -> expr acc e
   | True
   | False
   | Int _
@@ -600,6 +599,7 @@ and expr_ env acc p e =
   | BracedExpr _ -> acc
   | ParenthesizedExpr _ -> acc
   | PU_identifier _ -> acc
+  | FunctionPointer _ -> acc
 
 and case env acc = function
   | Default (_, b)

@@ -1,6 +1,2 @@
-File "bad_syntax.php", line 9, characters 8-18:
-Function pointers must be explicitly specified (Parsing[1002])
-File "bad_syntax.php", line 16, characters 8-13:
-Function pointers must be explicitly specified (Parsing[1002])
-File "bad_syntax.php", line 16, characters 8-15:
-Function pointers must be explicitly named (Typing[4363])
+File "bad_syntax.php", line 9, characters 8-20:
+Function pointers <> can only be created with toplevel functions and explicitly named static methods. Use lambdas (...) ==> {...} for other cases. (Parsing[1002])

@@ -120,6 +120,10 @@ and 'hi collection_targ =
   | CollectionTV of 'hi targ
   | CollectionTKV of 'hi targ * 'hi targ
 
+and ('ex, 'fb, 'en, 'hi) function_ptr_id =
+  | FP_id of sid
+  | FP_class_const of ('ex, 'fb, 'en, 'hi) class_id * pstring
+
 and ('ex, 'fb, 'en, 'hi) expr_ =
   | Array of ('ex, 'fb, 'en, 'hi) afield list
   | Darray of
@@ -156,7 +160,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       * ('ex, 'fb, 'en, 'hi) expr list
       (* positional args *)
       * ('ex, 'fb, 'en, 'hi) expr option (* unpacked arg *)
-  | FunctionPointer of ('ex, 'fb, 'en, 'hi) expr * 'hi targ list
+  | FunctionPointer of ('ex, 'fb, 'en, 'hi) function_ptr_id * 'hi targ list
   | Int of string
   | Float of string
   | String of string

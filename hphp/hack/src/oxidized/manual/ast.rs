@@ -48,6 +48,7 @@ pub type Field = aast::Field<Ex, Fb, En, Hi>;
 pub type FileAttribute = aast::FileAttribute<Ex, Fb, En, Hi>;
 pub type Fun_ = aast::Fun_<Ex, Fb, En, Hi>;
 pub type FuncBody = aast::FuncBody<Ex, Fb, En, Hi>;
+pub type FunctionPtrId = aast::FunctionPtrId<Ex, Fb, En, Hi>;
 pub type FunDef = aast::FunDef<Ex, Fb, En, Hi>;
 pub type FunParam = aast::FunParam<Ex, Fb, En, Hi>;
 pub type FunVariadicity = aast::FunVariadicity<Ex, Fb, En, Hi>;

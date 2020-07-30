@@ -19,8 +19,4 @@ function main(?MyTest $z): void {
 
   // Calls the method 'foo' if $z is not null
   $z?->foo<>("Hello");
-
-  // Always tries to call the method 'foo', so this is a type error
-  // because $z can be null
-  ($z?->foo<>)("Hello");
 }

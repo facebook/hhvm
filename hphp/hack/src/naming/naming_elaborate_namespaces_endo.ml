@@ -257,10 +257,16 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
               Option.map unpacked_element ~f:(self#on_expr env) )
         in
         handle_special_calls env renamed_call
-      | FunctionPointer ((p, Id fn), targs) ->
+      | FunctionPointer (FP_id fn, targs) ->
         let fn = NS.elaborate_id env.namespace NS.ElaborateFun fn in
         let targs = List.map targs ~f:(self#on_targ env) in
-        FunctionPointer ((p, Id fn), targs)
+        FunctionPointer (FP_id fn, targs)
+      | FunctionPointer
+          (FP_class_const ((p1, CIexpr (p2, Id x1)), meth_name), targs) ->
+        let name = elaborate_type_name env x1 in
+        let targs = List.map targs ~f:(self#on_targ env) in
+        FunctionPointer
+          (FP_class_const ((p1, CIexpr (p2, Id name)), meth_name), targs)
       | Obj_get (e1, (p, Id x), null_safe) ->
         Obj_get (self#on_expr env e1, (p, Id x), null_safe)
       | Id ((_, name) as sid) ->

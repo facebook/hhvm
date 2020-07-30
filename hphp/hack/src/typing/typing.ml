@@ -1740,59 +1740,6 @@ and expr_
     | Some (ty, _) ->
       let (env, ty) = Phase.localize_with_self ~pos:p env ty in
       make_result env p (Aast.Id id) ty)
-  | FunctionPointer
-      ((pos_obj, Obj_get (e1, (pos_id, Id sid), null_flavor)), targs) ->
-    let (env, te, ty1) = expr env e1 in
-    let ty_to_pass_to_obj_get =
-      match null_flavor with
-      | OG_nullthrows -> ty1
-      | OG_nullsafe ->
-        let (_, fake_non_null_ty) = Typing_solver.non_null env pos_obj ty1 in
-        fake_non_null_ty
-    in
-    let (env, (result, tal)) =
-      TOG.obj_get_
-        ~inst_meth:false (* Allow private and public I guess *)
-        ~obj_pos:p
-        ~is_method:true
-        ~nullsafe:
-          None
-          (* This is not a nullsafe method call, just nullsafe method access *)
-        ~coerce_from_ty:None (* What's coerce_from_ty actually mean? *)
-        ~explicit_targs:targs
-        ~is_nonnull:false (* Hmmm: No idea here. Does this depend on nullsafe *)
-        env
-        ty_to_pass_to_obj_get
-        (CIexpr e1)
-        sid
-        (fun x -> x) (* Not sure what this is either *)
-        (* Sure why not? *)
-        Errors.unify_error
-    in
-    let (env, result) =
-      match null_flavor with
-      | OG_nullthrows -> (env, result)
-      | OG_nullsafe ->
-        let r = Reason.Rnullsafe_op pos_obj in
-        let null_ty = MakeType.null r in
-        (* Intersect ty1 with null to make sure obj is nullable *)
-        let (env, null_or_nothing_ty) = Inter.intersect env ~r null_ty ty1 in
-        let (env, result) = Union.union env null_or_nothing_ty result in
-        (env, result)
-    in
-    let (env, result) =
-      Env.FakeMembers.check_instance_invalid env e1 (snd sid) result
-    in
-    let id =
-      Tast.make_typed_expr
-        pos_id
-        (mk (Reason.Rnone, TUtils.tany env))
-        (Aast.Id sid)
-    in
-    let (env, result, ty) =
-      make_result env pos_obj (Aast.Obj_get (te, id, null_flavor)) result
-    in
-    make_result env p (Aast.FunctionPointer (result, tal)) ty
   | Method_id (instance, meth) ->
     (* Method_id is used when creating a "method pointer" using the magic
      * inst_meth function.
@@ -1909,7 +1856,7 @@ and expr_
           p
           (Aast.Method_caller (pos_cname, meth_name))
           (Typing_utils.mk_tany env pos)))
-  | FunctionPointer ((pos_cc, Class_const ((cpos, cid), meth)), targs) ->
+  | FunctionPointer (FP_class_const ((cpos, cid), meth), targs) ->
     let (env, _, ce, cty) =
       static_class_id ~check_constraints:true cpos env [] cid
     in
@@ -1925,10 +1872,12 @@ and expr_
         meth
         cid
     in
-    let (env, result, ty) =
-      make_result env pos_cc (Aast.Class_const (ce, meth)) fpty
-    in
-    make_result env p (Aast.FunctionPointer (result, tal)) ty
+    let env = Env.set_tyvar_variance env fpty in
+    make_result
+      env
+      p
+      (Aast.FunctionPointer (FP_class_const (ce, meth), tal))
+      fpty
   | Smethod_id (c, meth) ->
     (* Smethod_id is used when creating a "method pointer" using the magic
      * class_meth function.
@@ -2179,20 +2128,10 @@ and expr_
         ~in_suspend:false
     in
     (env, te, ty)
-  | FunctionPointer ((pos_id, Id fid), targs) ->
+  | FunctionPointer (FP_id fid, targs) ->
     let (env, fty, targs) = fun_type_of_id env fid targs [] in
-    let id =
-      Tast.make_typed_expr
-        pos_id
-        (mk (Reason.Rnone, TUtils.tany env))
-        (Aast.Id fid)
-    in
-    let e = Aast.FunctionPointer (id, targs) in
+    let e = Aast.FunctionPointer (FP_id fid, targs) in
     make_result env p e fty
-  | FunctionPointer (_e, _targs) ->
-    (* Also a parse error *)
-    Errors.bad_function_pointer_construction p;
-    expr_error env Reason.Rnone outer
   | Binop (Ast_defs.QuestionQuestion, e1, e2) ->
     let (env, te1, ty1) = raw_expr ~lhs_of_null_coalesce:true env e1 in
     let (env, te2, ty2) = expr ?expected env e2 in

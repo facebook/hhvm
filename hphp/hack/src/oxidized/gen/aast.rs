@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<16220a609d9b71ddc86263d8e7829bfe>>
+// @generated SignedSource<<2b16d087624d39bf936cfad2f17b6aaf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -233,6 +233,24 @@ pub enum CollectionTarg<Hi> {
     Serialize,
     ToOcamlRep
 )]
+pub enum FunctionPtrId<Ex, Fb, En, Hi> {
+    FPId(Sid),
+    FPClassConst(ClassId<Ex, Fb, En, Hi>, Pstring),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 pub enum Expr_<Ex, Fb, En, Hi> {
     Array(Vec<Afield<Ex, Fb, En, Hi>>),
     Darray(
@@ -275,7 +293,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
             Option<Expr<Ex, Fb, En, Hi>>,
         )>,
     ),
-    FunctionPointer(Box<(Expr<Ex, Fb, En, Hi>, Vec<Targ<Hi>>)>),
+    FunctionPointer(Box<(FunctionPtrId<Ex, Fb, En, Hi>, Vec<Targ<Hi>>)>),
     Int(String),
     Float(String),
     String(String),

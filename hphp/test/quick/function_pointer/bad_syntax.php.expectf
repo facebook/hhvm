@@ -1,1 +1,1 @@
-Fatal error: Function pointers must be explicitly specified in %s/test/quick/function_pointer/bad_syntax.php on line 9
+Fatal error: Function pointers <> can only be created with toplevel functions and explicitly named static methods. Use lambdas (...) ==> {...} for other cases. in %s on line 9

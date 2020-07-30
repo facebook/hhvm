@@ -930,7 +930,10 @@ pub fn invalid_typehint_alias(alias: &str, hint: &str) -> Error {
 }
 
 pub const function_pointer_bad_recv: Error =
-    Cow::Borrowed("Function pointers must be explicitly specified");
+    Cow::Borrowed(concat!(
+        "Function pointers <> can only be created with toplevel functions and explicitly named static methods. ",
+        "Use lambdas (...) ==> {...} for other cases."
+    ));
 
 pub const local_variable_with_type: Error =
     Cow::Borrowed("Local variables cannot have type annotations in Hack.");

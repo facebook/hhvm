@@ -495,7 +495,11 @@ module Visitor_DEPRECATED = struct
 
       method on_call : 'a -> call_type -> expr -> expr list -> expr option -> 'a
 
-      method on_function_pointer : 'a -> expr -> targ list -> 'a
+      method on_function_pointer :
+        'a ->
+        (Pos.t, func_body_ann, unit, unit) function_ptr_id ->
+        targ list ->
+        'a
 
       method on_true : 'a -> 'a
 
@@ -617,6 +621,9 @@ module Visitor_DEPRECATED = struct
       method on_pu_atom : 'a -> string -> 'a
 
       method on_pu_identifier : 'a -> class_id -> pstring -> pstring -> 'a
+
+      method on_function_ptr_id :
+        'a -> (Pos.t, func_body_ann, unit, unit) function_ptr_id -> 'a
     end
 
   (*****************************************************************************)
@@ -799,7 +806,8 @@ module Visitor_DEPRECATED = struct
         | Class_const (cid, id) -> this#on_class_const acc cid id
         | Call (ct, e, _, el, unpacked_element) ->
           this#on_call acc ct e el unpacked_element
-        | FunctionPointer (e, targs) -> this#on_function_pointer acc e targs
+        | FunctionPointer (fpid, targs) ->
+          this#on_function_pointer acc fpid targs
         | String2 el -> this#on_string2 acc el
         | PrefixedString (_, e) -> this#on_expr acc e
         | Pair (ta, e1, e2) -> this#on_pair acc ta e1 e2
@@ -937,7 +945,7 @@ module Visitor_DEPRECATED = struct
         acc
 
       method on_function_pointer acc e targs =
-        let acc = this#on_expr acc e in
+        let acc = this#on_function_ptr_id acc e in
         let acc = List.fold_left targs ~f:this#on_targ ~init:acc in
         acc
 
@@ -1192,6 +1200,11 @@ module Visitor_DEPRECATED = struct
       method on_pu_identifier acc cid _ _ = this#on_class_id acc cid
 
       method on_pu_atom acc s = this#on_string acc s
+
+      method on_function_ptr_id acc fpi =
+        match fpi with
+        | FP_id sid -> this#on_id acc sid
+        | FP_class_const (cid, _) -> this#on_class_id acc cid
 
       method on_typedef acc t =
         let acc = this#on_id acc t.t_name in

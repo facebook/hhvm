@@ -1324,7 +1324,7 @@ and check_constant_expr env (pos, e) =
          || String.equal cn SN.SpecialFunctions.tuple ->
     arg_unpack_unexpected unpacked_element;
     List.for_all el ~f:(check_constant_expr env)
-  | Aast.FunctionPointer (((_, Aast.Id _) | (_, Aast.Class_const _)), _) -> true
+  | Aast.FunctionPointer ((Aast.FP_id _ | Aast.FP_class_const _), _) -> true
   | Aast.Collection (id, _, l) ->
     let (p, cn) = NS.elaborate_id (fst env).namespace NS.ElaborateClass id in
     (* Only vec/keyset/dict are allowed because they are value types *)
@@ -2205,10 +2205,19 @@ and expr_ env p (e : Nast.expr_) =
         targl env p tal,
         exprl env el,
         oexpr env unpacked_element )
-  | Aast.FunctionPointer ((p, Aast.Id fid), targs) ->
-    N.FunctionPointer ((p, N.Id fid), targl env p targs)
-  | Aast.FunctionPointer (e, targs) ->
-    N.FunctionPointer (expr env e, targl env p targs)
+  | Aast.FunctionPointer (Aast.FP_id fid, targs) ->
+    N.FunctionPointer (N.FP_id fid, targl env p targs)
+  | Aast.FunctionPointer
+      (Aast.FP_class_const ((_, Aast.CIexpr (_, Aast.Id x1)), x2), targs) ->
+    N.FunctionPointer
+      (N.FP_class_const (make_class_id env x1, x2), targl env p targs)
+  | Aast.FunctionPointer
+      (Aast.FP_class_const ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), x2), targs)
+    ->
+    let x1 = (p, Local_id.to_string lid) in
+    N.FunctionPointer
+      (N.FP_class_const (make_class_id env x1, x2), targl env p targs)
+  | Aast.FunctionPointer _ -> N.Any
   | Aast.Yield_break -> N.Yield_break
   | Aast.Yield e -> N.Yield (afield env e)
   | Aast.Await e -> N.Await (expr env e)

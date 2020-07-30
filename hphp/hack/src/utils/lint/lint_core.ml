@@ -87,7 +87,7 @@ let to_contextual_string lint =
 
 let to_highlighted_string (lint : string t) =
   Errors.make_absolute_error lint.code [(lint.pos, lint.message)]
-  |> Errors.to_highlighted_string
+  |> Highlighted_error_formatter.to_string
 
 let to_json
     {

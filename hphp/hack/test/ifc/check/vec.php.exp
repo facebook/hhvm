@@ -1,0 +1,12 @@
+There are privacy policy errors in \Basic#mutation:
+  Data with policy I appears in context V.
+  
+There are privacy policy errors in \Basic#nested:
+  Data with policy V appears in context I.
+  
+There are privacy policy errors in \Basic#set:
+  Data with policy I appears in context V.
+  
+There are privacy policy errors in \COW#copyOnWrite:
+  Data with policy X appears in context VX.
+  

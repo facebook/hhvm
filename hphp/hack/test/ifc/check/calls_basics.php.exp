@@ -1,0 +1,9 @@
+There are privacy policy errors in \flow_a_to_b:
+  Data with policy A appears in context B.
+  
+There are privacy policy errors in \indirect_flow_a_to_b:
+  Data with policy A appears in context B.
+  
+There are privacy policy errors in \indirect_flow_a_to_b_bis:
+  Data with policy A appears in context B.
+  

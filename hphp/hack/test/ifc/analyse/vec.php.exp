@@ -1,0 +1,97 @@
+Analyzing \empty:
+* pc: pc
+* This: None
+* Return:
+    \HH\vec<\HH\Container=[<tp>], \HH\KeyedContainer=[<tp'1>, <tp'2>],
+              \HH\KeyedTraversable=[<tp'3>, <tp'4>],
+              \HH\Rx\KeyedTraversable=[<tp'5>, <tp'6>],
+              \HH\Rx\Traversable=[<tp'7>], \HH\Traversable=[<tp'8>],
+              \HH\vec=[<tp'9>]><\HH\vec, lump'1>
+* Exception: \Exception<\Exception, lump>
+* Params:
+  lvars: {}
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars: {}
+Constraints:
+  [tp'10 < tp, tp'12 < tp'2, tp'11 < tp'1, tp'14 < tp'4, tp'13 < tp'3,
+   tp'16 < tp'6, tp'15 < tp'5, tp'17 < tp'7, tp'18 < tp'8, tp'19 < tp'9,
+   lump'2 = lump'1, \HH\vec'1 < \HH\vec]
+
+Analyzing \collection:
+* pc: pc
+* This: None
+* Return:
+    \HH\vec<\HH\Container=[<tp>], \HH\KeyedContainer=[<tp'1>, <tp'2>],
+              \HH\KeyedTraversable=[<tp'3>, <tp'4>],
+              \HH\Rx\KeyedTraversable=[<tp'5>, <tp'6>],
+              \HH\Rx\Traversable=[<tp'7>], \HH\Traversable=[<tp'8>],
+              \HH\vec=[<tp'9>]><\HH\vec, lump'1>
+* Exception: \Exception<\Exception, lump>
+* Params:
+  lvars: {}
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars: {}
+Constraints:
+  [PUBLIC < tp'19, PUBLIC < tp'19, tp'10 < tp, tp'12 < tp'2, tp'11 < tp'1,
+   tp'14 < tp'4, tp'13 < tp'3, tp'16 < tp'6, tp'15 < tp'5, tp'17 < tp'7,
+   tp'18 < tp'8, tp'19 < tp'9, lump'2 = lump'1, \HH\vec'1 < \HH\vec]
+
+Analyzing \add:
+* pc: pc
+* This: None
+* Return: <ret>
+* Exception: \Exception<\Exception, lump>
+* Params:
+  lvars:
+    { $vec ->
+      \HH\vec<\HH\Container=[<tp>], \HH\KeyedContainer=[<tp'1>, <tp'2>],
+                \HH\KeyedTraversable=[<tp'3>, <tp'4>],
+                \HH\Rx\KeyedTraversable=[<tp'5>, <tp'6>],
+                \HH\Rx\Traversable=[<tp'7>], \HH\Traversable=[<tp'8>],
+                \HH\vec=[<tp'9>]><\HH\vec, lump'1> }
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars:
+      { $vec ->
+        \HH\vec<\HH\Container=[<tp'10>],
+                  \HH\KeyedContainer=[<tp'11>, <tp'12>],
+                  \HH\KeyedTraversable=[<tp'13>, <tp'14>],
+                  \HH\Rx\KeyedTraversable=[<tp'15>, <tp'16>],
+                  \HH\Rx\Traversable=[<tp'17>], \HH\Traversable=[<tp'18>],
+                  \HH\vec=[<tp'19>]><\HH\vec'1, lump'2> }
+Constraints:
+  [tp < tp'10, tp'2 < tp'12, tp'1 < tp'11, tp'4 < tp'14, tp'3 < tp'13,
+   tp'6 < tp'16, tp'5 < tp'15, tp'7 < tp'17, tp'8 < tp'18, tp'9 < tp'19,
+   lump'1 = lump'2, \HH\vec < \HH\vec'1, PUBLIC < tp'19]
+
+Analyzing \retElem:
+* pc: pc
+* This: None
+* Return: <ret>
+* Exception: \Exception<\Exception, lump>
+* Params:
+  lvars:
+    { $vec ->
+      \HH\vec<\HH\Container=[<tp>], \HH\KeyedContainer=[<tp'1>, <tp'2>],
+                \HH\KeyedTraversable=[<tp'3>, <tp'4>],
+                \HH\Rx\KeyedTraversable=[<tp'5>, <tp'6>],
+                \HH\Rx\Traversable=[<tp'7>], \HH\Traversable=[<tp'8>],
+                \HH\vec=[<tp'9>]><\HH\vec, lump'1> }
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars:
+      { $vec ->
+        \HH\vec<\HH\Container=[<tp>], \HH\KeyedContainer=[<tp'1>, <tp'2>],
+                  \HH\KeyedTraversable=[<tp'3>, <tp'4>],
+                  \HH\Rx\KeyedTraversable=[<tp'5>, <tp'6>],
+                  \HH\Rx\Traversable=[<tp'7>], \HH\Traversable=[<tp'8>],
+                  \HH\vec=[<tp'9>]><\HH\vec, lump'1> }
+Constraints:
+  tp'9 < ret
+

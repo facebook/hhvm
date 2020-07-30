@@ -1,13 +1,3 @@
-Lattice:
- {}
-
-Decls:
-  class \Exception: { policied_props = [] }
-  class \G: { policied_props = [] }
-  class \HH\vec: { policied_props = [] }
-  function \id: { kind = public }
-  function \testVariance: { kind = public }
-  
 Analyzing \testVariance:
 * pc: pc
 * This: None
@@ -36,16 +26,4 @@ Analyzing \id:
     lvars: { $t -> <$t> }
 Constraints:
   $t < ret
-
-Flow constraints for \id:
-  
-  Simplified: True
-  Raw: $t < ret
-
-Flow constraints for \testVariance:
-  
-  Simplified: True
-  Raw:
-  [tp'2 < tp'5, tp'5 < tp'2, tp'1 < tp'4, tp'3 < tp, lump'2 = lump'1,
-   \G'1 < \G]
 

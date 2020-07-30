@@ -1,29 +1,3 @@
-Lattice:
- {}
-
-Decls:
-  class \A: { policied_props = [] }
-  class \B: { policied_props = [] }
-  class \C: { policied_props = [] }
-  class \D: { policied_props = [] }
-  class \E: { policied_props = [] }
-  class \Exception: { policied_props = [] }
-  class \F: { policied_props = [] }
-  class \G: { policied_props = [] }
-  class \H: { policied_props = [] }
-  class \HH\vec: { policied_props = [] }
-  class \I: { policied_props = [] }
-  class \K: { policied_props = [] }
-  class \L: { policied_props = [] }
-  class \T: { policied_props = [] }
-  function \indirect: { kind = public }
-  function \interfaceResolution: { kind = public }
-  function \interface_: { kind = public }
-  function \nested: { kind = public }
-  function \testAA: { kind = public }
-  function \testBB: { kind = public }
-  function \trait_: { kind = public }
-  
 Analyzing \testAA:
 * pc: pc
 * This: None
@@ -127,43 +101,4 @@ Analyzing \trait_:
     lvars: { $l -> \L<\T=[<tp'1>]><\L'1, lump'2> }
 Constraints:
   [tp'1 < tp, lump'2 = lump'1, \L'1 < \L]
-
-Flow constraints for \indirect:
-  
-  Simplified: True
-  Raw: [tp < tp'1, tp'1 < tp, lump'2 = lump'1, \F'1 < \F]
-
-Flow constraints for \interfaceResolution:
-  
-  Simplified: True
-  Raw: [tp < tp'1, lump'2 = lump'1, \K'1 < \K]
-
-Flow constraints for \interface_:
-  
-  Simplified: True
-  Raw: [tp < tp'1, lump'2 = lump'1, \G'1 < \G]
-
-Flow constraints for \nested:
-  
-  Simplified: True
-  Raw:
-  [tp'1 < tp, tp < tp'1, lump'2 = lump'4, \C < \C'1, tp < tp'1, tp'1 < tp,
-   lump'4 = lump'2, \C'1 < \C, lump'3 = lump'1, \D'1 < \D]
-
-Flow constraints for \testAA:
-  
-  Simplified: True
-  Raw: [tp'1 < tp'3, tp'2 < tp, lump'2 = lump'1, \A'1 < \A]
-
-Flow constraints for \testBB:
-  
-  Simplified: True
-  Raw:
-  [tp'1 < tp'6, tp'5 < tp, tp'4 < tp'9, tp'8 < tp'3, tp'2 < tp'7,
-   tp'7 < tp'2, lump'2 = lump'1, \B'1 < \B]
-
-Flow constraints for \trait_:
-  
-  Simplified: True
-  Raw: [tp'1 < tp, lump'2 = lump'1, \L'1 < \L]
 

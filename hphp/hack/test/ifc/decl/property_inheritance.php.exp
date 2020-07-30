@@ -1,6 +1,3 @@
-Lattice:
- {}
-
 Decls:
   class \A: { policied_props = [aPri, aPro, aPub] }
   class \B: { policied_props = [aPro, aPub, bPri, bPro, bPub] }

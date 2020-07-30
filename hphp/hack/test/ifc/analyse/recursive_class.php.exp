@@ -1,14 +1,3 @@
-Lattice:
- {}
-
-Decls:
-  class \Exception: { policied_props = [] }
-  class \HH\vec: { policied_props = [] }
-  class \R: { policied_props = [] }
-  function \R#__construct: { kind = public }
-  function \R#recursiveGet: { kind = public }
-  function \R#recursiveWrite: { kind = public }
-  
 Analyzing __construct:
 * pc: pc
 * This: \R<\R, lump'1>
@@ -51,27 +40,6 @@ Analyzing recursiveWrite:
   Locals:
     lvars: {}
 Constraints:
-  [lump'1 < .r, \R < .r, lump'1 < .r'1, .r < .r'1, lump'1 < .r'2,
-   .r'1 < .r'2, .r'2 < lump'1, PUBLIC < lump'1, pc < lump'1]
-
-Flow constraints for \R#__construct:
-  
-  Simplified: True
-  Raw:
-  [\R < lump'1, $prop < lump'1, pc < lump'1, \R < lump'1, lump'2 = lump'1,
-   \R'1 < lump'1, pc < lump'1]
-
-Flow constraints for \R#recursiveGet:
-  
-  Simplified: True
-  Raw:
-  [lump'1 < .r, \R < .r, lump'1 < .r'1, .r < .r'1, lump'1 < .r'2,
-   .r'1 < .r'2, lump'1 < .prop, .r'2 < .prop, .prop < ret]
-
-Flow constraints for \R#recursiveWrite:
-  
-  Simplified: True
-  Raw:
   [lump'1 < .r, \R < .r, lump'1 < .r'1, .r < .r'1, lump'1 < .r'2,
    .r'1 < .r'2, .r'2 < lump'1, PUBLIC < lump'1, pc < lump'1]
 

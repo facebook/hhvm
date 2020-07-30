@@ -1,20 +1,3 @@
-Lattice:
- {}
-
-Decls:
-  class \Exception: { policied_props = [] }
-  class \HH\vec: { policied_props = [] }
-  class \My: { policied_props = [mInt, other] }
-  class \Other: { policied_props = [oBool] }
-  function \My#__construct: { kind = public }
-  function \My#getMInt: { kind = public }
-  function \My#setMInt: { kind = public }
-  function \tlGetMyInt: { kind = public }
-  function \tlGetOther: { kind = public }
-  function \tlGetOtherBool: { kind = public }
-  function \tlSetMyInt: { kind = public }
-  function \tlSetOtherBool: { kind = public }
-  
 Analyzing __construct:
 * pc: pc
 * This:
@@ -160,55 +143,6 @@ Analyzing \tlSetOtherBool:
         \My<\My, lump'1, mInt=?thunk,
               other=\Other<\Other, lump'2, oBool=<.oBool>>> }
 Constraints:
-  [\Other < .other, \My < .other, .other < .oBool, $bool < .oBool,
-   pc < .oBool]
-
-Flow constraints for \My#__construct:
-  
-  Simplified: True
-  Raw:
-  [\My < .mInt, $mInt < .mInt, pc < .mInt, \My < \Other'1, .oBool < .oBool'1,
-   .oBool'1 < .oBool, lump'2 = lump'3, \Other < \Other'1, pc < \Other'1,
-   \My < lump'1, $mBool < lump'1, pc < lump'1]
-
-Flow constraints for \My#getMInt:
-  
-  Simplified: True
-  Raw: [.mInt < .mInt'1, \My < .mInt'1, .mInt'1 < ret]
-
-Flow constraints for \My#setMInt:
-  
-  Simplified: True
-  Raw: [\My < .mInt, $candidate < .mInt, pc < .mInt]
-
-Flow constraints for \tlGetMyInt:
-  
-  Simplified: True
-  Raw: [.mInt < .mInt'1, \My < .mInt'1, .mInt'1 < ret]
-
-Flow constraints for \tlGetOther:
-  
-  Simplified: True
-  Raw:
-  [\Other'1 < .other, \My < .other, .oBool < .oBool'1, .oBool'1 < .oBool,
-   lump'3 = lump'1, .other < \Other]
-
-Flow constraints for \tlGetOtherBool:
-  
-  Simplified: True
-  Raw:
-  [\Other < .other, \My < .other, .oBool < .oBool'1, .other < .oBool'1,
-   .oBool'1 < ret]
-
-Flow constraints for \tlSetMyInt:
-  
-  Simplified: True
-  Raw: [\My < .mInt, $val < .mInt, pc < .mInt]
-
-Flow constraints for \tlSetOtherBool:
-  
-  Simplified: True
-  Raw:
   [\Other < .other, \My < .other, .other < .oBool, $bool < .oBool,
    pc < .oBool]
 

@@ -1,0 +1,5 @@
+There are privacy policy errors in \C#test:
+  Data with policy PRIVATE appears in context PUBLIC.
+  Data with policy PRIVATE appears in context A.
+  Data with policy A appears in context B.
+  

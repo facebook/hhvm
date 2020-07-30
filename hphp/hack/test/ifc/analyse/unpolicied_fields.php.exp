@@ -1,17 +1,3 @@
-Lattice:
- {}
-
-Decls:
-  class \C: { policied_props = [cx] }
-  class \D: { policied_props = [] }
-  class \Exception: { policied_props = [] }
-  class \HH\vec: { policied_props = [] }
-  function \C#__construct: { kind = public }
-  function \C#testGetUnpolicied: { kind = public }
-  function \C#testSetDeep: { kind = public }
-  function \C#testSetMultipleUnpolicied: { kind = public }
-  function \D#__construct: { kind = public }
-  
 Analyzing __construct:
 * pc: pc
 * This: \C<\C, lump'1, cx=<.cx>>
@@ -83,34 +69,4 @@ Analyzing __construct:
     lvars: { $di -> <$di> }
 Constraints:
   [\D < lump'1, $di < lump'1, pc < lump'1]
-
-Flow constraints for \C#__construct:
-  
-  Simplified: True
-  Raw:
-  [\C < .cx, $cx < .cx, pc < .cx, \C < lump'1, $cy < lump'1, pc < lump'1,
-   \C < lump'1, lump'2 = lump'1, \D < lump'1, pc < lump'1]
-
-Flow constraints for \C#testGetUnpolicied:
-  
-  Simplified: True
-  Raw: [lump'1 < .cd, \C < .cd, lump'1 = lump'2, .cd < \D]
-
-Flow constraints for \C#testSetDeep:
-  
-  Simplified: True
-  Raw: [lump'1 < .cd, \C < .cd, .cd < lump'1, $i < lump'1, pc < lump'1]
-
-
-Flow constraints for \C#testSetMultipleUnpolicied:
-  
-  Simplified: True
-  Raw:
-  [\C < lump'1, PUBLIC < lump'1, pc < lump'1, \C < lump'1, lump'2 = lump'1,
-   \D < lump'1, pc < lump'1]
-
-Flow constraints for \D#__construct:
-  
-  Simplified: True
-  Raw: [\D < lump'1, $di < lump'1, pc < lump'1]
 

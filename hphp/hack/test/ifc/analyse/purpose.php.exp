@@ -1,18 +1,3 @@
-Lattice:
- {}
-
-Decls:
-  class \C: { policied_props = [ci:Secret, d:Secret] }
-  class \D: { policied_props = [] }
-  class \Exception: { policied_props = [] }
-  class \HH\vec: { policied_props = [] }
-  function \C#__construct: { kind = public }
-  function \C#getDeep: { kind = public }
-  function \C#getShallow1: { kind = public }
-  function \C#getShallow2: { kind = public }
-  function \C#writeDeep: { kind = public }
-  function \D#__construct: { kind = public }
-  
 Analyzing __construct:
 * pc: pc
 * This: \D<\D, lump'1>
@@ -97,37 +82,4 @@ Analyzing writeDeep:
     lvars: {}
 Constraints:
   [SECRET < .d, \C < .d, .d < SECRET, PUBLIC < SECRET, pc < SECRET]
-
-Flow constraints for \C#__construct:
-  
-  Simplified: True
-  Raw:
-  [\C < SECRET, $ci < SECRET, pc < SECRET, \C < SECRET, lump'2 = SECRET,
-   \D < SECRET, pc < SECRET]
-
-Flow constraints for \C#getDeep:
-  
-  Simplified: True
-  Raw: [SECRET < .d, \C < .d, SECRET < .di, .d < .di, .di < ret]
-
-Flow constraints for \C#getShallow1:
-  
-  Simplified: True
-  Raw: [SECRET < .ci, \C < .ci, .ci < ret]
-
-Flow constraints for \C#getShallow2:
-  
-  Simplified: True
-  Raw: [SECRET < .d, \C < .d, SECRET = lump'2, .d < \D]
-
-Flow constraints for \C#writeDeep:
-  
-  Simplified: PUBLIC < SECRET
-  Raw: [SECRET < .d, \C < .d, .d < SECRET, PUBLIC < SECRET, pc < SECRET]
-
-
-Flow constraints for \D#__construct:
-  
-  Simplified: True
-  Raw: [\D < lump'1, $di < lump'1, pc < lump'1]
 

@@ -1,0 +1,9 @@
+There are privacy policy errors in \leak_pc_in_catch:
+  Data with policy A appears in context B.
+  
+There are privacy policy errors in \nested_try:
+  Data with policy A appears in context B.
+  
+There are privacy policy errors in \throw_in_catch:
+  Data with policy A appears in context B.
+  

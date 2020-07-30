@@ -396,112 +396,7 @@ let make_absolute_error code (x : (Pos.absolute * string) list) :
 
 let read_lines path = In_channel.read_lines path
 
-let line_margin (line_num : int option) col_width : string =
-  let padded_num =
-    match line_num with
-    | Some line_num -> Printf.sprintf "%*d" col_width line_num
-    | None -> String.make col_width ' '
-  in
-  Tty.apply_color (Tty.Normal Tty.Cyan) (padded_num ^ " |")
-
-(* Get the lines of source code associated with this position. *)
-let load_context_lines (pos : Pos.absolute) : string list =
-  let path = Pos.filename pos in
-  let line = Pos.line pos in
-  let end_line = Pos.end_line pos in
-  let lines = (try read_lines path with Sys_error _ -> []) in
-  (* Line numbers are 1-indexed. *)
-  List.filteri lines ~f:(fun i _ -> i + 1 >= line && i + 1 <= end_line)
-
-let format_context_lines (pos : Pos.absolute) (lines : string list) col_width :
-    string =
-  let lines =
-    match lines with
-    | [] -> [Tty.apply_color (Tty.Dim Tty.Default) "No source found"]
-    | ls -> ls
-  in
-  let line_num = Pos.line pos in
-  let format_line i (line : string) =
-    Printf.sprintf "%s %s" (line_margin (Some (line_num + i)) col_width) line
-  in
-  let formatted_lines = List.mapi ~f:format_line lines in
-  (* TODO: display all the lines, showing the underline on all of them. *)
-  List.hd_exn formatted_lines
-
-(* Format this message as "  ^^^ You did something wrong here". *)
-let format_substring_underline
-    (pos : Pos.absolute)
-    (msg : string)
-    (first_context_line : string option)
-    is_first
-    col_width : string =
-  let (start_line, start_column) = Pos.line_column pos in
-  let (end_line, end_column) = Pos.end_line_column pos in
-  let underline_width =
-    match first_context_line with
-    | None -> 4 (* Arbitrary choice when source isn't available. *)
-    | Some first_context_line ->
-      if start_line = end_line then
-        end_column - start_column
-      else
-        String.length first_context_line - start_column
-  in
-  let underline = String.make (max underline_width 1) '^' in
-  let underline_padding =
-    if Option.is_some first_context_line then
-      String.make start_column ' '
-    else
-      ""
-  in
-  let color =
-    if is_first then
-      Tty.Bold Tty.Red
-    else
-      Tty.Dim Tty.Default
-  in
-  Printf.sprintf
-    "%s %s%s"
-    (line_margin None col_width)
-    underline_padding
-    (Tty.apply_color
-       color
-       ( if is_first then
-         underline
-       else
-         underline ^ " " ^ msg ))
-
-let format_filename (pos : Pos.absolute) : string =
-  let relative_path path =
-    let cwd = Filename.concat (Sys.getcwd ()) "" in
-    lstrip path cwd
-  in
-  let filename = relative_path (Pos.filename pos) in
-  Printf.sprintf
-    "   %s %s"
-    (Tty.apply_color (Tty.Normal Tty.Cyan) "-->")
-    (Tty.apply_color (Tty.Normal Tty.Green) filename)
-
 let num_digits x = int_of_float (Float.log10 (float_of_int x)) + 1
-
-let column_width line_number = max 3 (num_digits line_number)
-
-(* Format the line of code associated with this message, and the message itself. *)
-let format_message (msg : string) (pos : Pos.absolute) ~is_first ~col_width :
-    string * string =
-  let col_width =
-    Option.value col_width ~default:(column_width (Pos.line pos))
-  in
-  let context_lines = load_context_lines pos in
-  let pretty_ctx = format_context_lines pos context_lines col_width in
-  let pretty_msg =
-    format_substring_underline
-      pos
-      msg
-      (List.hd context_lines)
-      is_first
-      col_width
-  in
-  (pretty_ctx, pretty_msg)
 
 (** Sort messages such that messages in the same file are together.
     Do not reorder the files or messages within a file.
@@ -527,72 +422,6 @@ let group_messages_by_file (error : Pos.absolute error_) :
   let (grouped, filenames) = build_map msgs String.Map.empty [] in
   List.concat_map (List.rev filenames) ~f:(fun fn ->
       String.Map.find_exn grouped fn)
-
-(* Work out the column width needed for each file. Files with many
-   lines need a wider column due to the higher line numbers. *)
-let col_widths (msgs : Pos.absolute message list) : int Core_kernel.String.Map.t
-    =
-  (* Find the longest line number for every file in msgs. *)
-  let longest_lines =
-    List.fold msgs ~init:String.Map.empty ~f:(fun acc msg ->
-        let filename = Pos.filename (fst msg) in
-        let current_max =
-          Option.value (String.Map.find acc filename) ~default:0
-        in
-        String.Map.set
-          acc
-          ~key:filename
-          ~data:(max current_max (Pos.line (fst msg))))
-  in
-  String.Map.map longest_lines ~f:column_width
-
-(** Format the list of messages in a given error with context.
-    The list may not be ordered, and multiple messages may occur on one line.
- *)
-let format_error (error : Pos.absolute error_) : string =
-  let msgs = group_messages_by_file error in
-  (* The first message is the 'primary' message, so add a boolean to distinguish it. *)
-  let rec label_first msgs is_first =
-    match msgs with
-    | msg :: msgs -> (msg, is_first) :: label_first msgs false
-    | [] -> []
-  in
-  let labelled_msgs = label_first msgs true in
-  (* Sort messages by line number, so we can display with context. *)
-  let cmp (m1, _) (m2, _) =
-    match String.compare (Pos.filename (fst m1)) (Pos.filename (fst m2)) with
-    | 0 -> Int.compare (Pos.line (fst m1)) (Pos.line (fst m2))
-    | _ -> 0
-  in
-  let sorted_msgs = List.stable_sort ~compare:cmp labelled_msgs in
-  (* For every message, show it alongside the relevant line. If there
-     are multiple messages associated with the line, only show it once. *)
-  let col_widths = col_widths msgs in
-  let rec aux msgs prev : string list =
-    match msgs with
-    | (msg, is_first) :: msgs ->
-      let (pos, err_msg) = msg in
-      let filename = Pos.filename pos in
-      let line = Pos.line pos in
-      let col_width = String.Map.find col_widths filename in
-      let (pretty_ctx, pretty_msg) =
-        format_message err_msg pos ~is_first ~col_width
-      in
-      let formatted : string list =
-        match prev with
-        | Some (prev_filename, prev_line)
-          when String.equal prev_filename filename && prev_line = line ->
-          (* Previous message was on this line too, just show the message itself*)
-          [pretty_msg]
-        | Some (prev_filename, _) when String.equal prev_filename filename ->
-          (* Previous message was this file, but an earlier line. *)
-          [pretty_ctx; pretty_msg]
-        | _ -> [format_filename pos; pretty_ctx; pretty_msg]
-      in
-      formatted @ aux msgs (Some (filename, line))
-    | [] -> []
-  in
-  String.concat ~sep:"\n" (aux sorted_msgs None) ^ "\n"
 
 (* E.g. "10 errors found." *)
 let format_summary format errors dropped_count max_errors : string option =
@@ -620,27 +449,6 @@ let format_summary format errors dropped_count max_errors : string option =
     in
     Some (formatted_total ^ truncated)
   | Raw -> None
-
-let to_contextual_string (error : Pos.absolute error_) : string =
-  let error_code = get_code error in
-  let msgl = to_list error in
-  let buf = Buffer.create 50 in
-  (match msgl with
-  | [] -> failwith "Impossible: an error always has non-empty list of messages"
-  | (_, msg) :: _ ->
-    Buffer.add_string
-      buf
-      (Printf.sprintf
-         "%s %s\n"
-         (Tty.apply_color (Tty.Bold Tty.Red) (error_code_to_string error_code))
-         (Tty.apply_color (Tty.Bold Tty.Default) msg)));
-  (try Buffer.add_string buf (format_error error)
-   with _ ->
-     Buffer.add_string
-       buf
-       "Error could not be pretty-printed. Please file a bug.");
-  Buffer.add_string buf "\n";
-  Buffer.contents buf
 
 let to_absolute_for_test error =
   let (code, msg_l) = (get_code error, to_list error) in

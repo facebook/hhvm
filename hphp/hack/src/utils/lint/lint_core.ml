@@ -73,17 +73,11 @@ let to_contextual_string lint =
     | Lint_warning -> Tty.apply_color (Tty.Bold Tty.Yellow)
     | Lint_advice -> Tty.apply_color (Tty.Bold Tty.White)
   in
-  let heading =
-    Printf.sprintf
-      "%s %s"
-      (color (Errors.error_code_to_string lint.code))
-      (Tty.apply_color (Tty.Bold Tty.White) lint.message)
-  in
-  let fn = Errors.format_filename lint.pos in
-  let (ctx, msg) =
-    Errors.format_message "" lint.pos ~is_first:true ~col_width:None
-  in
-  Printf.sprintf "%s\n%s\n%s\n%s\n" heading fn ctx msg
+  Contextual_error_formatter.to_lint_string
+    ~color
+    ~code:lint.code
+    ~pos:lint.pos
+    ~message:lint.message
 
 let to_highlighted_string (lint : string t) =
   Errors.make_absolute_error lint.code [(lint.pos, lint.message)]

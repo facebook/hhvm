@@ -170,20 +170,6 @@ inline StrNR Func::fullNameStr() const {
   return StrNR(fullName());
 }
 
-inline const StringData* funcToStringHelper(const Func* func) {
-  if (RuntimeOption::EvalRaiseFuncConversionWarning) {
-    raise_warning(Strings::FUNC_TO_STRING);
-  }
-  return func->name();
-}
-
-inline int64_t funcToInt64Helper(const Func* func) {
-  if (RuntimeOption::EvalRaiseFuncConversionWarning) {
-    raise_warning("Func to int conversion");
-  }
-  return func->name()->toInt64();
-}
-
 inline void invalidFuncConversion(const char* type) {
   SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
     "Cannot convert func to {}", type

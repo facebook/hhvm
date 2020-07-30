@@ -5,6 +5,6 @@ int(0)
 Exception: String to varray conversion
 Exception: Cannot convert func to string
 bool(true)
-float(0)
+Exception: Cannot convert func to double
 Exception: Cannot convert func to int
 Exception: Func to varray conversion

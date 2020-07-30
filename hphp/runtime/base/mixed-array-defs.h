@@ -193,11 +193,9 @@ void ConvertTvToUncounted(
       assertx(data.pfunc->isPersistent());
       break;
     }
-    if (!data.pfunc->isMethod()) invalidFuncConversion("string");
+    invalidFuncConversion("string");
     case KindOfClass:
-      data.pstr = isFuncType(type)
-        ? const_cast<StringData*>(funcToStringHelper(data.pfunc))
-        : const_cast<StringData*>(classToStringHelper(data.pclass));
+      data.pstr = const_cast<StringData*>(classToStringHelper(data.pclass));
       // Fall-through
     case KindOfString:
       type = KindOfPersistentString;

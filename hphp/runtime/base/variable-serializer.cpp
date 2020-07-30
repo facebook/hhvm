@@ -1468,7 +1468,6 @@ void VariableSerializer::serializeFunc(const Func* func) {
     case Type::APCSerialize:
     case Type::DebuggerSerialize:
       invalidFuncConversion("string");
-      write(StrNR(funcToStringHelper(func)));
       break;
   }
 }

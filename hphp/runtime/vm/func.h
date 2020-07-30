@@ -1504,16 +1504,9 @@ inline tracing::Props traceProps(const Func* f) {
 }
 
 /*
- * Convert a function pointer where a string is needed in some context.
- */
-const StringData* funcToStringHelper(const Func* func);
-
-int64_t funcToInt64Helper(const Func* func);
-
-/*
  * Throw an exception that func cannot be converted to type.
  */
-void invalidFuncConversion(const char* type);
+[[noreturn]] void invalidFuncConversion(const char* type);
 
 ///////////////////////////////////////////////////////////////////////////////
 

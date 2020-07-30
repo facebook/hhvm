@@ -110,7 +110,6 @@ TypedNum numericConvHelper(TypedValue cell) {
 
     case KindOfFunc:
       invalidFuncConversion("int");
-      return stringToNumeric(funcToStringHelper(cell.m_data.pfunc));
 
     case KindOfClass:
       return stringToNumeric(classToStringHelper(cell.m_data.pclass));
@@ -497,9 +496,6 @@ void tvIncDecOp(Op op, tv_lval cell) {
     case KindOfFunc: {
       raiseIncDecInvalidType(cell);
       invalidFuncConversion("int");
-      auto s = funcToStringHelper(val(cell).pfunc);
-      stringIncDecOp(op, cell, const_cast<StringData*>(s));
-      return;
     }
 
     case KindOfClass: {
@@ -788,10 +784,10 @@ void tvBitNot(TypedValue& cell) {
 
     case KindOfFunc:
       invalidFuncConversion("int");
+
     case KindOfClass:
-      cell.m_data.pstr = isFuncType(cell.m_type)
-        ? const_cast<StringData*>(funcToStringHelper(cell.m_data.pfunc))
-        : const_cast<StringData*>(classToStringHelper(cell.m_data.pclass));
+      cell.m_data.pstr =
+        const_cast<StringData*>(classToStringHelper(cell.m_data.pclass));
       cell.m_type = KindOfString;
     case KindOfString:
       if (cell.m_data.pstr->cowCheck()) {

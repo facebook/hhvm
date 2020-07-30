@@ -207,11 +207,7 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
         raise_convert_rfunc_to_type("double");
 
       case KindOfFunc:
-        if (RuntimeOption::EvalRaiseFuncConversionWarning) {
-          raise_warning("Func to double conversion");
-        }
-        d = val(tv).pfunc->name()->toDouble();
-        continue;
+        invalidFuncConversion("double");
 
       case KindOfClass:
         d = classToStringHelper(val(tv).pclass)->toDouble();
@@ -300,7 +296,6 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
 
       case KindOfFunc:
         invalidFuncConversion("int");
-        i = funcToInt64Helper(val(tv).pfunc);
         continue;
 
       case KindOfClass:
@@ -373,10 +368,7 @@ double tvCastToDouble(TypedValue tv) {
       raise_convert_rfunc_to_type("double");
 
     case KindOfFunc:
-      if (RuntimeOption::EvalRaiseFuncConversionWarning) {
-        raise_warning("Func to double conversion");
-      }
-      return tv.m_data.pfunc->name()->toDouble();
+      invalidFuncConversion("double");
 
     case KindOfClass:
       return classToStringHelper(tv.m_data.pclass)->toDouble();
@@ -475,8 +467,6 @@ enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
 
     case KindOfFunc: {
       invalidFuncConversion("string");
-      auto const s = funcToStringHelper(val(tv).pfunc);
-      return persistentString(const_cast<StringData*>(s));
     }
 
     case KindOfClass: {
@@ -561,8 +551,6 @@ StringData* tvCastToStringData(TypedValue tv) {
 
     case KindOfFunc: {
       invalidFuncConversion("string");
-      auto const s = funcToStringHelper(tv.m_data.pfunc);
-      return const_cast<StringData*>(s);
     }
 
     case KindOfClass: {

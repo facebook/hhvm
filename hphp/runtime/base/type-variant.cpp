@@ -465,7 +465,6 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
       return 1;
     case KindOfFunc:
       invalidFuncConversion("int");
-      return funcToInt64Helper(m_data.pfunc);
     case KindOfClass:
       return classToStringHelper(m_data.pclass)->toInt64();
     case KindOfClsMeth:
@@ -512,9 +511,6 @@ Array Variant::toPHPArrayHelper() const {
       return empty_array();
     case KindOfFunc:
       invalidFuncConversion("array");
-      return Array::attach(ArrayData::Create(
-        Variant{funcToStringHelper(m_data.pfunc),
-                PersistentStrInit{}}));
     case KindOfClass:
       return Array::attach(ArrayData::Create(
         Variant{classToStringHelper(m_data.pclass),

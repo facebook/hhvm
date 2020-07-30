@@ -29,12 +29,10 @@ namespace HPHP {
 
 // We want to avoid potential include cycle with func.h/class.h, so putting
 // forward declarations here is more feasible and simpler.
-const StringData* funcToStringHelper(const Func* func);
-int64_t funcToInt64Helper(const Func* func);
 const StringData* classToStringHelper(const Class* cls);
 Array clsMethToVecHelper(const ClsMethDataRef clsMeth);
 void raiseClsMethConvertWarningHelper(const char* toType);
-void invalidFuncConversion(const char*);
+[[noreturn]] void invalidFuncConversion(const char*);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -98,7 +96,6 @@ inline int64_t tvToInt(TypedValue cell) {
     case KindOfRFunc:         raise_convert_rfunc_to_type("int"); break;
     case KindOfFunc:
       invalidFuncConversion("int");
-      return funcToInt64Helper(cell.m_data.pfunc);
     case KindOfClass:
       return classToStringHelper(cell.m_data.pclass)->toInt64();
     case KindOfClsMeth:

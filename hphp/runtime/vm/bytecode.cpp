@@ -2214,7 +2214,6 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
         case KindOfString: {
           double dval = 0.0;
           auto const str =
-            isFuncType(val->m_type) ? funcToStringHelper(val->m_data.pfunc) :
             isClassType(val->m_type) ? classToStringHelper(val->m_data.pclass) :
             val->m_data.pstr;
           DataType t = str->isNumericWithVal(intval, dval, 1);

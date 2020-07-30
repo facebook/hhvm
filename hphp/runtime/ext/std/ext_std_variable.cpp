@@ -468,7 +468,6 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfString: {
       auto const str =
         isStringType(value.getType()) ? value.getStringData() :
-        isFuncType(value.getType())   ? funcToStringHelper(value.toFuncVal()) :
                                         classToStringHelper(value.toClassVal());
       auto const size = str->size();
       if (size >= RuntimeOption::MaxSerializedStringSize) {

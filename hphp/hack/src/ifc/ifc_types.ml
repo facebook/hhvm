@@ -65,6 +65,7 @@ type fun_proto = {
   fp_this: ptype option;
   fp_args: ptype list;
   fp_ret: ptype;
+  fp_exn: ptype;
 }
 
 (* Flow constraints with quantifiers and implication *)

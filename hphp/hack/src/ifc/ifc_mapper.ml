@@ -55,4 +55,5 @@ let prop fpol fprop depth = function
           fp_this = Option.map ~f:pty_map proto.fp_this;
           fp_args = List.map ~f:pty_map proto.fp_args;
           fp_ret = pty_map proto.fp_ret;
+          fp_exn = pty_map proto.fp_exn;
         }

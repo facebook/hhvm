@@ -64,6 +64,7 @@ let global_exn ~subtype callable_results =
         |> List.fold ~init:[callee.res_constraint] ~f:(fun prop (t1, t2) ->
                subtype t1 t2 prop)
         |> L.(proto.fp_pc < callee.res_proto.fp_pc)
+        |> subtype callee.res_proto.fp_exn proto.fp_exn
         |> (match (proto.fp_this, callee.res_proto.fp_this) with
            | (Some t1, Some t2) -> subtype t1 t2
            | (None, Some _) ->

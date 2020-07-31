@@ -402,10 +402,24 @@ let property_ptype proto_renv obj_ptype property property_ty =
   | None ->
     ptype ~prefix:("." ^ property) (Some class_.c_lump) proto_renv property_ty
 
+let throw renv env exn_ty =
+  let union env t1 t2 = (env, mk_union t1 t2) in
+  let env = Env.merge_conts_into ~union env [K.Next] K.Catch in
+  let lpc = Env.get_lpc_policy env K.Next in
+  Env.acc
+    env
+    L.(
+      subtype renv.re_proto.pre_meta exn_ty renv.re_exn
+      && add_dependencies (PCSet.elements lpc) renv.re_exn)
+
 let call renv env callable_name that_pty_opt args_pty ret_ty =
   let ret_pty =
     let prefix = callable_name ^ "_ret" in
     ptype ~prefix None renv.re_proto ret_ty
+  in
+  let callee_exn_policy = Env.new_policy_var renv.re_proto "exn" in
+  let callee_exn =
+    class_ptype (Some callee_exn_policy) renv.re_proto [] Decl.exception_id
   in
   let env =
     match SMap.find_opt callable_name renv.re_proto.pre_decl.de_fun with
@@ -424,11 +438,16 @@ let call renv env callable_name that_pty_opt args_pty ret_ty =
           fp_pc = pc_joined;
           fp_args = args_pty;
           fp_ret = ret_pty;
+          fp_exn = callee_exn;
         }
       in
       let env = Env.acc env (fun acc -> Chole fp :: acc) in
       let env = Env.add_dep env callable_name in
-      env
+      (* Any function call may throw, so we need to update the current PC and
+       * exception dependencies based on the callee's exception policy
+       *)
+      let env = Env.push_pc env K.Next callee_exn_policy in
+      throw renv env callee_exn
     | None -> fail "unknown function '%s'" callable_name
   in
   (env, ret_pty)
@@ -693,10 +712,8 @@ let rec stmt renv env ((_pos, s) : Tast.stmt) =
             && subtype te renv.re_ret)
     end
   | A.Throw e ->
-    let (env, ty) = expr renv env e in
-    let union env t1 t2 = (env, mk_union t1 t2) in
-    let env = Env.merge_conts_into ~union env [K.Next] K.Catch in
-    Env.acc env @@ subtype ty renv.re_exn
+    let (env, exn_ty) = expr renv env e in
+    throw renv env exn_ty
   | A.Try (try_blk, [((_, exn), (_, exn_var), catch_blk)], []) ->
     (* NOTE: for now we only support try with a single catch block and no finally
      * block. Only \Exception is allowed to be caught
@@ -777,6 +794,7 @@ let callable meta decl_env class_name_opt name saved_env params body lrty =
           fp_this = this_ty;
           fp_args = param_tys;
           fp_ret = ret_ty;
+          fp_exn = exn;
         }
       in
       {

@@ -72,7 +72,7 @@ and lazy_ptype fmt ty =
 
 let fun_proto fmt fp =
   Option.iter ~f:(fprintf fmt "(this: %a)->" ptype) fp.fp_this;
-  fprintf fmt "%s<%a>" fp.fp_name policy fp.fp_pc;
+  fprintf fmt "%s<%a, %a>" fp.fp_name policy fp.fp_pc ptype fp.fp_exn;
   fprintf fmt "(@[<hov>%a@])" (list comma_sep ptype) fp.fp_args;
   fprintf fmt ":@ %a" ptype fp.fp_ret
 

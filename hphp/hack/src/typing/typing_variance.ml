@@ -462,7 +462,8 @@ and type_option tcopt root variance env = function
 and type_list tcopt root variance env tyl =
   List.iter tyl ~f:(type_ tcopt root variance env)
 
-and generic_ env variance name =
+and generic_ env variance name _targs =
+  (* TODO(T69551141) handle type arguments *)
   let declared_variance = get_tparam_variance env name in
   match (declared_variance, variance) with
   (* Happens if type parameter isn't from class *)
@@ -515,7 +516,7 @@ and type_ ctx root variance env ty =
    * (otherwise any class that used the `this` type would not be able to use
    * covariant type params).
    *)
-  | Tgeneric name ->
+  | Tgeneric (name, targs) ->
     let pos = Reason.to_pos reason in
     (* This section makes the position more precise.
      * Say we find a return type that is a tuple (int, int, T).
@@ -533,7 +534,7 @@ and type_ ctx root variance env ty =
         Vcontravariant ((pos, x, y) :: rest)
       | x -> x
     in
-    generic_ env variance name
+    generic_ env variance name targs
   | Toption ty -> type_ ctx root variance env ty
   | Tlike ty -> type_ ctx root variance env ty
   | Tprim _ -> ()
@@ -663,7 +664,8 @@ and get_typarams ctx root env (ty : decl_ty) =
     Option.value_map ty_opt ~f:(get_typarams ctx root env) ~default:empty
   in
   match get_node ty with
-  | Tgeneric id ->
+  | Tgeneric (id, _tyargs) ->
+    (* TODO(T69551141) handle type arguments *)
     (* If it's in the environment then it's not a generic method parameter *)
     if Option.is_some (SMap.find_opt id env) then
       empty
@@ -891,7 +893,9 @@ and get_typarams ctx root env (ty : decl_ty) =
       (* Tgeneric(tp):@T is a valid usage of tp and should not trigger the
        * linter
        *)
-      | Tgeneric tp -> single tp (get_reason ty)
+      | Tgeneric (tp, _) ->
+        (* TODO(T69551141) handle type arguments *)
+        single tp (get_reason ty)
       | _ -> empty
     in
     union param (flip param)

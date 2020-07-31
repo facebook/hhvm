@@ -49,7 +49,8 @@ let validator =
         ^ tconst
         ^ " because it is not marked <<__Enforceable>>"
 
-    method! on_tgeneric acc r name =
+    method! on_tgeneric acc r name _tyargs =
+      (* TODO(T69551141) handle type arguments *)
       if acc.like_context then
         acc
       else

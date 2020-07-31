@@ -19,6 +19,23 @@ let make_subst tparams tyl = Subst.make_decl tparams tyl
 (*****************************************************************************)
 
 let rec instantiate subst (ty : decl_ty) =
+  let merge_hk_type orig_r orig_var ty args =
+    let (r, ty_) = deref ty in
+    let res_ty_ =
+      match ty_ with
+      | Tapply (n, existing_args) ->
+        (* We could insist on existing_args = [] here unless we want to support partial application. *)
+        Tapply (n, existing_args @ args)
+      | Tgeneric (n, existing_args) ->
+        (* Same here *)
+        Tgeneric (n, existing_args @ args)
+      | _ ->
+        (* We could insist on args = [] here, everything else is a kinding error *)
+        ty_
+    in
+    mk (Reason.Rinstantiate (r, orig_var, orig_r), res_ty_)
+  in
+
   (* PERF: If subst is empty then instantiation is a no-op. We can save a
    * significant amount of CPU by avoiding recursively deconstructing the ty
    * data type.
@@ -27,12 +44,11 @@ let rec instantiate subst (ty : decl_ty) =
     ty
   else
     match deref ty with
-    | (r, Tgeneric x) ->
+    | (r, Tgeneric (x, args)) ->
+      let args = List.map args (instantiate subst) in
       (match SMap.find_opt x subst with
-      | Some x_ty ->
-        let (r', ty_) = deref x_ty in
-        mk (Reason.Rinstantiate (r', x, r), ty_)
-      | None -> mk (r, Tgeneric x))
+      | Some x_ty -> merge_hk_type r x x_ty args
+      | None -> mk (r, Tgeneric (x, args)))
     | (r, ty) ->
       let ty = instantiate_ subst ty in
       mk (r, ty)

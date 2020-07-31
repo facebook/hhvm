@@ -39,7 +39,9 @@ let check_param : env -> Nast.fun_param -> unit =
     | Toption ty -> check_memoizable env ty
     | Ttuple tyl -> List.iter tyl (check_memoizable env)
     (* Just accept all generic types for now. Stricter check_memoizables to come later. *)
-    | Tgeneric _ -> ()
+    | Tgeneric _ ->
+      (* TODO(T69551141) handle type arguments *)
+      ()
     (* For parameter type 'this::TID' defined by 'type const TID as Bar' check_memoizables
      * Bar recursively. Also enums represented using AKnewtype.
      *)

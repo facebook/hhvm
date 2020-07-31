@@ -242,9 +242,10 @@ and _ ty_ =
   (* The type of a generic parameter. The constraints on a generic parameter
    * are accessed through the lenv.tpenv component of the environment, which
    * is set up when checking the body of a function or method. See uses of
-   * Typing_phase.localize_generic_parameters_with_bounds.
+   * Typing_phase.add_generic_parameters_and_constraints. The list denotes
+   * type arguments (for higher-kinded generics).
    *)
-  | Tgeneric : string -> 'phase ty_
+  | Tgeneric : string * 'phase ty list -> 'phase ty_
   (* Union type.
    * The values that are members of this type are the union of the values
    * that are members of the components of the union.

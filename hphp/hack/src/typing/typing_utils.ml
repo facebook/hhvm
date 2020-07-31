@@ -292,7 +292,8 @@ let get_all_supertypes env ty =
       | Tnewtype (_, _, ty)
       | Tdependent (_, ty) ->
         iter seen env (TySet.add ty acc) tyl
-      | Tgeneric n ->
+      | Tgeneric (n, _targs) ->
+        (* TODO(T69551141) handle type arguments *)
         if SSet.mem n seen then
           iter seen env acc tyl
         else
@@ -329,7 +330,8 @@ let get_concrete_supertypes env ty =
       | Tnewtype (_, _, ty)
       | Tdependent (_, ty) ->
         iter seen env (TySet.add ty acc) tyl
-      | Tgeneric n ->
+      | Tgeneric (n, _targs) ->
+        (* TODO(T69551141) handle type arguments *)
         if SSet.mem n seen then
           iter seen env acc tyl
         else
@@ -445,7 +447,8 @@ let rec get_base_type env ty =
     ty
   (* If we have an expression dependent type and it only has one super
     type, we can treat it similarly to AKdependent _, Some ty  *)
-  | Tgeneric n when DependentKind.is_generic_dep_ty n ->
+  | Tgeneric (n, _targs) when DependentKind.is_generic_dep_ty n ->
+    (* TODO(T69551141) handle type arguments *)
     begin
       match TySet.elements (Env.get_upper_bounds env n) with
       | ty2 :: _ when ty_equal ty ty2 -> ty
@@ -491,7 +494,9 @@ let get_class_ids env ty =
     | Tunion tys
     | Tintersection tys ->
       List.fold tys ~init:acc ~f:(aux seen)
-    | Tgeneric name when not (List.mem ~equal:String.equal seen name) ->
+    | Tgeneric (name, _targs) when not (List.mem ~equal:String.equal seen name)
+      ->
+      (* TODO(T69551141) handle type arguments *)
       let seen = name :: seen in
       let upper_bounds = Env.get_upper_bounds env name in
       TySet.fold (fun ty acc -> aux seen acc ty) upper_bounds acc
@@ -674,7 +679,8 @@ let rec class_get_pu_ env cty name =
   | Tdynamic
   | Tunion _ ->
     (env, None)
-  | Tgeneric tp ->
+  | Tgeneric (tp, _targs) ->
+    (* TODO(T69551141) handle type arguments *)
     let upper_bounds = Env.get_upper_bounds env tp in
     let (env, pus) =
       Typing_set.fold

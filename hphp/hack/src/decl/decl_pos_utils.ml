@@ -133,7 +133,9 @@ struct
     | Tvarray root_ty -> Tvarray (ty root_ty)
     | Tvarray_or_darray (ty1, ty2) -> Tvarray_or_darray (ty ty1, ty ty2)
     | Tprim _ as x -> x
-    | Tgeneric _ as x -> x
+    | Tgeneric _ as x ->
+      (* TODO(T69551141) handle type arguments *)
+      x
     | Ttuple tyl -> Ttuple (List.map tyl ty)
     | Tunion tyl -> Tunion (List.map tyl ty)
     | Tintersection tyl -> Tintersection (List.map tyl ty)

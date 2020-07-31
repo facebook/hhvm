@@ -340,7 +340,8 @@ impl<'a> TypeBuilder<'a> {
         self.nullable(reason, self.nonnull(reason))
     }
     pub fn generic(&'a self, reason: &'a Reason<'a>, name: &'a str) -> Ty<'a> {
-        self.mk(reason, Ty_::Tgeneric(name))
+        // TODO (T69662957) must fill type args of Tgeneric
+        self.mk(reason, Ty_::Tgeneric(self.alloc((name, &[][..]))))
     }
     pub fn fun(&'a self, reason: &'a Reason<'a>, ft: &'a FunType<'a>) -> Ty<'a> {
         self.mk(reason, Ty_::Tfun(ft))

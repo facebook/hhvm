@@ -356,8 +356,9 @@ let is_any t =
   | _ -> false
 
 let is_generic_equal_to n t =
+  (* TODO(T69551141) handle type arguments *)
   match get_node t with
-  | Tgeneric n' when String.equal n n' -> true
+  | Tgeneric (n', _tyargs) when String.equal n n' -> true
   | _ -> false
 
 let is_prim p t =
@@ -599,7 +600,12 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
     | (Tintersection tyl1, Tintersection tyl2)
     | (Ttuple tyl1, Ttuple tyl2) ->
       tyl_compare ~sort:normalize_lists ~normalize_lists tyl1 tyl2
-    | (Tgeneric n1, Tgeneric n2) -> String.compare n1 n2
+    | (Tgeneric (n1, args1), Tgeneric (n2, args2)) ->
+      begin
+        match String.compare n1 n2 with
+        | 0 -> tyl_compare ~sort:false ~normalize_lists args1 args2
+        | n -> n
+      end
     | (Tnewtype (id, tyl, cstr1), Tnewtype (id2, tyl2, cstr2)) ->
       begin
         match String.compare id id2 with
@@ -836,7 +842,8 @@ let rec equal_decl_ty_ ty_1 ty_2 =
   | (Tdynamic, Tdynamic) -> true
   | (Tapply (id1, tyl1), Tapply (id2, tyl2)) ->
     Aast.equal_sid id1 id2 && equal_decl_tyl tyl1 tyl2
-  | (Tgeneric s1, Tgeneric s2) -> String.equal s1 s2
+  | (Tgeneric (s1, argl1), Tgeneric (s2, argl2)) ->
+    String.equal s1 s2 && equal_decl_tyl argl1 argl2
   | (Taccess (ty1, idl1), Taccess (ty2, idl2)) ->
     equal_decl_ty ty1 ty2 && List.equal ~equal:Aast.equal_sid idl1 idl2
   | (Tarray (tk1, tv1), Tarray (tk2, tv2)) ->

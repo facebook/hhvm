@@ -70,7 +70,8 @@ let is_enforceable (env : env) (ty : decl_ty) =
           end
         | None -> true
       end
-    | Tgeneric name ->
+    | Tgeneric (name, _args) ->
+      (* TODO(T69551141) handle type arguments *)
       begin
         match (Env.get_reified env name, Env.get_enforceable env name) with
         | (Aast.Erased, _) -> false

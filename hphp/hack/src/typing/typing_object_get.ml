@@ -687,6 +687,7 @@ and obj_get_
       k_lhs
       on_error
   | (r, Tgeneric _) ->
+    (* TODO(T69551141) handle type arguments? *)
     let resl =
       TUtils.try_over_concrete_supertypes env ety1 (fun env ty ->
           (* We probably don't want to rewrap new types for the 'this' closure *)

@@ -34,7 +34,8 @@ let validator =
       else
         super#on_tapply acc r (p, h) tyl
 
-    method! on_tgeneric acc r t =
+    method! on_tgeneric acc r t _tyargs =
+      (* TODO(T69551141) handle type arguments *)
       match Env.get_reified acc.env t with
       | Nast.Erased -> this#invalid acc r "not reified"
       | Nast.SoftReified -> this#invalid acc r "soft reified"
@@ -206,7 +207,8 @@ let handler =
       | ((pos, _), New (((_, ty), CI (_, class_id)), targs, _, _, _)) ->
         let (env, ty) = Env.expand_type env ty in
         (match get_node ty with
-        | Tgeneric ci when String.equal ci class_id ->
+        | Tgeneric (ci, _tyargs) when String.equal ci class_id ->
+          (* TODO(T69551141) handle type arguments *)
           if not (Env.get_newable env ci) then Errors.new_without_newable pos ci;
           if not (List.is_empty targs) then
             Errors.typaram_applied_to_type pos ci

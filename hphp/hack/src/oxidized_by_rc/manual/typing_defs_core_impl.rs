@@ -63,7 +63,7 @@ impl Ty {
     }
     pub fn is_generic(&self) -> bool {
         match self.get_node().as_ref() {
-            Ty_::Tgeneric(_) => true,
+            Ty_::Tgeneric(_, _) => true,
             _ => false,
         }
     }

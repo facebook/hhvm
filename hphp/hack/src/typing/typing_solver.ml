@@ -78,9 +78,10 @@ let rec freshen_inside_ty env ty =
   | Tdynamic
   | Tobject
   | Tprim _
-  | Tgeneric _
-  | Tdependent _ ->
+  | Tgeneric _ ->
+    (* TODO(T69551141) handle type arguments *)
     default ()
+  | Tdependent _ -> default ()
   (* Nullable is covariant *)
   | Toption ty ->
     let (env, ty) = freshen_inside_ty env ty in

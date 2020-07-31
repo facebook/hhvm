@@ -54,7 +54,7 @@ and hint_ p env = function
     in
     Tvarray_or_darray (t1, hint env h2)
   | Hprim p -> Tprim p
-  | Habstr x -> Tgeneric x
+  | Habstr x -> Tgeneric (x, [])
   | Hoption h ->
     let h = hint env h in
     Toption h

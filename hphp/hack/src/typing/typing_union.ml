@@ -241,9 +241,10 @@ and simplify_union_ env ty1 ty2 r =
       else
         let (env, tyl) = union_class env id1 tyl1 tyl2 in
         (env, Some (mk (r, Tclass ((p, id1), e, tyl))))
-    | ((_, Tgeneric name1), (_, Tgeneric name2)) when String.equal name1 name2
-      ->
-      (env, Some (mk (r, Tgeneric name1)))
+    | ((_, Tgeneric (name1, _tyargs1)), (_, Tgeneric (name2, _tyargs2)))
+      when String.equal name1 name2 ->
+      (* TODO(T69551141) handle type arguments above and below *)
+      (env, Some (mk (r, Tgeneric (name1, []))))
     | ((_, Tvarray ty1), (_, Tvarray ty2)) ->
       let (env, ty) = union env ty1 ty2 in
       (env, Some (mk (r, Tvarray ty)))

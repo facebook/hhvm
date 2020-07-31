@@ -27,61 +27,61 @@ Parsed decls:
                   { et_enforced = false;
                     et_type =
                     (Rhint (root|generic_method_tparam_scope.php line 4, characters 25-26),
-                     (Tgeneric "Ta"))
-                    };
-                  fp_flags =
-                  (make_fp_flags ~mutability:none ~accept_disposable:false
-                    ~has_default:false ~mode:FPnormal);
-                   }
-                 ];
-               ft_ret =
-               { et_enforced = false;
-                 et_type =
-                 (Rhint (root|generic_method_tparam_scope.php line 4, characters 33-34),
-                  (Tgeneric "Ta"))
-                 };
-               ft_flags =
-               (make_ft_flags sync none ~return_disposable:false
-                 ~returns_mutable:false ~returns_void_to_rx:false);
-               ft_reactive = Nonreactive }));
-         sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
-        { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_memoizelsb = false; sm_name = ([8:19-20], "g");
-          sm_override = false; sm_dynamicallycallable = false;
-          sm_reactivity = None;
-          sm_type =
-          (Rwitness (root|generic_method_tparam_scope.php line 8, characters 19-19),
-           (Tfun
-              { ft_arity = (Fstandard ());
-                ft_tparams = [(Invariant, ([8:21-23], "Tb"), [])];
-                ft_where_constraints = [];
-                ft_params =
-                [{ fp_pos = [8:28-30]; fp_name = (Some "$b");
-                   fp_type =
-                   { et_enforced = false;
-                     et_type =
-                     (Rhint (root|generic_method_tparam_scope.php line 8, characters 25-26),
-                      (Tgeneric "Tb"))
-                     };
-                   fp_flags =
-                   (make_fp_flags ~mutability:none ~accept_disposable:false
-                     ~has_default:false ~mode:FPnormal);
-                    }
-                  ];
-                ft_ret =
-                { et_enforced = false;
-                  et_type =
-                  (Rhint (root|generic_method_tparam_scope.php line 8, characters 33-34),
-                   (Tgeneric "Tb"))
+                     (Tgeneric ("Ta", [])))
                   };
-                ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
-                  ~returns_mutable:false ~returns_void_to_rx:false);
-                ft_reactive = Nonreactive }));
-          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
-        ];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      } };
-  funs = {}; typedefs = {}; consts = {} }
+                 fp_flags =
+                 (make_fp_flags ~mutability:none ~accept_disposable:false
+                   ~has_default:false ~mode:FPnormal);
+                  }
+               ];
+             ft_ret =
+             { et_enforced = false;
+               et_type =
+               (Rhint (root|generic_method_tparam_scope.php line 4, characters 33-34),
+                (Tgeneric ("Ta", [])))
+             };
+          ft_flags =
+          (make_ft_flags sync none ~return_disposable:false
+            ~returns_mutable:false ~returns_void_to_rx:false);
+          ft_reactive = Nonreactive }));
+      sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
+      { Shallow_decl_defs.sm_abstract = false; sm_final = false;
+        sm_memoizelsb = false; sm_name = ([8:19-20], "g");
+        sm_override = false; sm_dynamicallycallable = false;
+        sm_reactivity = None;
+        sm_type =
+        (Rwitness (root|generic_method_tparam_scope.php line 8, characters 19-19),
+         (Tfun
+            { ft_arity = (Fstandard ());
+              ft_tparams = [(Invariant, ([8:21-23], "Tb"), [])];
+              ft_where_constraints = [];
+              ft_params =
+              [{ fp_pos = [8:28-30]; fp_name = (Some "$b");
+                 fp_type =
+                 { et_enforced = false;
+                   et_type =
+                   (Rhint (root|generic_method_tparam_scope.php line 8, characters 25-26),
+                    (Tgeneric ("Tb", [])))
+                 };
+                fp_flags =
+                (make_fp_flags ~mutability:none ~accept_disposable:false
+                  ~has_default:false ~mode:FPnormal);
+                 }
+              ];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|generic_method_tparam_scope.php line 8, characters 33-34),
+               (Tgeneric ("Tb", [])))
+            };
+         ft_flags =
+         (make_ft_flags sync none ~return_disposable:false
+           ~returns_mutable:false ~returns_void_to_rx:false);
+         ft_reactive = Nonreactive }));
+    sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
+    ];
+  sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque> } };
+funs = {}; typedefs = {}; consts = {}
+}
 
 They matched!

@@ -24,7 +24,7 @@ end = struct
   let ty x =
     let rec ty t =
       match get_node t with
-      | Tgeneric x -> raise (Found (get_pos t, x))
+      | Tgeneric (x, _args) -> raise (Found (get_pos t, x))
       | Tthis -> ()
       | Tmixed -> ()
       | Tdynamic

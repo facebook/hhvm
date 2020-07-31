@@ -96,7 +96,8 @@ module ConditionTypes = struct
         | Some (((p, _) as sid), cls) ->
           let params =
             List.map (Cls.tparams cls) ~f:(fun { tp_name = (p, x); _ } ->
-                MakeType.generic (Reason.Rwitness p) x)
+                (* TODO(T69551141) handle type arguments *)
+                MakeType.generic (Reason.Rwitness p) x [])
           in
           let subst = Decl_instantiate.make_subst (Cls.tparams cls) [] in
           let ty = MakeType.apply (Reason.Rwitness p) sid params in
@@ -502,7 +503,8 @@ and simplify_subtype_i
               ~f:(fun res ty_sub ->
                 let ty_sub = LoclType ty_sub in
                 res ||| simplify_subtype_i ~subtype_env ~this_ty ty_sub ty_super))
-        | (_, Tgeneric name_sub) ->
+        | (_, Tgeneric (name_sub, _tyargs)) ->
+          (* TODO(T69551141) handle type arguments *)
           (match subtype_env.seen_generic_params with
           | None -> default ()
           | Some seen ->
@@ -841,6 +843,7 @@ and simplify_subtype_i
               let any = mk (r, Typing_defs.make_tany ()) in
               env |> destructure_array any
             | (_, (Tunion _ | Tintersection _ | Tgeneric _ | Tvar _)) ->
+              (* TODO(T69551141) handle type arguments of Tgeneric? *)
               default_subtype env
             | _ ->
               begin
@@ -1144,6 +1147,7 @@ and simplify_subtype_i
             default_subtype env
           | ((_, Tgeneric _), _)
             when Option.is_none subtype_env.seen_generic_params ->
+            (* TODO(T69551141) handle type arguments ? *)
             default_subtype env
           (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
            * then t1 <: t2 or t1' <: ?t2.  The converse is obviously
@@ -1152,6 +1156,7 @@ and simplify_subtype_i
            *)
           | ((_, (Tnewtype _ | Tdependent _ | Tgeneric _ | Tprim Nast.Tvoid)), _)
             ->
+            (* TODO(T69551141) handle type arguments? *)
             env
             |> simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super
             ||| default_subtype
@@ -1253,13 +1258,16 @@ and simplify_subtype_i
           else
             simplify_subtype ~subtype_env ~this_ty bound_sub ty_super env
         | _ -> default_subtype env))
-    | (_, Tgeneric name_super) ->
+    | (_, Tgeneric (name_super, _tyargs)) ->
+      (* TODO(T69551141) handle type arguments *)
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       (* If subtype and supertype are the same generic parameter, we're done *)
       | LoclType ty_sub ->
         (match get_node ty_sub with
-        | Tgeneric name_sub when String.equal name_sub name_super -> valid ()
+        | Tgeneric (name_sub, _tyargs) when String.equal name_sub name_super ->
+          valid ()
+        (* TODO(T69551141) handle type arguments *)
         (* When decomposing subtypes for the purpose of adding bounds on generic
          * parameters to the context, (so seen_generic_params = None), leave
          * subtype so that the bounds get added *)
@@ -3194,7 +3202,8 @@ let decompose_subtype_add_bound
   match (get_node ty_sub, get_node ty_super) with
   | (_, Tany _) -> env
   (* name_sub <: ty_super so add an upper bound on name_sub *)
-  | (Tgeneric name_sub, _) when not (phys_equal ty_sub ty_super) ->
+  | (Tgeneric (name_sub, _targs), _) when not (phys_equal ty_sub ty_super) ->
+    (* TODO(T69551141) handle type arguments *)
     log_subtype
       ~level:2
       ~this_ty:None
@@ -3209,7 +3218,8 @@ let decompose_subtype_add_bound
     else
       Env.add_upper_bound ~intersect:(try_intersect env) env name_sub ty_super
   (* ty_sub <: name_super so add a lower bound on name_super *)
-  | (_, Tgeneric name_super) when not (phys_equal ty_sub ty_super) ->
+  | (_, Tgeneric (name_super, _targs)) when not (phys_equal ty_sub ty_super) ->
+    (* TODO(T69551141) handle type arguments *)
     log_subtype
       ~level:2
       ~this_ty:None

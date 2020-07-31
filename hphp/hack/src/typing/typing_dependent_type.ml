@@ -102,8 +102,11 @@ module ExprDepTy = struct
             (env, mk (r_dep_ty, Tclass (c, Exact, tyl)))
           | _ -> apply env ty
         )
-      | (_, Tgeneric s) when DependentKind.is_generic_dep_ty s -> (env, ty)
+      | (_, Tgeneric (s, _tyargs)) when DependentKind.is_generic_dep_ty s ->
+        (* TODO(T69551141) handle type arguments *)
+        (env, ty)
       | (_, Tgeneric _) ->
+        (* TODO(T69551141) handle type arguments here? *)
         let (env, tyl) = Typing_utils.get_concrete_supertypes env ty in
         let (env, tyl') = List.fold_map tyl ~init:env ~f:make in
         if tyl_equal tyl tyl' then

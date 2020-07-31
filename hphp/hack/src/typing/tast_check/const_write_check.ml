@@ -56,7 +56,8 @@ let rec check_expr env (_, e) =
           | Tclass ((_, c), _, _) -> check_prop env c pid None
           | _ -> ()
         end
-      | Tgeneric name ->
+      | Tgeneric (name, _targs) ->
+        (* TODO(T69551141) handle type arguments *)
         let upper_bounds = Env.get_upper_bounds env name in
         let check_class bound =
           match get_node bound with

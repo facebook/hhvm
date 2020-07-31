@@ -29,7 +29,8 @@ let make_ts env ty =
         ~f:
           begin
             fun { tp_name = (p, x); _ } ->
-            mk (Reason.Rwitness p, Tgeneric x)
+            (* TODO(T69551141) handle type arguments *)
+            mk (Reason.Rwitness p, Tgeneric (x, []))
           end
         td_tparams
     in

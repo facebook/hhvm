@@ -61,7 +61,9 @@ let rec condition_type_from_reactivity r =
 let get_associated_condition_type env ~is_self ty =
   let (env, ty) = Env.expand_type env ty in
   match get_node ty with
-  | Tgeneric n -> Env.get_condition_type env n
+  | Tgeneric (n, _) ->
+    (* TODO(T69551141) handle type arguments *)
+    Env.get_condition_type env n
   | Tdependent (DTthis, _) ->
     condition_type_from_reactivity (env_reactivity env)
   | _ when is_self -> condition_type_from_reactivity (env_reactivity env)
@@ -415,6 +417,8 @@ let try_substitute_type_with_condition env cond_ty ty =
            MakeType.generic
              (Reason.Rwitness (get_pos ty))
              fresh_type_argument_name
+             (* TODO(T69551141) handle type arguments *)
+             []
          in
          (* if generic type is already registered this means we already saw
        parameter with the same pair (declared type * condition type) so there
@@ -460,7 +464,8 @@ let strip_condition_type_in_return env ty =
   else
     let (env, ety) = Env.expand_type env ty in
     match get_node ety with
-    | Tgeneric n when Option.is_some (Env.get_condition_type env n) ->
+    | Tgeneric (n, _targs) when Option.is_some (Env.get_condition_type env n) ->
+      (* TODO(T69551141) handle type arguments *)
       let upper_bounds = Env.get_upper_bounds env n in
       begin
         match Typing_set.elements upper_bounds with

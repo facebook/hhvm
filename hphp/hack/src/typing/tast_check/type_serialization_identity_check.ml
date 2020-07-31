@@ -29,7 +29,9 @@ let rec strip_ty ty =
     | Tobject -> ty
     | Tprim _ -> ty
     | Tvar _ -> ty
-    | Tgeneric _ -> ty
+    | Tgeneric _ ->
+      (* TODO(T69551141) handle type arguments *)
+      ty
     | Tdarray (ty1, ty2) -> Tdarray (strip_ty ty1, strip_ty ty2)
     | Tvarray ty -> Tvarray (strip_ty ty)
     | Tvarray_or_darray (ty1, ty2) ->

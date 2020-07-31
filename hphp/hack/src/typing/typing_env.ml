@@ -384,11 +384,12 @@ let add_upper_bound_global env name ty =
   let tpenv =
     let (env, ty) = expand_type env ty in
     match deref ty with
-    | (r, Tgeneric formal_super) ->
+    | (r, Tgeneric (formal_super, _tyargs)) ->
+      (* TODO(T69551141) handle type arguments *)
       TPEnv.add_lower_bound
         env.global_tpenv
         formal_super
-        (mk (r, Tgeneric name))
+        (mk (r, Tgeneric (name, [])))
     | _ -> env.global_tpenv
   in
   { env with global_tpenv = TPEnv.add_upper_bound tpenv name ty }
@@ -472,7 +473,9 @@ let tparams_visitor env =
   object (this)
     inherit [SSet.t] Type_visitor.locl_type_visitor
 
-    method! on_tgeneric acc _ s = SSet.add s acc
+    method! on_tgeneric acc _ s _ =
+      (* as for tnewtype: not traversing args, although they may contain Tgenerics *)
+      SSet.add s acc
 
     (* Perserving behavior but this seems incorrect to me since a newtype may
      * contain type arguments with generics
@@ -1333,7 +1336,9 @@ and get_tyvars_i env (ty : internal_type) =
         | None -> (env, ISet.empty, ISet.empty)
       end
     | Tdependent (_, ty) -> get_tyvars env ty
-    | Tgeneric _ -> (env, ISet.empty, ISet.empty)
+    | Tgeneric _ ->
+      (* TODO(T69551141) handle type arguments *)
+      (env, ISet.empty, ISet.empty)
     | Tclass ((_, cid), _, tyl) ->
       if List.is_empty tyl then
         (env, ISet.empty, ISet.empty)

@@ -25,52 +25,53 @@ Parsed decls:
                           { et_enforced = false;
                             et_type =
                             (Rhint (root|at_most_rx_as_func.php line 5, characters 34-34),
-                             (Tgeneric "T"))
-                            };
-                          fp_flags =
-                          (make_fp_flags ~mutability:none
-                            ~accept_disposable:false ~has_default:false
-                            ~mode:FPnormal);
-                           }
-                         ];
-                       ft_ret =
-                       { et_enforced = false;
-                         et_type =
-                         (Rhint (root|at_most_rx_as_func.php line 5, characters 38-41),
-                          (Tprim Tbool))
-                         };
-                       ft_flags =
-                       (make_ft_flags sync none ~return_disposable:false
-                         ~returns_mutable:false ~returns_void_to_rx:false);
-                       ft_reactive = RxVar {} }))
-                 };
-               fp_flags =
-               (make_fp_flags ~mutability:none ~accept_disposable:false
-                 ~has_default:false ~mode:FPnormal);
-                };
-              { fp_pos = [6:5-7]; fp_name = (Some "$x");
-                fp_type =
-                { et_enforced = false;
-                  et_type =
-                  (Rhint (root|at_most_rx_as_func.php line 6, characters 3-3),
-                   (Tgeneric "T"))
-                  };
-                fp_flags =
-                (make_fp_flags ~mutability:none ~accept_disposable:false
-                  ~has_default:false ~mode:FPnormal);
-                 }
-              ];
-            ft_ret =
-            { et_enforced = false;
-              et_type =
-              (Rhint (root|at_most_rx_as_func.php line 7, characters 4-7),
-               (Tprim Tbool))
+                             (Tgeneric ("T", [])))
+                          };
+                         fp_flags =
+                         (make_fp_flags ~mutability:none
+                           ~accept_disposable:false ~has_default:false
+                           ~mode:FPnormal);
+                          }
+                       ];
+                     ft_ret =
+                     { et_enforced = false;
+                       et_type =
+                       (Rhint (root|at_most_rx_as_func.php line 5, characters 38-41),
+                        (Tprim Tbool))
+                       };
+                     ft_flags =
+                     (make_ft_flags sync none ~return_disposable:false
+                       ~returns_mutable:false ~returns_void_to_rx:false);
+                     ft_reactive = RxVar {} }))
+               };
+              fp_flags =
+              (make_fp_flags ~mutability:none ~accept_disposable:false
+                ~has_default:false ~mode:FPnormal);
+               };
+            { fp_pos = [6:5-7]; fp_name = (Some "$x");
+              fp_type =
+              { et_enforced = false;
+                et_type =
+                (Rhint (root|at_most_rx_as_func.php line 6, characters 3-3),
+                 (Tgeneric ("T", [])))
               };
-            ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
-              ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Reactive {} }));
-      fe_deprecated = None;  } };
-  typedefs = {}; consts = {} }
+            fp_flags =
+            (make_fp_flags ~mutability:none ~accept_disposable:false
+              ~has_default:false ~mode:FPnormal);
+             }];
+       ft_ret =
+       { et_enforced = false;
+         et_type =
+         (Rhint (root|at_most_rx_as_func.php line 7, characters 4-7),
+          (Tprim Tbool))
+         };
+       ft_flags =
+       (make_ft_flags sync none ~return_disposable:false
+         ~returns_mutable:false ~returns_void_to_rx:false);
+       ft_reactive = Reactive {} }));
+    fe_deprecated = None;
+    
+    } }; typedefs = {}; consts = {}
+}
 
 They matched!

@@ -133,7 +133,8 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
               let substs = SMap.add tparam_name lower_bound substs in
               (tpenv, substs)
             | _ ->
-              let tparam_ty = mk (r, Tgeneric tparam_name) in
+              (* TODO(T69551141) handle type arguments for Tgeneric *)
+              let tparam_ty = mk (r, Tgeneric (tparam_name, [])) in
               let substs = SMap.add tparam_name tparam_ty substs in
               (tpenv, substs)
           in
@@ -153,7 +154,8 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
     | None -> (substs, None)
     | Some subst ->
       (match get_node subst with
-      | Tgeneric tparam' when String.( <> ) tparam' tparam ->
+      | Tgeneric (tparam', _tyargs) when String.( <> ) tparam' tparam ->
+        (* TODO(T69551141) handle type arguments *)
         let (substs, new_subst_opt) = reduce substs tparam' in
         begin
           match new_subst_opt with

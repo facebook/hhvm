@@ -316,7 +316,9 @@ and ptype ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
   let ptype = ptype ?prefix lump_pol_opt proto_renv in
   match T.get_node t with
   | T.Tprim _ -> Tprim (get_policy lump_pol_opt proto_renv ?prefix)
-  | T.Tgeneric _ -> Tgeneric (get_policy lump_pol_opt proto_renv ?prefix)
+  | T.Tgeneric (_name, _targs) ->
+    (* TODO(T69551141) Handle type arguments *)
+    Tgeneric (get_policy lump_pol_opt proto_renv ?prefix)
   | T.Ttuple tyl -> Ttuple (List.map ~f:ptype tyl)
   | T.Tunion tyl -> Tunion (List.map ~f:ptype tyl)
   | T.Tintersection tyl -> Tinter (List.map ~f:ptype tyl)

@@ -1405,7 +1405,8 @@ and class_constr_def env cls constructor =
 and class_implements_type env c1 removals ctype2 =
   let params =
     List.map c1.c_tparams.c_tparam_list (fun { tp_name = (p, s); _ } ->
-        mk (Reason.Rwitness p, Tgeneric s))
+        (* TODO(T69551141) handle type arguments *)
+        mk (Reason.Rwitness p, Tgeneric (s, [])))
   in
   let r = Reason.Rwitness (fst c1.c_name) in
   let ctype1 = mk (r, Tapply (c1.c_name, params)) in

@@ -182,13 +182,14 @@ let rec localize ~ety_env env (dty : decl_ty) =
     let (env, tk) = tvar_or_localize ~ety_env env r tk ~i:0 in
     let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
     (env, MakeType.varray_or_darray r tk tv)
-  | (r, Tgeneric x) ->
+  | (r, Tgeneric (x, _targs)) ->
+    (* TODO(T69551141) handle type arguments above and below *)
     begin
       match SMap.find_opt x ety_env.substs with
       | Some x_ty ->
         let (env, x_ty) = Env.expand_type env x_ty in
         (env, mk (Reason.Rinstantiate (get_reason x_ty, x, r), get_node x_ty))
-      | None -> (env, mk (r, Tgeneric x))
+      | None -> (env, mk (r, Tgeneric (x, [])))
     end
   | (r, Toption ty) ->
     let (env, ty) = localize ~ety_env env ty in
@@ -329,7 +330,8 @@ let rec localize ~ety_env env (dty : decl_ty) =
     in
     let (env, base) = localize ~ety_env env dbase in
     (match deref base with
-    | (r, Tgeneric tp) ->
+    | (r, Tgeneric (tp, _targs)) ->
+      (* TODO(T69551141) handle type arguments *)
       let member = (Reason.to_pos r, tp) in
       if guess_if_pu env tp then
         (env, mk (r, Tpu_type_access (member, enum_or_tyname)))
@@ -368,7 +370,8 @@ and localize_tparam pos (env, ety_env) ty tparam =
     let (env, new_name) =
       Env.add_fresh_generic_parameter env name ~reified ~enforceable ~newable
     in
-    let ty_fresh = mk (r, Tgeneric new_name) in
+    (* TODO(T69551141) handle type arguments *)
+    let ty_fresh = mk (r, Tgeneric (new_name, [])) in
     (* Substitute fresh type parameters for original formals in constraint *)
     let substs = SMap.add name ty_fresh ety_env.substs in
     let ety_env = { ety_env with substs } in
@@ -756,7 +759,8 @@ let localize_generic_parameters_with_bounds
   let env = Env.add_generic_parameters env tparams in
   let localize_bound
       env ({ tp_name = (pos, name); tp_constraints = cstrl; _ } : decl_tparam) =
-    let tparam_ty = mk (Reason.Rwitness pos, Tgeneric name) in
+    (* TODO(T69551141) handle type arguments for Tgeneric *)
+    let tparam_ty = mk (Reason.Rwitness pos, Tgeneric (name, [])) in
     List.map_env env cstrl (fun env (ck, cstr) ->
         let (env, ty) = localize env cstr ~ety_env in
         (env, (tparam_ty, ck, ty)))

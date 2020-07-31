@@ -131,6 +131,7 @@ type destructure_kind =
 type 'ty tparam = {
   tp_variance: Ast_defs.variance;
   tp_name: Ast_defs.id;
+  (* tp_parameters: 'ty tparam list; *)
   tp_constraints: (Ast_defs.constraint_kind * 'ty) list;
   tp_reified: Aast.reify_kind;
   tp_user_attributes: Nast.user_attribute list;
@@ -244,11 +245,12 @@ and _ ty_ =
        * known arms.
        *)
   | Tvar : Ident.t -> 'phase ty_
-  | Tgeneric : string -> 'phase ty_
+  | Tgeneric : string * 'phase ty list -> 'phase ty_
       (** The type of a generic parameter. The constraints on a generic parameter
        * are accessed through the lenv.tpenv component of the environment, which
        * is set up when checking the body of a function or method. See uses of
-       * Typing_phase.add_generic_parameters_and_constraints.
+       * Typing_phase.add_generic_parameters_and_constraints. The list denotes
+       * type arguments.
        *)
   | Tunion : 'phase ty list -> 'phase ty_
       (** Union type.

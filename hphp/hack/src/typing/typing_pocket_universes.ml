@@ -96,7 +96,9 @@ let expand_pocket_universes env reason base enum (ty : locl_ty) tyname =
     let member = (Reason.to_pos r, atom) in
     let (env, ty) = expand_atom env reason base enum member tyname in
     (env, Some ty)
-  | (r, Tgeneric s) -> apply env reason (Reason.to_pos r) s tyname
+  | (r, Tgeneric (s, _tyargs)) ->
+    (* TODO(T69551141) handle type arguments *)
+    apply env reason (Reason.to_pos r) s tyname
   | (r, Tdependent (dep_ty, bound)) ->
     let (env, bound) = Env.expand_type env bound in
     (match deref bound with
@@ -113,7 +115,8 @@ let expand_pocket_universes env reason base enum (ty : locl_ty) tyname =
       (* TODO(T59317869): play well with flow sensitivity *)
       let env = Env.add_upper_bound_global env gen bound in
       apply env new_r (Reason.to_pos r) gen tyname
-    | (_, Tgeneric gen) ->
+    | (_, Tgeneric (gen, _tyargs)) ->
+      (* TODO(T69551141) handle type arguments *)
       (* Patch the location for better error reporting *)
       let rdep =
         match r with

@@ -74,10 +74,12 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit =
          a1);
     Format.fprintf fmt "@,]@]";
     Format.fprintf fmt "@,))@]"
-  | Tgeneric a0 ->
-    Format.fprintf fmt "(@[<2>Tgeneric@ ";
+  | Tgeneric (a0, a1) ->
+    Format.fprintf fmt "(@[<2>Tgeneric (@,";
     Format.fprintf fmt "%S" a0;
-    Format.fprintf fmt "@])"
+    Format.fprintf fmt ",@ ";
+    pp_ty_list fmt a1;
+    Format.fprintf fmt "@,)@]"
   | Taccess a0 ->
     Format.fprintf fmt "(@[<2>Taccess@ ";
     pp_taccess_type fmt a0;

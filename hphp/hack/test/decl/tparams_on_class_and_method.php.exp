@@ -29,93 +29,89 @@ Parsed decls:
                   { et_enforced = false;
                     et_type =
                     (Rhint (root|tparams_on_class_and_method.php line 4, characters 25-26),
-                     (Tgeneric "Ta"))
-                    };
-                  fp_flags =
-                  (make_fp_flags ~mutability:none ~accept_disposable:false
-                    ~has_default:false ~mode:FPnormal);
-                   };
-                 { fp_pos = [4:35-37]; fp_name = (Some "$c");
-                   fp_type =
-                   { et_enforced = false;
-                     et_type =
-                     (Rhint (root|tparams_on_class_and_method.php line 4, characters 32-33),
-                      (Tgeneric "Tc"))
-                     };
-                   fp_flags =
-                   (make_fp_flags ~mutability:none ~accept_disposable:false
-                     ~has_default:false ~mode:FPnormal);
-                    }
-                 ];
-               ft_ret =
+                     (Tgeneric ("Ta", [])))
+                  };
+                 fp_flags =
+                 (make_fp_flags ~mutability:none ~accept_disposable:false
+                   ~has_default:false ~mode:FPnormal);
+                  };
+               { fp_pos = [4:35-37]; fp_name = (Some "$c");
+                 fp_type =
+                 { et_enforced = false;
+                   et_type =
+                   (Rhint (root|tparams_on_class_and_method.php line 4, characters 32-33),
+                    (Tgeneric ("Tc", [])))
+                 };
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~has_default:false ~mode:FPnormal);
+                }];
+          ft_ret =
+          { et_enforced = false;
+            et_type =
+            (Rhint (root|tparams_on_class_and_method.php line 4, characters 40-47),
+             (Ttuple
+                [(Rhint (root|tparams_on_class_and_method.php line 4, characters 41-42),
+                  (Tgeneric ("Ta", [])));
+                (Rhint (root|tparams_on_class_and_method.php line 4, characters 45-46),
+                 (Tgeneric ("Tc", [])))
+             ]))
+          };
+         ft_flags =
+         (make_ft_flags sync none ~return_disposable:false
+           ~returns_mutable:false ~returns_void_to_rx:false);
+         ft_reactive = Nonreactive }));
+    sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
+    { Shallow_decl_defs.sm_abstract = false; sm_final = false;
+      sm_memoizelsb = false; sm_name = ([8:19-20], "g"); sm_override = false;
+      sm_dynamicallycallable = false; sm_reactivity = None;
+      sm_type =
+      (Rwitness (root|tparams_on_class_and_method.php line 8, characters 19-19),
+       (Tfun
+          { ft_arity = (Fstandard ());
+            ft_tparams = [(Invariant, ([8:21-23], "Td"), [])];
+            ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [8:28-30]; fp_name = (Some "$b");
+               fp_type =
                { et_enforced = false;
                  et_type =
-                 (Rhint (root|tparams_on_class_and_method.php line 4, characters 40-47),
-                  (Ttuple
-                     [(Rhint (root|tparams_on_class_and_method.php line 4, characters 41-42),
-                       (Tgeneric "Ta"));
-                       (Rhint (root|tparams_on_class_and_method.php line 4, characters 45-46),
-                        (Tgeneric "Tc"))
-                       ]))
-                 };
-               ft_flags =
-               (make_ft_flags sync none ~return_disposable:false
-                 ~returns_mutable:false ~returns_void_to_rx:false);
-               ft_reactive = Nonreactive }));
-         sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
-        { Shallow_decl_defs.sm_abstract = false; sm_final = false;
-          sm_memoizelsb = false; sm_name = ([8:19-20], "g");
-          sm_override = false; sm_dynamicallycallable = false;
-          sm_reactivity = None;
-          sm_type =
-          (Rwitness (root|tparams_on_class_and_method.php line 8, characters 19-19),
-           (Tfun
-              { ft_arity = (Fstandard ());
-                ft_tparams = [(Invariant, ([8:21-23], "Td"), [])];
-                ft_where_constraints = [];
-                ft_params =
-                [{ fp_pos = [8:28-30]; fp_name = (Some "$b");
-                   fp_type =
-                   { et_enforced = false;
-                     et_type =
-                     (Rhint (root|tparams_on_class_and_method.php line 8, characters 25-26),
-                      (Tgeneric "Tb"))
-                     };
-                   fp_flags =
-                   (make_fp_flags ~mutability:none ~accept_disposable:false
-                     ~has_default:false ~mode:FPnormal);
-                    };
-                  { fp_pos = [8:35-37]; fp_name = (Some "$d");
-                    fp_type =
-                    { et_enforced = false;
-                      et_type =
-                      (Rhint (root|tparams_on_class_and_method.php line 8, characters 32-33),
-                       (Tgeneric "Td"))
-                      };
-                    fp_flags =
-                    (make_fp_flags ~mutability:none ~accept_disposable:false
-                      ~has_default:false ~mode:FPnormal);
-                     }
-                  ];
-                ft_ret =
-                { et_enforced = false;
-                  et_type =
-                  (Rhint (root|tparams_on_class_and_method.php line 8, characters 40-47),
-                   (Ttuple
-                      [(Rhint (root|tparams_on_class_and_method.php line 8, characters 41-42),
-                        (Tgeneric "Tb"));
-                        (Rhint (root|tparams_on_class_and_method.php line 8, characters 45-46),
-                         (Tgeneric "Td"))
-                        ]))
-                  };
-                ft_flags =
-                (make_ft_flags sync none ~return_disposable:false
-                  ~returns_mutable:false ~returns_void_to_rx:false);
-                ft_reactive = Nonreactive }));
-          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
-        ];
-      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
-      } };
-  funs = {}; typedefs = {}; consts = {} }
+                 (Rhint (root|tparams_on_class_and_method.php line 8, characters 25-26),
+                  (Tgeneric ("Tb", [])))
+               };
+              fp_flags =
+              (make_fp_flags ~mutability:none ~accept_disposable:false
+                ~has_default:false ~mode:FPnormal);
+               };
+            { fp_pos = [8:35-37]; fp_name = (Some "$d");
+              fp_type =
+              { et_enforced = false;
+                et_type =
+                (Rhint (root|tparams_on_class_and_method.php line 8, characters 32-33),
+                 (Tgeneric ("Td", [])))
+              };
+            fp_flags =
+            (make_fp_flags ~mutability:none ~accept_disposable:false
+              ~has_default:false ~mode:FPnormal);
+             }];
+       ft_ret =
+       { et_enforced = false;
+         et_type =
+         (Rhint (root|tparams_on_class_and_method.php line 8, characters 40-47),
+          (Ttuple
+             [(Rhint (root|tparams_on_class_and_method.php line 8, characters 41-42),
+               (Tgeneric ("Tb", [])));
+             (Rhint (root|tparams_on_class_and_method.php line 8, characters 45-46),
+              (Tgeneric ("Td", [])))
+          ]))
+       };
+      ft_flags =
+      (make_ft_flags sync none ~return_disposable:false
+        ~returns_mutable:false ~returns_void_to_rx:false);
+      ft_reactive = Nonreactive })); sm_visibility = Public;
+sm_fixme_codes = {}; sm_deprecated = None }]; sc_user_attributes = [];
+sc_enum_type = None; sc_decl_errors = <opaque> } }; funs = {}; typedefs = {};
+consts = {}
+}
 
 They matched!

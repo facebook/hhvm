@@ -115,24 +115,24 @@ Parsed decls:
                { et_enforced = false;
                  et_type =
                  (Rhint (root|like_types.php line 6, characters 23-23),
-                  (Tgeneric "T"))
-                 };
-               fp_flags =
-               (make_fp_flags ~mutability:none ~accept_disposable:false
-                 ~has_default:false ~mode:FPnormal);
-                }
-              ];
-            ft_ret =
-            { et_enforced = false;
-              et_type =
-              (Rhint (root|like_types.php line 6, characters 30-33),
-               (Tprim Tvoid))
-              };
-            ft_flags =
-            (make_ft_flags sync none ~return_disposable:false
-              ~returns_mutable:false ~returns_void_to_rx:false);
-            ft_reactive = Nonreactive }));
-      fe_deprecated = None;  } };
-  typedefs = {}; consts = {} }
+                  (Tgeneric ("T", [])))
+               };
+              fp_flags =
+              (make_fp_flags ~mutability:none ~accept_disposable:false
+                ~has_default:false ~mode:FPnormal);
+               }
+            ];
+          ft_ret =
+          { et_enforced = false;
+            et_type =
+            (Rhint (root|like_types.php line 6, characters 30-33),
+             (Tprim Tvoid))
+            };
+          ft_flags =
+          (make_ft_flags sync none ~return_disposable:false
+            ~returns_mutable:false ~returns_void_to_rx:false);
+          ft_reactive = Nonreactive }));
+    fe_deprecated = None;  } }; typedefs = {}; consts = {}
+}
 
 They matched!

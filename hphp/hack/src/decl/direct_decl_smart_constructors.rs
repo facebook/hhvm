@@ -1062,7 +1062,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 let Id(pos, name) = self.get_name("", node)?;
                 let reason = self.alloc(Reason::hint(pos));
                 let ty_ = if self.is_type_param_in_scope(name) {
-                    Ty_::Tgeneric(name)
+                    // TODO (T69662957) must fill type args of Tgeneric
+                    Ty_::Tgeneric(self.alloc((name, &[])))
                 } else {
                     match name.as_ref() {
                         "nothing" => Ty_::Tunion(&[]),
@@ -1406,7 +1407,10 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 // the name with the current namespace (as it does for any
                 // Tapply). We need to remove it.
                 match id.1.rsplit('\\').next() {
-                    Some(name) if self.is_type_param_in_scope(name) => Ty_::Tgeneric(name),
+                    // TODO (T69662957) must fill type args of Tgeneric
+                    Some(name) if self.is_type_param_in_scope(name) => {
+                        Ty_::Tgeneric(self.alloc((name, &[])))
+                    }
                     _ => return ty,
                 }
             }

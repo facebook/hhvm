@@ -318,7 +318,7 @@ module Full = struct
     | Tvarray_or_darray (x, y) -> tvarray_or_darray k x y
     | Tarray (x, y) -> tarray k x y
     | Tapply ((_, s), []) -> to_doc s
-    | Tgeneric s -> to_doc s
+    | Tgeneric (s, []) -> to_doc s
     | Taccess (root_ty, ids) ->
       Concat
         [
@@ -336,7 +336,9 @@ module Full = struct
     | Tfun ft -> tfun ~ty to_doc st env ft
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
-    | Tapply ((_, s), tyl) -> to_doc s ^^ list "<" k tyl ">"
+    | Tapply ((_, s), tyl)
+    | Tgeneric (s, tyl) ->
+      to_doc s ^^ list "<" k tyl ">"
     | Ttuple tyl -> ttuple k tyl
     | Tunion tyl -> Concat [text "|"; ttuple k tyl]
     | Tintersection tyl -> Concat [text "&"; ttuple k tyl]
@@ -414,9 +416,12 @@ module Full = struct
         | Exact when !debug_mode -> Concat [text "exact"; Space; d]
         | _ -> d
       end
-    | Tgeneric s -> to_doc s
-    | Tnewtype (s, [], _) -> to_doc s
-    | Tnewtype (s, tyl, _) -> to_doc s ^^ list "<" k tyl ">"
+    | Tnewtype (s, [], _)
+    | Tgeneric (s, []) ->
+      to_doc s
+    | Tnewtype (s, tyl, _)
+    | Tgeneric (s, tyl) ->
+      to_doc s ^^ list "<" k tyl ">"
     | Tdependent (dep, cstr) ->
       let cstr_info =
         if !debug_mode then
@@ -754,9 +759,9 @@ module ErrorString = struct
     | Tprim tp -> tprim tp
     | Tvar _ -> "some value"
     | Tfun _ -> "a function"
-    | Tgeneric s when DependentKind.is_generic_dep_ty s ->
-      "the expression dependent type " ^ s
-    | Tgeneric x -> "a value of generic type " ^ x
+    | Tgeneric (s, tyl) when DependentKind.is_generic_dep_ty s ->
+      "the expression dependent type " ^ s ^ inst env tyl
+    | Tgeneric (x, tyl) -> "a value of generic type " ^ x ^ inst env tyl
     | Tnewtype (x, _, _) when String.equal x SN.Classes.cClassname ->
       "a classname string"
     | Tnewtype (x, _, _) when String.equal x SN.Classes.cTypename ->
@@ -914,7 +919,9 @@ module Json = struct
       obj @@ kind p "any"
     | (p, Tnonnull) -> obj @@ kind p "nonnull"
     | (p, Tdynamic) -> obj @@ kind p "dynamic"
-    | (p, Tgeneric s) -> obj @@ kind p "generic" @ is_array true @ name s
+    | (p, Tgeneric (s, _tyargs)) ->
+      (* TODO(T69551141) handle type arguments *)
+      obj @@ kind p "generic" @ is_array true @ name s
     | (p, Tnewtype (s, _, ty)) when Typing_env.is_enum env s ->
       obj @@ kind p "enum" @ name s @ as_type ty
     | (p, Tnewtype (s, tys, ty)) ->
@@ -1041,7 +1048,8 @@ module Json = struct
           get_bool "is_array" (json, keytrace)
           >>= fun (is_array, _is_array_keytrace) ->
           if is_array then
-            ty (Tgeneric name)
+            (* TODO(T69551141) handle type arguments *)
+            ty (Tgeneric (name, []))
           else
             wrong_phase ~message:"Tgeneric is a decl-phase type." ~keytrace
         | "enum" ->

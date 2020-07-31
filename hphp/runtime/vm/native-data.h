@@ -36,6 +36,7 @@ struct NativeDataInfo {
 
   size_t sz;
   uint8_t rt_attrs;
+  bool ctor_throws;
   type_scan::Index tyindex;
   InitFunc init; // new Object
   CopyFunc copy; // clone $obj
@@ -92,7 +93,8 @@ void registerNativeDataInfo(const StringData* name,
                             NativeDataInfo::SleepFunc sleep,
                             NativeDataInfo::WakeupFunc wakeup,
                             type_scan::Index tyindex,
-                            uint8_t rt_attrs = 0);
+                            uint8_t rt_attrs = 0,
+                            bool ctor_throws = false);
 
 template<class T>
 void nativeDataInfoInit(ObjectData* obj) {
@@ -212,6 +214,10 @@ enum NDIFlags {
   // since memory props won't get setup/torn-down
   NO_COPY        = (1<<0),
   NO_SWEEP       = (1<<1),
+  // Forbid all forms of construction from hack code by throwing in the
+  // instanceCtor (i.e. only native funcs using other allocation code paths
+  // can create instances).
+  CTOR_THROWS    = (1<<2),
 };
 
 template<class T>
@@ -243,7 +249,8 @@ typename std::enable_if<
     hasSleep<T, Variant() const>::value ? ndisl : nullptr,
     hasWakeup<T, void(const Variant&, ObjectData*)>::value ? ndiw : nullptr,
     nativeTyindex<T>(),
-    rt_attrs);
+    rt_attrs,
+    (flags & NDIFlags::CTOR_THROWS));
 }
 
 // Return the ObjectData payload allocated after this NativeNode header

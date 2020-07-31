@@ -134,7 +134,9 @@ void AsyncGenerator::failCpp() {
 void AsioExtension::initAsyncGenerator() {
   Native::registerNativeDataInfo<AsyncGenerator>(
     AsyncGenerator::s_className.get(),
-    Native::NDIFlags::NO_SWEEP | Native::NDIFlags::NO_COPY);
+    Native::NDIFlags::NO_SWEEP | Native::NDIFlags::NO_COPY |
+      Native::NDIFlags::CTOR_THROWS
+  );
   loadSystemlib("async-generator");
   AsyncGenerator::s_class =
     Unit::lookupClass(AsyncGenerator::s_className.get());

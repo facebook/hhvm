@@ -3689,14 +3689,27 @@ void Class::setInstanceMemoCacheInfo() {
   }
 }
 
+namespace {
+ObjectData* throwingInstanceCtor(Class* cls) {
+  SystemLib::throwExceptionObject(
+    folly::sformat("Class {} may not be directly instantiated", cls->name())
+  );
+}
+} // namespace
+
 void Class::setNativeDataInfo() {
   for (auto cls = this; cls; cls = cls->parent()) {
     if (auto ndi = cls->preClass()->nativeDataInfo()) {
       allocExtraData();
       m_extra.raw()->m_nativeDataInfo = ndi;
-      m_extra.raw()->m_instanceCtor = Native::nativeDataInstanceCtor<false>;
-      m_extra.raw()->m_instanceCtorUnlocked =
-        Native::nativeDataInstanceCtor<true>;
+      if (ndi->ctor_throws) {
+        m_extra.raw()->m_instanceCtor = throwingInstanceCtor;
+        m_extra.raw()->m_instanceCtorUnlocked = throwingInstanceCtor;
+      } else {
+        m_extra.raw()->m_instanceCtor = Native::nativeDataInstanceCtor<false>;
+        m_extra.raw()->m_instanceCtorUnlocked =
+          Native::nativeDataInstanceCtor<true>;
+      }
       m_extra.raw()->m_instanceDtor = Native::nativeDataInstanceDtor;
       m_releaseFunc = Native::nativeDataInstanceDtor;
       m_RTAttrs |= ndi->rt_attrs;

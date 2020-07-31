@@ -190,7 +190,7 @@ struct GeneratorExtension final : Extension {
     HHVM_ME(Generator, getCalledClass);
     Native::registerNativeDataInfo<Generator>(
       Generator::s_className.get(),
-      Native::NDIFlags::NO_SWEEP);
+      Native::NDIFlags::NO_SWEEP | Native::NDIFlags::CTOR_THROWS);
     loadSystemlib("generator");
     Generator::s_class = Unit::lookupClass(Generator::s_className.get());
     assertx(Generator::s_class);

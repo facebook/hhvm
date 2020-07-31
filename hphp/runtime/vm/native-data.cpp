@@ -74,7 +74,8 @@ void registerNativeDataInfo(const StringData* name,
                             NativeDataInfo::SleepFunc sleep,
                             NativeDataInfo::WakeupFunc wakeup,
                             type_scan::Index tyindex,
-                            uint8_t rt_attrs) {
+                            uint8_t rt_attrs,
+                            bool ctor_throws) {
   assertx(s_nativedatainfo.find(name) == s_nativedatainfo.end());
   assertx((sleep == nullptr && wakeup == nullptr) ||
          (sleep != nullptr && wakeup != nullptr));
@@ -88,6 +89,7 @@ void registerNativeDataInfo(const StringData* name,
   info.sweep = sweep;
   info.sleep = sleep;
   info.wakeup = wakeup;
+  info.ctor_throws = ctor_throws;
   s_nativedatainfo[name] = info;
 }
 

@@ -263,6 +263,7 @@ ALWAYS_INLINE void Countable::rawIncRefCount() const {
 ALWAYS_INLINE void MaybeCountable::decRefCount() const {
   assertx(!tl_sweeping);
   assertx(checkCount());
+  assertx(hasMultipleRefs());
   if (one_bit_refcount) return;
 
   if (isRefCounted()) --m_count;
@@ -271,6 +272,7 @@ ALWAYS_INLINE void MaybeCountable::decRefCount() const {
 ALWAYS_INLINE void Countable::decRefCount() const {
   assertx(!tl_sweeping);
   assertx(checkCount());
+  assertx(hasMultipleRefs());
   if (one_bit_refcount) return;
 
   --m_count;

@@ -1,0 +1,1 @@
+Fatal error: Call to private IntlIterator::__construct() from invalid context in %s/ext_icu/no_new_intl_iterator.php on line 4

@@ -4797,9 +4797,6 @@ void in(ISS& env, const bc::OODeclExists& op) {
         constprop(env);
         return mayExist ? TTrue : TFalse;
       }
-      if (!any(env.collect.opts & CollectionOpts::Inlining)) {
-        unit->persistent.store(false, std::memory_order_relaxed);
-      }
       // At this point, if it mayExist, we still don't know that it
       // *does* exist, but if not we know that it either doesn't
       // exist, or it doesn't have the right type.

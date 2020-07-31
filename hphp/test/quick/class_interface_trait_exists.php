@@ -15,7 +15,6 @@ function main() {
     __DIR__.'/',
   );
 
-  var_dump(class_exists('fooo', false));
   var_dump(class_exists('fooo'));
   var_dump(class_exists('tttt'));
   var_dump(class_exists('cccc'));

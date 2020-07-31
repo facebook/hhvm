@@ -4,8 +4,8 @@ object(X) (0) {
 }
 object(Y) (0) {
 }
-bool(false)
-bool(false)
+bool(true)
+bool(true)
 object(X) (0) {
 }
 object(Y) (0) {

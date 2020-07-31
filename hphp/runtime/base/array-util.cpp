@@ -122,7 +122,7 @@ Variant ArrayUtil::PadLeft(const Array& input, const Variant& pad_value,
   }
 
   ArrayData* data;
-  if (input.get()->hasVanillaPackedLayout()) {
+  if (input->isVecType() || input->isVArray()) {
     data = PackedArray::MakeReserveVArray(pad_size);
   } else {
     data = MixedArray::MakeReserveDArray(pad_size);

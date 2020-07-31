@@ -67,15 +67,6 @@ inline size_t getContainerSize(const Variant& v) {
   return getContainerSize(*v.asTypedValue());
 }
 
-inline bool isPackedContainer(const TypedValue c) {
-  assertx(isContainer(c));
-  if (isArrayLikeType(c.m_type)) {
-    return c.m_data.parr->hasVanillaPackedLayout();
-  }
-
-  return isVectorCollection(c.m_data.pobj->collectionType());
-}
-
 ALWAYS_INLINE
 const TypedValue container_as_tv(const Variant& container) {
   const auto& cellContainer = *container.asTypedValue();

@@ -231,6 +231,7 @@ public:
   bool isDArray() const { return m_arr && m_arr->isDArray(); }
   bool isHAMSafeVArray() const { return m_arr && m_arr->isHAMSafeVArray(); }
   bool isHAMSafeDArray() const { return m_arr && m_arr->isHAMSafeDArray(); }
+  bool isHAMSafeDVArray() const { return m_arr && m_arr->isHAMSafeDVArray(); }
 
   /////////////////////////////////////////////////////////////////////////////
 

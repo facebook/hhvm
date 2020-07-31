@@ -308,6 +308,7 @@ public:
   bool isNotDVArray() const;
   bool isHAMSafeVArray() const;
   bool isHAMSafeDArray() const;
+  bool isHAMSafeDVArray() const;
 
   static bool dvArrayEqual(const ArrayData* a, const ArrayData* b);
 

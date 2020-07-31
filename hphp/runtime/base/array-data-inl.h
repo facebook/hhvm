@@ -207,6 +207,10 @@ inline bool ArrayData::isHAMSafeVArray() const {
 inline bool ArrayData::isHAMSafeDArray() const {
   return RuntimeOption::EvalHackArrDVArrs ? isDictType() : isDArray();
 }
+inline bool ArrayData::isHAMSafeDVArray() const {
+  return RuntimeOption::EvalHackArrDVArrs ? isDictType() || isVecType()
+                                          : isDVArray();
+}
 
 inline bool ArrayData::dvArrayEqual(const ArrayData* a, const ArrayData* b) {
   static_assert(kMixedKind == 0);

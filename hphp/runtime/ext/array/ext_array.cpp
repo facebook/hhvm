@@ -653,14 +653,15 @@ TypedValue HHVM_FUNCTION(array_pad,
                          const Variant& pad_value) {
   getCheckedArray(input);
   auto arr = [&](){
-    if (UNLIKELY(input.isDict() || input.isKeyset())) {
+    if (UNLIKELY(arr_input.isDict() || arr_input.isKeyset())) {
       return arr_input.toDArray();
-    } else if (UNLIKELY(input.isVec())) {
+    } else if (UNLIKELY(arr_input.isVec())) {
       return arr_input.toVArray();
     } else {
       return arr_input;
     }
   }();
+  assertx(arr->isHAMSafeDVArray());
   if (pad_size > 0) {
     return tvReturn(ArrayUtil::PadRight(arr, pad_value, pad_size));
   } else {
@@ -899,8 +900,20 @@ TypedValue HHVM_FUNCTION(array_slice,
     return make_persistent_array_like_tv(ArrayData::Create());
   }
 
-  bool input_is_packed = isClsMethType(cell_input.m_type) ||
-    isPackedContainer(cell_input);
+  bool input_is_packed = [&] {
+    if (isClsMethType(cell_input.m_type)) {
+      return true;
+    } else if (isArrayLikeType(cell_input.m_type)) {
+      auto const ad = cell_input.m_data.parr;
+      return ad->isVecType() || ad->isVArray();
+    }
+
+    assertx(cell_input.m_type == KindOfObject);
+    assertx(cell_input.m_data.pobj->isCollection());
+
+    return isVectorCollection(cell_input.m_data.pobj->collectionType());
+  }();
+
 
   // If the slice covers the entire input container, we can just nop when
   // preserve_keys is true, or when preserve_keys is false but the container

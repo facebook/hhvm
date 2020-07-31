@@ -304,6 +304,14 @@ void emitThrowNonExhaustiveSwitch(IRGS& env) {
   not_reached();
 }
 
+const StaticString s_class_to_string(Strings::CLASS_TO_STRING);
+
+void emitRaiseClassStringConversionWarning(IRGS& env) {
+  if (RuntimeOption::EvalRaiseClassConversionWarning) {
+      gen(env, RaiseWarning, cns(env, s_class_to_string.get()));
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void emitSelect(IRGS& env) {

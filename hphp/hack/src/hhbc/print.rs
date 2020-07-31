@@ -1818,6 +1818,7 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
         M::UGetCUNop => w.write("UGetCUNop"),
         M::LockObj => w.write("LockObj"),
         M::ThrowNonExhaustiveSwitch => w.write("ThrowNonExhaustiveSwitch"),
+        M::RaiseClassStringConversionWarning => w.write("RaiseClassStringConversionWarning"),
         M::VerifyParamType(id) => {
             w.write("VerifyParamType ")?;
             print_param_id(w, id)

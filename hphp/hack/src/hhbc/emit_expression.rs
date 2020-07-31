@@ -2252,12 +2252,12 @@ fn emit_args_inout_setters(
                                     false,
                                 )?
                                 .0;
+                                let (mk, warninstr) =
+                                    get_elem_member_key(e, env, 0, ag.1.as_ref(), false)?;
                                 let setter = InstrSeq::gather(vec![
+                                    warninstr,
                                     setter_base,
-                                    instr::setm(
-                                        0,
-                                        get_elem_member_key(e, env, 0, ag.1.as_ref(), false)?,
-                                    ),
+                                    instr::setm(0, mk),
                                     instr::popc(),
                                 ]);
                                 (instrs, setter)
@@ -3469,7 +3469,7 @@ fn emit_array_get_(
                 ArrayGetBase::Regular(base) => base.cls_stack_size,
                 ArrayGetBase::Inout { load, .. } => load.cls_stack_size,
             };
-            let memberkey =
+            let (memberkey, warninstr) =
                 get_elem_member_key(e, env, cls_stack_size, elem, null_coalesce_assignment)?;
             let mut querym_n_unpopped = None;
             let mut make_final = |total_stack_size: StackIndex| -> InstrSeq {
@@ -3487,6 +3487,7 @@ fn emit_array_get_(
                 // neither base nor expression needs to store anything
                 {
                     ArrayGetInstr::Regular(InstrSeq::gather(vec![
+                        warninstr,
                         base.base_instrs,
                         elem_instrs,
                         base.cls_instrs,
@@ -3507,6 +3508,7 @@ fn emit_array_get_(
                         // finish loading the value
                         (
                             InstrSeq::gather(vec![
+                                warninstr,
                                 base.base_instrs,
                                 emit_pos(outer_pos),
                                 base.setup_instrs,
@@ -3549,6 +3551,7 @@ fn emit_array_get_(
                     // simply concat two instruction sequences
                     base_instrs.push((
                         InstrSeq::gather(vec![
+                            warninstr,
                             elem_instrs,
                             cls_instrs,
                             emit_pos(outer_pos),
@@ -3584,6 +3587,7 @@ fn emit_array_get_(
                     base_instrs.push((elem_instrs, Some((local.clone(), local_kind))));
                     base_instrs.push((
                         InstrSeq::gather(vec![
+                            warninstr,
                             cls_instrs,
                             emit_pos(outer_pos),
                             setup_instrs,
@@ -3661,31 +3665,34 @@ fn get_elem_member_key(
     stack_index: StackIndex,
     elem: Option<&tast::Expr>,
     null_coalesce_assignment: bool,
-) -> Result<MemberKey> {
+) -> Result<(MemberKey, InstrSeq)> {
     use tast::ClassId_ as CI_;
     use tast::Expr as E;
     use tast::Expr_ as E_;
     match elem {
         // ELement missing (so it's array append)
-        None => Ok(MemberKey::W),
+        None => Ok((MemberKey::W, instr::empty())),
         Some(elem_expr) => match &elem_expr.1 {
             // Special case for local
-            E_::Lvar(x) if !is_local_this(env, &x.1) => Ok({
-                if null_coalesce_assignment {
-                    MemberKey::EC(stack_index)
-                } else {
-                    MemberKey::EL(get_local(e, env, &x.0, local_id::get_name(&x.1))?)
-                }
-            }),
+            E_::Lvar(x) if !is_local_this(env, &x.1) => Ok((
+                {
+                    if null_coalesce_assignment {
+                        MemberKey::EC(stack_index)
+                    } else {
+                        MemberKey::EL(get_local(e, env, &x.0, local_id::get_name(&x.1))?)
+                    }
+                },
+                instr::empty(),
+            )),
             // Special case for literal integer
             E_::Int(s) => {
                 match ast_constant_folder::expr_to_typed_value(e, &env.namespace, elem_expr) {
-                    Ok(TypedValue::Int(i)) => Ok(MemberKey::EI(i)),
+                    Ok(TypedValue::Int(i)) => Ok((MemberKey::EI(i), instr::empty())),
                     _ => Err(Unrecoverable(format!("{} is not a valid integer index", s))),
                 }
             }
             // Special case for literal string
-            E_::String(s) => Ok(MemberKey::ET(s.clone())),
+            E_::String(s) => Ok((MemberKey::ET(s.clone()), instr::empty())),
             // Special case for class name
             E_::ClassConst(x)
                 if is_special_class_constant_accessed_with_class_id(&(x.0).1, &(x.1).1) =>
@@ -3701,11 +3708,18 @@ fn get_elem_member_key(
                         )),
                     };
                 let fq_id = class::Type::from_ast_name(&cname).to_raw_string().into();
-                Ok(MemberKey::ET(fq_id))
+                if e.options().emit_class_pointers() > 0 {
+                    Ok((
+                        MemberKey::ET(fq_id),
+                        instr::raise_class_string_conversion_warning(),
+                    ))
+                } else {
+                    Ok((MemberKey::ET(fq_id), instr::empty()))
+                }
             }
             _ => {
                 // General case
-                Ok(MemberKey::EC(stack_index))
+                Ok((MemberKey::EC(stack_index), instr::empty()))
             }
         },
     }
@@ -4782,7 +4796,7 @@ fn emit_base_(
                     ArrayGetBase::Regular(base) => base.cls_stack_size,
                     ArrayGetBase::Inout { load, .. } => load.cls_stack_size,
                 };
-                let mk = get_elem_member_key(
+                let (mk, warninstr) = get_elem_member_key(
                     e,
                     env,
                     base_offset + cls_stack_size,
@@ -4790,7 +4804,11 @@ fn emit_base_(
                     null_coalesce_assignment,
                 )?;
                 let make_setup_instrs = |base_setup_instrs: InstrSeq| {
-                    InstrSeq::gather(vec![base_setup_instrs, instr::dim(mode, mk.clone())])
+                    InstrSeq::gather(vec![
+                        warninstr,
+                        base_setup_instrs,
+                        instr::dim(mode, mk.clone()),
+                    ])
                 };
                 Ok(match (base_result, local_temp_kind) {
                     // both base and index don't use temps - fallback to default handler
@@ -5420,7 +5438,7 @@ pub fn emit_lval_op_nonlist_steps(
                         base_offset,
                         rhs_stack_size,
                     )?;
-                    let mk = get_elem_member_key(
+                    let (mk, warninstr) = get_elem_member_key(
                         e,
                         env,
                         rhs_stack_size + cls_stack_size,
@@ -5441,7 +5459,12 @@ pub fn emit_lval_op_nonlist_steps(
                             ])
                         },
                         rhs_instrs,
-                        InstrSeq::gather(vec![emit_pos(pos), base_setup_instrs, final_instr]),
+                        InstrSeq::gather(vec![
+                            emit_pos(pos),
+                            warninstr,
+                            base_setup_instrs,
+                            final_instr,
+                        ]),
                     )
                 }
             },

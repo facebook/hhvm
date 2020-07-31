@@ -763,6 +763,8 @@ constexpr uint32_t kMaxConcatN = 4;
   O(Silence,         TWO(LA,OA(SilenceOp)),                             \
                                        NOV,             NOV,        NF) \
   O(ThrowNonExhaustiveSwitch, NA,      NOV,             NOV,        NF) \
+  O(RaiseClassStringConversionWarning,                                  \
+                              NA,      NOV,             NOV,        NF) \
   O(BaseGC,          TWO(IVA, OA(MOpMode)),                             \
                                        NOV,             NOV,        NF) \
   O(BaseGL,          TWO(LA, OA(MOpMode)),                              \

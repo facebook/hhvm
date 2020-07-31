@@ -344,6 +344,8 @@ static const struct {
                                       Local,        OutNone         }},
   { OpThrowNonExhaustiveSwitch,
                    {None,             None,         OutNone         }},
+  { OpRaiseClassStringConversionWarning,
+                   {None,             None,         OutNone         }},
   { OpAssertRATL,  {None,             None,         OutNone         }},
   { OpAssertRATStk,{None,             None,         OutNone         }},
   { OpBreakTraceHint,{None,           None,         OutNone         }},
@@ -999,6 +1001,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Throw:
   case Op::ThrowAsTypeStructException:
   case Op::ThrowNonExhaustiveSwitch:
+  case Op::RaiseClassStringConversionWarning:
   case Op::True:
   case Op::UnsetL:
   case Op::VerifyParamType:

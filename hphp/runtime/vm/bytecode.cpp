@@ -2599,6 +2599,12 @@ OPTBLD_INLINE void iopThrowNonExhaustiveSwitch() {
   not_reached();
 }
 
+OPTBLD_INLINE void iopRaiseClassStringConversionWarning() {
+  if (RuntimeOption::EvalRaiseClassConversionWarning) {
+    raise_warning(Strings::CLASS_TO_STRING);
+  }
+}
+
 OPTBLD_INLINE void iopResolveClass(Id id) {
   auto const cname = vmfp()->unit()->lookupLitstrId(id);
   auto const class_ = Unit::loadClass(cname);

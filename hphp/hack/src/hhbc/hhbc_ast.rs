@@ -576,6 +576,7 @@ pub enum InstructMisc {
     MemoSetEager(Option<(local::Type, isize)>),
     LockObj,
     ThrowNonExhaustiveSwitch,
+    RaiseClassStringConversionWarning,
 }
 
 #[derive(Clone, Debug)]

@@ -1523,7 +1523,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::Shr:
       return true;
 
-    // type transformations
+    // type transformations and related warnings
     case Op::CastBool:
     case Op::CastInt:
     case Op::CastDouble:
@@ -1534,6 +1534,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::CastVArray:
     case Op::CastDArray:
     case Op::DblAsBits:
+    case Op::RaiseClassStringConversionWarning:
 
     // type tests and assertions
     case Op::IsTypeC:

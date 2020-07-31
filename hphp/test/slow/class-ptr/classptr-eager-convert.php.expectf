@@ -7,8 +7,12 @@ keyset(2) {
   string(3) "Bar"
 }
 
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 47
+
 Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 48
 bool(false)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 49
 string(3) "Foo"
 ===dict:===
 Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 10
@@ -37,8 +41,12 @@ object(HH\Set) (2) {
   string(3) "Bar"
 }
 
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 57
+
 Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 58
 bool(false)
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 59
 class(Foo)
 
 Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 60
@@ -91,12 +99,18 @@ varray(2) {
 Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 80
 
 Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 81
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 81
 varray(2) {
   string(3) "Foo"
   string(3) "Baz"
 }
 ===shape===
 Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 87
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 88
+
+Warning: Class to string conversion in %s/test/slow/class-ptr/classptr-eager-convert.php on line 90
 darray(3) {
   ["Foo"]=>
   int(3)

@@ -402,6 +402,12 @@ pub mod instr {
         instr(Instruct::IMisc(InstructMisc::ThrowNonExhaustiveSwitch))
     }
 
+    pub fn raise_class_string_conversion_warning() -> InstrSeq {
+        instr(Instruct::IMisc(
+            InstructMisc::RaiseClassStringConversionWarning,
+        ))
+    }
+
     pub fn combine_and_resolve_type_struct(i: isize) -> InstrSeq {
         instr(Instruct::IOp(
             InstructOperator::CombineAndResolveTypeStruct(i),

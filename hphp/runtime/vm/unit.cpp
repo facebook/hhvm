@@ -1850,21 +1850,9 @@ void Unit::mergeImpl(MergeInfo* mi) {
 
   FTRACE(3, "ix: {}, end: {}, total: {}\n", ix, end, mi->m_mergeablesSize);
 
-  // Lets handle the common cases first
-  // 1) Unit will all functions
   if (ix == mi->m_mergeablesSize) {
     FTRACE(3, "  Unit with only free functions\n");
     return;
-  }
-  // 2) Unit with a single class (and possibly some free functions)
-  if (ix == mi->m_mergeablesSize - 1) {
-    void* obj = mi->mergeableObj(ix);
-    auto k = MergeKind(uintptr_t(obj) & 7);
-    if (k == MergeKind::Class && !(uintptr_t(obj) & 1)) {
-      FTRACE(3, "  Unit with a single class (and possibly some free functions\n");
-      defClass((PreClass*)obj, true);
-      return;
-    }
   }
 
   boost::dynamic_bitset<> define(mi->m_mergeablesSize - first);

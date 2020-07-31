@@ -219,3 +219,31 @@ let simplify c =
     | ITE (c, t1, t2) -> Ccond (c, import t1, import t2)
   in
   import (qelim c)
+
+(* Entailment procedure for props. This function decides C1 |= C2 where C1 is
+ * the transitive closure of flows and C2 is some prop where all holes are
+ * closed and all quantifiers are eliminated (via simplify). This function
+ * returns all flows that do not follow from the input lattice.
+ *)
+let rec entailment_violations lattice = function
+  | Ctrue -> []
+  | Ccond ((p1, p2), c1, c2) ->
+    let flow = (p1, Ppurpose p2) in
+    if List.is_empty @@ entailment_violations lattice (Cflow flow) then
+      entailment_violations lattice c1
+    else
+      entailment_violations lattice c2
+  | Cconj (c1, c2) ->
+    entailment_violations lattice c1 @ entailment_violations lattice c2
+  | Cflow (_, Ptop)
+  | Cflow (Pbot, _) ->
+    []
+  | Cflow (p1, p2) when equal_policy p1 p2 -> []
+  | Cflow flow ->
+    if FlowSet.mem flow lattice then
+      []
+    else
+      [flow]
+  (* Quantifiers and Holes should have been eliminated before this point *)
+  | Cquant _ -> failwith "Cquant"
+  | Chole _ -> failwith "Chole"

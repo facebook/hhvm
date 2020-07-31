@@ -918,13 +918,7 @@ let do_ raw_opts files_info ctx =
         (* Checking phase *)
         let log_checking name (_, simple) =
           let violations =
-            try Lattice.check_exn opts.opt_security_lattice simple
-            with Lattice.Checking_error ->
-              fail
-                "lattice checking error: something went wrong while checking %a against %s"
-                Pp.prop
-                simple
-                raw_opts.ropt_security_lattice
+            Logic.entailment_violations opts.opt_security_lattice simple
           in
 
           if

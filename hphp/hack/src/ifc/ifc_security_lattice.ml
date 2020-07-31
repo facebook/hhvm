@@ -16,8 +16,6 @@ open Ifc_types
 
 exception Invalid_security_lattice
 
-exception Checking_error
-
 let parse_policy purpose_str =
   match String.uppercase purpose_str with
   | "PUBLIC" -> Pbot
@@ -59,20 +57,3 @@ let rec transitive_closure set =
     transitive_closure new_set
 
 let mk_exn str = parse_exn str |> transitive_closure
-
-let rec check_exn lattice =
-  let is_safe_flow = function
-    | (Pbot, _)
-    | (_, Ptop) ->
-      true
-    | flow -> FlowSet.mem flow lattice
-  in
-  function
-  | Ctrue -> []
-  | Cflow flow ->
-    if is_safe_flow flow then
-      []
-    else
-      [flow]
-  | Cconj (prop1, prop2) -> check_exn lattice prop1 @ check_exn lattice prop2
-  | _ -> raise Checking_error

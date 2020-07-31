@@ -96,7 +96,7 @@ let ty_object r = mk (r, Tobject)
 
 let tyvar r v = mk (r, Tvar v)
 
-let generic r n args = mk (r, Tgeneric (n, args))
+let generic ?(type_args = []) r n = mk (r, Tgeneric (n, type_args))
 
 let err r = mk (r, Terr)
 

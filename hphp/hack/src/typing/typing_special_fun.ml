@@ -64,15 +64,15 @@ let transform_special_fun_ty fty id nargs =
         let param1 = update_param param1 ty1 in
         (* Return type should be ?Tv *)
         (* TODO(T69551141) handle type arguments *)
-        let ret = MakeType.nullable_decl rret (MakeType.generic rret "Tv" []) in
+        let ret = MakeType.nullable_decl rret (MakeType.generic rret "Tv") in
         ([param1; param2], ret)
       | 3 ->
         (* Third parameter should have type Tv *)
         (* TODO(T69551141) handle type arguments *)
-        let param3 = update_param param3 (MakeType.generic r3 "Tv" []) in
+        let param3 = update_param param3 (MakeType.generic r3 "Tv") in
         (* Return type should be Tv *)
         (* TODO(T69551141) handle type arguments *)
-        let ret = MakeType.generic rret "Tv" [] in
+        let ret = MakeType.generic rret "Tv" in
         ([param1; param2; param3], ret)
       (* Shouldn't happen! *)
       | _ -> (fty.ft_params, fty.ft_ret.et_type)
@@ -109,7 +109,7 @@ let transform_special_fun_ty fty id nargs =
       let r2 = get_reason param2.fp_type.et_type in
       let rret = get_reason fty.ft_ret.et_type in
       (* TODO(T69551141) handle type arguments *)
-      let tr = MakeType.generic rret "Tr" [] in
+      let tr = MakeType.generic rret "Tr" in
       let rec make_tparam_names i =
         if Int.equal i 0 then
           []
@@ -118,7 +118,7 @@ let transform_special_fun_ty fty id nargs =
       in
       let tparam_names = List.rev (make_tparam_names arity) in
       (* TODO(T69551141) handle type arguments *)
-      let vars = List.map tparam_names (fun n -> MakeType.generic r2 n []) in
+      let vars = List.map tparam_names (fun n -> MakeType.generic r2 n) in
       let make_tparam name =
         {
           tp_variance = Ast_defs.Invariant;

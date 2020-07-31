@@ -45,7 +45,7 @@ let subtype_method
         env { tp_name = (p, name); tp_constraints = cstrl; _ } =
       List.fold_left cstrl ~init:env ~f:(fun env (ck, cstr_ty) ->
           (* TODO(T69551141) handle type arguments *)
-          let tgeneric = MakeType.generic (Reason.Rwitness p) name [] in
+          let tgeneric = MakeType.generic (Reason.Rwitness p) name in
           Typing_generic_constraint.check_constraint
             env
             ck

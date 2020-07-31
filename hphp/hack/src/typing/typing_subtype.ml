@@ -97,7 +97,7 @@ module ConditionTypes = struct
           let params =
             List.map (Cls.tparams cls) ~f:(fun { tp_name = (p, x); _ } ->
                 (* TODO(T69551141) handle type arguments *)
-                MakeType.generic (Reason.Rwitness p) x [])
+                MakeType.generic (Reason.Rwitness p) x)
           in
           let subst = Decl_instantiate.make_subst (Cls.tparams cls) [] in
           let ty = MakeType.apply (Reason.Rwitness p) sid params in

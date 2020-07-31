@@ -89,7 +89,7 @@ let make_abstract env id name namel bnd =
        But T1::T is exactly equal to int, so $x->get() no longer needs
        to be expression dependent. Thus, $x->get() typechecks. *)
     (* TODO(T69551141) handle type arguments *)
-    Exact (MakeType.generic Reason.Rnone tp_name [])
+    Exact (MakeType.generic Reason.Rnone tp_name)
   else
     Abstract (name, namel, bnd)
 
@@ -188,7 +188,7 @@ let rec type_of_result ctx env root res =
       let generic_name = tp_name name id in
       let reason = make_reason env Reason.Rnone id root in
       (* TODO(T69551141) handle type arguments *)
-      let ty = MakeType.generic reason generic_name [] in
+      let ty = MakeType.generic reason generic_name in
       let env =
         Option.fold bnd ~init:env ~f:(fun env bnd ->
             (* TODO(T59317869): play well with flow sensitivity *)

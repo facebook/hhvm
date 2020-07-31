@@ -417,8 +417,7 @@ let try_substitute_type_with_condition env cond_ty ty =
            MakeType.generic
              (Reason.Rwitness (get_pos ty))
              fresh_type_argument_name
-             (* TODO(T69551141) handle type arguments *)
-             []
+           (* TODO(T69551141) handle type arguments *)
          in
          (* if generic type is already registered this means we already saw
        parameter with the same pair (declared type * condition type) so there

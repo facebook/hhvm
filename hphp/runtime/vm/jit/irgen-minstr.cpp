@@ -1685,7 +1685,6 @@ SSATmp* memberKey(IRGS& env, MemberKey mk) {
     case MW:
       return nullptr;
     case MEL: case MPL:
-      return ldLocWarn(env, mk.local, nullptr, DataTypeSpecific);
       return convertClassKey(
           env,
           ldLocWarn(env, mk.local, nullptr, DataTypeSpecific)

@@ -153,7 +153,7 @@ struct FCallArgsShort {
       Flags flags, uint32_t numArgs, uint32_t numRets,
       const std::unique_ptr<uint8_t[]>& inoutArgs,
       BlockId asyncEagerTarget, bool lockWhileUnwinding,
-      bool skipNumArgsCheck, SString context) {
+      bool skipNumArgsCheck, LSString context) {
     if (numArgs >= 16 ||
         numRets >= 16 ||
         (inoutArgs && numArgs > 8 && inoutArgs[1] > (kInoutMask >> 8)) ||
@@ -317,11 +317,11 @@ struct FCallArgsLong : FCallArgsBase {
   explicit FCallArgsLong(Flags flags, uint32_t numArgs, uint32_t numRets,
                          std::unique_ptr<uint8_t[]> inoutArgs,
                          BlockId asyncEagerTarget, bool lockWhileUnwinding,
-                         bool skipNumArgsCheck, SString context)
+                         bool skipNumArgsCheck, LSString context)
     : FCallArgsBase(flags, numArgs, numRets,
                     lockWhileUnwinding, skipNumArgsCheck)
-    , asyncEagerTarget(asyncEagerTarget)
     , inoutArgs(std::move(inoutArgs))
+    , asyncEagerTarget(asyncEagerTarget)
     , context(context) {
     assertx(IMPLIES(asyncEagerTarget == NoBlockId,
                     !supportsAsyncEagerReturn()));
@@ -439,9 +439,9 @@ struct FCallArgsLong : FCallArgsBase {
   }
   FCallArgsBase base() const { return *this; }
 
-  BlockId asyncEagerTarget;
   std::unique_ptr<uint8_t[]> inoutArgs;
-  SString context;
+  BlockId asyncEagerTarget;
+  LSString context;
 };
 
 struct FCallArgs {
@@ -452,7 +452,7 @@ struct FCallArgs {
   FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
             std::unique_ptr<uint8_t[]> inoutArgs,
             BlockId asyncEagerTarget, bool lockWhileUnwinding,
-            bool skipNumArgsCheck, SString context)
+            bool skipNumArgsCheck, LSString context)
       : s{FCallArgsShort::create(flags, numArgs, numRets, inoutArgs,
                                  asyncEagerTarget, lockWhileUnwinding,
                                  skipNumArgsCheck, context)} {
@@ -486,7 +486,7 @@ struct FCallArgs {
     return *this;
   }
   FCallArgs& operator=(FCallArgs&& o) {
-    assertx(raw != o.raw);
+    assertx(IMPLIES(!s.valid(), raw != o.raw));
     this->~FCallArgs();
     new (this) FCallArgs{std::move(o)};
     return *this;
@@ -601,7 +601,7 @@ struct FCallArgs {
     return s.valid() ?
       s.template popFlavor<nin,nobj>(i) : l->template popFlavor<nin,nobj>(i);
   }
-  SString context() const { return s.valid() ? nullptr : l->context; }
+  LSString context() const { return s.valid() ? nullptr : l->context; }
 private:
   union {
     copy_ptr<FCallArgsLong> l;
@@ -639,7 +639,6 @@ struct hasher_default {};
  * Default bytecode immediate hashers.
  */
 struct hasher_impl {
-  static size_t hash(SString s)  { return s->hash(); }
   static size_t hash(LSString s) { return s->hash(); }
   static size_t hash(RepoAuthType rat) { return rat.hash(); }
 
@@ -1071,38 +1070,14 @@ namespace imm {
 #define PUSH_FCALL        uint32_t numPush() const { return fca.numRets(); }
 #define PUSH_CALLNATIVE   uint32_t numPush() const { return arg3 + 1; }
 
-#define FLAGS_NF
-#define FLAGS_TF
-#define FLAGS_CF
-#define FLAGS_FF
-#define FLAGS_CF_TF
-#define FLAGS_CF_FF
-
-#define FLAGS_CTOR_NF
-#define FLAGS_CTOR_TF
-#define FLAGS_CTOR_CF
-#define FLAGS_CTOR_FF
-#define FLAGS_CTOR_CF_TF
-#define FLAGS_CTOR_CF_FF
-
-#define FLAGS_INIT_NF
-#define FLAGS_INIT_TF
-#define FLAGS_INIT_CF
-#define FLAGS_INIT_FF
-#define FLAGS_INIT_CF_TF
-#define FLAGS_INIT_CF_FF
-
 #define O(opcode, imms, inputs, outputs, flags) \
   struct opcode {                               \
     static constexpr Op op = Op::opcode;        \
-    explicit opcode ( IMM_CTOR_##imms           \
-                      FLAGS_CTOR_##flags)       \
+    explicit opcode (IMM_CTOR_##imms)           \
       IMM_INIT_##imms                           \
-      FLAGS_INIT_##flags                        \
     {}                                          \
                                                 \
     IMM_MEM_##imms                              \
-    FLAGS_##flags                               \
     IMM_EXTRA_##imms                            \
     POP_##inputs                                \
     PUSH_##outputs                              \
@@ -1142,27 +1117,6 @@ namespace imm {
   };
 OPCODES
 #undef O
-
-#undef FLAGS_NA
-#undef FLAGS_TF
-#undef FLAGS_CF
-#undef FLAGS_FF
-#undef FLAGS_CF_TF
-#undef FLAGS_CF_FF
-
-#undef FLAGS_CTOR_NA
-#undef FLAGS_CTOR_TF
-#undef FLAGS_CTOR_CF
-#undef FLAGS_CTOR_FF
-#undef FLAGS_CTOR_CF_TF
-#undef FLAGS_CTOR_CF_FF
-
-#undef FLAGS_INIT_NA
-#undef FLAGS_INIT_TF
-#undef FLAGS_INIT_CF
-#undef FLAGS_INIT_FF
-#undef FLAGS_INIT_CF_TF
-#undef FLAGS_INIT_CF_FF
 
 #undef PUSH_NOV
 #undef PUSH_ONE

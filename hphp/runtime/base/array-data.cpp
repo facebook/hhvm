@@ -1199,6 +1199,26 @@ bool ArrayData::intishCastKey(const StringData* key, int64_t& i) const {
   return false;
 }
 
+void ArrayData::setLegacyArray(bool legacy) {
+  assertx(hasExactlyOneRef());
+  assertx(!legacy
+          || isDictType()
+          || isVecType()
+          || (!RO::EvalHackArrDVArrs && isDVArray()));
+  /* TODO(jgriego) we should be asserting that the
+   * mark-ee should have provenance here but it's not
+   * safe and sane yet */
+  if (legacy && !isLegacyArray() && hasProvenanceData()) {
+    arrprov::clearTag(this);
+    setHasProvenanceData(false);
+  }
+  if (isVanilla()) {
+    m_aux16 = (m_aux16 & ~kLegacyArray) | (legacy ? kLegacyArray : 0);
+  } else {
+    BespokeArray::SetLegacyArrayInPlace(this, legacy);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

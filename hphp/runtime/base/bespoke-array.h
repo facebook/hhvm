@@ -49,6 +49,7 @@ struct BespokeArray : ArrayData {
 
   size_t heapSize() const;
   void scan(type_scan::Scanner& scan) const;
+  void setLegacyArrayBit(bool legacy);
 
   // Escalate the given bespoke array-like to a vanilla array-like.
   // The provided `reason` may be logged.
@@ -128,6 +129,9 @@ public:
   static ArrayData* ToVec(ArrayData* ad, bool copy);
   static ArrayData* ToDict(ArrayData* ad, bool copy);
   static ArrayData* ToKeyset(ArrayData* ad, bool copy);
+
+  // flags
+  static void SetLegacyArrayInPlace(ArrayData* ad, bool legacy);
 };
 
 } // namespace HPHP

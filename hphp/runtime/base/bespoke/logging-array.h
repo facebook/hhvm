@@ -91,6 +91,8 @@ struct LoggingLayout : public Layout {
   ArrayData* toVec(ArrayData*, bool copy) const final;
   ArrayData* toDict(ArrayData*, bool copy) const final;
   ArrayData* toKeyset(ArrayData*, bool copy) const final;
+
+  void setLegacyArrayInPlace(ArrayData*, bool legacy) const final;
 };
 
 }}

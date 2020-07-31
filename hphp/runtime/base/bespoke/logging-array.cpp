@@ -88,6 +88,7 @@ bool LoggingArray::checkInvariants() const {
   assertx(wrapped->toDataType() == toDataType());
   assertx(asBespoke(this)->layout() == s_layout);
   assertx(m_kind == getBespokeKind(wrapped->kind()));
+  assertx(isLegacyArray() == wrapped->isLegacyArray());
   return true;
 }
 
@@ -105,7 +106,8 @@ LoggingArray* LoggingArray::MakeFromVanilla(ArrayData* ad, SrcKey sk) {
   assertx(ad->getPosition() == ad->iter_begin());
 
   auto lad = static_cast<LoggingArray*>(tl_heap->objMallocIndex(kSizeIndex));
-  lad->initHeader(getBespokeKind(ad->kind()), OneReference);
+  lad->initHeader_16(getBespokeKind(ad->kind()), OneReference,
+                     ad->isLegacyArray() ? kLegacyArray : 0);
   lad->setLayout(s_layout);
   lad->wrapped = ad;
   lad->srckey = sk;
@@ -143,7 +145,8 @@ LoggingArray* LoggingArray::MakeFromStatic(ArrayData* ad, SrcKey sk) {
   MemoryStats::LogAlloc(AllocKind::StaticArray, size);
   insert.first->second = lad;
 
-  lad->initHeader(getBespokeKind(ad->kind()), StaticValue);
+  lad->initHeader_16(getBespokeKind(ad->kind()), StaticValue,
+                     ad->isLegacyArray() ? kLegacyArray : 0);
   lad->setLayout(s_layout);
   lad->wrapped = ad;
   lad->srckey = sk;
@@ -323,6 +326,17 @@ ArrayData* LoggingLayout::toDict(ArrayData* ad, bool copy) const {
 }
 ArrayData* LoggingLayout::toKeyset(ArrayData* ad, bool copy) const {
   return conv(ad, [=](ArrayData* w) { return w->toKeyset(copy); });
+}
+
+void LoggingLayout::setLegacyArrayInPlace(ArrayData* ad, bool legacy) const {
+  assert(ad->hasExactlyOneRef());
+  auto const lad = LoggingArray::asLogging(ad);
+  if (lad->wrapped->cowCheck()) {
+    auto const nad = lad->wrapped->copy();
+    lad->wrapped->decRefCount();
+    lad->wrapped = nad;
+  }
+  lad->wrapped->setLegacyArray(legacy);
 }
 
 //////////////////////////////////////////////////////////////////////////////

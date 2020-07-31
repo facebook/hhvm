@@ -244,6 +244,15 @@ ArrayData* BespokeArray::ToKeyset(ArrayData* ad, bool copy) {
   return asBespoke(ad)->layout()->toKeyset(ad, copy);
 }
 
+// flags
+void BespokeArray::SetLegacyArrayInPlace(ArrayData* ad, bool legacy) {
+  assertx(ad->hasExactlyOneRef());
+  auto const bad = asBespoke(ad);
+  bad->layout()->setLegacyArrayInPlace(ad, legacy);
+  bad->m_aux16 = (bad->m_aux16 & ~kLegacyArray)
+                 | (legacy ? kLegacyArray : 0);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 }

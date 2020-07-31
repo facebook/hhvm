@@ -14,7 +14,7 @@ function foo($x) {
   var_dump($b);
   $c = darray['a' => 1];
   var_dump(HH\is_array_marked_legacy($c));
-  var_dump($b);
+  var_dump($c);
   $d = varray[1, 2];
   var_dump(HH\is_array_marked_legacy($d));
   var_dump($d);

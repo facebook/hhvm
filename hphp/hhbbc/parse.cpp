@@ -400,28 +400,13 @@ void populate_block(ParseUnitState& puState,
                                       IMM_ARG(z, 3), IMM_ARG(l, 4), \
                                       IMM_ARG(m, 5), IMM_ARG(n, 6)
 
-#define FLAGS_NF
-#define FLAGS_TF
-#define FLAGS_CF
-#define FLAGS_FF
-#define FLAGS_CF_TF
-#define FLAGS_CF_FF
-
-#define FLAGS_ARG_NF
-#define FLAGS_ARG_TF
-#define FLAGS_ARG_CF
-#define FLAGS_ARG_FF
-#define FLAGS_ARG_CF_TF
-#define FLAGS_ARG_CF_FF
-
 #define O(opcode, imms, inputs, outputs, flags)                    \
   case Op::opcode:                                                 \
     {                                                              \
       auto b = [&] () -> Bytecode {                                \
         IMM_##imms /*these two macros advance the pc as required*/ \
-        FLAGS_##flags                                              \
         if (isTypeAssert(op)) return bc::Nop {};                   \
-        return bc::opcode { IMM_ARG_##imms FLAGS_ARG_##flags };    \
+        return bc::opcode { IMM_ARG_##imms };                      \
       }();                                                         \
       b.srcLoc = srcLocIx;                                         \
       if (Op::opcode == Op::CreateCl)    createcl(b);              \
@@ -478,20 +463,6 @@ void populate_block(ParseUnitState& puState,
   } while (pc != past);
 
 #undef O
-
-#undef FLAGS_NF
-#undef FLAGS_TF
-#undef FLAGS_CF
-#undef FLAGS_FF
-#undef FLAGS_CF_TF
-#undef FLAGS_CF_FF
-
-#undef FLAGS_ARG_NF
-#undef FLAGS_ARG_TF
-#undef FLAGS_ARG_CF
-#undef FLAGS_ARG_FF
-#undef FLAGS_ARG_CF_TF
-#undef FLAGS_ARG_CF_FF
 
 #undef IMM_BLA
 #undef IMM_SLA

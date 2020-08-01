@@ -322,12 +322,12 @@ where
         children_changed: bool,
     ) {
         if !children_changed {
-            std::mem::replace(&mut self.syntax, Syntax::from_children(kind, children));
+            self.syntax = Syntax::from_children(kind, children);
         } else {
             let children_values = &children.iter().map(|x| &x.value).collect::<Vec<_>>();
             let value = V::from_children(kind, 0, children_values);
             let syntax = Syntax::from_children(kind, children);
-            std::mem::replace(self, Self::make(syntax, value));
+            *self = Self::make(syntax, value);
         }
     }
 

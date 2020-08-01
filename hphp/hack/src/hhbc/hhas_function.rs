@@ -71,7 +71,7 @@ impl<'a> HhasFunction<'a> {
     {
         let old_body = std::mem::replace(&mut self.body, body);
         let ret = f();
-        std::mem::replace(&mut self.body, old_body);
+        self.body = old_body;
         ret
     }
 

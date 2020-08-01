@@ -222,7 +222,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                             namespaces::ElaborateKind::Record,
                             &sid,
                         );
-                        std::mem::replace(sid, new_name);
+                        *sid = new_name;
                     }
                     _ => (),
                 }

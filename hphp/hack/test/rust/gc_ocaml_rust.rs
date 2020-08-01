@@ -96,7 +96,7 @@ fn drop_the_struct(x: &mut Option<InterlanguageStruct>) {
         println!("unknown: drop_the_struct() called on a struct that was already dropped");
     }
     // to take ownership of the struct while in use (and thus be able to drop it):
-    std::mem::replace(x, None);
+    *x = None;
 }
 
 caml!(create_the_struct_ocaml() {

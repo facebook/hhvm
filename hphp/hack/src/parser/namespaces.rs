@@ -234,7 +234,7 @@ pub mod toplevel_elaborator {
                 }
 
                 let new_nsenv = RcOc::new(new_nsenv);
-                std::mem::replace(nsenv, RcOc::clone(&new_nsenv));
+                *nsenv = RcOc::clone(&new_nsenv);
                 acc.push(Def::<A>::mk_set_namespace_env(new_nsenv));
             }
             D::<A>::Class(mut x) => {

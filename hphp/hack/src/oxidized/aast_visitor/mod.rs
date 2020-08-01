@@ -80,7 +80,7 @@ mod tests {
             }
 
             fn visit_expr_(&mut self, c: &mut (), p: &mut Expr_<(), (), (), ()>) -> Result<(), ()> {
-                std::mem::replace(p, Expr_::Null);
+                *p = Expr_::Null;
                 p.recurse(c, self)
             }
         }

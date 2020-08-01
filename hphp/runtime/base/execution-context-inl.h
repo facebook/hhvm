@@ -278,13 +278,6 @@ inline TypedValue ExecutionContext::lookupClsCns(const StringData* cls,
   return lookupClsCns(NamedEntity::get(cls), cls, cns);
 }
 
-inline VarEnv* ExecutionContext::getVarEnv(const ActRec* fp) {
-  if (fp && !fp->isInlined() && (fp->func()->attrs() & AttrMayUseVV)) {
-    if (fp->hasVarEnv()) return fp->getVarEnv();
-  }
-  return nullptr;
-}
-
 inline ActRec*
 ExecutionContext::getPrevVMStateSkipFrame(const ActRec* fp,
                                           Offset* prevPc /* = NULL */,

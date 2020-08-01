@@ -78,7 +78,6 @@ void cgInlineCall(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   assertx(inst->src(0)->inst()->is(BeginInlining));
-  auto const target = inst->src(0)->inst()->extra<BeginInlining>()->func;
   auto const off = [&] () -> int32_t {
     if (isResumedParent(inst)) return 0;
     auto const be = inst->src(0)->inst();
@@ -98,12 +97,6 @@ void cgInlineCall(IRLS& env, const IRInstruction* inst) {
   v << store{callerFP, calleeFP[AROFF(m_sfp)]};
   emitImmStoreq(v, uintptr_t(tc::ustubs().retInlHelper),
                 calleeFP[AROFF(m_savedRip)]);
-
-  if (target->attrs() & AttrMayUseVV) {
-    v << storeqi{0, calleeFP[AROFF(m_varEnv)]};
-  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, calleeFP[AROFF(m_varEnv)]);
-  }
 
   if (extra->syncVmpc) {
     // If we are in a catch block, update the vmfp() to point to the inlined

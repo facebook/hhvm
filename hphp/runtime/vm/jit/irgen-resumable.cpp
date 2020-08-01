@@ -116,7 +116,6 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
 }
 
 void doTailAwaitDecRefs(IRGS& env, const std::vector<Type>& locals) {
-  auto const func = curFunc(env);
   auto const shouldFreeInline = [&]{
     if (locals.size() > RO::EvalHHIRInliningMaxReturnLocals) return false;
     auto numRefCounted = 0;
@@ -126,29 +125,17 @@ void doTailAwaitDecRefs(IRGS& env, const std::vector<Type>& locals) {
     return numRefCounted <= RO::EvalHHIRInliningMaxReturnDecRefs;
   }();
 
-  auto decRefLocalsAndThis = [&]{
-    if (shouldFreeInline) {
-      for (auto i = 0; i < locals.size(); i++) {
-        if (!locals[i].maybe(TCounted)) continue;
-        auto const data = LocalId { safe_cast<uint32_t>(i) };
-        gen(env, AssertLoc, data, locals[i], fp(env));
-        decRef(env, gen(env, LdLoc, data, locals[i], fp(env)), i);
-      }
-    } else {
-      gen(env, GenericRetDecRefs, fp(env));
+  if (shouldFreeInline) {
+    for (auto i = 0; i < locals.size(); i++) {
+      if (!locals[i].maybe(TCounted)) continue;
+      auto const data = LocalId { safe_cast<uint32_t>(i) };
+      gen(env, AssertLoc, data, locals[i], fp(env));
+      decRef(env, gen(env, LdLoc, data, locals[i], fp(env)), i);
     }
-    decRefThis(env);
-  };
-
-  // The VarEnv and the this pointer always need to be cleaned up.
-  if (func->attrs() & AttrMayUseVV) {
-    ifElse(env,
-      [&] (Block* skip) { gen(env, ReleaseVVAndSkip, skip, fp(env)); },
-      [&] { decRefLocalsAndThis(); }
-    );
   } else {
-    decRefLocalsAndThis();
+    gen(env, GenericRetDecRefs, fp(env));
   }
+  decRefThis(env);
 }
 
 template<class Hook>

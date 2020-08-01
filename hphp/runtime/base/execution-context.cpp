@@ -1216,14 +1216,6 @@ ActRec* ExecutionContext::getFrameAtDepthForDebuggerUnsafe(int frameDepth) {
   return ret;
 }
 
-void ExecutionContext::setVar(StringData* name, tv_rval v) {
-  VMRegAnchor _;
-  ActRec *fp = vmfp();
-  if (!fp) return;
-  if (fp->skipFrame()) fp = getPrevVMStateSkipFrame(fp);
-  if (fp) fp->getVarEnv()->set(name, v);
-}
-
 Array ExecutionContext::getLocalDefinedVariablesDebugger(int frame) {
   const auto fp = getFrameAtDepthForDebuggerUnsafe(frame);
   return getDefinedVariables(fp);
@@ -1502,7 +1494,6 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
     ar->trashThis();
   }
   ar->setNumArgs(numArgsInclUnpack);
-  ar->trashVarEnv();
 
 #ifdef HPHP_TRACE
   if (vmfp() == nullptr) {
@@ -2184,8 +2175,6 @@ void ExecutionContext::enterDebuggerDummyEnv() {
   vmfp() = ar;
   vmpc() = s_debuggerDummy->entry();
   vmFirstAR() = ar;
-  vmfp()->setVarEnv(m_globalVarEnv);
-  m_globalVarEnv->enterFP(nullptr, vmfp());
 }
 
 void ExecutionContext::exitDebuggerDummyEnv() {

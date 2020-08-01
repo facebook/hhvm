@@ -652,9 +652,6 @@ void checkFrame(ActRec* fp, TypedValue* sp, bool fullCheck) {
   if (func->cls()) {
     assertx(!func->cls()->isZombie());
   }
-  if ((func->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
-    assertx(fp->getVarEnv()->getFP() == fp);
-  }
   int numLocals = func->numLocals();
   assertx(sp <= (TypedValue*)fp - func->numSlotsInFrame() || isResumed(fp));
 

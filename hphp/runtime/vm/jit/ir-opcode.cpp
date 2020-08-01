@@ -913,7 +913,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ProfileType:
   case RBTraceEntry:
   case RBTraceMsg:
-  case ReleaseVVAndSkip:
   case ReqBindJmp:
   case ReqRetranslate:
   case ReqRetranslateOpt:

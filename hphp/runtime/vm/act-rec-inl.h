@@ -154,31 +154,6 @@ inline void ActRec::trashThis() {
 
 /////////////////////////////////////////////////////////////////////////////
 
-inline void ActRec::trashVarEnv() {
-  if (debug) setVarEnv(reinterpret_cast<VarEnv*>(kTrashedVarEnvSlot));
-}
-
-inline bool ActRec::checkVarEnv() const {
-  assertx(m_varEnv != reinterpret_cast<VarEnv*>(kTrashedVarEnvSlot));
-  return true;
-}
-
-inline bool ActRec::hasVarEnv() const {
-  assertx(checkVarEnv());
-  return m_varEnv;
-}
-
-inline VarEnv* ActRec::getVarEnv() const {
-  assertx(hasVarEnv());
-  return m_varEnv;
-}
-
-inline void ActRec::setVarEnv(VarEnv* val) {
-  m_varEnv = val;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 inline RxLevel ActRec::rxMinLevel() const {
   if (func()->isRxConditional()) return RxLevel::None;
   return func()->rxLevel();

@@ -225,29 +225,4 @@ void cgGenericRetDecRefs(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_ReleaseVV("ReleaseVV");
-
-void cgReleaseVVAndSkip(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-  auto& vc = vcold(env);
-
-  auto const sf = v.makeReg();
-  v << cmpqim{0, fp[AROFF(m_varEnv)], sf};
-
-  unlikelyIfThen(v, vc, CC_NZ, sf, [&] (Vout& v) {
-    cgCallHelper(
-      v, env,
-      CallSpec::direct(static_cast<void (*)(ActRec*)>(
-                       VarEnv::deallocate)),
-      kVoidDest,
-      SyncOptions::Sync,
-      argGroup(env, inst).reg(fp)
-    );
-    v << jmp{label(env, inst->taken())};
-  });
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 }}}

@@ -103,12 +103,6 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
     emitImmStoreq(v, ActRec::kTrashedThisSlot, newFP + AROFF(m_thisUnsafe));
   }
 
-  if (func->attrs() & AttrMayUseVV) {
-    v << storeqi{0, newFP + AROFF(m_varEnv)};
-  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, newFP + AROFF(m_varEnv));
-  }
-
   v << copy{newFP, dst};
   v << pushvmfp{dst};
 }

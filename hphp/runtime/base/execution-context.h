@@ -448,8 +448,6 @@ public:
    * for use by the debugger. Use in other contexts may not be safe.
    */
   ActRec* getFrameAtDepthForDebuggerUnsafe(int frame = 0);
-  VarEnv* getVarEnv(const ActRec* fp);
-  void setVar(StringData* name, tv_rval v);
   Array getLocalDefinedVariablesDebugger(int frame);
   Variant getEvaledArg(const StringData* val,
                        const String& namespacedName,

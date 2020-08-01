@@ -218,7 +218,6 @@ bool fcallHelper(CallFlags callFlags, Func* func, int32_t numArgs, void* ctx,
   );
   ar->setNumArgs(numArgs);
   ar->m_thisUnsafe = reinterpret_cast<ObjectData*>(ctx);
-  ar->trashVarEnv();
 
   // If doFCall() returns false, we've been asked to skip the function body due
   // to fb_intercept, so indicate that via the return value. If we did not
@@ -1092,7 +1091,6 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   us.endCatchSkipTeardownHelper = vwrap(cb, data, meta, [&] (Vout& v) {
     if (debug) {
       emitImmStoreq(v, ActRec::kTrashedThisSlot, rvmfp()[AROFF(m_thisUnsafe)]);
-      emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, rvmfp()[AROFF(m_varEnv)]);
     }
     v << copy{v.cns(false), rarg(1)};
     v << jmpi{body, RegSet{} | rarg(1)};

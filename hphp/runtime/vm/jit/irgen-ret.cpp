@@ -196,17 +196,7 @@ void implRet(IRGS& env, bool suspended) {
   // we don't care about the type.
   auto const retval = pop(env, DataTypeGeneric);
 
-  if (func->attrs() & AttrMayUseVV) {
-    ifElse(
-      env,
-      [&] (Block* skip) {
-        gen(env, ReleaseVVAndSkip, skip, fp(env));
-      },
-      [&] { freeLocalsAndThis(env); }
-    );
-  } else {
-    freeLocalsAndThis(env);
-  }
+  freeLocalsAndThis(env);
 
   // Async function has its own surprise check.
   if (func->isAsyncFunction()) {

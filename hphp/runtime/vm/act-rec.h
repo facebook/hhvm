@@ -37,7 +37,6 @@ struct Func;
 struct ObjectData;
 struct StringData;
 struct Unit;
-struct VarEnv;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -86,14 +85,13 @@ struct ActRec {
     ObjectData* m_thisUnsafe; // This.
     Class* m_clsUnsafe;       // Late bound class.
   };
-  VarEnv* m_varEnv; // Variable environment when live
+  void* m_thrash_DONT_USE;
 
   TYPE_SCAN_CUSTOM_FIELD(m_thisUnsafe) {
     if (m_func->implCls()) scanner.scan(m_thisUnsafe);
   }
-  TYPE_SCAN_CUSTOM_FIELD(m_varEnv) {
-    scanner.scan(m_varEnv);
-  }
+
+  TYPE_SCAN_IGNORE_FIELD(m_thrash_DONT_USE);
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -119,7 +117,6 @@ struct ActRec {
    * accessors (below) to encapsulate this logic.
    */
 
-  static constexpr uintptr_t kTrashedVarEnvSlot = 0xfeeefeee000f000f;
   static constexpr uintptr_t kTrashedThisSlot = 0xfeeefeeef00fe00e;
   static constexpr uintptr_t kTrashedFuncSlot = 0xfeeefeeef00fe00d;
 
@@ -276,36 +273,6 @@ struct ActRec {
   void trashThis();
 
   /////////////////////////////////////////////////////////////////////////////
-  // VarEnv.
-
-  /*
-   * Write garbage to the m_varEnv (in debug mode only).
-   */
-  void trashVarEnv();
-
-  /*
-   * Check that the m_varEnv is not the special garbage
-   * value.
-   */
-  bool checkVarEnv() const;
-
-  /*
-   * Whether the m_varEnv is non-null.
-   */
-  bool hasVarEnv() const;
-
-  /*
-   * Get the VarEnv.
-   *
-   * @requires: hasVarEnv()
-   */
-  VarEnv* getVarEnv() const;
-
-  /*
-   * Set `val' to the m_varEnv.
-   */
-  void setVarEnv(VarEnv* val);
-
   /*
    * Get the minimum possible effective level of reactivity.
    *

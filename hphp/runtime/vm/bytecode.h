@@ -114,21 +114,12 @@ struct VarEnv {
   explicit VarEnv(const VarEnv* varEnv, ActRec* fp);
   ~VarEnv();
 
-  // Free the VarEnv and locals for the given frame
-  // which must have a VarEnv
-  static void deallocate(ActRec* fp);
-
-  // Allocates a local VarEnv and attaches it to the existing FP.
-  static VarEnv* createLocal(ActRec* fp);
-
   // Allocate a global VarEnv.  Initially not attached to any frame.
   static void createGlobal();
 
   VarEnv* clone(ActRec* fp) const;
 
   void suspend(const ActRec* oldFP, ActRec* newFP);
-  void enterFP(ActRec* oldFP, ActRec* newFP);
-  void exitFP(ActRec* fp);
 
   void set(const StringData* name, tv_rval tv);
   tv_lval lookup(const StringData* name);

@@ -755,7 +755,6 @@ void EventHook::onFunctionSuspendAwaitEF(ActRec* suspending,
   // The locals were already teleported from suspending to resumableAR.
   suspending->setLocalsDecRefd();
   suspending->trashThis();
-  suspending->trashVarEnv();
 
   try {
     auto const flags = handle_request_surprise();
@@ -841,7 +840,6 @@ void EventHook::onFunctionSuspendCreateCont(ActRec* suspending,
   // The locals were already teleported from suspending to resumableAR.
   suspending->setLocalsDecRefd();
   suspending->trashThis();
-  suspending->trashVarEnv();
 
   try {
     auto const flags = handle_request_surprise();
@@ -881,7 +879,6 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
   // The locals are already gone. Tell everyone.
   ar->setLocalsDecRefd();
   ar->trashThis();
-  ar->trashVarEnv();
 
   try {
     auto const flags = handle_request_surprise();
@@ -916,7 +913,6 @@ void EventHook::onFunctionUnwind(ActRec* ar, ObjectData* phpException) {
   // The locals are already gone. Tell everyone.
   ar->setLocalsDecRefd();
   ar->trashThis();
-  ar->trashVarEnv();
 
   // TODO(#2329497) can't handle_request_surprise() yet, unwinder unable to
   // replace fault

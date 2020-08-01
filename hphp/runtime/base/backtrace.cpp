@@ -510,8 +510,6 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       }
     }
 
-    bool const mayUseVV = fp->func()->attrs() & AttrMayUseVV;
-
     auto const withNames = btArgs.m_withArgNames;
     auto const withValues = btArgs.m_withArgValues;
     if ((!btArgs.m_withArgNames && !btArgs.m_withArgValues) ||
@@ -526,38 +524,15 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       auto args = Array::CreateVArray();
       auto const nparams = fp->func()->numNonVariadicParams();
 
-      if (UNLIKELY(mayUseVV) &&
-          UNLIKELY(fp->hasVarEnv() && fp->getVarEnv()->getFP() != fp)) {
-        // VarEnv is attached to eval or debugger frame, other than the current
-        // frame. Access locals thru VarEnv.
-        auto varEnv = fp->getVarEnv();
-        auto func = fp->func();
-        for (int i = 0; i < nparams; i++) {
-          auto const argname = func->localVarName(i);
-          auto const lval = varEnv->lookup(argname);
+      for (int i = 0; i < nparams; i++) {
+        Variant val =
+          withValues ? Variant{variant_ref{frame_local(fp, i)}} : "";
 
-          auto val = init_null();
-          if (lval) { // the variable hasn't been unset
-            val = withValues ? Variant{variant_ref{lval}} : "";
-          }
-
-          if (withNames) {
-            args.set(String(const_cast<StringData*>(argname)), val);
-          } else {
-            args.append(val);
-          }
-        }
-      } else {
-        for (int i = 0; i < nparams; i++) {
-          Variant val =
-            withValues ? Variant{variant_ref{frame_local(fp, i)}} : "";
-
-          if (withNames) {
-            auto const argname = fp->func()->localVarName(i);
-            args.set(String(const_cast<StringData*>(argname)), val);
-          } else {
-            args.append(val);
-          }
+        if (withNames) {
+          auto const argname = fp->func()->localVarName(i);
+          args.set(String(const_cast<StringData*>(argname)), val);
+        } else {
+          args.append(val);
         }
       }
 
@@ -565,20 +540,12 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     }
 
     if (btArgs.m_withMetadata && !fp->localsDecRefd()) {
-      if (UNLIKELY(mayUseVV) && UNLIKELY(fp->hasVarEnv())) {
-        auto const val = fp->getVarEnv()->lookup(s_86metadata.get());
-        if (val && type(val) != KindOfUninit) {
+      auto local = fp->func()->lookupVarId(s_86metadata.get());
+      if (local != kInvalidId) {
+        auto const val = frame_local(fp, local);
+        if (type(val) != KindOfUninit) {
           always_assert(tvIsPlausible(*val));
           frame.set(s_metadata, Variant{variant_ref{val}});
-        }
-      } else {
-        auto local = fp->func()->lookupVarId(s_86metadata.get());
-        if (local != kInvalidId) {
-          auto const val = frame_local(fp, local);
-          if (type(val) != KindOfUninit) {
-            always_assert(tvIsPlausible(*val));
-            frame.set(s_metadata, Variant{variant_ref{val}});
-          }
         }
       }
     }
@@ -656,18 +623,10 @@ int64_t createBacktraceHash(bool consider_metadata) {
 
     if (consider_metadata && !fp->localsDecRefd()) {
       tv_rval meta;
-      if (
-        UNLIKELY(fp->func()->attrs() & AttrMayUseVV) &&
-        UNLIKELY(fp->hasVarEnv())
-      ) {
-        auto const val = fp->getVarEnv()->lookup(s_86metadata.get());
-        if (val && !isNullType(type(val))) meta = val;
-      } else {
-        auto local = fp->func()->lookupVarId(s_86metadata.get());
-        if (local != kInvalidId) {
-          auto const val = frame_local(fp, local);
-          if (!isNullType(type(val))) meta = val;
-        }
+      auto local = fp->func()->lookupVarId(s_86metadata.get());
+      if (local != kInvalidId) {
+        auto const val = frame_local(fp, local);
+        if (!isNullType(type(val))) meta = val;
       }
 
       if (meta) {

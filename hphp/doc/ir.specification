@@ -1752,12 +1752,6 @@ To string conversions:
   For debugging purposes.  Store kTVTrashJITRetVal to the return value slot on
   the activation record pointed to by S0.
 
-| ReleaseVVAndSkip, ND, S(FramePtr), B
-
-  Loads the VarEnv slot off the ActRec pointed to by S0. If it is null, does
-  nothing. Otherwise it frees the VarEnv and jumps to block B. This instruction
-  may not occur in an inlined call.
-
 | GenericRetDecRefs, ND, S(FramePtr), NF
 
   Does decrefs of all the current function's locals, where S0 is a pointer to

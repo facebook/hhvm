@@ -177,10 +177,6 @@ void cgCallUnpack(IRLS& env, const IRInstruction* inst) {
     emitImmStoreq(v, ActRec::kTrashedThisSlot, calleeAR + AROFF(m_thisUnsafe));
   }
 
-  if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, calleeAR + AROFF(m_varEnv));
-  }
-
   auto const syncSP = v.makeReg();
   v << lea{sp[cellsToBytes(extra->spOffset.offset)], syncSP};
   v << syncvmsp{syncSP};

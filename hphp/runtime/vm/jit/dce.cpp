@@ -568,7 +568,6 @@ bool canDCE(IRInstruction* inst) {
   case CreateAGen:
   case CreateAAWH:
   case CreateAFWH:
-  case CreateAFWHNoVV:
   case CreateAGWH:
   case AFWHPrepareChild:
   case StArResumeAddr:

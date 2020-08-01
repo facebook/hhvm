@@ -41,11 +41,6 @@ enum Attr {
   // simply memcpy-ing from the initializer vector.          |         //
   AttrDeepInit             = (1u <<  0), //       |    X     |         //
                                          //       |          |         //
-  // Indicates that a function may need to use a VarEnv or varargs (i.e.,
-  // extraArgs) at runtime.  If the debugger is enabled, all functions
-  // must be treated as having this flag.
-  AttrMayUseVV             = (1u <<  0), //       |          |    X    //
-                                         //       |          |         //
   // Method visibility.  The relative ordering of these is important.  //
   // N.B. the values are overlayed with some of the no-override bits for magic
   // class methods (next), since they don't apply to classes.

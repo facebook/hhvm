@@ -2275,7 +2275,6 @@ void in(ISS& env, const bc::ChainFaults&) {
 
 void in(ISS& env, const bc::NativeImpl&) {
   killLocals(env);
-  mayUseVV(env);
 
   if (is_collection_method_returning_this(env.ctx.cls, env.ctx.func)) {
     auto const resCls = env.index.builtin_class(env.ctx.cls->name);
@@ -4696,7 +4695,6 @@ void inclOpImpl(ISS& env) {
   killLocals(env);
   killThisProps(env);
   killSelfProps(env);
-  mayUseVV(env);
   push(env, TInitCell);
 }
 

@@ -836,8 +836,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // heap.
   case CreateGen:
   case CreateAGen:
-  case CreateAFWH:
-  case CreateAFWHNoVV: {
+  case CreateAFWH: {
     auto const fp = canonical(inst.src(0));
     auto fpInst = fp->inst();
     auto const frame = [&] () -> AliasClass {

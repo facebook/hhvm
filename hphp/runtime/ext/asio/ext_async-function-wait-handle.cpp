@@ -106,7 +106,6 @@ namespace {
   const StaticString s__closure_("{closure}");
 }
 
-template <bool mayUseVV>
 c_AsyncFunctionWaitHandle*
 c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
                                   size_t numSlots,
@@ -124,11 +123,11 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
   const size_t totalSize = sizeof(NativeNode) + frameSize + sizeof(Resumable) +
                            sizeof(c_AsyncFunctionWaitHandle);
   auto const resumable = Resumable::Create(frameSize, totalSize);
-  resumable->initialize<false, mayUseVV>(fp,
-                                         resumeAddr,
-                                         suspendOffset,
-                                         frameSize,
-                                         totalSize);
+  resumable->initialize<false>(fp,
+                               resumeAddr,
+                               suspendOffset,
+                               frameSize,
+                               totalSize);
   auto const waitHandle = new (resumable + 1) c_AsyncFunctionWaitHandle();
   assertx(waitHandle->hasExactlyOneRef());
   waitHandle->actRec()->setReturnVMExit();
@@ -137,20 +136,6 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
   waitHandle->initialize(child);
   return waitHandle;
 }
-
-template c_AsyncFunctionWaitHandle*
-c_AsyncFunctionWaitHandle::Create<true>(const ActRec* fp,
-                                        size_t numSlots,
-                                        jit::TCA resumeAddr,
-                                        Offset suspendOffset,
-                                        c_WaitableWaitHandle* child);
-
-template c_AsyncFunctionWaitHandle*
-c_AsyncFunctionWaitHandle::Create<false>(const ActRec* fp,
-                                        size_t numSlots,
-                                        jit::TCA resumeAddr,
-                                        Offset suspendOffset,
-                                        c_WaitableWaitHandle* child);
 
 void c_AsyncFunctionWaitHandle::PrepareChild(const ActRec* fp,
                                              c_WaitableWaitHandle* child) {

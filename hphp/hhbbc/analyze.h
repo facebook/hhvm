@@ -79,12 +79,6 @@ struct FuncAnalysisResult {
   LocalId retParam{MaxLocalId};
 
   /*
-   * Flag to indicate that the function does something that requires a
-   * variable environment.
-   */
-  bool mayUseVV;
-
-  /*
    * Flag to indicate that the function is effectFree, in the sense
    * that calls to it can be constant folded or dced (note that calls
    * are never truly effect free, because profilers could be enabled,

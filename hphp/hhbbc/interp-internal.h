@@ -258,10 +258,6 @@ void doRet(ISS& env, Type t, bool hasEffects) {
   }
 }
 
-void mayUseVV(ISS& env) {
-  env.collect.mayUseVV = true;
-}
-
 void hasInvariantIterBase(ISS& env) {
   env.collect.hasInvariantIterBase = true;
 }

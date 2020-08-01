@@ -179,9 +179,8 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
     // copying local variables and iterators. We don't support tracing when
     // we do the tail-call optimization, so we push the suspend hook here.
     auto const createNewAFWH = [&]{
-      auto const mayUseVV = func->attrs() & AttrMayUseVV;
-      auto const op = mayUseVV ? CreateAFWH : CreateAFWHNoVV;
-      auto const wh = gen(env, op, fp(env), cns(env, func->numSlotsInFrame()),
+      auto const wh = gen(env, CreateAFWH, fp(env),
+                          cns(env, func->numSlotsInFrame()),
                           resumeAddr(), suspendOff, child);
       suspendHook(env, [&] {
         auto const asyncAR = gen(env, LdAFWHActRec, wh);
@@ -401,7 +400,7 @@ Type awaitedTypeFromSSATmp(const SSATmp* awaitable) {
     return inst->src(2)->hasConstVal(TFunc)
       ? awaitedCallReturnType(inst->src(2)->funcVal()) : TInitCell;
   }
-  if (inst->is(CreateAFWH) || inst->is(CreateAFWHNoVV)) {
+  if (inst->is(CreateAFWH)) {
     return awaitedCallReturnType(inst->func());
   }
   if (inst->is(DefLabel)) {
@@ -428,7 +427,7 @@ bool likelySuspended(const SSATmp* awaitable) {
   awaitable = canonical(awaitable);
   auto const inst = awaitable->inst();
   if (inst->is(Call) && inst->extra<Call>()->asyncEagerReturn) return true;
-  if (inst->is(CreateAFWH) || inst->is(CreateAFWHNoVV)) return true;
+  if (inst->is(CreateAFWH)) return true;
   if (inst->is(DefLabel)) {
     auto likely = true;
     auto const dsts = inst->dsts();

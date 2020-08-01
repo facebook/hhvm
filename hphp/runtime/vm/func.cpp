@@ -581,7 +581,6 @@ void Func::print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrNoOverride){ out << " (nooverride)"; }
   if (attrs & AttrInterceptable) { out << " (interceptable)"; }
   if (attrs & AttrPersistent) { out << " (persistent)"; }
-  if (attrs & AttrMayUseVV) { out << " (mayusevv)"; }
   if (attrs & AttrBuiltin) { out << " (builtin)"; }
   if (attrs & AttrIsFoldable) { out << " (foldable)"; }
   if (attrs & AttrNoInjection) { out << " (no_injection)"; }
@@ -745,7 +744,6 @@ void logFunc(const Func* func, StructuredLogEntry& ent) {
   if (func->isClosureBody()) attrSet.emplace("closure_body");
   if (func->isPairGenerator()) attrSet.emplace("pair_generator");
   if (func->hasVariadicCaptureParam()) attrSet.emplace("variadic_param");
-  if (func->attrs() & AttrMayUseVV) attrSet.emplace("may_use_vv");
   if (func->isPhpLeafFn()) attrSet.emplace("leaf_function");
   if (func->cls() && func->cls()->isPersistent()) attrSet.emplace("persistent");
 

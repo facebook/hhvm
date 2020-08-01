@@ -2621,14 +2621,8 @@ void check_native(AsmState& as, bool is_construct) {
           // conditional compilation. Calling such a function will Fatal.
         }
       }
-    } else {
-      // was AttrOpCodeImpl
     }
-
-    // set extra attributes for builtin native functions
-    if (!SystemLib::s_inited) {
-      as.fe->attrs |= AttrBuiltin | AttrMayUseVV;
-    }
+    if (!SystemLib::s_inited) as.fe->attrs |= AttrBuiltin;
 
     for (auto& pi : as.fe->params) {
       pi.builtinType =
@@ -2654,9 +2648,6 @@ void parse_function(AsmState& as) {
   if (!SystemLib::s_inited) {
     attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
   }
-
-  // Be conservative by default. HHBBC can clear it where appropriate.
-  attrs |= AttrMayUseVV;
 
   int line0;
   int line1;

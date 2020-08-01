@@ -659,7 +659,7 @@ Flags handle_end_catch(Local& env, const IRInstruction& inst) {
   assertx(inst.op() == EndCatch);
   auto const data = inst.extra<EndCatchData>();
   if (data->teardown != EndCatchData::Teardown::Full ||
-      inst.func()->attrs() & AttrMayUseVV ||
+      inst.func()->isCPPBuiltin() ||
       findCatchHandler(inst.func(), inst.marker().bcOff()) != kInvalidOffset) {
     FTRACE(4, "      non-reducible EndCatch\n");
     return FNone{};
@@ -773,7 +773,7 @@ Flags handle_enter_tc_unwind(Local& env, const IRInstruction& inst) {
   if (!RuntimeOption::EvalHHIRLoadEnableTeardownOpts) return FNone{};
   assertx(inst.op() == EnterTCUnwind);
   auto const data = inst.extra<EnterTCUnwindData>();
-  if (!data->teardown || inst.func()->attrs() & AttrMayUseVV) {
+  if (!data->teardown || inst.func()->isCPPBuiltin()) {
     FTRACE(4, "      non-reducible EnterTCUnwind\n");
     return FNone{};
   }

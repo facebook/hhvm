@@ -349,7 +349,6 @@ VarEnv::VarEnv(ActRec* fp)
   , m_depth(1)
   , m_global(false)
 {
-  assertx(fp->func()->attrs() & AttrMayUseVV);
   TRACE(3, "Creating lazily attached VarEnv %p on stack\n", this);
 }
 
@@ -360,7 +359,6 @@ VarEnv::VarEnv(const VarEnv* varEnv, ActRec* fp)
 {
   assertx(varEnv->m_depth == 1);
   assertx(!varEnv->m_global);
-  assertx(fp->func()->attrs() & AttrMayUseVV);
 
   TRACE(3, "Cloning VarEnv %p to %p\n", varEnv, this);
 }
@@ -5241,7 +5239,7 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
   if (!func->isGenerator()) {  // Async function.
     // Create the AsyncFunctionWaitHandle object. Create takes care of
     // copying local variables and itertors.
-    auto waitHandle = c_AsyncFunctionWaitHandle::Create<true>(
+    auto waitHandle = c_AsyncFunctionWaitHandle::Create(
       fp, func->numSlotsInFrame(), nullptr, suspendOffset, child);
 
     if (RO::EvalEnableImplicitContext) {

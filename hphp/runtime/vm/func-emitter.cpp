@@ -144,18 +144,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   } else {
     assertx(preClass || !(attrs & AttrBuiltin) || (attrs & AttrIsMethCaller));
   }
-  if (!RuntimeOption::RepoAuthoritative) {
-    // In non-RepoAuthoritative mode, any function could get a VarEnv because
-    // of evalPHPDebugger.
-    attrs |= AttrMayUseVV;
-  } else if ((attrs & AttrInterceptable) &&
-             !name->empty() &&
-             !Func::isSpecial(name) &&
-             !isClosureBody) {
-    // intercepted functions need to pass all args through
-    // to the interceptee
-    attrs |= AttrMayUseVV;
-  }
   if (isVariadic()) {
     attrs |= AttrVariadicParam;
   }

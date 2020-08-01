@@ -518,7 +518,6 @@ struct CollectedInfo {
   PropertiesInfo props;
   hphp_fast_set<std::pair<const php::Func*, BlockId>>
     unfoldableFuncs;
-  bool mayUseVV{false};
   bool effectFree{true};
   bool hasInvariantIterBase{false};
   CollectionOpts opts{};

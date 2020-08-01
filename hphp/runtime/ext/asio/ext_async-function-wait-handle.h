@@ -117,7 +117,6 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
   static constexpr ptrdiff_t tailFramesOff() {
     return offsetof(c_AsyncFunctionWaitHandle, m_tailFrameIds);
   }
-  template <bool mayUseVV>
   static c_AsyncFunctionWaitHandle* Create(
     const ActRec* origFp,
     size_t numSlots,

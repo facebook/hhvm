@@ -2528,7 +2528,6 @@ void remove_unused_local_names(const FuncAnalysis& ainfo,
    * Closures currently rely on name information being available.
    */
   if (func->isClosureBody) return;
-  if (ainfo.mayUseVV) return;
 
   // For reified functions, skip the first non-param local
   auto loc = func->locals.begin() + func->params.size() + (int)func->isReified;
@@ -2689,7 +2688,6 @@ void remap_locals(const FuncAnalysis& ainfo,
    * some emitter quirk, so this might be worthwhile.
    */
   if (func->isClosureBody) return;
-  if (ainfo.mayUseVV) return;
 
   auto& localInterference = remappingIndex.localInterference;
   auto const& pinned = remappingIndex.pinnedLocals;

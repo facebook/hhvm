@@ -419,7 +419,6 @@ FuncAnalysis do_analyze_collect(const Index& index,
   } while (!incompleteQ.empty());
 
   ai.closureUseTypes = std::move(collect.closureUseTypes);
-  ai.mayUseVV = collect.mayUseVV;
   ai.effectFree = collect.effectFree;
   ai.hasInvariantIterBase = collect.hasInvariantIterBase;
   ai.unfoldableFuncs = collect.unfoldableFuncs;

@@ -835,11 +835,6 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
     }
   }
 
-  attrSetter(func->attrs,
-             func->attrs & AttrInterceptable ||
-             ainfo.mayUseVV,
-             AttrMayUseVV);
-
   if (options.InsertAssertions) {
     visit_blocks("insert assertions", index, ainfo, *collect,
                  insert_assertions);

@@ -144,8 +144,7 @@ struct alignas(16) Resumable {
     return reinterpret_cast<Resumable*>(frame + frameSize);
   }
 
-  template<bool clone,
-           bool mayUseVV = true>
+  template<bool clone>
   void initialize(const ActRec* fp, jit::TCA resumeAddr,
                   Offset suspendOffset, size_t frameSize, size_t totalSize) {
     assertx(fp);

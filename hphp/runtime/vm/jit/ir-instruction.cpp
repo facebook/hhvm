@@ -196,7 +196,6 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
       return move == Consume && srcNo == 0;
 
     case CreateAFWH:
-    case CreateAFWHNoVV:
       return srcNo == 4;
 
     case CreateAGWH:
@@ -289,7 +288,6 @@ Type allocObjReturn(const IRInstruction* inst) {
       return Type::ExactObj(AsyncGenerator::getClass());
 
     case CreateAFWH:
-    case CreateAFWHNoVV:
       return Type::ExactObj(c_AsyncFunctionWaitHandle::classof());
 
     case CreateAGWH:

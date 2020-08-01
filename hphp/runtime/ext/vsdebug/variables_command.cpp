@@ -530,7 +530,7 @@ const auto globalKeys = {
 // materializes it specifically for debugging. This shim doesn't need to have
 // the reffy behavior that PHP's globals array has. It can be a simple array.
 Variant globals_array() {
-  Array ret = g_context->m_globalVarEnv->getDefinedVariables();
+  Array ret = getDefinedVariables();
   return Variant::wrap(ret.lookup(s_GLOBALS));
 }
 }

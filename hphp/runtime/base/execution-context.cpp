@@ -100,7 +100,7 @@ ExecutionContext::ExecutionContext()
   , m_throwAllErrors(false)
   , m_pageletTasksStarted(0)
   , m_vhost(nullptr)
-  , m_globalVarEnv(nullptr)
+  , m_globalNVTable(nullptr)
   , m_lambdaCounter(0)
   , m_nesting(0)
   , m_dbgNoBreak(false)
@@ -1374,7 +1374,7 @@ void ExecutionContext::requestInit() {
   assertx(SystemLib::s_unit);
 
   initBlackHole();
-  VarEnv::createGlobal();
+  createGlobalNVTable();
   vmStack().requestInit();
   ResourceHdr::resetMaxId();
   jit::tc::requestInit();
@@ -1438,9 +1438,9 @@ void ExecutionContext::requestExit() {
   zend_rand_unseed();
   clearBlackHole();
 
-  if (m_globalVarEnv) {
-    req::destroy_raw(m_globalVarEnv);
-    m_globalVarEnv = nullptr;
+  if (m_globalNVTable) {
+    req::destroy_raw(m_globalNVTable);
+    m_globalNVTable = nullptr;
   }
 
   if (!m_lastError.isNull()) {
@@ -2178,7 +2178,7 @@ void ExecutionContext::enterDebuggerDummyEnv() {
 }
 
 void ExecutionContext::exitDebuggerDummyEnv() {
-  assertx(m_globalVarEnv);
+  assertx(m_globalNVTable);
   // Ensure that vmfp() is valid
   assertx(vmfp() != nullptr);
   // Ensure that vmfp() points to the only frame on the call stack.

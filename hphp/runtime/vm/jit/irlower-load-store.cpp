@@ -276,7 +276,7 @@ void cgStMBase(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static tv_lval ldGblAddrHelper(const StringData* name) {
-  return g_context->m_globalVarEnv->lookup(name);
+  return g_context->m_globalNVTable->lookup(name);
 }
 
 void cgLdGblAddr(IRLS& env, const IRInstruction* inst) {

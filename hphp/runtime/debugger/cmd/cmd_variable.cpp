@@ -245,7 +245,7 @@ const StaticString s_GLOBALS("GLOBALS");
 const StaticString s_this("this");
 
 Array CmdVariable::GetGlobalVariables() {
-  Array ret = g_context->m_globalVarEnv->getDefinedVariables();
+  Array ret = getDefinedVariables();
   ret.remove(s_GLOBALS);
   return ret;
 }

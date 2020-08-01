@@ -84,54 +84,10 @@ void setopBody(tv_lval lhs, SetOpOp op, TypedValue* rhs) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * Variable environment.
- *
- * A variable environment consists of the locals for the current function
- * (either pseudo-main, global function, or method), plus any variables that
- * are dynamically defined.
- *
- * Logically, a global function or method starts off with a variable
- * environment that contains only its locals, but a pseudo-main is handed
- * its caller's existing variable environment. Generally, however, we don't
- * create a variable environment for global functions or methods until it
- * actually needs one (i.e. if it is about to include a pseudo-main, or if
- * it uses dynamic variable lookups).
- *
- * Named locals always appear in the expected place on the stack, even after
- * a VarEnv is attached. Internally uses a NameValueTable to hook up names to
- * the local locations.
- */
-struct VarEnv {
- private:
-  NameValueTable m_nvTable;
-  uint16_t m_depth;
-  const bool m_global;
-
- public:
-  explicit VarEnv();
-  explicit VarEnv(ActRec* fp);
-  explicit VarEnv(const VarEnv* varEnv, ActRec* fp);
-  ~VarEnv();
-
-  // Allocate a global VarEnv.  Initially not attached to any frame.
-  static void createGlobal();
-
-  VarEnv* clone(ActRec* fp) const;
-
-  void suspend(const ActRec* oldFP, ActRec* newFP);
-
-  void set(const StringData* name, tv_rval tv);
-  tv_lval lookup(const StringData* name);
-  tv_lval lookupAdd(const StringData* name);
-  bool unset(const StringData* name);
-
-  Array getDefinedVariables() const;
-
-  // Used for save/store m_cfp for debugger
-  ActRec* getFP() const { return m_nvTable.getFP(); }
-  bool isGlobalScope() const { return m_global; }
-};
+// Creates and initializes the global NamedValue table
+void createGlobalNVTable();
+// Collects the variables defined on the global NamedValue table
+Array getDefinedVariables();
 
 ///////////////////////////////////////////////////////////////////////////////
 

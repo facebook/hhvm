@@ -571,7 +571,7 @@ TypedValue* getSPropOrRaise(const Class* cls,
 }
 
 tv_lval ldGblAddrDefHelper(StringData* name) {
-  return g_context->m_globalVarEnv->lookupAdd(name);
+  return g_context->m_globalNVTable->lookupAdd(name);
 }
 
 template <typename T>

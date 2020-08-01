@@ -585,7 +585,7 @@ public:
   // destroying the context, so C++ order of destruction is not an issue.
   req::fast_map<const ObjectData*,ArrayNoDtor> dynPropTable;
   TYPE_SCAN_IGNORE_FIELD(dynPropTable);
-  VarEnv* m_globalVarEnv;
+  NameValueTable* m_globalNVTable;
   struct FileInfo {
     Unit* unit;
     time_t ts_sec; // timestamp seconds

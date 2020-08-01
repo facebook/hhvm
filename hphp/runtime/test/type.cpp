@@ -215,7 +215,6 @@ TEST(Type, Ptr) {
   auto const a2 = TDArr.ptr(Ptr::Frame);
   EXPECT_EQ(TBottom, a1 & a2);
   EXPECT_EQ(a1, a1 - a2);
-  EXPECT_EQ(TVarEnv, (TVarEnv | a1) - a1);
 
   EXPECT_EQ(TBottom, TBottom.deref());
 

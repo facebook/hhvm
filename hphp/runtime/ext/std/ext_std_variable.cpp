@@ -669,7 +669,7 @@ bool HHVM_FUNCTION(HH_is_late_init_sprop_init,
 }
 
 bool HHVM_FUNCTION(HH_global_key_exists, StringArg key) {
-  return g_context->m_globalVarEnv->lookup(key.get()) != nullptr;
+  return g_context->m_globalNVTable->lookup(key.get()) != nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////

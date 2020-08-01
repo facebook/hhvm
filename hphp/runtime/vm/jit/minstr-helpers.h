@@ -36,16 +36,16 @@ tv_lval baseGImpl(TypedValue key) {
   auto const name = prepareKey(key);
   SCOPE_EXIT { decRefStr(name); };
 
-  auto const varEnv = g_context->m_globalVarEnv;
-  assertx(varEnv != nullptr);
+  auto const env = g_context->m_globalNVTable;
+  assertx(env != nullptr);
 
-  auto base = varEnv->lookup(name);
+  auto base = env->lookup(name);
   if (base == nullptr) {
     if (mode == MOpMode::Warn) throwArrayKeyException(name, false);
     if (mode == MOpMode::Define) {
       auto tv = make_tv<KindOfNull>();
-      varEnv->set(name, &tv);
-      base = varEnv->lookup(name);
+      env->set(name, &tv);
+      base = env->lookup(name);
     } else {
       return const_cast<TypedValue*>(&immutable_null_base);
     }

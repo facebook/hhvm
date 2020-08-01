@@ -344,16 +344,15 @@ constexpr bool operator>(Mem a, Mem b) {
  * Adding a new runtime type needs updating numRuntime variable.
  */
 #define IRT_RUNTIME                                                     \
-  IRT(VarEnv,      bits_t::bit<kRuntime>())                             \
-  IRT(NamedEntity, bits_t::bit<kRuntime+1>())                           \
-  IRT(RetAddr,     bits_t::bit<kRuntime+2>()) /* Return address */      \
-  IRT(StkPtr,      bits_t::bit<kRuntime+3>()) /* Stack pointer */       \
-  IRT(FramePtr,    bits_t::bit<kRuntime+4>()) /* Frame pointer */       \
-  IRT(TCA,         bits_t::bit<kRuntime+5>())                           \
-  IRT(ABC,         bits_t::bit<kRuntime+6>()) /* AsioBlockableChain */  \
-  IRT(RDSHandle,   bits_t::bit<kRuntime+7>()) /* rds::Handle */         \
-  IRT(Nullptr,     bits_t::bit<kRuntime+8>())                           \
-  IRT(Smashable,   bits_t::bit<kRuntime+9>()) /* Smashable uint64_t */  \
+  IRT(NamedEntity, bits_t::bit<kRuntime>())                             \
+  IRT(RetAddr,     bits_t::bit<kRuntime+1>()) /* Return address */      \
+  IRT(StkPtr,      bits_t::bit<kRuntime+2>()) /* Stack pointer */       \
+  IRT(FramePtr,    bits_t::bit<kRuntime+3>()) /* Frame pointer */       \
+  IRT(TCA,         bits_t::bit<kRuntime+4>())                           \
+  IRT(ABC,         bits_t::bit<kRuntime+5>()) /* AsioBlockableChain */  \
+  IRT(RDSHandle,   bits_t::bit<kRuntime+6>()) /* rds::Handle */         \
+  IRT(Nullptr,     bits_t::bit<kRuntime+7>())                           \
+  IRT(Smashable,   bits_t::bit<kRuntime+8>()) /* Smashable uint64_t */  \
   /* bits above this are unused */
 
 /*
@@ -414,7 +413,7 @@ constexpr bool operator>(Mem a, Mem b) {
 struct Type {
 private:
   static constexpr size_t kRuntime = 32;
-  static constexpr size_t numRuntime = 10;
+  static constexpr size_t numRuntime = 9;
   using bits_t = BitSet<kRuntime + numRuntime>;
 
 public:

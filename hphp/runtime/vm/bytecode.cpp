@@ -320,97 +320,29 @@ const StaticString
   s_HTTP_RAW_POST_DATA("HTTP_RAW_POST_DATA");
 }
 
-void VarEnv::createGlobal() {
-  assertx(!g_context->m_globalVarEnv);
-  g_context->m_globalVarEnv = req::make_raw<VarEnv>();
-}
-
-VarEnv::VarEnv()
-  : m_nvTable()
-  , m_depth(0)
-  , m_global(true)
-{
-  TRACE(3, "Creating VarEnv %p [global scope]\n", this);
+void createGlobalNVTable() {
+  assertx(!g_context->m_globalNVTable);
+  g_context->m_globalNVTable = req::make_raw<NameValueTable>();
+  auto nvTable = g_context->m_globalNVTable;
   Variant arr(ArrayData::CreateDArray());
-  m_nvTable.set(s_argc.get(),               init_null_variant.asTypedValue());
-  m_nvTable.set(s_argv.get(),               init_null_variant.asTypedValue());
-  m_nvTable.set(s__SERVER.get(),            arr.asTypedValue());
-  m_nvTable.set(s__GET.get(),               arr.asTypedValue());
-  m_nvTable.set(s__POST.get(),              arr.asTypedValue());
-  m_nvTable.set(s__COOKIE.get(),            arr.asTypedValue());
-  m_nvTable.set(s__FILES.get(),             arr.asTypedValue());
-  m_nvTable.set(s__ENV.get(),               arr.asTypedValue());
-  m_nvTable.set(s__REQUEST.get(),           arr.asTypedValue());
-  m_nvTable.set(s_HTTP_RAW_POST_DATA.get(), init_null_variant.asTypedValue());
-}
-
-VarEnv::VarEnv(ActRec* fp)
-  : m_nvTable(fp)
-  , m_depth(1)
-  , m_global(false)
-{
-  TRACE(3, "Creating lazily attached VarEnv %p on stack\n", this);
-}
-
-VarEnv::VarEnv(const VarEnv* varEnv, ActRec* fp)
-  : m_nvTable(varEnv->m_nvTable, fp)
-  , m_depth(1)
-  , m_global(false)
-{
-  assertx(varEnv->m_depth == 1);
-  assertx(!varEnv->m_global);
-
-  TRACE(3, "Cloning VarEnv %p to %p\n", varEnv, this);
-}
-
-VarEnv::~VarEnv() {
-  TRACE(3, "Destroying VarEnv %p [%s]\n",
-           this,
-           isGlobalScope() ? "global scope" : "local scope");
-  assertx(isGlobalScope() == (g_context->m_globalVarEnv == this));
-
-  if (isGlobalScope()) {
-    /*
-     * When detaching the global scope, we leak any live objects (and
-     * let MemoryManager clean them up).  This is because we're
-     * not supposed to run destructors for objects that are live at
-     * the end of a request.
-     */
-    m_nvTable.leak();
-  }
-}
-
-VarEnv* VarEnv::clone(ActRec* fp) const {
-  return req::make_raw<VarEnv>(this, fp);
-}
-
-void VarEnv::suspend(const ActRec* oldFP, ActRec* newFP) {
-  m_nvTable.suspend(oldFP, newFP);
-}
-
-void VarEnv::set(const StringData* name, tv_rval tv) {
-  m_nvTable.set(name, tv);
-}
-
-tv_lval VarEnv::lookup(const StringData* name) {
-  return m_nvTable.lookup(name);
-}
-
-tv_lval VarEnv::lookupAdd(const StringData* name) {
-  return m_nvTable.lookupAdd(name);
-}
-
-bool VarEnv::unset(const StringData* name) {
-  m_nvTable.unset(name);
-  return true;
+  nvTable->set(s_argc.get(),               init_null_variant.asTypedValue());
+  nvTable->set(s_argv.get(),               init_null_variant.asTypedValue());
+  nvTable->set(s__SERVER.get(),            arr.asTypedValue());
+  nvTable->set(s__GET.get(),               arr.asTypedValue());
+  nvTable->set(s__POST.get(),              arr.asTypedValue());
+  nvTable->set(s__COOKIE.get(),            arr.asTypedValue());
+  nvTable->set(s__FILES.get(),             arr.asTypedValue());
+  nvTable->set(s__ENV.get(),               arr.asTypedValue());
+  nvTable->set(s__REQUEST.get(),           arr.asTypedValue());
+  nvTable->set(s_HTTP_RAW_POST_DATA.get(), init_null_variant.asTypedValue());
 }
 
 const StaticString s_reified_generics_var("0ReifiedGenerics");
 
-Array VarEnv::getDefinedVariables() const {
+Array getDefinedVariables() {
   Array ret = Array::CreateDArray();
 
-  NameValueTable::Iterator iter(&m_nvTable);
+  NameValueTable::Iterator iter(g_context->m_globalNVTable);
   for (; iter.valid(); iter.next()) {
     auto const sd = iter.curKey();
     auto const val = iter.curVal();
@@ -1148,21 +1080,21 @@ static inline StringData* lookup_name(tv_rval key) {
 static inline tv_lval lookup_gbl(ActRec* /*fp*/, StringData*& name,
                                  tv_rval key) {
   name = lookup_name(key);
-  assertx(g_context->m_globalVarEnv);
-  return g_context->m_globalVarEnv->lookup(name);
+  assertx(g_context->m_globalNVTable);
+  return g_context->m_globalNVTable->lookup(name);
 }
 
 static inline tv_lval lookupd_gbl(ActRec* /*fp*/, StringData*& name,
                                   tv_rval key) {
   name = lookup_name(key);
-  assertx(g_context->m_globalVarEnv);
-  VarEnv* varEnv = g_context->m_globalVarEnv;
-  auto val = varEnv->lookup(name);
+  assertx(g_context->m_globalNVTable);
+  auto env = g_context->m_globalNVTable;
+  auto val = env->lookup(name);
   if (!val) {
     TypedValue tv;
     tvWriteNull(tv);
-    varEnv->set(name, &tv);
-    val = varEnv->lookup(name);
+    env->set(name, &tv);
+    val = env->lookup(name);
   }
   return val;
 }
@@ -3704,9 +3636,9 @@ OPTBLD_INLINE void iopUnsetG() {
   TypedValue* tv1 = vmStack().topTV();
   StringData* name = lookup_name(tv1);
   SCOPE_EXIT { decRefStr(name); };
-  VarEnv* varEnv = g_context->m_globalVarEnv;
-  assertx(varEnv != nullptr);
-  varEnv->unset(name);
+  auto env = g_context->m_globalNVTable;
+  assertx(env != nullptr);
+  env->unset(name);
   vmStack().popC();
 }
 

@@ -1517,7 +1517,7 @@ SimpleMutex unitInitLock(false /* reentrant */, RankUnitInit);
 std::atomic<uint64_t> s_loadedUnits{0};
 
 void setGlobal(StringData* name, TypedValue *value) {
-  g_context->m_globalVarEnv->set(name, value);
+  g_context->m_globalNVTable->set(name, value);
 }
 
 /*

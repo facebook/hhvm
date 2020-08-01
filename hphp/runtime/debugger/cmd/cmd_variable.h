@@ -52,7 +52,7 @@ private:
   /* Serialization limit on a single variable value.  -1 means unlimited. */
   int m_formatMaxLen{200};
 
-  /* Set true by onServer if it used g_context->m_globalVarEnv. */
+  /* Set true by onServer if it used g_context->m_globalNVTable. */
   bool m_global;
 
   req::root<String> m_varName;

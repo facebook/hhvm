@@ -427,9 +427,8 @@ int VariablesCommand::addLocals(
     count++;
   }
 
-  auto const noGbl = !fp->m_varEnv || !fp->m_varEnv->isGlobalScope();
   // Append the debugger specific environment.
-  if (noGbl && !g_context->getDebuggerEnv().isNull()) {
+  if (!g_context->getDebuggerEnv().isNull()) {
     IterateKVNoInc(
       g_context->getDebuggerEnv().get(),
       [&] (TypedValue k, TypedValue v) {

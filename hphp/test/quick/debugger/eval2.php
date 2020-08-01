@@ -5,11 +5,11 @@
 
   function throwSomething() {
 
-    throw new Exception($GLOBALS['_']);
+    throw new Exception($_ ?? 'I want to see this');
   }
 
   function printSomething() {
 
-    echo $GLOBALS['_'];
+    echo $_ ?? 'I want to see this';
     return "also returned something";
   }

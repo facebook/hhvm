@@ -19,7 +19,7 @@ Notice: Undefined variable: x
 null
 $_ = "don't want to see this"
 = throwSomething()
-Hit a php exception : exception 'Exception' with message 'don't want to see this' in %s/eval2.php:8
+Hit a php exception : exception 'Exception' with message 'I want to see this' in %s/eval2.php:8
 Stack trace:
 #0 (1): throwSomething()
 #1 (1): include()
@@ -34,6 +34,6 @@ Hit fatal : Encountered unexpected token 'syntax'.
     #2 include(), called at [:0]
 
 = printSomething()
-don't want to see this
+I want to see this
 "also returned something"
 quit

@@ -31,6 +31,10 @@ $this = TestNs\cls Object
 (
 )
 
+$break8 = TestNs\cls Object
+(
+)
+
 break clear all
 All breakpoints are cleared.
 break \TestNs\break8->pubObj()
@@ -49,6 +53,10 @@ Breakpoint 1 reached at TestNs\cls::pubCls() on line 16 of %s/break3.php
 
 variable
 $x = "test_break3"
+$break8 = TestNs\cls Object
+(
+)
+
 break clear all
 All breakpoints are cleared.
 continue
@@ -63,6 +71,10 @@ Breakpoint 1 reached at TestNs\Nested\foo() on line 23 of %s/break3.php
 
 variable
 $x = "test_break4"
+$break8 = TestNs\cls Object
+(
+)
+
 break clear all
 All breakpoints are cleared.
 continue
@@ -82,6 +94,10 @@ $this = TestNs\Nested\cls Object
 (
 )
 
+$break8 = TestNs\Nested\cls Object
+(
+)
+
 break clear all
 All breakpoints are cleared.
 continue
@@ -96,6 +112,10 @@ Breakpoint 1 reached at TestNs\Nested\cls::pubCls() on line 32 of %s/break3.php
 
 variable
 $x = "test_break6"
+$break8 = TestNs\Nested\cls Object
+(
+)
+
 break clear all
 All breakpoints are cleared.
 continue

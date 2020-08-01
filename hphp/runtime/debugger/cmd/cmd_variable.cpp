@@ -251,13 +251,8 @@ Array CmdVariable::GetGlobalVariables() {
 }
 
 bool CmdVariable::onServer(DebuggerProxy &proxy) {
-  if (m_frame < 0) {
-    m_variables = g_context->m_globalVarEnv->getDefinedVariables();
-    m_global = true;
-  } else {
+  if (m_frame >= 0) {
     m_variables = g_context->getLocalDefinedVariablesDebugger(m_frame);
-    const auto fp = g_context->getFrameAtDepthForDebuggerUnsafe(m_frame);
-    m_global = g_context->getVarEnv(fp) == g_context->m_globalVarEnv;
     auto oThis = g_context->getThis();
     if (nullptr != oThis) {
       auto tvThis = make_tv<KindOfObject>(oThis);
@@ -266,12 +261,8 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
     }
   }
 
-  if (m_global) {
-    m_variables.remove(s_GLOBALS);
-  }
-
   auto const& denv = g_context->getDebuggerEnv();
-  if (!m_global && !denv.isNull()) {
+  if (m_frame >= 0 && !denv.isNull()) {
     IterateKVNoInc(denv.get(), [&] (TypedValue k, TypedValue v) {
       if (!m_variables.exists(k)) m_variables.set(k, v, true);
     });

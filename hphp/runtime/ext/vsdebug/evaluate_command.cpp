@@ -175,19 +175,6 @@ bool EvaluateCommand::executeImpl(
   if (evalContext == "repl") {
     // Note that the execution code, if it succeeded, should have created
     // a varenv at the frame already.
-    const auto fp =
-      g_context->getFrameAtDepthForDebuggerUnsafe(frameDepth);
-    VarEnv* env = g_context->getVarEnv(fp);
-
-    if (env == nullptr) {
-      env = g_context->m_globalVarEnv;
-    }
-    if (env) {
-      env->set(
-        s_varName.get(),
-        executor.m_result.result.asTypedValue()
-      );
-    }
     auto& denv = g_context->getDebuggerEnv();
     if (denv.isNull()) denv = Array::CreateDArray();
     denv.set(StrNR{s_varName.get()}, executor.m_result.result, true);

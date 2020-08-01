@@ -2029,12 +2029,10 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     SCOPE_EXIT { vmpc() = savedPC; vmfp() = savedFP; };
     unit->merge();
 
-    enum VarAction { StoreFrame, StoreVV, StoreEnv };
+    enum VarAction { StoreFrame, StoreEnv };
 
     auto const uninit_cls = Unit::loadClass(s_uninitClsName.get());
 
-    auto globals = Array();
-    auto const global = fp && fp->m_varEnv && fp->m_varEnv->isGlobalScope();
     auto& env = m_debuggerEnv;
 
     auto const ctx = fp ? fp->func()->cls() : nullptr;
@@ -2079,21 +2077,8 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
           frameIds[id] = idx;
           continue;
         }
-        if (fp->hasVarEnv()) {
-          auto const tv = fp->getVarEnv()->lookup(f->localVarName(id));
-          if (tv) {
-            if (type(tv) != KindOfUninit) args.append(tvAsCVarRef(*tv));
-            else appendUninit();
-            actions[id] = StoreVV;
-            continue;
-          }
-        }
       }
-      auto const val = [&]{
-        if (!global) return env.lookup(StrNR{f->localVarName(id)});
-        auto const rval = fp->m_varEnv->lookup(f->localVarName(id));
-        return rval ? *rval : make_tv<KindOfUninit>();
-      }();
+      auto const val = env.lookup(StrNR{f->localVarName(id)});
       if (val.is_init()) args.append(val);
       else appendUninit();
     }
@@ -2113,15 +2098,8 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
         case StoreFrame:
           variant_ref{frame_local(fp, frameIds[id])}.unset();
           break;
-        case StoreVV:
-          fp->m_varEnv->unset(f->localVarName(id));
-          break;
         case StoreEnv:
-          if (global) {
-            fp->m_varEnv->unset(f->localVarName(id));
-          } else {
-            env.remove(StrNR{f->localVarName(id)});
-          }
+          env.remove(StrNR{f->localVarName(id)});
           break;
         }
         continue;
@@ -2130,15 +2108,8 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
       case StoreFrame:
         variant_ref{frame_local(fp, frameIds[id])} = arr[id + 1];
         break;
-      case StoreVV:
-        fp->m_varEnv->set(f->localVarName(id), &tv);
-        break;
       case StoreEnv:
-        if (global) {
-          fp->m_varEnv->set(f->localVarName(id), &tv);
-        } else {
-          env.set(StrNR{f->localVarName(id)}, tv);
-        }
+        env.set(StrNR{f->localVarName(id)}, tv);
         break;
       }
     }

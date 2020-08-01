@@ -681,7 +681,6 @@ struct Unit {
   SHA1 sha1;
   LSString filename;
   bool isHHFile{false};
-  std::atomic<bool> persistent{true};
   std::unique_ptr<FatalInfo> fatalInfo{nullptr};
   CompactVector<std::unique_ptr<Func>> funcs;
   CompactVector<std::unique_ptr<Class>> classes;

@@ -3861,26 +3861,22 @@ Index::~Index() {}
 //////////////////////////////////////////////////////////////////////
 
 void Index::mark_persistent_types_and_functions(php::Program& program) {
-  auto persist = [] (const php::Unit* unit) {
-    return unit->persistent.load(std::memory_order_relaxed);
-  };
   for (auto& unit : program.units) {
-    auto const persistent = persist(unit.get());
     for (auto& f : unit->funcs) {
       attribute_setter(f->attrs,
-                       persistent && (f->attrs & AttrUnique),
+                       f->attrs & AttrUnique,
                        AttrPersistent);
     }
 
     for (auto& t : unit->typeAliases) {
       attribute_setter(t->attrs,
-                       persistent && (t->attrs & AttrUnique),
+                       t->attrs & AttrUnique,
                        AttrPersistent);
     }
 
     for (auto& c : unit->constants) {
       attribute_setter(c->attrs,
-                       persistent && (c->attrs & AttrUnique),
+                       c->attrs & AttrUnique,
                        AttrPersistent);
     }
   }
@@ -3904,8 +3900,6 @@ void Index::mark_persistent_types_and_functions(php::Program& program) {
   for (auto& c : m_data->allClassInfos) {
     attribute_setter(c->cls->attrs,
                      (c->cls->attrs & AttrUnique) &&
-                     (persist(c->cls->unit) ||
-                      c->cls->parentName == s_Closure.get()) &&
                      check_persistent_class(*c),
                      AttrPersistent);
   }
@@ -3913,7 +3907,6 @@ void Index::mark_persistent_types_and_functions(php::Program& program) {
   for (auto& r : m_data->allRecordInfos) {
     attribute_setter(r->rec->attrs,
                      (r->rec->attrs & AttrUnique) &&
-                     persist(r->rec->unit) &&
                      check_persistent_record(*r),
                      AttrPersistent);
   }

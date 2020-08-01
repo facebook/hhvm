@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/vm/jit/tc.h"
-#include "hphp/util/managed-arena.h"
 #include "hphp/util/process.h"
 
 #include <algorithm>
@@ -47,36 +46,22 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
 
   w->writeFileHeader();
 
-  ProcStatus procStatus;
-  if (!procStatus.valid()) {
+  ProcStatus::update();
+  if (!ProcStatus::valid()) {
     w->writeFileFooter();
     return;
   }
-  // Subtract unused size in hugetlb arenas
-#if USE_JEMALLOC_EXTENT_HOOKS
-  size_t unused = 0;
-  // Various arenas where range of hugetlb pages can be reserved but only
-  // partially used.
-  unused += alloc::getRange(alloc::AddrRangeClass::VeryLow).retained();
-  unused += alloc::getRange(alloc::AddrRangeClass::Low).retained();
-  unused += alloc::getRange(alloc::AddrRangeClass::Uncounted).retained();
-  if (alloc::g_arena0) {
-    unused += alloc::g_arena0->retained();
-  }
-  for (auto const arena : alloc::g_local_arenas) {
-    if (arena) unused += arena->retained();
-  }
-  procStatus.registerUnused(unused >> 10); // convert to kB
-#endif
   w->beginObject("Memory");
 
-  w->writeEntry("VmSize", procStatus.VmSizeKb);
-  w->writeEntry("VmRSS", procStatus.VmRSSKb);
-  w->writeEntry("mem.rss", procStatus.VmRSSKb);
-  w->writeEntry("PeakUsage", procStatus.VmHWMKb);
-  w->writeEntry("HugetlbPages", procStatus.HugetlbPagesKb);
-  w->writeEntry("adjustedRSS", procStatus.adjustedRSSKb);
-  w->writeEntry("mem.rss_adjusted", procStatus.adjustedRSSKb);
+  w->writeEntry("VmSize", ProcStatus::VmSizeKb.load(std::memory_order_relaxed));
+  w->writeEntry("VmRSS", ProcStatus::VmRSSKb.load(std::memory_order_relaxed));
+  w->writeEntry("mem.rss", ProcStatus::VmRSSKb.load(std::memory_order_relaxed));
+  w->writeEntry("PeakUsage",
+                ProcStatus::VmHWMKb.load(std::memory_order_relaxed));
+  w->writeEntry("HugetlbPages",
+                ProcStatus::HugetlbPagesKb.load(std::memory_order_relaxed));
+  w->writeEntry("adjustedRSS", ProcStatus::adjustedRssKb());
+  w->writeEntry("mem.rss_adjusted", ProcStatus::adjustedRssKb());
 
   w->writeEntry("static_string_count", makeStaticStringCount());
   w->writeEntry("static_string_size", totalSize(AllocKind::StaticString));

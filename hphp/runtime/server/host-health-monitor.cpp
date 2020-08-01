@@ -25,6 +25,7 @@
 #include "hphp/util/compatibility.h"
 #include "hphp/util/health-monitor-types.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/process.h"
 
 namespace HPHP {
 
@@ -32,6 +33,7 @@ namespace {
 bool Enabled;
 int32_t MaxUpdatePeriod;
 auto DampenTime = std::chrono::milliseconds{0};
+int32_t ProcStatusUpdateSeconds;
 
 struct HostHealthMonitorExtension final : public Extension {
   HostHealthMonitorExtension() : Extension("hosthealthmonitor", "1.0") {}
@@ -44,6 +46,8 @@ struct HostHealthMonitorExtension final : public Extension {
     auto const dampenMs =
       Config::GetInt32(ini, globalConfig, "HealthMonitor.DampenTimeMs", 0);
     if (dampenMs > 0) DampenTime = std::chrono::milliseconds(dampenMs);
+    Config::Bind(ProcStatusUpdateSeconds, ini, globalConfig,
+                 "HealthMonitor.ProcStatusUpdateSeconds", 1);
   }
 } s_host_health_monitor_extension;
 
@@ -126,6 +130,7 @@ void HostHealthMonitor::monitor() {
     }
     if (notify) notifyObservers(newStatus);
     m_healthLevelCounter->addValue(healthLevelToInt(m_status));
+    ProcStatus::checkUpdate(ProcStatusUpdateSeconds);
     next += dura;
     auto const now = std::chrono::steady_clock::now();
     if (next <= now) {                  // already late, update immediately
@@ -140,9 +145,6 @@ void HostHealthMonitor::monitor() {
 }
 
 HealthLevel HostHealthMonitor::evaluate() {
-#ifdef USE_JEMALLOC
-  mallctl_epoch();
-#endif
   HealthLevel res = HealthLevel::Bold;
   std::lock_guard<std::mutex> g(m_lock);
   for (auto metric : m_metrics) {

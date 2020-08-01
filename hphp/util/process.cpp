@@ -46,6 +46,7 @@
 #include <set>
 
 #include "hphp/util/hugetlb.h"
+#include "hphp/util/managed-arena.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/user-info.h"
 
@@ -69,6 +70,13 @@ static void readString(FILE *f, string &out) {
 std::string Process::HostName;
 std::string Process::CurrentWorkingDirectory;
 char** Process::Argv;
+std::atomic_int64_t ProcStatus::VmSizeKb;
+std::atomic_int64_t ProcStatus::VmRSSKb;
+std::atomic_int64_t ProcStatus::VmHWMKb;
+std::atomic_int64_t ProcStatus::HugetlbPagesKb;
+std::atomic_int64_t ProcStatus::UnusedKb;
+std::atomic_int ProcStatus::threads;
+std::atomic_uint ProcStatus::lastUpdate;
 
 void Process::InitProcessStatics() {
   HostName = GetHostName();
@@ -109,13 +117,13 @@ bool Process::IsUnderGDB() {
 }
 
 int64_t Process::GetMemUsageMb() {
-  ProcStatus status;                    // read /proc/self/status
-  return status.valid() ? status.adjustedRSSKb / 1024 : 0;
+  ProcStatus::update();
+  return ProcStatus::valid() ? ProcStatus::adjustedRssKb() / 1024 : 0;
 }
 
 int Process::GetNumThreads() {
-  ProcStatus status;
-  return status.valid() ? status.Threads : 1;
+  ProcStatus::update();
+  return ProcStatus::valid() ? ProcStatus::nThreads() : 1;
 }
 
 // Files such as /proc/meminfo and /proc/self/status contain many lines
@@ -356,29 +364,53 @@ void Process::SetCoreDumpHugePages() {
 #endif
 }
 
-ProcStatus::ProcStatus() {
-#ifdef __linux__
+void ProcStatus::update() {
   if (FILE* f = fopen("/proc/self/status", "r")) {
     char line[128];
+    int64_t vmsize = 0, vmrss = 0, vmhwm = 0, hugetlb = 0;
     while (fgets(line, sizeof(line), f)) {
       if (!strncmp(line, "VmSize:", 7)) {
-        VmSizeKb = readSize(line, true);
+        vmsize = readSize(line, true);
       } else if (!strncmp(line, "VmRSS:", 6)) {
-        VmRSSKb = readSize(line, true);
+        vmrss = readSize(line, true);
       } else if (!strncmp(line, "VmHWM:", 6)) {
-        VmHWMKb = readSize(line, true);
+        vmhwm = readSize(line, true);
       } else if (!strncmp(line, "HugetlbPages:", 13)) {
-        HugetlbPagesKb = readSize(line, true);
+        hugetlb = readSize(line, true);
       } else if (!strncmp(line, "Threads:", 8)) {
-        Threads = readSize(line, false);
+        threads.store(readSize(line, false), std::memory_order_relaxed);
       }
     }
     fclose(f);
-    if (!valid()) return;
-    adjustedRSSKb = VmRSSKb + HugetlbPagesKb;
-    VmHWMKb += HugetlbPagesKb;
-  }
+    if (vmrss <= 0) {
+      // Invalid
+      lastUpdate.store(0, std::memory_order_release);
+    } else {
+      VmSizeKb.store(vmsize, std::memory_order_relaxed);
+      VmRSSKb.store(vmrss, std::memory_order_relaxed);
+      VmHWMKb.store(vmhwm + hugetlb, std::memory_order_relaxed);
+      HugetlbPagesKb.store(hugetlb, std::memory_order_relaxed);
+      lastUpdate.store(time(), std::memory_order_release);
+    }
+#ifdef USE_JEMALLOC
+    mallctl_epoch();
+#if USE_JEMALLOC_EXTENT_HOOKS
+    size_t unused = 0;
+    // Various arenas where range of hugetlb pages can be reserved but only
+    // partially used.
+    unused += alloc::getRange(alloc::AddrRangeClass::VeryLow).retained();
+    unused += alloc::getRange(alloc::AddrRangeClass::Low).retained();
+    unused += alloc::getRange(alloc::AddrRangeClass::Uncounted).retained();
+    if (alloc::g_arena0) {
+      unused += alloc::g_arena0->retained();
+    }
+    for (auto const arena : alloc::g_local_arenas) {
+      if (arena) unused += arena->retained();
+    }
+    updateUnused(unused >> 10); // convert to kB
 #endif
+#endif
+  }
 }
 
 bool Process::OOMScoreAdj(int adj) {

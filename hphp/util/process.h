@@ -17,6 +17,9 @@
 #ifndef incl_HPHP_PROCESS_H_
 #define incl_HPHP_PROCESS_H_
 
+#include <atomic>
+#include <cassert>
+#include <chrono>
 #include <map>
 #include <string>
 #include <vector>
@@ -57,31 +60,44 @@ struct MemInfo {
  * Kernel documentation: http://man7.org/linux/man-pages/man5/proc.5.html
  */
 struct ProcStatus {
-  int64_t VmSizeKb{-1};                 // virtual memory size
-  int64_t VmRSSKb{-1};                  // RSS, not including hugetlb pages
-  int64_t VmHWMKb{-1};                  // peak RSS
-  int64_t HugetlbPagesKb{0};            // Hugetlb mappings (2M + 1G)
+  static std::atomic_int64_t VmSizeKb;  // virtual memory size
+  static std::atomic_int64_t VmRSSKb;   // RSS, not including hugetlb pages
+  static std::atomic_int64_t VmHWMKb;   // peak RSS
+  static std::atomic_int64_t HugetlbPagesKb; // Hugetlb mappings (2M + 1G)
 
-  // 'Real' memory usage that includes VMRSS and HugetlbPages, but excludes
-  // unused space held by jemalloc.  This is mostly used to track regressions.
-  int64_t adjustedRSSKb{-1};
+  // Mapped but unused size, updated periodically when updating jemalloc stats.
+  static std::atomic_int64_t UnusedKb;
 
   // Number of threads running in the current process.
-  int Threads{-1};
+  static std::atomic_int threads;
+  static std::atomic_uint lastUpdate;   // seconds in std::chrono::steady_clock
 
-  // Constructor reads /proc/self/status and fill in the fields.
-  ProcStatus();
-  // Subtrace memory that is mapped in but unused.
-  void registerUnused(int64_t unusedKb) {
-    auto const r = adjustedRSSKb - unusedKb;
-    if (r >= 0) adjustedRSSKb = r;
+ public:
+  static auto adjustedRssKb() {
+    assert(valid());
+    return VmRSSKb.load(std::memory_order_relaxed)
+      + HugetlbPagesKb.load(std::memory_order_relaxed)
+      - UnusedKb.load(std::memory_order_relaxed);
   }
-
-  bool valid() const {
-    return VmSizeKb > 0 && VmRSSKb > 0 && VmHWMKb > 0 &&
-      HugetlbPagesKb >= 0 &&
-      Threads > 0;
+  static auto nThreads() {
+    return threads.load(std::memory_order_relaxed);
   }
+  static void updateUnused(int64_t unusedKb) {
+    UnusedKb.store(unusedKb, std::memory_order_relaxed);
+  }
+  static bool valid() {
+    return static_cast<bool>(lastUpdate.load(std::memory_order_acquire));
+  }
+  static unsigned time() {
+    auto const d = std::chrono::steady_clock::now().time_since_epoch();
+    return std::chrono::duration_cast<std::chrono::seconds>(d).count();
+  }
+  static void checkUpdate(int updateInterval) {
+    if (time() >= lastUpdate.load(std::memory_order_acquire) + updateInterval) {
+      update();
+    }
+  }
+  static void update();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

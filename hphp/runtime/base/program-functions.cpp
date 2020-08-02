@@ -50,6 +50,7 @@
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/json/ext_json.h"
+#include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
@@ -2853,6 +2854,8 @@ void hphp_session_exit(Transport* transport) {
                                        true /*psp*/);
     if (entry) {
       entry->setInt("response_code", transport->getResponseCode());
+      entry->setInt("uptime", f_server_uptime());
+      entry->setInt("rss", ProcStatus::adjustedRssKb());
       StructuredLog::log("hhvm_request_perf", *entry);
       transport->resetStructuredLogEntry();
     }

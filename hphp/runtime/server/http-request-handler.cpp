@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/extension-registry.h"
+#include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/files-match.h"
@@ -539,6 +540,8 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     entry->setInt("queue-time-us", queueTimeUs);
     StructuredLog::recordRequestGlobals(*entry);
     tl_heap->recordStats(*entry);
+    entry->setInt("uptime", f_server_uptime());
+    entry->setInt("rss", ProcStatus::adjustedRssKb());
   }
   HardwareCounter::UpdateServiceData(transport->getCpuTime(),
                                      transport->getWallTime(),

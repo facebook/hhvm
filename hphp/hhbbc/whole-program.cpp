@@ -539,7 +539,6 @@ void whole_program(php::ProgramPtr program,
                    int num_threads) {
   trace_time tracer("whole program");
 
-  RuntimeOption::EvalLowStaticArrays = false;
 
   if (num_threads > 0) {
     parallel::num_threads = num_threads;

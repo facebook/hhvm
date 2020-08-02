@@ -552,6 +552,8 @@ int main(int argc, char** argv) try {
     RuntimeOption::EvalHackCompilerExtractPath = hack_compiler_extract_path;
   }
 
+  RuntimeOption::EvalLowStaticArrays = false;
+
   register_process_init();
 
   hphp_process_init();

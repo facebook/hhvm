@@ -592,6 +592,9 @@ int process(const CompilerOptions &po) {
   BuiltinSymbols::s_systemAr.reset();
   Option::WholeProgram = wp;
 
+  // This should be set before parsing anything
+  RuntimeOption::EvalLowStaticArrays = false;
+
   LitstrTable::init();
   LitstrTable::get().setWriting();
 

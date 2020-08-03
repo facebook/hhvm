@@ -3754,13 +3754,25 @@ Index::Index(php::Program* program)
     preresolveTypes(env, m_data->classInfo);
   }
 
+  auto const error = [&](auto symbol, auto symbol2) {
+    auto filename = [](auto t) {
+      auto unit = t->unit;
+      if (!unit) return "BUILTIN";
+      return unit->filename->data();
+    };
+    throw Index::NonUniqueSymbolException(folly::sformat(
+      "More than one symbol with the name {} is defined. In {} and {}",
+      symbol->name->data(), filename(symbol), filename(symbol2)
+    ));
+  };
+
   for (auto &it : m_data->typeAliases) {
     const php::TypeAlias* ta = it.second;
-    attribute_setter(
-      ta->attrs,
-      !m_data->classInfo.count(ta->name) &&
-      !m_data->records.count(ta->name),
-      AttrUnique);
+    auto ci = m_data->classInfo.find(ta->name);
+    if (ci != m_data->classInfo.end()) error(ta, ci->second->cls);
+    auto sym = m_data->records.find(ta->name);
+    if (sym != m_data->records.end()) error(ta, sym->second);
+    attribute_setter(ta->attrs, true, AttrUnique);
   }
 
   for (auto &it : m_data->constants) {
@@ -3768,20 +3780,12 @@ Index::Index(php::Program* program)
   }
 
   for (auto& rinfo : m_data->allRecordInfos) {
-    auto const set = [&] {
-      auto const recname = rinfo->rec->name;
-      if (m_data->recordInfo.count(recname) != 1 ||
-          m_data->typeAliases.count(recname) ||
-          m_data->classes.count(recname)) {
-        return false;
-      }
-      if (rinfo->parent && !(rinfo->parent->rec->attrs & AttrUnique)) {
-        return false;
-      }
-      FTRACE(2, "Adding AttrUnique to record {}\n", recname->data());
-      return true;
-    }();
-    attribute_setter(rinfo->rec->attrs, set, AttrUnique);
+    auto const rec = rinfo->rec;
+    auto ci = m_data->classInfo.find(rec->name);
+    if (ci != m_data->classInfo.end()) error(rec, ci->second->cls);
+    auto sym = m_data->typeAliases.find(rec->name);
+    if (sym != m_data->typeAliases.end()) error(rec, sym->second);
+    attribute_setter(rinfo->rec->attrs, true, AttrUnique);
   }
 
   // Iterate allClassInfos so that we visit parent classes before

@@ -44,7 +44,9 @@ let subtype_method
     let check_tparam_constraints
         env { tp_name = (p, name); tp_constraints = cstrl; _ } =
       List.fold_left cstrl ~init:env ~f:(fun env (ck, cstr_ty) ->
-          (* TODO(T69551141) handle type arguments *)
+          (* TODO(T70068435) Revisit this when implementing bounds on HK generic vars.
+             For now it's safe to produce a Tgeneric with empty args here, because
+             if [name] were higher-kinded, then the constraints must be empty. *)
           let tgeneric = MakeType.generic (Reason.Rwitness p) name in
           Typing_generic_constraint.check_constraint
             env

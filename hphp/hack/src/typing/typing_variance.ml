@@ -463,7 +463,8 @@ and type_list tcopt root variance env tyl =
   List.iter tyl ~f:(type_ tcopt root variance env)
 
 and generic_ env variance name _targs =
-  (* TODO(T69551141) handle type arguments *)
+  (* TODO(T69931993) Once we support variance for HK generics, we have to update this.
+     For now, having type arguments implies tha the declared must be invariant *)
   let declared_variance = get_tparam_variance env name in
   match (declared_variance, variance) with
   (* Happens if type parameter isn't from class *)
@@ -893,8 +894,8 @@ and get_typarams ctx root env (ty : decl_ty) =
       (* Tgeneric(tp):@T is a valid usage of tp and should not trigger the
        * linter
        *)
-      | Tgeneric (tp, _) ->
-        (* TODO(T69551141) handle type arguments *)
+      | Tgeneric (tp, []) ->
+        (* may want to handle case where there are type arguments *)
         single tp (get_reason ty)
       | _ -> empty
     in

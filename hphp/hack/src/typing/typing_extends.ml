@@ -745,7 +745,6 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
      * is abstract
      *)
     let default =
-      (* TODO(T69551141) handle type arguments for Tgeneric *)
       MakeType.generic (Reason.Rtconst_no_cstr child_typeconst.ttc_name) name
     in
     let child_cstr =

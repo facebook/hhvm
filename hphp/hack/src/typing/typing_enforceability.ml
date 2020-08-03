@@ -70,8 +70,7 @@ let is_enforceable (env : env) (ty : decl_ty) =
           end
         | None -> true
       end
-    | Tgeneric (name, _args) ->
-      (* TODO(T69551141) handle type arguments *)
+    | Tgeneric (name, []) ->
       begin
         match (Env.get_reified env name, Env.get_enforceable env name) with
         | (Aast.Erased, _) -> false
@@ -79,6 +78,9 @@ let is_enforceable (env : env) (ty : decl_ty) =
         | (Aast.Reified, false) -> false
         | (Aast.Reified, true) -> true
       end
+    | Tgeneric (_name, _) ->
+      (* HK generics (i.e., with type arguments) cannot be enforcable at the moment *)
+      false
     | Taccess _ -> false
     | Tlike _ -> false
     | Tarray (None, None) -> true

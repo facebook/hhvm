@@ -88,7 +88,6 @@ let make_abstract env id name namel bnd =
        Here, $x->get() has type expr#1::T as T1::T (as Box::T).
        But T1::T is exactly equal to int, so $x->get() no longer needs
        to be expression dependent. Thus, $x->get() typechecks. *)
-    (* TODO(T69551141) handle type arguments *)
     Exact (MakeType.generic Reason.Rnone tp_name)
   else
     Abstract (name, namel, bnd)

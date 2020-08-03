@@ -123,7 +123,7 @@ let pos_contains (pos : Pos.absolute) ?(col_num : int option) (line_num : int) :
 (* Gets the list of unique marker/position tuples associated with a line. *)
 let markers_and_positions_for_line
     (position_group : position_group) (line_num : int) :
-    (marker * Pos.absolute) sexp_list =
+    (marker * Pos.absolute) list =
   List.filter position_group.messages ~f:(fun (_, msg) ->
       pos_contains (Errors.get_message_pos msg) line_num)
   |> List.dedup_and_sort ~compare:(fun ((m, _), _) ((n, _), _) ->
@@ -399,7 +399,34 @@ let position_groups_by_file marker_and_msgs : position_group list list =
   let close_enough prev_pos curr_pos =
     let line1_end = Pos.end_line prev_pos in
     let line2_begin = Pos.line curr_pos in
-    line1_end + n_extra_lines_hl + 1 >= line2_begin - n_extra_lines_hl
+
+    (* Example:
+      line1_end = 10:
+      [3] 10 |   $z = 3 * $x;
+          11 |   if ($z is int) {
+          12 |     echo 'int';
+
+      line2_begin = 16
+          14 |     echo 'not int';
+          15 |   }
+      [1] 16 |   return $z;
+
+      Then they should be conjoined as such:
+      [3] 10 |   $z = 3 * $x;
+          11 |   if ($z is int) {
+          12 |     echo 'int';
+          13 |   } else
+          14 |     echo 'not int';
+          15 |   }
+      [1] 16 |   return $z;
+
+      If they were any farther away, the line
+          13 |   } else
+      would be replaced with
+             :
+      to signify more than one interposing line.
+     *)
+    line1_end + n_extra_lines_hl + 2 >= line2_begin - n_extra_lines_hl
   in
   (* Group marked messages that are sufficiently close. *)
   let grouped_messages (messages : marked_message list) :

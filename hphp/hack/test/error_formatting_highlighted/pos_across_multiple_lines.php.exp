@@ -15,13 +15,13 @@ pos_across_multiple_lines.php:6:10
 Typing[4105] Too many arguments (expected 0 but got 3) [1]
 -> Definition is here [2]
 
-pos_across_multiple_lines.php:9:10
+pos_across_multiple_lines.php:15:3
      7 | }
      8 | 
 [2]  9 | function g(): void {
     10 |   echo "hello";
     11 | }
-       :
+    12 | 
     13 | <<__EntryPoint>>
     14 | function main(): void {
 [1] 15 |   g(1,

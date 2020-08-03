@@ -1,4 +1,3 @@
-.text._ZN4HPHP6VarEnv9lookupAddEPKNS_10StringDataE*
 .text._ZN4HPHP3jit18ldGblAddrDefHelperEPNS_10StringDataE*
 .text._ZN4HPHP14NameValueTable9lookupAddEPKNS_10StringDataE*
 .text._ZN4HPHP14NameValueTable14findTypedValueEPKNS_10StringDataE*

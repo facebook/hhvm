@@ -374,8 +374,19 @@ let make (state_dir : Path.t) : Incremental.state =
         state#save);
   let state_path = get_state_file_path state_dir in
   let (persistent_state : persistent_state) =
-    In_channel.with_file ~binary:true (Path.to_string state_path) ~f:(fun ic ->
-        Marshal.from_channel ic)
+    try
+      In_channel.with_file
+        ~binary:true
+        (Path.to_string state_path)
+        ~f:(fun ic -> Marshal.from_channel ic)
+    with e ->
+      let e = Exception.wrap e in
+      Hh_logger.warn
+        ( "HINT: An error occurred while loading hh_fanout state. "
+        ^^ "If it is corrupted, "
+        ^^ "try running `hh_fanout clean` to delete the state, "
+        ^^ "then try your query again." );
+      Exception.reraise e
   in
   let state = new state ~state_path ~persistent_state in
   (state :> Incremental.state)

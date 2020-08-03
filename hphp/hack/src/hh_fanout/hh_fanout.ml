@@ -176,25 +176,26 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
       saved_state_changed_files = changed_files;
     }
 
+let get_state_path ~(env : env) : Path.t =
+  match env.state_path with
+  | Some state_path -> state_path
+  | None ->
+    let state_path = Path.make "/tmp/hh_fanout" in
+    let state_path =
+      Path.concat state_path (Path.slash_escaped_string_of_path env.root)
+    in
+    let state_path =
+      Path.concat
+        state_path
+        (match Build_banner.banner with
+        | Some banner -> banner
+        | None -> "development")
+    in
+    let state_path = Path.concat state_path "hh_fanout_state" in
+    state_path
+
 let make_incremental_state ~(env : env) : Incremental.state =
-  let state_path =
-    match env.state_path with
-    | Some state_path -> state_path
-    | None ->
-      let state_path = Path.make "/tmp/hh_fanout" in
-      let state_path =
-        Path.concat state_path (Path.slash_escaped_string_of_path env.root)
-      in
-      let state_path =
-        Path.concat
-          state_path
-          (match Build_banner.banner with
-          | Some banner -> banner
-          | None -> "development")
-      in
-      let state_path = Path.concat state_path "hh_fanout_state" in
-      state_path
-  in
+  let state_path = get_state_path env in
   Hh_logger.log "State path: %s" (Path.to_string state_path);
   match env.state_backend with
   | OCaml_state_backend -> Incremental_ocaml.make state_path
@@ -544,6 +545,16 @@ let parse_env () =
     state_backend;
   }
 
+let clean_subcommand =
+  let open Command.Let_syntax in
+  Command.basic
+    ~summary:"Delete any state files which hh_fanout uses from disk."
+    (let%map env = parse_env () in
+     fun () ->
+       let state_path = get_state_path env in
+       Hh_logger.log "Deleting %s" (Path.to_string state_path);
+       Sys_utils.rm_dir_tree (Path.to_string state_path))
+
 let calculate_subcommand =
   let open Command.Param in
   let open Command.Let_syntax in
@@ -726,6 +737,7 @@ let () =
   @@ Command.group
        ~summary:"Provides access to Hack's dependency graph"
        [
+         ("clean", clean_subcommand);
          ("calculate", calculate_subcommand);
          ("calculate-errors", calculate_errors_subcommand);
          ("debug", debug_subcommand);

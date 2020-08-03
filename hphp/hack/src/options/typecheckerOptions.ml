@@ -100,9 +100,6 @@ let shallow_class_decl = GlobalOptions.tco_shallow_class_decl
 
 let like_type_hints = GlobalOptions.tco_like_type_hints
 
-let union_intersection_type_hints =
-  GlobalOptions.tco_union_intersection_type_hints
-
 let like_casts = GlobalOptions.tco_like_casts
 
 let simple_pessimize = GlobalOptions.tco_simple_pessimize

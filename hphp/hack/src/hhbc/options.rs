@@ -260,6 +260,7 @@ prefixed_flags!(
     "hhvm.hack.lang.",
     ABSTRACT_STATIC_PROPS,
     ALLOW_NEW_ATTRIBUTE_SYNTAX,
+    ALLOW_UNSTABLE_FEATURES,
     CONST_DEFAULT_FUNC_ARGS,
     CONST_DEFAULT_LAMBDA_ARGS,
     CONST_STATIC_PROPS,
@@ -697,6 +698,9 @@ mod tests {
     "global_value": false
   },
   "hhvm.hack.lang.allow_new_attribute_syntax": {
+    "global_value": false
+  },
+  "hhvm.hack.lang.allow_unstable_features": {
     "global_value": false
   },
   "hhvm.hack.lang.check_int_overflow": {
@@ -1181,5 +1185,6 @@ bitflags! {
         const DISABLE_ARRAY_CAST = 1 << 52;
         const DISABLE_ARRAY_TYPEHINT = 1 << 53;
         const HACK_ARR_DV_ARR_MARK = 1 << 54;
+        const ALLOW_UNSTABLE_FEATURES = 1 << 55;
     }
 }

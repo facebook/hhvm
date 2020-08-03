@@ -524,6 +524,7 @@ module LowererTest_ = struct
         ParserOptions.default with
         GlobalOptions.po_disable_xhp_children_declarations = true;
         GlobalOptions.po_disable_xhp_element_mangling = true;
+        GlobalOptions.po_allow_unstable_features = true;
       }
     in
     let lower_env =

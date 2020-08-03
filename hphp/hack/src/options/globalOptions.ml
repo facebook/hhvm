@@ -33,6 +33,7 @@ type t = {
   po_disable_nontoplevel_declarations: bool;
   po_disable_static_closures: bool;
   po_allow_goto: bool;
+  po_allow_unstable_features: bool;
   tco_log_inference_constraints: bool;
   tco_disallow_array_typehint: bool;
   tco_disallow_array_literal: bool;
@@ -198,6 +199,7 @@ let default =
     po_disable_nontoplevel_declarations = false;
     po_disable_static_closures = true;
     po_allow_goto = false;
+    po_allow_unstable_features = false;
     tco_log_inference_constraints = false;
     tco_disallow_array_typehint = false;
     tco_disallow_array_literal = false;
@@ -387,6 +389,7 @@ let make
     ?(po_disable_hh_ignore_error = default.po_disable_hh_ignore_error)
     ?(po_disable_array = default.po_disable_array)
     ?(po_disable_array_typehint = default.po_disable_array_typehint)
+    ?(po_allow_unstable_features = default.po_allow_unstable_features)
     ?(tco_enable_systemlib_annotations =
       default.tco_enable_systemlib_annotations)
     ?(tco_pu_enabled_paths = default.tco_pu_enabled_paths)
@@ -422,6 +425,7 @@ let make
     po_disable_nontoplevel_declarations;
     po_disable_static_closures;
     po_allow_goto;
+    po_allow_unstable_features;
     tco_log_inference_constraints;
     tco_disallow_array_typehint;
     tco_disallow_array_literal;
@@ -630,6 +634,8 @@ let po_disable_legacy_soft_typehints t = t.po_disable_legacy_soft_typehints
 let po_allowed_decl_fixme_codes t = t.po_allowed_decl_fixme_codes
 
 let po_allow_new_attribute_syntax t = t.po_allow_new_attribute_syntax
+
+let po_allow_unstable_features t = t.po_allow_unstable_features
 
 let tco_global_inference t = t.tco_global_inference
 

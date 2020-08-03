@@ -72,6 +72,8 @@ type t = {
   po_disable_static_closures: bool;
   (* Flag to enable PHP's `goto` operator *)
   po_allow_goto: bool;
+  (* Allows enabling unstable features via the __EnableUnstableFeatures attribute *)
+  po_allow_unstable_features: bool;
   (* Print types of size bigger than 1000 after performing a type union. *)
   tco_log_inference_constraints: bool;
   (*
@@ -364,6 +366,7 @@ val make :
   ?po_disable_hh_ignore_error:bool ->
   ?po_disable_array:bool ->
   ?po_disable_array_typehint:bool ->
+  ?po_allow_unstable_features:bool ->
   ?tco_enable_systemlib_annotations:bool ->
   ?tco_pu_enabled_paths:bool * Relative_path.t list ->
   ?tco_widen_is_array:bool ->
@@ -536,6 +539,8 @@ val po_const_default_lambda_args : t -> bool
 val po_disallow_silence : t -> bool
 
 val po_abstract_static_props : t -> bool
+
+val po_allow_unstable_features : t -> bool
 
 val po_disable_unset_class_const : t -> bool
 

@@ -4568,13 +4568,6 @@ where
         match &node.syntax {
             Missing => Ok(vec![]),
             WhereClause(c) => {
-                if is_class && !env.parser_options.po_enable_class_level_where_clauses {
-                    Self::raise_parsing_error(
-                        parent,
-                        env,
-                        "Class-level where clauses are disabled",
-                    );
-                }
                 let f = |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::WhereConstraint> {
                     match &n.syntax {
                         WhereConstraint(c) => {

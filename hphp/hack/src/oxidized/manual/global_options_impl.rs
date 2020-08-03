@@ -33,6 +33,7 @@ impl Default for GlobalOptions {
             po_disable_nontoplevel_declarations: false,
             po_disable_static_closures: true,
             po_allow_goto: false,
+            po_allow_unstable_features: false,
             tco_log_inference_constraints: false,
             tco_disallow_array_typehint: false,
             tco_disallow_array_literal: false,

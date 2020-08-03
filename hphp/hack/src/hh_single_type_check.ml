@@ -670,6 +670,7 @@ let parse_options () =
       ~tco_higher_kinded_types:!enable_higher_kinded_types
       ~po_allowed_decl_fixme_codes:!allowed_decl_fixme_codes
       ~tco_widen_is_array:!widen_is_array
+      ~po_allow_unstable_features:true
       ()
   in
   Errors.allowed_fixme_codes_strict :=

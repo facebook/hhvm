@@ -474,6 +474,8 @@ type t = {
   profile_desc: string;
   (* Allows the IDE to show the 'find all implementations' button *)
   go_to_implementation: bool;
+  (* Allows unstabled features to be enabled within a file via the '__EnableUnstableFeatures' attribute *)
+  allow_unstable_features: bool;
   watchman: Watchman.t;
 }
 
@@ -551,6 +553,7 @@ let default =
     profile_desc = "";
     (* seconds *)
     go_to_implementation = true;
+    allow_unstable_features = false;
     watchman = Watchman.default;
   }
 
@@ -975,6 +978,12 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.go_to_implementation
       config
   in
+  let allow_unstable_features =
+    bool_if_version
+      "allow_unstable_features"
+      ~default:default.allow_unstable_features
+      config
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1047,6 +1056,7 @@ let load_ fn ~silent ~current_version overrides =
     profile_owner;
     profile_desc;
     go_to_implementation;
+    allow_unstable_features;
     watchman;
   }
 

@@ -306,6 +306,8 @@ module UserAttributes = struct
 
   let uaPu = "__Pu"
 
+  let uaEnableUnstableFeatures = "__EnableUnstableFeatures"
+
   let as_map =
     AttributeKinds.(
       SMap.of_list
@@ -351,6 +353,7 @@ module UserAttributes = struct
           (uaNeverInline, [fn; mthd]);
           (uaDisableTypecheckerInternal, [fn; mthd]);
           (uaPu, [cls]);
+          (uaEnableUnstableFeatures, [file]);
         ])
 
   (* These are names which are allowed in the systemlib but not in normal programs *)

@@ -284,6 +284,8 @@ pub mod user_attributes {
 
     pub const NEVER_INLINE: &str = "__NEVER_INLINE";
 
+    pub const ENABLE_UNSTABLE_FEATURES: &str = "__EnableUnstableFeatures";
+
     lazy_static! {
         static ref AS_SET: HashSet<&'static str> = vec![
             OVERRIDE,
@@ -325,6 +327,7 @@ pub mod user_attributes {
             DYNAMICALLY_CONSTRUCTIBLE,
             REIFIABLE,
             NEVER_INLINE,
+            ENABLE_UNSTABLE_FEATURES,
         ]
         .into_iter()
         .collect();

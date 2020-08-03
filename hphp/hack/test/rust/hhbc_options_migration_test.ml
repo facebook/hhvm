@@ -126,6 +126,9 @@ let assert_opts_equal caml rust =
   assert_equal
     Hhbc_options.(enable_xhp_class_modifier caml)
     Hhbc_options.(enable_xhp_class_modifier rust);
+  assert_equal
+    Hhbc_options.(allow_unstable_features caml)
+    Hhbc_options.(allow_unstable_features rust);
   ()
 
 let json_override_2bools =
@@ -311,6 +314,9 @@ let test_all_overrides_json_only _ =
   \"hhvm.hack.lang.allow_new_attribute_syntax\": {
     \"global_value\": true
   },
+  \"hhvm.hack.lang.allow_unstable_features\": {
+    \"global_value\": false
+  },
   \"hhvm.hack.lang.check_int_overflow\": {
     \"global_value\": \"\"
   },
@@ -436,6 +442,9 @@ module CliArgOverrides = struct
   let hhvm'hack'lang'allow_new_attribute_syntax =
     "-vhhvm.lang.allow_new_attribute_syntax=true"
 
+  let hhvm'hack'lang'allow_unstable_features =
+    "-vhhvm.lang.allow_unstable_features=true"
+
   let hhvm'hack'lang'check_int_overflow =
     "-vhhvm.hack.lang.check_int_overflow=2"
 
@@ -524,6 +533,7 @@ let test_all_overrides_cli_only _ =
       hhvm'enable_intrinsics_extension;
       hhvm'hack'lang'abstract_static_props;
       hhvm'hack'lang'allow_new_attribute_syntax;
+      hhvm'hack'lang'allow_unstable_features;
       hhvm'hack'lang'check_int_overflow;
       hhvm'hack'lang'const_default_func_args;
       hhvm'hack'lang'const_static_props;

@@ -479,18 +479,10 @@ and hint_
     (p, x) =
   let tcopt = Provider_context.get_tcopt (fst env).ctx in
   let like_type_hints_enabled = TypecheckerOptions.like_type_hints tcopt in
-  let union_intersection_type_hints_enabled =
-    TypecheckerOptions.union_intersection_type_hints tcopt
-  in
   let hint = hint ~forbid_this ~allow_wildcard ~allow_like in
   match x with
-  | Aast.Hunion hl ->
-    if not union_intersection_type_hints_enabled then
-      Errors.experimental_feature p "union type hints";
-    N.Hunion (List.map hl ~f:(hint ~allow_retonly env))
+  | Aast.Hunion hl -> N.Hunion (List.map hl ~f:(hint ~allow_retonly env))
   | Aast.Hintersection hl ->
-    if not union_intersection_type_hints_enabled then
-      Errors.experimental_feature p "intersection type hints";
     N.Hintersection (List.map hl ~f:(hint ~allow_retonly env))
   | Aast.Htuple hl ->
     N.Htuple (List.map hl ~f:(hint ~allow_retonly ~tp_depth:(tp_depth + 1) env))

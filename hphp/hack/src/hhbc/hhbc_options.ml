@@ -58,6 +58,7 @@ type t = {
   option_enable_first_class_function_pointers: bool;
   option_disable_array: bool;
   option_disable_array_typehint: bool;
+  option_allow_unstable_features: bool;
 }
 [@@deriving eq, ord]
 
@@ -112,6 +113,7 @@ let default =
     option_enable_first_class_function_pointers = false;
     option_disable_array = false;
     option_disable_array_typehint = false;
+    option_allow_unstable_features = false;
   }
 
 let constant_folding o = o.option_constant_folding
@@ -211,6 +213,8 @@ let disable_array o = o.option_disable_array
 
 let disable_array_typehint o = o.option_disable_array_typehint
 
+let allow_unstable_features o = o.option_allow_unstable_features
+
 let canonical_aliased_namespaces an =
   List.sort (fun p1 p2 -> String.compare (fst p1) (fst p2)) an
 
@@ -294,6 +298,7 @@ let to_string o =
       @@ disable_xhp_element_mangling o;
       Printf.sprintf "disable_array: %B" @@ disable_array o;
       Printf.sprintf "disable_array_typehint: %B" @@ disable_array_typehint o;
+      Printf.sprintf "allow_unstable_features: %B" @@ allow_unstable_features o;
     ]
 
 let as_bool s =
@@ -398,6 +403,8 @@ let set_option options name value =
     { options with option_disable_array = as_bool value }
   | "hhvm.hack.lang.disable_array_typehint" ->
     { options with option_disable_array_typehint = as_bool value }
+  | "hhvm.hack.lang.allow_unstable_features" ->
+    { options with option_allow_unstable_features = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -603,6 +610,10 @@ let value_setters =
     @@ fun opts v -> { opts with option_disable_array = v = 1 } );
     ( set_value "hhvm.hack.lang.disable_array_typehint" get_value_from_config_int
     @@ fun opts v -> { opts with option_disable_array_typehint = v = 1 } );
+    ( set_value
+        "hhvm.hack.lang.allow_unstable_features"
+        get_value_from_config_int
+    @@ fun opts v -> { opts with option_allow_unstable_features = v = 1 } );
   ]
 
 let extract_config_options_from_json ~init config_json =

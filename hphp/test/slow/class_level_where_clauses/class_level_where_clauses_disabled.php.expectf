@@ -1,1 +1,1 @@
-Fatal error: Class-level where clauses are disabled in %s on line 12
+Fatal error: Cannot use unstable feature: 'class_level_where' in %s on line 12

@@ -3,9 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use itertools::Itertools;
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::{BTreeMap, HashMap, HashSet};
+use std::str::FromStr;
+use strum;
+use strum::IntoEnumIterator;
+use strum_macros::{Display, EnumIter, EnumString, IntoStaticStr};
 
 use naming_special_names_rust as sn;
 
@@ -50,6 +55,23 @@ enum BinopAllowsAwaitInPositions {
     BinopAllowAwaitLeft,
     BinopAllowAwaitRight,
     BinopAllowAwaitNone,
+}
+
+#[derive(
+    Clone,
+    Copy,
+    EnumIter,
+    EnumString,
+    Eq,
+    Display,
+    Hash,
+    IntoStaticStr,
+    PartialEq
+)]
+#[strum(serialize_all = "snake_case")]
+enum UnstableFeatures {
+    UnionIntersectionTypeHints,
+    ClassLevelWhere,
 }
 
 use BinopAllowsAwaitInPositions::*;
@@ -155,6 +177,7 @@ struct Context<'a, Syntax> {
     // proper ancestor (including lambdas) but not beyond the enclosing function or method
     pub active_is_rx_or_enclosing_for_lambdas: bool,
     pub active_const: Option<&'a Syntax>,
+    pub active_unstable_features: HashSet<UnstableFeatures>,
 }
 
 // TODO: why can't this be auto-derived?
@@ -167,6 +190,7 @@ impl<'a, Syntax> std::clone::Clone for Context<'a, Syntax> {
             active_callable_attr_spec: self.active_callable_attr_spec,
             active_is_rx_or_enclosing_for_lambdas: self.active_is_rx_or_enclosing_for_lambdas,
             active_const: self.active_const,
+            active_unstable_features: self.active_unstable_features.clone(),
         }
     }
 }
@@ -357,6 +381,60 @@ where
         iter.find(|x| assert_fun(*x))
     }
 
+    fn enable_unstable_feature(
+        &mut self,
+        _node: &'a Syntax<Token, Value>,
+        arg: &'a Syntax<Token, Value>,
+    ) {
+        let error_invalid_argument = |self_: &mut Self, message| {
+            self_.errors.push(Self::make_error_from_node(
+                arg,
+                errors::invalid_use_of_enable_unstable_feature(message),
+            ))
+        };
+
+        match &arg.syntax {
+            LiteralExpression(x) => {
+                let text = self.text(&x.literal_expression);
+                match UnstableFeatures::from_str(escaper::unquote_str(text)) {
+                    Ok(feature) => {
+                        self.env.context.active_unstable_features.insert(feature);
+                    }
+                    Err(_) => error_invalid_argument(
+                        self,
+                        format!(
+                            "there is no feature named {}.\nAvailable features are:\n\t{}",
+                            text,
+                            UnstableFeatures::iter().join("\n\t")
+                        )
+                        .as_str(),
+                    ),
+                }
+            }
+            _ => error_invalid_argument(self, "this is not a literal string expression"),
+        };
+    }
+
+    fn check_can_use_feature(
+        &mut self,
+        node: &'a Syntax<Token, Value>,
+        feature: &UnstableFeatures,
+    ) {
+        let parser_options = &self.env.parser_options;
+        let enabled = match feature {
+            UnstableFeatures::UnionIntersectionTypeHints => {
+                parser_options.tco_union_intersection_type_hints
+            }
+            UnstableFeatures::ClassLevelWhere => parser_options.po_enable_class_level_where_clauses,
+        } || self.env.context.active_unstable_features.contains(feature);
+        if !enabled {
+            self.errors.push(Self::make_error_from_node(
+                node,
+                errors::cannot_use_feature(feature.into()),
+            ))
+        }
+    }
+
     fn attr_spec_to_node_list(
         node: &'a Syntax<Token, Value>,
     ) -> impl DoubleEndedIterator<Item = &'a Syntax<Token, Value>> {
@@ -365,6 +443,7 @@ where
         match &node.syntax {
             AttributeSpecification(x) => f(&x.attribute_specification_attributes),
             OldAttributeSpecification(x) => f(&x.old_attribute_specification_attributes),
+            FileAttributeSpecification(x) => f(&x.file_attribute_specification_attributes),
             _ => Right(std::iter::empty()),
         }
     }
@@ -400,7 +479,9 @@ where
 
     fn attribute_specification_contains(&self, node: &'a Syntax<Token, Value>, name: &str) -> bool {
         match &node.syntax {
-            AttributeSpecification(_) | OldAttributeSpecification(_) => {
+            AttributeSpecification(_)
+            | OldAttributeSpecification(_)
+            | FileAttributeSpecification(_) => {
                 Self::attr_spec_to_node_list(node).any(|node| self.attr_name(node) == Some(name))
             }
             _ => false,
@@ -5359,6 +5440,37 @@ where
                 prev_context = Some(self.env.context.clone());
                 self.env.context.active_classish = Some(node)
             }
+            FileAttributeSpecification(_) => Self::attr_spec_to_node_list(node).for_each(|node| {
+                if self.attr_name(node).as_deref()
+                    == Some(sn::user_attributes::ENABLE_UNSTABLE_FEATURES)
+                {
+                    if !self.env.parser_options.po_allow_unstable_features {
+                        self.errors.push(Self::make_error_from_node(
+                            node,
+                            errors::invalid_use_of_enable_unstable_feature(
+                                "unstable features are disabled",
+                            ),
+                        ))
+                    } else if let Some(args) = self.attr_args(node) {
+                        let mut args = args.peekable();
+                        if args.peek().is_none() {
+                            self.errors.push(Self::make_error_from_node(
+                                node,
+                                errors::invalid_use_of_enable_unstable_feature(
+                                    format!(
+                                        "you didn't select a feature. Available features are:\n\t{}",
+                                        UnstableFeatures::iter().join("\n\t")
+                                    )
+                                    .as_str(),
+                                ),
+                            ))
+                        } else {
+                            args.for_each(|arg| self.enable_unstable_feature(node, arg))
+                        }
+                    } else {
+                    }
+                }
+            }),
             _ => (),
         };
 
@@ -5546,6 +5658,20 @@ where
             _ => self.fold_child_nodes(node),
         }
 
+        match &node.syntax {
+            UnionTypeSpecifier(_) | IntersectionTypeSpecifier(_) => {
+                self.check_can_use_feature(node, &UnstableFeatures::UnionIntersectionTypeHints)
+            }
+            ClassishDeclaration(x) => match &x.classish_where_clause.syntax {
+                WhereClause(_) => self.check_can_use_feature(
+                    &x.classish_where_clause,
+                    &UnstableFeatures::ClassLevelWhere,
+                ),
+                _ => (),
+            },
+            _ => (),
+        }
+
         if let Some(prev_context) = prev_context {
             self.env.context = prev_context;
         }
@@ -5596,6 +5722,7 @@ where
                 active_callable_attr_spec: None,
                 active_is_rx_or_enclosing_for_lambdas: false,
                 active_const: None,
+                active_unstable_features: HashSet::new(),
             },
             hhvm_compat_mode,
             hhi_mode,

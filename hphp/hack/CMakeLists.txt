@@ -42,14 +42,16 @@ else()
 endif()
 set(HACK_BUILD_ROOT "${DUNE_BUILD_DIR}/default")
 
+get_target_property(OPAM_EXECUTABLE opam IMPORTED_LOCATION)
+
 add_custom_command(
   OUTPUT "${OPAM_STAMP_FILE}"
-  DEPENDS ocaml opam_setup.sh
+  DEPENDS opam opam_setup.sh
   COMMAND
     ${CMAKE_CURRENT_SOURCE_DIR}/opam_setup.sh
-    "${OCAML_EXECUTABLE}"
+    "${OPAM_EXECUTABLE}"
     "${CMAKE_CURRENT_SOURCE_DIR}"
-    "${DUNE_BUILD_DIR}"
+    "${DUNE_BUILD_DIR}" # BUILD_ROOT
     && cmake -E touch "${OPAM_STAMP_FILE}"
 )
 add_custom_target(opam_setup DEPENDS "${OPAM_STAMP_FILE}" opam_setup.sh)

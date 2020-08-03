@@ -138,7 +138,7 @@ endif()
 # Add bundled libzip if the system one will not be used
 add_subdirectory(libzip)
 
-list(APPEND THIRD_PARTY_MODULES ocaml)
+list(APPEND THIRD_PARTY_MODULES opam)
 
 # Add bundled XED library if XED is enabled and the specified XED library
 # is either not found or incompatible.

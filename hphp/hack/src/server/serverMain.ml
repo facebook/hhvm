@@ -264,19 +264,19 @@ let report_persistent_exception
     ~(stack : string)
     ~(client : ClientProvider.client)
     ~(is_fatal : bool) : unit =
-  Marshal_tools.(
-    let message = Exn.to_string e in
-    let push =
-      if is_fatal then
-        ServerCommandTypes.FATAL_EXCEPTION { message; stack }
-      else
-        ServerCommandTypes.NONFATAL_EXCEPTION { message; stack }
-    in
-    begin
-      try ClientProvider.send_push_message_to_client client push with _ -> ()
-    end;
-    EventLogger.master_exception e stack;
-    Printf.eprintf "Error: %s\n%s\n%!" message stack)
+  let open Marshal_tools in
+  let message = Exn.to_string e in
+  let push =
+    if is_fatal then
+      ServerCommandTypes.FATAL_EXCEPTION { message; stack }
+    else
+      ServerCommandTypes.NONFATAL_EXCEPTION { message; stack }
+  in
+  begin
+    try ClientProvider.send_push_message_to_client client push with _ -> ()
+  end;
+  EventLogger.master_exception e stack;
+  Printf.eprintf "Error: %s\n%s\n%!" message stack
 
 (* Same as handle_connection_try, but for persistent clients *)
 [@@@warning "-52"]
@@ -350,41 +350,42 @@ let recheck genv old_env check_kind =
     (Errors.get_error_list new_env.errorl);
   (new_env, res)
 
-let query_notifier genv env query_kind t =
-  ServerNotifierTypes.(
-    let (env, raw_updates) =
-      match query_kind with
-      | `Sync ->
-        ( env,
-          begin
-            try Notifier_synchronous_changes (genv.notifier ())
-            with Watchman.Timeout -> Notifier_unavailable
-          end )
-      | `Async ->
-        ({ env with last_notifier_check_time = t }, genv.notifier_async ())
-      | `Skip -> (env, Notifier_async_changes SSet.empty)
-    in
-    let unpack_updates = function
-      | Notifier_unavailable -> (true, SSet.empty)
-      | Notifier_state_enter _ -> (true, SSet.empty)
-      | Notifier_state_leave _ -> (true, SSet.empty)
-      | Notifier_async_changes updates -> (true, updates)
-      | Notifier_synchronous_changes updates -> (false, updates)
-    in
-    let (updates_stale, raw_updates) = unpack_updates raw_updates in
-    let rec pump_async_updates acc =
-      match genv.notifier_async_reader () with
-      | Some reader when Buffered_line_reader.is_readable reader ->
-        let (_, raw_updates) = unpack_updates (genv.notifier_async ()) in
-        pump_async_updates (SSet.union acc raw_updates)
-      | _ -> acc
-    in
-    let raw_updates = pump_async_updates raw_updates in
-    let updates = Program.process_updates genv raw_updates in
-    Bad_files.check updates;
-    if not @@ Relative_path.Set.is_empty updates then
-      HackEventLogger.notifier_returned t (SSet.cardinal raw_updates);
-    (env, updates, updates_stale))
+let query_notifier genv env query_kind start_time =
+  let open ServerNotifierTypes in
+  let (env, raw_updates) =
+    match query_kind with
+    | `Sync ->
+      ( env,
+        begin
+          try Notifier_synchronous_changes (genv.notifier ())
+          with Watchman.Timeout -> Notifier_unavailable
+        end )
+    | `Async ->
+      ( { env with last_notifier_check_time = start_time },
+        genv.notifier_async () )
+    | `Skip -> (env, Notifier_async_changes SSet.empty)
+  in
+  let unpack_updates = function
+    | Notifier_unavailable -> (true, SSet.empty)
+    | Notifier_state_enter _ -> (true, SSet.empty)
+    | Notifier_state_leave _ -> (true, SSet.empty)
+    | Notifier_async_changes updates -> (true, updates)
+    | Notifier_synchronous_changes updates -> (false, updates)
+  in
+  let (updates_stale, raw_updates) = unpack_updates raw_updates in
+  let rec pump_async_updates acc =
+    match genv.notifier_async_reader () with
+    | Some reader when Buffered_line_reader.is_readable reader ->
+      let (_, raw_updates) = unpack_updates (genv.notifier_async ()) in
+      pump_async_updates (SSet.union acc raw_updates)
+    | _ -> acc
+  in
+  let raw_updates = pump_async_updates raw_updates in
+  let updates = Program.process_updates genv raw_updates in
+  Bad_files.check updates;
+  if not @@ Relative_path.Set.is_empty updates then
+    HackEventLogger.notifier_returned start_time (SSet.cardinal raw_updates);
+  (env, updates, updates_stale)
 
 (* This function loops until it has processed all outstanding changes.
  *
@@ -404,7 +405,7 @@ let query_notifier genv env query_kind t =
  * it's possible for client to request current recheck to be stopped.
  *)
 let rec recheck_until_no_changes_left acc genv env select_outcome =
-  let t = Unix.gettimeofday () in
+  let start_time = Unix.gettimeofday () in
   (* When a new client connects, we use the synchronous notifier.
    * This is to get synchronous file system changes when invoking
    * hh_client in terminal.
@@ -415,7 +416,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
     match select_outcome with
     | ClientProvider.Select_new _ -> `Sync
     | ClientProvider.Select_nothing ->
-      if Float.(t -. env.last_notifier_check_time > 0.5) then
+      if start_time -. env.last_notifier_check_time > 0.5 then
         `Async
       else
         `Skip
@@ -424,7 +425,9 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
     * do analysis on mid-edit state of the world *)
     | ClientProvider.Select_persistent -> `Skip
   in
-  let (env, updates, updates_stale) = query_notifier genv env query_kind t in
+  let (env, updates, updates_stale) =
+    query_notifier genv env query_kind start_time
+  in
   let acc = { acc with updates_stale } in
   let is_idle =
     (match select_outcome with
@@ -432,7 +435,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
     | _ -> true)
     && (* "average person types [...] between 190 and 200 characters per minute"
         * 60/200 = 0.3 *)
-    Float.(t -. env.last_command_time > 0.3)
+    start_time -. env.last_command_time > 0.3
   in
   (* saving any file is our trigger to start full recheck *)
   let env =
@@ -458,7 +461,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
             * rechecks and us restarting them. We're going to heavily favor edits and
             * restart only after a longer period since last edit. Note that we'll still
             * start full recheck immediately after any file save. *)
-           && Float.(t -. env.last_command_time > 5.0) ->
+           && start_time -. env.last_command_time > 5.0 ->
       let still_there =
         try
           ClientProvider.ping client;
@@ -515,7 +518,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
           acc.total_rechecked_count + total_rechecked_count;
         updates_stale = acc.updates_stale;
         recheck_id = acc.recheck_id;
-        duration = acc.duration +. (Unix.gettimeofday () -. t);
+        duration = acc.duration +. (Unix.gettimeofday () -. start_time);
       }
     in
     (* Avoid batching ide rechecks with disk rechecks - there might be
@@ -800,8 +803,10 @@ let serve_one_iteration genv env client_provider =
   env
 
 let watchman_interrupt_handler genv env =
-  let t = Unix.gettimeofday () in
-  let (env, updates, updates_stale) = query_notifier genv env `Async t in
+  let start_time = Unix.gettimeofday () in
+  let (env, updates, updates_stale) =
+    query_notifier genv env `Async start_time
+  in
   (* Async updates can always be stale, so we don't care *)
   ignore updates_stale;
   let size = Relative_path.Set.cardinal updates in

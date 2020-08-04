@@ -1,0 +1,59 @@
+include(ExternalProject)                                                        
+include(HPHPFunctions)
+# We usually use SHA512, but given the SHA256 is on the boost.org download
+# page, use that for transparency/ease of confirmation.
+SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
+  BOOST_DOWNLOAD_ARGS
+  SOURCE_URL
+  "https://dl.bintray.com/boostorg/release/1.73.0/source/boost_1_73_0.tar.bz2"
+  SOURCE_HASH
+  "SHA256=4eb3b8d442b426dc35346235c8733b5ae35ba431690e38c6a8263dce9fcbb402"
+)
+list(JOIN BOOST_COMPONENTS "," BOOST_COMPONENTS_CSV)
+set(
+  COMMON_ARGS
+  --prefix=<INSTALL_DIR>
+  --libdir=<INSTALL_DIR>/lib
+)
+set(
+  B2_ARGS
+  ${COMMON_ARGS}
+  --build-dir=<BINARY_DIR>
+  link=static
+  variant=release
+  threading=multi
+  runtime-link=static
+  cxxflags=-std=gnu++14
+)
+# We pass --with-libraires to boostrap.sh, but that does not consistently
+# affect b2
+foreach(COMPONENT IN LISTS BOOST_COMPONENTS)
+  list(APPEND B2_ARGS "--with-${COMPONENT}")
+endforeach()
+
+ExternalProject_Add(                                                            
+  bundled_boost
+  ${BOOST_DOWNLOAD_ARGS}
+  PATCH_COMMAND
+    cd tools/build && patch -p1 < "${CMAKE_CURRENT_SOURCE_DIR}/b3a59d265929a213f02a451bb6-macos-coalesce-template.patch"
+  CONFIGURE_COMMAND
+    CXX=${CMAKE_CXX_COMPILER}
+    <SOURCE_DIR>/bootstrap.sh
+    ${COMMON_ARGS}
+    "--with-libraries=${BOOST_COMPONENTS_CSV}"
+  BUILD_COMMAND
+    cd <SOURCE_DIR> && <BINARY_DIR>/b2 ${B2_ARGS}
+  INSTALL_COMMAND
+    cd <SOURCE_DIR> && <BINARY_DIR>/b2 ${B2_ARGS} install
+)
+add_dependencies(boost bundled_boost)
+ExternalProject_Get_Property(bundled_boost INSTALL_DIR)
+target_include_directories(boost INTERFACE "${INSTALL_DIR}/include")
+list(REMOVE_ITEM BOOST_COMPONENTS headers)
+foreach(COMPONENT IN LISTS BOOST_COMPONENTS)
+  target_link_libraries(
+    boost
+    INTERFACE
+    "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}boost_${COMPONENT}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  )
+endforeach()

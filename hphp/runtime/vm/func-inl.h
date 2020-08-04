@@ -415,8 +415,12 @@ inline void Func::setGenerated(bool isGenerated) {
 ///////////////////////////////////////////////////////////////////////////////
 // Definition context.
 
+inline bool Func::isPseudoMain() const {
+  return m_name->empty();
+}
+
 inline bool Func::isMethod() const {
-  return (bool)baseCls();
+  return !isPseudoMain() && (bool)baseCls();
 }
 
 inline bool Func::isFromTrait() const {
@@ -594,7 +598,7 @@ inline bool Func::isNoInjection() const {
 }
 
 inline bool Func::isSkipFrame() const {
-  return isCPPBuiltin() || (isBuiltin() && !isMethod());
+  return isCPPBuiltin() || (isBuiltin() && !isMethod() && !isPseudoMain());
 }
 
 inline bool Func::isProvenanceSkipFrame() const {

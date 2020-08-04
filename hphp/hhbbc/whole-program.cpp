@@ -140,6 +140,9 @@ void all_unit_contexts(const php::Unit* u, F&& fun) {
   for (auto& f : u->funcs) {
     fun(Context { u, f.get() });
   }
+  if (options.AnalyzePseudomains) {
+    fun(Context { u, u->pseudomain.get() });
+  }
 }
 
 std::vector<Context> const_pass_contexts(const php::Program& program) {
@@ -197,6 +200,12 @@ std::vector<WorkItem> initial_work(const php::Program& program,
     }
     for (auto& f : u->funcs) {
       ret.emplace_back(WorkType::Func, Context { u.get(), f.get() });
+    }
+    if (options.AnalyzePseudomains) {
+      ret.emplace_back(
+        WorkType::Func,
+        Context { u.get(), u->pseudomain.get() }
+      );
     }
   }
   return ret;
@@ -572,6 +581,7 @@ void whole_program(php::ProgramPtr program,
     for (auto& f : unit.funcs) {
       freeFuncMem(f.get());
     }
+    freeFuncMem(unit.pseudomain.get());
   };
 
   std::thread cleanup_pre;

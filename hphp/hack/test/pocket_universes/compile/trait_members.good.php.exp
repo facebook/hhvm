@@ -9,6 +9,17 @@
 .adata A_3 = """k:1:{s:1:\"K\";}""";
 .adata A_4 = """v:2:{s:8:\"MyTraitA\";s:8:\"MyTraitB\";}""";
 
+.main (1,1) {
+  .srcloc 4:7,4:14;
+  DefCls 0
+  .srcloc 13:7,13:14;
+  DefCls 1
+  .srcloc 22:7,22:7;
+  DefCls 2
+  Int 1
+  RetC
+}
+
 .function {} ["__EntryPoint"("""y:0:{}""")] (37,41) <"HH\\void" N > main() {
   .numiters 1;
   .declvars $member;

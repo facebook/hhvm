@@ -1633,7 +1633,13 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
   }();
   if (!subOpc) PUNT(SetOpL-Unsupported);
 
-  auto loc = ldLoc(env, id, nullptr, DataTypeGeneric);
+  // Needs to modify locals after doing effectful operations like converting
+  // things to strings, so we can't guard on their types.
+  if (curFunc(env)->isPseudoMain()) PUNT(SetOpL-PseudoMain);
+
+  // Null guard block for globals because we always punt on pseudomains
+  auto const ldPMExit = nullptr;
+  auto loc = ldLoc(env, id, ldPMExit, DataTypeGeneric);
 
   if (*subOpc == Op::Concat) {
     /*
@@ -1643,7 +1649,7 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
     auto const val    = popC(env);
     env.irb->constrainValue(loc, DataTypeSpecific);
     implConcat(env, val, loc, [&] (SSATmp* result) {
-      pushIncRef(env, stLocNRC(env, id, nullptr, result));
+      pushIncRef(env, stLocNRC(env, id, ldPMExit, result));
     });
     return;
   }
@@ -1667,14 +1673,15 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
   auto const result = opc == AddIntO || opc == SubIntO || opc == MulIntO
     ? gen(env, opc, exitSlow, loc, val)
     : gen(env, opc, loc, val);
-  pushStLoc(env, id, nullptr, result);
+  pushStLoc(env, id, ldPMExit, result);
 }
 
 void emitIncDecL(IRGS& env, NamedLocal loc, IncDecOp subop) {
+  auto const ldPMExit = makePseudoMainExit(env);
   auto const src = ldLocWarn(
     env,
     loc,
-    nullptr,
+    ldPMExit,
     DataTypeSpecific
   );
 
@@ -1682,7 +1689,7 @@ void emitIncDecL(IRGS& env, NamedLocal loc, IncDecOp subop) {
     pushIncRef(env, isPre(subop) ? result : src);
     // Update marker to ensure newly-pushed value isn't clobbered by DecRef.
     updateMarker(env);
-    stLoc(env, loc.id, nullptr, result);
+    stLoc(env, loc.id, ldPMExit, result);
     return;
   }
 

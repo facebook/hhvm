@@ -120,6 +120,8 @@ void dump_class_state(std::ostream& out,
 void dump_func_state(std::ostream& out,
                      const Index& index,
                      const php::Func* f) {
+  if (f->unit->pseudomain.get() == f) return;
+
   auto const name = f->cls
     ? folly::sformat(
         "{}::{}()",

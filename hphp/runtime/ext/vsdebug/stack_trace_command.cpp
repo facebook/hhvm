@@ -73,6 +73,7 @@ bool StackTraceCommand::executeImpl(
   // Respond with a stack trace!
   auto backtraceArgs = BacktraceArgs()
                         .withSelf()
+                        .withPseudoMain()
                         .setParserFrame(nullptr);
 
   const Array backtrace = createBacktrace(backtraceArgs);

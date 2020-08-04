@@ -620,14 +620,18 @@ std::string opt_ubs(const UBMap& ubs) {
 void print_func(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
 
-  out.fmtln(".function{}{}{} {}{}({}){}{{",
-    opt_ubs(finfo.ubs),
-    opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
-    format_line_pair(func),
-    opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
-    func->name(),
-    func_param_list(finfo),
-    func_flag_list(finfo));
+  if (func->isPseudoMain()) {
+    out.fmtln(".main{} {{", format_line_pair(func));
+  } else {
+    out.fmtln(".function{}{}{} {}{}({}){}{{",
+      opt_ubs(finfo.ubs),
+      opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
+      format_line_pair(func),
+      opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
+      func->name(),
+      func_param_list(finfo),
+      func_flag_list(finfo));
+  }
   indented(out, [&] {
     print_func_directives(out, finfo);
     print_func_body(out, finfo);

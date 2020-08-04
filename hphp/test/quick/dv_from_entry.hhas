@@ -1,5 +1,10 @@
 .hh_file 1;
 
+.main {
+  Int 1
+  RetC
+}
+
 
 .function <"" N  > foo($b = DV1("""22"""), $c = DV2("""33""")) {
 L0:

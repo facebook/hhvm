@@ -223,6 +223,22 @@ bool check_invariants(const FrameState& state) {
       local.value->toString()
     );
 
+    if (state.curFunc->isPseudoMain()) {
+      always_assert_flog(
+        local.value == nullptr,
+        "We should never be tracking values for locals in a pseudomain "
+          "right now.  Local {} had value {}",
+        id,
+        local.value->toString()
+      );
+      always_assert_flog(
+        local.type == TCell,
+        "We should never be tracking non-predicted types for locals in "
+          "a pseudomain right now.  Local {} had type {}",
+        id,
+        local.type.toString()
+      );
+    }
   }
 
   // We require the memory stack is always at least as big as the irSPOff,
@@ -455,9 +471,12 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case AssertLoc:
   case CheckLoc: {
     auto const id = inst->extra<LocalId>()->locId;
-    refineType(loc(id), inst->typeParam(), TypeSource::makeGuard(inst));
-    break;
-  }
+    if (inst->marker().func()->isPseudoMain()) {
+      setLocalPredictedType(id, inst->typeParam());
+    } else {
+      refineType(loc(id), inst->typeParam(), TypeSource::makeGuard(inst));
+    }
+  } break;
 
   case AssertStk:
   case CheckStk:
@@ -484,6 +503,11 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     }
     break;
 
+  case StLocPseudoMain:
+    setLocalPredictedType(inst->extra<LocalId>()->locId,
+                          inst->src(1)->type());
+    break;
+
   case EndCatch:
     /*
      * Hitting this means we've messed up with syncing the stack in a catch
@@ -507,7 +531,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case InterpOneCF: {
     auto const& extra = *inst->extra<InterpOneData>();
     assertx(!extra.smashesAllLocals || extra.nChangedLocals == 0);
-    if (extra.smashesAllLocals) {
+    if (extra.smashesAllLocals || inst->marker().func()->isPseudoMain()) {
       clearLocals();
     } else {
       auto it = extra.changedLocals;
@@ -617,6 +641,8 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
   // We don't update tracked local types for pseudomains, but we do care about
   // stack types.
+  auto const isPM = cur().curFunc->isPseudoMain();
+
   auto const baseTmp = inst->src(minstrBaseIdx(inst->op()));
   if (!baseTmp->type().maybe(TLvalToCell)) return;
 
@@ -670,8 +696,10 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
     };
 
     if (auto const blocal = base.local()) {
-      auto const l = loc(blocal->ids.singleValue());
-      apply_one(l, Ptr::Frame);
+      if (!isPM) {
+        auto const l = loc(blocal->ids.singleValue());
+        apply_one(l, Ptr::Frame);
+      }
     }
     if (auto const bstack = base.stack()) {
       assertx(bstack->size == 1);
@@ -692,7 +720,7 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
     return;
   }
 
-  if (base.maybe(ALocalAny)) {
+  if (base.maybe(ALocalAny) && !isPM) {
     for (uint32_t i = 0; i < cur().locals.size(); ++i) {
       if (base.maybe(ALocal { fp(), i })) {
         apply(loc(i));

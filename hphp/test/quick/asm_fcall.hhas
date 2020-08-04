@@ -3,6 +3,11 @@
 # Test some function call junk
 #
 
+.main {
+  Int 1
+  RetC
+}
+
 .function caller($who, $arg) {
   NullUninit
   NullUninit

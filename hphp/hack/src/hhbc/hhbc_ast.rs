@@ -516,6 +516,11 @@ pub enum InstructIncludeEvalDefine {
     ReqOnce,
     ReqDoc,
     Eval,
+    DefCls(ClassNum),
+    DefClsNop(ClassNum),
+    DefRecord(RecordNum),
+    DefCns(ConstNum),
+    DefTypeAlias(TypedefNum),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

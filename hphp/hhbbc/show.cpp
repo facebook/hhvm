@@ -371,6 +371,8 @@ std::string show(const Unit& unit, bool normalizeClosures) {
   std::string ret;
   folly::toAppend(
     "Unit ", unit.filename->data(), "\n",
+    "  function pseudomain:\n",
+    indent(4, show(*unit.pseudomain)),
     &ret
   );
 
@@ -568,6 +570,11 @@ std::string show(Context ctx) {
     return ctx.cls->name->toCppString();
   }
   auto ret = std::string{};
+  if (is_pseudomain(ctx.func)) {
+    ret = ctx.func->unit->filename->data();
+    ret += ";pseudomain";
+    return ret;
+  }
   if (ctx.cls) {
     ret = ctx.cls->name->toCppString();
     if (ctx.cls != ctx.func->cls) {

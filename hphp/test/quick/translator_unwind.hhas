@@ -2,6 +2,11 @@
 # Tests unwinding with dirty callee-saved registers that are mapped to
 # execution stack locations.
 
+.main {
+  Int 1
+  RetC
+}
+
 .function thrower() {
   NewObjD "Exception"
   Dup

@@ -32,7 +32,9 @@ namespace HPHP {
 namespace Verifier {
 
 void pretty_print(const FuncEmitter* fe, std::ostream& out) {
-  if (fe->pce() != nullptr) {
+  if (fe->isPseudoMain()) {
+    out << "Pseudo-main";
+  } else if (fe->pce() != nullptr) {
     out << "Method";
     Func::print_attrs(out, fe->attrs);
     if (fe->isMemoizeWrapper) out << " (memoize_wrapper)";

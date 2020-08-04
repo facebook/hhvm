@@ -1241,7 +1241,7 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
     throw PhpNotSupportedException(unit->filepath()->data());
   }
 
-  const_cast<Unit*>(unit)->merge();
+  auto ret = invokePseudoMain(unit->getMain(nullptr, false));
 
   auto it = unit->getCachedEntryPoint();
   if (callByHPHPInvoke && it != nullptr) {
@@ -1255,7 +1255,7 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
       invokeFunc(it, init_null_variant, nullptr, nullptr, false);
     }
   }
-  return make_tv<KindOfInt64>(1);
+  return ret;
 }
 
 void ExecutionContext::syncGdbState() {
@@ -1566,6 +1566,43 @@ static inline void enterVMCustomHandler(ActRec* ar, Action action) {
   }
 }
 
+TypedValue ExecutionContext::invokePseudoMain(const Func* f,
+                                              ObjectData* thiz /* = NULL */,
+                                              Class* cls /* = NULL */) {
+  assertx(f->isPseudoMain());
+  auto toMerge = f->unit();
+  toMerge->merge();
+  if (toMerge->isMergeOnly()) {
+    Stats::inc(Stats::PseudoMain_Skipped);
+    return make_tv<KindOfInt64>(1);
+  }
+
+  Stats::inc(Stats::PseudoMain_Executed);
+  VMRegAnchor _;
+
+  // We must do a stack overflow check for leaf functions on re-entry,
+  // because we won't have checked that the stack is deep enough for a
+  // leaf function /after/ re-entry, and the prologue for the leaf
+  // function will not make a check.
+  if (f->isPhpLeafFn()) {
+    // Check both the native stack and VM stack for overflow.
+    checkStack(vmStack(), f, kNumActRecCells);
+  } else {
+    // invokePseudoMain() must always check the native stack for overflow no
+    // matter what.
+    checkNativeStack();
+  }
+
+  // Reserve space for ActRec.
+  for (auto i = kNumActRecCells; i > 0; --i) vmStack().pushUninit();
+
+  auto const doEnterVM = [&] (ActRec* ar) {
+    enterVMAtPseudoMain(ar);
+  };
+
+  return invokeFuncImpl(f, thiz, cls, 0, doEnterVM);
+}
+
 TypedValue ExecutionContext::invokeFunc(const Func* f,
                                         const Variant& args_,
                                         ObjectData* thiz /* = NULL */,
@@ -1814,6 +1851,56 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
   return prevFp;
 }
 
+/*
+  Instantiate hoistable classes and functions.
+  If there is any more work left to do, setup a
+  new frame ready to execute the pseudomain.
+
+  return true iff the pseudomain needs to be executed.
+*/
+bool ExecutionContext::evalUnit(Unit* unit, PC callPC, PC& pc, int funcType) {
+  vmpc() = callPC;
+  unit->merge();
+  if (unit->isMergeOnly()) {
+    Stats::inc(Stats::PseudoMain_Skipped);
+    *vmStack().allocTV() = make_tv<KindOfInt64>(1);
+    return false;
+  }
+
+  Stats::inc(Stats::PseudoMain_Executed);
+
+  ActRec* ar = vmStack().allocA();
+  auto const cls = vmfp()->func()->cls();
+  auto const hasThis = cls && !vmfp()->func()->isStatic();
+  auto const func = unit->getMain(cls, hasThis);
+  assertx(!func->isCPPBuiltin());
+  ar->m_func = func;
+  if (cls) {
+    ar->setThisOrClass(vmfp()->getThisOrClass());
+    if (hasThis) ar->getThis()->incRefCount();
+  } else {
+    ar->trashThis();
+  }
+  ar->setNumArgs(0);
+  assertx(vmfp());
+  ar->setReturn(vmfp(), callPC, jit::tc::ustubs().retHelper, false);
+  pushFrameSlots(func);
+
+  auto prevFp = vmfp();
+  if (UNLIKELY(prevFp->skipFrame())) {
+    prevFp = g_context->getPrevVMStateSkipFrame(prevFp);
+  }
+  assertx(prevFp);
+
+  vmfp() = ar;
+  pc = func->getEntry();
+  vmpc() = pc;
+  bool ret = EventHook::FunctionCall(vmfp(), funcType);
+  pc = vmpc();
+  checkStack(vmStack(), func, 0);
+  return ret;
+}
+
 Variant ExecutionContext::getEvaledArg(const StringData* val,
                                        const String& namespacedName,
                                        const Unit* funcUnit) {
@@ -1979,7 +2066,26 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     fp = getPrevVMStateSkipFrame(fp);
   }
 
-  if (fp) phpDebuggerEvalHook(fp->m_func);
+  ObjectData *this_ = nullptr;
+  // NB: the ActRec and function within the AR may have different classes. The
+  // class in the ActRec is the type used when invoking the function (i.e.,
+  // Derived in Derived::Foo()) while the class obtained from the function is
+  // the type that declared the function Foo, which may be Base. We need both
+  // the class to match any object that this function may have been invoked on,
+  // and we need the class from the function execution is stopped in.
+  Class *frameClass = nullptr;
+  Class *functionClass = nullptr;
+  if (fp) {
+    functionClass = fp->m_func->cls();
+    if (functionClass) {
+      if (fp->hasThis()) {
+        this_ = fp->getThis();
+      } else if (fp->hasClass()) {
+        frameClass = fp->getClass();
+      }
+    }
+    phpDebuggerEvalHook(fp->m_func);
+  }
 
   const static StaticString s_cppException("Hit an exception");
   const static StaticString s_phpException("Hit a php exception");
@@ -2009,6 +2115,11 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
   };
 
   try {
+    // Start with the correct parent FP so that VarEnv can properly exitFP().
+    // Note that if the same VarEnv is used across multiple frames, the most
+    // recent FP must be used. This can happen if we are trying to debug
+    // an eval() call or a call issued by debugger itself.
+    //
     // We also need to change vmpc() to match, since we assert in a few places
     // that the vmpc() lies within vmfp()'s code.
     auto savedFP = vmfp();
@@ -2018,7 +2129,12 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
       vmfp() = fp;
     }
     SCOPE_EXIT { vmpc() = savedPC; vmfp() = savedFP; };
-    unit->merge();
+
+    invokePseudoMain(
+      unit->getMain(functionClass, this_),
+      this_,
+      frameClass
+    );
 
     enum VarAction { StoreFrame, StoreEnv };
 
@@ -2153,8 +2269,6 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
   return {true, init_null_variant, errorStr};
 }
 
-const StaticString s_include("include");
-
 void ExecutionContext::enterDebuggerDummyEnv() {
   static Unit* s_debuggerDummy = compile_debugger_string(
     "<?hh", 4, RepoOptions::defaults()
@@ -2166,10 +2280,8 @@ void ExecutionContext::enterDebuggerDummyEnv() {
   assertx(m_nesting == 0);
   assertx(vmStack().count() == 0);
   ActRec* ar = vmStack().allocA();
-  ar->m_func = s_debuggerDummy->lookupFuncId(0);
-  assertx(ar->m_func && ar->m_func->name()->equal(s_include.get()));
+  ar->m_func = s_debuggerDummy->getMain(nullptr, false);
   ar->setNumArgs(0);
-  for (int i = 0; i < ar->m_func->numLocals(); ++i) vmStack().pushInt(1);
   ar->trashThis();
   ar->setReturnVMExit();
   vmfp() = ar;

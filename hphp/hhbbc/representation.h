@@ -681,6 +681,7 @@ struct Unit {
   SHA1 sha1;
   LSString filename;
   bool isHHFile{false};
+  std::unique_ptr<Func> pseudomain;
   std::unique_ptr<FatalInfo> fatalInfo{nullptr};
   CompactVector<std::unique_ptr<Func>> funcs;
   CompactVector<std::unique_ptr<Class>> classes;

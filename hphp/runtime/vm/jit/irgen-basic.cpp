@@ -123,23 +123,25 @@ void emitClassGetTS(IRGS& env) {
 }
 
 void emitCGetL(IRGS& env, NamedLocal loc) {
+  auto const ldPMExit = makePseudoMainExit(env);
   auto const value = ldLocWarn(
     env,
     loc,
-    nullptr,
+    ldPMExit,
     DataTypeCountnessInit
   );
   pushIncRef(env, value);
 }
 
 void emitCGetQuietL(IRGS& env, int32_t id) {
+  auto const ldPMExit = makePseudoMainExit(env);
   pushIncRef(
     env,
     [&] {
       auto const loc = ldLoc(
         env,
         id,
-        nullptr,
+        ldPMExit,
         DataTypeCountness
       );
 
@@ -168,7 +170,8 @@ void emitCGetQuietL(IRGS& env, int32_t id) {
 }
 
 void emitCUGetL(IRGS& env, int32_t id) {
-  pushIncRef(env, ldLoc(env, id, nullptr, DataTypeGeneric));
+  auto const ldPMExit = makePseudoMainExit(env);
+  pushIncRef(env, ldLoc(env, id, ldPMExit, DataTypeGeneric));
 }
 
 void emitPushL(IRGS& env, int32_t id) {
@@ -179,11 +182,12 @@ void emitPushL(IRGS& env, int32_t id) {
 }
 
 void emitCGetL2(IRGS& env, NamedLocal loc) {
+  auto const ldPMExit = makePseudoMainExit(env);
   auto const oldTop = pop(env, DataTypeGeneric);
   auto const val = ldLocWarn(
     env,
     loc,
-    nullptr,
+    ldPMExit,
     DataTypeCountnessInit
   );
   pushIncRef(env, val);
@@ -197,11 +201,13 @@ void emitUnsetL(IRGS& env, int32_t id) {
 }
 
 void emitSetL(IRGS& env, int32_t id) {
+  auto const ldPMExit = makePseudoMainExit(env);
+
   // since we're just storing the value in a local, this function doesn't care
   // about the type of the value. stLoc needs to IncRef the value so it may
   // constrain it further.
   auto const src = popC(env, DataTypeGeneric);
-  pushStLoc(env, id, nullptr, src);
+  pushStLoc(env, id, ldPMExit, src);
 }
 
 void emitInitThisLoc(IRGS& env, int32_t id) {
@@ -554,8 +560,9 @@ void emitPopU2(IRGS& env) {
 }
 
 void emitPopL(IRGS& env, int32_t id) {
+  auto const ldPMExit = makePseudoMainExit(env);
   auto const src = popC(env, DataTypeGeneric);
-  stLocMove(env, id, nullptr, src);
+  stLocMove(env, id, ldPMExit, src);
 }
 
 void emitPopFrame(IRGS& env, uint32_t nout) {
@@ -617,6 +624,7 @@ void emitCGetCUNop(IRGS& env) {
 void emitUGetCUNop(IRGS& env) {
   assertTypeStack(env, BCSPRelOffset{0}, TUninit);
 }
+void emitDefClsNop(IRGS&, uint32_t){}
 void emitBreakTraceHint(IRGS&)     {}
 
 //////////////////////////////////////////////////////////////////////

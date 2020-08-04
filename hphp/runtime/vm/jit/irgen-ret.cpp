@@ -67,6 +67,9 @@ void freeLocalsAndThis(IRGS& env) {
   auto const localCount = curFunc(env)->numLocals();
 
   auto const shouldFreeInline = [&]() -> bool {
+    // In a pseudomain, we have to do a non-inline DecRef, because we can't
+    // side-exit in the middle of the sequence of LdLocPseudoMains.
+    if (curFunc(env)->isPseudoMain()) return false;
     // We don't want to specialize on arg types for builtins
     if (curFunc(env)->arFuncPtr()) return false;
 

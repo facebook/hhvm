@@ -2999,6 +2999,40 @@ Eval    [C]  ->  [C]
   The pseudo-main function from (string)$1 inherits the caller's variable
   environment.
 
+DefCls <class id>    []  ->  []
+
+  Define class. Bind the class specified by %1. If the class specified by %1 is
+  already bound, this instruction does nothing. If another class is already
+  bound to the associated name, this instruction throws a fatal error.
+
+DefClsNop <class id>  []  ->  []
+
+  For always-hoistable classes (which are automatically defined when the unit
+  is loaded). This instruction is used as a marker for the location in a
+  pseudo-main where a DefCls would've existed, but doesn't need to be. (It is
+  used as a place to raise errors from if the class fails to define.)
+
+DefCns <constant id>    []  ->  []
+
+  Define constant. If there is already a global constant with the same name,
+  this instruction throws a fatal error.
+
+DefTypeAlias <litstr id>   []  ->  []
+
+  Define type alias. Type aliases are a hhvm extension to PHP that allow
+  declaring new names for existing types. The unit contains a table of the type
+  aliases it was compiled with. This instruction looks up the type alias given
+  by %1 in the table. If there is an existing class or type alias defined with
+  the same name as %1, this function checks whether it is compatible with the
+  type alias given by %1, and if it isn't it throws a fatal error.
+
+DefRecord <record id>    []  ->  []
+
+  Define record. Bind the record specified by %1. If the record specified by %1
+  is already bound, this instruction does nothing. If another record or class
+  or type alias is already bound to the associated name, this instruction throws
+  a fatal error.
+
 13. Miscellaneous instructions
 ------------------------------
 

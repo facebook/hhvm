@@ -329,6 +329,14 @@ public:
    */
   using FuncRange = MergeInfo::FuncRange;
   using MutableFuncRange = MergeInfo::MutableFuncRange;
+
+  /*
+   * Cache for pseudomains for this unit, keyed by Class context.
+   */
+  using PseudoMainCacheMap = hphp_hash_map<
+    const Class*, Func*, pointer_hash<Class>
+  >;
+
   using PreClassPtrVec = VMCompactVector<PreClassPtr>;
   using TypeAliasVec = VMCompactVector<PreTypeAlias>;
   using ConstantVec = VMFixedVector<Constant>;
@@ -543,6 +551,14 @@ public:
   folly::Range<const PreClassPtr*> preclasses() const;
   folly::Range<PreRecordDescPtr*> prerecords();
   folly::Range<const PreRecordDescPtr*> prerecords() const;
+
+  /*
+   * Get a pseudomain for the Unit with the context class `cls'.
+   *
+   * We clone the toplevel pseudomain for each context class and cache the
+   * results in m_pseudoMainCache.
+   */
+  Func* getMain(Class* cls, bool hasThis) const;
 
   // Return the cached EntryPoint
   Func* getCachedEntryPoint() const;
@@ -792,16 +808,9 @@ public:
    * Define the type alias given by `id', binding it to the appropriate
    * NamedEntity for this request.
    *
-   * Raises a fatal error if type alias already defined or cannot be defined
-   * unless failIsFatal is unset
-   *
-   * Returns:
-   *   Persistent: Type alias is successfully defined and is persistent
-   *   Normal: Type alias is successfully defined and is not persistent
-   *   Fail: Type alias is not successfully defined
+   * returns true iff the bound type alias is persistent.
    */
-  enum class DefTypeAliasResult { Fail, Normal, Persistent };
-  Unit::DefTypeAliasResult defTypeAlias(Id id, bool failIsFatal = true);
+  bool defTypeAlias(Id id);
 
   /////////////////////////////////////////////////////////////////////////////
   // File attributes.
@@ -815,6 +824,11 @@ public:
    * Merge the Unit if it is not already merged.
    */
   void merge();
+
+  /*
+   * Is it sufficient to merge the Unit, and skip invoking its pseudomain?
+   */
+  bool isMergeOnly() const;
 
   /*
    * Is this Unit empty---i.e., does it define nothing and have no
@@ -951,6 +965,7 @@ private:
    * unitInitLock (see unit.cpp).
    */
   std::atomic<uint8_t> m_mergeState{MergeState::Unmerged};
+  bool m_mergeOnly: 1;
   bool m_interpretOnly : 1;
   bool m_isHHFile : 1;
   bool m_extended : 1;
@@ -976,6 +991,7 @@ private:
   SHA1 m_sha1;
   SHA1 m_bcSha1;
   VMFixedVector<const ArrayData*> m_arrays;
+  mutable PseudoMainCacheMap* m_pseudoMainCache{nullptr};
   mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;

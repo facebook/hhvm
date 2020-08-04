@@ -514,6 +514,11 @@ const char* EventHook::GetFunctionNameForProfiler(const Func* func,
         name = "{internal}";
       }
       break;
+    case EventHook::PseudoMain:
+      name = makeStaticString(
+        std::string("run_init::") + func->unit()->filepath()->data())
+        ->data();
+      break;
     case EventHook::Eval:
       name = "_";
       break;

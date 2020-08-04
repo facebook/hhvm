@@ -837,6 +837,8 @@ struct RuntimeOption {
   F(bool, TraceCommandLineRequest,     true)                            \
                                                                         \
   F(bool, JitDisabledByHphpd,          false)                           \
+  F(bool, JitPseudomain,               true)                            \
+  F(bool, JitPGOPseudomain,            false)                           \
   F(uint32_t, JitWarmupStatusBytes,    ((25 << 10) + 1))                \
   F(uint32_t, JitWarmupMaxCodeGenRate, 20000)                           \
   F(uint32_t, JitWarmupRateSeconds,    64)                              \

@@ -2,21 +2,21 @@ Inside file >%s/expressions/source_file_inclusion/include.php< at line >11< with
 
 Warning: %a
 include file does not exist
-bool(true)
+int(1)
 Inside file >%s/expressions/source_file_inclusion/include.php< at line >29< with namespace ><
-bool(true)
+int(1)
 Inside file >%s/expressions/source_file_inclusion/include.php< at line >37< with namespace ><
 ----------------------------------
 MY_MIN is not defined
 ----------------------------------
-bool(true)
-bool(true)
-bool(true)
+int(1)
+int(1)
+int(1)
 ----------------------------------
 ----------------------------------
 Inside file >%s/expressions/source_file_inclusion/include.php< at line >84<
 ----------------------------------
-bool(true)
+int(1)
 ----------------------------------
 Inside file >%s/expressions/source_file_inclusion/include.php< at line >93<
 Inside test() in %s/expressions/source_file_inclusion/test.php

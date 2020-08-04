@@ -46,6 +46,9 @@ namespace Stats {
   STAT(TC_DecRef_Profiled_100) \
   STAT(TC_DecRef_Profiled_0) \
   /* Execute pseudomain */ \
+  STAT(PseudoMain_Executed) \
+  STAT(PseudoMain_Skipped) \
+  STAT(PseudoMain_Guarded) \
   STAT(VMEnter) \
   /* Unit merging stats */ \
   STAT(UnitMerge_hoistable) \

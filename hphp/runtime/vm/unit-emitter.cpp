@@ -123,7 +123,7 @@ void UnitEmitter::setBc(const unsigned char* bc, size_t bclen) {
   }
   m_bc = (unsigned char*)malloc(bclen);
   m_bcmax = bclen;
-  if (bclen) memcpy(m_bc, bc, bclen);
+  memcpy(m_bc, bc, bclen);
   m_bclen = bclen;
 }
 
@@ -188,7 +188,28 @@ Id UnitEmitter::mergeArray(const ArrayData* a) {
 ///////////////////////////////////////////////////////////////////////////////
 // FuncEmitters.
 
+void UnitEmitter::initMain(int line1, int line2) {
+  assertx(m_fes.size() == 0);
+  StringData* name = staticEmptyString();
+  FuncEmitter* pseudomain = newFuncEmitter(name);
+  pseudomain->init(line1, line2, 0, AttrNone, name);
+}
+
+void UnitEmitter::addTrivialPseudoMain() {
+  initMain(0, 0);
+  auto const mfe = getMain();
+  emitOp(OpInt);
+  emitInt64(1);
+  emitOp(OpRetC);
+  mfe->maxStackCells = 1;
+  mfe->finish(bcPos());
+  m_mergeOnly = true;
+}
+
 FuncEmitter* UnitEmitter::newFuncEmitter(const StringData* name) {
+  // The pseudomain comes first.
+  assertx(m_fes.size() > 0 || !strcmp(name->data(), ""));
+
   auto fe = std::make_unique<FuncEmitter>(*this, m_nextFuncSn++, m_fes.size(),
                                           name);
   m_fes.push_back(std::move(fe));
@@ -604,6 +625,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_bc = allocateBCRegion(m_bc, m_bclen);
   u->m_bclen = m_bclen;
   u->m_filepath = m_filepath;
+  u->m_mergeOnly = m_mergeOnly;
   u->m_isHHFile = m_isHHFile;
   u->m_dirpath = makeStaticString(FileUtil::dirname(StrNR{m_filepath}));
   u->m_sha1 = m_sha1;
@@ -624,7 +646,20 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_ICE = m_ICE;
 
   size_t ix = m_fes.size() + m_hoistablePceIdList.size();
-  if (!m_allClassesHoistable) ix += m_mergeableStmts.size();
+  if (m_mergeOnly && !m_allClassesHoistable) {
+    size_t extra = 0;
+    for (auto& mergeable : m_mergeableStmts) {
+      extra++;
+      if (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited) {
+        if (mergeable.first != MergeKind::Class) {
+          extra = 0;
+          u->m_mergeOnly = false;
+          break;
+        }
+      }
+    }
+    ix += extra;
+  }
   Unit::MergeInfo *mi = Unit::MergeInfo::alloc(ix);
   u->m_mergeInfo.store(mi, std::memory_order_relaxed);
   ix = 0;
@@ -633,18 +668,21 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
     assertx(ix == fe->id());
     mi->mergeableObj(ix++) = func;
   }
+  assertx(u->getMain(nullptr, false)->isPseudoMain());
   mi->m_firstHoistablePreClass = ix;
+  assertx(m_fes.size());
   for (auto& id : m_hoistablePceIdList) {
     mi->mergeableObj(ix++) = u->m_preClasses[id].get();
   }
   mi->m_firstMergeablePreClass = ix;
-  if (!m_allClassesHoistable) {
+  if (u->m_mergeOnly && !m_allClassesHoistable) {
     for (auto& mergeable : m_mergeableStmts) {
       switch (mergeable.first) {
         case MergeKind::Class:
           mi->mergeableObj(ix++) = u->m_preClasses[mergeable.second].get();
           break;
         case MergeKind::Define:
+          assertx(RuntimeOption::RepoAuthoritative);
         case MergeKind::Record:
         case MergeKind::TypeAlias:
           mi->mergeableObj(ix++) =
@@ -731,7 +769,8 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
 
 template<class SerDe>
 void UnitEmitter::serdeMetaData(SerDe& sd) {
-  sd(m_isHHFile)
+  sd(m_mergeOnly)
+    (m_isHHFile)
     (m_metaData)
     (m_fileAttributes)
     (m_symbol_refs)
@@ -1395,6 +1434,22 @@ void UnitRepoProxy::GetUnitMergeablesStmt
       Id mergeableId;            /**/ query.getInt(2, mergeableId);
 
       auto k = MergeKind(mergeableKind);
+
+      if (UNLIKELY(!RuntimeOption::RepoAuthoritative)) {
+        /*
+         * We're using a repo generated in WholeProgram mode,
+         * but we're not using it in RepoAuthoritative mode
+         * (this is dodgy to start with). We're not going to
+         * deal with requires at merge time, so drop them
+         * here, and clear the mergeOnly flag for the unit.
+         * The two exceptions are persistent constants and
+         * TypeAliases which are allowed in systemlib.
+         */
+        if ((k != MergeKind::Define && k != MergeKind::TypeAlias)
+            || SystemLib::s_inited) {
+          ue.m_mergeOnly = false;
+        }
+      }
       switch (k) {
         case MergeKind::Define:
         case MergeKind::TypeAlias:
@@ -1645,6 +1700,8 @@ createFatalUnit(const StringData* filename, const SHA1& sha1, FatalOp op,
   ue->m_fatalOp = op;
   ue->m_fatalMsg = err;
 
+  ue->addTrivialPseudoMain();
+  ue->m_mergeOnly = false;
   return ue;
 }
 

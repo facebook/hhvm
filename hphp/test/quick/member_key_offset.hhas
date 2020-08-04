@@ -1,6 +1,11 @@
 .hh_file 1;
 #tests that verifier rejects illegal stack offsets in member keys
 
+.main {
+  Int 1
+  RetC
+}
+
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   .declvars $foo $baz $t;
   Null

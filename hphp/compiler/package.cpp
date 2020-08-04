@@ -16,7 +16,6 @@
 
 #include "hphp/compiler/package.h"
 
-#include <exception>
 #include <fstream>
 #include <map>
 #include <memory>
@@ -202,10 +201,6 @@ struct ParserWorker
         return true;
       } catch (Exception& e) {
         Logger::Error(e.getMessage());
-        return false;
-      } catch (std::exception& e) {
-        Logger::Error("Fatal: An unexpected exception was thrown: %s\n",
-          e.what());
         return false;
       } catch (...) {
         Logger::Error("Fatal: An unexpected exception was thrown");
@@ -420,7 +415,11 @@ std::unique_ptr<UnitEmitter> Package::createSymlinkWrapper(
   bool found_entrypoint = false;
 
   std::stringstream ss;
-  ss << ".hh_file 1;\n\n";
+  ss << ".hh_file 1;\n\n"
+     << ".main (1,1) {\n"
+     << "  Int 1\n"
+     << "  RetC\n"
+     << "}\n\n";
 
   for (auto& fe : org_ue->fevec()) {
     const UserAttributeMap& attrs = fe->userAttributes;

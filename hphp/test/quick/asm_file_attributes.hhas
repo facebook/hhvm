@@ -1,2 +1,7 @@
 .hh_file 1;
+.main {
+  Int 1
+  RetC
+}
+
 .file_attributes ["A"("""y:0:{}""")] ;

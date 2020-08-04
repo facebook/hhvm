@@ -42,6 +42,7 @@ namespace HPHP {
 struct EventHook {
   enum {
     NormalFunc,
+    PseudoMain,
     Eval,
   };
   enum {

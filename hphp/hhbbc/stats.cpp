@@ -134,6 +134,7 @@ struct Stats {
   std::atomic<uint64_t> totalClasses;
   std::atomic<uint64_t> totalRecords;
   std::atomic<uint64_t> totalFunctions;
+  std::atomic<uint64_t> totalPseudoMains;
   std::atomic<uint64_t> totalMethods;
   std::atomic<uint64_t> persistentSPropsPub;
   std::atomic<uint64_t> persistentSPropsProt;
@@ -210,6 +211,7 @@ std::string show(const Stats& stats) {
   folly::format(
     &ret,
     "       total_methods:  {: >8}\n"
+    "   total_pseudomains:  {: >8}\n"
     "         total_funcs:  {: >8}\n"
     "        unique_funcs:  {: >8}\n"
     "    persistent_funcs:  {: >8}\n"
@@ -225,6 +227,7 @@ std::string show(const Stats& stats) {
     "   persistent_sprops_prot: {: >8}\n"
     "   persistent_sprops_priv: {: >8}\n",
     stats.totalMethods.load(),
+    stats.totalPseudoMains.load(),
     stats.totalFunctions.load(),
     stats.uniqueFunctions.load(),
     stats.persistentFunctions.load(),
@@ -391,19 +394,23 @@ void collect_simple(Stats& stats, const Bytecode& bc) {
 
 void collect_func(Stats& stats, const Index& index, php::Func& func) {
   if (!func.cls) {
-    ++stats.totalFunctions;
-    if (func.attrs & AttrPersistent) {
-      ++stats.persistentFunctions;
-    }
-    if (func.attrs & AttrUnique) {
-      if (!(func.attrs & AttrPersistent)) {
-        FTRACE(1, "Func unique but not persistent: {} : {}\n",
+    if (is_pseudomain(&func)) {
+      ++stats.totalPseudoMains;
+    } else {
+      ++stats.totalFunctions;
+      if (func.attrs & AttrPersistent) {
+        ++stats.persistentFunctions;
+      }
+      if (func.attrs & AttrUnique) {
+        if (!(func.attrs & AttrPersistent)) {
+          FTRACE(1, "Func unique but not persistent: {} : {}\n",
+                 func.name, func.unit->filename);
+        }
+        ++stats.uniqueFunctions;
+      } else {
+        FTRACE(1, "Func not unique: {} : {}\n",
                func.name, func.unit->filename);
       }
-      ++stats.uniqueFunctions;
-    } else {
-      FTRACE(1, "Func not unique: {} : {}\n",
-             func.name, func.unit->filename);
     }
   }
 
@@ -517,6 +524,7 @@ void collect_stats(Stats& stats,
       for (auto& x : unit->funcs) {
         collect_func(stats, index, *x);
       }
+      collect_func(stats, index, *unit->pseudomain);
     }
   );
 }
@@ -556,6 +564,7 @@ void collect_stats(const StatsHolder& stats,
   for (auto& x : unit->funcs) {
     collect_func(*stats.stats, index, *x);
   }
+  collect_func(*stats.stats, index, *unit->pseudomain);
 }
 
 void print_stats(const StatsHolder& stats) {

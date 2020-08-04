@@ -3,6 +3,11 @@
 # Switch statement
 #
 
+.main {
+  Int 1
+  RetC
+}
+
 # array(0,1,2,3,4)
 .adata my_array = """Y:5:{i:0;i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:4;i:4;}""";
 

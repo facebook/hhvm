@@ -174,6 +174,12 @@ struct Options {
   bool FuncFamilies = true;
 
   /*
+   * Whether or not hhbbc should attempt to do anything intelligent to
+   * pseudomains.
+   */
+  bool AnalyzePseudomains = true;
+
+  /*
    * Should we do an extra whole-program pass to try to determine the types of
    * public static properties.  This will not yield any useful information for
    * programs that contain any sets to static properties with both a dynamic

@@ -33,9 +33,16 @@ uint32_t closure_num_use_vars(const php::Func* f) {
   return f->cls->properties.size();
 }
 
+bool is_pseudomain(const php::Func* f) {
+  return f->unit->pseudomain.get() == f;
+}
+
 bool is_volatile_local(const php::Func* func, LocalId lid) {
   auto const& l = func->locals[lid];
   if (!l.name) return false;
+
+  // Named pseudomain locals are bound to $GLOBALS.
+  if (is_pseudomain(func)) return true;
 
   return (RuntimeOption::EnableArgsInBacktraces &&
           l.name->same(s_reified_generics_var.get())) ||

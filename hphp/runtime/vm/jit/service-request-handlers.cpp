@@ -105,6 +105,10 @@ RegionContext getContext(SrcKey sk) {
   return ctx;
 }
 
+bool liveFrameIsPseudoMain() {
+  return false;
+}
+
 const StaticString s_AlwaysInterp("__ALWAYS_INTERP");
 
 /*
@@ -116,6 +120,11 @@ const StaticString s_AlwaysInterp("__ALWAYS_INTERP");
 TCA getTranslation(TransArgs args) {
   auto sk = args.sk;
   sk.func()->validate();
+
+  if (liveFrameIsPseudoMain() && !RuntimeOption::EvalJitPseudomain) {
+    SKTRACE(2, sk, "punting on pseudoMain\n");
+    return nullptr;
+  }
 
   if (!RID().getJit()) {
     SKTRACE(2, sk, "punting because jit was disabled\n");

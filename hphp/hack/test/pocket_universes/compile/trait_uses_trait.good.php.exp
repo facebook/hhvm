@@ -10,6 +10,19 @@
 .adata A_4 = """k:1:{s:1:\"K\";}""";
 .adata A_5 = """v:1:{s:8:\"MyTraitA\";}""";
 
+.main (1,1) {
+  .srcloc 4:7,4:14;
+  DefCls 0
+  .srcloc 13:7,13:14;
+  DefCls 1
+  .srcloc 24:7,24:7;
+  DefCls 2
+  .srcloc 37:7,37:7;
+  DefCls 3
+  Int 1
+  RetC
+}
+
 .function {} ["__EntryPoint"("""y:0:{}""")] (40,44) <"HH\\void" N > main() {
   .srcloc 41:8,41:23;
   NullUninit

@@ -34,6 +34,11 @@ namespace php { struct Func; struct Local; struct Block; }
 uint32_t closure_num_use_vars(const php::Func*);
 
 /*
+ * Returns whether a given php::Func is the pseudomain of its unit.
+ */
+bool is_pseudomain(const php::Func*);
+
+/*
  * Locals with certain special names can be set in the enclosing scope by
  * various php routines.  We don't attempt to track their types.  Furthermore,
  * in a pseudomain effectively all 'locals' are volatile, because any re-entry

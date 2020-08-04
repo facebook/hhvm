@@ -1,4 +1,9 @@
 .hh_file 1;
+.main {
+  Int 1
+  RetC
+}
+
 .function <"" N  > test(<"\?HH\\string" "HH\\string" nullable extended_hint > $a, <"\?HH\\string" "HH\\string" nullable extended_hint > $b, <"HH\\string" "HH\\string" > $c) {
   VerifyParamType $a
   VerifyParamType $b

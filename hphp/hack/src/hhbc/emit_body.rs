@@ -13,7 +13,7 @@ use emit_adata_rust as emit_adata;
 use emit_expression_rust as emit_expression;
 use emit_fatal_rust::raise_fatal_runtime;
 use emit_param_rust as emit_param;
-use emit_pos_rust::emit_pos;
+use emit_pos_rust::{emit_pos, emit_pos_then};
 use emit_statement::emit_final_stmts;
 use emit_type_hint_rust as emit_type_hint;
 use env::{emitter::Emitter, local, Env};
@@ -486,9 +486,49 @@ fn emit_ast_body(env: &mut Env, e: &mut Emitter, body: &AstBody) -> Result {
 fn emit_defs(env: &mut Env, emitter: &mut Emitter, prog: &[tast::Def]) -> Result {
     use tast::Def;
     fn emit_def(env: &mut Env, emitter: &mut Emitter, def: &tast::Def) -> Result {
+        fn get_order(emit_id: &Option<tast::EmitId>) -> &isize {
+            match emit_id {
+                None | Some(tast::EmitId::Anonymous) => {
+                    panic!("Expected closure_convert to annotate def with order number");
+                }
+                Some(tast::EmitId::EmitId(n)) => n,
+            }
+        };
         match def {
             Def::Stmt(s) => emit_statement::emit_stmt(emitter, env, s),
             Def::Namespace(ns) => emit_defs(env, emitter, &ns.1),
+            Def::Class(cd) => {
+                let make_def_instr = |num| {
+                    if emitter.systemlib() {
+                        instr::defclsnop(num)
+                    } else {
+                        instr::defcls(num)
+                    }
+                };
+                let tast::Id(pos, _) = &(*cd).name;
+                match &(*cd).emit_id {
+                    Some(tast::EmitId::EmitId(n)) => Ok(emit_pos_then(&pos, make_def_instr(*n))),
+                    Some(tast::EmitId::Anonymous) => Ok(instr::empty()),
+                    None => panic!(
+                        "Expected toplevel class declaration to be converted in closure_convert"
+                    ),
+                }
+            }
+            Def::Typedef(td) => {
+                let tast::Id(pos, _) = &(*td).name;
+                let num = get_order(&(*td).emit_id);
+                Ok(emit_pos_then(&pos, instr::deftypealias(*num)))
+            }
+            Def::RecordDef(rd) => {
+                let tast::Id(pos, _) = &(*rd).name;
+                let num = get_order(&(*rd).emit_id);
+                Ok(emit_pos_then(&pos, instr::defrecord(*num)))
+            }
+            Def::Constant(c) => {
+                let tast::Id(pos, _) = &(*c).name;
+                let num = get_order(&(*c).emit_id);
+                Ok(emit_pos_then(&pos, instr::defcns(*num)))
+            }
             _ => Ok(instr::empty()),
         }
     };

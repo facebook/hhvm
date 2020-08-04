@@ -1,1 +1,1 @@
--vEval.JitPGOThreshold=25
+-vEval.JitPGOThreshold=25 -vEval.JitPseudomain=0

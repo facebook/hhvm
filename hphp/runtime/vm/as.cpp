@@ -33,7 +33,10 @@
  *      Using this module, you can emit pretty much any sort of not
  *      trivially-illegal bytecode stream, and many trivially-illegal
  *      ones as well.  You can also easily create Units with illegal
- *      metadata.  Generally this will crash the VM.
+ *      metadata.  Generally this will crash the VM.  In other cases
+ *      (especially if you don't bother to DefCls your classes in your
+ *      .main) you'll just get mysterious "class not defined" errors
+ *      or weird behavior.
  *
  *    - Whitespace is not normally significant, but newlines may not
  *      be in the middle of a list of opcode arguments.  (After the
@@ -52,6 +55,8 @@
  *
  *   - It might be nice if you could refer to iterators by name
  *     instead of by index.
+ *
+ *   - DefCls by name would be nice.
  *
  * Missing features (partial list):
  *
@@ -735,6 +740,7 @@ struct AsmState {
 
   UnitEmitter* ue;
   Input in;
+  bool emittedPseudoMain{false};
 
   /*
    * Map of adata identifiers to their serialized contents
@@ -778,6 +784,7 @@ struct AsmState {
   int minStackDepth{0};
   int maxUnnamed{-1};
   std::set<std::string,stdltistr> hoistables;
+  std::unordered_map<uint32_t,Offset> defClsOffsets;
   Location::Range srcLoc{-1,-1,-1,-1};
   hphp_fast_map<SymbolRef,
                 CompactVector<std::string>,
@@ -1614,6 +1621,10 @@ std::map<std::string,ParserFunc> opcode_parsers;
                                                                        \
     /* Record source location. */                                      \
     as.ue->recordSourceLocation(as.srcLoc, curOpcodeOff);              \
+                                                                       \
+    if (Op##name == OpDefCls || Op##name == OpDefClsNop) {             \
+      as.defClsOffsets.emplace(immIVA[0], curOpcodeOff);               \
+    }                                                                  \
                                                                        \
     /* Retain stack depth after calls to exit */                       \
     if ((instrFlags(thisOpcode) & InstrFlags::TF) &&                   \
@@ -2570,6 +2581,31 @@ bool parse_line_range(AsmState& as, int& line0, int& line1) {
   return true;
 }
 
+/*
+ * If we haven't seen a pseudomain and we are compiling systemlib,
+ * add a pseudomain and return true
+ * If we haven't seen a pseudomain and we are not compiling systemlib,
+ * return false so that the caller can give an assembler error
+ * Otherwise, return true
+ */
+bool ensure_pseudomain(AsmState& as) {
+  if (!as.emittedPseudoMain) {
+    if (!SystemLib::s_inited) {
+      /*
+       * The SystemLib::s_hhas_unit is required to be merge-only,
+       * and we create the source by concatenating separate .hhas files
+       * Rather than choosing one to have the .main directive, we just
+       * generate a trivial pseudoMain automatically.
+       */
+      as.ue->addTrivialPseudoMain();
+      as.emittedPseudoMain = true;
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
 static StaticString s_native("__Native");
 
 MaybeDataType type_constraint_to_data_type(
@@ -2638,6 +2674,10 @@ void check_native(AsmState& as, bool is_construct) {
  *                    ;
  */
 void parse_function(AsmState& as) {
+  if (!ensure_pseudomain(as)) {
+    as.error(".function blocks must all follow the .main block");
+  }
+
   as.in.skipWhitespace();
 
   auto const ubs = parse_ubs(as);
@@ -3110,6 +3150,10 @@ void parse_cls_doccomment(AsmState& as) {
  */
 void parse_class_body(AsmState& as, bool class_is_const,
                       const UpperBoundMap& class_ubs) {
+  if (!ensure_pseudomain(as)) {
+    as.error(".class blocks must all follow the .main block");
+  }
+
   std::string directive;
   while (as.in.readword(directive)) {
     if (directive == ".property") {
@@ -3137,6 +3181,10 @@ void parse_class_body(AsmState& as, bool class_is_const,
  *                  ;
  */
 void parse_record_body(AsmState& as) {
+  if (!ensure_pseudomain(as)) {
+    as.error(".record blocks must all follow the .main block");
+  }
+
   std::string directive;
   while (as.in.readword(directive)) {
     if (directive == ".property") { parse_record_field(as); continue; }
@@ -3332,6 +3380,32 @@ void parse_filepath(AsmState& as) {
 }
 
 /*
+ * directive-main : ?line-range '{' function-body
+ *                ;
+ */
+void parse_main(AsmState& as) {
+  if (as.emittedPseudoMain) {
+    as.error("Multiple .main directives found");
+  }
+
+  int line0;
+  int line1;
+  bool fromSrcLoc = parse_line_range(as, line0, line1);
+
+  as.in.expectWs('{');
+
+  as.ue->initMain(line0, line1);
+  as.fe = as.ue->getMain();
+  as.emittedPseudoMain = true;
+  if (fromSrcLoc) {
+    as.srcLoc = Location::Range{line0,0,line1,0};
+  } else {
+    as.srcLoc = Location::Range{-1,-1,-1,-1};
+  }
+  parse_function_body(as);
+}
+
+/*
  * directive-adata :  identifier '=' php-serialized ';'
  *                 ;
  */
@@ -3439,8 +3513,7 @@ void parse_constant(AsmState& as) {
   if (type(constant.val) == KindOfUninit) {
     constant.val.m_data.pcnt = reinterpret_cast<MaybeCountable*>(Unit::getCns);
   }
-  auto const cid = as.ue->addConstant(constant);
-  as.ue->pushMergeableId(Unit::MergeKind::Define, cid);
+  as.ue->addConstant(constant);
 }
 
 /*
@@ -3595,6 +3668,7 @@ void parse(AsmState& as) {
 
   while (as.in.readword(directive)) {
     if (directive == ".filepath")      { parse_filepath(as)      ; continue; }
+    if (directive == ".main")          { parse_main(as)          ; continue; }
     if (directive == ".function")      { parse_function(as)      ; continue; }
     if (directive == ".adata")         { parse_adata(as)         ; continue; }
     if (directive == ".class")         { parse_class(as)         ; continue; }
@@ -3611,6 +3685,10 @@ void parse(AsmState& as) {
     if (directive == ".fatal")         { parse_fatal(as)         ; continue; }
 
     as.error("unrecognized top-level directive `" + directive + "'");
+  }
+
+  if (!ensure_pseudomain(as)) {
+    as.error("no .main found in hhas unit");
   }
 
   if (as.symbol_refs.size()) {
@@ -3652,6 +3730,9 @@ std::unique_ptr<UnitEmitter> assemble_string(
   ARRPROV_USE_RUNTIME_LOCATION();
   auto const bcSha1 = SHA1{string_sha1(folly::StringPiece(code, codeLen))};
   auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs, false);
+  if (!SystemLib::s_inited) {
+    ue->m_mergeOnly = true;
+  }
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
 

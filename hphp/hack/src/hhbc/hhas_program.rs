@@ -24,6 +24,7 @@ pub struct HhasProgram<'a> {
     pub record_defs: Vec<HhasRecord<'a>>,
     pub typedefs: Vec<Typedef<'a>>,
     pub file_attributes: Vec<HhasAttribute>,
+    pub main: HhasBody<'a>,
     pub symbol_refs: HhasSymbolRefs,
     pub constants: Vec<HhasConstant<'a>>,
     pub fatal: Option<(FatalOp, Pos, String)>,

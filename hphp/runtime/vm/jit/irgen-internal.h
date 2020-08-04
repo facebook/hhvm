@@ -668,7 +668,22 @@ inline SSATmp* ldLoc(IRGS& env,
                      uint32_t locId,
                      Block* exit,
                      GuardConstraint gc) {
-  env.irb->constrainLocal(locId, gc, "LdLoc");
+  assertx(IMPLIES(exit == nullptr, !curFunc(env)->isPseudoMain()));
+
+  auto const opStr = curFunc(env)->isPseudoMain()
+    ? "LdLocPseudoMain"
+    : "LdLoc";
+  env.irb->constrainLocal(locId, gc, opStr);
+
+  if (curFunc(env)->isPseudoMain()) {
+    auto const pred = env.irb->fs().local(locId).predictedType;
+    auto const type = relaxToGuardable(pred);
+    assertx(!type.isSpecialized());
+    assertx(type == type.dropConstVal());
+
+    return gen(env, LdLocPseudoMain, type, exit, LocalId(locId), fp(env));
+  }
+
   return gen(env, LdLoc, TCell, LocalId(locId), fp(env));
 }
 
@@ -718,12 +733,13 @@ inline SSATmp* ldLocWarn(IRGS& env,
 }
 
 /*
- * Generate a store to a local without doing anything else.
+ * Generate a store to a local without doing anything else.  This function just
+ * handles using StLocPseudoMain if we're in a pseudomain.
  */
 inline SSATmp* stLocRaw(IRGS& env, uint32_t id, SSATmp* fp, SSATmp* newVal) {
   return gen(
     env,
-    StLoc,
+    curFunc(env)->isPseudoMain() ? StLocPseudoMain : StLoc,
     LocalId(id),
     fp,
     newVal
@@ -818,6 +834,7 @@ inline SSATmp* ldStkAddr(IRGS& env, BCSPRelOffset relOffset) {
 }
 
 inline void decRefLocalsInline(IRGS& env) {
+  assertx(!curFunc(env)->isPseudoMain());
   for (int id = curFunc(env)->numLocals() - 1; id >= 0; --id) {
     auto const loc = ldLoc(env, id, nullptr, DataTypeGeneric);
     decRef(env, loc, id);

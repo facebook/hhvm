@@ -3,6 +3,11 @@
 # Test arrays for hhbc asm.
 #
 
+.main {
+  Int 1
+  RetC
+}
+
 .adata my_array = """Y:2:{s:3:"foo";s:3:"bar";s:3:"baz";s:4:"blah";}""";
 
 .class ClassWithArray {

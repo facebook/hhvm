@@ -1,4 +1,9 @@
 .hh_file 1;
+.main {
+  Int 1
+  RetC
+}
+
 .class [unique] A extends Closure {
   .method [public] <"" N  > foo() isClosureBody {
     Int 1

@@ -3,6 +3,11 @@
 # unnamed vars
 #
 
+.main {
+  Int 1
+  RetC
+}
+
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   Int 5
   SetL $x

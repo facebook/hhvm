@@ -608,6 +608,12 @@ struct Func final {
   // Definition context.                                                [const]
 
   /*
+   * Is the function a pseudomain (i.e., the function implicitly defined by the
+   * text after <?php in a file)?
+   */
+  bool isPseudoMain() const;
+
+  /*
    * Is this function a method defined on a class?
    *
    * Note that trait methods may not satisfy isMethod().

@@ -41,7 +41,7 @@ void RepoAutoloadMapBuilder::addUnit(const UnitEmitter& ue) {
     m_types.insert(std::make_pair(re->name(), unitSn));
   }
   for (auto& fe : ue.fevec()) {
-    if (!fe->isMethod()
+    if (!fe->isMethod() && !fe->isPseudoMain()
         && !boost::ends_with(fe->name->slice(), "$memoize_impl")) {
       m_funcs.insert(std::make_pair(fe->name, unitSn));
     }

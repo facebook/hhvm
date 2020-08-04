@@ -195,9 +195,10 @@ public:
   // Helper accessors.                                                  [const]
 
   /*
-   * Is the function a method, variadic (i.e., takes a `...'
+   * Is the function a pseudomain, a method, variadic (i.e., takes a `...'
    * parameter), or an HNI function with a native implementation?
    */
+  bool isPseudoMain() const;
   bool isMethod() const;
   bool isVariadic() const;
 

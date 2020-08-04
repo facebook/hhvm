@@ -278,6 +278,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdFrameCls:
   case LdClsCtor:
   case DefConst:
+  case DefCls:
   case LdCls:
   case LdClsCached:
   case LdClsInitData:

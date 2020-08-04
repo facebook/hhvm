@@ -3,6 +3,11 @@
 # Basic test of continuations in HH assembler.
 #
 
+.main {
+  Int 1
+  RetC
+}
+
 .function R() isGenerator {
   CreateCont
   PopC

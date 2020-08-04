@@ -8,6 +8,11 @@
 .adata A_4 = """Y:1:{i:1;i:1;}""";
 .adata A_5 = """y:1:{i:1;}""";
 
+.main {
+  Int 1
+  RetC
+}
+
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   Array @A_0
   PopC

@@ -1017,6 +1017,32 @@ void checkImplicitContextErrors(const ActRec* ar) {
 
 static void dispatch();
 
+void enterVMAtPseudoMain(ActRec* enterFnAr) {
+  assertx(enterFnAr);
+  assertx(enterFnAr->func()->isPseudoMain());
+  assertx(!isResumed(enterFnAr));
+  ARRPROV_USE_VMPC();
+  Stats::inc(Stats::VMEnter);
+
+  pushFrameSlots(enterFnAr->func());
+  vmfp() = enterFnAr;
+  vmpc() = enterFnAr->func()->getEntry();
+
+  if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
+  checkStack(vmStack(), enterFnAr->m_func, 0);
+  assertx(vmfp()->func()->contains(vmpc()));
+
+  if (RID().getJit() && !RID().getJitFolding()) {
+    jit::TCA start = enterFnAr->m_func->getFuncBody();
+    assert_flog(jit::tc::isValidCodeAddress(start),
+                "start = {} ; func = {} ({})\n",
+                start, enterFnAr->m_func, enterFnAr->m_func->fullName());
+    jit::enterTC(start);
+  } else {
+    dispatch();
+  }
+}
+
 void enterVMAtFunc(ActRec* enterFnAr, Array&& generics, bool hasInOut,
                    bool dynamicCall, bool allowDynCallNoPointer) {
   assertx(enterFnAr);
@@ -4673,10 +4699,11 @@ OPTBLD_INLINE void inclOp(PC origpc, PC& pc, InclOpFlags flags,
   }
 
   if (!(flags & InclOpFlags::Once) || initial) {
-    vmpc() = origpc;
-    unit->merge();
+    g_context->evalUnit(unit, origpc, pc, EventHook::PseudoMain);
+  } else {
+    Stats::inc(Stats::PseudoMain_Guarded);
+    vmStack().pushBool(true);
   }
-  vmStack().pushBool(true);
 }
 
 OPTBLD_INLINE void iopIncl(PC origpc, PC& pc) {
@@ -4750,9 +4777,23 @@ OPTBLD_INLINE void iopEval(PC origpc, PC& pc) {
     vmStack().pushBool(false);
     return;
   }
-  vmpc() = origpc;
-  unit->merge();
-  vmStack().pushBool(true);
+  vm->evalUnit(unit, origpc, pc, EventHook::Eval);
+}
+
+OPTBLD_INLINE void iopDefCls(uint32_t cid) {
+  PreClass* c = vmfp()->m_func->unit()->lookupPreClassId(cid);
+  Unit::defClass(c);
+}
+
+OPTBLD_INLINE void iopDefRecord(uint32_t cid) {
+  auto const r = vmfp()->m_func->unit()->lookupPreRecordId(cid);
+  Unit::defRecordDesc(r);
+}
+
+OPTBLD_INLINE void iopDefClsNop(uint32_t /*cid*/) {}
+
+OPTBLD_INLINE void iopDefTypeAlias(uint32_t tid) {
+  vmfp()->func()->unit()->defTypeAlias(tid);
 }
 
 OPTBLD_INLINE void iopThis() {

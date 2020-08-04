@@ -1,5 +1,6 @@
 .hh_file 1;
-# Test that things can get marked AlwaysHoistable
+# Test that B *doesn't* get marked AlwaysHoistable and so
+# DefClsNop won't actually define it
 
 .main {
   DefClsNop 0
@@ -7,10 +8,6 @@
 
   Int 1
   RetC
-}
-
-.class [unique] a {
-  .default_ctor;
 }
 
 .class [unique] B extends A {
@@ -25,6 +22,10 @@
     RetC
   }
 
+}
+
+.class [unique] A {
+  .default_ctor;
 }
 
 .function ["__EntryPoint"("""y:0:{}""")] main() {

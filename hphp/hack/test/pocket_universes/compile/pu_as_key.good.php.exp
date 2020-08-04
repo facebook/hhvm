@@ -6,6 +6,11 @@
 .adata A_0 = """D:0:{}""";
 .adata A_1 = """Y:1:{s:4:\"toto\";i:42;}""";
 
+.main (1,1) {
+  Int 1
+  RetC
+}
+
 .function {} ["__EntryPoint"("""y:0:{}""")] (4,15) <"HH\\void" N > main() {
   .numiters 1;
   .declvars $dict $key $value $shape;

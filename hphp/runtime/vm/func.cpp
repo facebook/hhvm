@@ -67,10 +67,8 @@ std::atomic<bool> Func::s_treadmill;
 
 /*
  * FuncId high water mark and FuncId -> Func* table.
- * We can't start with 0 since that's used for special sentinel value
- * in TreadHashMap
  */
-static std::atomic<FuncId> s_nextFuncId{1};
+static std::atomic<FuncId> s_nextFuncId{0};
 static AtomicVector<const Func*> s_funcVec{0, nullptr};
 static InitFiniNode s_funcVecReinit([]{
   UnsafeReinitEmptyAtomicVector(
@@ -275,7 +273,7 @@ void Func::initPrologues(int numParams) {
 
   m_funcBody = stubs.funcBodyHelperThunk;
 
-  TRACE(4, "initPrologues func %p %d\n", this, numPrologues);
+  TRACE(2, "initPrologues func %p %d\n", this, numPrologues);
   for (int i = 0; i < numPrologues; i++) {
     m_prologueTable[i] = stubs.fcallHelperThunk;
   }
@@ -593,7 +591,9 @@ void Func::print_attrs(std::ostream& out, Attr attrs) {
 }
 
 void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
-  if (preClass() != nullptr) {
+  if (isPseudoMain()) {
+    out << "Pseudo-main";
+  } else if (preClass() != nullptr) {
     out << "Method";
     print_attrs(out, m_attrs);
     if (isPhpLeafFn()) out << " (leaf)";

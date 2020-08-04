@@ -664,26 +664,32 @@ let serve_one_iteration genv env client_provider =
       select_outcome
   in
   let t_done_recheck = Unix.gettimeofday () in
-  let env = { env with last_recheck_loop_stats = stats } in
+  let did_work = stats.total_rechecked_count > 0 in
   let env =
-    match stats.total_rechecked_count with
-    | 0 -> env
-    | _ ->
-      HackEventLogger.recheck_end
-        stats.duration
-        stats.rechecked_batches
-        stats.rechecked_count
-        stats.total_rechecked_count;
-
-      Hh_logger.log "Recheck id: %s" recheck_id;
-      { env with last_recheck_loop_stats_for_actual_work = Some stats }
+    {
+      env with
+      last_recheck_loop_stats = stats;
+      last_recheck_loop_stats_for_actual_work =
+        ( if did_work then
+          Some stats
+        else
+          env.last_recheck_loop_stats_for_actual_work );
+    }
   in
+  if did_work then begin
+    HackEventLogger.recheck_end
+      stats.duration
+      stats.rechecked_batches
+      stats.rechecked_count
+      stats.total_rechecked_count;
+
+    Hh_logger.log "Recheck id: %s" recheck_id
+  end;
   (* if actual work was done, log whether anything got communicated to client *)
-  let log_diagnostics = env.last_recheck_loop_stats.total_rechecked_count > 0 in
   let env =
     match env.diag_subscribe with
     | None ->
-      if log_diagnostics then
+      if did_work then
         Hh_logger.log "Finished recheck_loop; no diag subscriptions";
       env
     | Some sub ->
@@ -691,22 +697,22 @@ let serve_one_iteration genv env client_provider =
       (* We possibly just did a lot of work. Check the client again to see
        * that we are still idle before proceeding to send diagnostics *)
       if ClientProvider.client_has_message client then (
-        if log_diagnostics then
+        if did_work then
           Hh_logger.log "Finished recheck_loop; client has message";
         env
       ) else if not @@ Relative_path.Set.is_empty env.ide_needs_parsing then (
         (* We processed some edits but didn't recheck them yet. *)
-        if log_diagnostics then
+        if did_work then
           Hh_logger.log "Finished recheck_loop; ide_needs_parsing";
         env
       ) else if has_pending_disk_changes genv then (
-        if log_diagnostics then
+        if did_work then
           Hh_logger.log "Finished recheck_loop; has_pending_disk_changes";
         env
       ) else
         let (sub, errors) = Diagnostic_subscription.pop_errors sub env.errorl in
         ( if SMap.is_empty errors then (
-          if log_diagnostics then
+          if did_work then
             Hh_logger.log "Finished recheck_loop; is_empty errors"
         ) else
           let id = Diagnostic_subscription.get_id sub in

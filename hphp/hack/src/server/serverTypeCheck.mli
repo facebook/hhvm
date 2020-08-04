@@ -16,11 +16,13 @@ val check_kind_to_string : check_kind -> string
 type check_results = {
   reparse_count: int;
   total_rechecked_count: int;
-  telemetry: Telemetry.t;
 }
 
 val type_check :
-  ServerEnv.genv -> ServerEnv.env -> check_kind -> ServerEnv.env * check_results
+  ServerEnv.genv ->
+  ServerEnv.env ->
+  check_kind ->
+  ServerEnv.env * check_results * Telemetry.t
 
 (****************************************************************************)
 (* Debugging: Declared here to stop ocamlc yelling at us for unused defs *)

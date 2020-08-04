@@ -45,7 +45,6 @@ type check_kind =
 type check_results = {
   reparse_count: int;
   total_rechecked_count: int;
-  telemetry: Telemetry.t;
 }
 
 let shallow_decl_enabled (ctx : Provider_context.t) =
@@ -696,7 +695,9 @@ end
 
 module Make : functor (CheckKind : CheckKindType) -> sig
   val type_check_core :
-    ServerEnv.genv -> ServerEnv.env -> ServerEnv.env * check_results
+    ServerEnv.genv ->
+    ServerEnv.env ->
+    ServerEnv.env * check_results * Telemetry.t
 end =
 functor
   (CheckKind : CheckKindType)
@@ -929,13 +930,13 @@ functor
     let do_type_checking
         (genv : genv)
         (env : env)
-        (telemetry : Telemetry.t)
         (capture_snapshot : ServerRecheckCapture.snapshot)
         ~(errors : Errors.t)
         ~(files_to_check : Relative_path.Set.t)
         ~(files_to_parse : Relative_path.Set.t)
         ~(lazy_check_later : Relative_path.Set.t)
         ~(old_env : env) : type_checking_result =
+      let telemetry = Telemetry.create () in
       if Relative_path.(Set.mem files_to_check default) then
         Hh_logger.log "WARNING: rechecking defintion in a dummy file";
       let dynamic_view_files =
@@ -1041,14 +1042,15 @@ functor
       }
 
     let type_check_core genv env =
+      let start_t = Unix.gettimeofday () in
+      let telemetry = Telemetry.create () in
+      let t = start_t in
       let env =
         if CheckKind.is_full then
           { env with full_check = Full_check_started }
         else
           env
       in
-      let start_t = Unix.gettimeofday () in
-      let t = start_t in
       (* Files in env.needs_decl contain declarations which were not finished.
        * They were only oldified, but we didn't run phase2 redeclarations for them
        * which would compute new versions, compare them with old ones and remove
@@ -1356,12 +1358,11 @@ functor
       (* Typecheck all of the files we determined might need rechecking as a
        consequence of the changes (or, in a lazy check, the subset of those
        files which are open in an IDE buffer). *)
-      let telemetry = Telemetry.create () in
       let {
         env;
         diag_subscribe;
         errors;
-        telemetry;
+        telemetry = do_telemetry;
         files_checked;
         full_check_done;
         needs_recheck;
@@ -1370,13 +1371,15 @@ functor
         do_type_checking
           genv
           env
-          telemetry
           capture_snapshot
           ~errors
           ~files_to_check
           ~files_to_parse
           ~lazy_check_later
           ~old_env
+      in
+      let telemetry =
+        Telemetry.object_ telemetry ~key:"do" ~value:do_telemetry
       in
       log_if_diag_subscribe_changed
         "type_check_core[old_env->env]"
@@ -1461,7 +1464,7 @@ functor
         }
       in
 
-      (env, { reparse_count; total_rechecked_count; telemetry })
+      (env, { reparse_count; total_rechecked_count }, telemetry)
   end
 
 (* This function is used to get the variant contstructor names of
@@ -1480,6 +1483,7 @@ module FC = Make (FullCheckKind)
 module LC = Make (LazyCheckKind)
 
 let type_check_unsafe genv env kind =
+  let telemetry = Telemetry.create () in
   (match kind with
   | Lazy_check -> HackEventLogger.set_lazy_incremental ()
   | Full_check -> ());
@@ -1493,9 +1497,12 @@ let type_check_unsafe genv env kind =
       "Check kind: will check only those files already open in IDE or with reported errors ('%s')"
       check_kind;
     ServerBusyStatus.send env ServerCommandTypes.Doing_local_typecheck;
-    let res = LC.type_check_core genv env in
+    let (env, res, core_telemetry) = LC.type_check_core genv env in
     ServerBusyStatus.send env ServerCommandTypes.Done_local_typecheck;
-    res
+    let telemetry =
+      Telemetry.object_ telemetry ~key:"core" ~value:core_telemetry
+    in
+    (env, res, telemetry)
   | Full_check ->
     Hh_logger.log
       "Check kind: will bring hh_server to consistency with code changes, by checking whatever fanout is needed ('%s')"
@@ -1504,7 +1511,10 @@ let type_check_unsafe genv env kind =
       env
       (ServerCommandTypes.Doing_global_typecheck
          (global_typecheck_kind genv env));
-    let ((env, _) as res) = FC.type_check_core genv env in
+    let (env, res, core_telemetry) = FC.type_check_core genv env in
+    let telemetry =
+      Telemetry.object_ telemetry ~key:"core" ~value:core_telemetry
+    in
     ( if is_full_check_done env.full_check then
       let total = Errors.count env.ServerEnv.errorl in
       let (is_truncated, shown) =
@@ -1516,7 +1526,7 @@ let type_check_unsafe genv env kind =
         ServerCommandTypes.Done_global_typecheck { is_truncated; shown; total }
       in
       ServerBusyStatus.send env msg );
-    res
+    (env, res, telemetry)
 
 let type_check genv env kind =
   ServerUtils.with_exit_on_exception @@ fun () ->

@@ -139,6 +139,7 @@ let finalize_init init_env =
   let telemetry =
     ServerUtils.log_hash_stats (Telemetry.create ())
     |> Telemetry.int_ ~key:"heap_size" ~value:heap_size
+    |> Telemetry.duration ~start_time:init_env.init_start_t
   in
   Hh_logger.log "Server is READY";
   let t' = Unix.gettimeofday () in
@@ -333,25 +334,9 @@ let handle_connection genv env client client_kind =
     handle_connection_ genv env client
     |> ServerUtils.wrap (handle_connection_try (fun x -> x) client)
 
-let recheck genv old_env check_kind =
-  let can_interrupt =
-    match check_kind with
-    | ServerTypeCheck.Full_check -> true
-    | _ -> false
-  in
-  let old_env = { old_env with can_interrupt } in
-  let (new_env, res) = ServerTypeCheck.type_check genv old_env check_kind in
-  let new_env = { new_env with can_interrupt = true } in
-  if old_env.init_env.needs_full_init && not new_env.init_env.needs_full_init
-  then
-    finalize_init new_env.init_env;
-  ServerStamp.touch_stamp_errors
-    (Errors.get_error_list old_env.errorl)
-    (Errors.get_error_list new_env.errorl);
-  (new_env, res)
-
 let query_notifier genv env query_kind start_time =
   let open ServerNotifierTypes in
+  let telemetry = Telemetry.create () in
   let (env, raw_updates) =
     match query_kind with
     | `Sync ->
@@ -385,7 +370,7 @@ let query_notifier genv env query_kind start_time =
   Bad_files.check updates;
   if not @@ Relative_path.Set.is_empty updates then
     HackEventLogger.notifier_returned start_time (SSet.cardinal raw_updates);
-  (env, updates, updates_stale)
+  (env, updates, updates_stale, telemetry)
 
 (* This function loops until it has processed all outstanding changes.
  *
@@ -406,6 +391,9 @@ let query_notifier genv env query_kind start_time =
  *)
 let rec recheck_until_no_changes_left acc genv env select_outcome =
   let start_time = Unix.gettimeofday () in
+  (* this is telemetry for the current batch, i.e. iteration: *)
+  let telemetry = Telemetry.create () in
+
   (* When a new client connects, we use the synchronous notifier.
    * This is to get synchronous file system changes when invoking
    * hh_client in terminal.
@@ -425,8 +413,11 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
     * do analysis on mid-edit state of the world *)
     | ClientProvider.Select_persistent -> `Skip
   in
-  let (env, updates, updates_stale) =
+  let (env, updates, updates_stale, query_telemetry) =
     query_notifier genv env query_kind start_time
+  in
+  let telemetry =
+    Telemetry.object_ telemetry ~key:"query" ~value:query_telemetry
   in
   let acc = { acc with updates_stale } in
   let is_idle =
@@ -505,17 +496,28 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
       else
         ServerTypeCheck.Full_check
     in
-    let ( env,
-          ServerTypeCheck.{ reparse_count; total_rechecked_count; telemetry } )
-        =
-      recheck genv env check_kind
+    let env = { env with can_interrupt = not lazy_check } in
+    let needed_full_init = env.init_env.needs_full_init in
+    let old_errorl = Errors.get_error_list env.errorl in
+    (* THIS NEXT CALL DOES THE HEAVY WORK! *)
+    let (env, res, recheck_telemetry) =
+      ServerTypeCheck.type_check genv env check_kind
     in
+    let telemetry =
+      Telemetry.object_ telemetry ~key:"recheck" ~value:recheck_telemetry
+    in
+    (* END OF HEAVY WORK *)
+    let env = { env with can_interrupt = true } in
+    if needed_full_init && not env.init_env.needs_full_init then
+      finalize_init env.init_env;
+    ServerStamp.touch_stamp_errors old_errorl (Errors.get_error_list env.errorl);
     let acc =
       {
-        rechecked_count = acc.rechecked_count + reparse_count;
+        rechecked_count =
+          acc.rechecked_count + res.ServerTypeCheck.reparse_count;
         per_batch_telemetry = telemetry :: acc.per_batch_telemetry;
         total_rechecked_count =
-          acc.total_rechecked_count + total_rechecked_count;
+          acc.total_rechecked_count + res.ServerTypeCheck.total_rechecked_count;
         updates_stale = acc.updates_stale;
         recheck_id = acc.recheck_id;
         duration = acc.duration +. (Unix.gettimeofday () -. start_time);
@@ -804,7 +806,7 @@ let serve_one_iteration genv env client_provider =
 
 let watchman_interrupt_handler genv env =
   let start_time = Unix.gettimeofday () in
-  let (env, updates, updates_stale) =
+  let (env, updates, updates_stale, _telemetry) =
     query_notifier genv env `Async start_time
   in
   (* Async updates can always be stale, so we don't care *)
@@ -828,7 +830,9 @@ let priority_client_interrupt_handler genv client_provider env =
    * this file contents. Async notifications are not always fast enough to
    * quarantee it, so we need an additional sync query before accepting such
    * client *)
-  let (env, updates, _) = query_notifier genv env `Sync t in
+  let (env, updates, _updates_stale, _telemetry) =
+    query_notifier genv env `Sync t
+  in
   let size = Relative_path.Set.cardinal updates in
   if size > 0 then (
     Hh_logger.log "Interrupted by Watchman sync query: %d files changed" size;

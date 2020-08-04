@@ -60,17 +60,18 @@ impl Allocator for Pool {
 
     #[inline(always)]
     fn block_with_size_and_tag(&self, size: usize, tag: u8) -> BlockBuilder<'_> {
-        let block = unsafe {
-            let ptr = reserve_block(tag, size) as *mut OpaqueValue<'_>;
-            std::slice::from_raw_parts_mut(ptr, size)
-        };
-        BlockBuilder::new(block)
+        let ptr = unsafe { reserve_block(tag, size) as *mut OpaqueValue<'_> };
+        BlockBuilder::new(ptr as usize, size)
     }
 
     #[inline(always)]
     fn set_field<'a>(&self, block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>) {
         assert!(index < block.size());
-        unsafe { caml_set_field(block.as_mut_ptr() as usize, index, value.to_bits()) };
+        unsafe { caml_set_field(self.block_ptr_mut(block) as usize, index, value.to_bits()) };
+    }
+
+    unsafe fn block_ptr_mut<'a>(&self, block: &mut BlockBuilder<'a>) -> *mut OpaqueValue<'a> {
+        block.address() as *mut _
     }
 
     fn memoized<'a>(

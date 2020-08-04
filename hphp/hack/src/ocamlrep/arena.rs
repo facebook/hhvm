@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::cmp::max;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
@@ -47,20 +47,22 @@ impl Chunk {
 // The generation number is used solely to identify which arena a cached value
 // belongs to in `RcOc`.
 //
-// We use usize::max_value() / 2 here to avoid colliding with ocamlpool
-// generation numbers. This generation trick isn't sound with the use of
-// multiple generation counters, but this mitigation should make it extremely
-// difficult to mix up values allocated with ocamlpool and Arena in practice
-// (one would have to serialize the same value with both, and only after
-// increasing the ocamlpool generation by an absurd amount).
+// We use usize::max_value() / 2 here to avoid colliding with ocamlpool and
+// SlabAllocator generation numbers (ocamlpool starts at 0, and SlabAllocator
+// starts at usize::max_value() / 4). This generation trick isn't sound with the
+// use of multiple generation counters, but this mitigation should make it
+// extremely difficult to mix up values allocated with ocamlpool, Arena, and
+// SlabAllocator in practice (one would have to serialize the same value with
+// multiple Allocators, and only after increasing the generation of one by an
+// absurd amount).
 //
-// If we add a third kind of allocator, we might want to rethink this strategy.
+// If we add more allocators, we might want to rethink this strategy.
 static NEXT_GENERATION: AtomicUsize = AtomicUsize::new(usize::max_value() / 2);
 
 /// An [`Allocator`](trait.Allocator.html) which builds values in Rust-managed
 /// memory. The memory is freed when the Arena is dropped.
 pub struct Arena {
-    generation: Cell<usize>,
+    generation: usize,
     current_chunk: RefCell<Chunk>,
     cache: MemoizationCache,
 }
@@ -76,7 +78,7 @@ impl Arena {
         let generation = NEXT_GENERATION.fetch_add(1, Ordering::SeqCst);
         let capacity_in_words = max(2, capacity_in_bytes / std::mem::size_of::<Value<'_>>());
         Self {
-            generation: Cell::new(generation),
+            generation,
             current_chunk: RefCell::new(Chunk::with_capacity(capacity_in_words)),
             cache: MemoizationCache::new(),
         }
@@ -134,7 +136,7 @@ impl Arena {
 impl Allocator for Arena {
     #[inline(always)]
     fn generation(&self) -> usize {
-        self.generation.get()
+        self.generation
     }
 
     fn block_with_size_and_tag(&self, size: usize, tag: u8) -> BlockBuilder<'_> {
@@ -144,12 +146,17 @@ impl Allocator for Arena {
         // this slice is never observed as a Value. We guarantee that by not
         // exposing raw Chunk memory--only allocated Values.
         block[0] = unsafe { OpaqueValue::from_bits(header.to_bits()) };
-        BlockBuilder::new(&mut block[1..])
+        let slice = &mut block[1..];
+        BlockBuilder::new(slice.as_ptr() as usize, slice.len())
     }
 
     #[inline(always)]
     fn set_field<'a>(&self, block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>) {
-        block.0[index] = value;
+        unsafe { *self.block_ptr_mut(block).add(index) = value }
+    }
+
+    unsafe fn block_ptr_mut<'a>(&self, block: &mut BlockBuilder<'a>) -> *mut OpaqueValue<'a> {
+        block.address() as *mut _
     }
 
     fn memoized<'a>(

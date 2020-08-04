@@ -5,6 +5,7 @@
 
 use std::collections::HashMap;
 use std::fmt::{self, Debug};
+use std::marker::PhantomData;
 use std::ops::Index;
 
 use crate::{Allocator, OpaqueValue, Value};
@@ -17,33 +18,50 @@ pub const STRING_TAG: u8 = 252;
 pub const DOUBLE_TAG: u8 = 253;
 
 /// A recently-allocated, not-yet-finalized Block.
-#[repr(transparent)]
-pub struct BlockBuilder<'a>(pub(crate) &'a mut [OpaqueValue<'a>]);
+///
+/// Morally equivalent to a `&'b mut [OpaqueValue<'a>]` slice where `'a: 'b`,
+/// but `Allocator`s may choose to use some non-pointer value (such as an offset
+/// into a `Vec`) as the address.
+pub struct BlockBuilder<'a> {
+    address: usize,
+    size: usize,
+    _phantom: PhantomData<&'a mut [OpaqueValue<'a>]>,
+}
 
 impl<'a> BlockBuilder<'a> {
+    /// `address` may be a pointer or an offset (the `Allocator` which invokes
+    /// `BlockBuilder::new` determines the meaning of `BlockBuilder` addresses).
+    /// `size` must be greater than 0 and denotes the number of fields in the
+    /// block.
     #[inline(always)]
-    pub fn new(block: &'a mut [OpaqueValue<'a>]) -> Self {
-        if block.len() == 0 {
+    pub fn new(address: usize, size: usize) -> Self {
+        if size == 0 {
             panic!()
         }
-        BlockBuilder(block)
+        BlockBuilder {
+            address,
+            size,
+            _phantom: PhantomData,
+        }
+    }
+
+    /// The address passed to `BlockBuilder::new`. May be a pointer or an offset
+    /// (the `Allocator` which invokes `BlockBuilder::new` determines the
+    /// meaning of `BlockBuilder` addresses).
+    #[inline(always)]
+    pub fn address(&self) -> usize {
+        self.address
     }
 
     /// The number of fields in this block.
     #[inline(always)]
     pub fn size(&self) -> usize {
-        self.0.len()
+        self.size
     }
 
     #[inline(always)]
     pub fn build(self) -> OpaqueValue<'a> {
-        unsafe { OpaqueValue::from_bits(self.0.as_ptr() as usize) }
-    }
-
-    /// Return a pointer to the first field in the block.
-    #[inline(always)]
-    pub fn as_mut_ptr(&mut self) -> *mut OpaqueValue<'a> {
-        self.0.as_mut_ptr()
+        unsafe { OpaqueValue::from_bits(self.address) }
     }
 }
 
@@ -77,10 +95,6 @@ impl<'a> Block<'a> {
         Some(&self.0[1..])
     }
 
-    pub(crate) fn header_ptr(&self) -> *const Value<'a> {
-        self.0.as_ptr()
-    }
-
     /// Helper for `Value::clone_with_allocator`.
     pub(crate) fn clone_with<'b, A: Allocator>(
         &self,
@@ -107,7 +121,7 @@ impl<'a> Block<'a> {
                 unsafe {
                     std::ptr::copy_nonoverlapping(
                         self.0.as_ptr().offset(1) as *const usize,
-                        block.as_mut_ptr() as *mut usize,
+                        alloc.block_ptr_mut(&mut block) as *mut usize,
                         self.size(),
                     )
                 }

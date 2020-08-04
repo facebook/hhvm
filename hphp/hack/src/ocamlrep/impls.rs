@@ -584,7 +584,7 @@ pub fn bytes_to_ocamlrep<'a, A: Allocator>(s: &[u8], alloc: &'a A) -> OpaqueValu
     let length = words * WORD_SIZE;
     let mut block = alloc.block_with_size_and_tag(words, block::STRING_TAG);
     let block_contents_as_slice: &mut [u8] = unsafe {
-        let block = block.as_mut_ptr();
+        let block = alloc.block_ptr_mut(&mut block);
         *block.add(words - 1) = OpaqueValue::from_bits(0);
         let block_bytes = block as *mut u8;
         *block_bytes.add(length - 1) = (length - s.len() - 1) as u8;

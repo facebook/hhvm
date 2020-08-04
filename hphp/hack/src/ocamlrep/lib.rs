@@ -329,6 +329,13 @@ pub trait ToOcamlRep {
     /// Implementors of this method must not mutate or drop any values after
     /// passing them to `Allocator::add` (or invoking `to_ocamlrep` on them),
     /// else `Allocator::memoized` may return incorrect results.
+    ///
+    /// Non-immediate `OpaqueValue`s may be either a pointer or an offset into
+    /// some container. The `Allocator` chooses whether values will be
+    /// represented with pointers or offsets, and defines the meaning of those
+    /// offsets. Therefore, implementations of `ToOcamlRep` which return a block
+    /// value *must* return an `OpaqueValue` allocated by `alloc`, and that
+    /// value must *only* reference other values allocated by `alloc`.
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a>;
 }
 
@@ -368,6 +375,18 @@ pub trait Allocator: Sized {
     /// Panics if `index` is out of bounds for `block` (i.e., greater than or
     /// equal to the block's size).
     fn set_field<'a>(&self, block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>);
+
+    /// # Safety
+    ///
+    /// Must be used only with values allocated by this `Allocator`. The caller
+    /// may assume the returned pointer is valid only until some other
+    /// `Allocator` method is called on `self` (since an allocation may
+    /// invalidate the pointed-to memory).
+    ///
+    /// Intended to be used only in implementations of `Allocator::set_field`
+    /// and in conversion-to-OCaml functions requiring access to the raw memory
+    /// of a block (e.g., `bytes_to_ocamlrep`).
+    unsafe fn block_ptr_mut<'a>(&self, block: &mut BlockBuilder<'a>) -> *mut OpaqueValue<'a>;
 
     #[inline(always)]
     fn block_with_size(&self, size: usize) -> BlockBuilder<'_> {

@@ -171,14 +171,13 @@ let run_loop_once :
     {
       did_read_disk_changes = !did_read_disk_changes_ref;
       rechecked_count =
-        env.ServerEnv.recent_recheck_loop_stats.ServerEnv.rechecked_count;
+        env.ServerEnv.last_recheck_loop_stats.ServerEnv.rechecked_count;
       total_rechecked_count =
-        env.ServerEnv.recent_recheck_loop_stats.ServerEnv.total_rechecked_count;
+        env.ServerEnv.last_recheck_loop_stats.ServerEnv.total_rechecked_count;
       last_actual_total_rechecked_count =
-        (match env.ServerEnv.last_recheck_info with
+        (match env.ServerEnv.last_recheck_loop_stats_for_actual_work with
         | None -> None
-        | Some { ServerEnv.stats; _ } ->
-          Some stats.ServerEnv.total_rechecked_count);
+        | Some stats -> Some stats.ServerEnv.total_rechecked_count);
       new_client_response =
         TestClientProvider.get_client_response Non_persistent;
       persistent_client_response =

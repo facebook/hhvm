@@ -337,7 +337,7 @@ let make_env ~init_id config =
         state_distance = None;
       };
     diag_subscribe = None;
-    recent_recheck_loop_stats = empty_recheck_loop_stats ~recheck_id:"<none>";
-    last_recheck_info = None;
+    last_recheck_loop_stats = empty_recheck_loop_stats ~recheck_id:"<none>";
+    last_recheck_loop_stats_for_actual_work = None;
     local_symbol_table = SearchUtils.default_si_env;
   }

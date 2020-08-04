@@ -68,17 +68,16 @@ module Program = struct
       genv
       env
       (save_state_result : SaveStateServiceTypes.save_state_result option) =
-    let last_recheck_info = env.ServerEnv.last_recheck_info in
     let recheck_stats =
-      match last_recheck_info with
+      match env.ServerEnv.last_recheck_loop_stats_for_actual_work with
       | None -> None
-      | Some info ->
+      | Some stats ->
         Some
           {
-            ServerCommandTypes.Recheck_stats.id = info.recheck_id;
-            time = info.recheck_time;
-            count = info.stats.total_rechecked_count;
-            telemetry = info.stats.telemetry;
+            ServerCommandTypes.Recheck_stats.id = stats.recheck_id;
+            time = stats.duration;
+            count = stats.total_rechecked_count;
+            telemetry = stats.telemetry;
           }
     in
     ServerError.print_error_list
@@ -627,7 +626,7 @@ let serve_one_iteration genv env client_provider =
   let env =
     match select_outcome with
     | ClientProvider.Select_nothing ->
-      let last_stats = env.recent_recheck_loop_stats in
+      let last_stats = env.last_recheck_loop_stats in
       (* Ugly hack: We want GC_SHAREDMEM_RAN to record the last rechecked
        * count so that we can figure out if the largest reclamations
        * correspond to massive rebases. However, the logging call is done in
@@ -665,7 +664,7 @@ let serve_one_iteration genv env client_provider =
       select_outcome
   in
   let t_done_recheck = Unix.gettimeofday () in
-  let env = { env with recent_recheck_loop_stats = stats } in
+  let env = { env with last_recheck_loop_stats = stats } in
   let env =
     match stats.total_rechecked_count with
     | 0 -> env
@@ -677,21 +676,10 @@ let serve_one_iteration genv env client_provider =
         stats.total_rechecked_count;
 
       Hh_logger.log "Recheck id: %s" recheck_id;
-      {
-        env with
-        last_recheck_info =
-          Some
-            {
-              stats;
-              recheck_id = stats.recheck_id;
-              recheck_time = stats.duration;
-            };
-      }
+      { env with last_recheck_loop_stats_for_actual_work = Some stats }
   in
   (* if actual work was done, log whether anything got communicated to client *)
-  let log_diagnostics =
-    env.recent_recheck_loop_stats.total_rechecked_count > 0
-  in
+  let log_diagnostics = env.last_recheck_loop_stats.total_rechecked_count > 0 in
   let env =
     match env.diag_subscribe with
     | None ->

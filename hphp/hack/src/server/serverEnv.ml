@@ -39,13 +39,6 @@ let empty_recheck_loop_stats ~(recheck_id : string) : recheck_loop_stats =
     recheck_id;
   }
 
-type recheck_info = {
-  stats: recheck_loop_stats;
-  recheck_id: string;
-  recheck_time: float;
-}
-[@@deriving show]
-
 (*****************************************************************************)
 (* The "static" environment, initialized first and then doesn't change *)
 (*****************************************************************************)
@@ -201,8 +194,8 @@ type env = {
       [@opaque]
   (* The diagnostic subscription information of the current client *)
   diag_subscribe: Diagnostic_subscription.t option;
-  recent_recheck_loop_stats: recheck_loop_stats;
-  last_recheck_info: recheck_info option;
+  last_recheck_loop_stats: recheck_loop_stats;
+  last_recheck_loop_stats_for_actual_work: recheck_loop_stats option;
   (* Symbols for locally changed files *)
   local_symbol_table: SearchUtils.si_env; [@opaque]
 }

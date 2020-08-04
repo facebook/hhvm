@@ -340,7 +340,7 @@ let handle
   ClientProvider.track client ~key:Connection_tracker.Server_got_cmd;
   let env = { env with ServerEnv.remote = force_remote msg } in
   let full_recheck_needed = command_needs_full_check msg in
-  let is_stale = ServerEnv.(env.recent_recheck_loop_stats.updates_stale) in
+  let is_stale = ServerEnv.(env.last_recheck_loop_stats.updates_stale) in
   let continuation =
     actually_handle genv client msg full_recheck_needed ~is_stale
   in

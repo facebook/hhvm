@@ -53,17 +53,16 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         Live_status
     in
     let has_unsaved_changes = ServerFileSync.has_unsaved_changes env in
-    let last_recheck_info = env.ServerEnv.last_recheck_info in
     let last_recheck_stats =
-      match last_recheck_info with
+      match env.ServerEnv.last_recheck_loop_stats_for_actual_work with
       | None -> None
-      | Some info ->
+      | Some stats ->
         Some
           {
-            Recheck_stats.id = info.recheck_id;
-            time = info.recheck_time;
-            count = info.stats.total_rechecked_count;
-            telemetry = info.stats.telemetry;
+            Recheck_stats.id = stats.recheck_id;
+            time = stats.duration;
+            count = stats.total_rechecked_count;
+            telemetry = stats.telemetry;
           }
     in
     ( env,

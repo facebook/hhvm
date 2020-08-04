@@ -133,19 +133,27 @@ module Program = struct
     to_recheck
 end
 
-let finalize_init init_env =
-  let heap_size = SharedMem.heap_size () in
-  Hh_logger.log "Heap size: %d" heap_size;
-  let telemetry =
-    ServerUtils.log_and_get_sharedmem_load_telemetry ()
-    |> Telemetry.int_ ~key:"heap_size" ~value:heap_size
-    |> Telemetry.duration ~start_time:init_env.init_start_t
-  in
-  Hh_logger.log "Server is READY";
+let finalize_init init_env typecheck_telemetry init_telemetry =
+  ServerProgress.send_to_monitor (MonitorRpc.PROGRESS_WARNING None);
+  (* rest is just logging/telemetry *)
   let t' = Unix.gettimeofday () in
-  Hh_logger.log "Took %f seconds to initialize." (t' -. init_env.init_start_t);
+  let heap_size = SharedMem.heap_size () in
+  let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
+  let telemetry =
+    Telemetry.create ()
+    |> Telemetry.duration ~start_time:init_env.init_start_t
+    |> Telemetry.object_ ~key:"init" ~value:init_telemetry
+    |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
+    |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
+    |> Telemetry.int_ ~key:"heap_size" ~value:heap_size
+  in
   HackEventLogger.server_is_ready telemetry;
-  ServerProgress.send_to_monitor (MonitorRpc.PROGRESS_WARNING None)
+  Hh_logger.log
+    "SERVER_IS_READY. Heap size: %d. Took %f seconds to init. Telemetry:\n%s"
+    heap_size
+    (t' -. init_env.init_start_t)
+    (Telemetry.to_string telemetry);
+  ()
 
 let shutdown_persistent_client client env =
   ClientProvider.shutdown_client client;
@@ -526,7 +534,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
         ServerTypeCheck.Full_check
     in
     let env = { env with can_interrupt = not lazy_check } in
-    let needed_full_init = Option.is_some env.init_env.why_needed_full_init in
+    let needed_full_init = env.init_env.why_needed_full_init in
     let old_errorl = Errors.get_error_list env.errorl in
 
     (* HERE'S WHERE WE DO THE HEAVY WORK! **)
@@ -550,8 +558,12 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
 
     (* Final telemetry and cleanup... *)
     let env = { env with can_interrupt = true } in
-    if needed_full_init && Option.is_none env.init_env.why_needed_full_init then
-      finalize_init env.init_env;
+    begin
+      match (needed_full_init, env.init_env.why_needed_full_init) with
+      | (Some needed_full_init, None) ->
+        finalize_init env.init_env telemetry needed_full_init
+      | _ -> ()
+    end;
     ServerStamp.touch_stamp_errors old_errorl (Errors.get_error_list env.errorl);
     let telemetry =
       Telemetry.duration telemetry ~key:"finalized_and_touched" ~start_time
@@ -1032,9 +1044,20 @@ let serve genv env in_fds =
   MultiThreadedCall.on_exception (fun (e, stack) ->
       ServerUtils.exit_on_exception e ~stack);
   let client_provider = ClientProvider.provider_from_file_descriptors in_fds in
-  (* This is needed when typecheck_after_init option is disabled. *)
+
+  (* This is needed when typecheck_after_init option is disabled.
+   * We're just filling it with placeholder telemetry values since
+   * we don't much care about this scenario. *)
+  let init_telemetry =
+    Telemetry.create ()
+    |> Telemetry.string_
+         ~key:"mode"
+         ~value:"serve_due_to_disabled_typecheck_after_init"
+  in
+  let typecheck_telemetry = Telemetry.create () in
   if Option.is_none env.init_env.why_needed_full_init then
-    finalize_init env.init_env;
+    finalize_init env.init_env typecheck_telemetry init_telemetry;
+
   let env = setup_interrupts env client_provider in
   let env = ref env in
   while true do

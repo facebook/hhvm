@@ -22,13 +22,7 @@ let class_const env c cc =
   let pos = fst name in
   match c.c_kind with
   | Ast_defs.Ctrait ->
-    let kind =
-      match c.c_kind with
-      | Ast_defs.Ctrait -> `trait
-      | Ast_defs.Cenum -> `enum
-      | _ -> assert false
-    in
-    Errors.cannot_declare_constant kind pos c.c_name;
+    Errors.cannot_declare_constant `trait pos c.c_name;
     None
   | Ast_defs.Cnormal
   | Ast_defs.Cabstract

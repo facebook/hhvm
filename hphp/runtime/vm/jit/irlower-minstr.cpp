@@ -718,8 +718,12 @@ void cgGetPackedPtrIter(IRLS& env, const IRInstruction* inst) {
     }
   }
 
+  auto const pos_l = v.makeReg();
   auto const px2 = v.makeReg();
-  v << shlqi{1, pos, px2, v.makeReg()};
+  auto const px2_l = v.makeReg();
+  v << movtql{pos, pos_l};
+  v << shlli{1, pos_l, px2_l, v.makeReg()};
+  v << movzlq{px2_l, px2};
   v << lea{arr[px2 * 8 + PackedArray::entriesOffset()], dst};
 }
 

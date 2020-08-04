@@ -1071,24 +1071,22 @@ functor
       else
         Hh_logger.log "Processing changes to %d files" reparse_count;
 
-      if CheckKind.is_full then (
-        let redecl_count = Relative_path.Set.cardinal env.needs_phase2_redecl in
-        let check_count = Relative_path.Set.cardinal env.needs_recheck in
-        Hh_logger.log
-          "Processing deferred type decl for %d file%s"
-          redecl_count
-          ( if redecl_count = 1 then
-            ""
-          else
-            "s" );
-        Hh_logger.log
-          "Processing deferred typechecking for %d file%s"
-          check_count
-          ( if check_count = 1 then
-            ""
-          else
-            "s" )
-      );
+      let telemetry =
+        if CheckKind.is_full then (
+          let redecl_count =
+            Relative_path.Set.cardinal env.needs_phase2_redecl
+          in
+          let check_count = Relative_path.Set.cardinal env.needs_recheck in
+          Hh_logger.log
+            "Processing deferred type decl for %d file(s), deferred typechecking for %d file(s)"
+            redecl_count
+            check_count;
+          telemetry
+          |> Telemetry.int_ ~key:"redecl_count" ~value:redecl_count
+          |> Telemetry.int_ ~key:"check_count" ~value:check_count
+        ) else
+          telemetry
+      in
 
       (* PARSING ***************************************************************)
       debug_print_path_set genv "files_to_parse" files_to_parse;
@@ -1103,10 +1101,19 @@ functor
       (* Parse all changed files. This clears the file contents cache prior
           to parsing. *)
       let parse_t = Unix.gettimeofday () in
+      let telemetry =
+        Telemetry.duration telemetry ~key:"parse_start" ~start_time
+      in
       let (env, { parse_errors = errors; failed_parsing; fast_parsed }) =
         do_parsing genv env ~files_to_parse ~stop_at_errors
       in
       let hs = SharedMem.heap_size () in
+      let telemetry =
+        telemetry
+        |> Telemetry.duration ~key:"parse_end" ~start_time
+        |> Telemetry.int_ ~key:"parse_end_heap_size" ~value:hs
+        |> Telemetry.int_ ~key:"parse_count" ~value:reparse_count
+      in
       HackEventLogger.parsing_end_for_typecheck t hs ~parsed_count:reparse_count;
       let t = Hh_logger.log_duration logstring t in
       Hh_logger.log "Heap size: %d" hs;
@@ -1114,6 +1121,9 @@ functor
       (* UPDATE NAMING TABLES **************************************************)
       let logstring = "Updating deps" in
       Hh_logger.log "Begin %s" logstring;
+      let telemetry =
+        Telemetry.duration telemetry ~key:"naming_update_start" ~start_time
+      in
 
       (* Hold on to the original environment; it's used by do_type_checking. *)
       let old_env = env in
@@ -1123,12 +1133,19 @@ functor
       let naming_table = update_naming_table env fast_parsed in
       HackEventLogger.updating_deps_end t;
       let t = Hh_logger.log_duration logstring t in
+      let telemetry =
+        Telemetry.duration telemetry ~key:"naming_update_end" ~start_time
+      in
+
       (* NAMING ****************************************************************)
       ServerProgress.send_progress_to_monitor
         ~include_in_logs:false
         "resolving symbol references";
       let logstring = "Naming" in
       Hh_logger.log "Begin %s" logstring;
+      let telemetry =
+        Telemetry.duration telemetry ~key:"naming_start" ~start_time
+      in
 
       let deptable_unlocked = Typing_deps.allow_dependency_table_reads true in
       (* Run Naming_global, updating the reverse naming table (which maps the names
@@ -1153,6 +1170,11 @@ functor
       let heap_size = SharedMem.heap_size () in
       Hh_logger.log "Heap size: %d" heap_size;
       HackEventLogger.naming_end t heap_size;
+      let telemetry =
+        telemetry
+        |> Telemetry.duration ~key:"naming_end" ~start_time
+        |> Telemetry.int_ ~key:"naming_end_heap_size" ~value:heap_size
+      in
 
       (* REDECL PHASE 1 ********************************************************)
       ServerProgress.send_progress_to_monitor
@@ -1165,6 +1187,11 @@ functor
       Hh_logger.log "Begin %s" logstring;
       Hh_logger.log
         "(Recomputing type declarations in changed files and determining immediate typechecking fanout)";
+      let telemetry =
+        telemetry
+        |> Telemetry.duration ~key:"redecl1_start" ~start_time
+        |> Telemetry.int_ ~key:"redecl1_file_count" ~value:count
+      in
 
       debug_print_fast_keys genv "to_redecl_phase1" fast;
 
@@ -1186,10 +1213,21 @@ functor
       HackEventLogger.first_redecl_end t hs;
       let t = Hh_logger.log_duration logstring t in
       Hh_logger.log "Heap size: %d" hs;
+      let telemetry =
+        telemetry
+        |> Telemetry.duration ~key:"redecl1_end" ~start_time
+        |> Telemetry.int_ ~key:"redecl1_end_heap_size" ~value:hs
+      in
 
       ServerRevisionTracker.decl_changed
         genv.ServerEnv.local_config
         (Relative_path.Set.cardinal to_redecl_phase2);
+      let telemetry =
+        Telemetry.duration
+          telemetry
+          ~key:"revtrack1_decl_changed_end"
+          ~start_time
+      in
 
       (* REDECL PHASE 2 ********************************************************)
 
@@ -1202,6 +1240,9 @@ functor
 
        When shallow_class_decl is enabled, there is no need to do phase 2. *)
       let ctx = Provider_utils.ctx_from_server_env env in
+      let telemetry =
+        Telemetry.duration telemetry ~key:"redecl2_now_start" ~start_time
+      in
       let (fast_redecl_phase2_now, lazy_decl_later) =
         if shallow_decl_enabled ctx then
           (Relative_path.Map.empty, Relative_path.Map.empty)
@@ -1221,6 +1262,9 @@ functor
           failed_parsing
       in
       let count = Relative_path.Map.cardinal fast_redecl_phase2_now in
+      let telemetry =
+        Telemetry.duration telemetry ~key:"redecl2_now_end" ~start_time
+      in
       ServerProgress.send_progress_to_monitor
         ~include_in_logs:false
         "evaluating type declarations of %d files"
@@ -1229,6 +1273,15 @@ functor
         Printf.sprintf "Type declaration (phase 2) for %d files" count
       in
       Hh_logger.log "Begin %s" logstring;
+      let telemetry =
+        telemetry
+        |> Telemetry.duration ~key:"redecl2_start" ~start_time
+        |> Telemetry.int_ ~key:"redecl2_count_now" ~value:count
+        |> Telemetry.int_
+             ~key:"redecl2_count_later"
+             ~value:(Relative_path.Map.cardinal lazy_decl_later)
+        |> Telemetry.bool_ ~key:"shallow" ~value:(shallow_decl_enabled ctx)
+      in
 
       if not (shallow_decl_enabled ctx) then (
         Hh_logger.log
@@ -1266,6 +1319,10 @@ functor
           in
           (errors_after_phase2, needs_phase2_redecl, to_recheck2)
       in
+      let telemetry =
+        Telemetry.duration telemetry ~key:"redecl2_end" ~start_time
+      in
+
       (* We have changed declarations, which means that typed ASTs could have
        * changed too. *)
       Ide_tast_cache.invalidate ();
@@ -1282,20 +1339,46 @@ functor
       HackEventLogger.second_redecl_end t hs;
       let t = Hh_logger.log_duration logstring t in
       Hh_logger.log "Heap size: %d" hs;
+      let telemetry =
+        telemetry
+        |> Telemetry.duration ~key:"redecl2_end2_merge" ~start_time
+        |> Telemetry.int_ ~key:"redecl2_end2_heap_size" ~value:hs
+      in
 
       ServerRevisionTracker.typing_changed
         genv.local_config
         (Relative_path.Set.cardinal to_recheck);
+      let telemetry =
+        Telemetry.duration
+          telemetry
+          ~key:"revtrack2_typing_changed_end"
+          ~start_time
+      in
 
       let env =
         CheckKind.get_env_after_decl ~old_env:env ~naming_table ~failed_naming
       in
       (* HANDLE PRECHECKED FILES AFTER LOCAL CHANGES ***************************)
       Hh_logger.log "Begin evaluating prechecked changes";
-      let env =
-        ServerPrecheckedFiles.update_after_local_changes genv env changed
+      let telemetry =
+        Telemetry.duration telemetry ~key:"prechecked1_start" ~start_time
+      in
+      let (env, prechecked1_telemetry) =
+        ServerPrecheckedFiles.update_after_local_changes
+          genv
+          env
+          changed
+          ~start_time
       in
       let t = Hh_logger.log_duration "Evaluating prechecked changes" t in
+      let telemetry =
+        telemetry
+        |> Telemetry.duration ~key:"prechecked1_end" ~start_time
+        |> Telemetry.object_ ~key:"prechecked1" ~value:prechecked1_telemetry
+        |> Telemetry.int_
+             ~key:"prechecked1_changed"
+             ~value:(Typing_deps.DepSet.cardinal changed)
+      in
       let (_ : bool) =
         Typing_deps.allow_dependency_table_reads deptable_unlocked
       in
@@ -1306,6 +1389,12 @@ functor
         = 0
       then
         ServerRevisionTracker.check_blocking ();
+      let telemetry =
+        Telemetry.duration
+          telemetry
+          ~key:"revtrack3_check_blocking_end"
+          ~start_time
+      in
 
       (* TYPE CHECKING *********************************************************)
 
@@ -1359,6 +1448,10 @@ functor
 
       ServerCheckpoint.process_updates files_to_check;
 
+      let telemetry =
+        Telemetry.duration telemetry ~key:"typecheck_start" ~start_time
+      in
+
       (* Typecheck all of the files we determined might need rechecking as a
        consequence of the changes (or, in a lazy check, the subset of those
        files which are open in an IDE buffer). *)
@@ -1366,7 +1459,7 @@ functor
         env;
         diag_subscribe;
         errors;
-        telemetry = do_telemetry;
+        telemetry = typecheck_telemetry;
         files_checked;
         full_check_done;
         needs_recheck;
@@ -1381,9 +1474,6 @@ functor
           ~files_to_parse
           ~lazy_check_later
           ~old_env
-      in
-      let telemetry =
-        Telemetry.object_ telemetry ~key:"do" ~value:do_telemetry
       in
       log_if_diag_subscribe_changed
         "type_check_core[old_env->env]"
@@ -1413,10 +1503,33 @@ functor
       in
       let t = Hh_logger.log_duration logstring t in
       Hh_logger.log "Total: %f\n%!" (t -. start_time);
+      let telemetry =
+        telemetry
+        |> Telemetry.duration ~key:"typecheck_end" ~start_time
+        |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
+        |> Telemetry.int_ ~key:"typecheck_heap_size" ~value:heap_size
+        |> Telemetry.int_
+             ~key:"typecheck_to_recheck_count"
+             ~value:to_recheck_count
+        |> Telemetry.int_
+             ~key:"typecheck_total_rechecked_count"
+             ~value:total_rechecked_count
+        |> Telemetry.int_
+             ~key:"typecheck_files_checked"
+             ~value:(Relative_path.Set.cardinal files_checked)
+        |> Telemetry.int_
+             ~key:"typecheck_lazy_check_later_count"
+             ~value:(Relative_path.Set.cardinal lazy_check_later)
+      in
 
       (* INVALIDATE FILES (EXPERIMENTAL TYPES IN CODEGEN) **********************)
       ServerInvalidateUnits.go genv files_checked fast_parsed naming_table;
 
+      let telemetry =
+        Telemetry.duration telemetry ~key:"invalidate_end" ~start_time
+      in
+
+      (* WRAP-UP ***************************************************************)
       let env =
         CheckKind.get_env_after_typing
           env
@@ -1425,36 +1538,65 @@ functor
           needs_recheck
           diag_subscribe
       in
-      (* STATS LOGGING *********************************************************)
-      if
-        SharedMem.hh_log_level () > 0
-        || GlobalOptions.tco_language_feature_logging env.tcopt
-      then (
-        Measure.print_stats ();
-        Measure.print_distributions ();
 
-        (* Log lambda counts for full checks where we don't load from a saved state *)
+      (* STATS LOGGING *********************************************************)
+      let telemetry =
         if
-          genv.ServerEnv.options |> ServerArgs.no_load
-          && full_check_done
-          && reparse_count = 0
-          (* Ignore incremental updates *)
+          SharedMem.hh_log_level () = 0
+          && not (GlobalOptions.tco_language_feature_logging env.tcopt)
         then
-          TypingLogger.log_lambda_counts ()
-      );
+          telemetry
+        else begin
+          Measure.print_stats ();
+          Measure.print_distributions ();
+
+          (* Log lambda counts for full checks where we don't load from a saved state *)
+          if
+            genv.ServerEnv.options |> ServerArgs.no_load
+            && full_check_done
+            && reparse_count = 0
+            (* Ignore incremental updates *)
+          then
+            TypingLogger.log_lambda_counts ();
+
+          Telemetry.object_
+            telemetry
+            ~key:"shmem"
+            ~value:(SharedMem.get_telemetry ())
+        end
+      in
       ServerDebug.info genv "incremental_done";
 
       (* HANDLE PRECHECKED FILES AFTER RECHECK *********************************)
+      let telemetry =
+        Telemetry.duration telemetry ~key:"prechecked2_start" ~start_time
+      in
       let deptable_unlocked = Typing_deps.allow_dependency_table_reads true in
-      let env =
-        ServerPrecheckedFiles.update_after_recheck genv env files_checked
+      let (env, prechecked2_telemetry) =
+        ServerPrecheckedFiles.update_after_recheck
+          genv
+          env
+          files_checked
+          ~start_time
       in
       let (_ : bool) =
         Typing_deps.allow_dependency_table_reads deptable_unlocked
       in
+      let telemetry =
+        telemetry
+        |> Telemetry.duration ~key:"prechecked2_end" ~start_time
+        |> Telemetry.object_ ~key:"prechecked2" ~value:prechecked2_telemetry
+      in
+
       (* We might have completed a full check, which might mean that a rebase was
        * successfully processed. *)
       ServerRevisionTracker.check_non_blocking env;
+      let telemetry =
+        Telemetry.duration
+          telemetry
+          ~key:"revtrack4_check_non_blocking_end"
+          ~start_time
+      in
 
       let env =
         {
@@ -1466,6 +1608,9 @@ functor
                 Typing_service_delegate.stop env.typing_service.delegate_state;
             };
         }
+      in
+      let telemetry =
+        Telemetry.duration telemetry ~key:"stop_typing_service" ~start_time
       in
 
       (env, { reparse_count; total_rechecked_count }, telemetry)

@@ -72,8 +72,16 @@ let update_rechecked_files env rechecked =
   HackEventLogger.prechecked_update_rechecked t;
   env
 
-let update_after_recheck genv env rechecked =
+let update_after_recheck genv env rechecked ~start_time =
+  let telemetry =
+    Telemetry.create ()
+    |> Telemetry.duration ~key:"start" ~start_time
+    |> Telemetry.int_
+         ~key:"rechecked"
+         ~value:(Relative_path.Set.cardinal rechecked)
+  in
   let env = update_rechecked_files env rechecked in
+  let telemetry = Telemetry.duration telemetry ~key:"end" ~start_time in
   match (env.full_check, env.prechecked_files) with
   | ( Full_check_done,
       Initial_typechecking
@@ -108,62 +116,104 @@ let update_after_recheck genv env rechecked =
     let clean_local_deps = dirty_local_deps in
     let dirty_local_deps = Typing_deps.DepSet.empty in
     HackEventLogger.prechecked_evaluate_init t size;
-
-    set
-      env
-      (Prechecked_files_ready
-         {
-           dirty_local_deps;
-           dirty_master_deps;
-           rechecked_files;
-           clean_local_deps;
-         })
-  | _ -> env
-
-let update_after_local_changes genv env changes =
-  match env.prechecked_files with
-  | Prechecked_files_disabled -> env
-  | Initial_typechecking dirty_deps ->
-    let dirty_local_deps =
-      Typing_deps.DepSet.union changes dirty_deps.dirty_local_deps
+    let telemetry =
+      telemetry
+      |> Telemetry.duration ~key:"fanout_end" ~start_time
+      |> Telemetry.int_ ~key:"size" ~value:size
     in
-    set env (Initial_typechecking { dirty_deps with dirty_local_deps })
-  | Prechecked_files_ready dirty_deps ->
-    (* This is cleared during transition from Initial_typechecking to
-     * Prechecked_files_ready and should not be populated again *)
-    assert (Typing_deps.DepSet.is_empty dirty_deps.dirty_local_deps);
-    let changes = Typing_deps.DepSet.diff changes dirty_deps.clean_local_deps in
-    if Typing_deps.DepSet.is_empty changes then
-      env
-    else
-      let t = Unix.gettimeofday () in
-      let clean_local_deps =
-        Typing_deps.DepSet.union dirty_deps.clean_local_deps changes
-      in
-      let (env, dirty_master_deps, size) =
-        intersect_with_master_deps
-          ~deps:changes
-          ~dirty_master_deps:dirty_deps.dirty_master_deps
-          ~rechecked_files:dirty_deps.rechecked_files
-          genv
-          env
-      in
-      let env =
-        if size = 0 then
-          env
-        else
-          let full_check =
-            match env.full_check with
-            | Full_check_done -> Full_check_needed
-            | x -> x
-          in
-          { env with full_check }
-      in
-      HackEventLogger.prechecked_evaluate_incremental t size;
+
+    let env =
       set
         env
         (Prechecked_files_ready
-           { dirty_deps with dirty_master_deps; clean_local_deps })
+           {
+             dirty_local_deps;
+             dirty_master_deps;
+             rechecked_files;
+             clean_local_deps;
+           })
+    in
+    (env, telemetry)
+  | _ -> (env, telemetry)
+
+let update_after_local_changes genv env changes ~start_time =
+  let telemetry =
+    Telemetry.create ()
+    |> Telemetry.duration ~key:"start" ~start_time
+    |> Telemetry.int_
+         ~key:"changes"
+         ~value:(Typing_deps.DepSet.cardinal changes)
+  in
+  let (env, telemetry) =
+    match env.prechecked_files with
+    | Prechecked_files_disabled ->
+      let telemetry =
+        telemetry |> Telemetry.string_ ~key:"mode" ~value:"disabled"
+      in
+      (env, telemetry)
+    | Initial_typechecking dirty_deps ->
+      let dirty_local_deps =
+        Typing_deps.DepSet.union changes dirty_deps.dirty_local_deps
+      in
+      let telemetry =
+        telemetry |> Telemetry.string_ ~key:"mode" ~value:"initial"
+      in
+      let env =
+        set env (Initial_typechecking { dirty_deps with dirty_local_deps })
+      in
+      (env, telemetry)
+    | Prechecked_files_ready dirty_deps ->
+      (* This is cleared during transition from Initial_typechecking to
+       * Prechecked_files_ready and should not be populated again *)
+      assert (Typing_deps.DepSet.is_empty dirty_deps.dirty_local_deps);
+      let changes =
+        Typing_deps.DepSet.diff changes dirty_deps.clean_local_deps
+      in
+      if Typing_deps.DepSet.is_empty changes then
+        let telemetry =
+          Telemetry.string_ telemetry ~key:"mode" ~value:"ready_empty"
+        in
+        (env, telemetry)
+      else
+        let t = Unix.gettimeofday () in
+        let clean_local_deps =
+          Typing_deps.DepSet.union dirty_deps.clean_local_deps changes
+        in
+        let (env, dirty_master_deps, size) =
+          intersect_with_master_deps
+            ~deps:changes
+            ~dirty_master_deps:dirty_deps.dirty_master_deps
+            ~rechecked_files:dirty_deps.rechecked_files
+            genv
+            env
+        in
+        let env =
+          if size = 0 then
+            env
+          else
+            let full_check =
+              match env.full_check with
+              | Full_check_done -> Full_check_needed
+              | x -> x
+            in
+            { env with full_check }
+        in
+        let telemetry =
+          telemetry
+          |> Telemetry.string_ ~key:"mode" ~value:"ready_changes"
+          |> Telemetry.int_ ~key:"size" ~value:size
+        in
+        HackEventLogger.prechecked_evaluate_incremental t size;
+        let env =
+          set
+            env
+            (Prechecked_files_ready
+               { dirty_deps with dirty_master_deps; clean_local_deps })
+        in
+        (env, telemetry)
+  in
+  let telemetry = Telemetry.duration telemetry ~key:"end" ~start_time in
+  (env, telemetry)
 
 let expand_all env =
   match env.prechecked_files with

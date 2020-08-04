@@ -39,6 +39,15 @@ let empty_recheck_loop_stats ~(recheck_id : string) : recheck_loop_stats =
     recheck_id;
   }
 
+(** The format of this json is user-facing, returned from 'hh check --json' *)
+let recheck_loop_stats_to_user_telemetry (stats : recheck_loop_stats) :
+    Telemetry.t =
+  Telemetry.create ()
+  |> Telemetry.string_ ~key:"id" ~value:stats.recheck_id
+  |> Telemetry.float_ ~key:"time" ~value:stats.duration
+  |> Telemetry.int_ ~key:"count" ~value:stats.total_rechecked_count
+  |> Telemetry.object_ ~key:"telemetry" ~value:stats.telemetry
+
 (*****************************************************************************)
 (* The "static" environment, initialized first and then doesn't change *)
 (*****************************************************************************)

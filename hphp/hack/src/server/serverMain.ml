@@ -69,16 +69,9 @@ module Program = struct
       env
       (save_state_result : SaveStateServiceTypes.save_state_result option) =
     let recheck_stats =
-      match env.ServerEnv.last_recheck_loop_stats_for_actual_work with
-      | None -> None
-      | Some stats ->
-        Some
-          {
-            ServerCommandTypes.Recheck_stats.id = stats.recheck_id;
-            time = stats.duration;
-            count = stats.total_rechecked_count;
-            telemetry = stats.telemetry;
-          }
+      Option.map
+        ~f:ServerEnv.recheck_loop_stats_to_user_telemetry
+        env.ServerEnv.last_recheck_loop_stats_for_actual_work
     in
     ServerError.print_error_list
       stdout

@@ -30,7 +30,7 @@ let get_save_state_result_json
 let get_error_list_json
     (error_list : Pos.absolute Errors.error_ list)
     ~(save_state_result : SaveStateServiceTypes.save_state_result option)
-    ~(recheck_stats : ServerCommandTypes.Recheck_stats.t option) =
+    ~(recheck_stats : Telemetry.t option) =
   let (error_list, did_pass) =
     match error_list with
     | [] -> ([], true)
@@ -52,30 +52,19 @@ let get_error_list_json
       in
       save_state_result_json :: properties
   in
-  ServerCommandTypes.Recheck_stats.(
-    let properties =
-      match recheck_stats with
-      | None -> properties
-      | Some { id; time; count; telemetry } ->
-        let last_recheck_result =
-          ( "last_recheck",
-            Hh_json.JSON_Object
-              [
-                ("id", Hh_json.JSON_String id);
-                ("time", Hh_json.JSON_Number (string_of_float time));
-                ("count", Hh_json.JSON_Number (string_of_int count));
-                ("telemetry", Telemetry.to_json telemetry);
-              ] )
-        in
-        last_recheck_result :: properties
-    in
-    Hh_json.JSON_Object properties)
+  let properties =
+    match recheck_stats with
+    | None -> properties
+    | Some telemetry ->
+      ("last_recheck", Telemetry.to_json telemetry) :: properties
+  in
+  Hh_json.JSON_Object properties
 
 let print_error_list_json
     (oc : Out_channel.t)
     (error_list : Pos.absolute Errors.error_ list)
     (save_state_result : SaveStateServiceTypes.save_state_result option)
-    (recheck_stats : ServerCommandTypes.Recheck_stats.t option) =
+    (recheck_stats : Telemetry.t option) =
   let res = get_error_list_json error_list ~save_state_result ~recheck_stats in
   Hh_json.json_to_output oc res;
   Out_channel.flush oc
@@ -86,7 +75,7 @@ let print_error_list
     ~(output_json : bool)
     ~(error_list : Pos.absolute Errors.error_ list)
     ~(save_state_result : SaveStateServiceTypes.save_state_result option)
-    ~(recheck_stats : ServerCommandTypes.Recheck_stats.t option) =
+    ~(recheck_stats : Telemetry.t option) =
   ( if output_json then
     print_error_list_json oc error_list save_state_result recheck_stats
   else if List.is_empty error_list then

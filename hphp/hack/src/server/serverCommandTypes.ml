@@ -11,22 +11,13 @@ type status_liveness =
   | Stale_status
   | Live_status
 
-module Recheck_stats = struct
-  type t = {
-    id: string;
-    time: float;
-    count: int;
-    telemetry: Telemetry.t;
-  }
-end
-
 module Server_status = struct
   type t = {
     liveness: status_liveness;
     has_unsaved_changes: bool;
     error_list: Pos.absolute Errors.error_ list;
     dropped_count: int;
-    last_recheck_stats: Recheck_stats.t option;
+    last_recheck_stats: Telemetry.t option;
   }
 end
 

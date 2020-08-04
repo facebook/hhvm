@@ -1165,7 +1165,12 @@ function exec_with_stack($cmd) {
     }
     return "Timed out running `$cmd'\n\n$s";
   }
-  if (!$status['exitcode']) return true;
+  if (
+    !$status['exitcode'] &&
+    !preg_match('/\\b(error|exception|fatal)\\b/', $s)
+  ) {
+    return true;
+  }
   $pid = $status['pid'];
   $stack =
     @file_get_contents("/tmp/stacktrace.$pid.log") ?:

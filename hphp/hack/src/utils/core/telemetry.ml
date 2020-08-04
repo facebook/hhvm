@@ -44,7 +44,7 @@ let string_opt
   | None -> (key, Hh_json.JSON_Null) :: telemetry
   | Some value -> string_ ?truncate telemetry ~key ~value
 
-let array_
+let string_list
     ?(truncate_elems : int option)
     ?(truncate_len : int option)
     (telemetry : t)
@@ -62,6 +62,10 @@ let array_
       List.map ~f:(fun s -> String_utils.truncate truncate_len s) value
   in
   let value = List.map ~f:(fun s -> Hh_json.JSON_String s) value in
+  (key, Hh_json.JSON_Array value) :: telemetry
+
+let object_list (telemetry : t) ~(key : string) ~(value : t list) : t =
+  let value = List.map ~f:to_json value in
   (key, Hh_json.JSON_Array value) :: telemetry
 
 let bool_ (key : string) (value : bool) : key_value_pair =

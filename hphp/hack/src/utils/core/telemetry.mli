@@ -26,13 +26,15 @@ val string_ : ?truncate:int -> t -> key:string -> value:string -> t
 
 val string_opt : ?truncate:int -> t -> key:string -> value:string option -> t
 
-val array_ :
+val string_list :
   ?truncate_elems:int ->
   ?truncate_len:int ->
   t ->
   key:string ->
   value:string list ->
   t
+
+val object_list : t -> key:string -> value:t list -> t
 
 val bool_ : t -> key:string -> value:bool -> t
 

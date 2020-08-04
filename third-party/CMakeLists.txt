@@ -76,19 +76,15 @@ list(APPEND THIRD_PARTY_MODULES thrift)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/thrift/src")
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/thrift/gen")
 
-list(APPEND THIRD_PARTY_MODULES zstd)
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/zstd/src/lib")
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/zstd/src/lib/dictBuilder")
-
 if (NOT MSVC)
   list(APPEND THIRD_PARTY_MODULES libafdt)
   list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/libafdt/src/src")
 endif()
 
-# Add bundled lz4 if the system one will not be used
 add_subdirectory(lz4)
+add_subdirectory(zstd)
 
-# fb-mysql must go after lz4 because it needs to know its <INSTALL_DIR>
+# fb-mysql must go after lz4 and zstd because it needs to know its <INSTALL_DIR>
 add_subdirectory(fb-mysql)
 find_package(RE2)
 if(NOT RE2_LIBRARY)

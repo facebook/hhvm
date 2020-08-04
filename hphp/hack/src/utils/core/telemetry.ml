@@ -10,6 +10,7 @@ open Hh_prelude
 
 type key_value_pair = string * Hh_json.json [@@deriving show]
 
+(** This list is in reverse order (i.e. most recent first) *)
 type t = key_value_pair list [@@deriving show]
 
 (* Ignore - we only use the generated `pp_key_value_pair` in deriving `show` for t *)
@@ -20,13 +21,14 @@ let compare (left : key_value_pair) (right : key_value_pair) : int =
 
 let create () : t = []
 
-let to_json (telemetry : t) : Hh_json.json = Hh_json.JSON_Object telemetry
+let to_json (telemetry : t) : Hh_json.json =
+  Hh_json.JSON_Object (List.rev telemetry)
 
 let to_string (telemetry : t) : string =
   to_json telemetry |> Hh_json.json_to_string
 
 let string_
-    ?(truncate : int option) (telemetry : t) ~(key : string) ~(value : string) :
+    ?(truncate : int option) ~(key : string) ~(value : string) (telemetry : t) :
     t =
   let value =
     match truncate with
@@ -37,9 +39,9 @@ let string_
 
 let string_opt
     ?(truncate : int option)
-    (telemetry : t)
     ~(key : string)
-    ~(value : string option) : t =
+    ~(value : string option)
+    (telemetry : t) : t =
   match value with
   | None -> (key, Hh_json.JSON_Null) :: telemetry
   | Some value -> string_ ?truncate telemetry ~key ~value
@@ -47,9 +49,9 @@ let string_opt
 let string_list
     ?(truncate_elems : int option)
     ?(truncate_len : int option)
-    (telemetry : t)
     ~(key : string)
-    ~(value : string list) : t =
+    ~(value : string list)
+    (telemetry : t) : t =
   let value =
     match truncate_elems with
     | None -> value
@@ -64,39 +66,39 @@ let string_list
   let value = List.map ~f:(fun s -> Hh_json.JSON_String s) value in
   (key, Hh_json.JSON_Array value) :: telemetry
 
-let object_list (telemetry : t) ~(key : string) ~(value : t list) : t =
+let object_list ~(key : string) ~(value : t list) (telemetry : t) : t =
   let value = List.map ~f:to_json value in
   (key, Hh_json.JSON_Array value) :: telemetry
 
-let bool_ (key : string) (value : bool) : key_value_pair =
-  (key, Hh_json.JSON_Bool value)
+let bool_ ~(key : string) ~(value : bool) (telemetry : t) : t =
+  (key, Hh_json.JSON_Bool value) :: telemetry
 
-let bool_ (telemetry : t) ~(key : string) ~(value : bool) : t =
-  bool_ key value :: telemetry
-
-let int_ (telemetry : t) ~(key : string) ~(value : int) : t =
+let int_ ~(key : string) ~(value : int) (telemetry : t) : t =
   (key, Hh_json.int_ value) :: telemetry
 
-let int_opt (telemetry : t) ~(key : string) ~(value : int option) : t =
+let int_opt ~(key : string) ~(value : int option) (telemetry : t) : t =
   match value with
   | None -> (key, Hh_json.JSON_Null) :: telemetry
   | Some value -> int_ telemetry ~key ~value
 
-let object_ (telemetry : t) ~(key : string) ~(value : t) : t =
-  (key, Hh_json.JSON_Object value) :: telemetry
+let object_ ~(key : string) ~(value : t) (telemetry : t) : t =
+  (key, Hh_json.JSON_Object (List.rev value)) :: telemetry
 
-let duration_seconds ?(key : string = "duration") (seconds : float) :
-    key_value_pair =
+let object_opt ~(key : string) ~(value : t option) (telemetry : t) : t =
+  match value with
+  | None -> (key, Hh_json.JSON_Null) :: telemetry
+  | Some value -> object_ ~key ~value telemetry
+
+let duration ?(key : string = "duration") ~(start_time : float) (telemetry : t)
+    : t =
+  let seconds = Unix.gettimeofday () -. start_time in
   let ms = int_of_float (1000.0 *. seconds) in
-  (key, Hh_json.int_ ms)
+  (key, Hh_json.int_ ms) :: telemetry
 
-let duration (telemetry : t) ~(start_time : float) : t =
-  duration_seconds (Unix.gettimeofday () -. start_time) :: telemetry
-
-let float_ (telemetry : t) ~(key : string) ~(value : float) : t =
+let float_ ~(key : string) ~(value : float) (telemetry : t) : t =
   (key, Hh_json.float_ value) :: telemetry
 
-let float_opt (telemetry : t) ~(key : string) ~(value : float option) : t =
+let float_opt ~(key : string) ~(value : float option) (telemetry : t) : t =
   match value with
   | None -> (key, Hh_json.JSON_Null) :: telemetry
   | Some value -> float_ telemetry ~key ~value
@@ -115,13 +117,13 @@ let exception_ (e : Exception.t) : key_value_pair =
     ~stack:(Some (Exception.get_backtrace_string e))
     (Exception.get_ctor_string e)
 
-let error_with_stack (telemetry : t) ~(stack : string) ~(e : string) : t =
+let error_with_stack ~(stack : string) ~(e : string) (telemetry : t) : t =
   let stack = Exception.clean_stack stack in
   error ~stack:(Some stack) e :: telemetry
 
-let error (telemetry : t) ~(e : string) : t = error ~stack:None e :: telemetry
+let error ~(e : string) (telemetry : t) : t = error ~stack:None e :: telemetry
 
-let exception_ (telemetry : t) ~(e : Exception.t) : t =
+let exception_ ~(e : Exception.t) (telemetry : t) : t =
   exception_ e :: telemetry
 
 let quick_gc_stat () : t =

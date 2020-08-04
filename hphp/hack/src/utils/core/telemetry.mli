@@ -22,38 +22,40 @@ It works with nested telemetry objects. In places where the structure differs,
 only `current` is kept. *)
 val diff : all:bool -> t -> prev:t -> t
 
-val string_ : ?truncate:int -> t -> key:string -> value:string -> t
+val string_ : ?truncate:int -> key:string -> value:string -> t -> t
 
-val string_opt : ?truncate:int -> t -> key:string -> value:string option -> t
+val string_opt : ?truncate:int -> key:string -> value:string option -> t -> t
 
 val string_list :
   ?truncate_elems:int ->
   ?truncate_len:int ->
-  t ->
   key:string ->
   value:string list ->
+  t ->
   t
 
-val object_list : t -> key:string -> value:t list -> t
+val object_list : key:string -> value:t list -> t -> t
 
-val bool_ : t -> key:string -> value:bool -> t
+val bool_ : key:string -> value:bool -> t -> t
 
-val int_ : t -> key:string -> value:int -> t
+val int_ : key:string -> value:int -> t -> t
 
-val int_opt : t -> key:string -> value:int option -> t
+val int_opt : key:string -> value:int option -> t -> t
 
-val object_ : t -> key:string -> value:t -> t
+val object_ : key:string -> value:t -> t -> t
 
-val duration : t -> start_time:float -> t
+val object_opt : key:string -> value:t option -> t -> t
 
-val float_ : t -> key:string -> value:float -> t
+val duration : ?key:string -> start_time:float -> t -> t
 
-val float_opt : t -> key:string -> value:float option -> t
+val float_ : key:string -> value:float -> t -> t
 
-val error : t -> e:string -> t
+val float_opt : key:string -> value:float option -> t -> t
 
-val error_with_stack : t -> stack:string -> e:string -> t
+val error : e:string -> t -> t
 
-val exception_ : t -> e:Exception.t -> t
+val error_with_stack : stack:string -> e:string -> t -> t
+
+val exception_ : e:Exception.t -> t -> t
 
 val quick_gc_stat : unit -> t

@@ -411,7 +411,7 @@ let query_notifier genv env query_kind t =
  * The above doesn't apply in presence of interruptions / cancellations -
  * it's possible for client to request current recheck to be stopped.
  *)
-let rec recheck_loop acc genv env select_outcome =
+let rec recheck_until_no_changes_left acc genv env select_outcome =
   let t = Unix.gettimeofday () in
   (* When a new client connects, we use the synchronous notifier.
    * This is to get synchronous file system changes when invoking
@@ -545,13 +545,7 @@ let rec recheck_loop acc genv env select_outcome =
     then
       (acc, env)
     else
-      recheck_loop acc genv env select_outcome
-
-let recheck_loop genv env select_outcome =
-  let (stats, env) =
-    recheck_loop empty_recheck_loop_stats genv env select_outcome
-  in
-  { env with recent_recheck_loop_stats = stats }
+      recheck_until_no_changes_left acc genv env select_outcome
 
 let new_serve_iteration_id () = Random_id.short_string ()
 
@@ -589,22 +583,6 @@ let has_pending_disk_changes genv =
   match genv.notifier_async_reader () with
   | Some reader when Buffered_line_reader.is_readable reader -> true
   | _ -> false
-
-let update_recheck_values env start_t recheck_id =
-  let end_t = Unix.gettimeofday () in
-  let recheck_time = end_t -. start_t in
-  let stats = env.recent_recheck_loop_stats in
-  match stats.total_rechecked_count with
-  | 0 -> env
-  | _ ->
-    HackEventLogger.recheck_end
-      recheck_time
-      stats.rechecked_batches
-      stats.rechecked_count
-      stats.total_rechecked_count;
-
-    Hh_logger.log "Recheck id: %s" recheck_id;
-    { env with last_recheck_info = Some { stats; recheck_id; recheck_time } }
 
 let serve_one_iteration genv env client_provider =
   let recheck_id = new_serve_iteration_id () in
@@ -666,7 +644,6 @@ let serve_one_iteration genv env client_provider =
         env
     | _ -> env
   in
-  let t_start_recheck = Unix.gettimeofday () in
   let stage =
     if env.init_env.needs_full_init then
       `Init
@@ -676,9 +653,31 @@ let serve_one_iteration genv env client_provider =
   HackEventLogger.with_id ~stage recheck_id @@ fun () ->
   (* We'll first do "recheck_loop" to handle all outstanding changes, so that *)
   (* after that we'll be able to give an up-to-date answer to the client. *)
-  let env = recheck_loop genv env select_outcome in
-  let env = update_recheck_values env t_start_recheck recheck_id in
+  (* Except: this might be stopped early in some cases, e.g. IDE checks. *)
+  let t_start_recheck = Unix.gettimeofday () in
+  let (stats, env) =
+    recheck_until_no_changes_left
+      empty_recheck_loop_stats
+      genv
+      env
+      select_outcome
+  in
   let t_done_recheck = Unix.gettimeofday () in
+  let recheck_time = t_done_recheck -. t_start_recheck in
+  let env = { env with recent_recheck_loop_stats = stats } in
+  let env =
+    match stats.total_rechecked_count with
+    | 0 -> env
+    | _ ->
+      HackEventLogger.recheck_end
+        recheck_time
+        stats.rechecked_batches
+        stats.rechecked_count
+        stats.total_rechecked_count;
+
+      Hh_logger.log "Recheck id: %s" recheck_id;
+      { env with last_recheck_info = Some { stats; recheck_id; recheck_time } }
+  in
   (* if actual work was done, log whether anything got communicated to client *)
   let log_diagnostics =
     env.recent_recheck_loop_stats.total_rechecked_count > 0

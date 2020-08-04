@@ -108,6 +108,7 @@ impl Default for GlobalOptions {
             tco_pu_enabled_paths: (false, vec![]),
             tco_widen_is_array: false,
             tco_higher_kinded_types: false,
+            tco_method_call_inference: false,
         }
     }
 }

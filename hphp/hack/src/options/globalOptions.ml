@@ -108,6 +108,7 @@ type t = {
   tco_pu_enabled_paths: bool * Relative_path.t list;
   tco_widen_is_array: bool;
   tco_higher_kinded_types: bool;
+  tco_method_call_inference: bool;
 }
 [@@deriving eq, show]
 
@@ -274,6 +275,7 @@ let default =
     tco_pu_enabled_paths = (false, []);
     tco_widen_is_array = false;
     tco_higher_kinded_types = false;
+    tco_method_call_inference = false;
   }
 
 let make
@@ -395,6 +397,7 @@ let make
     ?(tco_pu_enabled_paths = default.tco_pu_enabled_paths)
     ?(tco_widen_is_array = default.tco_widen_is_array)
     ?(tco_higher_kinded_types = default.tco_higher_kinded_types)
+    ?(tco_method_call_inference = default.tco_method_call_inference)
     () =
   {
     tco_experimental_features;
@@ -497,6 +500,7 @@ let make
     tco_pu_enabled_paths;
     tco_widen_is_array;
     tco_higher_kinded_types;
+    tco_method_call_inference;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -717,3 +721,5 @@ let tco_pu_enabled_paths t = t.tco_pu_enabled_paths
 let tco_widen_is_array t = t.tco_widen_is_array
 
 let tco_higher_kinded_types t = t.tco_higher_kinded_types
+
+let tco_method_call_inference t = t.tco_method_call_inference

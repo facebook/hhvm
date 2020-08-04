@@ -268,6 +268,8 @@ type t = {
   tco_widen_is_array: bool;
   (* Controls if higher-kinded types are supported *)
   tco_higher_kinded_types: bool;
+  (* Controls if method-call inference is supported *)
+  tco_method_call_inference: bool;
 }
 [@@deriving eq, show]
 
@@ -371,6 +373,7 @@ val make :
   ?tco_pu_enabled_paths:bool * Relative_path.t list ->
   ?tco_widen_is_array:bool ->
   ?tco_higher_kinded_types:bool ->
+  ?tco_method_call_inference:bool ->
   unit ->
   t
 
@@ -599,3 +602,5 @@ val tco_pu_enabled_paths : t -> bool * Relative_path.t list
 val tco_widen_is_array : t -> bool
 
 val tco_higher_kinded_types : t -> bool
+
+val tco_method_call_inference : t -> bool

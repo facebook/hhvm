@@ -250,6 +250,7 @@ let parse_options () =
   let codes_not_raised_partial = ref ISet.empty in
   let allowed_decl_fixme_codes = ref ISet.empty in
   let widen_is_array = ref false in
+  let method_call_inference = ref false in
   let options =
     [
       ( "--ifc",
@@ -593,6 +594,9 @@ let parse_options () =
       ( "--widen-is-array",
         Arg.Set widen_is_array,
         "Infer union of array-like types for `is_array`." );
+      ( "--method-call-inference",
+        Arg.Set method_call_inference,
+        " Infer constraints for method calls." );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -671,6 +675,7 @@ let parse_options () =
       ~po_allowed_decl_fixme_codes:!allowed_decl_fixme_codes
       ~tco_widen_is_array:!widen_is_array
       ~po_allow_unstable_features:true
+      ~tco_method_call_inference:!method_call_inference
       ()
   in
   Errors.allowed_fixme_codes_strict :=

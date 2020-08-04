@@ -9,5 +9,5 @@ class X {
 }
 <<__EntryPoint>>
 function main_require_constraint_nonexistent_class() {
-;
+  $x = new X();
 }

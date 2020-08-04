@@ -44,9 +44,11 @@ let recheck_loop_stats_to_user_telemetry (stats : recheck_loop_stats) :
   |> Telemetry.string_ ~key:"id" ~value:stats.recheck_id
   |> Telemetry.float_ ~key:"time" ~value:stats.duration
   |> Telemetry.int_ ~key:"count" ~value:stats.total_rechecked_count
+  |> Telemetry.int_ ~key:"reparse_count" ~value:stats.rechecked_count
   |> Telemetry.object_list
        ~key:"per_batch"
        ~value:(List.rev stats.per_batch_telemetry)
+  |> Telemetry.bool_ ~key:"updates_stale" ~value:stats.updates_stale
 
 (*****************************************************************************)
 (* The "static" environment, initialized first and then doesn't change *)

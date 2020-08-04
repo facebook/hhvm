@@ -236,7 +236,7 @@ let remote_worker_type_check_end _ = ()
 
 let remote_worker_load_naming_end _ = ()
 
-let recheck_end _ _ _ _ = ()
+let recheck_end _ _ _ _ _ = ()
 
 let indexing_end _ = ()
 

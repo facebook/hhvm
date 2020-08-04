@@ -1467,11 +1467,12 @@ functor
       (env, { reparse_count; total_rechecked_count }, telemetry)
   end
 
-(* This function is used to get the variant contstructor names of
-    the check kind type. The names are used in at least 3 places:
+(** This function is used to get the variant constructor names of
+    the check kind type. The names are used in at least 4 places:
     - the `type_check_unsafe` function below:
       - logs the names into the server log
       - uses HackEventLogger to log the names as the check_kind column value
+    - serverMain writes it into telemetry
     - HhMonitorInformant greps for it in the server log in order to set
         HackEventLogger's is_lazy_incremental column to true/false
 *)

@@ -336,7 +336,9 @@ let handle_connection genv env client client_kind =
 
 let query_notifier genv env query_kind start_time =
   let open ServerNotifierTypes in
-  let telemetry = Telemetry.create () in
+  let telemetry =
+    Telemetry.create () |> Telemetry.duration ~key:"start" ~start_time
+  in
   let (env, raw_updates) =
     match query_kind with
     | `Sync ->
@@ -350,6 +352,7 @@ let query_notifier genv env query_kind start_time =
         genv.notifier_async () )
     | `Skip -> (env, Notifier_async_changes SSet.empty)
   in
+  let telemetry = Telemetry.duration telemetry ~key:"notified" ~start_time in
   let unpack_updates = function
     | Notifier_unavailable -> (true, SSet.empty)
     | Notifier_state_enter _ -> (true, SSet.empty)
@@ -366,7 +369,14 @@ let query_notifier genv env query_kind start_time =
     | _ -> acc
   in
   let raw_updates = pump_async_updates raw_updates in
+  let telemetry = Telemetry.duration telemetry ~key:"pumped" ~start_time in
   let updates = Program.process_updates genv raw_updates in
+  let telemetry =
+    telemetry
+    |> Telemetry.duration ~key:"processed" ~start_time
+    |> Telemetry.int_ ~key:"raw_updates" ~value:(SSet.cardinal raw_updates)
+    |> Telemetry.int_ ~key:"updates" ~value:(Relative_path.Set.cardinal updates)
+  in
   if not @@ Relative_path.Set.is_empty updates then
     HackEventLogger.notifier_returned start_time (SSet.cardinal raw_updates);
   (env, updates, updates_stale, telemetry)
@@ -391,7 +401,9 @@ let query_notifier genv env query_kind start_time =
 let rec recheck_until_no_changes_left acc genv env select_outcome =
   let start_time = Unix.gettimeofday () in
   (* this is telemetry for the current batch, i.e. iteration: *)
-  let telemetry = Telemetry.create () in
+  let telemetry =
+    Telemetry.create () |> Telemetry.float_ ~key:"start_time" ~value:start_time
+  in
 
   (* When a new client connects, we use the synchronous notifier.
    * This is to get synchronous file system changes when invoking
@@ -416,7 +428,9 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
     query_notifier genv env query_kind start_time
   in
   let telemetry =
-    Telemetry.object_ telemetry ~key:"query" ~value:query_telemetry
+    telemetry
+    |> Telemetry.object_ ~key:"query" ~value:query_telemetry
+    |> Telemetry.duration ~key:"query_done" ~start_time
   in
   let acc = { acc with updates_stale } in
   let is_idle =
@@ -441,6 +455,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
         { env with disk_needs_parsing; full_check = Full_check_needed }
       | _ -> { env with disk_needs_parsing; full_check = Full_check_started }
   in
+  let telemetry = Telemetry.duration telemetry ~key:"got_updates" ~start_time in
   let env =
     match env.default_client_pending_command_needs_full_check with
     (* We need to auto-restart the recheck to make progress towards handling
@@ -475,6 +490,9 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
       { env with full_check = Full_check_started }
     | _ -> env
   in
+  let telemetry =
+    Telemetry.duration telemetry ~key:"sorted_out_client" ~start_time
+  in
   (* We have some new, or previously un-processed updates *)
   let full_check =
     is_full_check_started env.full_check
@@ -486,7 +504,19 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
   let lazy_check =
     (not @@ Relative_path.Set.is_empty env.ide_needs_parsing) && is_idle
   in
+  let telemetry =
+    telemetry
+    |> Telemetry.bool_ ~key:"full_check" ~value:full_check
+    |> Telemetry.bool_ ~key:"lazy_check" ~value:lazy_check
+    |> Telemetry.duration ~key:"figured_check_kind" ~start_time
+  in
   if (not full_check) && not lazy_check then
+    let telemetry =
+      Telemetry.string_ telemetry ~key:"check_kind" ~value:"None"
+    in
+    let acc =
+      { acc with per_batch_telemetry = telemetry :: acc.per_batch_telemetry }
+    in
     (acc, env)
   else
     let check_kind =
@@ -498,18 +528,34 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
     let env = { env with can_interrupt = not lazy_check } in
     let needed_full_init = env.init_env.needs_full_init in
     let old_errorl = Errors.get_error_list env.errorl in
-    (* THIS NEXT CALL DOES THE HEAVY WORK! *)
-    let (env, res, recheck_telemetry) =
+
+    (* HERE'S WHERE WE DO THE HEAVY WORK! **)
+    let telemetry =
+      telemetry
+      |> Telemetry.string_
+           ~key:"check_kind"
+           ~value:(ServerTypeCheck.check_kind_to_string check_kind)
+      |> Telemetry.duration ~key:"type_check_start" ~start_time
+    in
+    let (env, res, type_check_telemetry) =
       ServerTypeCheck.type_check genv env check_kind
     in
     let telemetry =
-      Telemetry.object_ telemetry ~key:"recheck" ~value:recheck_telemetry
+      telemetry
+      |> Telemetry.object_ ~key:"type_check" ~value:type_check_telemetry
+      |> Telemetry.duration ~key:"type_check_end" ~start_time
     in
+
     (* END OF HEAVY WORK *)
+
+    (* Final telemetry and cleanup... *)
     let env = { env with can_interrupt = true } in
     if needed_full_init && not env.init_env.needs_full_init then
       finalize_init env.init_env;
     ServerStamp.touch_stamp_errors old_errorl (Errors.get_error_list env.errorl);
+    let telemetry =
+      Telemetry.duration telemetry ~key:"finalized_and_touched" ~start_time
+    in
     let acc =
       {
         rechecked_count =
@@ -666,13 +712,18 @@ let serve_one_iteration genv env client_provider =
           env.last_recheck_loop_stats_for_actual_work );
     }
   in
+  let telemetry = ServerEnv.recheck_loop_stats_to_user_telemetry stats in
   if did_work then begin
     HackEventLogger.recheck_end
       stats.duration
-      (List.length stats.per_batch_telemetry)
+      (List.length stats.per_batch_telemetry - 1)
       stats.rechecked_count
-      stats.total_rechecked_count;
-    Hh_logger.log "Recheck id: %s" recheck_id
+      stats.total_rechecked_count
+      telemetry;
+    Hh_logger.log
+      "Recheck id: %s\n%s"
+      recheck_id
+      (Telemetry.to_string telemetry)
   end;
   (* if actual work was done, log whether anything got communicated to client *)
   let env =

@@ -523,11 +523,12 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
     in
     let acc =
       {
-        acc with
         rechecked_batches = acc.rechecked_batches + 1;
         rechecked_count = acc.rechecked_count + reparse_count;
         total_rechecked_count =
           acc.total_rechecked_count + total_rechecked_count;
+        updates_stale = acc.updates_stale;
+        duration = acc.duration +. (Unix.gettimeofday () -. t);
         telemetry;
       }
     in
@@ -663,20 +664,23 @@ let serve_one_iteration genv env client_provider =
       select_outcome
   in
   let t_done_recheck = Unix.gettimeofday () in
-  let recheck_time = t_done_recheck -. t_start_recheck in
   let env = { env with recent_recheck_loop_stats = stats } in
   let env =
     match stats.total_rechecked_count with
     | 0 -> env
     | _ ->
       HackEventLogger.recheck_end
-        recheck_time
+        stats.duration
         stats.rechecked_batches
         stats.rechecked_count
         stats.total_rechecked_count;
 
       Hh_logger.log "Recheck id: %s" recheck_id;
-      { env with last_recheck_info = Some { stats; recheck_id; recheck_time } }
+      {
+        env with
+        last_recheck_info =
+          Some { stats; recheck_id; recheck_time = stats.duration };
+      }
   in
   (* if actual work was done, log whether anything got communicated to client *)
   let log_diagnostics =

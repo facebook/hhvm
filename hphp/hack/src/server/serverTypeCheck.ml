@@ -1494,13 +1494,6 @@ functor
       let heap_size = SharedMem.heap_size () in
       Hh_logger.log "Heap size: %d" heap_size;
 
-      HackEventLogger.type_check_end
-        (ServerUtils.log_hash_stats telemetry)
-        ~heap_size
-        ~started_count:to_recheck_count
-        ~count:total_rechecked_count
-        ~experiments:genv.local_config.ServerLocalConfig.experiments
-        ~start_t:t;
       let logstring =
         Printf.sprintf "Typechecked %d files" total_rechecked_count
       in
@@ -1510,6 +1503,9 @@ functor
         telemetry
         |> Telemetry.duration ~key:"typecheck_end" ~start_time
         |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
+        |> Telemetry.object_
+             ~key:"hash"
+             ~value:(ServerUtils.log_and_get_sharedmem_load_telemetry ())
         |> Telemetry.int_ ~key:"typecheck_heap_size" ~value:heap_size
         |> Telemetry.int_
              ~key:"typecheck_to_recheck_count"
@@ -1615,6 +1611,14 @@ functor
       let telemetry =
         Telemetry.duration telemetry ~key:"stop_typing_service" ~start_time
       in
+
+      HackEventLogger.type_check_end
+        telemetry
+        ~heap_size
+        ~started_count:to_recheck_count
+        ~count:total_rechecked_count
+        ~experiments:genv.local_config.ServerLocalConfig.experiments
+        ~start_t:t;
 
       (env, { reparse_count; total_rechecked_count }, telemetry)
   end

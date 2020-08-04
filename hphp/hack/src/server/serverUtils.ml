@@ -61,7 +61,8 @@ let server_progress ~tracker ~timeout root =
     ~timeout
     (hh_monitor_config root)
 
-let log_hash_stats (telemetry : Telemetry.t) : Telemetry.t =
+let log_and_get_sharedmem_load_telemetry () : Telemetry.t =
+  let telemetry = Telemetry.create () in
   let unwrap (result : (Telemetry.t, Telemetry.t) result) : Telemetry.t =
     match result with
     | Ok telemetry -> telemetry
@@ -113,11 +114,11 @@ let exit_on_exception (exn : exn) ~(stack : Utils.callstack) =
   let (Utils.Callstack stack) = stack in
   match exn with
   | SharedMem.Out_of_shared_memory ->
-    ignore (log_hash_stats (Telemetry.create ()) : Telemetry.t);
+    ignore (log_and_get_sharedmem_load_telemetry () : Telemetry.t);
     Printf.eprintf "Error: failed to allocate in the shared heap.\n%!";
     Exit_status.(exit Out_of_shared_memory)
   | SharedMem.Hash_table_full ->
-    ignore (log_hash_stats (Telemetry.create ()) : Telemetry.t);
+    ignore (log_and_get_sharedmem_load_telemetry () : Telemetry.t);
     Printf.eprintf "Error: failed to allocate in the shared hashtable.\n%!";
     Exit_status.(exit Hash_table_full)
   | Watchman.Watchman_error s as e ->

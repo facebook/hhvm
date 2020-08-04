@@ -137,7 +137,7 @@ let finalize_init init_env =
   let heap_size = SharedMem.heap_size () in
   Hh_logger.log "Heap size: %d" heap_size;
   let telemetry =
-    ServerUtils.log_hash_stats (Telemetry.create ())
+    ServerUtils.log_and_get_sharedmem_load_telemetry ()
     |> Telemetry.int_ ~key:"heap_size" ~value:heap_size
     |> Telemetry.duration ~start_time:init_env.init_start_t
   in
@@ -1166,7 +1166,7 @@ let program_init genv env =
     genv.local_config.ServerLocalConfig.load_state_script_timeout
   in
   EventLogger.set_init_type init_type;
-  let telemetry = ServerUtils.log_hash_stats (Telemetry.create ()) in
+  let telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
   HackEventLogger.init_lazy_end
     telemetry
     ~informant_use_xdb

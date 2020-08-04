@@ -201,7 +201,7 @@ let type_check
     in
     let heap_size = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" heap_size;
-    let hash_telemetry = ServerUtils.log_hash_stats (Telemetry.create ()) in
+    let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
     let telemetry =
       Telemetry.create ()
       |> Telemetry.object_ ~key:"init" ~value:init_telemetry

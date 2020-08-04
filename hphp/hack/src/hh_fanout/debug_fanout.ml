@@ -14,7 +14,6 @@ type dependent = Typing_deps.Dep.dependent Typing_deps.Dep.variant
 type dependency = Typing_deps.Dep.dependency Typing_deps.Dep.variant
 
 type dep_edge = {
-  dependent_path: Relative_path.t;
   dependent: dependent;
   dependency: dependency;
 }
@@ -35,11 +34,9 @@ let result_to_json (result : result) : Hh_json.json =
             (Typing_deps.Dep.make dep |> Typing_deps.Dep.to_debug_string) );
       ]
   in
-  let dep_edge_to_json { dependent_path; dependent; dependency } =
+  let dep_edge_to_json { dependent; dependency } =
     Hh_json.JSON_Object
       [
-        ( "dependent_path",
-          Hh_json.JSON_String (Relative_path.to_absolute dependent_path) );
         ("dependent", dep_to_json dependent);
         ("dependency", dep_to_json dependency);
       ]
@@ -61,16 +58,14 @@ let result_to_json (result : result) : Hh_json.json =
 let calculate_dep_edges
     ~(ctx : Provider_context.t) _acc (paths : Relative_path.t list) :
     dep_edge HashSet.t list =
-  List.map paths ~f:(fun dependent_path ->
+  List.map paths ~f:(fun path ->
       let dep_edges = HashSet.create () in
       Typing_deps.add_dependency_callback
         "hh_fanout debug collect deps"
         (fun dependent dependency ->
-          HashSet.add dep_edges { dependent_path; dependent; dependency });
+          HashSet.add dep_edges { dependent; dependency });
 
-      let (ctx, entry) =
-        Provider_context.add_entry_if_missing ~ctx ~path:dependent_path
-      in
+      let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
       (match Provider_context.read_file_contents entry with
       | Some _ ->
         let _result : Tast_provider.Compute_tast_and_errors.t =

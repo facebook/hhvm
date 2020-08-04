@@ -202,13 +202,6 @@ def sanitize_hh_fanout_result(env: Env, result: Dict[str, object]) -> None:
         relativize_path(env, path) for path in cast(List[str], result["files"])
     ]
 
-    debug_result = cast(Dict[str, object], result["debug"])
-    relevant_dep_edges = cast(List[Dict[str, str]], debug_result["relevant_dep_edges"])
-    for relevant_dep_edge in relevant_dep_edges:
-        relevant_dep_edge["dependent_path"] = relativize_path(
-            env, relevant_dep_edge["dependent_path"]
-        )
-
     cursor = cast(Cursor, result["cursor"])
     delimiter = ","
     assert delimiter in cursor
@@ -393,7 +386,7 @@ def main() -> None:
             shutil.rmtree(debug_dir, ignore_errors=True)
             shutil.copytree(work_dir, debug_dir)
             sys.stderr.write(
-                f"DEBUGGING is enabled. "
+                "DEBUGGING is enabled. "
                 + f"You can examine the saved states at: {debug_dir}\n"
             )
 

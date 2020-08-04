@@ -26,6 +26,7 @@
             param_name = "$_"; param_expr = None; param_callconv = None;
             param_user_attributes = []; param_visibility = None }
            ];
+         m_cap = ((mixed), None);
          m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = ((void), (Some ([6:19-30], (Hprim Tvoid))));
@@ -488,6 +489,7 @@
             ];
           param_visibility = None }
          ];
+       f_cap = ((mixed), None);
        f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
        f_fun_kind = FSync;
        f_user_attributes =
@@ -570,7 +572,7 @@
           m_abstract = false; m_static = false; m_visibility = Private;
           m_name = ([29:20-23], "met"); m_tparams = [];
           m_where_constraints = []; m_variadic = FVnonVariadic;
-          m_params = [];
+          m_params = []; m_cap = ((mixed), None);
           m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
           m_fun_kind = FSync;
           m_user_attributes =

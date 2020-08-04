@@ -12,6 +12,7 @@
                    hf_is_mutable_return = false }))));
       f_name = ([4:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+      f_cap = ((mixed), None);
       f_body =
       { fb_ast =
         [([5:3-25],

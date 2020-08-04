@@ -475,6 +475,7 @@ fn make_closure(
         where_constraints: fd.where_constraints.clone(),
         variadic: fd.variadic.clone(),
         params: fd.params.clone(),
+        cap: TypeHint((), None), // TODO(T70095684)
         body: fd.body.clone(),
         fun_kind: fd.fun_kind,
         user_attributes: fd.user_attributes.clone(),
@@ -924,6 +925,7 @@ fn convert_meth_caller_to_func_ptr<'a>(
             make_fn_param(pos(), &obj_var.1, false, false),
             variadic_param,
         ],
+        cap: TypeHint((), None), // TODO(T70095684)
         body: FuncBody {
             ast: vec![
                 Stmt(pos(), Stmt_::Expr(Box::new(assert_invariant))),
@@ -1440,6 +1442,7 @@ fn extract_debugger_main(
         where_constraints: vec![],
         variadic: FunVariadicity::FVnonVariadic,
         params,
+        cap: TypeHint((), None), // TODO(T70095684)
         body: FuncBody {
             ast: body,
             annotation: (),

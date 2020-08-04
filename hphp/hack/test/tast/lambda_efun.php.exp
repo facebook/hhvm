@@ -5,6 +5,7 @@ Errors:
       f_ret = ((void), (Some ([12:17-21], (Hprim Tvoid))));
       f_name = ([12:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+      f_cap = ((mixed), None);
       f_body =
       { fb_ast =
         [([13:3-10],
@@ -31,6 +32,7 @@ Errors:
                            param_callconv = None; param_user_attributes = [];
                            param_visibility = None }
                           ];
+                        f_cap = ((mixed), None);
                         f_body =
                         { fb_ast =
                           [([15:15-22],
@@ -86,6 +88,7 @@ Errors:
                            param_callconv = None; param_user_attributes = [];
                            param_visibility = None }
                           ];
+                        f_cap = ((mixed), None);
                         f_body =
                         { fb_ast =
                           [([19:5-20],
@@ -149,6 +152,7 @@ Errors:
                             param_user_attributes = [];
                             param_visibility = None }
                           ];
+                        f_cap = ((mixed), None);
                         f_body =
                         { fb_ast =
                           [([23:21-28],

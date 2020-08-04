@@ -13,6 +13,7 @@ Errors:
          param_callconv = None; param_user_attributes = [];
          param_visibility = None }
         ];
+      f_cap = ((mixed), None);
       f_body =
       { fb_ast =
         [([4:3-18],
@@ -48,6 +49,7 @@ Errors:
            param_callconv = None; param_user_attributes = [];
            param_visibility = None }
          ];
+       f_cap = ((mixed), None);
        f_body =
        { fb_ast =
          [([8:3-17],
@@ -84,6 +86,7 @@ Errors:
            param_callconv = None; param_user_attributes = [];
            param_visibility = None }
          ];
+       f_cap = ((mixed), None);
        f_body =
        { fb_ast =
          [([12:3-16],
@@ -131,6 +134,7 @@ Errors:
            param_callconv = None; param_user_attributes = [];
            param_visibility = None }
          ];
+       f_cap = ((mixed), None);
        f_body =
        { fb_ast =
          [([16:3-15],

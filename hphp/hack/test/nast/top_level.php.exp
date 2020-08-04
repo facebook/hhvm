@@ -40,7 +40,7 @@
      { f_span = [17:1-23]; f_annotation = (); f_mode = Mstrict;
        f_ret = ((), None); f_name = ([17:10-18], "\\func_foo");
        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
-       f_params = [];
+       f_params = []; f_cap = ((), None);
        f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Named };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
@@ -54,6 +54,7 @@
      { f_span = [18:1-18]; f_annotation = (); f_mode = Mstrict;
        f_ret = ((), None); f_name = ([18:10-13], "\\foo"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+       f_cap = ((), None);
        f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Named };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
@@ -67,7 +68,7 @@
      { f_span = [22:3-25]; f_annotation = (); f_mode = Mstrict;
        f_ret = ((), None); f_name = ([22:12-20], "\\My\\Full\\func_foo");
        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
-       f_params = [];
+       f_params = []; f_cap = ((), None);
        f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Named };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
@@ -92,6 +93,7 @@
            param_name = "$_"; param_expr = None; param_callconv = None;
            param_user_attributes = []; param_visibility = None }
          ];
+       f_cap = ((), None);
        f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Named };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;

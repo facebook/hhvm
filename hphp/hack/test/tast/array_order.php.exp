@@ -3,6 +3,7 @@
       f_ret = ((void), (Some ([12:18-22], (Hprim Tvoid))));
       f_name = ([12:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+      f_cap = ((mixed), None);
       f_body =
       { fb_ast =
         [([13:3-52],
@@ -55,7 +56,7 @@
      { f_span = [17:1-30]; f_annotation = (); f_mode = Mpartial;
        f_ret = ((_), None); f_name = ([17:10-25], "\\my_php_function");
        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
-       f_params = [];
+       f_params = []; f_cap = ((mixed), None);
        f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<80669df17c9256861c00299ef2f9fb6f>>
+// @generated SignedSource<<c78ce5f213207a70bdb4ed115872a652>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1099,6 +1099,7 @@ impl<P: Params> Node<P> for Fun_<P::Ex, P::Fb, P::En, P::Hi> {
         self.where_constraints.accept(c, v)?;
         self.variadic.accept(c, v)?;
         self.params.accept(c, v)?;
+        self.cap.accept(c, v)?;
         self.body.accept(c, v)?;
         self.fun_kind.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
@@ -1490,6 +1491,7 @@ impl<P: Params> Node<P> for Method_<P::Ex, P::Fb, P::En, P::Hi> {
         self.where_constraints.accept(c, v)?;
         self.variadic.accept(c, v)?;
         self.params.accept(c, v)?;
+        self.cap.accept(c, v)?;
         self.body.accept(c, v)?;
         self.fun_kind.accept(c, v)?;
         self.user_attributes.accept(c, v)?;

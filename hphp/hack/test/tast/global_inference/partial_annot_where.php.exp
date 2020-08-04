@@ -11,6 +11,7 @@
          param_expr = None; param_callconv = None;
          param_user_attributes = []; param_visibility = None }
         ];
+      f_cap = ((mixed), None);
       f_body =
       { fb_ast =
         [([5:3-20],
@@ -65,7 +66,7 @@
          m_where_constraints =
          [(([4:35-36], (Habstr "T")), Constraint_super,
            ([4:43-51], (Hprim Tarraykey)))];
-         m_variadic = FVnonVariadic; m_params = [];
+         m_variadic = FVnonVariadic; m_params = []; m_cap = ((mixed), None);
          m_body =
          { fb_ast = [([5:5-17], (Return (Some (([5:12-16], null), Null))))];
            fb_annotation = () };

@@ -3,6 +3,7 @@
       f_ret = ((), (Some ([5:17-21], (Hprim Tvoid))));
       f_name = ([5:10-13], "\\Foo\\Bar\\qux"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+      f_cap = ((), None);
       f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Named };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
@@ -18,6 +19,7 @@
        f_ret = ((), (Some ([7:17-21], (Hprim Tvoid))));
        f_name = ([7:10-13], "\\Foo\\Bar\\baz"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+       f_cap = ((), None);
        f_body =
        { fb_ast =
          [([9:3-9],

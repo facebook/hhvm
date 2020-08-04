@@ -15,6 +15,7 @@
           param_callconv = None; param_user_attributes = [];
           param_visibility = None }
         ];
+      f_cap = ((mixed), None);
       f_body =
       { fb_ast =
         [([7:3-10:5],

@@ -1616,6 +1616,7 @@ where
                     fun_kind: Self::mk_fun_kind(suspension_kind, yield_),
                     variadic: Self::determine_variadicity(&params),
                     params,
+                    cap: ast::TypeHint((), None), // TODO(T70095684)
                     user_attributes: Self::p_user_attributes(&c.lambda_attribute_spec, env)?,
                     file_attributes: vec![],
                     external,
@@ -2264,6 +2265,7 @@ where
                     fun_kind: Self::mk_fun_kind(suspension_kind, yield_),
                     variadic: Self::determine_variadicity(&params),
                     params,
+                    cap: ast::TypeHint((), None), // TODO(T70095684)
                     user_attributes,
                     file_attributes: vec![],
                     external,
@@ -2305,6 +2307,7 @@ where
                     fun_kind: Self::mk_fun_kind(suspension_kind, yld),
                     variadic: Self::determine_variadicity(&[]),
                     params: vec![],
+                    cap: ast::TypeHint((), None), // TODO(T70095684)
                     user_attributes,
                     file_attributes: vec![],
                     external,
@@ -4222,6 +4225,7 @@ where
                     where_constraints: hdr.constrs,
                     variadic: Self::determine_variadicity(&hdr.parameters),
                     params: hdr.parameters,
+                    cap: ast::TypeHint((), None), // TODO(T70095684)
                     body: ast::FuncBody {
                         annotation: (),
                         ast: body,
@@ -4692,6 +4696,7 @@ where
                     tparams: hdr.type_parameters,
                     where_constraints: hdr.constrs,
                     params: hdr.parameters,
+                    cap: ast::TypeHint((), None), // TODO(T70095684)
                     body: ast::FuncBody {
                         ast: block,
                         annotation: (),

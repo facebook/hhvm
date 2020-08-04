@@ -1434,6 +1434,7 @@ and method_ genv m =
     N.m_tparams = tparam_l;
     N.m_where_constraints = where_constraints;
     N.m_params = paraml;
+    N.m_cap = m.Aast.m_cap;
     N.m_body = body;
     N.m_fun_kind = m.Aast.m_fun_kind;
     N.m_ret = ret;
@@ -1596,6 +1597,8 @@ and fun_ ctx f =
       f_tparams;
       f_where_constraints = where_constraints;
       f_params = paraml;
+      (* TODO(T70095684) double-check f_cap *)
+      f_cap = f.Aast.f_cap;
       f_body = body;
       f_fun_kind = f_kind;
       f_variadic = variadicity;
@@ -2370,6 +2373,8 @@ and expr_lambda env f =
     f_name = f.Aast.f_name;
     f_params = paraml;
     f_tparams = [];
+    (* TODO(T70095684) double-check f_cap *)
+    f_cap = f.Aast.f_cap;
     f_where_constraints = [];
     f_body = body;
     f_fun_kind = f.Aast.f_fun_kind;

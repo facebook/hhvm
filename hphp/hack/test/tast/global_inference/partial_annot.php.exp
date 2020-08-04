@@ -10,6 +10,7 @@
          param_expr = None; param_callconv = None;
          param_user_attributes = []; param_visibility = None }
         ];
+      f_cap = ((mixed), None);
       f_body =
       { fb_ast =
         [([5:3-20],
@@ -62,6 +63,7 @@
          m_abstract = false; m_static = false; m_visibility = Public;
          m_name = ([4:19-22], "get"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
+         m_cap = ((mixed), None);
          m_body =
          { fb_ast = [([5:5-17], (Return (Some (([5:12-16], null), Null))))];
            fb_annotation = () };

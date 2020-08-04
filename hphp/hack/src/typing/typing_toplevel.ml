@@ -462,6 +462,8 @@ let rec fun_def ctx f :
           Aast.f_where_constraints = f.f_where_constraints;
           Aast.f_variadic = t_variadic;
           Aast.f_params = typed_params;
+          (* TODO(T70095684) fix f_cap *)
+          Aast.f_cap = (MakeType.mixed Reason.none, hint_of_type_hint f.f_cap);
           Aast.f_fun_kind = f.f_fun_kind;
           Aast.f_file_attributes = file_attrs;
           Aast.f_user_attributes = user_attributes;
@@ -654,6 +656,8 @@ and method_def env cls m =
           Aast.m_where_constraints = m.m_where_constraints;
           Aast.m_variadic = t_variadic;
           Aast.m_params = typed_params;
+          (* TODO(T70095684) fix m_cap *)
+          Aast.m_cap = (MakeType.mixed Reason.none, hint_of_type_hint m.m_cap);
           Aast.m_fun_kind = m.m_fun_kind;
           Aast.m_user_attributes = user_attributes;
           Aast.m_ret = (locl_ty, hint_of_type_hint m.m_ret);

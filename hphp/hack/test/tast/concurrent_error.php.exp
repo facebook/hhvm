@@ -13,6 +13,7 @@ Errors:
                  [([3:37-40], (Hprim Tint))])))));
       f_name = ([3:16-23], "\\gen_int"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+      f_cap = ((mixed), None);
       f_body =
       { fb_ast = [([4:3-12], (Return (Some (([4:10-11], int), (Int "1")))))];
         fb_annotation = () };
@@ -33,6 +34,7 @@ Errors:
                   [([7:34-37], (Hprim Tint))])))));
        f_name = ([7:16-20], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+       f_cap = ((mixed), None);
        f_body =
        { fb_ast =
          [([8:3-13],

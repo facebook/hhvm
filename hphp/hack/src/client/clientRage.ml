@@ -100,7 +100,9 @@ let rage_pstacks (env : env) : string Lwt.t =
   a reason; the server pids_file also stores reasons. *)
   let%lwt hh_server_pids = pgrep "hh_server" in
   let%lwt hh_client_pids = pgrep "hh_client" in
-  let server_pids = PidLog.get_pids (ServerFiles.pids_file env.root) in
+  let server_pids =
+    (try PidLog.get_pids (ServerFiles.pids_file env.root) with _ -> [])
+  in
   let pids = IMap.empty in
   let pids =
     List.fold hh_server_pids ~init:pids ~f:(fun acc (pid, reason) ->

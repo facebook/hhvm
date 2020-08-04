@@ -578,6 +578,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
         updates_stale = acc.updates_stale;
         recheck_id = acc.recheck_id;
         duration = acc.duration +. (Unix.gettimeofday () -. start_time);
+        any_full_checks = acc.any_full_checks || not lazy_check;
       }
     in
     (* Avoid batching ide rechecks with disk rechecks - there might be
@@ -765,7 +766,7 @@ let serve_one_iteration genv env client_provider =
       (List.length stats.per_batch_telemetry - 1)
       stats.rechecked_count
       stats.total_rechecked_count
-      telemetry;
+      (Option.some_if stats.any_full_checks telemetry);
     Hh_logger.log
       "RECHECK_END (recheck_id %s):\n%s"
       recheck_id

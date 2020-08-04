@@ -24,6 +24,7 @@ type recheck_loop_stats = {
   duration: float;
   (* in seconds *)
   recheck_id: string;
+  any_full_checks: bool;
 }
 [@@deriving show]
 
@@ -35,6 +36,7 @@ let empty_recheck_loop_stats ~(recheck_id : string) : recheck_loop_stats =
     total_rechecked_count = 0;
     duration = 0.;
     recheck_id;
+    any_full_checks = false;
   }
 
 (** The format of this json is user-facing, returned from 'hh check --json' *)
@@ -49,6 +51,7 @@ let recheck_loop_stats_to_user_telemetry (stats : recheck_loop_stats) :
        ~key:"per_batch"
        ~value:(List.rev stats.per_batch_telemetry)
   |> Telemetry.bool_ ~key:"updates_stale" ~value:stats.updates_stale
+  |> Telemetry.bool_ ~key:"any_full_checks" ~value:stats.any_full_checks
 
 (*****************************************************************************)
 (* The "static" environment, initialized first and then doesn't change *)

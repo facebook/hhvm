@@ -1613,7 +1613,7 @@ functor
       in
 
       HackEventLogger.type_check_end
-        telemetry
+        (Option.some_if CheckKind.is_full telemetry)
         ~heap_size
         ~started_count:to_recheck_count
         ~count:total_rechecked_count

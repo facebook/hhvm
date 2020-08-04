@@ -209,7 +209,7 @@ let type_check
       |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
     in
     HackEventLogger.type_check_end
-      telemetry
+      (Some telemetry)
       ~heap_size
       ~started_count:count
       ~count

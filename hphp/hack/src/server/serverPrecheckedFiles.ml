@@ -110,7 +110,16 @@ let update_after_recheck genv env rechecked ~start_time =
         env
       else
         let full_check = Full_check_started in
-        let init_env = { env.init_env with needs_full_init = true } in
+        let why_needed_full_init =
+          Some
+            ( Telemetry.create ()
+            |> Telemetry.float_ ~key:"time" ~value:(Unix.gettimeofday ())
+            |> Telemetry.string_ ~key:"reason" ~value:"prechecked_fanout"
+            |> Telemetry.object_opt
+                 ~key:"prev"
+                 ~value:env.init_env.why_needed_full_init )
+        in
+        let init_env = { env.init_env with why_needed_full_init } in
         { env with init_env; full_check }
     in
     let clean_local_deps = dirty_local_deps in

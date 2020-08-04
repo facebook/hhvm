@@ -309,8 +309,8 @@ and init_env = {
   init_start_t: float;
   init_type: string;
   mergebase: string option;
-  (* Whether a full check was ever completed since init. *)
-  needs_full_init: bool;
+  (* Whether a full check was ever completed since init, and why it was needed *)
+  why_needed_full_init: Telemetry.t option;
   recheck_id: string option;
   (* Additional data associated with init that we want to log when a first full
    * check completes. *)

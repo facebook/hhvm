@@ -332,7 +332,7 @@ let make_env ~init_id config =
         init_start_t = Unix.gettimeofday ();
         init_type = "";
         mergebase = None;
-        needs_full_init = false;
+        why_needed_full_init = None;
         recheck_id = None;
         state_distance = None;
       };

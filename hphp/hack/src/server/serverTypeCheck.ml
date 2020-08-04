@@ -563,8 +563,11 @@ module FullCheckKind : CheckKindType = struct
       else
         (old_env.full_check, old_env.remote)
     in
-    let needs_full_init =
-      old_env.init_env.needs_full_init && not (is_full_check_done full_check)
+    let why_needed_full_init =
+      match old_env.init_env.why_needed_full_init with
+      | Some why_needed_full_init when not (is_full_check_done full_check) ->
+        Some why_needed_full_init
+      | _ -> None
     in
     let () =
       log_if_diag_subscribe_changed
@@ -579,7 +582,7 @@ module FullCheckKind : CheckKindType = struct
       needs_recheck;
       full_check;
       remote;
-      init_env = { old_env.init_env with needs_full_init };
+      init_env = { old_env.init_env with why_needed_full_init };
       diag_subscribe;
     }
 

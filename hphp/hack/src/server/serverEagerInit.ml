@@ -53,6 +53,11 @@ let type_decl
 
 let init (genv : ServerEnv.genv) (lazy_level : lazy_level) (env : ServerEnv.env)
     : ServerEnv.env * float =
+  let init_telemetry =
+    Telemetry.create ()
+    |> Telemetry.float_ ~key:"start_time" ~value:(Unix.gettimeofday ())
+    |> Telemetry.string_ ~key:"reason" ~value:"eager_init"
+  in
   (* We don't support a saved state for eager init. *)
   let (get_next, t) = indexing genv in
   let lazy_parse =
@@ -83,4 +88,4 @@ let init (genv : ServerEnv.genv) (lazy_level : lazy_level) (env : ServerEnv.env)
   in
   (* Type-checking everything *)
   SharedMem.cleanup_sqlite ();
-  type_check genv env (Relative_path.Map.keys fast) t
+  type_check genv env (Relative_path.Map.keys fast) init_telemetry t

@@ -27,5 +27,6 @@ val type_check :
   ServerEnv.genv ->
   ServerEnv.env ->
   Relative_path.t list ->
+  Telemetry.t ->
   float ->
   ServerEnv.env * float

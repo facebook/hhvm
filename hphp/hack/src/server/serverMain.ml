@@ -526,7 +526,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
         ServerTypeCheck.Full_check
     in
     let env = { env with can_interrupt = not lazy_check } in
-    let needed_full_init = env.init_env.needs_full_init in
+    let needed_full_init = Option.is_some env.init_env.why_needed_full_init in
     let old_errorl = Errors.get_error_list env.errorl in
 
     (* HERE'S WHERE WE DO THE HEAVY WORK! **)
@@ -550,7 +550,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
 
     (* Final telemetry and cleanup... *)
     let env = { env with can_interrupt = true } in
-    if needed_full_init && not env.init_env.needs_full_init then
+    if needed_full_init && Option.is_none env.init_env.why_needed_full_init then
       finalize_init env.init_env;
     ServerStamp.touch_stamp_errors old_errorl (Errors.get_error_list env.errorl);
     let telemetry =
@@ -682,7 +682,7 @@ let serve_one_iteration genv env client_provider =
     | _ -> env
   in
   let stage =
-    if env.init_env.needs_full_init then
+    if Option.is_some env.init_env.why_needed_full_init then
       `Init
     else
       `Recheck
@@ -1033,7 +1033,8 @@ let serve genv env in_fds =
       ServerUtils.exit_on_exception e ~stack);
   let client_provider = ClientProvider.provider_from_file_descriptors in_fds in
   (* This is needed when typecheck_after_init option is disabled. *)
-  if not env.init_env.needs_full_init then finalize_init env.init_env;
+  if Option.is_none env.init_env.why_needed_full_init then
+    finalize_init env.init_env;
   let env = setup_interrupts env client_provider in
   let env = ref env in
   while true do

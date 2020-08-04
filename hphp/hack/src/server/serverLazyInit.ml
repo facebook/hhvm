@@ -492,6 +492,12 @@ let type_check_dirty
     ~(dirty_local_files_unchanged_hash : Relative_path.Set.t)
     ~(dirty_local_files_changed_hash : Relative_path.Set.t)
     (t : float) : ServerEnv.env * float =
+  let start_t = Unix.gettimeofday () in
+  let telemetry =
+    Telemetry.create ()
+    |> Telemetry.float_ ~key:"start_time" ~value:start_t
+    |> Telemetry.string_ ~key:"reason" ~value:"lazy_dirty_init"
+  in
   let dirty_files_unchanged_hash =
     Relative_path.Set.union
       dirty_master_files_unchanged_hash
@@ -502,7 +508,6 @@ let type_check_dirty
       dirty_master_files_changed_hash
       dirty_local_files_changed_hash
   in
-  let start_t = Unix.gettimeofday () in
   let dirty_changed_fast =
     get_dirty_fast old_naming_table new_fast dirty_files_changed_hash
   in
@@ -589,7 +594,31 @@ let type_check_dirty
     exit 0
   ) else
     let env = { env with changed_files = dirty_files_changed_hash } in
-    let result = type_check genv env files_to_check t in
+    let init_telemetry =
+      telemetry
+      |> Telemetry.int_
+           ~key:"dirty_master_files_unchanged_hash"
+           ~value:(Relative_path.Set.cardinal dirty_master_files_unchanged_hash)
+      |> Telemetry.int_
+           ~key:"dirty_master_files_changed_hash"
+           ~value:(Relative_path.Set.cardinal dirty_master_files_changed_hash)
+      |> Telemetry.int_
+           ~key:"dirty_local_files_unchanged_hash"
+           ~value:(Relative_path.Set.cardinal dirty_local_files_unchanged_hash)
+      |> Telemetry.int_
+           ~key:"dirty_local_files_changed_hash"
+           ~value:(Relative_path.Set.cardinal dirty_local_files_changed_hash)
+      |> Telemetry.int_
+           ~key:"dirty_files_unchanged_hash"
+           ~value:(Relative_path.Set.cardinal dirty_files_unchanged_hash)
+      |> Telemetry.int_
+           ~key:"dirty_files_changed_hash"
+           ~value:(Relative_path.Set.cardinal dirty_files_changed_hash)
+      |> Telemetry.int_
+           ~key:"to_recheck"
+           ~value:(Relative_path.Set.cardinal to_recheck)
+    in
+    let result = type_check genv env files_to_check init_telemetry t in
     HackEventLogger.type_check_dirty
       ~start_t
       ~dirty_count:(Relative_path.Set.cardinal dirty_files_changed_hash)
@@ -775,6 +804,11 @@ let write_symbol_info_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
 (* If we fail to load a saved state, fall back to typechecking everything *)
 let full_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
     ServerEnv.env * float =
+  let init_telemetry =
+    Telemetry.create ()
+    |> Telemetry.float_ ~key:"start_time" ~value:(Unix.gettimeofday ())
+    |> Telemetry.string_ ~key:"reason" ~value:"lazy_full_init"
+  in
   let is_check_mode = ServerArgs.check_mode genv.options in
   let (env, t) =
     if
@@ -813,7 +847,7 @@ let full_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
     else
       env
   in
-  type_check genv env fnl t
+  type_check genv env fnl init_telemetry t
 
 let parse_only_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
     ServerEnv.env * float =

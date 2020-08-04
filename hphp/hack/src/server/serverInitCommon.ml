@@ -151,6 +151,7 @@ let type_check
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (files_to_check : Relative_path.t list)
+    (init_telemetry : Telemetry.t)
     (t : float) : ServerEnv.env * float =
   (* No type checking in AI mode *)
   if Option.is_some (ServerArgs.ai_mode genv.options) then
@@ -183,7 +184,7 @@ let type_check
     Hh_logger.log "Begin %s" logstring;
     let ( (errorl : Errors.t),
           (delegate_state : Typing_service_delegate.state),
-          (telemetry : Telemetry.t) ) =
+          (typecheck_telemetry : Telemetry.t) ) =
       let memory_cap =
         genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
       in
@@ -200,8 +201,15 @@ let type_check
     in
     let heap_size = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" heap_size;
+    let hash_telemetry = ServerUtils.log_hash_stats (Telemetry.create ()) in
+    let telemetry =
+      Telemetry.create ()
+      |> Telemetry.object_ ~key:"init" ~value:init_telemetry
+      |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
+      |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
+    in
     HackEventLogger.type_check_end
-      (ServerUtils.log_hash_stats telemetry)
+      telemetry
       ~heap_size
       ~started_count:count
       ~count
@@ -226,7 +234,8 @@ let type_check
         needs_recheck = Relative_path.Set.union env.needs_recheck needs_recheck;
         (* eagerly start rechecking after init *)
         full_check = Full_check_started;
-        init_env = { env.init_env with needs_full_init = true };
+        init_env =
+          { env.init_env with why_needed_full_init = Some init_telemetry };
       }
     in
     (env, t)

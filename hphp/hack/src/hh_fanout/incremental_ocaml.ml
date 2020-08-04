@@ -173,10 +173,10 @@ class cursor ~client_id ~cursor_state =
             errors
             |> List.map ~f:(fun (_phase, path) -> path)
             |> List.fold ~init:acc ~f:Relative_path.Set.union
-          | Saved_state_delta { changed_files; _ } ->
-            changed_files
-            |> Relative_path.Map.keys
-            |> List.fold ~init:acc ~f:Relative_path.Set.add
+          | Saved_state_delta { fanout_result; _ } ->
+            Relative_path.Set.union
+              acc
+              fanout_result.Calculate_fanout.fanout_files
           | Typecheck_result _ ->
             (* Don't need to typecheck any previous cursors. The fanout of
             the files that have changed before this typecheck have already

@@ -528,6 +528,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
         total_rechecked_count =
           acc.total_rechecked_count + total_rechecked_count;
         updates_stale = acc.updates_stale;
+        recheck_id = acc.recheck_id;
         duration = acc.duration +. (Unix.gettimeofday () -. t);
         telemetry;
       }
@@ -658,7 +659,7 @@ let serve_one_iteration genv env client_provider =
   let t_start_recheck = Unix.gettimeofday () in
   let (stats, env) =
     recheck_until_no_changes_left
-      empty_recheck_loop_stats
+      (empty_recheck_loop_stats ~recheck_id)
       genv
       env
       select_outcome
@@ -679,7 +680,12 @@ let serve_one_iteration genv env client_provider =
       {
         env with
         last_recheck_info =
-          Some { stats; recheck_id; recheck_time = stats.duration };
+          Some
+            {
+              stats;
+              recheck_id = stats.recheck_id;
+              recheck_time = stats.duration;
+            };
       }
   in
   (* if actual work was done, log whether anything got communicated to client *)

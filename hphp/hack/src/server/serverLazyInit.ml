@@ -487,18 +487,28 @@ let type_check_dirty
     (env : ServerEnv.env)
     (old_naming_table : Naming_table.t)
     (new_fast : FileInfo.names Relative_path.Map.t)
-    (dirty_master_files : Relative_path.Set.t)
-    (dirty_local_files : Relative_path.Set.t)
-    (similar_files : Relative_path.Set.t)
+    ~(dirty_master_files_unchanged_hash : Relative_path.Set.t)
+    ~(dirty_master_files_changed_hash : Relative_path.Set.t)
+    ~(dirty_local_files_unchanged_hash : Relative_path.Set.t)
+    ~(dirty_local_files_changed_hash : Relative_path.Set.t)
     (t : float) : ServerEnv.env * float =
-  let dirty_files =
-    Relative_path.Set.union dirty_master_files dirty_local_files
+  let dirty_files_unchanged_hash =
+    Relative_path.Set.union
+      dirty_master_files_unchanged_hash
+      dirty_local_files_unchanged_hash
+  in
+  let dirty_files_changed_hash =
+    Relative_path.Set.union
+      dirty_master_files_changed_hash
+      dirty_local_files_changed_hash
   in
   let start_t = Unix.gettimeofday () in
-  let dirty_fast = get_dirty_fast old_naming_table new_fast dirty_files in
+  let dirty_changed_fast =
+    get_dirty_fast old_naming_table new_fast dirty_files_changed_hash
+  in
   let names s =
     Relative_path.Map.fold
-      dirty_fast
+      dirty_changed_fast
       ~f:
         begin
           fun k v acc ->
@@ -509,21 +519,25 @@ let type_check_dirty
         end
       ~init:FileInfo.empty_names
   in
-  let master_deps = names dirty_master_files |> names_to_deps in
-  let local_deps = names dirty_local_files |> names_to_deps in
+  let master_deps = names dirty_master_files_changed_hash |> names_to_deps in
+  let local_deps = names dirty_local_files_changed_hash |> names_to_deps in
   (* Include similar_files in the dirty_fast used to determine which loaded
      declarations to oldify. This is necessary because the positions of
      declarations may have changed, which affects error messages and FIXMEs. *)
   let get_files_to_recheck =
     get_files_to_recheck genv env old_naming_table new_fast
-    @@ extend_fast genv dirty_fast env.naming_table similar_files
+    @@ extend_fast
+         genv
+         dirty_changed_fast
+         env.naming_table
+         dirty_files_unchanged_hash
   in
   let (env, to_recheck) =
     if use_prechecked_files genv then
       (* Start with dirty files and fan-out of local changes only *)
       let to_recheck =
         if genv.local_config.SLC.load_decls_from_saved_state then
-          get_files_to_recheck dirty_local_files
+          get_files_to_recheck dirty_local_files_changed_hash
         else
           let deps = Typing_deps.add_all_deps local_deps in
           Typing_deps.get_files deps
@@ -542,7 +556,7 @@ let type_check_dirty
       (* Start with full fan-out immediately *)
       let to_recheck =
         if genv.local_config.SLC.load_decls_from_saved_state then
-          get_files_to_recheck dirty_files
+          get_files_to_recheck dirty_files_changed_hash
         else
           let deps = Typing_deps.DepSet.union master_deps local_deps in
           let deps = Typing_deps.add_all_deps deps in
@@ -551,8 +565,10 @@ let type_check_dirty
       (env, to_recheck)
   in
   (* We still need to typecheck files whose declarations did not change *)
-  let to_recheck = Relative_path.Set.union to_recheck similar_files in
-  let fast = extend_fast genv dirty_fast env.naming_table to_recheck in
+  let to_recheck =
+    Relative_path.Set.union to_recheck dirty_files_unchanged_hash
+  in
+  let fast = extend_fast genv dirty_changed_fast env.naming_table to_recheck in
   let files_to_check = Relative_path.Map.keys fast in
 
   (* HACK: dump the fanout that we calculated and exit. This is for
@@ -572,15 +588,15 @@ let type_check_dirty
          ]);
     exit 0
   ) else
-    let env = { env with changed_files = dirty_files } in
+    let env = { env with changed_files = dirty_files_changed_hash } in
     let result = type_check genv env files_to_check t in
     HackEventLogger.type_check_dirty
       ~start_t
-      ~dirty_count:(Relative_path.Set.cardinal dirty_files)
+      ~dirty_count:(Relative_path.Set.cardinal dirty_files_changed_hash)
       ~recheck_count:(Relative_path.Set.cardinal to_recheck);
     Hh_logger.log
       "ServerInit type_check_dirty count: %d. recheck count: %d"
-      (Relative_path.Set.cardinal dirty_files)
+      (Relative_path.Set.cardinal dirty_files_changed_hash)
       (Relative_path.Set.cardinal to_recheck);
     result
 
@@ -955,14 +971,11 @@ let post_saved_state_initialization
         | _ -> false)
       dirty_files
   in
-  let (similar_master_files, dirty_master_files) =
+  let (dirty_master_files_unchanged_hash, dirty_master_files_changed_hash) =
     partition_similar dirty_master_files
   in
-  let (similar_local_files, dirty_local_files) =
+  let (dirty_local_files_unchanged_hash, dirty_local_files_changed_hash) =
     partition_similar dirty_local_files
-  in
-  let similar_files =
-    Relative_path.Set.union similar_master_files similar_local_files
   in
   let env =
     {
@@ -982,9 +995,10 @@ let post_saved_state_initialization
     env
     old_naming_table
     fast
-    dirty_master_files
-    dirty_local_files
-    similar_files
+    ~dirty_master_files_unchanged_hash
+    ~dirty_master_files_changed_hash
+    ~dirty_local_files_unchanged_hash
+    ~dirty_local_files_changed_hash
     t
 
 let saved_state_init

@@ -17,11 +17,10 @@ type recheck_loop_stats = {
   (* Watchman subscription has gone down, so state of the world after the
    * recheck loop may not reflect what is actually on disk. *)
   updates_stale: bool;
-  rechecked_batches: int;
+  per_batch_telemetry: Telemetry.t list;
   rechecked_count: int;
   (* includes dependencies *)
   total_rechecked_count: int;
-  telemetry: Telemetry.t;
   duration: float;
   (* in seconds *)
   recheck_id: string;
@@ -31,10 +30,9 @@ type recheck_loop_stats = {
 let empty_recheck_loop_stats ~(recheck_id : string) : recheck_loop_stats =
   {
     updates_stale = false;
-    rechecked_batches = 0;
+    per_batch_telemetry = [];
     rechecked_count = 0;
     total_rechecked_count = 0;
-    telemetry = Telemetry.create ();
     duration = 0.;
     recheck_id;
   }
@@ -46,7 +44,9 @@ let recheck_loop_stats_to_user_telemetry (stats : recheck_loop_stats) :
   |> Telemetry.string_ ~key:"id" ~value:stats.recheck_id
   |> Telemetry.float_ ~key:"time" ~value:stats.duration
   |> Telemetry.int_ ~key:"count" ~value:stats.total_rechecked_count
-  |> Telemetry.object_ ~key:"telemetry" ~value:stats.telemetry
+  |> Telemetry.object_list
+       ~key:"per_batch"
+       ~value:(List.rev stats.per_batch_telemetry)
 
 (*****************************************************************************)
 (* The "static" environment, initialized first and then doesn't change *)

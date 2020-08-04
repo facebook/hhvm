@@ -507,22 +507,15 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
         =
       recheck genv env check_kind
     in
-    let telemetry =
-      Telemetry.object_
-        acc.telemetry
-        ~key:(Printf.sprintf "batch_%d" acc.rechecked_batches)
-        ~value:telemetry
-    in
     let acc =
       {
-        rechecked_batches = acc.rechecked_batches + 1;
         rechecked_count = acc.rechecked_count + reparse_count;
+        per_batch_telemetry = telemetry :: acc.per_batch_telemetry;
         total_rechecked_count =
           acc.total_rechecked_count + total_rechecked_count;
         updates_stale = acc.updates_stale;
         recheck_id = acc.recheck_id;
         duration = acc.duration +. (Unix.gettimeofday () -. t);
-        telemetry;
       }
     in
     (* Avoid batching ide rechecks with disk rechecks - there might be
@@ -626,7 +619,7 @@ let serve_one_iteration genv env client_provider =
        * the SharedMem module, which doesn't know anything about Server stuff.
        * So we wrap the call here. *)
       HackEventLogger.with_rechecked_stats
-        last_stats.rechecked_batches
+        (List.length last_stats.per_batch_telemetry)
         last_stats.rechecked_count
         last_stats.total_rechecked_count
         (fun () -> SharedMem.collect `aggressive);
@@ -672,10 +665,9 @@ let serve_one_iteration genv env client_provider =
   if did_work then begin
     HackEventLogger.recheck_end
       stats.duration
-      stats.rechecked_batches
+      (List.length stats.per_batch_telemetry)
       stats.rechecked_count
       stats.total_rechecked_count;
-
     Hh_logger.log "Recheck id: %s" recheck_id
   end;
   (* if actual work was done, log whether anything got communicated to client *)

@@ -697,6 +697,7 @@ module Make : functor (CheckKind : CheckKindType) -> sig
   val type_check_core :
     ServerEnv.genv ->
     ServerEnv.env ->
+    float ->
     ServerEnv.env * check_results * Telemetry.t
 end =
 functor
@@ -1041,10 +1042,13 @@ functor
         total_rechecked_count;
       }
 
-    let type_check_core genv env =
-      let start_t = Unix.gettimeofday () in
+    let type_check_core genv env start_time =
+      let t = Unix.gettimeofday () in
+      (* `start_time` is when the recheck_loop started and includes preliminaries like
+       * reading about file-change notifications and communicating with client.
+       * We record all our telemetry uniformally with respect to this start.
+       * `t` is legacy, used for ad-hoc duration reporting within this function. *)
       let telemetry = Telemetry.create () in
-      let t = start_t in
       let env =
         if CheckKind.is_full then
           { env with full_check = Full_check_started }
@@ -1408,7 +1412,7 @@ functor
         Printf.sprintf "Typechecked %d files" total_rechecked_count
       in
       let t = Hh_logger.log_duration logstring t in
-      Hh_logger.log "Total: %f\n%!" (t -. start_t);
+      Hh_logger.log "Total: %f\n%!" (t -. start_time);
 
       (* INVALIDATE FILES (EXPERIMENTAL TYPES IN CODEGEN) **********************)
       ServerInvalidateUnits.go genv files_checked fast_parsed naming_table;
@@ -1505,7 +1509,7 @@ let type_check_unsafe genv env kind start_time =
     let telemetry =
       Telemetry.duration telemetry ~key:"core_start" ~start_time
     in
-    let (env, res, core_telemetry) = LC.type_check_core genv env in
+    let (env, res, core_telemetry) = LC.type_check_core genv env start_time in
     let telemetry =
       telemetry
       |> Telemetry.duration ~key:"core_end" ~start_time
@@ -1525,7 +1529,7 @@ let type_check_unsafe genv env kind start_time =
     let telemetry =
       Telemetry.duration telemetry ~key:"core_start" ~start_time
     in
-    let (env, res, core_telemetry) = FC.type_check_core genv env in
+    let (env, res, core_telemetry) = FC.type_check_core genv env start_time in
     let telemetry =
       telemetry
       |> Telemetry.duration ~key:"core_end" ~start_time

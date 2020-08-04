@@ -96,7 +96,12 @@ struct SpecHolder {
       // Static specs are kept by the cache.
       SpecCacheMap::accessor acc;
       if (s_specCacheMap.insert(acc, key)) {
-        acc->second = new StructSpec{compileSpec(spec, cls, isBinary)};
+        try {
+          acc->second = new StructSpec{compileSpec(spec, cls, isBinary)};
+        } catch (...) {
+          s_specCacheMap.erase(acc);
+          throw;
+        }
       }
       return *acc->second;
     } else {

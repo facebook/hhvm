@@ -260,4 +260,5 @@ function main_bad_spec() {
   testBadSpec('EdgeObjectWithBadSpec2');
   testBadSpec('EdgeObjectWithBadSpec3');
   testBadSpec('EdgeObjectWithBadSpec4');
+  testBadSpec('EdgeObjectWithBadSpec4');
 }

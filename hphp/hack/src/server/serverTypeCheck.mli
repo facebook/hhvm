@@ -22,6 +22,7 @@ val type_check :
   ServerEnv.genv ->
   ServerEnv.env ->
   check_kind ->
+  float ->
   ServerEnv.env * check_results * Telemetry.t
 
 (****************************************************************************)

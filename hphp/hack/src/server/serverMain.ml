@@ -538,7 +538,7 @@ let rec recheck_until_no_changes_left acc genv env select_outcome =
       |> Telemetry.duration ~key:"type_check_start" ~start_time
     in
     let (env, res, type_check_telemetry) =
-      ServerTypeCheck.type_check genv env check_kind
+      ServerTypeCheck.type_check genv env check_kind start_time
     in
     let telemetry =
       telemetry

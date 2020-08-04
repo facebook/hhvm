@@ -1483,12 +1483,16 @@ let check_kind_to_string = function
 module FC = Make (FullCheckKind)
 module LC = Make (LazyCheckKind)
 
-let type_check_unsafe genv env kind =
-  let telemetry = Telemetry.create () in
+let type_check_unsafe genv env kind start_time =
+  let check_kind = check_kind_to_string kind in
+  let telemetry =
+    Telemetry.create ()
+    |> Telemetry.string_ ~key:"kind" ~value:check_kind
+    |> Telemetry.duration ~key:"start" ~start_time
+  in
   (match kind with
   | Lazy_check -> HackEventLogger.set_lazy_incremental ()
   | Full_check -> ());
-  let check_kind = check_kind_to_string kind in
 
   HackEventLogger.with_check_kind check_kind @@ fun () ->
   Printf.eprintf "******************************************\n";
@@ -1498,11 +1502,17 @@ let type_check_unsafe genv env kind =
       "Check kind: will check only those files already open in IDE or with reported errors ('%s')"
       check_kind;
     ServerBusyStatus.send env ServerCommandTypes.Doing_local_typecheck;
-    let (env, res, core_telemetry) = LC.type_check_core genv env in
-    ServerBusyStatus.send env ServerCommandTypes.Done_local_typecheck;
     let telemetry =
-      Telemetry.object_ telemetry ~key:"core" ~value:core_telemetry
+      Telemetry.duration telemetry ~key:"core_start" ~start_time
     in
+    let (env, res, core_telemetry) = LC.type_check_core genv env in
+    let telemetry =
+      telemetry
+      |> Telemetry.duration ~key:"core_end" ~start_time
+      |> Telemetry.object_ ~key:"core" ~value:core_telemetry
+    in
+    ServerBusyStatus.send env ServerCommandTypes.Done_local_typecheck;
+    let telemetry = Telemetry.duration telemetry ~key:"sent_done" ~start_time in
     (env, res, telemetry)
   | Full_check ->
     Hh_logger.log
@@ -1512,9 +1522,14 @@ let type_check_unsafe genv env kind =
       env
       (ServerCommandTypes.Doing_global_typecheck
          (global_typecheck_kind genv env));
+    let telemetry =
+      Telemetry.duration telemetry ~key:"core_start" ~start_time
+    in
     let (env, res, core_telemetry) = FC.type_check_core genv env in
     let telemetry =
-      Telemetry.object_ telemetry ~key:"core" ~value:core_telemetry
+      telemetry
+      |> Telemetry.duration ~key:"core_end" ~start_time
+      |> Telemetry.object_ ~key:"core" ~value:core_telemetry
     in
     ( if is_full_check_done env.full_check then
       let total = Errors.count env.ServerEnv.errorl in
@@ -1527,8 +1542,9 @@ let type_check_unsafe genv env kind =
         ServerCommandTypes.Done_global_typecheck { is_truncated; shown; total }
       in
       ServerBusyStatus.send env msg );
+    let telemetry = Telemetry.duration telemetry ~key:"sent_done" ~start_time in
     (env, res, telemetry)
 
-let type_check genv env kind =
+let type_check genv env kind start_time =
   ServerUtils.with_exit_on_exception @@ fun () ->
-  type_check_unsafe genv env kind
+  type_check_unsafe genv env kind start_time

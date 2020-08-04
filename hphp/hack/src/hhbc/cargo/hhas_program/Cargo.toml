@@ -11,6 +11,7 @@ path = "../../hhas_program.rs"
 [dependencies]
 hhas_adata_rust = { path = "../hhas_adata" }
 hhas_attribute_rust = { path = "../hhas_attribute" }
+hhas_body_rust = { path = "../hhas_body" }
 hhas_class_rust = { path = "../hhas_class" }
 hhas_constant_rust = { path = "../hhas_constant" }
 hhas_function_rust = { path = "../hhas_function" }

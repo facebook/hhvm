@@ -1388,6 +1388,7 @@ version = "0.0.0"
 dependencies = [
  "hhas_adata_rust 0.0.0",
  "hhas_attribute_rust 0.0.0",
+ "hhas_body_rust 0.0.0",
  "hhas_class_rust 0.0.0",
  "hhas_constant_rust 0.0.0",
  "hhas_function_rust 0.0.0",

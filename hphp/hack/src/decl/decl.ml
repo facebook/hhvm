@@ -1053,21 +1053,6 @@ and typeconst_fold
     let typeconsts = SMap.add (snd stc.stc_name) tc typeconsts in
     (typeconsts, consts)
 
-and method_check_override
-    (c : Shallow_decl_defs.shallow_class)
-    (m : Shallow_decl_defs.shallow_method)
-    (acc : Decl_defs.element SMap.t) : bool =
-  let (pos, id) = m.sm_name in
-  let (_, class_id) = c.sc_name in
-  let override = m.sm_override in
-  match SMap.find_opt id acc with
-  | Some _ -> false (* overriding final methods is handled in typing *)
-  | None when override && Ast_defs.(equal_class_kind c.sc_kind Ctrait) -> true
-  | None when override ->
-    Errors.should_be_override pos class_id id;
-    false
-  | None -> false
-
 and method_redecl_acc
     ~(write_shmem : bool)
     (c : Shallow_decl_defs.shallow_class)
@@ -1123,7 +1108,9 @@ and method_decl_acc
     (c : Shallow_decl_defs.shallow_class)
     ((acc, condition_types) : Decl_defs.element SMap.t * SSet.t)
     (m : Shallow_decl_defs.shallow_method) : Decl_defs.element SMap.t * SSet.t =
-  let check_override = method_check_override c m acc in
+  (* If method doesn't override anything but has the <<__Override>> attribute, then
+   * set the override flag in ce_flags and let typing emit an appropriate error *)
+  let check_override = m.sm_override && not (SMap.mem (snd m.sm_name) acc) in
   let (pos, id) = m.sm_name in
   let get_reactivity t =
     match get_node t with

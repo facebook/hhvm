@@ -3867,25 +3867,22 @@ Index::~Index() {}
 void Index::mark_persistent_types_and_functions(php::Program& program) {
   for (auto& unit : program.units) {
     for (auto& f : unit->funcs) {
-      attribute_setter(f->attrs,
-                       f->attrs & AttrUnique,
-                       AttrPersistent);
+      assertx(f->attrs & AttrUnique);
+      attribute_setter(f->attrs, true, AttrPersistent);
     }
 
     for (auto& t : unit->typeAliases) {
-      attribute_setter(t->attrs,
-                       t->attrs & AttrUnique,
-                       AttrPersistent);
+      assertx(t->attrs & AttrUnique);
+      attribute_setter(t->attrs, true, AttrPersistent);
     }
 
     for (auto& c : unit->constants) {
-      attribute_setter(c->attrs,
-                       c->attrs & AttrUnique,
-                       AttrPersistent);
+      assertx(c->attrs & AttrUnique);
+      attribute_setter(c->attrs, true, AttrPersistent);
     }
   }
 
-  auto check_persistent_class = [&] (const ClassInfo& cinfo) {
+  DEBUG_ONLY auto check_persistent_class = [&] (const ClassInfo& cinfo) {
     if (cinfo.parent && !(cinfo.parent->cls->attrs & AttrPersistent)) {
       return false;
     }
@@ -3897,22 +3894,18 @@ void Index::mark_persistent_types_and_functions(php::Program& program) {
     return true;
   };
 
-  auto check_persistent_record = [&] (const RecordInfo& rinfo) {
+  DEBUG_ONLY auto check_persistent_record = [&] (const RecordInfo& rinfo) {
     return !rinfo.parent || (rinfo.parent->rec->attrs & AttrPersistent);
   };
 
   for (auto& c : m_data->allClassInfos) {
-    attribute_setter(c->cls->attrs,
-                     (c->cls->attrs & AttrUnique) &&
-                     check_persistent_class(*c),
-                     AttrPersistent);
+    assertx((c->cls->attrs & AttrUnique) && check_persistent_class(*c));
+    attribute_setter(c->cls->attrs, true, AttrPersistent);
   }
 
   for (auto& r : m_data->allRecordInfos) {
-    attribute_setter(r->rec->attrs,
-                     (r->rec->attrs & AttrUnique) &&
-                     check_persistent_record(*r),
-                     AttrPersistent);
+    assertx((r->rec->attrs & AttrUnique) && check_persistent_record(*r));
+    attribute_setter(r->rec->attrs, true, AttrPersistent);
   }
 }
 

@@ -9,14 +9,25 @@
 set -euf
 
 unset DUNE_BUILD_DIR
-OCAML_PREFIX=$(dirname "$1")
-SOURCE_ROOT="$2"
-BUILD_ROOT="${3:-"${SOURCE_ROOT}/_build"}"
-export PATH="$OCAML_PREFIX:$PATH"
+
+if [ -z "$1" ]; then
+  echo "Usage: $0 /path/to/bin/opam [/path/to/build/dir]"
+  exit 1
+fi
+
+OPAM_EXECUTABLE="$1"
+BUILD_ROOT="${2:-"${SOURCE_ROOT}/_build"}"
+
+SOURCE_ROOT="$(dirname "$0")"
+OPAM_EXECUTABLE_DIR="$(dirname "$OPAM_EXECUTABLE")"
+
+export PATH="$OPAM_EXECUTABLE_DIR:$PATH"
 # detect if we are building inside FB by checking a specific dune file
 if [ -e "$SOURCE_ROOT/src/facebook/dune" ]; then
+  echo "FB build"
   OPAMROOT="$SOURCE_ROOT/facebook/opam"
 else
+  echo "Non-FB build"
   OPAMROOT="${BUILD_ROOT}/opam"
 fi
 export OPAMROOT="$OPAMROOT"

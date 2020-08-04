@@ -37,12 +37,6 @@
 [submodule "mcrouter"]
 	path = third-party/mcrouter/src
 	url = https://github.com/facebook/mcrouter
-[submodule "ocaml"]
-	path = third-party/ocaml/src
-	url = https://github.com/ocaml/ocaml.git
-[submodule "ocamlbuild"]
-	path = third-party/ocaml/ocamlbuild
-	url = https://github.com/ocaml/ocamlbuild
 [submodule "proxygen"]
 	path = third-party/proxygen/src
 	url = https://github.com/facebook/proxygen

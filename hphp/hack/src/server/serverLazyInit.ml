@@ -849,8 +849,6 @@ let post_saved_state_initialization
       init_env = { env.init_env with mergebase = get_mergebase mergebase };
     }
   in
-  Bad_files.check dirty_local_files;
-  Bad_files.check changed_while_parsing;
 
   let (decl_and_typing_error_files, naming_and_parsing_error_files) =
     SaveStateService.partition_error_files_tf

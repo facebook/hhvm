@@ -712,8 +712,42 @@ let serve_one_iteration genv env client_provider =
           env.last_recheck_loop_stats_for_actual_work );
     }
   in
-  let telemetry = ServerEnv.recheck_loop_stats_to_user_telemetry stats in
+  (* push diagnostic changes to client, if necessary *)
+  let (env, diag_reason) =
+    match env.diag_subscribe with
+    | None -> (env, "no diag subscriptions")
+    | Some sub ->
+      let client = Utils.unsafe_opt env.persistent_client in
+      (* Should we hold off sending diagnostics to the client? *)
+      if ClientProvider.client_has_message client then
+        (env, "client has message")
+      else if not @@ Relative_path.Set.is_empty env.ide_needs_parsing then
+        (env, "ide_needs_parsing: processed edits but didn't recheck them yet")
+      else if has_pending_disk_changes genv then
+        (env, "has_pending_disk_changes")
+      else
+        let (sub, errors) = Diagnostic_subscription.pop_errors sub env.errorl in
+        let env = { env with diag_subscribe = Some sub } in
+        let id = Diagnostic_subscription.get_id sub in
+        let res = ServerCommandTypes.DIAGNOSTIC (id, errors) in
+        if SMap.is_empty errors then
+          (env, "is_empty errors")
+        else begin
+          try
+            ClientProvider.send_push_message_to_client client res;
+            (env, "sent push message")
+          with ClientProvider.Client_went_away ->
+            (* Leaving cleanup of this condition to handled_connection function *)
+            (env, "Client_went_away")
+        end
+  in
+  let t_sent_diagnostics = Unix.gettimeofday () in
+
   if did_work then begin
+    let telemetry =
+      ServerEnv.recheck_loop_stats_to_user_telemetry stats
+      |> Telemetry.string_ ~key:"diag_reason" ~value:diag_reason
+    in
     HackEventLogger.recheck_end
       stats.duration
       (List.length stats.per_batch_telemetry - 1)
@@ -721,51 +755,11 @@ let serve_one_iteration genv env client_provider =
       stats.total_rechecked_count
       telemetry;
     Hh_logger.log
-      "Recheck id: %s\n%s"
+      "RECHECK_END (recheck_id %s):\n%s"
       recheck_id
       (Telemetry.to_string telemetry)
   end;
-  (* if actual work was done, log whether anything got communicated to client *)
-  let env =
-    match env.diag_subscribe with
-    | None ->
-      if did_work then
-        Hh_logger.log "Finished recheck_loop; no diag subscriptions";
-      env
-    | Some sub ->
-      let client = Utils.unsafe_opt env.persistent_client in
-      (* We possibly just did a lot of work. Check the client again to see
-       * that we are still idle before proceeding to send diagnostics *)
-      if ClientProvider.client_has_message client then (
-        if did_work then
-          Hh_logger.log "Finished recheck_loop; client has message";
-        env
-      ) else if not @@ Relative_path.Set.is_empty env.ide_needs_parsing then (
-        (* We processed some edits but didn't recheck them yet. *)
-        if did_work then
-          Hh_logger.log "Finished recheck_loop; ide_needs_parsing";
-        env
-      ) else if has_pending_disk_changes genv then (
-        if did_work then
-          Hh_logger.log "Finished recheck_loop; has_pending_disk_changes";
-        env
-      ) else
-        let (sub, errors) = Diagnostic_subscription.pop_errors sub env.errorl in
-        ( if SMap.is_empty errors then (
-          if did_work then
-            Hh_logger.log "Finished recheck_loop; is_empty errors"
-        ) else
-          let id = Diagnostic_subscription.get_id sub in
-          let res = ServerCommandTypes.DIAGNOSTIC (id, errors) in
-          try
-            Hh_logger.log "Finished recheck_loop; sending push message";
-            ClientProvider.send_push_message_to_client client res
-          with ClientProvider.Client_went_away ->
-            (* Leaving cleanup of this condition to handled_connection function *)
-            Hh_logger.log "Finished recheck_loop; Client_went_away" );
-        { env with diag_subscribe = Some sub }
-  in
-  let t_sent_diagnostics = Unix.gettimeofday () in
+
   let env =
     match select_outcome with
     | ClientProvider.Select_persistent -> env

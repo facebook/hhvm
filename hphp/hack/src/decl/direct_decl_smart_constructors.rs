@@ -14,7 +14,7 @@ use bumpalo::{
 use hh_autoimport_rust as hh_autoimport;
 use naming_special_names_rust as naming_special_names;
 
-use arena_collections::{AssocListMut, MultiSetMut};
+use arena_collections::{AssocListMut, List, MultiSetMut};
 use flatten_smart_constructors::{FlattenOp, FlattenSmartConstructors};
 use minimal_parser::RescanTrivia;
 use oxidized_by_ref::{
@@ -177,20 +177,20 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct InProgressDecls<'a> {
-    pub classes: AssocListMut<'a, &'a str, shallow_decl_defs::ShallowClass<'a>>,
-    pub funs: AssocListMut<'a, &'a str, typing_defs::FunElt<'a>>,
-    pub typedefs: AssocListMut<'a, &'a str, typing_defs::TypedefType<'a>>,
-    pub consts: AssocListMut<'a, &'a str, typing_defs::Ty<'a>>,
+    pub classes: List<'a, (&'a str, shallow_decl_defs::ShallowClass<'a>)>,
+    pub funs: List<'a, (&'a str, typing_defs::FunElt<'a>)>,
+    pub typedefs: List<'a, (&'a str, typing_defs::TypedefType<'a>)>,
+    pub consts: List<'a, (&'a str, typing_defs::Ty<'a>)>,
 }
 
-pub fn empty_decls<'a>(arena: &'a Bump) -> InProgressDecls<'a> {
+pub fn empty_decls() -> InProgressDecls<'static> {
     InProgressDecls {
-        classes: AssocListMut::new_in(arena),
-        funs: AssocListMut::new_in(arena),
-        typedefs: AssocListMut::new_in(arena),
-        consts: AssocListMut::new_in(arena),
+        classes: List::empty(),
+        funs: List::empty(),
+        typedefs: List::empty(),
+        consts: List::empty(),
     }
 }
 
@@ -427,7 +427,7 @@ enum FileModeBuilder {
 pub struct State<'a> {
     pub source_text: IndexedSourceText<'a>,
     pub arena: &'a bumpalo::Bump,
-    pub decls: Rc<InProgressDecls<'a>>,
+    pub decls: InProgressDecls<'a>,
     filename: &'a RelativePath<'a>,
     namespace_builder: Rc<NamespaceBuilder<'a>>,
     classish_name_builder: ClassishNameBuilder<'a>,
@@ -449,7 +449,7 @@ impl<'a> State<'a> {
             source_text,
             arena,
             filename: arena.alloc(filename),
-            decls: Rc::new(empty_decls(arena)),
+            decls: empty_decls(),
             namespace_builder: Rc::new(NamespaceBuilder::new_in(arena)),
             classish_name_builder: ClassishNameBuilder::new(),
             type_parameters: Rc::new(Vec::new_in(arena)),
@@ -907,6 +907,22 @@ struct Attributes<'a> {
 }
 
 impl<'a> DirectDeclSmartConstructors<'a> {
+    fn add_class(&mut self, name: &'a str, decl: shallow_decl_defs::ShallowClass<'a>) {
+        self.state.decls.classes =
+            List::cons((name, decl), self.state.decls.classes, self.state.arena);
+    }
+    fn add_fun(&mut self, name: &'a str, decl: typing_defs::FunElt<'a>) {
+        self.state.decls.funs = List::cons((name, decl), self.state.decls.funs, self.state.arena);
+    }
+    fn add_typedef(&mut self, name: &'a str, decl: typing_defs::TypedefType<'a>) {
+        self.state.decls.typedefs =
+            List::cons((name, decl), self.state.decls.typedefs, self.state.arena);
+    }
+    fn add_const(&mut self, name: &'a str, decl: typing_defs::Ty<'a>) {
+        self.state.decls.consts =
+            List::cons((name, decl), self.state.decls.consts, self.state.arena);
+    }
+
     fn set_mode(&mut self, token: &CompactToken) {
         let mut offset = token.trailing_start_offset();
         for trivium in token.scan_trailing(self.state.source_text.source_text()) {
@@ -2200,9 +2216,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             decl_errors: Some(Errors::empty()),
         };
 
-        Rc::make_mut(&mut self.state.decls)
-            .typedefs
-            .insert(name, typedef);
+        self.add_typedef(name, typedef);
 
         Node::Ignored
     }
@@ -2356,9 +2370,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     decl_errors: Some(Errors::empty()),
                     pos,
                 };
-                Rc::make_mut(&mut self.state.decls)
-                    .funs
-                    .insert(name, fun_elt);
+                self.add_fun(name, fun_elt);
                 Node::Ignored
             }
             _ => Node::Ignored,
@@ -2443,7 +2455,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         type_: ty,
                     }))
                 } else {
-                    Rc::make_mut(&mut self.state.decls).consts.insert(id.1, ty);
+                    self.add_const(id.1, ty);
                     Node::Ignored
                 }
             }
@@ -2744,9 +2756,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             // NAST check.
             decl_errors: Errors::empty(),
         };
-        Rc::make_mut(&mut self.state.decls)
-            .classes
-            .insert(name, cls);
+        self.add_class(name, cls);
 
         self.state
             .classish_name_builder
@@ -2978,7 +2988,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             // NAST check.
             decl_errors: Errors::empty(),
         };
-        Rc::make_mut(&mut self.state.decls).classes.insert(key, cls);
+        self.add_class(key, cls);
         Node::Ignored
     }
 

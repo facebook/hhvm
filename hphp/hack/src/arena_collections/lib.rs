@@ -14,6 +14,7 @@ pub mod vec;
 pub mod list;
 
 pub use alist::{AssocList, AssocListMut, SortedAssocList};
+pub use list::List;
 pub use multiset::{MultiSet, MultiSetMut, SortedSet};
 
 pub use arena_trait::Arena;

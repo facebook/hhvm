@@ -10,6 +10,16 @@
 open Hh_prelude
 
 let go (results : ServerLintTypes.result) output_json error_format =
+  let (results, highlighted_error_format) = results in
+  let error_format =
+    match error_format with
+    | None ->
+      if highlighted_error_format then
+        Errors.Highlighted
+      else
+        Errors.Context
+    | Some ef -> ef
+  in
   if output_json then
     ServerLint.output_json stdout results
   else

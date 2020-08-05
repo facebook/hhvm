@@ -18,6 +18,7 @@ module Server_status = struct
     error_list: Pos.absolute Errors.error_ list;
     dropped_count: int;
     last_recheck_stats: Telemetry.t option;
+    highlighted_error_format: bool;
   }
 end
 
@@ -245,7 +246,7 @@ type _ t =
       -> Server_status.t t
   | STATUS_SINGLE :
       file_input * int option
-      -> (Pos.absolute Errors.error_ list * int) t
+      -> (Pos.absolute Errors.error_ list * int * bool) t
   | INFER_TYPE : file_input * int * int * bool -> InferAtPosService.result t
   | INFER_TYPE_BATCH :
       (string * int * int * (int * int) option) list * bool

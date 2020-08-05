@@ -553,7 +553,8 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
           ServerCommandTypes.FileContent (Sys_utils.read_stdin_to_string ())
         | _ -> ServerCommandTypes.FileName (expand_path filename)
       in
-      let%lwt ((error_list, dropped_count), telemetry) =
+      let%lwt ((error_list, dropped_count, highlighted_error_format), telemetry)
+          =
         rpc args (Rpc.STATUS_SINGLE (file_input, args.max_errors))
       in
       let status =
@@ -563,6 +564,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
           Rpc.Server_status.liveness = Rpc.Live_status;
           has_unsaved_changes = false;
           last_recheck_stats = None;
+          highlighted_error_format;
         }
       in
       let exit_status =

@@ -543,24 +543,25 @@ let check_members
       in
       if not removed then
         match get_member member_name with
-        | Some class_elt ->
+        (* We can skip this check if the class elements have the same origin, as we are
+         * essentially comparing a method against itself *)
+        | Some class_elt
+          when String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin ->
           let parent_class_elt = Inst.instantiate_ce psubst parent_class_elt in
           let class_elt = Inst.instantiate_ce subst class_elt in
           let check_member_unique =
             should_check_member_unique class_elt parent_class_elt
           in
-          ( if String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin then
-            let dep =
-              match mem_source with
-              | `FromMethod ->
-                Dep.Method (parent_class_elt.ce_origin, member_name)
-              | `FromSMethod ->
-                Dep.SMethod (parent_class_elt.ce_origin, member_name)
-              | `FromSProp -> Dep.SProp (parent_class_elt.ce_origin, member_name)
-              | `FromProp -> Dep.Prop (parent_class_elt.ce_origin, member_name)
-              | `FromConstructor -> Dep.Cstr parent_class_elt.ce_origin
-            in
-            Typing_deps.add_idep (Dep.Class (Cls.name class_)) dep );
+          let dep =
+            match mem_source with
+            | `FromMethod -> Dep.Method (parent_class_elt.ce_origin, member_name)
+            | `FromSMethod ->
+              Dep.SMethod (parent_class_elt.ce_origin, member_name)
+            | `FromSProp -> Dep.SProp (parent_class_elt.ce_origin, member_name)
+            | `FromProp -> Dep.Prop (parent_class_elt.ce_origin, member_name)
+            | `FromConstructor -> Dep.Cstr parent_class_elt.ce_origin
+          in
+          Typing_deps.add_idep (Dep.Class (Cls.name class_)) dep;
           check_override
             ~check_member_unique
             env
@@ -571,7 +572,7 @@ let check_members
             parent_class_elt
             class_elt
             on_error
-        | None -> env
+        | _ -> env
       else
         env)
 

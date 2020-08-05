@@ -1,16 +1,8 @@
-File "iface_require_incompat4.php", line 15, characters 11-12:
-Class I3 does not correctly implement all required members  (Typing[4340])
-File "iface_require_incompat4.php", line 15, characters 26-27:
-Some members are incompatible with those declared in type I2
-File "iface_require_incompat4.php", line 4, characters 10-11:
-The property x has the wrong type
-File "iface_require_incompat4.php", line 4, characters 10-11:
-Typing error
+File "iface_require_incompat4.php", line 19, characters 39-40:
+Unable to satisfy trait/interface requirement (Typing[4110])
 File "iface_require_incompat4.php", line 12, characters 25-29:
 Expected float
-File "iface_require_incompat4.php", line 4, characters 11-11:
-  via this generic T
-File "iface_require_incompat4.php", line 8, characters 25-27:
+File "iface_require_incompat4.php", line 12, characters 25-29:
+Considering that this type argument is invariant with respect to Super
+File "iface_require_incompat4.php", line 19, characters 23-25:
 But got int
-File "iface_require_incompat4.php", line 4, characters 11-11:
-  via this generic T

@@ -126,16 +126,12 @@ let is_method member_source =
     true
   | _ -> false
 
-let check_final_method member_source parent_class_elt class_elt on_error =
-  (* we only check for final overrides on methods, not properties *)
-  (* we don't check constructors, as they are already checked
-   * in the decl phase *)
-  let is_method = is_method member_source in
+let check_final_method parent_class_elt class_elt on_error =
   let is_override =
     get_ce_final parent_class_elt
     && String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
   in
-  if is_method && is_override && not (get_ce_synthesized class_elt) then
+  if is_override && not (get_ce_synthesized class_elt) then
     (* we have a final method being overridden by a user-declared method *)
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy pos) = class_elt.ce_pos in
@@ -144,28 +140,16 @@ let check_final_method member_source parent_class_elt class_elt on_error =
       ~child:pos
       ~on_error:(Some on_error)
 
-let check_memoizelsb_method member_source parent_class_elt class_elt on_error =
-  let is_method = is_method member_source in
-  let is_memoizelsb = get_ce_memoizelsb class_elt in
-  let is_override =
-    String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
-  in
-  if is_method && is_memoizelsb && is_override then
+let check_memoizelsb_method parent_class_elt class_elt on_error =
+  if get_ce_memoizelsb class_elt then
     (* we have a __MemoizeLSB method which is overriding something else *)
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy pos) = class_elt.ce_pos in
     Errors.override_memoizelsb parent_pos pos on_error
 
-let check_dynamically_callable
-    member_source member_name parent_class_elt class_elt on_error =
-  let is_method = is_method member_source in
-  let is_override =
-    String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
-  in
+let check_dynamically_callable member_name parent_class_elt class_elt on_error =
   if
-    is_method
-    && is_override
-    && get_ce_dynamicallycallable parent_class_elt
+    get_ce_dynamicallycallable parent_class_elt
     && not (get_ce_dynamicallycallable class_elt)
   then
     let (lazy parent_pos) = parent_class_elt.ce_pos in
@@ -186,23 +170,17 @@ let check_lsb_overrides
     | _ -> false
   in
   let parent_is_lsb = get_ce_lsb parent_class_elt in
-  let is_override =
-    String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
-  in
-  if is_sprop && parent_is_lsb && is_override then
+  if is_sprop && parent_is_lsb then
     (* __LSB attribute is being overridden *)
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy pos) = class_elt.ce_pos in
     Errors.override_lsb member_name parent_pos pos on_error
 
 let check_lateinit parent_class_elt class_elt on_error =
-  let is_override =
-    String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
-  in
   let lateinit_diff =
     Bool.( <> ) (get_ce_lateinit parent_class_elt) (get_ce_lateinit class_elt)
   in
-  if is_override && lateinit_diff then
+  if lateinit_diff then
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy child_pos) = class_elt.ce_pos in
     Errors.bad_lateinit_override
@@ -264,15 +242,15 @@ let check_override
     else
       on_error
   in
-  (* We first verify that we aren't overriding a final method *)
-  check_final_method mem_source parent_class_elt class_elt on_error;
-  check_memoizelsb_method mem_source parent_class_elt class_elt on_error;
-  check_dynamically_callable
-    mem_source
-    member_name
-    parent_class_elt
-    class_elt
-    on_error;
+  if is_method mem_source then begin
+    (* We first verify that we aren't overriding a final method *)
+    (* we only check for final overrides on methods, not properties *)
+    (* we don't check constructors, as they are already checked
+     * in the decl phase *)
+    check_final_method parent_class_elt class_elt on_error;
+    check_memoizelsb_method parent_class_elt class_elt on_error;
+    check_dynamically_callable member_name parent_class_elt class_elt on_error
+  end;
 
   (* Verify that we are not overriding an __LSB property *)
   check_lsb_overrides mem_source member_name parent_class_elt class_elt on_error;
@@ -524,8 +502,6 @@ let check_members
       && (not (get_ce_synthesized parent_class_elt))
       (* defined on original class *)
       && String.( <> ) class_elt.ce_origin (Cls.name class_)
-      (* defined from parent class, nothing to check *)
-      && String.( <> ) class_elt.ce_origin parent_class_elt.ce_origin
     | _ -> false
   in
   List.fold
@@ -659,50 +635,39 @@ let check_constructors
     | (_, Some cstr) when get_ce_override cstr ->
       (* <<__UNSAFE_Construct>> *)
       env
-    | (Some parent_cstr, Some cstr) ->
-      let parent_cstr = Inst.instantiate_ce psubst parent_cstr in
-      let cstr = Inst.instantiate_ce subst cstr in
-      if String.( <> ) parent_cstr.ce_origin cstr.ce_origin then
+    | (opt_parent_cstr, Some cstr)
+      when Option.is_some opt_parent_cstr || consistent ->
+      let parent_cstr =
+        match opt_parent_cstr with
+        | Some parent_cstr -> parent_cstr
+        | None -> default_constructor_ce parent_class
+      in
+      if String.( <> ) parent_cstr.ce_origin cstr.ce_origin then begin
+        let parent_cstr = Inst.instantiate_ce psubst parent_cstr in
+        let cstr = Inst.instantiate_ce subst cstr in
         Typing_deps.add_idep
           (Dep.Class (Cls.name class_))
           (Dep.Cstr parent_cstr.ce_origin);
-      check_override
+        check_override
+          env
+          ~check_member_unique:false
+          "__construct"
+          `FromMethod
+          ~ignore_fun_return:true
+          (parent_class, parent_ty)
+          (class_, class_ty)
+          parent_cstr
+          cstr
+          on_error
+      end else
         env
-        ~check_member_unique:false
-        "__construct"
-        `FromMethod
-        ~ignore_fun_return:true
-        (parent_class, parent_ty)
-        (class_, class_ty)
-        parent_cstr
-        cstr
-        on_error
-    | (None, Some cstr) when consistent ->
-      let parent_cstr = default_constructor_ce parent_class in
-      let parent_cstr = Inst.instantiate_ce psubst parent_cstr in
-      let cstr = Inst.instantiate_ce subst cstr in
-      if String.( <> ) parent_cstr.ce_origin cstr.ce_origin then
-        Typing_deps.add_idep
-          (Dep.Class (Cls.name class_))
-          (Dep.Cstr parent_cstr.ce_origin);
-      check_override
-        env
-        ~check_member_unique:false
-        "__construct"
-        `FromMethod
-        ~ignore_fun_return:true
-        (parent_class, parent_ty)
-        (class_, class_ty)
-        parent_cstr
-        cstr
-        on_error
-    | (None, _) -> env
+    | (_, _) -> env
   else (
     begin
       match (fst (Cls.construct parent_class), fst (Cls.construct class_)) with
       | (Some parent_cstr, _) when get_ce_synthesized parent_cstr -> ()
       | (Some parent_cstr, Some child_cstr) ->
-        check_final_method `FromMethod parent_cstr child_cstr on_error;
+        check_final_method parent_cstr child_cstr on_error;
         check_class_elt_visibility parent_cstr child_cstr on_error
       | (_, _) -> ()
     end;

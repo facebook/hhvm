@@ -232,6 +232,8 @@ val get_local_expr_id :
 
 val get_tpenv : env -> TPEnv.t
 
+val get_global_tpenv : env -> TPEnv.t
+
 val get_lower_bounds : env -> string -> TPEnv.tparam_bounds
 
 val get_upper_bounds : env -> string -> TPEnv.tparam_bounds

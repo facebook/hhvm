@@ -148,6 +148,7 @@ let subtype_method_decl
    * subtyping in the context of the ft_super constraints. But we'd better
    * restore tpenv afterwards *)
   let old_tpenv = Env.get_tpenv env in
+  let old_global_tpenv = Env.get_global_tpenv env in
   (* First extend the environment with the type parameters from the supertype, along
    * with their bounds
    *)
@@ -181,4 +182,4 @@ let subtype_method_decl
       on_error
   in
   (* Restore the type parameter environment *)
-  Env.env_with_tpenv env old_tpenv
+  Env.env_with_tpenv (Env.env_with_global_tpenv env old_global_tpenv) old_tpenv

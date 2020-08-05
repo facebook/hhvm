@@ -322,6 +322,8 @@ let get_tpenv env =
   | None -> TPEnv.empty
   | Some entry -> entry.Typing_per_cont_env.tpenv
 
+let get_global_tpenv env = env.global_tpenv
+
 let get_lower_bounds env name =
   let tpenv = get_tpenv env in
   let local = TPEnv.get_lower_bounds tpenv name in

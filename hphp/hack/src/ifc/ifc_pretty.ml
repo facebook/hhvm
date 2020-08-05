@@ -63,6 +63,7 @@ let rec ptype fmt ty =
     if not (SMap.is_empty c_property_map) then
       fprintf fmt ",@ %a" (smap comma_sep lazy_ptype) c_property_map;
     fprintf fmt "@]>"
+  | Tfun fn -> fun_ fmt fn
 
 and lazy_ptype fmt ty =
   if Lazy.is_val ty then
@@ -70,11 +71,14 @@ and lazy_ptype fmt ty =
   else
     fprintf fmt "?thunk"
 
+and fun_ fmt fn =
+  fprintf fmt "<%a, %a>" policy fn.f_pc ptype fn.f_exn;
+  fprintf fmt "(@[<hov>%a@])" (list comma_sep ptype) fn.f_args;
+  fprintf fmt ":@ %a" ptype fn.f_ret
+
 let fun_proto fmt fp =
   Option.iter ~f:(fprintf fmt "(this: %a)->" ptype) fp.fp_this;
-  fprintf fmt "%s<%a, %a>" fp.fp_name policy fp.fp_pc ptype fp.fp_exn;
-  fprintf fmt "(@[<hov>%a@])" (list comma_sep ptype) fp.fp_args;
-  fprintf fmt ":@ %a" ptype fp.fp_ret
+  fprintf fmt "%s%a" fp.fp_name fun_ fp.fp_type
 
 let prop =
   let rec conjuncts = function

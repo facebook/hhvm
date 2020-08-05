@@ -54,17 +54,9 @@ let global_exn ~subtype callable_results =
         in
         let callee = SMap.find callee_name closed_results_map in
         assert (not (Scope.equal callee.res_scope result.res_scope));
-        let arg_pairs =
-          match List.zip proto.fp_args callee.res_proto.fp_args with
-          | None -> invalid_call "arity mismatch"
-          | Some l -> l
-        in
         let pred (_, s) = Scope.equal s callee.res_scope in
-        arg_pairs
-        |> List.fold ~init:[callee.res_constraint] ~f:(fun prop (t1, t2) ->
-               subtype t1 t2 prop)
-        |> L.(proto.fp_pc < callee.res_proto.fp_pc)
-        |> subtype callee.res_proto.fp_exn proto.fp_exn
+        [callee.res_constraint]
+        |> subtype (Tfun callee.res_proto.fp_type) (Tfun proto.fp_type)
         |> (match (proto.fp_this, callee.res_proto.fp_this) with
            | (Some t1, Some t2) -> subtype t1 t2
            | (None, Some _) ->
@@ -72,7 +64,6 @@ let global_exn ~subtype callable_results =
            | (Some _, None) ->
              invalid_call ("expected '" ^ callee_name ^ "' to be a method")
            | (None, None) -> Utils.identity)
-        |> subtype callee.res_proto.fp_ret proto.fp_ret
         |> Logic.conjoin
         (* the assertion on scopes above ensures that we quantify
            only the callee policy variables *)

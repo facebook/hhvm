@@ -50,6 +50,7 @@ type ptype =
   | Tunion of ptype list
   | Tinter of ptype list
   | Tclass of class_
+  | Tfun of fun_
 
 and class_ = {
   c_name: string;
@@ -59,13 +60,17 @@ and class_ = {
   c_tparams: ptype list SMap.t;
 }
 
+and fun_ = {
+  f_pc: policy;
+  f_args: ptype list;
+  f_ret: ptype;
+  f_exn: ptype;
+}
+
 type fun_proto = {
   fp_name: string;
-  fp_pc: policy;
   fp_this: ptype option;
-  fp_args: ptype list;
-  fp_ret: ptype;
-  fp_exn: ptype;
+  fp_type: fun_;
 }
 
 (* Flow constraints with quantifiers and implication *)

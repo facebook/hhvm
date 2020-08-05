@@ -153,6 +153,18 @@ let rec subtype meta t1 t2 acc =
     |> L.(cl1.c_lump = cl2.c_lump)
     (* Covariant in class policy *)
     |> L.(cl1.c_self < cl2.c_self)
+  | (Tfun f1, Tfun f2) ->
+    let zipped_args =
+      match List.zip f1.f_args f2.f_args with
+      | Some zip -> zip
+      | None -> failwith "functions have different number of arguments"
+    in
+    (* Contravariant in argument types *)
+    List.fold ~f:(fun acc (t1, t2) -> subtype t2 t1 acc) ~init:acc zipped_args
+    (* Contravariant in PC *)
+    |> L.(f2.f_pc < f1.f_pc)
+    (* Covariant in return type and exceptions *)
+    |> L.(subtype f1.f_ret f2.f_ret && subtype f1.f_exn f2.f_exn)
   | (Tunion tl, _) ->
     List.fold tl ~init:acc ~f:(fun acc t1 -> subtype t1 t2 acc)
   | (pty1, pty2) ->
@@ -167,18 +179,26 @@ let adjust ?(prefix = "weak") ~adjustment renv env ty =
     | Astrengthen -> Aweaken
     | Aweaken -> Astrengthen
   in
-  let simple_freshen mk acc policy =
+  let freshen_policy adjustment acc policy =
     let new_policy = Env.new_policy_var renv.re_proto prefix in
     let prop =
       match adjustment with
       | Astrengthen -> L.(new_policy < policy)
       | Aweaken -> L.(policy < new_policy)
     in
-    (prop acc, mk new_policy)
+    (prop acc, new_policy)
   in
-  let rec freshen ~adjustment acc ty =
+  let rec freshen adjustment acc ty =
+    let freshen_cov = freshen adjustment in
+    let freshen_con = freshen @@ flip adjustment in
+    let freshen_pol_cov = freshen_policy adjustment in
+    let freshen_pol_con = freshen_policy @@ flip adjustment in
+    let simple_freshen f acc policy =
+      let (acc, p) = freshen_pol_cov acc policy in
+      (acc, f p)
+    in
     let on_list mk tl =
-      let (acc, tl') = List.map_env acc tl ~f:(freshen ~adjustment) in
+      let (acc, tl') = List.map_env acc tl ~f:freshen_cov in
       (acc, mk tl')
     in
     match ty with
@@ -190,13 +210,11 @@ let adjust ?(prefix = "weak") ~adjustment renv env ty =
     | Tclass class_ ->
       let adjust_tparam acc variance pty =
         match variance with
-        | Ast_defs.Covariant -> freshen ~adjustment acc pty
+        | Ast_defs.Covariant -> freshen_cov acc pty
         | Ast_defs.Invariant -> (acc, pty)
-        | Ast_defs.Contravariant ->
-          freshen ~adjustment:(flip adjustment) acc pty
+        | Ast_defs.Contravariant -> freshen_con acc pty
       in
-      let super_pol = Env.new_policy_var renv.re_proto prefix in
-      let acc = L.(class_.c_self < super_pol) acc in
+      let (acc, super_pol) = freshen_pol_cov acc class_.c_self in
       let (acc, tparams) =
         let adjust_tparams acc class_name =
           let variances = find_variances renv.re_proto.pre_meta class_name in
@@ -205,8 +223,14 @@ let adjust ?(prefix = "weak") ~adjustment renv env ty =
         SMap.map_env adjust_tparams acc class_.c_tparams
       in
       (acc, Tclass { class_ with c_self = super_pol; c_tparams = tparams })
+    | Tfun fun_ ->
+      let (acc, f_pc) = freshen_pol_con acc fun_.f_pc in
+      let (acc, f_args) = List.map_env acc ~f:freshen_con fun_.f_args in
+      let (acc, f_ret) = freshen_cov acc fun_.f_ret in
+      let (acc, f_exn) = freshen_cov acc fun_.f_exn in
+      (acc, Tfun { f_pc; f_args; f_ret; f_exn })
   in
-  let (acc, ty') = freshen ~adjustment env.e_acc ty in
+  let (acc, ty') = freshen adjustment env.e_acc ty in
   (Env.acc env (fun _ -> acc), ty')
 
 (* A constraint accumulator registering that the type t depends on
@@ -231,6 +255,8 @@ let rec add_dependencies pl t acc =
   | Tinter tl ->
     let f acc t = add_dependencies pl t acc in
     List.fold tl ~init:acc ~f
+  (* TODO(T70958722): Implement add_dependencies for Tfun *)
+  | Tfun _ -> fail "cannot add dependencies for Tfun"
 
 let policy_join renv env ?(prefix = "join") p1 p2 =
   match Logic.policy_join p1 p2 with
@@ -437,10 +463,13 @@ let call renv env callable_name that_pty_opt args_pty ret_ty =
         {
           fp_name = callable_name;
           fp_this = that_pty_opt;
-          fp_pc = pc_joined;
-          fp_args = args_pty;
-          fp_ret = ret_pty;
-          fp_exn = callee_exn;
+          fp_type =
+            {
+              f_pc = pc_joined;
+              f_args = args_pty;
+              f_ret = ret_pty;
+              f_exn = callee_exn;
+            };
         }
       in
       let env = Env.acc env (fun acc -> Chole fp :: acc) in
@@ -792,11 +821,14 @@ let callable meta decl_env class_name_opt name saved_env params body lrty =
       let proto =
         {
           fp_name = Decl.make_callable_name class_name_opt name;
-          fp_pc = global_pc;
           fp_this = this_ty;
-          fp_args = param_tys;
-          fp_ret = ret_ty;
-          fp_exn = exn;
+          fp_type =
+            {
+              f_pc = global_pc;
+              f_args = param_tys;
+              f_ret = ret_ty;
+              f_exn = exn;
+            };
         }
       in
       {

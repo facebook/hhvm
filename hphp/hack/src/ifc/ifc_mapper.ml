@@ -31,6 +31,16 @@ let rec ptype fty fpol = function
         c_property_map = prop_map;
         c_tparams;
       }
+  | Tfun f -> Tfun (fun_ fty fpol f)
+
+and fun_ fty fpol f =
+  let ptype = ptype fty fpol in
+  {
+    f_pc = fpol f.f_pc;
+    f_args = List.map ~f:ptype f.f_args;
+    f_ret = ptype f.f_ret;
+    f_exn = ptype f.f_exn;
+  }
 
 (* "fprop: int -> prop -> prop" takes as first argument the
    number of binders under which the prop argument is; it is
@@ -51,9 +61,6 @@ let prop fpol fprop depth = function
       Chole
         {
           fp_name = proto.fp_name;
-          fp_pc = fpol proto.fp_pc;
           fp_this = Option.map ~f:pty_map proto.fp_this;
-          fp_args = List.map ~f:pty_map proto.fp_args;
-          fp_ret = pty_map proto.fp_ret;
-          fp_exn = pty_map proto.fp_exn;
+          fp_type = fun_ pty_map fpol proto.fp_type;
         }

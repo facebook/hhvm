@@ -23,6 +23,7 @@ function my_option_map(): OptionInfoMap {
 'retranslate-all:'=> Pair { 'r', 'Emit optimized code after n profiling runs' },
 'php7'            => Pair { '7', 'Enable PHP7 mode' },
 'jit-gdb'         => Pair { '',  'Enable JIT symbols in GDB' },
+'jit-deserialize:'=> Pair { '', 'Enable jit deserialization' },
 'print-command'   => Pair { '',  'Just print the command, don\'t run it' },
 'region-mode:'    => Pair { '',
                             'Which region selector to use (e.g \'method\')' },
@@ -123,6 +124,21 @@ function determine_flags(OptionMap $opts): string {
     $flags .=
       '-v Eval.Jit=1 '.
       '';
+  }
+
+  if ($opts->containsKey('jit-deserialize')) {
+    if (!$opts->containsKey('repo')) {
+      error('jit-deserialize requires that you specify a repo.');
+    }
+    if ($opts->containsKey('region-mode') && $opts['region-mode'] === 'method') {
+      error('jit-deserialize option is not compatible with region-mode==method');
+    }
+    if (!$opts->containsKey('retranslate-all')) {
+      $opts['retranslate-all'] = 1;
+    }
+    $jit_serdes_file = (string)$opts['jit-deserialize'];
+    $flags .= '-v Eval.JitSerdesFile='.$jit_serdes_file.' ';
+    $flags .= '-v Eval.JitSerdesMode=DeserializeOrFail ';
   }
 
   if ($opts->containsKey('retranslate-all')) {

@@ -1,17 +1,23 @@
 find_library(ZSTD_LIB NAMES zstd)
 find_path(ZSTD_INCLUDE_DIR NAMES zstd.h)
 set(CMAKE_REQUIRED_INCLUDES "${ZSTD_INCLUDE_DIR}")
-check_cxx_source_compiles("
+
+option(FORCE_BUNDLED_ZSTD "Always build zstd, instead of using the system version" OFF)
+if (FORCE_BUNDLED_ZSTD)
+  set(CAN_USE_SYSTEM_ZSTD OFF)
+else ()
+  check_cxx_source_compiles("
 #include <zstd.h>
 
 
-int main() {
-static_assert(ZSTD_VERSION_MAJOR == 1);
-static_assert(ZSTD_VERSION_MINOR >= 4);
-  return 0;
-}
-" CAN_USE_SYSTEM_ZSTD)
-set(CMAKE_REQUIRED_INCLUDES)
+  int main() {
+  static_assert(ZSTD_VERSION_MAJOR == 1);
+  static_assert(ZSTD_VERSION_MINOR >= 4);
+    return 0;
+  }
+  " CAN_USE_SYSTEM_ZSTD)
+  set(CMAKE_REQUIRED_INCLUDES)
+endif ()
 
 add_library(zstd INTERFACE)
 if (CAN_USE_SYSTEM_ZSTD)
@@ -30,18 +36,19 @@ else ()
     "SHA512=417b813ade6c8436690bd9d6da34a9f87f50e7378752b72e63066befbee496392a4b72896fa56688d814f461871ab31d3c6637497ff2ed7a282d58513631a38b"
   )
   ExternalProject_Add(
-    zstdBuild
+    bundled_zstd
     ${ZSTD_DOWNLOAD_ARGS}
     CMAKE_ARGS
     <SOURCE_DIR>/build/cmake
+    -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
     -DZSTD_BUILD_STATIC=ON
     -DZSTD_BUILD_SHARED=OFF
     -DZSTD_BUILD_PROGRAMS=OFF
     -DCMAKE_INSTALL_LIBDIR=lib
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
   )
-  add_dependencies(zstd zstdBuild)
-  ExternalProject_Get_Property(zstdBuild INSTALL_DIR)
+  add_dependencies(zstd bundled_zstd)
+  ExternalProject_Get_Property(bundled_zstd INSTALL_DIR)
   target_include_directories(zstd INTERFACE "${INSTALL_DIR}/include")
   target_link_libraries(zstd INTERFACE
     "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}zstd${CMAKE_STATIC_LIBRARY_SUFFIX}")

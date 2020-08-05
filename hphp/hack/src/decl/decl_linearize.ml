@@ -73,26 +73,44 @@ let from_parent (c : shallow_class) : decl_ty list =
   | Ast_defs.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
   | _ -> c.sc_extends
 
-let normalize_for_comparison x =
-  if
-    Pos.equal Pos.none x.mro_use_pos
-    && Pos.equal Pos.none x.mro_ty_pos
-    && Option.is_none x.mro_required_at
-  then
-    x
-  else
-    {
-      x with
-      mro_use_pos = Pos.none;
-      mro_ty_pos = Pos.none;
-      mro_required_at = Option.map x.mro_required_at (fun _ -> Pos.none);
-    }
-
-let mro_elements_equal a =
-  let a = normalize_for_comparison a in
-  fun b ->
-    let b = normalize_for_comparison b in
-    equal_mro_element a b
+(* Return true if the two given MRO elements are equal in everything except name
+   (which is expected to be compared by the caller) and positions (which are
+   ignored). *)
+let emitted_mro_elements_equal a b =
+  let ( = ) = Bool.equal in
+  phys_equal a b
+  ||
+  let {
+    (* Ignore name and positions *)
+    mro_name = _;
+    mro_use_pos = _;
+    mro_ty_pos = _;
+    (* Compare everything else *)
+    mro_via_req_extends;
+    mro_via_req_impl;
+    mro_xhp_attrs_only;
+    mro_consts_only;
+    mro_copy_private_members;
+    mro_passthrough_abstract_typeconst;
+    mro_class_not_found;
+    mro_cyclic;
+    mro_required_at;
+    mro_trait_reuse;
+    mro_type_args;
+  } =
+    a
+  in
+  mro_via_req_extends = b.mro_via_req_extends
+  && mro_via_req_impl = b.mro_via_req_impl
+  && mro_xhp_attrs_only = b.mro_xhp_attrs_only
+  && mro_consts_only = b.mro_consts_only
+  && mro_copy_private_members = b.mro_copy_private_members
+  && mro_passthrough_abstract_typeconst = b.mro_passthrough_abstract_typeconst
+  && mro_class_not_found = b.mro_class_not_found
+  && Option.is_none mro_cyclic = Option.is_none b.mro_cyclic
+  && Option.is_none mro_required_at = Option.is_none b.mro_required_at
+  && Option.equal String.equal mro_trait_reuse b.mro_trait_reuse
+  && List.equal mro_type_args b.mro_type_args ~equal:equal_decl_ty
 
 let empty_mro_element =
   {
@@ -306,21 +324,39 @@ and linearize (env : env) (c : shallow_class) : linearization =
   in
   Sequence.unfold_step
     ~init:(Child child, ancestors, [], [])
-    ~f:(next_state env mro_name c.sc_kind)
+    ~f:(next_state env mro_name c.sc_kind (Caml.Hashtbl.create 32))
   |> Sequence.memoize
 
 and next_state
     (env : env)
     (class_name : string)
     (child_class_kind : Ast_defs.class_kind)
+    (emitted_elements : (string, mro_element list) Caml.Hashtbl.t)
     (state, ancestors, acc, synths) =
   Sequence.Step.(
     let child_class_concrete =
       Ast_defs.equal_class_kind child_class_kind Ast_defs.Cnormal
     in
+    let add_emitted mro =
+      let list =
+        match Caml.Hashtbl.find_opt emitted_elements mro.mro_name with
+        | Some list -> mro :: list
+        | None -> [mro]
+      in
+      Caml.Hashtbl.replace emitted_elements mro.mro_name list
+    in
+    let yield mro_element next_state ancestors synths =
+      add_emitted mro_element;
+      Yield (mro_element, (next_state, ancestors, mro_element :: acc, synths))
+    in
+    let was_emitted mro =
+      match Caml.Hashtbl.find_opt emitted_elements mro.mro_name with
+      | None -> false
+      | Some list -> List.mem list mro ~equal:emitted_mro_elements_equal
+    in
+    let name_was_emitted mro = Caml.Hashtbl.mem emitted_elements mro.mro_name in
     match (state, ancestors) with
-    | (Child child, _) ->
-      Yield (child, (Next_ancestor, ancestors, child :: acc, synths))
+    | (Child child, _) -> yield child Next_ancestor ancestors synths
     | (Next_ancestor, ancestor :: ancestors) ->
       let name_and_lin =
         ancestor_linearization env child_class_concrete ancestor
@@ -342,10 +378,9 @@ and next_state
               mro_cyclic = Some (SSet.add env.class_stack name);
             }
           in
-          Yield (next, (Next_ancestor, ancestors, next :: acc, synths))
+          yield next Next_ancestor ancestors synths
         | Some (next, rest) ->
-          let names_equal a b = String.equal a.mro_name b.mro_name in
-          let skip_or_mark_trait_reuse equals_next =
+          let skip_or_mark_trait_reuse was_emitted =
             let is_trait class_name =
               match Shallow_classes_provider.get (get_ctx env) class_name with
               | Some { sc_kind = Ast_defs.Ctrait; _ } -> true
@@ -361,11 +396,11 @@ and next_state
              mro_elements when they are already present in the
              linearization, we emit an element with the trait_reuse flag
              set so that we can error later. *)
-              if List.exists acc ~f:(names_equal next) then
+              if name_was_emitted next then
                 Some { next with mro_trait_reuse = Some name }
               else
                 Some next
-            else if List.exists acc ~f:equals_next then
+            else if was_emitted next then
               None
             else
               Some next
@@ -382,15 +417,12 @@ and next_state
                   (* Otherwise, keep them only if they represent a requirement that
                  we will need to validate later. *)
                   | (Some _, Ast_defs.(Cnormal | Cabstract | Cenum)) ->
-                    if List.exists synths ~f:(mro_elements_equal next) then
-                      synths
-                    else
-                      next :: synths
+                    next :: synths
                   | (None, _) -> synths
                 in
                 (None, synths)
               else
-                let next = skip_or_mark_trait_reuse (mro_elements_equal next) in
+                let next = skip_or_mark_trait_reuse was_emitted in
                 (next, synths)
             | Ancestor_types ->
               (* For ancestor types, we don't care about require-extends or
@@ -405,20 +437,22 @@ and next_state
                 if should_skip then
                   None
                 else
-                  skip_or_mark_trait_reuse (names_equal next)
+                  skip_or_mark_trait_reuse name_was_emitted
               in
               (next, synths)
           in
           (match next with
           | None -> Skip (Ancestor (name, rest), ancestors, acc, synths)
-          | Some next ->
-            Yield (next, (Ancestor (name, rest), ancestors, next :: acc, synths)))
+          | Some next -> yield next (Ancestor (name, rest)) ancestors synths)
       end
     | (Next_ancestor, []) ->
       let synths = List.rev synths in
       Skip (Synthesized_elts synths, ancestors, acc, synths)
     | (Synthesized_elts (next :: synths), ancestors) ->
-      Yield (next, (Synthesized_elts synths, ancestors, next :: acc, synths))
+      if was_emitted next then
+        Skip (Synthesized_elts synths, ancestors, acc, synths)
+      else
+        yield next (Synthesized_elts synths) ancestors synths
     | (Synthesized_elts [], _) ->
       let key = (class_name, env.linearization_kind) in
       Linearization_provider.complete (get_ctx env) key (List.rev acc);

@@ -33,6 +33,14 @@ struct SwitchProfile {
   SwitchProfile(const SwitchProfile&) = delete;
   SwitchProfile& operator=(const SwitchProfile&) = delete;
 
+  std::string toString() const {
+    return "";
+  }
+
+  folly::dynamic toDynamic() const {
+    return folly::dynamic::object();
+  }
+
   std::string toString(uint32_t size) const {
     auto const nCases = size / sizeof(uint32_t);
     std::string out;

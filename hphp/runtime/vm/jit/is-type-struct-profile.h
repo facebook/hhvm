@@ -20,6 +20,8 @@
 #include <cstdint>
 #include <string>
 
+#include <folly/dynamic.h>
+
 namespace HPHP {
 
 struct ArrayData;
@@ -36,6 +38,7 @@ public:
   void update(const ArrayData* ad);
   static void reduce(IsTypeStructProfile& l, const IsTypeStructProfile& r);
   std::string toString() const;
+  folly::dynamic toDynamic() const;
 
 private:
   uint32_t m_class{0};

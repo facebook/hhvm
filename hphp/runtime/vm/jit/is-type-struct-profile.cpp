@@ -46,4 +46,8 @@ std::string IsTypeStructProfile::toString() const {
   return folly::to<std::string>("class:", m_class, ",total:", m_total);
 }
 
+folly::dynamic IsTypeStructProfile::toDynamic() const {
+  return folly::dynamic::object("class", m_class)("total", m_total);
+}
+
 }}

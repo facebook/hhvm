@@ -1607,14 +1607,22 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
     }
     auto signature = read_raw<decltype(Repo::get().global().Signature)>(ser);
     if (signature != Repo::get().global().Signature) {
-      throw std::runtime_error("Mismatched repo-schema");
+      auto const msg =
+        folly::sformat("Mismatched repo-schema (expected signature '{}')",
+          Repo::get().global().Signature);
+
+      throw std::runtime_error(msg);
     }
     auto size = read_raw<size_t>(ser);
     std::string schema;
     schema.resize(size);
     read_raw(ser, &schema[0], size);
     if (schema != repoSchemaId()) {
-      throw std::runtime_error("Mismatched repo-schema");
+      auto const msg =
+        folly::sformat("Mismatched repo-schema (expected schema_id '{}')",
+          repoSchemaId());
+
+      throw std::runtime_error(msg);
     }
 
     size = read_raw<size_t>(ser);

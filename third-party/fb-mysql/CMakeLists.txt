@@ -18,7 +18,7 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   "SHA512=6f362dfae963c67985eda050b778c26729c8ec98110f9ed72d295061cdde0f7d2276d4126facab5f5bd741d63bb8afe3c6ca38eb4876f9db97fba07e405899ec"
 )
 ExternalProject_Add(
-  fbmysqlclient_external
+  bundled_fbmysqlclient
   ${FB_MYSQL_DOWNLOAD_ARGS}
   PATCH_COMMAND
   patch -p1 < "${CMAKE_CURRENT_SOURCE_DIR}/explicit_zstd_path.patch"
@@ -49,16 +49,16 @@ ExternalProject_Add(
 # re2 + re2Build -- otherwise putting them here would force
 # them to always be built, instead of using the system ones where available.
 set(DEPS lz4 zstd)
-add_dependencies(fbmysqlclient_external ${DEPS})
+add_dependencies(bundled_fbmysqlclient ${DEPS})
 
 # This extra indirection is needed because if the fbmysqlclient target links
 # ${DEPS} directly, the correct linking order is not guaranteed.
 add_library(fbmysqlclientDeps INTERFACE)
 target_link_libraries(fbmysqlclientDeps INTERFACE ${DEPS})
 
-ExternalProject_Get_Property(fbmysqlclient_external INSTALL_DIR)
+ExternalProject_Get_Property(bundled_fbmysqlclient INSTALL_DIR)
 
-add_dependencies(fbmysqlclient fbmysqlclient_external)
+add_dependencies(fbmysqlclient bundled_fbmysqlclient)
 target_include_directories(fbmysqlclient INTERFACE "${INSTALL_DIR}/include")
 target_link_libraries(fbmysqlclient INTERFACE
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}mysqlclient${CMAKE_STATIC_LIBRARY_SUFFIX}"

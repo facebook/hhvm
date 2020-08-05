@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<333ea47184efa96cc386039f052b26e7>>
+// @generated SignedSource<<ca032b2c4270fe38a353c9e010825bcc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 use arena_trait::TrivialDrop;
+use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -40,18 +41,46 @@ pub type FileT<'a, A> = phase_map::PhaseMap<'a, &'a [A]>;
 /// Results of multi-file analysis.
 pub type FilesT<'a, A> = relative_path::map::Map<'a, FileT<'a, A>>;
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize, ToOcamlRep)]
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    PartialEq,
+    Serialize,
+    ToOcamlRep
+)]
 pub struct Error_<'a, A>(pub oxidized::errors::ErrorCode, pub &'a [Message<'a, A>]);
 impl<'a, A: TrivialDrop> TrivialDrop for Error_<'a, A> {}
 
 pub type Error<'a> = Error_<'a, &'a pos::Pos<'a>>;
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct AppliedFixme<'a>(pub &'a pos::Pos<'a>, pub isize);
 impl<'a> TrivialDrop for AppliedFixme<'a> {}
 
-#[derive(Clone, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep)]
+#[derive(
+    Clone,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 pub struct Errors<'a>(pub FilesT<'a, Error<'a>>, pub FilesT<'a, AppliedFixme<'a>>);
 impl<'a> TrivialDrop for Errors<'a> {}

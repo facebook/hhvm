@@ -28,7 +28,7 @@ use bumpalo::Bump;
 use serde::Serialize;
 
 use arena_trait::TrivialDrop;
-use ocamlrep::ToOcamlRep;
+use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
 
 use crate::{AssocList, AssocListMut, SortedAssocList};
 
@@ -576,5 +576,17 @@ impl<T: ToOcamlRep + Ord> ToOcamlRep for SortedSet<'_, T> {
         let mut iter = self.iter();
         let (value, _) = ocamlrep::sorted_iter_to_ocaml_set(&mut iter, alloc, len);
         value
+    }
+}
+
+impl<'a, T: FromOcamlRepIn<'a> + Ord> FromOcamlRepIn<'a> for SortedSet<'a, T> {
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        alloc: &'a bumpalo::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
+        let mut list = bumpalo::collections::Vec::new_in(alloc);
+        ocamlrep::vec_from_ocaml_set_in(value, &mut list, alloc)?;
+        let list = SortedAssocList::from_slice(list.into_bump_slice());
+        Ok(Self { list })
     }
 }

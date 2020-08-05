@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<484e48550d2b64b348a4a295ae401d07>>
+// @generated SignedSource<<6d00fffb496451e44fc519284ce7633f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 use arena_trait::TrivialDrop;
+use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -24,7 +25,16 @@ pub use local_id::LocalId;
 pub use shape_map::ShapeMap;
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct Lid<'a>(pub &'a Pos<'a>, pub LocalId<'a>);
 impl<'a> TrivialDrop for Lid<'a> {}
@@ -44,7 +54,16 @@ pub use oxidized::aast_defs::ParamMutability;
 pub use oxidized::aast_defs::ImportFlavor;
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum XhpChild<'a> {
     ChildName(Sid<'a>),
@@ -57,7 +76,16 @@ impl<'a> TrivialDrop for XhpChild<'a> {}
 pub use oxidized::aast_defs::XhpChildOp;
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct Hint<'a>(pub &'a Pos<'a>, pub &'a Hint_<'a>);
 impl<'a> TrivialDrop for Hint<'a> {}
@@ -67,7 +95,16 @@ pub use oxidized::aast_defs::MutableReturn;
 pub type VariadicHint<'a> = Option<Hint<'a>>;
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct HintFun<'a> {
     pub reactive_kind: oxidized::aast_defs::FuncReactive,
@@ -82,7 +119,16 @@ pub struct HintFun<'a> {
 impl<'a> TrivialDrop for HintFun<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum Hint_<'a> {
     Hoption(Hint<'a>),
@@ -132,7 +178,16 @@ impl<'a> TrivialDrop for Hint_<'a> {}
 
 /// AST types such as Happly("int", []) are resolved to Hprim values
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum Tprim<'a> {
     Tnull,
@@ -152,7 +207,16 @@ pub enum Tprim<'a> {
 impl<'a> TrivialDrop for Tprim<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShapeFieldInfo<'a> {
     pub optional: bool,
@@ -162,7 +226,16 @@ pub struct ShapeFieldInfo<'a> {
 impl<'a> TrivialDrop for ShapeFieldInfo<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct NastShapeInfo<'a> {
     pub allows_unknown_fields: bool,
@@ -181,7 +254,16 @@ pub use oxidized::aast_defs::UseAsVisibility;
 pub use oxidized::aast_defs::TypedefVisibility;
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct Enum_<'a> {
     pub base: Hint<'a>,
@@ -190,7 +272,16 @@ pub struct Enum_<'a> {
 impl<'a> TrivialDrop for Enum_<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct WhereConstraint<'a>(
     pub Hint<'a>,

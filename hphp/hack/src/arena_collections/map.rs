@@ -9,11 +9,12 @@ use std::hash::{Hash, Hasher};
 use serde::Serialize;
 
 use arena_trait::{Arena, TrivialDrop};
-use ocamlrep::ToOcamlRep;
+use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
+use ocamlrep_derive::ToOcamlRep;
 
 /// The maximum height difference (or balance factor) that is allowed
 /// in the implementation of the AVL tree.
-const MAX_DELTA: u8 = 2;
+const MAX_DELTA: usize = 2;
 
 /// An arena-allocated map.
 ///
@@ -30,6 +31,8 @@ const MAX_DELTA: u8 = 2;
 #[derive(Debug, Serialize)]
 #[must_use]
 pub struct Map<'a, K, V>(Option<&'a Node<'a, K, V>>);
+
+impl<'a, K, V> TrivialDrop for Map<'a, K, V> {}
 
 /// The derived implementations of Copy and Clone require that K and V be
 /// Copy/Clone. We have no such requirement, since Map is just a pointer, so we
@@ -79,17 +82,57 @@ impl<K, V> Default for Map<'_, K, V> {
     }
 }
 
-impl<K: ToOcamlRep + Ord, V: ToOcamlRep> ToOcamlRep for Map<'_, K, V> {
+impl<K: ToOcamlRep, V: ToOcamlRep> ToOcamlRep for Map<'_, K, V> {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
-        let len = self.count();
-        let mut iter = self.iter();
-        let (value, _) = ocamlrep::sorted_iter_to_ocaml_map(&mut iter, alloc, len);
-        value
+        match self.0 {
+            None => alloc.add(&()),
+            Some(val) => alloc.add(val),
+        }
     }
 }
 
-#[derive(Debug, Serialize)]
-struct Node<'a, K, V>(Map<'a, K, V>, K, V, Map<'a, K, V>, u8);
+impl<'a, K, V> FromOcamlRepIn<'a> for Map<'a, K, V>
+where
+    K: FromOcamlRepIn<'a> + TrivialDrop,
+    V: FromOcamlRepIn<'a> + TrivialDrop,
+{
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        alloc: &'a bumpalo::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
+        if value.is_immediate() {
+            let _ = ocamlrep::from::expect_nullary_variant(value, 0)?;
+            Ok(Map(None))
+        } else {
+            Ok(Map(Some(
+                alloc.alloc(<Node<'a, K, V>>::from_ocamlrep_in(value, alloc)?),
+            )))
+        }
+    }
+}
+
+#[derive(Debug, Serialize, ToOcamlRep)]
+struct Node<'a, K, V>(Map<'a, K, V>, K, V, Map<'a, K, V>, usize);
+
+impl<'a, K, V> FromOcamlRepIn<'a> for Node<'a, K, V>
+where
+    K: FromOcamlRepIn<'a> + TrivialDrop,
+    V: FromOcamlRepIn<'a> + TrivialDrop,
+{
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        alloc: &'a bumpalo::Bump,
+    ) -> std::result::Result<Self, ocamlrep::FromError> {
+        let block = ocamlrep::from::expect_tuple(value, 5)?;
+        Ok(Node(
+            ocamlrep::from::field_in(block, 0, alloc)?,
+            ocamlrep::from::field_in(block, 1, alloc)?,
+            ocamlrep::from::field_in(block, 2, alloc)?,
+            ocamlrep::from::field_in(block, 3, alloc)?,
+            ocamlrep::from::field_in(block, 4, alloc)?,
+        ))
+    }
+}
 
 impl<'a, K: TrivialDrop, V: TrivialDrop> TrivialDrop for Node<'a, K, V> {}
 
@@ -294,7 +337,7 @@ impl<'a, K: Clone + Ord, V: Copy> Map<'a, K, V> {
     }
 }
 
-fn height<'a, K, V>(l: Map<'a, K, V>) -> u8 {
+fn height<'a, K, V>(l: Map<'a, K, V>) -> usize {
     match l {
         Map(None) => 0,
         Map(Some(Node(_, _, _, _, h))) => *h,

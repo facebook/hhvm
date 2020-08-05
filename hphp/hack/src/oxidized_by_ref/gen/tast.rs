@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0595d68bfa1ca6de81810972484b9dd8>>
+// @generated SignedSource<<09a5317dd8d1756c0501b94ee68b70e3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 use arena_trait::TrivialDrop;
+use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -27,10 +28,20 @@ pub type DeclTy<'a> = typing_defs::Ty<'a>;
 pub type TypeParamMutability<'a> = typing_defs::ParamMutability;
 
 #[derive(
-    Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Default,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct SavedEnv<'a> {
-    pub tcopt: oxidized::typechecker_options::TypecheckerOptions,
+    pub tcopt: typechecker_options::TypecheckerOptions<'a>,
     pub inference_env: typing_inference_env::TypingInferenceEnv<'a>,
     pub tpenv: type_parameter_env::TypeParameterEnv<'a>,
     pub reactivity: Reactivity<'a>,

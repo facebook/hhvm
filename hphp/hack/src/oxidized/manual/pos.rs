@@ -6,14 +6,23 @@
 use std::{borrow::Cow, cmp::Ordering, ops::Range, path::PathBuf, result::Result::*};
 
 use ocamlrep::rc::RcOc;
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep_derive::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 use serde::{Deserialize, Serialize};
 
 use crate::file_pos_large::FilePosLarge;
 use crate::file_pos_small::FilePosSmall;
 use crate::relative_path::{Prefix, RelativePath};
 
-#[derive(Clone, Debug, Deserialize, Hash, FromOcamlRep, ToOcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Hash,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    ToOcamlRep,
+    Serialize
+)]
 enum PosImpl {
     Small {
         file: RcOc<RelativePath>,
@@ -29,7 +38,16 @@ enum PosImpl {
 
 use PosImpl::*;
 
-#[derive(Clone, Debug, Deserialize, Hash, FromOcamlRep, ToOcamlRep, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Hash,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    ToOcamlRep,
+    Serialize
+)]
 pub struct Pos(PosImpl);
 
 pub type PosR<'a> = &'a Pos;

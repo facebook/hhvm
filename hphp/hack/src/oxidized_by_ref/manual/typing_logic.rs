@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 use serde::Serialize;
 
 use crate::typing_defs::*;
@@ -13,7 +13,16 @@ use crate::typing_defs::*;
 /// definition of Disj
 /// @TODO: work out what to do about this!
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum SubtypeProp<'a> {
     Coerce(Ty<'a>, Ty<'a>),

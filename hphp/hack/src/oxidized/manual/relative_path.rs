@@ -7,7 +7,7 @@ use std::convert::TryFrom;
 use std::fmt::{self, Display};
 use std::path::{Path, PathBuf};
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep_derive::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 use serde::{Deserialize, Serialize};
 
 #[derive(
@@ -18,6 +18,7 @@ use serde::{Deserialize, Serialize};
     Eq,
     Hash,
     FromOcamlRep,
+    FromOcamlRepIn,
     ToOcamlRep,
     Ord,
     PartialEq,

@@ -3,13 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b1c45e7dbc4998b4c66d0f3728b06ef6>>
+// @generated SignedSource<<8cea58147de00c09805917f2468fb14c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 use arena_trait::TrivialDrop;
 use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -49,7 +50,16 @@ pub use typing_defs::*;
 /// via a require extends type. This information is relevant when folding
 /// `dc_substs` during inheritance. See Decl_inherit module.
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct SubstContext<'a> {
     pub subst: s_map::SMap<'a, Ty<'a>>,
@@ -64,6 +74,7 @@ impl<'a> TrivialDrop for SubstContext<'a> {}
     Debug,
     Eq,
     FromOcamlRep,
+    FromOcamlRepIn,
     Hash,
     Ord,
     PartialEq,
@@ -83,7 +94,16 @@ pub enum SourceType {
 impl TrivialDrop for SourceType {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct MroElement<'a> {
     /// The class's name
@@ -160,6 +180,7 @@ impl<'a> TrivialDrop for MroElement<'a> {}
     Debug,
     Eq,
     FromOcamlRep,
+    FromOcamlRepIn,
     Hash,
     Ord,
     PartialEq,
@@ -178,7 +199,16 @@ impl TrivialDrop for LinearizationKind {}
 pub type ConditionTypeName<'a> = Option<&'a str>;
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum MethodReactivity<'a> {
     MethodPure(ConditionTypeName<'a>),
@@ -189,7 +219,16 @@ pub enum MethodReactivity<'a> {
 impl<'a> TrivialDrop for MethodReactivity<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct DeclClassType<'a> {
     pub need_init: bool,
@@ -232,7 +271,16 @@ pub struct DeclClassType<'a> {
 impl<'a> TrivialDrop for DeclClassType<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct Element<'a> {
     pub flags: isize,

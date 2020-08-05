@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep_derive::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 use serde::{Deserialize, Serialize};
 
 #[derive(
@@ -17,6 +17,7 @@ use serde::{Deserialize, Serialize};
     PartialEq,
     PartialOrd,
     FromOcamlRep,
+    FromOcamlRepIn,
     ToOcamlRep,
     Serialize
 )]

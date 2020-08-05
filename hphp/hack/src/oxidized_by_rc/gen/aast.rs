@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a3ef8b53c4e1ae592f13774e0b461468>>
+// @generated SignedSource<<3113300f159d55572dabfcaa630e95aa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_rc/regen.sh
@@ -140,6 +140,14 @@ pub enum CollectionTarg<Hi> {
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
+pub enum FunctionPtrId<Ex, Fb, En, Hi> {
+    FPId(Sid),
+    FPClassConst(ClassId<Ex, Fb, En, Hi>, Pstring),
+}
+
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub enum Expr_<Ex, Fb, En, Hi> {
     Array(Vec<Afield<Ex, Fb, En, Hi>>),
     Darray(
@@ -194,7 +202,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
             Option<Expr<Ex, Fb, En, Hi>>,
         )>,
     ),
-    FunctionPointer(std::rc::Rc<(Expr<Ex, Fb, En, Hi>, Vec<Targ<Hi>>)>),
+    FunctionPointer(std::rc::Rc<(FunctionPtrId<Ex, Fb, En, Hi>, Vec<Targ<Hi>>)>),
     Int(std::rc::Rc<std::rc::Rc<String>>),
     Float(std::rc::Rc<std::rc::Rc<String>>),
     String(std::rc::Rc<std::rc::Rc<String>>),
@@ -356,6 +364,7 @@ pub struct Fun_<Ex, Fb, En, Hi> {
     pub where_constraints: Vec<WhereConstraint>,
     pub variadic: FunVariadicity<Ex, Fb, En, Hi>,
     pub params: Vec<FunParam<Ex, Fb, En, Hi>>,
+    pub cap: TypeHint<Hi>,
     pub body: FuncBody<Ex, Fb, En, Hi>,
     pub fun_kind: oxidized::ast_defs::FunKind,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
@@ -620,6 +629,7 @@ pub struct Method_<Ex, Fb, En, Hi> {
     pub where_constraints: Vec<WhereConstraint>,
     pub variadic: FunVariadicity<Ex, Fb, En, Hi>,
     pub params: Vec<FunParam<Ex, Fb, En, Hi>>,
+    pub cap: TypeHint<Hi>,
     pub body: FuncBody<Ex, Fb, En, Hi>,
     pub fun_kind: oxidized::ast_defs::FunKind,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,

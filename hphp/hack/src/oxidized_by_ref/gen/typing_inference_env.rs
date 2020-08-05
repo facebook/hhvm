@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0f5ccbe230ae0ebb95264be124a52b26>>
+// @generated SignedSource<<1d70572b6d24bfd7753b6c194cd7a591>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 use arena_trait::TrivialDrop;
+use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -22,7 +23,16 @@ pub use crate::typing_logic as t_l;
 pub use crate::typing_tyvar_occurrences as occ;
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct TyvarConstraints<'a> {
     /// Does this type variable appear covariantly in the type of the expression?
@@ -48,7 +58,16 @@ pub struct TyvarConstraints<'a> {
 impl<'a> TrivialDrop for TyvarConstraints<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum SolvingInfo<'a> {
     /// when the type variable is bound to a type
@@ -59,7 +78,16 @@ pub enum SolvingInfo<'a> {
 impl<'a> TrivialDrop for SolvingInfo<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct TyvarInfo<'a> {
     /// Where was the type variable introduced? (e.g. generic method invocation,
@@ -74,7 +102,17 @@ impl<'a> TrivialDrop for TyvarInfo<'a> {}
 pub type Tvenv<'a> = i_map::IMap<'a, TyvarInfo<'a>>;
 
 #[derive(
-    Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Default,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct TypingInferenceEnv<'a> {
     pub tvenv: Tvenv<'a>,
@@ -86,7 +124,16 @@ pub struct TypingInferenceEnv<'a> {
 impl<'a> TrivialDrop for TypingInferenceEnv<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct GlobalTyvarInfo<'a> {
     pub tyvar_reason: &'a reason::Reason<'a>,
@@ -99,7 +146,16 @@ pub type GlobalTvenv<'a> = i_map::IMap<'a, GlobalTyvarInfo<'a>>;
 pub type TGlobal<'a> = GlobalTvenv<'a>;
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct TGlobalWithPos<'a>(pub &'a pos::Pos<'a>, pub TGlobal<'a>);
 impl<'a> TrivialDrop for TGlobalWithPos<'a> {}

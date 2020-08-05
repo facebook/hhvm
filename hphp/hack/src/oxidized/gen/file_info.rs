@@ -3,13 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<affe52fa40304c467a6eca71c472247e>>
+// @generated SignedSource<<37b0c8b4e70520e242a2532d548348ef>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 use arena_trait::TrivialDrop;
 use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
@@ -26,6 +27,7 @@ pub use prim_defs::*;
     Deserialize,
     Eq,
     FromOcamlRep,
+    FromOcamlRepIn,
     Hash,
     Ord,
     PartialEq,
@@ -52,6 +54,7 @@ impl TrivialDrop for Mode {}
     Deserialize,
     Eq,
     FromOcamlRep,
+    FromOcamlRepIn,
     Hash,
     Ord,
     PartialEq,

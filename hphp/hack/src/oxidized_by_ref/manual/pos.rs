@@ -8,13 +8,13 @@ use std::{cmp::Ordering, ops::Range, result::Result::*};
 use bumpalo::Bump;
 use serde::Serialize;
 
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 use oxidized::file_pos_large::FilePosLarge;
 use oxidized::file_pos_small::FilePosSmall;
 
 use crate::relative_path::RelativePath;
 
-#[derive(Clone, Hash, Serialize, ToOcamlRep)]
+#[derive(Clone, Hash, Serialize, ToOcamlRep, FromOcamlRepIn)]
 enum PosImpl<'a> {
     Small {
         file: &'a RelativePath<'a>,
@@ -32,7 +32,7 @@ impl arena_trait::TrivialDrop for PosImpl<'_> {}
 
 use PosImpl::*;
 
-#[derive(Clone, Hash, Serialize, ToOcamlRep)]
+#[derive(Clone, Hash, Serialize, ToOcamlRep, FromOcamlRepIn)]
 pub struct Pos<'a>(PosImpl<'a>);
 
 impl arena_trait::TrivialDrop for Pos<'_> {}

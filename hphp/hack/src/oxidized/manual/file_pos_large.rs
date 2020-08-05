@@ -5,7 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep_derive::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 
 #[derive(
     Copy,
@@ -15,6 +15,7 @@ use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
     Eq,
     Hash,
     FromOcamlRep,
+    FromOcamlRepIn,
     ToOcamlRep,
     PartialEq,
     Serialize
@@ -24,6 +25,8 @@ pub struct FilePosLarge {
     bol: usize,
     cnum: usize,
 }
+
+impl arena_trait::TrivialDrop for FilePosLarge {}
 
 const DUMMY: FilePosLarge = FilePosLarge {
     lnum: 0,

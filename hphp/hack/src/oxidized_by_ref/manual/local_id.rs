@@ -5,10 +5,20 @@
 
 use serde::Serialize;
 
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 
 #[derive(
-    Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct LocalId<'a>(isize, &'a str);
 

@@ -490,6 +490,28 @@ fn btree_map_from_ocamlrep<K: FromOcamlRep + Ord, V: FromOcamlRep>(
     Ok(())
 }
 
+pub fn vec_from_ocaml_map_in<'a, K, V>(
+    value: Value<'_>,
+    vec: &mut bumpalo::collections::Vec<'a, (K, V)>,
+    alloc: &'a Bump,
+) -> Result<(), FromError>
+where
+    K: FromOcamlRepIn<'a> + Ord,
+    V: FromOcamlRepIn<'a>,
+{
+    if value.is_immediate() {
+        let _ = from::expect_nullary_variant(value, 0)?;
+        return Ok(());
+    }
+    let block = expect_block_with_size_and_tag(value, 5, 0)?;
+    vec_from_ocaml_map_in(block[0], vec, alloc)?;
+    let key: K = from::field_in(block, 1, alloc)?;
+    let val: V = from::field_in(block, 2, alloc)?;
+    vec.push((key, val));
+    vec_from_ocaml_map_in(block[3], vec, alloc)?;
+    Ok(())
+}
+
 impl<T: ToOcamlRep + Ord> ToOcamlRep for BTreeSet<T> {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
         if self.is_empty() {
@@ -551,6 +573,22 @@ fn btree_set_from_ocamlrep<T: FromOcamlRep + Ord>(
     btree_set_from_ocamlrep(set, block[0])?;
     set.insert(from::field(block, 1)?);
     btree_set_from_ocamlrep(set, block[2])?;
+    Ok(())
+}
+
+pub fn vec_from_ocaml_set_in<'a, T: FromOcamlRepIn<'a> + Ord>(
+    value: Value<'_>,
+    vec: &mut bumpalo::collections::Vec<'a, T>,
+    alloc: &'a Bump,
+) -> Result<(), FromError> {
+    if value.is_immediate() {
+        let _ = from::expect_nullary_variant(value, 0)?;
+        return Ok(());
+    }
+    let block = expect_block_with_size_and_tag(value, 4, 0)?;
+    vec_from_ocaml_set_in(block[0], vec, alloc)?;
+    vec.push(from::field_in(block, 1, alloc)?);
+    vec_from_ocaml_set_in(block[2], vec, alloc)?;
     Ok(())
 }
 

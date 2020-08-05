@@ -5,7 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep_derive::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 
 #[derive(
     Clone,
@@ -17,6 +17,7 @@ use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
     PartialEq,
     PartialOrd,
     FromOcamlRep,
+    FromOcamlRepIn,
     ToOcamlRep,
     Serialize
 )]

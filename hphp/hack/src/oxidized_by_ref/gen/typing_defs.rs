@@ -3,13 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bc7e2e80289a43a3ef397ba0fb65fa49>>
+// @generated SignedSource<<0e98d2d87f023b7de9cf7cd2dad28192>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 use arena_trait::TrivialDrop;
 use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -21,7 +22,16 @@ pub use typing_defs_flags::*;
 pub use typing_defs_core::*;
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct PuOrigin<'a> {
     pub class: &'a str,
@@ -30,7 +40,16 @@ pub struct PuOrigin<'a> {
 impl<'a> TrivialDrop for PuOrigin<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ClassElt<'a> {
     pub visibility: Visibility<'a>,
@@ -44,7 +63,16 @@ pub struct ClassElt<'a> {
 impl<'a> TrivialDrop for ClassElt<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct FunElt<'a> {
     pub deprecated: Option<&'a str>,
@@ -55,7 +83,16 @@ pub struct FunElt<'a> {
 impl<'a> TrivialDrop for FunElt<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ClassConst<'a> {
     pub synthesized: bool,
@@ -82,13 +119,31 @@ impl<'a> TrivialDrop for ClassConst<'a> {}
 /// }
 /// ```
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct Requirement<'a>(pub &'a pos::Pos<'a>, pub Ty<'a>);
 impl<'a> TrivialDrop for Requirement<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ClassType<'a> {
     pub need_init: bool,
@@ -134,7 +189,16 @@ pub struct ClassType<'a> {
 impl<'a> TrivialDrop for ClassType<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum TypeconstAbstractKind<'a> {
     TCAbstract(Option<Ty<'a>>),
@@ -144,7 +208,16 @@ pub enum TypeconstAbstractKind<'a> {
 impl<'a> TrivialDrop for TypeconstAbstractKind<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct TypeconstType<'a> {
     pub abstract_: TypeconstAbstractKind<'a>,
@@ -158,7 +231,16 @@ pub struct TypeconstType<'a> {
 impl<'a> TrivialDrop for TypeconstType<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct PuEnumType<'a> {
     pub name: nast::Sid<'a>,
@@ -170,7 +252,16 @@ pub struct PuEnumType<'a> {
 impl<'a> TrivialDrop for PuEnumType<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct PuMemberType<'a> {
     pub atom: nast::Sid<'a>,
@@ -181,7 +272,16 @@ pub struct PuMemberType<'a> {
 impl<'a> TrivialDrop for PuMemberType<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct EnumType<'a> {
     pub base: Ty<'a>,
@@ -195,6 +295,7 @@ impl<'a> TrivialDrop for EnumType<'a> {}
     Debug,
     Eq,
     FromOcamlRep,
+    FromOcamlRepIn,
     Hash,
     Ord,
     PartialEq,
@@ -209,7 +310,16 @@ pub enum RecordFieldReq {
 impl TrivialDrop for RecordFieldReq {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct RecordDefType<'a> {
     pub name: nast::Sid<'a>,
@@ -222,7 +332,16 @@ pub struct RecordDefType<'a> {
 impl<'a> TrivialDrop for RecordDefType<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct TypedefType<'a> {
     pub pos: &'a pos::Pos<'a>,
@@ -235,7 +354,16 @@ pub struct TypedefType<'a> {
 impl<'a> TrivialDrop for TypedefType<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum DeserializationError<'a> {
     /// The type was valid, but some component thereof was a decl_ty when we

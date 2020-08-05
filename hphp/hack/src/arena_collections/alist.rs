@@ -28,7 +28,7 @@ use bumpalo::Bump;
 use serde::Serialize;
 
 use arena_trait::TrivialDrop;
-use ocamlrep::ToOcamlRep;
+use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
 
 /// Perform a linear search for the last entry in the slice with the given key.
 #[inline(always)]
@@ -951,5 +951,21 @@ impl<K: ToOcamlRep + Ord, V: ToOcamlRep> ToOcamlRep for SortedAssocList<'_, K, V
         let mut iter = self.iter();
         let (value, _) = ocamlrep::sorted_iter_to_ocaml_map(&mut iter, alloc, len);
         value
+    }
+}
+
+impl<'a, K, V> FromOcamlRepIn<'a> for SortedAssocList<'a, K, V>
+where
+    K: FromOcamlRepIn<'a> + Ord,
+    V: FromOcamlRepIn<'a>,
+{
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        alloc: &'a bumpalo::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
+        let mut entries = bumpalo::collections::Vec::new_in(alloc);
+        ocamlrep::vec_from_ocaml_map_in(value, &mut entries, alloc)?;
+        let entries = entries.into_bump_slice();
+        Ok(Self { entries })
     }
 }

@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4092e84aaaf4a88031d6636002c20f68>>
+// @generated SignedSource<<9259aa6ddf47eb066e67f04aa04fc675>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 use arena_trait::TrivialDrop;
+use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -24,7 +25,16 @@ pub type LoclTy<'a> = typing_defs::Ty<'a>;
 pub type LocalIdSetT<'a> = local_id::set::Set<'a>;
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct LocalEnv<'a> {
     pub per_cont_env: typing_per_cont_env::TypingPerContEnv<'a>,
@@ -34,7 +44,15 @@ pub struct LocalEnv<'a> {
 }
 impl<'a> TrivialDrop for LocalEnv<'a> {}
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Serialize, ToOcamlRep)]
+#[derive(
+    Clone,
+    Debug,
+    FromOcamlRepIn,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 pub struct Env<'a> {
     pub function_pos: &'a pos::Pos<'a>,
     pub fresh_typarams: s_set::SSet<'a>,
@@ -55,9 +73,17 @@ pub struct Env<'a> {
 }
 impl<'a> TrivialDrop for Env<'a> {}
 
-#[derive(Clone, Debug, PartialEq, PartialOrd, Serialize, ToOcamlRep)]
+#[derive(
+    Clone,
+    Debug,
+    FromOcamlRepIn,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 pub struct Genv<'a> {
-    pub tcopt: oxidized::typechecker_options::TypecheckerOptions,
+    pub tcopt: typechecker_options::TypecheckerOptions<'a>,
     pub return_: typing_env_return_info::TypingEnvReturnInfo<'a>,
     pub params: local_id::map::Map<'a, (Ty<'a>, &'a pos::Pos<'a>, ParamMode)>,
     pub condition_types: s_map::SMap<'a, Ty<'a>>,

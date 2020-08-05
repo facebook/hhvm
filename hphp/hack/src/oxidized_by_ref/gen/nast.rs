@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a354813e90b5ffafed67c1d752bd32e5>>
+// @generated SignedSource<<364b920e964ccfe318685b2c97048c76>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 use arena_trait::TrivialDrop;
+use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -26,7 +27,17 @@ pub use aast::XhpAttrHint;
 pub use ast_defs::ShapeFieldName;
 
 #[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum FuncBodyAnn<'a> {
     Named,
@@ -95,7 +106,16 @@ pub type PuMember<'a> = aast::PuMember<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, ()
 pub type Targ<'a> = aast::Targ<'a, ()>;
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct IgnoreAttributeEnv<'a> {
     pub ignored_attributes: &'a [&'a str],

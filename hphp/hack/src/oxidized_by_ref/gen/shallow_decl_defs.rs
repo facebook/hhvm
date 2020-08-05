@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<025a849d21e74330405d762f84737b51>>
+// @generated SignedSource<<bd2a801b5d2403c45c6391e911a2d628>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 use arena_trait::TrivialDrop;
+use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -18,7 +19,16 @@ use crate::*;
 pub use typing_defs::*;
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShallowClassConst<'a> {
     pub abstract_: bool,
@@ -29,7 +39,16 @@ pub struct ShallowClassConst<'a> {
 impl<'a> TrivialDrop for ShallowClassConst<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShallowTypeconst<'a> {
     pub abstract_: TypeconstAbstractKind<'a>,
@@ -42,7 +61,16 @@ pub struct ShallowTypeconst<'a> {
 impl<'a> TrivialDrop for ShallowTypeconst<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShallowPuMember<'a> {
     pub atom: aast::Sid<'a>,
@@ -52,7 +80,16 @@ pub struct ShallowPuMember<'a> {
 impl<'a> TrivialDrop for ShallowPuMember<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShallowPuEnum<'a> {
     pub name: aast::Sid<'a>,
@@ -64,7 +101,16 @@ pub struct ShallowPuEnum<'a> {
 impl<'a> TrivialDrop for ShallowPuEnum<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShallowProp<'a> {
     pub const_: bool,
@@ -81,7 +127,16 @@ pub struct ShallowProp<'a> {
 impl<'a> TrivialDrop for ShallowProp<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShallowMethod<'a> {
     pub abstract_: bool,
@@ -99,7 +154,16 @@ pub struct ShallowMethod<'a> {
 impl<'a> TrivialDrop for ShallowMethod<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShallowMethodRedeclaration<'a> {
     pub abstract_: bool,
@@ -115,7 +179,16 @@ pub struct ShallowMethodRedeclaration<'a> {
 impl<'a> TrivialDrop for ShallowMethodRedeclaration<'a> {}
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShallowClass<'a> {
     pub mode: oxidized::file_info::Mode,

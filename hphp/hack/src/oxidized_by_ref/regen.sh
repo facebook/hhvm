@@ -33,6 +33,9 @@ BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
   hphp/hack/src/errors/errors.ml                                              \
   hphp/hack/src/naming/naming_types.ml                                        \
   hphp/hack/src/naming/nast.ml                                                \
+  hphp/hack/src/options/globalOptions.ml                                      \
+  hphp/hack/src/options/parserOptions.ml                                      \
+  hphp/hack/src/options/typecheckerOptions.ml                                 \
   hphp/hack/src/parser/scoured_comments.ml                                    \
   hphp/hack/src/typing/tast.ml                                                \
   hphp/hack/src/typing/type_parameter_env.ml                                  \

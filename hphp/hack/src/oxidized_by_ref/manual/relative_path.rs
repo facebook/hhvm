@@ -113,6 +113,16 @@ impl ToOcamlRep for RelativePath<'_> {
     }
 }
 
+impl<'a> ocamlrep::FromOcamlRepIn<'a> for RelativePath<'a> {
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        alloc: &'a bumpalo::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
+        let (prefix, path) = <(Prefix, &'a Path)>::from_ocamlrep_in(value, alloc)?;
+        Ok(Self::new(prefix, path))
+    }
+}
+
 // This custom implementation of Serialize/Deserialize encodes the RelativePath
 // as a string. This allows using it as a map key in serde_json.
 impl Serialize for RelativePath<'_> {

@@ -5,7 +5,7 @@
 
 use std::fmt;
 
-use ocamlrep::{FromOcamlRep, ToOcamlRep};
+use ocamlrep::{FromOcamlRep, FromOcamlRepIn, ToOcamlRep};
 use serde::{Deserialize, Serialize};
 
 // Three values packed into one 64-bit integer:
@@ -35,6 +35,8 @@ use serde::{Deserialize, Serialize};
 // `u64`.
 #[derive(Copy, Clone, Deserialize, Hash, Eq, PartialEq, Serialize)]
 pub struct FilePosSmall(usize);
+
+impl arena_trait::TrivialDrop for FilePosSmall {}
 
 const COLUMN_BITS: usize = 9;
 const LINE_BITS: usize = 24;
@@ -197,5 +199,14 @@ impl ToOcamlRep for FilePosSmall {
 impl FromOcamlRep for FilePosSmall {
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
         Ok(Self(ocamlrep::from::expect_int(value)? as usize))
+    }
+}
+
+impl<'a> FromOcamlRepIn<'a> for FilePosSmall {
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        _alloc: &'a ocamlrep::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
+        Self::from_ocamlrep(value)
     }
 }

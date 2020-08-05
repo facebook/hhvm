@@ -7,7 +7,7 @@ use serde::Serialize;
 
 use crate::map::{Map, MapIter};
 use arena_trait::{Arena, TrivialDrop};
-use ocamlrep::ToOcamlRep;
+use ocamlrep::{FromOcamlRepIn, ToOcamlRep};
 
 /// An arena-allocated map.
 ///
@@ -38,6 +38,26 @@ impl<K: ToOcamlRep + Ord> ToOcamlRep for Set<'_, K> {
         let mut iter = self.iter();
         let (value, _) = ocamlrep::sorted_iter_to_ocaml_set(&mut iter, alloc, len);
         value
+    }
+}
+
+impl<'a, K> FromOcamlRepIn<'a> for Set<'a, K>
+where
+    K: FromOcamlRepIn<'a> + Ord + TrivialDrop + Clone,
+{
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        alloc: &'a bumpalo::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
+        // TODO: This is a bit wasteful. If we had iter_from_ocaml_set_in
+        // instead, we wouldn't need the extra vec.
+        let mut elements = bumpalo::collections::Vec::new_in(alloc);
+        ocamlrep::vec_from_ocaml_set_in(value, &mut elements, alloc)?;
+        let mut set = Set::empty();
+        for element in elements {
+            set = set.add(alloc, element);
+        }
+        Ok(set)
     }
 }
 

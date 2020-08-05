@@ -319,7 +319,7 @@ pub use cache::MemoizationCache;
 pub use error::{FromError, SlabIntegrityError};
 pub use impls::{
     bytes_from_ocamlrep, bytes_to_ocamlrep, sorted_iter_to_ocaml_map, sorted_iter_to_ocaml_set,
-    str_from_ocamlrep, str_to_ocamlrep,
+    str_from_ocamlrep, str_to_ocamlrep, vec_from_ocaml_map_in, vec_from_ocaml_set_in,
 };
 pub use value::{OpaqueValue, Value};
 

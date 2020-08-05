@@ -30,9 +30,8 @@ let default_derives () =
   (match Configuration.mode () with
   | Configuration.ByBox ->
     [(Some "ocamlrep_derive", "FromOcamlRep"); (Some "serde", "Deserialize")]
-  | Configuration.ByRef
-  | Configuration.ByRc ->
-    [])
+  | Configuration.ByRef -> [(Some "ocamlrep_derive", "FromOcamlRepIn")]
+  | Configuration.ByRc -> [])
   @ [
       (None, "Clone");
       (None, "Debug");
@@ -79,6 +78,10 @@ let additional_derives ty : (string option * string) list =
   | "tast::SavedEnv" -> [(None, "Default")]
   | "type_parameter_env::TypeParameterEnv" -> [(None, "Default")]
   | "typing_inference_env::TypingInferenceEnv" -> [(None, "Default")]
+  | "aast::EmitId" when Configuration.(mode () = ByBox) ->
+    [(None, "Copy"); (Some "ocamlrep_derive", "FromOcamlRepIn")]
+  | "aast::XhpAttrInfo" when Configuration.(mode () = ByBox) ->
+    [(None, "Copy"); (Some "ocamlrep_derive", "FromOcamlRepIn")]
   | _ -> []
 
 let derive_blacklist ty =
@@ -397,7 +400,9 @@ let type_declaration name td =
       let traits = derived_traits name @ additional_derives in
       let traits =
         if force_derive_copy then
-          (Some "ocamlrep_derive", "FromOcamlRep") :: traits
+          (Some "ocamlrep_derive", "FromOcamlRep")
+          :: (Some "ocamlrep_derive", "FromOcamlRepIn")
+          :: traits
         else
           traits
       in

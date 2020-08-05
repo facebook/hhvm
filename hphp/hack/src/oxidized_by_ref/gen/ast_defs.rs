@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5903faa39c66f2002eca384e704dccc7>>
+// @generated SignedSource<<6dc52d5982ae0a3823cd8ec594b15e74>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
 use arena_trait::TrivialDrop;
+use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -20,7 +21,16 @@ pub use crate::shape_map;
 pub use pos::Pos;
 
 #[derive(
-    Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Copy,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub struct Id<'a>(pub &'a Pos<'a>, pub &'a str);
 impl<'a> TrivialDrop for Id<'a> {}
@@ -28,7 +38,16 @@ impl<'a> TrivialDrop for Id<'a> {}
 pub type Pstring<'a> = (&'a Pos<'a>, &'a str);
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ShapeFieldName<'a> {
     SFlitInt(Pstring<'a>),
@@ -52,7 +71,16 @@ pub use oxidized::ast_defs::OgNullFlavor;
 pub use oxidized::ast_defs::FunKind;
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
 )]
 pub enum Bop<'a> {
     Plus,

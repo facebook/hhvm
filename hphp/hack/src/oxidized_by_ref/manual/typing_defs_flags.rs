@@ -56,6 +56,16 @@ impl ocamlrep::FromOcamlRep for FunTypeFlags {
     }
 }
 
+impl<'a> ocamlrep::FromOcamlRepIn<'a> for FunTypeFlags {
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        _alloc: &'a bumpalo::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
+        use ocamlrep::FromOcamlRep;
+        Self::from_ocamlrep(value)
+    }
+}
+
 impl serde::Serialize for FunTypeFlags {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         serializer.serialize_u16(self.bits())
@@ -89,6 +99,16 @@ impl ocamlrep::FromOcamlRep for FunParamFlags {
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
         let int_value = ocamlrep::from::expect_int(value)?;
         Ok(Self::from_bits_truncate(int_value.try_into()?))
+    }
+}
+
+impl<'a> ocamlrep::FromOcamlRepIn<'a> for FunParamFlags {
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        _alloc: &'a bumpalo::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
+        use ocamlrep::FromOcamlRep;
+        Self::from_ocamlrep(value)
     }
 }
 

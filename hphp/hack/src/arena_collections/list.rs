@@ -6,9 +6,9 @@
 use std::fmt::Debug;
 
 use arena_trait::{Arena, TrivialDrop};
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep_derive::{FromOcamlRepIn, ToOcamlRep};
 
-#[derive(Eq, Hash, PartialEq, Ord, PartialOrd, ToOcamlRep)]
+#[derive(Eq, FromOcamlRepIn, Hash, PartialEq, Ord, PartialOrd, ToOcamlRep)]
 pub enum List<'a, T> {
     Nil,
     Cons(&'a (T, List<'a, T>)),

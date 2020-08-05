@@ -283,7 +283,6 @@
     serverRemoteInit
     serverRpc)
   (libraries
-    bad_files
     build
     ci_util
     load_script

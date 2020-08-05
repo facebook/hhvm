@@ -8,12 +8,3 @@
     hackfmtEventLogger
     typingLogger)
   (flags (:standard -w @a-27)))
-
-(library
-  (name bad_files_stubs)
-  (wrapped false)
-  (modules
-    bad_files)
-  (libraries
-    logging_stubs)
-  (flags (:standard -w @a-27)))

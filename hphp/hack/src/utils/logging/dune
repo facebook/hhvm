@@ -30,5 +30,4 @@ let () =
   let fb_dune = Filename.concat fb_dir "dune" in
   let is_fb = Sys.file_exists fb_dune in
   let logging        = entry is_fb "logging" in
-  let bad_files      = entry is_fb "bad_files" in
-  Jbuild_plugin.V1.send @@ String.concat "\n" [ logging; bad_files ]
+  Jbuild_plugin.V1.send @@ String.concat "\n" [ logging ]

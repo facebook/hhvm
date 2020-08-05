@@ -1,1 +1,0 @@
-let check _ = ()

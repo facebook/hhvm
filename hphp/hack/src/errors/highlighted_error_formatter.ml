@@ -62,7 +62,7 @@ let out_of_bounds_char = "_"
 
 let background_highlighted = Tty.apply_color (Tty.Dim Tty.Default)
 
-let default_highlighted = Tty.apply_color (Tty.Normal Tty.Default)
+let default_highlighted s = s
 
 let line_num_highlighted line_num =
   background_highlighted (string_of_int line_num)
@@ -285,47 +285,14 @@ let load_context_lines_for_highlighted ~before ~after ~(pos : Pos.absolute) :
       original_lines @ [(line_num, Some additional)])
 
 let format_context_highlighted
-    (position_group : position_group) (col_width : int) ~(is_first : bool) =
-  let relative_path path =
-    let cwd = Filename.concat (Sys.getcwd ()) "" in
-    lstrip path cwd
-  in
+    (col_width : int) (position_group : position_group) =
   let lines =
     load_context_lines_for_highlighted
       ~before:n_extra_lines_hl
       ~after:n_extra_lines_hl
       ~pos:position_group.aggregate_position
   in
-  let pretty_ctx =
-    format_context_lines_highlighted ~position_group ~lines ~col_width
-  in
-  if is_first then
-    (* Main message is the one with the lowest-numbered marker *)
-    let (_, main_msg) =
-      List.sort
-        position_group.messages
-        ~compare:(fun ((mk1, _), _) ((mk2, _), _) -> Int.compare mk1 mk2)
-      |> List.hd_exn
-    in
-    let main_pos = Errors.get_message_pos main_msg in
-    let filename = relative_path (Pos.filename main_pos) in
-    let (line, col) = Pos.line_column main_pos in
-    let dirname =
-      let dn = Filename.dirname filename in
-      if String.equal Filename.current_dir_name dn then
-        ""
-      else
-        background_highlighted (Filename.dirname filename ^ "/")
-    in
-    let filename = default_highlighted (Filename.basename filename) in
-    let pretty_filename = Printf.sprintf "%s%s" dirname filename in
-    let pretty_position =
-      Printf.sprintf ":%d:%d" line (col + 1) |> background_highlighted
-    in
-    let line_info = Printf.sprintf "%s%s" pretty_filename pretty_position in
-    line_info ^ "\n" ^ pretty_ctx
-  else
-    pretty_ctx
+  format_context_lines_highlighted ~position_group ~lines ~col_width
 
 (* The column width will be the length of the largest prefix before
    the " |", which is composed of the list of markers, a space, and
@@ -448,6 +415,38 @@ let position_groups_by_file marker_and_msgs : position_group list list =
                messages;
              }))
 
+let format_file_name_and_pos (pgl : position_group list) =
+  let relative_path path =
+    let cwd = Filename.concat (Sys.getcwd ()) "" in
+    lstrip path cwd
+  in
+  (* Primary position for the file is the one with the lowest-numbered
+     marker across all positions in each position_group of the list *)
+  let primary_pos =
+    List.concat_map pgl ~f:(fun pg -> pg.messages)
+    |> List.stable_sort ~compare:(fun ((mk1, _), _) ((mk2, _), _) ->
+           Int.compare mk1 mk2)
+    |> List.hd_exn
+    |> snd
+    |> Errors.get_message_pos
+  in
+  let filename = relative_path (Pos.filename primary_pos) in
+  let (line, col) = Pos.line_column primary_pos in
+  let dirname =
+    let dn = Filename.dirname filename in
+    if String.equal Filename.current_dir_name dn then
+      ""
+    else
+      background_highlighted (Filename.dirname filename ^ "/")
+  in
+  let filename = default_highlighted (Filename.basename filename) in
+  let pretty_filename = Printf.sprintf "%s%s" dirname filename in
+  let pretty_position =
+    Printf.sprintf ":%d:%d" line (col + 1) |> background_highlighted
+  in
+  let line_info = pretty_filename ^ pretty_position in
+  line_info
+
 let format_all_contexts_highlighted (marker_and_msgs : marked_message list) =
   (* Create a set of position_groups (set of positions that can be written in the same snippet) *)
   let position_groups = position_groups_by_file marker_and_msgs in
@@ -461,11 +460,9 @@ let format_all_contexts_highlighted (marker_and_msgs : marked_message list) =
   let contexts =
     List.map position_groups (fun pgl ->
         (* Each position_groups list (pgl) is for a single file, so separate each with ':' *)
-        let ctx_strs =
-          List.mapi pgl ~f:(fun i pg ->
-              format_context_highlighted pg col_width ~is_first:(i = 0))
-        in
-        String.concat ~sep ctx_strs)
+        let fn_pos = format_file_name_and_pos pgl in
+        let ctx_strs = List.map pgl (format_context_highlighted col_width) in
+        fn_pos ^ "\n" ^ String.concat ~sep ctx_strs)
   in
   String.concat ~sep:"\n\n" contexts ^ "\n\n"
 

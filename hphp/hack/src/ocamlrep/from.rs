@@ -3,11 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-//! Helpers for implementing `FromOcamlRep::from_ocamlrep`.
+//! Helpers for implementing `FromOcamlRep::from_ocamlrep` or
+//! `FromOcamlRepIn::from_ocamlrep_in`.
 
 use std::convert::TryInto;
 
-use crate::{Block, FromError, FromOcamlRep, Value};
+use bumpalo::Bump;
+
+use crate::{Block, FromError, FromOcamlRep, FromOcamlRepIn, Value};
 
 pub fn expect_int(value: Value<'_>) -> Result<isize, FromError> {
     match value.as_int() {
@@ -64,4 +67,13 @@ pub fn expect_tuple<'a>(value: Value<'a>, size: usize) -> Result<Block<'a>, From
 
 pub fn field<T: FromOcamlRep>(block: Block<'_>, field: usize) -> Result<T, FromError> {
     T::from_ocamlrep(block[field]).map_err(|e| FromError::ErrorInField(field, Box::new(e)))
+}
+
+pub fn field_in<'a, T: FromOcamlRepIn<'a>>(
+    block: Block<'_>,
+    field: usize,
+    alloc: &'a Bump,
+) -> Result<T, FromError> {
+    T::from_ocamlrep_in(block[field], alloc)
+        .map_err(|e| FromError::ErrorInField(field, Box::new(e)))
 }

@@ -311,6 +311,8 @@ pub mod ptr;
 pub mod rc;
 pub mod slab;
 
+pub use bumpalo::Bump;
+
 pub use arena::Arena;
 pub use block::{Block, BlockBuilder};
 pub use cache::MemoizationCache;
@@ -321,8 +323,12 @@ pub use impls::{
 };
 pub use value::{OpaqueValue, Value};
 
-/// A data structure that can be converted to an equivalent OCaml value and
-/// reconstructed from an OCaml value of the same (OCaml) type.
+/// A data structure that can be converted to an OCaml value.
+///
+/// Types which implement both `ToOcamlRep` and `FromOcamlRep` (or
+/// `FromOcamlRepIn`) should provide compatible implementations thereof.
+/// In other words, it is expected that for any value with type `T`,
+/// `T::from_ocamlrep(value.to_ocamlrep(alloc)) == Ok(value)`.
 pub trait ToOcamlRep {
     /// Allocate an OCaml representation of `self` using the given Allocator.
     ///
@@ -337,23 +343,6 @@ pub trait ToOcamlRep {
     /// value *must* return an `OpaqueValue` allocated by `alloc`, and that
     /// value must *only* reference other values allocated by `alloc`.
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a>;
-}
-
-pub trait FromOcamlRep: Sized {
-    /// Convert the given ocamlrep Value to a value of type `Self`, if possible.
-    fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError>;
-
-    /// Convert the given OCaml value to a value of type `Self`, if possible.
-    ///
-    /// # Safety
-    ///
-    /// The given value must be a valid OCaml value. All values reachable from
-    /// the given value must be valid OCaml values. None of these values may be
-    /// naked pointers. None of these values may be modified while `from_ocaml`
-    /// is running.
-    unsafe fn from_ocaml(value: usize) -> Result<Self, FromError> {
-        Self::from_ocamlrep(Value::from_bits(value))
-    }
 }
 
 /// An interface for allocating OCaml values in some allocator-defined memory region.
@@ -446,4 +435,37 @@ pub trait Allocator: Sized {
     ///
     /// `add_root` is not re-entrant, and panics upon attempts to do so.
     fn add_root<T: ToOcamlRep + ?Sized>(&self, value: &T) -> OpaqueValue<'_>;
+}
+
+/// A type which can be reconstructed from an OCaml value.
+///
+/// Types which implement both `ToOcamlRep` and `FromOcamlRep` should provide
+/// compatible implementations thereof. In other words, it is expected that for
+/// any value, `T::from_ocamlrep(value.to_ocamlrep(alloc)) == Ok(value)`.
+pub trait FromOcamlRep: Sized {
+    /// Convert the given ocamlrep Value to a value of type `Self`, if possible.
+    fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError>;
+
+    /// Convert the given OCaml value to a value of type `Self`, if possible.
+    ///
+    /// # Safety
+    ///
+    /// The given value must be a valid OCaml value. All values reachable from
+    /// the given value must be valid OCaml values. None of these values may be
+    /// naked pointers. None of these values may be modified while `from_ocaml`
+    /// is running.
+    unsafe fn from_ocaml(value: usize) -> Result<Self, FromError> {
+        Self::from_ocamlrep(Value::from_bits(value))
+    }
+}
+
+/// A type which can be reconstructed from an OCaml value.
+///
+/// Types which implement both `ToOcamlRep` and `FromOcamlRepIn` should provide
+/// compatible implementations thereof. In other words, it is expected that for
+/// any value, `T::from_ocamlrep_in(value.to_ocamlrep(alloc), bump) == Ok(value)`.
+pub trait FromOcamlRepIn<'a>: Sized {
+    /// Convert the given ocamlrep Value to a value of type `Self`, allocated in
+    /// the given arena.
+    fn from_ocamlrep_in(value: Value<'_>, arena: &'a Bump) -> Result<Self, FromError>;
 }

@@ -11,6 +11,7 @@ use synstructure::{decl_derive, BindingInfo, VariantInfo};
 
 decl_derive!([ToOcamlRep] => derive_to_ocamlrep);
 decl_derive!([FromOcamlRep] => derive_from_ocamlrep);
+decl_derive!([FromOcamlRepIn] => derive_from_ocamlrep_in);
 
 fn derive_to_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
     // By default, if you are deriving an impl of trait Foo for generic type
@@ -41,8 +42,64 @@ fn derive_from_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
     s.gen_impl(quote! {
         gen impl ::ocamlrep::FromOcamlRep for @Self {
             fn from_ocamlrep(value: ::ocamlrep::Value<'_>) -> ::std::result::Result<Self, ::ocamlrep::FromError> {
-                use ::ocamlrep::{Allocator, FromOcamlRep};
+                use ::ocamlrep::FromOcamlRep;
                 #from_body
+            }
+        }
+    })
+}
+
+fn derive_from_ocamlrep_in(mut s: synstructure::Structure) -> TokenStream {
+    s.add_bounds(synstructure::AddBounds::Generics);
+
+    if s.ast().generics.lifetimes().next().is_none() {
+        s.add_bounds(synstructure::AddBounds::None);
+        let tparams = s.ast().generics.type_params();
+        let tparams_implement_from_ocamlrep: TokenStream = tparams
+            .map(|t| quote!(#t : ::ocamlrep::FromOcamlRep,))
+            .collect();
+        let from_body = from_ocamlrep_body(&s);
+        return s.gen_impl(quote! {
+            gen impl<'__ocamlrep_derive_allocator> ::ocamlrep::FromOcamlRepIn<'__ocamlrep_derive_allocator> for @Self
+            where #tparams_implement_from_ocamlrep
+            {
+                fn from_ocamlrep_in(
+                    value: ::ocamlrep::Value<'_>,
+                    alloc: &'__ocamlrep_derive_allocator ::ocamlrep::Bump,
+                ) -> ::std::result::Result<Self, ::ocamlrep::FromError> {
+                    use ::ocamlrep::FromOcamlRep;
+                    #from_body
+                }
+            }
+        });
+    }
+
+    // Constrain the lifetime of `'__ocamlrep_derive_allocator` to be equal to
+    // any declared lifetimes. This is so that we can reference the lifetime
+    // parameter to `FromOcamlRepIn` without requiring implementors to use a
+    // certain name for their lifetime parameter.
+    let lifetimes = s.ast().generics.lifetimes();
+    let lifetimes: TokenStream = lifetimes
+        .map(|l| {
+            quote! {
+                '__ocamlrep_derive_allocator : #l,
+                #l : '__ocamlrep_derive_allocator,
+            }
+        })
+        .collect();
+
+    let from_in_body = from_ocamlrep_in_body(&s);
+    s.gen_impl(quote! {
+        gen impl<'__ocamlrep_derive_allocator> ::ocamlrep::FromOcamlRepIn<'__ocamlrep_derive_allocator> for @Self
+        where
+            #lifetimes
+        {
+            fn from_ocamlrep_in(
+                value: ::ocamlrep::Value<'_>,
+                alloc: &'__ocamlrep_derive_allocator ::ocamlrep::Bump,
+            ) -> ::std::result::Result<Self, ::ocamlrep::FromError> {
+                use ::ocamlrep::FromOcamlRepIn;
+                #from_in_body
             }
         }
     })
@@ -58,8 +115,16 @@ fn to_ocamlrep_body(s: &synstructure::Structure) -> TokenStream {
 
 fn from_ocamlrep_body(s: &synstructure::Structure) -> TokenStream {
     match &s.ast().data {
-        syn::Data::Struct(struct_data) => struct_from_ocamlrep(&s, struct_data),
-        syn::Data::Enum(_) => enum_from_ocamlrep(collect_enum_variants(&s)),
+        syn::Data::Struct(struct_data) => struct_from_ocamlrep(&s, struct_data, false),
+        syn::Data::Enum(_) => enum_from_ocamlrep(collect_enum_variants(&s), false),
+        syn::Data::Union(_) => panic!("untagged unions not supported"),
+    }
+}
+
+fn from_ocamlrep_in_body(s: &synstructure::Structure) -> TokenStream {
+    match &s.ast().data {
+        syn::Data::Struct(struct_data) => struct_from_ocamlrep(&s, struct_data, true),
+        syn::Data::Enum(_) => enum_from_ocamlrep(collect_enum_variants(&s), true),
         syn::Data::Union(_) => panic!("untagged unions not supported"),
     }
 }
@@ -83,7 +148,11 @@ fn struct_to_ocamlrep(s: &synstructure::Structure, struct_data: &syn::DataStruct
     }
 }
 
-fn struct_from_ocamlrep(s: &synstructure::Structure, struct_data: &syn::DataStruct) -> TokenStream {
+fn struct_from_ocamlrep(
+    s: &synstructure::Structure,
+    struct_data: &syn::DataStruct,
+    from_in: bool,
+) -> TokenStream {
     let variant = &s.variants()[0];
     match struct_data.fields {
         syn::Fields::Unit => {
@@ -93,16 +162,19 @@ fn struct_from_ocamlrep(s: &synstructure::Structure, struct_data: &syn::DataStru
         syn::Fields::Unnamed(ref fields) if fields.unnamed.len() == 1 => {
             let constructor = variant.construct(|field, _| {
                 let ty = &field.ty;
-                quote! { <#ty>::from_ocamlrep(value)? }
+                if from_in {
+                    quote! { <#ty>::from_ocamlrep_in(value, alloc)? }
+                } else {
+                    quote! { <#ty>::from_ocamlrep(value)? }
+                }
             });
             quote! { Ok(#constructor) }
         }
         syn::Fields::Named(_) | syn::Fields::Unnamed(_) => {
             let size = variant.bindings().len();
-            let constructor =
-                variant.construct(|_, i| quote! { ::ocamlrep::from::field(block, #i)? });
+            let constructor = variant.construct(|_, i| field_constructor(i, from_in));
             quote! {
-                let mut block = ::ocamlrep::from::expect_tuple(value, #size)?;
+                let block = ::ocamlrep::from::expect_tuple(value, #size)?;
                 Ok(#constructor)
             }
         }
@@ -168,7 +240,7 @@ fn enum_to_ocamlrep(s: &synstructure::Structure, variants: EnumVariants<'_>) -> 
     })
 }
 
-fn enum_from_ocamlrep(variants: EnumVariants<'_>) -> TokenStream {
+fn enum_from_ocamlrep(variants: EnumVariants<'_>, from_in: bool) -> TokenStream {
     let EnumVariants {
         nullary_variants,
         block_variants,
@@ -194,9 +266,9 @@ fn enum_from_ocamlrep(variants: EnumVariants<'_>) -> TokenStream {
         let (size, constructor) = match get_boxed_tuple_len(variant) {
             None => (
                 variant.bindings().len(),
-                variant.construct(|_, i| quote! { ::ocamlrep::from::field(block, #i)? }),
+                variant.construct(|_, i| field_constructor(i, from_in)),
             ),
-            Some(len) => (len, boxed_tuple_variant_constructor(variant, len)),
+            Some(len) => (len, boxed_tuple_variant_constructor(variant, len, from_in)),
         };
         block_arms.extend(quote! { #tag => {
             ::ocamlrep::from::expect_block_size(block, #size)?;
@@ -264,7 +336,19 @@ fn boxed_tuple_variant_to_block(bi: &BindingInfo, tag: u8, len: usize) -> TokenS
     }
 }
 
-fn boxed_tuple_variant_constructor(variant: &VariantInfo, len: usize) -> TokenStream {
+fn field_constructor(index: usize, from_in: bool) -> TokenStream {
+    if from_in {
+        quote! { ::ocamlrep::from::field_in(block, #index, alloc)? }
+    } else {
+        quote! { ::ocamlrep::from::field(block, #index)? }
+    }
+}
+
+fn boxed_tuple_variant_constructor(
+    variant: &VariantInfo,
+    len: usize,
+    from_in: bool,
+) -> TokenStream {
     let mut ident = TokenStream::new();
     if let Some(prefix) = variant.prefix {
         ident.extend(quote!(#prefix ::));
@@ -273,11 +357,18 @@ fn boxed_tuple_variant_constructor(variant: &VariantInfo, len: usize) -> TokenSt
     ident.extend(quote!(#id));
 
     let mut fields = TokenStream::new();
-    for i in 0..len {
-        let idx = syn::Index::from(i);
-        fields.extend(quote! { ::ocamlrep::from::field(block, #idx)?, });
+    for idx in 0..len {
+        fields.extend(if from_in {
+            quote! { ::ocamlrep::from::field_in(block, #idx, alloc)?, }
+        } else {
+            quote! { ::ocamlrep::from::field(block, #idx)?, }
+        })
     }
-    quote! { #ident(::std::boxed::Box::new((#fields))) }
+    if from_in {
+        quote! { #ident(alloc.alloc((#fields))) }
+    } else {
+        quote! { #ident(::std::boxed::Box::new((#fields))) }
+    }
 }
 
 fn get_boxed_tuple_len(variant: &VariantInfo) -> Option<usize> {

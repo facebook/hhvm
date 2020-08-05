@@ -15,6 +15,7 @@ use std::hash::{Hash, Hasher};
 use std::ops::Deref;
 use std::rc::Rc;
 
+use bumpalo::Bump;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::{Allocator, FromError, FromOcamlRep, OpaqueValue, ToOcamlRep, Value};
@@ -272,6 +273,12 @@ impl<T: FromOcamlRep> FromOcamlRep for RcOc<T> {
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
         // NB: We don't get any sharing this way.
         Ok(RcOc::new(T::from_ocamlrep(value)?))
+    }
+}
+
+impl<'a, T: FromOcamlRep> crate::FromOcamlRepIn<'a> for RcOc<T> {
+    fn from_ocamlrep_in(value: Value<'_>, _alloc: &'a Bump) -> Result<Self, FromError> {
+        Self::from_ocamlrep(value)
     }
 }
 

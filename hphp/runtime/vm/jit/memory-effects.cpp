@@ -1439,12 +1439,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return IrrelevantEffects {};
 
   case AllocObj:
-    // AllocObj re-enters to call constructors, but if it weren't for that we
-    // could ignore its loads and stores since it's a new object.
-    return may_load_store(AEmpty, AEmpty);
+    // AllocObj may reenter if it throws or raises a notice.
+    return may_load_store(AHeapAny, AHeapAny);
   case AllocObjReified:
     // Similar to AllocObj but also stores the reification
-    return may_load_store(AEmpty, AHeapAny);
+    return may_load_store(AHeapAny, AHeapAny);
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that explicitly manipulate the stack.

@@ -21,7 +21,8 @@ ExternalProject_Add(
   bundled_fbmysqlclient
   ${FB_MYSQL_DOWNLOAD_ARGS}
   PATCH_COMMAND
-  patch -p1 < "${CMAKE_CURRENT_SOURCE_DIR}/explicit_zstd_path.patch"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../apply-quilt-patches.sh"
+  "${CMAKE_CURRENT_SOURCE_DIR}/patches"
   CMAKE_ARGS
   -DWITHOUT_SERVER=TRUE
   -DDISABLE_SHARED=TRUE

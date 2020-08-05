@@ -15,10 +15,10 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
+SOURCE_ROOT="$(dirname "$0")"
 OPAM_EXECUTABLE="$1"
 BUILD_ROOT="${2:-"${SOURCE_ROOT}/_build"}"
 
-SOURCE_ROOT="$(dirname "$0")"
 OPAM_EXECUTABLE_DIR="$(dirname "$OPAM_EXECUTABLE")"
 
 export PATH="$OPAM_EXECUTABLE_DIR:$PATH"

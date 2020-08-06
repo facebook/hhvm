@@ -73,6 +73,7 @@ char** Process::Argv;
 std::atomic_int64_t ProcStatus::VmSizeKb;
 std::atomic_int64_t ProcStatus::VmRSSKb;
 std::atomic_int64_t ProcStatus::VmHWMKb;
+std::atomic_int64_t ProcStatus::VmSwapKb;
 std::atomic_int64_t ProcStatus::HugetlbPagesKb;
 std::atomic_int64_t ProcStatus::UnusedKb;
 std::atomic_int ProcStatus::threads;
@@ -367,7 +368,7 @@ void Process::SetCoreDumpHugePages() {
 void ProcStatus::update() {
   if (FILE* f = fopen("/proc/self/status", "r")) {
     char line[128];
-    int64_t vmsize = 0, vmrss = 0, vmhwm = 0, hugetlb = 0;
+    int64_t vmsize = 0, vmrss = 0, vmhwm = 0, vmswap = 0, hugetlb = 0;
     while (fgets(line, sizeof(line), f)) {
       if (!strncmp(line, "VmSize:", 7)) {
         vmsize = readSize(line, true);
@@ -375,6 +376,8 @@ void ProcStatus::update() {
         vmrss = readSize(line, true);
       } else if (!strncmp(line, "VmHWM:", 6)) {
         vmhwm = readSize(line, true);
+      } else if (!strncmp(line, "VmSwap:", 7)) {
+        vmswap = readSize(line, true);
       } else if (!strncmp(line, "HugetlbPages:", 13)) {
         hugetlb = readSize(line, true);
       } else if (!strncmp(line, "Threads:", 8)) {
@@ -388,6 +391,7 @@ void ProcStatus::update() {
     } else {
       VmSizeKb.store(vmsize, std::memory_order_relaxed);
       VmRSSKb.store(vmrss, std::memory_order_relaxed);
+      VmSwapKb.store(vmswap, std::memory_order_relaxed);
       VmHWMKb.store(vmhwm + hugetlb, std::memory_order_relaxed);
       HugetlbPagesKb.store(hugetlb, std::memory_order_relaxed);
       lastUpdate.store(time(), std::memory_order_release);

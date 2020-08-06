@@ -63,7 +63,8 @@ struct ProcStatus {
   static std::atomic_int64_t VmSizeKb;  // virtual memory size
   static std::atomic_int64_t VmRSSKb;   // RSS, not including hugetlb pages
   static std::atomic_int64_t VmHWMKb;   // peak RSS
-  static std::atomic_int64_t HugetlbPagesKb; // Hugetlb mappings (2M + 1G)
+  static std::atomic_int64_t VmSwapKb;  // swap usage
+  static std::atomic_int64_t HugetlbPagesKb; // Hugetlb
 
   // Mapped but unused size, updated periodically when updating jemalloc stats.
   static std::atomic_int64_t UnusedKb;
@@ -76,6 +77,7 @@ struct ProcStatus {
   static auto adjustedRssKb() {
     assert(valid());
     return VmRSSKb.load(std::memory_order_relaxed)
+      + VmSwapKb.load(std::memory_order_relaxed)
       + HugetlbPagesKb.load(std::memory_order_relaxed)
       - UnusedKb.load(std::memory_order_relaxed);
   }

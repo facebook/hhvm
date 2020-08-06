@@ -58,6 +58,7 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
   w->writeEntry("mem.rss", ProcStatus::VmRSSKb.load(std::memory_order_relaxed));
   w->writeEntry("PeakUsage",
                 ProcStatus::VmHWMKb.load(std::memory_order_relaxed));
+  w->writeEntry("VmSwap", ProcStatus::VmSwapKb.load(std::memory_order_relaxed));
   w->writeEntry("HugetlbPages",
                 ProcStatus::HugetlbPagesKb.load(std::memory_order_relaxed));
   w->writeEntry("adjustedRSS", ProcStatus::adjustedRssKb());

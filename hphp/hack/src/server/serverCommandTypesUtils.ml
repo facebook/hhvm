@@ -84,7 +84,7 @@ let debug_describe_finale_data (data : finale_data) : string =
   let (Utils.Callstack stack) = data.stack in
   Printf.sprintf
     "Exit status %s - %s\n%s"
-    (Exit_status.to_string data.exit_status)
+    (Exit_status.show data.exit_status)
     data.msg
     (Exception.clean_stack stack)
 

@@ -76,14 +76,13 @@ type t =
   | Failed_to_load_should_retry
   | Failed_to_load_should_abort
   | Server_non_opt_build_mode
+[@@deriving show]
 
 exception Exit_with of t
 
 val exit_code : t -> int
 
 val exit : t -> 'a
-
-val to_string : t -> string
 
 val exit_code_to_string : int -> string
 

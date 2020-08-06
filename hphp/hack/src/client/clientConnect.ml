@@ -238,7 +238,7 @@ let with_server_hung_up (f : unit -> 'a Lwt.t) : 'a Lwt.t =
     ServerCommandTypes.(
       Printf.eprintf
         "Hack server disconnected suddenly [%s]\n   %s\n"
-        (Exit_status.to_string finale_data.exit_status)
+        (Exit_status.show finale_data.exit_status)
         finale_data.msg;
       (match finale_data.exit_status with
       | Exit_status.Failed_to_load_should_abort ->

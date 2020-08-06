@@ -1272,7 +1272,7 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
     (*   under DDOS, or maybe it's declining to answer new connections.       *)
     let message =
       match Exception.unwrap exn with
-      | Exit_status.Exit_with code -> Exit_status.to_string code
+      | Exit_status.Exit_with code -> Exit_status.show code
       | _ -> Exception.get_ctor_string exn
     in
     let longMessage =

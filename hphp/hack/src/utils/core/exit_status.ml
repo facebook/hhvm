@@ -78,7 +78,7 @@ type t =
   | Failed_to_load_should_retry
   | Failed_to_load_should_abort
   | Server_non_opt_build_mode
-[@@deriving enum]
+[@@deriving show, enum]
 
 let (_ignored : t -> int) = to_enum
 
@@ -161,75 +161,11 @@ let exit t =
   let ec = exit_code t in
   Stdlib.exit ec
 
-let to_string = function
-  | No_error -> "Ok"
-  | Server_non_opt_build_mode -> "Server_non_opt_build_mode"
-  | Checkpoint_error -> "Checkpoint_error"
-  | Input_error -> "Input_error"
-  | Kill_error -> "Kill_error"
-  | No_server_running_should_retry -> "No_server_running_should_retry"
-  | Server_hung_up_should_retry -> "Server_hung_up_should_retry"
-  | Server_hung_up_should_abort -> "Server_hung_up_should_abort"
-  | Out_of_time -> "Out_of_time"
-  | Out_of_retries -> "Out_of_retries"
-  | Server_already_exists -> "Server_already_exists"
-  | Server_shutting_down -> "Server_shutting_down"
-  | Type_error -> "Type_error"
-  | Build_id_mismatch -> "Build_id_mismatch"
-  | Monitor_connection_failure -> "Monitor_connection_failure"
-  | Unused_server -> "Unused_server"
-  | Lock_stolen -> "Lock_stolen"
-  | Lost_parent_monitor -> "Lost_parent_monitor"
-  | Interrupted -> "Interrupted"
-  | Worker_oomed -> "Worker_oomed"
-  | Worker_busy -> "Worker_busy"
-  | Worker_not_found_exception -> "Worker_not_found_exception"
-  | Worker_failed_to_send_job -> "Worker_failed_to_send_job"
-  | Socket_error -> "Socket_error"
-  | Missing_hhi -> "Missing_hhi"
-  | Dfind_died -> "Dfind_died"
-  | Dfind_unresponsive -> "Dfind_unresponsive"
-  | EventLogger_Timeout -> "EventLogger_Timeout"
-  | EventLogger_restart_out_of_retries -> "EventLogger_restart_out_of_retries"
-  | EventLogger_broken_pipe -> "EventLogger_broken_pipe"
-  | CantRunAI -> "CantRunAI"
-  | Watchman_failed -> "Watchman_failed"
-  | Watchman_fresh_instance -> "Watchman_fresh_instance"
-  | Watchman_invalid_result -> "Watchman_invalid_result"
-  | Hhconfig_deleted -> "Hhconfig_deleted"
-  | Hhconfig_changed -> "Hhconfig_changed"
-  | IDE_malformed_request -> "IDE_malformed_request"
-  | IDE_no_server -> "IDE_no_server"
-  | IDE_out_of_retries -> "IDE_out_of_retries"
-  | Nfs_root -> "Nfs_root"
-  | IDE_init_failure -> "IDE_init_failure"
-  | IDE_typechecker_died -> "IDE_typechecker_died"
-  | Redecl_heap_overflow -> "Redecl_heap_overflow"
-  | Shared_mem_assertion_failure -> "Shared_mem_assertion_failure"
-  | Out_of_shared_memory -> "Out_of_shared_memory"
-  | Hash_table_full -> "Hash_table_full"
-  | IDE_new_client_connected -> "IDE_new_client_connected"
-  | Lazy_decl_bug -> "Lazy_decl_bug"
-  | Decl_heap_elems_bug -> "Decl_heap_elems_bug"
-  | Parser_heap_build_error -> "Parser_heap_build_error"
-  | Heap_full -> "Heap_full"
-  | File_provider_stale -> "File_provider_stale"
-  | Sql_assertion_failure -> "Sql_assertion_failure"
-  | Local_type_env_stale -> "Local_type_env_stale"
-  | Sql_cantopen -> "Sql_cantopen"
-  | Sql_corrupt -> "Sql_corrupt"
-  | Sql_misuse -> "Sql_misuse"
-  | Uncaught_exception -> "Uncaught_exception"
-  | Decl_not_found -> "Decl_not_found"
-  | Big_rebase_detected -> "Big_rebase_detected"
-  | Failed_to_load_should_retry -> "Failed_to_load_should_retry"
-  | Failed_to_load_should_abort -> "Failed_to_load_should_abort"
-
 let exit_code_to_string (code : int) : string =
   let rec f acc candidate_i =
     match of_enum candidate_i with
     | Some candidate when exit_code candidate = code ->
-      f (to_string candidate :: acc) (candidate_i + 1)
+      f (show candidate :: acc) (candidate_i + 1)
     | _ when candidate_i > max ->
       (* If an ocaml binary exits with an uncaught exception, it produces exit code 2.
       We'll reconstruct that fact here. However our binaries should avoid exiting

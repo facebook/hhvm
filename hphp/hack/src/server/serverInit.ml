@@ -190,23 +190,7 @@ let init
           ( ServerLazyInit.full_init genv env,
             Load_state_failed (user_message, Utils.Callstack stack),
             false )
-        | _ ->
-          let finale_data =
-            {
-              Exit.exit_status = next_step;
-              msg = Some user_message;
-              stack = Utils.Callstack stack;
-            }
-          in
-          let finale_file = ServerFiles.server_finale_file (Unix.getpid ()) in
-          begin
-            try
-              let oc = Stdlib.open_out_bin finale_file in
-              Marshal.to_channel oc finale_data [];
-              Stdlib.close_out oc
-            with _ -> ()
-          end;
-          Exit.exit next_step))
+        | _ -> Exit.exit ~msg:user_message ~stack next_step))
     | (Off, Full_init)
     | (Decl, Full_init)
     | (Parse, Full_init) ->

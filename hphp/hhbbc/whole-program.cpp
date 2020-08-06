@@ -28,6 +28,7 @@
 
 #include "hphp/hhbbc/analyze.h"
 #include "hphp/hhbbc/class-util.h"
+#include "hphp/hhbbc/compression.h"
 #include "hphp/hhbbc/debug.h"
 #include "hphp/hhbbc/emit.h"
 #include "hphp/hhbbc/func-util.h"
@@ -548,6 +549,9 @@ void whole_program(php::ProgramPtr program,
                    int num_threads) {
   trace_time tracer("whole program");
 
+  if (options.TestCompression || RO::EvalHHBBCTestCompression) {
+    compression::testCompression(*program);
+  }
 
   if (num_threads > 0) {
     parallel::num_threads = num_threads;

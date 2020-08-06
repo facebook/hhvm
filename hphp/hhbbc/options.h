@@ -216,6 +216,11 @@ struct Options {
    * save the stats file to a temporary file.
    */
   std::string stats_file;
+
+  /*
+   * Run a test of HHBBC memory compression (e.g. bytecode compression).
+   */
+  bool TestCompression;
 };
 extern Options options;
 

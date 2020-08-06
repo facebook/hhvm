@@ -168,6 +168,7 @@ void parse_options(int argc, char** argv) {
     ("return-refine-limit",  po::value(&options.returnTypeRefineLimit))
     ("public-sprop-refine-limit", po::value(&options.publicSPropRefineLimit))
     ("bytecode-stats",       po::bool_switch(&print_bytecode_stats_and_exit))
+    ("test-compression",     po::bool_switch(&options.TestCompression))
     ;
 
   po::options_description oflags("Optimization Flags");

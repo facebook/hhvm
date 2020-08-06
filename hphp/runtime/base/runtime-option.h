@@ -723,6 +723,8 @@ struct RuntimeOption {
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \
   F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \
+  /* Equivalent to setting the --test-compression HHBBC-only flag. */   \
+  F(bool, HHBBCTestCompression,        false)                           \
   F(bool, EnablePerRepoOptions,        true)                            \
   F(bool, CachePerRepoOptionsPath,     true)                            \
   /* ThrowOnNonExhaustiveSwitch

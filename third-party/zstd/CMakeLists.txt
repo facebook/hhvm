@@ -38,8 +38,10 @@ else ()
   ExternalProject_Add(
     bundled_zstd
     ${ZSTD_DOWNLOAD_ARGS}
-    CMAKE_ARGS
+    CONFIGURE_COMMAND
+    ${CMAKE_COMMAND}
     <SOURCE_DIR>/build/cmake
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
     -DCMAKE_INSTALL_INCLUDEDIR=include
     -DCMAKE_INSTALL_LIBDIR=lib

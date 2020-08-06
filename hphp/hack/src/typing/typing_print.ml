@@ -1457,19 +1457,27 @@ module PrintClass = struct
     | Ast_defs.Contravariant -> "-"
     | Ast_defs.Invariant -> ""
 
-  let tparam
+  let rec tparam
       tcopt
       {
         tp_variance = var;
         tp_name = (position, name);
+        tp_tparams = params;
         tp_constraints = cstrl;
         tp_reified = reified;
         tp_user_attributes = _;
       } =
+    let params_string =
+      if List.is_empty params then
+        ""
+      else
+        "<" ^ tparam_list tcopt params ^ ">"
+    in
     variance var
     ^ pos position
     ^ " "
     ^ name
+    ^ params_string
     ^ " "
     ^ List.fold_right
         cstrl
@@ -1481,7 +1489,7 @@ module PrintClass = struct
     | Nast.SoftReified -> " soft reified"
     | Nast.Reified -> " reified"
 
-  let tparam_list ctx l =
+  and tparam_list ctx l =
     List.fold_right l ~f:(fun x acc -> tparam ctx x ^ ", " ^ acc) ~init:""
 
   let class_elt ctx ({ ce_visibility; ce_type = (lazy ty); _ } as ce) =

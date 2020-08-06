@@ -131,6 +131,7 @@ type destructure_kind =
 type 'ty tparam = {
   tp_variance: Ast_defs.variance;
   tp_name: Ast_defs.id;
+  tp_tparams: 'ty tparam list;
   tp_constraints: (Ast_defs.constraint_kind * 'ty) list;
   tp_reified: Aast.reify_kind;
   tp_user_attributes: Nast.user_attribute list;

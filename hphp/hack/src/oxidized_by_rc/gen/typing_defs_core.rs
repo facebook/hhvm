@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<caffad022c85abc5205ce3f47524ce7c>>
+// @generated SignedSource<<669794bb349b917516c198340fe531a7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_rc/regen.sh
@@ -60,6 +60,7 @@ pub use oxidized_by_ref::typing_defs_core::DestructureKind;
 pub struct Tparam {
     pub variance: oxidized::ast_defs::Variance,
     pub name: ast_defs::Id,
+    pub tparams: Vec<Tparam>,
     pub constraints: Vec<(oxidized::ast_defs::ConstraintKind, Ty)>,
     pub reified: oxidized::aast::ReifyKind,
     pub user_attributes: Vec<nast::UserAttribute>,

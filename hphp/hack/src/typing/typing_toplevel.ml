@@ -1263,6 +1263,7 @@ and pu_enum_def
         {
           tp_variance = Ast_defs.Invariant;
           tp_name = sid;
+          tp_tparams = [];
           tp_constraints = [(Ast_defs.Constraint_eq, hint_ty)];
           tp_reified = Aast.Erased;
           tp_user_attributes = [];

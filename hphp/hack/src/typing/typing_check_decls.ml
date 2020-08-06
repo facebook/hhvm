@@ -149,19 +149,9 @@ and hint_ env p = function
 and check_happly unchecked_tparams env h =
   let decl_ty = Decl_hint.hint env.decl_env h in
   let unchecked_tparams =
-    List.map unchecked_tparams (fun t ->
-        let cstrl =
-          List.map t.tp_constraints (fun (ck, cstr) ->
-              let cstr = Decl_hint.hint env.decl_env cstr in
-              (ck, cstr))
-        in
-        {
-          Typing_defs.tp_variance = t.tp_variance;
-          tp_name = t.tp_name;
-          tp_constraints = cstrl;
-          tp_reified = t.tp_reified;
-          tp_user_attributes = t.tp_user_attributes;
-        })
+    List.map
+      unchecked_tparams
+      (Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
   in
   let tyl =
     List.map unchecked_tparams (fun t ->

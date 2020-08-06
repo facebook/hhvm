@@ -495,6 +495,7 @@ pub struct TypeParameterDecl<'a> {
     reified: aast::ReifyKind,
     variance: Variance,
     constraints: &'a [(ConstraintKind, Node<'a>)],
+    tparam_params: &'a [Tparam<'a>],
 }
 
 #[derive(Clone, Debug)]
@@ -2236,17 +2237,30 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         reify: Self::R,
         variance: Self::R,
         name: Self::R,
-        _param_params: Self::R,
+        tparam_params: Self::R,
         constraints: Self::R,
     ) -> Self::R {
-        // TODO(T69662957) We ignore param_params for now, because they have no
-        // counterpart in Typing_defs_core.tparam, yet
         let constraints =
             unwrap_or_return!(self.filter_map_to_slice(constraints, |node| match node {
                 Node::TypeConstraint(&constraint) => Some(constraint),
                 n if n.is_ignored() => None,
                 n => panic!("Expected a type constraint, but was {:?}", n),
             }));
+
+        // TODO(T70068435) Once we add support for constraints on higher-kinded types
+        // (in particular, constraints on nested type parameters), we need to ensure
+        // that we correctly handle the scoping of nested type parameters.
+        // This includes making sure that the call to convert_type_appl_to_generic
+        // in make_type_parameters handles nested constraints.
+        // For now, we just make sure that the nested type parameters that make_type_parameters
+        // added to the global list of in-scope type parameters are removed immediately:
+        self.pop_type_params(tparam_params);
+
+        let tparam_params = match tparam_params {
+            Node::TypeParameters(&params) => params,
+            _ => &[],
+        };
+
         Node::TypeParameter(self.alloc(TypeParameterDecl {
             name,
             variance: match variance {
@@ -2259,6 +2273,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 _ => aast::ReifyKind::Erased,
             },
             constraints,
+            tparam_params,
         }))
     }
 
@@ -2284,6 +2299,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 variance,
                 reified,
                 constraints,
+                tparam_params,
             } = decl;
             let constraints = unwrap_or_return!(self.maybe_slice_from_iter(
                 constraints.iter().map(|constraint| {
@@ -2299,6 +2315,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 constraints,
                 reified,
                 user_attributes: &[],
+                tparams: tparam_params,
             });
         }
         Node::TypeParameters(self.alloc(tparams.into_bump_slice()))

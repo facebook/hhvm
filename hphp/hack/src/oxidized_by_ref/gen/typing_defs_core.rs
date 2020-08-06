@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<83b8070e300ee7a198e91e6ae1a22bed>>
+// @generated SignedSource<<da542d3054ffac2f5d2210af1d9f6c71>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -288,6 +288,7 @@ impl TrivialDrop for DestructureKind {}
 pub struct Tparam<'a> {
     pub variance: oxidized::ast_defs::Variance,
     pub name: ast_defs::Id<'a>,
+    pub tparams: &'a [Tparam<'a>],
     pub constraints: &'a [(oxidized::ast_defs::ConstraintKind, Ty<'a>)],
     pub reified: oxidized::aast::ReifyKind,
     pub user_attributes: &'a [nast::UserAttribute<'a>],

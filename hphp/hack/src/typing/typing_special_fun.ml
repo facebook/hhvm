@@ -118,6 +118,7 @@ let transform_special_fun_ty fty id nargs =
         {
           tp_variance = Ast_defs.Invariant;
           tp_name = (fst id, name);
+          tp_tparams = [];
           tp_constraints = [];
           tp_reified = Aast.Erased;
           tp_user_attributes = [];

@@ -354,6 +354,7 @@ and localize_tparam pos (env, ety_env) ty tparam =
   | (r, Tapply ((_, x), _argl)) when String.equal x SN.Typehints.wildcard ->
     let {
       tp_name = (_, name);
+      tp_tparams = _tparams;
       tp_constraints = cstrl;
       tp_reified = reified;
       tp_user_attributes;
@@ -488,28 +489,38 @@ and localize_ft
   in
   let ety_env = { ety_env with substs } in
   (* Localize the constraints for a type parameter declaration *)
-  let localize_tparam env t =
+  let rec localize_tparam ~nested env t =
     let (env, cstrl) =
-      List.map_env env t.tp_constraints (fun env (ck, ty) ->
-          let (env, ty) = localize_cstr_ty ~ety_env env ty t.tp_name in
-          let name_str = snd t.tp_name in
-          (* In order to access type constants on generics on where clauses,
+      (* TODO(T70068435)
+        For nested type parameters (i.e., type parameters of type parameters),
+        we do not support constraints, yet. If nested type parameters do have
+        constraints, this is reported earlier. We just throw them away here. *)
+      if nested then
+        (env, [])
+      else
+        List.map_env env t.tp_constraints (fun env (ck, ty) ->
+            let (env, ty) = localize_cstr_ty ~ety_env env ty t.tp_name in
+            let name_str = snd t.tp_name in
+            (* In order to access type constants on generics on where clauses,
              we need to add the constraints from the type parameters into the
              environment before localizing the where clauses with them. Temporarily
              add them to the environment here, and reset the environment later. *)
-          let env =
-            match ck with
-            | Ast_defs.Constraint_as -> Env.add_upper_bound env name_str ty
-            | Ast_defs.Constraint_super -> Env.add_lower_bound env name_str ty
-            | Ast_defs.Constraint_eq ->
-              Env.add_upper_bound
-                (Env.add_lower_bound env name_str ty)
-                name_str
-                ty
-          in
-          (env, (ck, ty)))
+            let env =
+              match ck with
+              | Ast_defs.Constraint_as -> Env.add_upper_bound env name_str ty
+              | Ast_defs.Constraint_super -> Env.add_lower_bound env name_str ty
+              | Ast_defs.Constraint_eq ->
+                Env.add_upper_bound
+                  (Env.add_lower_bound env name_str ty)
+                  name_str
+                  ty
+            in
+            (env, (ck, ty)))
     in
-    (env, { t with tp_constraints = cstrl })
+    let (env, tparams) =
+      List.map_env env t.tp_tparams (localize_tparam ~nested:true)
+    in
+    (env, { t with tp_constraints = cstrl; tp_tparams = tparams })
   in
   let localize_where_constraint env (ty1, ck, ty2) =
     let (env, ty1) = localize ~ety_env env ty1 in
@@ -520,7 +531,9 @@ and localize_ft
   let old_tpenv = Env.get_tpenv env in
   let old_global_tpenv = env.global_tpenv in
   (* Always localize tparams so they are available for later Tast check *)
-  let (env, tparams) = List.map_env env ft.ft_tparams localize_tparam in
+  let (env, tparams) =
+    List.map_env env ft.ft_tparams (localize_tparam ~nested:false)
+  in
   (* Localize the 'where' constraints *)
   let (env, where_constraints) =
     List.map_env env ft.ft_where_constraints localize_where_constraint

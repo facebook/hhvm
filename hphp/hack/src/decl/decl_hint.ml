@@ -26,6 +26,8 @@ and aast_tparam_to_decl_tparam env t =
   {
     tp_variance = t.Aast.tp_variance;
     tp_name = t.Aast.tp_name;
+    tp_tparams =
+      List.map ~f:(aast_tparam_to_decl_tparam env) t.Aast.tp_parameters;
     tp_constraints =
       List.map ~f:(Tuple.T2.map_snd ~f:(hint env)) t.Aast.tp_constraints;
     tp_reified = t.Aast.tp_reified;

@@ -1185,7 +1185,7 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
         (* irrelevant *)
         ai_mode = None;
         (* only relevant when autostart=true *)
-        progress_callback = ClientConnect.null_progress_reporter;
+        progress_callback = None;
         (* we're fast! *)
         do_post_handoff_handshake = false;
         ignore_hh_version = false;

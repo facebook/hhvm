@@ -34,7 +34,7 @@ type env = {
   profile_log: bool;
   remote: bool;
   ai_mode: string option;
-  progress_callback: string option -> unit;
+  progress_callback: (string option -> unit) option;
   do_post_handoff_handshake: bool;
   ignore_hh_version: bool;
   saved_state_ignore_hhconfig: bool;
@@ -51,7 +51,7 @@ type conn = {
   t_sent_connection_type: float;
   channels: Timeout.in_channel * Out_channel.t;
   server_finale_file: string;
-  conn_progress_callback: string option -> unit;
+  conn_progress_callback: (string option -> unit) option;
   conn_root: Path.t;
   conn_deadline: float option;
 }
@@ -80,8 +80,6 @@ let tty_progress_reporter () =
           (Tty.spinner ~angery_reaccs_only ())
       : unit )
 
-let null_progress_reporter (_status : string option) : unit = ()
-
 (* what is the server doing? or None if nothing *)
 let progress : string ref = ref "connecting"
 
@@ -108,8 +106,8 @@ let check_progress (root : Path.t) : unit =
 
 let delta_t : float = 3.0
 
-let print_wait_msg (progress_callback : string option -> unit) (root : Path.t) :
-    unit =
+let query_and_show_progress
+    (progress_callback : string option -> unit) ~(root : Path.t) : unit =
   let had_warning = Option.is_some !progress_warning in
   check_progress root;
   if not had_warning then
@@ -143,7 +141,7 @@ let rec wait_for_server_message
     ~(ic : Timeout.in_channel)
     ~(deadline : float option)
     ~(server_finale_file : string)
-    ~(progress_callback : string option -> unit)
+    ~(progress_callback : (string option -> unit) option)
     ~(root : Path.t) : 'a ServerCommandTypes.message_type Lwt.t =
   check_for_deadline deadline;
   let%lwt (readable, _, _) =
@@ -154,7 +152,7 @@ let rec wait_for_server_message
       1.0
   in
   if List.is_empty readable then (
-    print_wait_msg progress_callback root;
+    Option.iter progress_callback ~f:(query_and_show_progress ~root);
     wait_for_server_message
       ~connection_log_id
       ~expected_message
@@ -182,14 +180,15 @@ let rec wait_for_server_message
           ~connection_log_id
           "wait_for_server_message: got expected %s"
           (ServerCommandTypesUtils.debug_describe_message_type msg);
-        progress_callback None;
+        Option.iter progress_callback ~f:(fun callback -> callback None);
         Lwt.return msg
       ) else (
         log
           ~connection_log_id
           "wait_for_server_message: didn't want %s"
           (ServerCommandTypesUtils.debug_describe_message_type msg);
-        if not is_ping then print_wait_msg progress_callback root;
+        if not is_ping then
+          Option.iter progress_callback ~f:(query_and_show_progress ~root);
         wait_for_server_message
           ~connection_log_id
           ~expected_message
@@ -211,7 +210,7 @@ let rec wait_for_server_message
            finale_data
            ~f:ServerCommandTypesUtils.debug_describe_finale_data
            ~default:"[none]");
-      progress_callback None;
+      Option.iter progress_callback ~f:(fun callback -> callback None);
       raise (Server_hung_up finale_data)
 
 let wait_for_server_hello
@@ -219,7 +218,7 @@ let wait_for_server_hello
     (ic : Timeout.in_channel)
     (deadline : float option)
     (server_finale_file : string)
-    (progress_callback : string option -> unit)
+    (progress_callback : (string option -> unit) option)
     (root : Path.t) : unit Lwt.t =
   let%lwt (_ : 'a ServerCommandTypes.message_type) =
     wait_for_server_message

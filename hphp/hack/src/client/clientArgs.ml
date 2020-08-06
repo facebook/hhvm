@@ -91,6 +91,7 @@ let parse_check_args cmd =
   let force_dormant_start = ref false in
   let format_from = ref 0 in
   let from = ref "" in
+  let show_spinner = ref None in
   let hot_classes_threshold = ref 0 in
   let gen_saved_ignore_type_errors = ref false in
   let ignore_hh_version = ref false in
@@ -625,6 +626,9 @@ let parse_check_args cmd =
       ( "--server-rage",
         Arg.Unit (set_mode MODE_SERVER_RAGE),
         " (mode) dumps internal state of hh_server" );
+      ( "--show-spinner",
+        Arg.Bool (fun x -> show_spinner := Some x),
+        " shows a spinner while awaiting the typechecker" );
       ( "--single",
         Arg.String (fun x -> set_mode (MODE_STATUS_SINGLE x) ()),
         "<path> Return errors in file with provided name (give '-' for stdin)"
@@ -736,6 +740,7 @@ let parse_check_args cmd =
       error_format = !error_format;
       force_dormant_start = !force_dormant_start;
       from = !from;
+      show_spinner = Option.value ~default:(String.equal !from "") !show_spinner;
       gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
       ignore_hh_version = !ignore_hh_version;
       saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;

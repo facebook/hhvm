@@ -106,7 +106,10 @@ let connect ?(use_priority_pipe = false) args =
       profile_log = args.profile_log;
       remote = args.remote;
       ai_mode = args.ai_mode;
-      progress_callback = ClientConnect.tty_progress_reporter ();
+      progress_callback =
+        Option.some_if
+          args.show_spinner
+          (ClientConnect.tty_progress_reporter ());
       do_post_handoff_handshake = true;
       ignore_hh_version = args.ignore_hh_version;
       saved_state_ignore_hhconfig = args.saved_state_ignore_hhconfig;

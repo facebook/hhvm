@@ -1408,36 +1408,16 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     // constraint, considering the full list of type parameters to be in scope.
     fn convert_tapply_to_tgeneric(&self, ty: Ty<'a>) -> Ty<'a> {
         let ty_ = match *ty.1 {
-            Ty_::Tapply(&(id, [])) => {
-                // If the name contained a namespace delimiter in the original
-                // source text, then it can't have referred to a type parameter
-                // (since type parameters cannot be namespaced).
-                match ty.0.pos() {
-                    Some(pos) => {
-                        if self.source_text_at_pos(pos).contains(&b'\\') {
-                            return ty;
-                        }
-                    }
-                    None => return ty,
-                }
-                // However, the direct decl parser will unconditionally prefix
-                // the name with the current namespace (as it does for any
-                // Tapply). We need to remove it.
-                match id.1.rsplit('\\').next() {
-                    // TODO (T69662957) must fill type args of Tgeneric
-                    Some(name) if self.is_type_param_in_scope(name) => {
-                        Ty_::Tgeneric(self.alloc((name, &[])))
-                    }
-                    _ => return ty,
-                }
-            }
             Ty_::Tapply(&(id, targs)) => {
                 let converted_targs = self.slice_from_iter(
                     targs
                         .iter()
                         .map(|&targ| self.convert_tapply_to_tgeneric(targ)),
                 );
-                Ty_::Tapply(self.alloc((id, converted_targs)))
+                match self.tapply_should_be_tgeneric(ty.0, id) {
+                    Some(name) => Ty_::Tgeneric(self.alloc((name, converted_targs))),
+                    None => Ty_::Tapply(self.alloc((id, converted_targs))),
+                }
             }
             Ty_::Tarray(&(tk, tv)) => Ty_::Tarray(self.alloc((
                 tk.map(|tk| self.convert_tapply_to_tgeneric(tk)),
@@ -1503,6 +1483,33 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             _ => return ty,
         };
         Ty(ty.0, self.alloc(ty_))
+    }
+
+    // This is the logic for determining if convert_tapply_to_tgeneric should turn
+    // a Tapply into a Tgeneric
+    fn tapply_should_be_tgeneric(
+        &self,
+        reason: &'a Reason<'a>,
+        id: nast::Sid<'a>,
+    ) -> Option<&'a str> {
+        match reason.pos() {
+            // If the name contained a namespace delimiter in the original
+            // source text, then it can't have referred to a type parameter
+            // (since type parameters cannot be namespaced).
+            Some(pos) => {
+                if self.source_text_at_pos(pos).contains(&b'\\') {
+                    return None;
+                }
+            }
+            None => return None,
+        }
+        // However, the direct decl parser will unconditionally prefix
+        // the name with the current namespace (as it does for any
+        // Tapply). We need to remove it.
+        match id.1.rsplit('\\').next() {
+            Some(name) if self.is_type_param_in_scope(name) => return Some(name),
+            _ => return None,
+        }
     }
 }
 
@@ -2159,17 +2166,28 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             self.hint_ty(pos, ty_)
         } else {
             let Id(pos, class_type) = unwrap_or_return!(self.get_name("", class_type));
-            let class_type = self.state.namespace_builder.rename_import(class_type);
-            let class_type = if class_type.starts_with("\\") {
-                class_type
-            } else {
-                self.concat(self.state.namespace_builder.current_namespace(), class_type)
-            };
-            self.make_apply(
-                Id(pos, class_type),
-                type_arguments,
-                type_arguments.get_pos(self.state.arena),
-            )
+            match class_type.rsplit('\\').next() {
+                Some(name) if self.is_type_param_in_scope(name) => {
+                    let type_arguments = unwrap_or_return!(self.maybe_slice_from_iter(
+                        type_arguments.iter().map(|&node| self.node_to_ty(node))
+                    ));
+                    let ty_ = Ty_::Tgeneric(self.alloc((name, type_arguments)));
+                    self.hint_ty(pos, ty_)
+                }
+                _ => {
+                    let class_type = self.state.namespace_builder.rename_import(class_type);
+                    let class_type = if class_type.starts_with("\\") {
+                        class_type
+                    } else {
+                        self.concat(self.state.namespace_builder.current_namespace(), class_type)
+                    };
+                    self.make_apply(
+                        Id(pos, class_type),
+                        type_arguments,
+                        type_arguments.get_pos(self.state.arena),
+                    )
+                }
+            }
         }
     }
 

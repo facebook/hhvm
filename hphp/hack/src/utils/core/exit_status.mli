@@ -82,8 +82,6 @@ exception Exit_with of t
 
 val exit_code : t -> int
 
-val exit : t -> 'a
-
 val exit_code_to_string : int -> string
 
 val unpack : Unix.process_status -> string * int

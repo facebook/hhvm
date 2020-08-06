@@ -157,10 +157,6 @@ let exit_code = function
     220
   | Server_non_opt_build_mode -> 222
 
-let exit t =
-  let ec = exit_code t in
-  Stdlib.exit ec
-
 let exit_code_to_string (code : int) : string =
   let rec f acc candidate_i =
     match of_enum candidate_i with

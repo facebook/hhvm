@@ -394,34 +394,32 @@ let make_absolute_error code (x : (Pos.absolute * string) list) :
     Pos.absolute error_ =
   (code, x)
 
+let get_messages (error : 'a error_) = snd error
+
 let read_lines path = In_channel.read_lines path
 
 let num_digits x = int_of_float (Float.log10 (float_of_int x)) + 1
 
-(** Sort messages such that messages in the same file are together.
-    Do not reorder the files or messages within a file.
- *)
-let group_messages_by_file (error : Pos.absolute error_) :
-    Pos.absolute message list =
-  let msgs = to_list error in
-  let rec build_map msgs grouped filenames =
-    match msgs with
-    | msg :: msgs ->
-      let filename = Pos.filename (fst msg) in
-      (match String.Map.find grouped filename with
-      | Some file_msgs ->
-        let grouped =
-          String.Map.set grouped ~key:filename ~data:(file_msgs @ [msg])
-        in
-        build_map msgs grouped filenames
+(* Sort [xs] such that all the values that return the same
+   value for (f x) are consecutive. For any two elements
+   x1 and x2 in xs where (f x1) = (f x2), if x1 occurs before x2 in
+   xs, then x1 also occurs before x2 in the returned list. *)
+let combining_sort (xs : 'a list) ~(f : 'a -> string) : 'a list =
+  let rec build_map xs grouped keys =
+    match xs with
+    | x :: xs ->
+      let key = f x in
+      (match String.Map.find grouped key with
+      | Some members ->
+        let grouped = String.Map.set grouped ~key ~data:(members @ [x]) in
+        build_map xs grouped keys
       | None ->
-        let grouped = String.Map.set grouped ~key:filename ~data:[msg] in
-        build_map msgs grouped (filename :: filenames))
-    | [] -> (grouped, filenames)
+        let grouped = String.Map.set grouped ~key ~data:[x] in
+        build_map xs grouped (key :: keys))
+    | [] -> (grouped, keys)
   in
-  let (grouped, filenames) = build_map msgs String.Map.empty [] in
-  List.concat_map (List.rev filenames) ~f:(fun fn ->
-      String.Map.find_exn grouped fn)
+  let (grouped, keys) = build_map xs String.Map.empty [] in
+  List.concat_map (List.rev keys) ~f:(fun fn -> String.Map.find_exn grouped fn)
 
 (* E.g. "10 errors found." *)
 let format_summary format errors dropped_count max_errors : string option =

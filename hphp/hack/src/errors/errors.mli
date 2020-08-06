@@ -105,6 +105,8 @@ val get_pos : error -> Pos.t
 
 val get_severity : 'a error_ -> severity
 
+val get_messages : 'a error_ -> 'a message list
+
 val make_error : int -> (Pos.t * string) list -> error
 
 val make_absolute_error :
@@ -902,7 +904,7 @@ val to_json : Pos.absolute error_ -> Hh_json.json
 val convert_errors_to_string :
   ?include_filename:bool -> error list -> string list
 
-val group_messages_by_file : Pos.absolute error_ -> Pos.absolute message list
+val combining_sort : 'a list -> f:('a -> string) -> 'a list
 
 val to_string : ?indent:bool -> Pos.absolute error_ -> string
 

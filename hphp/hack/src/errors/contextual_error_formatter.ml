@@ -135,7 +135,13 @@ let col_widths (msgs : Pos.absolute Errors.message list) :
     The list may not be ordered, and multiple messages may occur on one line.
  *)
 let format_error (error : Pos.absolute Errors.error_) : string =
-  let msgs = Errors.group_messages_by_file error in
+  (* Sort messages such that messages in the same file are together.
+    Does not reorder the files or messages within a file. *)
+  let msgs =
+    Errors.get_messages error
+    |> Errors.combining_sort ~f:(fun msg ->
+           Errors.get_message_pos msg |> Pos.filename)
+  in
   (* The first message is the 'primary' message, so add a boolean to distinguish it. *)
   let rec label_first msgs is_first =
     match msgs with

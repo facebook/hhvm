@@ -1,0 +1,14 @@
+Typing[4110] Invalid argument [1]
+-> Expected string [2]
+-> But got int [1]
+
+builtin_call_bad_arg.php:4:22
+     2 | 
+     3 | function f(): void {
+[1]  4 |   xhprof_frame_begin(3);
+     5 | }
+
+builtins_fb.hhi:70:29
+[2] 70 | No source found
+
+1 error found.

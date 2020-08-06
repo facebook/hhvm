@@ -56,7 +56,7 @@ pub fn prim_to_string(prim: &Tprim) -> Cow<'static, str> {
 pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: &Hint) -> Result<String> {
     let Hint(_, h) = hint;
     Ok(match h.as_ref() {
-        Happly(Id(_, id), args) => {
+        Habstr(id, args) | Happly(Id(_, id), args) => {
             let name = fmt_name_or_prim(tparams, id);
             if args.is_empty() || strip_tparams {
                 name.to_string()
@@ -149,7 +149,6 @@ fn hint_to_string<'a>(h: &'a Hint_) -> Cow<'a, str> {
         Hprim(p) => prim_to_string(p),
         Hmixed | Hunion(_) | Hintersection(_) => typehints::MIXED.into(),
         Hnonnull => typehints::NONNULL.into(),
-        Habstr(s) => s.into(),
         Harray(_, _) => typehints::ARRAY.into(),
         Hdarray(_, _) => typehints::DARRAY.into(),
         Hvarray(_) => typehints::VARRAY.into(),
@@ -266,9 +265,10 @@ fn hint_to_type_constraint(
                 }
                 _ => (),
             };
-            happly_helper(tparams, kind, pos, s)?
+            type_application_helper(tparams, kind, pos, s)?
         }
-        h => happly_helper(tparams, kind, pos, &hint_to_string(h))?,
+        Habstr(s, _hs) => type_application_helper(tparams, kind, pos, s)?,
+        h => type_application_helper(tparams, kind, pos, &hint_to_string(h))?,
     })
 }
 
@@ -298,7 +298,13 @@ fn make_tc_with_flags_if_non_empty_flags(
     })
 }
 
-fn happly_helper(tparams: &[&str], kind: &Kind, pos: &Pos, name: &str) -> Result<constraint::Type> {
+// Used for nodes that do type application (i.e., Happly and Habstr)
+fn type_application_helper(
+    tparams: &[&str],
+    kind: &Kind,
+    pos: &Pos,
+    name: &str,
+) -> Result<constraint::Type> {
     use constraint::{Flags, Type};
     if tparams.contains(&name) {
         let tc_name = match kind {
@@ -375,7 +381,13 @@ fn param_hint_to_type_info(
                 !tparams.contains(&s.as_str())
             }
         }
-        Habstr(s) => !tparams.contains(&s.as_str()),
+        Habstr(s, hs) => {
+            if !hs.is_empty() {
+                false
+            } else {
+                !tparams.contains(&s.as_str())
+            }
+        }
         Herr | Hany => {
             return Err(Unrecoverable(
                 "Expected error on Tany in naming: param_hint_to_type_info".into(),

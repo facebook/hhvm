@@ -27,7 +27,7 @@ let check_is_class env (p, h) =
         | _ ->
           Errors.requires_non_class p name (Ast_defs.string_of_class_kind kind))
     end
-  | Aast.Habstr name -> Errors.requires_non_class p name "a generic"
+  | Aast.Habstr (name, _) -> Errors.requires_non_class p name "a generic"
   | _ -> Errors.requires_non_class p "This" "an invalid type hint"
 
 let check_is_interface (env, error_verb) (p, h) =

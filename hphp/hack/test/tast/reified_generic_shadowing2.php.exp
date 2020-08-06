@@ -23,7 +23,7 @@ Errors:
          m_variadic = FVnonVariadic;
          m_params =
          [{ param_annotation = ([6:29-31], Tc);
-            param_type_hint = ((Tc), (Some ([6:21-28], (Habstr "Tc"))));
+            param_type_hint = ((Tc), (Some ([6:21-28], (Habstr ("Tc", [])))));
             param_is_variadic = false; param_pos = [6:29-31];
             param_name = "$x"; param_expr = None; param_callconv = None;
             param_user_attributes = []; param_visibility = None }

@@ -89,7 +89,7 @@ pub(crate) fn has_reified_type_constraint(env: &Env, h: &aast::Hint) -> Reificat
         | Hint_::HpuAccess(_, _) => ReificationLevel::Not,
         // Not found in the original AST
         Hint_::Herr | Hint_::Hany => panic!("Should be a naming error"),
-        Hint_::Habstr(_) => panic!("TODO Unimplemented: Not in the original AST"),
+        Hint_::Habstr(_, _) => panic!("TODO Unimplemented: Not in the original AST"),
     }
 }
 
@@ -119,7 +119,7 @@ fn remove_awaitable(h: aast::Hint) -> aast::Hint {
         | Hint_::Hany
         | Hint_::Hmixed
         | Hint_::Hnonnull
-        | Hint_::Habstr(_)
+        | Hint_::Habstr(_, _)
         | Hint_::Harray(_, _)
         | Hint_::Hdarray(_, _)
         | Hint_::Hvarray(_)
@@ -212,7 +212,7 @@ pub(crate) fn remove_erased_generics(env: &Env, h: aast::Hint) -> aast::Hint {
             | Hint_::Hany
             | Hint_::Hmixed
             | Hint_::Hnonnull
-            | Hint_::Habstr(_)
+            | Hint_::Habstr(_, _)
             | Hint_::Harray(_, _)
             | Hint_::Hdarray(_, _)
             | Hint_::Hvarray(_)

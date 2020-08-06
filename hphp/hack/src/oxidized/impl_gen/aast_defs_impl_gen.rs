@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2c66e922660d9d2d99c0b6c7f951772a>>
+// @generated SignedSource<<ba1851a7927063dae77c059ddc7fd13d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -319,8 +319,8 @@ impl Hint_ {
     pub fn mk_hnonnull() -> Self {
         Hint_::Hnonnull
     }
-    pub fn mk_habstr(p0: String) -> Self {
-        Hint_::Habstr(p0)
+    pub fn mk_habstr(p0: String, p1: Vec<Hint>) -> Self {
+        Hint_::Habstr(p0, p1)
     }
     pub fn mk_harray(p0: Option<Hint>, p1: Option<Hint>) -> Self {
         Hint_::Harray(p0, p1)
@@ -547,9 +547,9 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_habstr(&self) -> Option<&String> {
+    pub fn as_habstr(&self) -> Option<(&String, &Vec<Hint>)> {
         match self {
-            Hint_::Habstr(p0) => Some(p0),
+            Hint_::Habstr(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
@@ -649,9 +649,9 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_habstr_mut(&mut self) -> Option<&mut String> {
+    pub fn as_habstr_mut(&mut self) -> Option<(&mut String, &mut Vec<Hint>)> {
         match self {
-            Hint_::Habstr(p0) => Some(p0),
+            Hint_::Habstr(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
@@ -751,9 +751,9 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_habstr_into(self) -> Option<String> {
+    pub fn as_habstr_into(self) -> Option<(String, Vec<Hint>)> {
         match self {
-            Hint_::Habstr(p0) => Some(p0),
+            Hint_::Habstr(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }

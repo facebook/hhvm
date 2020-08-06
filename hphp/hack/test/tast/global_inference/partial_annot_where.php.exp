@@ -64,7 +64,7 @@
          m_abstract = false; m_static = false; m_visibility = Public;
          m_name = ([4:19-22], "get"); m_tparams = [];
          m_where_constraints =
-         [(([4:35-36], (Habstr "T")), Constraint_super,
+         [(([4:35-36], (Habstr ("T", []))), Constraint_super,
            ([4:43-51], (Hprim Tarraykey)))];
          m_variadic = FVnonVariadic; m_params = []; m_cap = ((mixed), None);
          m_body =
@@ -72,7 +72,7 @@
            fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret =
-         ((?T), (Some ([4:26-28], (Hoption ([4:27-28], (Habstr "T"))))));
+         ((?T), (Some ([4:26-28], (Hoption ([4:27-28], (Habstr ("T", [])))))));
          m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];

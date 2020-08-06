@@ -409,6 +409,7 @@ let rec string_of_hint hint =
       (string_of_hint hf_return_ty)
   | Htuple hints ->
     Printf.sprintf "(%s)" (concat_map ~sep:", " ~f:string_of_hint hints)
+  | Habstr (name, hints)
   | Happly ((_, name), hints) ->
     let params =
       match hints with
@@ -445,7 +446,6 @@ let rec string_of_hint hint =
   | Hsoft hint -> "@" ^ string_of_hint hint
   | Hmixed -> "mixed"
   | Hnonnull -> "nonnull"
-  | Habstr s -> s
   | Harray (None, None) -> "array"
   | Harray (None, Some vhint) ->
     Printf.sprintf "array<%s>" (string_of_hint vhint)
@@ -713,7 +713,8 @@ let rec get_init_from_hint ctx tparams_stack hint =
     Printf.sprintf
       "shape(%s)"
       (concat_map ~sep:", " ~f:get_init_shape_field non_optional_fields)
-  | Habstr name ->
+  | Habstr (name, []) ->
+    (* FIXME: support non-empty type arguments of Habstr here? *)
     let rec loop tparams_stack =
       match tparams_stack with
       | tparams :: tparams_stack' ->

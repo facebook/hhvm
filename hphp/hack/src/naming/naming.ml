@@ -757,8 +757,27 @@ and hint_id
         Errors.lowercase_this p x;
         N.Herr
       | _ when SMap.mem x params ->
-        if not (List.is_empty hl) then Errors.typaram_applied_to_type p x;
-        N.Habstr x
+        let tcopt = Provider_context.get_tcopt (fst env).ctx in
+        let hl =
+          if
+            (not (TypecheckerOptions.higher_kinded_types tcopt))
+            && not (List.is_empty hl)
+          then (
+            Errors.typaram_applied_to_type p x;
+            []
+          ) else
+            hl
+        in
+
+        N.Habstr
+          ( x,
+            hintl
+              ~allow_wildcard
+              ~forbid_this
+              ~allow_retonly:true
+              ~tp_depth:(tp_depth + 1)
+              env
+              hl )
       | _ ->
         let () = check_name id in
         N.Happly

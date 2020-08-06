@@ -11,14 +11,15 @@ open Aast
 
 let static_method_check reified_params m =
   let visitor =
-    object
+    object (this)
       inherit [_] Aast.iter as super
 
       method! on_hint env (pos, h) =
         match h with
-        | Aast.Habstr t ->
+        | Aast.Habstr (t, args) ->
           if SSet.mem t reified_params then
-            Errors.static_meth_with_class_reified_generic m.m_span pos
+            Errors.static_meth_with_class_reified_generic m.m_span pos;
+          List.iter args ~f:(this#on_hint env)
         | _ -> super#on_hint env (pos, h)
     end
   in

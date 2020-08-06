@@ -69,7 +69,7 @@
            fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret =
-         ((?T), (Some ([4:26-28], (Hoption ([4:27-28], (Habstr "T"))))));
+         ((?T), (Some ([4:26-28], (Hoption ([4:27-28], (Habstr ("T", [])))))));
          m_external = false; m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];

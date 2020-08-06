@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6d00fffb496451e44fc519284ce7633f>>
+// @generated SignedSource<<3644cc5243988d0cb72759b51c06fb49>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -161,7 +161,7 @@ pub enum Hint_<'a> {
     Herr,
     Hmixed,
     Hnonnull,
-    Habstr(&'a str),
+    Habstr(&'a str, &'a [Hint<'a>]),
     Harray(Option<Hint<'a>>, Option<Hint<'a>>),
     Hdarray(Hint<'a>, Hint<'a>),
     Hvarray(Hint<'a>),

@@ -538,7 +538,7 @@ pub fn emit_class<'a>(emitter: &mut Emitter, ast_class: &'a tast::Class_) -> Res
             )),
             Hmixed => Ok(special_names::typehints::MIXED.into()),
             Hnonnull => Ok(special_names::typehints::NONNULL.into()),
-            Habstr(s) => Ok(s.into()),
+            Habstr(s, _) => Ok(s.into()),
             Harray(_, _) => Ok(special_names::typehints::ARRAY.into()),
             Hdarray(_, _) => Ok(special_names::typehints::DARRAY.into()),
             Hvarray(_) => Ok(special_names::typehints::VARRAY.into()),

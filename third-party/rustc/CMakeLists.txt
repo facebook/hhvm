@@ -22,22 +22,21 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   "SHA512=e1b3b1c41131af65f0487c742c0085b589e7c0eb73ce7ca4a38d30c9ce1af4d04686a141dde8cbaa7afc56bcb670e4d6f9b8b2dbad4700b89c5db371829a4ec4"
 )
 
-set(RUST_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/rust-prefix")
-
 include(ExternalProject)
 ExternalProject_Add(
-  rustInstall
+  bundled_rust
   ${RUST_DOWNLOAD_ARGS}
-  PREFIX "${RUST_PREFIX}"
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
   INSTALL_COMMAND
-  "${RUST_PREFIX}/src/rustInstall/install.sh" "--prefix=${RUST_PREFIX}"
+  "<SOURCE_DIR>/install.sh" "--prefix=<INSTALL_DIR>"
 )
 
 add_executable(rustc IMPORTED GLOBAL)
 add_executable(cargo IMPORTED GLOBAL)
-add_dependencies(rustc rustInstall)
-add_dependencies(cargo rustInstall)
-set_property(TARGET rustc PROPERTY IMPORTED_LOCATION "${RUST_PREFIX}/bin/rustc")
-set_property(TARGET cargo PROPERTY IMPORTED_LOCATION "${RUST_PREFIX}/bin/cargo")
+add_dependencies(rustc bundled_rust)
+add_dependencies(cargo bundled_rust)
+
+ExternalProject_Get_Property(bundled_rust INSTALL_DIR)
+set_property(TARGET rustc PROPERTY IMPORTED_LOCATION "${INSTALL_DIR}/bin/rustc")
+set_property(TARGET cargo PROPERTY IMPORTED_LOCATION "${INSTALL_DIR}/bin/cargo")

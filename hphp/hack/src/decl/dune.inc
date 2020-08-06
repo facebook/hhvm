@@ -247,7 +247,8 @@
     server_monitor
     shallow_decl_compare
     typing_deps
-    utils_core)
+    utils_core
+    utils_exit)
   (preprocess (pps ppx_deriving.std)))
 
 (library

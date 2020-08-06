@@ -266,7 +266,7 @@ let parse_options () =
   in
   if check_mode && Option.is_some !waiting_client then (
     Printf.eprintf "--check is incompatible with wait modes!\n";
-    Exit_status.(exit Input_error)
+    Exit.exit Exit_status.Input_error
   );
   let save_with_spec =
     match get_save_state_spec !save_with_spec with
@@ -282,7 +282,7 @@ let parse_options () =
   (match !root with
   | "" ->
     Printf.eprintf "You must specify a root directory!\n";
-    Exit_status.(exit Input_error)
+    Exit.exit Exit_status.Input_error
   | _ -> ());
   let root_path = Path.make !root in
   (ai_mode :=

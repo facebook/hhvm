@@ -22,6 +22,7 @@
     sys_utils
     utils_config_file_common
     utils_core
+    utils_exit
     utils_hash)
   (preprocess (pps lwt_ppx)) ; See T41851208
 )

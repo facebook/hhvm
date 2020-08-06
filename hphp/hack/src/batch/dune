@@ -28,4 +28,5 @@
     relative_path
     tast
     typechecker_options
-    utils_core))
+    utils_core
+    utils_exit))

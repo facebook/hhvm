@@ -325,7 +325,7 @@ let parallel_on_the_fly_decl
     (errors, changed, to_redecl, to_recheck)
   with e ->
     if SharedMem.is_heap_overflow () then
-      Exit_status.exit Exit_status.Redecl_heap_overflow
+      Exit.exit Exit_status.Redecl_heap_overflow
     else
       raise e
 

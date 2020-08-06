@@ -62,7 +62,7 @@ module Program = struct
       (Sys.Signal_handle
          (fun _ ->
            Hh_logger.log "Got sigusr2 signal. Going to shut down.";
-           Exit_status.exit Exit_status.Server_shutting_down))
+           Exit.exit Exit_status.Server_shutting_down))
 
   let run_once_and_exit
       genv
@@ -128,7 +128,7 @@ module Program = struct
           GlobalConfig.program_name;
 
         (* TODO: Notify the server monitor directly about this. *)
-        Exit_status.(exit Hhconfig_changed)
+        Exit.exit Exit_status.Hhconfig_changed
       ) );
     to_recheck
 end
@@ -1329,7 +1329,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
   if (not check_mode) && Sys_utils.is_nfs root_s && not enable_on_nfs then (
     Hh_logger.log "Refusing to run on %s: root is on NFS!" root_s;
     HackEventLogger.nfs_root ();
-    Exit_status.(exit Nfs_root)
+    Exit.exit Exit_status.Nfs_root
   );
 
   ( if
@@ -1351,7 +1351,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
       Hh_logger.log
         "Error: %s. Recompile the server in opt or dbgo mode, or pass --allow-non-opt-build to continue anyway."
         msg;
-      Exit_status.(exit Server_non_opt_build_mode)
+      Exit.exit Exit_status.Server_non_opt_build_mode
     ) );
 
   Program.preinit ();
@@ -1393,7 +1393,7 @@ let run_once options config local_config =
   in
   if not (ServerArgs.check_mode genv.options) then (
     Hh_logger.log "ServerMain run_once only supported in check mode.";
-    Exit_status.(exit Input_error)
+    Exit.exit Exit_status.Input_error
   );
 
   (* The type-checking happens here *)
@@ -1449,7 +1449,7 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   in
   if ServerArgs.check_mode genv.options then (
     Hh_logger.log "Invalid program args - can't run daemon in check mode.";
-    Exit_status.(exit Input_error)
+    Exit.exit Exit_status.Input_error
   );
   HackEventLogger.with_id ~stage:`Init env.init_env.init_id @@ fun () ->
   let env = MainInit.go genv options (fun () -> program_init genv env) in

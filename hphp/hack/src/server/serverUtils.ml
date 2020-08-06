@@ -116,15 +116,15 @@ let exit_on_exception (exn : exn) ~(stack : Utils.callstack) =
   | SharedMem.Out_of_shared_memory ->
     ignore (log_and_get_sharedmem_load_telemetry () : Telemetry.t);
     Printf.eprintf "Error: failed to allocate in the shared heap.\n%!";
-    Exit_status.(exit Out_of_shared_memory)
+    Exit.exit Exit_status.Out_of_shared_memory
   | SharedMem.Hash_table_full ->
     ignore (log_and_get_sharedmem_load_telemetry () : Telemetry.t);
     Printf.eprintf "Error: failed to allocate in the shared hashtable.\n%!";
-    Exit_status.(exit Hash_table_full)
+    Exit.exit Exit_status.Hash_table_full
   | Watchman.Watchman_error s as e ->
     Hh_logger.exc ~stack e;
     Hh_logger.log "Exiting. Failed due to watchman error: %s" s;
-    Exit_status.(exit Watchman_failed)
+    Exit.exit Exit_status.Watchman_failed
   | MultiThreadedCall.Coalesced_failures failures as e ->
     Hh_logger.exc ~stack e;
     let failure_msg = MultiThreadedCall.coalesced_failures_to_string failures in
@@ -137,7 +137,7 @@ let exit_on_exception (exn : exn) ~(stack : Utils.callstack) =
     let has_oom_failure = List.exists ~f:is_oom_failure failures in
     if has_oom_failure then
       let () = Hh_logger.log "Worker oomed. Exiting" in
-      Exit_status.(exit Worker_oomed)
+      Exit.exit Exit_status.Worker_oomed
     else
       (* We attempt to exit with the same code as a worker by folding over
        * all the failures and looking for a WEXITED. *)
@@ -165,10 +165,10 @@ let exit_on_exception (exn : exn) ~(stack : Utils.callstack) =
    * instead of being grouped into MultiThreaadedCall.Coalesced_failures *)
   | WorkerController.(Worker_failed (_, Worker_oomed)) as e ->
     Hh_logger.exc ~stack e;
-    Exit_status.(exit Worker_oomed)
+    Exit.exit Exit_status.Worker_oomed
   | WorkerController.Worker_busy as e ->
     Hh_logger.exc ~stack e;
-    Exit_status.(exit Worker_busy)
+    Exit.exit Exit_status.Worker_busy
   | WorkerController.(Worker_failed (_, Worker_quit (Unix.WEXITED i))) as e ->
     Hh_logger.exc ~stack e;
 
@@ -176,13 +176,14 @@ let exit_on_exception (exn : exn) ~(stack : Utils.callstack) =
     exit i
   | WorkerController.Worker_failed_to_send_job _ as e ->
     Hh_logger.exc ~stack e;
-    Exit_status.(exit Worker_failed_to_send_job)
-  | File_provider.File_provider_stale -> Exit_status.(exit File_provider_stale)
-  | Decl_class.Decl_heap_elems_bug -> Exit_status.(exit Decl_heap_elems_bug)
-  | Decl_defs.Decl_not_found _ -> Exit_status.(exit Decl_not_found)
+    Exit.exit Exit_status.Worker_failed_to_send_job
+  | File_provider.File_provider_stale ->
+    Exit.exit Exit_status.File_provider_stale
+  | Decl_class.Decl_heap_elems_bug -> Exit.exit Exit_status.Decl_heap_elems_bug
+  | Decl_defs.Decl_not_found _ -> Exit.exit Exit_status.Decl_not_found
   | SharedMem.C_assertion_failure _ as e ->
     Hh_logger.exc ~stack e;
-    Exit_status.(exit Shared_mem_assertion_failure)
+    Exit.exit Exit_status.Shared_mem_assertion_failure
   | SharedMem.Sql_assertion_failure err_num as e ->
     Hh_logger.exc ~stack e;
     let exit_code =
@@ -192,11 +193,11 @@ let exit_on_exception (exn : exn) ~(stack : Utils.callstack) =
       | 21 -> Exit_status.Sql_misuse
       | _ -> Exit_status.Sql_assertion_failure
     in
-    Exit_status.exit exit_code
-  | Exit_status.Exit_with ec -> Exit_status.(exit ec)
+    Exit.exit exit_code
+  | Exit_status.Exit_with ec -> Exit.exit ec
   | e ->
     Hh_logger.exc ~stack e;
-    Exit_status.(exit Uncaught_exception)
+    Exit.exit Exit_status.Uncaught_exception
 
 let with_exit_on_exception f =
   try f ()

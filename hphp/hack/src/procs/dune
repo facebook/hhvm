@@ -25,4 +25,5 @@
     procs_bucket
     procfs
     sys_utils
+    utils_exit
     worker_cancel))

@@ -226,9 +226,9 @@ let make_genv options config local_config workers =
             Timeout.with_timeout
               ~timeout:120
               ~on_timeout:(fun (_ : Timeout.timings) ->
-                Exit_status.(exit Dfind_unresponsive))
+                Exit.exit Exit_status.Dfind_unresponsive)
               ~do_:(fun t -> DfindLib.get_changes ~timeout:t dfind)
-          with _ -> Exit_status.(exit Dfind_died)
+          with _ -> Exit.exit Exit_status.Dfind_died
         in
         set
       in

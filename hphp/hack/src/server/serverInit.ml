@@ -206,7 +206,7 @@ let init
               Stdlib.close_out oc
             with _ -> ()
           end;
-          Exit_status.exit next_step))
+          Exit.exit next_step))
     | (Off, Full_init)
     | (Decl, Full_init)
     | (Parse, Full_init) ->

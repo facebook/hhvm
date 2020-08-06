@@ -159,7 +159,7 @@ let make_decision threshold count name =
     check_blocking ();
     if !did_change_mergebase then (
       Hh_logger.log "Changed %d %s due to rebase. Restarting!" count name;
-      Exit_status.(exit Big_rebase_detected)
+      Exit.exit Exit_status.Big_rebase_detected
     )
   )
 

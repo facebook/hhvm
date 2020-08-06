@@ -5,4 +5,5 @@
     socket)
   (libraries
     opaque_digest
-    sys_utils))
+    sys_utils
+    utils_exit))

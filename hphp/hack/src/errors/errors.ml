@@ -252,7 +252,7 @@ let lazy_decl_error_logging error error_map to_absolute to_string =
     (Caml.Printexc.raw_backtrace_to_string (Caml.Printexc.get_callstack 500));
 
   (* Exit with special error code so we can see the log after *)
-  Exit_status.exit Exit_status.Lazy_decl_bug
+  Exit.exit Exit_status.Lazy_decl_bug
 
 (*****************************************************************************)
 (* Error code printing. *)

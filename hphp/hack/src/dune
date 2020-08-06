@@ -69,7 +69,8 @@
     sys_utils
     tast
     typing
-    utils_core))
+    utils_core
+    utils_exit))
 
 (executable
   (name hh_single_compile)

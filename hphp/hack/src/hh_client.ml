@@ -94,7 +94,7 @@ let () =
       | ClientCommand.CDownloadSavedState env ->
         Lwt_main.run (ClientDownloadSavedState.main env)
     in
-    Exit_status.exit exit_status
+    Exit.exit exit_status
   with exn ->
     let e = Exception.wrap exn in
     (* We trust that if someone raised Exit_with then they had the decency to print
@@ -112,4 +112,4 @@ let () =
       (Exception.get_ctor_string e)
       (Exception.get_backtrace_string e |> Exception.clean_stack);
     HackEventLogger.client_bad_exit ~command_name es e;
-    Exit_status.exit es
+    Exit.exit es

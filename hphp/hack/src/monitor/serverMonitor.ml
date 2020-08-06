@@ -152,7 +152,7 @@ struct
           fun _ ->
           Hh_logger.log "Got an exit signal. Killing server and exiting.";
           SC.kill_server process;
-          Exit_status.exit Exit_status.Interrupted
+          Exit.exit Exit_status.Interrupted
         end
         [Sys.sigint; Sys.sigquit; Sys.sigterm; Sys.sighup]
     with _ -> Hh_logger.log "Failed to set signal handler"
@@ -293,7 +293,7 @@ struct
       let kill_signal_time = Unix.gettimeofday () in
       kill_server_with_check env.server;
       wait_for_server_exit_with_check env.server kill_signal_time;
-      Exit_status.(exit No_error)
+      Exit.exit Exit_status.No_error
     | MonitorRpc.SERVER_PROGRESS _tracker ->
       msg_to_channel client_fd (env.server_progress, env.server_progress_warning);
       Unix.close client_fd;
@@ -367,7 +367,7 @@ struct
          "Handling client_out_of_date threw with: %s"
          (Exn.to_string e));
     wait_for_server_exit_with_check env.server kill_signal_time;
-    Exit_status.exit Exit_status.Build_id_mismatch
+    Exit.exit Exit_status.Build_id_mismatch
 
   (* Send (possibly empty) sequences of messages before handing off to
    * server. *)
@@ -405,7 +405,7 @@ struct
       msg_to_channel client_fd (PH.Server_died { PH.status; PH.was_oom });
 
       (* Next client to connect starts a new server. *)
-      Exit_status.exit Exit_status.No_error
+      Exit.exit Exit_status.No_error
     | Died_config_changed ->
       if not is_purgatory_client then (
         let env = kill_and_maybe_restart_server env None in
@@ -709,9 +709,9 @@ struct
           (Hh_logger.log
              "check_and_run_loop_ threw with Unix.ECHILD. Exiting. - %s"
              stack);
-        Exit_status.exit Exit_status.No_server_running_should_retry
+        Exit.exit Exit_status.No_server_running_should_retry
       | Watchman.Watchman_restarted ->
-        Exit_status.exit Exit_status.Watchman_fresh_instance
+        Exit.exit Exit_status.Watchman_fresh_instance
       | Exit_status.Exit_with _ as e -> raise e
       | e ->
         let stack = Printexc.get_backtrace () in
@@ -721,7 +721,7 @@ struct
             "Probably an uncaught exception rethrown each retry. Exiting. %s"
             stack;
           HackEventLogger.uncaught_exception e;
-          Exit_status.exit Exit_status.Uncaught_exception
+          Exit.exit Exit_status.Uncaught_exception
         );
         Hh_logger.log
           "check_and_run_loop_ threw with exception: %s - %s"
@@ -736,7 +736,7 @@ struct
     if not (Lock.grab lock_file) then (
       Hh_logger.log "Lost lock; terminating.\n%!";
       HackEventLogger.lock_stolen lock_file;
-      Exit_status.(exit Lock_stolen)
+      Exit.exit Exit_status.Lock_stolen
     );
     let env = maybe_push_purgatory_clients env in
     let () = Sent_fds_collector.collect_garbage () in

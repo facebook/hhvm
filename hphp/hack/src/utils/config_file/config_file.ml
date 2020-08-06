@@ -22,7 +22,7 @@ let parse_hhconfig ~silent (fn : string) : string * string SMap.t =
   with e ->
     let stack = Printexc.get_backtrace () in
     Hh_logger.exc ~prefix:".hhconfig deleted: " ~stack e;
-    Exit_status.(exit Hhconfig_deleted)
+    Exit.exit Exit_status.Hhconfig_deleted
 
 let parse_local_config = Config_file_common.parse_local_config
 

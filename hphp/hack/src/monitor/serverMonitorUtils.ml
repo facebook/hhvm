@@ -151,5 +151,5 @@ let exit_if_parent_dead () =
   (* Cross-platform compatible way; parent PID becomes 1 when parent dies. *)
   if Unix.getppid () = 1 then (
     Hh_logger.log "Server's parent has died; exiting.\n";
-    Exit_status.exit Exit_status.Lost_parent_monitor
+    Exit.exit Exit_status.Lost_parent_monitor
   )

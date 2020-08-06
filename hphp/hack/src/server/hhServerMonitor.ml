@@ -73,7 +73,7 @@ let monitor_daemon_main
     let lock_file = ServerFiles.lock_file www_root in
     if not (Lock.grab lock_file) then (
       Hh_logger.log "Monitor daemon already running. Killing";
-      Exit_status.exit Exit_status.No_error
+      Exit.exit Exit_status.No_error
     ) );
 
   ignore @@ Sys_utils.setsid ();
@@ -172,8 +172,8 @@ let start () =
     in
     let options = ServerArgs.parse_options () in
     if ServerArgs.should_detach options then
-      Exit_status.exit (start_daemon options ~proc_stack)
+      Exit.exit (start_daemon options ~proc_stack)
     else
       monitor_daemon_main options ~proc_stack
   with SharedMem.Out_of_shared_memory ->
-    Exit_status.(exit Out_of_shared_memory)
+    Exit.exit Exit_status.Out_of_shared_memory

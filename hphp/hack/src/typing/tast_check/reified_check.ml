@@ -35,7 +35,9 @@ let validator =
         super#on_tapply acc r (p, h) tyl
 
     method! on_tgeneric acc r t _tyargs =
-      (* TODO(T69551141) handle type arguments *)
+      (* Ignoring type aguments: If there were any, then this generic variable isn't allowed to be
+        reified anyway *)
+      (* TODO(T70069116) actually implement that check *)
       match Env.get_reified acc.env t with
       | Nast.Erased -> this#invalid acc r "not reified"
       | Nast.SoftReified -> this#invalid acc r "soft reified"
@@ -208,7 +210,9 @@ let handler =
         let (env, ty) = Env.expand_type env ty in
         (match get_node ty with
         | Tgeneric (ci, _tyargs) when String.equal ci class_id ->
-          (* TODO(T69551141) handle type arguments *)
+          (* ignoring type arguments here: If we get a Tgeneric here, the underlying type
+             parameter must have been newable and reified, neither of which his allowed for
+             higher-kinded type-parameters *)
           if not (Env.get_newable env ci) then Errors.new_without_newable pos ci;
           if not (List.is_empty targs) then
             Errors.typaram_applied_to_type pos ci

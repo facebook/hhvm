@@ -87,6 +87,13 @@ If such a type exists, remove the type parameter from the tpenv.
 Returns a set of substitutions mapping each type parameter name to the type
 to which it is equal if found, otherwise to itself. *)
 let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
+  (* TODO(T70068435)
+    TODO(T69927003)
+    TODO(T70087549)
+    This currently assumes that [tparams] only contains non-HK type paramters.
+    (as seen in the Tgenerics created within and their arguments ignored)
+    Once Type_parameter_env know about kinds, we can at least check here
+    that this precondition is satisfied. *)
   let old_env = env in
   let tpenv = Env.get_tpenv env in
   (* For each tparam, "solve" it if it falls in any of those categories:
@@ -133,7 +140,7 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
               let substs = SMap.add tparam_name lower_bound substs in
               (tpenv, substs)
             | _ ->
-              (* TODO(T69551141) handle type arguments for Tgeneric *)
+              (* TODO see comment at beginning of function *)
               let tparam_ty = mk (r, Tgeneric (tparam_name, [])) in
               let substs = SMap.add tparam_name tparam_ty substs in
               (tpenv, substs)
@@ -154,8 +161,8 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
     | None -> (substs, None)
     | Some subst ->
       (match get_node subst with
-      | Tgeneric (tparam', _tyargs) when String.( <> ) tparam' tparam ->
-        (* TODO(T69551141) handle type arguments *)
+      | Tgeneric (tparam', []) when String.( <> ) tparam' tparam ->
+        (* TODO see comment at beginning of function *)
         let (substs, new_subst_opt) = reduce substs tparam' in
         begin
           match new_subst_opt with

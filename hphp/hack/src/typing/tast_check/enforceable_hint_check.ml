@@ -50,7 +50,8 @@ let validator =
         ^ " because it is not marked <<__Enforceable>>"
 
     method! on_tgeneric acc r name _tyargs =
-      (* TODO(T69551141) handle type arguments *)
+      (* If we allow higher-kinded generics to be enforceable at some point,
+         handle type arguments here *)
       if acc.like_context then
         acc
       else
@@ -170,6 +171,9 @@ let validator =
       this#check_for_wildcards acc tyl "shape"
 
     method check_generic acc r name =
+      (* No need to look at type arguments of generic var, as higher-kinded type params
+        cannot be enforcable *)
+      (* TODO(T70069116) implement enforcability check *)
       match
         (Env.get_reified acc.env name, Env.get_enforceable acc.env name)
       with

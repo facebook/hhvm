@@ -345,10 +345,6 @@ module Initialize : sig
   and saveOptions = { includeText: bool }
 end
 
-module Shutdown : sig end
-
-module Exit : sig end
-
 module RageFB : sig
   type result = rageItem list
 

@@ -404,11 +404,3 @@ type 'a message_type =
 
 (** Timeout on reading the command from the client - client probably frozen. *)
 exception Read_command_timeout
-
-(* This data is marshalled by the server to a <pid>.fin file in certain cases *)
-(* of a controlled exit, so the client can know about it. *)
-type finale_data = {
-  exit_status: Exit_status.t;
-  msg: string;
-  stack: Utils.callstack;
-}

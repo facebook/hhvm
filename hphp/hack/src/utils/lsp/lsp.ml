@@ -540,12 +540,6 @@ module Initialize = struct
   }
 end
 
-(* Shutdown request, method="shutdown" *)
-module Shutdown = struct end
-
-(* Exit notification, method="exit" *)
-module Exit = struct end
-
 (* Rage request, method="telemetry/rage" *)
 module RageFB = struct
   type result = rageItem list

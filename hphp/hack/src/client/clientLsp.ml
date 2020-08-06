@@ -4813,7 +4813,7 @@ let main (env : env) : Exit_status.t Lwt.t =
         in
         let server_finale_stack =
           match server_finale_data with
-          | Some { ServerCommandTypes.stack = Utils.Callstack s; _ } ->
+          | Some { Exit.stack = Utils.Callstack s; _ } ->
             s |> Exception.clean_stack
           | _ -> ""
         in
@@ -4840,7 +4840,11 @@ let main (env : env) : Exit_status.t Lwt.t =
         (* down and giving them a button to restart.                            *)
         let explanation =
           match server_finale_data with
-          | Some { ServerCommandTypes.msg; _ } -> msg
+          | Some { Exit.msg = Some msg; _ } -> msg
+          | Some { Exit.msg = None; exit_status; _ } ->
+            Printf.sprintf
+              "hh_server: stopped [%s]"
+              (Exit_status.show exit_status)
           | _ -> "hh_server: stopped."
         in
         (* When would be a good time to auto-dismiss the dialog and attempt     *)
@@ -4856,11 +4860,8 @@ let main (env : env) : Exit_status.t Lwt.t =
         let trigger_on_lock_file =
           match server_finale_data with
           | Some
-              {
-                ServerCommandTypes.exit_status =
-                  Exit_status.Failed_to_load_should_abort;
-                _;
-              } ->
+              { Exit.exit_status = Exit_status.Failed_to_load_should_abort; _ }
+            ->
             false
           | _ -> true
         in

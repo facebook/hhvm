@@ -20,7 +20,7 @@ let log ?tracker ?connection_log_id s =
   | Some id -> Hh_logger.log ("[%s] [client-connect] " ^^ s) id
   | None -> Hh_logger.log ("[client-connect] " ^^ s)
 
-exception Server_hung_up of ServerCommandTypes.finale_data option
+exception Server_hung_up of Exit.finale_data option
 
 type env = {
   root: Path.t;
@@ -56,11 +56,10 @@ type conn = {
   conn_deadline: float option;
 }
 
-let get_finale_data (server_finale_file : string) :
-    ServerCommandTypes.finale_data option =
+let get_finale_data (server_finale_file : string) : Exit.finale_data option =
   try
     let ic = Stdlib.open_in_bin server_finale_file in
-    let contents : ServerCommandTypes.finale_data = Marshal.from_channel ic in
+    let contents : Exit.finale_data = Marshal.from_channel ic in
     Stdlib.close_in ic;
     Some contents
   with _ -> None
@@ -208,7 +207,7 @@ let rec wait_for_server_message
         (e |> Exception.to_string |> Exception.clean_stack)
         (Option.value_map
            finale_data
-           ~f:ServerCommandTypesUtils.debug_describe_finale_data
+           ~f:Exit.show_finale_data
            ~default:"[none]");
       Option.iter progress_callback ~f:(fun callback -> callback None);
       raise (Server_hung_up finale_data)
@@ -235,20 +234,16 @@ let wait_for_server_hello
 let with_server_hung_up (f : unit -> 'a Lwt.t) : 'a Lwt.t =
   try%lwt f () with
   | Server_hung_up (Some finale_data) ->
-    ServerCommandTypes.(
-      Printf.eprintf
-        "Hack server disconnected suddenly [%s]\n   %s\n"
-        (Exit_status.show finale_data.exit_status)
-        finale_data.msg;
-      (match finale_data.exit_status with
-      | Exit_status.Failed_to_load_should_abort ->
-        raise Exit_status.(Exit_with Server_hung_up_should_abort)
-      | _ -> raise Exit_status.(Exit_with Server_hung_up_should_retry)))
-  | Server_hung_up None ->
     Printf.eprintf
-      ( "Hack server disconnected suddenly. Most likely a new one"
-      ^^ " is being initialized with a better saved state after a large rebase/update.\n"
-      );
+      "Hack server disconnected suddenly [%s]\n%s\n"
+      (Exit_status.show finale_data.Exit.exit_status)
+      (Option.value ~default:"" finale_data.Exit.msg);
+    (match finale_data.Exit.exit_status with
+    | Exit_status.Failed_to_load_should_abort ->
+      raise Exit_status.(Exit_with Server_hung_up_should_abort)
+    | _ -> raise Exit_status.(Exit_with Server_hung_up_should_retry))
+  | Server_hung_up None ->
+    Printf.eprintf "Hack server disconnected suddenly. It might have crashed.\n";
     raise Exit_status.(Exit_with Server_hung_up_should_retry)
 
 let rec connect

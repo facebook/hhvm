@@ -193,8 +193,8 @@ let init
         | _ ->
           let finale_data =
             {
-              ServerCommandTypes.exit_status = next_step;
-              msg = user_message;
+              Exit.exit_status = next_step;
+              msg = Some user_message;
               stack = Utils.Callstack stack;
             }
           in

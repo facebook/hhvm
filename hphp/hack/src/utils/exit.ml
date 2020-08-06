@@ -8,9 +8,17 @@
 
 type finale_data = {
   exit_status: Exit_status.t;
-  msg: string;
+  msg: string option;
   stack: Utils.callstack;
 }
+
+let show_finale_data (data : finale_data) : string =
+  let (Utils.Callstack stack) = data.stack in
+  Printf.sprintf
+    "Exit status [%s] %s\n%s"
+    (Exit_status.show data.exit_status)
+    (Option.value data.msg ~default:"")
+    (Exception.clean_stack stack)
 
 let finale_file_for_eventual_exit : string option ref = ref None
 
@@ -28,7 +36,6 @@ let exit
   match !finale_file_for_eventual_exit with
   | None -> Stdlib.exit exit_code
   | Some finale_file ->
-    let msg = Option.value ~default:"" msg in
     let stack =
       Option.value
         ~default:

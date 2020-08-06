@@ -9,7 +9,6 @@ SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   SOURCE_HASH
   "SHA256=4eb3b8d442b426dc35346235c8733b5ae35ba431690e38c6a8263dce9fcbb402"
 )
-list(JOIN BOOST_COMPONENTS "," BOOST_COMPONENTS_CSV)
 set(
   COMMON_ARGS
   --prefix=<INSTALL_DIR>
@@ -25,6 +24,8 @@ set(
   runtime-link=static
   cxxflags=-std=gnu++14
 )
+
+string(REPLACE ";" "," BOOST_COMPONENTS_CSV "${BOOST_COMPONENTS}")
 # We pass --with-libraires to boostrap.sh, but that does not consistently
 # affect b2
 foreach(COMPONENT IN LISTS BOOST_COMPONENTS)

@@ -15,8 +15,6 @@ shape. *)
 
 type t =
   | No_error
-  | Build_error
-  | Build_terminated
   | Checkpoint_error
   | Input_error
   | Kill_error
@@ -77,6 +75,7 @@ type t =
   | Big_rebase_detected
   | Failed_to_load_should_retry
   | Failed_to_load_should_abort
+  | Server_non_opt_build_mode
 
 exception Exit_with of t
 

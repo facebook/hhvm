@@ -1351,7 +1351,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
       Hh_logger.log
         "Error: %s. Recompile the server in opt or dbgo mode, or pass --allow-non-opt-build to continue anyway."
         msg;
-      Exit_status.(exit Build_error)
+      Exit_status.(exit Server_non_opt_build_mode)
     ) );
 
   Program.preinit ();

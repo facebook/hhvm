@@ -34,6 +34,13 @@ TRACE_SET_MOD(hhbbc_mem);
 
 constexpr int32_t kNoSrcLoc = -1;
 
+constexpr uint8_t k16BitCode = 0xfe;
+constexpr uint8_t k32BitCode = 0xff;
+
+// HHBC uses "9-bit" opcodes...that is, we have more than 256 valid
+// bytecode ops, but less than 512. How convenient!
+constexpr uint8_t k9BitOpShift = 0xff;
+
 template <typename>
 struct is_compact_vector : std::false_type {};
 
@@ -60,6 +67,15 @@ std::string name(const std::type_info& type) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+template <typename T>
+T decode_as_bytes(const Buffer& buffer, size_t& pos) {
+  static_assert(copy_as_bytes<T>(), "");
+  alignas(alignof(T)) char data[sizeof(T)];
+  memmove(&data[0], &buffer[pos], sizeof(T));
+  pos += sizeof(T);
+  return *reinterpret_cast<const T*>(&data[0]);
+}
 
 #define DECODE_MEMBER(x) decode<decltype(std::declval<T>().x)>(buffer, pos)
 
@@ -126,17 +142,35 @@ T decode(const Buffer& buffer, size_t& pos) {
     return data;
   }
 
+  if constexpr (std::is_same<T, uint32_t>::value) {
+    auto const byte = decode_as_bytes<uint8_t>(buffer, pos);
+    return byte == k32BitCode ? decode_as_bytes<uint32_t>(buffer, pos) :
+           byte == k16BitCode ? decode_as_bytes<uint16_t>(buffer, pos) : byte;
+  }
+
+  if constexpr (std::is_same<T, Op>::value) {
+    static_assert(sizeof(Op) == sizeof(uint16_t), "");
+    auto const byte = decode_as_bytes<uint8_t>(buffer, pos);
+    if (byte < k9BitOpShift) return Op(byte);
+    auto const next = decode_as_bytes<uint8_t>(buffer, pos);
+    return Op(safe_cast<uint16_t>(next) + k9BitOpShift);
+  }
+
   if constexpr (copy_as_bytes<T>()) {
-    alignas(alignof(T)) char data[sizeof(T)];
-    memmove(&data[0], &buffer[pos], sizeof(T));
-    pos += sizeof(T);
-    return *reinterpret_cast<const T*>(&data[0]);
+    return decode_as_bytes<T>(buffer, pos);
   }
 }
 
 #undef DECODE_MEMBER
 
 //////////////////////////////////////////////////////////////////////
+
+template <typename T>
+void encode_as_bytes(Buffer& buffer, const T& data) {
+  static_assert(copy_as_bytes<T>(), "");
+  auto const ptr = reinterpret_cast<const char*>(&data);
+  buffer.insert(buffer.end(), ptr, ptr + sizeof(T));
+}
 
 template <typename T>
 void encode(Buffer& buffer, const T& data) {
@@ -188,9 +222,29 @@ void encode(Buffer& buffer, const T& data) {
     encode(buffer, safe_cast<uint32_t>(data.size()));
     for (auto const& item : data) encode(buffer, item);
 
+  } else if constexpr (std::is_same<T, uint32_t>::value) {
+    if (data < std::min(k16BitCode, k32BitCode)) {
+      encode_as_bytes(buffer, safe_cast<uint8_t>(data));
+    } else if (data <= std::numeric_limits<uint16_t>::max()) {
+      encode_as_bytes(buffer, k16BitCode);
+      encode_as_bytes(buffer, safe_cast<uint16_t>(data));
+    } else {
+      encode_as_bytes(buffer, k32BitCode);
+      encode_as_bytes(buffer, data);
+    }
+
+  } else if constexpr (std::is_same<T, Op>::value) {
+    static_assert(sizeof(Op) == sizeof(uint16_t), "");
+    auto const raw = uint16_t(data);
+    if (raw < k9BitOpShift) {
+      encode_as_bytes(buffer, safe_cast<uint8_t>(raw));
+    } else {
+      encode_as_bytes(buffer, k9BitOpShift);
+      encode_as_bytes(buffer, safe_cast<uint8_t>(raw - k9BitOpShift));
+    }
+
   } else if constexpr (copy_as_bytes<T>()) {
-    auto const ptr = reinterpret_cast<const char*>(&data);
-    buffer.insert(buffer.end(), ptr, ptr + sizeof(T));
+    encode_as_bytes(buffer, data);
   }
 }
 

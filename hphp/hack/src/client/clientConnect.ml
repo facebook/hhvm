@@ -239,7 +239,8 @@ let with_server_hung_up (f : unit -> 'a Lwt.t) : 'a Lwt.t =
       (Exit_status.show finale_data.Exit.exit_status)
       (Option.value ~default:"" finale_data.Exit.msg);
     (match finale_data.Exit.exit_status with
-    | Exit_status.Failed_to_load_should_abort ->
+    | Exit_status.Failed_to_load_should_abort
+    | Exit_status.Server_non_opt_build_mode ->
       raise Exit_status.(Exit_with Server_hung_up_should_abort)
     | _ -> raise Exit_status.(Exit_with Server_hung_up_should_retry))
   | Server_hung_up None ->

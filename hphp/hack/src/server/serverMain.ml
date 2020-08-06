@@ -62,7 +62,10 @@ module Program = struct
       (Sys.Signal_handle
          (fun _ ->
            Hh_logger.log "Got sigusr2 signal. Going to shut down.";
-           Exit.exit Exit_status.Server_shutting_down))
+           Exit.exit
+             ~msg:
+               "Hh_server received a stop signal. This can happen from a large rebase/update"
+             Exit_status.Server_shutting_down_due_to_sigusr2))
 
   let run_once_and_exit
       genv
@@ -1334,9 +1337,9 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     Exit.exit Exit_status.Nfs_root
   );
 
-  ( if
+  if
     ServerConfig.warn_on_non_opt_build config && not Build_id.is_build_optimized
-  then
+  then begin
     let msg =
       Printf.sprintf
         "hh_server binary was built in \"%s\" mode, "
@@ -1349,12 +1352,15 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
       Hh_logger.log
         "Warning: %s. Initializing anyway due to --allow-non-opt-build option."
         msg
-    else (
-      Hh_logger.log
-        "Error: %s. Recompile the server in opt or dbgo mode, or pass --allow-non-opt-build to continue anyway."
-        msg;
-      Exit.exit Exit_status.Server_non_opt_build_mode
-    ) );
+    else
+      let msg =
+        Printf.sprintf
+          "Error: %s. Recompile the server in opt or dbgo mode, or pass --allow-non-opt-build to continue anyway."
+          msg
+      in
+      Hh_logger.log "%s" msg;
+      Exit.exit ~msg Exit_status.Server_non_opt_build_mode
+  end;
 
   Program.preinit ();
   Sys_utils.set_priorities ~cpu_priority ~io_priority;

@@ -51,7 +51,7 @@ type t =
   | File_provider_stale
   | Hhconfig_deleted
   | Hhconfig_changed
-  | Server_shutting_down
+  | Server_shutting_down_due_to_sigusr2
   | IDE_malformed_request
   | IDE_no_server
   | IDE_out_of_retries
@@ -88,7 +88,7 @@ let exit_code = function
   | Interrupted -> -6
   | No_error -> 0
   | Kill_error -> 1 (* used in clientStop/Start/Restart *)
-  | Server_shutting_down -> 1 (* used in server *)
+  | Server_shutting_down_due_to_sigusr2 -> 1 (* used in server *)
   (* CARE! exit code 2 is also used when an ocaml binary exits
   with an unhandled exception. It's a shame that we can't distinguish
   such exits from the following two codes. *)

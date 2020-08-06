@@ -174,7 +174,7 @@ let entry =
 let init_workers () =
   let nbr_procs = Sys_utils.nproc () in
   let gc_control = GlobalConfig.gc_control in
-  let config = GlobalConfig.default_sharedmem_config in
+  let config = SharedMem.default_config in
   let heap_handle = SharedMem.init config ~num_workers:nbr_procs in
   MultiWorker.make
     ?call_wrapper:None

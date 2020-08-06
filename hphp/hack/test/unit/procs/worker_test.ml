@@ -102,8 +102,6 @@ let () =
   Daemon.check_entry_point ();
 
   (* this call might not return *)
-  let heap_handle =
-    SharedMem.init ~num_workers GlobalConfig.default_sharedmem_config
-  in
+  let heap_handle = SharedMem.init ~num_workers SharedMem.default_config in
   let tests = make_tests heap_handle in
   Unit_test.run_all tests

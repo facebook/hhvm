@@ -63,9 +63,7 @@ let test_init_common ?(hhi_files = []) () =
   Relative_path.set_path_prefix Relative_path.Hhi (Path.make hhi);
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make tmp);
 
-  let handle =
-    SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config
-  in
+  let handle = SharedMem.init ~num_workers:0 SharedMem.default_config in
   ignore (handle : SharedMem.handle);
 
   ServerMain.force_break_recheck_loop_for_test true;

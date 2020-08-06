@@ -445,7 +445,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
     | MODE_OUTLINE
     | MODE_OUTLINE2 ->
       let (_handle : SharedMem.handle) =
-        SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config
+        SharedMem.init ~num_workers:0 SharedMem.default_config
       in
       let content = Sys_utils.read_stdin_to_string () in
       let results =

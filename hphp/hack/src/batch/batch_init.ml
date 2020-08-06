@@ -72,6 +72,6 @@ let init
 let init_with_defaults =
   init
     ~root:(Path.make "/")
-    ~shmem_config:GlobalConfig.default_sharedmem_config
+    ~shmem_config:SharedMem.default_config
     ~popt:ParserOptions.default
     ~tcopt:TypecheckerOptions.default

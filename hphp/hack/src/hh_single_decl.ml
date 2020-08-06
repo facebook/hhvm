@@ -17,7 +17,7 @@ type verbosity =
 let init root : Provider_context.t =
   Relative_path.(set_path_prefix Root root);
   let (_handle : SharedMem.handle) =
-    SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config
+    SharedMem.init ~num_workers:0 SharedMem.default_config
   in
   let tcopt =
     {

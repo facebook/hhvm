@@ -362,9 +362,7 @@ let test_docblock_finder (harness : Test_harness.t) : bool =
   let _ = harness in
   let init_id = Random_id.short_string () in
   let env = ServerEnvBuild.make_env ~init_id ServerConfig.default_config in
-  let handle =
-    SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config
-  in
+  let handle = SharedMem.init ~num_workers:0 SharedMem.default_config in
   ignore (handle : SharedMem.handle);
 
   (* Search for docblocks for various items *)

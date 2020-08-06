@@ -64,7 +64,7 @@ let make_gc_control config =
 
 let make_sharedmem_config config options local_config =
   let { SharedMem.global_size; heap_size; shm_min_avail; _ } =
-    GlobalConfig.default_sharedmem_config
+    SharedMem.default_config
   in
   let shm_dirs = local_config.ServerLocalConfig.shm_dirs in
   let global_size = int_ "sharedmem_global_size" ~default:global_size config in
@@ -475,7 +475,7 @@ let default_config =
     version = Config_file.Opaque_version None;
     load_script_timeout = 0;
     gc_control = GlobalConfig.gc_control;
-    sharedmem_config = GlobalConfig.default_sharedmem_config;
+    sharedmem_config = SharedMem.default_config;
     tc_options = TypecheckerOptions.default;
     glean_options = GleanOptions.default;
     symbol_write_options = SymbolWriteOptions.default;

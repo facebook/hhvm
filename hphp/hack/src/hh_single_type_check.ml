@@ -1993,7 +1993,7 @@ let main_hack ({ tcopt; _ } as opts) (sienv : SearchUtils.si_env) : unit =
   EventLogger.init_fake ();
 
   let (_handle : SharedMem.handle) =
-    SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config
+    SharedMem.init ~num_workers:0 SharedMem.default_config
   in
   Tempfile.with_tempdir (fun hhi_root ->
       Hhi.set_hhi_root_for_unit_test hhi_root;

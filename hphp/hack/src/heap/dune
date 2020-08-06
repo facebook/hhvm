@@ -41,6 +41,7 @@
     value)
   (preprocess (pps ppx_deriving.std visitors.ppx))
   (libraries
+    global_config
     heap_libc
     logging_common
     utils_core

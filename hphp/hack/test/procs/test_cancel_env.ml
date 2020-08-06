@@ -9,9 +9,7 @@ let entry =
       Hh_logger.set_id (Printf.sprintf "test_cancel_env %d" worker_id))
 
 let make_workers n =
-  let handle =
-    SharedMem.init ~num_workers:n GlobalConfig.default_sharedmem_config
-  in
+  let handle = SharedMem.init ~num_workers:n SharedMem.default_config in
   let workers =
     MultiWorker.make !pipe_path entry n GlobalConfig.gc_control handle
   in

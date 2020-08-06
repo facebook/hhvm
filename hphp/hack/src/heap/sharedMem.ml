@@ -30,6 +30,38 @@ type config = {
 }
 [@@deriving show]
 
+let default_config =
+  let gig = 1024 * 1024 * 1024 in
+  {
+    global_size = gig;
+    heap_size = 20 * gig;
+    dep_table_pow = 17;
+    (* 1 << 17 *)
+    hash_table_pow = 18;
+    (* 1 << 18 *)
+    shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir];
+    shm_min_avail = gig / 2;
+    (* Half a gig by default *)
+    log_level = 0;
+    sample_rate = 0.0;
+  }
+
+(* There are places where we don't expect to write to shared memory, and doing
+ * so would be a memory leak. But since shared memory is global, it's very easy
+ * to accidentally call a function that will attempt such write. Setting all the
+ * sizes to 0 will make it fail immediately. *)
+let empty_config =
+  {
+    global_size = 0;
+    heap_size = 0;
+    dep_table_pow = 0;
+    hash_table_pow = 0;
+    shm_dirs = [];
+    shm_min_avail = 0;
+    log_level = 0;
+    sample_rate = 0.0;
+  }
+
 (* Allocated in C only. *)
 type handle = private {
   h_fd: Unix.file_descr;

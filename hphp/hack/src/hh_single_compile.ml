@@ -751,9 +751,7 @@ let () =
        it breaks the testsuite where the output is compared to the
        expected one (i.e. in given file without CRLF). *)
       Caml.set_binary_mode_out Caml.stdout true;
-    let handle =
-      SharedMem.init ~num_workers:0 GlobalConfig.empty_sharedmem_config
-    in
+    let handle = SharedMem.init ~num_workers:0 SharedMem.empty_config in
     ignore (handle : SharedMem.handle);
     let options = parse_options () in
     main_hack options

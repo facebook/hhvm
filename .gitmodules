@@ -16,9 +16,6 @@
 [submodule "fatal"]
 	path = third-party/fatal
 	url = https://github.com/facebook/fatal
-[submodule "fb-mysql"]
-	path = third-party/fb-mysql/mysql-5.6
-	url = https://github.com/facebook/mysql-5.6.git
 [submodule "fb303"]
 	path = third-party/fb303/src
 	url = https://github.com/facebookincubator/fb303.git
@@ -58,6 +55,3 @@
 [submodule "xed-xed"]
 	path = third-party/xed/xed
 	url = https://github.com/intelxed/xed.git
-[submodule "zstd"]
-	path = third-party/zstd/src
-	url = https://github.com/facebook/zstd.git

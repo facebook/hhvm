@@ -57,6 +57,16 @@
     sys_utils))
 
 (library
+  (name utils_exit)
+  (wrapped false)
+  (modules
+    exit)
+  (preprocess (pps lwt_ppx ppx_deriving.std ppx_deriving.enum)) ; See T41851208
+  (libraries
+    global_config
+    utils_core))
+
+(library
   (name temp_file)
   (wrapped false)
   (modules

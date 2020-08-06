@@ -86,7 +86,7 @@ class Memcached {
     $servers_vals = array_values($servers);
     foreach($servers_vals as $i => $server) {
       $server = array_values($server);
-      if (!is_array($server)) {
+      if (!\HH\is_any_array($server)) {
         trigger_error(
           sprintf('Server list entry #%d is not an array', $i + 1),
           E_WARNING

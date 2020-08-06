@@ -381,7 +381,7 @@ namespace __SystemLib {
           if ($v === null) {
           } else if ($v is \DOMElement) {
             $el->appendChild($v);
-          } else if (\is_array($v)) {
+          } else if (\HH\is_any_array($v)) {
             $this->appendChildren($el, $v);
           } else {
             $el->appendChild($this->xml->createTextNode($v));

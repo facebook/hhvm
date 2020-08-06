@@ -124,12 +124,12 @@ class ReflectionParameter implements Reflector {
         $method = substr($func, $double_colon + 2);
         $params = (new ReflectionMethod($class, $method))->getParameters();
       }
-    } else if (is_array($func)) {
+    } else if ($func is KeyedContainer<_, _>) {
       $params = (new ReflectionMethod($func[0], $func[1]))->getParameters();
     } else {
       throw new ReflectionException(
         "The parameter class is expected to be either a string, " .
-        "an array(class, method) or a callable object"
+        "a container (containing a class and a method), or a callable object"
       );
     }
 

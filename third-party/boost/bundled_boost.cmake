@@ -32,6 +32,10 @@ foreach(COMPONENT IN LISTS BOOST_COMPONENTS)
   list(APPEND B2_ARGS "--with-${COMPONENT}")
 endforeach()
 
+if (APPLE)
+  set(BOOST_CXX_FLAGS "-isysroot${CMAKE_OSX_SYSROOT}")
+endif()
+
 ExternalProject_Add(                                                            
   bundled_boost
   ${BOOST_DOWNLOAD_ARGS}
@@ -39,6 +43,8 @@ ExternalProject_Add(
     cd tools/build && patch -p1 < "${CMAKE_CURRENT_SOURCE_DIR}/b3a59d265929a213f02a451bb6-macos-coalesce-template.patch"
   CONFIGURE_COMMAND
     CXX=${CMAKE_CXX_COMPILER}
+    CXXFLAGS=${BOOST_CXX_FLAGS}
+    NO_CXX11_CHECK=true # we have c++17 (at least), and the check ignores CXXFLAGS, including `-isysroot` on macos
     <SOURCE_DIR>/bootstrap.sh
     ${COMMON_ARGS}
     "--with-libraries=${BOOST_COMPONENTS_CSV}"

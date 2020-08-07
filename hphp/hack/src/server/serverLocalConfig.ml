@@ -97,6 +97,9 @@ module RemoteTypeCheck = struct
     disabled_on_errors: Errors.phase list;
     (* Enables remote type check *)
     enabled: bool;
+    (* A non-interactive host is, e.g., a dev host not currently associated with a user,
+        or a host used for non-interactive jobs (e.g., CI) *)
+    enabled_for_noninteractive_hosts: bool;
     (* Indicates how long to wait between heartbeats (in seconds) *)
     heartbeat_period: int;
     load_naming_table_on_full_init: bool;
@@ -121,6 +124,7 @@ module RemoteTypeCheck = struct
   let default =
     {
       enabled = false;
+      enabled_for_noninteractive_hosts = false;
       declaration_threshold = 50;
       disabled_on_errors = [];
       (* Indicates how long to wait between heartbeats (in seconds) *)
@@ -216,6 +220,14 @@ module RemoteTypeCheck = struct
         ~current_version
         config
     in
+    let enabled_for_noninteractive_hosts =
+      bool_if_min_version
+        "enabled_for_noninteractive_hosts"
+        ~prefix
+        ~default:default.enabled_for_noninteractive_hosts
+        ~current_version
+        config
+    in
     let worker_min_log_level =
       match
         Hh_logger.Level.of_enum_string
@@ -241,6 +253,7 @@ module RemoteTypeCheck = struct
       declaration_threshold;
       disabled_on_errors;
       enabled;
+      enabled_for_noninteractive_hosts;
       heartbeat_period;
       load_naming_table_on_full_init;
       max_batch_size;

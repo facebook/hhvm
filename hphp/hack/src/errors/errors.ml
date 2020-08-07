@@ -3165,7 +3165,7 @@ let echo_in_reactive_context pos =
   add
     (Typing.err_code Typing.EchoInReactiveContext)
     pos
-    "'echo' or 'print' are not allowed in reactive functions."
+    "`echo` or `print` are not allowed in reactive functions."
 
 let expected_tparam
     ~use_pos ~definition_pos n (on_error : typing_error_callback option) =

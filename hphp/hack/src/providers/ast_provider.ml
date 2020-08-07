@@ -93,9 +93,7 @@ let get_from_local_cache ~full ctx file_name =
       | None ->
         let source = Full_fidelity_source_text.make file_name contents in
         (match Full_fidelity_parser.parse_mode source with
-        | None
-        | Some FileInfo.Mphp ->
-          []
+        | None -> []
         | Some _ ->
           (* It's up to Parsing_service to add parsing errors. *)
           Errors.ignore_ @@ fun () ->

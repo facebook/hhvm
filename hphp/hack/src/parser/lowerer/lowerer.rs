@@ -395,13 +395,6 @@ where
     Syntax<T, V>: PositionedSyntaxTrait,
     V: SyntaxValueWithKind + SyntaxValueType<T> + std::fmt::Debug,
 {
-    fn mode_annotation(mode: file_info::Mode) -> file_info::Mode {
-        match mode {
-            file_info::Mode::Mphp => file_info::Mode::Mdecl,
-            m => m,
-        }
-    }
-
     fn p_pos(node: &Syntax<T, V>, env: &Env) -> Pos {
         node.position_exclusive(env.indexed_source_text)
             .unwrap_or_else(|| env.mk_none_pos())
@@ -1604,7 +1597,7 @@ where
                 let fun = ast::Fun_ {
                     span: pos.clone(),
                     annotation: (),
-                    mode: Self::mode_annotation(env.file_mode()),
+                    mode: env.file_mode(),
                     ret: ast::TypeHint((), ret),
                     name: ast::Id(pos, String::from(";anonymous")),
                     tparams: vec![],
@@ -2250,7 +2243,7 @@ where
                 let fun = ast::Fun_ {
                     span: Self::p_pos(node, env),
                     annotation: (),
-                    mode: Self::mode_annotation(env.file_mode()),
+                    mode: env.file_mode(),
                     ret: ast::TypeHint(
                         (),
                         Self::mp_optional(Self::p_hint, &c.anonymous_type, env)?,
@@ -2290,7 +2283,7 @@ where
                 let body = ast::Fun_ {
                     span: pos.clone(),
                     annotation: (),
-                    mode: Self::mode_annotation(env.file_mode()),
+                    mode: env.file_mode(),
                     ret: ast::TypeHint((), None),
                     name: ast::Id(name_pos, String::from(";anonymous")),
                     tparams: vec![],
@@ -4690,7 +4683,7 @@ where
                 Ok(vec![ast::Def::mk_fun(ast::Fun_ {
                     span: Self::p_fun_pos(node, env),
                     annotation: (),
-                    mode: Self::mode_annotation(env.file_mode()),
+                    mode: env.file_mode(),
                     ret,
                     name: hdr.name,
                     tparams: hdr.type_parameters,
@@ -4714,7 +4707,7 @@ where
             ClassishDeclaration(c) if Self::contains_class_body(c) => {
                 let mut env = Env::clone_and_unset_toplevel_if_toplevel(env);
                 let env = env.as_mut();
-                let mode = Self::mode_annotation(env.file_mode());
+                let mode = env.file_mode();
                 let user_attributes = Self::p_user_attributes(&c.classish_attribute, env)?;
                 let kinds = Self::p_kinds(&c.classish_modifiers, env)?;
                 let final_ = kinds.has(modifier::FINAL);
@@ -4811,7 +4804,7 @@ where
                             let init = &c.constant_declarator_initializer;
                             let gconst = ast::Gconst {
                                 annotation: (),
-                                mode: Self::mode_annotation(env.file_mode()),
+                                mode: env.file_mode(),
                                 name: Self::pos_name(name, env)?,
                                 type_: Self::mp_optional(Self::p_hint, ty, env)?,
                                 value: Self::p_simple_initializer(init, env)?,
@@ -4847,7 +4840,7 @@ where
                             .collect::<std::result::Result<Vec<Vec<_>>, _>>()?,
                     ),
                     namespace: Self::mk_empty_ns_env(env),
-                    mode: Self::mode_annotation(env.file_mode()),
+                    mode: env.file_mode(),
                     vis: match Self::token_kind(&c.alias_keyword) {
                         Some(TK::Type) => ast::TypedefVisibility::Transparent,
                         Some(TK::Newtype) => ast::TypedefVisibility::Opaque,
@@ -4872,7 +4865,7 @@ where
                 };
                 Ok(vec![ast::Def::mk_class(ast::Class_ {
                     annotation: (),
-                    mode: Self::mode_annotation(env.file_mode()),
+                    mode: env.file_mode(),
                     user_attributes: Self::p_user_attributes(&c.enum_attribute_spec, env)?,
                     file_attributes: vec![],
                     final_: false,
@@ -4937,11 +4930,7 @@ where
                     emit_id: None,
                 })])
             }
-            InclusionDirective(c)
-                if env.file_mode() != file_info::Mode::Mdecl
-                    && env.file_mode() != file_info::Mode::Mphp
-                    || env.codegen() =>
-            {
+            InclusionDirective(c) if env.file_mode() != file_info::Mode::Mdecl || env.codegen() => {
                 let expr = Self::p_expr(&c.inclusion_expression, env)?;
                 Ok(vec![ast::Def::mk_stmt(ast::Stmt::new(
                     Self::p_pos(node, env),
@@ -5008,11 +4997,7 @@ where
                     namespace: Self::mk_empty_ns_env(env),
                 })])
             }
-            _ if env.file_mode() == file_info::Mode::Mdecl
-                || (env.file_mode() == file_info::Mode::Mphp && !env.codegen) =>
-            {
-                Ok(vec![])
-            }
+            _ if env.file_mode() == file_info::Mode::Mdecl => Ok(vec![]),
             _ => Ok(vec![ast::Def::mk_stmt(Self::p_stmt(node, env)?)]),
         }
     }

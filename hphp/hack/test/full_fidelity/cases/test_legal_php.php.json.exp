@@ -40,13 +40,13 @@
               "kind":"token",
               "token":{
                 "kind":"name",
-                "text":"php",
+                "text":"hh",
                 "offset":2,
                 "leading_width":0,
-                "width":3,
+                "width":2,
                 "trailing_width":1,
                 "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":5,"width":1}],
+                "trailing":[{"kind":"end_of_line","text":"\n","offset":4,"width":1}],
                 "line_number":1
               }
             }
@@ -63,12 +63,12 @@
               "token":{
                 "kind":"function",
                 "text":"function",
-                "offset":6,
+                "offset":5,
                 "leading_width":1,
                 "width":8,
                 "trailing_width":1,
-                "leading":[{"kind":"end_of_line","text":"\n","offset":6,"width":1}],
-                "trailing":[{"kind":"whitespace","text":" ","offset":15,"width":1}],
+                "leading":[{"kind":"end_of_line","text":"\n","offset":5,"width":1}],
+                "trailing":[{"kind":"whitespace","text":" ","offset":14,"width":1}],
                 "line_number":3
               }
             },
@@ -77,7 +77,7 @@
               "token":{
                 "kind":"name",
                 "text":"f",
-                "offset":16,
+                "offset":15,
                 "leading_width":0,
                 "width":1,
                 "trailing_width":0,
@@ -92,7 +92,7 @@
               "token":{
                 "kind":"(",
                 "text":"(",
-                "offset":17,
+                "offset":16,
                 "leading_width":0,
                 "width":1,
                 "trailing_width":0,
@@ -117,12 +117,12 @@
                       "token":{
                         "kind":"variable",
                         "text":"$foo",
-                        "offset":18,
+                        "offset":17,
                         "leading_width":0,
                         "width":4,
                         "trailing_width":1,
                         "leading":[],
-                        "trailing":[{"kind":"whitespace","text":" ","offset":22,"width":1}],
+                        "trailing":[{"kind":"whitespace","text":" ","offset":21,"width":1}],
                         "line_number":3
                       }
                     },
@@ -133,12 +133,12 @@
                         "token":{
                           "kind":"=",
                           "text":"=",
-                          "offset":23,
+                          "offset":22,
                           "leading_width":0,
                           "width":1,
                           "trailing_width":1,
                           "leading":[],
-                          "trailing":[{"kind":"whitespace","text":" ","offset":24,"width":1}],
+                          "trailing":[{"kind":"whitespace","text":" ","offset":23,"width":1}],
                           "line_number":3
                         }
                       },
@@ -149,7 +149,7 @@
                           "token":{
                             "kind":"decimal_literal",
                             "text":"1",
-                            "offset":25,
+                            "offset":24,
                             "leading_width":0,
                             "width":1,
                             "trailing_width":0,
@@ -166,12 +166,12 @@
                     "token":{
                       "kind":",",
                       "text":",",
-                      "offset":26,
+                      "offset":25,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":1,
                       "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":27,"width":1}],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":26,"width":1}],
                       "line_number":3
                     }
                   }
@@ -189,7 +189,7 @@
                       "token":{
                         "kind":"variable",
                         "text":"$bar",
-                        "offset":28,
+                        "offset":27,
                         "leading_width":0,
                         "width":4,
                         "trailing_width":0,
@@ -209,12 +209,12 @@
               "token":{
                 "kind":")",
                 "text":")",
-                "offset":32,
+                "offset":31,
                 "leading_width":0,
                 "width":1,
                 "trailing_width":1,
                 "leading":[],
-                "trailing":[{"kind":"whitespace","text":" ","offset":33,"width":1}],
+                "trailing":[{"kind":"whitespace","text":" ","offset":32,"width":1}],
                 "line_number":3
               }
             },
@@ -229,20 +229,20 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":34,
+                "offset":33,
                 "leading_width":0,
                 "width":1,
                 "trailing_width":51,
                 "leading":[],
                 "trailing":[
-                  {"kind":"whitespace","text":" ","offset":35,"width":1},
+                  {"kind":"whitespace","text":" ","offset":34,"width":1},
                   {
                     "kind":"single_line_comment",
                     "text":"// missing value is illegal in hack, legal in php",
-                    "offset":36,
+                    "offset":35,
                     "width":49
                   },
-                  {"kind":"end_of_line","text":"\n","offset":85,"width":1}
+                  {"kind":"end_of_line","text":"\n","offset":84,"width":1}
                 ],
                 "line_number":3
               }
@@ -263,11 +263,11 @@
                           "token":{
                             "kind":"variable",
                             "text":"$a",
-                            "offset":86,
+                            "offset":85,
                             "leading_width":4,
                             "width":2,
                             "trailing_width":0,
-                            "leading":[{"kind":"whitespace","text":"    ","offset":86,"width":4}],
+                            "leading":[{"kind":"whitespace","text":"    ","offset":85,"width":4}],
                             "trailing":[],
                             "line_number":4
                           }
@@ -278,7 +278,7 @@
                         "token":{
                           "kind":"[",
                           "text":"[",
-                          "offset":92,
+                          "offset":91,
                           "leading_width":0,
                           "width":1,
                           "trailing_width":0,
@@ -293,12 +293,12 @@
                         "token":{
                           "kind":"]",
                           "text":"]",
-                          "offset":93,
+                          "offset":92,
                           "leading_width":0,
                           "width":1,
                           "trailing_width":1,
                           "leading":[],
-                          "trailing":[{"kind":"whitespace","text":" ","offset":94,"width":1}],
+                          "trailing":[{"kind":"whitespace","text":" ","offset":93,"width":1}],
                           "line_number":4
                         }
                       }
@@ -308,12 +308,12 @@
                       "token":{
                         "kind":"=",
                         "text":"=",
-                        "offset":95,
+                        "offset":94,
                         "leading_width":0,
                         "width":1,
                         "trailing_width":1,
                         "leading":[],
-                        "trailing":[{"kind":"whitespace","text":" ","offset":96,"width":1}],
+                        "trailing":[{"kind":"whitespace","text":" ","offset":95,"width":1}],
                         "line_number":4
                       }
                     },
@@ -324,12 +324,12 @@
                         "token":{
                           "kind":"new",
                           "text":"new",
-                          "offset":97,
+                          "offset":96,
                           "leading_width":0,
                           "width":3,
                           "trailing_width":1,
                           "leading":[],
-                          "trailing":[{"kind":"whitespace","text":" ","offset":100,"width":1}],
+                          "trailing":[{"kind":"whitespace","text":" ","offset":99,"width":1}],
                           "line_number":4
                         }
                       },
@@ -340,7 +340,7 @@
                           "token":{
                             "kind":"name",
                             "text":"E",
-                            "offset":101,
+                            "offset":100,
                             "leading_width":0,
                             "width":1,
                             "trailing_width":0,
@@ -360,20 +360,20 @@
                     "token":{
                       "kind":";",
                       "text":";",
-                      "offset":102,
+                      "offset":101,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":40,
                       "leading":[],
                       "trailing":[
-                        {"kind":"whitespace","text":" ","offset":103,"width":1},
+                        {"kind":"whitespace","text":" ","offset":102,"width":1},
                         {
                           "kind":"single_line_comment",
                           "text":"// error2038 in hack, but legal in php",
-                          "offset":104,
+                          "offset":103,
                           "width":38
                         },
-                        {"kind":"end_of_line","text":"\n","offset":142,"width":1}
+                        {"kind":"end_of_line","text":"\n","offset":141,"width":1}
                       ],
                       "line_number":4
                     }
@@ -386,12 +386,12 @@
               "token":{
                 "kind":"}",
                 "text":"}",
-                "offset":143,
+                "offset":142,
                 "leading_width":0,
                 "width":1,
                 "trailing_width":1,
                 "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":144,"width":1}],
+                "trailing":[{"kind":"end_of_line","text":"\n","offset":143,"width":1}],
                 "line_number":5
               }
             }
@@ -404,7 +404,7 @@
             "token":{
               "kind":"end_of_file",
               "text":"",
-              "offset":145,
+              "offset":144,
               "leading_width":0,
               "width":0,
               "trailing_width":0,
@@ -417,6 +417,6 @@
       ]
     }
   },
-  "program_text":"<?php\n\nfunction f($foo = 1, $bar) { // missing value is illegal in hack, legal in php\n    $a[] = new E; // error2038 in hack, but legal in php\n}\n",
-  "version":"2020-06-23-0001"
+  "program_text":"<?hh\n\nfunction f($foo = 1, $bar) { // missing value is illegal in hack, legal in php\n    $a[] = new E; // error2038 in hack, but legal in php\n}\n",
+  "version":"2020-06-30-0000"
 }

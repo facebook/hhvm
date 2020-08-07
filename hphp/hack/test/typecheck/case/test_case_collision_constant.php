@@ -1,6 +1,6 @@
-<?php // strict
+<?hh // strict
 
 // constants are case sensitive.
-const FOO = 4;
+const int FOO = 4;
 
-const foo = 7;
+const int foo = 7;

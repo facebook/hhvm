@@ -22,13 +22,6 @@ let env_from_config config =
   if env.Env.line_width < 0 then invalid_arg "Invalid line width";
   env
 
-let env_from_tree config tree =
-  let env = env_from_config config in
-  if SyntaxTree.is_php tree then
-    { env with Env.add_trailing_commas = false }
-  else
-    env
-
 (** Format a single node.
  *
  * A trailing newline will be included (and leading indentation, if
@@ -74,7 +67,7 @@ let text_with_formatted_ranges
 let format_tree ?config tree =
   let source_text = SyntaxTree.text tree in
   let text = SourceText.text source_text in
-  let env = env_from_tree config tree in
+  let env = env_from_config config in
   let chunk_groups =
     tree
     |> SyntaxTransforms.editable_from_positioned
@@ -112,7 +105,7 @@ let format_tree ?config tree =
 let format_range ?config range tree =
   let source_text = SyntaxTree.text tree in
   let text = SourceText.text source_text in
-  let env = env_from_tree config tree in
+  let env = env_from_config config in
   let chunk_groups =
     tree
     |> SyntaxTransforms.editable_from_positioned
@@ -138,7 +131,7 @@ let format_range ?config range tree =
 let format_intervals ?config intervals tree =
   let source_text = SyntaxTree.text tree in
   let text = SourceText.text source_text in
-  let env = env_from_tree config tree in
+  let env = env_from_config config in
   let chunk_groups =
     tree
     |> SyntaxTransforms.editable_from_positioned
@@ -203,7 +196,7 @@ let format_intervals ?config intervals tree =
  * Designed to be suitable for as-you-type-formatting. *)
 let format_at_offset ?config (tree : SyntaxTree.t) offset =
   let source_text = SyntaxTree.text tree in
-  let env = env_from_tree config tree in
+  let env = env_from_config config in
   let chunk_groups =
     tree
     |> SyntaxTransforms.editable_from_positioned

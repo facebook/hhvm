@@ -284,7 +284,7 @@ let minimum_arity paraml =
   in
   List.count paraml f
 
-let check_params env paraml =
+let check_params paraml =
   (* We wish to give an error on the first non-default parameter
   after a default parameter. That is:
   function foo(int $x, ?int $y = null, int $z)
@@ -308,8 +308,7 @@ let check_params env paraml =
       else
         loop (Option.is_some param.param_expr) rl
   in
-  (* PHP allows non-default valued parameters after default valued parameters. *)
-  if not FileInfo.(equal_mode env.Decl_env.mode Mphp) then loop false paraml
+  loop false paraml
 
 let make_params env ~is_lambda paraml =
   List.map paraml ~f:(make_param_ty env ~is_lambda)

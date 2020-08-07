@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<37b0c8b4e70520e242a2532d548348ef>>
+// @generated SignedSource<<c97ac7c73c6d806c96cc2de556a289b2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -36,8 +36,6 @@ pub use prim_defs::*;
     ToOcamlRep
 )]
 pub enum Mode {
-    /// Do the best you can to support legacy PHP
-    Mphp,
     /// just declare signatures, don't check anything
     Mdecl,
     /// check everything!

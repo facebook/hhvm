@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // make sure hack reserved keywords are allowed in php files
 class arraykey {}

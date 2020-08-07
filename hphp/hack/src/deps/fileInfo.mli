@@ -24,7 +24,6 @@ open Prim_defs
 (*****************************************************************************)
 
 type mode =
-  | Mphp (* Do the best you can to support legacy PHP *)
   | Mdecl (* just declare signatures, don't check anything *)
   | Mstrict (* check everything! *)
   | Mpartial (* Don't fail if you see a function/class you don't know *)
@@ -35,8 +34,6 @@ val is_strict : mode -> bool
 val parse_mode : string -> mode option
 
 val string_of_mode : mode -> string
-
-val is_hh_file : mode -> bool
 
 (*****************************************************************************)
 (* The record produced by the parsing phase. *)

@@ -49,10 +49,6 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) : sig
 
     val mode : t -> FileInfo.mode option
 
-    val is_hack : t -> bool
-
-    val is_php : t -> bool
-
     val is_strict : t -> bool
 
     val is_decl : t -> bool

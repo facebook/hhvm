@@ -52,7 +52,6 @@ pub fn emit_fatal_program<'p>(
         None,
     )?;
     Ok(HhasProgram {
-        is_hh: true,
         fatal: Some((op, pos.clone(), msg.as_ref().to_string())),
         main,
         ..HhasProgram::default()
@@ -153,7 +152,6 @@ fn emit_program_<'p>(
         typedefs,
         constants,
         adata,
-        is_hh: flags.contains(FromAstFlags::IS_HH_FILE),
         file_attributes,
         symbol_refs,
         fatal,
@@ -162,10 +160,9 @@ fn emit_program_<'p>(
 
 bitflags! {
     pub struct FromAstFlags: u8 {
-        const IS_HH_FILE =        0b0001;
-        const IS_EVALED =         0b0010;
-        const FOR_DEBUGGER_EVAL = 0b0100;
-        const IS_SYSTEMLIB =      0b1000;
+        const IS_EVALED =         0b0001;
+        const FOR_DEBUGGER_EVAL = 0b0010;
+        const IS_SYSTEMLIB =      0b0100;
     }
 }
 

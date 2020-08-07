@@ -41,7 +41,6 @@ let handle_unbound_name env (pos, name) kind =
     ()
   else
     match env.mode with
-    | FileInfo.Mphp -> ()
     | FileInfo.Mstrict
     | FileInfo.Mpartial
     | FileInfo.Mdecl ->

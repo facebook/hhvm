@@ -17,7 +17,6 @@ use oxidized::pos::Pos;
 
 #[derive(Default, Debug)]
 pub struct HhasProgram<'a> {
-    pub is_hh: bool,
     pub adata: Vec<HhasAdata>,
     pub functions: Vec<HhasFunction<'a>>,
     pub classes: Vec<HhasClass<'a>>,

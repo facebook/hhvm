@@ -291,12 +291,7 @@ let from_text_to_empty_tast (env : env) (source_text : SourceText.t) :
 
 let legacy (x : aast_result) : Parser_return.t =
   {
-    Parser_return.file_mode =
-      Option.some_if
-        (match x.fi_mode with
-        | FileInfo.Mphp -> false
-        | _ -> true)
-        x.fi_mode;
+    Parser_return.file_mode = Some x.fi_mode;
     Parser_return.comments = x.comments.sc_comments;
     Parser_return.ast = aast_to_nast x.ast;
     Parser_return.content = x.content;

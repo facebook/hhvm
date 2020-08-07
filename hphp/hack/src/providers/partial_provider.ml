@@ -12,4 +12,3 @@ let should_check_error mode code =
   | FileInfo.Mstrict -> true
   | FileInfo.Mpartial -> Errors.is_strict_code code
   | FileInfo.Mdecl -> false
-  | FileInfo.Mphp -> false

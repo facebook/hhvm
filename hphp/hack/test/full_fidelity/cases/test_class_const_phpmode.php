@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyClassName {
   const WHITE = "white";

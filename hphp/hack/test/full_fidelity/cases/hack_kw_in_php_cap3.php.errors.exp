@@ -1,9 +1,0 @@
-(3,10)-(3,15) Keyword inOut must be written in lowercase
-(3,15)-(3,15) A name or __construct keyword is expected here.
-(5,10)-(5,15) Keyword usIng must be written in lowercase
-(5,15)-(5,15) A name or __construct keyword is expected here.
-(7,1)-(7,6) Keyword inOut must be written in lowercase
-(7,6)-(7,6) An expression is expected here.
-(8,1)-(8,6) Keyword usIng must be written in lowercase
-(8,1)-(8,9) Using statement in function scoped form may only be used at the top level of a function or a method
-(8,8)-(8,8) An expression is expected here.

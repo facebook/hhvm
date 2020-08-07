@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function earlier(){
   function later(){

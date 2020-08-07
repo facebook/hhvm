@@ -1420,8 +1420,7 @@ and method_ genv m =
   in
   let body =
     match genv.in_mode with
-    | FileInfo.Mdecl
-    | FileInfo.Mphp ->
+    | FileInfo.Mdecl ->
       { N.fb_ast = []; fb_annotation = Nast.NamedWithUnsafeBlocks }
     | FileInfo.Mstrict
     | FileInfo.Mpartial ->
@@ -1585,8 +1584,7 @@ and fun_ ctx f =
   let f_kind = f.Aast.f_fun_kind in
   let body =
     match genv.in_mode with
-    | FileInfo.Mdecl
-    | FileInfo.Mphp ->
+    | FileInfo.Mdecl ->
       { N.fb_ast = []; fb_annotation = Nast.NamedWithUnsafeBlocks }
     | FileInfo.Mstrict
     | FileInfo.Mpartial ->

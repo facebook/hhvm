@@ -189,14 +189,6 @@ where
         &self.state
     }
 
-    pub fn is_hack(&self) -> bool {
-        self.mode != Some(Mode::Mphp)
-    }
-
-    pub fn is_php(&self) -> bool {
-        self.mode == Some(Mode::Mphp)
-    }
-
     pub fn is_strict(&self) -> bool {
         self.mode == Some(Mode::Mstrict)
     }

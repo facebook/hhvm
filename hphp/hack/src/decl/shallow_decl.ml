@@ -184,7 +184,7 @@ and static_prop env cv =
   }
 
 let method_type env m =
-  check_params env m.m_params;
+  check_params m.m_params;
   let reactivity = fun_reactivity env m.m_user_attributes in
   let mut = get_param_mutability m.m_user_attributes in
   let returns_mutable = fun_returns_mutable m.m_user_attributes in
@@ -229,7 +229,7 @@ let method_type env m =
   }
 
 let method_redeclaration_type env m =
-  check_params env m.mt_params;
+  check_params m.mt_params;
   let params = make_params env ~is_lambda:false m.mt_params in
   let ret =
     ret_from_fun_kind

@@ -2287,13 +2287,9 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         let name_token_offset = self.offset;
         let ch0 = self.peek_char(0).to_ascii_lowercase();
         let ch1 = self.peek_char(1).to_ascii_lowercase();
-        let ch2 = self.peek_char(2).to_ascii_lowercase();
-        match (ch0, ch1, ch2) {
-            ('h', 'h', _) => {
+        match (ch0, ch1) {
+            ('h', 'h') => {
                 self.make_long_tag(name_token_offset, 2, markup_text, less_than_question_token)
-            }
-            ('p', 'h', 'p') => {
-                self.make_long_tag(name_token_offset, 3, markup_text, less_than_question_token)
             }
             _ => (markup_text, Some((less_than_question_token, (None)))),
         }

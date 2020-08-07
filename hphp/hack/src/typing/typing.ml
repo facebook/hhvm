@@ -128,8 +128,7 @@ let unbound_name env (pos, name) e =
     Errors.unbound_name_typing pos name;
     expr_error env (Reason.Rwitness pos) e
   | FileInfo.Mdecl
-  | FileInfo.Mpartial
-  | FileInfo.Mphp ->
+  | FileInfo.Mpartial ->
     expr_any env pos e
 
 (* Is this type Traversable<vty> or Container<vty> for some vty? *)

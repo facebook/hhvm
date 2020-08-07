@@ -75,10 +75,9 @@ pub(crate) mod convert {
     pub fn mode_to_i64(mode: Option<Mode>) -> Option<i64> {
         match mode {
             Some(mode) => Some(match mode {
-                Mode::Mphp => 0,
-                Mode::Mdecl => 1,
-                Mode::Mstrict => 2,
-                Mode::Mpartial => 3,
+                Mode::Mdecl => 0,
+                Mode::Mstrict => 1,
+                Mode::Mpartial => 2,
             }),
             None => None,
         }

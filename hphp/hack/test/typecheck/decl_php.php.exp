@@ -1,6 +1,0 @@
-File "decl_php.php--partial.php", line 5, characters 19-19:
-No method 'g' in D (did you mean 'f'?) (Typing[4053])
-File "decl_php.php--partial.php", line 5, characters 12-16:
-This is why I think it is an object of type D
-File "decl_php.php--partial.php", line 3, characters 7-7:
-Declaration of D is here

@@ -106,16 +106,6 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
 
     let sc_state tree = tree.state
 
-    let is_hack tree =
-      match tree.mode with
-      | Some FileInfo.Mphp -> false
-      | _ -> true
-
-    let is_php tree =
-      match tree.mode with
-      | Some FileInfo.Mphp -> true
-      | _ -> false
-
     let is_strict tree =
       match tree.mode with
       | Some mode -> FileInfo.is_strict mode

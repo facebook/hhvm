@@ -17,10 +17,6 @@ impl Mode {
             _ => None,
         }
     }
-
-    pub fn is_hh_file(self) -> bool {
-        Self::Mphp != self
-    }
 }
 
 impl TryFrom<u32> for NameType {

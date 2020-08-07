@@ -25,7 +25,6 @@ open Prim_defs
 (*****************************************************************************)
 
 type mode =
-  | Mphp  (** Do the best you can to support legacy PHP *)
   | Mdecl  (** just declare signatures, don't check anything *)
   | Mstrict  (** check everything! *)
   | Mpartial  (** Don't fail if you see a function/class you don't know *)
@@ -40,15 +39,11 @@ let parse_mode = function
 
 let is_strict = function
   | Mstrict -> true
-  | Mphp
   | Mdecl
   | Mpartial ->
     false
 
-let is_hh_file mode = mode <> Mphp
-
 let string_of_mode = function
-  | Mphp -> "php"
   | Mdecl -> "decl"
   | Mstrict -> "strict"
   | Mpartial -> "partial"
@@ -57,7 +52,6 @@ let pp_mode fmt mode =
   Format.pp_print_string fmt
   @@
   match mode with
-  | Mphp -> "Mphp"
   | Mdecl -> "Mdecl"
   | Mstrict -> "Mstrict"
   | Mpartial -> "Mpartial"

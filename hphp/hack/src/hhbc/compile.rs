@@ -153,7 +153,7 @@ where
     );
 
     let (codegen_t, program) = match &mut parse_result {
-        Either::Right((ast, is_hh_file)) => {
+        Either::Right(ast) => {
             let namespace = RcOc::new(NamespaceEnv::empty(
                 emitter.options().hhvm.aliased_namespaces_cloned().collect(),
                 true, /* is_codegen */
@@ -168,7 +168,7 @@ where
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace), ast);
             emit_pu_rust::translate(ast);
             let e = &mut emitter;
-            profile(move || emit(e, &env, namespace, *is_hh_file, ast))
+            profile(move || emit(e, &env, namespace, ast))
         }
         Either::Left((pos, msg, is_runtime_error)) => {
             profile(|| emit_fatal(&mut emitter, *is_runtime_error, pos, msg))
@@ -205,13 +205,9 @@ fn emit<'p, S: AsRef<str>>(
     emitter: &mut Emitter,
     env: &Env<S>,
     namespace: RcOc<NamespaceEnv>,
-    is_hh: bool,
     ast: &'p mut Tast::Program,
 ) -> Result<HhasProgram<'p>, Error> {
     let mut flags = FromAstFlags::empty();
-    if is_hh {
-        flags |= FromAstFlags::IS_HH_FILE;
-    }
     if env.flags.contains(EnvFlags::IS_EVALED) {
         flags |= FromAstFlags::IS_EVALED;
     }
@@ -276,13 +272,13 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
 
 /// parse_file returns either error(Left) or ast(Right)
 /// - Left((Position, message, is_runtime_error))
-/// - Right((ast, is_hh_file))
+/// - Right(ast)
 fn parse_file(
     opts: &Options,
     stack_limit: &StackLimit,
     source_text: SourceText,
     elaborate_namespaces: bool,
-) -> Either<(Pos, String, bool), (Tast::Program, bool)> {
+) -> Either<(Pos, String, bool), Tast::Program> {
     let mut aast_env = AastEnv::default();
     aast_env.codegen = true;
     aast_env.fail_open = false;
@@ -328,7 +324,6 @@ fn parse_file(
                 errors,
                 aast,
                 scoured_comments,
-                file_mode,
                 ..
             } => {
                 let mut errors = errors.iter().filter(|e| {
@@ -344,7 +339,7 @@ fn parse_file(
                     Left((Pos::make_none(), String::new(), false))
                 } else {
                     match aast {
-                        Ok(aast) => Right((aast, file_mode.is_hh_file())),
+                        Ok(aast) => Right(aast),
                         Err(msg) => Left((Pos::make_none(), msg, false)),
                     }
                 }

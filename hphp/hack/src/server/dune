@@ -173,6 +173,27 @@
   (preprocess (pps lwt_ppx ppx_deriving.std)))  ; See T41851208
 
 (library
+  (name server_api)
+  (wrapped false)
+  (modules
+    serverApi)
+(libraries
+    decl_redecl_service
+    fileutils
+    hg
+    (select logging from
+      (facebook signed_source -> logging_fb)
+      (-> logging_stubs))
+    remote
+    server_env
+    sys_utils
+    typing
+    typing_check
+    typing_service_api
+    utils_core)
+  (preprocess (pps lwt_ppx ppx_deriving.std))) ; See T41851208
+
+(library
   (name server)
   (wrapped false)
   (modules
@@ -180,7 +201,6 @@
     colorFile
     fullFidelityParseService
     searchServiceRunner
-    serverApi
     serverBigCode
     serverBusyStatus
     serverCheckUtils
@@ -237,15 +257,14 @@
     hhi
     ide_rpc_api_types
     linting
-    (select logging from
-      (facebook signed_source -> logging_fb)
-      (-> logging_stubs))
     lsp
     parsing_service
     remote
     search
     security_stubs
+    server_api
     server_env
+    server_remote_utils
     server_services
     sys_utils
     tast_provider

@@ -191,3 +191,10 @@
   (modules security)
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))
+
+(library
+  (name server_remote_utils_stubs)
+  (wrapped false)
+  (modules serverRemoteUtils)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))

@@ -131,7 +131,7 @@ pub const error1038: Error =
 pub const error1039: Error = Cow::Borrowed("A closing XHP tag is expected here.");
 pub const error1041: Error =
     Cow::Borrowed("A function body or a semicolon (';') is expected here.");
-pub const error1044: Error = Cow::Borrowed("A name or __construct keyword is expected here.");
+pub const error1044: Error = Cow::Borrowed("A name or `__construct` keyword is expected here.");
 pub const error1045: Error =
     Cow::Borrowed("An 'extends' or 'implements' keyword is expected here.");
 pub const error1046: Error = Cow::Borrowed("A lambda arrow ('==>') is expected here.");

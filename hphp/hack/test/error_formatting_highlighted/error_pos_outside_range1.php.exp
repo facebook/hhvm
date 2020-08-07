@@ -1,4 +1,4 @@
-Parsing[1002] A name or __construct keyword is expected here. [1]
+Parsing[1002] A name or `__construct` keyword is expected here. [1]
 
 error_pos_outside_range1.php:3:11
     1 | <?hh

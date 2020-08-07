@@ -48,6 +48,8 @@ let on_clone_cancelled parent_outfd =
  *****************************************************************************)
 
 let subprocess_main ic oc =
+  (* Explicitly ensure that Folly is initialized (installs signal handlers) *)
+  Folly.ensure_folly_init ();
   let start_user_time = ref 0. in
   let start_system_time = ref 0. in
   let start_minor_words = ref 0. in

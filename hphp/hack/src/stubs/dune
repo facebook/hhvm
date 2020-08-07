@@ -198,3 +198,10 @@
   (modules serverRemoteUtils)
   (preprocess
     (pps lwt_ppx ppx_deriving.std)))
+
+(library
+  (name folly_stubs)
+  (wrapped false)
+  (modules folly)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))

@@ -304,6 +304,7 @@
   (libraries
     build
     ci_util
+    folly_stubs
     load_script
     lwt
     parent

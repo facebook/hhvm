@@ -19,6 +19,7 @@
     workerController)
   (libraries
     core_kernel
+    folly_stubs
     heap_shared_mem
     logging
     marshal_tools

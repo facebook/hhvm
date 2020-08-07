@@ -1108,7 +1108,6 @@ void parse_unit(php::Program& prog, const UnitEmitter* uep) {
 
   auto ret      = std::make_unique<php::Unit>();
   ret->filename = ue.m_filepath;
-  ret->isHHFile = ue.m_isHHFile;
   ret->metaData = ue.m_metaData;
   ret->fileAttributes = ue.m_fileAttributes;
 

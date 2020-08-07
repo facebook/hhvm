@@ -626,7 +626,6 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_bclen = m_bclen;
   u->m_filepath = m_filepath;
   u->m_mergeOnly = m_mergeOnly;
-  u->m_isHHFile = m_isHHFile;
   u->m_dirpath = makeStaticString(FileUtil::dirname(StrNR{m_filepath}));
   u->m_sha1 = m_sha1;
   u->m_bcSha1 = m_bcSha1;
@@ -770,7 +769,6 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
 template<class SerDe>
 void UnitEmitter::serdeMetaData(SerDe& sd) {
   sd(m_mergeOnly)
-    (m_isHHFile)
     (m_metaData)
     (m_fileAttributes)
     (m_symbol_refs)
@@ -1693,7 +1691,6 @@ createFatalUnit(const StringData* filename, const SHA1& sha1, FatalOp op,
   auto ue = std::make_unique<UnitEmitter>(sha1, SHA1{}, Native::s_noNativeFuncs,
                                           false);
   ue->m_filepath = filename;
-  ue->m_isHHFile = true;
 
   ue->m_fatalUnit = true;
   ue->m_fatalLoc = loc;

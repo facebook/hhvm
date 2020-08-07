@@ -1237,10 +1237,6 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
                                         bool callByHPHPInvoke) {
   checkHHConfig(unit);
 
-  if (!unit->isHHFile()) {
-    throw PhpNotSupportedException(unit->filepath()->data());
-  }
-
   auto ret = invokePseudoMain(unit->getMain(nullptr, false));
 
   auto it = unit->getCachedEntryPoint();
@@ -1359,7 +1355,6 @@ void ExecutionContext::ExcLoggerHook::operator()(
 }
 
 StaticString
-  s_php("<?php "),
   s_hh("<?hh "),
   s_namespace("namespace "),
   s_curly_start(" { "),
@@ -1916,15 +1911,13 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
   int pos = namespacedName.rfind('\\');
   if (pos != -1) {
     auto ns = namespacedName.substr(0, pos);
-    code = (funcUnit->isHHFile() ? s_hh : s_php) +
-      s_namespace + ns + s_curly_start + s_function_start +
+    code = s_hh + s_namespace + ns + s_curly_start + s_function_start +
       s_evaluate_default_argument + s_function_middle + key +
       s_semicolon + s_curly_end + s_curly_end;
     funcName = ns + "\\" + s_evaluate_default_argument;
   } else {
-    code = (funcUnit->isHHFile() ? s_hh : s_php) +
-      s_function_start + s_evaluate_default_argument + s_function_middle +
-      key + s_semicolon + s_curly_end;
+    code = s_hh + s_function_start + s_evaluate_default_argument +
+      s_function_middle + key + s_semicolon + s_curly_end;
     funcName = s_evaluate_default_argument;
   }
 

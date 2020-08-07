@@ -2,7 +2,6 @@
 
 .filepath "closure.good.php";
 
-.hh_file 1;
 .adata A_0 = """Y:2:{s:4:\"kind\";i:21;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
 .adata A_1 = """k:0:{}""";
 

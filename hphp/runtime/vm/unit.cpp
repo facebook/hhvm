@@ -185,7 +185,6 @@ Unit::MergeInfo* Unit::MergeInfo::alloc(size_t size) {
 Unit::Unit()
   : m_mergeOnly(false)
   , m_interpretOnly(false)
-  , m_isHHFile(false)
   , m_extended(false)
   , m_serialized(false)
   , m_ICE(false)

@@ -2,7 +2,6 @@
 
 .filepath "pu_as_key.good.php";
 
-.hh_file 1;
 .adata A_0 = """D:0:{}""";
 .adata A_1 = """Y:1:{s:4:\"toto\";i:42;}""";
 

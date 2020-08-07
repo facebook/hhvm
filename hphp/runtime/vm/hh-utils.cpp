@@ -36,7 +36,6 @@ void checkHHConfig(const Unit* unit) {
   if (RuntimeOption::RepoAuthoritative ||
       !RuntimeOption::LookForTypechecker ||
       s_foundHHConfig ||
-      !unit->isHHFile() ||
       isDebuggerAttached()) {
     return;
   }
@@ -106,7 +105,6 @@ void autoTypecheck(const Unit* unit) {
   if (RuntimeOption::RepoAuthoritative ||
       !RuntimeOption::AutoTypecheck ||
       *tl_doneAutoTypecheck ||
-      !unit->isHHFile() ||
       isDebuggerAttached()) {
     return;
   }

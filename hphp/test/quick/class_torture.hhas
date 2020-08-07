@@ -1,4 +1,3 @@
-.hh_file 1;
 # tests various ways poorly defined classes should fail the verifier
 
 .main {

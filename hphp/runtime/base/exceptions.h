@@ -172,12 +172,6 @@ struct PhpFileDoesNotExistException : ExtendedException {
   EXCEPTION_COMMON_IMPL(PhpFileDoesNotExistException);
 };
 
-struct PhpNotSupportedException : ExtendedException {
-  explicit PhpNotSupportedException(const char* file)
-    : ExtendedException("HHVM 4+ does not support PHP: %s", file) {}
-  EXCEPTION_COMMON_IMPL(PhpNotSupportedException);
-};
-
 //////////////////////////////////////////////////////////////////////
 
 /*

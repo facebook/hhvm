@@ -415,8 +415,7 @@ std::unique_ptr<UnitEmitter> Package::createSymlinkWrapper(
   bool found_entrypoint = false;
 
   std::stringstream ss;
-  ss << ".hh_file 1;\n\n"
-     << ".main (1,1) {\n"
+  ss << ".main (1,1) {\n"
      << "  Int 1\n"
      << "  RetC\n"
      << "}\n\n";

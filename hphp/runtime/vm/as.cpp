@@ -3517,26 +3517,6 @@ void parse_constant(AsmState& as) {
 }
 
 /*
- * directive-hh-file : '1' ';'
- *                   | '0' ';'
- *                   ;
- */
-void parse_hh_file(AsmState& as) {
-  as.in.skipWhitespace();
-  std::string word;
-  if (!as.in.readword(word)) {
-    as.error(".hh_file must have a value");
-  }
-  as.ue->m_isHHFile = word == "1";
-
-  if (!as.ue->m_isHHFile && word != "0") {
-    as.error(".hh_file must be either 1 or 0");
-  }
-
-  as.in.expectWs(';');
-}
-
-/*
  * directive-fatal : pos FatalOp string ';'
  */
 void parse_fatal(AsmState& as) {
@@ -3653,7 +3633,6 @@ void parse_file_attributes(AsmState& as) {
  *         |    ".adata"            directive-adata
  *         |    ".class"            directive-class
  *         |    ".alias"            directive-alias
- *         |    ".hh_file"          directive-hh-file
  *         |    ".includes"         directive-filepaths
  *         |    ".constant_refs"    directive-symbols
  *         |    ".function_refs"    directive-symbols
@@ -3674,7 +3653,6 @@ void parse(AsmState& as) {
     if (directive == ".class")         { parse_class(as)         ; continue; }
     if (directive == ".record")        { parse_record(as)        ; continue; }
     if (directive == ".alias")         { parse_alias(as)         ; continue; }
-    if (directive == ".hh_file")       { parse_hh_file(as)       ; continue; }
     if (directive == ".includes")      { parse_includes(as)      ; continue; }
     if (directive == ".const")         { parse_constant(as)      ; continue; }
     if (directive == ".constant_refs") { parse_constant_refs(as) ; continue; }

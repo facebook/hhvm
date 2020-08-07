@@ -726,7 +726,6 @@ let mutate_metadata (input : HP.t)  =
   let mut_data (prog : HP.t) : HP.t =
     let ids = prog |> HP.classes |> delete_map Hhas_class.name in
     HP.make
-      (prog |> HP.is_hh           |> mutate_bool)
       (prog |> HP.adata           |> delete_map mutate_adata)
       (prog |> HP.functions       |> delete_map mutate_fun_data)
       (prog |> HP.classes         |> delete_map (mutate_class_data ids))

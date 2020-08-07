@@ -931,13 +931,6 @@ String resolveVmInclude(StringData* path,
   return ctx.path;
 }
 
-Unit* checkPhpUnits(Unit* unit) {
-  if (unit && !unit->isHHFile()) {
-    throw PhpNotSupportedException(unit->filepath()->data());
-  }
-  return unit;
-}
-
 Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
                  const Native::FuncTable& nativeFuncs, bool alreadyRealpath) {
   bool init;
@@ -978,7 +971,7 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
         (it->second.ts_sec > s.st_mtime) ||
         ((it->second.ts_sec == s.st_mtime) &&
          (it->second.ts_nsec >= s.st_mtim.tv_nsec))) {
-      return checkPhpUnits(it->second.unit);
+      return it->second.unit;
     }
   }
 
@@ -1012,7 +1005,7 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
 
   lookupTimer.stop();
   if (ent) logLoad(*ent, path, currentDir, spath, cunit);
-  return checkPhpUnits(cunit.unit);
+  return cunit.unit;
 }
 
 Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable& nativeFuncs) {

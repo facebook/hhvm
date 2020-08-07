@@ -908,11 +908,6 @@ public:
   void setInterpretOnly();
 
   /*
-   * Does this unit correspond to a file with "<?hh" at the top?
-   */
-  bool isHHFile() const;
-
-  /*
    * Get parse/runtime failure information if this unit is created as
    * a result of one.
    */
@@ -967,7 +962,6 @@ private:
   std::atomic<uint8_t> m_mergeState{MergeState::Unmerged};
   bool m_mergeOnly: 1;
   bool m_interpretOnly : 1;
-  bool m_isHHFile : 1;
   bool m_extended : 1;
   bool m_serialized : 1;
   bool m_ICE : 1; // was this unit the result of an internal compiler error

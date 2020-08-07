@@ -871,12 +871,6 @@ void print_constant(Output& out, const Constant& cns) {
             member_tv_initializer(cns.val));
 }
 
-void print_hh_file(Output& out, const Unit* unit) {
-  out.nl();
-  if (unit->isHHFile()) out.fmtln(".hh_file 1;");
-  else out.fmtln(".hh_file 0;");
-}
-
 void print_fatal(Output& out, const Unit* unit) {
   if (auto const info = unit->getFatalInfo()) {
     out.nl();
@@ -891,7 +885,6 @@ void print_unit_metadata(Output& out, const Unit* unit) {
   out.nl();
 
   out.fmtln(".filepath {};", escaped(unit->filepath()));
-  print_hh_file(out, unit);
   print_fatal(out, unit);
   if (!unit->fileAttributes().empty()) {
     out.nl();

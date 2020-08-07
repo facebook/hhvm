@@ -421,7 +421,6 @@ public:
   const StringData* m_filepath{nullptr};
 
   bool m_mergeOnly{false};
-  bool m_isHHFile{false};
   bool m_ICE{false}; // internal compiler error
   bool m_useGlobalIds{0};
   bool m_fatalUnit{false}; // parse/runtime error

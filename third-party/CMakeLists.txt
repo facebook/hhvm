@@ -145,49 +145,7 @@ endif()
 
 ##### boost #####
 
-# boost checks
-find_package(Boost 1.62.0 COMPONENTS context fiber filesystem iostreams program_options regex system thread)
-if ("${Boost_VERSION}" EQUAL "107000")
-  # https://github.com/boostorg/variant/issues/69
-  message(WARNING "System boost is blacklisted version")
-
-  set(Boost_FOUND false)
-endif()
-
-add_library(boost INTERFACE)
-add_custom_target(boostMaybeBuild)
-if(NOT Boost_FOUND)
-  # The boost library can't have a dependency on boostBuild because of:
-  # https://public.kitware.com/Bug/view.php?id=15414
-  # Instead we add the dependency to the target being linked with hphp_link
-  add_dependencies(boostMaybeBuild boostBuild)
-  message(STATUS "Using third-party bundled boost")
-  add_subdirectory(boost)
-  # These are the archive names prefixed with lib so that cmake does not
-  # find these to be system archive instead of these third party ones.
-  set(Boost_LIBRARIES
-      "libboost_fiber"
-      "libboost_context"
-      "libboost_filesystem"
-      "libboost_iostreams"
-      "libboost_program_options"
-      "libboost_regex"
-      "libboost_system"
-      "libboost_thread"
-      CACHE STRING "" FORCE
-  )
-  foreach(lib ${Boost_LIBRARIES})
-    add_library(${lib} STATIC IMPORTED)
-    set_property(TARGET ${lib} PROPERTY IMPORTED_LOCATION
-                 "${CMAKE_CURRENT_SOURCE_DIR}/boost/build/lib/${lib}.a")
-  endforeach()
-  set(Boost_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/boost/build/include" CACHE STRING "" FORCE)
-  set(Boost_LIBRARY_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/boost/build/lib" CACHE STRING "" FORCE)
-  TP_INSTALL_HEADERS(boost boost/build/include/boost boost)
-  list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/boost/build/include")
-endif()
-target_include_directories(boost BEFORE INTERFACE ${Boost_INCLUDE_DIRS})
-target_link_libraries(boost INTERFACE ${Boost_LIBRARIES})
+add_subdirectory(boost)
 
 ##### libsodium #####
 

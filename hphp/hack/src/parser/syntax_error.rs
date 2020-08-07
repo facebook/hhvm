@@ -226,7 +226,7 @@ pub fn error2015(class_name: &str, method_name: &str) -> Error {
 }
 pub fn error2016(class_name: &str, method_name: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot declare abstract method {}::{} private",
+        "Cannot declare abstract method `{}::{}` private",
         class_name.to_string(),
         method_name.to_string(),
     ))

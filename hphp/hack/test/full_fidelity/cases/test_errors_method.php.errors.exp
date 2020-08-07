@@ -4,7 +4,7 @@
 (5,9)-(5,14) Methods cannot have duplicate modifiers
 (6,3)-(6,45) Redeclared method E::f
 (6,19)-(6,24) Cannot declare abstract method E::f final
-(7,3)-(7,19) Cannot declare abstract method E::f private
+(7,3)-(7,19) Cannot declare abstract method `E::f` private
 (7,3)-(7,40) Redeclared method E::f
 (8,3)-(8,46) Redeclared method E::f
 (9,3)-(9,46) Redeclared method E::f

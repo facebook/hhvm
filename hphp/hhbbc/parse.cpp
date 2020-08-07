@@ -684,7 +684,8 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->unit        = unit;
   ret->cls         = cls;
 
-  ret->attrs              = static_cast<Attr>(fe.attrs & ~AttrNoOverride);
+  ret->attrs              = static_cast<Attr>((fe.attrs & ~AttrNoOverride) |
+                                              AttrUnique | AttrPersistent);
   ret->userAttributes     = fe.userAttributes;
   ret->returnUserType     = fe.retUserType;
   ret->retTypeConstraint  = fe.retTypeConstraint;
@@ -864,7 +865,8 @@ std::unique_ptr<php::Record> parse_record(php::Unit* unit,
   ret->unit               = unit;
   ret->srcInfo            = php::SrcInfo {re.getLocation(), re.docComment()};
   ret->name               = re.name();
-  ret->attrs              = static_cast<Attr>(re.attrs() & ~AttrNoOverride);
+  ret->attrs              = static_cast<Attr>((re.attrs() & ~AttrNoOverride) |
+                                              AttrUnique | AttrPersistent);
   ret->parentName         = re.parentName()->empty()? nullptr: re.parentName();
   ret->id                 = re.id();
   ret->userAttributes     = re.userAttributes();
@@ -902,7 +904,8 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->closureContextCls  = nullptr;
   ret->parentName         = pce.parentName()->empty() ? nullptr
                                                       : pce.parentName();
-  ret->attrs              = static_cast<Attr>(pce.attrs() & ~AttrNoOverride);
+  ret->attrs              = static_cast<Attr>((pce.attrs() & ~AttrNoOverride) |
+                                              AttrUnique | AttrPersistent);
   ret->hoistability       = pce.hoistability();
   ret->userAttributes     = pce.userAttributes();
   ret->id                 = pce.id();
@@ -1069,7 +1072,7 @@ std::unique_ptr<php::Constant> parse_constant(const Constant& c, php::Unit* unit
     unit,
     c.name,
     c.val,
-    c.attrs
+    c.attrs | AttrUnique | AttrPersistent
   });
 }
 
@@ -1082,7 +1085,7 @@ std::unique_ptr<php::TypeAlias> parse_type_alias(php::Unit* unit,
     php::SrcInfo { te.getLocation() },
     te.name(),
     te.value(),
-    te.attrs(),
+    te.attrs() | AttrUnique | AttrPersistent,
     te.type(),
     te.nullable(),
     te.userAttributes(),

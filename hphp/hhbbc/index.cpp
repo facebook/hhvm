@@ -1989,11 +1989,7 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
   > closureMap;
 
   for (auto& c : unit.classes) {
-    auto const attrsToRemove =
-      AttrUnique |
-      AttrPersistent |
-      AttrNoOverride;
-    attribute_setter(c->attrs, false, attrsToRemove);
+    attribute_setter(c->attrs, false, AttrNoOverride);
 
     // Manually set closure classes to be unique to maintain invariance.
     if (is_closure(*c)) {
@@ -3866,51 +3862,6 @@ Index::Index(php::Program* program)
 Index::~Index() {}
 
 //////////////////////////////////////////////////////////////////////
-
-void Index::mark_persistent_types_and_functions(php::Program& program) {
-  for (auto& unit : program.units) {
-    for (auto& f : unit->funcs) {
-      assertx(f->attrs & AttrUnique);
-      attribute_setter(f->attrs, true, AttrPersistent);
-    }
-
-    for (auto& t : unit->typeAliases) {
-      assertx(t->attrs & AttrUnique);
-      attribute_setter(t->attrs, true, AttrPersistent);
-    }
-
-    for (auto& c : unit->constants) {
-      assertx(c->attrs & AttrUnique);
-      attribute_setter(c->attrs, true, AttrPersistent);
-    }
-  }
-
-  DEBUG_ONLY auto check_persistent_class = [&] (const ClassInfo& cinfo) {
-    if (cinfo.parent && !(cinfo.parent->cls->attrs & AttrPersistent)) {
-      return false;
-    }
-
-    for (auto const intrf : cinfo.declInterfaces) {
-      if (!(intrf->cls->attrs & AttrPersistent)) return false;
-    }
-
-    return true;
-  };
-
-  DEBUG_ONLY auto check_persistent_record = [&] (const RecordInfo& rinfo) {
-    return !rinfo.parent || (rinfo.parent->rec->attrs & AttrPersistent);
-  };
-
-  for (auto& c : m_data->allClassInfos) {
-    assertx((c->cls->attrs & AttrUnique) && check_persistent_class(*c));
-    attribute_setter(c->cls->attrs, true, AttrPersistent);
-  }
-
-  for (auto& r : m_data->allRecordInfos) {
-    assertx((r->rec->attrs & AttrUnique) && check_persistent_record(*r));
-    attribute_setter(r->rec->attrs, true, AttrPersistent);
-  }
-}
 
 void Index::mark_no_bad_redeclare_props(php::Class& cls) const {
   /*

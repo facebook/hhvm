@@ -601,7 +601,6 @@ void whole_program(php::ProgramPtr program,
     index.use_class_dependencies(options.HardPrivatePropInference);
     analyze_iteratively(index, *program, AnalyzeMode::NormalPass);
     cleanup_pre = std::thread([&] { index.cleanup_for_final(); });
-    index.mark_persistent_types_and_functions(*program);
     index.join_iface_vtable_thread();
     if (parallel::num_threads > parallel::final_threads) {
       parallel::num_threads = parallel::final_threads;

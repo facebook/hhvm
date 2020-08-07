@@ -141,6 +141,18 @@ constexpr const char* errorString<RecordDesc>() {
 }
 
 template<class T>
+const T* autoloadKnownPersistentType(rds::Handle h, const StringData* name) {
+  assertx(rds::isPersistentHandle(h));
+  AutoloadHandler::s_instance->autoloadType<T>(
+    StrNR(const_cast<StringData*>(name))
+  );
+  auto const ptr = rds::handleToRef<LowPtr<T>, rds::Mode::Persistent>(h).get();
+  // Autoloader should have inited it as a side-effect.
+  if (UNLIKELY(!ptr)) raise_error(errorString<T>(), name->data());
+  return ptr;
+}
+
+template<class T>
 const T* lookupKnownType(rds::Handle cache_handle,
                          const StringData* name) {
   assertx(rds::isNormalHandle(cache_handle));
@@ -262,8 +274,11 @@ void cgLdClsCached(IRLS& env, const IRInstruction* inst) {
 
   implLdCached<Class>(env, inst, name, [&] (Vout& v, rds::Handle ch) {
     auto const ptr = v.makeReg();
+    auto const target = rds::isPersistentHandle(ch)
+                        ? autoloadKnownPersistentType<Class>
+                        : lookupKnownType<Class>;
     auto const args = argGroup(env, inst).imm(ch).ssa(0);
-    cgCallHelper(v, env, CallSpec::direct(lookupKnownType<Class>),
+    cgCallHelper(v, env, CallSpec::direct(target),
                  callDest(ptr), SyncOptions::Sync, args);
     return ptr;
   });
@@ -275,8 +290,11 @@ void cgLdRecDescCached(IRLS& env, const IRInstruction* inst) {
   implLdCached<RecordDesc>(env, inst, extra->recName,
                            [&] (Vout& v, rds::Handle ch) {
     auto const ptr = v.makeReg();
+    auto const target = rds::isPersistentHandle(ch)
+                        ? autoloadKnownPersistentType<RecordDesc>
+                        : lookupKnownType<RecordDesc>;
     auto const args = argGroup(env, inst).imm(ch).immPtr(extra->recName);
-    cgCallHelper(v, env, CallSpec::direct(lookupKnownType<RecordDesc>),
+    cgCallHelper(v, env, CallSpec::direct(target),
                  callDest(ptr), SyncOptions::Sync, args);
     return ptr;
   });

@@ -36,7 +36,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 rds::Handle NamedEntity::getFuncHandle(const StringData* name) const {
-  m_cachedFunc.bind(rds::Mode::Normal, rds::LinkName{"NEFunc", name});
+  auto const mode =
+    RO::RepoAuthoritative ? rds::Mode::Persistent : rds::Mode::Normal;
+  m_cachedFunc.bind(mode, rds::LinkName{"NEFunc", name});
   return m_cachedFunc.handle();
 }
 
@@ -48,12 +50,16 @@ void NamedEntity::setCachedFunc(Func* f) {
 }
 
 rds::Handle NamedEntity::getClassHandle(const StringData* name) const {
-  m_cachedClass.bind(rds::Mode::Normal, rds::LinkName{"NEClass", name});
+  auto const mode =
+    RO::RepoAuthoritative ? rds::Mode::Persistent : rds::Mode::Normal;
+  m_cachedClass.bind(mode, rds::LinkName{"NEClass", name});
   return m_cachedClass.handle();
 }
 
 rds::Handle NamedEntity::getRecordDescHandle(const StringData* name) const {
-  m_cachedRecordDesc.bind(rds::Mode::Normal, rds::LinkName{"NERecord", name});
+  auto const mode =
+    RO::RepoAuthoritative ? rds::Mode::Persistent : rds::Mode::Normal;
+  m_cachedRecordDesc.bind(mode, rds::LinkName{"NERecord", name});
   return m_cachedRecordDesc.handle();
 }
 

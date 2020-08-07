@@ -243,12 +243,11 @@ std::string EvaluateCommand::prepareEvalExpression(const std::string& expr) {
   }
 
   // If the user supplied an expression that looks like a well formed script,
-  // meaning it begins with <?php or <?hh, do not do any further transformations
+  // meaning it begins with <?hh, do not do any further transformations
   // on it - we'll try to just evaluate it directly as the user intended, and
   // this will honor running as PHP vs Hack. Otherwise we are going to try
   // to interpret as Hack, and we need to turn this into a valid script snippet.
-  if (expression.find("<?php", 0, 5) == 0 ||
-      expression.find("<?hh", 0, 4) == 0) {
+  if (expression.find("<?hh", 0, 4) == 0) {
     return expression;
   }
 

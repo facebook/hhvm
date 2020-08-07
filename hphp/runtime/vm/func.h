@@ -609,7 +609,7 @@ struct Func final {
 
   /*
    * Is the function a pseudomain (i.e., the function implicitly defined by the
-   * text after <?php in a file)?
+   * text after <?hh in a file)?
    */
   bool isPseudoMain() const;
 

@@ -473,7 +473,7 @@ String highlight_code(const String& source, int line /* = 0 */,
                       int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
                       int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
   TRACE(7, "debugger_base:highlight_code\n");
-  String prepended = "<?php\n";
+  String prepended = "<?hh\n";
   prepended += source;
   String highlighted = highlight_php(prepended, line, lineFocus0, charFocus0,
                                      lineFocus1, charFocus1);

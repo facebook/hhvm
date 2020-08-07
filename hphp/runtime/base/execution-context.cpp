@@ -2034,7 +2034,7 @@ Unit* ExecutionContext::compileEvalString(
 
 ExecutionContext::EvaluationResult
 ExecutionContext::evalPHPDebugger(StringData* code, int frame) {
-  // The code has "<?php" prepended already
+  // The code has "<?hh" prepended already
   auto unit = compile_debugger_string(code->data(), code->size(),
     getRepoOptionsForCurrentFrame());
   if (unit == nullptr) {

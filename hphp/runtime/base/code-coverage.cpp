@@ -43,7 +43,7 @@ namespace HPHP {
  *
  * Indeed on this toy cover.php file:
  *
- *  <?php
+ *  <?hh
  *
  *  echo "here\n";
  *  for($i = 0; $i < 2; $i++) {

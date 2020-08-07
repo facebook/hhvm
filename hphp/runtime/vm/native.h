@@ -52,7 +52,7 @@ struct Extension;
  *
  * To finish exposing it to PHP, add an entry to Systemlib
  * using matching hack typehints:
- *   <?php
+ *   <?hh
  *   <<__Native>>
  *   function sum(int $a, int $b): int;
  *

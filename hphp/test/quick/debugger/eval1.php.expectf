@@ -13,7 +13,7 @@ print $eval1
 5
 print class_exists('test2')
 false
-<?php
+<?hh
 class test2 {
   public $a;
   private $b;

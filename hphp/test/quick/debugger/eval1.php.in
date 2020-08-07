@@ -5,7 +5,7 @@ print function_exists('test1')
 @ $eval1=test1(4)
 print $eval1
 print class_exists('test2')
-<?php
+<?hh
 class test2 {
   public $a;
   private $b;

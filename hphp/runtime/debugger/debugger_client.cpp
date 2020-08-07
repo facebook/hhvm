@@ -1013,8 +1013,8 @@ char* DebuggerClient::getCompletion(const char* text, int state) {
     if (m_inputState == TakingCommand) {
       switch (first_non_whitespace(rl_line_buffer)) {
         case '<':
-          if (strncasecmp(m_command.substr(0, 5).c_str(), "<?php", 5)) {
-            addCompletion("<?php");
+          if (strncasecmp(m_command.substr(0, 4).c_str(), "<?hh", 4)) {
+            addCompletion("<?hh");
             break;
           }
         case '@':
@@ -1028,7 +1028,7 @@ char* DebuggerClient::getCompletion(const char* text, int state) {
             addCompletion(GetCommands());
             addCompletion("@");
             addCompletion("=");
-            addCompletion("<?php");
+            addCompletion("<?hh");
             addCompletion("?>");
           } else {
             auto cmd = createCommand();
@@ -1732,7 +1732,7 @@ bool DebuggerClient::process() {
       return true;
     }
     case '<': {
-      if (match("<?php")) {
+      if (match("<?hh")) {
         processTakeCode();
         return true;
       }
@@ -1974,7 +1974,7 @@ void DebuggerClient::processTakeCode() {
     processEval();
     return;
   }
-  usageLogCommand("<?php", m_line);
+  usageLogCommand("<?hh", m_line);
   m_code = "<?hh ";
   m_code += m_line.substr(m_command.length()) + "\n";
   m_inputState = TakingCode;

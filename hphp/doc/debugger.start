@@ -68,16 +68,16 @@ At any breakpoints, examine variables or evaluate expressions,
   hphpd> variable
   hphpd> print $a
   hphpd> =$a
-  hphpd> <?php print $a; ?>
-  hphpd> <?php
+  hphpd> <?hh print $a; ?>
+  hphpd> <?hh
    ..... print $a;
    ..... ?>
 
 Optionally, modify variables like this,
 
   hphpd> $a = 10
-  hphpd> <?php $a = 10; ?>
-  hphpd> <?php
+  hphpd> <?hh $a = 10; ?>
+  hphpd> <?hh
    ..... $a = 10;
    ..... ?>
 

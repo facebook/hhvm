@@ -124,7 +124,7 @@ enum CodeColor {
 /**
  * "line", starting line number, or 0 for no line number display.
  * "lineFocus", the line to highlight, with gray background.
- * highlight_code() doesn't need <?php and will treat source entirely PHP.
+ * highlight_code() doesn't need <?hh and will treat source entirely PHP.
  */
 String highlight_php(const String& source, int line = 0, int lineFocus0 = 0,
                      int charFocus0 = 0, int lineFocus1 = 0,

@@ -30,3 +30,6 @@ val go_docblock_for_symbol :
   symbol:string ->
   kind:SearchUtils.si_kind ->
   DocblockService.result
+
+(** strips boilerplate copyright/codegen comments *)
+val clean_comments : string -> string

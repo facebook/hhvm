@@ -191,7 +191,6 @@
                           "line_number":3
                         }
                       },
-                      "awaitable_coroutine":{"kind":"missing"},
                       "awaitable_compound_statement":{
                         "kind":"compound_statement",
                         "compound_left_brace":{
@@ -295,7 +294,6 @@
                             "line_number":4
                           }
                         },
-                        "awaitable_coroutine":{"kind":"missing"},
                         "awaitable_compound_statement":{
                           "kind":"compound_statement",
                           "compound_left_brace":{
@@ -462,7 +460,6 @@
                             "line_number":5
                           }
                         },
-                        "awaitable_coroutine":{"kind":"missing"},
                         "awaitable_compound_statement":{
                           "kind":"compound_statement",
                           "compound_left_brace":{
@@ -567,7 +564,6 @@
                             "line_number":6
                           }
                         },
-                        "awaitable_coroutine":{"kind":"missing"},
                         "awaitable_compound_statement":{
                           "kind":"compound_statement",
                           "compound_left_brace":{
@@ -632,7 +628,6 @@
                             "line_number":6
                           }
                         },
-                        "awaitable_coroutine":{"kind":"missing"},
                         "awaitable_compound_statement":{
                           "kind":"compound_statement",
                           "compound_left_brace":{
@@ -735,7 +730,6 @@
                           "line_number":7
                         }
                       },
-                      "awaitable_coroutine":{"kind":"missing"},
                       "awaitable_compound_statement":{
                         "kind":"compound_statement",
                         "compound_left_brace":{
@@ -909,7 +903,6 @@
                           "line_number":10
                         }
                       },
-                      "awaitable_coroutine":{"kind":"missing"},
                       "awaitable_compound_statement":{
                         "kind":"compound_statement",
                         "compound_left_brace":{
@@ -983,7 +976,6 @@
                                         "line_number":11
                                       }
                                     },
-                                    "awaitable_coroutine":{"kind":"missing"},
                                     "awaitable_compound_statement":{
                                       "kind":"compound_statement",
                                       "compound_left_brace":{
@@ -1138,5 +1130,5 @@
     }
   },
   "program_text":"<?hh\nfunction f () {\n  $a = async {};\n  $a = async {} + 1;\n  $a = 1 + async {};\n  $a = async {} + async {};\n  $a = async {\n    $a = 1;\n  };\n  $a = async {\n    $b = async {} + 1;\n  };\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-05-0000"
 }

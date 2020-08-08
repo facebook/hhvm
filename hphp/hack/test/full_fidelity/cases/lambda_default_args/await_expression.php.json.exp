@@ -211,7 +211,6 @@
                       "kind":"lambda_expression",
                       "lambda_attribute_spec":{"kind":"missing"},
                       "lambda_async":{"kind":"missing"},
-                      "lambda_coroutine":{"kind":"missing"},
                       "lambda_signature":{
                         "kind":"lambda_signature",
                         "lambda_left_paren":{
@@ -503,5 +502,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction test(): void {\n  $_ = (bool $v = await genx()): void ==> {};\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-05-0000"
 }

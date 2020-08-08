@@ -385,24 +385,6 @@ Parsed decls:
             ~returns_mutable:false ~returns_void_to_rx:false);
           ft_reactive = Nonreactive }));
     fe_deprecated = None;  };
-  "\\some_coroutine" ->
-  { fe_pos = [90:20-34];
-    fe_type =
-    (Rwitness (root|functions.php line 90, characters 20-33),
-     (Tfun
-        { ft_arity = (Fstandard ()); ft_tparams = [];
-          ft_where_constraints = []; ft_params = [];
-          ft_ret =
-          { et_enforced = false;
-            et_type =
-            (Rhint (root|functions.php line 90, characters 38-41),
-             (Tprim Tbool))
-            };
-          ft_flags =
-          (make_ft_flags coroutine none ~return_disposable:false
-            ~returns_mutable:false ~returns_void_to_rx:false);
-          ft_reactive = Nonreactive }));
-    fe_deprecated = None;  };
   "\\takes_optional" ->
   { fe_pos = [33:10-24];
     fe_type =

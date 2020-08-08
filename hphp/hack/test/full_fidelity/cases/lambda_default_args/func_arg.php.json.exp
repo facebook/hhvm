@@ -514,7 +514,6 @@
                               "kind":"lambda_expression",
                               "lambda_attribute_spec":{"kind":"missing"},
                               "lambda_async":{"kind":"missing"},
-                              "lambda_coroutine":{"kind":"missing"},
                               "lambda_signature":{
                                 "kind":"lambda_signature",
                                 "lambda_left_paren":{
@@ -839,5 +838,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nclass A {\n\n  public static function get_int():int {return 5;}\n  public function test(): void {\n    $_ = (int $a = A::get_int()): void ==> {};\n  }\n\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-05-0000"
 }

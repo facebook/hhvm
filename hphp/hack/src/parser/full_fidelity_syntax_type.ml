@@ -104,7 +104,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { anonymous_attribute_spec                           : t
     ; anonymous_static_keyword                           : t
     ; anonymous_async_keyword                            : t
-    ; anonymous_coroutine_keyword                        : t
     ; anonymous_function_keyword                         : t
     ; anonymous_left_paren                               : t
     ; anonymous_parameters                               : t
@@ -117,7 +116,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and lambda_expression =
     { lambda_attribute_spec                              : t
     ; lambda_async                                       : t
-    ; lambda_coroutine                                   : t
     ; lambda_signature                                   : t
     ; lambda_arrow                                       : t
     ; lambda_body                                        : t
@@ -131,7 +129,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and closure_type_specifier =
     { closure_outer_left_paren                           : t
-    ; closure_coroutine                                  : t
     ; closure_function_keyword                           : t
     ; closure_inner_left_paren                           : t
     ; closure_parameter_list                             : t
@@ -612,7 +609,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { anonymous_attribute_spec                           : t
     ; anonymous_static_keyword                           : t
     ; anonymous_async_keyword                            : t
-    ; anonymous_coroutine_keyword                        : t
     ; anonymous_function_keyword                         : t
     ; anonymous_left_paren                               : t
     ; anonymous_parameters                               : t
@@ -631,7 +627,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LambdaExpression                  of
     { lambda_attribute_spec                              : t
     ; lambda_async                                       : t
-    ; lambda_coroutine                                   : t
     ; lambda_signature                                   : t
     ; lambda_arrow                                       : t
     ; lambda_body                                        : t
@@ -841,7 +836,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | AwaitableCreationExpression       of
     { awaitable_attribute_spec                           : t
     ; awaitable_async                                    : t
-    ; awaitable_coroutine                                : t
     ; awaitable_compound_statement                       : t
     }
   | XHPChildrenDeclaration            of
@@ -995,7 +989,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   | ClosureTypeSpecifier              of
     { closure_outer_left_paren                           : t
-    ; closure_coroutine                                  : t
     ; closure_function_keyword                           : t
     ; closure_inner_left_paren                           : t
     ; closure_parameter_list                             : t
@@ -1903,7 +1896,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { anonymous_attribute_spec: attribute_specification option value
     ; anonymous_static_keyword: Token.t option value
     ; anonymous_async_keyword: Token.t option value
-    ; anonymous_coroutine_keyword: Token.t option value
     ; anonymous_function_keyword: Token.t value
     ; anonymous_left_paren: Token.t value
     ; anonymous_parameters: parameter listesque value
@@ -1922,7 +1914,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and lambda_expression =
     { lambda_attribute_spec: attribute_specification option value
     ; lambda_async: Token.t option value
-    ; lambda_coroutine: Token.t option value
     ; lambda_signature: specifier value
     ; lambda_arrow: Token.t value
     ; lambda_body: lambda_body value
@@ -2132,7 +2123,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and awaitable_creation_expression =
     { awaitable_attribute_spec: attribute_specification option value
     ; awaitable_async: Token.t value
-    ; awaitable_coroutine: Token.t option value
     ; awaitable_compound_statement: compound_statement value
     }
   and xhp_children_declaration =
@@ -2286,7 +2276,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and closure_type_specifier =
     { closure_outer_left_paren: Token.t value
-    ; closure_coroutine: Token.t option value
     ; closure_function_keyword: Token.t value
     ; closure_inner_left_paren: Token.t value
     ; closure_parameter_list: closure_parameter_type_specifier listesque value

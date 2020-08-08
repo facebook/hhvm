@@ -856,13 +856,12 @@ where
         // (This work is tracked by task T22582715.)
         //
         // closure-type-specifier:
-        //   ( coroutine-opt function ( \
+        //   ( function ( \
         //   closure-param-type-specifier-list-opt \
         //   ) : type-specifier )
         //
         // TODO: Error recovery is pretty weak here. We could be smarter.
         let olp = self.fetch_token();
-        let coroutine = self.optional_token(TokenKind::Coroutine);
         let fnc = self.fetch_token();
         let ilp = self.require_left_paren();
         let (pts, irp) = if self.peek_token_kind() == TokenKind::RightParen {
@@ -883,7 +882,6 @@ where
             make_closure_type_specifier,
             self,
             olp,
-            coroutine,
             fnc,
             ilp,
             pts,

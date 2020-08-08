@@ -1746,7 +1746,7 @@ where
       Self { syntax, value }
     }
 
-    fn make_anonymous_function(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self, arg11: Self) -> Self {
+    fn make_anonymous_function(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self) -> Self {
       let children = [
           &arg0.value, 
           &arg1.value, 
@@ -1758,8 +1758,7 @@ where
           &arg7.value, 
           &arg8.value, 
           &arg9.value, 
-          &arg10.value, 
-          &arg11.value
+          &arg10.value
       ];
       let value = V::from_values(&children);
       let syntax = Self::make(
@@ -1777,8 +1776,7 @@ where
               arg7.syntax, 
               arg8.syntax, 
               arg9.syntax, 
-              arg10.syntax, 
-              arg11.syntax
+              arg10.syntax
           ],
       );
       Self { syntax, value }
@@ -1806,14 +1804,13 @@ where
       Self { syntax, value }
     }
 
-    fn make_lambda_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self) -> Self {
+    fn make_lambda_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self) -> Self {
       let children = [
           &arg0.value, 
           &arg1.value, 
           &arg2.value, 
           &arg3.value, 
-          &arg4.value, 
-          &arg5.value
+          &arg4.value
       ];
       let value = V::from_values(&children);
       let syntax = Self::make(
@@ -1825,8 +1822,7 @@ where
               arg1.syntax, 
               arg2.syntax, 
               arg3.syntax, 
-              arg4.syntax, 
-              arg5.syntax
+              arg4.syntax
           ],
       );
       Self { syntax, value }
@@ -2596,12 +2592,11 @@ where
       Self { syntax, value }
     }
 
-    fn make_awaitable_creation_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
+    fn make_awaitable_creation_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
       let children = [
           &arg0.value, 
           &arg1.value, 
-          &arg2.value, 
-          &arg3.value
+          &arg2.value
       ];
       let value = V::from_values(&children);
       let syntax = Self::make(
@@ -2611,8 +2606,7 @@ where
           &[
               arg0.syntax, 
               arg1.syntax, 
-              arg2.syntax, 
-              arg3.syntax
+              arg2.syntax
           ],
       );
       Self { syntax, value }
@@ -3176,7 +3170,7 @@ where
       Self { syntax, value }
     }
 
-    fn make_closure_type_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self) -> Self {
+    fn make_closure_type_specifier(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self) -> Self {
       let children = [
           &arg0.value, 
           &arg1.value, 
@@ -3185,8 +3179,7 @@ where
           &arg4.value, 
           &arg5.value, 
           &arg6.value, 
-          &arg7.value, 
-          &arg8.value
+          &arg7.value
       ];
       let value = V::from_values(&children);
       let syntax = Self::make(
@@ -3201,8 +3194,7 @@ where
               arg4.syntax, 
               arg5.syntax, 
               arg6.syntax, 
-              arg7.syntax, 
-              arg8.syntax
+              arg7.syntax
           ],
       );
       Self { syntax, value }

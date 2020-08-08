@@ -442,9 +442,9 @@ where
         Self::R::make_anonymous_class(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
     }
 
-    fn make_anonymous_function(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R, arg9 : Self::R, arg10 : Self::R, arg11 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10, &arg11]);
-        Self::R::make_anonymous_function(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)
+    fn make_anonymous_function(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R, arg9 : Self::R, arg10 : Self::R) -> Self::R {
+        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8, &arg9, &arg10]);
+        Self::R::make_anonymous_function(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
     }
 
     fn make_anonymous_function_use_clause(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
@@ -452,9 +452,9 @@ where
         Self::R::make_anonymous_function_use_clause(self.state_mut(), arg0, arg1, arg2, arg3)
     }
 
-    fn make_lambda_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5]);
-        Self::R::make_lambda_expression(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5)
+    fn make_lambda_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {
+        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4]);
+        Self::R::make_lambda_expression(self.state_mut(), arg0, arg1, arg2, arg3, arg4)
     }
 
     fn make_lambda_signature(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {
@@ -637,9 +637,9 @@ where
         Self::R::make_embedded_subscript_expression(self.state_mut(), arg0, arg1, arg2, arg3)
     }
 
-    fn make_awaitable_creation_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3]);
-        Self::R::make_awaitable_creation_expression(self.state_mut(), arg0, arg1, arg2, arg3)
+    fn make_awaitable_creation_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
+        self.state_mut().next(&[&arg0, &arg1, &arg2]);
+        Self::R::make_awaitable_creation_expression(self.state_mut(), arg0, arg1, arg2)
     }
 
     fn make_xhp_children_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
@@ -772,9 +772,9 @@ where
         Self::R::make_dictionary_type_specifier(self.state_mut(), arg0, arg1, arg2, arg3)
     }
 
-    fn make_closure_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8]);
-        Self::R::make_closure_type_specifier(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+    fn make_closure_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R) -> Self::R {
+        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7]);
+        Self::R::make_closure_type_specifier(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
     }
 
     fn make_closure_parameter_type_specifier(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {

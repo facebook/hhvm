@@ -275,7 +275,6 @@
                       "kind":"lambda_expression",
                       "lambda_attribute_spec":{"kind":"missing"},
                       "lambda_async":{"kind":"missing"},
-                      "lambda_coroutine":{"kind":"missing"},
                       "lambda_signature":{
                         "kind":"lambda_signature",
                         "lambda_left_paren":{
@@ -520,5 +519,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction test(): void {\n  $y = 4;\n  $_ = (int $x = $y): void ==> {};\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-05-0000"
 }

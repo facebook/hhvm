@@ -94,7 +94,6 @@
                     "kind":"lambda_expression",
                     "lambda_attribute_spec":{"kind":"missing"},
                     "lambda_async":{"kind":"missing"},
-                    "lambda_coroutine":{"kind":"missing"},
                     "lambda_signature":{
                       "kind":"lambda_signature",
                       "lambda_left_paren":{
@@ -338,7 +337,6 @@
                     "kind":"lambda_expression",
                     "lambda_attribute_spec":{"kind":"missing"},
                     "lambda_async":{"kind":"missing"},
-                    "lambda_coroutine":{"kind":"missing"},
                     "lambda_signature":{
                       "kind":"lambda_signature",
                       "lambda_left_paren":{
@@ -614,7 +612,6 @@
                     "kind":"lambda_expression",
                     "lambda_attribute_spec":{"kind":"missing"},
                     "lambda_async":{"kind":"missing"},
-                    "lambda_coroutine":{"kind":"missing"},
                     "lambda_signature":{
                       "kind":"lambda_signature",
                       "lambda_left_paren":{
@@ -838,7 +835,6 @@
                     "kind":"lambda_expression",
                     "lambda_attribute_spec":{"kind":"missing"},
                     "lambda_async":{"kind":"missing"},
-                    "lambda_coroutine":{"kind":"missing"},
                     "lambda_signature":{
                       "kind":"lambda_signature",
                       "lambda_left_paren":{
@@ -1073,7 +1069,6 @@
                     "anonymous_attribute_spec":{"kind":"missing"},
                     "anonymous_static_keyword":{"kind":"missing"},
                     "anonymous_async_keyword":{"kind":"missing"},
-                    "anonymous_coroutine_keyword":{"kind":"missing"},
                     "anonymous_function_keyword":{
                       "kind":"token",
                       "token":{
@@ -1377,7 +1372,6 @@
                     "anonymous_attribute_spec":{"kind":"missing"},
                     "anonymous_static_keyword":{"kind":"missing"},
                     "anonymous_async_keyword":{"kind":"missing"},
-                    "anonymous_coroutine_keyword":{"kind":"missing"},
                     "anonymous_function_keyword":{
                       "kind":"token",
                       "token":{
@@ -1665,7 +1659,6 @@
                     "anonymous_attribute_spec":{"kind":"missing"},
                     "anonymous_static_keyword":{"kind":"missing"},
                     "anonymous_async_keyword":{"kind":"missing"},
-                    "anonymous_coroutine_keyword":{"kind":"missing"},
                     "anonymous_function_keyword":{
                       "kind":"token",
                       "token":{
@@ -1932,7 +1925,6 @@
                     "kind":"lambda_expression",
                     "lambda_attribute_spec":{"kind":"missing"},
                     "lambda_async":{"kind":"missing"},
-                    "lambda_coroutine":{"kind":"missing"},
                     "lambda_signature":{
                       "kind":"lambda_signature",
                       "lambda_left_paren":{
@@ -2167,7 +2159,6 @@
                     "anonymous_attribute_spec":{"kind":"missing"},
                     "anonymous_static_keyword":{"kind":"missing"},
                     "anonymous_async_keyword":{"kind":"missing"},
-                    "anonymous_coroutine_keyword":{"kind":"missing"},
                     "anonymous_function_keyword":{
                       "kind":"token",
                       "token":{
@@ -2407,5 +2398,5 @@
     }
   },
   "program_text":"<?hh\n\nfoo((...$x, $y) ==> {});\n\nfoo((int ...$x, int $y) ==> {});\n\nfoo((..., $y) ==> {});\n\nfoo((int ...$x,) ==> {});\n\nfoo(function (int ...$x, int $y): void {});\n\nfoo(function (...$x, int $y): void {});\n\nfoo(function (..., int $y): void {});\n\nfoo((inout int ...$x) ==> {});\n\nfoo(function (inout int ...$x): void {});\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-05-0000"
 }

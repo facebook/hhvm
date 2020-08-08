@@ -220,7 +220,6 @@
                       "kind":"lambda_expression",
                       "lambda_attribute_spec":{"kind":"missing"},
                       "lambda_async":{"kind":"missing"},
-                      "lambda_coroutine":{"kind":"missing"},
                       "lambda_signature":{
                         "kind":"lambda_signature",
                         "lambda_left_paren":{
@@ -484,7 +483,6 @@
                             "kind":"lambda_expression",
                             "lambda_attribute_spec":{"kind":"missing"},
                             "lambda_async":{"kind":"missing"},
-                            "lambda_coroutine":{"kind":"missing"},
                             "lambda_signature":{
                               "kind":"lambda_signature",
                               "lambda_left_paren":{
@@ -760,5 +758,5 @@
     }
   },
   "program_text":"<?hh //strict\n\n/* There should be no errors due to the absence of typehints on $a and $b */\nfunction test():void {\n  $lambda = ($a, $b) ==> {\n    return 1;\n  };\n\n  bar(($a, $b) ==> {\n    return 1;\n  });\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-05-0000"
 }

@@ -499,7 +499,6 @@ module type Syntax_S = sig
     { anonymous_attribute_spec                           : t
     ; anonymous_static_keyword                           : t
     ; anonymous_async_keyword                            : t
-    ; anonymous_coroutine_keyword                        : t
     ; anonymous_function_keyword                         : t
     ; anonymous_left_paren                               : t
     ; anonymous_parameters                               : t
@@ -518,7 +517,6 @@ module type Syntax_S = sig
   | LambdaExpression                  of
     { lambda_attribute_spec                              : t
     ; lambda_async                                       : t
-    ; lambda_coroutine                                   : t
     ; lambda_signature                                   : t
     ; lambda_arrow                                       : t
     ; lambda_body                                        : t
@@ -728,7 +726,6 @@ module type Syntax_S = sig
   | AwaitableCreationExpression       of
     { awaitable_attribute_spec                           : t
     ; awaitable_async                                    : t
-    ; awaitable_coroutine                                : t
     ; awaitable_compound_statement                       : t
     }
   | XHPChildrenDeclaration            of
@@ -882,7 +879,6 @@ module type Syntax_S = sig
     }
   | ClosureTypeSpecifier              of
     { closure_outer_left_paren                           : t
-    ; closure_coroutine                                  : t
     ; closure_function_keyword                           : t
     ; closure_inner_left_paren                           : t
     ; closure_parameter_list                             : t
@@ -1161,9 +1157,9 @@ module type Syntax_S = sig
   val make_concurrent_statement : t -> t -> t
   val make_simple_initializer : t -> t -> t
   val make_anonymous_class : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
-  val make_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_anonymous_function_use_clause : t -> t -> t -> t -> t
-  val make_lambda_expression : t -> t -> t -> t -> t -> t -> t
+  val make_lambda_expression : t -> t -> t -> t -> t -> t
   val make_lambda_signature : t -> t -> t -> t -> t -> t
   val make_cast_expression : t -> t -> t -> t -> t
   val make_scope_resolution_expression : t -> t -> t -> t
@@ -1200,7 +1196,7 @@ module type Syntax_S = sig
   val make_element_initializer : t -> t -> t -> t
   val make_subscript_expression : t -> t -> t -> t -> t
   val make_embedded_subscript_expression : t -> t -> t -> t -> t
-  val make_awaitable_creation_expression : t -> t -> t -> t -> t
+  val make_awaitable_creation_expression : t -> t -> t -> t
   val make_xhp_children_declaration : t -> t -> t -> t
   val make_xhp_children_parenthesized_list : t -> t -> t -> t
   val make_xhp_category_declaration : t -> t -> t -> t
@@ -1227,7 +1223,7 @@ module type Syntax_S = sig
   val make_darray_type_specifier : t -> t -> t -> t -> t -> t -> t -> t
   val make_map_array_type_specifier : t -> t -> t -> t -> t -> t -> t
   val make_dictionary_type_specifier : t -> t -> t -> t -> t
-  val make_closure_type_specifier : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_closure_type_specifier : t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_closure_parameter_type_specifier : t -> t -> t
   val make_classname_type_specifier : t -> t -> t -> t -> t -> t
   val make_field_specifier : t -> t -> t -> t -> t

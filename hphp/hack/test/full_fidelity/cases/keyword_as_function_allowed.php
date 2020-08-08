@@ -8,7 +8,6 @@ function boolean() {}
 function category() {}
 function children() {}
 function classname() {}
-function coroutine() {}
 function darray() {}
 function define() {}
 function dict() {}
@@ -37,7 +36,6 @@ function resource() {}
 function self() {}
 function string() {}
 function super() {}
-function suspend() {}
 function this() {}
 function true() {}
 function type() {}
@@ -55,7 +53,6 @@ boolean();
 category();
 children();
 classname();
-coroutine();
 darray();
 define();
 dict();
@@ -84,7 +81,6 @@ resource();
 self();
 string();
 super();
-suspend();
 this();
 true();
 type();

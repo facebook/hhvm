@@ -66,35 +66,17 @@ module WithSyntax (Syntax : Positioned_syntax_sig.PositionedSyntax_S) = struct
         r9
         r10 )
 
-  let make_closure_type_specifier r1 coroutine r3 r4 r5 r6 r7 r8 r9 state =
-    let state = state || is_coroutine coroutine in
-    (state, Syntax.make_closure_type_specifier r1 coroutine r3 r4 r5 r6 r7 r8 r9)
+  let make_closure_type_specifier r1 r3 r4 r5 r6 r7 r8 r9 state =
+    (state, Syntax.make_closure_type_specifier r1 r3 r4 r5 r6 r7 r8 r9)
 
-  let make_anonymous_function
-      r1 r2 r3 coroutine r5 r6 r7 r8 r9 r10 r11 r12 state =
-    let state = state || is_coroutine coroutine in
-    ( state,
-      Syntax.make_anonymous_function
-        r1
-        r2
-        r3
-        coroutine
-        r5
-        r6
-        r7
-        r8
-        r9
-        r10
-        r11
-        r12 )
+  let make_anonymous_function r1 r2 r3 r5 r6 r7 r8 r9 r10 r11 r12 state =
+    (state, Syntax.make_anonymous_function r1 r2 r3 r5 r6 r7 r8 r9 r10 r11 r12)
 
-  let make_lambda_expression r1 r2 coroutine r3 r4 r5 state =
-    let state = state || is_coroutine coroutine in
-    (state, Syntax.make_lambda_expression r1 r2 coroutine r3 r4 r5)
+  let make_lambda_expression r1 r2 r3 r4 r5 state =
+    (state, Syntax.make_lambda_expression r1 r2 r3 r4 r5)
 
-  let make_awaitable_creation_expression r1 r2 coroutine r4 state =
-    let state = state || is_coroutine coroutine in
-    (state, Syntax.make_awaitable_creation_expression r1 r2 coroutine r4)
+  let make_awaitable_creation_expression r1 r2 r4 state =
+    (state, Syntax.make_awaitable_creation_expression r1 r2 r4)
 
   let make_old_attribute_specification left attribute_name right state =
     Syntax.(

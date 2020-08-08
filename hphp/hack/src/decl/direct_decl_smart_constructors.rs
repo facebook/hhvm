@@ -3373,10 +3373,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         left_paren: Self::R,
         _arg1: Self::R,
         _arg2: Self::R,
-        _arg3: Self::R,
         args: Self::R,
+        _arg4: Self::R,
         _arg5: Self::R,
-        _arg6: Self::R,
         ret_hint: Self::R,
         right_paren: Self::R,
     ) -> Self::R {

@@ -469,7 +469,6 @@
                       "kind":"lambda_expression",
                       "lambda_attribute_spec":{"kind":"missing"},
                       "lambda_async":{"kind":"missing"},
-                      "lambda_coroutine":{"kind":"missing"},
                       "lambda_signature":{
                         "kind":"lambda_signature",
                         "lambda_left_paren":{
@@ -814,5 +813,5 @@
     }
   },
   "program_text":"<?hh\n\nclass C {\n  public static function f() {\n    return \"lol\";\n  }\n}\n\nfunction test(): void {\n  $_ = ($x = vec[C::f()]): void ==> {};\n}\n",
-  "version":"2020-06-30-0000"
+  "version":"2020-08-05-0000"
 }

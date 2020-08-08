@@ -401,7 +401,6 @@
                       "anonymous_attribute_spec":{"kind":"missing"},
                       "anonymous_static_keyword":{"kind":"missing"},
                       "anonymous_async_keyword":{"kind":"missing"},
-                      "anonymous_coroutine_keyword":{"kind":"missing"},
                       "anonymous_function_keyword":{
                         "kind":"token",
                         "token":{
@@ -1027,5 +1026,5 @@
     }
   },
   "program_text":"<?hh\nfunction foo($a) {\n  return $a;\n}\nfunction bar() : void {\n  // No error; the annotations are not required on anonymous functions.\n  $x = function($b) { };\n  $y = <foo:bar:blah baz-abc=\"123\"/>; // no error on well-formed XHP\n}\nclass C\n{\n  public $x = 123; // no error; type annotation is optional\n  public int $y = 456; // no error\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-05-0000"
 }

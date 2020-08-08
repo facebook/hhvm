@@ -849,7 +849,6 @@
                               "kind":"lambda_expression",
                               "lambda_attribute_spec":{"kind":"missing"},
                               "lambda_async":{"kind":"missing"},
-                              "lambda_coroutine":{"kind":"missing"},
                               "lambda_signature":{
                                 "kind":"lambda_signature",
                                 "lambda_left_paren":{
@@ -1222,5 +1221,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nclass A {\n  const string S = \"hello\";\n  public string $s = \"${A::S}\";\n  const string S1 = \"${A::S}\";\n\n  public function test(): void {\n    $_ = (string $p = \"${A::S}\"): void ==> {};\n  }\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-05-0000"
 }

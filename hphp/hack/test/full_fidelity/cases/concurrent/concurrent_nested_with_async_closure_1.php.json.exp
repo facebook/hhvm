@@ -227,7 +227,6 @@
                                   "line_number":5
                                 }
                               },
-                              "awaitable_coroutine":{"kind":"missing"},
                               "awaitable_compound_statement":{
                                 "kind":"compound_statement",
                                 "compound_left_brace":{
@@ -634,5 +633,5 @@
     }
   },
   "program_text":"<?hh\n\nasync function f() {\n  concurrent {\n    await async {\n      concurrent {\n        await g();\n        await h();\n      }\n    };\n    await f();\n  }\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-05-0000"
 }

@@ -884,12 +884,11 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_anonymous_function(_: &C, anonymous_attribute_spec: Self, anonymous_static_keyword: Self, anonymous_async_keyword: Self, anonymous_coroutine_keyword: Self, anonymous_function_keyword: Self, anonymous_left_paren: Self, anonymous_parameters: Self, anonymous_right_paren: Self, anonymous_colon: Self, anonymous_type: Self, anonymous_use: Self, anonymous_body: Self) -> Self {
+    fn make_anonymous_function(_: &C, anonymous_attribute_spec: Self, anonymous_static_keyword: Self, anonymous_async_keyword: Self, anonymous_function_keyword: Self, anonymous_left_paren: Self, anonymous_parameters: Self, anonymous_right_paren: Self, anonymous_colon: Self, anonymous_type: Self, anonymous_use: Self, anonymous_body: Self) -> Self {
         let syntax = SyntaxVariant::AnonymousFunction(Box::new(AnonymousFunctionChildren {
             anonymous_attribute_spec,
             anonymous_static_keyword,
             anonymous_async_keyword,
-            anonymous_coroutine_keyword,
             anonymous_function_keyword,
             anonymous_left_paren,
             anonymous_parameters,
@@ -914,11 +913,10 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_lambda_expression(_: &C, lambda_attribute_spec: Self, lambda_async: Self, lambda_coroutine: Self, lambda_signature: Self, lambda_arrow: Self, lambda_body: Self) -> Self {
+    fn make_lambda_expression(_: &C, lambda_attribute_spec: Self, lambda_async: Self, lambda_signature: Self, lambda_arrow: Self, lambda_body: Self) -> Self {
         let syntax = SyntaxVariant::LambdaExpression(Box::new(LambdaExpressionChildren {
             lambda_attribute_spec,
             lambda_async,
-            lambda_coroutine,
             lambda_signature,
             lambda_arrow,
             lambda_body,
@@ -1309,11 +1307,10 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_awaitable_creation_expression(_: &C, awaitable_attribute_spec: Self, awaitable_async: Self, awaitable_coroutine: Self, awaitable_compound_statement: Self) -> Self {
+    fn make_awaitable_creation_expression(_: &C, awaitable_attribute_spec: Self, awaitable_async: Self, awaitable_compound_statement: Self) -> Self {
         let syntax = SyntaxVariant::AwaitableCreationExpression(Box::new(AwaitableCreationExpressionChildren {
             awaitable_attribute_spec,
             awaitable_async,
-            awaitable_coroutine,
             awaitable_compound_statement,
         }));
         let value = V::from_syntax(&syntax);
@@ -1599,10 +1596,9 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_closure_type_specifier(_: &C, closure_outer_left_paren: Self, closure_coroutine: Self, closure_function_keyword: Self, closure_inner_left_paren: Self, closure_parameter_list: Self, closure_inner_right_paren: Self, closure_colon: Self, closure_return_type: Self, closure_outer_right_paren: Self) -> Self {
+    fn make_closure_type_specifier(_: &C, closure_outer_left_paren: Self, closure_function_keyword: Self, closure_inner_left_paren: Self, closure_parameter_list: Self, closure_inner_right_paren: Self, closure_colon: Self, closure_return_type: Self, closure_outer_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ClosureTypeSpecifier(Box::new(ClosureTypeSpecifierChildren {
             closure_outer_left_paren,
-            closure_coroutine,
             closure_function_keyword,
             closure_inner_left_paren,
             closure_parameter_list,
@@ -2546,11 +2542,10 @@ where
                 acc
             },
             SyntaxVariant::AnonymousFunction(x) => {
-                let AnonymousFunctionChildren { anonymous_attribute_spec, anonymous_static_keyword, anonymous_async_keyword, anonymous_coroutine_keyword, anonymous_function_keyword, anonymous_left_paren, anonymous_parameters, anonymous_right_paren, anonymous_colon, anonymous_type, anonymous_use, anonymous_body } = *x;
+                let AnonymousFunctionChildren { anonymous_attribute_spec, anonymous_static_keyword, anonymous_async_keyword, anonymous_function_keyword, anonymous_left_paren, anonymous_parameters, anonymous_right_paren, anonymous_colon, anonymous_type, anonymous_use, anonymous_body } = *x;
                 let acc = f(anonymous_attribute_spec, acc);
                 let acc = f(anonymous_static_keyword, acc);
                 let acc = f(anonymous_async_keyword, acc);
-                let acc = f(anonymous_coroutine_keyword, acc);
                 let acc = f(anonymous_function_keyword, acc);
                 let acc = f(anonymous_left_paren, acc);
                 let acc = f(anonymous_parameters, acc);
@@ -2570,10 +2565,9 @@ where
                 acc
             },
             SyntaxVariant::LambdaExpression(x) => {
-                let LambdaExpressionChildren { lambda_attribute_spec, lambda_async, lambda_coroutine, lambda_signature, lambda_arrow, lambda_body } = *x;
+                let LambdaExpressionChildren { lambda_attribute_spec, lambda_async, lambda_signature, lambda_arrow, lambda_body } = *x;
                 let acc = f(lambda_attribute_spec, acc);
                 let acc = f(lambda_async, acc);
-                let acc = f(lambda_coroutine, acc);
                 let acc = f(lambda_signature, acc);
                 let acc = f(lambda_arrow, acc);
                 let acc = f(lambda_body, acc);
@@ -2854,10 +2848,9 @@ where
                 acc
             },
             SyntaxVariant::AwaitableCreationExpression(x) => {
-                let AwaitableCreationExpressionChildren { awaitable_attribute_spec, awaitable_async, awaitable_coroutine, awaitable_compound_statement } = *x;
+                let AwaitableCreationExpressionChildren { awaitable_attribute_spec, awaitable_async, awaitable_compound_statement } = *x;
                 let acc = f(awaitable_attribute_spec, acc);
                 let acc = f(awaitable_async, acc);
-                let acc = f(awaitable_coroutine, acc);
                 let acc = f(awaitable_compound_statement, acc);
                 acc
             },
@@ -3063,9 +3056,8 @@ where
                 acc
             },
             SyntaxVariant::ClosureTypeSpecifier(x) => {
-                let ClosureTypeSpecifierChildren { closure_outer_left_paren, closure_coroutine, closure_function_keyword, closure_inner_left_paren, closure_parameter_list, closure_inner_right_paren, closure_colon, closure_return_type, closure_outer_right_paren } = *x;
+                let ClosureTypeSpecifierChildren { closure_outer_left_paren, closure_function_keyword, closure_inner_left_paren, closure_parameter_list, closure_inner_right_paren, closure_colon, closure_return_type, closure_outer_right_paren } = *x;
                 let acc = f(closure_outer_left_paren, acc);
-                let acc = f(closure_coroutine, acc);
                 let acc = f(closure_function_keyword, acc);
                 let acc = f(closure_inner_left_paren, acc);
                 let acc = f(closure_parameter_list, acc);
@@ -4011,7 +4003,7 @@ where
                  anonymous_class_class_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::AnonymousFunction, 12) => SyntaxVariant::AnonymousFunction(Box::new(AnonymousFunctionChildren {
+             (SyntaxKind::AnonymousFunction, 11) => SyntaxVariant::AnonymousFunction(Box::new(AnonymousFunctionChildren {
                  anonymous_body: ts.pop().unwrap(),
                  anonymous_use: ts.pop().unwrap(),
                  anonymous_type: ts.pop().unwrap(),
@@ -4020,7 +4012,6 @@ where
                  anonymous_parameters: ts.pop().unwrap(),
                  anonymous_left_paren: ts.pop().unwrap(),
                  anonymous_function_keyword: ts.pop().unwrap(),
-                 anonymous_coroutine_keyword: ts.pop().unwrap(),
                  anonymous_async_keyword: ts.pop().unwrap(),
                  anonymous_static_keyword: ts.pop().unwrap(),
                  anonymous_attribute_spec: ts.pop().unwrap(),
@@ -4033,11 +4024,10 @@ where
                  anonymous_use_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::LambdaExpression, 6) => SyntaxVariant::LambdaExpression(Box::new(LambdaExpressionChildren {
+             (SyntaxKind::LambdaExpression, 5) => SyntaxVariant::LambdaExpression(Box::new(LambdaExpressionChildren {
                  lambda_body: ts.pop().unwrap(),
                  lambda_arrow: ts.pop().unwrap(),
                  lambda_signature: ts.pop().unwrap(),
-                 lambda_coroutine: ts.pop().unwrap(),
                  lambda_async: ts.pop().unwrap(),
                  lambda_attribute_spec: ts.pop().unwrap(),
                  
@@ -4280,9 +4270,8 @@ where
                  embedded_subscript_receiver: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::AwaitableCreationExpression, 4) => SyntaxVariant::AwaitableCreationExpression(Box::new(AwaitableCreationExpressionChildren {
+             (SyntaxKind::AwaitableCreationExpression, 3) => SyntaxVariant::AwaitableCreationExpression(Box::new(AwaitableCreationExpressionChildren {
                  awaitable_compound_statement: ts.pop().unwrap(),
-                 awaitable_coroutine: ts.pop().unwrap(),
                  awaitable_async: ts.pop().unwrap(),
                  awaitable_attribute_spec: ts.pop().unwrap(),
                  
@@ -4462,7 +4451,7 @@ where
                  dictionary_type_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::ClosureTypeSpecifier, 9) => SyntaxVariant::ClosureTypeSpecifier(Box::new(ClosureTypeSpecifierChildren {
+             (SyntaxKind::ClosureTypeSpecifier, 8) => SyntaxVariant::ClosureTypeSpecifier(Box::new(ClosureTypeSpecifierChildren {
                  closure_outer_right_paren: ts.pop().unwrap(),
                  closure_return_type: ts.pop().unwrap(),
                  closure_colon: ts.pop().unwrap(),
@@ -4470,7 +4459,6 @@ where
                  closure_parameter_list: ts.pop().unwrap(),
                  closure_inner_left_paren: ts.pop().unwrap(),
                  closure_function_keyword: ts.pop().unwrap(),
-                 closure_coroutine: ts.pop().unwrap(),
                  closure_outer_left_paren: ts.pop().unwrap(),
                  
              })),
@@ -5281,7 +5269,6 @@ pub struct AnonymousFunctionChildren<T, V> {
     pub anonymous_attribute_spec: Syntax<T, V>,
     pub anonymous_static_keyword: Syntax<T, V>,
     pub anonymous_async_keyword: Syntax<T, V>,
-    pub anonymous_coroutine_keyword: Syntax<T, V>,
     pub anonymous_function_keyword: Syntax<T, V>,
     pub anonymous_left_paren: Syntax<T, V>,
     pub anonymous_parameters: Syntax<T, V>,
@@ -5304,7 +5291,6 @@ pub struct AnonymousFunctionUseClauseChildren<T, V> {
 pub struct LambdaExpressionChildren<T, V> {
     pub lambda_attribute_spec: Syntax<T, V>,
     pub lambda_async: Syntax<T, V>,
-    pub lambda_coroutine: Syntax<T, V>,
     pub lambda_signature: Syntax<T, V>,
     pub lambda_arrow: Syntax<T, V>,
     pub lambda_body: Syntax<T, V>,
@@ -5588,7 +5574,6 @@ pub struct EmbeddedSubscriptExpressionChildren<T, V> {
 pub struct AwaitableCreationExpressionChildren<T, V> {
     pub awaitable_attribute_spec: Syntax<T, V>,
     pub awaitable_async: Syntax<T, V>,
-    pub awaitable_coroutine: Syntax<T, V>,
     pub awaitable_compound_statement: Syntax<T, V>,
 }
 
@@ -5796,7 +5781,6 @@ pub struct DictionaryTypeSpecifierChildren<T, V> {
 #[derive(Debug, Clone)]
 pub struct ClosureTypeSpecifierChildren<T, V> {
     pub closure_outer_left_paren: Syntax<T, V>,
-    pub closure_coroutine: Syntax<T, V>,
     pub closure_function_keyword: Syntax<T, V>,
     pub closure_inner_left_paren: Syntax<T, V>,
     pub closure_parameter_list: Syntax<T, V>,
@@ -6992,19 +6976,18 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             AnonymousFunction(x) => {
-                get_index(12).and_then(|index| { match index {
+                get_index(11).and_then(|index| { match index {
                         0 => Some(&x.anonymous_attribute_spec),
                     1 => Some(&x.anonymous_static_keyword),
                     2 => Some(&x.anonymous_async_keyword),
-                    3 => Some(&x.anonymous_coroutine_keyword),
-                    4 => Some(&x.anonymous_function_keyword),
-                    5 => Some(&x.anonymous_left_paren),
-                    6 => Some(&x.anonymous_parameters),
-                    7 => Some(&x.anonymous_right_paren),
-                    8 => Some(&x.anonymous_colon),
-                    9 => Some(&x.anonymous_type),
-                    10 => Some(&x.anonymous_use),
-                    11 => Some(&x.anonymous_body),
+                    3 => Some(&x.anonymous_function_keyword),
+                    4 => Some(&x.anonymous_left_paren),
+                    5 => Some(&x.anonymous_parameters),
+                    6 => Some(&x.anonymous_right_paren),
+                    7 => Some(&x.anonymous_colon),
+                    8 => Some(&x.anonymous_type),
+                    9 => Some(&x.anonymous_use),
+                    10 => Some(&x.anonymous_body),
                         _ => None,
                     }
                 })
@@ -7020,13 +7003,12 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             LambdaExpression(x) => {
-                get_index(6).and_then(|index| { match index {
+                get_index(5).and_then(|index| { match index {
                         0 => Some(&x.lambda_attribute_spec),
                     1 => Some(&x.lambda_async),
-                    2 => Some(&x.lambda_coroutine),
-                    3 => Some(&x.lambda_signature),
-                    4 => Some(&x.lambda_arrow),
-                    5 => Some(&x.lambda_body),
+                    2 => Some(&x.lambda_signature),
+                    3 => Some(&x.lambda_arrow),
+                    4 => Some(&x.lambda_body),
                         _ => None,
                     }
                 })
@@ -7378,11 +7360,10 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             AwaitableCreationExpression(x) => {
-                get_index(4).and_then(|index| { match index {
+                get_index(3).and_then(|index| { match index {
                         0 => Some(&x.awaitable_attribute_spec),
                     1 => Some(&x.awaitable_async),
-                    2 => Some(&x.awaitable_coroutine),
-                    3 => Some(&x.awaitable_compound_statement),
+                    2 => Some(&x.awaitable_compound_statement),
                         _ => None,
                     }
                 })
@@ -7641,16 +7622,15 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ClosureTypeSpecifier(x) => {
-                get_index(9).and_then(|index| { match index {
+                get_index(8).and_then(|index| { match index {
                         0 => Some(&x.closure_outer_left_paren),
-                    1 => Some(&x.closure_coroutine),
-                    2 => Some(&x.closure_function_keyword),
-                    3 => Some(&x.closure_inner_left_paren),
-                    4 => Some(&x.closure_parameter_list),
-                    5 => Some(&x.closure_inner_right_paren),
-                    6 => Some(&x.closure_colon),
-                    7 => Some(&x.closure_return_type),
-                    8 => Some(&x.closure_outer_right_paren),
+                    1 => Some(&x.closure_function_keyword),
+                    2 => Some(&x.closure_inner_left_paren),
+                    3 => Some(&x.closure_parameter_list),
+                    4 => Some(&x.closure_inner_right_paren),
+                    5 => Some(&x.closure_colon),
+                    6 => Some(&x.closure_return_type),
+                    7 => Some(&x.closure_outer_right_paren),
                         _ => None,
                     }
                 })

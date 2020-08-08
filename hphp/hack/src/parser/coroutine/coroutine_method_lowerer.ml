@@ -251,13 +251,7 @@ let rewrite_anon context anon_node =
   in
   let anonymous_type = make_coroutine_result_type_syntax anonymous_type in
   let anon =
-    {
-      anon with
-      anonymous_coroutine_keyword = make_missing ();
-      anonymous_parameters;
-      anonymous_type;
-      anonymous_body;
-    }
+    { anon with anonymous_parameters; anonymous_type; anonymous_body }
   in
   Syntax.synthesize_from anon_node (from_anonymous_function anon)
 
@@ -282,9 +276,8 @@ let rewrite_lambda
   let lambda =
     {
       lambda with
-      lambda_coroutine = make_missing ();
-      (* TODO: This loses trivia on the original keyword. *)
       lambda_signature;
+      (* TODO: This loses trivia on the original keyword. *)
       lambda_body;
     }
   in

@@ -99,9 +99,9 @@ pub trait SyntaxType<'a, C>: SyntaxTypeBase<'a, C>
     fn make_concurrent_statement(ctx: &C, concurrent_keyword: Self, concurrent_statement: Self) -> Self;
     fn make_simple_initializer(ctx: &C, simple_initializer_equal: Self, simple_initializer_value: Self) -> Self;
     fn make_anonymous_class(ctx: &C, anonymous_class_class_keyword: Self, anonymous_class_left_paren: Self, anonymous_class_argument_list: Self, anonymous_class_right_paren: Self, anonymous_class_extends_keyword: Self, anonymous_class_extends_list: Self, anonymous_class_implements_keyword: Self, anonymous_class_implements_list: Self, anonymous_class_body: Self) -> Self;
-    fn make_anonymous_function(ctx: &C, anonymous_attribute_spec: Self, anonymous_static_keyword: Self, anonymous_async_keyword: Self, anonymous_coroutine_keyword: Self, anonymous_function_keyword: Self, anonymous_left_paren: Self, anonymous_parameters: Self, anonymous_right_paren: Self, anonymous_colon: Self, anonymous_type: Self, anonymous_use: Self, anonymous_body: Self) -> Self;
+    fn make_anonymous_function(ctx: &C, anonymous_attribute_spec: Self, anonymous_static_keyword: Self, anonymous_async_keyword: Self, anonymous_function_keyword: Self, anonymous_left_paren: Self, anonymous_parameters: Self, anonymous_right_paren: Self, anonymous_colon: Self, anonymous_type: Self, anonymous_use: Self, anonymous_body: Self) -> Self;
     fn make_anonymous_function_use_clause(ctx: &C, anonymous_use_keyword: Self, anonymous_use_left_paren: Self, anonymous_use_variables: Self, anonymous_use_right_paren: Self) -> Self;
-    fn make_lambda_expression(ctx: &C, lambda_attribute_spec: Self, lambda_async: Self, lambda_coroutine: Self, lambda_signature: Self, lambda_arrow: Self, lambda_body: Self) -> Self;
+    fn make_lambda_expression(ctx: &C, lambda_attribute_spec: Self, lambda_async: Self, lambda_signature: Self, lambda_arrow: Self, lambda_body: Self) -> Self;
     fn make_lambda_signature(ctx: &C, lambda_left_paren: Self, lambda_parameters: Self, lambda_right_paren: Self, lambda_colon: Self, lambda_type: Self) -> Self;
     fn make_cast_expression(ctx: &C, cast_left_paren: Self, cast_type: Self, cast_right_paren: Self, cast_operand: Self) -> Self;
     fn make_scope_resolution_expression(ctx: &C, scope_resolution_qualifier: Self, scope_resolution_operator: Self, scope_resolution_name: Self) -> Self;
@@ -138,7 +138,7 @@ pub trait SyntaxType<'a, C>: SyntaxTypeBase<'a, C>
     fn make_element_initializer(ctx: &C, element_key: Self, element_arrow: Self, element_value: Self) -> Self;
     fn make_subscript_expression(ctx: &C, subscript_receiver: Self, subscript_left_bracket: Self, subscript_index: Self, subscript_right_bracket: Self) -> Self;
     fn make_embedded_subscript_expression(ctx: &C, embedded_subscript_receiver: Self, embedded_subscript_left_bracket: Self, embedded_subscript_index: Self, embedded_subscript_right_bracket: Self) -> Self;
-    fn make_awaitable_creation_expression(ctx: &C, awaitable_attribute_spec: Self, awaitable_async: Self, awaitable_coroutine: Self, awaitable_compound_statement: Self) -> Self;
+    fn make_awaitable_creation_expression(ctx: &C, awaitable_attribute_spec: Self, awaitable_async: Self, awaitable_compound_statement: Self) -> Self;
     fn make_xhp_children_declaration(ctx: &C, xhp_children_keyword: Self, xhp_children_expression: Self, xhp_children_semicolon: Self) -> Self;
     fn make_xhp_children_parenthesized_list(ctx: &C, xhp_children_list_left_paren: Self, xhp_children_list_xhp_children: Self, xhp_children_list_right_paren: Self) -> Self;
     fn make_xhp_category_declaration(ctx: &C, xhp_category_keyword: Self, xhp_category_categories: Self, xhp_category_semicolon: Self) -> Self;
@@ -165,7 +165,7 @@ pub trait SyntaxType<'a, C>: SyntaxTypeBase<'a, C>
     fn make_darray_type_specifier(ctx: &C, darray_keyword: Self, darray_left_angle: Self, darray_key: Self, darray_comma: Self, darray_value: Self, darray_trailing_comma: Self, darray_right_angle: Self) -> Self;
     fn make_map_array_type_specifier(ctx: &C, map_array_keyword: Self, map_array_left_angle: Self, map_array_key: Self, map_array_comma: Self, map_array_value: Self, map_array_right_angle: Self) -> Self;
     fn make_dictionary_type_specifier(ctx: &C, dictionary_type_keyword: Self, dictionary_type_left_angle: Self, dictionary_type_members: Self, dictionary_type_right_angle: Self) -> Self;
-    fn make_closure_type_specifier(ctx: &C, closure_outer_left_paren: Self, closure_coroutine: Self, closure_function_keyword: Self, closure_inner_left_paren: Self, closure_parameter_list: Self, closure_inner_right_paren: Self, closure_colon: Self, closure_return_type: Self, closure_outer_right_paren: Self) -> Self;
+    fn make_closure_type_specifier(ctx: &C, closure_outer_left_paren: Self, closure_function_keyword: Self, closure_inner_left_paren: Self, closure_parameter_list: Self, closure_inner_right_paren: Self, closure_colon: Self, closure_return_type: Self, closure_outer_right_paren: Self) -> Self;
     fn make_closure_parameter_type_specifier(ctx: &C, closure_parameter_call_convention: Self, closure_parameter_type: Self) -> Self;
     fn make_classname_type_specifier(ctx: &C, classname_keyword: Self, classname_left_angle: Self, classname_type: Self, classname_trailing_comma: Self, classname_right_angle: Self) -> Self;
     fn make_field_specifier(ctx: &C, field_question: Self, field_name: Self, field_arrow: Self, field_type: Self) -> Self;

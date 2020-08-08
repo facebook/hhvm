@@ -4,7 +4,6 @@ class attribute {}
 class binary {}
 class category {}
 class children {}
-class coroutine {}
 class define {}
 class enum {}
 class fallthrough {}
@@ -15,7 +14,6 @@ class newtype {}
 class Object {}
 class object {}
 class super {}
-class suspend {}
 class type {}
 class where {}
 
@@ -23,7 +21,6 @@ new attribute();
 new binary();
 new category();
 new children();
-new coroutine();
 new define();
 new enum();
 new fallthrough();
@@ -34,6 +31,5 @@ new newtype();
 new Object();
 new object();
 new super();
-new suspend();
 new type();
 new where();

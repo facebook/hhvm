@@ -2111,7 +2111,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; anonymous_parameters = validate_list_with (validate_parameter) x.anonymous_parameters
     ; anonymous_left_paren = validate_token x.anonymous_left_paren
     ; anonymous_function_keyword = validate_token x.anonymous_function_keyword
-    ; anonymous_coroutine_keyword = validate_option_with (validate_token) x.anonymous_coroutine_keyword
     ; anonymous_async_keyword = validate_option_with (validate_token) x.anonymous_async_keyword
     ; anonymous_static_keyword = validate_option_with (validate_token) x.anonymous_static_keyword
     ; anonymous_attribute_spec = validate_option_with (validate_attribute_specification) x.anonymous_attribute_spec
@@ -2123,7 +2122,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { anonymous_attribute_spec = invalidate_option_with (invalidate_attribute_specification) x.anonymous_attribute_spec
       ; anonymous_static_keyword = invalidate_option_with (invalidate_token) x.anonymous_static_keyword
       ; anonymous_async_keyword = invalidate_option_with (invalidate_token) x.anonymous_async_keyword
-      ; anonymous_coroutine_keyword = invalidate_option_with (invalidate_token) x.anonymous_coroutine_keyword
       ; anonymous_function_keyword = invalidate_token x.anonymous_function_keyword
       ; anonymous_left_paren = invalidate_token x.anonymous_left_paren
       ; anonymous_parameters = invalidate_list_with (invalidate_parameter) x.anonymous_parameters
@@ -2158,7 +2156,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { lambda_body = validate_lambda_body x.lambda_body
     ; lambda_arrow = validate_token x.lambda_arrow
     ; lambda_signature = validate_specifier x.lambda_signature
-    ; lambda_coroutine = validate_option_with (validate_token) x.lambda_coroutine
     ; lambda_async = validate_option_with (validate_token) x.lambda_async
     ; lambda_attribute_spec = validate_option_with (validate_attribute_specification) x.lambda_attribute_spec
     }
@@ -2168,7 +2165,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.LambdaExpression
       { lambda_attribute_spec = invalidate_option_with (invalidate_attribute_specification) x.lambda_attribute_spec
       ; lambda_async = invalidate_option_with (invalidate_token) x.lambda_async
-      ; lambda_coroutine = invalidate_option_with (invalidate_token) x.lambda_coroutine
       ; lambda_signature = invalidate_specifier x.lambda_signature
       ; lambda_arrow = invalidate_token x.lambda_arrow
       ; lambda_body = invalidate_lambda_body x.lambda_body
@@ -2798,7 +2794,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_awaitable_creation_expression : awaitable_creation_expression validator = function
   | { Syntax.syntax = Syntax.AwaitableCreationExpression x; value = v } -> v,
     { awaitable_compound_statement = validate_compound_statement x.awaitable_compound_statement
-    ; awaitable_coroutine = validate_option_with (validate_token) x.awaitable_coroutine
     ; awaitable_async = validate_token x.awaitable_async
     ; awaitable_attribute_spec = validate_option_with (validate_attribute_specification) x.awaitable_attribute_spec
     }
@@ -2808,7 +2803,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.AwaitableCreationExpression
       { awaitable_attribute_spec = invalidate_option_with (invalidate_attribute_specification) x.awaitable_attribute_spec
       ; awaitable_async = invalidate_token x.awaitable_async
-      ; awaitable_coroutine = invalidate_option_with (invalidate_token) x.awaitable_coroutine
       ; awaitable_compound_statement = invalidate_compound_statement x.awaitable_compound_statement
       }
     ; Syntax.value = v
@@ -3276,7 +3270,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; closure_parameter_list = validate_list_with (validate_closure_parameter_type_specifier) x.closure_parameter_list
     ; closure_inner_left_paren = validate_token x.closure_inner_left_paren
     ; closure_function_keyword = validate_token x.closure_function_keyword
-    ; closure_coroutine = validate_option_with (validate_token) x.closure_coroutine
     ; closure_outer_left_paren = validate_token x.closure_outer_left_paren
     }
   | s -> validation_fail (Some SyntaxKind.ClosureTypeSpecifier) s
@@ -3284,7 +3277,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.ClosureTypeSpecifier
       { closure_outer_left_paren = invalidate_token x.closure_outer_left_paren
-      ; closure_coroutine = invalidate_option_with (invalidate_token) x.closure_coroutine
       ; closure_function_keyword = invalidate_token x.closure_function_keyword
       ; closure_inner_left_paren = invalidate_token x.closure_inner_left_paren
       ; closure_parameter_list = invalidate_list_with (invalidate_closure_parameter_type_specifier) x.closure_parameter_list

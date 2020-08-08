@@ -1358,7 +1358,6 @@ module WithToken(Token: TokenType) = struct
         anonymous_attribute_spec;
         anonymous_static_keyword;
         anonymous_async_keyword;
-        anonymous_coroutine_keyword;
         anonymous_function_keyword;
         anonymous_left_paren;
         anonymous_parameters;
@@ -1371,7 +1370,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc anonymous_attribute_spec in
          let acc = f acc anonymous_static_keyword in
          let acc = f acc anonymous_async_keyword in
-         let acc = f acc anonymous_coroutine_keyword in
          let acc = f acc anonymous_function_keyword in
          let acc = f acc anonymous_left_paren in
          let acc = f acc anonymous_parameters in
@@ -1395,14 +1393,12 @@ module WithToken(Token: TokenType) = struct
       | LambdaExpression {
         lambda_attribute_spec;
         lambda_async;
-        lambda_coroutine;
         lambda_signature;
         lambda_arrow;
         lambda_body;
       } ->
          let acc = f acc lambda_attribute_spec in
          let acc = f acc lambda_async in
-         let acc = f acc lambda_coroutine in
          let acc = f acc lambda_signature in
          let acc = f acc lambda_arrow in
          let acc = f acc lambda_body in
@@ -1778,12 +1774,10 @@ module WithToken(Token: TokenType) = struct
       | AwaitableCreationExpression {
         awaitable_attribute_spec;
         awaitable_async;
-        awaitable_coroutine;
         awaitable_compound_statement;
       } ->
          let acc = f acc awaitable_attribute_spec in
          let acc = f acc awaitable_async in
-         let acc = f acc awaitable_coroutine in
          let acc = f acc awaitable_compound_statement in
          acc
       | XHPChildrenDeclaration {
@@ -2060,7 +2054,6 @@ module WithToken(Token: TokenType) = struct
          acc
       | ClosureTypeSpecifier {
         closure_outer_left_paren;
-        closure_coroutine;
         closure_function_keyword;
         closure_inner_left_paren;
         closure_parameter_list;
@@ -2070,7 +2063,6 @@ module WithToken(Token: TokenType) = struct
         closure_outer_right_paren;
       } ->
          let acc = f acc closure_outer_left_paren in
-         let acc = f acc closure_coroutine in
          let acc = f acc closure_function_keyword in
          let acc = f acc closure_inner_left_paren in
          let acc = f acc closure_parameter_list in
@@ -3207,7 +3199,6 @@ module WithToken(Token: TokenType) = struct
         anonymous_attribute_spec;
         anonymous_static_keyword;
         anonymous_async_keyword;
-        anonymous_coroutine_keyword;
         anonymous_function_keyword;
         anonymous_left_paren;
         anonymous_parameters;
@@ -3220,7 +3211,6 @@ module WithToken(Token: TokenType) = struct
         anonymous_attribute_spec;
         anonymous_static_keyword;
         anonymous_async_keyword;
-        anonymous_coroutine_keyword;
         anonymous_function_keyword;
         anonymous_left_paren;
         anonymous_parameters;
@@ -3244,14 +3234,12 @@ module WithToken(Token: TokenType) = struct
       | LambdaExpression {
         lambda_attribute_spec;
         lambda_async;
-        lambda_coroutine;
         lambda_signature;
         lambda_arrow;
         lambda_body;
       } -> [
         lambda_attribute_spec;
         lambda_async;
-        lambda_coroutine;
         lambda_signature;
         lambda_arrow;
         lambda_body;
@@ -3627,12 +3615,10 @@ module WithToken(Token: TokenType) = struct
       | AwaitableCreationExpression {
         awaitable_attribute_spec;
         awaitable_async;
-        awaitable_coroutine;
         awaitable_compound_statement;
       } -> [
         awaitable_attribute_spec;
         awaitable_async;
-        awaitable_coroutine;
         awaitable_compound_statement;
       ]
       | XHPChildrenDeclaration {
@@ -3909,7 +3895,6 @@ module WithToken(Token: TokenType) = struct
       ]
       | ClosureTypeSpecifier {
         closure_outer_left_paren;
-        closure_coroutine;
         closure_function_keyword;
         closure_inner_left_paren;
         closure_parameter_list;
@@ -3919,7 +3904,6 @@ module WithToken(Token: TokenType) = struct
         closure_outer_right_paren;
       } -> [
         closure_outer_left_paren;
-        closure_coroutine;
         closure_function_keyword;
         closure_inner_left_paren;
         closure_parameter_list;
@@ -5057,7 +5041,6 @@ module WithToken(Token: TokenType) = struct
         anonymous_attribute_spec;
         anonymous_static_keyword;
         anonymous_async_keyword;
-        anonymous_coroutine_keyword;
         anonymous_function_keyword;
         anonymous_left_paren;
         anonymous_parameters;
@@ -5070,7 +5053,6 @@ module WithToken(Token: TokenType) = struct
         "anonymous_attribute_spec";
         "anonymous_static_keyword";
         "anonymous_async_keyword";
-        "anonymous_coroutine_keyword";
         "anonymous_function_keyword";
         "anonymous_left_paren";
         "anonymous_parameters";
@@ -5094,14 +5076,12 @@ module WithToken(Token: TokenType) = struct
       | LambdaExpression {
         lambda_attribute_spec;
         lambda_async;
-        lambda_coroutine;
         lambda_signature;
         lambda_arrow;
         lambda_body;
       } -> [
         "lambda_attribute_spec";
         "lambda_async";
-        "lambda_coroutine";
         "lambda_signature";
         "lambda_arrow";
         "lambda_body";
@@ -5477,12 +5457,10 @@ module WithToken(Token: TokenType) = struct
       | AwaitableCreationExpression {
         awaitable_attribute_spec;
         awaitable_async;
-        awaitable_coroutine;
         awaitable_compound_statement;
       } -> [
         "awaitable_attribute_spec";
         "awaitable_async";
-        "awaitable_coroutine";
         "awaitable_compound_statement";
       ]
       | XHPChildrenDeclaration {
@@ -5759,7 +5737,6 @@ module WithToken(Token: TokenType) = struct
       ]
       | ClosureTypeSpecifier {
         closure_outer_left_paren;
-        closure_coroutine;
         closure_function_keyword;
         closure_inner_left_paren;
         closure_parameter_list;
@@ -5769,7 +5746,6 @@ module WithToken(Token: TokenType) = struct
         closure_outer_right_paren;
       } -> [
         "closure_outer_left_paren";
-        "closure_coroutine";
         "closure_function_keyword";
         "closure_inner_left_paren";
         "closure_parameter_list";
@@ -7041,7 +7017,6 @@ module WithToken(Token: TokenType) = struct
           anonymous_attribute_spec;
           anonymous_static_keyword;
           anonymous_async_keyword;
-          anonymous_coroutine_keyword;
           anonymous_function_keyword;
           anonymous_left_paren;
           anonymous_parameters;
@@ -7055,7 +7030,6 @@ module WithToken(Token: TokenType) = struct
           anonymous_attribute_spec;
           anonymous_static_keyword;
           anonymous_async_keyword;
-          anonymous_coroutine_keyword;
           anonymous_function_keyword;
           anonymous_left_paren;
           anonymous_parameters;
@@ -7080,7 +7054,6 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.LambdaExpression, [
           lambda_attribute_spec;
           lambda_async;
-          lambda_coroutine;
           lambda_signature;
           lambda_arrow;
           lambda_body;
@@ -7088,7 +7061,6 @@ module WithToken(Token: TokenType) = struct
         LambdaExpression {
           lambda_attribute_spec;
           lambda_async;
-          lambda_coroutine;
           lambda_signature;
           lambda_arrow;
           lambda_body;
@@ -7500,13 +7472,11 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.AwaitableCreationExpression, [
           awaitable_attribute_spec;
           awaitable_async;
-          awaitable_coroutine;
           awaitable_compound_statement;
         ]) ->
         AwaitableCreationExpression {
           awaitable_attribute_spec;
           awaitable_async;
-          awaitable_coroutine;
           awaitable_compound_statement;
         }
       | (SyntaxKind.XHPChildrenDeclaration, [
@@ -7809,7 +7779,6 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.ClosureTypeSpecifier, [
           closure_outer_left_paren;
-          closure_coroutine;
           closure_function_keyword;
           closure_inner_left_paren;
           closure_parameter_list;
@@ -7820,7 +7789,6 @@ module WithToken(Token: TokenType) = struct
         ]) ->
         ClosureTypeSpecifier {
           closure_outer_left_paren;
-          closure_coroutine;
           closure_function_keyword;
           closure_inner_left_paren;
           closure_parameter_list;
@@ -9341,7 +9309,6 @@ module WithToken(Token: TokenType) = struct
         anonymous_attribute_spec
         anonymous_static_keyword
         anonymous_async_keyword
-        anonymous_coroutine_keyword
         anonymous_function_keyword
         anonymous_left_paren
         anonymous_parameters
@@ -9355,7 +9322,6 @@ module WithToken(Token: TokenType) = struct
           anonymous_attribute_spec;
           anonymous_static_keyword;
           anonymous_async_keyword;
-          anonymous_coroutine_keyword;
           anonymous_function_keyword;
           anonymous_left_paren;
           anonymous_parameters;
@@ -9386,7 +9352,6 @@ module WithToken(Token: TokenType) = struct
       let make_lambda_expression
         lambda_attribute_spec
         lambda_async
-        lambda_coroutine
         lambda_signature
         lambda_arrow
         lambda_body
@@ -9394,7 +9359,6 @@ module WithToken(Token: TokenType) = struct
         let syntax = LambdaExpression {
           lambda_attribute_spec;
           lambda_async;
-          lambda_coroutine;
           lambda_signature;
           lambda_arrow;
           lambda_body;
@@ -9917,13 +9881,11 @@ module WithToken(Token: TokenType) = struct
       let make_awaitable_creation_expression
         awaitable_attribute_spec
         awaitable_async
-        awaitable_coroutine
         awaitable_compound_statement
       =
         let syntax = AwaitableCreationExpression {
           awaitable_attribute_spec;
           awaitable_async;
-          awaitable_coroutine;
           awaitable_compound_statement;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
@@ -10307,7 +10269,6 @@ module WithToken(Token: TokenType) = struct
 
       let make_closure_type_specifier
         closure_outer_left_paren
-        closure_coroutine
         closure_function_keyword
         closure_inner_left_paren
         closure_parameter_list
@@ -10318,7 +10279,6 @@ module WithToken(Token: TokenType) = struct
       =
         let syntax = ClosureTypeSpecifier {
           closure_outer_left_paren;
-          closure_coroutine;
           closure_function_keyword;
           closure_inner_left_paren;
           closure_parameter_list;
@@ -10757,7 +10717,6 @@ module WithToken(Token: TokenType) = struct
           anonymous_attribute_spec;
           anonymous_static_keyword;
           anonymous_async_keyword;
-          anonymous_coroutine_keyword;
           anonymous_function_keyword;
           anonymous_left_paren;
           anonymous_parameters;
@@ -10770,7 +10729,6 @@ module WithToken(Token: TokenType) = struct
           anonymous_attribute_spec;
           anonymous_static_keyword;
           anonymous_async_keyword;
-          anonymous_coroutine_keyword;
           anonymous_function_keyword;
           anonymous_left_paren;
           anonymous_parameters;
@@ -10783,14 +10741,12 @@ module WithToken(Token: TokenType) = struct
      let from_lambda_expression {
           lambda_attribute_spec;
           lambda_async;
-          lambda_coroutine;
           lambda_signature;
           lambda_arrow;
           lambda_body;
        } = LambdaExpression {
           lambda_attribute_spec;
           lambda_async;
-          lambda_coroutine;
           lambda_signature;
           lambda_arrow;
           lambda_body;
@@ -10810,7 +10766,6 @@ module WithToken(Token: TokenType) = struct
        }
      let from_closure_type_specifier {
           closure_outer_left_paren;
-          closure_coroutine;
           closure_function_keyword;
           closure_inner_left_paren;
           closure_parameter_list;
@@ -10820,7 +10775,6 @@ module WithToken(Token: TokenType) = struct
           closure_outer_right_paren;
        } = ClosureTypeSpecifier {
           closure_outer_left_paren;
-          closure_coroutine;
           closure_function_keyword;
           closure_inner_left_paren;
           closure_parameter_list;
@@ -10889,7 +10843,6 @@ module WithToken(Token: TokenType) = struct
           anonymous_attribute_spec;
           anonymous_static_keyword;
           anonymous_async_keyword;
-          anonymous_coroutine_keyword;
           anonymous_function_keyword;
           anonymous_left_paren;
           anonymous_parameters;
@@ -10902,7 +10855,6 @@ module WithToken(Token: TokenType) = struct
           anonymous_attribute_spec;
           anonymous_static_keyword;
           anonymous_async_keyword;
-          anonymous_coroutine_keyword;
           anonymous_function_keyword;
           anonymous_left_paren;
           anonymous_parameters;
@@ -10918,14 +10870,12 @@ module WithToken(Token: TokenType) = struct
         | LambdaExpression {
           lambda_attribute_spec;
           lambda_async;
-          lambda_coroutine;
           lambda_signature;
           lambda_arrow;
           lambda_body;
             } -> {
           lambda_attribute_spec;
           lambda_async;
-          lambda_coroutine;
           lambda_signature;
           lambda_arrow;
           lambda_body;
@@ -10951,7 +10901,6 @@ module WithToken(Token: TokenType) = struct
         match x with
         | ClosureTypeSpecifier {
           closure_outer_left_paren;
-          closure_coroutine;
           closure_function_keyword;
           closure_inner_left_paren;
           closure_parameter_list;
@@ -10961,7 +10910,6 @@ module WithToken(Token: TokenType) = struct
           closure_outer_right_paren;
             } -> {
           closure_outer_left_paren;
-          closure_coroutine;
           closure_function_keyword;
           closure_inner_left_paren;
           closure_parameter_list;

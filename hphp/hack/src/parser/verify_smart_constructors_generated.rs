@@ -700,9 +700,9 @@ impl<'src> SmartConstructors<'src, State> for VerifySmartConstructors
         r
     }
 
-    fn make_anonymous_function(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R, arg8: Self::R, arg9: Self::R, arg10: Self::R, arg11: Self::R) -> Self::R {
-        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
-        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_anonymous_function(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+    fn make_anonymous_function(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R, arg8: Self::R, arg9: Self::R, arg10: Self::R) -> Self::R {
+        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_anonymous_function(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
         self.state_mut().verify(&args);
         self.state_mut().push(r.kind());
         r
@@ -716,9 +716,9 @@ impl<'src> SmartConstructors<'src, State> for VerifySmartConstructors
         r
     }
 
-    fn make_lambda_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
-        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4, arg5);
-        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_lambda_expression(self, arg0, arg1, arg2, arg3, arg4, arg5);
+    fn make_lambda_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
+        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4);
+        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_lambda_expression(self, arg0, arg1, arg2, arg3, arg4);
         self.state_mut().verify(&args);
         self.state_mut().push(r.kind());
         r
@@ -1012,9 +1012,9 @@ impl<'src> SmartConstructors<'src, State> for VerifySmartConstructors
         r
     }
 
-    fn make_awaitable_creation_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        let args = arg_kinds!(arg0, arg1, arg2, arg3);
-        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_awaitable_creation_expression(self, arg0, arg1, arg2, arg3);
+    fn make_awaitable_creation_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
+        let args = arg_kinds!(arg0, arg1, arg2);
+        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_awaitable_creation_expression(self, arg0, arg1, arg2);
         self.state_mut().verify(&args);
         self.state_mut().push(r.kind());
         r
@@ -1228,9 +1228,9 @@ impl<'src> SmartConstructors<'src, State> for VerifySmartConstructors
         r
     }
 
-    fn make_closure_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R, arg8: Self::R) -> Self::R {
-        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
-        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_closure_type_specifier(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+    fn make_closure_type_specifier(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R) -> Self::R {
+        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_closure_type_specifier(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
         self.state_mut().verify(&args);
         self.state_mut().push(r.kind());
         r

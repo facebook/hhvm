@@ -99,7 +99,6 @@
                 "line_number":2
               }
             },
-            "awaitable_coroutine":{"kind":"missing"},
             "awaitable_compound_statement":{
               "kind":"compound_statement",
               "compound_left_brace":{
@@ -288,5 +287,5 @@
     }
   },
   "program_text":"<?hh\nforeach(async {switch (1) varray )\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-05-0000"
 }

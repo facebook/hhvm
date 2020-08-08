@@ -86,5 +86,3 @@ function noreturn_type_hint(): noreturn {
 
 function variadic_function(mixed ...$args): void {
 }
-
-coroutine function some_coroutine(): bool { return false; }

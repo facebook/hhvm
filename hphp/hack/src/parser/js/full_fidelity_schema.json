@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2020-06-30-0000",
+  "version" : "2020-08-05-0000",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -1226,7 +1226,6 @@
         { "field_name" : "attribute_spec" },
         { "field_name" : "static_keyword" },
         { "field_name" : "async_keyword" },
-        { "field_name" : "coroutine_keyword" },
         { "field_name" : "function_keyword" },
         { "field_name" : "left_paren" },
         { "field_name" : "parameters" },
@@ -1253,7 +1252,6 @@
       "fields" : [
         { "field_name" : "attribute_spec" },
         { "field_name" : "async" },
-        { "field_name" : "coroutine" },
         { "field_name" : "signature" },
         { "field_name" : "arrow" },
         { "field_name" : "body" }
@@ -1611,7 +1609,6 @@
       "fields" : [
         { "field_name" : "attribute_spec" },
         { "field_name" : "async" },
-        { "field_name" : "coroutine" },
         { "field_name" : "compound_statement" }
       ] },
     { "kind_name" : "XHPChildrenDeclaration",
@@ -1873,7 +1870,6 @@
       "prefix" : "closure",
       "fields" : [
         { "field_name" : "outer_left_paren" },
-        { "field_name" : "coroutine" },
         { "field_name" : "function_keyword" },
         { "field_name" : "inner_left_paren" },
         { "field_name" : "parameter_list" },

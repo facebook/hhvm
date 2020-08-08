@@ -402,7 +402,6 @@
                       "kind":"lambda_expression",
                       "lambda_attribute_spec":{"kind":"missing"},
                       "lambda_async":{"kind":"missing"},
-                      "lambda_coroutine":{"kind":"missing"},
                       "lambda_signature":{
                         "kind":"lambda_signature",
                         "lambda_left_paren":{
@@ -1079,7 +1078,6 @@
                               "kind":"lambda_expression",
                               "lambda_attribute_spec":{"kind":"missing"},
                               "lambda_async":{"kind":"missing"},
-                              "lambda_coroutine":{"kind":"missing"},
                               "lambda_signature":{
                                 "kind":"lambda_signature",
                                 "lambda_left_paren":{
@@ -1565,5 +1563,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nfunction get_int(): int {\n  return 0;\n}\n\nfunction test(): void {\n  $_ = ((int, int) $mt = tuple(get_int(), get_int())): void ==> {};\n}\n\nclass A {\n  public function test(): void {\n    $_ = ((int, int) $mt = tuple(get_int(), get_int())): void ==> {};\n  }\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-05-0000"
 }

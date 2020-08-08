@@ -1125,7 +1125,6 @@ let schema : schema_node list =
           ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
           ("static_keyword", ZeroOrOne Token);
           ("async_keyword", ZeroOrOne Token);
-          ("coroutine_keyword", ZeroOrOne Token);
           ("function_keyword", Token);
           ("left_paren", Token);
           ("parameters", ZeroOrMore (Aggregate Parameter));
@@ -1162,7 +1161,6 @@ let schema : schema_node list =
         [
           ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
           ("async", ZeroOrOne Token);
-          ("coroutine", ZeroOrOne Token);
           ("signature", Aggregate Specifier);
           ("arrow", Token);
           ("body", Aggregate LambdaBody);
@@ -1682,7 +1680,6 @@ let schema : schema_node list =
         [
           ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
           ("async", Token);
-          ("coroutine", ZeroOrOne Token);
           ("compound_statement", Just "CompoundStatement");
         ];
     };
@@ -2057,7 +2054,6 @@ let schema : schema_node list =
       fields =
         [
           ("outer_left_paren", Token);
-          ("coroutine", ZeroOrOne Token);
           ("function_keyword", Token);
           ("inner_left_paren", Token);
           ("parameter_list", ZeroOrMore (Just "ClosureParameterTypeSpecifier"));

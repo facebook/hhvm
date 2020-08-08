@@ -6456,7 +6456,6 @@
                 "line_number":68
               }
             },
-            "lambda_coroutine":{"kind":"missing"},
             "lambda_signature":{
               "kind":"lambda_signature",
               "lambda_left_paren":{
@@ -8092,7 +8091,6 @@
                   "anonymous_attribute_spec":{"kind":"missing"},
                   "anonymous_static_keyword":{"kind":"missing"},
                   "anonymous_async_keyword":{"kind":"missing"},
-                  "anonymous_coroutine_keyword":{"kind":"missing"},
                   "anonymous_function_keyword":{
                     "kind":"token",
                     "token":{
@@ -9464,7 +9462,6 @@
             "kind":"lambda_expression",
             "lambda_attribute_spec":{"kind":"missing"},
             "lambda_async":{"kind":"missing"},
-            "lambda_coroutine":{"kind":"missing"},
             "lambda_signature":{
               "kind":"lambda_signature",
               "lambda_left_paren":{
@@ -9966,5 +9963,5 @@
     }
   },
   "program_text":"<?hh\n\n// Raise \"Unexpected token\"\nfunction abstract() {}\nfunction array() {}\nfunction as() {}\nfunction async() {}\nfunction await() {}\nfunction break() {}\nfunction case() {}\nfunction catch() {}\nfunction class() {}\nfunction clone() {}\nfunction const() {}\nfunction continue() {}\nfunction default() {}\nfunction do() {}\nfunction echo() {}\nfunction else() {}\nfunction elseif() {}\nfunction endfor() {}\nfunction endforeach() {}\nfunction endif() {}\nfunction endswitch() {}\nfunction endwhile() {}\nfunction eval() {}\nfunction extends() {}\nfunction final() {}\nfunction finally() {}\nfunction for() {}\nfunction foreach() {}\nfunction function() {}\nfunction global() {}\nfunction goto() {}\nfunction if() {}\nfunction implements() {}\nfunction include() {}\nfunction include_once() {}\nfunction inout() {}\nfunction instanceof() {}\nfunction insteadof() {}\nfunction interface() {}\nfunction list() {}\nfunction namespace() {}\nfunction new() {}\nfunction print() {}\nfunction private() {}\nfunction protected() {}\nfunction public() {}\nfunction require() {}\nfunction require_once() {}\nfunction return() {}\nfunction shape() {}\nfunction static() {}\nfunction switch() {}\nfunction throw() {}\nfunction trait() {}\nfunction try() {}\nfunction use() {}\nfunction using() {}\nfunction var() {}\nfunction while() {}\nfunction yield() {}\n\n// abstract(); // can't test this; this token kicks us into parse_classish_declaration and makes the parser think the rest of the test is a classish body\narray();\nas();\nasync();\nawait();\nbreak();\ncase();\ncatch();\n// class(); // can't test this; this token kicks us into parse_classish_declaration and makes the parser think the rest of the test is a classish body\nclone();\nconst();\ncontinue();\ndeclare();\ndefault();\ndo();\necho();\nelse();\nelseif();\nendfor();\nendforeach();\nenddeclare();\nendif();\nendswitch();\nendwhile();\neval();\nextends();\n// final(); // can't test this; this token kicks us into parse_classish_declaration and makes the parser think the rest of the test is a classish body\nfinally();\nfor();\nforeach();\nfunction();\nglobal();\ngoto();\nif();\nimplements();\ninclude();\ninclude_once();\ninout();\ninstanceof();\ninsteadof();\n// interface(); // can't test this; this token kicks us into parse_classish_declaration and makes the parser think the rest of the test is a classish body\nlist();\nnamespace();\nnew();\nprint();\nprivate();\nprotected();\npublic();\nrequire();\nrequire_once();\nreturn();\nshape();\nstatic();\n// switch(); // can't test this; this token kicks us into parse_switch_statement and makes the parser think the rest of the test is a switch body\nthrow();\n// trait(); // can't test this; this token kicks us into parse_classish_declaration and makes the parser think the rest of the test is a classish body\n// try(); // can't test this; this token kicks us into parse_try_statement and makes the parser think the rest of the test is the body of a try\nuse();\nusing();\nvar();\nwhile();\nyield();\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-05-0000"
 }

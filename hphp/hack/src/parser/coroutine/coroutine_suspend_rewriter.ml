@@ -176,13 +176,6 @@ let only_tail_call_suspends body =
       return_helper return_expression
     | _ -> List.for_all ~f:aux (Syntax.children node)
   in
-  let body =
-    match syntax body with
-    | LambdaExpression { lambda_coroutine; lambda_body; _ }
-      when not @@ is_missing lambda_coroutine ->
-      fix_up_lambda_body lambda_body
-    | _ -> body
-  in
   aux body
 
 (* Returns pair:

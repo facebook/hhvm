@@ -1361,7 +1361,6 @@
                           "line_number":13
                         }
                       },
-                      "closure_coroutine":{"kind":"missing"},
                       "closure_function_keyword":{
                         "kind":"token",
                         "token":{
@@ -2119,7 +2118,6 @@
                                   "line_number":20
                                 }
                               },
-                              "closure_coroutine":{"kind":"missing"},
                               "closure_function_keyword":{
                                 "kind":"token",
                                 "token":{
@@ -3153,7 +3151,6 @@
                           "line_number":33
                         }
                       },
-                      "anonymous_coroutine_keyword":{"kind":"missing"},
                       "anonymous_function_keyword":{
                         "kind":"token",
                         "token":{
@@ -3348,7 +3345,6 @@
                           "line_number":34
                         }
                       },
-                      "lambda_coroutine":{"kind":"missing"},
                       "lambda_signature":{
                         "kind":"lambda_signature",
                         "lambda_left_paren":{
@@ -3670,7 +3666,6 @@
                       "anonymous_attribute_spec":{"kind":"missing"},
                       "anonymous_static_keyword":{"kind":"missing"},
                       "anonymous_async_keyword":{"kind":"missing"},
-                      "anonymous_coroutine_keyword":{"kind":"missing"},
                       "anonymous_function_keyword":{
                         "kind":"token",
                         "token":{
@@ -3852,7 +3847,6 @@
                       "kind":"lambda_expression",
                       "lambda_attribute_spec":{"kind":"missing"},
                       "lambda_async":{"kind":"missing"},
-                      "lambda_coroutine":{"kind":"missing"},
                       "lambda_signature":{
                         "kind":"lambda_signature",
                         "lambda_left_paren":{
@@ -4021,5 +4015,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction f(int $x, inout mixed ...$ys): void {} // ERROR\n\nfunction g1(inout string $s = 'g1'): void {} // ERROR\n\nfunction g2(string $s = 'g2', inout int $i): void {} // ERROR\n\nfunction g3(inout int $i, string $s = 'g3'): void {} // no error\n\nfunction q(inout $x): void {} // ERROR\n\nfunction v((function(inout mixed ...): void) $f): void {} // ERROR\n\nfunction z(inout vec<int> $v): void {\n  $v[] = 42;\n} // no error\n\nclass C {\n  public static function x((function(): bool) $p, inout ?C $c): void {\n    if ($p()) {\n      $c = new self();\n    }\n  } // no error\n}\n\nfunction test(): void {\n  $i = 999;\n  g3(inout $i, 'ok'); // no error\n\n  $v = vec[];\n\n  $c = async function(inout $v) {}; // ERROR\n  $c = async (inout $v) ==> 42; // ERROR\n}\n\nasync function gen_test(): void {\n  $c = function(inout $f) {}; // no error\n  $c = (inout $v) ==> 42; // no error\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-05-0000"
 }

@@ -3466,7 +3466,6 @@ where
                 if self.env.is_hhvm_compat()
                     && !x.lambda_async.is_missing()
                     && x.lambda_async.trailing_width() == 0
-                    && x.lambda_coroutine.full_width() == 0
                     && x.lambda_signature.leading_width() == 0 =>
             {
                 self.errors

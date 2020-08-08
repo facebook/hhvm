@@ -505,7 +505,6 @@
                           "line_number":7
                         }
                       },
-                      "closure_coroutine":{"kind":"missing"},
                       "closure_function_keyword":{
                         "kind":"token",
                         "token":{
@@ -1188,5 +1187,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction f(\n  ~int $a,\n  vec<~dict<int, string>> $b,\n  ~SomeClass::TFoo $c,\n  (function(~int): void) $d,\n  ?~int $e,\n  ~?int $f,\n  ~~int $g,\n  (int, ~string) $h,\n): void {}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-05-0000"
 }

@@ -482,7 +482,6 @@ let make_functional_type_syntax argument_types return_type_syntax =
   in
   make_closure_type_specifier
     left_paren_syntax
-    (* coroutine *) (make_missing ())
     function_keyword_syntax
     left_paren_syntax
     argument_list_syntax
@@ -543,7 +542,6 @@ let make_lambda_from_method_syntax existing_node lambda_signature lambda_body =
        {
          lambda_attribute_spec = make_missing ();
          lambda_async = make_missing ();
-         lambda_coroutine = make_missing ();
          lambda_signature;
          lambda_arrow = lambda_arrow_syntax;
          lambda_body;

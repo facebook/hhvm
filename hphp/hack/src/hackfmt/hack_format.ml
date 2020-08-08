@@ -1310,7 +1310,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           anonymous_attribute_spec = attr;
           anonymous_static_keyword = static_kw;
           anonymous_async_keyword = async_kw;
-          anonymous_coroutine_keyword = coroutine_kw;
           anonymous_function_keyword = fun_kw;
           anonymous_left_paren = lp;
           anonymous_parameters = params;
@@ -1328,8 +1327,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present static_kw space;
           t env async_kw;
           when_present async_kw space;
-          t env coroutine_kw;
-          when_present coroutine_kw space;
           t env fun_kw;
           transform_argish_with_return_type env lp params rp colon ret_type;
           t env use;
@@ -1352,7 +1349,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         {
           lambda_attribute_spec = attr;
           lambda_async = async;
-          lambda_coroutine = coroutine;
           lambda_signature = signature;
           lambda_arrow = arrow;
           lambda_body = body;
@@ -1363,8 +1359,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present attr space;
           t env async;
           when_present async space;
-          t env coroutine;
-          when_present coroutine space;
           t env signature;
           Space;
           t env arrow;
@@ -1731,7 +1725,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         {
           awaitable_attribute_spec = attr;
           awaitable_async = async_kw;
-          awaitable_coroutine = coroutine_kw;
           awaitable_compound_statement = body;
         } ->
       Concat
@@ -1740,8 +1733,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present attr space;
           t env async_kw;
           when_present async_kw space;
-          t env coroutine_kw;
-          when_present coroutine_kw space;
           (* TODO: rethink possible one line bodies *)
           (* TODO: correctly handle spacing after the closing brace *)
           handle_possible_compound_statement env ~space:false body;
@@ -2139,7 +2130,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.ClosureTypeSpecifier
         {
           closure_outer_left_paren = outer_left_p;
-          closure_coroutine = coroutine;
           closure_function_keyword = kw;
           closure_inner_left_paren = inner_left_p;
           closure_parameter_list = param_list;
@@ -2151,8 +2141,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       Concat
         [
           t env outer_left_p;
-          t env coroutine;
-          when_present coroutine space;
           t env kw;
           transform_argish_with_return_type
             env

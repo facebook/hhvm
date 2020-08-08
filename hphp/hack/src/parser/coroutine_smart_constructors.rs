@@ -157,7 +157,6 @@ where
     fn make_closure_type_specifier(
         &mut self,
         r1: Self::R,
-        coroutine: Self::R,
         r3: Self::R,
         r4: Self::R,
         r5: Self::R,
@@ -166,8 +165,7 @@ where
         r8: Self::R,
         r9: Self::R,
     ) -> Self::R {
-        self.state.update_seen_ppl(is_coroutine(&coroutine));
-        Self::R::make_closure_type_specifier(&self.state, r1, coroutine, r3, r4, r5, r6, r7, r8, r9)
+        Self::R::make_closure_type_specifier(&self.state, r1, r3, r4, r5, r6, r7, r8, r9)
     }
 
     fn make_anonymous_function(
@@ -175,7 +173,6 @@ where
         r1: Self::R,
         r2: Self::R,
         r3: Self::R,
-        coroutine: Self::R,
         r5: Self::R,
         r6: Self::R,
         r7: Self::R,
@@ -185,46 +182,27 @@ where
         r11: Self::R,
         r12: Self::R,
     ) -> Self::R {
-        self.state.update_seen_ppl(is_coroutine(&coroutine));
-        Self::R::make_anonymous_function(
-            &self.state,
-            r1,
-            r2,
-            r3,
-            coroutine,
-            r5,
-            r6,
-            r7,
-            r8,
-            r9,
-            r10,
-            r11,
-            r12,
-        )
+        Self::R::make_anonymous_function(&self.state, r1, r2, r3, r5, r6, r7, r8, r9, r10, r11, r12)
     }
 
     fn make_lambda_expression(
         &mut self,
         r1: Self::R,
         r2: Self::R,
-        coroutine: Self::R,
         r4: Self::R,
         r5: Self::R,
         r6: Self::R,
     ) -> Self::R {
-        self.state.update_seen_ppl(is_coroutine(&coroutine));
-        Self::R::make_lambda_expression(&self.state, r1, r2, coroutine, r4, r5, r6)
+        Self::R::make_lambda_expression(&self.state, r1, r2, r4, r5, r6)
     }
 
     fn make_awaitable_creation_expression(
         &mut self,
         r1: Self::R,
         r2: Self::R,
-        coroutine: Self::R,
         r4: Self::R,
     ) -> Self::R {
-        self.state.update_seen_ppl(is_coroutine(&coroutine));
-        Self::R::make_awaitable_creation_expression(&self.state, r1, r2, coroutine, r4)
+        Self::R::make_awaitable_creation_expression(&self.state, r1, r2, r4)
     }
 
     fn make_constructor_call(

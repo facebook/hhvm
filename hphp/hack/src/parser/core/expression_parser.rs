@@ -1697,12 +1697,11 @@ where
             _ => {
                 let mut parser1 = self.clone();
                 match parser1.possible_lambda_expression() {
-                    Some((attribute_spec, async_, coroutine, signature)) => {
+                    Some((attribute_spec, async_, signature)) => {
                         self.continue_from(parser1);
                         self.parse_lambda_expression_after_signature(
                             attribute_spec,
                             async_,
-                            coroutine,
                             signature,
                         )
                     }
@@ -1760,7 +1759,7 @@ where
         }
     }
 
-    fn possible_lambda_expression(&mut self) -> Option<(S::R, S::R, S::R, S::R)> {
+    fn possible_lambda_expression(&mut self) -> Option<(S::R, S::R, S::R)> {
         // We have a left paren in hand and we already know we're not in a cast.
         // We need to know whether this is a parenthesized expression or the
         // signature of a lambda.
@@ -1787,11 +1786,11 @@ where
         let old_errors = self.errors.len();
 
         let attribute_spec = S!(make_missing, self, self.pos());
-        let (async_, coroutine, signature) = self.parse_lambda_header();
+        let (async_, signature) = self.parse_lambda_header();
         if old_errors == self.errors.len()
             && self.peek_token_kind() == TokenKind::EqualEqualGreaterThan
         {
-            Some((attribute_spec, async_, coroutine, signature))
+            Some((attribute_spec, async_, signature))
         } else {
             None
         }
@@ -1801,7 +1800,7 @@ where
         // SPEC
         // lambda-expression:
         //   async-opt  lambda-function-signature  ==>  lambda-body
-        let (async_, coroutine, signature) = self.parse_lambda_header();
+        let (async_, signature) = self.parse_lambda_header();
         let arrow = self.require_lambda_arrow();
         let body = self.parse_lambda_body();
         S!(
@@ -1809,7 +1808,6 @@ where
             self,
             attribute_spec,
             async_,
-            coroutine,
             signature,
             arrow,
             body
@@ -1820,10 +1818,9 @@ where
         &mut self,
         attribute_spec: S::R,
         async_: S::R,
-        coroutine: S::R,
         signature: S::R,
     ) -> S::R {
-        // We had a signature with no async or coroutine, and we disambiguated it
+        // We had a signature with no async, and we disambiguated it
         // from a cast.
         let arrow = self.require_lambda_arrow();
         let body = self.parse_lambda_body();
@@ -1832,18 +1829,16 @@ where
             self,
             attribute_spec,
             async_,
-            coroutine,
             signature,
             arrow,
             body
         )
     }
 
-    fn parse_lambda_header(&mut self) -> (S::R, S::R, S::R) {
+    fn parse_lambda_header(&mut self) -> (S::R, S::R) {
         let async_ = self.optional_token(TokenKind::Async);
-        let coroutine = self.optional_token(TokenKind::Coroutine);
         let signature = self.parse_lambda_signature();
-        (async_, coroutine, signature)
+        (async_, signature)
     }
 
     fn parse_lambda_signature(&mut self) -> S::R {
@@ -2504,7 +2499,7 @@ where
     fn parse_anon_or_lambda_or_awaitable(&mut self) -> S::R {
         // TODO: The original Hack parser accepts "async" as an identifier, and
         // so we do too. We might consider making it reserved.
-        // Skip any async or coroutine declarations that may be present. When we
+        // Skip any async declarations that may be present. When we
         // feed the original parser into the syntax parsers. they will take care of
         // them as appropriate.
         let parser1 = self.clone();
@@ -2512,7 +2507,6 @@ where
         let mut parser2 = self.clone();
         let _ = parser2.optional_token(TokenKind::Static);
         let _ = parser2.optional_token(TokenKind::Async);
-        let _ = parser2.optional_token(TokenKind::Coroutine);
         match parser2.peek_token_kind() {
             TokenKind::Function => self.parse_anon(attribute_spec),
             TokenKind::LeftBrace => self.parse_async_block(attribute_spec),
@@ -2521,8 +2515,8 @@ where
             }
             _ => {
                 self.continue_from(parser1);
-                let static_or_async_or_coroutine_as_name = self.next_token_as_name();
-                S!(make_token, self, static_or_async_or_coroutine_as_name)
+                let static_or_async_as_name = self.next_token_as_name();
+                S!(make_token, self, static_or_async_as_name)
             }
         }
     }
@@ -2530,18 +2524,16 @@ where
     fn parse_async_block(&mut self, attribute_spec: S::R) -> S::R {
         // grammar:
         //   awaitable-creation-expression :
-        //     async-opt  coroutine-opt  compound-statement
+        //     async-opt compound-statement
         // TODO awaitable-creation-expression must not be used as the
         //      anonymous-function-body in a lambda-expression
         let async_ = self.optional_token(TokenKind::Async);
-        let coroutine = self.optional_token(TokenKind::Coroutine);
         let stmt = self.parse_compound_statement();
         S!(
             make_awaitable_creation_expression,
             self,
             attribute_spec,
             async_,
-            coroutine,
             stmt
         )
     }
@@ -2585,7 +2577,7 @@ where
     fn parse_anon(&mut self, attribute_spec: S::R) -> S::R {
         // SPEC
         // anonymous-function-creation-expression:
-        //   static-opt async-opt coroutine-opt  function
+        //   static-opt async-opt function
         //     ( anonymous-function-parameter-list-opt  )
         //     anonymous-function-return-opt
         //     anonymous-function-use-clauseopt
@@ -2598,7 +2590,6 @@ where
         // type annotations optional.
         let static_ = self.optional_token(TokenKind::Static);
         let async_ = self.optional_token(TokenKind::Async);
-        let coroutine = self.optional_token(TokenKind::Coroutine);
         let fn_ = self.assert_token(TokenKind::Function);
         let (left_paren, params, right_paren) = self.parse_parameter_list_opt();
         let (colon, return_type) = self.parse_optional_return();
@@ -2621,7 +2612,6 @@ where
             attribute_spec,
             static_,
             async_,
-            coroutine,
             fn_,
             left_paren,
             params,

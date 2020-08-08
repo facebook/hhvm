@@ -105,7 +105,6 @@ impl ExprLocation {
 pub enum SuspensionKind {
     SKSync,
     SKAsync,
-    SKCoroutine,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -984,7 +983,7 @@ where
                 }
                 Ok(Hfun(ast::HintFun {
                     reactive_kind: ast::FuncReactive::FNonreactive,
-                    is_coroutine: !c.closure_coroutine.is_missing(),
+                    is_coroutine: false,
                     param_tys: type_hints,
                     param_kinds: kinds,
                     param_mutability: vec![],
@@ -1561,8 +1560,7 @@ where
         };
         match &node.syntax {
             LambdaExpression(c) => {
-                let suspension_kind =
-                    Self::mk_suspension_kind(node, env, &c.lambda_async, &c.lambda_coroutine);
+                let suspension_kind = Self::mk_suspension_kind(&c.lambda_async);
                 let (params, ret) = match &c.lambda_signature.syntax {
                     LambdaSignature(c) => (
                         Self::could_map(Self::p_fun_param, &c.lambda_parameters, env)?,
@@ -2224,12 +2222,7 @@ where
                     }
                     _ => Ok(vec![]),
                 };
-                let suspension_kind = Self::mk_suspension_kind(
-                    node,
-                    env,
-                    &c.anonymous_async_keyword,
-                    &c.anonymous_coroutine_keyword,
-                );
+                let suspension_kind = Self::mk_suspension_kind(&c.anonymous_async_keyword);
                 let (body, yield_) = {
                     let mut env1 = Env::clone_and_unset_toplevel_if_toplevel(env);
                     Self::mp_yielding(&Self::p_function_body, &c.anonymous_body, env1.as_mut())?
@@ -2270,8 +2263,7 @@ where
                 Ok(E_::mk_efun(fun, uses))
             }
             AwaitableCreationExpression(c) => {
-                let suspension_kind =
-                    Self::mk_suspension_kind(node, env, &c.awaitable_async, &c.awaitable_coroutine);
+                let suspension_kind = Self::mk_suspension_kind(&c.awaitable_async);
                 let (blk, yld) = Self::mp_yielding(
                     &Self::p_function_body,
                     &c.awaitable_compound_statement,
@@ -3530,11 +3522,9 @@ where
                 }
                 let kinds = Self::p_kinds(function_modifiers, env)?;
                 let has_async = kinds.has(modifier::ASYNC);
-                let has_coroutine = kinds.has(modifier::COROUTINE);
                 let parameters = Self::could_map(Self::p_fun_param, function_parameter_list, env)?;
                 let return_type = Self::mp_optional(Self::p_hint, function_type, env)?;
-                let suspension_kind =
-                    Self::mk_suspension_kind_(node, env, has_async, has_coroutine);
+                let suspension_kind = Self::mk_suspension_kind_(has_async);
                 let name = Self::pos_name(function_name, env)?;
                 let constrs = Self::p_where_constraint(false, node, function_where_clause, env)?;
                 let type_parameters = Self::p_tparam_l(false, function_type_parameter_list, env)?;
@@ -3651,35 +3641,15 @@ where
         Self::with_new_nonconcurrent_scope(f, env)
     }
 
-    fn mk_suspension_kind(
-        node: &Syntax<T, V>,
-        env: &mut Env,
-        async_keyword: &Syntax<T, V>,
-        coroutine_keyword: &Syntax<T, V>,
-    ) -> SuspensionKind {
-        Self::mk_suspension_kind_(
-            node,
-            env,
-            !async_keyword.is_missing(),
-            !coroutine_keyword.is_missing(),
-        )
+    fn mk_suspension_kind(async_keyword: &Syntax<T, V>) -> SuspensionKind {
+        Self::mk_suspension_kind_(!async_keyword.is_missing())
     }
 
-    fn mk_suspension_kind_(
-        node: &Syntax<T, V>,
-        env: &mut Env,
-        has_async: bool,
-        has_coroutine: bool,
-    ) -> SuspensionKind {
+    fn mk_suspension_kind_(has_async: bool) -> SuspensionKind {
         use SuspensionKind::*;
-        match (has_async, has_coroutine) {
-            (false, false) => SKSync,
-            (true, false) => SKAsync,
-            (false, true) => SKCoroutine,
-            (true, true) => {
-                Self::raise_parsing_error(node, env, "Coroutine functions may not be async");
-                SKCoroutine
-            }
+        match has_async {
+            false => SKSync,
+            true => SKAsync,
         }
     }
 
@@ -3691,7 +3661,6 @@ where
             (SKAsync, true) => FAsyncGenerator,
             (SKSync, false) => FSync,
             (SKAsync, false) => FAsync,
-            (SKCoroutine, _) => FCoroutine,
         }
     }
 

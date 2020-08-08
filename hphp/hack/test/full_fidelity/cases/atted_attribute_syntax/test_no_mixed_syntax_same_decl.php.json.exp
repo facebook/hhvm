@@ -142,7 +142,6 @@
               "anonymous_attribute_spec":{"kind":"missing"},
               "anonymous_static_keyword":{"kind":"missing"},
               "anonymous_async_keyword":{"kind":"missing"},
-              "anonymous_coroutine_keyword":{"kind":"missing"},
               "anonymous_function_keyword":{
                 "kind":"token",
                 "token":{
@@ -275,5 +274,5 @@
     }
   },
   "program_text":"<?hh\n\n@Attr1\n@Attr2\n<<Attr3, Attr4>>\nfunction f(): void {}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-05-0000"
 }

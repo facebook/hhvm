@@ -273,7 +273,7 @@ void Func::initPrologues(int numParams) {
 
   m_funcBody = stubs.funcBodyHelperThunk;
 
-  TRACE(2, "initPrologues func %p %d\n", this, numPrologues);
+  TRACE(4, "initPrologues func %p %d\n", this, numPrologues);
   for (int i = 0; i < numPrologues; i++) {
     m_prologueTable[i] = stubs.fcallHelperThunk;
   }

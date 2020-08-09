@@ -808,9 +808,16 @@ public:
    * Define the type alias given by `id', binding it to the appropriate
    * NamedEntity for this request.
    *
-   * returns true iff the bound type alias is persistent.
+   * Raises a fatal error if type alias already defined or cannot be defined
+   * unless failIsFatal is unset
+   *
+   * Returns:
+   *   Persistent: Type alias is successfully defined and is persistent
+   *   Normal: Type alias is successfully defined and is not persistent
+   *   Fail: Type alias is not successfully defined
    */
-  bool defTypeAlias(Id id);
+  enum class DefTypeAliasResult { Fail, Normal, Persistent };
+  Unit::DefTypeAliasResult defTypeAlias(Id id, bool failIsFatal = true);
 
   /////////////////////////////////////////////////////////////////////////////
   // File attributes.

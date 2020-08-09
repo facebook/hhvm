@@ -3513,7 +3513,8 @@ void parse_constant(AsmState& as) {
   if (type(constant.val) == KindOfUninit) {
     constant.val.m_data.pcnt = reinterpret_cast<MaybeCountable*>(Unit::getCns);
   }
-  as.ue->addConstant(constant);
+  auto const cid = as.ue->addConstant(constant);
+  as.ue->pushMergeableId(Unit::MergeKind::Define, cid);
 }
 
 /*
@@ -3708,9 +3709,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   ARRPROV_USE_RUNTIME_LOCATION();
   auto const bcSha1 = SHA1{string_sha1(folly::StringPiece(code, codeLen))};
   auto ue = std::make_unique<UnitEmitter>(sha1, bcSha1, nativeFuncs, false);
-  if (!SystemLib::s_inited) {
-    ue->m_mergeOnly = true;
-  }
+  ue->m_mergeOnly = true;
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
 

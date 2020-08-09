@@ -645,20 +645,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_ICE = m_ICE;
 
   size_t ix = m_fes.size() + m_hoistablePceIdList.size();
-  if (m_mergeOnly && !m_allClassesHoistable) {
-    size_t extra = 0;
-    for (auto& mergeable : m_mergeableStmts) {
-      extra++;
-      if (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited) {
-        if (mergeable.first != MergeKind::Class) {
-          extra = 0;
-          u->m_mergeOnly = false;
-          break;
-        }
-      }
-    }
-    ix += extra;
-  }
+  if (m_mergeOnly && !m_allClassesHoistable) ix += m_mergeableStmts.size();
   Unit::MergeInfo *mi = Unit::MergeInfo::alloc(ix);
   u->m_mergeInfo.store(mi, std::memory_order_relaxed);
   ix = 0;
@@ -681,7 +668,6 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
           mi->mergeableObj(ix++) = u->m_preClasses[mergeable.second].get();
           break;
         case MergeKind::Define:
-          assertx(RuntimeOption::RepoAuthoritative);
         case MergeKind::Record:
         case MergeKind::TypeAlias:
           mi->mergeableObj(ix++) =
@@ -1432,22 +1418,6 @@ void UnitRepoProxy::GetUnitMergeablesStmt
       Id mergeableId;            /**/ query.getInt(2, mergeableId);
 
       auto k = MergeKind(mergeableKind);
-
-      if (UNLIKELY(!RuntimeOption::RepoAuthoritative)) {
-        /*
-         * We're using a repo generated in WholeProgram mode,
-         * but we're not using it in RepoAuthoritative mode
-         * (this is dodgy to start with). We're not going to
-         * deal with requires at merge time, so drop them
-         * here, and clear the mergeOnly flag for the unit.
-         * The two exceptions are persistent constants and
-         * TypeAliases which are allowed in systemlib.
-         */
-        if ((k != MergeKind::Define && k != MergeKind::TypeAlias)
-            || SystemLib::s_inited) {
-          ue.m_mergeOnly = false;
-        }
-      }
       switch (k) {
         case MergeKind::Define:
         case MergeKind::TypeAlias:
@@ -1698,7 +1668,6 @@ createFatalUnit(const StringData* filename, const SHA1& sha1, FatalOp op,
   ue->m_fatalMsg = err;
 
   ue->addTrivialPseudoMain();
-  ue->m_mergeOnly = false;
   return ue;
 }
 

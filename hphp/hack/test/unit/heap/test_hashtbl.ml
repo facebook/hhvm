@@ -74,8 +74,8 @@ let expect_stats ~nonempty ~used =
     expect_equals ~name:"slots" slots expected.slots)
 
 let expect_heap_size count =
-  (* Currently a single element takes 64 bytes *)
-  let heap_space_per_element = 64 in
+  (* Currently a single element takes 16 bytes *)
+  let heap_space_per_element = 16 in
   expect_equals ~name:"heap_size" (heap_size ()) (count * heap_space_per_element)
 
 let expect_mem key =

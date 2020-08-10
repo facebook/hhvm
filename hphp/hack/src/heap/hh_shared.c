@@ -268,6 +268,9 @@ typedef struct {
 #define ALIGN(x,a)              __ALIGN_MASK(x,(typeof(x))(a)-1)
 #define CACHE_ALIGN(x)          ALIGN(x,CACHE_LINE_SIZE)
 
+/* Align heap entries on 64-bit boundaries */
+#define HEAP_ALIGN(x)           ALIGN(x,8)
+
 /* Fix the location of our shared memory so we can save and restore the
  * hashtable easily */
 #ifdef _WIN32
@@ -1660,13 +1663,13 @@ CAMLprim value hh_collect(void) {
       // entry was not marked in the first pass and should be collected. Don't
       // move dest pointer, but advance src pointer to next heap entry.
       header = *(hh_header_t *)src;
-      aligned_size = CACHE_ALIGN(Heap_entry_total_size(header));
+      aligned_size = HEAP_ALIGN(Heap_entry_total_size(header));
     } else {
       // If the lsb is 0, this is a pointer to the addr field of the hashtable
       // element, which holds the header bytes. This entry is live.
       char *hashtbl_addr = *(char **)src;
       header = *(hh_header_t *)hashtbl_addr;
-      aligned_size = CACHE_ALIGN(Heap_entry_total_size(header));
+      aligned_size = HEAP_ALIGN(Heap_entry_total_size(header));
 
       // Fix the hashtbl addr field to point to our new location and restore the
       // heap header data temporarily stored in the addr field bits.
@@ -1708,7 +1711,7 @@ static void raise_heap_full(void) {
 static heap_entry_t* hh_alloc(hh_header_t header, /*out*/size_t *total_size) {
   // the size of this allocation needs to be kept in sync with wasted_heap_size
   // modification in hh_remove
-  size_t slot_size = CACHE_ALIGN(Heap_entry_total_size(header));
+  size_t slot_size = HEAP_ALIGN(Heap_entry_total_size(header));
   *total_size = slot_size;
   char *chunk = __sync_fetch_and_add(heap, (char*) slot_size);
   if (chunk + slot_size > heap_max) {
@@ -2323,7 +2326,7 @@ CAMLprim value hh_remove(value key) {
   size_t entry_size = Entry_size(hashtbl[slot].addr->header);
   // see hh_alloc for the source of this size
   size_t slot_size =
-    CACHE_ALIGN(Heap_entry_total_size(hashtbl[slot].addr->header));
+    HEAP_ALIGN(Heap_entry_total_size(hashtbl[slot].addr->header));
   __sync_fetch_and_add(wasted_heap_size, slot_size);
   hashtbl[slot].addr = NULL;
   removed_count += 1;

@@ -35,10 +35,10 @@ struct BlockUpdateInfo;
  * the corresponding analyze_func call.
  *
  * This routine may modify the php::Blocks attached to the passed-in
- * php::Func, but it won't modify the top-level meta-data in the
- * php::Func itself.
+ * php::Func, and may renumber the php::Func's locals, but won't update
+ * any of the func's other metadata.
  */
-void optimize_func(const Index&, FuncAnalysis&&, bool isFinal);
+void optimize_func(const Index&, FuncAnalysis&&);
 
 void update_bytecode(
     php::MutFunc func,

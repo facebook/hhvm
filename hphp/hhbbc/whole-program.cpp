@@ -231,10 +231,7 @@ WorkItem work_item_for(const DependencyContext& d, AnalyzeMode mode) {
               mode == AnalyzeMode::ConstPass ||
               !options.HardPrivatePropInference ||
               is_used_trait(*cls));
-      return WorkItem {
-        WorkType::Func,
-        Context { func->unit, const_cast<php::Func*>(func), cls }
-      };
+      return WorkItem { WorkType::Func, Context { func->unit, func, cls } };
     }
     case DependencyContextType::PropName:
       // We only record dependencies on static property names. We don't schedule
@@ -459,9 +456,7 @@ void final_pass(Index& index,
         }
       );
       for (auto const& ctx : contexts) {
-        optimize_func(index,
-                      analyze_func(index, ctx, CollectionOpts{}),
-                      true);
+        optimize_func(index, analyze_func(index, ctx, CollectionOpts{}));
       }
       assert(check(*unit));
       state_after("optimize", *unit);

@@ -40,7 +40,7 @@ struct ContextHash;
  */
 struct Context {
   const php::Unit* unit;
-  php::Func* func;
+  const php::Func* func;
   const php::Class* cls;
 
   using Hash = ContextHash;
@@ -91,7 +91,7 @@ struct AnalysisContext {
   const php::Class* cls;
 
   operator Context() const {
-    return Context { unit, const_cast<php::Func*>(func.func), cls };
+    return Context { unit, func.func, cls };
   }
 };
 

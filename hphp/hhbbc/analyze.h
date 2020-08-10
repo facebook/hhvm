@@ -97,8 +97,7 @@ struct FuncAnalysisResult {
   /*
    * A set of pair of functions and their push blocks that we failed to fold.
    */
-  hphp_fast_set<std::pair<const php::Func*, BlockId>>
-    unfoldableFuncs;
+  hphp_fast_set<std::pair<const php::Func*, BlockId>> unfoldableFuncs;
 
   /*
    * Bitset representing which parameters may affect the result of the
@@ -143,7 +142,7 @@ struct FuncAnalysis : FuncAnalysisResult {
  * The result of a class-at-a-time analysis.
  */
 struct ClassAnalysis {
-  ClassAnalysis(Context ctx, bool anyInterceptable) :
+  ClassAnalysis(const Context& ctx, bool anyInterceptable) :
       ctx(ctx), anyInterceptable(anyInterceptable) {}
 
   ClassAnalysis(ClassAnalysis&&) = default;
@@ -175,7 +174,7 @@ struct ClassAnalysis {
  *
  * This routine makes no changes to the php::Func.
  */
-FuncAnalysis analyze_func(const Index&, Context, CollectionOpts opts);
+FuncAnalysis analyze_func(const Index&, const Context&, CollectionOpts opts);
 
 /*
  * Analyze a function like analyze_func, but exposing gathered CollectedInfo
@@ -183,7 +182,7 @@ FuncAnalysis analyze_func(const Index&, Context, CollectionOpts opts);
  * enable collecting some pass-specific types of information (e.g. public
  * static property types).
  */
-FuncAnalysis analyze_func_collect(const Index&, Context, CollectedInfo&);
+FuncAnalysis analyze_func_collect(const Index&, const Context&, CollectedInfo&);
 
 /*
  * Perform a flow-sensitive type analysis on a function, using the
@@ -196,7 +195,7 @@ FuncAnalysis analyze_func_collect(const Index&, Context, CollectedInfo&);
  * Currently this is not supported for closure bodies.
  */
 FuncAnalysis analyze_func_inline(const Index&,
-                                 Context,
+                                 const Context&,
                                  const Type& thisType,
                                  const CompactVector<Type>& args,
                                  CollectionOpts opts = {});
@@ -207,7 +206,7 @@ FuncAnalysis analyze_func_inline(const Index&,
  * This involves doing a analyze_func call on each of its functions,
  * and inferring some whole-class information at the same time.
  */
-ClassAnalysis analyze_class(const Index&, Context);
+ClassAnalysis analyze_class(const Index&, const Context&);
 
 /*
  * Propagate a block input State to each instruction in the block.

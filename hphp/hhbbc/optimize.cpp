@@ -434,14 +434,12 @@ BlockId make_fatal_block(FuncAnalysis& ainfo,
 
 //////////////////////////////////////////////////////////////////////
 
-template<class BlockContainer, class AInfo, class Fun>
-void visit_blocks_impl(const char* what,
-                       const Index& index,
-                       AInfo& ainfo,
-                       CollectedInfo& collect,
-                       const BlockContainer& rpoBlocks,
-                       Fun&& fun) {
-
+template<class Fun>
+void visit_blocks(const char* what,
+                  const Index& index,
+                  const FuncAnalysis& ainfo,
+                  CollectedInfo& collect,
+                  Fun&& fun) {
   BlockId curBlk = NoBlockId;
   SCOPE_ASSERT_DETAIL(what) {
     if (curBlk == NoBlockId) return std::string{"\nNo block processed\n"};
@@ -452,7 +450,7 @@ void visit_blocks_impl(const char* what,
   };
 
   FTRACE(1, "|---- {}\n", what);
-  for (auto const bid : rpoBlocks) {
+  for (auto const bid : ainfo.rpoBlocks) {
     curBlk = bid;
     FTRACE(2, "block #{}\n", bid);
     auto const& state = ainfo.bdata[bid].stateIn;
@@ -466,28 +464,6 @@ void visit_blocks_impl(const char* what,
     fun(index, ainfo, collect, bid, state);
   }
   assert(check(*ainfo.ctx.func));
-}
-
-template<class Fun>
-void visit_blocks_mutable(const char* what,
-                          const Index& index,
-                          FuncAnalysis& ainfo,
-                          CollectedInfo& collect,
-                          Fun&& fun) {
-  // Make a copy of the block list so it can be mutated by the visitor.
-  auto const blocksCopy = ainfo.rpoBlocks;
-  visit_blocks_impl(what, index, ainfo, collect,
-                    blocksCopy, std::forward<Fun>(fun));
-}
-
-template<class Fun>
-void visit_blocks(const char* what,
-                  const Index& index,
-                  const FuncAnalysis& ainfo,
-                  CollectedInfo& collect,
-                  Fun&& fun) {
-  visit_blocks_impl(what, index, ainfo, collect,
-                    ainfo.rpoBlocks, std::forward<Fun>(fun));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -765,16 +741,12 @@ void fixTypeConstraint(const Index& index, TypeConstraint& tc) {
 
 //////////////////////////////////////////////////////////////////////
 
-void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
+void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
   FTRACE(2, "{:-^70} {}\n", "Optimize Func", ainfo.ctx.func->name);
 
   bool again;
   folly::Optional<CollectedInfo> collect;
-
-  collect.emplace(
-    index, ainfo.ctx, nullptr,
-    CollectionOpts{}, &ainfo
-  );
+  collect.emplace(index, ainfo.ctx, nullptr, CollectionOpts{}, &ainfo);
 
   update_bytecode(ainfo.ctx.func, std::move(ainfo.blockUpdates), &ainfo);
   optimize_iterators(index, ainfo, *collect);
@@ -805,16 +777,11 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
        */
       ainfo = analyze_func(index, ainfo.ctx, CollectionOpts{});
       update_bytecode(ainfo.ctx.func, std::move(ainfo.blockUpdates), &ainfo);
-      collect.emplace(
-        index, ainfo.ctx, nullptr,
-        CollectionOpts{}, &ainfo
-      );
+      collect.emplace(index, ainfo.ctx, nullptr, CollectionOpts{}, &ainfo);
     }
 
     // If we merged blocks, there could be new optimization opportunities
   } while (again);
-
-  if (!isFinal) return;
 
   auto const func = ainfo.ctx.func;
   if (func->name == s_86pinit.get() ||
@@ -916,7 +883,7 @@ Bytecode gen_constant(const TypedValue& cell) {
   not_reached();
 }
 
-void optimize_func(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
+void optimize_func(const Index& index, FuncAnalysis&& ainfo) {
   auto const bump = trace_bump_for(ainfo.ctx.cls, ainfo.ctx.func);
 
   SCOPE_ASSERT_DETAIL("optimize_func") {
@@ -926,7 +893,7 @@ void optimize_func(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
   Trace::Bump bumper1{Trace::hhbbc, bump};
   Trace::Bump bumper2{Trace::hhbbc_cfg, bump};
   Trace::Bump bumper3{Trace::hhbbc_dce, bump};
-  do_optimize(index, std::move(ainfo), isFinal);
+  do_optimize(index, std::move(ainfo));
 }
 
 void update_bytecode(

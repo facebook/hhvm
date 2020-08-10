@@ -77,7 +77,7 @@ Type get_type_of_reified_list(const UserAttributeMap& ua) {
   return RO::EvalHackArrDVArrs ? vec(types) : arr_packed_varray(types);
 }
 
-State entry_state(const Index& index, Context const ctx,
+State entry_state(const Index& index, const Context& ctx,
                   const KnownArgs* knownArgs) {
   auto ret = State{};
   ret.initialized = true;
@@ -263,13 +263,13 @@ Context adjust_closure_context(Context ctx) {
 }
 
 FuncAnalysis do_analyze_collect(const Index& index,
-                                Context const base_ctx,
+                                const Context& base_ctx,
                                 CollectedInfo& collect,
                                 const KnownArgs* knownArgs) {
   assertx(base_ctx.cls == adjust_closure_context(base_ctx).cls);
   auto const ctx = AnalysisContext {
     base_ctx.unit,
-    php::MutFunc(base_ctx.func),
+    php::MutFunc(const_cast<php::Func*>(base_ctx.func)),
     base_ctx.cls
   };
   FuncAnalysis ai{ctx};
@@ -468,7 +468,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
 }
 
 FuncAnalysis do_analyze(const Index& index,
-                        Context const inputCtx,
+                        const Context& inputCtx,
                         ClassAnalysis* clsAnalysis,
                         const KnownArgs* knownArgs,
                         CollectionOpts opts) {
@@ -570,19 +570,19 @@ FuncAnalysis::FuncAnalysis(AnalysisContext ctx)
   }
 }
 
-FuncAnalysis analyze_func(const Index& index, Context const ctx,
+FuncAnalysis analyze_func(const Index& index, const Context& ctx,
                           CollectionOpts opts) {
   return do_analyze(index, ctx, nullptr, nullptr, opts);
 }
 
 FuncAnalysis analyze_func_collect(const Index& index,
-                                  Context const ctx,
+                                  const Context& ctx,
                                   CollectedInfo& collect) {
   return do_analyze_collect(index, ctx, collect, nullptr);
 }
 
 FuncAnalysis analyze_func_inline(const Index& index,
-                                 Context const ctx,
+                                 const Context& ctx,
                                  const Type& thisType,
                                  const CompactVector<Type>& args,
                                  CollectionOpts opts) {
@@ -592,7 +592,7 @@ FuncAnalysis analyze_func_inline(const Index& index,
                     opts | CollectionOpts::Inlining);
 }
 
-ClassAnalysis analyze_class(const Index& index, Context const ctx) {
+ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
 
   assertx(ctx.cls && !ctx.func && !is_used_trait(*ctx.cls));
 

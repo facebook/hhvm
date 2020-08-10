@@ -589,7 +589,7 @@ struct Index {
    * Find all the extra methods associated with a class from its
    * traits.
    */
-  const hphp_fast_set<php::Func*>*
+  const hphp_fast_set<const php::Func*>*
     lookup_extra_methods(const php::Class*) const;
 
   /*

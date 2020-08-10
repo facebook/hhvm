@@ -443,7 +443,7 @@ struct ConstFunc {
 };
 struct MutFunc : public ConstFunc {
   MutFunc() = default;
-  explicit MutFunc(const Func* f) : ConstFunc(f) {}
+  explicit MutFunc(Func* f) : ConstFunc(f) {}
 
   BlockVec& blocks_mut() const { return const_cast<Func*>(func)->rawBlocks; }
   operator Func*() const { return const_cast<Func*>(func); }

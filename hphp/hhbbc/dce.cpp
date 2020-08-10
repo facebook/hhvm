@@ -1984,8 +1984,7 @@ void adjustMinstr(Bytecode& op, MaskType m) {
 
 template<typename LocRaw>
 CompactVector<Bytecode> eager_unsets(std::bitset<kMaxTrackedLocals> candidates,
-                                     const php::Func* func,
-                                     LocRaw type) {
+                                     const php::Func* func, LocRaw type) {
   auto loc = std::min(safe_cast<uint32_t>(func->locals.size()),
                       safe_cast<uint32_t>(kMaxTrackedLocals));
   auto const end = RuntimeOption::EnableArgsInBacktraces
@@ -2794,11 +2793,7 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
     return ai.bdata[blk].rpoId;
   };
 
-  auto collect = CollectedInfo {
-    index, ai.ctx, nullptr,
-    CollectionOpts{}, &ai
-  };
-
+  auto collect = CollectedInfo{index, ai.ctx, nullptr, CollectionOpts{}, &ai};
   FTRACE(1, "|---- global DCE analyze ({})\n", show(ai.ctx));
   FTRACE(2, "{}", [&] {
     using namespace folly::gen;

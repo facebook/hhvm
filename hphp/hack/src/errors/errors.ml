@@ -3948,8 +3948,8 @@ let required_field_is_optional pos1 pos2 name (on_error : typing_error_callback)
   on_error
     ~code:(Typing.err_code Typing.RequiredFieldIsOptional)
     [
-      (pos1, "The field '" ^ name ^ "' is optional");
-      (pos2, "The field '" ^ name ^ "' is defined as required");
+      (pos1, "The field '" ^ name ^ "' is **optional**");
+      (pos2, "The field '" ^ name ^ "' is defined as **required**");
     ]
 
 let array_get_with_optional_field pos1 pos2 name =

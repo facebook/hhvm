@@ -125,12 +125,6 @@ struct Stats {
   std::array<std::atomic<uint64_t>,kNumRATTags> ratStk_tags;
   std::atomic<uint64_t> ratL_specialized_array;
   std::atomic<uint64_t> ratStk_specialized_array;
-  std::atomic<uint64_t> persistentClasses;
-  std::atomic<uint64_t> persistentRecords;
-  std::atomic<uint64_t> persistentFunctions;
-  std::atomic<uint64_t> uniqueClasses;
-  std::atomic<uint64_t> uniqueRecords;
-  std::atomic<uint64_t> uniqueFunctions;
   std::atomic<uint64_t> totalClasses;
   std::atomic<uint64_t> totalRecords;
   std::atomic<uint64_t> totalFunctions;
@@ -211,14 +205,8 @@ std::string show(const Stats& stats) {
     &ret,
     "       total_methods:  {: >8}\n"
     "         total_funcs:  {: >8}\n"
-    "        unique_funcs:  {: >8}\n"
-    "    persistent_funcs:  {: >8}\n"
     "       total_classes:  {: >8}\n"
-    "      unique_classes:  {: >8}\n"
-    "  persistent_classes:  {: >8}\n"
     "       total_records:  {: >8}\n"
-    "      unique_records:  {: >8}\n"
-    "  persistent_records:  {: >8}\n"
     "\n"
     "        total_sprops:      {: >8}\n"
     "   persistent_sprops_pub:  {: >8}\n"
@@ -226,14 +214,8 @@ std::string show(const Stats& stats) {
     "   persistent_sprops_priv: {: >8}\n",
     stats.totalMethods.load(),
     stats.totalFunctions.load(),
-    stats.uniqueFunctions.load(),
-    stats.persistentFunctions.load(),
     stats.totalClasses.load(),
-    stats.uniqueClasses.load(),
-    stats.persistentClasses.load(),
     stats.totalRecords.load(),
-    stats.uniqueRecords.load(),
-    stats.persistentRecords.load(),
     stats.totalSProps.load(),
     stats.persistentSPropsPub.load(),
     stats.persistentSPropsProt.load(),
@@ -390,22 +372,7 @@ void collect_simple(Stats& stats, const Bytecode& bc) {
 }
 
 void collect_func(Stats& stats, const Index& index, php::Func& func) {
-  if (!func.cls) {
-    ++stats.totalFunctions;
-    if (func.attrs & AttrPersistent) {
-      ++stats.persistentFunctions;
-    }
-    if (func.attrs & AttrUnique) {
-      if (!(func.attrs & AttrPersistent)) {
-        FTRACE(1, "Func unique but not persistent: {} : {}\n",
-               func.name, func.unit->filename);
-      }
-      ++stats.uniqueFunctions;
-    } else {
-      FTRACE(1, "Func not unique: {} : {}\n",
-             func.name, func.unit->filename);
-    }
-  }
+  if (!func.cls) ++stats.totalFunctions;
 
   auto const ty = index.lookup_return_type_raw(&func);
 
@@ -448,36 +415,10 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
 
 void collect_record(Stats& stats, const php::Record& rec) {
   ++stats.totalRecords;
-  if (rec.attrs & AttrPersistent) {
-    ++stats.persistentRecords;
-  }
-  if (rec.attrs & AttrUnique) {
-    if (!(rec.attrs & AttrPersistent)) {
-      FTRACE(1, "Record unique but not persistent: {} : {}\n",
-             rec.name, rec.unit->filename);
-    }
-    ++stats.uniqueRecords;
-  } else {
-    FTRACE(1, "Record not unique: {} : {}\n",
-           rec.name, rec.unit->filename);
-  }
 }
 
 void collect_class(Stats& stats, const Index& index, const php::Class& cls) {
   ++stats.totalClasses;
-  if (cls.attrs & AttrPersistent) {
-    ++stats.persistentClasses;
-  }
-  if (cls.attrs & AttrUnique) {
-    if (!(cls.attrs & AttrPersistent)) {
-      FTRACE(1, "Class unique but not persistent: {} : {}\n",
-             cls.name, cls.unit->filename);
-    }
-    ++stats.uniqueClasses;
-  } else {
-    FTRACE(1, "Class not unique: {} : {}\n",
-           cls.name, cls.unit->filename);
-  }
   stats.totalMethods += cls.methods.size();
 
   for (auto& kv : index.lookup_private_props(&cls)) {

@@ -2471,12 +2471,7 @@ void in(ISS& env, const bc::ClassGetC& op) {
 
   if (auto const clsname = getNameFromType(t)) {
     if (auto const rcls = env.index.resolve_class(env.ctx, clsname)) {
-      auto const cls = rcls->cls();
-      if (cls &&
-          ((cls->attrs & AttrPersistent) ||
-           cls == env.ctx.cls)) {
-        effect_free(env);
-      }
+      if (rcls->cls()) effect_free(env);
       push(env, clsExact(*rcls));
       return;
     }

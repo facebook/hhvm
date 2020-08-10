@@ -205,6 +205,15 @@ let decl_env fmt de =
 let violation fmt (l, r) =
   fprintf fmt "Data with policy %a appears in context %a." policy l policy r
 
+let implicit_violation fmt (l, r) =
+  fprintf
+    fmt
+    "Data with an implicit policy is leaked by %a in context %a."
+    policy
+    l
+    policy
+    r
+
 let security_lattice fmt lattice =
   let flow fmt (l, r) = fprintf fmt "%a < %a" policy l policy r in
   let flows = FlowSet.elements lattice in

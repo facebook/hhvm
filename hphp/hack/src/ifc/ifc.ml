@@ -233,9 +233,6 @@ let adjust ?(prefix = "weak") ~adjustment renv env ty =
   let (acc, ty') = freshen adjustment env.e_acc ty in
   (Env.acc env (fun _ -> acc), ty')
 
-(* A constraint accumulator registering that the type t depends on
-   policies in the list pl (seen differently, the policies in pl
-   flow into the type t) *)
 let rec add_dependencies pl t acc =
   match t with
   | Tinter [] ->
@@ -782,6 +779,74 @@ and block renv env (blk : Tast.block) =
   in
   List.fold_left ~f:seq ~init:env blk
 
+let rec set_policy p = function
+  | Tprim _ -> Tprim p
+  | Tgeneric _ -> Tgeneric p
+  | Ttuple l -> Ttuple (List.map ~f:(set_policy p) l)
+  | Tunion l -> Tunion (List.map ~f:(set_policy p) l)
+  | Tinter l -> Tinter (List.map ~f:(set_policy p) l)
+  | Tclass c -> Tclass { c with c_self = p }
+  | Tfun f ->
+    Tfun
+      {
+        f_pc = p;
+        f_args = List.map ~f:(set_policy p) f.f_args;
+        f_ret = set_policy p f.f_ret;
+        f_exn = set_policy p f.f_exn;
+      }
+
+let rec domain =
+  let get_var = function
+    | Pfree_var (v, s) -> VarSet.singleton (v, s)
+    | _ -> VarSet.empty
+  in
+  let get_list =
+    List.fold ~f:(fun s t -> VarSet.union s @@ domain t) ~init:VarSet.empty
+  in
+  function
+  | Tprim p
+  | Tgeneric p ->
+    get_var p
+  | Ttuple pl
+  | Tunion pl
+  | Tinter pl ->
+    get_list pl
+  | Tclass cls -> get_var cls.c_self
+  | Tfun f ->
+    f.f_ret :: f.f_exn :: f.f_args |> get_list |> VarSet.union (get_var f.f_pc)
+
+(* Check if some function prototype is governed by a policy, meaning that the
+ * policy flows into the argument and pc and that the return type flows into
+ * the policy
+ *)
+let governs meta p fp acc =
+  let proto_vars = domain @@ Tfun fp.fp_type in
+  (* Quantify only the free variables that do not show up in the function
+   * prototype. We eliminate them via simplification because they only show up
+   * on one side of the entailment *)
+  let quantify =
+    let pred v = not @@ VarSet.mem v proto_vars in
+    Logic.quantify ~pred ~quant:Qexists
+  in
+  let assumed_ty = set_policy p @@ Tfun fp.fp_type in
+  let lattice =
+    (* We assume that the prototype is equivalent to the assumed type. This
+     * means that:
+     *  proto <: assumed_ty : Policy P flows into input and out of outputs
+     *  assumed_ty <: proto : Inputs flow into P and P flows into outputs
+     * In the future, we can adjust these flows by using different assumed
+     * types for the upper and lower bounds.
+     *)
+    equivalent meta (Tfun fp.fp_type) assumed_ty []
+    |> Logic.conjoin
+    |> quantify
+    |> Logic.simplify
+    |> Logic.flatten_prop
+    |> Ifc_security_lattice.transitive_closure
+  in
+  let prop = Logic.conjoin acc |> quantify |> Logic.simplify in
+  Logic.entailment_violations lattice prop
+
 let callable meta decl_env class_name_opt name saved_env params body lrty =
   try
     (* Setup the read-only environment *)
@@ -816,26 +881,33 @@ let callable meta decl_env class_name_opt name saved_env params body lrty =
       Format.printf "@."
     end;
 
+    let callable_name = Decl.make_callable_name class_name_opt name in
+
+    let proto =
+      {
+        fp_name = Decl.make_callable_name class_name_opt name;
+        fp_this = this_ty;
+        fp_type =
+          { f_pc = global_pc; f_args = param_tys; f_ret = ret_ty; f_exn = exn };
+      }
+    in
+
+    let violations =
+      match SMap.find_opt callable_name decl_env.de_fun with
+      | Some { fd_kind = FDCIPP } ->
+        let implicit = Env.new_policy_var proto_renv "implicit" in
+        governs meta implicit proto env.e_acc
+      | _ -> []
+    in
+
     (* Return the results *)
     let res =
-      let proto =
-        {
-          fp_name = Decl.make_callable_name class_name_opt name;
-          fp_this = this_ty;
-          fp_type =
-            {
-              f_pc = global_pc;
-              f_args = param_tys;
-              f_ret = ret_ty;
-              f_exn = exn;
-            };
-        }
-      in
       {
         res_proto = proto;
         res_scope = scope;
         res_constraint = Logic.conjoin env.e_acc;
         res_deps = env.e_deps;
+        res_violations = violations;
       }
     in
     Some res
@@ -950,9 +1022,13 @@ let do_ raw_opts files_info ctx =
           SMap.iter log_solver simplified_results;
 
         (* Checking phase *)
-        let log_checking name (_, simple) =
+        let log_checking name (res, simple) =
+          let with_pp pp = List.map ~f:(fun v -> (v, pp)) in
           let violations =
-            Logic.entailment_violations opts.opt_security_lattice simple
+            with_pp
+              Pp.violation
+              (Logic.entailment_violations opts.opt_security_lattice simple)
+            @ with_pp Pp.implicit_violation res.res_violations
           in
 
           if
@@ -960,7 +1036,7 @@ let do_ raw_opts files_info ctx =
             && not (List.is_empty violations)
           then begin
             Format.printf "There are privacy policy errors in %s:@.  @[<v>" name;
-            List.iter ~f:(Format.printf "%a@," Pp.violation) violations;
+            List.iter ~f:(fun (v, f) -> Format.printf "%a@," f v) violations;
             Format.printf "@]\n"
           end
         in
@@ -984,6 +1060,10 @@ class Policied
     HH\FunctionAttribute {
   public function __construct(public string $purpose = "") { }
 }
+class Cipp
+ implements
+ HH\FunctionAttribute,
+ HH\MethodAttribute {}
 |}
     );
   |]

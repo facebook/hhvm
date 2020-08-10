@@ -26,6 +26,8 @@ let infer_flows_id = "\\InferFlows"
 
 let exception_id = "\\Exception"
 
+let cipp_id = "\\Cipp"
+
 let make_callable_name cls_name_opt name =
   match cls_name_opt with
   | None -> name
@@ -42,6 +44,8 @@ let callable_decl attrs =
   let fd_kind =
     if Option.is_some (get_attr infer_flows_id attrs) then
       FDInferFlows
+    else if Option.is_some (get_attr cipp_id attrs) then
+      FDCIPP
     else
       FDPublic
   in

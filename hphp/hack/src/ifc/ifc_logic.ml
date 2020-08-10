@@ -247,3 +247,15 @@ let rec entailment_violations lattice = function
   (* Quantifiers and Holes should have been eliminated before this point *)
   | Cquant _ -> failwith "Cquant"
   | Chole _ -> failwith "Chole"
+
+(* Flatten a prop into a set of flows. Note: this only works for conjuctions of
+ * simple flows. Quantifiers, conditions, and holes are not allowed
+ *)
+let rec flatten_prop = function
+  | Ctrue -> FlowSet.empty
+  | Cconj (c1, c2) -> FlowSet.union (flatten_prop c1) (flatten_prop c2)
+  | Cflow f -> FlowSet.singleton f
+  (* Not supported *)
+  | Ccond _ -> failwith "Ccond"
+  | Cquant _ -> failwith "Cquant"
+  | Chole _ -> failwith "Chole"

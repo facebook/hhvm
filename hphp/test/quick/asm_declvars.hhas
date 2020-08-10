@@ -2,11 +2,6 @@
 # test declvars
 #
 
-.main {
-  Int 1
-  RetC
-}
-
 .function foo($x) {
   # $y should get assigned to _1 even though $z is used first
   .declvars $y $z;

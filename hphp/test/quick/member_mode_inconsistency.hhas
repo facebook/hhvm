@@ -1,10 +1,5 @@
 #Checks that inconsistent member op mode sequences don't verify
 
-.main {
-  Int 1
-  RetC
-}
-
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   .declvars $foo $baz $t;
   Null

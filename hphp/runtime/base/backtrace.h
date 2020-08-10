@@ -197,14 +197,6 @@ struct BacktraceArgs {
   }
 
   /**
-   * Include the pseudo main in the backtrace.
-   */
-  BacktraceArgs& withPseudoMain(bool withPseudoMain = true) {
-    m_withPseudoMain = withPseudoMain;
-    return *this;
-  }
-
-  /**
    * Include argument values in backtrace.
    */
   BacktraceArgs& withArgValues(bool withValues = true) {
@@ -235,7 +227,6 @@ struct BacktraceArgs {
       !m_withSelf &&
       !m_withThis &&
       !m_withMetadata &&
-      !m_withPseudoMain &&
       (!RuntimeOption::EnableArgsInBacktraces || !m_withArgValues) &&
       !m_withArgNames &&
       !m_limit &&
@@ -250,7 +241,6 @@ private:
   bool m_withSelf{false};
   bool m_withThis{false};
   bool m_withMetadata{false};
-  bool m_withPseudoMain{false};
   bool m_withArgValues{true};
   bool m_withArgNames{false};
   int m_limit{0};

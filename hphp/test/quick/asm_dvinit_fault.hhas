@@ -4,11 +4,6 @@
 # HHVM doesn't generate code like this, but it's legal bytecode.
 #
 
-.main {
-  Int 1
-  RetC
-}
-
 .function foo($x = dv_init1, $y = dv_init2) {
 main_entry:
   CGetL $x

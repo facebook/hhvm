@@ -1,10 +1,5 @@
 # Test making closures
 
-.main {
-  Int 1
-  RetC
-}
-
 .class [no_override unique] ClosureTest extends Closure {
   .property [private] x = uninit;
   .method [public static] __invoke() isClosureBody {

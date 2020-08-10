@@ -1,12 +1,6 @@
 # tests that constructors and destructors fail verification properly when
 # poorly defined
 
-.main {
-  DefCls 0
-
-  Int 1
-  RetC
-}
 
 .class A {
   .property [public] attre =

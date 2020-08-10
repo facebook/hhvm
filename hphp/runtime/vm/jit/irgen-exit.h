@@ -60,12 +60,6 @@ Block* makeExit(IRGS&, TransFlags trflags);
 Block* makeGuardExit(IRGS&, TransFlags);
 
 /*
- * Has the effects of makeExit(env) if the current function is a psuedomain,
- * and otherwise returns nullptr.
- */
-Block* makePseudoMainExit(IRGS&);
-
-/*
  * Create a block that exits the current region by making a retranslate opt
  * service request.  Must not be used inside of an inlined function.
  */

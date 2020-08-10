@@ -1,10 +1,5 @@
 # Some tests for catch regions.
 
-.main {
-  Int 1
-  RetC
-}
-
 .function throw_stuff($msg) {
   .try {
     String "about to throw: "

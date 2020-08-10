@@ -449,7 +449,6 @@ void pushInlineFrame(IRGS& env, const InlineFrame& inlineFrame) {
 }
 
 InlineFrame implInlineReturn(IRGS& env, bool suspend) {
-  assertx(!curFunc(env)->isPseudoMain());
   assertx(resumeMode(env) == ResumeMode::None);
 
   auto const& fs = env.irb->fs();

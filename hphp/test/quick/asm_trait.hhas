@@ -2,18 +2,6 @@
 # Try making some traits
 #
 
-.main {
-  DefCls 0
-  DefCls 1
-  DefCls 2
-  DefCls 3
-  DefCls 4
-  DefCls 5
-  DefCls 6
-
-  Int 1
-  RetC
-}
 
 .class [trait] Frobbable {
   .default_ctor;

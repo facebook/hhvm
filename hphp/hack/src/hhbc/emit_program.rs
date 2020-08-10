@@ -5,7 +5,6 @@
 
 use closure_convert_rust as closure_convert;
 use emit_adata_rust as emit_adata;
-use emit_body_rust::{emit_body_with_default_args, make_body};
 use emit_class_rust::emit_classes_from_program;
 use emit_constant_rust::emit_constants_from_program;
 use emit_fatal_rust as emit_fatal;
@@ -15,12 +14,10 @@ use emit_record_def_rust::emit_record_defs_from_program;
 use emit_symbol_refs_rust as emit_symbol_refs;
 use emit_typedef_rust::emit_typedefs_from_program;
 use env::{self, emitter::Emitter, Env};
-use hhas_body_rust::HhasBody;
 use hhas_program_rust::HhasProgram;
 use hhbc_ast_rust::FatalOp;
-use instruction_sequence_rust::{instr, unrecoverable, Error, InstrSeq, Result};
+use instruction_sequence_rust::{unrecoverable, Error, Result};
 use ocamlrep::rc::RcOc;
-use options::Options;
 use oxidized::{ast as Tast, namespace_env, pos::Pos};
 
 extern crate bitflags;
@@ -30,30 +27,12 @@ use bitflags::bitflags;
 
 /// This is the entry point from hh_single_compile & fuzzer
 pub fn emit_fatal_program<'p>(
-    options: &Options,
-    is_systemlib: bool,
     op: FatalOp,
     pos: &Pos,
     msg: impl AsRef<str>,
 ) -> Result<HhasProgram<'p>> {
-    let mut emitter = Emitter::new(options.clone(), is_systemlib, false);
-    let body_instrs = InstrSeq::gather(vec![]);
-    let main = make_body(
-        &mut emitter,
-        body_instrs,
-        vec![],
-        false,
-        false,
-        vec![],
-        vec![],
-        vec![],
-        None,
-        None,
-        None,
-    )?;
     Ok(HhasProgram {
         fatal: Some((op, pos.clone(), msg.as_ref().to_string())),
-        main,
         ..HhasProgram::default()
     })
 }
@@ -93,20 +72,14 @@ pub fn emit_program<'p>(
 ) -> Result<HhasProgram<'p>> {
     let result = emit_program_(emitter, flags, namespace, tast);
     match result {
-        Err(Error::IncludeTimeFatalException(op, pos, msg)) => emit_fatal_program(
-            emitter.options(),
-            flags.contains(FromAstFlags::IS_SYSTEMLIB),
-            op,
-            &pos,
-            msg,
-        ),
+        Err(Error::IncludeTimeFatalException(op, pos, msg)) => emit_fatal_program(op, &pos, msg),
         _ => result,
     }
 }
 
 fn emit_program_<'p>(
     emitter: &mut Emitter,
-    flags: FromAstFlags,
+    _flags: FromAstFlags,
     namespace: RcOc<namespace_env::Env>,
     prog: &'p mut Tast::Program,
 ) -> Result<HhasProgram<'p>> {
@@ -129,7 +102,6 @@ fn emit_program_<'p>(
     }
     closure_convert::convert_toplevel_prog(emitter, prog)?;
     emitter.for_debugger_eval = for_debugger_eval;
-    let main = emit_main(emitter, flags, RcOc::clone(&namespace), prog)?;
     let mut functions = emit_functions_from_program(emitter, prog)?;
     let classes = emit_classes_from_program(emitter, prog)?;
     let record_defs = emit_record_defs_from_program(emitter, prog)?;
@@ -145,7 +117,6 @@ fn emit_program_<'p>(
     let fatal = None;
 
     Ok(HhasProgram {
-        main,
         record_defs,
         classes,
         functions,
@@ -164,19 +135,4 @@ bitflags! {
         const FOR_DEBUGGER_EVAL = 0b0010;
         const IS_SYSTEMLIB =      0b0100;
     }
-}
-
-// IMPLEMENTATION DETAILS
-fn emit_main<'a>(
-    emitter: &mut Emitter,
-    flags: FromAstFlags,
-    namespace: RcOc<namespace_env::Env>,
-    prog: &'a Tast::Program,
-) -> Result<HhasBody<'a>> {
-    let return_value = if flags.contains(FromAstFlags::IS_EVALED) {
-        instr::null()
-    } else {
-        instr::int(1)
-    };
-    emit_body_with_default_args(emitter, namespace, prog, return_value)
 }

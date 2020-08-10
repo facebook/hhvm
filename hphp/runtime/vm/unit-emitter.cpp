@@ -123,7 +123,7 @@ void UnitEmitter::setBc(const unsigned char* bc, size_t bclen) {
   }
   m_bc = (unsigned char*)malloc(bclen);
   m_bcmax = bclen;
-  memcpy(m_bc, bc, bclen);
+  if (bclen) memcpy(m_bc, bc, bclen);
   m_bclen = bclen;
 }
 
@@ -188,28 +188,7 @@ Id UnitEmitter::mergeArray(const ArrayData* a) {
 ///////////////////////////////////////////////////////////////////////////////
 // FuncEmitters.
 
-void UnitEmitter::initMain(int line1, int line2) {
-  assertx(m_fes.size() == 0);
-  StringData* name = staticEmptyString();
-  FuncEmitter* pseudomain = newFuncEmitter(name);
-  pseudomain->init(line1, line2, 0, AttrNone, name);
-}
-
-void UnitEmitter::addTrivialPseudoMain() {
-  initMain(0, 0);
-  auto const mfe = getMain();
-  emitOp(OpInt);
-  emitInt64(1);
-  emitOp(OpRetC);
-  mfe->maxStackCells = 1;
-  mfe->finish(bcPos());
-  m_mergeOnly = true;
-}
-
 FuncEmitter* UnitEmitter::newFuncEmitter(const StringData* name) {
-  // The pseudomain comes first.
-  assertx(m_fes.size() > 0 || !strcmp(name->data(), ""));
-
   auto fe = std::make_unique<FuncEmitter>(*this, m_nextFuncSn++, m_fes.size(),
                                           name);
   m_fes.push_back(std::move(fe));
@@ -625,7 +604,6 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_bc = allocateBCRegion(m_bc, m_bclen);
   u->m_bclen = m_bclen;
   u->m_filepath = m_filepath;
-  u->m_mergeOnly = m_mergeOnly;
   u->m_dirpath = makeStaticString(FileUtil::dirname(StrNR{m_filepath}));
   u->m_sha1 = m_sha1;
   u->m_bcSha1 = m_bcSha1;
@@ -645,7 +623,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_ICE = m_ICE;
 
   size_t ix = m_fes.size() + m_hoistablePceIdList.size();
-  if (m_mergeOnly && !m_allClassesHoistable) ix += m_mergeableStmts.size();
+  if (!m_allClassesHoistable) ix += m_mergeableStmts.size();
   Unit::MergeInfo *mi = Unit::MergeInfo::alloc(ix);
   u->m_mergeInfo.store(mi, std::memory_order_relaxed);
   ix = 0;
@@ -654,14 +632,12 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
     assertx(ix == fe->id());
     mi->mergeableObj(ix++) = func;
   }
-  assertx(u->getMain(nullptr, false)->isPseudoMain());
   mi->m_firstHoistablePreClass = ix;
-  assertx(m_fes.size());
   for (auto& id : m_hoistablePceIdList) {
     mi->mergeableObj(ix++) = u->m_preClasses[id].get();
   }
   mi->m_firstMergeablePreClass = ix;
-  if (u->m_mergeOnly && !m_allClassesHoistable) {
+  if (!m_allClassesHoistable) {
     for (auto& mergeable : m_mergeableStmts) {
       switch (mergeable.first) {
         case MergeKind::Class:
@@ -754,8 +730,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
 
 template<class SerDe>
 void UnitEmitter::serdeMetaData(SerDe& sd) {
-  sd(m_mergeOnly)
-    (m_metaData)
+  sd(m_metaData)
     (m_fileAttributes)
     (m_symbol_refs)
     (m_bcSha1)
@@ -1667,7 +1642,6 @@ createFatalUnit(const StringData* filename, const SHA1& sha1, FatalOp op,
   ue->m_fatalOp = op;
   ue->m_fatalMsg = err;
 
-  ue->addTrivialPseudoMain();
   return ue;
 }
 

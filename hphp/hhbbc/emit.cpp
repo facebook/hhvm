@@ -86,11 +86,6 @@ struct EmitUnitState {
    */
   std::vector<Offset>  classOffsets;
   std::vector<PceInfo> pceInfo;
-  std::vector<Id>      typeAliasInfo;
-  std::vector<Id>      constantInfo;
-
-  std::unordered_set<Id> processedTypeAlias;
-  std::unordered_set<Id> processedConstant;
 };
 
 /*
@@ -99,14 +94,7 @@ struct EmitUnitState {
  */
 template<typename T>
 struct OpInfoHelper {
-  static constexpr bool by_value =
-    T::op == Op::DefCls      ||
-    T::op == Op::DefClsNop   ||
-    T::op == Op::CreateCl    ||
-    T::op == Op::DefCns      ||
-    T::op == Op::DefTypeAlias;
-
-
+  static constexpr bool by_value = T::op == Op::CreateCl;
   using type = typename std::conditional<by_value, T, const T&>::type;
 };
 
@@ -294,32 +282,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     return ret;
   };
 
-  auto const pseudomain = is_pseudomain(func);
-  auto process_mergeable = [&] (const Bytecode& bc) {
-    if (!pseudomain) return;
-    switch (bc.op) {
-      case Op::DefCns: {
-        auto cid = bc.DefCns.arg1;
-        ue.pushMergeableId(Unit::MergeKind::Define, cid);
-        euState.processedConstant.insert(cid);
-        return;
-      }
-      case Op::DefTypeAlias: {
-        auto tid = bc.DefTypeAlias.arg1;
-        ue.pushMergeableId(Unit::MergeKind::TypeAlias, tid);
-        euState.processedTypeAlias.insert(tid);
-        return;
-      }
-      case Op::DefRecord: {
-        auto rid = bc.DefRecord.arg1;
-        ue.pushMergeableRecord(rid);
-        return;
-      }
-      default:
-        return;
-    }
-  };
-
   auto const map_local = [&] (LocalId id) {
     if (id >= func->locals.size()) return id;
     auto const loc = func->locals[id];
@@ -370,7 +332,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
   };
 
   auto emit_inst = [&] (const Bytecode& inst) {
-    process_mergeable(inst);
     auto const startOffset = ue.bcPos();
     lastOff = startOffset;
 
@@ -419,9 +380,9 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     auto emit_srcloc = [&] {
       auto const sl = srcLoc(*func, inst.srcLoc);
-      if (!sl.isValid()) return;
-      Location::Range loc(sl.start.line, sl.start.col,
-                          sl.past.line, sl.past.col);
+      auto const loc = sl.isValid() ?
+        Location::Range(sl.start.line, sl.start.col, sl.past.line, sl.past.col)
+        : Location::Range(-1,-1,-1,-1);
       ue.recordSourceLocation(loc, startOffset);
     };
 
@@ -437,9 +398,9 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     auto ret_assert = [&] { assert(currentStackDepth == inst.numPop()); };
 
-    auto clsid_impl = [&] (uint32_t& id, bool closure) {
+    auto createcl  = [&] (auto& data) {
+      auto& id = data.arg2;
       if (euState.classOffsets[id] != kInvalidOffset) {
-        always_assert(closure);
         for (auto const& elm : euState.pceInfo) {
           if (elm.origId == id) {
             id = elm.pce->id();
@@ -450,17 +411,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       }
       euState.classOffsets[id] = startOffset;
       id = recordClass(euState, ue, id);
-    };
-    auto defcls    = [&] (auto& data) { clsid_impl(data.arg1, false); };
-    auto defclsnop = [&] (auto& data) { clsid_impl(data.arg1, false); };
-    auto createcl  = [&] (auto& data) { clsid_impl(data.arg2, true); };
-    auto deftypealias = [&] (auto& data) {
-      euState.typeAliasInfo.push_back(data.arg1);
-      data.arg1 = euState.typeAliasInfo.size() - 1;
-    };
-    auto defconstant  = [&] (auto& data) {
-      euState.constantInfo.push_back(data.arg1);
-      data.arg1 = euState.constantInfo.size() - 1;
     };
 
     auto emit_lar  = [&](const LocalRange& range) {
@@ -559,11 +509,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
           ue.emitOp(Op::PopC);                                  \
         }                                                       \
       }                                                         \
-      caller<Op::DefCls>(defcls, data);                         \
-      caller<Op::DefClsNop>(defclsnop, data);                   \
       caller<Op::CreateCl>(createcl, data);                     \
-      caller<Op::DefTypeAlias>(deftypealias, data);             \
-      caller<Op::DefCns>(defconstant, data);                    \
                                                                 \
       if (isRet(Op::opcode)) ret_assert();                      \
       ue.emitOp(Op::opcode);                                    \
@@ -1269,22 +1215,6 @@ void emit_func(EmitUnitState& state, UnitEmitter& ue,
   emit_finish_func(state, func, *fe, info);
 }
 
-void emit_pseudomain(EmitUnitState& state,
-                     UnitEmitter& ue,
-                     const php::Unit& unit) {
-  FTRACE(2,  "    pseudomain\n");
-  auto& pm = *unit.pseudomain;
-  renumber_locals(pm);
-  ue.initMain(std::get<0>(pm.srcInfo.loc),
-              std::get<1>(pm.srcInfo.loc));
-  auto const fe = ue.getMain();
-  auto const func = php::ConstFunc(&pm);
-  auto const info = emit_bytecode(state, ue, func);
-  ue.m_mergeOnly = true;
-
-  emit_finish_func(state, func, *fe, info);
-}
-
 void emit_record(UnitEmitter& ue, const php::Record& rec) {
   auto const re = ue.newRecordEmitter(rec.name->toCppString());
   re->init(
@@ -1308,6 +1238,7 @@ void emit_record(UnitEmitter& ue, const php::Record& rec) {
         f.userAttributes
     );
   }
+  ue.pushMergeableRecord(re->id());
 }
 
 void emit_class(EmitUnitState& state,
@@ -1436,8 +1367,7 @@ void emit_class(EmitUnitState& state,
   pce->setEnumBaseTy(cls.enumBaseTy);
 }
 
-void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias,
-                    const EmitUnitState& state) {
+void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias) {
   auto const te = ue.newTypeAliasEmitter(alias.name->toCppString());
   te->init(
       std::get<0>(alias.srcInfo.loc),
@@ -1451,22 +1381,17 @@ void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias,
   te->setTypeStructure(alias.typeStructure);
 
   auto const id = te->id();
-  if (state.processedTypeAlias.find(id) == state.processedTypeAlias.end()) {
-    ue.pushMergeableId(Unit::MergeKind::TypeAlias, id);
-  }
+  ue.pushMergeableId(Unit::MergeKind::TypeAlias, id);
 }
 
-void emit_constant(UnitEmitter& ue, const php::Constant& constant,
-                   const EmitUnitState& state) {
+void emit_constant(UnitEmitter& ue, const php::Constant& constant) {
   Constant c {
     constant.name,
     constant.val,
     constant.attrs,
   };
   auto const id = ue.addConstant(c);
-  if (state.processedConstant.find(id) == state.processedConstant.end()) {
-    ue.pushMergeableId(Unit::MergeKind::Define, id);
-  }
+  ue.pushMergeableId(Unit::MergeKind::Define, id);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1501,8 +1426,6 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   EmitUnitState state { index, &unit };
   state.classOffsets.resize(unit.classes.size(), kInvalidOffset);
 
-  emit_pseudomain(state, *ue, unit);
-
   // Go thought all constant and see if they still need their matching 86cinit
   // func. In repo mode we are able to optimize away most of them away. And if
   // the const don't need them anymore we should not emit them.
@@ -1511,8 +1434,8 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
     string_data_hash,
     string_data_same
   > const_86cinit_funcs;
-  for (auto cid : state.constantInfo) {
-    auto& c = unit.constants[cid];
+  for (size_t id = 0; id < unit.constants.size(); ++id) {
+    auto& c = unit.constants[id];
     if (type(c->val) != KindOfUninit) {
       const_86cinit_funcs.insert(Constant::funcNameFromName(c->name));
     }
@@ -1525,7 +1448,6 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   std::vector<std::unique_ptr<FuncEmitter> > top_fes;
   for (size_t id = 0; id < unit.funcs.size(); ++id) {
     auto const f = unit.funcs[id].get();
-    assertx(f != unit.pseudomain.get());
     if (const_86cinit_funcs.find(f->name) != const_86cinit_funcs.end()) {
       continue;
     }
@@ -1535,16 +1457,11 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
 
   /*
    * Find any top-level classes that need to be included due to
-   * hoistability, even though the corresponding DefCls was not
-   * reachable.
+   * hoistability.
    */
   for (size_t id = 0; id < unit.classes.size(); ++id) {
     if (state.classOffsets[id] != kInvalidOffset) continue;
     auto const c = unit.classes[id].get();
-    if (c->hoistability != PreClass::MaybeHoistable &&
-        c->hoistability != PreClass::AlwaysHoistable) {
-      continue;
-    }
     // Closures are AlwaysHoistable; but there's no need to include
     // them unless there's a reachable CreateCl.
     if (is_closure(*c)) continue;
@@ -1560,12 +1477,12 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
                 state.classOffsets[pceInfo.origId], *c);
   }
 
-  for (auto tid : state.typeAliasInfo) {
-    emit_typealias(*ue, *unit.typeAliases[tid], state);
+  for (size_t id = 0; id < unit.typeAliases.size(); ++id) {
+    emit_typealias(*ue, *unit.typeAliases[id]);
   }
 
-  for (auto cid : state.constantInfo) {
-    emit_constant(*ue, *unit.constants[cid], state);
+  for (size_t id = 0; id < unit.constants.size(); ++id) {
+    emit_constant(*ue, *unit.constants[id]);
   }
 
   for (size_t id = 0; id < unit.records.size(); ++id) {

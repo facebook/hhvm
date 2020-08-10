@@ -1,10 +1,5 @@
 # Check that some corner cases for string escaping work
 
-.main  {
-  Int 1
-  RetC
-}
-
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   String "\0441\n"
   Print

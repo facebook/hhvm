@@ -1,9 +1,4 @@
 # Tests that silence ends without silence starts fail the verifier
-.main {
-  Int 1
-  RetC
-}
-
 .function <"" N  > add($x, $y) {
   CGetL $y
   CGetL2 $x

@@ -179,7 +179,6 @@ bool check(const php::Class& c) {
 }
 
 bool check(const php::Unit& u) {
-  assert(check(*u.pseudomain));
   for (DEBUG_ONLY auto& c : u.classes)   assert(check(*c));
   for (DEBUG_ONLY auto& f : u.funcs)     assert(check(*f));
   return true;

@@ -39,6 +39,7 @@ BypassAccessCheck(bac) set to off
 Hit fatal : Cannot access protected property
     #0 at [:1]
     #1 include(), called at [:1]
+    #2 include(), called at [:0]
 
 print $eval2->ab()
 "3:"
@@ -75,6 +76,7 @@ Hit fatal : Call to private method test2::seven() from context 'cls'
     #2 cls->meth(), called at [:%d]
     #3 test2->callCls(), called at [:%d]
     #4 include(), called at [:%d]
+    #5 include(), called at [:%d]
 
 set bac on
 BypassAccessCheck(bac) set to on.

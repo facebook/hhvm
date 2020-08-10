@@ -995,14 +995,6 @@ To string conversions:
 
   Loads local slot localId from the frame S0 and puts the value in D as type T.
 
-| LdLocPseudoMain<T,localId>, DParam(Cell), S(FramePtr), B
-
-  Loads local number localId from frame S0 and puts the value in D if the
-  local's type is a subtype of T. If the local's type is not a subtype of T,
-  then the load does not happen, and this instruction branches to B. This
-  instruction is used for loading locals in pseudo-mains, where they can alias
-  globals.
-
 | LdStkAddr<offset>, D(PtrToStkCell), S(StkPtr), NF
 
   Loads the address of the stack slot given by the pointer in S0 at the given
@@ -1103,10 +1095,6 @@ To string conversions:
 
   Loads the record whose name is recName out of the RDS. If the record is not
   defined, branch to B.
-
-| DefCls, D(Cls), S(Int), NF
-
-  Define the class corresponding to PreClass S0 in the current unit.
 
 | DefConst<T>, DParam(Top), NA, NF
 
@@ -1792,12 +1780,6 @@ To string conversions:
 | StLoc<localId>, ND, S(FramePtr) S(Cell), NF
 
   Store S1 to local number localId on the frame pointed to by S0.
-
-| StLocPseudoMain<localId>, ND, S(FramePtr) S(Cell), NF
-
-  Behaves just like StLoc, except the hard requirement that it is only emitted
-  for pseudo-mains. We don't optimize StGbl the same way as StLoc, as we need
-  intraprocedural analysis to know whether the store is truly dead.
 
 | StLocRange<localIds>, ND, S(FramePtr) S(Cell), NF
 

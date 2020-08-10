@@ -189,11 +189,6 @@ void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
     // on hhbbc to assert these types.
     return;
   }
-  if (func->isPseudoMain()) {
-    // Pseudomains inherit the variable environment of their caller, so don't
-    // assert anything in them.
-    return;
-  }
   auto const numLocs = func->numLocals();
   auto loc = func->numParams();
   if (func->hasReifiedGenerics()) {

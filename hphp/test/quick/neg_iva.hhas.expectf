@@ -1,2 +1,1 @@
-
-Fatal error: Assembler Error: line 27: couldn't convert input argument (-1) to proper type in %s on line -1
+Fatal error: Assembler Error: line 22: couldn't convert input argument (-1) to proper type in %s on line -1

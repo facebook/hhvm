@@ -1,10 +1,5 @@
 # tests that verifier checks properties of the CreateCl bytecode
 
-.main {
-  Int 1
-  RetC
-}
-
 .function foo() {
   Int 1
   Int 1

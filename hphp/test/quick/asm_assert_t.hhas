@@ -2,11 +2,6 @@
 # Simple test of AssertRAT opcodes
 #
 
-.main {
-  Int 1
-  RetC
-}
-
 .class Foo {
   .default_ctor;
 

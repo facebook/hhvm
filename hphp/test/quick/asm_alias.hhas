@@ -1,15 +1,5 @@
 # Test declaring type aliases
 
-.main {
-  DefCls 0
-  DefTypeAlias 0
-  DefTypeAlias 1
-  DefTypeAlias 2
-  DefTypeAlias 3
-
-  Int 1
-  RetC
-}
 
 .function foo(<"@Foo" "Foo" extended_hint soft > $x) {
   VerifyParamType $x

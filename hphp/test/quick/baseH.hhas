@@ -1,10 +1,5 @@
 # check that baseH fails to verify if $this can be null
 
-.main {
-  Int 1
-  RetC
-}
-
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   .declvars $foo $baz $t;
   Null

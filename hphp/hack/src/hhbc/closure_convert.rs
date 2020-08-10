@@ -31,9 +31,11 @@ use oxidized::{
     ast_defs::*,
     file_info::Mode,
     local_id, namespace_env,
+    relative_path::{Prefix, RelativePath},
     s_map::SMap,
 };
 use rx_rust as rx;
+use std::path::PathBuf;
 use unique_list_rust::UniqueList;
 
 type Scope<'a> = AstScope<'a>;
@@ -1432,8 +1434,14 @@ fn extract_debugger_main(
     );
     unsets.push(catch);
     let body = unsets;
+    let pos = Pos::from_line_cols_offset(
+        RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(""))),
+        1,
+        0..0,
+        0,
+    );
     let fd = Fun_ {
-        span: Pos::make_none(),
+        span: pos,
         annotation: (),
         mode: Mode::Mstrict,
         ret: TypeHint((), None),

@@ -128,12 +128,6 @@ Block* makeExitSurprise(IRGS& env, Offset targetBcOff) {
   return exit;
 }
 
-Block* makePseudoMainExit(IRGS& env) {
-  return curFunc(env)->isPseudoMain()
-    ? makeExit(env)
-    : nullptr;
-}
-
 Block* makeExitOpt(IRGS& env) {
   always_assert(!isInlining(env));
   auto const exit = defBlock(env, Block::Hint::Unlikely);

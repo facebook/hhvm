@@ -194,11 +194,6 @@ bool canInlineAt(SrcKey callSK,
     return traceRefusal(callSK, callee, "callee is interceptable", annotations);
   }
 
-  // TODO(#4238160): Inlining into pseudomain callsites is still buggy.
-  if (callSK.func()->isPseudoMain()) {
-    return traceRefusal(callSK, callee, "PseudoMain", annotations);
-  }
-
   if (!isCalleeInlinable(callSK, callee, annotations) ||
       !checkNumArgs(callSK, callee, fca, annotations)) {
     return false;

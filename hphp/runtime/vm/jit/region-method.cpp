@@ -65,7 +65,6 @@ RegionDescPtr selectMethod(const RegionContext& context) {
 
   auto const func = context.sk.func();
   if (!isFuncEntry(func, context.sk.offset())) return nullptr;
-  if (func->isPseudoMain()) return nullptr;
   FTRACE(1, "function entry for {}: using selectMethod\n",
          func->fullName()->data());
 

@@ -102,11 +102,7 @@ void FuncEmitter::init(int l1, int l2, Offset base_, Attr attrs_,
   attrs = fix_attrs(attrs_);
   docComment = docComment_;
 
-  if (!isPseudoMain()) {
-    if (!SystemLib::s_inited) {
-      assertx(attrs & AttrBuiltin);
-    }
-  }
+  if (!SystemLib::s_inited) assertx(attrs & AttrBuiltin);
 }
 
 void FuncEmitter::finish(Offset past_) {
@@ -633,7 +629,7 @@ void FuncRepoProxy::GetFuncsStmt
       }
       assertx(fe->sn() == funcSn);
       fe->serdeMetaData(extraBlob);
-      if (!SystemLib::s_inited && !fe->isPseudoMain()) {
+      if (!SystemLib::s_inited) {
         assertx(fe->attrs & AttrBuiltin);
         if (preClassId < 0) {
           assertx(fe->attrs & AttrPersistent);

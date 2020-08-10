@@ -667,7 +667,6 @@ jit::TCA dispatchBB();
 void pushFrameSlots(const Func* func, int nparams = 0);
 Array getDefinedVariables(const ActRec*);
 
-void enterVMAtPseudoMain(ActRec* enterFnAr);
 void enterVMAtFunc(ActRec* enterFnAr, Array&& generics, bool hasInOut,
                    bool dynamicCall, bool allowDynCallNoPointer);
 void enterVMAtCurPC();

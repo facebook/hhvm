@@ -1101,36 +1101,6 @@ pub mod instr {
         instr(Instruct::IMisc(InstructMisc::CreateCl(param_num, cls_num)))
     }
 
-    pub fn defcls(n: ClassNum) -> InstrSeq {
-        instr(Instruct::IIncludeEvalDefine(
-            InstructIncludeEvalDefine::DefCls(n),
-        ))
-    }
-
-    pub fn defclsnop(n: ClassNum) -> InstrSeq {
-        instr(Instruct::IIncludeEvalDefine(
-            InstructIncludeEvalDefine::DefClsNop(n),
-        ))
-    }
-
-    pub fn defrecord(n: ClassNum) -> InstrSeq {
-        instr(Instruct::IIncludeEvalDefine(
-            InstructIncludeEvalDefine::DefRecord(n),
-        ))
-    }
-
-    pub fn deftypealias(n: ClassNum) -> InstrSeq {
-        instr(Instruct::IIncludeEvalDefine(
-            InstructIncludeEvalDefine::DefTypeAlias(n),
-        ))
-    }
-
-    pub fn defcns(n: ConstNum) -> InstrSeq {
-        instr(Instruct::IIncludeEvalDefine(
-            InstructIncludeEvalDefine::DefCns(n),
-        ))
-    }
-
     pub fn eval() -> InstrSeq {
         instr(Instruct::IIncludeEvalDefine(
             InstructIncludeEvalDefine::Eval,

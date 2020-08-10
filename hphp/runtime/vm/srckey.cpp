@@ -36,8 +36,7 @@ std::string show(SrcKey sk) {
   }
   return folly::sformat("{}:{} in {}(id 0x{:#x})@{: >6}{}{}",
                         filepath, unit->getLineNumber(sk.offset()),
-                        func->isPseudoMain() ? "pseudoMain"
-                                             : func->fullName()->data(),
+                        func->fullName()->data(),
                         (uint32_t)sk.funcID(), sk.offset(),
                         resumeModeShortName(sk.resumeMode()),
                         sk.hasThis()  ? "t" : "",
@@ -75,14 +74,6 @@ std::string SrcKey::getSymbol() const {
 
   if (f->isBuiltin()) {
     return f->fullName()->data();
-  }
-
-  if (f->isPseudoMain()) {
-    return folly::format(
-      "{{pseudo-main}}::{}::line-{}",
-      u->filepath(),
-      u->getLineNumber(offset())
-    ).str();
   }
 
   if (f->isMethod() && !f->cls()) {

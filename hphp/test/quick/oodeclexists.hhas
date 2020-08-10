@@ -1,10 +1,5 @@
 # tests that OODeclExists with bad argument types properly punts to the interpreter
 
-.main {
-  Int 1
-  RetC
-}
-
 .function ["__EntryPoint"("""y:0:{}""")] main() {
   NullUninit
   NullUninit

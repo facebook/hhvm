@@ -1,10 +1,5 @@
 # tests that AssertRATL cannot appear at the end of a block
 
-.main {
-    Int 1
-    RetC
-}
-
 .function foo($x){
     NullUninit
     NullUninit

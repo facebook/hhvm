@@ -8,21 +8,6 @@
 .adata A_3 = """k:2:{s:1:\"S\";s:2:\"S2\";}""";
 .adata A_4 = """k:1:{s:1:\"X\";}""";
 
-.main (1,1) {
-  .srcloc 3:7,3:7;
-  DefCls 0
-  .srcloc 12:7,12:7;
-  DefCls 1
-  .srcloc 26:7,26:7;
-  DefCls 2
-  .srcloc 40:7,40:10;
-  DefCls 3
-  .srcloc 41:7,41:9;
-  DefCls 4
-  Int 1
-  RetC
-}
-
 .function {} ["__EntryPoint"("""y:0:{}""")] (51,83) <"HH\\void" N > main() {
   .numiters 1;
   .declvars $k;

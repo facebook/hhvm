@@ -336,12 +336,6 @@ bool UnitChecker::checkBytecode() {
   for (Id i = 0; i < m_unit->numPreClasses(); i++) {
     for (auto f : m_unit->pce(i)->methods()) addFunc(f);
   }
-  // iterate funcs in offset order, checking for holes and overlap
-  if (funcs.empty()) {
-    error("unit %s must have at least one func\n",
-           m_unit->sha1().toString().c_str());
-    return false;
-  }
   Offset last_past = 0;
   for (FuncMap::iterator i = funcs.begin(), e = funcs.end(); i != e; ) {
     auto const f = (*i++).second;
@@ -369,28 +363,10 @@ bool UnitChecker::checkBytecode() {
 }
 
 bool UnitChecker::checkFuncs() {
-  const FuncEmitter* pseudo = nullptr;
-  bool multi = false;
   bool ok = true;
 
   auto doCheck = [&] (const FuncEmitter* func) {
-    if (func->isPseudoMain()) {
-      if(func->isMemoizeWrapper) {
-        error("%s", "pseudo-main cannot be a memoize wrapper\n");
-        ok = false;
-      }
-      if (pseudo) {
-        multi = true;
-        error("%s", "unit should have exactly one pseudo-main\n");
-        ok = false;
-      }
-      pseudo = func;
-    }
-
-    if (func->isNative) {
-      ok &= checkNativeFunc(func, m_errmode);
-    }
-
+    if (func->isNative) ok &= checkNativeFunc(func, m_errmode);
     ok &= checkFunc(func, m_errmode);
   };
 
@@ -398,11 +374,6 @@ bool UnitChecker::checkFuncs() {
 
   for (Id i = 0; i < m_unit->numPreClasses(); i++) {
     for (auto f : m_unit->pce(i)->methods()) doCheck(f);
-  }
-
-  if (!multi && m_unit->getMain() != pseudo) {
-    error("%s", "funcs and unit disagree on what is the pseudo-main\n");
-    ok = false;
   }
 
   return ok;

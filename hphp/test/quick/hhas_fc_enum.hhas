@@ -1,11 +1,5 @@
 # Test out making enums
 
-.main {
-  DefCls 0
-
-  Int 1
-  RetC
-}
 
 .function test(<"Foo" "Foo"> $x) {
   VerifyParamType $x

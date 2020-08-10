@@ -1,18 +1,3 @@
-# tests various ways poorly defined classes should fail the verifier
-
-.main {
-  .declvars $x;
-
-  DefCls 0
-  DefCls 1
-  DefCls 2
-  DefCls 4
-  DefCls 6
-
-  Int 1
-  RetC
-}
-
 .class [final interface] iface {
 
 }

@@ -1655,11 +1655,6 @@ void dce(Env& env, const bc::ContRaise& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContValid& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CreateCl& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CreateCont& op) { no_dce(env, op); }
-void dce(Env& env, const bc::DefCls& op) { no_dce(env, op); }
-void dce(Env& env, const bc::DefClsNop& op) { no_dce(env, op); }
-void dce(Env& env, const bc::DefCns& op) { no_dce(env, op); }
-void dce(Env& env, const bc::DefRecord& op) { no_dce(env, op); }
-void dce(Env& env, const bc::DefTypeAlias& op) { no_dce(env, op); }
 void dce(Env& env, const bc::EntryNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Eval& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallBuiltin& op) { no_dce(env, op); }
@@ -2533,7 +2528,6 @@ void remove_unused_local_names(const FuncAnalysis& ainfo,
    * Closures currently rely on name information being available.
    */
   if (func->isClosureBody) return;
-  if (is_pseudomain(func)) return;
 
   // For reified functions, skip the first non-param local
   auto loc = func->locals.begin() + func->params.size() + (int)func->isReified;
@@ -2694,7 +2688,6 @@ void remap_locals(const FuncAnalysis& ainfo,
    * some emitter quirk, so this might be worthwhile.
    */
   if (func->isClosureBody) return;
-  if (is_pseudomain(func)) return;
 
   auto& localInterference = remappingIndex.localInterference;
   auto const& pinned = remappingIndex.pinnedLocals;

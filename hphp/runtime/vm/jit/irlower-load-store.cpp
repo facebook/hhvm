@@ -109,24 +109,6 @@ void cgDbgTrashFrame(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgLdLocPseudoMain(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const off = localOffset(inst->extra<LdLocPseudoMain>()->locId);
-  auto& v = vmain(env);
-
-  irlower::emitTypeCheck(v, env, inst->typeParam(), fp[off + TVOFF(m_type)],
-                         fp[off + TVOFF(m_data)], inst->taken());
-  loadTV(v, inst->dst(), dstLoc(env, inst, 0), fp[off]);
-}
-
-void cgStLocPseudoMain(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const off = localOffset(inst->extra<StLocPseudoMain>()->locId);
-  storeTV(vmain(env), fp[off], srcLoc(env, inst, 1), inst->src(1));
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void cgLdStk(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const off = cellsToBytes(inst->extra<LdStk>()->offset.offset);

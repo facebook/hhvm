@@ -77,19 +77,6 @@ Type get_type_of_reified_list(const UserAttributeMap& ua) {
   return RO::EvalHackArrDVArrs ? vec(types) : arr_packed_varray(types);
 }
 
-State pseudomain_entry_state(const php::Func* func) {
-  auto ret = State{};
-  ret.initialized = true;
-  ret.thisType = TOptObj;
-  ret.locals.resize(func->locals.size());
-  ret.iters.resize(func->numIters);
-  for (auto i = 0; i < ret.locals.size(); ++i) {
-    // Named pseudomain locals are bound to $GLOBALS.
-    ret.locals[i] = func->locals[i].name ? TCell : TUninit;
-  }
-  return ret;
-}
-
 State entry_state(const Index& index, Context const ctx,
                   const KnownArgs* knownArgs) {
   auto ret = State{};
@@ -215,15 +202,7 @@ prepare_incompleteQ(const Index& index,
   auto const ctx       = ai.ctx;
   auto const numParams = ctx.func->params.size();
 
-  auto const entryState = [&] {
-    if (!is_pseudomain(ctx.func)) {
-      return entry_state(index, ctx, knownArgs);
-    }
-
-    assert(!knownArgs);
-    assert(numParams == 0);
-    return pseudomain_entry_state(ctx.func);
-  }();
+  auto const entryState = entry_state(index, ctx, knownArgs);
 
   if (knownArgs) {
     // When we have known args, we only need to add one of the entry points to

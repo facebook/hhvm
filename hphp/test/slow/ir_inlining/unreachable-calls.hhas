@@ -1,8 +1,3 @@
-.main {
-  Int 1
-  RetC
-}
-
 .class [unique final persistent] Cls1 {
   .default_ctor;
   .method [public unique] foobaz($a, $b, $c, $d, $e) {

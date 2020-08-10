@@ -1,8 +1,3 @@
-.main {
-  Int 1
-  RetC
-}
-
 .function test() {
   Int 42
   SetL $x

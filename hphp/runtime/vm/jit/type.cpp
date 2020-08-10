@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/type.h"
 
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
@@ -1107,7 +1108,7 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
 
 Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
   auto const result = typeFromRATImpl(ty, ctx);
-  return RO::EvalAllowBespokeArrayLikes ? result.widenToBespoke() : result;
+  return allowBespokeArrayLikes() ? result.widenToBespoke() : result;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1259,7 +1260,7 @@ Type relaxToConstraint(Type t, const GuardConstraint& gc) {
   // we could guard to superclasses and unify multiple regions. Rethink it.
   if (gc.wantClass()) return t;
   assertx(gc.wantVanillaArray());
-  assertx(RO::EvalAllowBespokeArrayLikes);
+  assertx(allowBespokeArrayLikes());
   return t.arrSpec().vanilla() ? t.unspecialize().narrowToVanilla() : t;
 }
 

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/func.h"
@@ -561,7 +562,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
   // Don't produce vanilla types if the bespoke runtime checks flag is off,
   // because we never use these types. Otherwise, apply layout-dependence.
   auto const checkLayoutFlags = [&](Type t) {
-    if (!RO::EvalAllowBespokeArrayLikes) return t;
+    if (!allowBespokeArrayLikes()) return t;
     return inst->isLayoutAgnostic() ? t.widenToBespoke() : t.narrowToVanilla();
   };
   using namespace TypeNames;

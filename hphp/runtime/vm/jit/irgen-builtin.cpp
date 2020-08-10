@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/irgen-builtin.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/enum-cache.h"
 #include "hphp/runtime/base/file-util.h"
@@ -2231,7 +2232,7 @@ Type builtinReturnType(const Func* builtin) {
 
   // Allow builtins to return bespoke array likes if the flag is set.
   assertx(!type.arrSpec().vanilla());
-  if (!RO::EvalAllowBespokeArrayLikes) type = type.narrowToVanilla();
+  if (!allowBespokeArrayLikes()) type = type.narrowToVanilla();
 
   // "Reference" types (types represented by a pointer) can always be null.
   if (type.isReferenceType()) {

@@ -96,6 +96,7 @@ namespace Trace {
       TM(asmppc64)      \
       TM(atomicvector)  \
       TM(bcinterp)      \
+      TM(bespoke)       \
       TM(bisector)      \
       TM(class_load)    \
       TM(cti)           \

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/attr.h"
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/object-data.h"
@@ -164,7 +165,7 @@ void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
   }
 
   DEBUG_ONLY auto const arrSpec = type.arrSpec();
-  assertx(RO::EvalAllowBespokeArrayLikes);
+  assertx(allowBespokeArrayLikes());
   assertx(arrSpec.vanilla());
   assertx(!arrSpec.type());
 

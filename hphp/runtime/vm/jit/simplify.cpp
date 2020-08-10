@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -3148,7 +3149,7 @@ SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
   auto const oneTy = TBool | TInt | TDbl | TStr | TRes;
   if (ty <= oneTy) return cns(env, 1);
 
-  if (!RO::EvalAllowBespokeArrayLikes || ty.arrSpec().vanilla()) {
+  if (!allowBespokeArrayLikes() || ty.arrSpec().vanilla()) {
     if (ty <= TArr) return gen(env, CountArray, val);
     if (ty <= TVec) return gen(env, CountVec, val);
     if (ty <= TDict) return gen(env, CountDict, val);

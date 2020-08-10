@@ -1065,14 +1065,21 @@ struct RuntimeOption {
   F(int64_t, SelectHotCFGSampleRate, 100)                               \
   F(int64_t, FunctionCallSampleRate, 0)                                 \
   F(double, InitialLoadFactor, 1.0)                                     \
-  /* When the "allow" flag is off, we assume that all array-likes have  \
-   * their standard (aka "vanilla") layouts. When the flag is on, we    \
-   * must check for "bespoke" hidden classes as well.                   \
+  /* Controls emitting checks for bespoke arrays and using logging      \
+   * arrays at runtime.                                                 \
    *                                                                    \
-   * The "allow" flag affects the JIT, but setting it doesn't cause us  \
-   * to produce BespokeArrays - to set the "emit" flag to do that. */   \
-  F(bool, AllowBespokeArrayLikes, false)                                \
-  F(bool, EmitBespokeArrayLikes,  false)                                \
+   * 0 - Disable bespokes. We assume that all array-likes have their    \
+   *     standard (aka "vanilla") layouts.                              \
+   * 1 - Test bespokes. We emit checks for vanilla layouts and produce  \
+   *     logging arrays based on the request ID. If rid % 2 == 1, then  \
+   *     a logging array is generated.                                  \
+   * 2 - Production bespokes. We emit checks as in (1), and produce     \
+   *     logging arrays based on per creation site sampling with the    \
+   *     sample rate specified by EmitLoggingArraySampleRate. If the    \
+   *     sample rate is 0, logging arrays are never constructed.        \
+   *     Logging arrays are only created before RTA has begun. */       \
+  F(int32_t, BespokeArrayLikeMode, 0)                                   \
+  F(uint64_t, EmitLoggingArraySampleRate, 0)                            \
   /* Raise notices on various array operations which may present        \
    * compatibility issues with Hack arrays.                             \
    *                                                                    \

@@ -24,6 +24,14 @@
 
 namespace HPHP {
 
+inline bool allowBespokeArrayLikes() {
+  return RO::EvalBespokeArrayLikeMode > 0;
+}
+
+inline bool shouldTestBespokeArrayLikes() {
+  return RO::EvalBespokeArrayLikeMode == 1;
+}
+
 namespace bespoke {
 // Hide "BespokeLayout" and its implementations to the rest of the codebase.
 struct Layout;

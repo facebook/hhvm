@@ -914,7 +914,7 @@ function hhvm_cmd_impl(
     }
 
     if (isset($options['bespoke'])) {
-      $args[] = '-vEval.EmitBespokeArrayLikes=true';
+      $args[] = '-vEval.BespokeArrayLikeMode=1';
     }
 
     $cmds[] = implode(' ', array_merge($args, $extra_args));

@@ -1,1 +1,1 @@
--vEval.EmitBespokeArrayLikes=false
+-vEval.BespokeArrayLikeMode=0

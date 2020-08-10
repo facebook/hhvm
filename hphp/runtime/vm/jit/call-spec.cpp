@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/jit/call-spec.h"
 
+#include "hphp/runtime/base/bespoke-array.h"
+
 #include "hphp/runtime/vm/jit/arg-group.h"
 
 #include "hphp/util/abi-cxx.h"
@@ -140,7 +142,7 @@ bool CallSpec::verifySignature(const CallDest& dest,
 
 folly::Optional<ArrayData::ArrayKind> getArrayKind(Type type) {
   assertx(type <= TArr);
-  if (!RO::EvalAllowBespokeArrayLikes || type.arrSpec().vanilla()) {
+  if (!allowBespokeArrayLikes() || type.arrSpec().vanilla()) {
     if (type <= TVArr) return ArrayData::kPackedKind;
     if (type <= TDArr) return ArrayData::kMixedKind;
   }

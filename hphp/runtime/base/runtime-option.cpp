@@ -2792,13 +2792,14 @@ void RuntimeOption::Load(
 
   // We don't support provenance for bespoke array-likes, so don't construct
   // any at runtime if we're logging provenance instrumentation results.
-  RO::EvalEmitBespokeArrayLikes &= !RO::EvalLogArrayProvenance;
+  if (RO::EvalBespokeArrayLikeMode > 0 && RO::EvalLogArrayProvenance) {
+    RO::EvalBespokeArrayLikeMode = 0;
+  }
 
   // If we're going to construct bespoke array-likes at runtime, ensure that
   // we JIT checks for these types as well. We support JIT-ing these checks
   // even if there are no runtime bespokes as way to test our guard logic.
-  RO::EvalAllowBespokeArrayLikes |= RO::EvalEmitBespokeArrayLikes;
-  if (!RO::EvalAllowBespokeArrayLikes) specializeVanillaDestructors();
+  if (RO::EvalBespokeArrayLikeMode == 0) specializeVanillaDestructors();
 
   // Hack Array Compats
 

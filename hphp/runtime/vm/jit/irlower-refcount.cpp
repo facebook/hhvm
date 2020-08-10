@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -261,7 +262,7 @@ float decRefDestroyedPercent(Vout& v, IRLS& /*env*/,
 }
 
 CallSpec makeDtorCall(Vout& v, Type ty, Vloc loc, ArgGroup& args) {
-  // Even if AllowBespokeArrayLikes is set, we can optimize destructors
+  // Even if allowBespokeArrayLikes() is true, we can optimize destructors
   // if the value being destructed is a vanilla array-like.
   if (ty.arrSpec().vanilla()) {
     if (ty <= (TVArr|TVec))  return CallSpec::direct(PackedArray::Release);

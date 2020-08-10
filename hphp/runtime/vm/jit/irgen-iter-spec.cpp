@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 
+#include "hphp/runtime/base/bespoke-array.h"
+
 #include "hphp/runtime/vm/jit/array-iter-profile.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-control.h"
@@ -333,7 +335,9 @@ struct PackedAccessor : public Accessor {
     is_ptr_iter = specialization.base_const && !specialization.output_key;
     is_hack_arr = specialization.base_type == IterSpecialization::Vec;
     arr_type = is_hack_arr ? TVec : TVArr;
-    if (RO::EvalAllowBespokeArrayLikes) arr_type = arr_type.narrowToVanilla();
+    if (allowBespokeArrayLikes()) {
+      arr_type = arr_type.narrowToVanilla();
+    }
     pos_type = is_ptr_iter ? TPtrToElemCell : TInt;
     iter_type = specialization;
   }
@@ -381,7 +385,9 @@ struct MixedAccessor : public Accessor {
     is_ptr_iter = specialization.base_const;
     is_hack_arr = specialization.base_type == IterSpecialization::Dict;
     arr_type = is_hack_arr ? TDict : TDArr;
-    if (RO::EvalAllowBespokeArrayLikes) arr_type = arr_type.narrowToVanilla();
+    if (allowBespokeArrayLikes()) {
+      arr_type = arr_type.narrowToVanilla();
+    }
     pos_type = is_ptr_iter ? TPtrToElemCell : TInt;
     key_type = getKeyType(specialization);
     iter_type = specialization;

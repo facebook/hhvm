@@ -23,23 +23,57 @@
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "folly/SharedMutex.h"
 #include "folly/container/F14Map.h"
 
+#include <mutex>
+
 namespace HPHP { namespace bespoke {
+
+TRACE_SET_MOD(bespoke);
 
 //////////////////////////////////////////////////////////////////////////////
 
 ArrayData* maybeEnableLogging(ArrayData* ad) {
-  if (!RO::EvalEmitBespokeArrayLikes) return ad;
+  if (!allowBespokeArrayLikes() ||
+      (!shouldTestBespokeArrayLikes() &&
+       jit::mcgen::retranslateAllScheduled())) {
+    return ad;
+  }
   VMRegAnchor _;
   auto const fp = vmfp();
   auto const sk = SrcKey(fp->func(), vmpc(), resumeModeFromActRec(fp));
-  return ad->isStatic() ? LoggingArray::MakeFromStatic(ad, sk)
-                        : LoggingArray::MakeFromVanilla(ad, sk);
+
+  static std::mutex s_mutex;
+  static folly::F14FastMap<SrcKey, uint64_t, SrcKey::Hasher> s_map;
+
+  auto const shouldEmitBespoke = [&] {
+    if (shouldTestBespokeArrayLikes()) {
+      FTRACE(5, "Observe rid: {}\n", requestCount());
+      return !jit::mcgen::retranslateAllEnabled() || requestCount() % 2 == 1;
+    } else {
+      if (RO::EvalEmitLoggingArraySampleRate == 0) return false;
+
+      std::lock_guard<std::mutex> lock(s_mutex);
+      auto insert = s_map.insert({sk, 0});
+      auto const skCount = insert.first->second++;
+      FTRACE(5, "Observe SrcKey count: {}\n", skCount);
+      return (skCount - 1) % RO::EvalEmitLoggingArraySampleRate == 0;
+    }
+  }();
+
+  if (shouldEmitBespoke) {
+    FTRACE(5, "Emit bespoke at {}\n", sk.getSymbol());
+    return ad->isStatic() ? LoggingArray::MakeFromStatic(ad, sk)
+                          : LoggingArray::MakeFromVanilla(ad, sk);
+  } else {
+    FTRACE(5, "Emit vanilla at {}\n", sk.getSymbol());
+    return ad;
+  }
 }
 
 const ArrayData* maybeEnableLogging(const ArrayData* ad) {

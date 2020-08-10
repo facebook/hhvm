@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/type.h"
 
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 
@@ -456,7 +457,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
   // Otherwise, assume that non-layout-agnostic ops taking an S(Arr) actually
   // take an S(VanillaArr), and likewise for other array-likes.
   auto const checkLayoutFlags = [&] (std::vector<Type> types) {
-    if (RO::EvalAllowBespokeArrayLikes && !inst->isLayoutAgnostic()) {
+    if (allowBespokeArrayLikes() && !inst->isLayoutAgnostic()) {
       for (auto& type : types) type = type.narrowToVanilla();
     }
     return types;

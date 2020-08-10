@@ -1212,6 +1212,8 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni) {
 
   translateDispatch(irgs, ni);
 
+  handleVanillaOutputs(irgs, ni.source);
+
   FTRACE(3, "\nTranslated {}: {} with state:\n{}\n",
          ni.offset(), ni, show(irgs));
 }

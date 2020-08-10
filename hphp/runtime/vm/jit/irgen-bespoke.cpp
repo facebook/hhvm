@@ -180,6 +180,26 @@ void handleBespokeInputs(IRGS& env, SrcKey sk) {
   env.irb->resetGuardFailBlock();
 }
 
+void handleVanillaOutputs(IRGS& env, SrcKey sk) {
+  if (!RO::EvalEmitBespokeArrayLikes) return;
+  if (env.context.kind != TransKind::Profile) return;
+  if (!isArrLikeConstructorOp(sk.op())) return;
+
+  auto const vanilla = topC(env);
+  auto const logging = gen(env, NewLoggingArray, vanilla);
+  ifThen(env,
+    [&](Block* taken) {
+      auto const eq = gen(env, EqArrayDataPtr, vanilla, logging);
+      gen(env, JmpZero, taken, eq);
+    },
+    [&]{
+      discard(env);
+      push(env, logging);
+      gen(env, Jmp, makeExit(env, nextBcOff(env)));
+    }
+  );
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

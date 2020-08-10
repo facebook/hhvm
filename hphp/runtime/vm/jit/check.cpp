@@ -534,6 +534,7 @@ using TypeNames::TCA;
 #define DDictLastKey
 #define DKeysetFirstElem
 #define DKeysetLastElem
+#define DLoggingArrLike
 #define DVArr
 #define DDArr
 #define DStaticDArr
@@ -593,6 +594,7 @@ using TypeNames::TCA;
 #undef DDictLastKey
 #undef DKeysetFirstElem
 #undef DKeysetLastElem
+#undef DLoggingArrLike
 #undef DVArr
 #undef DDArr
 #undef DStaticDArr

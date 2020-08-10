@@ -1111,6 +1111,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return may_load_store_move(stack_in, AElemIAny, stack_in);
     }
 
+  case NewLoggingArray:
+    // May read any data referenced by the input array, but not locals/stack.
+    return may_load_store(AHeapAny, AHeapAny);
+
   case NewKeysetArray:
     {
       // NewKeysetArray is reading elements from the stack, but writes to a

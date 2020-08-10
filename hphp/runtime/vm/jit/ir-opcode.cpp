@@ -65,6 +65,7 @@ TRACE_SET_MOD(hhir);
 #define DDictLastKey      HasDest
 #define DKeysetFirstElem  HasDest
 #define DKeysetLastElem   HasDest
+#define DLoggingArrLike   HasDest
 #define DVArr          HasDest
 #define DDArr          HasDest
 #define DStaticDArr    HasDest
@@ -139,6 +140,7 @@ OpInfo g_opInfo[] = {
 #undef DDictLastKey
 #undef DKeysetFirstElem
 #undef DKeysetLastElem
+#undef DLoggingArrLike
 #undef DVArr
 #undef DDArr
 #undef DStaticDArr
@@ -886,6 +888,7 @@ bool opcodeMayRaise(Opcode opc) {
   case NewDArray:
   case NewDictArray:
   case NewInstanceRaw:
+  case NewLoggingArray:
   case NewPair:
   case NewRFunc:
   case NewStructDArray:

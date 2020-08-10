@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-provenance.h"
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/object-data.h"
@@ -235,6 +236,13 @@ void cgAKExistsObj(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Array creation.
+
+void cgNewLoggingArray(IRLS& env, const IRInstruction* inst) {
+  auto const target = CallSpec::direct(
+    static_cast<ArrayData*(*)(ArrayData*)>(&bespoke::maybeEnableLogging));
+  cgCallHelper(vmain(env), env, target, callDest(env, inst),
+               SyncOptions::Sync, argGroup(env, inst).ssa(0));
+}
 
 namespace {
 

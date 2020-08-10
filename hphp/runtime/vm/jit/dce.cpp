@@ -204,6 +204,7 @@ bool canDCE(IRInstruction* inst) {
   case LdPackedElem:
   case LdPackedArrayDataElemAddr:
   case NewInstanceRaw:
+  case NewLoggingArray:
   case NewDArray:
   case NewDictArray:
   case NewCol:

@@ -450,6 +450,7 @@ function get_options($argv) {
     'jitsample:' => '',
     '*hh_single_type_check:' => '',
     'write-to-checkout' => '',
+    'bespoke' => '',
   ];
   $options = darray[];
   $files = varray[];
@@ -910,6 +911,10 @@ function hhvm_cmd_impl(
 
     if (isset($options['hh_single_type_check'])) {
       $args[] = '--hh_single_type_check='.$options['hh_single_type_check'];
+    }
+
+    if (isset($options['bespoke'])) {
+      $args[] = '-vEval.EmitBespokeArrayLikes=true';
     }
 
     $cmds[] = implode(' ', array_merge($args, $extra_args));
@@ -1996,6 +2001,13 @@ function skip_test($options, $test, $run_skipif = true): ?string {
     if (find_debug_config($test, 'hphpd.ini')) {
       return 'skip-debugger';
     }
+  }
+
+
+  if (isset($options['bespoke']) &&
+      strpos($test, "all_type_comparison_test.php") !== false) {
+      // Skip due to changes in array identity
+      return 'skip-bespoke';
   }
 
   if (!$run_skipif) return null;

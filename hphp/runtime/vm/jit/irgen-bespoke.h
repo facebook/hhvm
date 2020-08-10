@@ -40,6 +40,12 @@ bool checkBespokeInputs(IRGS&, SrcKey);
  */
 void handleBespokeInputs(IRGS&, SrcKey);
 
+/*
+ * After emitting code for the given SrcKey, call this method to perform any
+ * bespoke operations on its output. Typically operates on array constructors.
+ */
+void handleVanillaOutputs(IRGS&, SrcKey);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

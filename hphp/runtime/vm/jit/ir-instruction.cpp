@@ -534,6 +534,15 @@ Type ptrIterValReturn(const IRInstruction* inst) {
   return ptr.deref();
 }
 
+Type loggingArrLikeReturn(const IRInstruction* inst) {
+  assertx(inst->is(NewLoggingArray));
+  auto const arr = inst->src(0)->type();
+
+  assertx(arr <= TArrLike);
+  assertx(arr.isKnownDataType());
+  return arr.unspecialize();
+}
+
 template <uint32_t...> struct IdxSeq {};
 
 inline Type unionReturn(const IRInstruction* /*inst*/, IdxSeq<>) {
@@ -586,6 +595,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DDictLastKey      return dictFirstLastReturn(inst, false, true);
 #define DKeysetFirstElem  return keysetFirstLastReturn(inst, true);
 #define DKeysetLastElem   return keysetFirstLastReturn(inst, false);
+#define DLoggingArrLike   return loggingArrLikeReturn(inst);
 #define DVArr return checkLayoutFlags(RO::EvalHackArrDVArrs ? TVec : TVArr);
 #define DDArr return checkLayoutFlags(RO::EvalHackArrDVArrs ? TDict : TDArr);
 #define DStaticDArr     return (TStaticDict | TStaticArr) & [&]{ DDArr }();
@@ -636,6 +646,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DDictLastKey
 #undef DKeysetFirstElem
 #undef DKeysetLastElem
+#undef DLoggingArrLike
 #undef DVArr
 #undef DDArr
 #undef DStaticDArr

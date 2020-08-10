@@ -1028,6 +1028,21 @@ constexpr bool isJmp(Op opcode) {
     opcode == Op::JmpNZ;
 }
 
+constexpr bool isArrLikeConstructorOp(Op opcode) {
+  return
+    opcode == Op::Array ||
+    opcode == Op::Dict ||
+    opcode == Op::Keyset ||
+    opcode == Op::Vec ||
+    opcode == Op::NewDictArray ||
+    opcode == Op::NewStructDArray ||
+    opcode == Op::NewStructDict ||
+    opcode == Op::NewVec ||
+    opcode == Op::NewKeysetArray ||
+    opcode == Op::NewVArray ||
+    opcode == Op::NewDArray;
+}
+
 constexpr bool isBinaryOp(Op opcode) {
   return
 #define SETOP_OP(setOpOp, bcOp) opcode == bcOp ||

@@ -844,7 +844,7 @@ let governs meta p fp acc =
     |> Logic.flatten_prop
     |> Ifc_security_lattice.transitive_closure
   in
-  let prop = Logic.conjoin acc |> quantify |> Logic.simplify in
+  let prop = quantify acc |> Logic.simplify in
   Logic.entailment_violations lattice prop
 
 let callable meta decl_env class_name_opt name saved_env params body lrty =
@@ -892,12 +892,12 @@ let callable meta decl_env class_name_opt name saved_env params body lrty =
       }
     in
 
-    let violations =
+    let entailment =
       match SMap.find_opt callable_name decl_env.de_fun with
       | Some { fd_kind = FDCIPP } ->
         let implicit = Env.new_policy_var proto_renv "implicit" in
-        governs meta implicit proto env.e_acc
-      | _ -> []
+        governs meta implicit proto
+      | _ -> const []
     in
 
     (* Return the results *)
@@ -907,7 +907,7 @@ let callable meta decl_env class_name_opt name saved_env params body lrty =
         res_scope = scope;
         res_constraint = Logic.conjoin env.e_acc;
         res_deps = env.e_deps;
-        res_violations = violations;
+        res_entailment = entailment;
       }
     in
     Some res
@@ -1004,12 +1004,13 @@ let do_ raw_opts files_info ctx =
         let simplify result =
           let pred = const true in
           ( result,
+            result.res_entailment result.res_constraint,
             Logic.simplify
             @@ Logic.quantify ~pred ~quant:Qexists result.res_constraint )
         in
         let simplified_results = SMap.map simplify results in
 
-        let log_solver name (result, simplified) =
+        let log_solver name (result, _, simplified) =
           Format.printf "@[<v>";
           Format.printf "Flow constraints for %s:@.  @[<v>" name;
           Format.printf "@,@[<hov>Simplified:@ @[<hov>%a@]@]" Pp.prop simplified;
@@ -1022,13 +1023,13 @@ let do_ raw_opts files_info ctx =
           SMap.iter log_solver simplified_results;
 
         (* Checking phase *)
-        let log_checking name (res, simple) =
+        let log_checking name (_, impl, simple) =
           let with_pp pp = List.map ~f:(fun v -> (v, pp)) in
           let violations =
             with_pp
               Pp.violation
               (Logic.entailment_violations opts.opt_security_lattice simple)
-            @ with_pp Pp.implicit_violation res.res_violations
+            @ with_pp Pp.implicit_violation impl
           in
 
           if

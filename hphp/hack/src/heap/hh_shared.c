@@ -1705,10 +1705,11 @@ static void raise_heap_full(void) {
 /* Allocates in the shared heap. The chunks are cache aligned. */
 /*****************************************************************************/
 
-static heap_entry_t* hh_alloc(hh_header_t header) {
+static heap_entry_t* hh_alloc(hh_header_t header, /*out*/size_t *total_size) {
   // the size of this allocation needs to be kept in sync with wasted_heap_size
   // modification in hh_remove
   size_t slot_size = CACHE_ALIGN(Heap_entry_total_size(header));
+  *total_size = slot_size;
   char *chunk = __sync_fetch_and_add(heap, (char*) slot_size);
   if (chunk + slot_size > heap_max) {
     raise_heap_full();
@@ -1799,7 +1800,8 @@ value hh_serialize_raw(value data) {
 static heap_entry_t* hh_store_ocaml(
   value data,
   /*out*/size_t *alloc_size,
-  /*out*/size_t *orig_size
+  /*out*/size_t *orig_size,
+  /*out*/size_t *total_size
 ) {
   char* value = NULL;
   size_t size = 0;
@@ -1853,7 +1855,7 @@ static heap_entry_t* hh_store_ocaml(
     | uncompressed_size << 1
     | 1;
 
-  heap_entry_t* addr = hh_alloc(header);
+  heap_entry_t* addr = hh_alloc(header, total_size);
   memcpy(&addr->data,
          uncompressed_size ? compressed_data : value,
          size);
@@ -1905,13 +1907,16 @@ static value write_at(unsigned int slot, value data) {
     assert_allow_hashtable_writes_by_current_process();
     size_t alloc_size = 0;
     size_t orig_size = 0;
-    hashtbl[slot].addr = hh_store_ocaml(data, &alloc_size, &orig_size);
+    size_t total_size = 0;
+    hashtbl[slot].addr = hh_store_ocaml(data, &alloc_size, &orig_size, &total_size);
     Store_field(result, 0, Val_long(alloc_size));
     Store_field(result, 1, Val_long(orig_size));
+    Store_field(result, 2, Val_long(total_size));
     __sync_fetch_and_add(hcounter_filled, 1);
   } else {
     Store_field(result, 0, Min_long);
     Store_field(result, 1, Min_long);
+    Store_field(result, 2, Min_long);
   }
   CAMLreturn(result);
 }
@@ -1992,10 +1997,11 @@ static heap_entry_t* hh_store_raw_entry(
   value data
 ) {
   size_t size = caml_string_length(data) - sizeof(heap_entry_t);
+  size_t total_size = 0;
   heap_entry_t* entry = (heap_entry_t*)Bytes_val(data);
 
   hh_header_t header = entry->header;
-  heap_entry_t* addr = hh_alloc(header);
+  heap_entry_t* addr = hh_alloc(header, &total_size);
   memcpy(&addr->data,
          entry->data,
          size);

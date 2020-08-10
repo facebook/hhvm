@@ -536,7 +536,7 @@ module Immediate (Key : Key) (Value : Value.Type) : sig
 end = struct
   (* Returns the number of bytes allocated in the heap, or a negative number
    * if no new memory was allocated *)
-  external hh_add : Key.md5 -> Value.t -> int * int = "hh_add"
+  external hh_add : Key.md5 -> Value.t -> int * int * int = "hh_add"
 
   external hh_mem : Key.md5 -> bool = "hh_mem"
 
@@ -570,11 +570,16 @@ end = struct
 
   let measure_get = Value.description ^ " (bytes deserialized from shared heap)"
 
-  let log_serialize compressed original =
+  let log_serialize compressed original total =
     let compressed = float compressed in
     let original = float original in
+    let total = float total in
     let saved = original -. compressed in
     let ratio = compressed /. original in
+    Measure.sample
+      (Value.description ^ " (total bytes including header and padding)")
+      total;
+    Measure.sample "ALL bytes (total bytes including header and padding)" total;
     Measure.sample measure_add compressed;
     Measure.sample "ALL bytes serialized into shared heap" compressed;
     Measure.sample
@@ -607,10 +612,10 @@ end = struct
     ()
 
   let add key value =
-    let (compressed_size, original_size) = hh_add key value in
+    let (compressed_size, original_size, total_size) = hh_add key value in
     (* compressed_size is a negative number if nothing new was added *)
     if hh_log_level () > 0 && compressed_size > 0 then
-      log_serialize compressed_size original_size
+      log_serialize compressed_size original_size total_size
 
   let mem key = hh_mem key
 

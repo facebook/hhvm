@@ -2653,6 +2653,8 @@ and expr_
       | Lfun _ -> false
       | _ -> assert false
     in
+    (* Check type annotations on the lambda *)
+    Typing_check_decls.fun_ env f;
     (* This is the function type as declared on the lambda itself.
      * If type hints are absent then use Tany instead. *)
     let declared_fe = Decl.fun_decl_in_env env.decl_env ~is_lambda:true f in

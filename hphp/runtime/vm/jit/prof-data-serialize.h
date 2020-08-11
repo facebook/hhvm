@@ -180,6 +180,8 @@ void write_unit(ProfDataSerializer& ser, const Unit* unit);
 Unit* read_unit(ProfDataDeserializer& ser);
 void write_class(ProfDataSerializer& ser, const Class* cls);
 Class* read_class(ProfDataDeserializer& ser);
+void write_lclass(ProfDataSerializer& ser, const LazyClassData cls);
+LazyClassData read_lclass(ProfDataDeserializer& ser);
 void write_record(ProfDataSerializer& ser, const RecordDesc* rec);
 RecordDesc* read_record(ProfDataDeserializer& ser);
 void write_func(ProfDataSerializer& ser, const Func* func);

@@ -289,6 +289,7 @@ constexpr bool operator>(Mem a, Mem b) {
   c(UncountedDArr,   bits_t::bit<29>())                                 \
   c(CountedDArr,     bits_t::bit<30>())                                 \
   c(RClsMeth,        bits_t::bit<31>())                                 \
+  c(LazyCls,         bits_t::bit<32>())                                 \
 /**/
 
 /*
@@ -296,10 +297,11 @@ constexpr bool operator>(Mem a, Mem b) {
  */
 #ifdef USE_LOWPTR
 #define UNCCOUNTED_INIT_UNION \
-        kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kRecDesc|kClsMeth
+        kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kRecDesc|kLazyCls| \
+        kClsMeth
 #else
 #define UNCCOUNTED_INIT_UNION \
-        kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kRecDesc
+        kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kRecDesc|kLazyCls
 #endif
 
 #ifdef USE_LOWPTR
@@ -412,7 +414,7 @@ constexpr bool operator>(Mem a, Mem b) {
  */
 struct Type {
 private:
-  static constexpr size_t kRuntime = 32;
+  static constexpr size_t kRuntime = 33;
   static constexpr size_t numRuntime = 9;
   using bits_t = BitSet<kRuntime + numRuntime>;
 

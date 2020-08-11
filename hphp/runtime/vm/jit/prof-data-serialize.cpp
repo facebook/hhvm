@@ -1323,6 +1323,20 @@ Class* read_class(ProfDataDeserializer& ser) {
   return ret;
 }
 
+void write_lclass(ProfDataSerializer& ser, LazyClassData lcls) {
+  ITRACE(2, "LClass>\n");
+  Trace::Indent _i;
+  write_raw_string(ser, lcls.name());
+  ITRACE(2, "LCLass: {}\n", lcls.name());
+}
+
+LazyClassData read_lclass(ProfDataDeserializer& ser) {
+  ITRACE(2, "LClass>\n");
+  auto const name = read_raw_string(ser);
+  ITRACE(2, "LClass: {}\n", name ? name : staticEmptyString());
+  return LazyClassData(name);
+}
+
 void write_record(ProfDataSerializer& ser, const RecordDesc* rec) {
   SCOPE_EXIT {
     ITRACE(2, "RecordDesc: {}\n", rec ? rec->name() : staticEmptyString());

@@ -67,8 +67,11 @@ std::unique_ptr<RecordDesc> testRecordDesc(const char* name,
 
 TEST(Type, Equality) {
   EXPECT_NE(TCls, TPtrToObj);
+  EXPECT_NE(TLazyCls, TPtrToObj);
   EXPECT_NE(TCls, TLvalToObj);
+  EXPECT_NE(TLazyCls, TLvalToObj);
   EXPECT_NE(TCls, TMemToObj);
+  EXPECT_NE(TLazyCls, TMemToObj);
 }
 
 TEST(Type, Null) {
@@ -111,6 +114,7 @@ TEST(Type, KnownDataType) {
     TCountedKeyset,
     TRes,
     TBool,
+    TLazyCls,
     TUninit,
     TInitNull
   };
@@ -142,6 +146,8 @@ TEST(Type, ToString) {
   EXPECT_EQ("Vec", TVec.toString());
   EXPECT_EQ("Dict", TDict.toString());
   EXPECT_EQ("Keyset", TKeyset.toString());
+
+  EXPECT_EQ("LazyCls", TLazyCls.toString());
 
   auto const sub = Type::SubObj(SystemLib::s_HH_IteratorClass);
   auto const exact = Type::ExactObj(SystemLib::s_HH_IteratorClass);
@@ -215,6 +221,10 @@ TEST(Type, Ptr) {
   auto const a2 = TDArr.ptr(Ptr::Frame);
   EXPECT_EQ(TBottom, a1 & a2);
   EXPECT_EQ(a1, a1 - a2);
+
+  EXPECT_EQ(TPtrToLazyCls, TLazyCls.ptr(Ptr::Ptr));
+  EXPECT_EQ(TLazyCls, TPtrToLazyCls.deref());
+  EXPECT_EQ(TBottom, TPtrToLazyCls & TLazyCls);
 
   EXPECT_EQ(TBottom, TBottom.deref());
 
@@ -369,6 +379,11 @@ TEST(Type, Subtypes) {
   EXPECT_TRUE(TVArr <= TArrLike);
   EXPECT_TRUE(TDArr <= TArrLike);
   EXPECT_TRUE(TArr <= TArrLike);
+
+  Type funcOrlcls = TFunc | TLazyCls;
+  EXPECT_EQ("{Func|LazyCls}", funcOrlcls.toString());
+  EXPECT_TRUE(TLazyCls <= funcOrlcls);
+  EXPECT_FALSE(TCls <= funcOrlcls);
 }
 
 TEST(Type, Top) {
@@ -486,6 +501,10 @@ TEST(Type, Specialized) {
 
   auto const subCls = Type::SubCls(SystemLib::s_HH_IteratorClass);
   EXPECT_EQ(TCls, TCls - subCls);
+
+  auto const lclsOrStr = TLazyCls | TStr;
+  EXPECT_EQ(TStr, lclsOrStr - TLazyCls);
+  EXPECT_EQ(TLazyCls, lclsOrStr - TStr);
 }
 
 TEST(Type, ArrayFitsSpec) {
@@ -812,6 +831,13 @@ TEST(Type, Const) {
   auto keysetData = ArrayData::GetScalarArray(std::move(keyset));
   auto constKeyset = Type::cns(keysetData);
   EXPECT_TRUE(constKeyset < TKeyset);
+
+  auto constLCls = Type::cns(LazyClassData(makeStaticString("Foo")));
+  EXPECT_TRUE(constLCls < TLazyCls);
+  EXPECT_TRUE(constLCls.hasConstVal());
+  EXPECT_FALSE(TLazyCls.hasConstVal());
+  EXPECT_EQ(TLazyCls | TBool, constLCls | True);
+  EXPECT_EQ(TBottom, constLCls & True);
 }
 
 TEST(Type, DVArray) {

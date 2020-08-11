@@ -7,9 +7,6 @@
  *
  *)
 
-val with_expr_hook :
-  (Nast.expr -> Typing_defs.locl_ty -> unit) -> (unit -> 'a) -> 'a
-
 val debug_print_last_pos : 'a -> unit
 
 val typedef_def : Provider_context.t -> Nast.typedef -> Tast.typedef

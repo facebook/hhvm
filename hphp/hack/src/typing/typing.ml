@@ -65,18 +65,6 @@ let debug_print_last_pos _ =
     "Last typecheck pos: %s"
     (Pos.string (Pos.to_absolute !debug_last_pos))
 
-(****************************************************************************)
-(* Hooks *)
-(****************************************************************************)
-
-let expr_hook = ref None
-
-let with_expr_hook hook f =
-  with_context
-    ~enter:(fun () -> expr_hook := Some hook)
-    ~exit:(fun () -> expr_hook := None)
-    ~do_:f
-
 (*****************************************************************************)
 (* Helpers *)
 (*****************************************************************************)
@@ -1162,23 +1150,15 @@ and raw_expr
     env
     e =
   debug_last_pos := fst e;
-  let (env, te, ty) =
-    expr_
-      ~accept_using_var
-      ~is_using_clause
-      ?expected
-      ?lhs_of_null_coalesce
-      ~valkind
-      ~check_defined
-      env
-      e
-  in
-  let () =
-    match !expr_hook with
-    | Some f -> f e (Typing_expand.fully_expand env ty)
-    | None -> ()
-  in
-  (env, te, ty)
+  expr_
+    ~accept_using_var
+    ~is_using_clause
+    ?expected
+    ?lhs_of_null_coalesce
+    ~valkind
+    ~check_defined
+    env
+    e
 
 and lvalue env e =
   let valkind = `lvalue in

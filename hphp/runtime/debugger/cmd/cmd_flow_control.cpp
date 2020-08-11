@@ -90,10 +90,10 @@ void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
   if (!site || !site->valid()) return;
   RequestInjectionData &rid = RequestInfo::s_requestInfo->m_reqInjectionData;
   rid.m_flowFilter.clear();
+  auto const unit = site->getFunc()->unit();
   TRACE(3, "Prepare location filter for %s:%d, unit %p:\n",
-        site->getFile(), site->getLine0(), site->getUnit());
+        site->getFile(), site->getLine0(), unit);
   OffsetRangeVec ranges;
-  const auto unit = site->getUnit();
   if (m_smallStep) {
     // Get offset range for the pc only.
     OffsetRange range;
@@ -108,7 +108,7 @@ void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
       ranges.clear();
     }
   }
-  auto func = unit->getFunc(site->getCurOffset());
+  auto const func = site->getFunc();
   if (func->isResumable()) {
     auto excludeResumableReturns = [] (Op op) {
       return (op != OpYield) &&

@@ -85,7 +85,7 @@ InterruptSite::InterruptSite(bool hardBreakPoint, const Variant& error)
       m_callingSite(nullptr), m_class(nullptr),
       m_file((StringData*)nullptr),
       m_line0(0), m_char0(0), m_line1(0), m_char1(0),
-      m_offset(kInvalidOffset), m_unit(nullptr), m_valid(false),
+      m_offset(kInvalidOffset), m_func(nullptr), m_valid(false),
       m_funcEntry(false) {
   TRACE(2, "InterruptSite::InterruptSite\n");
 #define bail_on(c) if (c) { return; }
@@ -97,18 +97,16 @@ InterruptSite::InterruptSite(bool hardBreakPoint, const Variant& error)
     // so we need to construct the site on the caller
     Offset offset;
     fp = context->getPrevVMStateSkipFrame(fp, &offset);
-    auto f = fp->m_func;
-    m_offset = f->offsetOf(skipCall(f->at(offset)));
+    m_func = fp->func();
+    m_offset = m_func->offsetOf(skipCall(m_func->at(offset)));
   } else {
     auto const *pc = vmpc();
-    auto f = fp->m_func;
-    bail_on(!f);
-    m_unit = f->unit();
-    bail_on(!m_unit);
-    m_offset = f->offsetOf(pc);
-    auto base = f->isGenerator()
-      ? BaseGenerator::userBase(f)
-      : f->base();
+    m_func = fp->func();
+    bail_on(!m_func);
+    m_offset = m_func->offsetOf(pc);
+    auto base = m_func->isGenerator()
+      ? BaseGenerator::userBase(m_func)
+      : m_func->base();
     if (m_offset == base) {
       m_funcEntry = true;
     }
@@ -124,7 +122,7 @@ InterruptSite::InterruptSite(ActRec *fp, Offset offset, const Variant& error)
     m_callingSite(nullptr), m_class(nullptr),
     m_file((StringData*)nullptr),
     m_line0(0), m_char0(0), m_line1(0), m_char1(0),
-    m_offset(offset), m_unit(nullptr), m_valid(false),
+    m_offset(offset), m_func(nullptr), m_valid(false),
     m_funcEntry(false), m_builtin(false) {
   TRACE(2, "InterruptSite::InterruptSite(fp)\n");
   this->Initialize(fp);
@@ -136,23 +134,24 @@ void InterruptSite::Initialize(ActRec *fp) {
 #define bail_on(c) if (c) { return; }
   assertx(fp);
   m_activationRecord = fp;
-  bail_on(!fp->m_func);
-  m_unit = fp->m_func->unit();
-  bail_on(!m_unit);
-  m_file = String(StrNR{m_unit->filepath()});
-  if (m_unit->getSourceLoc(m_offset, m_sourceLoc)) {
+  m_func = fp->func();
+  bail_on(!m_func);
+  auto const unit = m_func->unit();
+  bail_on(!unit);
+  m_file = String(StrNR{unit->filepath()});
+  if (unit->getSourceLoc(m_offset, m_sourceLoc)) {
     m_line0 = m_sourceLoc.line0;
     m_char0 = m_sourceLoc.char0;
     m_line1 = m_sourceLoc.line1;
     m_char1 = m_sourceLoc.char1;
   }
-  m_function = fp->m_func->name()->data();
-  if (fp->m_func->preClass()) {
-    m_class = fp->m_func->preClass()->name()->data();
+  m_function = m_func->name()->data();
+  if (m_func->preClass()) {
+    m_class = m_func->preClass()->name()->data();
   } else {
     m_class = "";
   }
-  m_builtin = fp->m_func->isBuiltin();
+  m_builtin = m_func->isBuiltin();
 #undef bail_on
   m_valid = true;
 }

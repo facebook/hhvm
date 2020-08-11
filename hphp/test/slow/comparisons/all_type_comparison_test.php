@@ -167,19 +167,12 @@ function main(): void {
   $arr14 = varray[varray[1, 2], varray[99]];
   $arr15 = varray[Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8}];
   $arr16 = varray[Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8}];
-  // The behavior of this test critically relies on $arr17 and $arr18 being
-  // equal by identity; they would not compare equal otherwise. Be explicit.
-  $make_nan_array = () ==> varray[1, NAN];
-  $arr17 = $make_nan_array();
-  $arr18 = $make_nan_array();
-  $arr19 = varray[NAN, 1];
-  $arr20 = varray[1, NAN, 2];
-  $arr21 = darray['key1' => 1, 'key2' => 2, 'key3' => 3];
-  $arr22 = darray['key1' => 1, 'key2' => 2, 'key3' => 3];
-  $arr23 = darray['key1' => 1, 'key2-other' => 2, 'key3' => 3];
-  $arr24 = darray['key2' => 2, 'key3' => 3, 'key1' => 1];
-  $arr25 = varray['baz', 'foo'];
-  $arr26 = varray['baz', new ToStringThrower];
+  $arr17 = darray['key1' => 1, 'key2' => 2, 'key3' => 3];
+  $arr18 = darray['key1' => 1, 'key2' => 2, 'key3' => 3];
+  $arr19 = darray['key1' => 1, 'key2-other' => 2, 'key3' => 3];
+  $arr20 = darray['key2' => 2, 'key3' => 3, 'key1' => 1];
+  $arr21 = varray['baz', 'foo'];
+  $arr22 = varray['baz', new ToStringThrower];
 
   $vec1 = vec[];
   $vec2 = vec[1, 2];
@@ -249,8 +242,6 @@ function main(): void {
                'array arr17' => $arr17, 'array arr18' => $arr18,
                'array arr19' => $arr19, 'array arr20' => $arr20,
                'array arr21' => $arr21, 'array arr22' => $arr22,
-               'array arr23' => $arr23, 'array arr24' => $arr24,
-               'array arr25' => $arr25, 'array arr26' => $arr26,
 
                'vec vec1' => $vec1, 'vec vec2' => $vec2, 'vec vec3' => $vec3,
                'vec vec4' => $vec4, 'vec vec5' => $vec5, 'vec vec6' => $vec6,

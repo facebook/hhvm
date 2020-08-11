@@ -2005,7 +2005,7 @@ function skip_test($options, $test, $run_skipif = true): ?string {
 
 
   if (isset($options['bespoke']) &&
-      strpos($test, "all_type_comparison_test.php") !== false) {
+      strpos($test, "nan_array_id_test.php") !== false) {
       // Skip due to changes in array identity
       return 'skip-bespoke';
   }

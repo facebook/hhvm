@@ -248,7 +248,7 @@ void publishTranslationMeta(TransMetaInfo& info) {
       if (!cur.aStart) continue;
       if (prev.aStart) {
         if (prev.bcStart < vmUnit->bclen()) {
-          recordBCInstr(uint32_t(vmUnit->getOp(prev.bcStart)),
+          recordBCInstr(uint32_t(sk.func()->getOp(prev.bcStart)),
                         prev.aStart, cur.aStart, false);
         }
       } else {
@@ -258,9 +258,9 @@ void publishTranslationMeta(TransMetaInfo& info) {
     }
   }
 
-  recordGdbTranslation(sk, sk.func(), view.main(), loc.mainStart(),
+  recordGdbTranslation(sk, view.main(), loc.mainStart(),
                        loc.mainEnd(), false, false);
-  recordGdbTranslation(sk, sk.func(), view.cold(), loc.coldCodeStart(),
+  recordGdbTranslation(sk, view.cold(), loc.coldCodeStart(),
                        loc.coldEnd(), false, false);
 
   transdb::addTranslation(tr);

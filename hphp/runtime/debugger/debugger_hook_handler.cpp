@@ -39,7 +39,8 @@ static void addBreakPointInUnit(BreakPointInfoPtr bp, Unit* unit) {
 
   assertx(offsets.size() > 0);
   auto bpOffset = offsets[0].base;
-  phpAddBreakPoint(unit, bpOffset);
+  auto func = unit->getFunc(bpOffset);
+  phpAddBreakPoint(func, bpOffset);
 }
 
 void proxySetBreakPoints(DebuggerProxy* proxy) {

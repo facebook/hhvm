@@ -117,7 +117,7 @@ void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
              (op != OpRetC);
     };
     rid.m_flowFilter.addRanges(unit, ranges,
-                                      excludeResumableReturns);
+                                     excludeResumableReturns);
   } else {
     rid.m_flowFilter.addRanges(unit, ranges);
   }
@@ -131,8 +131,8 @@ bool CmdFlowControl::hasStepOuts() {
   return m_stepOut1.valid() || m_stepOut2.valid();
 }
 
-bool CmdFlowControl::atStepOutOffset(Unit* unit, Offset o) {
-  return m_stepOut1.at(unit, o) || m_stepOut2.at(unit, o);
+bool CmdFlowControl::atStepOutOffset(const Func* func, Offset o) {
+  return m_stepOut1.at(func, o) || m_stepOut2.at(func, o);
 }
 
 // Place internal breakpoints to get out of the current function. This may place
@@ -155,8 +155,7 @@ void CmdFlowControl::setupStepOuts() {
     // step outs. This will cause cmds like Next and Out to just let the program
     // run, which is appropriate.
     if (!fp) break;
-    Unit* returnUnit = fp->m_func->unit();
-    PC callPC = returnUnit->at(callOffset);
+    PC callPC = fp->m_func->at(callOffset);
     TRACE(2, "CmdFlowControl::setupStepOuts: at '%s' offset %d opcode %s\n",
           fp->m_func->fullName()->data(), callOffset,
           opcodeToName(peek_op(callPC)));
@@ -174,7 +173,7 @@ void CmdFlowControl::setupStepOuts() {
         Offset nextOffset = callOffset + instrLen(callPC);
         TRACE(2, "CmdFlowControl: step out to '%s' offset %d (fall-thru)\n",
               fp->m_func->fullName()->data(), nextOffset);
-        m_stepOut1 = StepDestination(returnUnit, nextOffset);
+        m_stepOut1 = StepDestination(fp->m_func, nextOffset);
       }
       // Set an internal breakpoint at the target of a control flow instruction.
       // A good example of a control flow op that invokes PHP is IterNext.
@@ -185,17 +184,17 @@ void CmdFlowControl::setupStepOuts() {
           Offset targetOffset = callOffset + targets[0];
           TRACE(2, "CmdFlowControl: step out to '%s' offset %d (jump target)\n",
                 fp->m_func->fullName()->data(), targetOffset);
-          m_stepOut2 = StepDestination(returnUnit, targetOffset);
+          m_stepOut2 = StepDestination(fp->m_func, targetOffset);
         }
       }
       // If we have no place to step out to, then unwind another frame and try
       // again. The most common case that leads here is Ret*, which does not
       // fall-thru and has no encoded target.
     } else {
-      auto const returnOffset = returnUnit->offsetOf(skipCall(callPC));
+      auto const returnOffset = fp->m_func->offsetOf(skipCall(callPC));
       TRACE(2, "CmdFlowControl: step out to '%s' offset %d\n",
             fp->m_func->fullName()->data(), returnOffset);
-      m_stepOut1 = StepDestination(returnUnit, returnOffset);
+      m_stepOut1 = StepDestination(fp->m_func, returnOffset);
     }
   }
 }
@@ -228,17 +227,17 @@ void CmdFlowControl::cleanupStepOuts() {
 // flow control command.
 
 CmdFlowControl::StepDestination::StepDestination() :
-    m_unit(nullptr), m_offset(kInvalidOffset),
+    m_func(nullptr), m_offset(kInvalidOffset),
     m_ownsInternalBreakpoint(false)
 {
 }
 
-CmdFlowControl::StepDestination::StepDestination(const Unit* unit,
+CmdFlowControl::StepDestination::StepDestination(const Func* func,
                                                  Offset offset) :
-    m_unit(unit), m_offset(offset)
+    m_func(func), m_offset(offset)
 {
-  m_ownsInternalBreakpoint = !phpHasBreakpoint(m_unit, m_offset);
-  if (m_ownsInternalBreakpoint) phpAddBreakPoint(m_unit, m_offset);
+  m_ownsInternalBreakpoint = !phpHasBreakpoint(m_func, m_offset);
+  if (m_ownsInternalBreakpoint) phpAddBreakPoint(m_func, m_offset);
 }
 
 CmdFlowControl::StepDestination::StepDestination(StepDestination&& other) {
@@ -248,11 +247,11 @@ CmdFlowControl::StepDestination::StepDestination(StepDestination&& other) {
 CmdFlowControl::StepDestination&
 CmdFlowControl::StepDestination::operator=(StepDestination&& other) {
   if (this != &other) {
-    if (m_ownsInternalBreakpoint) phpRemoveBreakPoint(m_unit, m_offset);
-    m_unit = other.m_unit;
+    if (m_ownsInternalBreakpoint) phpRemoveBreakPoint(m_func, m_offset);
+    m_func = other.m_func;
     m_offset = other.m_offset;
     m_ownsInternalBreakpoint = other.m_ownsInternalBreakpoint;
-    other.m_unit = nullptr;
+    other.m_func = nullptr;
     other.m_offset = kInvalidOffset;
     other.m_ownsInternalBreakpoint = false;
   }
@@ -260,7 +259,7 @@ CmdFlowControl::StepDestination::operator=(StepDestination&& other) {
 }
 
 CmdFlowControl::StepDestination::~StepDestination() {
-  if (m_ownsInternalBreakpoint) phpRemoveBreakPoint(m_unit, m_offset);
+  if (m_ownsInternalBreakpoint) phpRemoveBreakPoint(m_func, m_offset);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

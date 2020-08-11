@@ -38,6 +38,7 @@ namespace HPHP {
 struct Unit;
 struct UnitEmitter;
 struct Func;
+struct FuncEmitter;
 
 constexpr size_t kMaxHhbcImms = 6;
 
@@ -921,7 +922,7 @@ ArgUnion* getImmPtr(PC opcode, int idx);
 
 void staticStreamer(const TypedValue* tv, std::string& out);
 
-std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u);
+std::string instrToString(PC it, Either<const Func*, const FuncEmitter*> f);
 void staticArrayStreamer(const ArrayData*, std::string&);
 
 /*

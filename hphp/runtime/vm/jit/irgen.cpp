@@ -193,7 +193,7 @@ void endRegion(IRGS& env) {
   auto const curSk  = curSrcKey(env);
   if (!instrAllowsFallThru(curSk.op())) return; // nothing to do here
 
-  auto const nextSk = curSk.advanced(curUnit(env));
+  auto const nextSk = curSk.advanced(curFunc(env));
   endRegion(env, nextSk);
 }
 

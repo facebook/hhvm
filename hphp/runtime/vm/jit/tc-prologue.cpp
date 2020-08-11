@@ -186,9 +186,9 @@ bool publishFuncPrologueMeta(Func* func, int nArgs, TransKind kind,
     reportTraceletToVtune(func->unit(), func, tr);
   }
 
-  recordGdbTranslation(funcBody, func, codeView.main(), loc.mainStart(),
+  recordGdbTranslation(funcBody, codeView.main(), loc.mainStart(),
                        loc.mainEnd(), false, true);
-  recordGdbTranslation(funcBody, func, codeView.cold(), loc.coldStart(),
+  recordGdbTranslation(funcBody, codeView.cold(), loc.coldStart(),
                        loc.coldEnd(), false, true);
   recordBCInstr(OpFuncPrologue, loc.mainStart(), loc.mainEnd(), false);
   return true;

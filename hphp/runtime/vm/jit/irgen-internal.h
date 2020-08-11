@@ -76,7 +76,7 @@ inline SrcKey curSrcKey(const IRGS& env) {
 
 inline SrcKey nextSrcKey(const IRGS& env) {
   auto srcKey = curSrcKey(env);
-  srcKey.advance(curUnit(env));
+  srcKey.advance(curFunc(env));
   return srcKey;
 }
 

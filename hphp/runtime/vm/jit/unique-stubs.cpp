@@ -196,7 +196,7 @@ bool fcallHelper(CallFlags callFlags, Func* func, int32_t numArgs, void* ctx,
   }
 
   unsafeRegs.stack.nalloc(numArgs + (callFlags.hasGenerics() ? 1 : 0));
-  unsafeRegs.pc = unsafeRegs.fp->unit()->at(
+  unsafeRegs.pc = unsafeRegs.fp->func()->at(
     unsafeRegs.fp->func()->base() + callFlags.callOffset());
   unsafeRegs.jitReturnAddr = savedRip;
   tl_regState = VMRegState::CLEAN;

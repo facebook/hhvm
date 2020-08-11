@@ -128,7 +128,8 @@ ExtOpcodeResult getExtOpcode(TCA addr, const TransRec* trec) {
         (bcMap[i].afrozenStart <= addr && bcMap[i+1].afrozenStart > addr)) {
       auto* unit = g_repo->getUnit(bcMap[i].sha1);
       always_assert(unit);
-      return {true, (ExtOpcode)unit->getOp(bcMap[i].bcStart)};
+      auto const func = unit->getFunc(bcMap[i].bcStart);
+      return {true, (ExtOpcode)func->getOp(bcMap[i].bcStart)};
     }
   }
 

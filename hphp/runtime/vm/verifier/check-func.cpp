@@ -374,7 +374,7 @@ bool FuncChecker::checkPrimaryBody(Offset base, Offset past) {
       }
       if ((instrFlags(op) & TF) == 0) {
         error("Last instruction in primary body is not terminal %d:%s\n",
-              offset(pc), instrToString(pc, unit()).c_str());
+              offset(pc), instrToString(pc, m_func).c_str());
         ok = false;
       }
     }
@@ -1931,7 +1931,7 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
   auto const verify_rx = (RuntimeOption::EvalRxVerifyBody > 0) &&
     funcAttrIsAnyRx(m_func->attrs) && !m_func->isRxDisabled;
   if (m_errmode == kVerbose) {
-    std::cout << blockToString(b, m_graph, unit()) << std::endl;
+    std::cout << blockToString(b, m_graph, m_func) << std::endl;
   }
   PC prev_pc = nullptr;
   for (InstrRange i = blockInstrs(b); !i.empty(); ) {
@@ -1939,7 +1939,7 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     if (m_errmode == kVerbose) {
       std::cout << "  " << std::setw(5) << offset(pc) << ":" <<
                    stateToString(cur) << " " <<
-                   instrToString(pc, unit()) << std::endl;
+                   instrToString(pc, m_func) << std::endl;
     }
     auto const op = peek_op(pc);
     if (mayTakeExnEdges(op)) ok &= checkExnEdge(cur, op, b);

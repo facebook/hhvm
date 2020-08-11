@@ -129,13 +129,13 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
    * advance past the end of the function, and potentially contain an invalid
    * bytecode offset.
    */
-  void advance(const Unit* u = nullptr);
+  void advance(const Func* f = nullptr);
 
   /*
    * Return a SrcKey representing the next instruction, without mutating this
    * SrcKey.
    */
-  SrcKey advanced(const Unit* u = nullptr) const;
+  SrcKey advanced(const Func* f = nullptr) const;
 
   /////////////////////////////////////////////////////////////////////////////
 

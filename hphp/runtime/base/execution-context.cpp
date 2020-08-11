@@ -1293,11 +1293,11 @@ void ExecutionContext::pushVMState(TypedValue* savedSP) {
     // Some asserts and tracing.
     const Func* func = savedVM.fp->m_func;
     /* bound-check asserts in offsetOf */
-    func->unit()->offsetOf(savedVM.pc);
+    func->offsetOf(savedVM.pc);
     TRACE(3, "pushVMState: saving frame %s pc %p off %d fp %p\n",
           func->name()->data(),
           savedVM.pc,
-          func->unit()->offsetOf(savedVM.pc),
+          func->offsetOf(savedVM.pc),
           savedVM.fp);
   }
 }
@@ -1330,11 +1330,11 @@ void ExecutionContext::popVMState() {
         savedVM.fp->m_func->unit()) {
       const Func* func = savedVM.fp->m_func;
       (void) /* bound-check asserts in offsetOf */
-        func->unit()->offsetOf(savedVM.pc);
+        func->offsetOf(savedVM.pc);
       TRACE(3, "popVMState: restoring frame %s pc %p off %d fp %p\n",
             func->name()->data(),
             savedVM.pc,
-            func->unit()->offsetOf(savedVM.pc),
+            func->offsetOf(savedVM.pc),
             savedVM.fp);
     }
   }
@@ -1682,7 +1682,7 @@ static void prepareAsyncFuncEntry(ActRec* enterFnAr,
   // If we're going to unwind, we need to resume at the offset we
   // suspended at, so we look up the correct catch trace (not the one
   // for the next op).
-  vmpc() = enterFnAr->func()->unit()->at(
+  vmpc() = enterFnAr->func()->at(
     willUnwind
       ? resumable->suspendOffset()
       : resumable->resumeFromAwaitOffset()
@@ -1802,7 +1802,7 @@ ActRec* ExecutionContext::getPrevVMState(const ActRec* fp,
   assertx(prevFp->func()->unit());
   if (prevSp) *prevSp = vmstate.sp;
   if (prevPc) {
-    *prevPc = prevFp->func()->unit()->offsetOf(vmstate.pc);
+    *prevPc = prevFp->func()->offsetOf(vmstate.pc);
   }
   if (fromVMEntry) *fromVMEntry = true;
   if (jitReturnAddr) *jitReturnAddr = (uint64_t)vmstate.jitReturnAddr;

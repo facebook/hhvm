@@ -235,7 +235,7 @@ void raise_dynamically_sampled_notice(folly::StringPiece fmt, Args&& ... args) {
     if (LIKELY(!vmfp()->skipFrame())) return vmpc();
     Offset offset;
     auto ar = g_context->getPrevVMStateSkipFrame(vmfp(), &offset);
-    return ar->func()->unit()->at(offset);
+    return ar->func()->at(offset);
   }();
 
   auto const str = folly::sformat(fmt, std::move(args) ...);

@@ -131,7 +131,7 @@ void phpDebuggerOpcodeHook(const unsigned char* pc) {
 
   // If we are no longer on the active line breakpoint, clear it
   int active_line = req_data.getActiveLineBreak();
-  int line = unit->getLineNumber(unit->offsetOf(pc));
+  int line = unit->getLineNumber(func->offsetOf(pc));
   if (UNLIKELY(active_line != -1 && active_line != line)) {
     req_data.clearActiveLineBreak();
   }
@@ -288,7 +288,7 @@ void phpDebuggerExceptionHandlerHook() noexcept {
         return;
       }
       const auto pc = vmpc();
-      auto line = unit->getLineNumber(unit->offsetOf(pc));
+      auto line = unit->getLineNumber(func->offsetOf(pc));
       getDebuggerHook()->onNextBreak(unit, line);
       return;
     }
@@ -393,7 +393,7 @@ void phpDebuggerStepIn() {
   // bytecode-source mapping.
   int line;
   SourceLoc source_loc;
-  if (unit->getSourceLoc(unit->offsetOf(pc), source_loc)) {
+  if (unit->getSourceLoc(func->offsetOf(pc), source_loc)) {
     line = source_loc.line1;
   } else {
     TRACE(5, "Could not grab the current line number\n");
@@ -459,8 +459,8 @@ void phpDebuggerNext() {
 //////////////////////////////////////////////////////////////////////////
 // Breakpoint manipulation
 
-void phpAddBreakPoint(const Unit* unit, Offset offset) {
-  PC pc = unit->at(offset);
+void phpAddBreakPoint(const Func* f, Offset offset) {
+  PC pc = f->at(offset);
   getBreakPointFilter()->addPC(pc);
 }
 
@@ -469,7 +469,7 @@ void phpAddBreakPointFuncEntry(const Func* f) {
   auto base = f->isGenerator()
     ? BaseGenerator::userBase(f)
     : f->base();
-  auto pc = f->unit()->at(base);
+  auto pc = f->at(base);
 
   TRACE(5, "func() break %s : unit %p offset %d ==> pc %p)\n",
         f->fullName()->data(), f->unit(), base, pc);
@@ -481,8 +481,7 @@ void phpAddBreakPointFuncEntry(const Func* f) {
 
 void phpAddBreakPointFuncExit(const Func* f) {
   // Iterate through the function's opcodes and place breakpoints on each RetC
-  const Unit* unit = f->unit();
-  for (PC pc = unit->at(f->base()); pc < unit->at(f->past());
+  for (PC pc = f->entry(); pc < f->at(f->past());
        pc += instrLen(pc)) {
     if (peek_op(pc) != OpRetC && peek_op(pc) != OpRetCSuspended &&
         peek_op(pc) != OpRetM) {
@@ -507,13 +506,14 @@ bool phpAddBreakPointLine(const Unit* unit, int line) {
   bool containsEntryNop = false;
   for (auto const offset : offsets) {
     auto bpOffset = offset.base;
-    auto op = unit->getOp(bpOffset);
+    auto f = unit->getFunc(bpOffset);
+    auto op = f->getOp(bpOffset);
     if (op == Op::EntryNop) {
       containsEntryNop = true;
     }
 
     if (containsEntryNop) {
-      phpAddBreakPoint(unit, offset.base);
+      phpAddBreakPoint(f, offset.base);
     }
   }
 
@@ -521,17 +521,18 @@ bool phpAddBreakPointLine(const Unit* unit, int line) {
     RID().m_lineBreakPointFilter.addRanges(unit, offsets);
   } else {
     auto bpOffset = offsets[0].base;
-    phpAddBreakPoint(unit, bpOffset);
+    auto f = unit->getFunc(bpOffset);
+    phpAddBreakPoint(f, bpOffset);
 
-    auto pc = unit->at(bpOffset);
+    auto pc = f->at(bpOffset);
     RID().m_lineBreakPointFilter.addPC(pc);
   }
 
   return true;
 }
 
-void phpRemoveBreakPoint(const Unit* unit, Offset offset) {
-  auto const pc = unit->at(offset);
+void phpRemoveBreakPoint(const Func* f, Offset offset) {
+  auto const pc = f->at(offset);
   RID().m_breakPointFilter.removePC(pc);
 }
 
@@ -539,16 +540,15 @@ void phpRemoveBreakPointFuncEntry(const Func* f) {
   // See note in debugger-hook.h. This can only remove from the function entry
   // filter
   auto base = f->isGenerator() ? BaseGenerator::userBase(f) : f->base();
-  auto pc = f->unit()->at(base);
+  auto pc = f->at(base);
   RID().m_callBreakPointFilter.removePC(pc);
 }
 
 void phpRemoveBreakPointFuncExit(const Func* f) {
   // See note in debugger-hook.h. This can only remove from the function exit
   // filter
-  const Unit* unit = f->unit();
   auto& req_data = RID();
-  for (PC pc = unit->at(f->base()); pc < unit->at(f->past());
+  for (PC pc = f->at(f->base()); pc < f->at(f->past());
        pc += instrLen(pc)) {
     if (peek_op(pc) == OpRetC || peek_op(pc) == OpRetCSuspended ||
         peek_op(pc) == OpRetM) {
@@ -566,10 +566,10 @@ void phpRemoveBreakPointLine(const Unit* unit, int line) {
   }
 }
 
-bool phpHasBreakpoint(const Unit* unit, Offset offset) {
+bool phpHasBreakpoint(const Func* f, Offset offset) {
   auto& req_data = RID();
   if (!req_data.m_breakPointFilter.isNull()) {
-    auto const pc = unit->at(offset);
+    auto const pc = f->at(offset);
     return req_data.m_breakPointFilter.checkPC(pc);
   }
   return false;
@@ -586,9 +586,10 @@ PCFilter* getFlowFilter() {
 String getCurrentFilePath(int* pLine) {
   VMRegAnchor anchor;
   auto pc = vmpc();
-  auto const unit = vmfp()->func()->unit();
+  auto const func = vmfp()->func();
+  auto const unit = func->unit();
   if (pLine != nullptr) {
-    *pLine = unit->getLineNumber(unit->offsetOf(pc));
+    *pLine = unit->getLineNumber(func->offsetOf(pc));
   }
   auto const filepath = const_cast<StringData*>(unit->filepath());
   return File::TranslatePath(String(filepath));

@@ -695,7 +695,7 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
   if (func->numLocals() > 0) {
     // Don't print locals for parent frames on a Ret(C|V) since some of them
     // may already be destructed.
-    if (isRet(func->unit()->getOp(offset)) && !isTop) {
+    if (isRet(func->getOp(offset)) && !isTop) {
       os << "<locals destroyed>";
     } else {
       os << "<";
@@ -755,7 +755,7 @@ std::string Stack::toString(const ActRec* fp, int offset,
   auto func = fp->func();
   os << prefix << "=== Stack at "
      << unit->filepath()->data() << ":"
-     << unit->getLineNumber(unit->offsetOf(vmpc()))
+     << unit->getLineNumber(func->offsetOf(vmpc()))
      << " func " << func->fullName()->data() << " ===\n";
 
   toStringFrame(os, fp, offset, m_top, prefix);
@@ -5003,7 +5003,7 @@ OPTBLD_INLINE TCA iopCreateCont(PC origpc, PC& pc) {
   auto const fp = vmfp();
   auto const func = fp->func();
   auto const numSlots = func->numSlotsInFrame();
-  auto const suspendOffset = func->unit()->offsetOf(origpc);
+  auto const suspendOffset = func->offsetOf(origpc);
   assertx(!isResumed(fp));
   assertx(func->isGenerator());
 
@@ -5044,7 +5044,7 @@ OPTBLD_INLINE void movePCIntoGenerator(PC origpc, BaseGenerator* gen) {
   genAR->setReturn(vmfp(), origpc, retHelper, false);
 
   vmfp() = genAR;
-  vmpc() = genAR->func()->unit()->at(gen->resumable()->resumeFromYieldOffset());
+  vmpc() = genAR->func()->at(gen->resumable()->resumeFromYieldOffset());
 }
 
 OPTBLD_INLINE void contEnterImpl(PC origpc) {
@@ -5075,7 +5075,7 @@ OPTBLD_INLINE TCA yield(PC origpc, PC& pc, const TypedValue* key, const TypedVal
 
   auto const fp = vmfp();
   auto const func = fp->func();
-  auto const suspendOffset = func->unit()->offsetOf(origpc);
+  auto const suspendOffset = func->offsetOf(origpc);
   assertx(isResumed(fp));
   assertx(func->isGenerator());
 
@@ -5164,7 +5164,7 @@ OPTBLD_INLINE void iopContGetReturn() {
 OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
   auto const fp = vmfp();
   auto const func = fp->func();
-  auto const suspendOffset = func->unit()->offsetOf(origpc);
+  auto const suspendOffset = func->offsetOf(origpc);
   assertx(func->isAsync());
   assertx(resumeModeFromActRec(fp) != ResumeMode::Async);
 
@@ -5225,7 +5225,7 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
 OPTBLD_INLINE void asyncSuspendR(PC origpc, PC& pc) {
   auto const fp = vmfp();
   auto const func = fp->func();
-  auto const suspendOffset = func->unit()->offsetOf(origpc);
+  auto const suspendOffset = func->offsetOf(origpc);
   assertx(!fp->sfp());
   assertx(func->isAsync());
   assertx(resumeModeFromActRec(fp) == ResumeMode::Async);
@@ -5481,7 +5481,8 @@ void DumpCurUnit(int skip) {
 void PrintTCCallerInfo() {
   VMRegAnchor _;
 
-  auto const u = vmfp()->m_func->unit();
+  auto const f = vmfp()->m_func;
+  auto const u = f->unit();
   auto const rip = []() -> jit::TCA {
     DECLARE_FRAME_POINTER(reg_fp);
     // NB: We can't directly mutate the register-mapped `reg_fp'.
@@ -5494,7 +5495,7 @@ void PrintTCCallerInfo() {
 
   fprintf(stderr, "Called from TC address %p\n", rip);
   std::cerr << u->filepath()->data() << ':'
-            << u->getLineNumber(u->offsetOf(vmpc())) << '\n';
+            << u->getLineNumber(f->offsetOf(vmpc())) << '\n';
 }
 
 // thread-local cached coverage info
@@ -5720,9 +5721,9 @@ OPCODES
   condStackTraceSep(Op##opcode);                                        \
   COND_STACKTRACE("op"#opcode" pre:  ");                                \
   PC pc = vmpc();                                                       \
-  ONTRACE(1, auto offset = vmfp()->m_func->unit()->offsetOf(pc);        \
+  ONTRACE(1, auto offset = vmfp()->m_func->offsetOf(pc);                \
           Trace::trace("op"#opcode" offset: %d\n", offset));            \
-  assertx(peek_op(pc) == Op::opcode);                                    \
+  assertx(peek_op(pc) == Op::opcode);                                   \
   pc += encoded_op_size(Op::opcode);                                    \
   auto const retAddr = iopWrap##opcode(pc);                             \
   vmpc() = pc;                                                          \
@@ -5836,7 +5837,7 @@ TCA dispatchImpl() {
     op = decode_op(pc);                                                 \
     COND_STACKTRACE("dispatch:                    ");                   \
     FTRACE(1, "dispatch: {}: {}\n", pcOff(),                            \
-           instrToString(opPC, vmfp()->m_func->unit()));                \
+           instrToString(opPC, vmfp()->m_func));                        \
     DISPATCH_ACTUAL();                                                  \
 } while (0)
 
@@ -5996,7 +5997,7 @@ PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
   assert(vmpc() == pc);
   assert(peek_op(pc) == opcode);
   FTRACE(1, "dispatch: {}: {}\n", pcOff(),
-         instrToString(pc, vmfp()->m_func->unit()));
+         instrToString(pc, vmfp()->m_func));
   if (!repo_auth) {
     if (UNLIKELY(modes != ExecMode::Normal)) {
       execModeHelper(pc, modes);

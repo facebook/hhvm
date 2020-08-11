@@ -85,7 +85,7 @@ RegionContext getContext(SrcKey sk) {
 
   // Get the bytecode for `ctx', skipping Asserts.
   auto const op = [&] {
-    auto pc = func->unit()->at(sk.offset());
+    auto pc = func->at(sk.offset());
     while (isTypeAssert(peek_op(pc))) {
       pc += instrLen(pc);
     }
@@ -301,7 +301,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       if (mcgen::retranslateOpt(sk.funcID())) {
         // Retranslation was successful. Resume execution at the new Optimize
         // translation.
-        vmpc() = sk.unit()->at(sk.offset());
+        vmpc() = sk.func()->at(sk.offset());
         start = tc::ustubs().resumeHelper;
       } else {
         // Retranslation failed, probably because we couldn't get the write
@@ -318,10 +318,10 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       auto ar = info.args[0].ar;
       auto const caller = info.args[1].ar;
       assertx(caller == vmfp());
-      Unit* destUnit = caller->func()->unit();
+      auto const destFunc = caller->func();
       // Set PC so logging code in getTranslation doesn't get confused.
       vmpc() = skipCall(
-        destUnit->at(caller->m_func->base() + ar->callOffset()));
+        destFunc->at(destFunc->base() + ar->callOffset()));
       if (ar->isAsyncEagerReturn()) {
         // When returning to the interpreted FCall, the execution continues at
         // the next opcode, not honoring the request for async eager return.
@@ -337,7 +337,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       assertx(caller == vmfp());
       TRACE(3, "REQ_POST_INTERP_RET: from %s to %s\n",
             ar->m_func->fullName()->data(),
-            caller->m_func->fullName()->data());
+            destFunc->fullName()->data());
       sk = liveSK();
       start = getTranslation(TransArgs{sk});
       break;
@@ -351,7 +351,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
   }
 
   if (start == nullptr) {
-    vmpc() = sk.unit()->at(sk.offset());
+    vmpc() = sk.pc();
     start = tc::ustubs().interpHelperSyncedPC;
   }
 

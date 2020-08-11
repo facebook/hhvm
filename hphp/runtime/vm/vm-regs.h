@@ -108,7 +108,7 @@ inline const unsigned char*& vmpc() {
 }
 
 inline Offset pcOff() {
-  return vmfp()->m_func->unit()->offsetOf(vmpc());
+  return vmfp()->m_func->offsetOf(vmpc());
 }
 
 inline ActRec*& vmFirstAR() {
@@ -140,7 +140,7 @@ inline void interp_set_regs(ActRec* ar, TypedValue* sp, Offset pcOff) {
   tl_regState = VMRegState::CLEAN;
   vmfp() = ar;
   vmsp() = sp;
-  vmpc() = ar->unit()->at(pcOff);
+  vmpc() = ar->func()->at(pcOff);
   vmJitReturnAddr() = nullptr; // We never elide frames around an interpOne
 }
 

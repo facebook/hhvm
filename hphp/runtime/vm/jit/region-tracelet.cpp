@@ -389,8 +389,8 @@ void truncateLiterals(Env& env) {
   auto& lastBlock = *env.region->blocks().back();
   auto sk = lastBlock.start();
   auto endSk = sk;
-  auto unit = lastBlock.unit();
-  for (int i = 0, len = lastBlock.length(); i < len; ++i, sk.advance(unit)) {
+  auto func = lastBlock.func();
+  for (int i = 0, len = lastBlock.length(); i < len; ++i, sk.advance(func)) {
     auto const op = sk.op();
     if (!isLiteral(op) && !isThisSelfOrParent(op) && !isTypeAssert(op)) {
       if (i == len - 1) return;
@@ -475,7 +475,7 @@ RegionDescPtr form_region(Env& env) {
     }
 
     // We successfully translated the instruction, so update env.sk.
-    env.sk.advance(env.curBlock->unit());
+    env.sk.advance(env.curBlock->func());
 
     if (instructionEndsRegion(env)) {
       FTRACE(1, "selectTracelet: tracelet broken after {}\n", env.inst);

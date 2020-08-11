@@ -69,8 +69,7 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
     return;
   }
   PC pc = vmpc();
-  Unit* unit = fp->m_func->unit();
-  Offset offset = unit->offsetOf(pc);
+  Offset offset = fp->m_func->offsetOf(pc);
   TRACE(2, "CmdNext: pc %p, opcode %s at '%s' offset %d\n",
         pc,
         opcodeToName(peek_op(pc)),
@@ -103,10 +102,10 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
   // there.
   if (hasStepOuts() || hasStepResumable()) {
     TRACE(2, "CmdNext: checking internal breakpoint(s)\n");
-    if (atStepOutOffset(unit, offset)) {
+    if (atStepOutOffset(fp->m_func, offset)) {
       if (deeper) return; // Recursion
       TRACE(2, "CmdNext: hit step-out\n");
-    } else if (atStepResumableOffset(unit, offset)) {
+    } else if (atStepResumableOffset(fp->m_func, offset)) {
       if (m_stepResumableId != getResumableId(fp)) return;
       TRACE(2, "CmdNext: hit step-cont\n");
       // We're in the resumable we expect. This may be at a
@@ -257,8 +256,8 @@ bool CmdNext::hasStepResumable() {
   return m_stepResumable.valid();
 }
 
-bool CmdNext::atStepResumableOffset(Unit* unit, Offset o) {
-  return m_stepResumable.at(unit, o);
+bool CmdNext::atStepResumableOffset(const Func* func, Offset o) {
+  return m_stepResumable.at(func, o);
 }
 
 // Await / Yield opcodes mark a suspend points of async functions and
@@ -271,12 +270,12 @@ void CmdNext::setupStepSuspend(ActRec* fp, PC pc) {
   if (op == OpAwait) {
     decode_iva(pc);
   }
-  Offset nextInst = fp->func()->unit()->offsetOf(pc);
+  Offset nextInst = fp->func()->offsetOf(pc);
   assertx(nextInst != kInvalidOffset);
   m_stepResumableId = fp;
   TRACE(2, "CmdNext: patch for resumable step at '%s' offset %d\n",
         fp->m_func->fullName()->data(), nextInst);
-  m_stepResumable = StepDestination(fp->m_func->unit(), nextInst);
+  m_stepResumable = StepDestination(fp->m_func, nextInst);
 }
 
 // We were trying to step over an Await in an eagerly executed frame, and the
@@ -294,7 +293,7 @@ void CmdNext::stepIntoSuspendedFrame() {
   TRACE(2,
         "CmdNext: patch for cont step after Await at '%s' offset %d\n",
         func->fullName()->data(), nextInst);
-  m_stepResumable = StepDestination(func->unit(), nextInst);
+  m_stepResumable = StepDestination(func, nextInst);
 }
 
 void CmdNext::cleanupStepResumable() {

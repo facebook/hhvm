@@ -55,7 +55,7 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
 
   TRACE(2, "isTailAwait analysis:\n");
   if (sk.op() != Op::Await) {
-    FTRACE(2, "  Non-Await opcode: {}\n", instrToString(sk.pc(), unit));
+    FTRACE(2, "  Non-Await opcode: {}\n", instrToString(sk.pc(), func));
     return false;
   } else if (func->isGenerator()) {
     FTRACE(2, "  Function is a generator: {}\n", func->fullName());
@@ -73,7 +73,7 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
   // In some cases, we'll use a temporary local for tail awaits.
   // Track up to one usage of such a variable.
   auto resultLocal = kInvalidId;
-  sk.advance(unit);
+  sk.advance(func);
   for (auto i = 0; i < func->numLocals(); i++) {
     auto const loc = Location::Local { safe_cast<uint32_t>(i) };
     locals.push_back(env.irb->fs().typeOf(loc));
@@ -81,7 +81,7 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
 
   // Place a limit on the number of iterations in case of infinite loops.
   for (auto i = 256; i-- > 0;) {
-    FTRACE(2, "  {}\n", instrToString(sk.pc(), unit));
+    FTRACE(2, "  {}\n", instrToString(sk.pc(), func));
     switch (sk.op()) {
       case Op::RetC:         return resultLocal == kInvalidId;
       case Op::AssertRATStk: break;
@@ -108,7 +108,7 @@ bool isTailAwait(const IRGS& env, std::vector<Type>& locals) {
       }
       default:               return false;
     }
-    sk.advance(unit);
+    sk.advance(func);
   }
 
   TRACE(2, "  Processed too many opcodes; bailing\n");
@@ -381,7 +381,7 @@ void implYield(IRGS& env, bool withKey) {
  * here).
  */
 Type awaitedTypeFromHHBBC(IRGS& env, Offset nextBcOff) {
-  auto pc = curUnit(env)->at(nextBcOff);
+  auto pc = curFunc(env)->at(nextBcOff);
   if (decode_op(pc) != Op::AssertRATStk) return TInitCell;
   auto const stkLoc = decode_iva(pc);
   if (stkLoc != 0) return TInitCell;

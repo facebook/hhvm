@@ -114,25 +114,6 @@ inline Offset Unit::bclen() const {
   return m_bclen;
 }
 
-inline PC Unit::at(Offset off) const {
-  assertx(off >= 0 && off <= Offset(m_bclen));
-  return m_bc + off;
-}
-
-inline Offset Unit::offsetOf(PC pc) const {
-  assertx(contains(pc));
-  return pc - m_bc;
-}
-
-inline bool Unit::contains(PC pc) const {
-  return pc >= m_bc && pc <= m_bc + m_bclen;
-}
-
-inline Op Unit::getOp(Offset instrOffset) const {
-  assertx(instrOffset < m_bclen);
-  return peek_op(m_bc + instrOffset);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Litstrs and NamedEntitys.
 

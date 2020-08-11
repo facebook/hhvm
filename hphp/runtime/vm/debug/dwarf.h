@@ -172,7 +172,7 @@ struct DwarfInfo {
   FuncDB m_functions;
 
   const char *lookupFile(const Unit *unit);
-  void addLineEntries(TCRange range, const Unit *unit,
+  void addLineEntries(TCRange range, const Func* func,
                       PC instr, FunctionInfo* f);
   void transferFuncs(DwarfChunk* from, DwarfChunk* to);
   void compactChunks();

@@ -75,7 +75,7 @@ void AsyncFlowStepper::setup() {
 
   auto const pc = vmpc();
   SourceLoc source_loc;
-  if (!unit->getSourceLoc(unit->offsetOf(pc), source_loc)) {
+  if (!unit->getSourceLoc(func->offsetOf(pc), source_loc)) {
     TRACE(5, "Could not grab the current line number\n");
     return;
   }
@@ -234,11 +234,11 @@ void AsyncFlowStepper::setResumeInternalBreakpoint(PC pc) {
   assertx(decode_op(pc) == Op::Await);
 
   auto resumeInstPc = pc + instrLen(pc);
-  assertx(vmfp()->func()->unit()->offsetOf(resumeInstPc) != kInvalidOffset);
+  assertx(vmfp()->func()->offsetOf(resumeInstPc) != kInvalidOffset);
 
   TRACE(2, "Setup internal breakpoint after await at '%s' offset %d\n",
     vmfp()->func()->fullName()->data(),
-    vmfp()->func()->unit()->offsetOf(resumeInstPc));
+    vmfp()->func()->offsetOf(resumeInstPc));
   m_resumeBreakpointFilter.addPC(resumeInstPc);
 
   auto bpFilter = getBreakPointFilter();

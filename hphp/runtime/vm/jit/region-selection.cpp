@@ -681,7 +681,7 @@ void RegionDesc::Block::addInstruction() {
 void RegionDesc::Block::truncateAfter(SrcKey final) {
   auto skIter = start();
   int newLen = -1;
-  for (int i = 0; i < m_length; ++i, skIter.advance(unit())) {
+  for (int i = 0; i < m_length; ++i, skIter.advance(func())) {
     if (skIter == final) {
       newLen = i + 1;
       break;
@@ -723,12 +723,11 @@ void RegionDesc::Block::clearPreConditions() {
 void RegionDesc::Block::checkInstructions() const {
   if (!debug || length() == 0) return;
 
-  auto u = unit();
   auto sk = start();
 
   for (int i = 1; i < length(); ++i) {
     if (i != length() - 1) checkInstruction(sk.op());
-    sk.advance(u);
+    sk.advance(func());
   }
   assertx(sk.offset() == m_last);
 }
@@ -1217,7 +1216,7 @@ std::string show(const RegionDesc::Block& b) {
 
   for (int i = 0; i < b.length(); ++i) {
     std::string instrString;
-    folly::toAppend(instrToString(b.unit()->at(skIter.offset()), b.unit()),
+    folly::toAppend(instrToString(b.func()->at(skIter.offset()), b.func()),
                     &instrString);
 
     folly::toAppend(
@@ -1228,7 +1227,7 @@ std::string show(const RegionDesc::Block& b) {
       "\n",
       &ret
     );
-    skIter.advance(b.unit());
+    skIter.advance(b.func());
   }
 
   folly::toAppend(show(b.postConds()), &ret);

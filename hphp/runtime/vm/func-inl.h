@@ -272,6 +272,23 @@ inline bool Func::contains(Offset offset) const {
   return offset >= base() && offset < past();
 }
 
+inline PC Func::at(Offset off) const {
+  // We don't use contains because we want to allow past becase it is often
+  // used in loops
+  assertx(off >= base() && off <= past());
+  return unit()->entry() + off;
+}
+
+inline Offset Func::offsetOf(PC pc) const {
+  assertx(contains(pc));
+  return pc - unit()->entry();
+}
+
+inline Op Func::getOp(Offset instrOffset) const {
+  assertx(contains(instrOffset));
+  return peek_op(unit()->entry() + instrOffset);
+}
+
 inline Offset Func::ctiEntry() const {
   return shared()->m_cti_base.load(std::memory_order_acquire);
 }

@@ -34,7 +34,7 @@ private:
   void stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc);
   void stepIntoSuspendedFrame();
   bool hasStepResumable();
-  bool atStepResumableOffset(Unit* unit, Offset o);
+  bool atStepResumableOffset(const Func* func, Offset o);
   void setupStepSuspend(ActRec* fp, PC pc);
   void cleanupStepResumable();
   void* getResumableId(ActRec* fp);

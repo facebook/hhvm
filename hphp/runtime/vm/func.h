@@ -405,6 +405,17 @@ struct Func final {
   bool contains(Offset offset) const;
 
   /*
+   * Convert between PC and Offset from entry().
+   */
+  PC at(Offset off) const;
+  Offset offsetOf(PC pc) const;
+
+  /*
+   * Get the Op at `instrOffset'.
+   */
+  Op getOp(Offset instrOffset) const;
+
+  /*
    * Return a vector of pairs of (param index, corresponding DV funclet
    * offset).
    */

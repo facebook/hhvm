@@ -265,11 +265,11 @@ void phpDebuggerNext();
 // Breakpoint manipulation
 
 // Add breakpoints of various types
-void phpAddBreakPoint(const Unit* unit, Offset offset);
+void phpAddBreakPoint(const Func* f, Offset offset);
 void phpAddBreakPointFuncEntry(const Func* f);
 void phpAddBreakPointFuncExit(const Func* f);
 // Returns false if the line is invalid
-bool phpAddBreakPointLine(const Unit* unit, int line);
+bool phpAddBreakPointLine(const Unit* u, int line);
 
 // Breakpoint removal functions.
 // FIXME Note that internally there is a global PCFilter for all breakpoints.
@@ -283,12 +283,12 @@ bool phpAddBreakPointLine(const Unit* unit, int line);
 // This means once added, we will always interrupt on that breakpoint until the
 // hook is detached.  This isn't a huge deal as it just means we can't jit those
 // opcodes, but it should be fixed since it's just a design issue.
-void phpRemoveBreakPoint(const Unit* unit, Offset offset);
+void phpRemoveBreakPoint(const Func* f, Offset offset);
 void phpRemoveBreakPointFuncEntry(const Func* f);
 void phpRemoveBreakPointFuncExit(const Func* f);
-void phpRemoveBreakPointLine(const Unit* unit, int line);
+void phpRemoveBreakPointLine(const Unit* u, int line);
 
-bool phpHasBreakpoint(const Unit* unit, Offset offset);
+bool phpHasBreakpoint(const Func* f, Offset offset);
 
 StackDepthDisposition getStackDisposition(int baseline);
 

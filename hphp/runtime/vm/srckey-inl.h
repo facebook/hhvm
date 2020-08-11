@@ -36,10 +36,10 @@ inline SrcKey::SrcKey(const Func* f, Offset off, ResumeMode resumeMode)
 
 inline SrcKey::SrcKey(const Func* f, PC pc, ResumeMode resumeMode)
   : m_funcID{f->getFuncId()}
-  , m_offset{(uint32_t)f->unit()->offsetOf(pc)}
+  , m_offset{(uint32_t)f->offsetOf(pc)}
   , m_resumeModeAndPrologue{encodeResumeMode(resumeMode)}
 {
-  assertx((uint32_t)f->unit()->offsetOf(pc) >> 31 == 0);
+  assertx((uint32_t)f->offsetOf(pc) >> 31 == 0);
 }
 
 inline SrcKey::SrcKey(FuncId funcId, Offset off, ResumeMode resumeMode)
@@ -60,10 +60,10 @@ inline SrcKey::SrcKey(const Func* f, Offset off, PrologueTag)
 
 inline SrcKey::SrcKey(const Func* f, PC pc, PrologueTag)
   : m_funcID{f->getFuncId()}
-  , m_offset{(uint32_t)f->unit()->offsetOf(pc)}
+  , m_offset{(uint32_t)f->offsetOf(pc)}
   , m_resumeModeAndPrologue{encodePrologue()}
 {
-  assertx((uint32_t)f->unit()->offsetOf(pc) >> 31 == 0);
+  assertx((uint32_t)f->offsetOf(pc) >> 31 == 0);
 }
 
 inline SrcKey::SrcKey(FuncId funcId, Offset off, PrologueTag)
@@ -140,11 +140,11 @@ inline const Unit* SrcKey::unit() const {
 }
 
 inline Op SrcKey::op() const {
-  return unit()->getOp(offset());
+  return func()->getOp(offset());
 }
 
 inline PC SrcKey::pc() const {
-  return unit()->at(offset());
+  return func()->at(offset());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -158,13 +158,13 @@ inline OffsetSet SrcKey::succOffsets() const {
   return instrSuccOffsets(pc(), func());
 }
 
-inline void SrcKey::advance(const Unit* u) {
-  m_offset += instrLen((u ? u : unit())->at(offset()));
+inline void SrcKey::advance(const Func* f) {
+  m_offset += instrLen((f ? f : func())->at(offset()));
 }
 
-inline SrcKey SrcKey::advanced(const Unit* u) const {
+inline SrcKey SrcKey::advanced(const Func* f) const {
   auto tmp = *this;
-  tmp.advance(u);
+  tmp.advance(f);
   return tmp;
 }
 

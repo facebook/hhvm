@@ -97,14 +97,15 @@ InterruptSite::InterruptSite(bool hardBreakPoint, const Variant& error)
     // so we need to construct the site on the caller
     Offset offset;
     fp = context->getPrevVMStateSkipFrame(fp, &offset);
-    m_offset = fp->unit()->offsetOf(skipCall(fp->unit()->at(offset)));
+    auto f = fp->m_func;
+    m_offset = f->offsetOf(skipCall(f->at(offset)));
   } else {
     auto const *pc = vmpc();
     auto f = fp->m_func;
     bail_on(!f);
     m_unit = f->unit();
     bail_on(!m_unit);
-    m_offset = m_unit->offsetOf(pc);
+    m_offset = f->offsetOf(pc);
     auto base = f->isGenerator()
       ? BaseGenerator::userBase(f)
       : f->base();

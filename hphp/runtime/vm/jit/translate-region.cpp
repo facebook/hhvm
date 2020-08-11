@@ -469,7 +469,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     }
 
     // Generate IR for each bytecode instruction in this block.
-    for (unsigned i = 0; i < block.length(); ++i, sk.advance(block.unit())) {
+    for (unsigned i = 0; i < block.length(); ++i, sk.advance(block.func())) {
       ProfSrcKey psk { canonTransID(irgs.profTransIDs), sk };
       auto const lastInstr = i == block.length() - 1;
       auto const penultimateInst = i == block.length() - 2;

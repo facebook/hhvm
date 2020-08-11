@@ -62,7 +62,7 @@ Op NormalizedInstruction::op() const {
 }
 
 PC NormalizedInstruction::pc() const {
-  return unit()->at(source.offset());
+  return func()->at(source.offset());
 }
 
 const Unit* NormalizedInstruction::unit() const {
@@ -78,11 +78,11 @@ Offset NormalizedInstruction::offset() const {
 }
 
 std::string NormalizedInstruction::toString() const {
-  return instrToString(pc(), unit());
+  return instrToString(pc(), func());
 }
 
 SrcKey NormalizedInstruction::nextSk() const {
-  return source.advanced(m_unit);
+  return source.advanced(func());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

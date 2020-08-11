@@ -178,12 +178,12 @@ FuncInfo find_func_info(const Func* func) {
   };
 
   auto find_jump_targets = [&] {
-    auto pc           = func->unit()->at(func->base());
-    auto const stop   = func->unit()->at(func->past());
-    auto const bcBase = func->unit()->at(0);
+    auto pc           = func->entry();
+    auto const stop   = func->at(func->past());
+    auto const bcBase = func->unit()->entry();
 
     for (; pc != stop; pc += instrLen(pc)) {
-      auto const off = func->unit()->offsetOf(pc);
+      auto const off = func->offsetOf(pc);
       auto const targets = instrJumpTargets(bcBase, off);
       for (auto const& target : targets) {
         add_target("L", target);
@@ -260,7 +260,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
   auto const startPc = pc;
 
   auto rel_label = [&] (Offset off) {
-    auto const tgt = startPc - finfo.unit->at(0) + off;
+    auto const tgt = finfo.func->offsetOf(startPc) + off;
     return jmp_label(finfo, tgt);
   };
 
@@ -443,8 +443,8 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
   auto const lblStop = end(finfo.labels);
   auto       ehIter  = begin(finfo.ehStarts);
   auto const ehStop  = end(finfo.ehStarts);
-  auto       bcIter  = func->unit()->at(func->base());
-  auto const bcStop  = func->unit()->at(func->past());
+  auto       bcIter  = func->entry();
+  auto const bcStop  = func->at(func->past());
 
   SourceLoc srcLoc;
 
@@ -452,7 +452,7 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
   min_priority_queue<Offset> ehHandlers;
 
   while (bcIter != bcStop) {
-    auto const off = func->unit()->offsetOf(bcIter);
+    auto const off = func->offsetOf(bcIter);
 
     // First, close any protected EH regions that are past-the-end at
     // this offset.

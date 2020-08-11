@@ -41,10 +41,6 @@ inline Offset UnitEmitter::bcPos() const {
   return m_bclen;
 }
 
-inline Offset UnitEmitter::offsetOf(const unsigned char* pc) const {
-  return pc - m_bc;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // FuncEmitters.
 

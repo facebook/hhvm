@@ -105,14 +105,15 @@ void PCFilter::addRanges(const Unit* unit, const OffsetRangeVec& offsets,
                          OpcodeFilter isOpcodeAllowed) {
   for (auto range = offsets.cbegin(); range != offsets.cend(); ++range) {
     TRACE(3, "\toffsets [%d, %d)\n", range->base, range->past);
-    for (PC pc = unit->at(range->base); pc < unit->at(range->past);
+    auto func = unit->getFunc(range->base);
+    for (PC pc = func->at(range->base); pc < func->at(range->past);
          pc += instrLen(pc)) {
       if (isOpcodeAllowed(peek_op(pc))) {
         TRACE(3, "\t\tpc %p\n", pc);
         addPC(pc);
       } else {
         TRACE(3, "\t\tpc %p -- skipping (offset %d)\n", pc,
-              unit->offsetOf(pc));
+              func->offsetOf(pc));
       }
     }
   }
@@ -124,21 +125,22 @@ void PCFilter::removeRanges(const Unit* unit, const OffsetRangeVec& offsets,
                             OpcodeFilter isOpcodeAllowed) {
   for (auto range = offsets.cbegin(); range != offsets.cend(); ++range) {
     TRACE(3, "\toffsets [%d, %d) (remove)\n", range->base, range->past);
-    for (PC pc = unit->at(range->base); pc < unit->at(range->past);
+    auto func = unit->getFunc(range->base);
+    for (PC pc = func->at(range->base); pc < func->at(range->past);
          pc += instrLen(pc)) {
       if (isOpcodeAllowed(peek_op(pc))) {
         TRACE(3, "\t\tpc %p (remove)\n", pc);
         removePC(pc);
       } else {
         TRACE(3, "\t\tpc %p -- skipping (offset %d) (remove)\n", pc,
-              unit->offsetOf(pc));
+              func->offsetOf(pc));
       }
     }
   }
 }
 
-void PCFilter::removeOffset(const Unit* unit, Offset offset) {
-  removePC(unit->at(offset));
+void PCFilter::removeOffset(const Func* func, Offset offset) {
+  removePC(func->at(offset));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

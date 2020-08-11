@@ -47,7 +47,7 @@ void printInstr(const UnitEmitter*, PC pc);
  * Dump one whole block to a string with a header showing its out-edges,
  * and rpo_id.
  */
-std::string blockToString(const Block* b, const Graph* g, const UnitEmitter* u);
+std::string blockToString(const Block* b, const Graph* g, const FuncEmitter* u);
 
 /**
  * Generate a GML-format file for every Func in this unit.  The filename

@@ -2105,7 +2105,7 @@ void logArrayAccessProfile(IRGS& env, SSATmp* arr, SSATmp* key,
   entry.setVec("inline_state", inline_state);
   entry.setStr("arr_type", arr->type().toString());
   entry.setStr("key_type", key->type().toString());
-  entry.setStr("hhbc", instrToString(marker.sk().pc(), unit));
+  entry.setStr("hhbc", instrToString(marker.sk().pc(), func));
   entry.setStr("mode", subopToName(mode));
 
   StructuredLog::log("hhvm_array_accesses", entry);

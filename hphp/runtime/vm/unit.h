@@ -260,22 +260,6 @@ public:
   PC entry() const;
   Offset bclen() const;
 
-  /*
-   * Convert between PC and Offset from entry().
-   */
-  PC at(Offset off) const;
-  Offset offsetOf(PC pc) const;
-
-  /*
-   * Is `pc' in this Unit?
-   */
-  bool contains(PC pc) const;
-
-  /*
-   * Get the Op at `instrOffset'.
-   */
-  Op getOp(Offset instrOffset) const;
-
   /////////////////////////////////////////////////////////////////////////////
   // Code locations.                                                    [const]
 

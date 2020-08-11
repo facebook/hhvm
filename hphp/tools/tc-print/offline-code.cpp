@@ -299,7 +299,8 @@ void OfflineCode::printRangeInfo(std::ostream& os,
     auto const currBC = *rangeInfo.bc;
     if (rangeInfo.unit) {
       auto const currUnit = *rangeInfo.unit;
-      auto const bcPast = currBC + instrLen(currUnit->at(currBC));
+      auto const func = currUnit->getFunc(currBC);
+      auto const bcPast = currBC + instrLen(func->at(currBC));
       currUnit->prettyPrint(os, Unit::PrintOpts().range(currBC, bcPast));
     } else {
       auto const currSha1 = rangeInfo.sha1 ?
@@ -442,9 +443,9 @@ TCRangeInfo OfflineCode::getRangeInfo(const TransBCMapping& transBCMap,
 
   if (auto const currUnit = g_repo->getUnit(transBCMap.sha1)) {
    rangeInfo.unit = currUnit;
-   rangeInfo.func = currUnit->getFunc(transBCMap.bcStart);
-   rangeInfo.instrStr = instrToString(currUnit->at(transBCMap.bcStart),
-                                      currUnit);
+   auto const func = currUnit->getFunc(transBCMap.bcStart);
+   rangeInfo.func = func;
+   rangeInfo.instrStr = instrToString(func->at(transBCMap.bcStart), func);
    auto const lineNum = currUnit->getLineNumber(transBCMap.bcStart);
    if (lineNum != -1) rangeInfo.lineNum = lineNum;
   }

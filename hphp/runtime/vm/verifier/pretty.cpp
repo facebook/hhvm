@@ -133,15 +133,16 @@ static void pretty_print(
   const auto* it = &ue->bc()[startOffset];
   int prevLineNum = -1;
   while (it < &ue->bc()[stopOffset]) {
-    assertx(funcIt == funcMap.end() || funcIt->first >= ue->offsetOf(it));
-    if (funcIt != funcMap.end() && funcIt->first == ue->offsetOf(it)) {
+    auto fe = funcIt->second;
+    assertx(funcIt == funcMap.end() || funcIt->first >= fe->offsetOf(it));
+    if (funcIt != funcMap.end() && funcIt->first == fe->offsetOf(it)) {
       out.put('\n');
-      pretty_print(funcIt->second, out);
+      pretty_print(fe, out);
       ++funcIt;
       prevLineNum = -1;
     }
 
-    int lineNum = SourceLocation::getLineNumber(ue->lineTable(), ue->offsetOf(it));
+    int lineNum = SourceLocation::getLineNumber(ue->lineTable(), fe->offsetOf(it));
     if (lineNum != prevLineNum) {
       out << "  // line " << lineNum << std::endl;
       prevLineNum = lineNum;
@@ -149,25 +150,25 @@ static void pretty_print(
 
     out << ' '
         << std::setw(4) << (it - ue->bc()) << ": "
-        << instrToString(it, ue)
+        << instrToString(it, fe)
         << std::endl;
     it += instrLen(it);
   }
 }
 
-void printInstr(const UnitEmitter* unit, PC pc) {
-  std::cout << "  " << std::setw(4) << (pc - unit->bc()) << ":" <<
+void printInstr(const FuncEmitter* func, PC pc) {
+  std::cout << "  " << std::setw(4) << (pc - func->ue().bc()) << ":" <<
                (isCF(pc) ? "C":" ") <<
                (isTF(pc) ? "T":" ") <<
                std::setw(3) << instrLen(pc) <<
-               " " << instrToString(pc, unit) << std::endl;
+               " " << instrToString(pc, func) << std::endl;
 }
 
-std::string blockToString(const Block* b, const Graph*, const UnitEmitter* u) {
+std::string blockToString(const Block* b, const Graph*, const FuncEmitter* f) {
   std::stringstream out;
   out << "B" << b->id << ":"
-      << u->offsetOf(b->start) <<
-         "-" << u->offsetOf(b->last) <<
+      << f->offsetOf(b->start) <<
+         "-" << f->offsetOf(b->last) <<
          " rpo=" << b->rpo_id <<
          " succ=";
   for (BlockPtrRange j = succBlocks(b); !j.empty(); ) {
@@ -181,13 +182,12 @@ std::string blockToString(const Block* b, const Graph*, const UnitEmitter* u) {
 }
 
 void printBlocks(const FuncEmitter* func, const Graph* g) {
-  auto const unit = &func->ue();
   pretty_print(func, std::cout);
   for (LinearBlocks i(g->first_linear, 0); !i.empty(); i.popFront()) {
     const Block* b = i.front();
-    std::cout << blockToString(b, g, unit) << std::endl;
+    std::cout << blockToString(b, g, func) << std::endl;
     for (InstrRange j(b->start, b->end); !j.empty(); ) {
-      printInstr(unit, j.popFront());
+      printInstr(func, j.popFront());
     }
   }
   std::cout << std::endl;
@@ -215,7 +215,7 @@ void printGml(const UnitEmitter* unit) {
       const Block* b = j.popFront();
       std::stringstream strbuf;
       pretty_print(
-        unit, strbuf, unit->offsetOf(b->start), unit->offsetOf(b->end)
+        unit, strbuf, func->offsetOf(b->start), func->offsetOf(b->end)
       );
       std::string code = strbuf.str();
       for (int i = 0, n = code.size(); i < n; ++i) {

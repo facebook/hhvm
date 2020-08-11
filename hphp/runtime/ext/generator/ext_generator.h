@@ -62,8 +62,8 @@ struct BaseGenerator {
     auto base = func->base();
 
     // Skip past VerifyParamType and EntryNoop bytecodes
-    auto pc = func->unit()->at(base);
-    auto past = func->unit()->at(func->past());
+    auto pc = func->at(base);
+    auto past = func->at(func->past());
     while (peek_op(pc) != OpCreateCont) {
       pc += instrLen(pc);
       always_assert(pc < past);
@@ -74,7 +74,7 @@ struct BaseGenerator {
     assertx(op1 == OpCreateCont);
     assertx(op2 == OpPopC);
 
-    return func->unit()->offsetOf(pc);
+    return func->offsetOf(pc);
   }
 
   static size_t genSize(size_t ndSize, size_t frameSz) {

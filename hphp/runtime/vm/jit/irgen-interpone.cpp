@@ -298,7 +298,7 @@ void interpOne(IRGS& env) {
   auto popped = getStackPopped(sk.pc());
   auto pushed = getStackPushed(sk.pc());
   FTRACE(1, "emitting InterpOne for {}, result = {}, popped {}, pushed {}\n",
-         instrToString(sk.pc(), sk.unit()),
+         instrToString(sk.pc(), sk.func()),
          stackType.has_value() ? stackType->toString() : "<none>",
          popped, pushed);
 
@@ -334,8 +334,8 @@ void interpOne(IRGS& env,
                int popped,
                int pushed,
                InterpOneData& idata) {
-  auto const unit = curUnit(env);
-  auto const op = unit->getOp(bcOff(env));
+  auto const func = curFunc(env);
+  auto const op = func->getOp(bcOff(env));
 
   idata.bcOff = bcOff(env);
   idata.cellsPopped = popped;

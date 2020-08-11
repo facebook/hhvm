@@ -192,7 +192,7 @@ struct alignas(16) Resumable {
   }
   Offset resumeFromAwaitOffset() const {
     assertx(m_actRec.func()->contains(m_suspendOffset));
-    auto const suspendPC = m_actRec.func()->unit()->at(m_suspendOffset);
+    auto const suspendPC = m_actRec.func()->at(m_suspendOffset);
     assertx(peek_op(suspendPC) == OpAwait || peek_op(suspendPC) == OpAwaitAll);
     auto const resumeOffset = m_suspendOffset + instrLen(suspendPC);
     assertx(m_actRec.func()->contains(resumeOffset));
@@ -201,7 +201,7 @@ struct alignas(16) Resumable {
   Offset resumeFromYieldOffset() const {
     assertx(m_actRec.func()->contains(m_suspendOffset));
     // TODO(alexeyt) remove `yield from` and the need for this complexity
-    auto const pc = m_actRec.func()->unit()->at(m_suspendOffset);
+    auto const pc = m_actRec.func()->at(m_suspendOffset);
     DEBUG_ONLY auto const suspendedOp = peek_op(pc);
     assertx(suspendedOp == OpCreateCont ||
             suspendedOp == OpYield ||

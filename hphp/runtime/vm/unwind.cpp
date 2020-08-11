@@ -237,7 +237,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
 
   assertx(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
           isResumed(prevFp));
-  pc = prevFp->func()->unit()->at(callOff + prevFp->func()->base());
+  pc = prevFp->func()->at(callOff + prevFp->func()->base());
   assertx(prevFp->func()->contains(pc));
   fp = prevFp;
   return phpException;
@@ -380,7 +380,7 @@ UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
 
     ITRACE(1, "unwind: func {}, raiseOffset {}, fp {}, sp {}, teardown {}\n",
            func->name()->data(),
-           func->unit()->offsetOf(pc),
+           func->offsetOf(pc),
            implicit_cast<void*>(fp),
            implicit_cast<void*>(stack.top()),
            teardown);
@@ -401,7 +401,7 @@ UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
     if (RequestInfo::s_requestInfo->m_pendingException == nullptr &&
         phpException && !UNLIKELY(fp->localsDecRefd())) {
 
-      const EHEnt* eh = func->findEH(func->unit()->offsetOf(pc));
+      const EHEnt* eh = func->findEH(func->offsetOf(pc));
       if (eh != nullptr) {
         // Found exception handler. Push the exception on top of the
         // stack and resume VM.
@@ -411,7 +411,7 @@ UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
                func->unit()->filepath()->data());
 
         vmStack().pushObjectNoRc(phpException);
-        pc = func->unit()->at(eh->m_handler);
+        pc = func->at(eh->m_handler);
         DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
         return UnwindNone;
       }

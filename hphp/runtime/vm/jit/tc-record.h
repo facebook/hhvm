@@ -41,7 +41,7 @@ namespace tc {
 /*
  * Record translation for gdb debugging of the tc.
  */
-void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,
+void recordGdbTranslation(SrcKey sk, const CodeBlock& cb,
                           const TCA start, const TCA end, bool exit,
                           bool inPrologue);
 

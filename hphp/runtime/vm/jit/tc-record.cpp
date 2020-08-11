@@ -48,7 +48,7 @@ TRACE_SET_MOD(mcg);
 
 namespace HPHP { namespace jit { namespace tc {
 
-void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,
+void recordGdbTranslation(SrcKey sk, const CodeBlock& cb,
                           const TCA start, const TCA end, bool exit,
                           bool inPrologue) {
   assertx(cb.contains(start, end));
@@ -57,8 +57,8 @@ void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,
     if (!RuntimeOption::EvalJitNoGdb) {
       Debug::DebugInfo::Get()->recordTracelet(
         Debug::TCRange(start, end, &cb == &code().cold()),
-        srcFunc,
-        srcFunc->unit() ? srcFunc->unit()->at(sk.offset()) : nullptr,
+        sk.func(),
+        sk.pc(),
         exit, inPrologue
       );
     }
@@ -66,7 +66,7 @@ void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,
       Debug::DebugInfo::Get()->recordPerfMap(
         Debug::TCRange(start, end, &cb == &code().cold()),
         sk,
-        srcFunc,
+        sk.func(),
         exit,
         inPrologue
       );

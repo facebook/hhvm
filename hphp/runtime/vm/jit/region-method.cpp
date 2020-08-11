@@ -73,8 +73,6 @@ RegionDescPtr selectMethod(const RegionContext& context) {
   Arena arena;
   GraphBuilder gb(arena, func);
   auto const graph = gb.build();
-  auto const unit = func->unit();
-
   jit::hash_map<Block*,RegionDesc::BlockId> blockMap;
 
   /*
@@ -87,7 +85,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
   {
     auto spOffset = context.spOffset;
     for (Block* b = graph->first_linear; b != nullptr; b = b->next_rpo) {
-      auto const start  = unit->offsetOf(b->start);
+      auto const start  = func->offsetOf(b->start);
       auto const length = numInstrs(b->start, b->end);
       SrcKey sk{context.sk, start};
       auto const rblock = ret->addBlock(sk, length, spOffset);
@@ -135,8 +133,8 @@ RegionDescPtr selectMethod(const RegionContext& context) {
           "Stack depth mismatch in region method on {}\n"
           "  srcblkoff={}, dstblkoff={}, src={}, target={}",
           func->fullName()->data(),
-          func->unit()->offsetOf(b->start),
-          func->unit()->offsetOf(b->succs[idx]->start),
+          func->offsetOf(b->start),
+          func->offsetOf(b->succs[idx]->start),
           sp.offset,
           succ->initialSpOffset().offset
         );
@@ -145,7 +143,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
       succ->setInitialSpOffset(sp);
       FTRACE(2,
         "spOff for {} -> {}\n",
-        func->unit()->offsetOf(b->succs[idx]->start),
+        func->offsetOf(b->succs[idx]->start),
         sp.offset
       );
     }

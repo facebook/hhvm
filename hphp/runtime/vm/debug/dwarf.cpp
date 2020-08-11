@@ -97,17 +97,17 @@ const char *DwarfInfo::lookupFile(const Unit *unit) {
 }
 
 void DwarfInfo::addLineEntries(TCRange range,
-                               const Unit *unit,
+                               const Func* func,
                                PC instr,
                                FunctionInfo* f) {
-  if (unit == nullptr || instr == nullptr) {
+  if (func == nullptr || instr == nullptr) {
     // For stubs, just add line 0
     f->m_lineTable.push_back(LineEntry(range, 0));
     return;
   }
-  Offset offset = unit->offsetOf(instr);
+  Offset offset = func->offsetOf(instr);
 
-  int lineNum = unit->getLineNumber(offset);
+  int lineNum = func->unit()->getLineNumber(offset);
   if (lineNum >= 0) {
     f->m_lineTable.push_back(LineEntry(range, lineNum));
   }
@@ -195,7 +195,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range,
     m_functions[end] = f;
   }
 
-  addLineEntries(TCRange(start, end, range.isAcold()), unit, instr, f);
+  addLineEntries(TCRange(start, end, range.isAcold()), func, instr, f);
 
   if (f->m_chunk == nullptr) {
     if (m_dwarfChunks.size() == 0 || m_dwarfChunks[0] == nullptr) {

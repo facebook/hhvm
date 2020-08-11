@@ -218,7 +218,7 @@ void AsioBlockableChain::UnblockJitHelper(ActRec* ar,
   auto& regs = vmRegs();
   regs.stack.top() = sp;
   assertx(vmStack().isValidAddress((uintptr_t)vmsp()));
-  regs.pc = prevF->unit()->at(prevF->base() + ar->callOffset());
+  regs.pc = prevF->at(prevF->base() + ar->callOffset());
   regs.fp = prevAr;
   regs.jitReturnAddr = nullptr;
 

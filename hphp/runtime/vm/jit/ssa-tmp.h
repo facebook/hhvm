@@ -61,6 +61,7 @@ struct SSATmp {
   const ArrayData*   arrLikeVal() const   { return type().arrLikeVal(); }
   const Func*        funcVal() const      { return type().funcVal(); }
   const Class*       clsVal() const       { return type().clsVal(); }
+  LazyClassData      lclsVal() const      { return type().lclsVal(); }
   const RecordDesc*  recVal() const       { return type().recVal(); }
   const ClsMethDataRef clsmethVal() const { return type().clsmethVal(); }
   rds::Handle        rdsHandleVal() const { return type().rdsHandleVal(); }

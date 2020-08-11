@@ -4164,6 +4164,7 @@ Type from_cell(TypedValue cell) {
   case KindOfRFunc:
   case KindOfFunc:
   case KindOfClass:
+  case KindOfLazyClass:
   case KindOfClsMeth:
   case KindOfRClsMeth:
   case KindOfRecord:
@@ -4198,6 +4199,10 @@ Type from_DataType(DataType dt) {
   case KindOfRFunc:    return TRFunc;
   case KindOfFunc:     return TFunc;
   case KindOfClass:    return TCls;
+  case KindOfLazyClass: {
+    always_assert(false);
+    return TCls; // TODO (T68823001)
+  }
   case KindOfClsMeth:  return TClsMeth;
   case KindOfRClsMeth: return TRClsMeth;
   }

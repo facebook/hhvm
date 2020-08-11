@@ -369,6 +369,8 @@ bool HHVM_FUNCTION(array_key_exists,
 
     case KindOfClass:
       return ad->exists(StrNR(classToStringHelper(cell->m_data.pclass)));
+    case KindOfLazyClass:
+      return ad->exists(StrNR(lazyClassToStringHelper(cell->m_data.plazyclass)));
 
     case KindOfPersistentString:
     case KindOfString: {
@@ -743,6 +745,7 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfRFunc:
       case KindOfFunc:
       case KindOfClass:
+      case KindOfLazyClass:
       case KindOfClsMeth:
       case KindOfRClsMeth:
       case KindOfRecord:
@@ -1039,6 +1042,7 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfRFunc:
       case KindOfFunc:
       case KindOfClass:
+      case KindOfLazyClass:
       case KindOfClsMeth:
       case KindOfRClsMeth:
       case KindOfRecord:
@@ -1257,6 +1261,7 @@ int64_t HHVM_FUNCTION(count,
     case KindOfFunc:
     case KindOfRClsMeth:
     case KindOfClass:
+    case KindOfLazyClass:
       return 1;
 
     case KindOfPersistentDArray:
@@ -3209,6 +3214,8 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
 
     case KindOfClass:
       return tvReturn(StrNR(classToStringHelper(input.toClassVal())));
+    case KindOfLazyClass:
+      return tvReturn(StrNR(lazyClassToStringHelper(input.toLazyClassVal())));
 
     case KindOfInt64:
     case KindOfBoolean:

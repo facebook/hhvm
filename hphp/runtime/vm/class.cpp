@@ -2793,6 +2793,7 @@ bool Class::compatibleTraitPropInit(const TypedValue& tv1,
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRecord:

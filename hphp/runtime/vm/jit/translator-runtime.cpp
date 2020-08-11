@@ -626,6 +626,7 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
       case KindOfRFunc:
       case KindOfFunc:
       case KindOfClass:
+      case KindOfLazyClass:
       case KindOfClsMeth:
       case KindOfRClsMeth:
       case KindOfRecord:

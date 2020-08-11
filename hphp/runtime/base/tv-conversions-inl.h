@@ -64,7 +64,8 @@ inline bool tvToBool(TypedValue cell) {
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
-    case KindOfRClsMeth:      return true;
+    case KindOfRClsMeth:
+    case KindOfLazyClass:     return true;
   }
   not_reached();
 }
@@ -98,6 +99,8 @@ inline int64_t tvToInt(TypedValue cell) {
       invalidFuncConversion("int");
     case KindOfClass:
       return classToStringHelper(cell.m_data.pclass)->toInt64();
+    case KindOfLazyClass:
+      return lazyClassToStringHelper(cell.m_data.plazyclass)->toInt64();
     case KindOfClsMeth:
       raiseClsMethConvertWarningHelper("int");
       return 1;

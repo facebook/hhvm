@@ -46,6 +46,7 @@ DataTypeProfiler::DataTypeProfiler(std::string name)
   , m_clsmeth(name + "=KindOfClsMeth")
   , m_rclsmeth(name + "=KindOfRClsMeth")
   , m_record(name + "=KindOfRecord")
+  , m_lclass(name + "=KindOfLazyClass")
 {}
 
 DataType DataTypeProfiler::operator()(DataType type) {
@@ -72,6 +73,7 @@ DataType DataTypeProfiler::operator()(DataType type) {
     case KindOfRFunc:         m_rfunc.count(); break;
     case KindOfFunc:          m_func.count(); break;
     case KindOfClass:         m_class.count(); break;
+    case KindOfLazyClass:     m_lclass.count(); break;
     case KindOfClsMeth:       m_clsmeth.count(); break;
     case KindOfRClsMeth:      m_rclsmeth.count(); break;
     case KindOfRecord:        m_record.count(); break;
@@ -105,7 +107,8 @@ DataTypeProfiler::~DataTypeProfiler() {
                m_class.hits() +
                m_clsmeth.hits() +
                m_rclsmeth.hits() +
-               m_record.hits();
+               m_record.hits() +
+               m_lclass.hits();
   if (!total) return;
   fprintf(stderr, "%s: total=%zu KindOfUninit=%.1f%% "
                   "KindOfNull=%.1f%% "
@@ -131,7 +134,8 @@ DataTypeProfiler::~DataTypeProfiler() {
                   "KindOfClass=%.1f%% "
                   "KindOfClsMeth=%.1f%% "
                   "KindOfRClsMeth=%.1f%% "
-                  "KindOfRecord=%.1f%% ",
+                  "KindOfRecord=%.1f%% "
+                  "KindOfLazyClass=%.1f%% ",
           m_name.c_str(), total,
           100.0 * m_uninit.hits() / total,
           100.0 * m_null.hits() / total,
@@ -157,7 +161,8 @@ DataTypeProfiler::~DataTypeProfiler() {
           100.0 * m_class.hits() / total,
           100.0 * m_clsmeth.hits() / total,
           100.0 * m_rclsmeth.hits() / total,
-          100.0 * m_record.hits() / total);
+          100.0 * m_record.hits() / total,
+          100.0 * m_lclass.hits() / total);
 }
 
 }

@@ -79,11 +79,14 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       invalidFuncConversion("string");
     }
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfPersistentString:
     case KindOfString: {
       auto const s =
         isClassType(cell.type())
-          ? const_cast<StringData*>(classToStringHelper(val(cell).pclass))
+          ? const_cast<StringData*>(classToStringHelper(val(cell).pclass)) :
+        isLazyClassType(cell.type())
+          ? const_cast<StringData*>(lazyClassToStringHelper(val(cell).plazyclass))
           : val(cell).pstr;
       if (serialized) {
         // It is priming, and there might not be the right class definitions

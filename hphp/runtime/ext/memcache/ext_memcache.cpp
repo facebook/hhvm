@@ -172,6 +172,7 @@ static uint32_t memcache_get_flag_for_type(const Variant& var) {
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRecord:

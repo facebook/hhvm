@@ -510,6 +510,7 @@ static int fb_compact_serialize_variant(
     case KindOfString:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
       fb_compact_serialize_string(sb, var.toString());
       return 0;
 

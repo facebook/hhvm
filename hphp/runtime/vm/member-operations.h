@@ -520,6 +520,10 @@ NEVER_INLINE TypedValue ElemSlow(tv_rval base, key_type<keyType> key) {
       return ElemString<mode, keyType>(
         classToStringHelper(base.val().pclass), key
       );
+    case KindOfLazyClass:
+      return ElemString<mode, keyType>(
+        lazyClassToStringHelper(base.val().plazyclass), key
+      );
     case KindOfPersistentString:
     case KindOfString:
       return ElemString<mode, keyType>(base.val().pstr, key);
@@ -891,6 +895,7 @@ tv_lval ElemD(tv_lval base, key_type<keyType> key) {
     case KindOfFunc:
     case KindOfRClsMeth:
     case KindOfClass:
+    case KindOfLazyClass:
       return ElemDScalar();
     case KindOfPersistentString:
     case KindOfString:
@@ -1199,6 +1204,7 @@ tv_lval ElemU(tv_lval base, key_type<keyType> key) {
       // necessary to placate the type system.
       return const_cast<TypedValue*>(&immutable_uninit_base);
     case KindOfClass:
+    case KindOfLazyClass:
       raise_error(Strings::OP_NOT_SUPPORTED_CLASS);
       return nullptr;
     case KindOfRFunc:
@@ -1312,6 +1318,7 @@ inline tv_lval NewElem(tv_lval base) {
     case KindOfFunc:
     case KindOfRClsMeth:
     case KindOfClass:
+    case KindOfLazyClass:
       return NewElemInvalid();
     case KindOfPersistentString:
     case KindOfString:
@@ -1684,6 +1691,7 @@ StringData* SetElemSlow(tv_lval base, key_type<keyType> key,
     case KindOfFunc:
     case KindOfRClsMeth:
     case KindOfClass:
+    case KindOfLazyClass:
       SetElemScalar<setResult>(value);
       return nullptr;
     case KindOfPersistentString:
@@ -1902,6 +1910,7 @@ inline void SetNewElem(tv_lval base, TypedValue* value) {
     case KindOfFunc:
     case KindOfRClsMeth:
     case KindOfClass:
+    case KindOfLazyClass:
       return SetNewElemScalar<setResult>(value);
     case KindOfPersistentString:
     case KindOfString:
@@ -1992,6 +2001,7 @@ inline TypedValue SetOpElem(SetOpOp op, tv_lval base,
     case KindOfFunc:
     case KindOfRClsMeth:
     case KindOfClass:
+    case KindOfLazyClass:
       return SetOpElemScalar();
 
     case KindOfPersistentString:
@@ -2074,6 +2084,7 @@ inline TypedValue SetOpNewElem(SetOpOp op, tv_lval base, TypedValue* rhs) {
     case KindOfFunc:
     case KindOfRClsMeth:
     case KindOfClass:
+    case KindOfLazyClass:
       return SetOpNewElemScalar();
 
     case KindOfPersistentString:
@@ -2189,6 +2200,7 @@ inline TypedValue IncDecElem(IncDecOp op, tv_lval base, TypedValue key) {
     case KindOfFunc:
     case KindOfRClsMeth:
     case KindOfClass:
+    case KindOfLazyClass:
       return IncDecElemScalar();
 
     case KindOfPersistentString:
@@ -2277,6 +2289,7 @@ inline TypedValue IncDecNewElem(IncDecOp op, tv_lval base) {
     case KindOfFunc:
     case KindOfRClsMeth:
     case KindOfClass:
+    case KindOfLazyClass:
       return IncDecNewElemScalar();
 
     case KindOfPersistentString:
@@ -2527,6 +2540,7 @@ void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
       raise_error("Cannot unset a reified class method pointer");
       return;
     case KindOfClass:
+    case KindOfLazyClass:
       raise_error("Cannot unset a class");
       return;
 
@@ -2740,6 +2754,11 @@ NEVER_INLINE bool IssetElemSlow(tv_rval base, key_type<keyType> key) {
         classToStringHelper(val(base).pclass), key
       );
 
+    case KindOfLazyClass:
+      return IssetElemString<keyType>(
+        lazyClassToStringHelper(val(base).plazyclass), key
+      );
+
     case KindOfPersistentString:
     case KindOfString:
       return IssetElemString<keyType>(val(base).pstr, key);
@@ -2824,6 +2843,7 @@ tv_lval propPre(TypedValue& tvRef, tv_lval base) {
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
       return propPreNull<mode>(tvRef);
 
     case KindOfPersistentString:
@@ -2880,6 +2900,7 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRecord:
@@ -2991,6 +3012,7 @@ inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRecord:
@@ -3053,6 +3075,7 @@ inline tv_lval SetOpProp(TypedValue& tvRef,
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRecord:
@@ -3117,6 +3140,7 @@ inline TypedValue IncDecProp(
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRecord:

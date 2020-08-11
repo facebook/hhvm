@@ -294,6 +294,7 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
       return m_type;
@@ -342,6 +343,7 @@ bool Variant::isScalar() const noexcept {
     case KindOfString:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
       return true;
   }
   not_reached();
@@ -381,6 +383,7 @@ static bool isAllowedAsConstantValueImpl(TypedValue tv) {
     case KindOfUninit:
     case KindOfObject:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfRFunc:
     case KindOfRClsMeth:
     case KindOfRecord:
@@ -431,7 +434,8 @@ bool Variant::toBooleanHelper() const {
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
-    case KindOfRClsMeth:      return true;
+    case KindOfRClsMeth:
+    case KindOfLazyClass:        return true;
     case KindOfRecord:
       raise_convert_record_to_type("bool");
       return false;
@@ -467,6 +471,8 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
       invalidFuncConversion("int");
     case KindOfClass:
       return classToStringHelper(m_data.pclass)->toInt64();
+    case KindOfLazyClass:
+      return lazyClassToStringHelper(m_data.plazyclass)->toInt64();
     case KindOfClsMeth:
       raiseClsMethConvertWarningHelper("int");
       return 1;
@@ -515,6 +521,10 @@ Array Variant::toPHPArrayHelper() const {
       return Array::attach(ArrayData::Create(
         Variant{classToStringHelper(m_data.pclass),
                 PersistentStrInit{}}));
+    case KindOfLazyClass:
+      return Array::attach(ArrayData::Create(
+        Variant{lazyClassToStringHelper(m_data.plazyclass),
+                PersistentStrInit{}}));
     case KindOfClsMeth:
       raiseClsMethConvertWarningHelper("array");
       return make_map_array(0, m_data.pclsmeth->getClsStr(),
@@ -553,6 +563,7 @@ Resource Variant::toResourceHelper() const {
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRecord:
@@ -649,6 +660,7 @@ void Variant::setEvalScalar() {
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
       break;
 
     case KindOfRFunc:

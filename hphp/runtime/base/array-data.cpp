@@ -117,6 +117,7 @@ struct ScalarHash {
           case KindOfRFunc:
           case KindOfFunc:
           case KindOfClass:
+          case KindOfLazyClass:
           case KindOfClsMeth:
           case KindOfRClsMeth:
           case KindOfRecord:
@@ -968,6 +969,7 @@ std::string describeKeyType(const TypedValue* tv) {
   case KindOfRFunc:           return "rfunc";
   case KindOfFunc:            return "func";
   case KindOfClass:           return "class";
+  case KindOfLazyClass:       return "lclass";
   case KindOfClsMeth:         return "clsmeth";
   case KindOfRClsMeth:        return "rclsmeth";
   }
@@ -1000,6 +1002,7 @@ std::string describeKeyValue(TypedValue tv) {
   case KindOfRFunc:
   case KindOfFunc:
   case KindOfClass:
+  case KindOfLazyClass:
   case KindOfClsMeth:
   case KindOfRClsMeth:
   case KindOfRecord:

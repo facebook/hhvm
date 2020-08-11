@@ -534,6 +534,10 @@ Type::bits_t Type::bitsFromDataType(DataType outer) {
     case KindOfRFunc            : return kRFunc;
     case KindOfFunc             : return kFunc;
     case KindOfClass            : return kCls;
+    case KindOfLazyClass        : {
+      always_assert(false);
+      return kCls; // TODO (T68823001)
+    }
     case KindOfClsMeth          : return kClsMeth;
     case KindOfRClsMeth         : return kRClsMeth;
     case KindOfRecord           : return kRecord;

@@ -977,6 +977,7 @@ static void json_create_zval(Variant &z, UncheckedBuffer &buf, DataType type,
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRecord:

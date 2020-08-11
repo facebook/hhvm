@@ -260,6 +260,7 @@ static MaybeDataType convert_for_pow(const Variant& val,
 
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfPersistentString:
     case KindOfString: {
       auto dt = val.toNumeric(ival, dval, true);

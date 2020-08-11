@@ -266,6 +266,7 @@ inline int dataTypeToSoap(DataType dt) {
     case KindOfDouble:  return SOAP_ENC_DOUBLE_DT;
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfPersistentString:
     case KindOfString:  return XSD_STRING;
     case KindOfPersistentVec:

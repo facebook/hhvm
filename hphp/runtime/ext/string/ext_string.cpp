@@ -1008,6 +1008,7 @@ String HHVM_FUNCTION(chr, const Variant& ascii) {
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
     case KindOfRecord:

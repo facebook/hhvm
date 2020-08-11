@@ -297,6 +297,7 @@ std::pair<int, double> sizeOfArray(
         case KindOfRFunc:
         case KindOfFunc:
         case KindOfClass:
+        case KindOfLazyClass:
         case KindOfClsMeth:
         case KindOfRClsMeth:
         case KindOfRecord:
@@ -399,6 +400,7 @@ void stringsOfArray(
         case KindOfRFunc:
         case KindOfFunc:
         case KindOfClass:
+        case KindOfLazyClass:
         case KindOfClsMeth:
         case KindOfRClsMeth:
         case KindOfRecord:
@@ -478,7 +480,8 @@ std::pair<int, double> tvGetSize(
     case KindOfInt64:
     case KindOfDouble:
     case KindOfFunc:
-    case KindOfClass: {
+    case KindOfClass:
+    case KindOfLazyClass: {
       // Counted as part sizeof(TypedValue)
       break;
     }
@@ -657,7 +660,8 @@ void tvGetStrings(
     case HPHP::KindOfFunc:
     case HPHP::KindOfClass:
     case HPHP::KindOfClsMeth:
-    case HPHP::KindOfRClsMeth: {
+    case HPHP::KindOfRClsMeth:
+    case HPHP::KindOfLazyClass: {
       // Not strings
       break;
     }

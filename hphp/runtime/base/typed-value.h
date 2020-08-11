@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/runtime/vm/lazy-class.h"
 #include "hphp/util/type-scan.h"
 #include "hphp/util/type-traits.h"
 
@@ -66,6 +67,7 @@ union Value {
   ClsMethDataRef pclsmeth; // KindOfClsMeth
   RClsMethData* prclsmeth; // KindOfRClsMeth
   RecordData*   prec;   // KindOfRecord
+  LazyClassData plazyclass;   // KindOfLazyClass
 };
 
 enum VarNrFlag { NR_FLAG = 1 << 29 };

@@ -706,7 +706,8 @@ Variant HHVM_FUNCTION(file_put_contents,
     case KindOfPersistentString:
     case KindOfString:
     case KindOfFunc:
-    case KindOfClass: {
+    case KindOfClass:
+    case KindOfLazyClass: {
       String value = data.toString();
       if (!value.empty()) {
         numbytes += value.size();

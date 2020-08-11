@@ -699,6 +699,7 @@ public:
   const ArrayData* arrLikeVal() const;
   const HPHP::Func* funcVal() const;
   const Class* clsVal() const;
+  LazyClassData lclsVal() const;
   const RecordDesc* recVal() const;
   ClsMethDataRef clsmethVal() const;
   rds::Handle rdsHandleVal() const;
@@ -915,6 +916,7 @@ private:
     const Class* m_clsVal;
     const RecordDesc* m_recVal;
     ClsMethDataRef m_clsmethVal;
+    LazyClassData m_lclsVal;
     jit::TCA m_tcaVal;
     rds::Handle m_rdsHandleVal;
     TypedValue* m_ptrVal;

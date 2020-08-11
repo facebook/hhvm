@@ -342,6 +342,7 @@ inline Type Type::cns(const TypedValue& tv) {
       // TODO (T29639296)
       case KindOfFunc:
       case KindOfClass:
+      case KindOfLazyClass:
       case KindOfClsMeth:
       case KindOfRClsMeth:
       case KindOfRecord:
@@ -392,7 +393,7 @@ inline uint64_t Type::rawVal() const {
   assertx(hasConstVal());
   return m_extra;
 }
-
+// TODO (T68823001): replace the type of lazy class below
 #define IMPLEMENT_CNS_VAL(TypeName, name, valtype)      \
   inline valtype Type::name##Val() const {              \
     assertx(hasConstVal(TypeName));                      \
@@ -409,6 +410,7 @@ IMPLEMENT_CNS_VAL(TStaticDict, dict, const ArrayData*)
 IMPLEMENT_CNS_VAL(TStaticKeyset, keyset, const ArrayData*)
 IMPLEMENT_CNS_VAL(TFunc,       func, const HPHP::Func*)
 IMPLEMENT_CNS_VAL(TCls,        cls,  const Class*)
+IMPLEMENT_CNS_VAL(TCls,        lcls,  LazyClassData)
 IMPLEMENT_CNS_VAL(TRecDesc,    rec,  const RecordDesc*)
 IMPLEMENT_CNS_VAL(TClsMeth,    clsmeth,  ClsMethDataRef)
 IMPLEMENT_CNS_VAL(TTCA,        tca,  jit::TCA)

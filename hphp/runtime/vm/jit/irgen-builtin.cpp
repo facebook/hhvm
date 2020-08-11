@@ -730,6 +730,8 @@ SSATmp* opt_foldable(IRGS& env,
       case KindOfPersistentVArray:
       case KindOfVArray:
         return cns(env, make_tv<KindOfPersistentVArray>(scalar_array()));
+      case KindOfLazyClass:
+        return cns(env, retVal.m_data.plazyclass.name());
       case KindOfUninit:
       case KindOfObject:
       case KindOfResource:

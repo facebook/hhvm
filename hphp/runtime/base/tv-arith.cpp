@@ -114,6 +114,9 @@ TypedNum numericConvHelper(TypedValue cell) {
     case KindOfClass:
       return stringToNumeric(classToStringHelper(cell.m_data.pclass));
 
+    case KindOfLazyClass:
+      return stringToNumeric(lazyClassToStringHelper(cell.m_data.plazyclass));
+
     case KindOfString:
     case KindOfPersistentString:
       return stringToNumeric(cell.m_data.pstr);
@@ -505,6 +508,13 @@ void tvIncDecOp(Op op, tv_lval cell) {
       return;
     }
 
+    case KindOfLazyClass: {
+      raiseIncDecInvalidType(cell);
+      auto s = lazyClassToStringHelper(val(cell).plazyclass);
+      stringIncDecOp(op, cell, const_cast<StringData*>(s));
+      return;
+    }
+
     case KindOfPersistentString:
     case KindOfString:
       raiseIncDecInvalidType(cell);
@@ -784,11 +794,15 @@ void tvBitNot(TypedValue& cell) {
 
     case KindOfFunc:
       invalidFuncConversion("int");
-
     case KindOfClass:
+      // Fall-through
+    case KindOfLazyClass:
       cell.m_data.pstr =
-        const_cast<StringData*>(classToStringHelper(cell.m_data.pclass));
+        isClassType(cell.m_type) ?
+        const_cast<StringData*>(classToStringHelper(cell.m_data.pclass)) :
+        const_cast<StringData*>(lazyClassToStringHelper(cell.m_data.plazyclass));
       cell.m_type = KindOfString;
+      // Fall-through
     case KindOfString:
       if (cell.m_data.pstr->cowCheck()) {
     case KindOfPersistentString:

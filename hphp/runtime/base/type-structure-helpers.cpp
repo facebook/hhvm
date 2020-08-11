@@ -52,10 +52,13 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
     case KindOfRClsMeth:
       return false;
 
-    case KindOfClass: {
+    case KindOfClass:
+    case KindOfLazyClass: {
       auto const cls = lookupClass();
       if (cls && interface_supports_string(cls->name())) {
-        classToStringHelper(tv->m_data.pclass); // maybe raise a warning
+        if (RuntimeOption::EvalRaiseClassConversionWarning) {
+          raise_warning(Strings::CLASS_TO_STRING);
+        }
         return true;
       }
       return false;

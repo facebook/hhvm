@@ -4721,6 +4721,7 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       case KindOfFunc:
       case KindOfRClsMeth:
       case KindOfClass:
+      case KindOfLazyClass:
         always_assert_flog(false, "Unexpected DataType");
         break;
       }

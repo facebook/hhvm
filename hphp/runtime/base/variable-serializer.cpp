@@ -1656,6 +1656,7 @@ void VariableSerializer::serializeVariant(tv_rval tv,
       assertx(!isArrayKey);
       serializeRClsMeth(val(tv).prclsmeth);
 
+    case KindOfLazyClass: // TODO (T68823429)
     case KindOfRecord:
       // TODO(T41025646): implement serialization of record
       always_assert(false);

@@ -313,6 +313,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromContainer,
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfClsMeth:
     case KindOfRClsMeth:
       failNotContainer();

@@ -149,6 +149,10 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, int64_t val) {
     case KindOfClass:
       return strRelOp(op, cell, val, classToStringHelper(cell.m_data.pclass));
 
+    case KindOfLazyClass:
+      return strRelOp(op, cell, val,
+                      lazyClassToStringHelper(cell.m_data.plazyclass));
+
     case KindOfClsMeth:
       if (RuntimeOption::EvalHackArrDVArrs) {
         return op.clsmethVsNonClsMeth();
@@ -224,6 +228,10 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, double val) {
 
     case KindOfClass:
       return strRelOp(op, cell, val, classToStringHelper(cell.m_data.pclass));
+
+    case KindOfLazyClass:
+      return strRelOp(op, cell, val,
+                      lazyClassToStringHelper(cell.m_data.plazyclass));
 
     case KindOfClsMeth:
       if (RuntimeOption::EvalHackArrDVArrs) {
@@ -316,6 +324,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const StringData* val) {
     case KindOfClass:
       return op(classToStringHelper(cell.m_data.pclass), val);
 
+    case KindOfLazyClass:
+      return op(lazyClassToStringHelper(cell.m_data.plazyclass), val);
+
     case KindOfClsMeth:
       if (RuntimeOption::EvalHackArrDVArrs) {
         return op.clsmethVsNonClsMeth();
@@ -363,6 +374,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ArrayData* ad) {
     case KindOfString:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfResource:
       return op.phpArrVsNonArr();
 
@@ -476,6 +488,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ObjectData* od) {
     case KindOfClass:
       return strRelOp(classToStringHelper(cell.m_data.pclass));
 
+    case KindOfLazyClass:
+      return strRelOp(lazyClassToStringHelper(cell.m_data.plazyclass));
+
     case KindOfClsMeth:
       if (RuntimeOption::EvalHackArrDVArrs) {
         return op.clsmethVsNonClsMeth();
@@ -560,6 +575,11 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ResourceData* rd) {
 
     case KindOfClass: {
       auto const str = classToStringHelper(cell.m_data.pclass);
+      return op(str->toDouble(), rd->o_toDouble());
+    }
+
+    case KindOfLazyClass: {
+      auto const str = lazyClassToStringHelper(cell.m_data.plazyclass);
       return op(str->toDouble(), rd->o_toDouble());
     }
 
@@ -671,6 +691,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, ClsMethDataRef clsMeth) {
     case KindOfPersistentString:
     case KindOfString:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfResource:
       if (RuntimeOption::EvalHackArrDVArrs) {
         return op.clsmethVsNonClsMeth();
@@ -782,6 +803,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, RClsMethData* rclsmeth) {
     case KindOfFunc:
     case KindOfRFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfResource:
     case KindOfClsMeth:
     case KindOfPersistentDict:
@@ -818,6 +840,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, RFuncData* rfunc) {
     case KindOfString:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfResource:
     case KindOfClsMeth:
     case KindOfRClsMeth:
@@ -852,6 +875,11 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Func* val) {
   }
 
   return op(cell.m_data.pfunc, val);
+}
+
+template<class Op>
+typename Op::RetType tvRelOp(Op, TypedValue, LazyClassData) {
+  not_reached(); //TODO (T68823357)
 }
 
 template<class Op>
@@ -924,6 +952,10 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Class* val) {
     case KindOfClass:
       return op(cell.m_data.pclass, val);
 
+    case KindOfLazyClass:
+      return op(lazyClassToStringHelper(cell.m_data.plazyclass),
+                classToStringHelper(val));
+
     case KindOfClsMeth:
       if (RuntimeOption::EvalHackArrDVArrs) {
         return op.clsmethVsNonClsMeth();
@@ -979,6 +1011,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue c1, TypedValue c2) {
   case KindOfRFunc:        return tvRelOp(op, c1, c2.m_data.prfunc);
   case KindOfFunc:         return tvRelOp(op, c1, c2.m_data.pfunc);
   case KindOfClass:        return tvRelOp(op, c1, c2.m_data.pclass);
+  case KindOfLazyClass:    return tvRelOp(op, c1, c2.m_data.plazyclass);
   case KindOfClsMeth:      return tvRelOp(op, c1, c2.m_data.pclsmeth);
   case KindOfRClsMeth:     return tvRelOp(op, c1, c2.m_data.prclsmeth);
   case KindOfRecord:       return tvRelOp(op, c1, c2.m_data.prec);
@@ -1424,6 +1457,18 @@ bool tvSame(TypedValue c1, TypedValue c2) {
       }
       if (c2.m_type != KindOfClass) return false;
       return c1.m_data.pclass == c2.m_data.pclass;
+
+    case KindOfLazyClass:
+      if (isStringType(c2.m_type)) {
+        return lazyClassToStringHelper(c1.m_data.plazyclass)->same(c2.m_data.pstr);
+      }
+      if (isClassType(c2.m_type)) {
+        return
+          lazyClassToStringHelper(c1.m_data.plazyclass)
+            ->same(classToStringHelper(c2.m_data.pclass));
+      }
+      if (c2.m_type != KindOfLazyClass) return false;
+      return c1.m_data.plazyclass.name() == c2.m_data.plazyclass.name();
 
     case KindOfPersistentVec:
     case KindOfVec:

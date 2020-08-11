@@ -112,6 +112,7 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
       case KindOfRFunc:
       case KindOfFunc:
       case KindOfClass:
+      case KindOfLazyClass:
       case KindOfClsMeth:
       case KindOfRClsMeth:
       case KindOfRecord:

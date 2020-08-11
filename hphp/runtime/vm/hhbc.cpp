@@ -686,6 +686,7 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfRecord:
       break;
   }

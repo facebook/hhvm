@@ -898,6 +898,7 @@ std::string describe_actual_type(tv_rval val) {
     case KindOfRFunc:         return "reified function";
     case KindOfFunc:          return "func";
     case KindOfClass:         return "class";
+    case KindOfLazyClass:        return "lazy class";
     case KindOfClsMeth:       return "clsmeth";
     case KindOfRClsMeth:      return "reified clsmeth";
     case KindOfRecord:
@@ -1243,6 +1244,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
         case KindOfFunc:
         case KindOfRClsMeth:
         case KindOfClass:
+        case KindOfLazyClass:
           always_assert_flog(false, "Unexpected DataType");
       }
       not_reached();

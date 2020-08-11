@@ -78,6 +78,7 @@ public:
   bool isResource()  const { return isResourceType(getType()); }
   bool isFunc()      const { return isFuncType(getType()); }
   bool isClass()     const { return isClassType(getType()); }
+  bool isLazyClass() const { return isLazyClassType(getType()); }
   bool isClsMeth()   const { return isClsMethType(getType()); }
 
   bool isPrimitive() const { return !isRefcountedType(type(m_val)); }
@@ -108,6 +109,11 @@ public:
   auto toClassVal() const {
     assertx(isClass());
     return val(m_val).pclass;
+  }
+
+  auto toLazyClassVal() const {
+    assertx(isLazyClass());
+    return val(m_val).plazyclass;
   }
 
   ClsMethDataRef toClsMethVal() const {
@@ -326,6 +332,11 @@ struct Variant : private TypedValue {
   /* implicit */ Variant(Class* v) {
     m_type = KindOfClass;
     m_data.pclass = v;
+  }
+
+  /* implicit */ Variant(LazyClassData v) {
+    m_type = KindOfLazyClass;
+    m_data.plazyclass = v;
   }
 
   /* implicit */ Variant(const ClsMethDataRef v) {
@@ -770,6 +781,9 @@ struct Variant : private TypedValue {
   bool isClass() const {
     return isClassType(getType());
   }
+  bool isLazyClass() const {
+    return isLazyClassType(getType());
+  }
   bool isClsMeth() const {
     return isClsMethType(getType());
   }
@@ -803,6 +817,7 @@ struct Variant : private TypedValue {
       case KindOfRFunc:
       case KindOfFunc:
       case KindOfClass:
+      case KindOfLazyClass:
       case KindOfClsMeth:
       case KindOfRClsMeth:
       case KindOfRecord:
@@ -1050,6 +1065,9 @@ struct Variant : private TypedValue {
   }
   auto toClassVal() const {
     return const_variant_ref{*this}.toClassVal();
+  }
+  auto toLazyClassVal() const {
+    return const_variant_ref{*this}.toLazyClassVal();
   }
   ClsMethDataRef toClsMethVal() const {
     return const_variant_ref{*this}.toClsMethVal();

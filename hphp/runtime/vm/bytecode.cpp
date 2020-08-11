@@ -622,6 +622,11 @@ static std::string toStringElm(TypedValue tv) {
          << tv.m_data.pclass->name()->data()
          << ")";
       continue;
+    case KindOfLazyClass:
+      os << ":LClass("
+         << tv.m_data.plazyclass.name()->data()
+         << ")";
+      continue;
     case KindOfClsMeth:
       os << ":ClsMeth("
        << tv.m_data.pclsmeth->getCls()->name()->data()
@@ -2067,12 +2072,14 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
           return;
 
         case KindOfClass:
+        case KindOfLazyClass:
         case KindOfPersistentString:
         case KindOfString: {
           double dval = 0.0;
           auto const str =
             isClassType(val->m_type) ? classToStringHelper(val->m_data.pclass) :
-            val->m_data.pstr;
+            isLazyClassType(val->m_type) ?
+            lazyClassToStringHelper(val->m_data.plazyclass) : val->m_data.pstr;
           DataType t = str->isNumericWithVal(intval, dval, 1);
           switch (t) {
             case KindOfNull:
@@ -2103,6 +2110,7 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
             case KindOfRFunc:
             case KindOfFunc:
             case KindOfClass:
+            case KindOfLazyClass:
             case KindOfClsMeth:
             case KindOfRClsMeth:
             case KindOfRecord:

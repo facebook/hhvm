@@ -195,7 +195,11 @@ void ConvertTvToUncounted(
     }
     invalidFuncConversion("string");
     case KindOfClass:
-      data.pstr = const_cast<StringData*>(classToStringHelper(data.pclass));
+      // Fall-through
+    case KindOfLazyClass:
+      data.pstr = isClassType(type)
+          ? const_cast<StringData*>(classToStringHelper(data.pclass))
+          : const_cast<StringData*>(lazyClassToStringHelper(data.plazyclass));
       // Fall-through
     case KindOfString:
       type = KindOfPersistentString;

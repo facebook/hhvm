@@ -155,6 +155,9 @@ bool tvIsPlausible(const TypedValue cell) {
         assertPtr(cell.m_data.pclass);
         assertx(cell.m_data.pclass->validate());
         return;
+      case KindOfLazyClass:
+        assertPtr(cell.m_data.plazyclass.name());
+        return;
       case KindOfClsMeth:
         assertx(cell.m_data.pclsmeth->validate());
         return;

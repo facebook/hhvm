@@ -103,6 +103,8 @@ Variant SSATmp::variantVal() const {
       return Variant{arrLikeVal(), dt, Variant::PersistentArrInit{}};
     case KindOfClass:
       return Variant{const_cast<Class*>(clsVal())};
+    case KindOfLazyClass:
+      return Variant{lclsVal()};
     case KindOfFunc:
       return Variant{funcVal()};
     case KindOfClsMeth:

@@ -442,6 +442,7 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       break;
 
     case KindOfResource:
+    case KindOfLazyClass: // TODO(T68810726)
     case KindOfRecord: { // TODO(T41025646)
       auto msg = folly::format(
         "Cannot Serialize unexpected type {}",

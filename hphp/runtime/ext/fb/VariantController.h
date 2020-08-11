@@ -78,6 +78,7 @@ struct VariantControllerImpl {
       case KindOfInt64:      return HPHP::serialize::Type::INT64;
       case KindOfFunc:
       case KindOfClass:
+      case KindOfLazyClass:
       case KindOfPersistentString:
       case KindOfString:     return HPHP::serialize::Type::STRING;
       case KindOfObject:     return HPHP::serialize::Type::OBJECT;

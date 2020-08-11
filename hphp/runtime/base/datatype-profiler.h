@@ -40,7 +40,7 @@ private:
                      m_object, m_resource,
                      m_func, m_rfunc,
                      m_class, m_clsmeth, m_rclsmeth,
-                     m_record;
+                     m_record, m_lclass;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

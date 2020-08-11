@@ -127,6 +127,7 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
 
       case KindOfFunc:
       case KindOfClass:
+      case KindOfLazyClass:
         b = true;
         continue;
 
@@ -211,6 +212,10 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
 
       case KindOfClass:
         d = classToStringHelper(val(tv).pclass)->toDouble();
+        continue;
+
+      case KindOfLazyClass:
+        d = lazyClassToStringHelper(val(tv).plazyclass)->toDouble();
         continue;
 
       case KindOfClsMeth:
@@ -302,6 +307,10 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
         i = classToStringHelper(val(tv).pclass)->toInt64();
         continue;
 
+      case KindOfLazyClass:
+        i = lazyClassToStringHelper(val(tv).plazyclass)->toInt64();
+        continue;
+
       case KindOfClsMeth:
         raiseClsMethConvertWarningHelper("int");
         i = 1;
@@ -372,6 +381,9 @@ double tvCastToDouble(TypedValue tv) {
 
     case KindOfClass:
       return classToStringHelper(tv.m_data.pclass)->toDouble();
+
+    case KindOfLazyClass:
+      return lazyClassToStringHelper(tv.m_data.plazyclass)->toDouble();
 
     case KindOfClsMeth:
       raiseClsMethConvertWarningHelper("double");
@@ -474,6 +486,11 @@ enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
       return persistentString(const_cast<StringData*>(s));
     }
 
+    case KindOfLazyClass: {
+      auto const s = lazyClassToStringHelper(val(tv).plazyclass);
+      return persistentString(const_cast<StringData*>(s));
+    }
+
     case KindOfClsMeth:
       SystemLib::throwInvalidOperationExceptionObject(
         "clsmeth to string conversion"
@@ -558,6 +575,11 @@ StringData* tvCastToStringData(TypedValue tv) {
       return const_cast<StringData*>(s);
     }
 
+    case KindOfLazyClass: {
+      auto const s = lazyClassToStringHelper(tv.m_data.plazyclass);
+      return const_cast<StringData*>(s);
+    }
+
     case KindOfClsMeth:
       SystemLib::throwInvalidOperationExceptionObject(
         "clsmeth to string conversion"
@@ -592,6 +614,7 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
       return ArrayData::Create(tv);
 
     case KindOfPersistentDArray:
@@ -702,6 +725,7 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
 
       case KindOfFunc:
       case KindOfClass:
+      case KindOfLazyClass:
         a = ArrayData::Create(*tv);
         continue;
 
@@ -809,6 +833,11 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
           "Class to vec conversion"
         );
 
+      case KindOfLazyClass:
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Lazy class to vec conversion"
+        );
+
       case KindOfClsMeth: {
         raiseClsMethConvertWarningHelper("vec");
         a = make_vec_array(
@@ -907,6 +936,11 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
       case KindOfClass:
         SystemLib::throwInvalidArgumentExceptionObject(
           "Class to dict conversion"
+        );
+
+      case KindOfLazyClass:
+        SystemLib::throwInvalidArgumentExceptionObject(
+          "Lazy class to dict conversion"
         );
 
       case KindOfClsMeth: {
@@ -1009,6 +1043,11 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
           "Class to keyset conversion"
         );
 
+      case KindOfLazyClass:
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Lazy class to keyset conversion"
+        );
+
       case KindOfClsMeth: {
         raiseClsMethConvertWarningHelper("keyset");
         a = make_keyset_array(
@@ -1106,6 +1145,11 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
       case KindOfClass:
         SystemLib::throwInvalidOperationExceptionObject(
           "Class to varray conversion"
+        );
+
+      case KindOfLazyClass:
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Lazy class to varray conversion"
         );
 
       case KindOfClsMeth: {
@@ -1209,6 +1253,11 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
           "Class to darray conversion"
         );
 
+      case KindOfLazyClass:
+        SystemLib::throwInvalidOperationExceptionObject(
+          "Lazy class to darray conversion"
+        );
+
       case KindOfClsMeth: {
         raiseClsMethConvertWarningHelper("darray");
         a = make_darray(
@@ -1250,6 +1299,7 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
     case KindOfString:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass:
     case KindOfResource: {
       DArrayInit props(1);
       props.set(s_scalar, tv);

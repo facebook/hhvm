@@ -344,6 +344,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfBoolean:
       case KindOfResource:
       case KindOfRecord:
+      case KindOfLazyClass: // TODO (T68823113)
         return AnnotAction::Fail;
       case KindOfObject:
         not_reached();

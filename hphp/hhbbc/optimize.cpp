@@ -875,9 +875,10 @@ Bytecode gen_constant(const TypedValue& cell) {
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfLazyClass: // TODO (T68822846)
     case KindOfClsMeth:
     case KindOfRClsMeth:
-    case KindOfRecord: // TODO(arnabde)
+    case KindOfRecord:
       always_assert(0 && "invalid constant in propagate_constants");
   }
   not_reached();

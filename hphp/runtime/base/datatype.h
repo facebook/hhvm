@@ -81,7 +81,8 @@ namespace HPHP {
   DT(Func,              10) \
   DT(RClsMeth,          11) \
   DT(Class,             12) \
-  DT(ClsMeth,           use_lowptr ? 14 : 7)
+  DT(ClsMeth,           use_lowptr ? 14 : 7) \
+  DT(LazyClass,         16)
 
 enum class DataType : int8_t {
 #define DT(name, value) name = value,
@@ -120,7 +121,7 @@ constexpr DataType kExtraInvalidDataType = static_cast<DataType>(-127);
  * DataType limits.
  */
 auto constexpr kMinDataType = dt_t(KindOfPersistentDArray);
-auto constexpr kMaxDataType = dt_t(use_lowptr ? KindOfClsMeth : KindOfClass);
+auto constexpr kMaxDataType = dt_t(KindOfLazyClass);
 auto constexpr kMinRefCountedDataType = dt_t(KindOfDArray);
 auto constexpr kMaxRefCountedDataType = dt_t(KindOfRClsMeth);
 
@@ -360,6 +361,7 @@ constexpr bool isFuncType(DataType t) { return t == KindOfFunc; }
 constexpr bool isClassType(DataType t) { return t == KindOfClass; }
 constexpr bool isClsMethType(DataType t) { return t == KindOfClsMeth; }
 constexpr bool isRClsMethType(DataType t) { return t == KindOfRClsMeth; }
+constexpr bool isLazyClassType(DataType t) { return t == KindOfLazyClass; }
 
 constexpr int kHasPersistentMask = -128;
 
@@ -406,7 +408,8 @@ bool operator>=(DataType, DataType) = delete;
   case KindOfPersistentDict: \
   case KindOfPersistentKeyset: \
   case KindOfFunc:          \
-  case KindOfClass
+  case KindOfClass:         \
+  case KindOfLazyClass
 }
 
 ///////////////////////////////////////////////////////////////////////////////

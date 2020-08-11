@@ -35,8 +35,6 @@ function dechex(int $number): string;
 function implode(string $glue, <<__MaybeMutable>> $pieces): string; // could be Container<Stringish>
 <<__PHPStdLib, __Pure>>
 function explode(string $delimiter, string $str, int $limit = 0x7FFFFFFF): varray<string>; // : array<string> & false for '' delimiter
-<<__Pure>>
-function is_array(<<__MaybeMutable>> mixed $arg): bool;
 }
 
 namespace HH {

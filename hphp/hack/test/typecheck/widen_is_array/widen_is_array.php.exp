@@ -1,8 +1,0 @@
-File "widen_is_array.php", line 5, characters 5-17:
-  KeyedContainer<arraykey, mixed>
-File "widen_is_array.php", line 10, characters 15-18:
-Invalid argument (Typing[4110])
-File "widen_is_array.php", line 15, characters 20-29:
-Expected vec<mixed>
-File "widen_is_array.php", line 4, characters 7-14:
-But got KeyedContainer<arraykey, mixed> from the argument to this \is_array test

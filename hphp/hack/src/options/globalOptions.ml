@@ -106,7 +106,6 @@ type t = {
   po_disable_array_typehint: bool;
   tco_enable_systemlib_annotations: bool;
   tco_pu_enabled_paths: bool * Relative_path.t list;
-  tco_widen_is_array: bool;
   tco_higher_kinded_types: bool;
   tco_method_call_inference: bool;
 }
@@ -273,7 +272,6 @@ let default =
     po_disable_array_typehint = true;
     tco_enable_systemlib_annotations = false;
     tco_pu_enabled_paths = (false, []);
-    tco_widen_is_array = false;
     tco_higher_kinded_types = false;
     tco_method_call_inference = false;
   }
@@ -395,7 +393,6 @@ let make
     ?(tco_enable_systemlib_annotations =
       default.tco_enable_systemlib_annotations)
     ?(tco_pu_enabled_paths = default.tco_pu_enabled_paths)
-    ?(tco_widen_is_array = default.tco_widen_is_array)
     ?(tco_higher_kinded_types = default.tco_higher_kinded_types)
     ?(tco_method_call_inference = default.tco_method_call_inference)
     () =
@@ -498,7 +495,6 @@ let make
     po_disable_array_typehint;
     tco_enable_systemlib_annotations;
     tco_pu_enabled_paths;
-    tco_widen_is_array;
     tco_higher_kinded_types;
     tco_method_call_inference;
   }
@@ -717,8 +713,6 @@ let po_disable_array_typehint t = t.po_disable_array_typehint
 let tco_enable_systemlib_annotations t = t.tco_enable_systemlib_annotations
 
 let tco_pu_enabled_paths t = t.tco_pu_enabled_paths
-
-let tco_widen_is_array t = t.tco_widen_is_array
 
 let tco_higher_kinded_types t = t.tco_higher_kinded_types
 

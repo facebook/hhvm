@@ -2,23 +2,23 @@ File "is_array_bad.php", line 13, characters 10-11:
 Invalid return type (Typing[4110])
 File "is_array_bad.php", line 11, characters 41-56:
 Expected darray<int, int>
-File "is_array_bad.php", line 12, characters 13-20:
-But got (varray_or_darray<arraykey, T#1> & ~darray<int, string>) from the argument to this \is_array test
+File "is_array_bad.php", line 12, characters 13-27:
+But got (varray_or_darray<arraykey, T#1> & ~darray<int, string>) from the argument to this \HH\is_php_array test
 File "is_array_bad.php", line 18, characters 10-11:
 Invalid return type (Typing[4110])
 File "is_array_bad.php", line 16, characters 41-54:
 Expected varray<string>
-File "is_array_bad.php", line 17, characters 13-20:
-But got (varray_or_darray<arraykey, T#1> & ~darray<int, string>) from the argument to this \is_array test
+File "is_array_bad.php", line 17, characters 13-27:
+But got (varray_or_darray<arraykey, T#1> & ~darray<int, string>) from the argument to this \HH\is_php_array test
 File "is_array_bad.php", line 23, characters 10-11:
 Invalid return type (Typing[4110])
 File "is_array_bad.php", line 21, characters 27-40:
 Expected varray<string>
-File "is_array_bad.php", line 22, characters 13-20:
-But got (varray_or_darray<arraykey, T#1> & varray_or_darray<arraykey, _>) from the argument to this \is_array test
+File "is_array_bad.php", line 22, characters 13-27:
+But got (varray_or_darray<arraykey, T#1> & varray_or_darray<arraykey, _>) from the argument to this \HH\is_php_array test
 File "is_array_bad.php", line 28, characters 10-11:
 Invalid return type (Typing[4110])
 File "is_array_bad.php", line 26, characters 27-45:
 Expected darray<int, string>
-File "is_array_bad.php", line 27, characters 13-20:
-But got (varray_or_darray<arraykey, T#1> & varray_or_darray<arraykey, _>) from the argument to this \is_array test
+File "is_array_bad.php", line 27, characters 13-27:
+But got (varray_or_darray<arraykey, T#1> & varray_or_darray<arraykey, _>) from the argument to this \HH\is_php_array test

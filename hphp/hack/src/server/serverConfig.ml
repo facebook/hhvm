@@ -439,7 +439,6 @@ let load ~silent config_filename options =
           Some
             ( false,
               List.map ~f:(fun suffix -> Relative_path.from_root ~suffix) l ))
-      ?tco_widen_is_array:(bool_opt "widen_is_array" config)
       ?tco_method_call_inference:(bool_opt "method_call_inference" config)
       ()
   in

@@ -4,7 +4,7 @@
 class FakeArray<+Tk as arraykey, +T> { }
 
 function foo<T>(T $input): T {
-  if ($input is int || is_array($input)) {
+  if ($input is int || HH\is_php_array($input)) {
     return $input;
   }
   invariant_violation('!!!');
@@ -18,7 +18,7 @@ function mimc<T>(T $input): T {
 }
 
 function foo2<T>(T $input): T {
-  if (is_array($input)) {
+  if (HH\is_php_array($input)) {
     return $input;
   }
   invariant_violation('!!!');

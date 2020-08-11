@@ -20,7 +20,7 @@ function returns_int(mixed $in): ?int {
 
 /* HH_IGNORE_ERROR[4045] array without generics */
 function returns_array(mixed $in): ?array {
-  if (\is_array($in)) {
+  if (\HH\is_php_array($in)) {
     return $in;
   }
   return null;

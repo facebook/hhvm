@@ -262,10 +262,6 @@ type t = {
    * Paths are relative to the path of .hhconfig
    *)
   tco_pu_enabled_paths: bool * Relative_path.t list;
-  (* Companion option to the runtime's `Eval.WidenIsArray`: changes `is_array`
-   * to use the same inference rules as `is_any_array`.
-   *)
-  tco_widen_is_array: bool;
   (* Controls if higher-kinded types are supported *)
   tco_higher_kinded_types: bool;
   (* Controls if method-call inference is supported *)
@@ -371,7 +367,6 @@ val make :
   ?po_allow_unstable_features:bool ->
   ?tco_enable_systemlib_annotations:bool ->
   ?tco_pu_enabled_paths:bool * Relative_path.t list ->
-  ?tco_widen_is_array:bool ->
   ?tco_higher_kinded_types:bool ->
   ?tco_method_call_inference:bool ->
   unit ->
@@ -598,8 +593,6 @@ val po_disable_array_typehint : t -> bool
 val tco_enable_systemlib_annotations : t -> bool
 
 val tco_pu_enabled_paths : t -> bool * Relative_path.t list
-
-val tco_widen_is_array : t -> bool
 
 val tco_higher_kinded_types : t -> bool
 

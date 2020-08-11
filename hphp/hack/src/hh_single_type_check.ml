@@ -249,7 +249,6 @@ let parse_options () =
   let allowed_fixme_codes_partial = ref ISet.empty in
   let codes_not_raised_partial = ref ISet.empty in
   let allowed_decl_fixme_codes = ref ISet.empty in
-  let widen_is_array = ref false in
   let method_call_inference = ref false in
   let options =
     [
@@ -591,9 +590,6 @@ let parse_options () =
               |> List.map ~f:int_of_string
               |> ISet.of_list),
         "List of fixmes that are allowed in declarations." );
-      ( "--widen-is-array",
-        Arg.Set widen_is_array,
-        "Infer union of array-like types for `is_array`." );
       ( "--method-call-inference",
         Arg.Set method_call_inference,
         " Infer constraints for method calls." );
@@ -673,7 +669,6 @@ let parse_options () =
       ~tco_pu_enabled_paths:(!enable_pocket_universes_syntax, [])
       ~tco_higher_kinded_types:!enable_higher_kinded_types
       ~po_allowed_decl_fixme_codes:!allowed_decl_fixme_codes
-      ~tco_widen_is_array:!widen_is_array
       ~po_allow_unstable_features:true
       ~tco_method_call_inference:!method_call_inference
       ()

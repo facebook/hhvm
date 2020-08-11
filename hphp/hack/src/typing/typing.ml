@@ -6557,15 +6557,6 @@ and condition
   | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_php_array ->
     safely_refine_is_array env `PHPArray p f lv
-  | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], None)
-    when tparamet && String.equal f SN.StdlibFunctions.is_array ->
-    let kind =
-      if TCO.widen_is_array (Env.get_tcopt env) then
-        `AnyArray
-      else
-        `PHPArray
-    in
-    safely_refine_is_array env kind p f lv
   | Aast.Call
       ( Cnormal,
         (_, Aast.Class_const ((_, Aast.CI (_, class_name)), (_, method_name))),

@@ -7,6 +7,6 @@ KeyedTraversable<Tk, ?Tv> $traversable,
   return darray[];
 }
 function testit(mixed $m):void {
-  invariant(is_array($m), 'hack');
+  invariant(HH\is_php_array($m), 'hack');
   $a = darray_filter_falsy($m);
 }

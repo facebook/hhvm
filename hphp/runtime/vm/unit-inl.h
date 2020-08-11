@@ -26,61 +26,6 @@
 #include "hphp/runtime/vm/unit-util.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-// SourceLoc.
-
-inline SourceLoc::SourceLoc(const Location::Range& r) {
-  setLoc(&r);
-}
-
-inline void SourceLoc::reset() {
-  line0 = char0 = line1 = char1 = 1;
-}
-
-inline bool SourceLoc::valid() const {
-  return line0 != 1 || char0 != 1 || line1 != 1 || char1 != 1;
-}
-
-inline void SourceLoc::setLoc(const Location::Range* l) {
-  line0 = l->line0;
-  char0 = l->char0;
-  line1 = l->line1;
-  char1 = l->char1;
-}
-
-inline bool SourceLoc::same(const SourceLoc* l) const {
-  return (this == l) ||
-         (line0 == l->line0 && char0 == l->char0 &&
-          line1 == l->line1 && char1 == l->char1);
-}
-
-inline bool SourceLoc::operator==(const SourceLoc& l) const {
-  return same(&l);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Location tables.
-
-template<typename T>
-Offset TableEntry<T>::pastOffset() const {
-  return m_pastOffset;
-}
-
-template<typename T>
-T TableEntry<T>::val() const {
-  return m_val;
-}
-
-template<typename T>
-bool TableEntry<T>::operator<(const TableEntry& other) const {
-  return m_pastOffset < other.m_pastOffset;
-}
-
-template<typename T>
-template<class SerDe>
-void TableEntry<T>::serde(SerDe& sd) {
-  sd(m_pastOffset)(m_val);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Unit::MergeInfo.

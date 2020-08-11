@@ -670,16 +670,16 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
    * info altogether, since it may not be backed by a repo).
    */
   if (m_sourceLocTab.size() != 0) {
-    stashLineTable(u.get(), createLineTable(m_sourceLocTab, m_bclen));
+    SourceLocation::stashLineTable(u.get(), createLineTable(m_sourceLocTab, m_bclen));
     // If the debugger is enabled, or we plan to dump hhas we will
     // need the extended line table information in the output, and if
     // we're not writing the repo, stashing it here is necessary for
     // it to make it through.
     if (needs_extended_line_table()) {
-      stashExtendedLineTable(u.get(), createSourceLocTable());
+      SourceLocation::stashExtendedLineTable(u.get(), createSourceLocTable());
     }
   } else if (saveLineTable) {
-    stashLineTable(u.get(), m_lineTable);
+    SourceLocation::stashLineTable(u.get(), m_lineTable);
   }
 
   if (u->m_extended) {

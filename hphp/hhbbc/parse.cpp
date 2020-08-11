@@ -425,7 +425,7 @@ void populate_block(ParseUnitState& puState,
       puState.srcLocInfo,
       [&] (const SourceLocTable& tab) {
         SourceLoc sloc;
-        if (getSourceLoc(tab, opPC - ue.bc(), sloc)) {
+        if (SourceLocation::getLoc(tab, opPC - ue.bc(), sloc)) {
           return php::SrcLoc {
             { static_cast<uint32_t>(sloc.line0),
               static_cast<uint32_t>(sloc.char0) },
@@ -436,7 +436,7 @@ void populate_block(ParseUnitState& puState,
         return php::SrcLoc{};
       },
       [&] (const LineTable& tab) {
-        auto const line = getLineNumber(tab, opPC - ue.bc());
+        auto const line = SourceLocation::getLineNumber(tab, opPC - ue.bc());
         if (line != -1) {
           return php::SrcLoc {
             { static_cast<uint32_t>(line), 0 },

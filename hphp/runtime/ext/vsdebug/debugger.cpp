@@ -1799,7 +1799,7 @@ std::pair<int, int> Debugger::calibrateBreakpointLineInUnit(
   };
 
   std::set<SourceLoc, sourceLocCompare> candidateLocations;
-  const auto& table = getSourceLocTable(unit);
+  const auto& table = SourceLocation::getLocTable(unit);
   for (auto const& tableEntry : table) {
     const SourceLoc& sourceLocation = tableEntry.val();
 

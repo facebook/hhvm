@@ -141,7 +141,7 @@ static void pretty_print(
       prevLineNum = -1;
     }
 
-    int lineNum = getLineNumber(ue->lineTable(), ue->offsetOf(it));
+    int lineNum = SourceLocation::getLineNumber(ue->lineTable(), ue->offsetOf(it));
     if (lineNum != prevLineNum) {
       out << "  // line " << lineNum << std::endl;
       prevLineNum = lineNum;

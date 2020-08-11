@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/named-entity-pair-table.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/record.h"
+#include "hphp/runtime/vm/source-location.h"
 #include "hphp/runtime/vm/type-alias.h"
 
 #include "hphp/util/compact-vector.h"
@@ -84,135 +85,10 @@ struct FatalInfo {
   std::string m_fatalMsg;
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// Location tables.
-
-/*
- * Delimiter pairs for a location in the source code.
- */
-struct SourceLoc {
-  /*
-   * Constructors.
-   */
-  SourceLoc() {}
-  explicit SourceLoc(const Location::Range& l);
-
-  /*
-   * Reset to, or check for, the invalid state.
-   */
-  void reset();
-  bool valid() const;
-
-  /*
-   * Set to a parser Location.
-   */
-  void setLoc(const Location::Range* l);
-
-  /*
-   * Equality.
-   */
-  bool same(const SourceLoc* l) const;
-  bool operator==(const SourceLoc& l) const;
-
-  /*
-   * Start and end lines and characters.
-   *
-   * The default {1, 1, 1, 1} is an invalid sentinel value.
-   */
-  int line0{1};
-  int char0{1};
-  int line1{1};
-  int char1{1};
-
-  template <typename SerDes> void serde(SerDes& sd) {
-    sd(line0);
-    sd(char0);
-    sd(line1);
-    sd(char1);
-  }
-};
-
-/*
- * Pair of (base, past) offsets.
- */
-struct OffsetRange {
-  OffsetRange() {}
-
-  OffsetRange(Offset base, Offset past)
-    : base(base)
-    , past(past)
-  {}
-
-  Offset base{0};
-  Offset past{0};
-};
-
-using OffsetRangeVec = std::vector<OffsetRange>;
-
-/*
- * Generic entry for representing many-to-one mappings of Offset -> T.
- *
- * Each entry's `pastOffset' is expected to be the offset just past the range
- * of offsets which logically map to its `val'.  In this way, by maintaining a
- * relatively sparse set of entries in a vector, we can use least upper bound
- * searches on an offset key to find its corresponding T.
- *
- * The values of `pastOffset' in such a table are expected to be sorted and
- * unique, but the values of `val' need not be.
- */
-template<typename T>
-struct TableEntry {
-  /*
-   * Constructors.
-   */
-  TableEntry()
-    : m_pastOffset()
-    , m_val()
-  {}
-
-  TableEntry(Offset pastOffset, T val)
-    : m_pastOffset(pastOffset)
-    , m_val(val)
-  {}
-
-  /*
-   * Accessors.
-   */
-  Offset pastOffset() const;
-  T val() const;
-
-  /*
-   * Comparison.
-   */
-  bool operator<(const TableEntry& other) const;
-
-  template<class SerDe> void serde(SerDe& sd);
-
-private:
-  Offset m_pastOffset{0};
-  T m_val;
-};
-
 /*
  * Table specializations.
  */
-using LineEntry      = TableEntry<int>;
-using SourceLocEntry = TableEntry<SourceLoc>;
-using LineInfo       = std::pair<OffsetRange, int>;
-
-using LineTable      = std::vector<LineEntry>;
-using SourceLocTable = std::vector<SourceLocEntry>;
 using FuncTable      = VMCompactVector<const Func*>;
-
-/*
- * Get the line number or SourceLoc for Offset `pc' in `table'.
- */
-int getLineNumber(const LineTable& table, Offset pc);
-bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc);
-void stashLineTable(const Unit* unit, LineTable table);
-void stashExtendedLineTable(const Unit* unit, SourceLocTable table);
-
-const SourceLocTable& getSourceLocTable(const Unit*);
 
 /*
  * Sum of all Unit::m_bclen

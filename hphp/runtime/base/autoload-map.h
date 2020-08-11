@@ -159,6 +159,19 @@ struct FactsStore : public AutoloadMap {
    */
   virtual Array getDerivedTypes(
       const String& baseType, const Variant& filters) = 0;
+
+  /**
+   * Return all attributes decorating the given type.
+   */
+  virtual Array getTypeAttributes(const String& type) = 0;
+
+  /**
+   * Return the arguments associated with the given type and attribute, as a
+   * vec.
+   *
+   * If the given type does not have the given attribute, return an empty vec.
+   */
+  virtual Array getTypeAttrArgs(const String& type, const String& attr) = 0;
 };
 
 } // namespace HPHP

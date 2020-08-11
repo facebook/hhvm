@@ -235,7 +235,7 @@ void syncFuncBodyVMRegs(ActRec* fp, void* sp) {
   if (firstDVI != kInvalidOffset) {
     regs.pc = fp->m_func->unit()->entry() + firstDVI;
   } else {
-    regs.pc = fp->m_func->getEntry();
+    regs.pc = fp->m_func->entry();
   }
 }
 

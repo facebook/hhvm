@@ -690,7 +690,7 @@ SSATmp* opt_foldable(IRGS& env,
     // set to anything valid, so we need to do so here (for assertions and
     // backtraces in the invocation, among other things).
     auto const savedPC = vmpc();
-    vmpc() = vmfp() ? vmfp()->m_func->getEntry() : nullptr;
+    vmpc() = vmfp() ? vmfp()->m_func->entry() : nullptr;
     SCOPE_EXIT{ vmpc() = savedPC; };
 
     assertx(!RID().getJitFolding());

@@ -1993,12 +1993,12 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
         auto prevFp = getPrevVMState(fp);
         if (!prevFp) break;
         if (prevFp == target) {
-          return prevFp->func()->getEntry() + fp->callOffset();
+          return prevFp->func()->entry() + fp->callOffset();
         }
         fp = prevFp;
       }
     }
-    return target->func()->getEntry();
+    return target->func()->entry();
   };
 
   try {

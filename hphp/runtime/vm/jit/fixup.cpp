@@ -104,7 +104,7 @@ TreadHashMap<uint32_t,FixupEntry,FixupHash> s_fixups{kInitCapac};
 
 PC pc(const ActRec* /*ar*/, const Func* f, const Fixup& fixup) {
   assertx(f);
-  return f->getEntry() + fixup.pcOffset;
+  return f->entry() + fixup.pcOffset;
 }
 
 void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,

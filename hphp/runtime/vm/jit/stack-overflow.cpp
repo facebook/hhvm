@@ -55,7 +55,7 @@ void handleStackOverflow(ActRec* calleeAR) {
   // function entry. This is not really true, but it's good enough for unwinder.
   auto& unsafeRegs = vmRegsUnsafe();
   unsafeRegs.fp = calleeAR;
-  unsafeRegs.pc = calleeAR->func()->getEntry();
+  unsafeRegs.pc = calleeAR->func()->entry();
   unsafeRegs.stack.top() =
     reinterpret_cast<TypedValue*>(calleeAR) - calleeAR->func()->numSlotsInFrame();
   unsafeRegs.jitReturnAddr = nullptr;

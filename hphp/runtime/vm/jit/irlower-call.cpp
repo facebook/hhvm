@@ -423,7 +423,7 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
   auto const func = inst->marker().func();
 
   if (FixupMap::eagerRecord(func)) {
-    emitEagerSyncPoint(v, func->getEntry(), rvmtl(), fp, sp);
+    emitEagerSyncPoint(v, func->entry(), rvmtl(), fp, sp);
   }
   v << vinvoke{
     CallSpec::direct(func->arFuncPtr(), nullptr),

@@ -210,7 +210,7 @@ Offset compile_cti(Func* func, PC unitpc) {
   bc_total += func->past() - func->base();
   TRACE(1, "cti %s entry %p size %d %lu total %lu %lu\n",
         func->fullName()->size() > 0 ? func->fullName()->data() : "\"\"",
-        func->getEntry(),
+        func->entry(),
         func->past() - func->base(), cti_size,
         bc_total, a.used());
   TRACE(2, "cti lookups %lu misses %lu\n", cc_lookups, cc_misses);

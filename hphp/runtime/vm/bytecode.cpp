@@ -981,7 +981,7 @@ static void prepareFuncEntry(ActRec *ar, Array&& generics) {
   vmfp() = ar;
   vmpc() = firstDVInitializer != kInvalidOffset
     ? func->unit()->entry() + firstDVInitializer
-    : func->getEntry();
+    : func->entry();
   vmJitReturnAddr() = nullptr;
 
   if (nargs < func->numRequiredParams()) {
@@ -2297,7 +2297,7 @@ OPTBLD_INLINE TCA jitReturnPost(JitReturn retInfo) {
 OPTBLD_INLINE void returnToCaller(PC& pc, ActRec* sfp, Offset callOff) {
   vmfp() = sfp;
   pc = LIKELY(sfp != nullptr)
-    ? skipCall(sfp->func()->getEntry() + callOff)
+    ? skipCall(sfp->func()->entry() + callOff)
     : nullptr;
 }
 
@@ -3710,7 +3710,7 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
     } else {
       // Unwind live frame.
       vmfp() = ar->m_sfp;
-      vmpc() = vmfp()->func()->getEntry() + ar->callOffset();
+      vmpc() = vmfp()->func()->entry() + ar->callOffset();
       assertx(vmStack().top() + func->numSlotsInFrame() == (void*)ar);
       frame_free_locals_inl_no_hook(ar, func->numLocals());
       vmStack().ndiscard(func->numSlotsInFrame());
@@ -6047,7 +6047,7 @@ PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
     assert(nextpc == origPc + instrLen(origPc));
     pushPrediction({*returnaddr + kCtiIndirectJmpSize, nextpc});
   }
-  if (do_prof) LookupProf(pc == vmfp()->m_func->getEntry());
+  if (do_prof) LookupProf(pc == vmfp()->m_func->entry());
   // return ip to jump to, caller will do jmp(rax)
   return lookup_cti(vmfp()->m_func, pc);
 }

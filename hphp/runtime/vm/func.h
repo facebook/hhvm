@@ -388,7 +388,7 @@ struct Func final {
   /*
    * Get the function's main entrypoint.
    */
-  PC getEntry() const;
+  PC entry() const;
 
   /*
    * Get the offsets of the start (base) and end (past) of the function's

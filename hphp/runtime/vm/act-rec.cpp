@@ -52,7 +52,7 @@ void ActRec::setReturn(ActRec* fp, PC callPC, void* retAddr,
   m_sfp = fp;
   m_savedRip = reinterpret_cast<uintptr_t>(retAddr);
   m_callOffAndFlags = encodeCallOffsetAndFlags(
-    Offset(callPC - fp->func()->getEntry()),
+    Offset(callPC - fp->func()->entry()),
     asyncEagerReturn ? (1 << AsyncEagerRet) : 0
   );
 }

@@ -246,7 +246,7 @@ inline const StringData* Func::docComment() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Bytecode.
 
-inline PC Func::getEntry() const {
+inline PC Func::entry() const {
   return m_unit->entry() + shared()->m_base;
 }
 

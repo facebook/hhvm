@@ -1402,3 +1402,8 @@ val exception_occurred : Pos.t -> Exception.t -> unit
 val redundant_covariant : Pos.t -> string -> string -> unit
 
 val meth_caller_trait : Pos.t -> string -> unit
+
+val unsupported_hk_feature :
+  because_nested:bool -> Pos.t -> string -> string -> unit
+
+val tparam_non_shadowing_reuse : Pos.t -> string -> unit

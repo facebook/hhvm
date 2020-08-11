@@ -634,4 +634,5 @@ ConcreteConstInterfaceOverride = 4374
 MethCallerTrait = 4375
 PocketUniversesAttributes = 4376
 DuplicateInterface = 4377
+TypeParameterNameAlreadyUsedNonShadow = 4378
   |}]

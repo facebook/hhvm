@@ -1196,10 +1196,18 @@ and type_param ~forbid_this ((genv, _) as env) t =
   then
     let (pos, name) = t.Aast.tp_name in
     Errors.tparam_with_tparam pos name );
+
+  (* TODO(T70068435) Once we allow constraints on nested parameters, we must update the type
+      parameter environment for the nested calls of type_param so that hint_ can correctly
+      convert between Happly and Habstr in constraints *)
+  let tp_parameters =
+    List.map t.Aast.tp_parameters (type_param ~forbid_this env)
+  in
+
   {
     N.tp_variance = t.Aast.tp_variance;
     tp_name = t.Aast.tp_name;
-    tp_parameters = [];
+    tp_parameters;
     tp_constraints =
       List.map t.Aast.tp_constraints (constraint_ ~forbid_this env);
     tp_reified = t.Aast.tp_reified;

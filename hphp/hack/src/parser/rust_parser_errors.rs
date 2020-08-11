@@ -5443,7 +5443,9 @@ where
                 if self.attr_name(node).as_deref()
                     == Some(sn::user_attributes::ENABLE_UNSTABLE_FEATURES)
                 {
-                    if !self.env.parser_options.po_allow_unstable_features {
+                    if !self.env.parser_options.po_allow_unstable_features
+                        && !self.env.is_hhi_mode()
+                    {
                         self.errors.push(Self::make_error_from_node(
                             node,
                             errors::invalid_use_of_enable_unstable_feature(

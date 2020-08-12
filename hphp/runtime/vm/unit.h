@@ -177,7 +177,6 @@ public:
      * Get a reference or pointer to the mergeable at index `idx'.
      */
     void*& mergeableObj(int idx);
-    void** mergeableData(int idx);
 
     unsigned m_firstHoistablePreClass;
     unsigned m_firstMergeablePreClass;

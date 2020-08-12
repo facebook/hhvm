@@ -52,10 +52,6 @@ inline void*& Unit::MergeInfo::mergeableObj(int idx) {
   return m_mergeables[idx];
 }
 
-inline void** Unit::MergeInfo::mergeableData(int idx) {
-  return m_mergeables + idx;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Basic accessors.
 

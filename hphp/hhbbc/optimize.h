@@ -40,9 +40,9 @@ using BlockUpdates = CompactVector<std::pair<BlockId, BlockUpdateInfo>>;
  * php::Func, and may renumber the php::Func's locals, but won't update
  * any of the func's other metadata.
  */
-void optimize_func(const Index&, FuncAnalysis&&, php::MutFunc);
+void optimize_func(const Index&, FuncAnalysis&&, php::WideFunc&);
 
-void update_bytecode(php::MutFunc, BlockUpdates&&, FuncAnalysis* = nullptr);
+void update_bytecode(php::WideFunc&, BlockUpdates&&, FuncAnalysis* = nullptr);
 
 /*
  * Optimize property type hints for a particular class.

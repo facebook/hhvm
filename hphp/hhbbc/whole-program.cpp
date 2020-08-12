@@ -317,7 +317,7 @@ void analyze_iteratively(Index& index, php::Program& program,
         return "Updating Func: " + show(fa.ctx);
       };
       // This const_cast is safe since no two threads update the same Func.
-      auto const func = php::MutFunc(const_cast<php::Func*>(&*fa.ctx.func));
+      auto func = php::WideFunc::mut(const_cast<php::Func*>(fa.ctx.func));
       index.refine_return_info(fa, deps);
       index.refine_constants(fa, deps);
       update_bytecode(func, std::move(fa.blockUpdates));
@@ -455,7 +455,7 @@ void final_pass(Index& index,
       );
       for (auto const& ctx : contexts) {
         // This const_cast is safe since no two threads update the same Func.
-        auto const func = php::MutFunc(const_cast<php::Func*>(&*ctx.func));
+        auto func = php::WideFunc::mut(const_cast<php::Func*>(ctx.func));
         optimize_func(index, analyze_func(index, ctx, CollectionOpts{}), func);
       }
       assert(check(*unit));
@@ -548,8 +548,7 @@ void whole_program(php::ProgramPtr program,
   Index index(program.get());
   auto stats = allocate_stats();
   auto freeFuncMem = [&] (php::Func* fun) {
-    auto mf = php::MutFunc(fun);
-    mf.blocks_mut().clear();
+    php::WideFunc::mut(fun).blocks().clear();
   };
   auto emitUnit = [&] (php::Unit& unit) {
     auto ue = emit_unit(index, unit);

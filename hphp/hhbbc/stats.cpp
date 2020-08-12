@@ -378,7 +378,7 @@ void collect_func(Stats& stats, const Index& index, const php::Func& func) {
 
   add_type(stats.returns, ty);
 
-  auto const cf = php::ConstFunc(&func);
+  auto const cf = php::WideFunc::cns(&func);
   for (auto const bid : cf.blockRange()) {
     auto const blk = cf.blocks()[bid].get();
     if (blk->dead) continue;

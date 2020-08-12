@@ -288,7 +288,7 @@ std::string dot_instructions(const Func& func, const Block& b) {
 }
 
 // Output DOT-format graph.  Paste into dot -Txlib or similar.
-std::string dot_cfg(php::ConstFunc func) {
+std::string dot_cfg(const php::WideFunc& func) {
   std::string ret;
   for (auto const bid : rpoSortAddDVs(func)) {
     auto const b = func.blocks()[bid].get();
@@ -310,7 +310,7 @@ std::string dot_cfg(php::ConstFunc func) {
 
 std::string show(const Func& f) {
   std::string ret;
-  auto const func = php::ConstFunc(&f);
+  auto const func = php::WideFunc::cns(&f);
 
 #define X(what) if (func->what) folly::toAppend(#what "\n", &ret)
   X(isClosureBody);

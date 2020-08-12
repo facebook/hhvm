@@ -599,15 +599,15 @@ void build_cfg(ParseUnitState& puState,
 
   link_entry_points(func, fe, findBlock);
 
-  auto mf = php::MutFunc(&func);
-  mf.blocks_mut().resize(blockMap.size());
+  auto mf = php::WideFunc::mut(&func);
+  mf.blocks().resize(blockMap.size());
   for (auto& kv : blockMap) {
     auto const blk = kv.second.second.mutate();
     auto const id = kv.second.first;
     blk->multiSucc = predSuccCounts[id].second > 1;
     blk->multiPred = predSuccCounts[id].first > 1;
     blk->hhbcs.shrink_to_fit();
-    mf.blocks_mut()[id] = std::move(kv.second.second);
+    mf.blocks()[id] = std::move(kv.second.second);
   }
 }
 
@@ -723,8 +723,8 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
       blk.exnNodeId    = NoExnNodeId;
       blk.hhbcs = {gen_constant(it->second), bc::RetC {}};
 
-      auto mf = php::MutFunc(ret.get());
-      mf.blocks_mut().emplace_back(std::move(blk));
+      auto mf = php::WideFunc::mut(ret.get());
+      mf.blocks().emplace_back(std::move(blk));
 
       ret->dvEntries.resize(fe.params.size(), NoBlockId);
       ret->mainEntry = mainEntry;

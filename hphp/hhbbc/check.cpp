@@ -136,7 +136,7 @@ bool check(const php::Func& f) {
   assert(checkParams(f));
   assert(checkName(f.name));
 
-  auto const func = php::ConstFunc(&f);
+  auto const func = php::WideFunc::cns(&f);
   for (DEBUG_ONLY auto& block : func.blocks()) assert(checkBlock(f, *block));
 
   /*

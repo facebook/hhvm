@@ -2587,7 +2587,7 @@ const StaticString
   s_implicit_context_genSet("HH\\ImplicitContext::genSet");
 
 void in(ISS& env, const bc::GetMemoKeyL& op) {
-  auto const func = env.ctx.func;
+  auto const& func = env.ctx.func;
   auto const name = folly::to<std::string>(
     func && func->cls ? func->cls->name->data() : "",
     func && func->cls ? "::" : "",
@@ -5678,7 +5678,7 @@ BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
   if (options.RemoveDeadBlocks) {
     State temp{env.state, State::Compact{}};
     while (true) {
-      auto const func = env.ctx.func;
+      auto const& func = env.ctx.func;
       auto const targetBlk = func.blocks()[target].get();
       if (!targetBlk->multiPred) break;
       auto const ok = [&] {

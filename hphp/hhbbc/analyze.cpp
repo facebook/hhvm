@@ -267,7 +267,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
                                 CollectedInfo& collect,
                                 const KnownArgs* knownArgs) {
   assertx(base_ctx.cls == adjust_closure_context(base_ctx).cls);
-  auto const func = php::ConstFunc(base_ctx.func);
+  auto const func = php::WideFunc::cns(base_ctx.func);
   auto const ctx = AnalysisContext { base_ctx.unit, func, base_ctx.cls };
   FuncAnalysis ai{ctx};
 

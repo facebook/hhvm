@@ -37,7 +37,7 @@ namespace {
  *
  */
 struct PostOrderWalker {
-  php::ConstFunc func;
+  const php::WideFunc& func;
   std::vector<BlockId>& out;
   boost::dynamic_bitset<>& visited;
 
@@ -55,7 +55,7 @@ struct PostOrderWalker {
 };
 
 void postorderWalk(
-    php::ConstFunc func,
+    const php::WideFunc& func,
     std::vector<BlockId>& out,
     boost::dynamic_bitset<>& visited,
     BlockId blk) {
@@ -67,7 +67,8 @@ void postorderWalk(
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<BlockId> rpoSortFromBlock(php::ConstFunc func, BlockId start) {
+std::vector<BlockId> rpoSortFromBlock(
+    const php::WideFunc& func, BlockId start) {
   boost::dynamic_bitset<> visited(func.blocks().size());
   std::vector<BlockId> ret;
   ret.reserve(func.blocks().size());
@@ -76,11 +77,11 @@ std::vector<BlockId> rpoSortFromBlock(php::ConstFunc func, BlockId start) {
   return ret;
 }
 
-std::vector<BlockId> rpoSortFromMain(php::ConstFunc func) {
+std::vector<BlockId> rpoSortFromMain(const php::WideFunc& func) {
   return rpoSortFromBlock(func, func->mainEntry);
 }
 
-std::vector<BlockId> rpoSortAddDVs(php::ConstFunc func) {
+std::vector<BlockId> rpoSortAddDVs(const php::WideFunc& func) {
   boost::dynamic_bitset<> visited(func.blocks().size());
   std::vector<BlockId> ret;
   ret.reserve(func.blocks().size());
@@ -102,7 +103,7 @@ std::vector<BlockId> rpoSortAddDVs(php::ConstFunc func) {
 }
 
 BlockToBlocks
-computeNonThrowPreds(php::ConstFunc func,
+computeNonThrowPreds(const php::WideFunc& func,
                      const std::vector<BlockId>& rpoBlocks) {
   auto preds = BlockToBlocks{};
   preds.reserve(rpoBlocks.size());
@@ -122,7 +123,7 @@ computeNonThrowPreds(php::ConstFunc func,
 }
 
 BlockToBlocks
-computeThrowPreds(php::ConstFunc func,
+computeThrowPreds(const php::WideFunc& func,
                   const std::vector<BlockId>& rpoBlocks) {
   auto preds = BlockToBlocks{};
   preds.reserve(rpoBlocks.size());
@@ -147,7 +148,7 @@ computeThrowPreds(php::ConstFunc func,
  * date (this is just a heuristic to avoid having to keep a seen set,
  * because we don't expect long cyclic chains of no-op blocks).
  */
-BlockId next_real_block(php::ConstFunc func, BlockId id) {
+BlockId next_real_block(const php::WideFunc& func, BlockId id) {
   auto blk = func.blocks()[id].get();
   auto min = id;
   while (is_single_nop(*blk)) {

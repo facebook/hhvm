@@ -284,12 +284,11 @@ private:
    * blocks in an unspecified order.  Blocks use BlockIds to represent
    * control flow arcs. The id of a block is its index in this vector.
    *
-   * Use ConstFunc / MutFunc wrapper types to access this data.
+   * Use WideFunc to access this data.
    */
   BlockVec rawBlocks;
 
-  friend struct ConstFunc;
-  friend struct MutFunc;
+  friend struct WideFunc;
 };
 
 /*
@@ -424,29 +423,37 @@ struct Func : FuncBase {
 
 /*
  * We keep the code of a Func compressed at rest, so you must instantiate
- * one of the two "fat pointers" below to actually read or write its code.
- * Instantiating these pointers is a potentially heavy-weight operation.
+ * a "wide pointer" to read or write its block data. These pointers store
+ * a copy of the expanded data, so instantiating them is a heavy-weight
+ * operation and they cannot be copied or moved.
  */
-struct ConstFunc {
-  explicit ConstFunc(const Func* f) : func(f) {}
+struct WideFunc {
+  WideFunc(WideFunc&&) = delete;
+  WideFunc(const WideFunc&) = delete;
+  WideFunc& operator=(WideFunc&&) = delete;
+  WideFunc& operator=(const WideFunc&) = delete;
 
-  const BlockVec& blocks() const { return func->rawBlocks; }
+  static WideFunc mut(Func* f) { return WideFunc(f); }
+  static const WideFunc cns(const Func* f) {
+    return WideFunc(const_cast<Func*>(f));
+  }
+
+  operator Func*() { return func; }
+  Func& operator*() { return *func; }
+  Func* operator->() { return func; }
+  BlockVec& blocks() { return func->rawBlocks; }
+
   operator const Func*() const { return func; }
   const Func& operator*() const { return *func; }
   const Func* operator->() const { return func; }
+  const BlockVec& blocks() const { return func->rawBlocks; }
 
   operator bool() const { return func; }
   auto blockRange() const { return IntLikeRange<BlockId>{func->rawBlocks}; }
 
-  const Func* func = nullptr;
-};
-struct MutFunc : public ConstFunc {
-  explicit MutFunc(Func* f) : ConstFunc(f) {}
-
-  BlockVec& blocks_mut() const { return const_cast<Func*>(func)->rawBlocks; }
-  operator Func*() const { return const_cast<Func*>(func); }
-  Func* operator->() const { return const_cast<Func*>(func); }
-  Func& operator*() const { return *const_cast<Func*>(func); }
+private:
+  explicit WideFunc(Func* f) : func(f) {}
+  Func* func = nullptr;
 };
 
 //////////////////////////////////////////////////////////////////////

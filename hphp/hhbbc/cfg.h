@@ -52,7 +52,7 @@ inline bool is_single_nop(const php::Block& b) {
  * Walk through single_nop blocks to the next block that actually does
  * something.
  */
-BlockId next_real_block(php::ConstFunc func, BlockId id);
+BlockId next_real_block(const php::WideFunc& func, BlockId id);
 
 /*
  * Call a function for every jump target of a given bytecode, or Op.
@@ -105,7 +105,7 @@ void forEachNonThrowSuccessor(const php::Block& block, Fun f) {
  * Obtain the blocks for a function in a reverse post order, starting
  * with the specified block.  The exact order is not specified.
  */
-std::vector<BlockId> rpoSortFromBlock(php::ConstFunc, BlockId);
+std::vector<BlockId> rpoSortFromBlock(const php::WideFunc&, BlockId);
 
 /*
  * Obtain the blocks for a function in a reverse post order, starting
@@ -113,7 +113,7 @@ std::vector<BlockId> rpoSortFromBlock(php::ConstFunc, BlockId);
  *
  * DV initializer blocks will not appear in this list.
  */
-std::vector<BlockId> rpoSortFromMain(php::ConstFunc);
+std::vector<BlockId> rpoSortFromMain(const php::WideFunc&);
 
 /*
  * Obtain the blocks for a function in a reverse post order, taking
@@ -123,7 +123,7 @@ std::vector<BlockId> rpoSortFromMain(php::ConstFunc);
  * virtual empty "entry" block, with edges to each DV entry point and
  * an edge to the main entry point.
  */
-std::vector<BlockId> rpoSortAddDVs(php::ConstFunc);
+std::vector<BlockId> rpoSortAddDVs(const php::WideFunc&);
 
 /*
  * Mappings from blocks to sets of blocks.
@@ -144,7 +144,7 @@ using BlockToBlocks = std::vector<
  * in the list.
  */
 BlockToBlocks
-computeNonThrowPreds(php::ConstFunc, const std::vector<BlockId>&);
+computeNonThrowPreds(const php::WideFunc&, const std::vector<BlockId>&);
 
 /*
  * Find the immediate throw predecessors for each block in an
@@ -155,7 +155,7 @@ computeNonThrowPreds(php::ConstFunc, const std::vector<BlockId>&);
  * in the list.
  */
 BlockToBlocks
-computeThrowPreds(php::ConstFunc, const std::vector<BlockId>&);
+computeThrowPreds(const php::WideFunc&, const std::vector<BlockId>&);
 
 /*
  * Visit each leaf in the ExnNode tree.

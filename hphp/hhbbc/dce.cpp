@@ -2039,7 +2039,7 @@ folly::Optional<DceState>
 dce_visit(const Index& index,
           const FuncAnalysis& fa,
           CollectedInfo& collect,
-          php::ConstFunc func,
+          const php::WideFunc& func,
           BlockId bid,
           const State& stateIn,
           const DceOutState& dceOutState,
@@ -2253,7 +2253,7 @@ struct DceAnalysis {
 DceAnalysis analyze_dce(const Index& index,
                         const FuncAnalysis& fa,
                         CollectedInfo& collect,
-                        php::ConstFunc func,
+                        const php::WideFunc& func,
                         BlockId bid,
                         const State& stateIn,
                         const DceOutState& dceOutState,
@@ -2316,7 +2316,7 @@ void adjust_ndiscard(Bytecode& bc, int64_t adj) {
 /*
  * Do the actual updates to the bytecodes.
  */
-void dce_perform(php::MutFunc func, const DceActionMap& actionMap) {
+void dce_perform(php::WideFunc& func, const DceActionMap& actionMap) {
 
   using It = BytecodeVec::iterator;
   auto setloc = [] (int32_t srcLoc, It start, int n) {
@@ -2328,7 +2328,7 @@ void dce_perform(php::MutFunc func, const DceActionMap& actionMap) {
   for (auto const& elm : actionMap) {
     auto const& id = elm.first;
     auto const& dceAction = elm.second;
-    auto const b = func.blocks_mut()[id.blk].mutate();
+    auto const b = func.blocks()[id.blk].mutate();
     FTRACE(1, "{} {}\n", show(elm), show(*func, b->hhbcs[id.idx]));
     switch (dceAction.action) {
       case DceAction::PopInputs:
@@ -2502,7 +2502,7 @@ DceOptResult
 optimize_dce(const Index& index,
              const FuncAnalysis& fa,
              CollectedInfo& collect,
-             php::ConstFunc func,
+             const php::WideFunc& func,
              BlockId bid,
              const State& stateIn,
              const DceOutState& dceOutState) {
@@ -2524,7 +2524,7 @@ optimize_dce(const Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
-void remove_unused_local_names(php::MutFunc func,
+void remove_unused_local_names(php::WideFunc& func,
                                std::bitset<kMaxTrackedLocals> usedLocalNames) {
   if (!options.RemoveUnusedLocalNames) return;
   /*
@@ -2551,7 +2551,7 @@ void remove_unused_local_names(php::MutFunc func,
 
 // Take a vector mapping local ids to new local ids, and apply it to the
 // function passed in via ainfo.
-void apply_remapping(const FuncAnalysis& ainfo, php::MutFunc func,
+void apply_remapping(const FuncAnalysis& ainfo, php::WideFunc& func,
                      std::vector<LocalId>&& remapping) {
   auto const maxRemappedLocals = remapping.size();
   // During Global DCE we are for the most part free to modify the BCs since
@@ -2561,7 +2561,7 @@ void apply_remapping(const FuncAnalysis& ainfo, php::MutFunc func,
   for (auto const bid : ainfo.rpoBlocks) {
     FTRACE(2, "Remapping block #{}\n", bid);
 
-    auto const blk = func.blocks_mut()[bid].mutate();
+    auto const blk = func.blocks()[bid].mutate();
     for (uint32_t idx = blk->hhbcs.size(); idx-- > 0;) {
       auto& o = blk->hhbcs[idx];
 
@@ -2677,7 +2677,7 @@ void apply_remapping(const FuncAnalysis& ainfo, php::MutFunc func,
   }
 }
 
-void remap_locals(const FuncAnalysis& ainfo, php::MutFunc func,
+void remap_locals(const FuncAnalysis& ainfo, php::WideFunc& func,
                   LocalRemappingIndex&& remappingIndex) {
   if (!options.CompactLocalSlots) return;
   /*
@@ -2779,7 +2779,7 @@ void remap_locals(const FuncAnalysis& ainfo, php::MutFunc func,
 void local_dce(const Index& index,
                const FuncAnalysis& ainfo,
                CollectedInfo& collect,
-               php::MutFunc func,
+               php::WideFunc& func,
                BlockId bid,
                const State& stateIn) {
   // For local DCE, we have to assume all variables are in the
@@ -2791,7 +2791,8 @@ void local_dce(const Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
-bool global_dce(const Index& index, const FuncAnalysis& ai, php::MutFunc func) {
+bool global_dce(const Index& index, const FuncAnalysis& ai,
+                php::WideFunc& func) {
   auto rpoId = [&] (BlockId blk) {
     return ai.bdata[blk].rpoId;
   };

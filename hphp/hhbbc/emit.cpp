@@ -146,7 +146,7 @@ php::SrcLoc srcLoc(const php::Func& func, int32_t ix) {
  * case for DV initializers is that each one falls through to the
  * next, with the block jumping back to the main entry point.
  */
-std::vector<BlockId> order_blocks(php::ConstFunc f) {
+std::vector<BlockId> order_blocks(const php::WideFunc& f) {
   auto sorted = rpoSortFromMain(f);
 
   // Get the DV blocks, without the rest of the primary function body,
@@ -256,7 +256,7 @@ const StaticString
   s_hhbbc_fail_verification("__hhvm_intrinsics\\hhbbc_fail_verification");
 
 EmitBcInfo emit_bytecode(EmitUnitState& euState, UnitEmitter& ue,
-                         php::ConstFunc func, const Locals& locals) {
+                         const php::WideFunc& func, const Locals& locals) {
   EmitBcInfo ret = {};
   auto& blockInfo = ret.blockInfo;
   blockInfo.resize(func.blocks().size());
@@ -856,7 +856,7 @@ size_t shared_prefix(ForwardRange1& r1, ForwardRange2& r2) {
  * reasonably likely to have the same ExnNode.  Try to coalesce the EH
  * regions we create for in those cases.
  */
-void emit_ehent_tree(FuncEmitter& fe, php::ConstFunc func,
+void emit_ehent_tree(FuncEmitter& fe, const php::WideFunc& func,
                      const EmitBcInfo& info) {
   hphp_fast_map<
     const php::ExnNode*,
@@ -1103,8 +1103,9 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   }
 }
 
-void emit_finish_func(EmitUnitState& state, php::ConstFunc cf, FuncEmitter& fe,
-                      const EmitBcInfo& info, const Locals& locals) {
+void emit_finish_func(EmitUnitState& state, const php::WideFunc& cf,
+                      FuncEmitter& fe, const EmitBcInfo& info,
+                      const Locals& locals) {
   auto const& func = *cf;
   if (info.containsCalls) fe.containsCalls = true;;
 
@@ -1208,7 +1209,7 @@ void emit_func(EmitUnitState& state, UnitEmitter& ue,
                FuncEmitter* fe, const php::Func& f) {
   FTRACE(2,  "    func {}\n", f.name->data());
   auto const locals = emit_init_func(*fe, f);
-  auto const func = php::ConstFunc(&f);
+  auto const func = php::WideFunc::cns(&f);
   auto const info = emit_bytecode(state, ue, func, locals);
   emit_finish_func(state, func, *fe, info, locals);
 }
@@ -1297,7 +1298,7 @@ void emit_class(EmitUnitState& state,
     auto const fe = ue.newMethodEmitter(m->name, pce);
     auto const locals = emit_init_func(*fe, *m);
     pce->addMethod(fe);
-    auto const func = php::ConstFunc(m.get());
+    auto const func = php::WideFunc::cns(m.get());
     auto const info = emit_bytecode(state, ue, func, locals);
     emit_finish_func(state, func, *fe, info, locals);
   }

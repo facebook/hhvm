@@ -39,7 +39,7 @@ namespace php { struct Block; }
  * Perform DCE on a single basic block.
  */
 void local_dce(const Index&, const FuncAnalysis&, CollectedInfo& collect,
-               php::MutFunc, BlockId bid, const State&);
+               php::WideFunc&, BlockId bid, const State&);
 
 /*
  * Eliminate dead code in a function, across basic blocks, based on
@@ -47,7 +47,7 @@ void local_dce(const Index&, const FuncAnalysis&, CollectedInfo& collect,
  *
  * Returns true if we should re-run the optimizer.
  */
-bool global_dce(const Index&, const FuncAnalysis&, php::MutFunc);
+bool global_dce(const Index&, const FuncAnalysis&, php::WideFunc&);
 
 //////////////////////////////////////////////////////////////////////
 

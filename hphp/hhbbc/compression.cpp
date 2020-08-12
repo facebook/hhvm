@@ -335,8 +335,8 @@ void testCompression(php::Program& program) {
   auto buffer = Buffer{};
 
   auto test_compression_function = [&](php::Func& func) {
-    auto mf = php::MutFunc(&func);
-    for (auto& block : mf.blocks_mut()) {
+    auto mf = php::WideFunc::mut(&func);
+    for (auto& block : mf.blocks()) {
       auto const old_size = block->hhbcs.size() * sizeof(block->hhbcs[0]);
       compression::encodeBytecodeVec(buffer, block->hhbcs);
       auto result = block.mutate();

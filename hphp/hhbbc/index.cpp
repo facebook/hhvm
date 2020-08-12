@@ -2170,7 +2170,7 @@ std::unique_ptr<php::Func> clone_meth_helper(
     return true;
   };
 
-  auto mf = php::MutFunc(cloneMeth.get());
+  auto mf = php::WideFunc::mut(cloneMeth.get());
   hphp_fast_map<size_t, hphp_fast_map<size_t, uint32_t>> updates;
 
   for (size_t bid = 0; bid < mf.blocks().size(); bid++) {
@@ -2191,7 +2191,7 @@ std::unique_ptr<php::Func> clone_meth_helper(
   }
 
   for (auto elm : updates) {
-    auto const blk = mf.blocks_mut()[elm.first].mutate();
+    auto const blk = mf.blocks()[elm.first].mutate();
     for (auto const& ix : elm.second) {
       blk->hhbcs[ix.first].CreateCl.arg2 = ix.second;
     }
@@ -5473,7 +5473,7 @@ void Index::refine_class_constants(
 
 void Index::refine_constants(const FuncAnalysisResult& fa,
                              DependencyContextSet& deps) {
-  auto const func = fa.ctx.func;
+  auto const& func = fa.ctx.func;
   if (func->cls != nullptr) return;
 
   auto const val = tv(fa.inferredReturn);
@@ -5572,7 +5572,7 @@ static bool moreRefinedForIndex(const Type& newType,
 
 void Index::refine_return_info(const FuncAnalysisResult& fa,
                                DependencyContextSet& deps) {
-  auto const func = fa.ctx.func;
+  auto const& func = fa.ctx.func;
   auto const finfo = create_func_info(*m_data, func);
   auto const t = loosen_interfaces(fa.inferredReturn);
 

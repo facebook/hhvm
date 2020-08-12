@@ -36,7 +36,7 @@ static bool is_dead(const php::Block* blk) {
   return blk->dead;
 }
 
-void remove_unreachable_blocks(const FuncAnalysis& ainfo, php::MutFunc func) {
+void remove_unreachable_blocks(const FuncAnalysis& ainfo, php::WideFunc& func) {
   auto done_header = false;
   auto header = [&] {
     if (done_header) return;
@@ -60,7 +60,7 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo, php::MutFunc func) {
     if (!make_unreachable(bid)) continue;
     header();
     FTRACE(2, "Marking {} unreachable\n", bid);
-    auto const blk = func.blocks_mut()[bid].mutate();
+    auto const blk = func.blocks()[bid].mutate();
     auto const srcLoc = blk->hhbcs.front().srcLoc;
     blk->hhbcs = {
       bc_with_loc(srcLoc, bc::String { s_unreachable.get() }),
@@ -99,7 +99,7 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo, php::MutFunc func) {
       case Op::JmpNZ:
       case Op::JmpZ: {
         FTRACE(2, "blk: {} - jcc -> jmp {}\n", bid, reachableTarget);
-        auto const blk = func.blocks_mut()[bid].mutate();
+        auto const blk = func.blocks()[bid].mutate();
         blk->hhbcs.back() = bc_with_loc(blk->hhbcs.back().srcLoc, bc::PopC {});
         blk->fallthrough = reachableTarget;
         break;
@@ -107,7 +107,7 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo, php::MutFunc func) {
       case Op::Switch:
       case Op::SSwitch: {
         FTRACE(2, "blk: {} -", bid);
-        auto const blk = func.blocks_mut()[bid].mutate();
+        auto const blk = func.blocks()[bid].mutate();
         forEachNormalSuccessor(
           *blk,
           [&] (BlockId& id) {
@@ -154,7 +154,7 @@ struct SwitchInfo {
   DataType kind;
 };
 
-bool analyzeSwitch(php::ConstFunc func, BlockId bid,
+bool analyzeSwitch(const php::WideFunc& func, BlockId bid,
                    std::vector<MergeBlockInfo>& blkInfos,
                    SwitchInfo* switchInfo) {
   auto const& blk = *func.blocks()[bid];
@@ -305,7 +305,7 @@ Bytecode buildStringSwitch(SwitchInfo& switchInfo) {
   return { bc::SSwitch { std::move(sswitchTab) } };
 }
 
-bool buildSwitches(php::MutFunc func, BlockId bid,
+bool buildSwitches(php::WideFunc& func, BlockId bid,
                    std::vector<MergeBlockInfo>& blkInfos) {
   SwitchInfo switchInfo;
   std::vector<BlockId> blocks;
@@ -327,7 +327,7 @@ bool buildSwitches(php::MutFunc func, BlockId bid,
       auto bc = switchInfo.kind == KindOfInt64 ?
         buildIntSwitch(switchInfo) : buildStringSwitch(switchInfo);
       if (bc.op != Op::Nop) {
-        auto const blk = func.blocks_mut()[bid].mutate();
+        auto const blk = func.blocks()[bid].mutate();
         auto it = blk->hhbcs.end();
         // blk->fallthrough implies it was a JmpZ JmpNZ block,
         // which means we have exactly 4 instructions making up
@@ -347,7 +347,7 @@ bool buildSwitches(php::MutFunc func, BlockId bid,
         blk->fallthrough = NoBlockId;
         for (auto id : blocks) {
           if (blkInfos[id].multiplePreds) continue;
-          auto const removed = func.blocks_mut()[id].mutate();
+          auto const removed = func.blocks()[id].mutate();
           removed->dead = true;
           removed->hhbcs = { bc::Nop {} };
           removed->fallthrough = NoBlockId;
@@ -366,7 +366,7 @@ bool buildSwitches(php::MutFunc func, BlockId bid,
 
 }
 
-bool control_flow_opts(const FuncAnalysis& ainfo, php::MutFunc func) {
+bool control_flow_opts(const FuncAnalysis& ainfo, php::WideFunc& func) {
   FTRACE(2, "control_flow_opts: {}\n", func->name);
 
   std::vector<MergeBlockInfo> blockInfo(
@@ -421,7 +421,7 @@ bool control_flow_opts(const FuncAnalysis& ainfo, php::MutFunc func) {
   }
   for (auto bid : func.blockRange()) {
     if (blockInfo[bid].followSucc) {
-      auto const blk = func.blocks_mut()[bid].mutate();
+      auto const blk = func.blocks()[bid].mutate();
       forEachNormalSuccessor(
         *blk,
         [&] (BlockId& succId) {
@@ -456,12 +456,12 @@ bool control_flow_opts(const FuncAnalysis& ainfo, php::MutFunc func) {
       bInfo.couldBeSwitch = nInfo.couldBeSwitch;
       bInfo.onlySwitch = false;
 
-      auto const blk = func.blocks_mut()[bid].mutate();
+      auto const blk = func.blocks()[bid].mutate();
       blk->fallthrough = cnxt->fallthrough;
       blk->fallthroughNS = cnxt->fallthroughNS;
       std::copy(cnxt->hhbcs.begin(), cnxt->hhbcs.end(),
                 std::back_inserter(blk->hhbcs));
-      auto const nxt = func.blocks_mut()[nid].mutate();
+      auto const nxt = func.blocks()[nid].mutate();
       nxt->fallthrough = NoBlockId;
       nxt->dead = true;
       nxt->hhbcs = { bc::Nop {} };
@@ -482,7 +482,7 @@ bool control_flow_opts(const FuncAnalysis& ainfo, php::MutFunc func) {
 }
 
 void split_critical_edges(const Index& index, FuncAnalysis& ainfo,
-                          php::MutFunc func) {
+                          php::WideFunc& func) {
   // Changed tracks if we need to recompute RPO.
   auto changed = false;
   assertx(func.blocks().size() == ainfo.bdata.size());
@@ -498,7 +498,7 @@ void split_critical_edges(const Index& index, FuncAnalysis& ainfo,
                               BlockId dstBid) {
     auto const srcLoc = srcBlk->hhbcs.back().srcLoc;
     auto const newBid = make_block(func, srcBlk);
-    auto const newBlk = func.blocks_mut()[newBid].mutate();
+    auto const newBlk = func.blocks()[newBid].mutate();
     newBlk->hhbcs = { bc_with_loc(srcLoc, bc::Nop{}) };
     newBlk->fallthrough = dstBid;
 
@@ -559,7 +559,7 @@ void split_critical_edges(const Index& index, FuncAnalysis& ainfo,
     forEachNormalSuccessor(*blk, [&] (BlockId succBid) {
       if (hasMultiplePreds[succBid] && !seenSuccs[succBid]) {
         seenSuccs[succBid] = true;
-        split_edge(bid, func.blocks_mut()[bid].mutate(), succBid);
+        split_edge(bid, func.blocks()[bid].mutate(), succBid);
       }
     });
   }

@@ -33,12 +33,12 @@ struct FuncAnalysis;
  * If options.RemoveDeadBlocks is off, this function just replaces
  * blocks we believe are unreachable with fatal opcodes.
  */
-void remove_unreachable_blocks(const FuncAnalysis&, php::MutFunc func);
+void remove_unreachable_blocks(const FuncAnalysis&, php::WideFunc& func);
 
 /*
  * Simplify control flow, and create Switch and SSwitch bytecodes.
  */
-bool control_flow_opts(const FuncAnalysis&, php::MutFunc func);
+bool control_flow_opts(const FuncAnalysis&, php::WideFunc& func);
 
 /*
  * Split critical edges.
@@ -62,7 +62,7 @@ bool control_flow_opts(const FuncAnalysis&, php::MutFunc func);
  * Critical edge blocks that remain a single nop will get folded away by
  * control_flow_opts.
  */
-void split_critical_edges(const Index&, FuncAnalysis&, php::MutFunc func);
+void split_critical_edges(const Index&, FuncAnalysis&, php::WideFunc& func);
 
 //////////////////////////////////////////////////////////////////////
 

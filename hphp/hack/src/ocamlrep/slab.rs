@@ -482,8 +482,9 @@ pub fn copy_slab(
     let src_slab = Slab::from_bytes(src);
     let dest_slab = Slab::from_uninit_bytes_mut(dest);
 
-    // TODO: Do a less expensive sanity check once we're confident in correctness
-    src_slab.check_integrity()?;
+    if !src_slab.is_initialized() {
+        return Err(SlabIntegrityError::NotInitialized);
+    }
 
     // memcpy `src_slab` into `dest_slab`. Panic if they differ in length.
     dest_slab.copy_from_slice(src_slab);
@@ -548,8 +549,10 @@ impl<'a> SlabReader<'a> {
     /// The caller must only invoke this function on byte slices which were
     /// initialized by slab APIs (e.g., `OwnedSlab::as_bytes`, `copy_slab`).
     pub unsafe fn from_bytes(bytes: &'a [u8]) -> Result<Self, SlabIntegrityError> {
-        // TODO: Do a less expensive sanity check once we're confident in correctness
-        Slab::from_bytes(bytes).check_integrity()?;
+        let slab = Slab::from_bytes(bytes);
+        if !slab.is_initialized() {
+            return Err(SlabIntegrityError::NotInitialized);
+        }
         Ok(SlabReader(bytes))
     }
 

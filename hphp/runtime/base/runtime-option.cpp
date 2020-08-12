@@ -19,6 +19,7 @@
 #include "hphp/parser/scanner.h"
 #include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/crash-reporter.h"
@@ -2799,7 +2800,12 @@ void RuntimeOption::Load(
   // If we're going to construct bespoke array-likes at runtime, ensure that
   // we JIT checks for these types as well. We support JIT-ing these checks
   // even if there are no runtime bespokes as way to test our guard logic.
-  if (RO::EvalBespokeArrayLikeMode == 0) specializeVanillaDestructors();
+  if (RO::EvalBespokeArrayLikeMode == 0) {
+    specializeVanillaDestructors();
+    bespoke::setLoggingEnabled(false);
+  } else {
+    bespoke::setLoggingEnabled(true);
+  }
 
   // Hack Array Compats
 

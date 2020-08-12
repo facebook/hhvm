@@ -38,6 +38,7 @@ struct Layout;
 // Maybe wrap this array in a LoggingArray, based on runtime options.
 ArrayData* maybeEnableLogging(ArrayData*);
 const ArrayData* maybeEnableLogging(const ArrayData*);
+void setLoggingEnabled(bool);
 }
 
 /*

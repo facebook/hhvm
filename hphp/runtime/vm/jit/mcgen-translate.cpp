@@ -41,6 +41,7 @@
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/workload-stats.h"
 
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/tracing.h"
 #include "hphp/runtime/base/vm-worker.h"
@@ -687,6 +688,8 @@ void checkRetranslateAll(bool force) {
     // Another thread beat us.
     return;
   }
+
+  if (!shouldTestBespokeArrayLikes()) bespoke::setLoggingEnabled(false);
 
   if (!force && RuntimeOption::ServerExecutionMode()) {
     // We schedule a one-time call to retranslateAll() via the treadmill.  We

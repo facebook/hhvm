@@ -30,6 +30,7 @@
 #include "folly/SharedMutex.h"
 #include "folly/container/F14Map.h"
 
+#include <atomic>
 #include <mutex>
 
 namespace HPHP { namespace bespoke {
@@ -38,12 +39,16 @@ TRACE_SET_MOD(bespoke);
 
 //////////////////////////////////////////////////////////////////////////////
 
+namespace {
+std::atomic<bool> g_loggingEnabled;
+}
+
+void setLoggingEnabled(bool val) {
+  g_loggingEnabled.store(val, std::memory_order_relaxed);
+}
+
 ArrayData* maybeEnableLogging(ArrayData* ad) {
-  if (!allowBespokeArrayLikes() ||
-      (!shouldTestBespokeArrayLikes() &&
-       jit::mcgen::retranslateAllScheduled())) {
-    return ad;
-  }
+  if (!g_loggingEnabled.load(std::memory_order_relaxed)) return ad;
   VMRegAnchor _;
   auto const fp = vmfp();
   auto const sk = SrcKey(fp->func(), vmpc(), resumeModeFromActRec(fp));

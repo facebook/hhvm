@@ -3744,7 +3744,7 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
 
   assertx(kNumActRecCells == 3);
   ActRec* ar = vmStack().indA(fca.numInputs());
-  ar->m_func = func;
+  ar->setFunc(func);
   ar->setNumArgs(fca.numArgs + (fca.hasUnpack() ? 1 : 0));
   auto const asyncEagerReturn =
     fca.asyncEagerOffset != kInvalidOffset && func->supportsAsyncEagerReturn();

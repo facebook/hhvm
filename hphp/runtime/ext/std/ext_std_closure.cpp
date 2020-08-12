@@ -138,7 +138,7 @@ int c_Closure::initActRecFromClosure(ActRec* ar, TypedValue* sp) {
     c_Closure::fromObject(ar->getThisInPrologue()));
 
   // Put in the correct context
-  ar->m_func = closure->getInvokeFunc();
+  ar->setFunc(closure->getInvokeFunc());
 
   if (ar->func()->cls()) {
     // Swap in the $this or late bound class or null if it is from a plain

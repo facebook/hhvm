@@ -133,6 +133,8 @@ struct ActRec {
   const Func* func() const;
   const Unit* unit() const;
 
+  void setFunc(const Func*);
+
   /*
    * Set up frame linkage with the caller ActRec.
    */

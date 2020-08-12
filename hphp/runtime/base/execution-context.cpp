@@ -1480,7 +1480,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
 
   ActRec* ar = vmStack().indA(numArgsInclUnpack);
   ar->setReturnVMExit();
-  ar->m_func = f;
+  ar->setFunc(f);
   if (thiz) {
     ar->setThis(thiz);
   } else if (cls) {
@@ -2159,7 +2159,7 @@ void ExecutionContext::enterDebuggerDummyEnv() {
   assertx(m_nesting == 0);
   assertx(vmStack().count() == 0);
   ActRec* ar = vmStack().allocA();
-  ar->m_func = s_debuggerDummy->lookupFuncId(0);
+  ar->setFunc(s_debuggerDummy->lookupFuncId(0));
   assertx(ar->m_func && ar->m_func->name()->equal(s_include.get()));
   ar->setNumArgs(0);
   for (int i = 0; i < ar->m_func->numLocals(); ++i) vmStack().pushInt(1);

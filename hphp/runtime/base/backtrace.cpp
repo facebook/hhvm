@@ -162,7 +162,7 @@ BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm) {
     auto const ifr = jit::getInlineFrame(stk->frame);
 
     auto const prevFP = &ctx.fakeAR[0];
-    prevFP->m_func = ifr.func;
+    prevFP->setFunc(ifr.func);
     prevFP->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
       ifr.callOff,
       1 << ActRec::LocalsDecRefd  // don't attempt to read locals
@@ -199,7 +199,7 @@ BTFrame initBTContextAt(BTContext& ctx, jit::CTCA ip, BTFrame frm) {
 
   if (auto const f = getBuiltin()) {
     auto const prevFP = &ctx.fakeAR[0];
-    prevFP->m_func = f;
+    prevFP->setFunc(f);
     prevFP->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
       frm.pc - frm.fp->func()->base(),
       1 << ActRec::LocalsDecRefd  // don't attempt to read locals
@@ -231,7 +231,7 @@ BTFrame getPrevActRec(
     if (ctx.afwhTailFrameIndex < wh->lastTailFrameIndex()) {
       auto const sk = getAsyncFrame(wh->tailFrame(ctx.afwhTailFrameIndex++));
       auto const prevFP = fp->m_sfp;
-      prevFP->m_func = sk.func();
+      prevFP->setFunc(sk.func());
       return BTFrame{prevFP, sk.offset()};
     }
 
@@ -255,7 +255,7 @@ BTFrame getPrevActRec(
 
     auto prev = BTFrame{};
     prev.fp = fp->m_sfp;
-    prev.fp->m_func = ifr.func;
+    prev.fp->setFunc(ifr.func);
     prev.fp->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
       ifr.callOff,
       1 << ActRec::LocalsDecRefd  // don't attempt to read locals
@@ -323,7 +323,7 @@ BTFrame getPrevActRec(
       ctx.afwhTailFrameIndex = index + 1;
       ctx.stashedFrm.fp = afwh->actRec();
       auto const prevFP = &ctx.fakeAR[0];
-      prevFP->m_func = sk.func();
+      prevFP->setFunc(sk.func());
       prevFP->m_callOffAndFlags =
         ActRec::encodeCallOffsetAndFlags(0, 1 << ActRec::LocalsDecRefd);
       return BTFrame{prevFP, sk.offset()};

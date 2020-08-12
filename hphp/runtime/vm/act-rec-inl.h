@@ -24,6 +24,10 @@ inline const Func* ActRec::func() const {
   return m_func;
 }
 
+inline void ActRec::setFunc(const Func* f) {
+  m_func = f;
+}
+
 inline const Unit* ActRec::unit() const {
   func()->validate();
   return func()->unit();

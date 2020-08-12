@@ -371,16 +371,16 @@ void collect_simple(Stats& stats, const Bytecode& bc) {
   }
 }
 
-void collect_func(Stats& stats, const Index& index, php::Func& func) {
+void collect_func(Stats& stats, const Index& index, const php::Func& func) {
   if (!func.cls) ++stats.totalFunctions;
 
   auto const ty = index.lookup_return_type_raw(&func);
 
   add_type(stats.returns, ty);
 
-  auto mf = php::MutFunc(&func);
-  for (auto const bid : mf.blockRange()) {
-    auto const blk = mf.blocks()[bid].get();
+  auto const cf = php::ConstFunc(&func);
+  for (auto const bid : cf.blockRange()) {
+    auto const blk = cf.blocks()[bid].get();
     if (blk->dead) continue;
     for (auto& bc : blk->hhbcs) {
       collect_simple(stats, bc);
@@ -389,12 +389,12 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
 
   if (!options.extendedStats) return;
 
-  auto const ctx = AnalysisContext { func.unit, mf, func.cls };
+  auto const ctx = AnalysisContext { func.unit, cf, func.cls };
   auto const fa  = analyze_func(index, ctx, CollectionOpts{});
   {
     Trace::Bump bumper{Trace::hhbbc, kStatsBump};
-    for (auto const bid : mf.blockRange()) {
-      auto const blk = mf.blocks()[bid].get();
+    for (auto const bid : cf.blockRange()) {
+      auto const blk = cf.blocks()[bid].get();
       auto state = fa.bdata[bid].stateIn;
       if (!state.initialized) continue;
 
@@ -446,16 +446,16 @@ void collect_stats(Stats& stats,
   parallel::for_each(
     program.units,
     [&] (const std::unique_ptr<php::Unit>& unit) {
-      for (auto& c : unit->classes) {
+      for (auto const& c : unit->classes) {
         collect_class(stats, index, *c);
-        for (auto& m : c->methods) {
+        for (auto const& m : c->methods) {
           collect_func(stats, index, *m);
         }
       }
-      for (auto& r : unit->records) {
+      for (auto const& r : unit->records) {
         collect_record(stats, *r);
       }
-      for (auto& x : unit->funcs) {
+      for (auto const& x : unit->funcs) {
         collect_func(stats, index, *x);
       }
     }

@@ -428,7 +428,6 @@ struct Func : FuncBase {
  * Instantiating these pointers is a potentially heavy-weight operation.
  */
 struct ConstFunc {
-  ConstFunc() = default;
   explicit ConstFunc(const Func* f) : func(f) {}
 
   const BlockVec& blocks() const { return func->rawBlocks; }
@@ -439,10 +438,9 @@ struct ConstFunc {
   operator bool() const { return func; }
   auto blockRange() const { return IntLikeRange<BlockId>{func->rawBlocks}; }
 
-  const Func* func;
+  const Func* func = nullptr;
 };
 struct MutFunc : public ConstFunc {
-  MutFunc() = default;
   explicit MutFunc(Func* f) : ConstFunc(f) {}
 
   BlockVec& blocks_mut() const { return const_cast<Func*>(func)->rawBlocks; }

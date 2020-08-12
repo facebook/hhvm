@@ -280,10 +280,11 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
 void insert_assertions(const Index& index,
                        const FuncAnalysis& ainfo,
                        CollectedInfo& collect,
+                       php::MutFunc func,
                        BlockId bid,
                        State state) {
   BytecodeVec newBCs;
-  auto const& cblk = ainfo.ctx.func.blocks()[bid];
+  auto const& cblk = func.blocks()[bid];
   newBCs.reserve(cblk->hhbcs.size());
 
   auto& arrTable = *index.array_table_builder();
@@ -295,12 +296,12 @@ void insert_assertions(const Index& index,
   auto interp = Interp { index, ctx, collect, bid, cblk.get(), state };
 
   for (auto& op : cblk->hhbcs) {
-    FTRACE(2, "  == {}\n", show(ctx.func, op));
+    FTRACE(2, "  == {}\n", show(func, op));
 
     auto gen = [&] (const Bytecode& newb) {
       newBCs.push_back(newb);
       newBCs.back().srcLoc = op.srcLoc;
-      FTRACE(2, "   + {}\n", show(ctx.func, newBCs.back()));
+      FTRACE(2, "   + {}\n", show(func, newBCs.back()));
     };
 
     if (state.unreachable) {
@@ -318,7 +319,7 @@ void insert_assertions(const Index& index,
 
     insert_assertions_step(
       arrTable,
-      *ctx.func,
+      *func,
       op,
       preState,
       flags.mayReadLocalSet,
@@ -342,7 +343,7 @@ void insert_assertions(const Index& index,
   }
 
   if (cblk->fallthrough != fallthrough || cblk->hhbcs != newBCs) {
-    auto const blk = ainfo.ctx.func.blocks_mut()[bid].mutate();
+    auto const blk = func.blocks_mut()[bid].mutate();
     blk->fallthrough = fallthrough;
     blk->hhbcs = std::move(newBCs);
   }
@@ -424,14 +425,6 @@ void sync_ainfo(BlockId bid, FuncAnalysis& ainfo, const State& state) {
   });
 }
 
-BlockId make_fatal_block(FuncAnalysis& ainfo,
-                         const php::Block* srcBlk,
-                         const State& state) {
-  auto bid = make_fatal_block(ainfo.ctx.func, srcBlk);
-  sync_ainfo(bid, ainfo, state);
-  return bid;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 template<class Fun>
@@ -439,13 +432,14 @@ void visit_blocks(const char* what,
                   const Index& index,
                   const FuncAnalysis& ainfo,
                   CollectedInfo& collect,
+                  php::MutFunc func,
                   Fun&& fun) {
   BlockId curBlk = NoBlockId;
   SCOPE_ASSERT_DETAIL(what) {
     if (curBlk == NoBlockId) return std::string{"\nNo block processed\n"};
     return folly::sformat(
         "block #{}\nin-{}", curBlk,
-        state_string(*ainfo.ctx.func, ainfo.bdata[curBlk].stateIn, collect)
+        state_string(*func, ainfo.bdata[curBlk].stateIn, collect)
     );
   };
 
@@ -461,9 +455,9 @@ void visit_blocks(const char* what,
     // TODO(#3732260): this should probably spend an extra interp pass
     // in debug builds to check that no transformation to the bytecode
     // was made that changes the block output state.
-    fun(index, ainfo, collect, bid, state);
+    fun(index, ainfo, collect, func, bid, state);
   }
-  assert(check(*ainfo.ctx.func));
+  assert(check(*func));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -493,17 +487,18 @@ struct OptimizeIterState {
   void operator()(const Index& index,
                   const FuncAnalysis& ainfo,
                   CollectedInfo& collect,
+                  php::MutFunc func,
                   BlockId bid,
                   State state) {
     auto const ctx = ainfo.ctx;
-    auto const blk = ctx.func.blocks()[bid].get();
+    auto const blk = func.blocks()[bid].get();
     auto interp = Interp { index, ctx, collect, bid, blk, state };
     for (uint32_t opIdx = 0; opIdx < blk->hhbcs.size(); ++opIdx) {
       // If we've already determined that nothing is eligible, we can just stop.
       if (!eligible.any()) break;
 
       auto const& op = blk->hhbcs[opIdx];
-      FTRACE(2, "  == {}\n", show(ctx.func, op));
+      FTRACE(2, "  == {}\n", show(func, op));
 
       if (state.unreachable) break;
 
@@ -515,7 +510,7 @@ struct OptimizeIterState {
           []  (DeadIter) {},
           [&] (const LiveIter& ti) {
             FTRACE(4, "   iter {: <2}  :: {}\n",
-                   it, show(*ctx.func, state.iters[it]));
+                   it, show(*func, state.iters[it]));
             // The init block is unknown. This can only happen if there's more
             // than one block where this iterator was initialized. This makes
             // tracking the iteration loop ambiguous, and can't happen with how
@@ -547,7 +542,7 @@ struct OptimizeIterState {
           eligible[bid] = false;
         }
         fixups.emplace_back(Fixup{bid, opIdx, bid, base});
-        FTRACE(2, "   + fixup ({})\n", fixups.back().show(*ctx.func));
+        FTRACE(2, "   + fixup ({})\n", fixups.back().show(*func));
       };
 
       auto const fixupFromState = [&] (IterId it) {
@@ -556,11 +551,11 @@ struct OptimizeIterState {
           []  (DeadIter) {},
           [&] (const LiveIter& ti) {
             if (ti.initBlock != NoBlockId) {
-              assertx(iterFromInit(ctx.func, ti.initBlock) == it);
+              assertx(iterFromInit(func, ti.initBlock) == it);
               fixups.emplace_back(
                 Fixup{bid, opIdx, ti.initBlock, ti.baseLocal}
               );
-              FTRACE(2, "   + fixup ({})\n", fixups.back().show(*ctx.func));
+              FTRACE(2, "   + fixup ({})\n", fixups.back().show(*func));
             }
           }
         );
@@ -615,10 +610,8 @@ struct OptimizeIterState {
   boost::dynamic_bitset<> updated;
 };
 
-void optimize_iterators(const Index& index,
-                        const FuncAnalysis& ainfo,
-                        CollectedInfo& collect) {
-  auto const func = ainfo.ctx.func;
+void optimize_iterators(const Index& index, const FuncAnalysis& ainfo,
+                        CollectedInfo& collect, php::MutFunc func) {
   // Quick exit. If there's no iterators, or if no associated local survives to
   // the end of the iterator, there's nothing to do.
   if (!func->numIters || !ainfo.hasInvariantIterBase) return;
@@ -630,7 +623,7 @@ void optimize_iterators(const Index& index,
   state.updated.resize(func.blocks().size(), false);
 
   // Visit all the blocks and build up the fixup state.
-  visit_blocks("optimize_iterators", index, ainfo, collect, state);
+  visit_blocks("optimize_iterators", index, ainfo, collect, func, state);
   if (!state.eligible.any()) return;
 
   FTRACE(2, "Rewrites:\n");
@@ -741,33 +734,33 @@ void fixTypeConstraint(const Index& index, TypeConstraint& tc) {
 
 //////////////////////////////////////////////////////////////////////
 
-void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
-  FTRACE(2, "{:-^70} {}\n", "Optimize Func", ainfo.ctx.func->name);
+void do_optimize(const Index& index, FuncAnalysis&& ainfo, php::MutFunc func) {
+  FTRACE(2, "{:-^70} {}\n", "Optimize Func", func->name);
 
   bool again;
   folly::Optional<CollectedInfo> collect;
   collect.emplace(index, ainfo.ctx, nullptr, CollectionOpts{}, &ainfo);
 
-  update_bytecode(ainfo.ctx.func, std::move(ainfo.blockUpdates), &ainfo);
-  optimize_iterators(index, ainfo, *collect);
+  update_bytecode(func, std::move(ainfo.blockUpdates), &ainfo);
+  optimize_iterators(index, ainfo, *collect, func);
 
   do {
     again = false;
-    FTRACE(10, "{}", show(*ainfo.ctx.func));
+    FTRACE(10, "{}", show(*func));
     /*
      * Note: it's useful to do dead block removal before DCE, so it can remove
      * code relating to the branch to the dead block.
      */
-    remove_unreachable_blocks(ainfo);
+    remove_unreachable_blocks(ainfo, func);
 
     if (options.LocalDCE) {
-      visit_blocks("local DCE", index, ainfo, *collect, local_dce);
+      visit_blocks("local DCE", index, ainfo, *collect, func, local_dce);
     }
     if (options.GlobalDCE) {
-      split_critical_edges(index, ainfo);
-      if (global_dce(index, ainfo)) again = true;
-      if (control_flow_opts(ainfo)) again = true;
-      assert(check(*ainfo.ctx.func));
+      split_critical_edges(index, ainfo, func);
+      if (global_dce(index, ainfo, func)) again = true;
+      if (control_flow_opts(ainfo, func)) again = true;
+      assert(check(*func));
       /*
        * Global DCE can change types of locals across blocks.  See
        * dce.cpp for an explanation.
@@ -776,14 +769,13 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
        * anything else.
        */
       ainfo = analyze_func(index, ainfo.ctx, CollectionOpts{});
-      update_bytecode(ainfo.ctx.func, std::move(ainfo.blockUpdates), &ainfo);
+      update_bytecode(func, std::move(ainfo.blockUpdates), &ainfo);
       collect.emplace(index, ainfo.ctx, nullptr, CollectionOpts{}, &ainfo);
     }
 
     // If we merged blocks, there could be new optimization opportunities
   } while (again);
 
-  auto const func = ainfo.ctx.func;
   if (func->name == s_86pinit.get() ||
       func->name == s_86sinit.get() ||
       func->name == s_86linit.get()) {
@@ -804,7 +796,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
 
   if (options.InsertAssertions) {
     visit_blocks("insert assertions", index, ainfo, *collect,
-                 insert_assertions);
+                 func, insert_assertions);
   }
 
   // NOTE: We shouldn't duplicate blocks that are shared between two Funcs
@@ -884,8 +876,9 @@ Bytecode gen_constant(const TypedValue& cell) {
   not_reached();
 }
 
-void optimize_func(const Index& index, FuncAnalysis&& ainfo) {
-  auto const bump = trace_bump_for(ainfo.ctx.cls, ainfo.ctx.func);
+void optimize_func(const Index& index, FuncAnalysis&& ainfo,
+                   php::MutFunc func) {
+  auto const bump = trace_bump_for(ainfo.ctx.cls, func);
 
   SCOPE_ASSERT_DETAIL("optimize_func") {
     return "Optimizing:" + show(ainfo.ctx);
@@ -894,14 +887,11 @@ void optimize_func(const Index& index, FuncAnalysis&& ainfo) {
   Trace::Bump bumper1{Trace::hhbbc, bump};
   Trace::Bump bumper2{Trace::hhbbc_cfg, bump};
   Trace::Bump bumper3{Trace::hhbbc_dce, bump};
-  do_optimize(index, std::move(ainfo));
+  do_optimize(index, std::move(ainfo), func);
 }
 
-void update_bytecode(
-    php::MutFunc func,
-    CompactVector<std::pair<BlockId, BlockUpdateInfo>>&& blockUpdates,
-    FuncAnalysis* ainfo) {
-
+void update_bytecode(php::MutFunc func, BlockUpdates&& blockUpdates,
+                     FuncAnalysis* ainfo) {
   for (auto& ent : blockUpdates) {
     auto blk = func.blocks_mut()[ent.first].mutate();
     auto const srcLoc = blk->hhbcs.front().srcLoc;
@@ -926,9 +916,7 @@ void update_bytecode(
     auto fatal = [&] {
       if (fatal_block == NoBlockId) {
         fatal_block = make_fatal_block(func, blk);
-        if (ainfo) {
-          sync_ainfo(fatal_block, *ainfo, {});
-        }
+        if (ainfo) sync_ainfo(fatal_block, *ainfo, {});
       }
       return fatal_block;
     };
@@ -950,7 +938,6 @@ void update_bytecode(
       }
     }
   }
-  blockUpdates.clear();
 }
 
 //////////////////////////////////////////////////////////////////////

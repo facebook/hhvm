@@ -27,6 +27,8 @@ struct FuncAnalysis;
 struct Bytecode;
 struct BlockUpdateInfo;
 
+using BlockUpdates = CompactVector<std::pair<BlockId, BlockUpdateInfo>>;
+
 /*
  * Use information from an analyze call to perform various
  * optimizations on a function.
@@ -38,12 +40,9 @@ struct BlockUpdateInfo;
  * php::Func, and may renumber the php::Func's locals, but won't update
  * any of the func's other metadata.
  */
-void optimize_func(const Index&, FuncAnalysis&&);
+void optimize_func(const Index&, FuncAnalysis&&, php::MutFunc);
 
-void update_bytecode(
-    php::MutFunc func,
-    CompactVector<std::pair<BlockId, BlockUpdateInfo>>&& blockUpdates,
-    FuncAnalysis* = nullptr);
+void update_bytecode(php::MutFunc, BlockUpdates&&, FuncAnalysis* = nullptr);
 
 /*
  * Optimize property type hints for a particular class.

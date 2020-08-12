@@ -16,6 +16,8 @@
 #ifndef incl_HHBBC_CFG_OPTS_H_
 #define incl_HHBBC_CFG_OPTS_H_
 
+#include "hphp/hhbbc/representation.h"
+
 namespace HPHP { namespace HHBBC {
 
 struct Index;
@@ -31,12 +33,12 @@ struct FuncAnalysis;
  * If options.RemoveDeadBlocks is off, this function just replaces
  * blocks we believe are unreachable with fatal opcodes.
  */
-void remove_unreachable_blocks(const FuncAnalysis&);
+void remove_unreachable_blocks(const FuncAnalysis&, php::MutFunc func);
 
 /*
  * Simplify control flow, and create Switch and SSwitch bytecodes.
  */
-bool control_flow_opts(const FuncAnalysis&);
+bool control_flow_opts(const FuncAnalysis&, php::MutFunc func);
 
 /*
  * Split critical edges.
@@ -60,7 +62,7 @@ bool control_flow_opts(const FuncAnalysis&);
  * Critical edge blocks that remain a single nop will get folded away by
  * control_flow_opts.
  */
-void split_critical_edges(const Index&, FuncAnalysis&);
+void split_critical_edges(const Index&, FuncAnalysis&, php::MutFunc func);
 
 //////////////////////////////////////////////////////////////////////
 

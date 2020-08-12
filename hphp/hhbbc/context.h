@@ -87,7 +87,7 @@ inline bool operator==(const CallContext& a, const CallContext& b) {
  */
 struct AnalysisContext {
   const php::Unit* unit;
-  php::MutFunc func;
+  php::ConstFunc func;
   const php::Class* cls;
 
   operator Context() const {

@@ -296,9 +296,7 @@ void analyze_iteratively(Index& index, php::Program& program,
           switch (wi.type) {
           case WorkType::Func:
             ++total_funcs;
-            return WorkResult {
-              analyze_func(index, wi.ctx, CollectionOpts{})
-            };
+            return WorkResult { analyze_func(index, wi.ctx, CollectionOpts{}) };
           case WorkType::Class:
             ++total_classes;
             return WorkResult { analyze_class(index, wi.ctx) };
@@ -318,21 +316,21 @@ void analyze_iteratively(Index& index, php::Program& program,
       SCOPE_ASSERT_DETAIL("update_func") {
         return "Updating Func: " + show(fa.ctx);
       };
+      // This const_cast is safe since no two threads update the same Func.
+      auto const func = php::MutFunc(const_cast<php::Func*>(&*fa.ctx.func));
       index.refine_return_info(fa, deps);
       index.refine_constants(fa, deps);
-      update_bytecode(fa.ctx.func, std::move(fa.blockUpdates));
+      update_bytecode(func, std::move(fa.blockUpdates));
 
       if (options.AnalyzePublicStatics && mode == AnalyzeMode::NormalPass) {
         index.record_public_static_mutations(
-          *fa.ctx.func,
+          *func,
           std::move(fa.publicSPropMutations)
         );
       }
 
       if (fa.resolvedConstants.size()) {
-        index.refine_class_constants(fa.ctx,
-                                     fa.resolvedConstants,
-                                     deps);
+        index.refine_class_constants(fa.ctx, fa.resolvedConstants, deps);
       }
       for (auto& kv : fa.closureUseTypes) {
         assert(is_closure(*kv.first));
@@ -456,7 +454,9 @@ void final_pass(Index& index,
         }
       );
       for (auto const& ctx : contexts) {
-        optimize_func(index, analyze_func(index, ctx, CollectionOpts{}));
+        // This const_cast is safe since no two threads update the same Func.
+        auto const func = php::MutFunc(const_cast<php::Func*>(&*ctx.func));
+        optimize_func(index, analyze_func(index, ctx, CollectionOpts{}), func);
       }
       assert(check(*unit));
       state_after("optimize", *unit);

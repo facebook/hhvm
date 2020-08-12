@@ -21,9 +21,9 @@
 #include <boost/variant/static_visitor.hpp>
 #include <boost/container/flat_set.hpp>
 
+#include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
-#include "hphp/hhbbc/bc.h"
 
 namespace HPHP { namespace HHBBC {
 

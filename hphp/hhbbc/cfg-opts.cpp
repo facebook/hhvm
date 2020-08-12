@@ -36,16 +36,15 @@ static bool is_dead(const php::Block* blk) {
   return blk->dead;
 }
 
-void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
+void remove_unreachable_blocks(const FuncAnalysis& ainfo, php::MutFunc func) {
   auto done_header = false;
   auto header = [&] {
     if (done_header) return;
     done_header = true;
-    FTRACE(2, "Remove unreachable blocks: {}\n", ainfo.ctx.func->name);
+    FTRACE(2, "Remove unreachable blocks: {}\n", func->name);
   };
 
-  auto const func = ainfo.ctx.func;
-  auto& blocks = ainfo.ctx.func.blocks();
+  auto& blocks = func.blocks();
 
   auto make_unreachable = [&](BlockId bid) {
     auto const blk = blocks[bid].get();
@@ -57,7 +56,7 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
            blk->hhbcs.back().op != Op::Fatal;
   };
 
-  for (auto bid : ainfo.ctx.func.blockRange()) {
+  for (auto bid : func.blockRange()) {
     if (!make_unreachable(bid)) continue;
     header();
     FTRACE(2, "Marking {} unreachable\n", bid);
@@ -155,8 +154,7 @@ struct SwitchInfo {
   DataType kind;
 };
 
-bool analyzeSwitch(php::ConstFunc func,
-                   BlockId bid,
+bool analyzeSwitch(php::ConstFunc func, BlockId bid,
                    std::vector<MergeBlockInfo>& blkInfos,
                    SwitchInfo* switchInfo) {
   auto const& blk = *func.blocks()[bid];
@@ -307,8 +305,7 @@ Bytecode buildStringSwitch(SwitchInfo& switchInfo) {
   return { bc::SSwitch { std::move(sswitchTab) } };
 }
 
-bool buildSwitches(php::MutFunc func,
-                   BlockId bid,
+bool buildSwitches(php::MutFunc func, BlockId bid,
                    std::vector<MergeBlockInfo>& blkInfos) {
   SwitchInfo switchInfo;
   std::vector<BlockId> blocks;
@@ -369,8 +366,7 @@ bool buildSwitches(php::MutFunc func,
 
 }
 
-bool control_flow_opts(const FuncAnalysis& ainfo) {
-  auto const func = ainfo.ctx.func;
+bool control_flow_opts(const FuncAnalysis& ainfo, php::MutFunc func) {
   FTRACE(2, "control_flow_opts: {}\n", func->name);
 
   std::vector<MergeBlockInfo> blockInfo(
@@ -485,10 +481,10 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
   return anyChanges;
 }
 
-void split_critical_edges(const Index& index, FuncAnalysis& ainfo) {
+void split_critical_edges(const Index& index, FuncAnalysis& ainfo,
+                          php::MutFunc func) {
   // Changed tracks if we need to recompute RPO.
   auto changed = false;
-  auto const func = ainfo.ctx.func;
   assertx(func.blocks().size() == ainfo.bdata.size());
 
   // Makes an empty block and inserts it between src and dst.  Since we can't

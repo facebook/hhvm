@@ -44,40 +44,69 @@ let worker_id_str ~(worker_id : int) =
   else
     Printf.sprintf "worker-%d" worker_id
 
-let restore state ~(worker_id : int) =
+let restore
+    {
+      saved_root;
+      saved_hhi;
+      saved_tmp;
+      saved_gi_tmp;
+      trace;
+      allowed_fixme_codes_strict;
+      allowed_fixme_codes_partial;
+      codes_not_raised_partial;
+      strict_codes;
+      paths_to_ignore;
+      no_load;
+      logging_init;
+    }
+    ~(worker_id : int) =
   Hh_logger.set_id (worker_id_str ~worker_id);
-  Relative_path.(set_path_prefix Root state.saved_root);
-  Relative_path.(set_path_prefix Hhi state.saved_hhi);
-  Relative_path.(set_path_prefix Tmp state.saved_tmp);
-  Typing_global_inference.restore_path state.saved_gi_tmp;
-  Typing_deps.trace := state.trace;
-  Errors.allowed_fixme_codes_strict := state.allowed_fixme_codes_strict;
-  Errors.allowed_fixme_codes_partial := state.allowed_fixme_codes_partial;
-  Errors.codes_not_raised_partial := state.codes_not_raised_partial;
-  Errors.error_codes_treated_strictly := state.strict_codes;
-  FilesToIgnore.set_paths_to_ignore state.paths_to_ignore;
-  ServerLoadFlag.set_no_load state.no_load;
+  Relative_path.(set_path_prefix Root saved_root);
+  Relative_path.(set_path_prefix Hhi saved_hhi);
+  Relative_path.(set_path_prefix Tmp saved_tmp);
+  Typing_global_inference.restore_path saved_gi_tmp;
+  Typing_deps.trace := trace;
+  Errors.allowed_fixme_codes_strict := allowed_fixme_codes_strict;
+  Errors.allowed_fixme_codes_partial := allowed_fixme_codes_partial;
+  Errors.codes_not_raised_partial := codes_not_raised_partial;
+  Errors.error_codes_treated_strictly := strict_codes;
+  FilesToIgnore.set_paths_to_ignore paths_to_ignore;
+  ServerLoadFlag.set_no_load no_load;
   Errors.set_allow_errors_in_default_path false;
-  state.logging_init ()
+  logging_init ()
 
-let to_string state =
-  let saved_root = Path.to_string state.saved_root in
-  let saved_hhi = Path.to_string state.saved_hhi in
-  let saved_tmp = Path.to_string state.saved_tmp in
+let to_string
+    {
+      saved_root;
+      saved_hhi;
+      saved_tmp;
+      saved_gi_tmp;
+      trace;
+      allowed_fixme_codes_strict = _;
+      allowed_fixme_codes_partial = _;
+      codes_not_raised_partial = _;
+      strict_codes;
+      paths_to_ignore = _;
+      no_load = _;
+      logging_init = _;
+    } =
+  let saved_root = Path.to_string saved_root in
+  let saved_hhi = Path.to_string saved_hhi in
+  let saved_tmp = Path.to_string saved_tmp in
   let trace =
-    if state.trace then
+    if trace then
       "true"
     else
       "false"
   in
-  let strict_codes = ISet.to_string state.strict_codes in
+  let strict_codes = ISet.to_string strict_codes in
   (* OCaml regexps cannot be re-serialized to strings *)
   let paths_to_ignore = "(...)" in
   [
     ("saved_root", saved_root);
     ("saved_hhi", saved_hhi);
     ("saved_tmp", saved_tmp);
-    ("saved_gi_tmp", state.saved_gi_tmp);
+    ("saved_gi_tmp", saved_gi_tmp);
     ("trace", trace);
     ("strict_codes", strict_codes);
     ("paths_to_ignore", paths_to_ignore);

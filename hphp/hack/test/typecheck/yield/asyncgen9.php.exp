@@ -1,5 +1,5 @@
 File "asyncgen9.php", line 4, characters 16-20:
-await can only be used inside async functions (NastCheck[3003])
+`await` can only be used inside `async` functions (NastCheck[3003])
 File "asyncgen9.php", line 4, characters 12-14:
 Invalid foreach (Typing[4110])
 File "asyncgen9.php", line 4, characters 12-14:

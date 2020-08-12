@@ -1,4 +1,4 @@
 File "using_bad_async.php", line 15, characters 16-17:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 File "using_bad_async.php", line 15, characters 15-38:
-await can only be used inside async functions (NastCheck[3003])
+`await` can only be used inside `async` functions (NastCheck[3003])

@@ -1,5 +1,5 @@
 File "asyncgen3.php", line 8, characters 8-18:
-await can only be used inside async functions (NastCheck[3003])
+`await` can only be used inside `async` functions (NastCheck[3003])
 File "asyncgen3.php", line 9, characters 3-16:
 Invalid yield (Typing[4110])
 File "asyncgen3.php", line 7, characters 15-47:

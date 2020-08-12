@@ -1874,7 +1874,7 @@ let await_in_sync_function p =
   add
     (NastCheck.err_code NastCheck.AwaitInSyncFunction)
     p
-    "await can only be used inside async functions"
+    "`await` can only be used inside `async` functions"
 
 let interface_use_trait p =
   add

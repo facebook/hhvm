@@ -4,6 +4,7 @@
   (modules
     batch_global_state)
   (libraries
+    collections
     errors
     hhi
     ignore

@@ -1,6 +1,6 @@
 File "array_sub2.php", line 21, characters 12-13:
 Invalid argument (Typing[4110])
 File "array_sub2.php", line 12, characters 23-37:
-Expected darray<bool, [unresolved]>
+Expected `darray<bool, [unresolved]>`
 File "array_sub2.php", line 20, characters 15-24:
-But got varray<int>
+But got `varray<int>`

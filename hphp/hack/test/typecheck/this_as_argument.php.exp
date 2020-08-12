@@ -1,8 +1,8 @@
 File "this_as_argument.php", line 20, characters 18-19:
 Invalid argument (Typing[4110])
 File "this_as_argument.php", line 20, characters 5-5:
-Expected exactly the type C
+Expected exactly the type `C`
 File "this_as_argument.php", line 20, characters 5-5:
   where the class 'C' was referenced here
 File "this_as_argument.php", line 9, characters 24-24:
-But got the nonexact type C
+But got the nonexact type `C`

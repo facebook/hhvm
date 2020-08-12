@@ -1,6 +1,6 @@
 File "bad_inout_hint_parent3.php", line 8, characters 19-21:
 The method foo has the wrong type (Typing[4341])
 File "bad_inout_hint_parent3.php", line 8, characters 39-44:
-Expected string
+Expected `string`
 File "bad_inout_hint_parent3.php", line 4, characters 39-46:
-But got arraykey
+But got `arraykey`

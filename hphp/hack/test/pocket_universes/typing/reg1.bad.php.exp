@@ -3,6 +3,6 @@ Unbound name: E (Naming[2049])
 File "reg1.bad.php", line 15, characters 25-26:
 Invalid argument (Typing[4110])
 File "reg1.bad.php", line 15, characters 12-23:
-Expected this:@E
+Expected `this:@E`
 File "reg1.bad.php", line 14, characters 40-41:
-But got TF
+But got `TF`

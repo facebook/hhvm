@@ -1,6 +1,6 @@
 File "void_usage_2.php", line 12, characters 14-20:
 Invalid return type (Typing[4110])
 File "void_usage_2.php", line 10, characters 7-13:
-Expected void
+Expected `void`
 File "void_usage_2.php", line 12, characters 18-18:
-But got C
+But got `C`

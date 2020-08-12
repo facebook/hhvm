@@ -1,18 +1,18 @@
 File "invoke_on_nothing.php", line 15, characters 37-42:
 Invalid return type (Typing[4110])
 File "invoke_on_nothing.php", line 14, characters 32-50:
-Expected Awaitable<vec<int>>
+Expected `Awaitable<vec<int>>`
 File "invoke_on_nothing.php", line 15, characters 37-42:
-But got vec<int>
+But got `vec<int>`
 File "invoke_on_nothing.php", line 14, characters 11-100:
 Invalid return type (Typing[4336])
 File "invoke_on_nothing.php", line 14, characters 11-100:
-Expected void because this function does not always return a value
+Expected `void` because this function does not always return a value
 File "invoke_on_nothing.php", line 14, characters 32-50:
-But got Awaitable<vec<int>>
+But got `Awaitable<vec<int>>`
 File "invoke_on_nothing.php", line 14, characters 11-100:
 Invalid return type (Typing[4336])
 File "invoke_on_nothing.php", line 14, characters 32-50:
-Expected Awaitable<vec<int>>
+Expected `Awaitable<vec<int>>`
 File "invoke_on_nothing.php", line 14, characters 11-100:
-But got void because this function does not always return a value
+But got `void` because this function does not always return a value

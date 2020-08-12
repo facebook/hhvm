@@ -1,6 +1,6 @@
 File "invariant_return.php", line 12, characters 30-45:
 Invalid return type (Typing[4110])
 File "invariant_return.php", line 12, characters 17-19:
-Expected int
+Expected `int`
 File "func_pointers.hhi", line 184, characters 4-7:
-But got void
+But got `void`

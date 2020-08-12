@@ -1,8 +1,8 @@
 File "test_erling.php", line 15, characters 7-8:
 Invalid argument (Typing[4110])
 File "test_erling.php", line 12, characters 21-21:
-Expected A
+Expected `A`
 File "test_erling.php", line 12, characters 21-21:
 Considering that this type argument is invariant with respect to Vector
 File "test_erling.php", line 14, characters 21-22:
-But got ?A
+But got `?A`

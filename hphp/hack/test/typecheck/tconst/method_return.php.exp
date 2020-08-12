@@ -5,12 +5,12 @@ This declaration is neither final nor uses the <<__ConsistentConstruct>> attribu
 File "method_return.php", line 26, characters 26-35:
 Invalid return type (Typing[4336])
 File "method_return.php", line 26, characters 26-35:
-Expected void because this function does not always return a value
+Expected `void` because this function does not always return a value
 File "method_return.php", line 26, characters 40-46:
-But got this::T
+But got `this::T`
 File "method_return.php", line 26, characters 26-35:
 Invalid return type (Typing[4336])
 File "method_return.php", line 26, characters 40-46:
-Expected this::T
+Expected `this::T`
 File "method_return.php", line 26, characters 26-35:
-But got void because this function does not always return a value
+But got `void` because this function does not always return a value

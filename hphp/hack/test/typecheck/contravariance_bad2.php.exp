@@ -1,6 +1,6 @@
 File "contravariance_bad2.php", line 10, characters 25-34:
 Invalid return type (Typing[4336])
 File "contravariance_bad2.php", line 10, characters 25-34:
-Expected void because this function does not always return a value
+Expected `void` because this function does not always return a value
 File "contravariance_bad2.php", line 10, characters 60-60:
-But got T
+But got `T`

@@ -9,9 +9,9 @@ This is why I think it is Awaitable
 File "await_new_precedence.php", line 20, characters 18-19:
 Invalid argument (Typing[4110])
 File "await_new_precedence.php", line 17, characters 16-27:
-Expected Awaitable<[unresolved]>
+Expected `Awaitable<[unresolved]>`
 File "await_new_precedence.php", line 19, characters 30-32:
-But got int
+But got `int`
 File "await_new_precedence.php", line 20, characters 3-30:
 This expression is of type Awaitable, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
 File "await_new_precedence.php", line 17, characters 35-46:

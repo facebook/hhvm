@@ -1,6 +1,6 @@
 File "variadic_args1.php--strict.php", line 18, characters 20-24:
 Invalid argument (Typing[4110])
 File "variadic_args1.php--strict.php", line 32, characters 34-45:
-Expected darray<[unresolved], [unresolved]>
+Expected `darray<[unresolved], [unresolved]>`
 File "variadic_args1.php--strict.php", line 11, characters 21-25:
-But got varray<T> (variadic argument)
+But got `varray<T>` (variadic argument)

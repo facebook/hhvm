@@ -1,9 +1,9 @@
 File "interface_method_lookup_08.php", line 28, characters 10-18:
 Invalid return type (Typing[4110])
 File "interface_method_lookup_08.php", line 27, characters 23-25:
-Expected int
+Expected `int`
 File "interface_method_lookup_08.php", line 16, characters 26-28:
-But got num
+But got `num`
 File "interface_method_lookup_08.php", line 36, characters 14-16:
 No method 'foo' in C (Typing[4053])
 File "interface_method_lookup_08.php", line 35, characters 16-16:

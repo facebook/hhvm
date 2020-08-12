@@ -13,12 +13,12 @@ Pocket Universe enumeration F is already declared in A (Naming[2101])
 File "dup_check.bad.php", line 22, characters 7-7:
 Wrong type hint (Typing[4350])
 File "dup_check.bad.php", line 12, characters 10-10:
-Expected Y
+Expected `Y`
 File "dup_check.bad.php", line 22, characters 11-12:
-But got int
+But got `int`
 File "dup_check.bad.php", line 23, characters 7-7:
 Wrong type hint (Typing[4350])
 File "dup_check.bad.php", line 12, characters 10-10:
-Expected Y
+Expected `Y`
 File "dup_check.bad.php", line 23, characters 11-12:
-But got int
+But got `int`

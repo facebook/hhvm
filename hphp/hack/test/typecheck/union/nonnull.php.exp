@@ -29,6 +29,6 @@ File "nonnull.php--file2.php", line 57, characters 3-13:
 File "nonnull.php--file2.php", line 51, characters 18-19:
 Invalid argument (Typing[4110])
 File "nonnull.php--file2.php", line 60, characters 25-31:
-Expected nonnull
+Expected `nonnull`
 File "nonnull.php--file1.php", line 5, characters 14-17:
-But got ?int
+But got `?int`

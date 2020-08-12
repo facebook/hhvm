@@ -5,6 +5,6 @@ Some type constraint(s) are violated here
 File "super_constraint_11.php", line 14, characters 23-23:
 T is a constrained type parameter
 File "super_constraint_11.php", line 11, characters 37-51:
-Expected NotWidgetParent
+Expected `NotWidgetParent`
 File "super_constraint_11.php", line 14, characters 31-42:
-But got WidgetParent
+But got `WidgetParent`

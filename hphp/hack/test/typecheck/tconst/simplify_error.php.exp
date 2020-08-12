@@ -1,8 +1,8 @@
 File "simplify_error.php", line 13, characters 31-33:
 The method foo has the wrong type (Typing[4341])
 File "simplify_error.php", line 7, characters 28-34:
-Expected this::T
+Expected `this::T`
 File "simplify_error.php", line 4, characters 38-38:
   via this generic T
 File "simplify_error.php", line 13, characters 38-38:
-But got T
+But got `T`

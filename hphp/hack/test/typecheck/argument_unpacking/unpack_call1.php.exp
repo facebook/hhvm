@@ -55,12 +55,12 @@ Definition is here
 File "unpack_call1.php", line 85, characters 8-19:
 Invalid argument (Typing[4110])
 File "unpack_call1.php", line 85, characters 8-19:
-Expected Traversable<[unresolved]> (it is unpacked with '...')
+Expected `Traversable<[unresolved]>` (it is unpacked with '...')
 File "unpack_call1.php", line 90, characters 24-28:
-But got mixed
+But got `mixed`
 File "unpack_call1.php", line 87, characters 8-14:
 Invalid argument (Typing[4110])
 File "unpack_call1.php", line 87, characters 8-14:
-Expected Traversable<[unresolved]> (it is unpacked with '...')
+Expected `Traversable<[unresolved]>` (it is unpacked with '...')
 File "unpack_call1.php", line 90, characters 24-28:
-But got mixed
+But got `mixed`

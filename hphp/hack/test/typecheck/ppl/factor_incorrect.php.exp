@@ -1,6 +1,6 @@
 File "factor_incorrect.php", line 31, characters 12-15:
 Invalid argument (Typing[4110])
 File "factor_incorrect.php", line 17, characters 26-28:
-Expected int
+Expected `int`
 File "factor_incorrect.php", line 31, characters 12-15:
-But got string
+But got `string`

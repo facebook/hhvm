@@ -1,6 +1,6 @@
 File "trait_require_param2.php", line 5, characters 22-24:
 Invalid return type (Typing[4336])
 File "trait_require_param2.php", line 5, characters 22-24:
-Expected void because this function does not always return a value
+Expected `void` because this function does not always return a value
 File "trait_require_param2.php", line 5, characters 29-29:
-But got T
+But got `T`

@@ -5,6 +5,6 @@ Some type constraint(s) are violated here
 File "generic_incompatible_implementation2.php", line 6, characters 21-21:
 T is a constrained type parameter
 File "generic_incompatible_implementation2.php", line 6, characters 26-28:
-Expected num
+Expected `num`
 File "generic_incompatible_implementation2.php", line 6, characters 21-21:
-But got T
+But got `T`

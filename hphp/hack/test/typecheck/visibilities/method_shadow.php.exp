@@ -7,6 +7,6 @@ Instead of the public instance declared in B
 File "method_shadow.php", line 6, characters 12-20:
 Invalid return type (Typing[4110])
 File "method_shadow.php", line 5, characters 32-37:
-Expected string
+Expected `string`
 File "method_shadow.php", line 8, characters 27-29:
-But got int
+But got `int`

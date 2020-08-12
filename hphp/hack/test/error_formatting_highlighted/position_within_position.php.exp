@@ -1,6 +1,6 @@
 Typing[4110] await can only operate on an Awaitable [1]
--> Expected Awaitable<[unresolved]> [1]
--> But got int [2]
+-> Expected `Awaitable<[unresolved]>` [1]
+-> But got `int` [2]
 
 position_within_position.php:4:3
       2 | 
@@ -9,8 +9,8 @@ position_within_position.php:4:3
       5 | }
 
 Typing[4336] Invalid return type [1]
--> Expected Awaitable<void> because this function does not always return a value [1]
--> But got void [2]
+-> Expected `Awaitable<void>` because this function does not always return a value [1]
+-> But got `void` [2]
 
 position_within_position.php:3:16
       1 | <?hh // strict
@@ -20,8 +20,8 @@ position_within_position.php:3:16
       5 | }
 
 Typing[4336] Invalid return type [1]
--> Expected void [2]
--> But got Awaitable<void> because this function does not always return a value [1]
+-> Expected `void` [2]
+-> But got `Awaitable<void>` because this function does not always return a value [1]
 
 position_within_position.php:3:16
       1 | <?hh // strict

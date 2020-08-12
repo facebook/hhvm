@@ -1,6 +1,6 @@
 File "constraint_gen_fail1.php", line 17, characters 3-17:
 Invalid assignment (Typing[4110])
 File "constraint_gen_fail1.php", line 16, characters 29-29:
-Expected T
+Expected `T`
 File "constraint_gen_fail1.php", line 17, characters 15-15:
-But got A
+But got `A`

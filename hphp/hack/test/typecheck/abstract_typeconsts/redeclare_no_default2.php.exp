@@ -9,6 +9,6 @@ Some members are incompatible with those declared in type B
 File "redeclare_no_default2.php", line 4, characters 23-23:
 The constraint on this type constant is inconsistent with its parent
 File "redeclare_no_default2.php", line 8, characters 28-33:
-Expected string
+Expected `string`
 File "redeclare_no_default2.php", line 4, characters 28-32:
-But got mixed
+But got `mixed`

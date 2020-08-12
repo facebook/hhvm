@@ -3,120 +3,120 @@ Assignments can no longer be used as expressions. Pull the assignment out into a
 File "do_assign_in_invariant.php", line 47, characters 15-16:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 29, characters 20-21:
-Expected BD
+Expected `BD`
 File "do_assign_in_invariant.php", line 41, characters 12-12:
-But got A
+But got `A`
 File "do_assign_in_invariant.php", line 59, characters 29-30:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 36, characters 37-37:
-Expected B
+Expected `B`
 File "do_assign_in_invariant.php", line 56, characters 14-14:
-But got D
+But got `D`
 File "do_assign_in_invariant.php", line 59, characters 33-34:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 36, characters 43-43:
-Expected D
+Expected `D`
 File "do_assign_in_invariant.php", line 48, characters 14-14:
-But got B
+But got `B`
 File "do_assign_in_invariant.php", line 45, characters 15-16:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 25, characters 20-21:
-Expected AB
+Expected `AB`
 File "do_assign_in_invariant.php", line 56, characters 14-14:
-But got D
+But got `D`
 File "do_assign_in_invariant.php", line 46, characters 15-16:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 26, characters 20-21:
-Expected AD
+Expected `AD`
 File "do_assign_in_invariant.php", line 48, characters 14-14:
-But got B
+But got `B`
 File "do_assign_in_invariant.php", line 47, characters 15-16:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 29, characters 20-21:
-Expected BD
+Expected `BD`
 File "do_assign_in_invariant.php", line 41, characters 12-12:
-But got A
+But got `A`
 File "do_assign_in_invariant.php", line 59, characters 29-30:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 36, characters 37-37:
-Expected B
+Expected `B`
 File "do_assign_in_invariant.php", line 56, characters 14-14:
-But got D
+But got `D`
 File "do_assign_in_invariant.php", line 59, characters 33-34:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 36, characters 43-43:
-Expected D
+Expected `D`
 File "do_assign_in_invariant.php", line 48, characters 14-14:
-But got B
+But got `B`
 File "do_assign_in_invariant.php", line 63, characters 13-14:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 28, characters 20-21:
-Expected BC
+Expected `BC`
 File "do_assign_in_invariant.php", line 56, characters 14-14:
-But got D
+But got `D`
 File "do_assign_in_invariant.php", line 64, characters 13-14:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 29, characters 20-21:
-Expected BD
+Expected `BD`
 File "do_assign_in_invariant.php", line 52, characters 14-14:
-But got C
+But got `C`
 File "do_assign_in_invariant.php", line 65, characters 13-14:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 30, characters 20-21:
-Expected CD
+Expected `CD`
 File "do_assign_in_invariant.php", line 48, characters 14-14:
-But got B
+But got `B`
 File "do_assign_in_invariant.php", line 74, characters 14-15:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 22, characters 19-19:
-Expected E
+Expected `E`
 File "do_assign_in_invariant.php", line 69, characters 12-12:
-But got A
+But got `A`
 File "do_assign_in_invariant.php", line 86, characters 39-40:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 33, characters 41-41:
-Expected B
+Expected `B`
 File "do_assign_in_invariant.php", line 83, characters 14-14:
-But got D
+But got `D`
 File "do_assign_in_invariant.php", line 86, characters 43-44:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 33, characters 47-47:
-Expected D
+Expected `D`
 File "do_assign_in_invariant.php", line 75, characters 14-14:
-But got B
+But got `B`
 File "do_assign_in_invariant.php", line 73, characters 14-15:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 19, characters 19-19:
-Expected A
+Expected `A`
 File "do_assign_in_invariant.php", line 33, characters 55-55:
-But got E
+But got `E`
 File "do_assign_in_invariant.php", line 74, characters 14-15:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 22, characters 19-19:
-Expected E
+Expected `E`
 File "do_assign_in_invariant.php", line 69, characters 12-12:
-But got A
+But got `A`
 File "do_assign_in_invariant.php", line 86, characters 39-40:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 33, characters 41-41:
-Expected B
+Expected `B`
 File "do_assign_in_invariant.php", line 83, characters 14-14:
-But got D
+But got `D`
 File "do_assign_in_invariant.php", line 86, characters 43-44:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 33, characters 47-47:
-Expected D
+Expected `D`
 File "do_assign_in_invariant.php", line 75, characters 14-14:
-But got B
+But got `B`
 File "do_assign_in_invariant.php", line 90, characters 13-14:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 32, characters 20-21:
-Expected CE
+Expected `CE`
 File "do_assign_in_invariant.php", line 33, characters 54-55:
-But got ?C
+But got `?C`
 File "do_assign_in_invariant.php", line 92, characters 15-16:
 Invalid argument (Typing[4110])
 File "do_assign_in_invariant.php", line 21, characters 23-23:
-Expected E
+Expected `E`
 File "do_assign_in_invariant.php", line 79, characters 14-14:
-But got C
+But got `C`

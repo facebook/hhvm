@@ -3,6 +3,6 @@ File "test_method_call.php", line 24, characters 3-14:
 File "test_method_call.php", line 12, characters 19-21:
 Invalid return type (Typing[4336])
 File "test_method_call.php", line 12, characters 19-21:
-Expected void because this function does not always return a value
+Expected `void` because this function does not always return a value
 File "test_method_call.php", line 12, characters 26-34:
-But got Something
+But got `Something`

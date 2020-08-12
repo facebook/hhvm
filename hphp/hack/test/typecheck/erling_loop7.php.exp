@@ -1,6 +1,6 @@
 File "erling_loop7.php", line 16, characters 10-11:
 Invalid return type (Typing[4110])
 File "erling_loop7.php", line 3, characters 18-20:
-Expected int
+Expected `int`
 File "erling_loop7.php", line 13, characters 12-18:
-But got string
+But got `string`

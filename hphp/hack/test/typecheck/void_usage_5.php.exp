@@ -1,6 +1,6 @@
 File "void_usage_5.php", line 5, characters 5-61:
 Invalid return type (Typing[4336])
 File "void_usage_5.php", line 5, characters 5-61:
-Expected void because this function does not always return a value
+Expected `void` because this function does not always return a value
 File "void_usage_5.php", line 10, characters 12-17:
-But got string
+But got `string`

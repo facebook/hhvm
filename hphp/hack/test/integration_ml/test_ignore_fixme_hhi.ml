@@ -38,9 +38,9 @@ let errors =
 File "/f.php", line 5, characters 10-10:
 Invalid return type (Typing[4110])
 File "/f.php", line 3, characters 15-20:
-Expected string
+Expected `string`
 File "/f.php", line 5, characters 10-10:
-But got int
+But got `int`
 
 File "/f.php", line 4, characters 3-21:
 You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error 4110 (Typing[4110])

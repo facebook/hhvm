@@ -3,8 +3,8 @@ Some type constraint(s) here are violated (Typing[4323])
 File "reified_targs_newable2.php", line 5, characters 34-34:
 'T' is a constrained type parameter
 File "reified_targs_newable2.php", line 5, characters 41-46:
-Expected string
+Expected `string`
 File "reified_targs_newable2.php", line 5, characters 41-46:
 Considering that this type argument is invariant with respect to A
 File "reified_targs_newable2.php", line 12, characters 14-16:
-But got int
+But got `int`

@@ -1,6 +1,6 @@
 File "typedef_as3.php", line 15, characters 9-12:
 Invalid constraint on newtype (Typing[4332])
 File "typedef_as3.php", line 15, characters 17-17:
-Expected B
+Expected `B`
 File "typedef_as3.php", line 15, characters 21-21:
-But got A
+But got `A`

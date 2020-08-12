@@ -5,6 +5,6 @@ Some type constraint(s) are violated here
 File "constraint_override_bad2.php", line 20, characters 23-23:
 T is a constrained type parameter
 File "constraint_override_bad2.php", line 20, characters 28-28:
-Expected C
+Expected `C`
 File "constraint_override_bad2.php", line 20, characters 23-23:
-But got T
+But got `T`

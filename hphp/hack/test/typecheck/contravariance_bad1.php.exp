@@ -1,10 +1,10 @@
 File "contravariance_bad1.php", line 39, characters 10-11:
 Invalid return type (Typing[4110])
 File "contravariance_bad1.php", line 33, characters 16-16:
-Expected A
+Expected `A`
 File "contravariance_bad1.php", line 16, characters 46-46:
   via this generic T
 File "contravariance_bad1.php", line 30, characters 30-30:
-But got B
+But got `B`
 File "contravariance_bad1.php", line 30, characters 30-30:
 Considering that this type argument is contravariant with respect to ISettable

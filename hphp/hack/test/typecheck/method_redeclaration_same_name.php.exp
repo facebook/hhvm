@@ -3,6 +3,6 @@ File "method_redeclaration_same_name.php", line 23, characters 3-18:
 File "method_redeclaration_same_name.php", line 18, characters 19-19:
 The method f has the wrong type (Typing[4341])
 File "method_redeclaration_same_name.php", line 10, characters 24-29:
-Expected string
+Expected `string`
 File "method_redeclaration_same_name.php", line 18, characters 24-31:
-But got arraykey
+But got `arraykey`

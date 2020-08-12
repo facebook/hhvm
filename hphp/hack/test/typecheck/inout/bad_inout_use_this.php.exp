@@ -3,6 +3,6 @@ Arguments for inout parameters must be local variables or simple subscript expre
 File "bad_inout_use_this.php", line 9, characters 13-17:
 Invalid argument to an inout parameter (Typing[4110])
 File "bad_inout_use_this.php", line 9, characters 13-17:
-Expected this
+Expected `this`
 File "bad_inout_use_this.php", line 3, characters 18-19:
-But got ?C
+But got `?C`

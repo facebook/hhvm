@@ -3,6 +3,6 @@ The property x has the wrong type (Typing[4341])
 File "override_member.php", line 17, characters 15-16:
 Typing error
 File "override_member.php", line 13, characters 10-12:
-Expected int
+Expected `int`
 File "override_member.php", line 17, characters 10-13:
-But got bool
+But got `bool`

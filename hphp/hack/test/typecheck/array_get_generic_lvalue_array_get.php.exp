@@ -1,6 +1,6 @@
 File "array_get_generic_lvalue_array_get.php", line 8, characters 10-11:
 Invalid return type (Typing[4110])
 File "array_get_generic_lvalue_array_get.php", line 6, characters 47-48:
-Expected Tv
+Expected `Tv`
 File "array_get_generic_lvalue_array_get.php", line 6, characters 18-36:
-But got darray<mixed, mixed>
+But got `darray<mixed, mixed>`

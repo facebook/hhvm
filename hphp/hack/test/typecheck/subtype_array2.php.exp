@@ -1,6 +1,6 @@
 File "subtype_array2.php", line 20, characters 11-12:
 Invalid argument (Typing[4110])
 File "subtype_array2.php", line 16, characters 24-27:
-Expected bool
+Expected `bool`
 File "subtype_array2.php", line 12, characters 27-29:
-But got int
+But got `int`

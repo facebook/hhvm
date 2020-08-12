@@ -17,6 +17,6 @@ File "tuples.php", line 76, characters 3-13:
 File "tuples.php", line 40, characters 36-37:
 Invalid argument (Typing[4110])
 File "tuples.php", line 81, characters 43-65:
-Expected (mixed, arraykey, bool)
+Expected `(mixed, arraykey, bool)`
 File "tuples.php", line 35, characters 10-33:
-But got (int, int, bool, bool)
+But got `(int, int, bool, bool)`

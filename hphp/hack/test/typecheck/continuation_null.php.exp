@@ -1,6 +1,6 @@
 File "continuation_null.php", line 13, characters 3-12:
 Invalid yield (Typing[4110])
 File "continuation_null.php", line 12, characters 32-35:
-Expected void
+Expected `void`
 File "continuation_null.php", line 13, characters 9-12:
-But got null
+But got `null`

@@ -1,6 +1,6 @@
 File "reactive_calls4.php", line 5, characters 10-24:
 Invalid return type (Typing[4336])
 File "reactive_calls4.php", line 5, characters 10-24:
-Expected void because this function does not always return a value
+Expected `void` because this function does not always return a value
 File "reactive_calls4.php", line 5, characters 29-50:
-But got (function(): void)
+But got `(function(): void)`

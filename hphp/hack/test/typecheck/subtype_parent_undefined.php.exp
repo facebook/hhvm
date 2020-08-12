@@ -1,6 +1,6 @@
 File "subtype_parent_undefined.php", line 10, characters 10-11:
 Invalid return type (Typing[4110])
 File "subtype_parent_undefined.php", line 9, characters 21-21:
-Expected I
+Expected `I`
 File "subtype_parent_undefined.php", line 9, characters 14-14:
-But got C
+But got `C`

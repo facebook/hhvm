@@ -3,11 +3,11 @@ File "this_ret_bad2.php", line 35, characters 3-46:
 File "this_ret_bad2.php", line 41, characters 16-34:
 Invalid argument (Typing[4110])
 File "this_ret_bad2.php", line 33, characters 15-17:
-Expected <expr#1>
+Expected `<expr#1>`
 File "this_ret_bad2.php", line 41, characters 16-19:
   where '<expr#1>' is a reference to this expression
 File "this_ret_bad2.php", line 25, characters 27-29:
-But got Bar
+But got `Bar`
 File "this_ret_bad2.php", line 25, characters 27-29:
 Considering that this type argument is invariant with respect to Foo
 File "this_ret_bad2.php", line 33, characters 15-17:

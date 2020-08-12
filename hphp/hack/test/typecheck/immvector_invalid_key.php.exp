@@ -1,8 +1,8 @@
 File "immvector_invalid_key.php", line 15, characters 8-22:
 Invalid index type for this ImmVector (Typing[4324])
 File "immvector_invalid_key.php", line 15, characters 12-21:
-Expected int
+Expected `int`
 File "immvector_invalid_key.php", line 14, characters 20-31:
 This can only be indexed with integers
 File "immvector_invalid_key.php", line 15, characters 12-21:
-But got string
+But got `string`

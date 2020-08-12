@@ -5,6 +5,6 @@ Some type constraint(s) are violated here
 File "classmeth_constraints_bad.php", line 6, characters 34-34:
 T is a constrained type parameter
 File "classmeth_constraints_bad.php", line 6, characters 39-42:
-Expected Base
+Expected `Base`
 File "classmeth_constraints_bad.php", line 11, characters 6-6:
-But got int
+But got `int`

@@ -3,8 +3,8 @@ File "explicit_type_collection_passing_map1.php", line 6, characters 3-13:
 File "explicit_type_collection_passing_map1.php", line 7, characters 10-11:
 Invalid argument (Typing[4110])
 File "explicit_type_collection_passing_map1.php", line 3, characters 21-26:
-Expected string
+Expected `string`
 File "explicit_type_collection_passing_map1.php", line 3, characters 21-26:
 Considering that this type argument is invariant with respect to Map
 File "explicit_type_collection_passing_map1.php", line 5, characters 12-19:
-But got arraykey
+But got `arraykey`

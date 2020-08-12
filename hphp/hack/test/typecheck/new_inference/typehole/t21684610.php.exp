@@ -5,6 +5,6 @@ Some type constraint(s) are violated here
 File "t21684610.php", line 8, characters 15-16:
 Ti is a constrained type parameter
 File "t21684610.php", line 8, characters 21-25:
-Expected I1<[unresolved]>
+Expected `I1<[unresolved]>`
 File "t21684610.php", line 15, characters 10-10:
-But got int
+But got `int`

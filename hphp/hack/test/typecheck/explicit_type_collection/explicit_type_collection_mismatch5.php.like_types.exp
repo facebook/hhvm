@@ -1,6 +1,0 @@
-File "explicit_type_collection_mismatch5.php", line 4, characters 8-38:
-Some elements in this collection are incompatible (Typing[4110])
-File "explicit_type_collection_mismatch5.php", line 4, characters 15-17:
-Expected int
-File "explicit_type_collection_mismatch5.php", line 4, characters 20-24:
-But got bool

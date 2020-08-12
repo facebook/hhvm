@@ -38,9 +38,9 @@ let disk_diagnostics =
 File "/bar.php", line 4, characters 7-8:
 Invalid argument (Typing[4110])
 File "/foo.php", line 3, characters 14-16:
-Expected int
+Expected `int`
 File "/bar.php", line 3, characters 15-19:
-But got mixed
+But got `mixed`
 |}
 
 let ide_diagnostics =
@@ -48,9 +48,9 @@ let ide_diagnostics =
 File "/bar.php", line 4, characters 7-8:
 Invalid argument (Typing[4110])
 File "/foo.php", line 3, characters 14-19:
-Expected string
+Expected `string`
 File "/bar.php", line 3, characters 15-19:
-But got mixed
+But got `mixed`
 |}
 
 let test () =

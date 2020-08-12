@@ -1,9 +1,9 @@
 File "this2.php", line 14, characters 12-18:
 Invalid return type (Typing[4110])
 File "this2.php", line 13, characters 26-29:
-Expected this
+Expected `this`
 File "this2.php", line 14, characters 16-16:
-But got X
+But got `X`
 File "this2.php", line 12, characters 7-7:
 Since X is not final
 File "this2.php", line 14, characters 16-16:

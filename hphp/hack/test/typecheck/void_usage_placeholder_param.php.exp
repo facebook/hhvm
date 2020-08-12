@@ -1,6 +1,6 @@
 File "void_usage_placeholder_param.php", line 10, characters 16-17:
 Invalid argument (Typing[4110])
 File "void_usage_placeholder_param.php", line 7, characters 25-26:
-Expected C2
+Expected `C2`
 File "void_usage_placeholder_param.php", line 10, characters 16-17:
-But got void ($_ is a placeholder variable not meant to be used)
+But got `void` ($_ is a placeholder variable not meant to be used)

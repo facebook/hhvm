@@ -3,6 +3,6 @@ File "nullsafe-prop-4.php", line 8, characters 3-8:
 File "nullsafe-prop-4.php", line 8, characters 3-10:
 Typing error (Typing[4110])
 File "nullsafe-prop-4.php", line 8, characters 3-10:
-Expected num because this is used in an arithmetic operation
+Expected `num` because this is used in an arithmetic operation
 File "nullsafe-prop-4.php", line 8, characters 3-8:
-But got ?int (use of ?-> operator)
+But got `?int` (use of ?-> operator)

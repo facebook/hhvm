@@ -1,7 +1,7 @@
 File "loader_example.php", line 43, characters 11-12:
 Invalid argument (Typing[4110])
 File "loader_example.php", line 17, characters 27-30:
-Expected <expr#1>
+Expected `<expr#1>`
 File "loader_example.php", line 43, characters 3-4:
   where '<expr#1>' is a reference to this expression
 File "loader_example.php", line 12, characters 23-38:
@@ -9,7 +9,7 @@ File "loader_example.php", line 12, characters 23-38:
 File "loader_example.php", line 43, characters 3-4:
   where '<expr#1>' is a reference to this expression
 File "loader_example.php", line 31, characters 49-55:
-But got ALoader
+But got `ALoader`
 File "loader_example.php", line 38, characters 16-22:
 Since ALoader is not final
 File "loader_example.php", line 31, characters 49-55:

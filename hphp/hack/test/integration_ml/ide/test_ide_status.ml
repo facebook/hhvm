@@ -38,9 +38,9 @@ let full_diagnostics =
 File \"/bar.php\", line 4, characters 7-7:
 Invalid argument (Typing[4110])
 File \"/foo.php\", line 3, characters 14-19:
-Expected string
+Expected `string`
 File \"/bar.php\", line 4, characters 7-7:
-But got int
+But got `int`
 "
 
 let test () =

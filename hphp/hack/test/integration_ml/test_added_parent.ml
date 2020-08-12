@@ -49,9 +49,9 @@ let bar_errors =
   "File \"/bar.php\", line 6, characters 12-26:
 Invalid argument (Typing[4110])
 File \"/bar.php\", line 3, characters 19-21:
-Expected int
+Expected `int`
 File \"/foo.php\", line 5, characters 25-30:
-But got string
+But got `string`
 "
 
 let root = "/"

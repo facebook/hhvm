@@ -5,132 +5,132 @@ Assignments can no longer be used as expressions. Pull the assignment out into a
 File "for_assign_in_invariant.php", line 38, characters 54-55:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 31, characters 58-59:
-Expected BD
+Expected `BD`
 File "for_assign_in_invariant.php", line 36, characters 12-12:
-But got A
+But got `A`
 File "for_assign_in_invariant.php", line 43, characters 15-16:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 26, characters 20-21:
-Expected BD
+Expected `BD`
 File "for_assign_in_invariant.php", line 36, characters 12-12:
-But got A
+But got `A`
 File "for_assign_in_invariant.php", line 38, characters 46-47:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 31, characters 44-45:
-Expected AB
+Expected `AB`
 File "for_assign_in_invariant.php", line 52, characters 14-14:
-But got D
+But got `D`
 File "for_assign_in_invariant.php", line 38, characters 50-51:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 31, characters 51-52:
-Expected AD
+Expected `AD`
 File "for_assign_in_invariant.php", line 44, characters 14-14:
-But got B
+But got `B`
 File "for_assign_in_invariant.php", line 38, characters 54-55:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 31, characters 58-59:
-Expected BD
+Expected `BD`
 File "for_assign_in_invariant.php", line 36, characters 12-12:
-But got A
+But got `A`
 File "for_assign_in_invariant.php", line 41, characters 15-16:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 24, characters 20-21:
-Expected AB
+Expected `AB`
 File "for_assign_in_invariant.php", line 52, characters 14-14:
-But got D
+But got `D`
 File "for_assign_in_invariant.php", line 42, characters 15-16:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 25, characters 20-21:
-Expected AD
+Expected `AD`
 File "for_assign_in_invariant.php", line 44, characters 14-14:
-But got B
+But got `B`
 File "for_assign_in_invariant.php", line 43, characters 15-16:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 26, characters 20-21:
-Expected BD
+Expected `BD`
 File "for_assign_in_invariant.php", line 36, characters 12-12:
-But got A
+But got `A`
 File "for_assign_in_invariant.php", line 38, characters 46-47:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 31, characters 44-45:
-Expected AB
+Expected `AB`
 File "for_assign_in_invariant.php", line 52, characters 14-14:
-But got D
+But got `D`
 File "for_assign_in_invariant.php", line 38, characters 50-51:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 31, characters 51-52:
-Expected AD
+Expected `AD`
 File "for_assign_in_invariant.php", line 44, characters 14-14:
-But got B
+But got `B`
 File "for_assign_in_invariant.php", line 38, characters 54-55:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 31, characters 58-59:
-Expected BD
+Expected `BD`
 File "for_assign_in_invariant.php", line 36, characters 12-12:
-But got A
+But got `A`
 File "for_assign_in_invariant.php", line 63, characters 53-54:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 28, characters 62-63:
-Expected BD
+Expected `BD`
 File "for_assign_in_invariant.php", line 59, characters 12-12:
-But got A
+But got `A`
 File "for_assign_in_invariant.php", line 68, characters 14-15:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 21, characters 19-19:
-Expected E
+Expected `E`
 File "for_assign_in_invariant.php", line 28, characters 70-71:
-But got null
+But got `null`
 File "for_assign_in_invariant.php", line 63, characters 45-46:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 28, characters 48-49:
-Expected AB
+Expected `AB`
 File "for_assign_in_invariant.php", line 77, characters 14-14:
-But got D
+But got `D`
 File "for_assign_in_invariant.php", line 63, characters 49-50:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 28, characters 55-56:
-Expected AD
+Expected `AD`
 File "for_assign_in_invariant.php", line 69, characters 14-14:
-But got B
+But got `B`
 File "for_assign_in_invariant.php", line 63, characters 53-54:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 28, characters 62-63:
-Expected BD
+Expected `BD`
 File "for_assign_in_invariant.php", line 59, characters 12-12:
-But got A
+But got `A`
 File "for_assign_in_invariant.php", line 68, characters 14-15:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 21, characters 19-19:
-Expected E
+Expected `E`
 File "for_assign_in_invariant.php", line 28, characters 70-71:
-But got null
+But got `null`
 File "for_assign_in_invariant.php", line 63, characters 45-46:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 28, characters 48-49:
-Expected AB
+Expected `AB`
 File "for_assign_in_invariant.php", line 77, characters 14-14:
-But got D
+But got `D`
 File "for_assign_in_invariant.php", line 63, characters 49-50:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 28, characters 55-56:
-Expected AD
+Expected `AD`
 File "for_assign_in_invariant.php", line 69, characters 14-14:
-But got B
+But got `B`
 File "for_assign_in_invariant.php", line 63, characters 53-54:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 28, characters 62-63:
-Expected BD
+Expected `BD`
 File "for_assign_in_invariant.php", line 59, characters 12-12:
-But got A
+But got `A`
 File "for_assign_in_invariant.php", line 81, characters 12-13:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 20, characters 19-19:
-Expected C
+Expected `C`
 File "for_assign_in_invariant.php", line 28, characters 71-71:
-But got E
+But got `E`
 File "for_assign_in_invariant.php", line 82, characters 12-13:
 Invalid argument (Typing[4110])
 File "for_assign_in_invariant.php", line 21, characters 19-19:
-Expected E
+Expected `E`
 File "for_assign_in_invariant.php", line 73, characters 14-14:
-But got C
+But got `C`

@@ -5,6 +5,6 @@ Some type constraint(s) are violated here
 File "lambda_constraint_bad.php", line 11, characters 12-12:
 T is a constrained type parameter
 File "lambda_constraint_bad.php", line 11, characters 17-17:
-Expected I
+Expected `I`
 File "lambda_constraint_bad.php", line 18, characters 19-19:
-But got C
+But got `C`

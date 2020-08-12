@@ -1,6 +1,6 @@
 File "vec_const_typing.php", line 12, characters 12-26:
 Invalid return type (Typing[4110])
 File "vec_const_typing.php", line 11, characters 33-35:
-Expected int
+Expected `int`
 File "vec_const_typing.php", line 5, characters 13-18:
-But got string
+But got `string`

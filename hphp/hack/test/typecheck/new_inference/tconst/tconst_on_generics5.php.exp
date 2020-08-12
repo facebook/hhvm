@@ -15,6 +15,6 @@ Some type constraint(s) are violated here
 File "tconst_on_generics5.php", line 25, characters 31-32:
 T1 is a constrained type parameter
 File "tconst_on_generics5.php", line 25, characters 37-39:
-Expected Box
+Expected `Box`
 File "tconst_on_generics5.php", line 25, characters 47-47:
-But got B
+But got `B`

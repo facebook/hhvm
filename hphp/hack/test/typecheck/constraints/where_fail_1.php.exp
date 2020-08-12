@@ -1,6 +1,6 @@
 File "where_fail_1.php", line 14, characters 28-29:
 Invalid argument (Typing[4110])
 File "where_fail_1.php", line 10, characters 61-67:
-Expected Derived
+Expected `Derived`
 File "where_fail_1.php", line 13, characters 24-27:
-But got Base
+But got `Base`

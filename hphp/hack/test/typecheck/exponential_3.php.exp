@@ -1,6 +1,6 @@
 File "exponential_3.php", line 12, characters 16-22:
 Invalid argument (Typing[4110])
 File "exponential_3.php", line 3, characters 22-26:
-Expected float
+Expected `float`
 File "exponential_3.php", line 12, characters 16-22:
-But got num because this is the result of an arithmetic operation
+But got `num` because this is the result of an arithmetic operation

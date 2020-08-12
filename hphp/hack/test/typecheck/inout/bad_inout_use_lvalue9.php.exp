@@ -5,6 +5,6 @@ Arguments for inout parameters must be local variables or simple subscript expre
 File "bad_inout_use_lvalue9.php", line 6, characters 5-23:
 Invalid argument (Typing[4110])
 File "bad_inout_use_lvalue9.php", line 3, characters 18-27:
-Expected varray<int>
+Expected `varray<int>`
 File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
-But got (int, int)
+But got `(int, int)`

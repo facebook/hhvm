@@ -17,9 +17,9 @@ Assignments can no longer be used as expressions. Pull the assignment out into a
 File "condition_conjunction.php", line 10, characters 16-17:
 Invalid argument (Typing[4110])
 File "condition_conjunction.php", line 39, characters 21-23:
-Expected int
+Expected `int`
 File "condition_conjunction.php", line 3, characters 19-22:
-But got ?int
+But got `?int`
 File "condition_conjunction.php", line 11, characters 20-21:
 Variable $z is undefined, or not always defined (did you mean $s instead?) (Naming[2050])
 File "condition_conjunction.php", line 12, characters 20-21:
@@ -27,9 +27,9 @@ Variable $u is undefined, or not always defined (did you mean $s instead?) (Nami
 File "condition_conjunction.php", line 16, characters 14-15:
 Invalid argument (Typing[4110])
 File "condition_conjunction.php", line 39, characters 21-23:
-Expected int
+Expected `int`
 File "condition_conjunction.php", line 3, characters 19-22:
-But got ?int
+But got `?int`
 File "condition_conjunction.php", line 17, characters 18-19:
 Variable $z is undefined, or not always defined (did you mean $s instead?) (Naming[2050])
 File "condition_conjunction.php", line 18, characters 18-19:

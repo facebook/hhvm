@@ -93,48 +93,48 @@ You cannot have an array without generics in strict mode (Typing[4045])
 File "arrays.php", line 53, characters 16-17:
 Invalid argument (Typing[4110])
 File "arrays.php", line 184, characters 26-33:
-Expected varray<[unresolved]>
+Expected `varray<[unresolved]>`
 File "arrays.php", line 14, characters 3-7:
-But got varray_or_darray<arraykey, _>
+But got `varray_or_darray<arraykey, _>`
 File "arrays.php", line 63, characters 20-21:
 Invalid argument (Typing[4110])
 File "arrays.php", line 185, characters 27-36:
-Expected varray<int>
+Expected `varray<int>`
 File "arrays.php", line 14, characters 3-7:
-But got varray_or_darray<arraykey, _>
+But got `varray_or_darray<arraykey, _>`
 File "arrays.php", line 72, characters 20-21:
 Invalid argument (Typing[4110])
 File "arrays.php", line 185, characters 27-36:
-Expected varray<int>
+Expected `varray<int>`
 File "arrays.php", line 14, characters 3-7:
-But got varray_or_darray<arraykey, _>
+But got `varray_or_darray<arraykey, _>`
 File "arrays.php", line 95, characters 20-21:
 Invalid argument (Typing[4110])
 File "arrays.php", line 185, characters 33-35:
-Expected int
+Expected `int`
 File "arrays.php", line 89, characters 17-18:
-But got string
+But got `string`
 File "arrays.php", line 96, characters 23-24:
 Invalid argument (Typing[4110])
 File "arrays.php", line 186, characters 36-41:
-Expected string
+Expected `string`
 File "arrays.php", line 87, characters 17-17:
-But got int
+But got `int`
 File "arrays.php", line 120, characters 20-21:
 Invalid argument (Typing[4110])
 File "arrays.php", line 185, characters 33-35:
-Expected int
+Expected `int`
 File "arrays.php", line 114, characters 17-18:
-But got string
+But got `string`
 File "arrays.php", line 121, characters 23-24:
 Invalid argument (Typing[4110])
 File "arrays.php", line 186, characters 36-41:
-Expected string
+Expected `string`
 File "arrays.php", line 112, characters 17-17:
-But got int
+But got `int`
 File "arrays.php", line 4, characters 16-16:
 Wrong type hint (Typing[4338])
 File "arrays.php", line 4, characters 9-14:
-Expected string
+Expected `string`
 File "arrays.php", line 4, characters 20-20:
-But got int
+But got `int`

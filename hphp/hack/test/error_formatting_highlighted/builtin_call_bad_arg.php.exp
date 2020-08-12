@@ -1,6 +1,6 @@
 Typing[4110] Invalid argument [1]
--> Expected string [2]
--> But got int [1]
+-> Expected `string` [2]
+-> But got `int` [1]
 
 builtin_call_bad_arg.php:4:22
      2 | 

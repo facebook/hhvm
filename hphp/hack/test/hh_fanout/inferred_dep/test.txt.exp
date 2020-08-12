@@ -116,7 +116,7 @@ Typecheck for change set on line 56
 File "/uses_foo.php", line 14, characters 10-33:
 Invalid return type (Typing[4110])
 File "/uses_foo.php", line 2, characters 22-24:
-Expected int
+Expected `int`
 File "/baz.php", line 3, characters 33-38:
-But got string
+But got `string`
 (Additionally, hh_fanout errors matched hh_server errors.)

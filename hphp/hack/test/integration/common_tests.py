@@ -381,8 +381,8 @@ class BarebonesTests(TestCase[CommonTestDriver]):
         self.test_driver.check_cmd(
             [
                 "{root}foo_4.php:4:24,26: Invalid return type (Typing[4110])",
-                "  {root}foo_4.php:3:27,29: Expected int",
-                "  {root}foo_4.php:4:24,26: But got string",
+                "  {root}foo_4.php:3:27,29: Expected `int`",
+                "  {root}foo_4.php:4:24,26: But got `string`",
             ]
         )
 
@@ -433,8 +433,8 @@ class BarebonesTests(TestCase[CommonTestDriver]):
         self.test_driver.check_cmd(
             [
                 "{root}class_3.php:5:12,19: Invalid return type (Typing[4110])",
-                "  {root}class_3.php:4:28,30: Expected int",
-                "  {root}class_1.php:4:51,54: But got bool",
+                "  {root}class_3.php:4:28,30: Expected `int`",
+                "  {root}class_1.php:4:51,54: But got `bool`",
             ]
         )
 
@@ -476,8 +476,8 @@ class CommonTests(BarebonesTests):
         self.test_driver.check_cmd(
             [
                 "{root}foo_2.php:4:24,26: Invalid return type (Typing[4110])",
-                "  {root}foo_2.php:3:27,29: Expected int",
-                "  {root}foo_2.php:4:24,26: But got string",
+                "  {root}foo_2.php:3:27,29: Expected `int`",
+                "  {root}foo_2.php:4:24,26: But got `string`",
             ]
         )
 
@@ -565,8 +565,8 @@ class CommonTests(BarebonesTests):
         self.test_driver.check_cmd(
             [
                 "{root}foo_1.php:4:24,26: Invalid return type (Typing[4110])",
-                "  {root}foo_1.php:3:27,32: Expected string",
-                "  {root}bar_2.php:3:23,25: But got int",
+                "  {root}foo_1.php:3:27,32: Expected `string`",
+                "  {root}bar_2.php:3:23,25: But got `int`",
             ]
         )
 
@@ -1281,8 +1281,8 @@ class CommonTests(BarebonesTests):
         self.test_driver.check_cmd(
             [
                 "{root}typing_error.php:2:32,34: Invalid return type (Typing[4110])",
-                "  {root}typing_error.php:2:19,21: Expected int",
-                "  {root}foo_3.php:3:23,28: But got string",
+                "  {root}typing_error.php:2:19,21: Expected `int`",
+                "  {root}foo_3.php:3:23,28: But got `string`",
             ],
             options=["--single", "{root}typing_error.php"],
             stdin="",
@@ -1291,8 +1291,8 @@ class CommonTests(BarebonesTests):
         self.test_driver.check_cmd(
             [
                 ":2:32,34: Invalid return type (Typing[4110])",
-                "  :2:19,21: Expected int",
-                "  {root}foo_3.php:3:23,28: But got string",
+                "  :2:19,21: Expected `int`",
+                "  {root}foo_3.php:3:23,28: But got `string`",
             ],
             options=["--single", "-"],
             stdin="<?hh //strict\n function aaaa(): int { return h(); }",

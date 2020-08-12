@@ -1,7 +1,7 @@
 File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 10-42:
 Invalid return type (Typing[4110])
 File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 21, characters 33-33:
-Expected B
+Expected `B`
 File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 15, characters 38-42:
   via this generic Tnext
 File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 12, characters 24-27:
@@ -9,6 +9,6 @@ File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 12, cha
 File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 6, characters 39-40:
   via this generic Tv
 File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 21, characters 57-57:
-But got C
+But got `C`
 File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 21, characters 57-57:
 Considering that this type argument is invariant with respect to BaseIterable

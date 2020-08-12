@@ -1,6 +1,6 @@
 File "idx2_2.php", line 10, characters 10-11:
 Invalid return type (Typing[4110])
 File "idx2_2.php", line 7, characters 15-17:
-Expected int
+Expected `int`
 File "idx.hhi", line 31, characters 10-12:
-But got ?int
+But got `?int`

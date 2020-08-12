@@ -1,8 +1,8 @@
 File "bad_input_type.php", line 10, characters 7-8:
 Invalid argument (Typing[4110])
 File "bad_input_type.php", line 4, characters 18-20:
-Expected int
+Expected `int`
 File "bad_input_type.php", line 7, characters 14-17:
   resulting from expanding the type constant C::T
 File "bad_input_type.php", line 10, characters 7-8:
-But got string
+But got `string`

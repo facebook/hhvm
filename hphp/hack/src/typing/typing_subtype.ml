@@ -418,11 +418,12 @@ and simplify_subtype_i
           Typing_print.full_strip_ns_i env ety_sub)
     in
     let (ty_super_descr, ty_sub_descr) =
+      let wrapped s = "`" ^ s ^ "`" in
       if String.equal ty_super_descr ty_sub_descr then
-        ( "exactly the type " ^ ty_super_descr,
-          "the nonexact type " ^ ty_sub_descr )
+        ( "exactly the type " ^ wrapped ty_super_descr,
+          "the nonexact type " ^ wrapped ty_sub_descr )
       else
-        (ty_super_descr, ty_sub_descr)
+        (wrapped ty_super_descr, wrapped ty_sub_descr)
     in
     let left = Reason.to_string ("Expected " ^ ty_super_descr) r_super in
     let right = Reason.to_string ("But got " ^ ty_sub_descr) r_sub @ suffix in

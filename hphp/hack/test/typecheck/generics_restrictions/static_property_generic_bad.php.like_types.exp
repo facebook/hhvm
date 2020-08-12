@@ -25,8 +25,8 @@ This is the class containing the static property
 File "static_property_generic_bad.php", line 13, characters 5-31:
 Invalid assignment (Typing[4110])
 File "static_property_generic_bad.php", line 10, characters 38-41:
-Expected TVal
+Expected `TVal`
 File "static_property_generic_bad.php", line 11, characters 26-29:
   via this generic TVal
 File "static_property_generic_bad.php", line 12, characters 34-37:
-But got dynamic because it is an unenforceable type
+But got `dynamic` because it is an unenforceable type

@@ -1,6 +1,6 @@
 File "awaitable_yield_waitfor_error.php", line 12, characters 16-18:
 Invalid return type (Typing[4336])
 File "awaitable_yield_waitfor_error.php", line 12, characters 16-18:
-Expected Awaitable<void> because this function does not always return a value
+Expected `Awaitable<void>` because this function does not always return a value
 File "awaitable_yield_waitfor_error.php", line 12, characters 23-26:
-But got void
+But got `void`

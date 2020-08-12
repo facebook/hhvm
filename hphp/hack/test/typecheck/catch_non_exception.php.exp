@@ -1,6 +1,6 @@
 File "catch_non_exception.php", line 10, characters 12-23:
 Invalid exception (Typing[4110])
 File "catch_non_exception.php", line 10, characters 12-23:
-Expected Throwable because it is used as an exception
+Expected `Throwable` because it is used as an exception
 File "catch_non_exception.php", line 10, characters 12-23:
-But got NonException
+But got `NonException`

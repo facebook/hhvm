@@ -1,8 +1,8 @@
 Errors:
   [4:15-28] Unbound name: NoSuchClass (an object type)
   [3:10-14] Invalid return type
-  [3:10-14] Expected void because this function does not always return a value
-  [3:18-23] But got mixed
+  [3:10-14] Expected `void` because this function does not always return a value
+  [3:18-23] But got `mixed`
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial;
       f_ret = ((mixed), (Some ([3:18-23], Hmixed)));

@@ -1,6 +1,6 @@
 File "foreach_error.php", line 12, characters 14-15:
 Invalid argument (Typing[4110])
 File "foreach_error.php", line 16, characters 19-21:
-Expected int
+Expected `int`
 File "foreach_error.php", line 9, characters 18-21:
-But got num
+But got `num`

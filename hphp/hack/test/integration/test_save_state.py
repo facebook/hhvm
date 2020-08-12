@@ -199,11 +199,11 @@ watchman_init_timeout = 1
         self.test_driver.check_cmd(
             [
                 "{root}class_3.php:5:12,19: Invalid return type (Typing[4110])",
-                "  {root}class_3.php:4:28,30: Expected int",
-                "  {root}class_1.php:5:33,38: But got string",
+                "  {root}class_3.php:4:28,30: Expected `int`",
+                "  {root}class_1.php:5:33,38: But got `string`",
                 "{root}class_3b.php:5:8,15: Invalid return type (Typing[4110])",
-                "  {root}class_3b.php:4:26,28: Expected int",
-                "  {root}class_1.php:5:33,38: But got string",
+                "  {root}class_3b.php:4:26,28: Expected `int`",
+                "  {root}class_1.php:5:33,38: But got `string`",
             ],
             assert_loaded_saved_state=False,
         )
@@ -216,8 +216,8 @@ watchman_init_timeout = 1
         self.test_driver.check_cmd(
             [
                 "{root}class_3.php:5:12,19: Invalid return type (Typing[4110])",
-                "  {root}class_3.php:4:28,30: Expected int",
-                "  {root}class_1.php:5:33,38: But got string",
+                "  {root}class_3.php:4:28,30: Expected `int`",
+                "  {root}class_1.php:5:33,38: But got `string`",
             ]
         )
         self.test_driver.proc_call([hh_client, "stop", self.test_driver.repo_dir])
@@ -228,11 +228,11 @@ watchman_init_timeout = 1
         self.test_driver.check_cmd(
             [
                 "{root}class_3.php:5:12,19: Invalid return type (Typing[4110])",
-                "  {root}class_3.php:4:28,30: Expected int",
-                "  {root}class_1.php:5:33,38: But got string",
+                "  {root}class_3.php:4:28,30: Expected `int`",
+                "  {root}class_1.php:5:33,38: But got `string`",
                 "{root}class_3b.php:5:8,15: Invalid return type (Typing[4110])",
-                "  {root}class_3b.php:4:26,28: Expected int",
-                "  {root}class_1.php:5:33,38: But got string",
+                "  {root}class_3b.php:4:26,28: Expected `int`",
+                "  {root}class_1.php:5:33,38: But got `string`",
             ]
         )
 
@@ -257,11 +257,11 @@ watchman_init_timeout = 1
         self.test_driver.check_cmd(
             [
                 "{root}class_3.php:5:12,19: Invalid return type (Typing[4110])",
-                "  {root}class_3.php:4:28,30: Expected int",
-                "  {root}class_1.php:5:33,38: But got string",
+                "  {root}class_3.php:4:28,30: Expected `int`",
+                "  {root}class_1.php:5:33,38: But got `string`",
                 "{root}class_3b.php:5:8,15: Invalid return type (Typing[4110])",
-                "  {root}class_3b.php:4:26,28: Expected int",
-                "  {root}class_1.php:5:33,38: But got string",
+                "  {root}class_3b.php:4:26,28: Expected `int`",
+                "  {root}class_1.php:5:33,38: But got `string`",
             ],
             assert_loaded_saved_state=True,
         )
@@ -274,8 +274,8 @@ watchman_init_timeout = 1
         self.test_driver.check_cmd(
             [
                 "{root}class_3.php:5:12,19: Invalid return type (Typing[4110])",
-                "  {root}class_3.php:4:28,30: Expected int",
-                "  {root}class_1.php:5:33,38: But got string",
+                "  {root}class_3.php:4:28,30: Expected `int`",
+                "  {root}class_1.php:5:33,38: But got `string`",
             ]
         )
         self.test_driver.proc_call([hh_client, "stop", self.test_driver.repo_dir])
@@ -286,11 +286,11 @@ watchman_init_timeout = 1
         self.test_driver.check_cmd(
             [
                 "{root}class_3.php:5:12,19: Invalid return type (Typing[4110])",
-                "  {root}class_3.php:4:28,30: Expected int",
-                "  {root}class_1.php:5:33,38: But got string",
+                "  {root}class_3.php:4:28,30: Expected `int`",
+                "  {root}class_1.php:5:33,38: But got `string`",
                 "{root}class_3b.php:5:8,15: Invalid return type (Typing[4110])",
-                "  {root}class_3b.php:4:26,28: Expected int",
-                "  {root}class_1.php:5:33,38: But got string",
+                "  {root}class_3b.php:4:26,28: Expected `int`",
+                "  {root}class_1.php:5:33,38: But got `string`",
             ]
         )
 
@@ -315,8 +315,8 @@ watchman_init_timeout = 1
         self.test_driver.check_cmd(
             [
                 "{root}class_3.php:5:12,19: Invalid return type (Typing[4110])",
-                "  {root}class_3.php:4:28,30: Expected int",
-                "  {root}class_1.php:5:33,38: But got string",
+                "  {root}class_3.php:4:28,30: Expected `int`",
+                "  {root}class_1.php:5:33,38: But got `string`",
             ]
         )
 
@@ -336,11 +336,11 @@ watchman_init_timeout = 1
         self.test_driver.check_cmd(
             [
                 "{root}class_3.php:5:12,19: Invalid return type (Typing[4110])",
-                "  {root}class_3.php:4:28,30: Expected int",
-                "  {root}class_1.php:5:33,38: But got string",
+                "  {root}class_3.php:4:28,30: Expected `int`",
+                "  {root}class_1.php:5:33,38: But got `string`",
                 "{root}class_3b.php:5:8,15: Invalid return type (Typing[4110])",
-                "  {root}class_3b.php:4:26,28: Expected int",
-                "  {root}class_1.php:5:33,38: But got string",
+                "  {root}class_3b.php:4:26,28: Expected `int`",
+                "  {root}class_1.php:5:33,38: But got `string`",
             ],
             assert_loaded_saved_state=False,
         )

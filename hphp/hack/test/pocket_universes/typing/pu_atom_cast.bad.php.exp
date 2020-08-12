@@ -1,32 +1,32 @@
 File "pu_atom_cast.bad.php", line 8, characters 15-23:
 Invalid argument (Typing[4110])
 File "pu_atom_cast.bad.php", line 8, characters 10-12:
-Expected int
+Expected `int`
 File "pu_atom_cast.bad.php", line 3, characters 20-20:
   via this generic T
 File "pu_atom_cast.bad.php", line 8, characters 15-23:
-But got :@message
+But got `:@message`
 File "pu_atom_cast.bad.php", line 9, characters 17-25:
 Invalid argument (Typing[4110])
 File "pu_atom_cast.bad.php", line 9, characters 10-14:
-Expected float
+Expected `float`
 File "pu_atom_cast.bad.php", line 3, characters 20-20:
   via this generic T
 File "pu_atom_cast.bad.php", line 9, characters 17-25:
-But got :@message
+But got `:@message`
 File "pu_atom_cast.bad.php", line 10, characters 13-21:
 Invalid argument (Typing[4110])
 File "pu_atom_cast.bad.php", line 10, characters 10-10:
-Expected T
+Expected `T`
 File "pu_atom_cast.bad.php", line 3, characters 20-20:
   via this generic T
 File "pu_atom_cast.bad.php", line 10, characters 13-21:
-But got :@message
+But got `:@message`
 File "pu_atom_cast.bad.php", line 11, characters 13-21:
 Invalid argument (Typing[4110])
 File "pu_atom_cast.bad.php", line 11, characters 10-10:
-Expected C
+Expected `C`
 File "pu_atom_cast.bad.php", line 3, characters 20-20:
   via this generic T
 File "pu_atom_cast.bad.php", line 11, characters 13-21:
-But got :@message
+But got `:@message`

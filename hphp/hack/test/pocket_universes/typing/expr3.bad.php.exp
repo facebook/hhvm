@@ -1,6 +1,6 @@
 File "expr3.bad.php", line 22, characters 25-26:
 Invalid argument (Typing[4110])
 File "expr3.bad.php", line 22, characters 12-23:
-Expected this:@F
+Expected `this:@F`
 File "expr3.bad.php", line 21, characters 31-37:
-But got this:@E
+But got `this:@E`

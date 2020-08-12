@@ -1,9 +1,9 @@
 File "tconst7.php", line 15, characters 14-30:
 Invalid argument (Typing[4110])
 File "tconst7.php", line 6, characters 21-30:
-Expected this::TFoo
+Expected `this::TFoo`
 File "tconst7.php", line 15, characters 14-30:
-But got ?this::TFoo
+But got `?this::TFoo`
 File "tconst7.php", line 11, characters 20-29:
 Invalid "as" expression hint (Typing[4195])
 File "tconst7.php", line 4, characters 23-26:

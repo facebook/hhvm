@@ -9,6 +9,6 @@ Not a dynamic value
 File "test_shapes.php", line 7, characters 10-11:
 Invalid return type (Typing[4110])
 File "test_shapes.php", line 2, characters 19-21:
-Expected int
+Expected `int`
 File "test_shapes.php", line 3, characters 8-38:
-But got shape(NotRealClass::const => int)
+But got `shape(NotRealClass::const => int)`

@@ -1,6 +1,6 @@
 File "variadic_args3.php", line 12, characters 19-20:
 Invalid argument (Typing[4110])
 File "variadic_args3.php", line 5, characters 22-26:
-Expected string (variadic argument)
+Expected `string` (variadic argument)
 File "variadic_args3.php", line 12, characters 19-20:
-But got int
+But got `int`

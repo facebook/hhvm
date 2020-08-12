@@ -1,6 +1,6 @@
 File "where_on_function_callsite.php", line 11, characters 12-13:
 Invalid argument (Typing[4110])
 File "where_on_function_callsite.php", line 4, characters 40-42:
-Expected int
+Expected `int`
 File "where_on_function_callsite.php", line 10, characters 8-14:
-But got string
+But got `string`

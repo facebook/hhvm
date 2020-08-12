@@ -1,8 +1,8 @@
 File "enum_as_false_input.php", line 23, characters 10-24:
 Invalid return type (Typing[4110])
 File "enum_as_false_input.php", line 22, characters 27-35:
-Expected DerpyEnum
+Expected `DerpyEnum`
 File "enum_as_false_input.php", line 23, characters 10-17:
-But got BaitEnum
+But got `BaitEnum`
 File "enum_as_false_input.php", line 23, characters 10-17:
   where the class 'BaitEnum' was referenced here

@@ -1,6 +1,6 @@
 File "parent_const.php", line 13, characters 12-22:
 Invalid return type (Typing[4110])
 File "parent_const.php", line 12, characters 27-32:
-Expected string
+Expected `string`
 File "parent_const.php", line 4, characters 9-11:
-But got int
+But got `int`

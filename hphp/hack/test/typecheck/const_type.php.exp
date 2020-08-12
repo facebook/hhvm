@@ -1,6 +1,6 @@
 File "const_type.php", line 13, characters 13-17:
 Wrong type hint (Typing[4338])
 File "const_type.php", line 13, characters 9-11:
-Expected int
+Expected `int`
 File "const_type.php", line 13, characters 21-23:
-But got string
+But got `string`

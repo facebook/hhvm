@@ -1,6 +1,6 @@
 File "interface_constructor2.php", line 17, characters 19-29:
 The method __construct has the wrong type (Typing[4341])
 File "interface_constructor2.php", line 17, characters 31-34:
-Expected bool
+Expected `bool`
 File "interface_constructor2.php", line 13, characters 31-33:
-But got int
+But got `int`

@@ -3,9 +3,9 @@ File "typename_array_literal_bad.php", line 10, characters 3-15:
 File "typename_array_literal_bad.php", line 11, characters 10-13:
 Invalid return type (Typing[4110])
 File "typename_array_literal_bad.php", line 8, characters 51-51:
-Expected I
+Expected `I`
 File "typename_array_literal_bad.php", line 9, characters 47-47:
-But got D
+But got `D`
 File "typename_array_literal_bad.php", line 9, characters 47-47:
   where the class 'D' was referenced here
 File "classname.hhi", line 17, characters 35-35:

@@ -46,9 +46,9 @@ let f123_diagnostics =
 File "/foo123.php", line 3, characters 37-37:
 Invalid return type (Typing[4110])
 File "/foo123.php", line 3, characters 21-26:
-Expected string
+Expected `string`
 File "/foo123.php", line 3, characters 37-37:
-But got int
+But got `int`
 |}
 
 let test () =

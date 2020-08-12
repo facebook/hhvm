@@ -42,8 +42,8 @@ let test () =
     "File \"/foo.php\", line 3, characters 20-22:\n"
     ^ "Invalid return type (Typing[4110])\n"
     ^ "File \"/foo.php\", line 2, characters 23-25:\n"
-    ^ "Expected int\n"
+    ^ "Expected `int`\n"
     ^ "File \"/foo.php\", line 3, characters 20-22:\n"
-    ^ "But got string\n"
+    ^ "But got `string`\n"
   in
   Test.assertSingleError expected_error (Errors.get_error_list env.errorl)

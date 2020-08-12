@@ -1,15 +1,15 @@
 File "lambda_unpacked_parameters.php", line 11, characters 14-24:
 Invalid argument (Typing[4110])
 File "lambda_unpacked_parameters.php", line 11, characters 14-24:
-Expected Traversable<[unresolved]> (it is unpacked with '...')
+Expected `Traversable<[unresolved]>` (it is unpacked with '...')
 File "lambda_unpacked_parameters.php", line 9, characters 17-17:
-But got int
+But got `int`
 File "lambda_unpacked_parameters.php", line 15, characters 14-14:
 Invalid argument (Typing[4110])
 File "lambda_unpacked_parameters.php", line 14, characters 28-29:
-Expected string (variadic argument)
+Expected `string` (variadic argument)
 File "lambda_unpacked_parameters.php", line 15, characters 14-14:
-But got int
+But got `int`
 File "lambda_unpacked_parameters.php", line 47, characters 12-13:
 Was expecting an object but type is unknown (Typing[4297])
 File "lambda_unpacked_parameters.php", line 46, characters 18-19:

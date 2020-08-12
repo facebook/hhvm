@@ -1,6 +1,6 @@
 File "explicit_type_collection_generic_class.php", line 7, characters 12-37:
 Some elements in this collection are incompatible (Typing[4110])
 File "explicit_type_collection_generic_class.php", line 7, characters 16-16:
-Expected T
+Expected `T`
 File "explicit_type_collection_generic_class.php", line 6, characters 21-21:
-But got dynamic because it is an unenforceable type
+But got `dynamic` because it is an unenforceable type

@@ -1,6 +1,6 @@
 File "arg_null.php", line 12, characters 18-19:
 Wrong type hint (Typing[4331])
 File "arg_null.php", line 12, characters 14-16:
-Expected int
+Expected `int`
 File "arg_null.php", line 12, characters 23-26:
-But got null
+But got `null`

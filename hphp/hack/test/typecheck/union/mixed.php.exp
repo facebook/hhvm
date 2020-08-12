@@ -27,33 +27,33 @@ File "mixed.php", line 91, characters 3-13:
 File "mixed.php", line 27, characters 12-13:
 Invalid argument (Typing[4110])
 File "mixed.php", line 102, characters 19-19:
-Expected A
+Expected `A`
 File "mixed.php", line 11, characters 48-54:
-But got nonnull
+But got `nonnull`
 File "mixed.php", line 36, characters 12-13:
 Invalid argument (Typing[4110])
 File "mixed.php", line 102, characters 19-19:
-Expected A
+Expected `A`
 File "mixed.php", line 11, characters 34-38:
-But got mixed
+But got `mixed`
 File "mixed.php", line 44, characters 17-18:
 Invalid argument (Typing[4110])
 File "mixed.php", line 101, characters 24-29:
-Expected Object
+Expected `Object`
 File "mixed.php", line 41, characters 14-14:
-But got A
+But got `A`
 File "mixed.php", line 45, characters 12-13:
 Invalid argument (Typing[4110])
 File "mixed.php", line 102, characters 19-19:
-Expected A
+Expected `A`
 File "mixed.php", line 39, characters 14-19:
-But got Object
+But got `Object`
 File "mixed.php", line 56, characters 18-19:
 Invalid argument (Typing[4110])
 File "mixed.php", line 96, characters 52-54:
-Expected int
+Expected `int`
 File "mixed.php", line 52, characters 36-41:
-But got string
+But got `string`
 File "mixed.php", line 65, characters 28-29:
 Invalid argument (Typing[4041])
 File "mixed.php", line 59, characters 10-31:

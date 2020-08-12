@@ -1,6 +1,6 @@
 File "xhp_attr_10.php", line 5, characters 18-26:
 Wrong type hint (Typing[4339])
 File "xhp_attr_10.php", line 5, characters 13-16:
-Expected bool
+Expected `bool`
 File "xhp_attr_10.php", line 5, characters 22-26:
-But got string
+But got `string`

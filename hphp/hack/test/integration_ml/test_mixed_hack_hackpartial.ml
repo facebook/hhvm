@@ -51,9 +51,9 @@ let errors =
 File "/g.hack", line 9, characters 12-12:
 Invalid return type (Typing[4110])
 File "/g.hack", line 7, characters 18-23:
-Expected string
+Expected `string`
 File "/g.hack", line 9, characters 12-12:
-But got int
+But got `int`
 
 File "/g.hack", line 8, characters 5-23:
 You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error 4110 (Typing[4110])

@@ -1,6 +1,6 @@
 File "typedef_as1.php", line 12, characters 9-12:
 Invalid constraint on newtype (Typing[4332])
 File "typedef_as1.php", line 12, characters 17-19:
-Expected int
+Expected `int`
 File "typedef_as1.php", line 12, characters 23-26:
-But got bool
+But got `bool`

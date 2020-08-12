@@ -1,6 +1,6 @@
 File "typing_fail_duck.php", line 37, characters 21-34:
 Invalid argument (Typing[4110])
 File "typing_fail_duck.php", line 32, characters 15-24:
-Expected DoesRender
+Expected `DoesRender`
 File "typing_fail_duck.php", line 37, characters 25-32:
-But got MyClass1
+But got `MyClass1`

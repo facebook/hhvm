@@ -1,6 +1,6 @@
 File "generic_subtyping4.php", line 52, characters 14-20:
 Invalid argument (Typing[4110])
 File "generic_subtyping4.php", line 41, characters 19-22:
-Expected bool
+Expected `bool`
 File "generic_subtyping4.php", line 46, characters 21-21:
-But got int
+But got `int`

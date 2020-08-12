@@ -1,6 +1,6 @@
 File "arraykey_type_hint_bad.php", line 20, characters 5-6:
 Invalid argument (Typing[4110])
 File "arraykey_type_hint_bad.php", line 14, characters 12-19:
-Expected arraykey
+Expected `arraykey`
 File "arraykey_type_hint_bad.php", line 19, characters 12-12:
-But got C
+But got `C`

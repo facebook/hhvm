@@ -7,8 +7,8 @@ Some type constraint(s) are violated here
 File "contravariance_constraint_bad.php", line 22, characters 26-26:
 T is a constrained type parameter
 File "contravariance_constraint_bad.php", line 22, characters 31-37:
-Expected IHasFoo
+Expected `IHasFoo`
 File "contravariance_constraint_bad.php", line 29, characters 60-66:
-But got IHasBar
+But got `IHasBar`
 File "contravariance_constraint_bad.php", line 29, characters 60-66:
 Considering that this type argument is contravariant with respect to ICanCallFoo

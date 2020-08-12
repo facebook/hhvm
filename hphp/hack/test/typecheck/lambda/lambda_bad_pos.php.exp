@@ -5,9 +5,9 @@ Some type constraint(s) are violated here
 File "lambda_bad_pos.php", line 6, characters 21-22:
 Tv is a constrained type parameter
 File "lambda_bad_pos.php", line 6, characters 27-34:
-Expected arraykey
+Expected `arraykey`
 File "lambda_bad_pos.php", line 25, characters 22-22:
-But got C
+But got `C`
 File "hackarray.hhi", line 15, characters 61-61:
   via this generic T
 File "interfaces.hhi", line 118, characters 84-85:

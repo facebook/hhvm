@@ -1,6 +1,6 @@
 File "fc_enum_case_10.php--use.php", line 5, characters 10-16:
 Invalid return type (Typing[4336])
 File "fc_enum_case_10.php--use.php", line 5, characters 10-16:
-Expected void because this function does not always return a value
+Expected `void` because this function does not always return a value
 File "fc_enum_case_10.php--use.php", line 5, characters 27-29:
-But got int
+But got `int`

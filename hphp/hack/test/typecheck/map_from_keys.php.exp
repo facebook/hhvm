@@ -1,6 +1,6 @@
 File "map_from_keys.php--file1.php", line 3, characters 10-17:
 Invalid return type (Typing[4336])
 File "map_from_keys.php--file1.php", line 3, characters 10-17:
-Expected void because this function does not always return a value
+Expected `void` because this function does not always return a value
 File "map_from_keys.php--file1.php", line 3, characters 22-26:
-But got varray_or_darray<arraykey, _>
+But got `varray_or_darray<arraykey, _>`

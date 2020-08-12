@@ -5,6 +5,6 @@ Some type constraint(s) are violated here
 File "gen4a.php", line 20, characters 23-23:
 T is a constrained type parameter
 File "gen4a.php", line 20, characters 28-28:
-Expected B
+Expected `B`
 File "gen4a.php", line 20, characters 23-23:
-But got T
+But got `T`

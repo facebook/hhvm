@@ -5,36 +5,36 @@ File "array_map7.php", line 27, characters 3-34:
 File "array_map7.php", line 26, characters 21-51:
 Invalid argument (Typing[4110])
 File "array_map7.php", line 35, characters 28-41:
-Expected darray<arraykey, bool>
+Expected `darray<arraykey, bool>`
 File "stdlib/builtins_array.hhi", line 118, characters 10-18:
-But got varray<[unresolved]>
+But got `varray<[unresolved]>`
 File "array_map7.php", line 26, characters 21-51:
 Invalid argument (Typing[4110])
 File "array_map7.php", line 35, characters 28-41:
-Expected darray<arraykey, bool>
+Expected `darray<arraykey, bool>`
 File "stdlib/builtins_array.hhi", line 118, characters 10-18:
-But got varray<bool>
+But got `varray<bool>`
 File "array_map7.php", line 28, characters 28-52:
 Invalid argument (Typing[4110])
 File "array_map7.php", line 36, characters 35-55:
-Expected darray<arraykey, bool>
+Expected `darray<arraykey, bool>`
 File "stdlib/builtins_array.hhi", line 118, characters 10-18:
-But got varray<[unresolved]>
+But got `varray<[unresolved]>`
 File "array_map7.php", line 28, characters 28-52:
 Invalid argument (Typing[4110])
 File "array_map7.php", line 36, characters 35-55:
-Expected darray<arraykey, bool>
+Expected `darray<arraykey, bool>`
 File "stdlib/builtins_array.hhi", line 118, characters 10-18:
-But got varray<bool>
+But got `varray<bool>`
 File "array_map7.php", line 29, characters 25-52:
 Invalid argument (Typing[4110])
 File "array_map7.php", line 37, characters 32-49:
-Expected darray<mixed, bool>
+Expected `darray<mixed, bool>`
 File "stdlib/builtins_array.hhi", line 118, characters 10-18:
-But got varray<[unresolved]>
+But got `varray<[unresolved]>`
 File "array_map7.php", line 29, characters 25-52:
 Invalid argument (Typing[4110])
 File "array_map7.php", line 37, characters 32-49:
-Expected darray<mixed, bool>
+Expected `darray<mixed, bool>`
 File "stdlib/builtins_array.hhi", line 118, characters 10-18:
-But got varray<bool>
+But got `varray<bool>`

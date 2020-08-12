@@ -1,12 +1,12 @@
 File "nullsafe-unresolved.php", line 6, characters 18-19:
 Invalid argument (Typing[4110])
 File "nullsafe-unresolved.php", line 15, characters 25-40:
-Expected Container<mixed>
+Expected `Container<mixed>`
 File "nullsafe-unresolved.php", line 5, characters 8-15:
-But got null (use of ?-> operator)
+But got `null` (use of ?-> operator)
 File "nullsafe-unresolved.php", line 8, characters 18-19:
 Invalid argument (Typing[4110])
 File "nullsafe-unresolved.php", line 15, characters 25-40:
-Expected Container<mixed>
+Expected `Container<mixed>`
 File "nullsafe-unresolved.php", line 7, characters 8-13:
-But got null (use of ?-> operator)
+But got `null` (use of ?-> operator)

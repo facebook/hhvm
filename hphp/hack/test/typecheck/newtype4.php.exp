@@ -1,6 +1,6 @@
 File "newtype4.php--file2.php", line 5, characters 8-9:
 Invalid argument (Typing[4110])
 File "newtype4.php--file2.php", line 3, characters 15-15:
-Expected a
+Expected `a`
 File "newtype4.php--file2.php", line 4, characters 16-18:
-But got int
+But got `int`

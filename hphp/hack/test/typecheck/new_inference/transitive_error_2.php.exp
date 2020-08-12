@@ -5,6 +5,6 @@ Some type constraint(s) are violated here
 File "transitive_error_2.php", line 8, characters 12-12:
 T is a constrained type parameter
 File "transitive_error_2.php", line 8, characters 17-22:
-Expected string
+Expected `string`
 File "transitive_error_2.php", line 4, characters 20-22:
-But got int
+But got `int`

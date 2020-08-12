@@ -3768,7 +3768,7 @@ let null_member_write = null_member Typing.NullMemberWrite
 let top_member null_code nonnull_code ~is_method ~is_nullable s pos1 ty pos2 =
   let msg =
     Printf.sprintf
-      "You are trying to access the %s '%s' but this is %s. Use a specific class or interface name."
+      "You are trying to access the %s `%s` but this is %s. Use a **specific** class or interface name."
       ( if is_method then
         "method"
       else

@@ -515,9 +515,10 @@ void split_critical_edges(const Index& index, FuncAnalysis& ainfo,
       index, ainfo.ctx, nullptr,
       CollectionOpts{}, &ainfo
     };
+    auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
     ainfo.bdata.push_back({
       0, // We renumber the blocks at the end of the function.
-      locally_propagated_bid_state(index, ainfo, collect, srcBid,
+      locally_propagated_bid_state(index, ctx, collect, srcBid,
                                    ainfo.bdata[srcBid].stateIn,
                                    newBid)
     });

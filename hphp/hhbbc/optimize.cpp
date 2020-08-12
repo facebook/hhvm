@@ -288,7 +288,7 @@ void insert_assertions(const Index& index,
   newBCs.reserve(cblk->hhbcs.size());
 
   auto& arrTable = *index.array_table_builder();
-  auto const ctx = ainfo.ctx;
+  auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
 
   std::vector<uint8_t> obviousStackOutputs(state.stack.size(), false);
 
@@ -399,7 +399,10 @@ bool propagate_constants(const Bytecode& bc, State& state,
 
 //////////////////////////////////////////////////////////////////////
 
-BlockId make_fatal_block(php::MutFunc func, const php::Block* srcBlk) {
+// Create a new fatal error block. Update the given FuncAnalysis if
+// it is non-null - specifically, assign the new block an rpoId.
+BlockId make_fatal_block(php::MutFunc func, const php::Block* srcBlk,
+                         FuncAnalysis* ainfo) {
   FTRACE(1, " ++ new block {}\n", func.blocks().size());
   auto bid = make_block(func, srcBlk);
   auto const blk = func.blocks_mut()[bid].mutate();
@@ -411,18 +414,16 @@ BlockId make_fatal_block(php::MutFunc func, const php::Block* srcBlk) {
   blk->fallthrough = NoBlockId;
   blk->throwExit = NoBlockId;
   blk->exnNodeId = NoExnNodeId;
+
+  if (ainfo) {
+    assertx(ainfo->bdata.size() == bid);
+    assertx(bid + 1 == func.blocks().size());
+    auto const rpoId = safe_cast<uint32_t>(ainfo->rpoBlocks.size());
+    ainfo->rpoBlocks.push_back(bid);
+    ainfo->bdata.push_back(FuncAnalysis::BlockData { rpoId, State {} });
+  }
+
   return bid;
-}
-
-void sync_ainfo(BlockId bid, FuncAnalysis& ainfo, const State& state) {
-  assertx(ainfo.bdata.size() == bid);
-  assertx(bid + 1 == ainfo.ctx.func.blocks().size());
-
-  ainfo.rpoBlocks.push_back(bid);
-  ainfo.bdata.push_back(FuncAnalysis::BlockData {
-    static_cast<uint32_t>(ainfo.rpoBlocks.size() - 1),
-    state
-  });
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -490,8 +491,8 @@ struct OptimizeIterState {
                   php::MutFunc func,
                   BlockId bid,
                   State state) {
-    auto const ctx = ainfo.ctx;
     auto const blk = func.blocks()[bid].get();
+    auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
     auto interp = Interp { index, ctx, collect, bid, blk, state };
     for (uint32_t opIdx = 0; opIdx < blk->hhbcs.size(); ++opIdx) {
       // If we've already determined that nothing is eligible, we can just stop.
@@ -915,8 +916,7 @@ void update_bytecode(php::MutFunc func, BlockUpdates&& blockUpdates,
     auto fatal_block = NoBlockId;
     auto fatal = [&] {
       if (fatal_block == NoBlockId) {
-        fatal_block = make_fatal_block(func, blk);
-        if (ainfo) sync_ainfo(fatal_block, *ainfo, {});
+        fatal_block = make_fatal_block(func, blk, ainfo);
       }
       return fatal_block;
     };

@@ -4020,6 +4020,17 @@ void in(ISS& env, const bc::ResolveClass& op) {
 
 namespace {
 
+Context getCallContext(const ISS& env, const FCallArgs& fca) {
+  if (auto const name = fca.context()) {
+    auto const rcls = env.index.resolve_class(env.ctx, name);
+    if (rcls && rcls->cls()) {
+      return Context { env.ctx.unit, env.ctx.func, rcls->cls() };
+    }
+    return Context { env.ctx.unit, env.ctx.func, nullptr };
+  }
+  return env.ctx;
+}
+
 void fcallObjMethodNullsafe(ISS& env, const FCallArgs& fca, bool extraInput) {
   BytecodeVec repl;
   if (extraInput) repl.push_back(bc::PopC {});
@@ -4089,17 +4100,7 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
     return unknown();
   }
 
-  auto const ctx = [&] {
-    if (auto const name = op.fca.context()) {
-      auto const rcls = env.index.resolve_class(env.ctx, name);
-      if (rcls && rcls->cls()) {
-        return AnalysisContext { env.ctx.unit, env.ctx.func, rcls->cls() };
-      }
-      return AnalysisContext { env.ctx.unit, env.ctx.func, nullptr };
-    }
-    return env.ctx;
-  }();
-
+  auto const ctx = getCallContext(env, op.fca);
   auto const ctxTy = intersection_of(input, TObj);
   auto const clsTy = objcls(ctxTy);
   auto const rfunc = env.index.resolve_method(ctx, clsTy, methName);
@@ -4181,17 +4182,7 @@ template <typename Op, class UpdateBC>
 void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
                         bool dynamic, uint32_t numExtraInputs,
                         UpdateBC updateBC) {
-  auto const ctx = [&] {
-    if (auto const name = op.fca.context()) {
-      auto const rcls = env.index.resolve_class(env.ctx, name);
-      if (rcls && rcls->cls()) {
-        return AnalysisContext { env.ctx.unit, env.ctx.func, rcls->cls() };
-      }
-      return AnalysisContext { env.ctx.unit, env.ctx.func, nullptr };
-    }
-    return env.ctx;
-  }();
-
+  auto const ctx = getCallContext(env, op.fca);
   auto const rfunc = env.index.resolve_method(ctx, clsTy, methName);
 
   if (fcallOptimizeChecks(env, op.fca, rfunc, updateBC) ||

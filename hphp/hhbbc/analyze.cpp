@@ -379,9 +379,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
 
       auto const blk = ctx.func.blocks()[bid].get();
       auto stateOut = ai.bdata[bid].stateIn;
-      auto interp   = Interp {
-        index, ctx, collect, bid, blk, stateOut
-      };
+      auto interp   = Interp { index, ctx, collect, bid, blk, stateOut };
       auto flags    = run(interp, ai.bdata[bid].stateIn, propagate);
       if (any(collect.opts & CollectionOpts::EffectFreeOnly) &&
           !collect.effectFree) {
@@ -843,18 +841,17 @@ ClassAnalysis analyze_class(const Index& index, const Context& ctx) {
 
 std::vector<std::pair<State,StepFlags>>
 locally_propagated_states(const Index& index,
-                          const FuncAnalysis& fa,
+                          const AnalysisContext& ctx,
                           CollectedInfo& collect,
                           BlockId bid,
                           State state) {
   Trace::Bump bumper{Trace::hhbbc, 10};
 
+  auto const blk = ctx.func.blocks()[bid].get();
+  auto interp = Interp { index, ctx, collect, bid, blk, state };
+
   std::vector<std::pair<State,StepFlags>> ret;
-
-  auto const blk = fa.ctx.func.blocks()[bid].get();
   ret.reserve(blk->hhbcs.size() + 1);
-
-  auto interp = Interp { index, fa.ctx, collect, bid, blk, state };
 
   for (auto& op : blk->hhbcs) {
     ret.emplace_back(state, StepFlags{});
@@ -868,7 +865,7 @@ locally_propagated_states(const Index& index,
 
 
 State locally_propagated_bid_state(const Index& index,
-                                   const FuncAnalysis& fa,
+                                   const AnalysisContext& ctx,
                                    CollectedInfo& collect,
                                    BlockId bid,
                                    State state,
@@ -876,17 +873,15 @@ State locally_propagated_bid_state(const Index& index,
   Trace::Bump bumper{Trace::hhbbc, 10};
   if (!state.initialized) return {};
 
-  auto const blk = fa.ctx.func.blocks()[bid].get();
-  auto stateOut = state;
-  Interp interp {
-    index, fa.ctx, collect, bid, blk, stateOut
-  };
+  auto const originalState = state;
+  auto const blk = ctx.func.blocks()[bid].get();
+  auto interp = Interp { index, ctx, collect, bid, blk, state };
 
   State ret{};
   auto const propagate = [&] (BlockId target, const State* st) {
     if (target == targetBid) merge_into(ret, *st);
   };
-  run(interp, state, propagate);
+  run(interp, originalState, propagate);
 
   ret.stack.compact();
   return ret;

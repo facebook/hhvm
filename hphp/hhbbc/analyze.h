@@ -56,7 +56,7 @@ struct FuncAnalysisResult {
    * their declaring class.  So ctx.func->cls will not be the same as
    * ctx->cls in this case.
    */
-  AnalysisContext ctx;
+  Context ctx;
 
   /*
    * If this function allocates closures, this maps each of those
@@ -222,7 +222,7 @@ ClassAnalysis analyze_class(const Index&, const Context&);
  */
 std::vector<std::pair<State,StepFlags>>
 locally_propagated_states(const Index&,
-                          const FuncAnalysis&,
+                          const AnalysisContext&,
                           CollectedInfo& collect,
                           BlockId bid,
                           State stateIn);
@@ -233,7 +233,7 @@ locally_propagated_states(const Index&,
  * to the CFG in betwee analysis rounds.
  */
 State locally_propagated_bid_state(const Index& index,
-                                   const FuncAnalysis& fa,
+                                   const AnalysisContext& ctx,
                                    CollectedInfo& collect,
                                    BlockId bid,
                                    State state,

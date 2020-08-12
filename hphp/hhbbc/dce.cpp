@@ -2039,6 +2039,7 @@ folly::Optional<DceState>
 dce_visit(const Index& index,
           const FuncAnalysis& fa,
           CollectedInfo& collect,
+          php::ConstFunc func,
           BlockId bid,
           const State& stateIn,
           const DceOutState& dceOutState,
@@ -2056,7 +2057,8 @@ dce_visit(const Index& index,
     return folly::none;
   }
 
-  auto const states = locally_propagated_states(index, fa, collect,
+  auto const ctx = AnalysisContext { fa.ctx.unit, func, fa.ctx.cls };
+  auto const states = locally_propagated_states(index, ctx, collect,
                                                 bid, stateIn);
 
   auto dceState = DceState{ index, fa };
@@ -2067,7 +2069,7 @@ dce_visit(const Index& index,
   // if they are not live there.
   dceState.mayNeedUnsetting = dceState.liveLocals;
 
-  auto const blk = fa.ctx.func.blocks()[bid].get();
+  auto const blk = func.blocks()[bid].get();
   auto const dceStkSz = [&] {
     switch (blk->hhbcs.back().op) {
       case Op::MemoGet:
@@ -2095,7 +2097,7 @@ dce_visit(const Index& index,
   for (uint32_t idx = blk->hhbcs.size(); idx-- > 0;) {
     auto const& op = blk->hhbcs[idx];
 
-    FTRACE(2, "  == #{} {}\n", idx, show(fa.ctx.func, op));
+    FTRACE(2, "  == #{} {}\n", idx, show(func, op));
 
     auto visit_env = Env {
       dceState,
@@ -2183,7 +2185,7 @@ dce_visit(const Index& index,
       // we flag it as maybe needing to be unset in all successors.
       dceState.mayNeedUnsetting |= unsetable;
     } else if (unsetable.any() && !visit_env.stateAfter.unreachable) {
-      auto bcs = eager_unsets(unsetable, fa.ctx.func, [&](uint32_t i) {
+      auto bcs = eager_unsets(unsetable, func, [&](uint32_t i) {
         return visit_env.stateAfter.locals[i];
       });
       if (!bcs.empty()) {
@@ -2210,7 +2212,7 @@ dce_visit(const Index& index,
     }
 
     FTRACE(4, "    dce frame: {}\n",
-           loc_bits_string(fa.ctx.func, dceState.liveLocals));
+           loc_bits_string(func, dceState.liveLocals));
     FTRACE(4, "    dce stack: {}\n",
       [&] {
         using namespace folly::gen;
@@ -2251,11 +2253,12 @@ struct DceAnalysis {
 DceAnalysis analyze_dce(const Index& index,
                         const FuncAnalysis& fa,
                         CollectedInfo& collect,
+                        php::ConstFunc func,
                         BlockId bid,
                         const State& stateIn,
                         const DceOutState& dceOutState,
                         LocalRemappingIndex* localRemappingIndex = nullptr) {
-  if (auto dceState = dce_visit(index, fa, collect,
+  if (auto dceState = dce_visit(index, fa, collect, func,
                                 bid, stateIn, dceOutState,
                                 localRemappingIndex)) {
     return DceAnalysis {
@@ -2499,10 +2502,12 @@ DceOptResult
 optimize_dce(const Index& index,
              const FuncAnalysis& fa,
              CollectedInfo& collect,
+             php::ConstFunc func,
              BlockId bid,
              const State& stateIn,
              const DceOutState& dceOutState) {
-  auto dceState = dce_visit(index, fa, collect, bid, stateIn, dceOutState);
+  auto dceState = dce_visit(index, fa, collect, func, bid,
+                            stateIn, dceOutState);
 
   if (!dceState) {
     return {std::bitset<kMaxTrackedLocals>{}};
@@ -2779,9 +2784,8 @@ void local_dce(const Index& index,
                const State& stateIn) {
   // For local DCE, we have to assume all variables are in the
   // live-out set for the block.
-  auto const ret = optimize_dce(index, ainfo, collect, bid, stateIn,
+  auto const ret = optimize_dce(index, ainfo, collect, func, bid, stateIn,
                                 DceOutState{DceOutState::Local{}});
-
   dce_perform(func, ret.actionMap);
 }
 
@@ -3030,6 +3034,7 @@ bool global_dce(const Index& index, const FuncAnalysis& ai, php::MutFunc func) {
       index,
       ai,
       collect,
+      func,
       bid,
       ai.bdata[bid].stateIn,
       blockState,
@@ -3186,6 +3191,7 @@ bool global_dce(const Index& index, const FuncAnalysis& ai, php::MutFunc func) {
       index,
       ai,
       collect,
+      func,
       bid,
       ai.bdata[bid].stateIn,
       blockStates[bid]

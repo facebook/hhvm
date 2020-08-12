@@ -157,11 +157,11 @@ void CmdFlowControl::setupStepOuts() {
     if (!fp) break;
     PC callPC = fp->m_func->at(callOffset);
     TRACE(2, "CmdFlowControl::setupStepOuts: at '%s' offset %d opcode %s\n",
-          fp->m_func->fullName()->data(), callOffset,
+          fp->func()->fullName()->data(), callOffset,
           opcodeToName(peek_op(callPC)));
     // Don't step out to generated or builtin functions, keep looking.
-    if (fp->m_func->line1() == 0) continue;
-    if (fp->m_func->isBuiltin()) continue;
+    if (fp->func()->line1() == 0) continue;
+    if (fp->func()->isBuiltin()) continue;
     if (fromVMEntry) {
       TRACE(2, "CmdFlowControl::setupStepOuts: VM entry\n");
       // We only execute this for opcodes which invoke more PHP, and that does
@@ -172,7 +172,7 @@ void CmdFlowControl::setupStepOuts() {
       if (instrAllowsFallThru(reentrantOp)) {
         Offset nextOffset = callOffset + instrLen(callPC);
         TRACE(2, "CmdFlowControl: step out to '%s' offset %d (fall-thru)\n",
-              fp->m_func->fullName()->data(), nextOffset);
+              fp->func()->fullName()->data(), nextOffset);
         m_stepOut1 = StepDestination(fp->m_func, nextOffset);
       }
       // Set an internal breakpoint at the target of a control flow instruction.
@@ -183,7 +183,7 @@ void CmdFlowControl::setupStepOuts() {
           assertx(targets.size() == 1);
           Offset targetOffset = callOffset + targets[0];
           TRACE(2, "CmdFlowControl: step out to '%s' offset %d (jump target)\n",
-                fp->m_func->fullName()->data(), targetOffset);
+                fp->func()->fullName()->data(), targetOffset);
           m_stepOut2 = StepDestination(fp->m_func, targetOffset);
         }
       }
@@ -193,7 +193,7 @@ void CmdFlowControl::setupStepOuts() {
     } else {
       auto const returnOffset = fp->m_func->offsetOf(skipCall(callPC));
       TRACE(2, "CmdFlowControl: step out to '%s' offset %d\n",
-            fp->m_func->fullName()->data(), returnOffset);
+            fp->func()->fullName()->data(), returnOffset);
       m_stepOut1 = StepDestination(fp->m_func, returnOffset);
     }
   }

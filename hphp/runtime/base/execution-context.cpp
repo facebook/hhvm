@@ -1183,20 +1183,20 @@ StringData* ExecutionContext::getContainingFileName() {
   if (ar == nullptr) return staticEmptyString();
   if (ar->skipFrame()) ar = getPrevVMStateSkipFrame(ar);
   if (ar == nullptr) return staticEmptyString();
-  Unit* unit = ar->m_func->unit();
-  auto const path = ar->m_func->originalFilename() ?
-    ar->m_func->originalFilename() : unit->filepath();
+  Unit* unit = ar->func()->unit();
+  auto const path = ar->func()->originalFilename() ?
+    ar->func()->originalFilename() : unit->filepath();
   return const_cast<StringData*>(path);
 }
 
 int ExecutionContext::getLine() {
   VMRegAnchor _;
   ActRec* ar = vmfp();
-  Unit* unit = ar ? ar->m_func->unit() : nullptr;
+  Unit* unit = ar ? ar->func()->unit() : nullptr;
   Offset pc = unit ? pcOff() : 0;
   if (ar == nullptr) return -1;
   if (ar->skipFrame()) ar = getPrevVMStateSkipFrame(ar, &pc);
-  if (ar == nullptr || (unit = ar->m_func->unit()) == nullptr) return -1;
+  if (ar == nullptr || (unit = ar->func()->unit()) == nullptr) return -1;
   return unit->getLineNumber(pc);
 }
 
@@ -1288,10 +1288,10 @@ void ExecutionContext::pushVMState(TypedValue* savedSP) {
   m_nesting++;
 
   if (debug && savedVM.fp &&
-      savedVM.fp->m_func &&
-      savedVM.fp->m_func->unit()) {
+      savedVM.fp->func() &&
+      savedVM.fp->func()->unit()) {
     // Some asserts and tracing.
-    const Func* func = savedVM.fp->m_func;
+    const Func* func = savedVM.fp->func();
     /* bound-check asserts in offsetOf */
     func->offsetOf(savedVM.pc);
     TRACE(3, "pushVMState: saving frame %s pc %p off %d fp %p\n",
@@ -1326,9 +1326,9 @@ void ExecutionContext::popVMState() {
 
   if (debug) {
     if (savedVM.fp &&
-        savedVM.fp->m_func &&
-        savedVM.fp->m_func->unit()) {
-      const Func* func = savedVM.fp->m_func;
+        savedVM.fp->func() &&
+        savedVM.fp->func()->unit()) {
+      const Func* func = savedVM.fp->func();
       (void) /* bound-check asserts in offsetOf */
         func->offsetOf(savedVM.pc);
       TRACE(3, "popVMState: restoring frame %s pc %p off %d fp %p\n",
@@ -1497,7 +1497,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   } else {
     TRACE(1, "Reentry: enter %s(pc %p ar %p) from %s(%p)\n",
           f->name()->data(), vmpc(), ar,
-          vmfp()->m_func ? vmfp()->m_func->name()->data()
+          vmfp()->func() ? vmfp()->func()->name()->data()
                          : "unknownBuiltin",
           vmfp());
   }
@@ -1972,7 +1972,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     fp = getPrevVMStateSkipFrame(fp);
   }
 
-  if (fp) phpDebuggerEvalHook(fp->m_func);
+  if (fp) phpDebuggerEvalHook(fp->func());
 
   const static StaticString s_cppException("Hit an exception");
   const static StaticString s_phpException("Hit a php exception");
@@ -2160,9 +2160,9 @@ void ExecutionContext::enterDebuggerDummyEnv() {
   assertx(vmStack().count() == 0);
   ActRec* ar = vmStack().allocA();
   ar->setFunc(s_debuggerDummy->lookupFuncId(0));
-  assertx(ar->m_func && ar->m_func->name()->equal(s_include.get()));
+  assertx(ar->func() && ar->func()->name()->equal(s_include.get()));
   ar->setNumArgs(0);
-  for (int i = 0; i < ar->m_func->numLocals(); ++i) vmStack().pushInt(1);
+  for (int i = 0; i < ar->func()->numLocals(); ++i) vmStack().pushInt(1);
   ar->trashThis();
   ar->setReturnVMExit();
   vmfp() = ar;
@@ -2181,7 +2181,7 @@ void ExecutionContext::exitDebuggerDummyEnv() {
   assertx(m_nestedVMs.size() == 0);
   assertx(m_nesting == 0);
   // Teardown the frame we erected by enterDebuggerDummyEnv()
-  const Func* func = vmfp()->m_func;
+  const Func* func = vmfp()->func();
   try {
     vmfp()->setLocalsDecRefd();
     frame_free_locals_no_hook(vmfp());

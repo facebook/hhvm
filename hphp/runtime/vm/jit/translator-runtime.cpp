@@ -356,7 +356,7 @@ void VerifyParamTypeCallable(TypedValue value, int param) {
 void VerifyParamTypeFail(int paramNum, const TypeConstraint* tc) {
   VMRegAnchor _;
   const ActRec* ar = liveFrame();
-  const Func* func = ar->m_func;
+  const Func* func = ar->func();
   if (!tc) {
     tc = &func->params()[paramNum].typeConstraint;
   }
@@ -384,7 +384,7 @@ void VerifyRetTypeCallable(int32_t id, TypedValue value) {
 void VerifyRetTypeFail(int32_t id, TypedValue* tv, const TypeConstraint* tc) {
   VMRegAnchor _;
   const ActRec* ar = liveFrame();
-  const Func* func = ar->m_func;
+  const Func* func = ar->func();
   if (id == TypeConstraint::ReturnId) {
     if (!tc) tc = &func->returnTypeConstraint();
     assertx(!tc->check(tv, func->cls()));
@@ -399,7 +399,7 @@ void VerifyRetTypeFail(int32_t id, TypedValue* tv, const TypeConstraint* tc) {
 void VerifyReifiedLocalTypeImpl(int32_t id, ArrayData* ts) {
   VMRegAnchor _;
   const ActRec* ar = liveFrame();
-  const Func* func = ar->m_func;
+  const Func* func = ar->func();
   auto const param = frame_local(ar, id);
   bool warn = false;
   if (verifyReifiedLocalType(ts, param, tcCouldBeReified(func, id), warn)) {
@@ -420,7 +420,7 @@ void VerifyReifiedLocalTypeImpl(int32_t id, ArrayData* ts) {
 void VerifyReifiedReturnTypeImpl(TypedValue cell, ArrayData* ts) {
   VMRegAnchor _;
   const ActRec* ar = liveFrame();
-  const Func* func = ar->m_func;
+  const Func* func = ar->func();
   bool warn = false;
   if (verifyReifiedLocalType(ts, &cell,
         tcCouldBeReified(func, TypeConstraint::ReturnId), warn)) {
@@ -648,7 +648,7 @@ int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
 //////////////////////////////////////////////////////////////////////
 
 void checkFrame(ActRec* fp, TypedValue* sp, bool fullCheck) {
-  const Func* func = fp->m_func;
+  const Func* func = fp->func();
   func->validate();
   if (func->cls()) {
     assertx(!func->cls()->isZombie());

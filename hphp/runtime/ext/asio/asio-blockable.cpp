@@ -214,7 +214,7 @@ void AsioBlockableChain::UnblockJitHelper(ActRec* ar,
   SCOPE_EXIT { tl_regState = VMRegState::DIRTY; };
 
   auto prevAr = g_context->getOuterVMFrame(ar);
-  const Func* prevF = prevAr->m_func;
+  const Func* prevF = prevAr->func();
   auto& regs = vmRegs();
   regs.stack.top() = sp;
   assertx(vmStack().isValidAddress((uintptr_t)vmsp()));

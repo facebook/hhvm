@@ -98,7 +98,7 @@ void handlePossibleStackOverflow(ActRec* calleeAR) {
    * which might mean decreffing some uninits unnecessarily, but that's ok.
    */
 
-  calleeAR->setNumArgs(calleeAR->m_func->numLocals());
+  calleeAR->setNumArgs(calleeAR->func()->numLocals());
   handleStackOverflow(calleeAR);
 }
 

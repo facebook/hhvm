@@ -427,7 +427,7 @@ void coerceFCallArgsFromStack(TypedValue* args,
 
 TypedValue* functionWrapper(ActRec* ar) {
   assertx(ar);
-  auto func = ar->m_func;
+  auto func = ar->func();
   auto numArgs = func->numParams();
   auto numNonDefault = ar->numArgs();
   TypedValue* args = ((TypedValue*)ar) - 1;
@@ -447,7 +447,7 @@ TypedValue* functionWrapper(ActRec* ar) {
 
 TypedValue* methodWrapper(ActRec* ar) {
   assertx(ar);
-  auto func = ar->m_func;
+  auto func = ar->func();
   auto numArgs = func->numParams();
   auto numNonDefault = ar->numArgs();
   bool isStatic = func->isStatic();
@@ -487,7 +487,7 @@ TypedValue* methodWrapper(ActRec* ar) {
 }
 
 [[noreturn]] TypedValue* unimplementedWrapper(ActRec* ar) {
-  auto func = ar->m_func;
+  auto func = ar->func();
   auto cls = func->cls();
   if (cls) {
     raise_error("Call to unimplemented native method %s::%s()",

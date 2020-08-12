@@ -33,7 +33,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline ActRec* liveFrame() { return vmfp(); }
-inline const Func* liveFunc() { return liveFrame()->m_func; }
+inline const Func* liveFunc() { return liveFrame()->func(); }
 inline const Unit* liveUnit() { return liveFunc()->unit(); }
 inline Class* liveClass() { return liveFunc()->cls(); }
 inline ResumeMode liveResumeMode() { return resumeModeFromActRec(liveFrame()); }

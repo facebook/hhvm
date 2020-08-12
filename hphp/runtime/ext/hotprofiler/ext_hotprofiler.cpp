@@ -1148,7 +1148,7 @@ struct MemoProfiler final : Profiler {
     ActRec *ar = vmfp();
     // Lots of random cases to skip just to keep this simple for
     // now. There's no reason not to do more later.
-    if (ar->m_func->isCPPBuiltin() || isResumed(ar)) return;
+    if (ar->func()->isCPPBuiltin() || isResumed(ar)) return;
     auto ret = tvAsCVarRef(retval);
     if (ret.isNull()) return;
     if (!(ret.isString() || ret.isObject() || ret.isArray())) return;

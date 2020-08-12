@@ -69,11 +69,11 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
     return;
   }
   PC pc = vmpc();
-  Offset offset = fp->m_func->offsetOf(pc);
+  Offset offset = fp->func()->offsetOf(pc);
   TRACE(2, "CmdNext: pc %p, opcode %s at '%s' offset %d\n",
         pc,
         opcodeToName(peek_op(pc)),
-        fp->m_func->fullName()->data(),
+        fp->func()->fullName()->data(),
         offset);
 
   int currentVMDepth = g_context->m_nesting;
@@ -135,11 +135,11 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
       }
       // Sometimes we have handlers in generated code, i.e., Continuation::next.
       // These just help propagate exceptions so ignore those.
-      if (fp->m_func->line1() == 0) {
+      if (fp->func()->line1() == 0) {
         TRACE(2, "CmdNext: exception handler, ignoring func with no source\n");
         return;
       }
-      if (fp->m_func->isBuiltin()) {
+      if (fp->func()->isBuiltin()) {
         TRACE(2, "CmdNext: exception handler, ignoring builtin functions\n");
         return;
       }
@@ -274,7 +274,7 @@ void CmdNext::setupStepSuspend(ActRec* fp, PC pc) {
   assertx(nextInst != kInvalidOffset);
   m_stepResumableId = fp;
   TRACE(2, "CmdNext: patch for resumable step at '%s' offset %d\n",
-        fp->m_func->fullName()->data(), nextInst);
+        fp->func()->fullName()->data(), nextInst);
   m_stepResumable = StepDestination(fp->m_func, nextInst);
 }
 

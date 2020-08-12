@@ -994,7 +994,7 @@ void raise_bad_type_warning(const char *fmt, ...) {
 void raise_expected_array_warning(const char* fn /*=nullptr*/) {
   if (!fn) {
     if (auto ar = g_context->getStackFrame()) {
-     fn = ar->m_func->name()->data();
+     fn = ar->func()->name()->data();
     } else {
      fn = "(unknown)";
     }
@@ -1005,7 +1005,7 @@ void raise_expected_array_warning(const char* fn /*=nullptr*/) {
 void raise_expected_array_or_collection_warning(const char* fn /*=nullptr*/) {
   if (!fn) {
     if (auto ar = g_context->getStackFrame()) {
-      fn = ar->m_func->name()->data();
+      fn = ar->func()->name()->data();
     } else {
       fn = "(unknown)";
     }

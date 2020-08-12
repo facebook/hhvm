@@ -156,7 +156,7 @@ Class* arGetContextClass(const ActRec* ar) {
   if (ar == nullptr) {
     return nullptr;
   }
-  return ar->m_func->cls();
+  return ar->func()->cls();
 }
 
 void frame_free_locals_no_hook(ActRec* fp) {
@@ -253,22 +253,22 @@ template<class T> struct imm_array {
 
 ALWAYS_INLINE TypedValue* decode_local(PC& pc) {
   auto la = decode_iva(pc);
-  assertx(la < vmfp()->m_func->numLocals());
+  assertx(la < vmfp()->func()->numLocals());
   return frame_local(vmfp(), la);
 }
 
 ALWAYS_INLINE local_var decode_indexed_local(PC& pc) {
   auto la = decode_iva(pc);
-  assertx(la < vmfp()->m_func->numLocals());
+  assertx(la < vmfp()->func()->numLocals());
   return local_var{frame_local(vmfp(), la), safe_cast<int32_t>(la)};
 }
 
 ALWAYS_INLINE named_local_var decode_named_local_var(PC& pc) {
   auto loc = decode_named_local(pc);
   assertx(0 <= loc.id);
-  assertx(loc.id < vmfp()->m_func->numLocals());
+  assertx(loc.id < vmfp()->func()->numLocals());
   assertx(kInvalidLocalName <= loc.name);
-  assertx(loc.name < vmfp()->m_func->numNamedLocals());
+  assertx(loc.name < vmfp()->func()->numNamedLocals());
   return named_local_var{loc.name, frame_local(vmfp(), loc.id)};
 }
 
@@ -682,7 +682,7 @@ static void toStringFrame(std::ostream& os, const ActRec* fp,
   }
 
   os << prefix;
-  const Func* func = fp->m_func;
+  const Func* func = fp->func();
   assertx(func);
   func->validate();
   std::string funcName(func->fullName()->data());
@@ -810,7 +810,7 @@ TypedValue* Stack::resumableStackBase(const ActRec* fp) {
 
 Array getDefinedVariables(const ActRec* fp) {
   if (UNLIKELY(fp == nullptr || fp->isInlined())) return empty_darray();
-  auto const func = fp->m_func;
+  auto const func = fp->func();
   auto const numLocals = func->numNamedLocals();
   DArrayInit ret(numLocals);
   for (Id id = 0; id < numLocals; ++id) {
@@ -906,7 +906,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
 
 static void prepareFuncEntry(ActRec *ar, Array&& generics) {
   assertx(!isResumed(ar));
-  const Func* func = ar->m_func;
+  const Func* func = ar->func();
   Offset firstDVInitializer = kInvalidOffset;
   folly::Optional<uint32_t> raiseTooManyArgumentsWarnings;
   const int nparams = func->numNonVariadicParams();
@@ -956,10 +956,10 @@ static void prepareFuncEntry(ActRec *ar, Array&& generics) {
     // initActRecFromClosure doesn't move stack
     stack.nalloc(nuse);
     nlocals += nuse;
-    func = ar->m_func;
+    func = ar->func();
   }
 
-  if (ar->m_func->hasReifiedGenerics()) {
+  if (ar->func()->hasReifiedGenerics()) {
     ARRPROV_USE_RUNTIME_LOCATION();
     // Currently does not work with closures
     assertx(!func->isClosureBody());
@@ -995,17 +995,17 @@ static void prepareFuncEntry(ActRec *ar, Array&& generics) {
 namespace {
 // Check whether the location of reified generics matches the one we expect
 void checkForReifiedGenericsErrors(const ActRec* ar, bool hasGenerics) {
-  if (!ar->m_func->hasReifiedGenerics()) return;
+  if (!ar->func()->hasReifiedGenerics()) return;
   if (!hasGenerics) {
-    if (areAllGenericsSoft(ar->m_func->getReifiedGenericsInfo())) {
-      raise_warning_for_soft_reified(0, true, ar->m_func->fullName());
+    if (areAllGenericsSoft(ar->func()->getReifiedGenericsInfo())) {
+      raise_warning_for_soft_reified(0, true, ar->func()->fullName());
       return;
     }
-    throw_call_reified_func_without_generics(ar->m_func);
+    throw_call_reified_func_without_generics(ar->func());
   }
-  auto const generics = frame_local(ar, ar->m_func->numParams());
+  auto const generics = frame_local(ar, ar->func()->numParams());
   assertx(tvIsHAMSafeVArray(generics));
-  checkFunReifiedGenericMismatch(ar->m_func, val(generics).parr);
+  checkFunReifiedGenericMismatch(ar->func(), val(generics).parr);
 }
 
 void checkImplicitContextErrors(const ActRec* ar) {
@@ -1037,14 +1037,14 @@ void enterVMAtFunc(ActRec* enterFnAr, Array&& generics, bool hasInOut,
                           allowDynCallNoPointer);
   checkImplicitContextErrors(enterFnAr);
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
-  checkStack(vmStack(), enterFnAr->m_func, 0);
+  checkStack(vmStack(), enterFnAr->func(), 0);
   assertx(vmfp()->func()->contains(vmpc()));
 
   if (RID().getJit() && !RID().getJitFolding()) {
-    jit::TCA start = enterFnAr->m_func->getFuncBody();
+    jit::TCA start = enterFnAr->func()->getFuncBody();
     assert_flog(jit::tc::isValidCodeAddress(start),
                 "start = {} ; func = {} ({})\n",
-                start, enterFnAr->m_func, enterFnAr->m_func->fullName());
+                start, enterFnAr->func(), enterFnAr->func()->fullName());
     jit::enterTC(start);
   } else {
     dispatch();
@@ -1223,23 +1223,23 @@ OPTBLD_INLINE void iopFalse() {
 }
 
 OPTBLD_INLINE void iopFile() {
-  auto s = vmfp()->m_func->unit()->filepath();
+  auto s = vmfp()->func()->unit()->filepath();
   vmStack().pushStaticString(s);
 }
 
 OPTBLD_INLINE void iopDir() {
-  auto s = vmfp()->m_func->unit()->dirpath();
+  auto s = vmfp()->func()->unit()->dirpath();
   vmStack().pushStaticString(s);
 }
 
 OPTBLD_INLINE void iopMethod() {
-  auto s = vmfp()->m_func->fullName();
+  auto s = vmfp()->func()->fullName();
   vmStack().pushStaticString(s);
 }
 
 OPTBLD_INLINE void iopFuncCred() {
   vmStack().pushObjectNoRc(
-    FunctionCredential::newInstance(vmfp()->m_func));
+    FunctionCredential::newInstance(vmfp()->func()));
 }
 
 OPTBLD_INLINE void iopClassName() {
@@ -1299,7 +1299,7 @@ ArrayData* newStructArrayImpl(imm_array<int32_t> ids, F f) {
   assertx(n > 0 && n <= ArrayData::MaxElemsOnStack);
   req::vector<const StringData*> names;
   names.reserve(n);
-  auto unit = vmfp()->m_func->unit();
+  auto unit = vmfp()->func()->unit();
   for (size_t i = 0; i < n; ++i) {
     auto name = unit->lookupLitstrId(ids[i]);
     names.push_back(name);
@@ -1366,7 +1366,7 @@ void newRecordImpl(const StringData* s,
   assertx(n > 0 && n <= ArrayData::MaxElemsOnStack);
   req::vector<const StringData*> names;
   names.reserve(n);
-  auto const unit = vmfp()->m_func->unit();
+  auto const unit = vmfp()->func()->unit();
   for (size_t i = 0; i < n; ++i) {
     auto name = unit->lookupLitstrId(ids[i]);
     names.push_back(name);
@@ -1479,7 +1479,7 @@ OPTBLD_INLINE void iopClsCns(const StringData* clsCnsName) {
 
 OPTBLD_INLINE void iopClsCnsD(const StringData* clsCnsName, Id classId) {
   const NamedEntityPair& classNamedEntity =
-    vmfp()->m_func->unit()->lookupNamedEntityPairId(classId);
+    vmfp()->func()->unit()->lookupNamedEntityPairId(classId);
   auto const clsCns = g_context->lookupClsCns(classNamedEntity.second,
                                        classNamedEntity.first, clsCnsName);
   auto const c1 = vmStack().allocC();
@@ -1768,7 +1768,7 @@ OPTBLD_INLINE void iopInstanceOf() {
 }
 
 OPTBLD_INLINE void iopInstanceOfD(Id id) {
-  const NamedEntity* ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
+  const NamedEntity* ne = vmfp()->func()->unit()->lookupNamedEntityId(id);
   TypedValue* c1 = vmStack().topC();
   bool r = tvInstanceOf(c1, ne);
   vmStack().replaceC<KindOfBoolean>(r);
@@ -2190,7 +2190,7 @@ void iopSSwitch(PC origpc, PC& pc, imm_array<StrVecItem> jmptab) {
   assertx(veclen > 1);
   unsigned cases = veclen - 1; // the last vector item is the default case
   TypedValue* val = vmStack().topTV();
-  Unit* u = vmfp()->m_func->unit();
+  Unit* u = vmfp()->func()->unit();
   unsigned i;
   for (i = 0; i < cases; ++i) {
     auto item = jmptab[i];
@@ -2536,8 +2536,8 @@ OPTBLD_INLINE void iopClassGetTS() {
 }
 
 static void raise_undefined_local(ActRec* fp, LocalName pind) {
-  assertx(pind < fp->m_func->numNamedLocals());
-  assertx(fp->m_func->localVarName(pind));
+  assertx(pind < fp->func()->numNamedLocals());
+  assertx(fp->func()->localVarName(pind));
   if (debug) {
     auto vm = &*g_context;
     always_assert_flog(
@@ -2548,7 +2548,7 @@ static void raise_undefined_local(ActRec* fp, LocalName pind) {
     );
   }
   raise_notice(Strings::UNDEFINED_VARIABLE,
-               fp->m_func->localVarName(pind)->data());
+               fp->func()->localVarName(pind)->data());
 }
 
 static inline void cgetl_inner_body(tv_rval fr, TypedValue* to) {
@@ -3091,7 +3091,7 @@ OPTBLD_INLINE void iopMemoGetEager(PC& pc,
                                    PC notfound,
                                    PC suspended,
                                    LocalRange keys) {
-  assertx(vmfp()->m_func->isAsyncFunction());
+  assertx(vmfp()->func()->isAsyncFunction());
   assertx(!isResumed(vmfp()));
 
   if (auto const c = memoGetImpl(keys)) {
@@ -3211,7 +3211,7 @@ OPTBLD_INLINE void memoSetImpl(LocalRange keys, TypedValue val) {
 OPTBLD_INLINE void iopMemoSet(LocalRange keys) {
   auto val = *vmStack().topC();
   assertx(val.m_type != KindOfUninit);
-  if (vmfp()->m_func->isAsyncFunction()) {
+  if (vmfp()->func()->isAsyncFunction()) {
     assertx(tvIsObject(val) && val.m_data.pobj->isWaitHandle());
     val.m_aux.u_asyncEagerReturnFlag = 0;
   }
@@ -3219,7 +3219,7 @@ OPTBLD_INLINE void iopMemoSet(LocalRange keys) {
 }
 
 OPTBLD_INLINE void iopMemoSetEager(LocalRange keys) {
-  assertx(vmfp()->m_func->isAsyncFunction());
+  assertx(vmfp()->func()->isAsyncFunction());
   assertx(!isResumed(vmfp()));
   auto val = *vmStack().topC();
   assertx(val.m_type != KindOfUninit);
@@ -3282,9 +3282,9 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue val, IsTypeOp op) {
   case IsTypeOp::Scalar: return HHVM_FN(is_scalar)(tvAsCVarRef(val));
   case IsTypeOp::Arr:
     if (!RO::EvalWidenIsArray) {
-      return is_array(&val, !vmfp()->m_func->isBuiltin());
+      return is_array(&val, !vmfp()->func()->isBuiltin());
     }
-    return is_any_array(&val, !vmfp()->m_func->isBuiltin());
+    return is_any_array(&val, !vmfp()->func()->isBuiltin());
   case IsTypeOp::ArrLike:
     return is_any_array(&val, /* logOnHackArrays = */ false);
   case IsTypeOp::ClsMeth: return is_clsmeth(&val);
@@ -3359,7 +3359,7 @@ const StaticString
   s_implicit_context_genSet("HH\\ImplicitContext::genSet");
 
 OPTBLD_INLINE void iopGetMemoKeyL(named_local_var loc) {
-  DEBUG_ONLY auto const func = vmfp()->m_func;
+  DEBUG_ONLY auto const func = vmfp()->func();
   assertx(func->isMemoizeWrapper() ||
           func->fullName()->isame(s_implicit_context_set.get()) ||
           func->fullName()->isame(s_implicit_context_genSet.get()));
@@ -3904,7 +3904,7 @@ OPTBLD_INLINE void fcallFuncRClsMeth(PC origpc, PC& pc, const FCallArgs& fca) {
 }
 
 Func* resolveFuncImpl(Id id) {
-  auto unit = vmfp()->m_func->unit();
+  auto unit = vmfp()->func()->unit();
   auto const nep = unit->lookupNamedEntityPairId(id);
   auto func = Unit::loadFunc(nep.second, nep.first);
   if (func == nullptr) raise_resolve_undefined(unit->lookupLitstrId(id));
@@ -3917,7 +3917,7 @@ OPTBLD_INLINE void iopResolveFunc(Id id) {
 }
 
 OPTBLD_INLINE void iopResolveMethCaller(Id id) {
-  auto unit = vmfp()->m_func->unit();
+  auto unit = vmfp()->func()->unit();
   auto const nep = unit->lookupNamedEntityPairId(id);
   auto func = Unit::loadFunc(nep.second, nep.first);
   assertx(func && func->isMethCaller());
@@ -4197,7 +4197,7 @@ OPTBLD_INLINE void iopResolveClsMethod(const StringData* methName) {
 
 OPTBLD_INLINE void iopResolveClsMethodD(Id classId,
                                         const StringData* methName) {
-  auto const nep = vmfp()->m_func->unit()->lookupNamedEntityPairId(classId);
+  auto const nep = vmfp()->func()->unit()->lookupNamedEntityPairId(classId);
   auto cls = Unit::loadClass(nep.second, nep.first);
   if (UNLIKELY(cls == nullptr)) {
     raise_error("Failure to resolve class name \'%s\'", nep.first->data());
@@ -4250,7 +4250,7 @@ OPTBLD_INLINE void iopResolveRClsMethod(const StringData* methName) {
 
 OPTBLD_INLINE void iopResolveRClsMethodD(Id classId,
                                          const StringData* methName) {
-  auto const nep = vmfp()->m_func->unit()->lookupNamedEntityPairId(classId);
+  auto const nep = vmfp()->func()->unit()->lookupNamedEntityPairId(classId);
   auto cls = Unit::loadClass(nep.second, nep.first);
   if (UNLIKELY(cls == nullptr)) {
     raise_error("Failure to resolve class name \'%s\'", nep.first->data());
@@ -4341,7 +4341,7 @@ OPTBLD_INLINE void
 iopFCallClsMethodD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
                    Id classId, const StringData* methName) {
   const NamedEntityPair &nep =
-    vmfp()->m_func->unit()->lookupNamedEntityPairId(classId);
+    vmfp()->func()->unit()->lookupNamedEntityPairId(classId);
   Class* cls = Unit::loadClass(nep.second, nep.first);
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, nep.first->data());
@@ -4389,11 +4389,11 @@ ObjectData* newObjImpl(Class* cls, ArrayData* reified_types) {
 
 void newObjDImpl(Id id, ArrayData* reified_types) {
   const NamedEntityPair &nep =
-    vmfp()->m_func->unit()->lookupNamedEntityPairId(id);
+    vmfp()->func()->unit()->lookupNamedEntityPairId(id);
   auto cls = Unit::loadClass(nep.second, nep.first);
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS,
-                vmfp()->m_func->unit()->lookupLitstrId(id)->data());
+                vmfp()->func()->unit()->lookupLitstrId(id)->data());
   }
   auto this_ = newObjImpl(cls, reified_types);
   if (reified_types) vmStack().popC();
@@ -4510,11 +4510,11 @@ OPTBLD_INLINE
 void iopFCallBuiltin(
   uint32_t numArgs, uint32_t numNonDefault, uint32_t numOut, Id id
 ) {
-  auto const ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
+  auto const ne = vmfp()->func()->unit()->lookupNamedEntityId(id);
   auto const func = ne->uniqueFunc();
   if (func == nullptr || !func->isBuiltin()) {
     raise_error("Call to undefined function %s()",
-                vmfp()->m_func->unit()->lookupLitstrId(id)->data());
+                vmfp()->func()->unit()->lookupLitstrId(id)->data());
   }
 
   if (func->numInOutParams() != numOut) {
@@ -4648,7 +4648,7 @@ OPTBLD_INLINE void inclOp(PC origpc, PC& pc, InclOpFlags flags,
 
   auto curUnitFilePath = [&] {
     namespace fs = boost::filesystem;
-    fs::path currentUnit(vmfp()->m_func->unit()->filepath()->data());
+    fs::path currentUnit(vmfp()->func()->unit()->filepath()->data());
     fs::path currentDir(currentUnit.branch_path());
     return currentDir.string();
   };
@@ -4821,7 +4821,7 @@ OPTBLD_INLINE void iopLateBoundCls() {
 }
 
 OPTBLD_INLINE void iopVerifyParamType(local_var param) {
-  const Func *func = vmfp()->m_func;
+  const Func *func = vmfp()->func();
   assertx(param.index < func->numParams());
   assertx(func->numParams() == int(func->params().size()));
   const TypeConstraint& tc = func->params()[param.index].typeConstraint;
@@ -4842,7 +4842,7 @@ OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
   iopVerifyParamType(param);
   auto const cell = vmStack().topC();
   assertx(tvIsHAMSafeDArray(cell));
-  auto isTypeVar = tcCouldBeReified(vmfp()->m_func, param.index);
+  auto isTypeVar = tcCouldBeReified(vmfp()->func(), param.index);
   bool warn = false;
   if ((isTypeVar || tvIsObject(param.lval)) &&
       !verifyReifiedLocalType(cell->m_data.parr, param.lval, isTypeVar, warn)) {
@@ -4850,7 +4850,7 @@ OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
       folly::sformat(
         "Argument {} passed to {}() must be an instance of {}, {} given",
         param.index + 1,
-        vmfp()->m_func->fullName()->data(),
+        vmfp()->func()->fullName()->data(),
         TypeStructure::toString(ArrNR(cell->m_data.parr),
           TypeStructure::TSDisplayType::TSDisplayTypeUser).c_str(),
         describe_actual_type(param.lval)
@@ -4861,7 +4861,7 @@ OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
 }
 
 OPTBLD_INLINE void iopVerifyOutType(uint32_t paramId) {
-  auto const func = vmfp()->m_func;
+  auto const func = vmfp()->func();
   assertx(paramId < func->numParams());
   assertx(func->numParams() == int(func->params().size()));
   auto const& tc = func->params()[paramId].typeConstraint;
@@ -4883,7 +4883,7 @@ OPTBLD_INLINE void iopVerifyOutType(uint32_t paramId) {
 namespace {
 
 OPTBLD_INLINE void verifyRetTypeImpl(size_t ind) {
-  const auto func = vmfp()->m_func;
+  const auto func = vmfp()->func();
   const auto tc = func->returnTypeConstraint();
   if (tc.isCheckable()) tc.verifyReturn(vmStack().indC(ind), func);
   if (func->hasReturnWithMultiUBs()) {
@@ -4906,14 +4906,14 @@ OPTBLD_INLINE void iopVerifyRetTypeTS() {
   auto const ts = vmStack().topC();
   assertx(tvIsHAMSafeDArray(ts));
   auto const cell = vmStack().indC(1);
-  bool isTypeVar = tcCouldBeReified(vmfp()->m_func, TypeConstraint::ReturnId);
+  bool isTypeVar = tcCouldBeReified(vmfp()->func(), TypeConstraint::ReturnId);
   bool warn = false;
   if ((isTypeVar || tvIsObject(cell)) &&
       !verifyReifiedLocalType(ts->m_data.parr, cell, isTypeVar, warn)) {
     raise_reified_typehint_error(
       folly::sformat(
         "Value returned from function {}() must be of type {}, {} given",
-        vmfp()->m_func->fullName()->data(),
+        vmfp()->func()->fullName()->data(),
         TypeStructure::toString(ArrNR(ts->m_data.parr),
           TypeStructure::TSDisplayType::TSDisplayTypeUser).c_str(),
         describe_actual_type(cell)
@@ -4924,7 +4924,7 @@ OPTBLD_INLINE void iopVerifyRetTypeTS() {
 }
 
 OPTBLD_INLINE void iopVerifyRetNonNullC() {
-  const auto func = vmfp()->m_func;
+  const auto func = vmfp()->func();
   const auto tc = func->returnTypeConstraint();
   tc.verifyReturnNonNull(vmStack().topC(), func);
 }
@@ -4968,7 +4968,7 @@ OPTBLD_INLINE void iopParent() {
 }
 
 OPTBLD_INLINE void iopCreateCl(uint32_t numArgs, uint32_t clsIx) {
-  auto const func = vmfp()->m_func;
+  auto const func = vmfp()->func();
   auto const preCls = func->unit()->lookupPreClassId(clsIx);
   auto const c = Unit::defClosure(preCls);
 
@@ -5051,7 +5051,7 @@ OPTBLD_INLINE void contEnterImpl(PC origpc) {
 
   // The stack must have one cell! Or else resumableStackBase() won't work!
   assertx(vmStack().top() + 1 ==
-         (TypedValue*)vmfp() - vmfp()->m_func->numSlotsInFrame());
+         (TypedValue*)vmfp() - vmfp()->func()->numSlotsInFrame());
 
   // Do linkage of the generator's AR.
   assertx(vmfp()->hasThis());
@@ -5441,7 +5441,7 @@ OPTBLD_INLINE void iopSilence(tv_lval loc, SilenceOp subop) {
 
 std::string prettyStack(const std::string& prefix) {
   if (!vmfp()) return "__Halted";
-  int offset = (vmfp()->m_func->unit() != nullptr)
+  int offset = (vmfp()->func()->unit() != nullptr)
                ? pcOff() : 0;
   auto begPrefix = prefix + "__";
   auto midPrefix = prefix + "|| ";
@@ -5458,7 +5458,7 @@ void DumpStack() {
 // callable from gdb
 void DumpCurUnit(int skip) {
   ActRec* fp = vmfp();
-  Offset pc = fp->m_func->unit() ? pcOff() : 0;
+  Offset pc = fp->func()->unit() ? pcOff() : 0;
   while (skip--) {
     fp = g_context->getPrevVMState(fp, &pc);
   }
@@ -5467,8 +5467,8 @@ void DumpCurUnit(int skip) {
     return;
   }
 
-  printf("Offset = %d, in function %s\n", pc, fp->m_func->name()->data());
-  Unit* u = fp->m_func->unit();
+  printf("Offset = %d, in function %s\n", pc, fp->func()->name()->data());
+  Unit* u = fp->func()->unit();
   if (u == nullptr) {
     std::cout << "Current unit is NULL\n";
     return;
@@ -5481,7 +5481,7 @@ void DumpCurUnit(int skip) {
 void PrintTCCallerInfo() {
   VMRegAnchor _;
 
-  auto const f = vmfp()->m_func;
+  auto const f = vmfp()->func();
   auto const u = f->unit();
   auto const rip = []() -> jit::TCA {
     DECLARE_FRAME_POINTER(reg_fp);
@@ -5503,7 +5503,7 @@ static __thread Unit* s_prev_unit;
 static __thread int s_prev_line;
 
 void recordCodeCoverage(PC /*pc*/) {
-  Unit* unit = vmfp()->m_func->unit();
+  Unit* unit = vmfp()->func()->unit();
   assertx(unit != nullptr);
   if (unit == SystemLib::s_hhas_unit) {
     return;
@@ -5721,7 +5721,7 @@ OPCODES
   condStackTraceSep(Op##opcode);                                        \
   COND_STACKTRACE("op"#opcode" pre:  ");                                \
   PC pc = vmpc();                                                       \
-  ONTRACE(1, auto offset = vmfp()->m_func->offsetOf(pc);                \
+  ONTRACE(1, auto offset = vmfp()->func()->offsetOf(pc);                \
           Trace::trace("op"#opcode" offset: %d\n", offset));            \
   assertx(peek_op(pc) == Op::opcode);                                   \
   pc += encoded_op_size(Op::opcode);                                    \
@@ -5837,7 +5837,7 @@ TCA dispatchImpl() {
     op = decode_op(pc);                                                 \
     COND_STACKTRACE("dispatch:                    ");                   \
     FTRACE(1, "dispatch: {}: {}\n", pcOff(),                            \
-           instrToString(opPC, vmfp()->m_func));                        \
+           instrToString(opPC, vmfp()->func()));                        \
     DISPATCH_ACTUAL();                                                  \
 } while (0)
 
@@ -5997,7 +5997,7 @@ PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
   assert(vmpc() == pc);
   assert(peek_op(pc) == opcode);
   FTRACE(1, "dispatch: {}: {}\n", pcOff(),
-         instrToString(pc, vmfp()->m_func));
+         instrToString(pc, vmfp()->func()));
   if (!repo_auth) {
     if (UNLIKELY(modes != ExecMode::Normal)) {
       execModeHelper(pc, modes);
@@ -6048,9 +6048,9 @@ PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
     assert(nextpc == origPc + instrLen(origPc));
     pushPrediction({*returnaddr + kCtiIndirectJmpSize, nextpc});
   }
-  if (do_prof) LookupProf(pc == vmfp()->m_func->entry());
+  if (do_prof) LookupProf(pc == vmfp()->func()->entry());
   // return ip to jump to, caller will do jmp(rax)
-  return lookup_cti(vmfp()->m_func, pc);
+  return lookup_cti(vmfp()->func(), pc);
 }
 }
 

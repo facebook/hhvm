@@ -438,7 +438,7 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
 static void traceCallback(ActRec* fp, TypedValue* sp, Offset bcOff) {
   if (Trace::moduleEnabled(Trace::hhirTracelets)) {
     FTRACE(0, "{} {} {} {} {}\n",
-           fp->m_func->fullName()->data(), bcOff, fp, sp,
+           fp->func()->fullName()->data(), bcOff, fp, sp,
            __builtin_return_address(0));
   }
   checkFrame(fp, sp, true /* fullCheck */);

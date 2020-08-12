@@ -650,7 +650,7 @@ TCA emitFCallUnpackHelper(CodeBlock& main, CodeBlock& cold,
     auto const unit = v.makeReg();
     auto const bc = v.makeReg();
 
-    // Load fp->m_func->m_unit->m_bc.
+    // Load fp->func()->m_unit->m_bc.
     v << load{rvmfp()[AROFF(m_func)], func};
     v << load{func[Func::unitOff()], unit};
     v << load{unit[Unit::bcOff()], bc};

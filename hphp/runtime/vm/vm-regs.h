@@ -108,7 +108,7 @@ inline const unsigned char*& vmpc() {
 }
 
 inline Offset pcOff() {
-  return vmfp()->m_func->offsetOf(vmpc());
+  return vmfp()->func()->offsetOf(vmpc());
 }
 
 inline ActRec*& vmFirstAR() {

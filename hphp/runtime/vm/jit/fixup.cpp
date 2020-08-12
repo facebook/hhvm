@@ -37,7 +37,7 @@ bool isVMFrame(const ActRec* ar, bool may_be_non_runtime) {
   assertx(
     !ret ||
     may_be_non_runtime ||
-    (ar->m_func->validate(), true)
+    (ar->func()->validate(), true)
   );
   return ret;
 }
@@ -109,7 +109,7 @@ PC pc(const ActRec* /*ar*/, const Func* f, const Fixup& fixup) {
 
 void regsFromActRec(TCA tca, const ActRec* ar, const Fixup& fixup,
                     VMRegs* outRegs) {
-  const Func* f = ar->m_func;
+  const Func* f = ar->func();
   assertx(f);
   TRACE(3, "regsFromActRec:: tca %p -> (pcOff %d, spOff %d)\n",
         (void*)tca, fixup.pcOffset, fixup.spOffset);
@@ -193,11 +193,11 @@ bool fixupWork(ActRec* nextRbp, bool soft) {
 
     if (isVMFrame(nextRbp, soft)) {
       TRACE(2, "fixup checking vm frame %s\n",
-            nextRbp->m_func->name()->data());
+            nextRbp->func()->name()->data());
       VMRegs regs;
       if (getFrameRegs(rbp, &regs)) {
         TRACE(2, "fixup(end): func %s fp %p sp %p pc %p\n",
-              regs.fp->m_func->name()->data(),
+              regs.fp->func()->name()->data(),
               regs.fp, regs.sp, regs.pc);
         auto& vmRegs = vmRegsUnsafe();
         vmRegs.fp = const_cast<ActRec*>(regs.fp);

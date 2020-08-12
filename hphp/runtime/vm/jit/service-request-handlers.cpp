@@ -58,7 +58,7 @@ RegionContext getContext(SrcKey sk) {
   auto const fp = vmfp();
   auto const sp = vmsp();
 
-  always_assert(func == fp->m_func);
+  always_assert(func == fp->func());
   auto const ctxClass = func->cls();
   auto const addLiveType = [&](Location loc, tv_rval tv) {
     auto const bespoke = tvIsArrayLike(tv) && !val(tv).parr->isVanilla();
@@ -233,9 +233,9 @@ void syncFuncBodyVMRegs(ActRec* fp, void* sp) {
     }
   }
   if (firstDVI != kInvalidOffset) {
-    regs.pc = fp->m_func->unit()->entry() + firstDVI;
+    regs.pc = fp->func()->unit()->entry() + firstDVI;
   } else {
-    regs.pc = fp->m_func->entry();
+    regs.pc = fp->func()->entry();
   }
 }
 
@@ -249,7 +249,7 @@ TCA funcBodyHelper(ActRec* fp) {
   syncFuncBodyVMRegs(fp, sp);
   tl_regState = VMRegState::CLEAN;
 
-  auto const func = const_cast<Func*>(fp->m_func);
+  auto const func = const_cast<Func*>(fp->func());
   auto tca = getFuncBody(func);
   if (!tca) {
     tca = tc::ustubs().resumeHelper;
@@ -336,7 +336,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       }
       assertx(caller == vmfp());
       TRACE(3, "REQ_POST_INTERP_RET: from %s to %s\n",
-            ar->m_func->fullName()->data(),
+            ar->func()->fullName()->data(),
             destFunc->fullName()->data());
       sk = liveSK();
       start = getTranslation(TransArgs{sk});

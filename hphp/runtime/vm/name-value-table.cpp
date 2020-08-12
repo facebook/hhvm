@@ -35,7 +35,7 @@ NameValueTable::NameValueTable(ActRec* fp)
   : m_fp(fp)
 {
   assertx(m_fp);
-  const auto func = m_fp->m_func;
+  const auto func = m_fp->func();
   const Id numNames = func->numNamedLocals();
 
   /**
@@ -105,7 +105,7 @@ void NameValueTable::attach(ActRec* fp) {
   assertx(m_fp == nullptr);
   m_fp = fp;
 
-  const auto func = fp->m_func;
+  const auto func = fp->func();
   const Id numNames = func->numNamedLocals();
 
   for (Id i = 0; i < numNames; ++i) {
@@ -128,7 +128,7 @@ void NameValueTable::detach(ActRec* fp) {
   assertx(m_fp == fp);
   m_fp = nullptr;
 
-  const auto func = fp->m_func;
+  const auto func = fp->func();
   const Id numNames = func->numNamedLocals();
 
   for (Id i = 0; i < numNames; ++i) {

@@ -79,7 +79,7 @@ inline void ActRec::setNumArgs(uint32_t numArgs) {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void ActRec::setThisOrClass(void* objOrCls) {
-  assertx(m_func->implCls());
+  assertx(func()->implCls());
   setThisOrClassAllowNull(objOrCls);
 }
 
@@ -88,33 +88,33 @@ inline void ActRec::setThisOrClassAllowNull(void* objOrCls) {
 }
 
 inline bool ActRec::hasThis() const {
-  assertx(m_func->implCls());
+  assertx(func()->implCls());
   assertx(reinterpret_cast<uintptr_t>(m_thisUnsafe) != kTrashedThisSlot);
-  return use_lowptr ? !is_low_mem(m_thisUnsafe) : !m_func->isStatic();
+  return use_lowptr ? !is_low_mem(m_thisUnsafe) : !func()->isStatic();
 }
 
 inline bool ActRec::hasClass() const {
-  assertx(m_func->implCls());
+  assertx(func()->implCls());
   assertx(reinterpret_cast<uintptr_t>(m_thisUnsafe) != kTrashedThisSlot);
-  return use_lowptr ? is_low_mem(m_thisUnsafe) : m_func->isStatic();
+  return use_lowptr ? is_low_mem(m_thisUnsafe) : func()->isStatic();
 }
 
 inline bool ActRec::hasThisInPrologue() const {
-  assertx(m_func->implCls());
+  assertx(func()->implCls());
   return use_lowptr
     ? !is_low_mem(m_thisUnsafe)
-    : !m_func->isStaticInPrologue();
+    : !func()->isStaticInPrologue();
 }
 
 inline bool ActRec::hasClassInPrologue() const {
-  assertx(m_func->implCls());
+  assertx(func()->implCls());
   return use_lowptr
     ? is_low_mem(m_thisUnsafe)
-    : m_func->isStaticInPrologue();
+    : func()->isStaticInPrologue();
 }
 
 inline void* ActRec::getThisOrClass() const {
-  assertx(m_func->implCls());
+  assertx(func()->implCls());
   return m_thisUnsafe;
 }
 
@@ -143,12 +143,12 @@ inline Class* ActRec::getClassInPrologue() const {
 }
 
 inline void ActRec::setThis(ObjectData* val) {
-  assertx(m_func->implCls() && !m_func->isStaticInPrologue());
+  assertx(func()->implCls() && !func()->isStaticInPrologue());
   m_thisUnsafe = val;
 }
 
 inline void ActRec::setClass(Class* val) {
-  assertx(val && m_func->implCls() && (m_func->isStaticInPrologue()));
+  assertx(val && func()->implCls() && (func()->isStaticInPrologue()));
   m_clsUnsafe = val;
 }
 

@@ -158,13 +158,13 @@ private:
 
   static inline void ringbufferEnter(const ActRec* ar) {
     if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
-      auto name = ar->m_func->fullName();
+      auto name = ar->func()->fullName();
       Trace::ringbufferMsg(name->data(), name->size(), Trace::RBTypeFuncEntry);
     }
   }
   static inline void ringbufferExit(const ActRec* ar) {
     if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {
-      auto name = ar->m_func->fullName();
+      auto name = ar->func()->fullName();
       Trace::ringbufferMsg(name->data(), name->size(), Trace::RBTypeFuncExit);
     }
   }

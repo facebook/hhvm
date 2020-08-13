@@ -8,72 +8,9 @@
  *)
 
 open Hh_prelude
-open Ocaml_overrides
 open ServerCommandTypes
-open String_utils
-module C = Tty
 
-let print_reason_color
-    ~(first : bool) ~(code : int) ((p, s) : Pos.absolute * string) =
-  let (line, start, end_) = Pos.info_pos p in
-  let code_clr = C.Normal C.Yellow in
-  let err_clr =
-    if first then
-      C.Bold C.Red
-    else
-      C.Normal C.Green
-  in
-  let file_clr =
-    if first then
-      C.Bold C.Red
-    else
-      C.Normal C.Red
-  in
-  let line_clr = C.Normal C.Yellow in
-  let col_clr = C.Normal C.Cyan in
-  let to_print_code =
-    if not first then
-      []
-    else
-      [
-        (C.Normal C.Default, " (");
-        (code_clr, Errors.error_code_to_string code);
-        (C.Normal C.Default, ")");
-      ]
-  in
-  let to_print =
-    [
-      (line_clr, string_of_int line);
-      (C.Normal C.Default, ":");
-      (col_clr, string_of_int start);
-      (C.Normal C.Default, ",");
-      (col_clr, string_of_int end_);
-      (C.Normal C.Default, ": ");
-      (err_clr, s);
-    ]
-    @ to_print_code
-    @ [(C.Normal C.Default, "\n")]
-  in
-  if not first then
-    Printf.printf "  "
-  else
-    ();
-  if Unix.isatty Unix.stdout then
-    let cwd = Filename.concat (Sys.getcwd ()) "" in
-    let file_path =
-      [(file_clr, lstrip (Pos.filename p) cwd); (C.Normal C.Default, ":")]
-    in
-    C.cprint (file_path @ to_print)
-  else
-    let strings = List.map to_print (fun (_, x) -> x) in
-    Printf.printf "%s:" (Pos.filename p);
-    List.iter strings (Printf.printf "%s")
-
-let print_error_color e =
-  let code = Errors.get_code e in
-  let msg_list = Errors.to_list e in
-  print_reason_color ~first:true ~code (List.hd_exn msg_list);
-  List.iter (List.tl_exn msg_list) (print_reason_color ~first:false ~code)
+let print_error_raw e = Printf.printf "%s" (Raw_error_formatter.to_string e)
 
 let print_error_contextual e =
   Printf.printf "%s" (Contextual_error_formatter.to_string e)
@@ -139,8 +76,8 @@ let go status output_json from error_format max_errors =
     in
     let f =
       match error_format with
+      | Errors.Raw -> print_error_raw
       | Errors.Context -> print_error_contextual
-      | Errors.Raw -> print_error_color
       | Errors.Highlighted -> print_error_highlighted
     in
     List.iter error_list f;

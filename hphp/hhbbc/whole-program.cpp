@@ -551,9 +551,6 @@ void whole_program(php::ProgramPtr program,
 
   Index index(program.get());
   auto stats = allocate_stats();
-  auto freeFuncMem = [&] (php::Func* fun) {
-    php::WideFunc::mut(fun).blocks().clear();
-  };
   auto emitUnit = [&] (php::Unit& unit) {
     auto ue = emit_unit(index, unit);
     if (RuntimeOption::EvalAbortBuildOnVerifyError && !ue->check(false)) {
@@ -566,14 +563,6 @@ void whole_program(php::ProgramPtr program,
       _Exit(1);
     }
     ueq.push(std::move(ue));
-    for (auto& c : unit.classes) {
-      for (auto& m : c->methods) {
-        freeFuncMem(m.get());
-      }
-    }
-    for (auto& f : unit.funcs) {
-      freeFuncMem(f.get());
-    }
   };
 
   std::thread cleanup_pre;

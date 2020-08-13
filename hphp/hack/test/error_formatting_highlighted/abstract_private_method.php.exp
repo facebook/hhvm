@@ -7,7 +7,7 @@ abstract_private_method.php:3:7
     4 |   private abstract function f(): void;
     5 | }
 
-Parsing[1002] Cannot declare abstract method `E::f` private [1]
+Parsing[1002] Cannot declare abstract method E::f private [1]
 
 abstract_private_method.php:4:3
     2 | 

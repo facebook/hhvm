@@ -1,6 +1,6 @@
 Typing[4163] Invalid return type [1]
--> The field 'y' is **optional** [2]
--> The field 'y' is defined as **required** [3]
+-> The field 'y' is optional [2]
+-> The field 'y' is defined as required [3]
 
 required_field_optional.php:13:10
      6 | );

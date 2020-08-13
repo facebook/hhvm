@@ -1,0 +1,9 @@
+Typing[4226] echo or print are not allowed in reactive functions. [1]
+
+print_in_reactive_function.php:6:3
+    4 | function f(): void {
+    5 |   // should be error
+[1] 6 |   print 1;
+    7 | }
+
+1 error found.

@@ -1,6 +1,6 @@
 Typing[4110] Invalid return type [1]
--> Expected `dict<int, int>` [2]
--> But got `string` [1]
+-> Expected dict<int, int> [2]
+-> But got string [1]
 
 pos_across_multiple_lines.php:6:10
     1 | <?hh

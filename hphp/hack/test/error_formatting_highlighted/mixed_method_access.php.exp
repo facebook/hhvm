@@ -1,4 +1,4 @@
-Typing[4064] You are trying to access the method `bar` but this is a mixed value. Use a **specific** class or interface name. [1]
+Typing[4064] You are trying to access the method bar but this is a mixed value. Use a specific class or interface name. [1]
 -> Definition is here [2]
 
 mixed_method_access.php:4:9

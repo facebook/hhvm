@@ -22,7 +22,10 @@ type style =
   | Normal of raw_color
   | Bold of raw_color
   | Dim of raw_color
+  | Italics of raw_color
   | Underline of raw_color
+  | BoldDim of raw_color
+  | BoldItalics of raw_color
   | BoldUnderline of raw_color
   | DimUnderline of raw_color
   | NormalWithBG of raw_color * raw_color

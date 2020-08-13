@@ -22,7 +22,9 @@
 
 #include "hphp/util/assertions.h"
 
-/**
+namespace HPHP {
+
+/*
  * A simple class of a growable number of profiling counters with fixed
  * addresses, suitable for being incremented from the TC.
  */
@@ -83,5 +85,7 @@ private:
   T m_initVal;
   std::vector<std::unique_ptr<T[]>> m_chunks;
 };
+
+}
 
 #endif

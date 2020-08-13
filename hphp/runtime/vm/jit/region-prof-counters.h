@@ -17,7 +17,8 @@
 #ifndef incl_HPHP_JIT_REGION_PROF_COUNTERS_H_
 #define incl_HPHP_JIT_REGION_PROF_COUNTERS_H_
 
-#include "hphp/runtime/vm/jit/prof-counters.h"
+#include "hphp/runtime/base/prof-counters.h"
+
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 

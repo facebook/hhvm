@@ -20,13 +20,13 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/rds-local.h"
 
+#include "hphp/runtime/base/prof-counters.h"
 #include "hphp/runtime/base/rds.h"
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/treadmill.h"
 
-#include "hphp/runtime/vm/jit/prof-counters.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"

@@ -27,11 +27,8 @@
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
-#include "folly/SharedMutex.h"
-#include "folly/container/F14Map.h"
-
+#include <tbb/concurrent_hash_map.h>
 #include <atomic>
-#include <mutex>
 
 namespace HPHP { namespace bespoke {
 
@@ -39,63 +36,32 @@ TRACE_SET_MOD(bespoke);
 
 //////////////////////////////////////////////////////////////////////////////
 
-namespace {
-std::atomic<bool> g_loggingEnabled;
-}
+struct LoggingProfile {
+  explicit LoggingProfile(SrcKey key)
+    : srckey(key)
+    , sampleCount(0)
+    , staticArray(nullptr) {};
 
-void setLoggingEnabled(bool val) {
-  g_loggingEnabled.store(val, std::memory_order_relaxed);
-}
-
-ArrayData* maybeEnableLogging(ArrayData* ad) {
-  if (!g_loggingEnabled.load(std::memory_order_relaxed)) return ad;
-  VMRegAnchor _;
-  auto const fp = vmfp();
-  auto const sk = SrcKey(fp->func(), vmpc(), resumeModeFromActRec(fp));
-
-  static std::mutex s_mutex;
-  static folly::F14FastMap<SrcKey, uint64_t, SrcKey::Hasher> s_map;
-
-  auto const shouldEmitBespoke = [&] {
-    if (shouldTestBespokeArrayLikes()) {
-      FTRACE(5, "Observe rid: {}\n", requestCount());
-      return !jit::mcgen::retranslateAllEnabled() || requestCount() % 2 == 1;
-    } else {
-      if (RO::EvalEmitLoggingArraySampleRate == 0) return false;
-
-      std::lock_guard<std::mutex> lock(s_mutex);
-      auto insert = s_map.insert({sk, 0});
-      auto const skCount = insert.first->second++;
-      FTRACE(5, "Observe SrcKey count: {}\n", skCount);
-      return (skCount - 1) % RO::EvalEmitLoggingArraySampleRate == 0;
-    }
-  }();
-
-  if (shouldEmitBespoke) {
-    FTRACE(5, "Emit bespoke at {}\n", sk.getSymbol());
-    return ad->isStatic() ? LoggingArray::MakeFromStatic(ad, sk)
-                          : LoggingArray::MakeFromVanilla(ad, sk);
-  } else {
-    FTRACE(5, "Emit vanilla at {}\n", sk.getSymbol());
-    return ad;
-  }
-}
-
-const ArrayData* maybeEnableLogging(const ArrayData* ad) {
-  return maybeEnableLogging(const_cast<ArrayData*>(ad));
-}
-
-//////////////////////////////////////////////////////////////////////////////
+  SrcKey srckey;
+  std::atomic<uint64_t> sampleCount;
+  LoggingArray* staticArray;
+};
 
 namespace {
 
 constexpr size_t kSizeIndex = 1;
 static_assert(kSizeIndex2Size[kSizeIndex] >= sizeof(LoggingArray),
               "kSizeIndex must be large enough to fit a LoggingArray");
-static_assert(kSizeIndex2Size[kSizeIndex - 1] < sizeof(LoggingArray),
+static_assert(kSizeIndex == 0 ||
+              kSizeIndex2Size[kSizeIndex - 1] < sizeof(LoggingArray),
               "kSizeIndex must be the smallest size for LoggingArray");
 
 LoggingLayout* s_layout = new LoggingLayout();
+std::atomic<bool> g_loggingEnabled;
+
+using ProfileMap =
+  tbb::concurrent_hash_map<SrcKey, LoggingProfile*, SrcKey::TbbHashCompare>;
+ProfileMap s_profileMap;
 
 // The bespoke kind for a vanilla kind. Assumes the kind supports bespokes.
 HeaderKind getBespokeKind(ArrayData::ArrayKind kind) {
@@ -117,7 +83,98 @@ HeaderKind getBespokeKind(ArrayData::ArrayKind kind) {
   not_reached();
 }
 
+LoggingArray* makeWithProfile(ArrayData* ad, LoggingProfile* prof) {
+  assertx(ad->isVanilla());
+  assertx(ad->getPosition() == ad->iter_begin());
+
+  auto lad = static_cast<LoggingArray*>(tl_heap->objMallocIndex(kSizeIndex));
+  lad->initHeader_16(getBespokeKind(ad->kind()), OneReference,
+                     ad->isLegacyArray() ? ArrayData::kLegacyArray : 0);
+  lad->setLayout(s_layout);
+  lad->wrapped = ad;
+  lad->profile = prof;
+  assertx(lad->checkInvariants());
+  return lad;
 }
+}
+
+void setLoggingEnabled(bool val) {
+  g_loggingEnabled.store(val, std::memory_order_relaxed);
+}
+
+ArrayData* maybeEnableLogging(ArrayData* ad) {
+  if (!g_loggingEnabled.load(std::memory_order_relaxed)) return ad;
+  VMRegAnchor _;
+  auto const fp = vmfp();
+  auto const sk = SrcKey(fp->func(), vmpc(), resumeModeFromActRec(fp));
+
+  auto profile = [&] {
+    {
+      ProfileMap::const_accessor it;
+      if (s_profileMap.find(it, sk)) return it->second;
+    }
+
+    auto prof = std::make_unique<LoggingProfile>(sk);
+    if (ad->isStatic()) {
+      auto const size = sizeof(LoggingArray);
+      auto lad = static_cast<LoggingArray*>(
+          RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
+
+      lad->initHeader_16(getBespokeKind(ad->kind()), StaticValue,
+                         ad->isLegacyArray() ? ArrayData::kLegacyArray : 0);
+      lad->setLayout(s_layout);
+      lad->wrapped = ad;
+      lad->profile = prof.get();
+
+      prof->staticArray = lad;
+    }
+
+    ProfileMap::accessor insert;
+    if (s_profileMap.insert(insert, sk)) {
+      insert->second = prof.release();
+      MemoryStats::LogAlloc(AllocKind::StaticArray, sizeof(LoggingArray));
+    } else {
+      // Someone beat us; clean up
+      if (ad->isStatic()) {
+        if (RO::EvalLowStaticArrays) {
+          low_free(prof->staticArray);
+        } else {
+          uncounted_free(prof->staticArray);
+        }
+      }
+    }
+
+    return insert->second;
+  }();
+
+  auto const shouldEmitBespoke = [&] {
+    if (shouldTestBespokeArrayLikes()) {
+      FTRACE(5, "Observe rid: {}\n", requestCount());
+      return !jit::mcgen::retranslateAllEnabled() || requestCount() % 2 == 1;
+    } else {
+      if (RO::EvalEmitLoggingArraySampleRate == 0) return false;
+
+      auto const skCount = profile->sampleCount++;
+      FTRACE(5, "Observe SrcKey count: {}\n", skCount);
+      return (skCount - 1) % RO::EvalEmitLoggingArraySampleRate == 0;
+    }
+  }();
+
+  if (shouldEmitBespoke) {
+    FTRACE(5, "Emit bespoke at {}\n", sk.getSymbol());
+    return ad->isStatic() ? profile->staticArray
+                          : makeWithProfile(ad, profile);
+  } else {
+    FTRACE(5, "Emit vanilla at {}\n", sk.getSymbol());
+    return ad;
+  }
+}
+
+const ArrayData* maybeEnableLogging(const ArrayData* ad) {
+  return maybeEnableLogging(const_cast<ArrayData*>(ad));
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 bool LoggingArray::checkInvariants() const {
   assertx(!isVanilla());
@@ -138,58 +195,6 @@ LoggingArray* LoggingArray::asLogging(ArrayData* ad) {
 }
 const LoggingArray* LoggingArray::asLogging(const ArrayData* ad) {
   return asLogging(const_cast<ArrayData*>(ad));
-}
-
-LoggingArray* LoggingArray::MakeFromVanilla(ArrayData* ad, SrcKey sk) {
-  assertx(ad->isVanilla());
-  assertx(ad->getPosition() == ad->iter_begin());
-
-  auto lad = static_cast<LoggingArray*>(tl_heap->objMallocIndex(kSizeIndex));
-  lad->initHeader_16(getBespokeKind(ad->kind()), OneReference,
-                     ad->isLegacyArray() ? kLegacyArray : 0);
-  lad->setLayout(s_layout);
-  lad->wrapped = ad;
-  lad->srckey = sk;
-  assertx(lad->checkInvariants());
-  return lad;
-}
-
-LoggingArray* LoggingArray::MakeFromStatic(ArrayData* ad, SrcKey sk) {
-  assertx(ad->isStatic());
-  assertx(ad->isVanilla());
-  assertx(ad->getPosition() == ad->iter_begin());
-
-  static folly::SharedMutex s_mutex;
-  static folly::F14FastMap<SrcKey, LoggingArray*, SrcKey::Hasher> s_map;
-
-  auto const result = [&](LoggingArray* lad) {
-    assertx(lad->wrapped == ad);
-    assertx(lad->checkInvariants());
-    return lad;
-  };
-
-  {
-    folly::SharedMutex::ReadHolder lock(s_mutex);
-    auto const it = s_map.find(sk);
-    if (it != s_map.end()) return result(it->second);
-  }
-
-  folly::SharedMutex::WriteHolder lock(s_mutex);
-  auto insert = s_map.insert({sk, nullptr});
-  if (!insert.second) return result(insert.first->second);
-
-  auto const size = sizeof(LoggingArray);
-  auto lad = static_cast<LoggingArray*>(
-    RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
-  MemoryStats::LogAlloc(AllocKind::StaticArray, size);
-  insert.first->second = lad;
-
-  lad->initHeader_16(getBespokeKind(ad->kind()), StaticValue,
-                     ad->isLegacyArray() ? kLegacyArray : 0);
-  lad->setLayout(s_layout);
-  lad->wrapped = ad;
-  lad->srckey = sk;
-  return result(lad);
 }
 
 LoggingArray* LoggingArray::updateKind() {
@@ -263,7 +268,7 @@ namespace {
 
 ArrayData* escalate(LoggingArray* lad, ArrayData* result) {
   if (result == lad->wrapped) return lad;
-  return LoggingArray::MakeFromVanilla(result, lad->srckey);
+  return makeWithProfile(result, lad->profile);
 }
 
 arr_lval escalate(LoggingArray* lad, arr_lval result) {
@@ -342,14 +347,14 @@ ArrayData* conv(ArrayData* ad, F&& f) {
   auto const lad = LoggingArray::asLogging(ad);
   auto const result = f(lad->wrapped);
   if (result == lad->wrapped) return lad->updateKind();
-  return LoggingArray::MakeFromVanilla(result, lad->srckey);
+  return makeWithProfile(result, lad->profile);
 }
 
 }
 
 ArrayData* LoggingLayout::copy(const ArrayData* ad) const {
   auto const lad = LoggingArray::asLogging(ad);
-  return LoggingArray::MakeFromVanilla(lad->wrapped->copy(), lad->srckey);
+  return makeWithProfile(lad->wrapped->copy(), lad->profile);
 }
 ArrayData* LoggingLayout::toVArray(ArrayData* ad, bool copy) const {
   return conv(ad, [=](ArrayData* w) { return w->toVArray(copy); });

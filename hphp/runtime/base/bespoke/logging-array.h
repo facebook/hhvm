@@ -26,14 +26,11 @@
 
 namespace HPHP { namespace bespoke {
 
+struct LoggingProfile;
+
 struct LoggingArray : BespokeArray {
   static LoggingArray* asLogging(ArrayData* ad);
   static const LoggingArray* asLogging(const ArrayData* ad);
-
-  // `sk` is the array creation site for this array. Note that if we copy
-  // or convert an array, we'll still attribute later ops to the same site.
-  static LoggingArray* MakeFromVanilla(ArrayData* ad, SrcKey sk);
-  static LoggingArray* MakeFromStatic(ArrayData* ad, SrcKey sk);
 
   // Updates m_kind in place to match the wrapped array's kind. Returns this.
   LoggingArray* updateKind();
@@ -41,7 +38,7 @@ struct LoggingArray : BespokeArray {
   bool checkInvariants() const;
 
   ArrayData* wrapped;
-  SrcKey srckey;
+  LoggingProfile* profile;
 };
 
 struct LoggingLayout : public Layout {

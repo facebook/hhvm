@@ -78,7 +78,7 @@ where
                 let ocaml_errors = pool.add(&errors);
                 let ocaml_state = unsafe { state.to_ocaml(&context) };
                 let tree = if leak_rust_tree {
-                    let mut mode = parse_mode(&source_text);
+                    let (_, mut mode) = parse_mode(&source_text);
                     if mode == Some(Mode::Mpartial) && disable_modes {
                         mode = Some(Mode::Mstrict);
                     }
@@ -200,7 +200,8 @@ macro_rules! parse {
 
 ocaml_ffi! {
     fn rust_parse_mode(source_text: SourceText) -> Option<file_info::Mode> {
-        parse_mode(&source_text)
+        let (_, mode) = parse_mode(&source_text);
+        mode
     }
 
     fn scan_leading_xhp_trivia(source_text: SourceText, offset: usize) -> Vec<MinimalTrivium> {

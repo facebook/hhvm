@@ -1,0 +1,18 @@
+(alias
+    (name dot_php)
+    (deps %{exe:../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/dot_php/*.php)
+          (glob_files %{project_root}/test/dot_php/*.exp)
+          (glob_files %{project_root}/test/dot_php/HH_FLAGS))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/dot_php
+    --program %{exe:../../src/hh_single_type_check.exe}
+    --out-extension .legacy.out
+    --in-extension .php
+    --batch
+    --flags --error-format raw --out-extension .legacy.out)))
+
+(alias
+    (name runtest)
+    (deps (alias dot_php)))

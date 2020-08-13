@@ -16,7 +16,7 @@ function f(): UNSAFE_TYPE_HH_FIXME {
 }
 
 ////file4.php
-
+<?hh
 abstract final class HH_FIXME {
   const type MISSING_TYPE = UNSAFE_TYPE_HH_FIXME;
 }

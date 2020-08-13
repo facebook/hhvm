@@ -171,6 +171,7 @@ let from_text_rust (env : env) (source_text : SourceText.t) :
   in
   match rust_from_text_ffi rust_env source_text with
   | Ok r -> r
+  | Error Rust_aast_parser_types.NotAHackFile -> failwith "Not a Hack file"
   | Error (Rust_aast_parser_types.ParserFatal (e, p)) ->
     raise @@ SyntaxError.ParserFatal (e, p)
   | Error (Rust_aast_parser_types.Other msg) -> failwith msg

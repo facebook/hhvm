@@ -293,6 +293,9 @@ fn parse_file(
     let ast_result = AastParser::from_text(&aast_env, &indexed_source_text, Some(stack_limit));
     match ast_result {
         Err(AastError::Other(msg)) => Left((Pos::make_none(), msg, false)),
+        Err(AastError::NotAHackFile()) => {
+            Left((Pos::make_none(), "Not a Hack file".to_string(), false))
+        }
         Err(AastError::ParserFatal(syntax_error, pos)) => {
             Left((pos, syntax_error.message.to_string(), false))
         }

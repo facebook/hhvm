@@ -38,5 +38,6 @@ type result = (Pos.t, unit, unit, unit) Aast.program result_
 type tast_result = Tast.program result_
 
 type error =
+  | NotAHackFile
   | ParserFatal of Full_fidelity_syntax_error.t * Pos.t
   | Other of string

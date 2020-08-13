@@ -11,7 +11,7 @@ use itertools::{
     Either::{Left, Right},
 };
 use lowerer::{lower, ScourComment};
-use mode_parser::parse_mode;
+use mode_parser::{parse_mode, Language};
 use namespaces_rust as namespaces;
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use oxidized::{
@@ -36,6 +36,7 @@ type PositionedSyntaxTree<'a> = SyntaxTree<'a, PositionedSyntax, ()>;
 
 #[derive(Debug, FromOcamlRep, ToOcamlRep)]
 pub enum Error {
+    NotAHackFile(),
     ParserFatal(SyntaxError, Pos),
     Other(String),
 }
@@ -71,7 +72,11 @@ impl<'a> AastParser {
         rewritten_source: Option<&'a IndexedSourceText<'a>>,
         stack_limit: Option<&'a StackLimit>,
     ) -> Result<ParserResult> {
-        let (mode, tree) = Self::parse_text(env, indexed_source_text, stack_limit)?;
+        let (language, mode, tree) = Self::parse_text(env, indexed_source_text, stack_limit)?;
+        match language {
+            Language::Hack => {}
+            _ => return Err(Error::NotAHackFile()),
+        }
         let mode = mode.unwrap_or(Mode::Mpartial);
         let scoured_comments =
             Self::scour_comments_and_add_fixmes(env, indexed_source_text, &tree.root())?;
@@ -92,7 +97,7 @@ impl<'a> AastParser {
             let indexed_source_text = rewritten_source.unwrap_or(indexed_source_text);
             let original_tree = &tree;
             let tree = if let Some(rewritten_source) = rewritten_source {
-                let (_, rewritten_tree) = Self::parse_text(env, rewritten_source, stack_limit)?;
+                let (_, _, rewritten_tree) = Self::parse_text(env, rewritten_source, stack_limit)?;
                 Left(rewritten_tree.drop_state())
             } else {
                 Right(&tree)
@@ -188,9 +193,13 @@ impl<'a> AastParser {
         env: &Env,
         indexed_source_text: &'a IndexedSourceText<'a>,
         stack_limit: Option<&'a StackLimit>,
-    ) -> Result<(Option<Mode>, PositionedSyntaxTreeWithCoroutineState<'a>)> {
+    ) -> Result<(
+        Language,
+        Option<Mode>,
+        PositionedSyntaxTreeWithCoroutineState<'a>,
+    )> {
         let source_text = indexed_source_text.source_text();
-        let mut mode = parse_mode(indexed_source_text.source_text());
+        let (language, mut mode) = parse_mode(indexed_source_text.source_text());
         if mode == Some(Mode::Mpartial) && env.parser_options.po_disable_modes {
             mode = Some(Mode::Mstrict);
         }
@@ -234,7 +243,7 @@ impl<'a> AastParser {
                 None,
             )
         };
-        Ok((mode, tree))
+        Ok((language, mode, tree))
     }
 
     fn scour_comments_and_add_fixmes(

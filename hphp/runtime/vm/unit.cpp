@@ -1179,7 +1179,7 @@ Unit::DefTypeAliasResult Unit::defTypeAlias(Id id, bool failIsFatal) {
 
   nameList->m_cachedTypeAlias.bind(
     persistent ? rds::Mode::Persistent : rds::Mode::Normal,
-    rds::LinkName{"TypeAlias", thisType->value},
+    rds::LinkName{"TypeAlias", thisType->name},
     &resolved
   );
   if (nameList->m_cachedTypeAlias.isPersistent()) {

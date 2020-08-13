@@ -576,14 +576,18 @@ Class* read_class_internal(ProfDataDeserializer& ser) {
   if (preClass->attrs() & AttrEnum &&
       preClass->enumBaseTy().isObject()) {
     auto const dt = read_raw<DataType>(ser);
-    auto const ne = preClass->enumBaseTy().namedEntity();
+    auto const& tc = preClass->enumBaseTy();
+    auto const ne = tc.namedEntity();
     if (!ne->m_cachedTypeAlias.bound() ||
         !ne->m_cachedTypeAlias.isInit()) {
       enumBaseReq.emplace();
       enumBaseReq->type = dt == KindOfInt64 ?
         AnnotType::Int : AnnotType::String;
-      enumBaseReq->name = preClass->enumBaseTy().typeName();
-      ne->m_cachedTypeAlias.bind(rds::Mode::Normal, rds::LinkID{"NETypeAlias"});
+      enumBaseReq->name = tc.typeName();
+      ne->m_cachedTypeAlias.bind(
+        rds::Mode::Normal,
+        rds::LinkName{"TypeAlias", tc.typeName()}
+      );
       ne->m_cachedTypeAlias.initWith(*enumBaseReq);
     }
   }

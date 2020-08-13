@@ -21,25 +21,24 @@
 #include "hphp/runtime/base/type-string.h"
 
 #include "hphp/hhbbc/misc.h"
-#include "hphp/hhbbc/representation.h"
 
 namespace HPHP { namespace HHBBC {
 
+//////////////////////////////////////////////////////////////////////
+
+namespace php { struct WideFunc; }
+
+struct FuncAnalysis;
 struct Index;
 struct State;
-struct Context;
-struct Bytecode;
-struct FuncAnalysis;
-struct CollectedInfo;
-namespace php { struct Block; }
+struct VisitContext;
 
 //////////////////////////////////////////////////////////////////////
 
 /*
  * Perform DCE on a single basic block.
  */
-void local_dce(const Index&, const FuncAnalysis&, CollectedInfo& collect,
-               php::WideFunc&, BlockId bid, const State&);
+void local_dce(VisitContext& visit, BlockId bid, const State&);
 
 /*
  * Eliminate dead code in a function, across basic blocks, based on

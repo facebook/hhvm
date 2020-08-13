@@ -2036,12 +2036,7 @@ struct DceOutState {
 };
 
 folly::Optional<DceState>
-dce_visit(const Index& index,
-          const FuncAnalysis& fa,
-          CollectedInfo& collect,
-          const php::WideFunc& func,
-          BlockId bid,
-          const State& stateIn,
+dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
           const DceOutState& dceOutState,
           LocalRemappingIndex* localRemappingIndex = nullptr) {
   if (!stateIn.initialized) {
@@ -2057,11 +2052,13 @@ dce_visit(const Index& index,
     return folly::none;
   }
 
+  auto& func = visit.func;
+  auto const& fa = visit.ainfo;
   auto const ctx = AnalysisContext { fa.ctx.unit, func, fa.ctx.cls };
-  auto const states = locally_propagated_states(index, ctx, collect,
-                                                bid, stateIn);
+  auto const states = locally_propagated_states(
+    visit.index, ctx, visit.collect, bid, stateIn);
 
-  auto dceState = DceState{ index, fa };
+  auto dceState = DceState{ visit.index, fa };
   dceState.liveLocals = dceOutState.locLive;
   dceState.isLocal    = dceOutState.isLocal;
   dceState.remappingIndex = localRemappingIndex;
@@ -2250,26 +2247,20 @@ struct DceAnalysis {
   std::bitset<kMaxTrackedLocals>      locMayNeedUnsettingExn;
 };
 
-DceAnalysis analyze_dce(const Index& index,
-                        const FuncAnalysis& fa,
-                        CollectedInfo& collect,
-                        const php::WideFunc& func,
-                        BlockId bid,
-                        const State& stateIn,
-                        const DceOutState& dceOutState,
+DceAnalysis analyze_dce(VisitContext& visit, BlockId bid,
+                        const State& stateIn, const DceOutState& dceOutState,
                         LocalRemappingIndex* localRemappingIndex = nullptr) {
-  if (auto dceState = dce_visit(index, fa, collect, func,
-                                bid, stateIn, dceOutState,
-                                localRemappingIndex)) {
-    return DceAnalysis {
-      dceState->liveLocals,
-      dceState->stack,
-      dceState->forcedLiveLocations,
-      dceState->mayNeedUnsetting,
-      dceState->mayNeedUnsettingExn
-    };
-  }
-  return DceAnalysis {};
+  auto dceState = dce_visit(visit, bid, stateIn, dceOutState,
+                            localRemappingIndex);
+  if (!dceState) return DceAnalysis {};
+
+  return DceAnalysis {
+    dceState->liveLocals,
+    dceState->stack,
+    dceState->forcedLiveLocations,
+    dceState->mayNeedUnsetting,
+    dceState->mayNeedUnsettingExn
+  };
 }
 
 template<class Op>
@@ -2499,19 +2490,10 @@ struct DceOptResult {
 };
 
 DceOptResult
-optimize_dce(const Index& index,
-             const FuncAnalysis& fa,
-             CollectedInfo& collect,
-             const php::WideFunc& func,
-             BlockId bid,
-             const State& stateIn,
+optimize_dce(VisitContext& visit, BlockId bid, const State& stateIn,
              const DceOutState& dceOutState) {
-  auto dceState = dce_visit(index, fa, collect, func, bid,
-                            stateIn, dceOutState);
-
-  if (!dceState) {
-    return {std::bitset<kMaxTrackedLocals>{}};
-  }
+  auto dceState = dce_visit(visit, bid, stateIn, dceOutState);
+  if (!dceState) return {std::bitset<kMaxTrackedLocals>{}};
 
   return {
     std::move(dceState->usedLocalNames),
@@ -2776,17 +2758,12 @@ void remap_locals(const FuncAnalysis& ainfo, php::WideFunc& func,
 
 }
 
-void local_dce(const Index& index,
-               const FuncAnalysis& ainfo,
-               CollectedInfo& collect,
-               php::WideFunc& func,
-               BlockId bid,
-               const State& stateIn) {
+void local_dce(VisitContext& visit, BlockId bid, const State& stateIn) {
   // For local DCE, we have to assume all variables are in the
   // live-out set for the block.
-  auto const ret = optimize_dce(index, ainfo, collect, func, bid, stateIn,
+  auto const ret = optimize_dce(visit, bid, stateIn,
                                 DceOutState{DceOutState::Local{}});
-  dce_perform(func, ret.actionMap);
+  dce_perform(visit.func, ret.actionMap);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2798,6 +2775,8 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
   };
 
   auto collect = CollectedInfo{index, ai.ctx, nullptr, CollectionOpts{}, &ai};
+  auto visit = VisitContext(index, ai, collect, func);
+
   FTRACE(1, "|---- global DCE analyze ({})\n", show(ai.ctx));
   FTRACE(2, "{}", [&] {
     using namespace folly::gen;
@@ -3031,16 +3010,8 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
     FTRACE(2, "block #{}\n", bid);
 
     auto& blockState = blockStates[bid];
-    auto const result = analyze_dce(
-      index,
-      ai,
-      collect,
-      func,
-      bid,
-      ai.bdata[bid].stateIn,
-      blockState,
-      &localRemappingIndex
-    );
+    auto const result = analyze_dce(visit, bid, ai.bdata[bid].stateIn,
+                                    blockState, &localRemappingIndex);
 
     FTRACE(2, "loc live out  : {}\n"
               "loc out exn   : {}\n"
@@ -3188,16 +3159,8 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
   bool didAddOpts = false;
   for (auto const bid : ai.rpoBlocks) {
     FTRACE(2, "block #{}\n", bid);
-    auto ret = optimize_dce(
-      index,
-      ai,
-      collect,
-      func,
-      bid,
-      ai.bdata[bid].stateIn,
-      blockStates[bid]
-    );
-
+    auto const& stateIn = ai.bdata[bid].stateIn;
+    auto ret = optimize_dce(visit, bid, stateIn, blockStates[bid]);
     auto const unsetable = (~ret.locLiveIn) & predMayNeedUnsetting(bid) &
                            (~ret.willBeUnsetLocals);
     if (unsetable.any() && ai.bdata[bid].stateIn.initialized &&

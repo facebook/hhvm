@@ -174,15 +174,8 @@ struct ClassAnalysis {
  *
  * This routine makes no changes to the php::Func.
  */
-FuncAnalysis analyze_func(const Index&, const Context&, CollectionOpts opts);
-
-/*
- * Analyze a function like analyze_func, but exposing gathered CollectedInfo
- * results.  The CollectedInfo structure can be initialized by the caller to
- * enable collecting some pass-specific types of information (e.g. public
- * static property types).
- */
-FuncAnalysis analyze_func_collect(const Index&, const Context&, CollectedInfo&);
+FuncAnalysis analyze_func(const Index&, const AnalysisContext&,
+                          CollectionOpts opts);
 
 /*
  * Perform a flow-sensitive type analysis on a function, using the
@@ -195,7 +188,7 @@ FuncAnalysis analyze_func_collect(const Index&, const Context&, CollectedInfo&);
  * Currently this is not supported for closure bodies.
  */
 FuncAnalysis analyze_func_inline(const Index&,
-                                 const Context&,
+                                 const AnalysisContext&,
                                  const Type& thisType,
                                  const CompactVector<Type>& args,
                                  CollectionOpts opts = {});

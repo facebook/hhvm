@@ -769,7 +769,8 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, php::WideFunc& func) 
        * We need to perform a final type analysis before we do
        * anything else.
        */
-      ainfo = analyze_func(index, ainfo.ctx, CollectionOpts{});
+      auto const ctx = AnalysisContext { ainfo.ctx.unit, func, ainfo.ctx.cls };
+      ainfo = analyze_func(index, ctx, CollectionOpts{});
       update_bytecode(func, std::move(ainfo.blockUpdates), &ainfo);
       collect.emplace(index, ainfo.ctx, nullptr, CollectionOpts{}, &ainfo);
     }

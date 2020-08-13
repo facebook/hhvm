@@ -294,9 +294,12 @@ void analyze_iteratively(Index& index, php::Program& program,
         // DefaultConstructible.
         [&] (const WorkItem& wi) -> folly::Optional<WorkResult> {
           switch (wi.type) {
-          case WorkType::Func:
+          case WorkType::Func: {
             ++total_funcs;
-            return WorkResult { analyze_func(index, wi.ctx, CollectionOpts{}) };
+            auto const wf = php::WideFunc::cns(wi.ctx.func);
+            auto const ctx = AnalysisContext { wi.ctx.unit, wf, wi.ctx.cls };
+            return WorkResult { analyze_func(index, ctx, CollectionOpts{}) };
+          }
           case WorkType::Class:
             ++total_classes;
             return WorkResult { analyze_class(index, wi.ctx) };
@@ -453,9 +456,10 @@ void final_pass(Index& index,
           contexts.push_back(std::move(ctx));
         }
       );
-      for (auto const& ctx : contexts) {
+      for (auto const& context : contexts) {
         // This const_cast is safe since no two threads update the same Func.
-        auto func = php::WideFunc::mut(const_cast<php::Func*>(ctx.func));
+        auto func = php::WideFunc::mut(const_cast<php::Func*>(context.func));
+        auto const ctx = AnalysisContext { context.unit, func, context.cls };
         optimize_func(index, analyze_func(index, ctx, CollectionOpts{}), func);
       }
       assert(check(*unit));

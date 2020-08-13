@@ -136,6 +136,7 @@ bool check(const php::Func& f) {
   assert(checkParams(f));
   assert(checkName(f.name));
 
+  if constexpr (!debug) return true;
   auto const func = php::WideFunc::cns(&f);
   for (DEBUG_ONLY auto& block : func.blocks()) assert(checkBlock(f, *block));
 
@@ -144,12 +145,12 @@ bool check(const php::Func& f) {
    * implementation progresses.  Asserting them now so they are
    * revisited here if they aren't true anymore.
    */
-  if (f.isPairGenerator)        assert(f.isGenerator);
+  if (f.isPairGenerator) assert(f.isGenerator);
 
   if (f.isClosureBody) {
-    assert(f.cls &&
-           f.cls->parentName &&
-           f.cls->parentName->isame(s_Closure.get()));
+    assertx(f.cls);
+    assertx(f.cls->parentName);
+    assertx(f.cls->parentName->isame(s_Closure.get()));
   }
 
   assert(checkExnTree(f));
@@ -179,8 +180,8 @@ bool check(const php::Class& c) {
 }
 
 bool check(const php::Unit& u) {
-  for (DEBUG_ONLY auto& c : u.classes)   assert(check(*c));
-  for (DEBUG_ONLY auto& f : u.funcs)     assert(check(*f));
+  for (DEBUG_ONLY auto& c : u.classes) assert(check(*c));
+  for (DEBUG_ONLY auto& f : u.funcs)   assert(check(*f));
   return true;
 }
 

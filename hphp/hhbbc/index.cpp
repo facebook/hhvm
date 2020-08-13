@@ -3358,11 +3358,9 @@ Type context_sensitive_return_type(IndexData& data,
     ++interp_nesting_level;
     SCOPE_EXIT { --interp_nesting_level; };
 
-    auto const calleeCtx = Context {
-      finfo->func->unit,
-      finfo->func,
-      finfo->func->cls
-    };
+    auto const func = finfo->func;
+    auto const wf = php::WideFunc::cns(func);
+    auto const calleeCtx = AnalysisContext { func->unit, wf, func->cls };
     auto const ty =
       analyze_func_inline(*data.m_index, calleeCtx,
                           callCtx.context, callCtx.args).inferredReturn;
@@ -5015,9 +5013,10 @@ Type Index::lookup_foldable_return_type(Context ctx,
     ++interp_nesting_level;
     SCOPE_EXIT { --interp_nesting_level; };
 
+    auto const wf = php::WideFunc::cns(func);
     auto const fa = analyze_func_inline(
       *this,
-      Context { func->unit, func, func->cls },
+      AnalysisContext { func->unit, wf, func->cls },
       calleeCtx.context,
       calleeCtx.args,
       CollectionOpts::EffectFreeOnly

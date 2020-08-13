@@ -115,7 +115,6 @@ DATATYPES
  * TypedValues, such as for MixedArray tombstones).
  */
 constexpr DataType kInvalidDataType      = static_cast<DataType>(-128);
-constexpr DataType kExtraInvalidDataType = static_cast<DataType>(-127);
 
 /*
  * DataType limits.

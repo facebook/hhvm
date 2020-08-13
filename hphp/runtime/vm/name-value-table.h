@@ -26,18 +26,11 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-struct ActRec;
 struct StringData;
 
 /*
  * This class implements a name to TypedValue map. Basically a hashtable from
  * StringData* to TypedValue. Used by variable environments in bytecode.cpp.
- *
- * The table may be optionally attached to an ActRec, in which case it will
- * contain a kNamedLocalDataType TypedValue per every named local defined in
- * ActRec's function.  This is to keep storage for locals in functions with a
- * VarEnv in their normal location, but still make them accessible by name
- * through this table.
  */
 struct NameValueTable {
   struct Iterator {
@@ -66,49 +59,10 @@ struct NameValueTable {
    */
   explicit NameValueTable();
 
-  /*
-   * Create a NameValueTable attached to an already existing ActRec
-   * and populate the table with ActRec's locals.
-   */
-  explicit NameValueTable(ActRec* fp);
-
-  /**
-   * Clone NameValueTable.
-   */
-  explicit NameValueTable(const NameValueTable& nvTable, ActRec* fp);
-
   ~NameValueTable();
 
   NameValueTable(const NameValueTable&) = delete;
   NameValueTable& operator=(const NameValueTable&) = delete;
-
-  /**
-   * Suspend locals into an in-resumable ActRec.
-   */
-  void suspend(const ActRec* oldFP, ActRec* newFP);
-
-  /**
-   * Attach to a new ActRec and populate its locals with TypedValues stored
-   * in this NameValueTable.
-   */
-  void attach(ActRec* fp);
-
-  /**
-   * Detach from the current ActRec and steal its named locals.
-   */
-  void detach(ActRec* fp);
-
-  ActRec* getFP() const { return m_fp; }
-
-  /*
-   * Explicitly request letting go of all elements in the
-   * NameValueTable without decrefing them.
-   *
-   * This is intended for use when destroying the global scope, where
-   * we shouldn't be running destructors.
-   */
-  void leak();
-  bool leaked() const { return !m_table; }
 
   /*
    * Set the slot for the supplied name to `val', allocating it if
@@ -135,16 +89,7 @@ struct NameValueTable {
    */
   tv_lval lookupAdd(const StringData* name);
 
-  /*
-   * Lookup a name, returning it's position, or the canonical invalid position.
-   */
-  ssize_t lookupPos(const StringData* name);
-
 private:
-  // Dummy DT for named locals; keep out of conflict with actual DataTypes in
-  // base/datatype.h.
-  static constexpr auto kNamedLocalDataType = kExtraInvalidDataType;
-
   // Element type for the name/value hashtable.
   struct Elm {
     TypedValue        m_tv;
@@ -161,7 +106,6 @@ private:
 private:
   void reserve(size_t desiredSize);
   void allocate(const size_t newCapac);
-  tv_lval derefNamedLocal(TypedValue* tv) const;
   tv_lval findTypedValue(const StringData* name);
   Elm* insertImpl(const StringData* name);
   Elm* insert(const StringData* name);
@@ -169,14 +113,11 @@ private:
   Elm* findElm(const StringData* name) const;
 
 private:
-  ActRec* m_fp{nullptr};
   Elm* m_table{nullptr};
   uint32_t m_tabMask{0};
   uint32_t m_elms{0};
 
   TYPE_SCAN_CUSTOM() {
-    if (leaked()) return;
-    scanner.scan(m_fp);
     scanner.scan(m_table);
   }
 };

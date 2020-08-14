@@ -2949,7 +2949,7 @@ SSATmp* hackArrIssetImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&] (TypedValue tv) { return cns(env, tvIsNull(tv)); }
+    [&] (TypedValue tv) { return cns(env, !tvIsNull(tv)); }
   );
 }
 

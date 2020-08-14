@@ -192,26 +192,27 @@
                       }
                     },
                     "binary_right_operand":{
-                      "kind":"array_intrinsic_expression",
-                      "array_intrinsic_keyword":{
+                      "kind":"darray_intrinsic_expression",
+                      "darray_intrinsic_keyword":{
                         "kind":"token",
                         "token":{
-                          "kind":"array",
-                          "text":"array",
+                          "kind":"darray",
+                          "text":"darray",
                           "offset":32,
                           "leading_width":0,
-                          "width":5,
-                          "trailing_width":1,
+                          "width":6,
+                          "trailing_width":0,
                           "leading":[],
-                          "trailing":[{"kind":"whitespace","text":" ","offset":37,"width":1}],
+                          "trailing":[],
                           "line_number":3
                         }
                       },
-                      "array_intrinsic_left_paren":{
+                      "darray_intrinsic_explicit_type":{"kind":"missing"},
+                      "darray_intrinsic_left_bracket":{
                         "kind":"token",
                         "token":{
-                          "kind":"(",
-                          "text":"(",
+                          "kind":"[",
+                          "text":"[",
                           "offset":38,
                           "leading_width":0,
                           "width":1,
@@ -221,7 +222,7 @@
                           "line_number":3
                         }
                       },
-                      "array_intrinsic_members":{
+                      "darray_intrinsic_members":{
                         "kind":"list",
                         "elements":[
                           {
@@ -312,11 +313,11 @@
                           }
                         ]
                       },
-                      "array_intrinsic_right_paren":{
+                      "darray_intrinsic_right_bracket":{
                         "kind":"token",
                         "token":{
-                          "kind":")",
-                          "text":")",
+                          "kind":"]",
+                          "text":"]",
                           "offset":51,
                           "leading_width":0,
                           "width":1,
@@ -381,6 +382,6 @@
       ]
     }
   },
-  "program_text":"<?hh\nfunction f(){\n  await $x . array ($a => b *= 1);\n}\n",
-  "version":"2020-06-23-0001"
+  "program_text":"<?hh\nfunction f(){\n  await $x . darray[$a => b *= 1];\n}\n",
+  "version":"2020-08-13-0000"
 }

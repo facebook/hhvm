@@ -1327,7 +1327,6 @@ and check_constant_expr env (pos, e) =
     check_constant_expr env e1
     && Option.for_all e2 (check_constant_expr env)
     && check_constant_expr env e3
-  | Aast.Array l -> List.for_all l ~f:(check_afield_constant_expr env)
   | Aast.Darray (_, l) ->
     List.for_all l ~f:(fun (e1, e2) ->
         check_constant_expr env e1 && check_constant_expr env e2)
@@ -1899,11 +1898,6 @@ and expr env (p, e) = (p, expr_ env p e)
 and expr_ env p (e : Nast.expr_) =
   match e with
   | Aast.ParenthesizedExpr e -> N.ParenthesizedExpr (expr env e)
-  | Aast.Array l ->
-    let tcopt = Provider_context.get_tcopt (fst env).ctx in
-    if TypecheckerOptions.disallow_array_literal tcopt then
-      Errors.array_literals_disallowed p;
-    N.Array (List.map l (afield env))
   | Aast.Varray (ta, l) ->
     N.Varray (Option.map ~f:(targ env) ta, List.map l (expr env))
   | Aast.Darray (tap, l) ->

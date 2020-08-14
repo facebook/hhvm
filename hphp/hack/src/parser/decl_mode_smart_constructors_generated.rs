@@ -493,10 +493,6 @@ where
         <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_record_creation_expression(self, arg0, arg1, arg2, arg3)
     }
 
-    fn make_array_intrinsic_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_array_intrinsic_expression(self, arg0, arg1, arg2, arg3)
-    }
-
     fn make_darray_intrinsic_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
         <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_darray_intrinsic_expression(self, arg0, arg1, arg2, arg3, arg4)
     }

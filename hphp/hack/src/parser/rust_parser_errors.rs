@@ -3116,7 +3116,6 @@ where
                 | ConstructorCall(_)
                 | ShapeExpression(_)
                 | TupleExpression(_)
-                | ArrayIntrinsicExpression(_)
                 | DarrayIntrinsicExpression(_)
                 | DictionaryIntrinsicExpression(_)
                 | KeysetIntrinsicExpression(_)
@@ -4634,9 +4633,6 @@ where
             DictionaryIntrinsicExpression(x) => {
                 check_collection_members(self, &x.dictionary_intrinsic_members)
             }
-            ArrayIntrinsicExpression(x) => {
-                check_collection_members(self, &x.array_intrinsic_members)
-            }
             ShapeExpression(x) => check_collection_members(self, &x.shape_expression_fields),
             ElementInitializer(x) => {
                 self.check_constant_expression(&x.element_key);
@@ -5086,7 +5082,6 @@ where
             LambdaExpression(_)
             | AnonymousFunction(_)
             | AwaitableCreationExpression(_)
-            | ArrayIntrinsicExpression(_)
             | DarrayIntrinsicExpression(_)
             | VarrayIntrinsicExpression(_)
             | ShapeExpression(_)
@@ -5490,7 +5485,6 @@ where
                 self.methodish_errors(node);
             }
 
-            ArrayIntrinsicExpression(_) => self.expression_errors(node),
             LiteralExpression(_)
             | SafeMemberSelectionExpression(_)
             | FunctionCallExpression(_)

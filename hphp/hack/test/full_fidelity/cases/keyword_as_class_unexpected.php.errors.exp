@@ -122,8 +122,8 @@
 (64,7)-(64,12) Encountered unexpected token 'yield'.
 (66,5)-(66,13) Unexpected node on right hand side of new or instanceof: token
 (66,13)-(66,13) An expression is expected here.
-(67,5)-(67,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new array()()'?
-(67,5)-(67,12) Unexpected node on right hand side of new or instanceof: array_intrinsic_expression
+(67,5)-(67,10) Unexpected node on right hand side of new or instanceof: token
+(67,10)-(67,10) An expression is expected here.
 (68,5)-(68,7) Unexpected node on right hand side of new or instanceof: token
 (68,7)-(68,7) An expression is expected here.
 (69,5)-(69,10) Unexpected node on right hand side of new or instanceof: token

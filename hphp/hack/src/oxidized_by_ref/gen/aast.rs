@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<26249b2020569adf9f39020cc060e415>>
+// @generated SignedSource<<1f19158d0f79188f91a4280febdbe721>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -280,7 +280,6 @@ impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> Tri
     ToOcamlRep
 )]
 pub enum Expr_<'a, Ex, Fb, En, Hi> {
-    Array(&'a [Afield<'a, Ex, Fb, En, Hi>]),
     Darray(
         &'a (
             Option<(Targ<'a, Hi>, Targ<'a, Hi>)>,

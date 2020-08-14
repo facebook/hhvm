@@ -453,8 +453,6 @@ module Visitor_DEPRECATED = struct
 
       method on_as_expr : 'a -> (Pos.t, func_body_ann, unit, unit) as_expr -> 'a
 
-      method on_array : 'a -> afield list -> 'a
-
       method on_shape : 'a -> (Ast_defs.shape_field_name * expr) list -> 'a
 
       method on_valCollection : 'a -> vc_kind -> targ option -> expr list -> 'a
@@ -773,7 +771,6 @@ module Visitor_DEPRECATED = struct
       method on_expr_ acc e =
         match e with
         | Any -> acc
-        | Array afl -> this#on_array acc afl
         | Darray (tap, fieldl) -> this#on_darray acc tap fieldl
         | Varray (ta, el) -> this#on_varray acc ta el
         | Shape sh -> this#on_shape acc sh
@@ -834,8 +831,6 @@ module Visitor_DEPRECATED = struct
         | ParenthesizedExpr e -> this#on_expr acc e
         | PU_atom sid -> this#on_pu_atom acc sid
         | PU_identifier (e, s1, s2) -> this#on_pu_identifier acc e s1 s2
-
-      method on_array acc afl = List.fold_left afl ~f:this#on_afield ~init:acc
 
       method on_collection acc tal afl =
         let acc =

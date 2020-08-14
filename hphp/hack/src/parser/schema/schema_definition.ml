@@ -1531,21 +1531,6 @@ let schema : schema_node list =
         ];
     };
     {
-      kind_name = "ArrayIntrinsicExpression";
-      type_name = "array_intrinsic_expression";
-      func_name = "array_intrinsic_expression";
-      description = "array_intrinsic_expression";
-      prefix = "array_intrinsic";
-      aggregates = [Expression; ConstructorExpression; LambdaBody];
-      fields =
-        [
-          ("keyword", Token);
-          ("left_paren", Token);
-          ("members", ZeroOrMore (Aggregate ConstructorExpression));
-          ("right_paren", Token);
-        ];
-    };
-    {
       kind_name = "DarrayIntrinsicExpression";
       type_name = "darray_intrinsic_expression";
       func_name = "darray_intrinsic_expression";

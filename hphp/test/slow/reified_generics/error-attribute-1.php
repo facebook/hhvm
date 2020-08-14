@@ -1,5 +1,5 @@
 <?hh
 
-<<__Reified(array(1,2))>>
+<<__Reified(varray[1,2])>>
 class D {}
 

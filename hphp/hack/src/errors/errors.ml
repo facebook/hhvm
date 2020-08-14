@@ -1509,12 +1509,6 @@ let array_typehints_disallowed pos =
     pos
     "Array typehints are no longer legal; use varray or darray instead"
 
-let array_literals_disallowed pos =
-  add
-    (Naming.err_code Naming.ArrayLiteralsDisallowed)
-    pos
-    "Array literals are no longer legal; use varray or darray instead"
-
 let wildcard_disallowed pos =
   add
     (Naming.err_code Naming.WildcardDisallowed)

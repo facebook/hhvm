@@ -1,7 +1,7 @@
 <?hh
 
 class C {
-  <<__Reified(array(1,2))>>
+  <<__Reified(varray[1,2])>>
   function f() {}
 }
 

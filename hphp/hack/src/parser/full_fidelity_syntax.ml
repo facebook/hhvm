@@ -169,7 +169,6 @@ module WithToken(Token: TokenType) = struct
       | ObjectCreationExpression          _ -> SyntaxKind.ObjectCreationExpression
       | ConstructorCall                   _ -> SyntaxKind.ConstructorCall
       | RecordCreationExpression          _ -> SyntaxKind.RecordCreationExpression
-      | ArrayIntrinsicExpression          _ -> SyntaxKind.ArrayIntrinsicExpression
       | DarrayIntrinsicExpression         _ -> SyntaxKind.DarrayIntrinsicExpression
       | DictionaryIntrinsicExpression     _ -> SyntaxKind.DictionaryIntrinsicExpression
       | KeysetIntrinsicExpression         _ -> SyntaxKind.KeysetIntrinsicExpression
@@ -361,7 +360,6 @@ module WithToken(Token: TokenType) = struct
     let is_object_creation_expression           = has_kind SyntaxKind.ObjectCreationExpression
     let is_constructor_call                     = has_kind SyntaxKind.ConstructorCall
     let is_record_creation_expression           = has_kind SyntaxKind.RecordCreationExpression
-    let is_array_intrinsic_expression           = has_kind SyntaxKind.ArrayIntrinsicExpression
     let is_darray_intrinsic_expression          = has_kind SyntaxKind.DarrayIntrinsicExpression
     let is_dictionary_intrinsic_expression      = has_kind SyntaxKind.DictionaryIntrinsicExpression
     let is_keyset_intrinsic_expression          = has_kind SyntaxKind.KeysetIntrinsicExpression
@@ -1663,17 +1661,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc record_creation_left_bracket in
          let acc = f acc record_creation_members in
          let acc = f acc record_creation_right_bracket in
-         acc
-      | ArrayIntrinsicExpression {
-        array_intrinsic_keyword;
-        array_intrinsic_left_paren;
-        array_intrinsic_members;
-        array_intrinsic_right_paren;
-      } ->
-         let acc = f acc array_intrinsic_keyword in
-         let acc = f acc array_intrinsic_left_paren in
-         let acc = f acc array_intrinsic_members in
-         let acc = f acc array_intrinsic_right_paren in
          acc
       | DarrayIntrinsicExpression {
         darray_intrinsic_keyword;
@@ -3505,17 +3492,6 @@ module WithToken(Token: TokenType) = struct
         record_creation_members;
         record_creation_right_bracket;
       ]
-      | ArrayIntrinsicExpression {
-        array_intrinsic_keyword;
-        array_intrinsic_left_paren;
-        array_intrinsic_members;
-        array_intrinsic_right_paren;
-      } -> [
-        array_intrinsic_keyword;
-        array_intrinsic_left_paren;
-        array_intrinsic_members;
-        array_intrinsic_right_paren;
-      ]
       | DarrayIntrinsicExpression {
         darray_intrinsic_keyword;
         darray_intrinsic_explicit_type;
@@ -5346,17 +5322,6 @@ module WithToken(Token: TokenType) = struct
         "record_creation_left_bracket";
         "record_creation_members";
         "record_creation_right_bracket";
-      ]
-      | ArrayIntrinsicExpression {
-        array_intrinsic_keyword;
-        array_intrinsic_left_paren;
-        array_intrinsic_members;
-        array_intrinsic_right_paren;
-      } -> [
-        "array_intrinsic_keyword";
-        "array_intrinsic_left_paren";
-        "array_intrinsic_members";
-        "array_intrinsic_right_paren";
       ]
       | DarrayIntrinsicExpression {
         darray_intrinsic_keyword;
@@ -7352,18 +7317,6 @@ module WithToken(Token: TokenType) = struct
           record_creation_left_bracket;
           record_creation_members;
           record_creation_right_bracket;
-        }
-      | (SyntaxKind.ArrayIntrinsicExpression, [
-          array_intrinsic_keyword;
-          array_intrinsic_left_paren;
-          array_intrinsic_members;
-          array_intrinsic_right_paren;
-        ]) ->
-        ArrayIntrinsicExpression {
-          array_intrinsic_keyword;
-          array_intrinsic_left_paren;
-          array_intrinsic_members;
-          array_intrinsic_right_paren;
         }
       | (SyntaxKind.DarrayIntrinsicExpression, [
           darray_intrinsic_keyword;
@@ -9731,21 +9684,6 @@ module WithToken(Token: TokenType) = struct
           record_creation_left_bracket;
           record_creation_members;
           record_creation_right_bracket;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_array_intrinsic_expression
-        array_intrinsic_keyword
-        array_intrinsic_left_paren
-        array_intrinsic_members
-        array_intrinsic_right_paren
-      =
-        let syntax = ArrayIntrinsicExpression {
-          array_intrinsic_keyword;
-          array_intrinsic_left_paren;
-          array_intrinsic_members;
-          array_intrinsic_right_paren;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

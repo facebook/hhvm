@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8849e38eba43b6c30aab78f04db9327e>>
+// @generated SignedSource<<6b8ff00f33c1a467655e4baef5bce635>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -253,7 +253,6 @@ pub enum FunctionPtrId<Ex, Fb, En, Hi> {
     ToOcamlRep
 )]
 pub enum Expr_<Ex, Fb, En, Hi> {
-    Array(Vec<Afield<Ex, Fb, En, Hi>>),
     Darray(
         Box<(
             Option<(Targ<Hi>, Targ<Hi>)>,

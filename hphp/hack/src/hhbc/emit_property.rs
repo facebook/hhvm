@@ -199,7 +199,6 @@ fn expr_requires_deep_init(expr: &tast::Expr) -> bool {
         | Expr_::Int(_)
         | Expr_::Float(_)
         | Expr_::String(_) => false,
-        Expr_::Array(afs) => afs.iter().any(af_expr_requires_deep_init),
         Expr_::Collection(e) if (e.0).1 == "keyset" || (e.0).1 == "dict" || (e.0).1 == "vec" => {
             (e.2).iter().any(af_expr_requires_deep_init)
         }

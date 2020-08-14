@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c914910b2713bb1f16549eca1f44c8ab>>
+// @generated SignedSource<<5b5790d28180df51af85566662165aaa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -702,10 +702,6 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::Fb, P::En, P::Hi> {
         v: &mut dyn Visitor<'node, P = P>,
     ) -> Result<(), P::Error> {
         match self {
-            Expr_::Array(a0) => {
-                a0.accept(c, v)?;
-                Ok(())
-            }
             Expr_::Darray(a) => {
                 a.0.accept(c, v)?;
                 a.1.accept(c, v)?;

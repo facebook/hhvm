@@ -58,6 +58,7 @@
 (61,13)-(61,13) A name or `__construct` keyword is expected here.
 (62,15)-(62,15) A name or `__construct` keyword is expected here.
 (63,15)-(63,15) A name or `__construct` keyword is expected here.
+(66,6)-(66,6) An expression is expected here.
 (67,3)-(67,3) An expression is expected here.
 (68,8)-(68,8) A lambda arrow ('==>') is expected here.
 (69,8)-(69,8) An expression is expected here.

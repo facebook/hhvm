@@ -1038,11 +1038,11 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         ParenthesizedExpr(&expr) => expr_to_ty(arena, expr),
                         Any => Some(TANY_),
 
-                        Array(_) | ArrayGet(_) | As(_) | Assert(_) | Await(_) | Binop(_)
-                        | BracedExpr(_) | Call(_) | Callconv(_) | Cast(_) | ClassConst(_)
-                        | ClassGet(_) | Clone(_) | Collection(_) | Darray(_) | Dollardollar(_)
-                        | Efun(_) | Eif(_) | ExprList(_) | FunctionPointer(_) | FunId(_)
-                        | Id(_) | Import(_) | Is(_) | KeyValCollection(_) | Lfun(_) | List(_)
+                        ArrayGet(_) | As(_) | Assert(_) | Await(_) | Binop(_) | BracedExpr(_)
+                        | Call(_) | Callconv(_) | Cast(_) | ClassConst(_) | ClassGet(_)
+                        | Clone(_) | Collection(_) | Darray(_) | Dollardollar(_) | Efun(_)
+                        | Eif(_) | ExprList(_) | FunctionPointer(_) | FunId(_) | Id(_)
+                        | Import(_) | Is(_) | KeyValCollection(_) | Lfun(_) | List(_)
                         | Lplaceholder(_) | Lvar(_) | MethodCaller(_) | MethodId(_) | New(_)
                         | ObjGet(_) | Omitted | Pair(_) | Pipe(_) | PUAtom(_) | PUIdentifier(_)
                         | Record(_) | Shape(_) | SmethodId(_) | Suspend(_) | ValCollection(_)
@@ -1850,32 +1850,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         } else {
             expr
         }
-    }
-
-    fn make_array_intrinsic_expression(
-        &mut self,
-        array: Self::R,
-        _arg1: Self::R,
-        fields: Self::R,
-        right_paren: Self::R,
-    ) -> Self::R {
-        let fields = unwrap_or_return!(self.map_to_slice(fields, |node| match node {
-            Node::ListItem(&(key, value)) => {
-                let key = self.node_to_expr(key)?;
-                let value = self.node_to_expr(value)?;
-                Some(aast::Afield::AFkvalue(key, value))
-            }
-            node => Some(aast::Afield::AFvalue(self.node_to_expr(node)?)),
-        }));
-        Node::Expr(self.alloc(aast::Expr(
-            unwrap_or_return!(Pos::merge(
-                    self.state.arena,
-                    unwrap_or_return!(array.get_pos(self.state.arena)),
-                    unwrap_or_return!(right_paren.get_pos(self.state.arena)),
-                )
-                .ok()),
-            nast::Expr_::Array(fields),
-        )))
     }
 
     fn make_darray_intrinsic_expression(

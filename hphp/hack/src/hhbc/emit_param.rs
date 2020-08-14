@@ -288,10 +288,6 @@ fn match_default_and_hint(hint_type: &str, param_expr: &Option<a::Expr>) -> Opti
                 "bool" => None,
                 _ => Some("Boolean"),
             },
-            a::Expr_::Array(_) => match hint_type {
-                "array" | "HH\\varray" | "HH\\darray" | "HH\\varray_or_darray" => None,
-                _ => Some("Array"),
-            },
             a::Expr_::Int(_) => match hint_type {
                 "int" | "num" | "arraykey" | "float" => None,
                 _ => Some("Int64"),

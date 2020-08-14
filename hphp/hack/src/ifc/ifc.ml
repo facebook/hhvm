@@ -671,7 +671,6 @@ and expr renv env (((_epos, ety), e) : Tast.expr) =
       | _ -> fail "unhandled method call on %a" Pp.ptype obj_pty
     end
   (* --- expressions below are not yet supported *)
-  | A.Array _
   | A.Darray (_, _)
   | A.Varray (_, _)
   | A.Shape _

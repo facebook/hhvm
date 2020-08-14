@@ -125,7 +125,6 @@ and ('ex, 'fb, 'en, 'hi) function_ptr_id =
   | FP_class_const of ('ex, 'fb, 'en, 'hi) class_id * pstring
 
 and ('ex, 'fb, 'en, 'hi) expr_ =
-  | Array of ('ex, 'fb, 'en, 'hi) afield list
   | Darray of
       ('hi targ * 'hi targ) option
       * (('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr) list

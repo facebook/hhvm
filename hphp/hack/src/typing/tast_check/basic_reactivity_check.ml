@@ -613,13 +613,6 @@ let check =
         | (_, ValCollection (_, _, els)) ->
           let ctx = disallow_mutable_locals ctx in
           List.iter els ~f:(self#on_expr (env, ctx))
-        | (_, Array fs) ->
-          let ctx = disallow_mutable_locals ctx in
-          List.iter fs ~f:(function
-              | AFvalue e -> self#on_expr (env, ctx) e
-              | AFkvalue (k, v) ->
-                self#on_expr (env, ctx) k;
-                self#on_expr (env, ctx) v)
         | (_, Darray (_, els))
         | (_, KeyValCollection (_, _, els)) ->
           let ctx = disallow_mutable_locals ctx in

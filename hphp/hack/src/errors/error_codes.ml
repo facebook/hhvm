@@ -134,7 +134,7 @@ module Naming = struct
     | XhpRequiredWithDefault
     | VariableVariablesDisallowedDEPRECATED
     | ArrayTypehintsDisallowed
-    | ArrayLiteralsDisallowed
+    | ArrayLiteralsDisallowedDEPRECATED
     | WildcardDisallowed
     | AttributeClassNameConflict
     | MethodNeedsVisibility

@@ -462,7 +462,6 @@ and expr_ env acc p e =
   let fun_paraml = fun_paraml env in
   match e with
   | Any -> acc
-  | Array fdl -> List.fold_left ~f:afield ~init:acc fdl
   | Darray (_, fdl) -> List.fold_left ~f:field ~init:acc fdl
   | Varray (_, fdl) -> List.fold_left ~f:expr ~init:acc fdl
   | ValCollection (_, _, el) -> exprl acc el

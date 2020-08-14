@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bd22d091dfa4f0a74945eea40b90d533>>
+// @generated SignedSource<<77512066359e9838cc1afe49d039281c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -702,10 +702,6 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::Fb, P::En, P::Hi> {
         v: &mut dyn VisitorMut<'node, P = P>,
     ) -> Result<(), P::Error> {
         match self {
-            Expr_::Array(a0) => {
-                a0.accept(c, v)?;
-                Ok(())
-            }
             Expr_::Darray(a) => {
                 a.0.accept(c, v)?;
                 a.1.accept(c, v)?;

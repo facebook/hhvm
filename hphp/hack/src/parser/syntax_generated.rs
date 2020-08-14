@@ -1204,17 +1204,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_array_intrinsic_expression(_: &C, array_intrinsic_keyword: Self, array_intrinsic_left_paren: Self, array_intrinsic_members: Self, array_intrinsic_right_paren: Self) -> Self {
-        let syntax = SyntaxVariant::ArrayIntrinsicExpression(Box::new(ArrayIntrinsicExpressionChildren {
-            array_intrinsic_keyword,
-            array_intrinsic_left_paren,
-            array_intrinsic_members,
-            array_intrinsic_right_paren,
-        }));
-        let value = V::from_syntax(&syntax);
-        Self::make(syntax, value)
-    }
-
     fn make_darray_intrinsic_expression(_: &C, darray_intrinsic_keyword: Self, darray_intrinsic_explicit_type: Self, darray_intrinsic_left_bracket: Self, darray_intrinsic_members: Self, darray_intrinsic_right_bracket: Self) -> Self {
         let syntax = SyntaxVariant::DarrayIntrinsicExpression(Box::new(DarrayIntrinsicExpressionChildren {
             darray_intrinsic_keyword,
@@ -2771,14 +2760,6 @@ where
                 let acc = f(record_creation_right_bracket, acc);
                 acc
             },
-            SyntaxVariant::ArrayIntrinsicExpression(x) => {
-                let ArrayIntrinsicExpressionChildren { array_intrinsic_keyword, array_intrinsic_left_paren, array_intrinsic_members, array_intrinsic_right_paren } = *x;
-                let acc = f(array_intrinsic_keyword, acc);
-                let acc = f(array_intrinsic_left_paren, acc);
-                let acc = f(array_intrinsic_members, acc);
-                let acc = f(array_intrinsic_right_paren, acc);
-                acc
-            },
             SyntaxVariant::DarrayIntrinsicExpression(x) => {
                 let DarrayIntrinsicExpressionChildren { darray_intrinsic_keyword, darray_intrinsic_explicit_type, darray_intrinsic_left_bracket, darray_intrinsic_members, darray_intrinsic_right_bracket } = *x;
                 let acc = f(darray_intrinsic_keyword, acc);
@@ -3388,7 +3369,6 @@ where
             SyntaxVariant::ObjectCreationExpression {..} => SyntaxKind::ObjectCreationExpression,
             SyntaxVariant::ConstructorCall {..} => SyntaxKind::ConstructorCall,
             SyntaxVariant::RecordCreationExpression {..} => SyntaxKind::RecordCreationExpression,
-            SyntaxVariant::ArrayIntrinsicExpression {..} => SyntaxKind::ArrayIntrinsicExpression,
             SyntaxVariant::DarrayIntrinsicExpression {..} => SyntaxKind::DarrayIntrinsicExpression,
             SyntaxVariant::DictionaryIntrinsicExpression {..} => SyntaxKind::DictionaryIntrinsicExpression,
             SyntaxVariant::KeysetIntrinsicExpression {..} => SyntaxKind::KeysetIntrinsicExpression,
@@ -4201,13 +4181,6 @@ where
                  record_creation_members: ts.pop().unwrap(),
                  record_creation_left_bracket: ts.pop().unwrap(),
                  record_creation_type: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::ArrayIntrinsicExpression, 4) => SyntaxVariant::ArrayIntrinsicExpression(Box::new(ArrayIntrinsicExpressionChildren {
-                 array_intrinsic_right_paren: ts.pop().unwrap(),
-                 array_intrinsic_members: ts.pop().unwrap(),
-                 array_intrinsic_left_paren: ts.pop().unwrap(),
-                 array_intrinsic_keyword: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::DarrayIntrinsicExpression, 5) => SyntaxVariant::DarrayIntrinsicExpression(Box::new(DarrayIntrinsicExpressionChildren {
@@ -5495,14 +5468,6 @@ pub struct RecordCreationExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct ArrayIntrinsicExpressionChildren<T, V> {
-    pub array_intrinsic_keyword: Syntax<T, V>,
-    pub array_intrinsic_left_paren: Syntax<T, V>,
-    pub array_intrinsic_members: Syntax<T, V>,
-    pub array_intrinsic_right_paren: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
 pub struct DarrayIntrinsicExpressionChildren<T, V> {
     pub darray_intrinsic_keyword: Syntax<T, V>,
     pub darray_intrinsic_explicit_type: Syntax<T, V>,
@@ -6108,7 +6073,6 @@ pub enum SyntaxVariant<T, V> {
     ObjectCreationExpression(Box<ObjectCreationExpressionChildren<T, V>>),
     ConstructorCall(Box<ConstructorCallChildren<T, V>>),
     RecordCreationExpression(Box<RecordCreationExpressionChildren<T, V>>),
-    ArrayIntrinsicExpression(Box<ArrayIntrinsicExpressionChildren<T, V>>),
     DarrayIntrinsicExpression(Box<DarrayIntrinsicExpressionChildren<T, V>>),
     DictionaryIntrinsicExpression(Box<DictionaryIntrinsicExpressionChildren<T, V>>),
     KeysetIntrinsicExpression(Box<KeysetIntrinsicExpressionChildren<T, V>>),
@@ -7261,16 +7225,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     1 => Some(&x.record_creation_left_bracket),
                     2 => Some(&x.record_creation_members),
                     3 => Some(&x.record_creation_right_bracket),
-                        _ => None,
-                    }
-                })
-            },
-            ArrayIntrinsicExpression(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.array_intrinsic_keyword),
-                    1 => Some(&x.array_intrinsic_left_paren),
-                    2 => Some(&x.array_intrinsic_members),
-                    3 => Some(&x.array_intrinsic_right_paren),
                         _ => None,
                     }
                 })

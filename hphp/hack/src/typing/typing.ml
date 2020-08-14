@@ -96,16 +96,6 @@ let expr_any env p e =
   let ty = Typing_utils.mk_tany env p in
   (env, with_type ty Tast.dummy_saved_env e, ty)
 
-let compare_field_kinds x y =
-  match (x, y) with
-  | (AFvalue (p1, _), AFkvalue ((p2, _), _))
-  | (AFkvalue ((p2, _), _), AFvalue (p1, _)) ->
-    Errors.field_kinds p1 p2;
-    false
-  | _ -> true
-
-let check_consistent_fields x l = List.for_all l (compare_field_kinds x)
-
 let unbound_name env (pos, name) e =
   let strictish = Partial.should_check_error (Env.get_mode env) 4107 in
   match Env.get_mode env with
@@ -171,12 +161,6 @@ let get_akvarray_inst ty =
   match get_node ty with
   | Tvarray vty -> Some vty
   | _ -> get_value_collection_inst ty
-
-(* Is this type array<kty,vty> or a supertype for some kty and vty? *)
-let get_akdarray_inst p ty =
-  match get_node ty with
-  | Tdarray (kty, vty) -> Some (kty, vty)
-  | _ -> get_key_value_collection_inst p ty
 
 (* Is this type one of the three key-value collection types
  * e.g. dict<kty,vty> or a supertype for some kty and vty? *)
@@ -1398,113 +1382,6 @@ and expr_
     let (env, te, ty) = expr env e in
     make_result env p (Aast.ParenthesizedExpr te) ty
   | Any -> expr_error env (Reason.Rwitness p) outer
-  (* This is actually now outlawed in the parser but until we remove it completely
-   * let's default to varray
-   *)
-  | Array [] ->
-    let (env, tv) = Env.fresh_type env p in
-    let ty = MakeType.varray (Reason.Rwitness p) tv in
-    make_result env p (Aast.Array []) ty
-  | Array (x :: rl as l) ->
-    (* True if all fields are values, or all fields are key => value *)
-    let fields_consistent = check_consistent_fields x rl in
-    let is_vec =
-      match x with
-      | AFvalue _ -> true
-      | AFkvalue _ -> false
-    in
-    if fields_consistent && is_vec then
-      (* Use expected type to determine expected element type *)
-      let (env, elem_expected) =
-        match expand_expected_and_get_node env expected with
-        | (env, Some (pos, ur, ety, _)) ->
-          begin
-            match get_akvarray_inst ety with
-            | Some vty -> (env, Some (ExpectedTy.make pos ur vty))
-            | None -> (env, None)
-          end
-        | _ -> (env, None)
-      in
-      let (env, tel, arraykind) =
-        let (env, tel, value_ty) =
-          compute_exprs_and_supertype
-            ~expected:elem_expected
-            ~use_pos:p
-            (Reason.Rtype_variable_generics (p, "T", "array"))
-            env
-            l
-            array_field_value
-        in
-        (env, tel, Tvarray value_ty)
-      in
-      make_result
-        env
-        p
-        (Aast.Array (List.map tel (fun e -> Aast.AFvalue e)))
-        (mk (Reason.Rwitness p, arraykind))
-    else if (* TODO TAST: produce a typed expression here *)
-            is_vec then
-      (* Use expected type to determine expected element type *)
-      let (env, vexpected) =
-        match expand_expected_and_get_node env expected with
-        | (env, Some (pos, ur, ety, _)) ->
-          begin
-            match get_akvarray_inst ety with
-            | Some vty -> (env, Some (ExpectedTy.make pos ur vty))
-            | None -> (env, None)
-          end
-        | _ -> (env, None)
-      in
-      let (env, _value_exprs, value_ty) =
-        compute_exprs_and_supertype
-          ~expected:vexpected
-          ~use_pos:p
-          (Reason.Rtype_variable_generics (p, "T", "array"))
-          env
-          l
-          array_field_value
-      in
-      make_result env p Aast.Any (MakeType.varray (Reason.Rwitness p) value_ty)
-    else
-      (* Use expected type to determine expected element type *)
-      let (env, kexpected, vexpected) =
-        match expand_expected_and_get_node env expected with
-        | (env, Some (pos, reason, ety, _)) ->
-          begin
-            match get_akdarray_inst p ety with
-            | Some (kty, vty) ->
-              let k_expected = ExpectedTy.make pos reason kty in
-              let v_expected = ExpectedTy.make pos reason vty in
-              (env, Some k_expected, Some v_expected)
-            | None -> (env, None, None)
-          end
-        | _ -> (env, None, None)
-      in
-      let (env, key_exprs, key_ty) =
-        compute_exprs_and_supertype
-          ~expected:kexpected
-          ~use_pos:p
-          (Reason.Rtype_variable_generics (p, "Tk", "array"))
-          env
-          l
-          array_field_key
-      in
-      let (env, value_exprs, value_ty) =
-        compute_exprs_and_supertype
-          ~use_pos:p
-          ~expected:vexpected
-          (Reason.Rtype_variable_generics (p, "Tv", "array"))
-          env
-          l
-          array_field_value
-      in
-      make_result
-        env
-        p
-        (Aast.Array
-           (List.map (List.zip_exn key_exprs value_exprs) (fun (tek, tev) ->
-                Aast.AFkvalue (tek, tev))))
-        (MakeType.darray (Reason.Rwitness p) key_ty value_ty)
   | Varray (th, el)
   | ValCollection (_, th, el) ->
     let (get_expected_kind, name, subtype_val, make_expr, make_ty) =
@@ -3997,11 +3874,6 @@ and array_value ~(expected : ExpectedTy.t option) env x =
   let (env, te, ty) = expr ?expected env x in
   (env, (te, ty))
 
-and array_field_value ~(expected : ExpectedTy.t option) env = function
-  | AFvalue x
-  | AFkvalue (_, x) ->
-    array_value ~expected env x
-
 and arraykey_value
     p class_name ~(expected : ExpectedTy.t option) env ((pos, _) as x) =
   let (env, (te, ty)) = array_value ~expected env x in
@@ -4016,13 +3888,6 @@ and arraykey_value
       Errors.unify_error
   in
   (env, (te, ty))
-
-and array_field_key ~(expected : ExpectedTy.t option) env = function
-  (* This shouldn't happen *)
-  | AFvalue ((p, _) as e) ->
-    let ty = MakeType.int (Reason.Rwitness p) in
-    (env, (with_type ty Tast.dummy_saved_env e, ty))
-  | AFkvalue (x, _) -> array_value ~expected env x
 
 and check_parent_construct pos env el unpacked_element env_parent =
   let check_not_abstract = false in

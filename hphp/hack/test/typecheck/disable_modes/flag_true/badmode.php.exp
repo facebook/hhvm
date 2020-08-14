@@ -1,1 +1,2 @@
-No errors
+File "badmode.php", line 1, characters 1-4:
+Incorrect comment; possible values include strict, partial, or empty (Parsing[1002])

@@ -42,7 +42,6 @@ let go status output_json from error_format max_errors =
     error_list;
     dropped_count;
     last_recheck_stats;
-    highlighted_error_format;
   } =
     status
   in
@@ -65,15 +64,6 @@ let go status output_json from error_format max_errors =
       ~save_state_result:None
       ~recheck_stats:last_recheck_stats
   else
-    let error_format =
-      match error_format with
-      | None ->
-        if highlighted_error_format then
-          Errors.Highlighted
-        else
-          Errors.Context
-      | Some ef -> ef
-    in
     let f =
       match error_format with
       | Errors.Raw -> print_error_raw

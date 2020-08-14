@@ -73,7 +73,7 @@ type client_check_env = {
   autostart: bool;
   config: (string * string) list;
   dynamic_view: bool;
-  error_format: Errors.format option;
+  error_format: Errors.format;
   force_dormant_start: bool;
   from: string;
   show_spinner: bool;

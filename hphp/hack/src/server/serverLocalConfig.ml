@@ -490,8 +490,6 @@ type t = {
   (* Allows unstabled features to be enabled within a file via the '__EnableUnstableFeatures' attribute *)
   allow_unstable_features: bool;
   watchman: Watchman.t;
-  (* Use the highlighted error format rather than the default contextual format *)
-  highlighted_error_format: bool;
 }
 
 let default =
@@ -570,7 +568,6 @@ let default =
     go_to_implementation = true;
     allow_unstable_features = false;
     watchman = Watchman.default;
-    highlighted_error_format = false;
   }
 
 let path =
@@ -1000,13 +997,6 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.allow_unstable_features
       config
   in
-  let highlighted_error_format =
-    bool_
-      "enabled"
-      ~prefix:(Some "highlighted_error_format")
-      ~default:false
-      config
-  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1081,7 +1071,6 @@ let load_ fn ~silent ~current_version overrides =
     go_to_implementation;
     allow_unstable_features;
     watchman;
-    highlighted_error_format;
   }
 
 let load ~silent ~current_version config_overrides =

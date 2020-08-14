@@ -87,7 +87,7 @@ let parse_check_args cmd =
   let autostart = ref true in
   let config = ref [] in
   let dynamic_view = ref false in
-  let error_format = ref None in
+  let error_format = ref Errors.Highlighted in
   let force_dormant_start = ref false in
   let format_from = ref 0 in
   let from = ref "" in
@@ -233,9 +233,9 @@ let parse_check_args cmd =
         Arg.String
           (fun s ->
             match s with
-            | "raw" -> error_format := Some Errors.Raw
-            | "context" -> error_format := Some Errors.Context
-            | "highlighted" -> error_format := Some Errors.Highlighted
+            | "raw" -> error_format := Errors.Raw
+            | "context" -> error_format := Errors.Context
+            | "highlighted" -> error_format := Errors.Highlighted
             | _ -> print_string "Warning: unrecognized error format.\n"),
         "<raw|context|highlighted> Error formatting style" );
       ( "--extract-standalone",

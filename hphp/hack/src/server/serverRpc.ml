@@ -65,18 +65,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         error_list;
         dropped_count;
         last_recheck_stats;
-        highlighted_error_format =
-          genv.local_config.ServerLocalConfig.highlighted_error_format;
       } )
   | STATUS_SINGLE (fn, max_errors) ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    let (error_list, dropped_count) =
-      take_max_errors (ServerStatusSingle.go fn ctx) max_errors
-    in
-    ( env,
-      ( error_list,
-        dropped_count,
-        genv.local_config.ServerLocalConfig.highlighted_error_format ) )
+    (env, take_max_errors (ServerStatusSingle.go fn ctx) max_errors)
   | COVERAGE_LEVELS (path, file_input) ->
     let path = Relative_path.create_detect_prefix path in
     let (ctx, entry) = single_ctx env path file_input in
@@ -337,23 +329,14 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | COVERAGE_COUNTS path -> (env, ServerCoverageMetric.go path genv env)
   | LINT fnl ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    ( env,
-      ( ServerLint.go genv ctx fnl,
-        genv.local_config.ServerLocalConfig.highlighted_error_format ) )
+    (env, ServerLint.go genv ctx fnl)
   | LINT_STDIN { filename; contents } ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    ( env,
-      ( ServerLint.go_stdin ctx ~filename ~contents,
-        genv.local_config.ServerLocalConfig.highlighted_error_format ) )
+    (env, ServerLint.go_stdin ctx ~filename ~contents)
   | LINT_ALL code ->
     let ctx = Provider_utils.ctx_from_server_env env in
-    ( env,
-      ( ServerLint.lint_all genv ctx code,
-        genv.local_config.ServerLocalConfig.highlighted_error_format ) )
-  | LINT_XCONTROLLER fnl ->
-    ( env,
-      ( ServerLint.go_xcontroller genv env fnl,
-        genv.local_config.ServerLocalConfig.highlighted_error_format ) )
+    (env, ServerLint.lint_all genv ctx code)
+  | LINT_XCONTROLLER fnl -> (env, ServerLint.go_xcontroller genv env fnl)
   | CREATE_CHECKPOINT x -> (env, ServerCheckpoint.create_checkpoint x)
   | RETRIEVE_CHECKPOINT x -> (env, ServerCheckpoint.retrieve_checkpoint x)
   | DELETE_CHECKPOINT x -> (env, ServerCheckpoint.delete_checkpoint x)

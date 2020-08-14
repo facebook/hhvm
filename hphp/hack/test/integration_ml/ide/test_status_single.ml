@@ -26,7 +26,7 @@ let status_single_request =
 
 let check_status_single_response = function
   | None -> Test.fail "Expected STATUS_SINGLE response"
-  | Some ([], _, _) -> ()
+  | Some ([], _) -> ()
   | Some _ -> Test.fail "Expected no errors"
 
 let root = "/"

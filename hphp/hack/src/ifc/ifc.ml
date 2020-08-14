@@ -439,6 +439,23 @@ let throw renv env exn_ty =
       subtype renv.re_proto.pre_meta exn_ty renv.re_exn
       && add_dependencies (PCSet.elements lpc) renv.re_exn)
 
+let rec set_policy p = function
+  | Tprim _ -> Tprim p
+  | Tgeneric _ -> Tgeneric p
+  | Ttuple l -> Ttuple (List.map ~f:(set_policy p) l)
+  | Tunion l -> Tunion (List.map ~f:(set_policy p) l)
+  | Tinter l -> Tinter (List.map ~f:(set_policy p) l)
+  | Tclass c -> Tclass { c with c_self = p }
+  | Tfun f ->
+    Tfun
+      {
+        f_pc = p;
+        f_self = p;
+        f_args = List.map ~f:(set_policy p) f.f_args;
+        f_ret = set_policy p f.f_ret;
+        f_exn = set_policy p f.f_exn;
+      }
+
 let call renv env callable_name that_pty_opt args_pty ret_ty =
   let ret_pty =
     let prefix = callable_name ^ "_ret" in
@@ -449,42 +466,44 @@ let call renv env callable_name that_pty_opt args_pty ret_ty =
   let callee_exn =
     class_ptype (Some callee_exn_policy) renv.re_proto [] Decl.exception_id
   in
+  (* The PC of the function being called depends on the join of the current
+   * PC dependencies, as well as the function's own self policy *)
+  let (env, pc_joined) =
+    let join pc' (env, pc) = policy_join renv env ~prefix:"pcjoin" pc pc' in
+    PCSet.fold join (Env.get_gpc_policy renv env K.Next) (env, callee)
+  in
+  let hole_ty =
+    {
+      f_pc = pc_joined;
+      f_self = callee;
+      f_args = args_pty;
+      f_ret = ret_pty;
+      f_exn = callee_exn;
+    }
+  in
   let env =
     match SMap.find_opt callable_name renv.re_proto.pre_decl.de_fun with
+    | Some { fd_kind = FDCIPP } ->
+      let cipp_policy = Env.new_policy_var renv.re_proto "implicit" in
+      let cipp_ty = set_policy cipp_policy (Tfun hole_ty) in
+      Env.acc env @@ subtype renv.re_proto.pre_meta cipp_ty (Tfun hole_ty)
     (* TODO(T68007489): Temporarily infer everything for every function call.
      * switch back to using InferFlows annotation when scaling is an issue.
      *)
     | Some _ ->
-      (* The PC of the function being called depends on the join of the current
-       * PC dependencies, as well as the function's own self policy *)
-      let (env, pc_joined) =
-        let join pc' (env, pc) = policy_join renv env ~prefix:"pcjoin" pc pc' in
-        PCSet.fold join (Env.get_gpc_policy renv env K.Next) (env, callee)
-      in
       let fp =
-        {
-          fp_name = callable_name;
-          fp_this = that_pty_opt;
-          fp_type =
-            {
-              f_pc = pc_joined;
-              f_self = callee;
-              f_args = args_pty;
-              f_ret = ret_pty;
-              f_exn = callee_exn;
-            };
-        }
+        { fp_name = callable_name; fp_this = that_pty_opt; fp_type = hole_ty }
       in
-      let env = Env.acc env (fun acc -> Chole fp :: acc) in
-      let env = Env.add_dep env callable_name in
-      let env = Env.acc env @@ add_dependencies [callee] ret_pty in
-      (* Any function call may throw, so we need to update the current PC and
-       * exception dependencies based on the callee's exception policy
-       *)
-      let env = Env.push_pc env K.Next callee_exn_policy in
-      throw renv env callee_exn
+      Env.acc env (fun acc -> Chole fp :: acc)
     | None -> fail "unknown function '%s'" callable_name
   in
+  let env = Env.add_dep env callable_name in
+  let env = Env.acc env @@ add_dependencies [callee] ret_pty in
+  (* Any function call may throw, so we need to update the current PC and
+   * exception dependencies based on the callee's exception policy
+   *)
+  let env = Env.push_pc env K.Next callee_exn_policy in
+  let env = throw renv env callee_exn in
   (env, ret_pty)
 
 let vec_element_pty vec_pty =
@@ -785,23 +804,6 @@ and block renv env (blk : Tast.block) =
     Env.merge_pcs_into env [K.Exit; K.Catch] K.Next
   in
   List.fold_left ~f:seq ~init:env blk
-
-let rec set_policy p = function
-  | Tprim _ -> Tprim p
-  | Tgeneric _ -> Tgeneric p
-  | Ttuple l -> Ttuple (List.map ~f:(set_policy p) l)
-  | Tunion l -> Tunion (List.map ~f:(set_policy p) l)
-  | Tinter l -> Tinter (List.map ~f:(set_policy p) l)
-  | Tclass c -> Tclass { c with c_self = p }
-  | Tfun f ->
-    Tfun
-      {
-        f_pc = p;
-        f_self = p;
-        f_args = List.map ~f:(set_policy p) f.f_args;
-        f_ret = set_policy p f.f_ret;
-        f_exn = set_policy p f.f_exn;
-      }
 
 let rec domain =
   let get_var = function

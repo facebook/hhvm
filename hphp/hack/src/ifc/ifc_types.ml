@@ -61,7 +61,10 @@ and class_ = {
 }
 
 and fun_ = {
+  (* The PC guards a function's effects *)
   f_pc: policy;
+  (* Policy that the function's computational contents depend on *)
+  f_self: policy;
   f_args: ptype list;
   f_ret: ptype;
   f_exn: ptype;

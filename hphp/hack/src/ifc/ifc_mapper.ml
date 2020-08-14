@@ -37,6 +37,7 @@ and fun_ fty fpol f =
   let ptype = ptype fty fpol in
   {
     f_pc = fpol f.f_pc;
+    f_self = fpol f.f_self;
     f_args = List.map ~f:ptype f.f_args;
     f_ret = ptype f.f_ret;
     f_exn = ptype f.f_exn;

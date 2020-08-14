@@ -163,6 +163,8 @@ let rec subtype meta t1 t2 acc =
     List.fold ~f:(fun acc (t1, t2) -> subtype t2 t1 acc) ~init:acc zipped_args
     (* Contravariant in PC *)
     |> L.(f2.f_pc < f1.f_pc)
+    (* Covariant in its own identity *)
+    |> L.(f1.f_self < f2.f_self)
     (* Covariant in return type and exceptions *)
     |> L.(subtype f1.f_ret f2.f_ret && subtype f1.f_exn f2.f_exn)
   | (Tunion tl, _) ->
@@ -225,10 +227,11 @@ let adjust ?(prefix = "weak") ~adjustment renv env ty =
       (acc, Tclass { class_ with c_self = super_pol; c_tparams = tparams })
     | Tfun fun_ ->
       let (acc, f_pc) = freshen_pol_con acc fun_.f_pc in
+      let (acc, f_self) = freshen_pol_cov acc fun_.f_self in
       let (acc, f_args) = List.map_env acc ~f:freshen_con fun_.f_args in
       let (acc, f_ret) = freshen_cov acc fun_.f_ret in
       let (acc, f_exn) = freshen_cov acc fun_.f_exn in
-      (acc, Tfun { f_pc; f_args; f_ret; f_exn })
+      (acc, Tfun { f_pc; f_self; f_args; f_ret; f_exn })
   in
   let (acc, ty') = freshen adjustment env.e_acc ty in
   (Env.acc env (fun _ -> acc), ty')
@@ -243,17 +246,16 @@ let rec add_dependencies pl t acc =
     L.(pl <* [Pbot]) acc
   | Tprim pol
   | Tgeneric pol
-  (* For classes, we only add a dependency to the class policy and not to its
-     properties *)
-  | Tclass { c_self = pol; _ } ->
+  (* For classes and functions, we only add a dependency to the self policy and
+     not to its properties *)
+  | Tclass { c_self = pol; _ }
+  | Tfun { f_self = pol; _ } ->
     L.(pl <* [pol]) acc
   | Tunion tl
   | Ttuple tl
   | Tinter tl ->
     let f acc t = add_dependencies pl t acc in
     List.fold tl ~init:acc ~f
-  (* TODO(T70958722): Implement add_dependencies for Tfun *)
-  | Tfun _ -> fail "cannot add dependencies for Tfun"
 
 let policy_join renv env ?(prefix = "join") p1 p2 =
   match Logic.policy_join p1 p2 with
@@ -442,6 +444,7 @@ let call renv env callable_name that_pty_opt args_pty ret_ty =
     let prefix = callable_name ^ "_ret" in
     ptype ~prefix None renv.re_proto ret_ty
   in
+  let callee = Env.new_policy_var renv.re_proto callable_name in
   let callee_exn_policy = Env.new_policy_var renv.re_proto "exn" in
   let callee_exn =
     class_ptype (Some callee_exn_policy) renv.re_proto [] Decl.exception_id
@@ -452,9 +455,11 @@ let call renv env callable_name that_pty_opt args_pty ret_ty =
      * switch back to using InferFlows annotation when scaling is an issue.
      *)
     | Some _ ->
+      (* The PC of the function being called depends on the join of the current
+       * PC dependencies, as well as the function's own self policy *)
       let (env, pc_joined) =
         let join pc' (env, pc) = policy_join renv env ~prefix:"pcjoin" pc pc' in
-        PCSet.fold join (Env.get_gpc_policy renv env K.Next) (env, Pbot)
+        PCSet.fold join (Env.get_gpc_policy renv env K.Next) (env, callee)
       in
       let fp =
         {
@@ -463,6 +468,7 @@ let call renv env callable_name that_pty_opt args_pty ret_ty =
           fp_type =
             {
               f_pc = pc_joined;
+              f_self = callee;
               f_args = args_pty;
               f_ret = ret_pty;
               f_exn = callee_exn;
@@ -471,6 +477,7 @@ let call renv env callable_name that_pty_opt args_pty ret_ty =
       in
       let env = Env.acc env (fun acc -> Chole fp :: acc) in
       let env = Env.add_dep env callable_name in
+      let env = Env.acc env @@ add_dependencies [callee] ret_pty in
       (* Any function call may throw, so we need to update the current PC and
        * exception dependencies based on the callee's exception policy
        *)
@@ -790,6 +797,7 @@ let rec set_policy p = function
     Tfun
       {
         f_pc = p;
+        f_self = p;
         f_args = List.map ~f:(set_policy p) f.f_args;
         f_ret = set_policy p f.f_ret;
         f_exn = set_policy p f.f_exn;
@@ -882,13 +890,20 @@ let callable meta decl_env class_name_opt name saved_env params body lrty =
     end;
 
     let callable_name = Decl.make_callable_name class_name_opt name in
+    let f_self = Env.new_policy_var proto_renv callable_name in
 
     let proto =
       {
         fp_name = Decl.make_callable_name class_name_opt name;
         fp_this = this_ty;
         fp_type =
-          { f_pc = global_pc; f_args = param_tys; f_ret = ret_ty; f_exn = exn };
+          {
+            f_pc = global_pc;
+            f_self;
+            f_args = param_tys;
+            f_ret = ret_ty;
+            f_exn = exn;
+          };
       }
     in
 

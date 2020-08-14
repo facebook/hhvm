@@ -71,10 +71,11 @@ and lazy_ptype fmt ty =
   else
     fprintf fmt "?thunk"
 
+(* Format: <pc, self>(arg1, arg2, ...): ret [exn] *)
 and fun_ fmt fn =
-  fprintf fmt "<%a, %a>" policy fn.f_pc ptype fn.f_exn;
+  fprintf fmt "<%a, %a>" policy fn.f_pc policy fn.f_self;
   fprintf fmt "(@[<hov>%a@])" (list comma_sep ptype) fn.f_args;
-  fprintf fmt ":@ %a" ptype fn.f_ret
+  fprintf fmt ":@ %a [%a]" ptype fn.f_ret ptype fn.f_exn
 
 let fun_proto fmt fp =
   Option.iter ~f:(fprintf fmt "(this: %a)->" ptype) fp.fp_this;

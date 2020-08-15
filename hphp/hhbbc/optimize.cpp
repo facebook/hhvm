@@ -940,6 +940,7 @@ void update_bytecode(php::WideFunc& func, BlockUpdates&& blockUpdates,
       }
     }
   }
+  blockUpdates.clear();
 }
 
 //////////////////////////////////////////////////////////////////////

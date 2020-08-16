@@ -109,6 +109,7 @@ struct c_WaitableWaitHandle;
 struct Strobelight final {
   static Strobelight& getInstance(void) noexcept;
   static bool active();
+  static bool isXenonActive();
 
   ~Strobelight() noexcept {};
   Strobelight(const Strobelight&) = delete;
@@ -122,7 +123,6 @@ struct Strobelight final {
 
  private:
   Strobelight() noexcept {};
-  static bool isXenonActive();
 };
 
 }

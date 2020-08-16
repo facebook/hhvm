@@ -37,8 +37,6 @@ TRACE_SET_MOD(strobelight);
 
 namespace {
 
-const int64_t kXenonExclusionInterval_s = 10;
-
 // statics used by the Strobelight classes
 const StaticString
   s_class("class"),
@@ -61,7 +59,10 @@ void onStrobelightSignal(int signo) {
     // sets on only current thread
     if (rds::header()) {
       // Ignore threads that are not serving requests, otherwise this segfaults
-      setSurpriseFlag(XenonSignalFlag);
+      if (!Strobelight::isXenonActive()) {
+        // Do not set the flag if Xenon is actively profiling this request
+        setSurpriseFlag(XenonSignalFlag);
+      }
     }
   } else if (signo == strobelight::kSignumAll) {
     // sets on ALL threads
@@ -157,9 +158,8 @@ void Strobelight::init() {
 }
 
 bool Strobelight::active() {
-  // Turn off strobelight if xenon is forced on
-  // TODO remove this when strobelight has its own surpriseFlag
-  if (isXenonActive()) {
+  if (rds::header() && isXenonActive()) {
+    // if Xenon owns this request, back off
     return false;
   }
 
@@ -174,10 +174,9 @@ bool Strobelight::isXenonActive() {
     return true;
   }
 
-  int64_t now_s = time(NULL);
-  int64_t then_s = Xenon::getInstance().getLastSurpriseTime();
-  if (now_s - then_s <= kXenonExclusionInterval_s) {
-    TRACE(2, "Strobelight::isXenonActive => true, timeout\n");
+  bool xenonProfiled = Xenon::getInstance().getIsProfiledRequest();
+  if (xenonProfiled) {
+    TRACE(2, "Strobelight::isXenonActive => true, profiled\n");
     return true;
   }
 
@@ -214,16 +213,17 @@ void Strobelight::log(c_WaitableWaitHandle* wh) const {
 void Strobelight::surpriseAll() {
   TRACE(1, "Strobelight::surpriseAll\n");
 
-  // TODO remove this when strobelight has its own surpriseFlag
-  if (isXenonActive()) {
-    return;
-  }
-
   RequestInfo::ExecutePerRequest(
     [] (RequestInfo* t) {
       // TODO: get a dedicated surprise flag to avoid colliding with xenon
       // Set the strobelight flag to collect a sample
-      t->m_reqInjectionData.setFlag(XenonSignalFlag);
+      if (!isXenonActive()) {
+        // Xenon has first crack at profiling requests. If a request
+        // is marked as being profiled, we do not allow strobelight to
+        // interfere with Xenon's profiling. In practice, collisions
+        // should be extremely rare.
+        t->m_reqInjectionData.setFlag(XenonSignalFlag);
+      }
     }
   );
 }

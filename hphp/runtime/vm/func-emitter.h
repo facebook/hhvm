@@ -72,7 +72,6 @@ struct FuncEmitter {
   };
 
   typedef std::vector<ParamInfo> ParamInfoVec;
-  typedef std::vector<Func::SVInfo> SVInfoVec;
   typedef std::vector<EHEnt> EHEntVec;
 
   /////////////////////////////////////////////////////////////////////////////

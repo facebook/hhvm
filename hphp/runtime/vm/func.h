@@ -166,17 +166,7 @@ struct Func final {
     UserAttributeMap userAttributes;
   };
 
-  /*
-   * Static variable info.
-   */
-  struct SVInfo {
-    template<class SerDe> void serde(SerDe& sd) { sd(name); }
-
-    LowStringPtr name;
-  };
-
   using ParamInfoVec = VMFixedVector<ParamInfo>;
-  using SVInfoVec = VMFixedVector<SVInfo>;
   using EHEntVec = VMFixedVector<EHEnt>;
   using UpperBoundVec = VMCompactVector<TypeConstraint>;
   using ParamUBMap = vm_flat_map<uint32_t, UpperBoundVec>;

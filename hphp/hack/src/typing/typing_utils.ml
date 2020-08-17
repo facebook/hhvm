@@ -124,6 +124,18 @@ let (union_ref : union ref) = ref (not_implemented "union")
 
 let union x = !union_ref x
 
+type make_union =
+  env ->
+  Reason.t ->
+  locl_ty list ->
+  Reason.t option ->
+  Reason.t option ->
+  env * locl_ty
+
+let (make_union_ref : make_union ref) = ref (not_implemented "make_union")
+
+let make_union env = !make_union_ref env
+
 type union_i =
   env -> Reason.t -> internal_type -> locl_ty -> env * internal_type
 

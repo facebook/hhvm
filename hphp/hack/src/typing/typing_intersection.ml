@@ -41,7 +41,7 @@ let non env r ty ~approx =
 In this context, "atomic" means: which can't be broken down in a union of smaller
 types.
 For now, only break Toption. We might also break down things like num or arraykey
-in the future if necessary. *)
+in the future if necessary. Inverted by recompose_atomic. *)
 let decompose_atomic env ty =
   let rec decompose_list tyl acc_tyl =
     match tyl with
@@ -55,6 +55,28 @@ let decompose_atomic env ty =
   let tyl = decompose ty [] [] in
   let tyl = TySet.elements (TySet.of_list tyl) in
   (env, MkType.union (get_reason ty) tyl)
+
+(** Build a union from a list of types. Flatten if any of the types themselves are union.
+    Also, pull nullable out to a top-level Toption. Undoes decompose atomic.
+*)
+let recompose_atomic env r tyl =
+  let rec traverse nullable dynamic tyl_acc tyl =
+    match tyl with
+    | [] -> (nullable, dynamic, List.rev tyl_acc)
+    | ty :: tyl ->
+      if Utils.is_nothing env ty then
+        traverse nullable dynamic tyl_acc tyl
+      else (
+        match deref ty with
+        | (r, Toption ty) -> traverse (Some r) dynamic (ty :: tyl_acc) tyl
+        | (r, Tprim Aast.Tnull) -> traverse (Some r) dynamic tyl_acc tyl
+        | (r, Tdynamic) -> traverse nullable (Some r) tyl_acc tyl
+        | (_, Tunion tyl') -> traverse nullable dynamic tyl_acc (tyl' @ tyl)
+        | _ -> traverse nullable dynamic (ty :: tyl_acc) tyl
+      )
+  in
+  let (nullable_r, dynamic_r, tyl) = traverse None None [] tyl in
+  Utils.make_union env r tyl nullable_r dynamic_r
 
 (** Number of '&' symbols in an intersection representation. E.g. for (A & B),
 returns 1, for A, returns 0. *)
@@ -144,13 +166,13 @@ let rec intersect env ~r ty1 ty2 =
               let (env, not_common_tyl) =
                 intersect_unions env r (r1, tyl1') (r2, tyl2')
               in
-              Utils.fold_union env r (common_tyl @ not_common_tyl)
+              recompose_atomic env r (common_tyl @ not_common_tyl)
             | ((r_union, Tunion tyl), ty)
             | (ty, (r_union, Tunion tyl)) ->
               let (env, inter_tyl) =
                 intersect_ty_union env r (mk ty) (r_union, tyl)
               in
-              Utils.fold_union env r inter_tyl
+              recompose_atomic env r inter_tyl
             | _ -> make_intersection env r [ty1; ty2]
           with Nothing -> (env, MkType.nothing r)
         in

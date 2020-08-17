@@ -650,6 +650,8 @@ let () = Typing_utils.fold_union_ref := fold_union
 
 let () = Typing_utils.simplify_unions_ref := simplify_unions
 
+let () = Typing_utils.make_union_ref := make_union
+
 let () =
   (* discard optional parameter. *)
   let simplify_unions env ty = simplify_unions env ty in

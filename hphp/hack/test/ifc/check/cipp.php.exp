@@ -1,8 +1,32 @@
-Data with an implicit policy is leaked by pc in context PUBLIC.
-Data with an implicit policy is leaked by \C in context PUBLIC.
-Data with an implicit policy is leaked by pc in context A.
-Data with an implicit policy is leaked by \C in context A.
-Data with an implicit policy is leaked by $x in context A.
-Data with an implicit policy is leaked by pc in context PUBLIC.
-Data with an implicit policy is leaked by \C in context PUBLIC.
-Data with an implicit policy is leaked by $x in context PUBLIC.
+File "cipp.php", line 39, characters 3-14:
+Context-implicit policy leaks into PUBLIC via pc. (Typing[4380])
+File "cipp.php", line 9, characters 14-21:
+Leakage sink
+File "cipp.php", line 39, characters 3-14:
+Context-implicit policy leaks into PUBLIC via \C. (Typing[4380])
+File "cipp.php", line 9, characters 14-21:
+Leakage sink
+File "cipp.php", line 28, characters 3-13:
+Context-implicit policy leaks into A via pc. (Typing[4380])
+File "cipp.php", line 6, characters 14-19:
+Leakage sink
+File "cipp.php", line 28, characters 3-13:
+Context-implicit policy leaks into A via \C. (Typing[4380])
+File "cipp.php", line 6, characters 14-19:
+Leakage sink
+File "cipp.php", line 28, characters 3-13:
+Context-implicit policy leaks into A via $x. (Typing[4380])
+File "cipp.php", line 6, characters 14-19:
+Leakage sink
+File "cipp.php", line 33, characters 3-15:
+Context-implicit policy leaks into PUBLIC via pc. (Typing[4380])
+File "cipp.php", line 9, characters 14-21:
+Leakage sink
+File "cipp.php", line 33, characters 3-15:
+Context-implicit policy leaks into PUBLIC via \C. (Typing[4380])
+File "cipp.php", line 9, characters 14-21:
+Leakage sink
+File "cipp.php", line 33, characters 3-15:
+Context-implicit policy leaks into PUBLIC via $x. (Typing[4380])
+File "cipp.php", line 9, characters 14-21:
+Leakage sink

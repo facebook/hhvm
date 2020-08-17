@@ -5083,6 +5083,23 @@ let illegal_information_flow
   in
   add_list (Typing.err_code Typing.IllegalInformationFlow) reasons
 
+let context_implicit_policy_leakage
+    primary secondaries (source_poss, source) (sink_poss, sink) =
+  let program_point p =
+    (p, "Another program point contributing to the leakage")
+  in
+  let explain_source p = (p, "Leakage source") in
+  let explain_sink p = (p, "Leakage sink") in
+  let reasons =
+    ( primary,
+      Printf.sprintf "Context-implicit policy leaks into %s via %s." sink source
+    )
+    :: List.map ~f:program_point secondaries
+    @ List.map ~f:explain_source source_poss
+    @ List.map ~f:explain_sink sink_poss
+  in
+  add_list (Typing.err_code Typing.ContextImplicitPolicyLeakage) reasons
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

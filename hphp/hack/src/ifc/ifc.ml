@@ -1041,11 +1041,10 @@ let check meta tast () =
     let simple_illegal_flows =
       Logic.entailment_violations meta.m_opts.opt_security_lattice simple
     in
-    let report_simple_illegal_flows (poss, source, sink) =
-      let source_poss = PosSet.elements @@ pos_of source in
-      let sink_poss = PosSet.elements @@ pos_of sink in
-      let source = (source_poss, Format.asprintf "%a" Pp.policy source) in
-      let sink = (sink_poss, Format.asprintf "%a" Pp.policy sink) in
+    let to_err node =
+      (PosSet.elements (pos_of node), Format.asprintf "%a" Pp.policy node)
+    in
+    let illegal_information_flow (poss, source, sink) =
       (* Separate error positions that are not in the result and filter out
          unknown positions *)
       let (primary_poss, other_poss) =
@@ -1062,14 +1061,28 @@ let check meta tast () =
           (primary, List.unordered_append primary_poss other_poss)
       in
 
+      let (source, sink) = (to_err source, to_err sink) in
       Errors.illegal_information_flow primary_pos other_poss source sink
     in
 
-    if should_print ~user_mode:meta.m_opts.opt_mode ~phase:Mcheck then begin
-      List.iter ~f:report_simple_illegal_flows simple_illegal_flows;
+    let context_implicit_policy_leakage (pos, source, sink) =
+      (* The latest program point contributing to the violation is the primary error *)
+      let (primary, secondaries) =
+        let poss =
+          PosSet.elements pos |> List.sort ~compare:Pos.compare |> List.rev
+        in
+        match poss with
+        | [] -> (result.res_span, [])
+        | primary :: secondaries -> (primary, secondaries)
+      in
+      let (source, sink) = (to_err source, to_err sink) in
+      Errors.context_implicit_policy_leakage primary secondaries source sink
+    in
 
-      let f (_, l, r) = Format.printf "%a@," Pp.implicit_violation (l, r) in
-      List.iter ~f implicit
+    if should_print ~user_mode:meta.m_opts.opt_mode ~phase:Mcheck then begin
+      List.iter ~f:illegal_information_flow simple_illegal_flows;
+
+      List.iter ~f:context_implicit_policy_leakage implicit
     end
   in
   SMap.iter check_valid_flow simplified_results

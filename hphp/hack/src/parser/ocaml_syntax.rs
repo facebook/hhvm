@@ -4,7 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-pub mod ocaml_coroutine_state;
+pub mod ocaml_context_state;
 mod ocaml_syntax_generated;
 
 use ocaml::core::mlvalues::Value as OcamlValue;
@@ -18,6 +18,7 @@ use parser_core_types::{
 };
 use rust_to_ocaml::*;
 
+pub use crate::ocaml_context_state::*;
 pub use crate::ocaml_syntax_generated::*;
 
 #[derive(Debug, Clone)]

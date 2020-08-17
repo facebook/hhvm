@@ -80,7 +80,6 @@ type aast_result = {
 }
 
 (* TODO: Make these not default to positioned_syntax *)
-include Full_fidelity_ast_types
 module SourceText = Full_fidelity_source_text
 
 (* Creates a relative position out of the error and the given path and source text. *)
@@ -116,31 +115,6 @@ external rust_from_text_ffi :
   SourceText.t ->
   (Rust_aast_parser_types.result, Rust_aast_parser_types.error) result
   = "from_text"
-
-let rewrite_coroutines source_text script =
-  Full_fidelity_editable_positioned_syntax.from_positioned_syntax script
-  |> Ppl_class_rewriter.rewrite_ppl_classes
-  |> Coroutine_lowerer.lower_coroutines
-  |> Full_fidelity_editable_positioned_syntax.text
-  |> SourceText.make (SourceText.file_path source_text)
-
-(*
-rewrite_coroutines_for_rust is invoked from Rust. It takes `source_text` and `script` and
-returns original source and rewritten source.
-
-Why does it need to take `source_text`? It only requires `file_path`, why not just pass file_path
-from Rust side?
-
-`source_text` contains raw source string, the string won't be copied when Rust receives it for the sake of perf.
-This assumes Ocaml GC won't collect it during Rust call. `rewrite_coroutines_for_rust` will be called from Rust during
-a function call to Rust. Ocaml GC may collect/promote it. Passing it to Ocaml and return it(possiblely not smae ptr)
-back to Rust can avoid segfault.
-*)
-let rewrite_coroutines_for_rust source_text script =
-  (source_text, rewrite_coroutines source_text script)
-
-let () =
-  Callback.register "rewrite_coroutines_for_rust" rewrite_coroutines_for_rust
 
 let process_syntax_errors
     (env : env)

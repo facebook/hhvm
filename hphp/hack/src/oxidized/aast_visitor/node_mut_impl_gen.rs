@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<77512066359e9838cc1afe49d039281c>>
+// @generated SignedSource<<bcaef1a5ea52d164f4adc18fed276abd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1229,7 +1229,6 @@ impl<P: Params> NodeMut<P> for HintFun {
         v: &mut dyn VisitorMut<'node, P = P>,
     ) -> Result<(), P::Error> {
         self.reactive_kind.accept(c, v)?;
-        self.is_coroutine.accept(c, v)?;
         self.param_tys.accept(c, v)?;
         self.param_kinds.accept(c, v)?;
         self.param_mutability.accept(c, v)?;

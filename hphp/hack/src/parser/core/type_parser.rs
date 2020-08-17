@@ -841,7 +841,7 @@ where
         let _ = parser1.assert_token(TokenKind::LeftParen);
         let token = parser1.peek_token();
         match token.kind() {
-            TokenKind::Function | TokenKind::Coroutine => self.parse_closure_type_specifier(),
+            TokenKind::Function => self.parse_closure_type_specifier(),
             _ => self.parse_tuple_or_union_or_intersection_type_specifier(),
         }
     }

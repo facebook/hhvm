@@ -66,7 +66,6 @@ and hint_ p env = function
   | Hfun
       {
         hf_reactive_kind = reactivity;
-        hf_is_coroutine = is_coroutine;
         hf_param_tys = hl;
         hf_param_kinds = kl;
         hf_param_mutability = muts;
@@ -119,10 +118,7 @@ and hint_ p env = function
         ft_ret = ret;
         ft_flags =
           make_ft_flags
-            ( if is_coroutine then
-              Ast_defs.FCoroutine
-            else
-              Ast_defs.FSync )
+            Ast_defs.FSync
             None
             ~return_disposable:false
             ~returns_void_to_rx:false

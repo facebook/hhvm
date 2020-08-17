@@ -156,10 +156,6 @@ where
         self.is_specific_token(TokenKind::Async)
     }
 
-    pub fn is_coroutine(&self) -> bool {
-        self.is_specific_token(TokenKind::Coroutine)
-    }
-
     pub fn is_yield(&self) -> bool {
         self.is_specific_token(TokenKind::Yield)
     }

@@ -1136,32 +1136,24 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 self.tany_with_pos(header.name.get_pos(self.state.arena).unwrap_or(Pos::none()))
             }),
         };
-        let (async_, is_coroutine) = header.modifiers.iter().fold(
-            (false, false),
-            |(async_, is_coroutine), node| match node {
-                Node::Token(TokenKind::Async) => (true, is_coroutine),
-                Node::Token(TokenKind::Coroutine) => (async_, true),
-                _ => (async_, is_coroutine),
-            },
-        );
-        let fun_kind = if is_coroutine {
-            FunKind::FCoroutine
-        } else {
-            if body.iter().any(|node| match node {
-                Node::Token(TokenKind::Yield) => true,
-                _ => false,
-            }) {
-                if async_ {
-                    FunKind::FAsyncGenerator
-                } else {
-                    FunKind::FGenerator
-                }
+        let async_ = header
+            .modifiers
+            .iter()
+            .any(|n| matches!(n, Node::Token(TokenKind::Async)));
+        let fun_kind = if body.iter().any(|node| match node {
+            Node::Token(TokenKind::Yield) => true,
+            _ => false,
+        }) {
+            if async_ {
+                FunKind::FAsyncGenerator
             } else {
-                if async_ {
-                    FunKind::FAsync
-                } else {
-                    FunKind::FSync
-                }
+                FunKind::FGenerator
+            }
+        } else {
+            if async_ {
+                FunKind::FAsync
+            } else {
+                FunKind::FSync
             }
         };
         let attributes = attributes.as_attributes(self.state.arena)?;
@@ -1766,7 +1758,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::As
             | TokenKind::Super
             | TokenKind::Async
-            | TokenKind::Coroutine
             | TokenKind::DotDotDot
             | TokenKind::Extends
             | TokenKind::Final

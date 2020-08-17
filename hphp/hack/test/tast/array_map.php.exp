@@ -10,7 +10,6 @@
           (Some ([4:3-24],
                  (Hfun
                     { hf_reactive_kind = FNonreactive;
-                      hf_is_coroutine = false;
                       hf_param_tys = [([4:13-16], (Hprim Tint))];
                       hf_param_kinds = [None]; hf_param_mutability = [None];
                       hf_variadic_ty = None;
@@ -25,7 +24,6 @@
            (Some ([5:3-32],
                   (Hfun
                      { hf_reactive_kind = FNonreactive;
-                       hf_is_coroutine = false;
                        hf_param_tys =
                        [([5:13-16], (Hprim Tint));
                          ([5:18-24], (Hprim Tstring))];
@@ -44,7 +42,6 @@
            (Some ([6:3-47],
                   (Hfun
                      { hf_reactive_kind = FNonreactive;
-                       hf_is_coroutine = false;
                        hf_param_tys =
                        [([6:13-16], (Hprim Tint));
                          ([6:18-24], (Hprim Tstring));
@@ -66,7 +63,6 @@
            (Some ([7:3-24],
                   (Hfun
                      { hf_reactive_kind = FNonreactive;
-                       hf_is_coroutine = false;
                        hf_param_tys = [([7:13-16], (Hprim Tnum))];
                        hf_param_kinds = [None]; hf_param_mutability = [None];
                        hf_variadic_ty = None;

@@ -183,7 +183,7 @@ where
 
     pub fn parse_statement(&mut self) -> S::R {
         match self.peek_token_kind() {
-            TokenKind::Async | TokenKind::Coroutine | TokenKind::Function => {
+            TokenKind::Async | TokenKind::Function => {
                 self.parse_possible_php_function(/* toplevel:*/ false)
             }
             TokenKind::Abstract
@@ -293,12 +293,12 @@ where
         let kind0 = self.peek_token_kind_with_lookahead(0);
         let kind1 = self.peek_token_kind_with_lookahead(1);
         match (kind0, kind1) {
-            | (TokenKind::Async, TokenKind::Function) | (TokenKind::Coroutine, TokenKind::Function)
+            | (TokenKind::Async, TokenKind::Function)
                 if self.peek_token_kind_with_lookahead(2) == TokenKind::LeftParen =>
                 self.parse_expression_statement(),
             | (TokenKind::Function, TokenKind::LeftParen) // Verbose-style lambda
-            // Async / coroutine, compact-style lambda
-            | (TokenKind::Async, TokenKind::LeftParen)| (TokenKind::Coroutine, TokenKind::LeftParen)
+            // Async, compact-style lambda
+            | (TokenKind::Async, TokenKind::LeftParen)
             | (TokenKind::Async, TokenKind::LeftBrace) // Async block
                 => self.parse_expression_statement(),
             | _ => {

@@ -870,10 +870,6 @@ SYNTAX
     Full_fidelity_source_text.t ->
     Full_fidelity_parser_env.t ->
     unit * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
-  val rust_parse_with_coroutine_sc :
-    Full_fidelity_source_text.t ->
-    Full_fidelity_parser_env.t ->
-    bool * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
   val rust_parse_with_decl_mode_sc :
     Full_fidelity_source_text.t ->
     Full_fidelity_parser_env.t ->
@@ -928,7 +924,6 @@ TYPE_TESTS
   val is_abstract       : t -> bool
   val is_final          : t -> bool
   val is_async          : t -> bool
-  val is_coroutine      : t -> bool
   val is_void           : t -> bool
   val is_left_brace     : t -> bool
   val is_ellipsis       : t -> bool
@@ -1120,7 +1115,7 @@ module GenerateFFRustPositionedSmartConstructors = struct
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf
       "    fn make_%s(&mut self, %s) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, NoState>>::make_%s(self, %s)
+        <Self as SyntaxSmartConstructors<'src, S, State>>::make_%s(self, %s)
     }\n\n"
       x.type_name
       args
@@ -1131,48 +1126,58 @@ module GenerateFFRustPositionedSmartConstructors = struct
     make_header CStyle ""
     ^ "
 
-use parser_core_types::positioned_syntax::PositionedSyntax;
-use parser_core_types::positioned_token::PositionedToken;
-use smart_constructors::{NoState, SmartConstructors};
-use syntax_smart_constructors::SyntaxSmartConstructors;
+
+use parser_core_types::{syntax::*, lexable_token::LexableToken};
+use smart_constructors::SmartConstructors;
+use syntax_smart_constructors::{SyntaxSmartConstructors, StateType};
 
 #[derive(Clone)]
-pub struct PositionedSmartConstructors {
-    pub state: NoState,
+pub struct PositionedSmartConstructors<'src, S, State: StateType<'src, S>> {
+    pub state: State,
+    phantom_s: std::marker::PhantomData<&'src S>,
 }
 
-impl PositionedSmartConstructors {
-    pub fn new() -> Self {
-        Self { state: NoState }
+impl<'src, S, State: StateType<'src, S>> PositionedSmartConstructors<'src, S, State> {
+    pub fn new(state: State) -> Self {
+        Self { state, phantom_s: std::marker::PhantomData }
     }
 }
 
-impl<'src> SyntaxSmartConstructors<'src, PositionedSyntax, NoState> for PositionedSmartConstructors {}
+impl<'src, S, State> SyntaxSmartConstructors<'src, S, State> for PositionedSmartConstructors<'src, S, State>
+where
+    State: StateType<'src, S>,
+    S: SyntaxType<'src, State> + Clone,
+    S::Token: LexableToken<'src>,
+{}
 
-impl<'src> SmartConstructors<'src, NoState> for PositionedSmartConstructors {
-    type Token = PositionedToken;
-    type R = PositionedSyntax;
+impl<'src, S, State> SmartConstructors<'src, State> for PositionedSmartConstructors<'src, S, State>
+where
+    S::Token: LexableToken<'src>,
+    S: SyntaxType<'src, State> + Clone,
+    State: StateType<'src, S>,
+{
+    type Token = S::Token;
+    type R = S;
 
-    fn state_mut(&mut self) -> &mut NoState {
+    fn state_mut(&mut self) -> &mut State {
        &mut self.state
     }
 
-    fn into_state(self) -> NoState {
+    fn into_state(self) -> State {
       self.state
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, NoState>>::make_missing(self, offset)
+        <Self as SyntaxSmartConstructors<'src, S, State>>::make_missing(self, offset)
     }
 
     fn make_token(&mut self, offset: Self::Token) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, NoState>>::make_token(self, offset)
+        <Self as SyntaxSmartConstructors<'src, S, State>>::make_token(self, offset)
     }
 
     fn make_list(&mut self, lst: Vec<Self::R>, offset: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, NoState>>::make_list(self, lst, offset)
+        <Self as SyntaxSmartConstructors<'src, S, State>>::make_list(self, lst, offset)
     }
-
 CONSTRUCTOR_METHODS}
 "
 
@@ -1272,131 +1277,6 @@ CONSTRUCTOR_METHODS}
       ~filename:
         (full_fidelity_path_prefix ^ "verify_smart_constructors_generated.rs")
       ~template:verify_smart_constructors_template
-      ()
-end
-
-(* GenerateFFRustVerifySmartConstructors *)
-
-module GenerateFFRustCoroutineSmartConstructors = struct
-  let to_constructor_methods x =
-    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::R" i) in
-    let args = String.concat ~sep:", " args in
-    let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
-    let fwd_args = String.concat ~sep:", " fwd_args in
-    sprintf
-      "    fn make_%s(&mut self, %s) -> Self::R {
-        <Self as SyntaxSmartConstructors<Self::R, T>>::make_%s(self, %s)
-    }\n\n"
-      x.type_name
-      args
-      x.type_name
-      fwd_args
-
-  let coroutine_smart_constructors_template : string =
-    make_header CStyle ""
-    ^ "
-use parser_core_types::{
-  syntax::*,
-  lexable_token::LexableToken,
-};
-use crate::*;
-use smart_constructors::SmartConstructors;
-use syntax_smart_constructors::{StateType, SyntaxSmartConstructors};
-
-impl<'src, S, T, Token, Value> SmartConstructors<'src, T>
-    for CoroutineSmartConstructors<'src, S, T>
-where
-    Token: LexableToken<'src>,
-    Value: SyntaxValueType<Token> + SyntaxValueWithKind,
-    S: SyntaxType<'src, T, Token=Token, Value=Value>,
-    T: StateType<'src, S> + CoroutineStateType,
-{
-    type Token = Token;
-    type R = S;
-
-    fn state_mut(&mut self) -> &mut T {
-        &mut self.state
-    }
-
-    fn into_state(self) -> T {
-      self.state
-    }
-
-    fn make_missing(&mut self, offset: usize) -> Self::R {
-       <Self as SyntaxSmartConstructors<'src, Self::R, T>>::make_missing(self, offset)
-    }
-
-    fn make_token(&mut self, offset: Self::Token) -> Self::R {
-       <Self as SyntaxSmartConstructors<'src, Self::R, T>>::make_token(self, offset)
-    }
-
-    fn make_list(&mut self, lst: Vec<Self::R>, offset: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, Self::R, T>>::make_list(self, lst, offset)
-    }
-
-CONSTRUCTOR_METHODS}
-"
-
-  let coroutine_smart_constructors =
-    Full_fidelity_schema.make_template_file
-      ~transformations:
-        [{ pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }]
-      ~filename:
-        (full_fidelity_path_prefix ^ "coroutine_smart_constructors_generated.rs")
-      ~template:coroutine_smart_constructors_template
-      ()
-end
-
-(* GenerateFFRustCoroutineSmartConstructors *)
-
-module GenerateFFVerifySmartConstructors = struct
-  let full_fidelity_verify_smart_constructors_template : string =
-    make_header
-      MLStyle
-      "
- * This module contains smart constructors implementation that can be used to
- * build AST.
-"
-    ^ "
-
-open Hh_prelude
-
-module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
-  module Token = Syntax.Token
-
-  type t = Syntax.t list [@@deriving show]
-
-  type r = Syntax.t [@@deriving show, eq]
-
-  exception NotEquals of string * Syntax.t list * Syntax.t list * Syntax.t list
-
-  exception
-    NotPhysicallyEquals of
-      string * Syntax.t list * Syntax.t list * Syntax.t list
-
-  let verify ~stack params args cons_name =
-    let equals e1 e2 =
-      if not (phys_equal e1 e2) then
-        if equal_r e1 e2 then
-          raise @@ NotPhysicallyEquals (cons_name, List.rev stack, params, args)
-        else
-          raise @@ NotEquals (cons_name, List.rev stack, params, args)
-    in
-    List.iter2_exn ~f:equals params args
-
-  let rust_parse = Syntax.rust_parse_with_verify_sc
-
-  let initial_state _ = []
-end
-"
-
-  let full_fidelity_verify_smart_constructors =
-    Full_fidelity_schema.make_template_file
-      ~transformations:[]
-      ~filename:
-        ( full_fidelity_path_prefix
-        ^ "smart_constructors/verifySmartConstructors.ml" )
-      ~template:full_fidelity_verify_smart_constructors_template
       ()
 end
 
@@ -2275,7 +2155,6 @@ TYPE_TESTS
     let is_abstract   = is_specific_token TokenKind.Abstract
     let is_final      = is_specific_token TokenKind.Final
     let is_async      = is_specific_token TokenKind.Async
-    let is_coroutine  = is_specific_token TokenKind.Coroutine
     let is_void       = is_specific_token TokenKind.Void
     let is_left_brace = is_specific_token TokenKind.LeftBrace
     let is_ellipsis   = is_specific_token TokenKind.DotDotDot
@@ -3023,11 +2902,9 @@ let templates =
     GenerateFFRustMinimalSmartConstructors.minimal_smart_constructors;
     GenerateFFRustPositionedSmartConstructors.positioned_smart_constructors;
     GenerateFFRustVerifySmartConstructors.verify_smart_constructors;
-    GenerateFFVerifySmartConstructors.full_fidelity_verify_smart_constructors;
     GenerateFFSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors;
     GenerateFFRustSyntaxSmartConstructors
     .full_fidelity_syntax_smart_constructors;
-    GenerateFFRustCoroutineSmartConstructors.coroutine_smart_constructors;
     GenerateFFRustDeclModeSmartConstructors.decl_mode_smart_constructors;
     GenerateRustFlattenSmartConstructors.flatten_smart_constructors;
     GenerateRustFactsSmartConstructors.facts_smart_constructors;

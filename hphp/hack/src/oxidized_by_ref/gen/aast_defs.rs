@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3644cc5243988d0cb72759b51c06fb49>>
+// @generated SignedSource<<1e36f42bab8c473b5a4e29616d662232>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -44,8 +44,6 @@ pub type Sid<'a> = ast_defs::Id<'a>;
 pub use oxidized::aast_defs::IsReified;
 
 pub use oxidized::aast_defs::CallType;
-
-pub use oxidized::aast_defs::IsCoroutine;
 
 pub use oxidized::aast_defs::FuncReactive;
 
@@ -108,7 +106,6 @@ pub type VariadicHint<'a> = Option<Hint<'a>>;
 )]
 pub struct HintFun<'a> {
     pub reactive_kind: oxidized::aast_defs::FuncReactive,
-    pub is_coroutine: oxidized::aast_defs::IsCoroutine,
     pub param_tys: &'a [Hint<'a>],
     pub param_kinds: &'a [Option<oxidized::ast_defs::ParamKind>],
     pub param_mutability: &'a [Option<oxidized::aast_defs::ParamMutability>],

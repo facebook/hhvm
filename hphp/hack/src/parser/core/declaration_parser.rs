@@ -1175,7 +1175,7 @@ where
         let next_token_kind = next_token.kind();
         match (current_token_kind, next_token_kind) {
             // Detected the usual start to a method, so continue parsing as method.
-            (TokenKind::Async, _) | (TokenKind::Coroutine, _) | (TokenKind::Function, _) => {
+            (TokenKind::Async, _) | (TokenKind::Function, _) => {
                 self.parse_methodish(attribute_spec, modifiers)
             }
             (TokenKind::LeftParen, _) => self.parse_property_declaration(attribute_spec, modifiers),
@@ -1183,7 +1183,7 @@ where
             // We encountered one unexpected token, but the next still indicates that
             // we should be parsing a methodish. Throw an error, process the token
             // as an extra, and keep going.
-            (_, TokenKind::Async) | (_, TokenKind::Coroutine) | (_, TokenKind::Function)
+            (_, TokenKind::Async) | (_, TokenKind::Function)
                 if !(next_token.has_leading_trivia_kind(TriviaKind::EndOfLine)) =>
             {
                 self.with_error_on_whole_token(Errors::error1056);
@@ -1824,7 +1824,7 @@ where
     fn parse_function_declaration_header(&mut self, modifiers: S::R, is_methodish: bool) -> S::R {
         // SPEC
         // function-definition-header:
-        //   attribute-specification-opt  async-opt  coroutine-opt  function  name  /
+        //   attribute-specification-opt  async-opt  function  name  /
         //   generic-type-parameter-list-opt  (  parameter-list-opt  ) :  /
         //   return-type   where-clause-opt
         // TODO: The spec does not specify "where" clauses. Add them.
@@ -2064,7 +2064,6 @@ where
                 | TokenKind::Protected
                 | TokenKind::Private
                 | TokenKind::Async
-                | TokenKind::Coroutine
                 | TokenKind::Final => {
                     let token = self.next_token();
                     let item = S!(make_token, self, token);
@@ -2094,7 +2093,7 @@ where
 
                 self.parse_alias_declaration(attribute_specification)
             }
-            TokenKind::Async | TokenKind::Coroutine | TokenKind::Function => {
+            TokenKind::Async | TokenKind::Function => {
                 if attribute_specification.is_missing() {
                     // if attribute section is missing - it might be either
                     // function declaration or expression statement containing
@@ -2373,10 +2372,11 @@ where
                         _ => self.parse_classish_declaration(missing),
                     }
                 }
-                TokenKind::Async | TokenKind::Coroutine | TokenKind::Function => self
-                    .with_statement_parser(|p: &mut StatementParser<'a, S, T>| {
+                TokenKind::Async | TokenKind::Function => {
+                    self.with_statement_parser(|p: &mut StatementParser<'a, S, T>| {
                         p.parse_possible_php_function(true)
-                    }),
+                    })
+                }
                 TokenKind::At if self.env.allow_new_attribute_syntax => {
                     self.parse_enum_or_classish_or_function_declaration()
                 }

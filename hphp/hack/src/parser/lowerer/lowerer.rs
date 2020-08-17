@@ -983,7 +983,6 @@ where
                 }
                 Ok(Hfun(ast::HintFun {
                     reactive_kind: ast::FuncReactive::FNonreactive,
-                    is_coroutine: false,
                     param_tys: type_hints,
                     param_kinds: kinds,
                     param_mutability: vec![],
@@ -3631,10 +3630,10 @@ where
     }
 
     fn mk_suspension_kind_(has_async: bool) -> SuspensionKind {
-        use SuspensionKind::*;
-        match has_async {
-            false => SKSync,
-            true => SKAsync,
+        if has_async {
+            SuspensionKind::SKAsync
+        } else {
+            SuspensionKind::SKSync
         }
     }
 

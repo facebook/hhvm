@@ -56,7 +56,6 @@ let rec check_hint env (pos, hint) =
       Aast.
         {
           hf_reactive_kind = _;
-          hf_is_coroutine = _;
           hf_param_tys = hl;
           hf_param_kinds = _;
           hf_param_mutability = _;

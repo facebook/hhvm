@@ -43,7 +43,6 @@ type t =
   | Const
   | Construct
   | Continue
-  | Coroutine
   | Darray
   | Default
   | Define
@@ -258,7 +257,6 @@ let from_string keyword ~only_reserved =
   | "const"                               -> Some Const
   | "__construct"                         -> Some Construct
   | "continue"                            -> Some Continue
-  | "coroutine"    when not only_reserved -> Some Coroutine
   | "darray"       when not only_reserved -> Some Darray
   | "default"                             -> Some Default
   | "define"       when not only_reserved -> Some Define
@@ -447,7 +445,6 @@ let to_string kind =
   | Const                         -> "const"
   | Construct                     -> "__construct"
   | Continue                      -> "continue"
-  | Coroutine                     -> "coroutine"
   | Darray                        -> "darray"
   | Default                       -> "default"
   | Define                        -> "define"

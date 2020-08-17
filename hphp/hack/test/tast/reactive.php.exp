@@ -4,7 +4,7 @@
       (((function(int): void)),
        (Some ([4:18-45],
               (Hfun
-                 { hf_reactive_kind = FReactive; hf_is_coroutine = false;
+                 { hf_reactive_kind = FReactive;
                    hf_param_tys = [([4:32-35], (Hprim Tint))];
                    hf_param_kinds = [None]; hf_param_mutability = [None];
                    hf_variadic_ty = None;

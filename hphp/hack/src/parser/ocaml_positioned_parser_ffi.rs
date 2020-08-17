@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use positioned_coroutine_parser::{ScState, SmartConstructors};
+use ocaml_positioned_parser::{ScState, SmartConstructors};
+use smart_constructors;
 
 rust_parser_ffi::parse!(
-    parse_positioned_with_coroutine_sc,
+    ocaml_parse_positioned,
     SmartConstructors<'a>,
     ScState<'a>,
-    positioned_coroutine_parser::parse_script,
+    ocaml_positioned_parser::parse_script
 );

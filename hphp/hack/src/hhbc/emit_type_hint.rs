@@ -66,17 +66,11 @@ pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: &Hint) -> Result<St
         }
         Hfun(hf) => {
             // TODO(mqian): Implement for inout parameters
-            if hf.is_coroutine {
-                return Err(Unrecoverable(
-                    "Codegen for coroutine functions is not supported".into(),
-                ));
-            } else {
-                format!(
-                    "(function ({}): {})",
-                    fmt_hints(tparams, &hf.param_tys)?,
-                    fmt_hint(tparams, false, &hf.return_ty)?
-                )
-            }
+            format!(
+                "(function ({}): {})",
+                fmt_hints(tparams, &hf.param_tys)?,
+                fmt_hint(tparams, false, &hf.return_ty)?
+            )
         }
         Haccess(Hint(_, hint), accesses) => {
             if let Happly(Id(_, id), _) = hint.as_ref() {

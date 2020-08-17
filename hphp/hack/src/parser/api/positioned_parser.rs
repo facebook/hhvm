@@ -26,7 +26,8 @@ use parser::{
 use positioned_smart_constructors::*;
 use stack_limit::StackLimit;
 
-pub type SmartConstructors = WithKind<PositionedSmartConstructors>;
+pub type SmartConstructors<'src> =
+    WithKind<PositionedSmartConstructors<'src, PositionedSyntax, NoState>>;
 
 pub type ScState = NoState;
 
@@ -35,7 +36,7 @@ pub fn parse_script<'a>(
     env: ParserEnv,
     stack_limit: Option<&'a StackLimit>,
 ) -> (PositionedSyntax, Vec<SyntaxError>, NoState) {
-    let sc = WithKind::new(PositionedSmartConstructors::new());
+    let sc = WithKind::new(PositionedSmartConstructors::new(NoState));
     let mut parser = Parser::new(&source, env, sc);
     let root = parser.parse_script(stack_limit);
     let errors = parser.errors();

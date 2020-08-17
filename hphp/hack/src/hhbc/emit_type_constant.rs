@@ -311,27 +311,21 @@ fn hint_to_type_constant_list(
             }
         },
         Hfun(hf) => {
-            if hf.is_coroutine {
-                return Err(unrecoverable(
-                    "Codegen for coroutine functions is not supported",
-                ));
-            } else {
-                let kind = get_kind(tparams, "$$internal$$fun");
-                let single_hint = |name: &str, h| {
-                    hint_to_type_constant(opts, tparams, targ_map, h, false, false)
-                        .map(|tc| (vec![(TypedValue::String(name.into()), tc)]))
-                };
-                let return_type = single_hint("return_type", &hf.return_ty)?;
-                let variadic_type = hf
-                    .variadic_ty
-                    .as_ref()
-                    .map_or_else(|| Ok(vec![]), |h| single_hint("variadic_type", &h))?;
-                let param_types = vec![(
-                    TypedValue::String("param_types".into()),
-                    hints_to_type_constant(opts, tparams, targ_map, &hf.param_tys)?,
-                )];
-                [kind, return_type, param_types, variadic_type].concat()
-            }
+            let kind = get_kind(tparams, "$$internal$$fun");
+            let single_hint = |name: &str, h| {
+                hint_to_type_constant(opts, tparams, targ_map, h, false, false)
+                    .map(|tc| (vec![(TypedValue::String(name.into()), tc)]))
+            };
+            let return_type = single_hint("return_type", &hf.return_ty)?;
+            let variadic_type = hf
+                .variadic_ty
+                .as_ref()
+                .map_or_else(|| Ok(vec![]), |h| single_hint("variadic_type", &h))?;
+            let param_types = vec![(
+                TypedValue::String("param_types".into()),
+                hints_to_type_constant(opts, tparams, targ_map, &hf.param_tys)?,
+            )];
+            [kind, return_type, param_types, variadic_type].concat()
         }
         Htuple(hints) => {
             let kind = get_kind(tparams, "tuple");

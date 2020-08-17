@@ -104,7 +104,6 @@ and hint_ env p = function
   | Hfun
       {
         hf_reactive_kind = _;
-        hf_is_coroutine = _;
         hf_param_tys = hl;
         hf_param_kinds = _;
         hf_param_mutability = _;

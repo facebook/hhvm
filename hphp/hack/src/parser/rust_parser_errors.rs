@@ -1831,7 +1831,7 @@ where
                 );
 
                 self.invalid_modifier_errors("Top-level functions", node, |kind| {
-                    kind == TokenKind::Async || kind == TokenKind::Coroutine
+                    kind == TokenKind::Async
                 });
             }
             MethodishDeclaration(md) => {
@@ -1882,7 +1882,6 @@ where
                         || kind == TokenKind::Protected
                         || kind == TokenKind::Public
                         || kind == TokenKind::Async
-                        || kind == TokenKind::Coroutine
                 });
 
                 if self.is_inside_interface() {
@@ -5748,8 +5747,8 @@ where
     }
 }
 
-pub fn parse_errors<'a>(
-    tree: &'a SyntaxTree<'a, PositionedSyntax, ()>,
+pub fn parse_errors<'a, State: Clone>(
+    tree: &'a SyntaxTree<'a, PositionedSyntax, State>,
     parser_options: ParserOptions,
     hhvm_compat_mode: bool,
     hhi_mode: bool,
@@ -5765,8 +5764,8 @@ pub fn parse_errors<'a>(
     )
 }
 
-pub fn parse_errors_with_text<'a>(
-    tree: &'a SyntaxTree<'a, PositionedSyntax, ()>,
+pub fn parse_errors_with_text<'a, State: Clone>(
+    tree: &'a SyntaxTree<'a, PositionedSyntax, State>,
     text: IndexedSourceText<'a>,
     parser_options: ParserOptions,
     hhvm_compat_mode: bool,

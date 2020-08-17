@@ -459,8 +459,7 @@ where
             // LessThanLessThan start attribute spec that is allowed on anonymous
             // functions or lambdas
             | TokenKind::LessThanLessThan
-            | TokenKind::Async
-            | TokenKind::Coroutine => self.parse_anon_or_lambda_or_awaitable(),
+            | TokenKind::Async => self.parse_anon_or_lambda_or_awaitable(),
             | TokenKind::At if allow_new_attr => self.parse_anon_or_lambda_or_awaitable(),
             | TokenKind::Include
             | TokenKind::Include_once

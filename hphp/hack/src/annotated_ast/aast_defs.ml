@@ -28,8 +28,6 @@ and call_type =
   | Cuser_func [@visitors.name "call_type_Cuser_func"]
       (** when the call looks like call_user_func(...) *)
 
-and is_coroutine = bool
-
 and func_reactive =
   | FPure
   | FReactive
@@ -67,7 +65,6 @@ and variadic_hint = hint option
 
 and hint_fun = {
   hf_reactive_kind: func_reactive;
-  hf_is_coroutine: is_coroutine;
   hf_param_tys: hint list;
   hf_param_kinds: Ast_defs.param_kind option list;
   hf_param_mutability: param_mutability option list;

@@ -4,11 +4,7 @@
 name = "aast_parser"
 version = "0.0.0"
 dependencies = [
- "coroutine_lowerer 0.0.0",
- "coroutine_parser_leak_tree 0.0.0",
- "coroutine_smart_constructors 0.0.0",
  "decl_mode_parser 0.0.0",
- "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "lowerer 0.0.0",
  "mode_parser 0.0.0",
  "namespaces_rust 0.0.0",
@@ -17,8 +13,10 @@ dependencies = [
  "ocamlrep_derive 0.0.0",
  "oxidized 0.0.0",
  "parser_core_types 0.0.0",
+ "positioned_parser 0.0.0",
  "rust_aast_parser_types 0.0.0",
  "rust_parser_errors 0.0.0",
+ "smart_constructors 0.0.0",
  "stack_limit 0.0.0",
 ]
 
@@ -307,51 +305,6 @@ name = "core_utils_rust"
 version = "0.0.0"
 dependencies = [
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "coroutine_lowerer"
-version = "0.0.0"
-dependencies = [
- "ocaml 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "ocamlrep 0.0.0",
- "parser_core_types 0.0.0",
- "rust_to_ocaml 0.0.0",
-]
-
-[[package]]
-name = "coroutine_parser_leak_tree"
-version = "0.0.0"
-dependencies = [
- "coroutine_smart_constructors 0.0.0",
- "parser 0.0.0",
- "stack_limit 0.0.0",
-]
-
-[[package]]
-name = "coroutine_parser_leak_tree_ffi"
-version = "0.0.0"
-dependencies = [
- "coroutine_parser_leak_tree 0.0.0",
- "ocamlrep 0.0.0",
- "ocamlrep_ocamlpool 0.0.0",
- "oxidized 0.0.0",
- "parser_core_types 0.0.0",
- "rust_parser_ffi 0.0.0",
- "rust_to_ocaml 0.0.0",
- "smart_constructors 0.0.0",
- "stack_limit 0.0.0",
-]
-
-[[package]]
-name = "coroutine_smart_constructors"
-version = "0.0.0"
-dependencies = [
- "ocaml 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "parser_core_types 0.0.0",
- "rust_to_ocaml 0.0.0",
- "smart_constructors 0.0.0",
- "syntax_smart_constructors 0.0.0",
 ]
 
 [[package]]
@@ -1210,10 +1163,8 @@ name = "hack_parser_ffi"
 version = "3.49.0"
 dependencies = [
  "aast_parser_ffi 0.0.0",
- "coroutine_parser_leak_tree_ffi 0.0.0",
  "decl_mode_parser_ffi 0.0.0",
  "minimal_parser_ffi 0.0.0",
- "positioned_coroutine_parser_ffi 0.0.0",
  "positioned_parser_ffi 0.0.0",
  "verify_parser_ffi 0.0.0",
 ]
@@ -1821,18 +1772,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ocaml_syntax"
-version = "0.0.0"
-dependencies = [
- "coroutine_smart_constructors 0.0.0",
- "ocaml 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "ocamlpool_rust 0.0.0",
- "parser_core_types 0.0.0",
- "rust_to_ocaml 0.0.0",
- "syntax_smart_constructors 0.0.0",
-]
-
-[[package]]
 name = "ocamlpool_rust"
 version = "0.0.0"
 dependencies = [
@@ -1994,31 +1933,6 @@ dependencies = [
  "num-traits 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "wasm-bindgen 0.2.60 (registry+https://github.com/rust-lang/crates.io-index)",
  "web-sys 0.3.37 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "positioned_coroutine_parser"
-version = "0.0.0"
-dependencies = [
- "coroutine_smart_constructors 0.0.0",
- "ocaml_syntax 0.0.0",
- "parser 0.0.0",
- "stack_limit 0.0.0",
-]
-
-[[package]]
-name = "positioned_coroutine_parser_ffi"
-version = "0.0.0"
-dependencies = [
- "ocamlrep 0.0.0",
- "ocamlrep_ocamlpool 0.0.0",
- "oxidized 0.0.0",
- "parser_core_types 0.0.0",
- "positioned_coroutine_parser 0.0.0",
- "rust_parser_ffi 0.0.0",
- "rust_to_ocaml 0.0.0",
- "smart_constructors 0.0.0",
- "stack_limit 0.0.0",
 ]
 
 [[package]]

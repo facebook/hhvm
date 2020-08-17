@@ -475,7 +475,6 @@ module WithToken(Token: TokenType) = struct
     let is_abstract   = is_specific_token TokenKind.Abstract
     let is_final      = is_specific_token TokenKind.Final
     let is_async      = is_specific_token TokenKind.Async
-    let is_coroutine  = is_specific_token TokenKind.Coroutine
     let is_void       = is_specific_token TokenKind.Void
     let is_left_brace = is_specific_token TokenKind.LeftBrace
     let is_ellipsis   = is_specific_token TokenKind.DotDotDot

@@ -376,7 +376,6 @@ let rec string_of_hint hint =
   | Hfun
       {
         hf_reactive_kind = _;
-        hf_is_coroutine;
         hf_param_tys;
         hf_param_kinds;
         hf_param_mutability = _;
@@ -384,12 +383,6 @@ let rec string_of_hint hint =
         hf_return_ty;
         hf_is_mutable_return = _;
       } ->
-    let coroutine =
-      if hf_is_coroutine then
-        "coroutine "
-      else
-        ""
-    in
     let param_hints = List.map hf_param_tys ~f:string_of_hint in
     let param_kinds =
       List.map hf_param_kinds ~f:(function
@@ -403,8 +396,7 @@ let rec string_of_hint hint =
       | None -> []
     in
     Printf.sprintf
-      "(%sfunction(%s) : %s)"
-      coroutine
+      "(function(%s) : %s)"
       (String.concat ~sep:", " (params @ variadic))
       (string_of_hint hf_return_ty)
   | Htuple hints ->

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1465c0c352a1e27b4d465e6f706beab0>>
+// @generated SignedSource<<509e13ba4e9a7444a7de79e180d3dfd8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -67,8 +67,6 @@ pub enum CallType {
     CuserFunc,
 }
 impl TrivialDrop for CallType {}
-
-pub type IsCoroutine = bool;
 
 #[derive(
     Clone,
@@ -215,7 +213,6 @@ pub type VariadicHint = Option<Hint>;
 )]
 pub struct HintFun {
     pub reactive_kind: FuncReactive,
-    pub is_coroutine: IsCoroutine,
     pub param_tys: Vec<Hint>,
     pub param_kinds: Vec<Option<ast_defs::ParamKind>>,
     pub param_mutability: Vec<Option<ParamMutability>>,

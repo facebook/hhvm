@@ -1034,10 +1034,6 @@ module type Syntax_S = sig
     Full_fidelity_source_text.t ->
     Full_fidelity_parser_env.t ->
     unit * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
-  val rust_parse_with_coroutine_sc :
-    Full_fidelity_source_text.t ->
-    Full_fidelity_parser_env.t ->
-    bool * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
   val rust_parse_with_decl_mode_sc :
     Full_fidelity_source_text.t ->
     Full_fidelity_parser_env.t ->
@@ -1438,7 +1434,6 @@ module type Syntax_S = sig
   val is_abstract       : t -> bool
   val is_final          : t -> bool
   val is_async          : t -> bool
-  val is_coroutine      : t -> bool
   val is_void           : t -> bool
   val is_left_brace     : t -> bool
   val is_ellipsis       : t -> bool

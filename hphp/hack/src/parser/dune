@@ -48,7 +48,6 @@
   (name full_fidelity)
   (wrapped false)
   (modules
-   full_fidelity_ast_types
    full_fidelity_parser_env
    full_fidelity_editable_positioned_original_source_data
    full_fidelity_editable_positioned_syntax
@@ -91,7 +90,6 @@
    syntaxTransforms
 
    ; from smart_constructors
-   coroutine_smart_constructor
    smartConstructors
    smartConstructorsWrappers
    verifySmartConstructors
@@ -147,7 +145,6 @@
     logging
     namespace_env
     nast
-    parser_ppl
     partial_provider
     rust_parser_ffi
     typing_ast

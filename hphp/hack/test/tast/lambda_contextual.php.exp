@@ -10,7 +10,6 @@
           (Some ([3:20-41],
                  (Hfun
                     { hf_reactive_kind = FNonreactive;
-                      hf_is_coroutine = false;
                       hf_param_tys = [([3:31-34], (Hprim Tint))];
                       hf_param_kinds = [None]; hf_param_mutability = [None];
                       hf_variadic_ty = None;

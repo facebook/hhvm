@@ -34,20 +34,6 @@ external parse_positioned_with_decl_mode_sc :
 let parse_positioned_with_decl_mode_sc text env =
   parse_positioned_with_decl_mode_sc text env
 
-external parse_positioned_with_coroutine_sc :
-  SourceText.t -> Env.t -> (bool, PositionedSyntax.t) result
-  = "parse_positioned_with_coroutine_sc"
-
-external parse_positioned_with_coroutine_sc_leak_tree :
-  SourceText.t -> Env.t -> (bool, PositionedSyntax.t) result
-  = "parse_positioned_with_coroutine_sc_leak_tree"
-
-let parse_positioned_with_coroutine_sc text env =
-  if Env.leak_rust_tree env then
-    parse_positioned_with_coroutine_sc_leak_tree text env
-  else
-    parse_positioned_with_coroutine_sc text env
-
 external parse_positioned_with_verify_sc :
   SourceText.t -> Env.t -> (PositionedSyntax.t list, PositionedSyntax.t) result
   = "parse_positioned_with_verify_sc"
@@ -58,8 +44,6 @@ let parse_positioned_with_verify_sc text env =
 let init () =
   Full_fidelity_minimal_syntax.rust_parse_ref := parse_minimal;
   Full_fidelity_positioned_syntax.rust_parse_ref := parse_positioned;
-  Full_fidelity_positioned_syntax.rust_parse_with_coroutine_sc_ref :=
-    parse_positioned_with_coroutine_sc;
   Full_fidelity_positioned_syntax.rust_parse_with_decl_mode_sc_ref :=
     parse_positioned_with_decl_mode_sc;
   Full_fidelity_positioned_syntax.rust_parse_with_verify_sc_ref :=

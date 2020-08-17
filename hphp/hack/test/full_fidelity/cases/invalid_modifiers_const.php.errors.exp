@@ -5,5 +5,4 @@
 (4,43)-(4,49) Constants cannot have multiple visibility modifiers
 (4,43)-(4,49) Constants cannot be declared public
 (4,50)-(4,55) Constants cannot be declared async
-(4,56)-(4,65) Constants cannot be declared coroutine
 (6,12)-(6,20) Constants cannot have duplicate modifiers

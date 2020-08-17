@@ -2332,7 +2332,7 @@ void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {
   auto const elem = cond(
     env,
     [&] (Block* taken) {
-      gen(env, CheckPackedArrayDataBounds, taken, use_base, key);
+      gen(env, CheckVecBounds, taken, use_base, key);
     },
     [&] { return gen(env, LdVecElem, use_base, key); },
     [&] { return def; }
@@ -2514,7 +2514,7 @@ void emitAKExists(IRGS& env) {
       auto const result = cond(
         env,
         [&](Block* taken) {
-          gen(env, CheckPackedArrayDataBounds, taken, arr, key);
+          gen(env, CheckVecBounds, taken, arr, key);
         },
         [&] { return cns(env, true); },
         [&] { return cns(env, false); }

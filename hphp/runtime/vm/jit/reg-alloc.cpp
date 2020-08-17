@@ -118,7 +118,7 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
     return srcIdx == 1;
   case StClsInitElem:
     return srcIdx == 1;
-  case InitPackedLayoutArray:
+  case InitVecElem:
     return srcIdx == 1;
   case StMem:
     return srcIdx == 1 && (!wide_tv_val || inst.src(0)->isA(TPtrToCell));

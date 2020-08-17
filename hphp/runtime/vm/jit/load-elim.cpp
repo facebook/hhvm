@@ -534,7 +534,7 @@ Flags handle_general_effects(Local& env,
     break;
   }
 
-  case CheckPackedArrayDataBounds: {
+  case CheckVecBounds: {
     assertx(inst.src(0)->type().subtypeOfAny(TVArr, TVec));
     if (!inst.src(1)->hasConstVal(TInt)) break;
 

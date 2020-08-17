@@ -202,7 +202,7 @@ bool canDCE(IRInstruction* inst) {
   case LdStrLen:
   case LdVecElem:
   case LdPackedElem:
-  case LdPackedArrayDataElemAddr:
+  case LdVecElemAddr:
   case NewInstanceRaw:
   case NewLoggingArray:
   case NewDArray:
@@ -289,10 +289,10 @@ bool canDCE(IRInstruction* inst) {
   case AllocStructDict:
   case AllocVArray:
   case AllocVec:
-  case GetMixedPtrIter:
-  case GetPackedPtrIter:
-  case AdvanceMixedPtrIter:
-  case AdvancePackedPtrIter:
+  case GetDictPtrIter:
+  case GetVecPtrIter:
+  case AdvanceDictPtrIter:
+  case AdvanceVecPtrIter:
   case LdPtrIterKey:
   case LdPtrIterVal:
   case EqPtrIter:
@@ -365,7 +365,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckType:
   case CheckNullptr:
   case CheckTypeMem:
-  case CheckMixedArrayKeys:
+  case CheckDictKeys:
   case CheckSmashableClass:
   case CheckLoc:
   case CheckStk:
@@ -475,9 +475,9 @@ bool canDCE(IRInstruction* inst) {
   case DebugBacktraceFast:
   case InitThrowableFileAndLine:
   case ConstructInstance:
-  case InitMixedLayoutArray:
-  case InitPackedLayoutArray:
-  case InitPackedLayoutArrayLoop:
+  case InitDictElem:
+  case InitVecElem:
+  case InitVecElemLoop:
   case NewKeysetArray:
   case NewRecord:
   case NewStructDArray:
@@ -662,7 +662,7 @@ bool canDCE(IRInstruction* inst) {
   case SetNewElemArray:
   case SetNewElemVec:
   case SetNewElemKeyset:
-  case ReservePackedArrayDataNewElem:
+  case ReserveVecNewElem:
   case VectorIsset:
   case PairIsset:
   case MapIsset:
@@ -671,7 +671,7 @@ bool canDCE(IRInstruction* inst) {
   case ProfileCall:
   case ProfileMethod:
   case ProfileSubClsCns:
-  case CheckPackedArrayDataBounds:
+  case CheckVecBounds:
   case LdVectorSize:
   case BeginCatch:
   case EndCatch:
@@ -1123,7 +1123,7 @@ void fullDCE(IRUnit& unit) {
         if (inst->is(DecRef)) {
           rcInsts[srcInst].decs.emplace_back(inst);
         }
-        if (inst->is(InitPackedLayoutArray, StClosureArg)) {
+        if (inst->is(InitVecElem, StClosureArg)) {
           if (ix == 0) rcInsts[srcInst].aux.emplace_back(inst);
         }
       }

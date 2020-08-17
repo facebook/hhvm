@@ -352,7 +352,7 @@ struct PackedAccessor : public Accessor {
   }
 
   SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const override {
-    return is_ptr_iter ? gen(env, GetPackedPtrIter, arr, idx) : idx;
+    return is_ptr_iter ? gen(env, GetVecPtrIter, arr, idx) : idx;
   }
 
   SSATmp* getElm(IRGS& env, SSATmp* arr, SSATmp* pos) const override {
@@ -371,7 +371,7 @@ struct PackedAccessor : public Accessor {
 
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
     return is_ptr_iter
-      ? gen(env, AdvancePackedPtrIter, IterOffsetData{offset}, pos)
+      ? gen(env, AdvanceVecPtrIter, IterOffsetData{offset}, pos)
       : gen(env, AddInt, cns(env, offset), pos);
   }
 
@@ -395,7 +395,7 @@ struct MixedAccessor : public Accessor {
 
   SSATmp* checkBase(IRGS& env, SSATmp* base, Block* exit) const override {
     auto const arr = gen(env, CheckType, exit, arr_type, base);
-    gen(env, CheckMixedArrayKeys, exit, key_type, arr);
+    gen(env, CheckDictKeys, exit, key_type, arr);
     return arr;
   }
 
@@ -405,11 +405,11 @@ struct MixedAccessor : public Accessor {
   }
 
   SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const override {
-    return is_ptr_iter ? gen(env, GetMixedPtrIter, arr, idx) : idx;
+    return is_ptr_iter ? gen(env, GetDictPtrIter, arr, idx) : idx;
   }
 
   SSATmp* getElm(IRGS& env, SSATmp* arr, SSATmp* pos) const override {
-    return is_ptr_iter ? pos : gen(env, GetMixedPtrIter, arr, pos);
+    return is_ptr_iter ? pos : gen(env, GetDictPtrIter, arr, pos);
   }
 
   SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
@@ -422,7 +422,7 @@ struct MixedAccessor : public Accessor {
 
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
     return is_ptr_iter
-      ? gen(env, AdvanceMixedPtrIter, IterOffsetData{offset}, pos)
+      ? gen(env, AdvanceDictPtrIter, IterOffsetData{offset}, pos)
       : gen(env, AddInt, cns(env, offset), pos);
   }
 

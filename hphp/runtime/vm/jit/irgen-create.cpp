@@ -428,7 +428,7 @@ void emitNewPackedLayoutArray(IRGS& env, uint32_t numArgs, Opcode op) {
   if (numArgs > RuntimeOption::EvalHHIRMaxInlineInitPackedElements) {
     gen(
       env,
-      InitPackedLayoutArrayLoop,
+      InitVecElemLoop,
       InitPackedArrayLoopData {
         spOffBCFromIRSP(env),
         numArgs
@@ -444,7 +444,7 @@ void emitNewPackedLayoutArray(IRGS& env, uint32_t numArgs, Opcode op) {
   for (int i = 0; i < numArgs; ++i) {
     gen(
       env,
-      InitPackedLayoutArray,
+      InitVecElem,
       IndexData { static_cast<uint32_t>(numArgs - i - 1) },
       array,
       popC(env, DataTypeGeneric)
@@ -492,7 +492,7 @@ void newStructImpl(IRGS& env, const ImmVector& immVec,
   for (int i = 0; i < numArgs; ++i) {
     auto const index = numArgs - i - 1;
     auto const data = KeyedIndexData(index, extra.keys[index]);
-    gen(env, InitMixedLayoutArray, data, arr, popC(env, DataTypeGeneric));
+    gen(env, InitDictElem, data, arr, popC(env, DataTypeGeneric));
   }
   push(env, arr);
 }

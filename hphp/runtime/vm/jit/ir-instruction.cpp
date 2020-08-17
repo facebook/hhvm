@@ -205,10 +205,10 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case CreateSSWH:
       return srcNo == 0;
 
-    case InitPackedLayoutArray:
+    case InitVecElem:
       return srcNo == 1;
 
-    case InitPackedLayoutArrayLoop:
+    case InitVecElemLoop:
       return srcNo > 0;
 
     case NewPair:
@@ -512,12 +512,12 @@ Type ptrToLvalReturn(const IRInstruction* inst) {
 // This definition makes sense by analogy to regular int* types in C: the type
 // of the end of the array is an int* even though its target is invalid.
 Type ptrIterReturn(const IRInstruction* inst) {
-  if (inst->is(AdvanceMixedPtrIter, AdvancePackedPtrIter)) {
+  if (inst->is(AdvanceDictPtrIter, AdvanceVecPtrIter)) {
     auto const ptr = inst->src(0)->type();
     assertx(ptr <= TPtrToElemCell);
     return ptr;
   }
-  assertx(inst->is(GetMixedPtrIter, GetPackedPtrIter));
+  assertx(inst->is(GetDictPtrIter, GetVecPtrIter));
   auto const arr = inst->src(0)->type();
   assertx(arr <= TArrLike);
   auto const value = [&]{

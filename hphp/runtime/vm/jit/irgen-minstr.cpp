@@ -563,7 +563,7 @@ void checkVecBounds(IRGS& env, SSATmp* base, SSATmp* idx) {
   ifThen(
     env,
     [&](Block* taken) {
-      gen(env, CheckPackedArrayDataBounds, taken, base, idx);
+      gen(env, CheckVecBounds, taken, base, idx);
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
@@ -583,7 +583,7 @@ SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
   };
 
   auto check = [&] (Block* taken) {
-    gen(env, CheckPackedArrayDataBounds, taken, base, key);
+    gen(env, CheckVecBounds, taken, base, key);
   };
 
   auto result = [&] {
@@ -643,7 +643,7 @@ SSATmp* emitVecQuietGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
   auto const elem = cond(
     env,
     [&] (Block* taken) {
-      gen(env, CheckPackedArrayDataBounds, taken, base, key);
+      gen(env, CheckVecBounds, taken, base, key);
     },
     [&] { return gen(env, LdVecElem, base, key); },
     [&] { return cns(env, TInitNull); }
@@ -783,7 +783,7 @@ SSATmp* emitPackedArrayIsset(IRGS& env, SSATmp* base, SSATmp* key) {
   return cond(
     env,
     [&] (Block* taken) {
-      gen(env, CheckPackedArrayDataBounds, taken, base, key);
+      gen(env, CheckVecBounds, taken, base, key);
     },
     [&] { // Next:
       auto const packedElem = gen(env, LdPackedElem, base, key);
@@ -807,7 +807,7 @@ SSATmp* emitVecIsset(IRGS& env, SSATmp* base, SSATmp* key) {
   return cond(
     env,
     [&] (Block* taken) {
-      gen(env, CheckPackedArrayDataBounds, taken, base, key);
+      gen(env, CheckVecBounds, taken, base, key);
     },
     [&] {
       auto const elem = gen(env, LdVecElem, base, key);
@@ -1147,7 +1147,7 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
         key->type(),
         curClass(env)
       ).first.lval(Ptr::Elem);
-      return gen(env, LdPackedArrayDataElemAddr, elemType, base, key);
+      return gen(env, LdVecElemAddr, elemType, base, key);
     }
     return invalid_key();
   }
@@ -1157,7 +1157,7 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
     return cond(
       env,
       [&] (Block* taken) {
-        gen(env, CheckPackedArrayDataBounds, taken, base, key);
+        gen(env, CheckVecBounds, taken, base, key);
       },
       [&] {
         auto const elemType = vecElemType(
@@ -1165,7 +1165,7 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
           key->type(),
           curClass(env)
         ).first.lval(Ptr::Elem);
-        return gen(env, LdPackedArrayDataElemAddr, elemType, base, key);
+        return gen(env, LdVecElemAddr, elemType, base, key);
       },
       [&] { return ptrToInitNull(env); }
     );
@@ -1566,10 +1566,10 @@ void setNewElemPackedArrayDataImpl(IRGS& env, uint32_t nDiscard,
         gen(env, JmpNZero, taken, appendToSelf);
       }
       gen(env, CheckArrayCOW, taken, base);
-      auto const offset = gen(env, ReservePackedArrayDataNewElem, taken, base);
+      auto const offset = gen(env, ReserveVecNewElem, taken, base);
       auto const elemPtr = gen(
         env,
-        LdPackedArrayDataElemAddr,
+        LdVecElemAddr,
         TLvalToElemUninit,
         base,
         offset

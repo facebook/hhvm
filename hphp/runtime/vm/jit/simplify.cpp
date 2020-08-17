@@ -277,8 +277,8 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
                    CheckInit,
                    CheckInitMem,
                    CheckRDSInitialized,
-                   CheckPackedArrayDataBounds,
-                   CheckMixedArrayKeys,
+                   CheckVecBounds,
+                   CheckDictKeys,
                    CheckMixedArrayOffset,
                    CheckMissingKeyInArrLike,
                    CheckDictOffset,
@@ -2768,8 +2768,7 @@ SSATmp* simplifyAssertNonNull(State& /*env*/, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyCheckPackedArrayDataBounds(State& env,
-                                           const IRInstruction* inst) {
+SSATmp* simplifyCheckVecBounds(State& env, const IRInstruction* inst) {
   auto const array = inst->src(0);
   auto const idx   = inst->src(1);
 
@@ -2785,8 +2784,7 @@ SSATmp* simplifyCheckPackedArrayDataBounds(State& env,
   return mergeBranchDests(env, inst);
 }
 
-SSATmp* simplifyReservePackedArrayDataNewElem(State& env,
-                                              const IRInstruction* inst) {
+SSATmp* simplifyReserveVecNewElem(State& env, const IRInstruction* inst) {
   auto const base = inst->src(0);
 
   if (base->type() <= (TPersistentArr|TPersistentVec)) {
@@ -3048,7 +3046,7 @@ SSATmp* simplifyKeysetGetK(State& env, const IRInstruction* inst) {
   return cns(env, *tv);
 }
 
-SSATmp* simplifyGetMixedPtrIter(State& env, const IRInstruction* inst) {
+SSATmp* simplifyGetDictPtrIter(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const idx = inst->src(1);
   if (!arr->hasConstVal(TArrLike)) return nullptr;
@@ -3058,7 +3056,7 @@ SSATmp* simplifyGetMixedPtrIter(State& env, const IRInstruction* inst) {
   return cns(env, Type::cns(elm, outputType(inst)));
 }
 
-SSATmp* simplifyGetPackedPtrIter(State& env, const IRInstruction* inst) {
+SSATmp* simplifyGetVecPtrIter(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const idx = inst->src(1);
   if (!arr->hasConstVal(TArrLike)) return nullptr;
@@ -3067,7 +3065,7 @@ SSATmp* simplifyGetPackedPtrIter(State& env, const IRInstruction* inst) {
   return cns(env, Type::cns(elm, outputType(inst)));
 }
 
-SSATmp* simplifyCheckMixedArrayKeys(State& env, const IRInstruction* inst) {
+SSATmp* simplifyCheckDictKeys(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (!src->hasConstVal()) return mergeBranchDests(env, inst);
   auto const arr = src->arrLikeVal();
@@ -3549,8 +3547,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckTypeMem)
   X(AssertType)
   X(CheckNonNull)
-  X(CheckPackedArrayDataBounds)
-  X(ReservePackedArrayDataNewElem)
+  X(CheckVecBounds)
+  X(ReserveVecNewElem)
   X(ConcatStrStr)
   X(ConcatStr3)
   X(ConcatStr4)
@@ -3738,9 +3736,9 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(KeysetGet)
   X(KeysetGetQuiet)
   X(KeysetGetK)
-  X(GetMixedPtrIter)
-  X(GetPackedPtrIter)
-  X(CheckMixedArrayKeys)
+  X(GetDictPtrIter)
+  X(GetVecPtrIter)
+  X(CheckDictKeys)
   X(CheckMixedArrayOffset)
   X(CheckDictOffset)
   X(CheckKeysetOffset)

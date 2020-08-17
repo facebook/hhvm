@@ -1508,8 +1508,8 @@ void emitResolveObjMethod(IRGS& env) {
     RuntimeOption::EvalHackArrDVArrs ? AllocVec : AllocVArray,
     PackedArrayData { 2 }
   );
-  gen(env, InitPackedLayoutArray, IndexData { 0 }, methPair, obj);
-  gen(env, InitPackedLayoutArray, IndexData { 1 }, methPair, func);
+  gen(env, InitVecElem, IndexData { 0 }, methPair, obj);
+  gen(env, InitVecElem, IndexData { 1 }, methPair, func);
   decRef(env, name);
   popC(env);
   popC(env);

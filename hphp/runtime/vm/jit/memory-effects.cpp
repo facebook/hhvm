@@ -150,7 +150,7 @@ AliasClass pointee(
     };
 
     if (type <= TMemToElemCell) {
-      if (sinst->is(LdPackedArrayDataElemAddr)) return elem();
+      if (sinst->is(LdVecElemAddr)) return elem();
       return AElemAny;
     }
 
@@ -1077,17 +1077,17 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   //////////////////////////////////////////////////////////////////////
   // Array loads and stores
 
-  case InitPackedLayoutArray: {
+  case InitVecElem: {
     auto const arr = inst.src(0);
     auto const val = inst.src(1);
-    auto const idx = inst.extra<InitPackedLayoutArray>()->index;
+    auto const idx = inst.extra<InitVecElem>()->index;
     return PureStore { AElemI { arr, idx }, val, arr };
   }
 
-  case InitMixedLayoutArray: {
+  case InitDictElem: {
     auto const arr = inst.src(0);
     auto const val = inst.src(1);
-    auto const key = inst.extra<InitMixedLayoutArray>()->key;
+    auto const key = inst.extra<InitDictElem>()->key;
     return PureStore { AElemS { arr, key }, val, arr };
   }
 
@@ -1100,9 +1100,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     };
   }
 
-  case InitPackedLayoutArrayLoop:
+  case InitVecElemLoop:
     {
-      auto const extra = inst.extra<InitPackedLayoutArrayLoop>();
+      auto const extra = inst.extra<InitVecElemLoop>();
       auto const stack_in = AStack {
         inst.src(1),
         extra->offset + static_cast<int32_t>(extra->size) - 1,
@@ -1264,7 +1264,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DictLastKey:
     return may_load_store(AEmpty, AEmpty);
 
-  case CheckMixedArrayKeys:
+  case CheckDictKeys:
   case CheckMixedArrayOffset:
   case CheckDictOffset:
   case CheckKeysetOffset:
@@ -1370,7 +1370,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AHeapAny | all_pointees(inst)
     );
 
-  case ReservePackedArrayDataNewElem:
+  case ReserveVecNewElem:
     return may_load_store(AHeapAny, AHeapAny);
 
   /*
@@ -1507,8 +1507,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AddDbl:
   case AddInt:
   case AddIntO:
-  case AdvanceMixedPtrIter:
-  case AdvancePackedPtrIter:
+  case AdvanceDictPtrIter:
+  case AdvanceVecPtrIter:
   case AndInt:
   case AssertType:
   case AssertLoc:
@@ -1531,8 +1531,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqDbl:
   case EqInt:
   case EqPtrIter:
-  case GetMixedPtrIter:
-  case GetPackedPtrIter:
+  case GetDictPtrIter:
+  case GetVecPtrIter:
   case GteBool:
   case GteInt:
   case GtBool:
@@ -1542,7 +1542,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case JmpZero:
   case LdPropAddr:
   case LdStkAddr:
-  case LdPackedArrayDataElemAddr:
+  case LdVecElemAddr:
   case LteBool:
   case LteDbl:
   case LteInt:
@@ -1810,7 +1810,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvObjToBool:
   case CountCollection:
   case LdVectorSize:
-  case CheckPackedArrayDataBounds:
+  case CheckVecBounds:
   case LdColVec:
   case LdColDict:
     return may_load_store(AEmpty, AEmpty);

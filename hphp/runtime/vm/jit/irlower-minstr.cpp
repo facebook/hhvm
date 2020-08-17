@@ -517,7 +517,7 @@ void cgCheckArrayCOW(IRLS& env, const IRInstruction* inst) {
   ifThen(v, CC_NE, sf, label(env, inst->taken()));
 }
 
-void cgCheckMixedArrayKeys(IRLS& env, const IRInstruction* inst) {
+void cgCheckDictKeys(IRLS& env, const IRInstruction* inst) {
   auto const src = srcLoc(env, inst, 0).reg();
   auto const mask = MixedArrayKeys::getMask(inst->typeParam());
   always_assert_flog(mask, "Invalid MixedArray key check: {}",
@@ -682,7 +682,7 @@ void cgArrayGet(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgGetMixedPtrIter(IRLS& env, const IRInstruction* inst) {
+void cgGetDictPtrIter(IRLS& env, const IRInstruction* inst) {
   auto const pos_tmp = inst->src(1);
   auto const arr = srcLoc(env, inst, 0).reg();
   auto const pos = srcLoc(env, inst, 1).reg();
@@ -702,7 +702,7 @@ void cgGetMixedPtrIter(IRLS& env, const IRInstruction* inst) {
   v << lea{arr[px3 * 8 + MixedArray::dataOff()], dst};
 }
 
-void cgGetPackedPtrIter(IRLS& env, const IRInstruction* inst) {
+void cgGetVecPtrIter(IRLS& env, const IRInstruction* inst) {
   auto const pos_tmp = inst->src(1);
   auto const arr = srcLoc(env, inst, 0).reg();
   auto const pos = srcLoc(env, inst, 1).reg();
@@ -727,22 +727,22 @@ void cgGetPackedPtrIter(IRLS& env, const IRInstruction* inst) {
   v << lea{arr[px2 * 8 + PackedArray::entriesOffset()], dst};
 }
 
-void cgAdvanceMixedPtrIter(IRLS& env, const IRInstruction* inst) {
+void cgAdvanceDictPtrIter(IRLS& env, const IRInstruction* inst) {
   auto const src = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
 
   auto& v = vmain(env);
-  auto const extra = inst->extra<AdvanceMixedPtrIter>();
+  auto const extra = inst->extra<AdvanceDictPtrIter>();
   auto const delta = extra->offset * int32_t(sizeof(MixedArrayElm));
   v << addqi{delta, src, dst, v.makeReg()};
 }
 
-void cgAdvancePackedPtrIter(IRLS& env, const IRInstruction* inst) {
+void cgAdvanceVecPtrIter(IRLS& env, const IRInstruction* inst) {
   auto const src = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
 
   auto& v = vmain(env);
-  auto const extra = inst->extra<AdvancePackedPtrIter>();
+  auto const extra = inst->extra<AdvanceVecPtrIter>();
   auto const delta = extra->offset * int32_t(sizeof(TypedValue));
   v << addqi{delta, src, dst, v.makeReg()};
 }
@@ -992,7 +992,7 @@ void record_packed_access(const ArrayData* ad) {
   StructuredLog::log("hhvm_arrays", record);
 }
 
-void cgLdPackedArrayDataElemAddr(IRLS& env, const IRInstruction* inst) {
+void cgLdVecElemAddr(IRLS& env, const IRInstruction* inst) {
   auto const arrLoc = srcLoc(env, inst, 0);
   auto const idxLoc = srcLoc(env, inst, 1);
   auto const dstLoc = irlower::dstLoc(env, inst, 0);
@@ -1044,7 +1044,7 @@ void cgSetNewElemVec(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
-void cgReservePackedArrayDataNewElem(IRLS& env, const IRInstruction* i) {
+void cgReserveVecNewElem(IRLS& env, const IRInstruction* i) {
   static_assert(ArrayData::sizeofSize() == 4, "");
 
   auto& v = vmain(env);

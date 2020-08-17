@@ -518,8 +518,8 @@ bool opcodeMayRaise(Opcode opc) {
   case AddInt:
   case AddIntO:
   case AddNewElemVec:
-  case AdvanceMixedPtrIter:
-  case AdvancePackedPtrIter:
+  case AdvanceDictPtrIter:
+  case AdvanceVecPtrIter:
   case AFWHBlockOn:
   case AFWHPushTailFrame:
   case AKExistsArr:
@@ -553,12 +553,12 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckKeysetOffset:
   case CheckLoc:
   case CheckMBase:
-  case CheckMixedArrayKeys:
+  case CheckDictKeys:
   case CheckMixedArrayOffset:
   case CheckMissingKeyInArrLike:
   case CheckNonNull:
   case CheckNullptr:
-  case CheckPackedArrayDataBounds:
+  case CheckVecBounds:
   case CheckRange:
   case CheckRDSInitialized:
   case CheckInOuts:
@@ -686,8 +686,8 @@ bool opcodeMayRaise(Opcode opc) {
   case FuncHasAttr:
   case GenericRetDecRefs:
   case GetMemoKeyScalar:
-  case GetMixedPtrIter:
-  case GetPackedPtrIter:
+  case GetDictPtrIter:
+  case GetVecPtrIter:
   case GetTime:
   case GetTimeNs:
   case GtBool:
@@ -708,11 +708,11 @@ bool opcodeMayRaise(Opcode opc) {
   case IncProfCounter:
   case IncRef:
   case IncStat:
-  case InitMixedLayoutArray:
+  case InitDictElem:
   case InitObjProps:
   case InitObjMemoSlots:
-  case InitPackedLayoutArray:
-  case InitPackedLayoutArrayLoop:
+  case InitVecElem:
+  case InitVecElemLoop:
   case InitThrowableFileAndLine:
   case InlineCall:
   case InlineReturn:
@@ -809,7 +809,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdObjClass:
   case LdObjInvoke:
   case LdOutAddr:
-  case LdPackedArrayDataElemAddr:
+  case LdVecElemAddr:
   case LdPackedElem:
   case LdPairElem:
   case LdPropAddr:
@@ -918,7 +918,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ReqBindJmp:
   case ReqRetranslate:
   case ReqRetranslateOpt:
-  case ReservePackedArrayDataNewElem:
+  case ReserveVecNewElem:
   case RestoreErrorLevel:
   case RetCtrl:
   case SameKeyset:

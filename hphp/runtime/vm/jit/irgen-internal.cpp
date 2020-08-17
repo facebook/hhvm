@@ -40,8 +40,8 @@ SSATmp* convertClsMethToVec(IRGS& env, SSATmp* clsMeth) {
   auto vec = gen(env,
     RuntimeOption::EvalHackArrDVArrs ? AllocVec : AllocVArray,
     PackedArrayData { 2 });
-  gen(env, InitPackedLayoutArray, IndexData { 0 }, vec, cls);
-  gen(env, InitPackedLayoutArray, IndexData { 1 }, vec, func);
+  gen(env, InitVecElem, IndexData { 0 }, vec, cls);
+  gen(env, InitVecElem, IndexData { 1 }, vec, func);
   return vec;
 }
 

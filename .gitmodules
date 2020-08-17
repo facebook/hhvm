@@ -1,9 +1,6 @@
 [submodule "__FORKS__"]
 	path = third-party/forks
 	url = https://github.com/hhvm/hhvm-third-party.git
-[submodule "brotli"]
-	path = third-party/brotli/src
-	url = https://github.com/google/brotli
 [submodule "double-conversion"]
 	path = third-party/double-conversion
 	url = https://github.com/google/double-conversion

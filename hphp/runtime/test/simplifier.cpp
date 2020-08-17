@@ -119,18 +119,18 @@ TEST(Simplifier, Count) {
     EXPECT_EQ(1, result.dst->intVal());
   }
 
-  // Count($vanilla_array) --> CountArray($vanilla_array)
+  // Count($vec) --> CountVec($vec)
   {
-    auto const arr = unit.gen(Conjure, dummy, TVanillaArr);
+    auto const arr = unit.gen(Conjure, dummy, TVec);
     auto const count = unit.gen(Count, dummy, arr->dst());
     auto const result = simplify(unit, count);
 
     EXPECT_NE(nullptr, result.dst);
     EXPECT_EQ(1, result.instrs.size());
-    EXPECT_MATCH(result.instrs[0], CountArray, arr->dst());
+    EXPECT_MATCH(result.instrs[0], CountVec, arr->dst());
   }
 
-  // Count($varr) --> CountArray($varr)
+  // Count($varr) --> CountVec($varr)
   {
     auto const arr = unit.gen(Conjure, dummy, TVArr);
     auto const count = unit.gen(Count, dummy, arr->dst());
@@ -138,7 +138,7 @@ TEST(Simplifier, Count) {
 
     EXPECT_NE(nullptr, result.dst);
     EXPECT_EQ(1, result.instrs.size());
-    EXPECT_MATCH(result.instrs[0], CountArray, arr->dst());
+    EXPECT_MATCH(result.instrs[0], CountVec, arr->dst());
   }
 
   // Count($some_obj) --> Count($some_obj)

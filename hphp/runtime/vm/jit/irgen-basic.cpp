@@ -78,7 +78,7 @@ void emitClassGetTS(IRGS& env) {
 
   auto const val = gen(
     env,
-    RuntimeOption::EvalHackArrDVArrs ? AKExistsDict : AKExistsArr,
+    AKExistsDict,
     ts,
     cns(env, s_generic_types.get())
   );

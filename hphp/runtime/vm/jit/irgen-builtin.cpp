@@ -808,8 +808,7 @@ SSATmp* opt_container_first_key(IRGS& env, const ParamPrep& params) {
     return cond(
       env,
       [&](Block* taken) {
-        auto const length = type <= TVec ?
-          gen(env, CountVec, value) : gen(env, CountArray, value);
+        auto const length = gen(env, CountVec, value);
         gen(env, JmpZero, taken, length);
       },
       [&] { return cns(env, 0); },
@@ -838,8 +837,7 @@ SSATmp* opt_container_last_key(IRGS& env, const ParamPrep& params) {
     return cond(
       env,
       [&](Block* taken) {
-        auto const length = type <= TVec ?
-          gen(env, CountVec, value) : gen(env, CountArray, value);
+        auto const length = gen(env, CountVec, value);
         gen(env, JmpZero, taken, length);
         return length;
       },
@@ -1065,14 +1063,13 @@ SSATmp* opt_enum_is_valid(IRGS& env, const ParamPrep& params) {
   auto const enum_values = getEnumValues(env, params);
   if (!enum_values) return nullptr;
   auto const ad = MixedArray::asMixed(enum_values->names.get());
-  auto const op = ad->isDictType() ? AKExistsDict : AKExistsArr;
   if (value->isA(TInt)) {
     if (ad->keyTypes().mustBeStrs()) return cns(env, false);
-    return gen(env, op, cns(env, ad->asArrayData()), value);
+    return gen(env, AKExistsDict, cns(env, ad->asArrayData()), value);
   } else if (value->isA(TStr)) {
     // We're not doing intish-casts here, so we bail if ad has any int keys.
     if (!ad->keyTypes().mustBeStrs()) return nullptr;
-    return gen(env, op, cns(env, ad->asArrayData()), value);
+    return gen(env, AKExistsDict, cns(env, ad->asArrayData()), value);
   }
   return cns(env, false);
 }
@@ -2503,7 +2500,7 @@ void emitAKExists(IRGS& env) {
     gen(env, ThrowInvalidArrayKey, arr, key);
   };
 
-  if (arr->type().subtypeOfAny(TVArr, TVec)) {
+  if (arr->type().subtypeOfAny(TVec, TVArr)) {
     if (key->isA(TStr)) {
       push(env, cns(env, false));
       decRef(env, arr);
@@ -2526,16 +2523,12 @@ void emitAKExists(IRGS& env) {
     return throwBadKey();
   }
 
-  if (arr->isA(TDict) || arr->isA(TKeyset)) {
+  if (arr->isA(TDict) || arr->isA(TDArr) || arr->isA(TKeyset)) {
     if (!key->isA(TInt) && !key->isA(TStr)) {
       return throwBadKey();
     }
-    auto const val = gen(
-      env,
-      arr->isA(TDict) ? AKExistsDict : AKExistsKeyset,
-      arr,
-      key
-    );
+    auto const op = arr->isA(TKeyset) ? AKExistsKeyset : AKExistsDict;
+    auto const val = gen(env, op, arr, key);
     push(env, val);
     decRef(env, arr);
     decRef(env, key);

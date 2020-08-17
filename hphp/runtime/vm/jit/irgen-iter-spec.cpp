@@ -347,8 +347,7 @@ struct PackedAccessor : public Accessor {
   }
 
   SSATmp* getSize(IRGS& env, SSATmp* arr) const override {
-    auto const op = is_hack_arr ? CountVec : CountArray;
-    return gen(env, op, arr);
+    return gen(env, CountVec, arr);
   }
 
   SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const override {
@@ -383,8 +382,7 @@ private:
 struct MixedAccessor : public Accessor {
   explicit MixedAccessor(IterSpecialization specialization) {
     is_ptr_iter = specialization.base_const;
-    is_hack_arr = specialization.base_type == IterSpecialization::Dict;
-    arr_type = is_hack_arr ? TDict : TDArr;
+    arr_type = specialization.base_type == IterSpecialization::Dict ? TDict : TDArr;
     if (allowBespokeArrayLikes()) {
       arr_type = arr_type.narrowToVanilla();
     }
@@ -400,8 +398,7 @@ struct MixedAccessor : public Accessor {
   }
 
   SSATmp* getSize(IRGS& env, SSATmp* arr) const override {
-    auto const op = is_hack_arr ? CountDict : CountArray;
-    return gen(env, op, arr);
+    return gen(env, CountDict, arr);
   }
 
   SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const override {
@@ -428,7 +425,6 @@ struct MixedAccessor : public Accessor {
 
 private:
   bool is_ptr_iter = false;
-  bool is_hack_arr = false;
   Type key_type;
 };
 

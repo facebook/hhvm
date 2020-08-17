@@ -2211,11 +2211,11 @@ SSATmp* simplifyConvTVToBool(State& env, const IRInstruction* inst) {
     auto const length = gen(env, CountArray, src);
     return gen(env, NeqInt, length, cns(env, 0));
   }
-  if (srcType <= TVec) {
+  if (srcType.subtypeOfAny(TVec, TVArr)) {
     auto const length = gen(env, CountVec, src);
     return gen(env, NeqInt, length, cns(env, 0));
   }
-  if (srcType <= TDict) {
+  if (srcType.subtypeOfAny(TDict, TDArr)) {
     auto const length = gen(env, CountDict, src);
     return gen(env, NeqInt, length, cns(env, 0));
   }
@@ -2305,11 +2305,11 @@ SSATmp* simplifyConvTVToInt(State& env, const IRInstruction* inst) {
     auto const length = gen(env, Count, src);
     return gen(env, Select, length, cns(env, 1), cns(env, 0));
   }
-  if (srcType <= TVec) {
+  if (srcType.subtypeOfAny(TVec, TVArr)) {
     auto const length = gen(env, CountVec, src);
     return gen(env, Select, length, cns(env, 1), cns(env, 0));
   }
-  if (srcType <= TDict) {
+  if (srcType.subtypeOfAny(TDict, TDArr)) {
     auto const length = gen(env, CountDict, src);
     return gen(env, Select, length, cns(env, 1), cns(env, 0));
   }
@@ -2339,11 +2339,11 @@ SSATmp* simplifyConvTVToDbl(State& env, const IRInstruction* inst) {
   if (srcType <= TDbl)  return src;
   if (srcType <= TNull) return cns(env, 0.0);
   if (srcType <= TArr)  return gen(env, ConvArrToDbl, src);
-  if (srcType <= TVec) {
+  if (srcType.subtypeOfAny(TVec, TVArr)) {
     auto const length = gen(env, CountVec, src);
     return gen(env, ConvBoolToDbl, gen(env, ConvIntToBool, length));
   }
-  if (srcType <= TDict) {
+  if (srcType.subtypeOfAny(TDict, TDArr)) {
     auto const length = gen(env, CountDict, src);
     return gen(env, ConvBoolToDbl, gen(env, ConvIntToBool, length));
   }
@@ -2990,7 +2990,7 @@ X(DictGet, Get, dictVal)
 X(DictGetQuiet, GetQuiet, dictVal)
 X(DictIsset, Isset, dictVal)
 X(DictIdx, Idx, dictVal)
-X(AKExistsDict, AKExists, dictVal)
+X(AKExistsDict, AKExists, arrLikeVal)
 
 #undef X
 
@@ -3148,9 +3148,8 @@ SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
   if (ty <= oneTy) return cns(env, 1);
 
   if (!allowBespokeArrayLikes() || ty.arrSpec().vanilla()) {
-    if (ty <= TArr) return gen(env, CountArray, val);
-    if (ty <= TVec) return gen(env, CountVec, val);
-    if (ty <= TDict) return gen(env, CountDict, val);
+    if (ty.subtypeOfAny(TVec, TVArr)) return gen(env, CountVec, val);
+    if (ty.subtypeOfAny(TDict, TDArr)) return gen(env, CountDict, val);
     if (ty <= TKeyset) return gen(env, CountKeyset, val);
   }
 
@@ -3164,13 +3163,9 @@ SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
 }
 
 namespace {
-SSATmp* simplifyCountHelper(
-  State& env,
-  const IRInstruction* inst,
-  const Type& ty
-) {
+SSATmp* simplifyCountHelper(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  if (src->hasConstVal(ty)) return cns(env, src->arrLikeVal()->size());
+  if (src->hasConstVal(TArrLike)) return cns(env, src->arrLikeVal()->size());
 
   auto const at = src->type().arrSpec().type();
   if (!at) return nullptr;
@@ -3186,21 +3181,17 @@ SSATmp* simplifyCountHelper(
 }
 }
 
-SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
-  return simplifyCountHelper(env, inst, TArr);
+#define X(Name)                                                 \
+SSATmp* simplify##Name(State& env, const IRInstruction* inst) { \
+  return simplifyCountHelper(env, inst);                        \
 }
 
-SSATmp* simplifyCountVec(State& env, const IRInstruction* inst) {
-  return simplifyCountHelper(env, inst, TVec);
-}
+X(CountArray)
+X(CountVec)
+X(CountDict)
+X(CountKeyset)
 
-SSATmp* simplifyCountDict(State& env, const IRInstruction* inst) {
-  return simplifyCountHelper(env, inst, TDict);
-}
-
-SSATmp* simplifyCountKeyset(State& env, const IRInstruction* inst) {
-  return simplifyCountHelper(env, inst, TKeyset);
-}
+#undef X
 
 SSATmp* simplifyLdClsName(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);

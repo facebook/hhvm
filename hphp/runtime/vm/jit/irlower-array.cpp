@@ -202,9 +202,11 @@ void cgAKExistsDict(IRLS& env, const IRInstruction* inst) {
   auto const keyTy = inst->src(1)->type();
   auto& v = vmain(env);
 
+  static_assert(MixedArray::ExistsInt == MixedArray::ExistsIntDict);
+  static_assert(MixedArray::ExistsStr == MixedArray::ExistsStrDict);
   auto const target = (keyTy <= TInt)
-    ? CallSpec::direct(MixedArray::ExistsIntDict)
-    : CallSpec::direct(MixedArray::ExistsStrDict);
+    ? CallSpec::direct(MixedArray::ExistsInt)
+    : CallSpec::direct(MixedArray::ExistsStr);
 
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None,
                argGroup(env, inst).ssa(0).ssa(1));

@@ -1967,9 +1967,9 @@ To string conversions:
 
 | CountArray,      D(Int), S(Arr),    NF
 
-| CountVec,        D(Int), S(Vec),    NF
+| CountVec,        D(Int), S(VArr,Vec),    NF
 
-| CountDict,       D(Int), S(Dict),   NF
+| CountDict,       D(Int), S(DArr,Dict),   NF
 
 | CountKeyset,     D(Int), S(Keyset), NF
 
@@ -2281,7 +2281,7 @@ To string conversions:
 
   Has the effects of array_key_exists(S0, S1).
 
-| AKExistsDict, D(Bool), S(Dict) S(Int,Str), NF
+| AKExistsDict, D(Bool), S(DArr,Dict) S(Int,Str), NF
 
   Has the effects of array_key_exists(S0, S1).
 

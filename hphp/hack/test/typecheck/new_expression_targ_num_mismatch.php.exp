@@ -1,0 +1,4 @@
+File "new_expression_targ_num_mismatch.php", line 8, characters 7-9:
+Wrong number of type arguments (expected 1, got 2) (Typing[4101])
+File "new_expression_targ_num_mismatch.php", line 3, characters 7-9:
+Definition is here

@@ -11,7 +11,7 @@ Wrong number of type arguments (expected 1, got 2) (Typing[4101])
 File "box_arity.php", line 5, characters 7-13:
 Definition is here
 File "box_arity.php", line 18, characters 15-20:
-All type arguments must be specified because a type parameter is reified (Typing[4303])
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
 File "box_arity.php", line 4, characters 7-12:
 Definition is here
 File "box_arity.php", line 20, characters 15-33:
@@ -19,7 +19,7 @@ Wrong number of type arguments (expected 1, got 2) (Typing[4101])
 File "box_arity.php", line 4, characters 7-12:
 Definition is here
 File "box_arity.php", line 22, characters 15-21:
-All type arguments must be specified because a type parameter is reified (Typing[4303])
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
 File "box_arity.php", line 5, characters 7-13:
 Definition is here
 File "box_arity.php", line 24, characters 15-34:

@@ -146,27 +146,17 @@ let handler =
       check_variadic_param env f.f_variadic
 
     method! at_expr env (_, e) =
+      let check_targs targs =
+        List.iter targs (fun (_, hint) -> check_hint env hint)
+      in
+
       match e with
       | As (_, h, _) -> check_hint env h
       | Is (_, h) -> check_hint env h
-      | New ((_, CI (_, cid)), targs, _, _, (p, _)) ->
-        begin
-          match Env.get_class env cid with
-          | None -> ()
-          | Some class_ ->
-            let tparams_length = List.length (Cls.tparams class_) in
-            let hargs_length = List.length targs in
-            let c_pos = Cls.pos class_ in
-            if
-              Int.( <> ) hargs_length tparams_length
-              && Int.( <> ) 0 hargs_length
-            then
-              Errors.type_arity
-                p
-                c_pos
-                ~expected:tparams_length
-                ~actual:hargs_length
-        end
+      | FunctionPointer (_, targs)
+      | Call (_, _, targs, _, _)
+      | New (_, targs, _, _, _) ->
+        check_targs targs
       | _ -> ()
 
     method! at_typedef env t =

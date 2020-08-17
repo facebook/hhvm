@@ -1,9 +1,9 @@
 File "deep_soft_reification.php", line 12, characters 14-24:
-All type arguments must be specified because a type parameter is reified (Typing[4303])
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
 File "deep_soft_reification.php", line 5, characters 7-17:
 Definition is here
 File "deep_soft_reification.php", line 15, characters 14-20:
-All type arguments must be specified because a type parameter is reified (Typing[4303])
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
 File "deep_soft_reification.php", line 6, characters 7-13:
 Definition is here
 File "deep_soft_reification.php", line 28, characters 26-31:

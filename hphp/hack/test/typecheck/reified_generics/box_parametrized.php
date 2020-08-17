@@ -8,14 +8,14 @@ class Erased<T> {}
 class Reified<reify Tr> {}
 
 function Erased_parametrizedCheck(): void {
-  new Erased<Erased>();
+  new Erased<Erased<_>>();
 
   new Erased<Reified>(); // bad
   new Erased<Reified<int>>();
 }
 
 function Reified_parametrizedCheck(): void {
-  new Reified<Erased>();
+  new Reified<Erased>();  // bad
 
   new Reified<Reified>(); // bad
   new Reified<Reified<int>>();
@@ -23,7 +23,7 @@ function Reified_parametrizedCheck(): void {
 
 // just some sanity checks
 function deepChecks(): void {
-  new Erased<Erased<Erased>>();
+  new Erased<Erased<Erased>>(); // bad
   new Erased<Erased<Erased<Reified>>>(); // bad
   new Erased<Erased<Erased<Reified<int>>>>();
 

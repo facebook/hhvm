@@ -154,26 +154,15 @@ let verify_targ_valid env reification tparam ((_, hint) as targ) =
 
 let verify_call_targs env expr_pos decl_pos tparams targs =
   ( if tparams_has_reified tparams then
-    let check_targ_hints = function
-      | (_, (pos, Aast.Happly ((_, class_id), hints))) ->
-        let tc = Env.get_class env class_id in
-        Option.iter tc ~f:(fun tc ->
-            let tparams = Cls.tparams tc in
-            let tparams_length = List.length tparams in
-            let targs_length = List.length hints in
-            if Int.( <> ) tparams_length targs_length then
-              let c_pos = Cls.pos tc in
-              if Int.( <> ) targs_length 0 then
-                Errors.type_arity
-                  pos
-                  c_pos
-                  ~expected:tparams_length
-                  ~actual:targs_length
-              else
-                Errors.require_args_reify c_pos pos)
-      | _ -> ()
-    in
-    List.iter targs ~f:check_targ_hints );
+    let tparams_length = List.length tparams in
+    let targs_length = List.length targs in
+    if Int.( <> ) tparams_length targs_length then
+      if Int.( = ) targs_length 0 then
+        Errors.require_args_reify decl_pos expr_pos
+      else
+        (* mismatches with targs_length > 0 are not specific to reification and handled
+                  elsewhere *)
+        () );
   let all_wildcards = List.for_all ~f:is_wildcard targs in
   if all_wildcards && tparams_has_reified tparams then
     Errors.require_args_reify decl_pos expr_pos
@@ -253,29 +242,13 @@ let handler =
 
     method! at_hint env =
       function
-      | (pos, Aast.Happly ((_, class_id), hints)) ->
+      | (_pos, Aast.Happly ((_, class_id), hints)) ->
         let tc = Env.get_class env class_id in
         Option.iter tc ~f:(fun tc ->
             let tparams = Cls.tparams tc in
             ignore
               (List.iter2 tparams hints ~f:(fun tp hint ->
-                   verify_targ_valid env Unresolved tp ((), hint)));
-
-            (* TODO: This check could be unified with the existence check above,
-             * but would require some consolidation T38941033. List.iter2 gives
-             * a nice Or_unequal_lengths.t result that replaces this if statement *)
-            let tparams_length = List.length tparams in
-            let targs_length = List.length hints in
-            if Int.( <> ) tparams_length targs_length then
-              let c_pos = Cls.pos tc in
-              if Int.( <> ) targs_length 0 then
-                Errors.type_arity
-                  pos
-                  c_pos
-                  ~expected:tparams_length
-                  ~actual:targs_length
-              else if tparams_has_reified tparams then
-                Errors.require_args_reify c_pos pos)
+                   verify_targ_valid env Unresolved tp ((), hint))))
       | _ -> ()
 
     method! at_tparam env tparam =

@@ -6,7 +6,7 @@ class SoftReified<<<__Soft>> reify T> {}
 class Reified<reify T> {}
 
 function new_targCheck(): void {
-  new Erased<Erased>();
+  new Erased<Erased<_>>();
   new Erased<Erased<int>>();
 
   new Erased<SoftReified>(); // bad

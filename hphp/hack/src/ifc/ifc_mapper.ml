@@ -49,7 +49,8 @@ and fun_ fty fpol f =
 let prop fpol fprop depth = function
   | Ctrue -> Ctrue
   | Cquant (q, n, c) -> Cquant (q, n, fprop (depth + n) c)
-  | Ccond ((p, x), ct, ce) -> Ccond ((fpol p, x), fprop depth ct, fprop depth ce)
+  | Ccond ((pos, p, x), ct, ce) ->
+    Ccond ((pos, fpol p, x), fprop depth ct, fprop depth ce)
   | Cconj (cl, cr) -> Cconj (fprop depth cl, fprop depth cr)
   | Cflow (p1, p2) -> Cflow (fpol p1, fpol p2)
   | Chole proto ->

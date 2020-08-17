@@ -1,6 +1,18 @@
 File "security_lattice.php", line 23, characters 3-433:
 Data with policy PRIVATE appears in context PUBLIC. (Typing[4379])
+File "security_lattice.php", line 20, characters 16-23:
+The data source with policy PRIVATE
+File "security_lattice.php", line 18, characters 16-22:
+The data sink with policy PUBLIC
 File "security_lattice.php", line 23, characters 3-433:
 Data with policy PRIVATE appears in context A. (Typing[4379])
+File "security_lattice.php", line 20, characters 16-23:
+The data source with policy PRIVATE
+File "security_lattice.php", line 14, characters 16-17:
+The data sink with policy A
 File "security_lattice.php", line 23, characters 3-433:
 Data with policy A appears in context B. (Typing[4379])
+File "security_lattice.php", line 14, characters 16-17:
+The data source with policy A
+File "security_lattice.php", line 16, characters 16-17:
+The data sink with policy B

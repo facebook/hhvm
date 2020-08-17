@@ -29,12 +29,20 @@ type policy =
   (* Free variable; relative to a scope *)
   | Pfree_var of policy_var * Ifc_scope.t
   (* A policy allowing use for a single purpose *)
-  | Ppurpose of purpose
+  | Ppurpose of
+      (Pos.t[@equal (fun _ _ -> true)] [@compare (fun _ _ -> 0)]) * purpose
   (* Bottom policy; public *)
-  | Pbot
+  | Pbot of (Pos.t[@equal (fun _ _ -> true)] [@compare (fun _ _ -> 0)])
   (* Top policy; private *)
-  | Ptop
-[@@deriving ord, eq, show]
+  | Ptop of (Pos.t[@equal (fun _ _ -> true)] [@compare (fun _ _ -> 0)])
+[@@deriving eq, ord, show]
+
+let pos_of = function
+  | Ppurpose (pos, _)
+  | Ptop pos
+  | Pbot pos ->
+    Some pos
+  | _ -> None
 
 (* Two kinds of quantification in constraints, universal and
    existential *)
@@ -81,7 +89,7 @@ type prop =
   | Ctrue
   | Cquant of quant * int * prop
   (* if policy <= purpose then prop0 else prop1 *)
-  | Ccond of (policy * purpose) * prop * prop
+  | Ccond of (Pos.t * policy * purpose) * prop * prop
   | Cconj of prop * prop
   | Cflow of (policy * policy)
   (* holes are introduced by calls to functions for which
@@ -142,6 +150,7 @@ type env = {
 }
 
 type policied_property = {
+  pp_pos: Pos.t;
   pp_name: string;
   pp_type: Type.locl_ty;
   pp_purpose: purpose option;

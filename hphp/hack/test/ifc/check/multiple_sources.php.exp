@@ -1,0 +1,60 @@
+File "multiple_sources.php", line 43, characters 3-70:
+Data with policy B appears in context A. (Typing[4379])
+File "multiple_sources.php", line 8, characters 16-18:
+The data source with policy B
+File "multiple_sources.php", line 6, characters 16-17:
+The data sink with policy A
+File "multiple_sources.php", line 19, characters 3-94:
+Data with policy B appears in context PUBLIC. (Typing[4379])
+File "multiple_sources.php", line 8, characters 16-18:
+The data source with policy B
+File "multiple_sources.php", line 12, characters 16-22:
+The data sink with policy PUBLIC
+File "multiple_sources.php", line 19, characters 3-94:
+Data with policy A appears in context PUBLIC. (Typing[4379])
+File "multiple_sources.php", line 6, characters 16-17:
+The data source with policy A
+File "multiple_sources.php", line 12, characters 16-22:
+The data sink with policy PUBLIC
+File "multiple_sources.php", line 27, characters 3-117:
+Data with policy B appears in context PUBLIC. (Typing[4379])
+File "multiple_sources.php", line 8, characters 16-18:
+The data source with policy B
+File "multiple_sources.php", line 12, characters 16-22:
+The data sink with policy PUBLIC
+File "multiple_sources.php", line 27, characters 3-117:
+Data with policy A appears in context PUBLIC. (Typing[4379])
+File "multiple_sources.php", line 6, characters 16-17:
+The data source with policy A
+File "multiple_sources.php", line 12, characters 16-22:
+The data sink with policy PUBLIC
+File "multiple_sources.php", line 32, characters 3-117:
+Data with policy B appears in context PUBLIC. (Typing[4379])
+File "multiple_sources.php", line 8, characters 16-18:
+The data source with policy B
+File "multiple_sources.php", line 12, characters 16-22:
+The data sink with policy PUBLIC
+File "multiple_sources.php", line 32, characters 3-117:
+Data with policy A appears in context PUBLIC. (Typing[4379])
+File "multiple_sources.php", line 6, characters 16-17:
+The data source with policy A
+File "multiple_sources.php", line 12, characters 16-22:
+The data sink with policy PUBLIC
+File "multiple_sources.php", line 37, characters 3-144:
+Data with policy B appears in context PUBLIC. (Typing[4379])
+File "multiple_sources.php", line 8, characters 16-18:
+The data source with policy B
+File "multiple_sources.php", line 12, characters 16-22:
+The data sink with policy PUBLIC
+File "multiple_sources.php", line 37, characters 3-144:
+Data with policy A appears in context PUBLIC. (Typing[4379])
+File "multiple_sources.php", line 6, characters 16-17:
+The data source with policy A
+File "multiple_sources.php", line 12, characters 16-22:
+The data sink with policy PUBLIC
+File "multiple_sources.php", line 23, characters 3-90:
+Data with policy B appears in context PUBLIC. (Typing[4379])
+File "multiple_sources.php", line 8, characters 16-18:
+The data source with policy B
+File "multiple_sources.php", line 12, characters 16-22:
+The data sink with policy PUBLIC

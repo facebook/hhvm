@@ -243,7 +243,7 @@ let rec add_dependencies pl t acc =
        Here we choose that mixed will be public; we
        could choose a different default policy or
        have mixed carry a policy (preferable). *)
-    L.(pl <* [Pbot]) acc
+    L.(pl <* [Pbot Pos.none]) acc
   | Tprim pol
   | Tgeneric pol
   (* For classes and functions, we only add a dependency to the self policy and
@@ -301,11 +301,11 @@ let rec class_ptype lump_pol_opt proto_renv targs name =
     | Some class_sig -> class_sig
     | None -> fail "could not found a class policy signature for %s" name
   in
-  let prop_ptype { pp_name; pp_type; pp_purpose; _ } =
+  let prop_ptype { pp_name; pp_type; pp_purpose; pp_pos; _ } =
     (* Purpose of the property takes precedence over any lump policy. *)
     let lump_pol_opt =
       Option.merge
-        (Option.map ~f:Lattice.parse_policy pp_purpose)
+        (Option.map ~f:(Lattice.parse_policy pp_pos) pp_purpose)
         lump_pol_opt
         ~f:(fun a _ -> a)
     in
@@ -578,7 +578,7 @@ and assign renv env op lhs_exp rhs_exp =
   (env, lhs_pty)
 
 (* Generate flow constraints for an expression *)
-and expr renv env (((_epos, ety), e) : Tast.expr) =
+and expr renv env (((epos, ety), e) : Tast.expr) =
   let expr = expr renv in
   match e with
   | A.True
@@ -587,7 +587,7 @@ and expr renv env (((_epos, ety), e) : Tast.expr) =
   | A.Float _
   | A.String _ ->
     (* literals are public *)
-    (env, Tprim Pbot)
+    (env, Tprim (Pbot epos))
   | A.Binop (Ast_defs.Eq op, e1, e2) -> assign renv env op e1 e2
   | A.Binop (_, e1, e2) ->
     let (env, ty1) = expr env e1 in
@@ -1030,15 +1030,14 @@ let check meta tast () =
     let simple_illegal_flows =
       Logic.entailment_violations meta.m_opts.opt_security_lattice simple
     in
+    let report_simple_illegal_flows (source, sink) =
+      let source = (pos_of source, Format.asprintf "%a" Pp.policy source) in
+      let sink = (pos_of sink, Format.asprintf "%a" Pp.policy sink) in
+      Errors.illegal_information_flow result.res_span source sink
+    in
 
     if should_print ~user_mode:meta.m_opts.opt_mode ~phase:Mcheck then begin
-      List.iter
-        ~f:(fun (source, sink) ->
-          Errors.illegal_information_flow
-            result.res_span
-            ( Format.asprintf "%a" Pp.policy source,
-              Format.asprintf "%a" Pp.policy sink ))
-        simple_illegal_flows;
+      List.iter ~f:report_simple_illegal_flows simple_illegal_flows;
 
       List.iter ~f:(Format.printf "%a@," Pp.implicit_violation) implicit
     end

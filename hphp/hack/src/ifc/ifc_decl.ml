@@ -122,7 +122,8 @@ let add_super class_decl_env class_decl_acc super =
 
 let mk_policied_prop
     {
-      A.cv_id = (_, pp_name);
+      A.cv_span = pp_pos;
+      cv_id = (_, pp_name);
       cv_type = (pp_type, _);
       cv_visibility = pp_visibility;
       cv_user_attributes = attrs;
@@ -139,7 +140,8 @@ let mk_policied_prop
   in
   match find_policy attrs with
   | `No_policy -> None
-  | `Policy pp_purpose -> Some { pp_name; pp_type; pp_visibility; pp_purpose }
+  | `Policy pp_purpose ->
+    Some { pp_name; pp_type; pp_visibility; pp_purpose; pp_pos }
 
 let class_ class_decl_env class_ =
   let { A.c_name = (_, name); c_vars = properties; _ } = class_ in

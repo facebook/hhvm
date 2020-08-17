@@ -5061,11 +5061,22 @@ let tparam_non_shadowing_reuse pos var_name =
     ^ " was already used for another generic parameter. Please use a different name to avoid confusion."
     )
 
-let illegal_information_flow pos (source, sink) =
-  add
-    (Typing.err_code Typing.IllegalInformationFlow)
-    pos
-    (Printf.sprintf "Data with policy %s appears in context %s." source sink)
+let illegal_information_flow pos (source_pos_opt, source) (sink_pos_opt, sink) =
+  let explain node_pos_opt node printer reasons =
+    match node_pos_opt with
+    | Some pos -> (pos, printer node) :: reasons
+    | None -> reasons
+  in
+  let reasons =
+    let sprintf = Printf.sprintf "Data with policy %s appears in context %s." in
+    let sprintf_source = Printf.sprintf "The data source with policy %s" in
+    let sprintf_sink = Printf.sprintf "The data sink with policy %s" in
+    [(pos, sprintf source sink)]
+    |> explain source_pos_opt source sprintf_source
+    |> explain sink_pos_opt sink sprintf_sink
+    |> List.rev
+  in
+  add_list (Typing.err_code Typing.IllegalInformationFlow) reasons
 
 (*****************************************************************************)
 (* Printing *)

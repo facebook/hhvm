@@ -1,6 +1,18 @@
 File "catch.php", line 12, characters 1-178:
 Data with policy A appears in context B. (Typing[4379])
+File "catch.php", line 6, characters 14-19:
+The data source with policy A
+File "catch.php", line 9, characters 14-19:
+The data sink with policy B
 File "catch.php", line 31, characters 1-204:
 Data with policy A appears in context B. (Typing[4379])
+File "catch.php", line 6, characters 14-19:
+The data source with policy A
+File "catch.php", line 9, characters 14-19:
+The data sink with policy B
 File "catch.php", line 41, characters 1-144:
 Data with policy A appears in context B. (Typing[4379])
+File "catch.php", line 6, characters 14-19:
+The data source with policy A
+File "catch.php", line 9, characters 14-19:
+The data sink with policy B

@@ -16,16 +16,17 @@ open Ifc_types
 
 exception Invalid_security_lattice
 
-let parse_policy purpose_str =
+let parse_policy pos purpose_str =
   match String.uppercase purpose_str with
-  | "PUBLIC" -> Pbot
-  | "PRIVATE" -> Ptop
-  | purpose -> Ppurpose purpose
+  | "PUBLIC" -> Pbot pos
+  | "PRIVATE" -> Ptop pos
+  | purpose -> Ppurpose (pos, purpose)
 
 (* Parses a Hasse diagram written in a ';' separated format,
  * e.g., "A < B; B < C; A < D"
  *)
 let parse_exn str =
+  let pos = Pos.none in
   String.filter ~f:(fun chr -> not @@ Char.equal ' ' chr) str
   |> String.split ~on:';'
   |> (fun xs ->
@@ -35,7 +36,7 @@ let parse_exn str =
          xs)
   |> List.map ~f:(fun str ->
          match String.lsplit2 ~on:'<' str with
-         | Some (l, r) -> (parse_policy l, parse_policy r)
+         | Some (l, r) -> (parse_policy pos l, parse_policy pos r)
          | None -> raise Invalid_security_lattice)
   |> FlowSet.of_list
 

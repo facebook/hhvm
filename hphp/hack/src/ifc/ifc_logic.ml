@@ -41,32 +41,32 @@ end
    one of the two policies is a variable. *)
 let policy_meet p1 p2 =
   match (p1, p2) with
-  | (Ptop, p)
-  | (p, Ptop) ->
+  | (Ptop _, p)
+  | (p, Ptop _) ->
     Some p
-  | (Ppurpose n1, Ppurpose n2) ->
+  | (Ppurpose (pos, n1), Ppurpose (_, n2)) ->
     if String.equal n1 n2 then
       Some p1
     else
-      Some Pbot
-  | (Pbot, _)
-  | (_, Pbot) ->
-    Some Pbot
+      Some (Pbot pos)
+  | ((Pbot _ as p), _)
+  | (_, (Pbot _ as p)) ->
+    Some p
   | _ -> None
 
 let policy_join p1 p2 =
   match (p1, p2) with
-  | (Ptop, _)
-  | (_, Ptop) ->
-    Some Ptop
-  | (Pbot, p)
-  | (p, Pbot) ->
+  | ((Ptop _ as p), _)
+  | (_, (Ptop _ as p)) ->
     Some p
-  | (Ppurpose n1, Ppurpose n2) ->
+  | (Pbot _, p)
+  | (p, Pbot _) ->
+    Some p
+  | (Ppurpose (pos, n1), Ppurpose (_, n2)) ->
     if String.equal n1 n2 then
       Some p1
     else
-      Some Ptop
+      Some (Ptop pos)
   | _ -> None
 
 let conjoin = function
@@ -120,13 +120,13 @@ let quantify ~pred ~quant:q ?(depth = 0) c =
    are left; it is used internally in the simplify function
    below *)
 type if_tree =
-  | ITE of (policy * purpose) * if_tree * if_tree
+  | ITE of (Pos.t * policy * purpose) * if_tree * if_tree
   | FLW of (policy * policy) list
 
 (* Slow simplification procedure for constraints.
    A correctness proof for the quantifier elimination is here:
    https://github.com/mpu/hol/blob/master/hol4/constraintScript.sml *)
-let simplify c =
+let simplify (c : prop) =
   let split3 l =
     (* Split a list of flow constraints as:
        - lower bounds for (Pbound_var 0)
@@ -152,7 +152,7 @@ let simplify c =
     List.concat
       [
         oth;
-        List.map ~f:(fun l -> (l, Pbot)) lbs;
+        List.map ~f:(fun l -> (l, Pbot Pos.none)) lbs;
         List.map ~f:(fun u -> (max, u)) ubs;
       ]
   in
@@ -170,13 +170,13 @@ let simplify c =
     | FLW l ->
       let f (a, b) = (shift a, shift b) in
       FLW (List.map ~f l)
-    | ITE ((p, x), t1, t2) -> ITE ((shift p, x), pop t1, pop t2)
+    | ITE ((pos, p, x), t1, t2) -> ITE ((pos, shift p, x), pop t1, pop t2)
   in
   let rec elim_exists_ift = function
     (* Same as exelim above, but for if_tree constraints *)
     | FLW l -> FLW (dedup (elim_exists l))
-    | ITE (c, t1, t2) ->
-      assert (not (equal_policy (fst c) (Pbound_var 0)));
+    | ITE (((_, pol, _) as c), t1, t2) ->
+      assert (not (equal_policy pol (Pbound_var 0)));
       ITE (c, elim_exists_ift t1, elim_exists_ift t2)
   in
   let rec cat t1 t2 =
@@ -190,8 +190,8 @@ let simplify c =
   let rec elim_forall_ift max = function
     (* Same as alelim above, but for if_tree constraints *)
     | FLW l -> FLW (elim_forall ~max l)
-    | ITE ((Pbound_var 0, x), t1, t2) ->
-      let max_if = Option.value_exn (policy_meet max (Ppurpose x)) in
+    | ITE ((pos, Pbound_var 0, x), t1, t2) ->
+      let max_if = Option.value_exn (policy_meet max (Ppurpose (pos, x))) in
       cat (elim_forall_ift max_if t1) (elim_forall_ift max t2)
     | ITE (c, t1, t2) -> ITE (c, elim_forall_ift max t1, elim_forall_ift max t2)
   in
@@ -203,7 +203,7 @@ let simplify c =
       let elim =
         match q with
         | Qexists -> elim_exists_ift
-        | Qforall -> elim_forall_ift Ptop
+        | Qforall -> elim_forall_ift (Ptop Pos.none)
       in
       let elim l = pop (elim l) in
       funpow n ~f:elim ~init:(qelim c)
@@ -227,16 +227,16 @@ let simplify c =
  *)
 let rec entailment_violations lattice = function
   | Ctrue -> []
-  | Ccond ((p1, p2), c1, c2) ->
-    let flow = (p1, Ppurpose p2) in
+  | Ccond ((pos, p1, p2), c1, c2) ->
+    let flow = (p1, Ppurpose (pos, p2)) in
     if List.is_empty @@ entailment_violations lattice (Cflow flow) then
       entailment_violations lattice c1
     else
       entailment_violations lattice c2
   | Cconj (c1, c2) ->
     entailment_violations lattice c1 @ entailment_violations lattice c2
-  | Cflow (_, Ptop)
-  | Cflow (Pbot, _) ->
+  | Cflow (_, Ptop _)
+  | Cflow (Pbot _, _) ->
     []
   | Cflow (p1, p2) when equal_policy p1 p2 -> []
   | Cflow flow ->

@@ -1,2 +1,6 @@
 File "new.php", line 12, characters 1-91:
 Data with policy PRIVATE appears in context PUBLIC. (Typing[4379])
+File "new.php", line 5, characters 66-72:
+The data source with policy PRIVATE
+File "new.php", line 9, characters 65-71:
+The data sink with policy PUBLIC

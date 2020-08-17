@@ -32,9 +32,9 @@ let option pp fmt opt =
   | None -> fprintf fmt "None"
 
 let show_policy = function
-  | Pbot -> "PUBLIC"
-  | Ptop -> "PRIVATE"
-  | Ppurpose p -> p
+  | Pbot _ -> "PUBLIC"
+  | Ptop _ -> "PRIVATE"
+  | Ppurpose (_, p) -> p
   | Pfree_var (v, _s) -> v
   | Pbound_var n -> Printf.sprintf "<bound%d>" n
 
@@ -86,8 +86,8 @@ let prop =
     | Cconj (Cflow (a, b), Cflow (c, d))
       when equal_policy a d && equal_policy b c ->
       [`q (a, b)]
-    | Cflow (a, (Pbot as b))
-    | Cflow ((Ptop as b), a) ->
+    | Cflow (a, (Pbot _ as b))
+    | Cflow ((Ptop _ as b), a) ->
       [`q (a, b)]
     | Cconj (cl, cr) -> conjuncts cl @ conjuncts cr
     | Ctrue -> []
@@ -126,7 +126,7 @@ let prop =
               ~init:(b + 1, [])))
         (aux (b + n))
         (conjuncts c)
-    | [`c (Ccond ((p, x), ct, ce))] ->
+    | [`c (Ccond ((_, p, x), ct, ce))] ->
       fprintf fmt "@[<hov>if %a < %s@" pol p x;
       let cct = conjuncts ct in
       let cce = conjuncts ce in

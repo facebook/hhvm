@@ -1,4 +1,4 @@
 File "typedef4.php", line 18, characters 7-15:
-Expected a trait but got a type alias. (Naming[2052])
+Expected a `trait` but got a type alias. (Naming[2052])
 File "typedef4.php", line 14, characters 6-14:
 Alias definition is here.

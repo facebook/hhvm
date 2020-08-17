@@ -1,2 +1,2 @@
 File "badglobal.php", line 5, characters 3-10:
-Variable $GLOBALS is undefined, or not always defined (Naming[2050])
+Variable `$GLOBALS` is undefined, or not always defined (Naming[2050])

@@ -1,4 +1,4 @@
 File "conditional.php", line 4, characters 14-15:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 File "conditional.php", line 5, characters 10-11:
-Variable $x is undefined, or not always defined (did you mean $b instead?) (Naming[2050])
+Variable `$x` is undefined, or not always defined (did you mean `$b` instead?) (Naming[2050])

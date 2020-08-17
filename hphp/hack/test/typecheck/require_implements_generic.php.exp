@@ -1,2 +1,2 @@
 File "require_implements_generic.php", line 6, characters 22-22:
-Unbound name: T (an object type) (Naming[2049])
+Unbound name: `T` (an object type) (Naming[2049])

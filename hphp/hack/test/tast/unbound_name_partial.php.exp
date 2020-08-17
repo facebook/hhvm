@@ -1,5 +1,5 @@
 Errors:
-  [4:15-28] Unbound name: NoSuchClass (an object type)
+  [4:15-28] Unbound name: `NoSuchClass` (an object type)
   [3:10-14] Invalid return type
   [3:10-14] Expected `void` because this function does not always return a value
   [3:18-23] But got `mixed`

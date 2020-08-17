@@ -1,4 +1,4 @@
 File "pipe_operator_dollardollar_static_member.php", line 14, characters 15-25:
-No class variable '$notAMember' in Foo (did you mean '$myInt'?) (Typing[4090])
+No class variable `$notAMember` in `Foo` (did you mean '$myInt'?) (Typing[4090])
 File "pipe_operator_dollardollar_static_member.php", line 3, characters 7-9:
-Declaration of Foo is here
+Declaration of `Foo` is here

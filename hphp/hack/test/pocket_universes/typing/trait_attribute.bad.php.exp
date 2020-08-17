@@ -1,41 +1,41 @@
 File "trait_attribute.bad.php", line 11, characters 7-8:
-Class/Trait C0 does not need any __Pu attribute (Typing[4376])
+Class/Trait `C0` does not need any `__Pu` attribute (Typing[4376])
 File "trait_attribute.bad.php", line 18, characters 7-8:
-Class/Trait C1 does not need any __Pu attribute (Typing[4376])
+Class/Trait `C1` does not need any `__Pu` attribute (Typing[4376])
 File "trait_attribute.bad.php", line 33, characters 8-15:
-Class/Trait D0 has a useless attribute 'name' for enumeration E (Typing[4376])
+Class/Trait `D0` has a useless attribute `name` for enumeration `E` (Typing[4376])
 File "trait_attribute.bad.php", line 41, characters 8-14:
-Class/Trait D1 has a unknown attribute 'foo' for enumeration E (Typing[4376])
+Class/Trait `D1` has a unknown attribute `foo` for enumeration `E` (Typing[4376])
 File "trait_attribute.bad.php", line 50, characters 7-8:
-Class/Trait D2 should have the attribute:
-__Pu("E: name") (Typing[4376])
+Class/Trait `D2` should have the attribute:
+`__Pu("E: name")` (Typing[4376])
 File "trait_attribute.bad.php", line 56, characters 7-8:
-Class/Trait D3 should have the attribute:
-__Pu("E: name") (Typing[4376])
+Class/Trait `D3` should have the attribute:
+`__Pu("E: name")` (Typing[4376])
 File "trait_attribute.bad.php", line 60, characters 8-20:
-Duplicated field 'name' in __Pu attribute (Typing[4376])
+Duplicated field `name` in `__Pu` attribute (Typing[4376])
 File "trait_attribute.bad.php", line 65, characters 18-25:
-Duplicated attribute 'E' in __Pu attribute (Typing[4376])
+Duplicated attribute `E` in `__Pu` attribute (Typing[4376])
 File "trait_attribute.bad.php", line 70, characters 3-6:
-Invalid __Pu attribute (Typing[4376])
+Invalid `__Pu` attribute (Typing[4376])
 File "trait_attribute.bad.php", line 71, characters 7-8:
-Class/Trait D6 should have the attribute:
-__Pu("E: name") (Typing[4376])
+Class/Trait `D6` should have the attribute:
+`__Pu("E: name")` (Typing[4376])
 File "trait_attribute.bad.php", line 76, characters 7-7:
-Class/Trait E should have the attribute:
-__Pu("E: name") (Typing[4376])
+Class/Trait `E` should have the attribute:
+`__Pu("E: name")` (Typing[4376])
 File "trait_attribute.bad.php", line 93, characters 7-8:
-Class/Trait F1 should have the attribute:
-__Pu("E: name") (Typing[4376])
+Class/Trait `F1` should have the attribute:
+`__Pu("E: name")` (Typing[4376])
 File "trait_attribute.bad.php", line 98, characters 7-8:
-Class/Trait F2 should have the attribute:
-__Pu("E: name") (Typing[4376])
+Class/Trait `F2` should have the attribute:
+`__Pu("E: name")` (Typing[4376])
 File "trait_attribute.bad.php", line 104, characters 7-8:
-Class/Trait TX should have the attribute:
-__Pu("E: name") (Typing[4376])
+Class/Trait `TX` should have the attribute:
+`__Pu("E: name")` (Typing[4376])
 File "trait_attribute.bad.php", line 128, characters 7-7:
-Class/Trait N should have the attribute:
-__Pu("PU1: id, val", "PU0: msg") (Typing[4376])
+Class/Trait `N` should have the attribute:
+`__Pu("PU1: id, val", "PU0: msg")` (Typing[4376])
 File "trait_attribute.bad.php", line 132, characters 7-7:
-Class/Trait P should have the attribute:
-__Pu("PU1: id, val") (Typing[4376])
+Class/Trait `P` should have the attribute:
+`__Pu("PU1: id, val")` (Typing[4376])

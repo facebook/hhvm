@@ -1,2 +1,2 @@
 File "use_unknown_class_as_trait_fail.php", line 15, characters 7-7:
-Unbound name: Z (a trait) (Naming[2049])
+Unbound name: `Z` (a trait) (Naming[2049])

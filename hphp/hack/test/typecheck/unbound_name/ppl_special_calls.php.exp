@@ -1,4 +1,4 @@
 File "ppl_special_calls.php", line 14, characters 5-10:
-Unbound name: sample (a global function) (Naming[2049])
+Unbound name: `sample` (a global function) (Naming[2049])
 File "ppl_special_calls.php", line 14, characters 5-10:
-Unbound name (typing): sample (Typing[4107])
+Unbound name (typing): `sample` (Typing[4107])

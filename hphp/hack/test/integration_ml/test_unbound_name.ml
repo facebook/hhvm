@@ -23,7 +23,7 @@ class B {}
 let errors =
   {|
 File "/A.php", line 5, characters 12-12:
-Unbound name: B (an object type) (Naming[2049])
+Unbound name: `B` (an object type) (Naming[2049])
 |}
 
 let test () =

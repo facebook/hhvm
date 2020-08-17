@@ -1,2 +1,2 @@
 File "dynamic_new4.php", line 19, characters 15-17:
-Cannot use dynamic new. (Naming[2060])
+Cannot use dynamic `new`. (Naming[2060])

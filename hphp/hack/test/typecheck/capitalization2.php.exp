@@ -1,4 +1,4 @@
 File "capitalization2.php--f2.php", line 2, characters 14-22:
-Could not find cAmelCase (Naming[2006])
+Could not find `cAmelCase` (Naming[2006])
 File "capitalization2.php--f1.php", line 3, characters 7-15:
-Did you mean CamelCase?
+Did you mean `CamelCase`?

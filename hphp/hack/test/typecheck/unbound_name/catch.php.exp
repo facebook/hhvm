@@ -1,5 +1,5 @@
 File "catch.php", line 21, characters 10-26:
-Unbound name: NotFoundException (an object type) (Naming[2049])
+Unbound name: `NotFoundException` (an object type) (Naming[2049])
 File "catch.php", line 27, characters 10-10:
 Generics are not allowed in this position. (Typing[4306])
 File "catch.php", line 27, characters 10-10:

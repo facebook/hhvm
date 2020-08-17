@@ -1,2 +1,2 @@
 File "lambda14.php", line 36, characters 23-24:
-Variable $z is undefined, or not always defined (did you mean $baz instead?) (Naming[2050])
+Variable `$z` is undefined, or not always defined (did you mean `$baz` instead?) (Naming[2050])

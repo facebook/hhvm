@@ -35,7 +35,7 @@ class C {}
 let errors =
   {|
 File "/A.php", line 5, characters 31-31:
-Unbound name: C (Naming[2049])
+Unbound name: `C` (Naming[2049])
 |}
 
 let root = "/"

@@ -1,15 +1,15 @@
 File "dup_check.bad.php", line 9, characters 15-15:
-Pocket Universe case type T is already declared in A:@F (Naming[2101])
+Pocket Universe case type `T` is already declared in `A:@F` (Naming[2101])
 File "dup_check.bad.php", line 12, characters 12-12:
-Pocket Universe case value x is already declared in A:@F (Naming[2101])
+Pocket Universe case value `x` is already declared in `A:@F` (Naming[2101])
 File "dup_check.bad.php", line 18, characters 7-7:
-Pocket Universe instance A is already declared in A:@F (Naming[2101])
+Pocket Universe instance `A` is already declared in `A:@F` (Naming[2101])
 File "dup_check.bad.php", line 20, characters 12-12:
-type T is already assigned in A:@F:@A (Naming[2101])
+type `T` is already assigned in `A:@F:@A` (Naming[2101])
 File "dup_check.bad.php", line 23, characters 7-7:
-value x is already assigned in A:@F:@A (Naming[2101])
+value `x` is already assigned in `A:@F:@A` (Naming[2101])
 File "dup_check.bad.php", line 27, characters 8-8:
-Pocket Universe enumeration F is already declared in A (Naming[2101])
+Pocket Universe enumeration `F` is already declared in `A` (Naming[2101])
 File "dup_check.bad.php", line 22, characters 7-7:
 Wrong type hint (Typing[4350])
 File "dup_check.bad.php", line 12, characters 10-10:

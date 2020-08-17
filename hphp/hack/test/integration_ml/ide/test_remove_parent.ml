@@ -36,7 +36,7 @@ let foo_parent_missing_diagnostics =
   "
 /foo.php:
 File \"/foo.php\", line 3, characters 19-27:
-Unbound name: FooParent (an object type) (Naming[2049])
+Unbound name: `FooParent` (an object type) (Naming[2049])
 
 File \"/foo.php\", line 5, characters 12-14:
 No method 'lol' in Foo (did you mean 'test'?) (Typing[4053])

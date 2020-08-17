@@ -1,2 +1,2 @@
 File "naming_fail_test8.php", line 24, characters 3-4:
-Variable $k is undefined, or not always defined (did you mean $x instead?) (Naming[2050])
+Variable `$k` is undefined, or not always defined (did you mean `$x` instead?) (Naming[2050])

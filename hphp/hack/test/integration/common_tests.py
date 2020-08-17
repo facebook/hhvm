@@ -403,10 +403,10 @@ class BarebonesTests(TestCase[CommonTestDriver]):
 
         self.test_driver.check_cmd(
             [
-                "{root}foo_4.php:3:19,21: Name already bound: FOO (Naming[2012])",
-                "  {root}foo_3.php:7:15,17: Previous definition Foo differs only in capitalization ",
-                "{root}foo_4.php:4:22,22: Name already bound: H (Naming[2012])",
-                "  {root}foo_3.php:3:18,18: Previous definition h differs only in capitalization ",
+                "{root}foo_4.php:3:19,21: Name already bound: `FOO` (Naming[2012])",
+                "  {root}foo_3.php:7:15,17: Previous definition `Foo` differs only in capitalization ",
+                "{root}foo_4.php:4:22,22: Name already bound: `H` (Naming[2012])",
+                "  {root}foo_3.php:3:18,18: Previous definition `h` differs only in capitalization ",
             ]
         )
 
@@ -492,7 +492,7 @@ class CommonTests(BarebonesTests):
 
         self.test_driver.check_cmd(
             [
-                "{root}foo_1.php:4:20,20: Unbound name: g (a global function) (Naming[2049])"
+                "{root}foo_1.php:4:20,20: Unbound name: `g` (a global function) (Naming[2049])"
             ]
         )
 
@@ -514,7 +514,7 @@ class CommonTests(BarebonesTests):
         )
         self.test_driver.check_cmd(
             [
-                "{root}foo_1.php:4:20,20: Unbound name: g (a global function) (Naming[2049])"
+                "{root}foo_1.php:4:20,20: Unbound name: `g` (a global function) (Naming[2049])"
             ]
         )
 
@@ -529,7 +529,7 @@ class CommonTests(BarebonesTests):
 
         self.test_driver.check_cmd(
             [
-                "{root}foo_2_dup.php:3:18,18: Name already bound: g (Naming[2012])",
+                "{root}foo_2_dup.php:3:18,18: Name already bound: `g` (Naming[2012])",
                 "  {root}foo_2.php:3:18,18: Previous definition is here",
             ]
         )
@@ -976,18 +976,18 @@ class CommonTests(BarebonesTests):
         self.test_driver.start_hh_server(changed_files=["foo_4.php", "foo_5.php"])
         self.test_driver.check_cmd(
             [
-                "{root}foo_4.php:3:19,21: Name already bound: Foo (Naming[2012])",
+                "{root}foo_4.php:3:19,21: Name already bound: `Foo` (Naming[2012])",
                 "  {root}foo_3.php:7:15,17: Previous definition is here",
-                "{root}foo_5.php:6:28,29: No class variable '$y' in Bar (did you mean '$x'?) (Typing[4090])",
-                "  {root}foo_5.php:3:19,21: Declaration of Bar is here",
+                "{root}foo_5.php:6:28,29: No class variable `$y` in `Bar` (did you mean '$x'?) (Typing[4090])",
+                "  {root}foo_5.php:3:19,21: Declaration of `Bar` is here",
             ]
         )
 
         os.remove(os.path.join(self.test_driver.repo_dir, "foo_4.php"))
         self.test_driver.check_cmd(
             [
-                "{root}foo_5.php:6:28,29: No class variable '$y' in Bar (Typing[4090])",
-                "  {root}foo_5.php:3:19,21: Declaration of Bar is here",
+                "{root}foo_5.php:6:28,29: No class variable `$y` in `Bar` (Typing[4090])",
+                "  {root}foo_5.php:3:19,21: Declaration of `Bar` is here",
             ]
         )
 

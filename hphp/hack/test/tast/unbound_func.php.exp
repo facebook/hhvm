@@ -1,6 +1,6 @@
 Errors:
-  [4:3-15] Unbound name: unbound_func (a global function)
-  [4:3-15] Unbound name (typing): unbound_func
+  [4:3-15] Unbound name: `unbound_func` (a global function)
+  [4:3-15] Unbound name (typing): `unbound_func`
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mstrict;
       f_ret = ((void), (Some ([3:18-22], (Hprim Tvoid))));

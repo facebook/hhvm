@@ -1,2 +1,2 @@
 File "pending_if10.php", line 7, characters 10-11:
-Variable $x is undefined, or not always defined (did you mean $b instead?) (Naming[2050])
+Variable `$x` is undefined, or not always defined (did you mean `$b` instead?) (Naming[2050])

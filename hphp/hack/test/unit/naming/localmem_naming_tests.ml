@@ -50,7 +50,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
   Asserter.String_asserter.assert_list_equals
     [
       "[4110] Invalid return type; Expected `int`; But got `string`";
-      "[2006] Could not find foo; Did you mean Foo?";
+      "[2006] Could not find `foo`; Did you mean `Foo`?";
     ]
     (errors_to_string errors)
     "unsaved: compute_tast(class Foo) should have these errors";
@@ -79,8 +79,8 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
   Asserter.String_asserter.assert_list_equals
     [
       "[4110] Invalid return type; Expected `int`; But got `string`";
-      "[2049] Unbound name: Foo";
-      "[2049] Unbound name: foo";
+      "[2049] Unbound name: `Foo`";
+      "[2049] Unbound name: `foo`";
     ]
     (errors_to_string errors)
     "unsaved: compute_tast(class Foo1) should have these errors";
@@ -106,7 +106,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
   Asserter.String_asserter.assert_list_equals
     [
       "[4110] Invalid return type; Expected `int`; But got `string`";
-      "[2006] Could not find foo; Did you mean Foo?";
+      "[2006] Could not find `foo`; Did you mean `Foo`?";
     ]
     (errors_to_string errors)
     "unsaved: compute_tast(class Foo again) should have these errors";

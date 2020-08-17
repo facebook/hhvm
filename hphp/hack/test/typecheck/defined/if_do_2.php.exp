@@ -1,2 +1,2 @@
 File "if_do_2.php", line 14, characters 10-11:
-Variable $y is undefined, or not always defined (did you mean $b instead?) (Naming[2050])
+Variable `$y` is undefined, or not always defined (did you mean `$b` instead?) (Naming[2050])

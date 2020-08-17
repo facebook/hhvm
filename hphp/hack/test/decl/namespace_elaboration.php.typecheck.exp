@@ -1,12 +1,12 @@
 File "namespace_elaboration.php", line 31, characters 25-31:
-Unbound name: MyNamespace\MyType (Naming[2049])
+Unbound name: `MyNamespace\MyType` (Naming[2049])
 File "namespace_elaboration.php", line 31, characters 13-18:
-Unbound name: MyNamespace\MyType (Naming[2049])
+Unbound name: `MyNamespace\MyType` (Naming[2049])
 File "namespace_elaboration.php", line 35, characters 36-47:
-Unbound name: MyNamespace\MyOtherType (Naming[2049])
+Unbound name: `MyNamespace\MyOtherType` (Naming[2049])
 File "namespace_elaboration.php", line 35, characters 19-29:
-Unbound name: MyNamespace\MyOtherType (Naming[2049])
+Unbound name: `MyNamespace\MyOtherType` (Naming[2049])
 File "namespace_elaboration.php", line 39, characters 38-50:
-Unbound name: MyNamespace\MyBracedType (Naming[2049])
+Unbound name: `MyNamespace\MyBracedType` (Naming[2049])
 File "namespace_elaboration.php", line 39, characters 20-31:
-Unbound name: MyNamespace\MyBracedType (Naming[2049])
+Unbound name: `MyNamespace\MyBracedType` (Naming[2049])

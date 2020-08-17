@@ -1,5 +1,5 @@
 File "fake_nullable2.php", line 11, characters 14-16:
-You are trying to access the method 'add' but this object can be null. (Typing[4064])
+You are trying to access the method `add` but this object can be null. (Typing[4064])
 File "fake_nullable2.php", line 5, characters 38-49:
 This can be null
 File "fake_nullable2.php", line 11, characters 5-20:

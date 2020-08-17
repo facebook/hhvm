@@ -1,5 +1,5 @@
 File "redeclare_no_default.php", line 14, characters 33-35:
-Cannot reference abstract constant C::T directly (Typing[4129])
+Cannot reference abstract constant `C::T` directly (Typing[4129])
 File "redeclare_no_default.php", line 8, characters 23-23:
 Declaration is here
 File "redeclare_no_default.php", line 8, characters 23-23:

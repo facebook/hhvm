@@ -1,2 +1,2 @@
 File "finally_naming.php", line 20, characters 12-13:
-Variable $b is undefined, or not always defined (did you mean $a instead?) (Naming[2050])
+Variable `$b` is undefined, or not always defined (did you mean `$a` instead?) (Naming[2050])

@@ -5,4 +5,4 @@ The name TB was already used for another generic parameter. Please use a differe
 File "tparam_method_vs_class2.php", line 10, characters 28-29:
 The name TB was already used for another generic parameter. Please use a different name to avoid confusion. (Typing[4378])
 File "tparam_method_vs_class2.php", line 10, characters 19-23:
-Method name already bound: test1 (Naming[2033])
+Method name already bound: `test1` (Naming[2033])

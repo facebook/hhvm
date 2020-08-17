@@ -1,7 +1,7 @@
 Errors:
-  [4:7-21] Unbound global function: 'unbound_func' is not a valid name for fun()
-  [4:7-21] Unbound name: unbound_func (a global function)
-  [4:7-21] Unbound name (typing): unbound_func
+  [4:7-21] Unbound global function: `unbound_func` is not a valid name for fun()
+  [4:7-21] Unbound name: `unbound_func` (a global function)
+  [4:7-21] Unbound name (typing): `unbound_func`
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mstrict;
       f_ret = ((void), (Some ([3:18-22], (Hprim Tvoid))));

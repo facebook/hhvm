@@ -1,2 +1,2 @@
 File "lambda09.php", line 19, characters 12-13:
-Variable $y is undefined, or not always defined (did you mean $x instead?) (Naming[2050])
+Variable `$y` is undefined, or not always defined (did you mean `$x` instead?) (Naming[2050])

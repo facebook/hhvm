@@ -1,5 +1,5 @@
 File "reason_err_messages.php", line 4, characters 10-19:
-Unbound name: BogusClass (an object type) (Naming[2049])
+Unbound name: `BogusClass` (an object type) (Naming[2049])
 File "reason_err_messages.php", line 4, characters 10-30:
 Invalid return type (Typing[4110])
 File "reason_err_messages.php", line 3, characters 27-36:
@@ -7,7 +7,7 @@ Expected `(int, int)`
 File "reason_err_messages.php", line 4, characters 10-19:
 But got `dynamic`
 File "reason_err_messages.php", line 8, characters 8-17:
-Unbound name: BogusConst (a global constant) (Naming[2049])
+Unbound name: `BogusConst` (a global constant) (Naming[2049])
 File "reason_err_messages.php", line 9, characters 10-11:
 Invalid return type (Typing[4110])
 File "reason_err_messages.php", line 7, characters 33-42:

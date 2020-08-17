@@ -1,2 +1,2 @@
 File "naming_fail_test6.php", line 16, characters 9-10:
-Variable $i is undefined, or not always defined (Naming[2050])
+Variable `$i` is undefined, or not always defined (Naming[2050])

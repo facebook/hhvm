@@ -1,4 +1,4 @@
 File "shape_typeconst3.php", line 7, characters 8-20:
-No class constant 'MISSING_CONST' in C (Typing[4090])
+No class constant `MISSING_CONST` in `C` (Typing[4090])
 File "shape_typeconst3.php", line 3, characters 7-7:
-Declaration of C is here
+Declaration of `C` is here

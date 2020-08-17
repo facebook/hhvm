@@ -24,7 +24,7 @@ let d_contents = contents "D"
 let errors =
   "
 File \"/test.php\", line 3, characters 15-15:
-Unbound name: C (Naming[2049])
+Unbound name: `C` (Naming[2049])
 "
 
 let test () =

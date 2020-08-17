@@ -1,5 +1,5 @@
 Errors:
-  [4:3-17] Unbound name: unbound_global (a global constant)
+  [4:3-17] Unbound name: `unbound_global` (a global constant)
   [4:3-17] Unbound global constant (Typing)
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mstrict;

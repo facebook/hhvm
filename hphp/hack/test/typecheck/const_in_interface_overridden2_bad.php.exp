@@ -5,4 +5,4 @@ Some members are incompatible with those declared in type I1
 File "const_in_interface_overridden2_bad.php", line 7, characters 13-22:
 Non-abstract constants defined in an interface cannot be overridden when implementing or extending that interface.
 File "const_in_interface_overridden2_bad.php", line 4, characters 13-22:
-You could make SOME_CONST abstract in I1.
+You could make `SOME_CONST` abstract in `I1`.

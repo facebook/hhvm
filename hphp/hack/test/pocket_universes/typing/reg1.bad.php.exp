@@ -1,5 +1,5 @@
 File "reg1.bad.php", line 14, characters 37-37:
-Unbound name: E (Naming[2049])
+Unbound name: `E` (Naming[2049])
 File "reg1.bad.php", line 15, characters 25-26:
 Invalid argument (Typing[4110])
 File "reg1.bad.php", line 15, characters 12-23:

@@ -1,2 +1,2 @@
 File "nonnull_type_alias.php", line 3, characters 6-12:
-NonNull cannot be used as it is reserved. (Naming[2068])
+`NonNull` cannot be used as it is reserved. (Naming[2068])

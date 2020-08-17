@@ -1,7 +1,3 @@
-There are privacy policy errors in \leak_pc:
-  Data with an implicit policy is leaked by pc in context PUBLIC.
-  
-There are privacy policy errors in \leak_value:
-  Data with an implicit policy is leaked by pc in context PUBLIC.
-  Data with an implicit policy is leaked by $x in context PUBLIC.
-  
+Data with an implicit policy is leaked by pc in context PUBLIC.
+Data with an implicit policy is leaked by pc in context PUBLIC.
+Data with an implicit policy is leaked by $x in context PUBLIC.

@@ -1,5 +1,6 @@
-There are privacy policy errors in \C#test:
-  Data with policy PRIVATE appears in context PUBLIC.
-  Data with policy PRIVATE appears in context A.
-  Data with policy A appears in context B.
-  
+File "security_lattice.php", line 23, characters 3-433:
+Data with policy PRIVATE appears in context PUBLIC. (Typing[4379])
+File "security_lattice.php", line 23, characters 3-433:
+Data with policy PRIVATE appears in context A. (Typing[4379])
+File "security_lattice.php", line 23, characters 3-433:
+Data with policy A appears in context B. (Typing[4379])

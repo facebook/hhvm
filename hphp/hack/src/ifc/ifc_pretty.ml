@@ -203,9 +203,6 @@ let decl_env fmt de =
   SMap.iter handle_fun de.de_fun;
   fprintf fmt "@]"
 
-let violation fmt (l, r) =
-  fprintf fmt "Data with policy %a appears in context %a." policy l policy r
-
 let implicit_violation fmt (l, r) =
   fprintf
     fmt

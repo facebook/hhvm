@@ -1,12 +1,8 @@
-There are privacy policy errors in \Basic#mutation:
-  Data with policy I appears in context V.
-  
-There are privacy policy errors in \Basic#nested:
-  Data with policy V appears in context I.
-  
-There are privacy policy errors in \Basic#set:
-  Data with policy I appears in context V.
-  
-There are privacy policy errors in \COW#copyOnWrite:
-  Data with policy X appears in context VX.
-  
+File "vec.php", line 13, characters 3-69:
+Data with policy I appears in context V. (Typing[4379])
+File "vec.php", line 17, characters 3-111:
+Data with policy V appears in context I. (Typing[4379])
+File "vec.php", line 9, characters 3-62:
+Data with policy I appears in context V. (Typing[4379])
+File "vec.php", line 36, characters 3-116:
+Data with policy X appears in context VX. (Typing[4379])

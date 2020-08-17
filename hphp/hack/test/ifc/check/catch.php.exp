@@ -1,9 +1,6 @@
-There are privacy policy errors in \leak_pc_in_catch:
-  Data with policy A appears in context B.
-  
-There are privacy policy errors in \nested_try:
-  Data with policy A appears in context B.
-  
-There are privacy policy errors in \throw_in_catch:
-  Data with policy A appears in context B.
-  
+File "catch.php", line 12, characters 1-178:
+Data with policy A appears in context B. (Typing[4379])
+File "catch.php", line 31, characters 1-204:
+Data with policy A appears in context B. (Typing[4379])
+File "catch.php", line 41, characters 1-144:
+Data with policy A appears in context B. (Typing[4379])

@@ -856,7 +856,7 @@ let governs meta p fp acc =
   let prop = quantify acc |> Logic.simplify in
   Logic.entailment_violations lattice prop
 
-let callable meta decl_env class_name_opt name saved_env params body lrty =
+let callable span meta decl_env class_name_opt name saved_env params body lrty =
   try
     (* Setup the read-only environment *)
     let scope = Scope.alloc () in
@@ -919,6 +919,7 @@ let callable meta decl_env class_name_opt name saved_env params body lrty =
     (* Return the results *)
     let res =
       {
+        res_span = span;
         res_proto = proto;
         res_scope = scope;
         res_constraint = Logic.conjoin env.e_acc;
@@ -940,11 +941,12 @@ let walk_tast meta decl_env =
           f_params = params;
           f_body = body;
           f_ret = (lrty, _);
+          f_span = span;
           _;
         } ->
       Option.map
         ~f:(fun x -> [x])
-        (callable meta decl_env None name saved_env params body lrty)
+        (callable span meta decl_env None name saved_env params body lrty)
     | A.Class { A.c_name = (_, class_name); c_methods = methods; _ } ->
       let handle_method
           {
@@ -953,10 +955,11 @@ let walk_tast meta decl_env =
             m_params = params;
             m_body = body;
             m_ret = (lrty, _);
+            m_span = span;
             _;
           } =
         let c_name = Some class_name in
-        callable meta decl_env c_name name saved_env params body lrty
+        callable span meta decl_env c_name name saved_env params body lrty
       in
       Some (List.filter_map ~f:handle_method methods)
     | _ -> None
@@ -977,6 +980,71 @@ let opts_of_raw_opts raw_opts =
   in
   { opt_mode; opt_security_lattice }
 
+let check meta tast () =
+  (* Declaration phase *)
+  let decl_env = Decl.collect_sigs tast in
+  if should_print ~user_mode:meta.m_opts.opt_mode ~phase:Mdecl then
+    Format.printf "%a@." Pp.decl_env decl_env;
+
+  (* Flow analysis phase *)
+  let results = walk_tast meta decl_env tast in
+
+  (* Solver phase *)
+  let results =
+    try Solver.global_exn ~subtype:(subtype meta) results with
+    | Solver.Error Solver.RecursiveCycle ->
+      fail "solver error: cyclic call graph"
+    | Solver.Error (Solver.MissingResults callable) ->
+      fail "solver error: missing results for callable '%s'" callable
+    | Solver.Error (Solver.InvalidCall (reason, caller, callee)) ->
+      fail
+        "solver error: invalid call to '%s' in '%s' (%s)"
+        callee
+        caller
+        reason
+  in
+
+  let simplify result =
+    let pred = const true in
+    ( result,
+      result.res_entailment result.res_constraint,
+      Logic.simplify
+      @@ Logic.quantify ~pred ~quant:Qexists result.res_constraint )
+  in
+  let simplified_results = SMap.map simplify results in
+
+  let log_solver name (result, _, simplified) =
+    Format.printf "@[<v>";
+    Format.printf "Flow constraints for %s:@.  @[<v>" name;
+    Format.printf "@,@[<hov>Simplified:@ @[<hov>%a@]@]" Pp.prop simplified;
+    let raw = result.res_constraint in
+    Format.printf "@,@[<hov>Raw:@ @[<hov>%a@]@]" Pp.prop raw;
+    Format.printf "@]";
+    Format.printf "@]\n\n"
+  in
+  if should_print ~user_mode:meta.m_opts.opt_mode ~phase:Msolve then
+    SMap.iter log_solver simplified_results;
+
+  (* Checking phase *)
+  let check_valid_flow _ (result, implicit, simple) =
+    let simple_illegal_flows =
+      Logic.entailment_violations meta.m_opts.opt_security_lattice simple
+    in
+
+    if should_print ~user_mode:meta.m_opts.opt_mode ~phase:Mcheck then begin
+      List.iter
+        ~f:(fun (source, sink) ->
+          Errors.illegal_information_flow
+            result.res_span
+            ( Format.asprintf "%a" Pp.policy source,
+              Format.asprintf "%a" Pp.policy sink ))
+        simple_illegal_flows;
+
+      List.iter ~f:(Format.printf "%a@," Pp.implicit_violation) implicit
+    end
+  in
+  SMap.iter check_valid_flow simplified_results
+
 let do_ raw_opts files_info ctx =
   let opts = opts_of_raw_opts raw_opts in
 
@@ -984,82 +1052,22 @@ let do_ raw_opts files_info ctx =
     let lattice = opts.opt_security_lattice in
     Format.printf "@[Lattice:@. %a@]\n\n" Pp.security_lattice lattice );
 
-  Relative_path.Map.iter files_info ~f:(fun path i ->
-      (* skip decls and partial *)
-      match i.FileInfo.file_mode with
-      | Some FileInfo.Mstrict ->
-        let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
-        let meta = { m_opts = opts; m_path = path; m_ctx = ctx } in
-        let { Tast_provider.Compute_tast.tast; _ } =
-          Tast_provider.compute_tast_unquarantined ~ctx ~entry
-        in
+  let handle_file path info errors =
+    match info.FileInfo.file_mode with
+    | Some FileInfo.Mstrict ->
+      let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+      let meta = { m_opts = opts; m_path = path; m_ctx = ctx } in
+      let { Tast_provider.Compute_tast.tast; _ } =
+        Tast_provider.compute_tast_unquarantined ~ctx ~entry
+      in
 
-        (* Declaration phase *)
-        let decl_env = Decl.collect_sigs tast in
-        if should_print ~user_mode:opts.opt_mode ~phase:Mdecl then
-          Format.printf "%a@." Pp.decl_env decl_env;
+      let check = check meta tast in
+      let (new_errors, _) = Errors.do_with_context path Errors.Typing check in
+      errors @ Errors.get_error_list new_errors
+    | _ -> errors
+  in
 
-        (* Flow analysis phase *)
-        let results = walk_tast meta decl_env tast in
-
-        (* Solver phase *)
-        let results =
-          try Solver.global_exn ~subtype:(subtype meta) results with
-          | Solver.Error Solver.RecursiveCycle ->
-            fail "solver error: cyclic call graph"
-          | Solver.Error (Solver.MissingResults callable) ->
-            fail "solver error: missing results for callable '%s'" callable
-          | Solver.Error (Solver.InvalidCall (reason, caller, callee)) ->
-            fail
-              "solver error: invalid call to '%s' in '%s' (%s)"
-              callee
-              caller
-              reason
-        in
-
-        let simplify result =
-          let pred = const true in
-          ( result,
-            result.res_entailment result.res_constraint,
-            Logic.simplify
-            @@ Logic.quantify ~pred ~quant:Qexists result.res_constraint )
-        in
-        let simplified_results = SMap.map simplify results in
-
-        let log_solver name (result, _, simplified) =
-          Format.printf "@[<v>";
-          Format.printf "Flow constraints for %s:@.  @[<v>" name;
-          Format.printf "@,@[<hov>Simplified:@ @[<hov>%a@]@]" Pp.prop simplified;
-          let raw = result.res_constraint in
-          Format.printf "@,@[<hov>Raw:@ @[<hov>%a@]@]" Pp.prop raw;
-          Format.printf "@]";
-          Format.printf "@]\n\n"
-        in
-        if should_print ~user_mode:opts.opt_mode ~phase:Msolve then
-          SMap.iter log_solver simplified_results;
-
-        (* Checking phase *)
-        let log_checking name (_, impl, simple) =
-          let with_pp pp = List.map ~f:(fun v -> (v, pp)) in
-          let violations =
-            with_pp
-              Pp.violation
-              (Logic.entailment_violations opts.opt_security_lattice simple)
-            @ with_pp Pp.implicit_violation impl
-          in
-
-          if
-            should_print ~user_mode:opts.opt_mode ~phase:Mcheck
-            && not (List.is_empty violations)
-          then begin
-            Format.printf "There are privacy policy errors in %s:@.  @[<v>" name;
-            List.iter ~f:(fun (v, f) -> Format.printf "%a@," f v) violations;
-            Format.printf "@]\n"
-          end
-        in
-        SMap.iter log_checking simplified_results
-      | _ -> ());
-  ()
+  Relative_path.Map.fold files_info ~init:[] ~f:handle_file
 
 let magic_builtins =
   [|

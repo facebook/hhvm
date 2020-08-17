@@ -249,6 +249,8 @@ type renv = {
 
 (* The analysis result for a callable *)
 type callable_result = {
+  (* Position of the callable the result pertains to *)
+  res_span: Pos.t;
   (* The callable signature, with flow types *)
   res_proto: fun_proto;
   (* The scope of the free policy variables in res_proto

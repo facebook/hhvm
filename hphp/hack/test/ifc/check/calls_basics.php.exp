@@ -1,9 +1,6 @@
-There are privacy policy errors in \flow_a_to_b:
-  Data with policy A appears in context B.
-  
-There are privacy policy errors in \indirect_flow_a_to_b:
-  Data with policy A appears in context B.
-  
-There are privacy policy errors in \indirect_flow_a_to_b_bis:
-  Data with policy A appears in context B.
-  
+File "calls_basics.php", line 31, characters 1-71:
+Data with policy A appears in context B. (Typing[4379])
+File "calls_basics.php", line 44, characters 1-86:
+Data with policy A appears in context B. (Typing[4379])
+File "calls_basics.php", line 50, characters 1-113:
+Data with policy A appears in context B. (Typing[4379])

@@ -10,6 +10,7 @@
     --in-extension .php
     --flags
     --ifc check ""
+    --error-format raw
     )))
 
 (alias

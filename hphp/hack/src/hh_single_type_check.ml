@@ -1305,7 +1305,11 @@ let handle_mode
         print_errors errors
       else
         let raw_opts = { Ifc_types.ropt_mode; ropt_security_lattice } in
-        Ifc.do_ raw_opts files_info ctx
+        let ifc_errors = Ifc.do_ raw_opts files_info ctx in
+        if not @@ List.is_empty ifc_errors then begin
+          print_errors ifc_errors;
+          exit 2
+        end
   | Ai ai_options ->
     if not (List.is_empty parse_errors) then
       List.iter ~f:(print_error error_format) parse_errors

@@ -1405,3 +1405,5 @@ val unsupported_hk_feature :
   because_nested:bool -> Pos.t -> string -> string -> unit
 
 val tparam_non_shadowing_reuse : Pos.t -> string -> unit
+
+val illegal_information_flow : Pos.t -> string * string -> unit

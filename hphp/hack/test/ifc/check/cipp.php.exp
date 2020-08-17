@@ -1,14 +1,8 @@
-There are privacy policy errors in \write_PUBLIC_into_PUBLIC:
-  Data with an implicit policy is leaked by pc in context PUBLIC.
-  Data with an implicit policy is leaked by \C in context PUBLIC.
-  
-There are privacy policy errors in \write_cipp_into_A:
-  Data with an implicit policy is leaked by pc in context A.
-  Data with an implicit policy is leaked by \C in context A.
-  Data with an implicit policy is leaked by $x in context A.
-  
-There are privacy policy errors in \write_cipp_into_PUBLIC:
-  Data with an implicit policy is leaked by pc in context PUBLIC.
-  Data with an implicit policy is leaked by \C in context PUBLIC.
-  Data with an implicit policy is leaked by $x in context PUBLIC.
-  
+Data with an implicit policy is leaked by pc in context PUBLIC.
+Data with an implicit policy is leaked by \C in context PUBLIC.
+Data with an implicit policy is leaked by pc in context A.
+Data with an implicit policy is leaked by \C in context A.
+Data with an implicit policy is leaked by $x in context A.
+Data with an implicit policy is leaked by pc in context PUBLIC.
+Data with an implicit policy is leaked by \C in context PUBLIC.
+Data with an implicit policy is leaked by $x in context PUBLIC.

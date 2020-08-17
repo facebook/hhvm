@@ -1,3 +1,2 @@
-There are privacy policy errors in \f:
-  Data with policy PRIVATE appears in context PUBLIC.
-  
+File "new.php", line 12, characters 1-91:
+Data with policy PRIVATE appears in context PUBLIC. (Typing[4379])

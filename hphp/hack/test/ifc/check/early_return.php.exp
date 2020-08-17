@@ -1,3 +1,2 @@
-There are privacy policy errors in \earlyReturn:
-  Data with policy SECRET appears in context PUBLIC.
-  
+File "early_return.php", line 17, characters 1-119:
+Data with policy SECRET appears in context PUBLIC. (Typing[4379])

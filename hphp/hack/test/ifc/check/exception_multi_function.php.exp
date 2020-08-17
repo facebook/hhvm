@@ -1,6 +1,4 @@
-There are privacy policy errors in \g:
-  Data with policy A appears in context B.
-  
-There are privacy policy errors in \g2:
-  Data with policy A appears in context B.
-  
+File "exception_multi_function.php", line 22, characters 1-218:
+Data with policy A appears in context B. (Typing[4379])
+File "exception_multi_function.php", line 32, characters 1-221:
+Data with policy A appears in context B. (Typing[4379])

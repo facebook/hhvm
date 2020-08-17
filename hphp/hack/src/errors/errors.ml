@@ -5061,6 +5061,12 @@ let tparam_non_shadowing_reuse pos var_name =
     ^ " was already used for another generic parameter. Please use a different name to avoid confusion."
     )
 
+let illegal_information_flow pos (source, sink) =
+  add
+    (Typing.err_code Typing.IllegalInformationFlow)
+    pos
+    (Printf.sprintf "Data with policy %s appears in context %s." source sink)
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/hhbbc/compression.h"
+#include "hphp/hhbbc/wide-func.h"
 
 #include "hphp/hhbbc/bc.h"
 #include "hphp/util/trace.h"
@@ -22,7 +22,7 @@
 #include <cxxabi.h>
 #endif // _GNUG_
 
-namespace HPHP { namespace HHBBC { namespace compression {
+namespace HPHP { namespace HHBBC { namespace php {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -31,6 +31,8 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(hhbbc_mem);
+
+using Buffer = std::vector<char>;
 
 constexpr int32_t kNoSrcLoc = -1;
 
@@ -250,10 +252,6 @@ void encode(Buffer& buffer, const T& data) {
 
 //////////////////////////////////////////////////////////////////////
 
-}
-
-//////////////////////////////////////////////////////////////////////
-
 #define IMM_NA
 #define IMM_ONE(x)                IMM(x, 1)
 #define IMM_TWO(x, y)             IMM_ONE(x) IMM(y, 2)
@@ -327,22 +325,26 @@ void encodeBytecodeVec(Buffer& buffer, const BytecodeVec& bcs) {
 
 //////////////////////////////////////////////////////////////////////
 
-void testCompression(php::Program& program) {
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void testCompression(Program& program) {
   trace_time tracer("test compression");
   auto total_full_size = size_t{0};
   auto total_compressed_size = size_t{0};
   auto temp = BytecodeVec{};
   auto buffer = Buffer{};
 
-  auto test_compression_function = [&](php::Func& func) {
-    auto mf = php::WideFunc::mut(&func);
+  auto test_compression_function = [&](Func& func) {
+    auto mf = WideFunc::mut(&func);
     for (auto& block : mf.blocks()) {
       auto const old_size = block->hhbcs.size() * sizeof(block->hhbcs[0]);
-      compression::encodeBytecodeVec(buffer, block->hhbcs);
+      encodeBytecodeVec(buffer, block->hhbcs);
       auto result = block.mutate();
       std::swap(temp, result->hhbcs);
       result->hhbcs.clear();
-      compression::decodeBytecodeVec(buffer, result->hhbcs);
+      decodeBytecodeVec(buffer, result->hhbcs);
       auto const new_size = buffer.size();
 
       SCOPE_ASSERT_DETAIL("test_compression") {

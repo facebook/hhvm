@@ -23,10 +23,11 @@
 
 #include "hphp/runtime/vm/unit-util.h"
 
-#include "hphp/hhbbc/representation.h"
-#include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/class-util.h"
+#include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/unit-util.h"
+#include "hphp/hhbbc/wide-func.h"
 
 namespace HPHP { namespace HHBBC { namespace php {
 

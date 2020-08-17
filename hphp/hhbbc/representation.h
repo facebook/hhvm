@@ -42,14 +42,14 @@
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/src-loc.h"
 
-namespace HPHP { namespace HHBBC {
-namespace php {
+namespace HPHP { namespace HHBBC { namespace php {
 
 //////////////////////////////////////////////////////////////////////
 
-struct Func;
 struct ExnNode;
+struct Func;
 struct Unit;
+struct WideFunc;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -203,27 +203,6 @@ struct Param {
    * Whether this parameter is a variadic capture.
    */
   bool isVariadic: 1;
-};
-
-template <typename T>
-struct IntLikeIterator {
-  explicit IntLikeIterator(T v) : val{v} {}
-  T operator *() const { return val; }
-  T operator ++() { return ++val; }
-  bool operator !=(IntLikeIterator other) { return val != other.val; }
-private:
-  T val;
-};
-
-template <typename T>
-struct IntLikeRange {
-  explicit IntLikeRange(T v) : sz{v} {}
-  template<typename C>
-  explicit IntLikeRange(const C& v) : sz(v.size()) {}
-  IntLikeIterator<T> begin() const { return IntLikeIterator<T>{0}; }
-  IntLikeIterator<T> end() const { return IntLikeIterator<T>{sz}; }
-private:
-    T sz;
 };
 
 /*
@@ -419,41 +398,6 @@ struct Func : FuncBase {
    * User attribute list.
    */
   UserAttributeMap userAttributes;
-};
-
-/*
- * We keep the code of a Func compressed at rest, so you must instantiate
- * a "wide pointer" to read or write its block data. These pointers store
- * a copy of the expanded data, so instantiating them is a heavy-weight
- * operation and they cannot be copied or moved.
- */
-struct WideFunc {
-  WideFunc(WideFunc&&) = delete;
-  WideFunc(const WideFunc&) = delete;
-  WideFunc& operator=(WideFunc&&) = delete;
-  WideFunc& operator=(const WideFunc&) = delete;
-
-  static WideFunc mut(Func* f) { return WideFunc(f); }
-  static const WideFunc cns(const Func* f) {
-    return WideFunc(const_cast<Func*>(f));
-  }
-
-  operator Func*() { return func; }
-  Func& operator*() { return *func; }
-  Func* operator->() { return func; }
-  BlockVec& blocks() { return func->rawBlocks; }
-
-  operator const Func*() const { return func; }
-  const Func& operator*() const { return *func; }
-  const Func* operator->() const { return func; }
-  const BlockVec& blocks() const { return func->rawBlocks; }
-
-  operator bool() const { return func; }
-  auto blockRange() const { return IntLikeRange<BlockId>{func->rawBlocks}; }
-
-private:
-  explicit WideFunc(Func* f) : func(f) {}
-  Func* func = nullptr;
 };
 
 //////////////////////////////////////////////////////////////////////

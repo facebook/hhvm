@@ -25,6 +25,7 @@
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/unit-util.h"
+#include "hphp/hhbbc/wide-func.h"
 
 namespace HPHP { namespace HHBBC {
 

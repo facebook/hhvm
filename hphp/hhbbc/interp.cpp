@@ -54,6 +54,7 @@
 #include "hphp/hhbbc/type-ops.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
+#include "hphp/hhbbc/wide-func.h"
 
 #include "hphp/hhbbc/interp-internal.h"
 

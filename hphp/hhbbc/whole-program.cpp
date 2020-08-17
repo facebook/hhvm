@@ -28,7 +28,6 @@
 
 #include "hphp/hhbbc/analyze.h"
 #include "hphp/hhbbc/class-util.h"
-#include "hphp/hhbbc/compression.h"
 #include "hphp/hhbbc/debug.h"
 #include "hphp/hhbbc/emit.h"
 #include "hphp/hhbbc/func-util.h"
@@ -40,6 +39,7 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/stats.h"
 #include "hphp/hhbbc/type-system.h"
+#include "hphp/hhbbc/wide-func.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -540,7 +540,7 @@ void whole_program(php::ProgramPtr program,
   trace_time tracer("whole program");
 
   if (options.TestCompression || RO::EvalHHBBCTestCompression) {
-    compression::testCompression(*program);
+    php::testCompression(*program);
   }
 
   if (num_threads > 0) {

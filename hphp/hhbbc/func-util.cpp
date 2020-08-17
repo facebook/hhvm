@@ -17,6 +17,7 @@
 
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/wide-func.h"
 
 #include "hphp/runtime/vm/func.h"
 

@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <vector>
 
+#include "hphp/hhbbc/wide-func.h"
+
 namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////

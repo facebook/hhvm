@@ -52,17 +52,19 @@ let prop fpol fprop depth = function
   | Ccond ((pos, p, x), ct, ce) ->
     Ccond ((pos, fpol p, x), fprop depth ct, fprop depth ce)
   | Cconj (cl, cr) -> Cconj (fprop depth cl, fprop depth cr)
-  | Cflow (p1, p2) -> Cflow (fpol p1, fpol p2)
-  | Chole proto ->
+  | Cflow (pos, p1, p2) -> Cflow (pos, fpol p1, fpol p2)
+  | Chole (pos, proto) ->
     if phys_equal fpol Ifc_utils.identity then
-      Chole proto
+      Chole (pos, proto)
     else
       (* "pty_map pty" applies fpol to all the policies in the
          flow type pty *)
       let rec pty_map pty = ptype pty_map fpol pty in
-      Chole
+      let proto =
         {
           fp_name = proto.fp_name;
           fp_this = Option.map ~f:pty_map proto.fp_this;
           fp_type = fun_ pty_map fpol proto.fp_type;
         }
+      in
+      Chole (pos, proto)

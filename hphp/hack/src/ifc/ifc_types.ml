@@ -99,10 +99,10 @@ type prop =
   (* if policy <= purpose then prop0 else prop1 *)
   | Ccond of (Pos.t * policy * purpose) * prop * prop
   | Cconj of prop * prop
-  | Cflow of (policy * policy)
+  | Cflow of (PosSet.t * policy * policy)
   (* holes are introduced by calls to functions for which
      we do not have a flow type at hand *)
-  | Chole of fun_proto
+  | Chole of (Pos.t * fun_proto)
 
 module Flow = struct
   type t = policy * policy
@@ -134,7 +134,7 @@ module VarSet = Set.Make (Var)
 
 type var_set = VarSet.t
 
-type entailment = prop -> Flow.t list
+type entailment = prop -> (PosSet.t * policy * policy) list
 
 type local_env = {
   le_vars: ptype LMap.t;

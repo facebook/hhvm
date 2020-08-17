@@ -1,18 +1,24 @@
-File "catch.php", line 12, characters 1-178:
+File "catch.php", line 18, characters 5-15:
 Data with policy A appears in context B. (Typing[4379])
 File "catch.php", line 6, characters 14-19:
 The data source with policy A
 File "catch.php", line 9, characters 14-19:
 The data sink with policy B
-File "catch.php", line 31, characters 1-204:
+File "catch.php", line 14, characters 9-17:
+Another program point contributing to the illegal flow
+File "catch.php", line 37, characters 5-14:
 Data with policy A appears in context B. (Typing[4379])
 File "catch.php", line 6, characters 14-19:
 The data source with policy A
 File "catch.php", line 9, characters 14-19:
 The data sink with policy B
-File "catch.php", line 41, characters 1-144:
+File "catch.php", line 33, characters 9-17:
+Another program point contributing to the illegal flow
+File "catch.php", line 47, characters 3-12:
 Data with policy A appears in context B. (Typing[4379])
 File "catch.php", line 6, characters 14-19:
 The data source with policy A
 File "catch.php", line 9, characters 14-19:
 The data sink with policy B
+File "catch.php", line 45, characters 9-13:
+Another program point contributing to the illegal flow

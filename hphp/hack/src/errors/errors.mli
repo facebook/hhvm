@@ -1407,4 +1407,4 @@ val unsupported_hk_feature :
 val tparam_non_shadowing_reuse : Pos.t -> string -> unit
 
 val illegal_information_flow :
-  Pos.t -> Pos.t list * string -> Pos.t list * string -> unit
+  Pos.t -> Pos.t list -> Pos.t list * string -> Pos.t list * string -> unit

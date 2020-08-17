@@ -83,11 +83,11 @@ let fun_proto fmt fp =
 
 let prop =
   let rec conjuncts = function
-    | Cconj (Cflow (a, b), Cflow (c, d))
+    | Cconj (Cflow (_, a, b), Cflow (_, c, d))
       when equal_policy a d && equal_policy b c ->
       [`q (a, b)]
-    | Cflow (a, (Pbot _ as b))
-    | Cflow ((Ptop _ as b), a) ->
+    | Cflow (_, a, (Pbot _ as b))
+    | Cflow (_, (Ptop _ as b), a) ->
       [`q (a, b)]
     | Cconj (cl, cr) -> conjuncts cl @ conjuncts cr
     | Ctrue -> []
@@ -110,7 +110,7 @@ let prop =
     function
     | [] -> fprintf fmt "True"
     | [`q (p1, p2)] -> fprintf fmt "%a = %a" pol p1 pol p2
-    | [`c (Cflow (p1, p2))] -> fprintf fmt "%a < %a" pol p1 pol p2
+    | [`c (Cflow (_, p1, p2))] -> fprintf fmt "%a < %a" pol p1 pol p2
     | [`c (Cquant (q, n, c))] ->
       fprintf
         fmt
@@ -131,7 +131,7 @@ let prop =
       let cct = conjuncts ct in
       let cce = conjuncts ce in
       fprintf fmt "then %a@ else %a@]" (aux b) cct (aux b) cce
-    | [`c (Chole fp)] -> fprintf fmt "@[<h>{%a}@]" fun_proto fp
+    | [`c (Chole (_, fp))] -> fprintf fmt "@[<h>{%a}@]" fun_proto fp
     | l ->
       let pp = list comma_sep (fun fmt c -> aux b fmt [c]) in
       fprintf fmt "[@[<hov>%a@]]" pp l

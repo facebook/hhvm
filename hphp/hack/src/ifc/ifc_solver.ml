@@ -48,7 +48,7 @@ let global_exn ~subtype callable_results =
   let close_one closed_results_map res_name =
     let result = SMap.find res_name results_map in
     let rec subst depth = function
-      | Chole ({ fp_name = callee_name; _ } as proto) ->
+      | Chole (pos, ({ fp_name = callee_name; _ } as proto)) ->
         let invalid_call reason =
           raise (Error (InvalidCall (reason, res_name, callee_name)))
         in
@@ -56,9 +56,9 @@ let global_exn ~subtype callable_results =
         assert (not (Scope.equal callee.res_scope result.res_scope));
         let pred (_, s) = Scope.equal s callee.res_scope in
         [callee.res_constraint]
-        |> subtype (Tfun callee.res_proto.fp_type) (Tfun proto.fp_type)
+        |> subtype ~pos (Tfun callee.res_proto.fp_type) (Tfun proto.fp_type)
         |> (match (proto.fp_this, callee.res_proto.fp_this) with
-           | (Some t1, Some t2) -> subtype t1 t2
+           | (Some t1, Some t2) -> subtype ~pos t1 t2
            | (None, Some _) ->
              invalid_call ("expected '" ^ callee_name ^ "' to be a function")
            | (Some _, None) ->

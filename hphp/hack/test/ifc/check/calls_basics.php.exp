@@ -1,18 +1,52 @@
-File "calls_basics.php", line 31, characters 1-71:
+File "calls_basics.php", line 33, characters 3-15:
 Data with policy A appears in context B. (Typing[4379])
 File "calls_basics.php", line 5, characters 14-19:
 The data source with policy A
 File "calls_basics.php", line 8, characters 14-19:
 The data sink with policy B
-File "calls_basics.php", line 44, characters 1-86:
+File "calls_basics.php", line 28, characters 3-12:
+Another program point contributing to the illegal flow
+File "calls_basics.php", line 27, characters 3-11:
+Another program point contributing to the illegal flow
+File "calls_basics.php", line 12, characters 5-18:
+Another program point contributing to the illegal flow
+File "calls_basics.php", line 32, characters 3-18:
+Another program point contributing to the illegal flow
+File "calls_basics.php", line 46, characters 5-17:
 Data with policy A appears in context B. (Typing[4379])
 File "calls_basics.php", line 5, characters 14-19:
 The data source with policy A
 File "calls_basics.php", line 8, characters 14-19:
 The data sink with policy B
-File "calls_basics.php", line 50, characters 1-113:
+File "calls_basics.php", line 12, characters 5-18:
+Another program point contributing to the illegal flow
+File "calls_basics.php", line 45, characters 7-15:
+Another program point contributing to the illegal flow
+File "calls_basics.php", line 52, characters 5-26:
 Data with policy A appears in context B. (Typing[4379])
 File "calls_basics.php", line 5, characters 14-19:
 The data source with policy A
 File "calls_basics.php", line 8, characters 14-19:
 The data sink with policy B
+File "calls_basics.php", line 20, characters 7-19:
+Another program point contributing to the illegal flow
+File "calls_basics.php", line 17, characters 9-20:
+Another program point contributing to the illegal flow
+File "calls_basics.php", line 12, characters 5-18:
+Another program point contributing to the illegal flow
+File "calls_basics.php", line 51, characters 7-21:
+Another program point contributing to the illegal flow
+File "calls_basics.php", line 52, characters 5-26:
+Data with policy A appears in context B. (Typing[4379])
+File "calls_basics.php", line 5, characters 14-19:
+The data source with policy A
+File "calls_basics.php", line 8, characters 14-19:
+The data sink with policy B
+File "calls_basics.php", line 18, characters 7-18:
+Another program point contributing to the illegal flow
+File "calls_basics.php", line 17, characters 9-20:
+Another program point contributing to the illegal flow
+File "calls_basics.php", line 12, characters 5-18:
+Another program point contributing to the illegal flow
+File "calls_basics.php", line 51, characters 7-21:
+Another program point contributing to the illegal flow

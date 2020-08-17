@@ -32,7 +32,7 @@ namespace {
 
 TRACE_SET_MOD(hhbbc_mem);
 
-using Buffer = std::vector<char>;
+using Buffer = CompactVector<char>;
 
 constexpr int32_t kNoSrcLoc = -1;
 
@@ -260,10 +260,10 @@ void encode(Buffer& buffer, const T& data) {
 #define IMM_FIVE(x, y, z, n, m)   IMM_FOUR(x, y, z, n) IMM(m, 5)
 #define IMM_SIX(x, y, z, n, m, o) IMM_FIVE(x, y, z, n, m) IMM(o, 6)
 
-void decodeBytecodeVec(const Buffer& buffer, BytecodeVec& bcs) {
+BytecodeVec decodeBytecodeVec(const Buffer& buffer, size_t& pos) {
   FTRACE(2, "\ndecodeBytecodeVec: {} bytes\n", buffer.size());
   Trace::Indent _;
-  auto pos = size_t{0};
+  auto bcs = BytecodeVec{};
 
 #define IMM(type, n) \
   decode<decltype(std::declval<T>().IMM_NAME_##type(n))>(buffer, pos),
@@ -287,7 +287,7 @@ void decodeBytecodeVec(const Buffer& buffer, BytecodeVec& bcs) {
     switch (inst.op) { OPCODES }
 #undef O
   }
-  assertx(pos == buffer.size());
+  return bcs;
 }
 
 void encodeBytecodeVec(Buffer& buffer, const BytecodeVec& bcs) {
@@ -325,48 +325,89 @@ void encodeBytecodeVec(Buffer& buffer, const BytecodeVec& bcs) {
 
 //////////////////////////////////////////////////////////////////////
 
+BlockVec decodeBlockVec(const Buffer& buffer, size_t& pos) {
+  auto blocks = BlockVec{};
+  blocks.resize(decode<uint32_t>(buffer, pos));
+  for (auto& block : blocks) {
+    auto tmp = Block {
+      decodeBytecodeVec(buffer, pos),
+      decode<ExnNodeId>(buffer, pos) + NoExnNodeId,
+      decode<BlockId>(buffer, pos) + NoBlockId,
+      decode<BlockId>(buffer, pos) + NoBlockId,
+      decode<uint8_t>(buffer, pos)
+    };
+    block.emplace(std::move(tmp));
+  }
+  return blocks;
+}
+
+void encodeBlockVec(Buffer& buffer, const BlockVec& blocks) {
+  encode(buffer, safe_cast<uint32_t>(blocks.size()));
+  for (auto const& block : blocks) {
+    encodeBytecodeVec(buffer, block->hhbcs);
+    encode(buffer, block->exnNodeId - NoExnNodeId);
+    encode(buffer, block->fallthrough - NoBlockId);
+    encode(buffer, block->throwExit - NoBlockId);
+    encode(buffer, block->initializer);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
+
+size_t estimateHeapSize(const BlockVec& blocks) {
+  auto result = blocks.size() * sizeof(decltype(blocks[0]));
+  for (auto const& block : blocks) {
+    result += sizeof(Block);
+    result += block->hhbcs.size() * sizeof(decltype(block->hhbcs[0]));
+  }
+  return result;
+}
+
+bool checkBlockVecs(const Func& func, const BlockVec& a, const BlockVec& b) {
+  always_assert(a.size() == b.size());
+  for (auto i = 0; i < a.size(); i++) {
+    auto const& ai = a[i];
+    auto const& bi = b[i];
+    always_assert(ai->hhbcs.size() == bi->hhbcs.size());
+    for (auto j = 0; j < ai->hhbcs.size(); j++) {
+      SCOPE_ASSERT_DETAIL("test_compression") {
+        return folly::format("Original:\n{}\n\nFinal:\n{}",
+                             show(func, ai->hhbcs[j]),
+                             show(func, bi->hhbcs[j])).str();
+      };
+      always_assert(ai->hhbcs[j] == bi->hhbcs[j]);
+    }
+    always_assert(ai->exnNodeId == bi->exnNodeId);
+    always_assert(ai->fallthrough == bi->fallthrough);
+    always_assert(ai->throwExit == bi->throwExit);
+    always_assert(ai->initializer == bi->initializer);
+  }
+  return true;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+}
 
 void testCompression(Program& program) {
   trace_time tracer("test compression");
   auto total_full_size = size_t{0};
   auto total_compressed_size = size_t{0};
-  auto temp = BytecodeVec{};
+  auto temp = BlockVec{};
   auto buffer = Buffer{};
 
   auto test_compression_function = [&](Func& func) {
     auto mf = WideFunc::mut(&func);
-    for (auto& block : mf.blocks()) {
-      auto const old_size = block->hhbcs.size() * sizeof(block->hhbcs[0]);
-      encodeBytecodeVec(buffer, block->hhbcs);
-      auto result = block.mutate();
-      std::swap(temp, result->hhbcs);
-      result->hhbcs.clear();
-      decodeBytecodeVec(buffer, result->hhbcs);
-      auto const new_size = buffer.size();
-
-      SCOPE_ASSERT_DETAIL("test_compression") {
-        auto const new_block = show(func, *result);
-        std::swap(temp, result->hhbcs);
-        auto const old_block = show(func, *result);
-        return folly::format("Original:\n\n{}\nFinal:\n\n{}\n",
-                             old_block, new_block).str();
-      };
-      always_assert(temp.size() == result->hhbcs.size());
-      for (auto i = 0; i < temp.size(); i++) {
-        SCOPE_ASSERT_DETAIL("test_compression_bytecode") {
-          return folly::format("Original:\n{}\n\nFinal:\n{}",
-                               show(func, temp[i]),
-                               show(func, result->hhbcs[i])).str();
-        };
-        always_assert(temp[i] == result->hhbcs[i]);
-      }
-      total_full_size += old_size;
-      total_compressed_size += new_size;
-      buffer.clear();
-    }
+    auto& blocks = mf.blocks();
+    encodeBlockVec(buffer, blocks);
+    std::swap(temp, blocks);
+    auto pos = size_t{0};
+    blocks = decodeBlockVec(buffer, pos);
+    always_assert(pos == buffer.size());
+    always_assert(checkBlockVecs(func, temp, blocks));
+    total_full_size += estimateHeapSize(blocks);
+    total_compressed_size += buffer.size();
+    buffer.clear();
   };
 
   for (auto& unit : program.units) {

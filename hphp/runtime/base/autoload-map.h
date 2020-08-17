@@ -149,6 +149,16 @@ struct FactsStore : public AutoloadMap {
   virtual Variant getKind(const String& type) = 0;
 
   /**
+   * Return true iff the type cannot be constructed.
+   */
+  virtual bool isTypeAbstract(const String& type) = 0;
+
+  /**
+   * Return true iff no other type can inherit from this type.
+   */
+  virtual bool isTypeFinal(const String& type) = 0;
+
+  /**
    * Return all types in the repo which the given type extends.
    */
   virtual Array getBaseTypes(

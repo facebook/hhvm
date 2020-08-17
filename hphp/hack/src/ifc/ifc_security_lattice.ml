@@ -26,7 +26,7 @@ let parse_policy pos purpose_str =
  * e.g., "A < B; B < C; A < D"
  *)
 let parse_exn str =
-  let pos = Pos.none in
+  let pos = PosSet.empty in
   String.filter ~f:(fun chr -> not @@ Char.equal ' ' chr) str
   |> String.split ~on:';'
   |> (fun xs ->

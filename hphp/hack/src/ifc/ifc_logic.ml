@@ -40,31 +40,33 @@ end
 (* Compute the meet of two policies, returns None if
    one of the two policies is a variable. *)
 let policy_meet p1 p2 =
+  let pos = PosSet.union (pos_of p1) (pos_of p2) in
   match (p1, p2) with
   | (Ptop _, p)
   | (p, Ptop _) ->
-    Some p
-  | (Ppurpose (pos, n1), Ppurpose (_, n2)) ->
+    Some (set_pos pos p)
+  | (Ppurpose (_, n1), Ppurpose (_, n2)) ->
     if String.equal n1 n2 then
-      Some p1
+      Some (set_pos pos p1)
     else
       Some (Pbot pos)
-  | ((Pbot _ as p), _)
-  | (_, (Pbot _ as p)) ->
-    Some p
+  | (Pbot _, _)
+  | (_, Pbot _) ->
+    Some (Pbot pos)
   | _ -> None
 
 let policy_join p1 p2 =
+  let pos = PosSet.union (pos_of p1) (pos_of p2) in
   match (p1, p2) with
-  | ((Ptop _ as p), _)
-  | (_, (Ptop _ as p)) ->
-    Some p
+  | (Ptop _, _)
+  | (_, Ptop _) ->
+    Some (Ptop pos)
   | (Pbot _, p)
   | (p, Pbot _) ->
-    Some p
-  | (Ppurpose (pos, n1), Ppurpose (_, n2)) ->
+    Some (set_pos pos p)
+  | (Ppurpose (_, n1), Ppurpose (_, n2)) ->
     if String.equal n1 n2 then
-      Some p1
+      Some (set_pos pos p1)
     else
       Some (Ptop pos)
   | _ -> None
@@ -152,7 +154,7 @@ let simplify (c : prop) =
     List.concat
       [
         oth;
-        List.map ~f:(fun l -> (l, Pbot Pos.none)) lbs;
+        List.map ~f:(fun l -> (l, Pbot PosSet.empty)) lbs;
         List.map ~f:(fun u -> (max, u)) ubs;
       ]
   in
@@ -191,7 +193,9 @@ let simplify (c : prop) =
     (* Same as alelim above, but for if_tree constraints *)
     | FLW l -> FLW (elim_forall ~max l)
     | ITE ((pos, Pbound_var 0, x), t1, t2) ->
-      let max_if = Option.value_exn (policy_meet max (Ppurpose (pos, x))) in
+      let max_if =
+        Option.value_exn (policy_meet max (Ppurpose (PosSet.singleton pos, x)))
+      in
       cat (elim_forall_ift max_if t1) (elim_forall_ift max t2)
     | ITE (c, t1, t2) -> ITE (c, elim_forall_ift max t1, elim_forall_ift max t2)
   in
@@ -203,7 +207,7 @@ let simplify (c : prop) =
       let elim =
         match q with
         | Qexists -> elim_exists_ift
-        | Qforall -> elim_forall_ift (Ptop Pos.none)
+        | Qforall -> elim_forall_ift (Ptop PosSet.empty)
       in
       let elim l = pop (elim l) in
       funpow n ~f:elim ~init:(qelim c)
@@ -228,7 +232,7 @@ let simplify (c : prop) =
 let rec entailment_violations lattice = function
   | Ctrue -> []
   | Ccond ((pos, p1, p2), c1, c2) ->
-    let flow = (p1, Ppurpose (pos, p2)) in
+    let flow = (p1, Ppurpose (PosSet.singleton pos, p2)) in
     if List.is_empty @@ entailment_violations lattice (Cflow flow) then
       entailment_violations lattice c1
     else

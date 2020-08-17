@@ -243,7 +243,7 @@ let rec add_dependencies pl t acc =
        Here we choose that mixed will be public; we
        could choose a different default policy or
        have mixed carry a policy (preferable). *)
-    L.(pl <* [Pbot Pos.none]) acc
+    L.(pl <* [Pbot PosSet.empty]) acc
   | Tprim pol
   | Tgeneric pol
   (* For classes and functions, we only add a dependency to the self policy and
@@ -304,8 +304,9 @@ let rec class_ptype lump_pol_opt proto_renv targs name =
   let prop_ptype { pp_name; pp_type; pp_purpose; pp_pos; _ } =
     (* Purpose of the property takes precedence over any lump policy. *)
     let lump_pol_opt =
+      let pos = PosSet.singleton pp_pos in
       Option.merge
-        (Option.map ~f:(Lattice.parse_policy pp_pos) pp_purpose)
+        (Option.map ~f:(Lattice.parse_policy pos) pp_purpose)
         lump_pol_opt
         ~f:(fun a _ -> a)
     in
@@ -587,7 +588,7 @@ and expr renv env (((epos, ety), e) : Tast.expr) =
   | A.Float _
   | A.String _ ->
     (* literals are public *)
-    (env, Tprim (Pbot epos))
+    (env, Tprim (Pbot (PosSet.singleton epos)))
   | A.Binop (Ast_defs.Eq op, e1, e2) -> assign renv env op e1 e2
   | A.Binop (_, e1, e2) ->
     let (env, ty1) = expr env e1 in
@@ -1031,8 +1032,10 @@ let check meta tast () =
       Logic.entailment_violations meta.m_opts.opt_security_lattice simple
     in
     let report_simple_illegal_flows (source, sink) =
-      let source = (pos_of source, Format.asprintf "%a" Pp.policy source) in
-      let sink = (pos_of sink, Format.asprintf "%a" Pp.policy sink) in
+      let source_poss = PosSet.elements @@ pos_of source in
+      let sink_poss = PosSet.elements @@ pos_of sink in
+      let source = (source_poss, Format.asprintf "%a" Pp.policy source) in
+      let sink = (sink_poss, Format.asprintf "%a" Pp.policy sink) in
       Errors.illegal_information_flow result.res_span source sink
     in
 

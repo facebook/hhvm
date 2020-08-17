@@ -18,6 +18,8 @@ type purpose = string [@@deriving ord, eq, show]
 (* A policy variable *)
 type policy_var = string [@@deriving ord, eq, show]
 
+module PosSet = Set.Make (Pos)
+
 (* In policies, variables are handled using a locally-nameless
    representation. This means that variables bound in a
    constraints use de Bruijn indices while free variables use
@@ -30,19 +32,25 @@ type policy =
   | Pfree_var of policy_var * Ifc_scope.t
   (* A policy allowing use for a single purpose *)
   | Ppurpose of
-      (Pos.t[@equal (fun _ _ -> true)] [@compare (fun _ _ -> 0)]) * purpose
+      (PosSet.t[@equal (fun _ _ -> true)] [@compare (fun _ _ -> 0)]) * purpose
   (* Bottom policy; public *)
-  | Pbot of (Pos.t[@equal (fun _ _ -> true)] [@compare (fun _ _ -> 0)])
+  | Pbot of (PosSet.t[@equal (fun _ _ -> true)] [@compare (fun _ _ -> 0)])
   (* Top policy; private *)
-  | Ptop of (Pos.t[@equal (fun _ _ -> true)] [@compare (fun _ _ -> 0)])
-[@@deriving eq, ord, show]
+  | Ptop of (PosSet.t[@equal (fun _ _ -> true)] [@compare (fun _ _ -> 0)])
+[@@deriving eq, ord]
 
 let pos_of = function
   | Ppurpose (pos, _)
   | Ptop pos
   | Pbot pos ->
-    Some pos
-  | _ -> None
+    pos
+  | _ -> PosSet.empty
+
+let set_pos pos = function
+  | Ppurpose (_, name) -> Ppurpose (pos, name)
+  | Ptop _ -> Ptop pos
+  | Pbot _ -> Pbot pos
+  | pol -> pol
 
 (* Two kinds of quantification in constraints, universal and
    existential *)

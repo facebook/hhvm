@@ -3618,11 +3618,10 @@ bool fcallOptimizeChecks(
   }
 
   // Infer whether the callee supports async eager return.
-  if (fca.asyncEagerTarget() != NoBlockId &&
-      !fca.supportsAsyncEagerReturn()) {
+  if (fca.asyncEagerTarget() != NoBlockId) {
     auto const status = env.index.supports_async_eager_return(func);
-    if (status) {
-      reduce(env, fcallWithFCA(fca.fixEager(*status)));
+    if (status && !*status) {
+      reduce(env, fcallWithFCA(fca.withoutAsyncEagerTarget()));
       return true;
     }
   }
@@ -3779,7 +3778,7 @@ void fcallKnownImpl(
 
   if (fca.asyncEagerTarget() != NoBlockId && typeFromWH(returnType) == TBottom) {
     // Kill the async eager target if the function never returns.
-    reduce(env, fcallWithFCA(std::move(fca.fixEager(false))));
+    reduce(env, fcallWithFCA(std::move(fca.withoutAsyncEagerTarget())));
     return;
   }
 

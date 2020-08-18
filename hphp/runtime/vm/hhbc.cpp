@@ -1203,8 +1203,7 @@ std::string show(const FCallArgsBase& fca, const uint8_t* inoutArgsRaw,
   std::vector<std::string> flags;
   if (fca.hasUnpack()) flags.push_back("Unpack");
   if (fca.hasGenerics()) flags.push_back("Generics");
-  if (fca.supportsAsyncEagerReturn()) flags.push_back("SupportsAER");
-  if (fca.lockWhileUnwinding) flags.push_back("LockWhileUnwinding");
+  if (fca.lockWhileUnwinding()) flags.push_back("LockWhileUnwinding");
   if (fca.skipRepack) flags.push_back("SkipRepack");
   return folly::sformat(
     "<{}> {} {} {} {} \"{}\"",

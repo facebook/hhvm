@@ -1806,8 +1806,8 @@ FCall* opcodes
   are followed by an additional value containing the list of reified generics.
   Only FCall*D opcodes are allowed to pass generics.
 
-  SupportsAER: hint from static analysis indicating whether the callee is known
-  to support async eager return. Requires specified async eager offset in %5.
+  LockWhileUnwinding: whether to lock newly constructed objects if unwinding the
+  constructor call.
 
 FCallFunc <fca>                 [U U U C|V..C|V C]  ->  [C..C]
 FCallFuncD <fca> <litstr id>    [U U U C|V..C|V]  ->  [C..C]

@@ -1210,9 +1210,6 @@ fn print_fcall_args<W: Write>(
     let mut flags = vec![];
     if_then(fls.contains(F::HAS_UNPACK), || flags.push("Unpack"));
     if_then(fls.contains(F::HAS_GENERICS), || flags.push("Generics"));
-    if_then(fls.contains(F::SUPPORTS_ASYNC_EAGER_RETURN), || {
-        flags.push("SupportsAER")
-    });
     if_then(fls.contains(F::LOCK_WHILE_UNWINDING), || {
         flags.push("LockWhileUnwinding")
     });

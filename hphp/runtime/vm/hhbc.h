@@ -108,9 +108,8 @@ struct FCallArgsBase {
     HasUnpack                = (1 << 0),
     // Pass generics to the callee.
     HasGenerics              = (1 << 1),
-    // Op is not FCallCtor and callee is known to support async eager return.
-    // In the encoded form, this bit is re-used to encode lockWhileUnwinding
-    SupportsAsyncEagerReturn = (1 << 2),
+    // Lock newly constructed object if unwinding the constructor call.
+    LockWhileUnwinding       = (1 << 2),
     // HHBC-only: Op should be resolved using an explicit context class
     ExplicitContext          = (1 << 3),
     // HHBC-only: is the number of returns provided? false => 1
@@ -125,47 +124,38 @@ struct FCallArgsBase {
 
   // Flags that are valid on FCallArgsBase::flags struct (i.e. non-HHBC-only).
   static constexpr uint8_t kInternalFlags =
-    HasUnpack | HasGenerics | SupportsAsyncEagerReturn;
+    HasUnpack | HasGenerics | LockWhileUnwinding;
 
   explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets,
-                         bool lockWhileUnwinding, bool skipRepack)
+                         bool skipRepack)
     : numArgs(numArgs)
     , numRets(numRets)
     , flags(flags)
-    , lockWhileUnwinding(lockWhileUnwinding)
     , skipRepack(skipRepack)
   {
     assertx(!(flags & ~kInternalFlags));
-    assertx(!(supportsAsyncEagerReturn() && lockWhileUnwinding));
   }
   bool hasUnpack() const { return flags & Flags::HasUnpack; }
   bool hasGenerics() const { return flags & Flags::HasGenerics; }
+  bool lockWhileUnwinding() const { return flags & Flags::LockWhileUnwinding; }
   uint32_t numInputs() const {
     return numArgs + (hasUnpack() ? 1 : 0) + (hasGenerics() ? 1 : 0);
-  }
-  bool supportsAsyncEagerReturn() const {
-    return flags & Flags::SupportsAsyncEagerReturn;
   }
   uint32_t numArgs;
   uint32_t numRets;
   Flags flags;
-  bool lockWhileUnwinding;
   bool skipRepack;
 };
 
 struct FCallArgs : FCallArgsBase {
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
                      const uint8_t* inoutArgs, Offset asyncEagerOffset,
-                     bool lockWhileUnwinding, bool skipRepack,
-                     const StringData* context)
-    : FCallArgsBase(flags, numArgs, numRets,
-                    lockWhileUnwinding, skipRepack)
+                     bool skipRepack, const StringData* context)
+    : FCallArgsBase(flags, numArgs, numRets, skipRepack)
     , asyncEagerOffset(asyncEagerOffset)
     , inoutArgs(inoutArgs)
     , context(context) {
     assertx(IMPLIES(inoutArgs != nullptr, numArgs != 0));
-    assertx(IMPLIES(asyncEagerOffset == kInvalidOffset,
-                    !supportsAsyncEagerReturn()));
   }
   bool enforceInOut() const { return inoutArgs != nullptr; }
   bool isInOut(uint32_t i) const {
@@ -176,8 +166,7 @@ struct FCallArgs : FCallArgsBase {
     assertx(!hasGenerics());
     return FCallArgs(
       static_cast<Flags>(flags | Flags::HasGenerics),
-      numArgs, numRets, inoutArgs, asyncEagerOffset, lockWhileUnwinding,
-      skipRepack, context);
+      numArgs, numRets, inoutArgs, asyncEagerOffset, skipRepack, context);
   }
   Offset asyncEagerOffset;
   const uint8_t* inoutArgs;

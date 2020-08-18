@@ -374,8 +374,8 @@ void populate_block(ParseUnitState& puState,
                          assertx(aeTarget == NoBlockId || next == past);     \
                          return FCallArgs(fca.flags, fca.numArgs,            \
                                           fca.numRets, std::move(inoutArgs), \
-                                          aeTarget, fca.lockWhileUnwinding,  \
-                                          fca.skipRepack, fca.context);      \
+                                          aeTarget, fca.skipRepack,          \
+                                          fca.context);                      \
                        }();
 
 #define IMM_NA

@@ -443,7 +443,6 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     fca.numRets,
     nullptr,  // inout-ness already checked
     fca.asyncEagerOffset,
-    fca.lockWhileUnwinding,
     fca.skipRepack,
     fca.context
   ));
@@ -1815,7 +1814,7 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
   }
 
   auto const fca = FCallArgs(FCallArgs::Flags::None, numParams, 1, nullptr,
-                             kInvalidOffset, false, false, nullptr);
+                             kInvalidOffset, false, nullptr);
   prepareAndCallKnown(env, callee, fca, nullptr, false, false);
 }
 

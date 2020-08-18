@@ -65,8 +65,7 @@ bitflags! {
     pub struct FcallFlags: u8 {
         const HAS_UNPACK =                  0b0001;
         const HAS_GENERICS =                0b0010;
-        const SUPPORTS_ASYNC_EAGER_RETURN = 0b0100;
-        const LOCK_WHILE_UNWINDING =        0b1000;
+        const LOCK_WHILE_UNWINDING =        0b0100;
     }
 }
 impl Default for FcallFlags {

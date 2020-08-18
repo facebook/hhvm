@@ -30,12 +30,18 @@ let process_doc_comment comment decl_pos decl_ref_json prog =
       let (_, prog) = add_decl_comment_fact doc decl_pos decl_ref_json prog in
       prog
 
-let process_decl_loc decl_fun defn_fun decl_ref_fun pos id elem doc progress =
+let process_decl_loc
+    decl_fun defn_fun decl_ref_fun pos span id elem doc progress =
   let (decl_id, prog) = decl_fun id progress in
   let (_, prog) = defn_fun elem decl_id prog in
   let ref_json = decl_ref_fun decl_id in
   let (_, prog) = add_decl_loc_fact pos ref_json prog in
   let prog = process_doc_comment doc pos ref_json prog in
+  let prog =
+    match span with
+    | None -> prog
+    | Some span_pos -> snd (add_decl_span_fact span_pos ref_json prog)
+  in
   (decl_id, prog)
 
 let process_container_decl ctx source_map con progress =
@@ -55,6 +61,7 @@ let process_container_decl ctx source_map con progress =
             (add_property_defn_fact ctx source_map)
             build_property_decl_json_ref
             pos
+            (Some prop.cv_span)
             id
             prop
             prop.cv_doc_comment
@@ -71,6 +78,7 @@ let process_container_decl ctx source_map con progress =
             (add_class_const_defn_fact ctx)
             build_class_const_decl_json_ref
             pos
+            None
             id
             const
             const.cc_doc_comment
@@ -87,6 +95,7 @@ let process_container_decl ctx source_map con progress =
             (add_type_const_defn_fact ctx source_map)
             build_type_const_decl_json_ref
             pos
+            (Some tc.c_tconst_span)
             id
             tc
             tc.c_tconst_doc_comment
@@ -103,6 +112,7 @@ let process_container_decl ctx source_map con progress =
             (add_method_defn_fact ctx source_map)
             build_method_decl_json_ref
             pos
+            (Some meth.m_span)
             id
             meth
             meth.m_doc_comment
@@ -118,6 +128,7 @@ let process_container_decl ctx source_map con progress =
   in
   let ref_json = build_container_decl_json_ref con_type con_decl_id in
   let (_, prog) = add_decl_loc_fact con_pos ref_json prog in
+  let (_, prog) = add_decl_span_fact con.c_span ref_json prog in
   process_doc_comment con.c_doc_comment con_pos ref_json prog
 
 let process_xref
@@ -146,6 +157,7 @@ let process_enum_decl ctx source_map enm progress =
   let (enum_id, prog) = add_enum_decl_fact id progress in
   let enum_decl_ref = build_enum_decl_json_ref enum_id in
   let (_, prog) = add_decl_loc_fact pos enum_decl_ref prog in
+  let (_, prog) = add_decl_span_fact enm.c_span enum_decl_ref prog in
   let (enumerators, prog) =
     List.fold enm.c_consts ~init:([], prog) ~f:(fun (decls, prog) enumerator ->
         let (pos, id) = enumerator.cc_id in
@@ -178,6 +190,7 @@ let process_func_decl ctx source_map elem progress =
       (add_func_defn_fact ctx source_map)
       build_func_decl_json_ref
       pos
+      (Some elem.f_span)
       id
       elem
       elem.f_doc_comment
@@ -201,6 +214,7 @@ let process_gconst_decl ctx source_map elem progress =
       (add_gconst_defn_fact ctx source_map)
       build_gconst_decl_json_ref
       pos
+      (Some elem.cst_span)
       id
       elem
       None
@@ -259,6 +273,7 @@ let process_typedef_decl ctx source_map elem progress =
   let (decl_id, prog) = add_typedef_decl_fact ctx source_map id elem progress in
   let ref_json = build_typedef_decl_json_ref decl_id in
   let (_, prog) = add_decl_loc_fact pos ref_json prog in
+  let (_, prog) = add_decl_span_fact elem.t_span ref_json prog in
   prog
 
 let process_decls ctx files_info (tasts : Tast.program list) =
@@ -371,6 +386,8 @@ let progress_to_json progress =
         progress.resultJson.declarationComment );
       ( sprintf "hack.DeclarationLocation.%d" ver,
         progress.resultJson.declarationLocation );
+      ( sprintf "hack.DeclarationSpan.%d" ver,
+        progress.resultJson.declarationSpan );
       ( sprintf "hack.MethodDeclaration.%d" ver,
         progress.resultJson.methodDeclaration );
       ( sprintf "hack.ClassConstDeclaration.%d" ver,

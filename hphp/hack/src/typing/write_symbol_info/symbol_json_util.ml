@@ -98,6 +98,7 @@ let init_progress =
       classDefinition = [];
       declarationComment = [];
       declarationLocation = [];
+      declarationSpan = [];
       enumDeclaration = [];
       enumDefinition = [];
       enumerator = [];
@@ -172,6 +173,11 @@ let update_json_data predicate json progress =
       {
         progress.resultJson with
         declarationLocation = json :: progress.resultJson.declarationLocation;
+      }
+    | DeclarationSpan ->
+      {
+        progress.resultJson with
+        declarationSpan = json :: progress.resultJson.declarationSpan;
       }
     | EnumDeclaration ->
       {

@@ -16,6 +16,7 @@ type predicate =
   | ClassDefinition
   | DeclarationComment
   | DeclarationLocation
+  | DeclarationSpan
   | EnumDeclaration
   | EnumDefinition
   | Enumerator
@@ -44,6 +45,7 @@ type glean_json = {
   classDefinition: json list;
   declarationComment: json list;
   declarationLocation: json list;
+  declarationSpan: json list;
   enumDeclaration: json list;
   enumDefinition: json list;
   enumerator: json list;

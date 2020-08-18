@@ -434,7 +434,7 @@ std::unique_ptr<UnitEmitter> Package::createSymlinkWrapper(
          << "  NullUninit\n"
          << "  NullUninit\n"
          << "  NullUninit\n"
-         << "  FCallFuncD <SkipNumArgsCheck> 0 1 \"\" - \"\" \"" << escaped_name << "\"\n"
+         << "  FCallFuncD <> 0 1 \"\" - \"\" \"" << escaped_name << "\"\n"
          << "  PopC\n"
          << "  Null\n"
          << "  RetC\n"

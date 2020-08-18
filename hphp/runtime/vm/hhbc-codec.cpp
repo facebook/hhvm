@@ -127,7 +127,7 @@ void encodeFCallArgsBase(UnitEmitter& ue, const FCallArgsBase& fca,
                          bool hasContext) {
   auto flags = uint8_t{fca.flags};
   assertx(!(flags & ~FCallArgsBase::kInternalFlags));
-  if (!fca.numArgs && fca.skipNumArgsCheck) flags |= FCallArgsBase::NoArgs;
+  if (!fca.numArgs && fca.skipRepack) flags |= FCallArgsBase::NoArgs;
   if (fca.numRets != 1) flags |= FCallArgsBase::HasInOut;
   if (hasInoutArgs) flags |= FCallArgsBase::EnforceInOut;
   if (hasAsyncEagerOffset) flags |= FCallArgsBase::HasAsyncEagerOffset;
@@ -139,8 +139,8 @@ void encodeFCallArgsBase(UnitEmitter& ue, const FCallArgsBase& fca,
   }
 
   ue.emitByte(flags);
-  if (fca.numArgs || !fca.skipNumArgsCheck) {
-    ue.emitIVA((uint64_t)fca.numArgs * 2 + fca.skipNumArgsCheck);
+  if (fca.numArgs || !fca.skipRepack) {
+    ue.emitIVA((uint64_t)fca.numArgs * 2 + fca.skipRepack);
   }
   if (fca.numRets != 1) ue.emitIVA(fca.numRets);
 }
@@ -167,13 +167,13 @@ FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc, StringDecoder u) {
   }();
 
   uint32_t numArgs;
-  bool skipNumArgsCheck;
+  bool skipRepack;
   if (flags & FCallArgs::NoArgs) {
     numArgs = 0;
-    skipNumArgsCheck = true;
+    skipRepack = true;
   } else {
     numArgs = decode_iva(pc);
-    skipNumArgsCheck = numArgs % 2;
+    skipRepack = numArgs % 2;
     numArgs /= 2;
   }
   auto const numRets = (flags & FCallArgs::HasInOut) ? decode_iva(pc) : 1;
@@ -185,7 +185,7 @@ FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc, StringDecoder u) {
   return FCallArgs(
     static_cast<FCallArgs::Flags>(flags & FCallArgs::kInternalFlags),
     numArgs, numRets, inoutArgs, asyncEagerOffset, lockWhileUnwinding,
-    skipNumArgsCheck, context
+    skipRepack, context
   );
 }
 

@@ -139,7 +139,7 @@ inline bool operator!=(const LocalRange& a, const LocalRange& b) {
 struct FCallArgsShort {
   using Flags = FCallArgsBase::Flags;
   static constexpr int kValidFlag = (1u << 15);
-  static constexpr int kSkipNumArgsCheck = (1u << 14);
+  static constexpr int kSkipRepack = (1u << 14);
   static constexpr int kLockWhileUnwinding = (1u << 13);
   static constexpr int kEnforceInOut = (1u << 12);
   static constexpr int kInoutMask = (1u << 12) - 1;
@@ -153,7 +153,7 @@ struct FCallArgsShort {
       Flags flags, uint32_t numArgs, uint32_t numRets,
       const std::unique_ptr<uint8_t[]>& inoutArgs,
       BlockId asyncEagerTarget, bool lockWhileUnwinding,
-      bool skipNumArgsCheck, LSString context) {
+      bool skipRepack, LSString context) {
     if (numArgs >= 16 ||
         numRets >= 16 ||
         (inoutArgs && numArgs > 8 && inoutArgs[1] > (kInoutMask >> 8)) ||
@@ -172,14 +172,14 @@ struct FCallArgsShort {
       }
       fca.inoutArgsAndFlags |= kEnforceInOut;
     }
-    if (skipNumArgsCheck) fca.inoutArgsAndFlags |= kSkipNumArgsCheck;
+    if (skipRepack) fca.inoutArgsAndFlags |= kSkipRepack;
     if (lockWhileUnwinding) fca.inoutArgsAndFlags |= kLockWhileUnwinding;
     fca.inoutArgsAndFlags |= kValidFlag;
     return fca;
   }
   bool valid() const { return inoutArgsAndFlags & kValidFlag; }
-  bool skipNumArgsCheck() const {
-    return inoutArgsAndFlags & kSkipNumArgsCheck;
+  bool skipRepack() const {
+    return inoutArgsAndFlags & kSkipRepack;
   }
   bool lockWhileUnwinding() const {
     return inoutArgsAndFlags & kLockWhileUnwinding;
@@ -231,9 +231,9 @@ struct FCallArgsShort {
     f(numArgs > 8 ? 2 : 1, br);
   }
 
-  FCallArgsShort withoutNumArgsCheck() const {
+  FCallArgsShort withoutRepack() const {
     auto fca = *this;
-    fca.inoutArgsAndFlags |= kSkipNumArgsCheck;
+    fca.inoutArgsAndFlags |= kSkipRepack;
     return fca;
   }
   friend bool operator==(const FCallArgsShort& a, const FCallArgsShort& b) {
@@ -304,7 +304,7 @@ struct FCallArgsShort {
   FCallArgsBase base() const {
     return FCallArgsBase{
       flags, numArgs, numRets,
-      lockWhileUnwinding(), skipNumArgsCheck()
+      lockWhileUnwinding(), skipRepack()
     };
   }
 };
@@ -317,9 +317,9 @@ struct FCallArgsLong : FCallArgsBase {
   explicit FCallArgsLong(Flags flags, uint32_t numArgs, uint32_t numRets,
                          std::unique_ptr<uint8_t[]> inoutArgs,
                          BlockId asyncEagerTarget, bool lockWhileUnwinding,
-                         bool skipNumArgsCheck, LSString context)
+                         bool skipRepack, LSString context)
     : FCallArgsBase(flags, numArgs, numRets,
-                    lockWhileUnwinding, skipNumArgsCheck)
+                    lockWhileUnwinding, skipRepack)
     , inoutArgs(std::move(inoutArgs))
     , asyncEagerTarget(asyncEagerTarget)
     , context(context) {
@@ -328,7 +328,7 @@ struct FCallArgsLong : FCallArgsBase {
   }
   FCallArgsLong(const FCallArgsLong& o)
     : FCallArgsLong(o.flags, o.numArgs, o.numRets, nullptr, o.asyncEagerTarget,
-                    o.lockWhileUnwinding, o.skipNumArgsCheck, o.context) {
+                    o.lockWhileUnwinding, o.skipRepack, o.context) {
     if (o.inoutArgs) {
       auto const numBytes = (numArgs + 7) / 8;
       inoutArgs = std::make_unique<uint8_t[]>(numBytes);
@@ -338,7 +338,7 @@ struct FCallArgsLong : FCallArgsBase {
   FCallArgsLong(FCallArgsLong&& o)
     : FCallArgsLong(o.flags, o.numArgs, o.numRets, std::move(o.inoutArgs),
                     o.asyncEagerTarget, o.lockWhileUnwinding,
-                    o.skipNumArgsCheck, o.context) {}
+                    o.skipRepack, o.context) {}
 
   bool enforceInOut() const { return inoutArgs.get() != nullptr; }
   bool isInOut(uint32_t i) const {
@@ -378,9 +378,9 @@ struct FCallArgsLong : FCallArgsBase {
     }
     return fca;
   }
-  FCallArgsLong withoutNumArgsCheck() const {
+  FCallArgsLong withoutRepack() const {
     auto fca = *this;
-    fca.skipNumArgsCheck = true;
+    fca.skipRepack = true;
     return fca;
   }
   template<typename F>
@@ -399,7 +399,7 @@ struct FCallArgsLong : FCallArgsBase {
       eq(a.inoutArgs.get(), b.inoutArgs.get(), (a.numArgs + 7) / 8) &&
       a.asyncEagerTarget == b.asyncEagerTarget &&
       a.lockWhileUnwinding == b.lockWhileUnwinding &&
-      a.skipNumArgsCheck == b.skipNumArgsCheck &&
+      a.skipRepack == b.skipRepack &&
       a.context == b.context;
   }
 
@@ -452,14 +452,14 @@ struct FCallArgs {
   FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
             std::unique_ptr<uint8_t[]> inoutArgs,
             BlockId asyncEagerTarget, bool lockWhileUnwinding,
-            bool skipNumArgsCheck, LSString context)
+            bool skipRepack, LSString context)
       : s{FCallArgsShort::create(flags, numArgs, numRets, inoutArgs,
                                  asyncEagerTarget, lockWhileUnwinding,
-                                 skipNumArgsCheck, context)} {
+                                 skipRepack, context)} {
     if (!s.valid()) {
       assertx(!l);
       l.emplace(flags, numArgs, numRets, std::move(inoutArgs), asyncEagerTarget,
-                lockWhileUnwinding, skipNumArgsCheck, context);
+                lockWhileUnwinding, skipRepack, context);
     }
   }
   FCallArgs(const FCallArgsShort& o) : s{o} {}
@@ -520,9 +520,9 @@ struct FCallArgs {
     if (s.valid()) return s.fixEager(supports_eager);
     return l->fixEager(supports_eager);
   }
-  FCallArgs withoutNumArgsCheck() const {
-    if (s.valid()) return s.withoutNumArgsCheck();
-    return l->withoutNumArgsCheck();
+  FCallArgs withoutRepack() const {
+    if (s.valid()) return s.withoutRepack();
+    return l->withoutRepack();
   }
 
   FCallArgsBase base() const {
@@ -587,10 +587,10 @@ struct FCallArgs {
       s.supportsAsyncEagerReturn() :
       l->supportsAsyncEagerReturn();
   }
-  bool skipNumArgsCheck() const {
+  bool skipRepack() const {
     return s.valid() ?
-      s.skipNumArgsCheck() :
-      l->skipNumArgsCheck;
+      s.skipRepack() :
+      l->skipRepack;
   }
   template<int nin>
   uint32_t numPop() const {

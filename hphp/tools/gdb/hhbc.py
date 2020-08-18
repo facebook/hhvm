@@ -339,14 +339,14 @@ class HHBC(object):
             flags = ptr.cast(T('uint8_t').pointer()).dereference()
             size = 1
 
-            skipNumArgsCheck = " skipNumArgsCheck"
+            skipRepack = " skipRepack"
             if flags & V('HPHP::FCallArgs::NoArgs'):
                 num_args = 0
             else:
                 iva = HHBC.decode_iva(ptr + size)
                 v = int(iva['value'])
                 if (v % 2) == 0:
-                    skipNumArgsCheck = ""
+                    skipRepack = ""
                 num_args = v // 2
                 size += iva['size']
 
@@ -375,7 +375,7 @@ class HHBC(object):
 
             info['size'] = size
             info['value'] = (str(num_args) + ' ' + has_unpack
-                             + ' ' + num_rets + asyncEagerOffset + skipNumArgsCheck
+                             + ' ' + num_rets + asyncEagerOffset + skipRepack
                              + context)
 
         else:

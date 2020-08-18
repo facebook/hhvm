@@ -3627,8 +3627,8 @@ bool fcallOptimizeChecks(
     }
   }
 
-  if (!fca.skipNumArgsCheck() && fca.numArgs() <= func.minNonVariadicParams()) {
-    reduce(env, fcallWithFCA(fca.withoutNumArgsCheck()));
+  if (!fca.skipRepack() && fca.numArgs() <= func.minNonVariadicParams()) {
+    reduce(env, fcallWithFCA(fca.withoutRepack()));
     return true;
   }
 

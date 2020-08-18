@@ -1318,7 +1318,7 @@ std::tuple<FCallArgs::Flags, bool, bool>
 read_fcall_flags(AsmState& as, Op thisOpcode) {
   uint8_t flags = 0;
   bool lockWhileUnwinding = false;
-  bool skipNumArgsCheck = false;
+  bool skipRepack = false;
 
   as.in.skipSpaceTab();
   as.in.expect('<');
@@ -1343,14 +1343,14 @@ read_fcall_flags(AsmState& as, Op thisOpcode) {
     }
     if (flag == "Unpack") { flags |= FCallArgs::HasUnpack; continue; }
     if (flag == "Generics") { flags |= FCallArgs::HasGenerics; continue; }
-    if (flag == "SkipNumArgsCheck") { skipNumArgsCheck = true; continue; }
+    if (flag == "SkipRepack") { skipRepack = true; continue; }
 
     as.error("unrecognized FCall flag `" + flag + "'");
   }
   as.in.expectWs('>');
 
   return std::make_tuple(static_cast<FCallArgs::Flags>(flags),
-                         lockWhileUnwinding, skipNumArgsCheck);
+                         lockWhileUnwinding, skipRepack);
 }
 
 // Read a vector of booleans formatted as a quoted string of '0' and '1'.
@@ -1390,8 +1390,8 @@ std::tuple<FCallArgsBase, std::unique_ptr<uint8_t[]>, std::string,
 read_fcall_args(AsmState& as, Op thisOpcode) {
   FCallArgs::Flags flags;
   bool lockWhileUnwinding;
-  bool skipNumArgsCheck;
-  std::tie(flags, lockWhileUnwinding, skipNumArgsCheck)
+  bool skipRepack;
+  std::tie(flags, lockWhileUnwinding, skipRepack)
     = read_fcall_flags(as, thisOpcode);
   auto const numArgs = read_opcode_arg<uint32_t>(as);
   auto const numRets = read_opcode_arg<uint32_t>(as);
@@ -1400,7 +1400,7 @@ read_fcall_args(AsmState& as, Op thisOpcode) {
   auto const ctx = read_fca_context(as);
   return std::make_tuple(
     FCallArgsBase(flags, numArgs, numRets,
-                  lockWhileUnwinding, skipNumArgsCheck),
+                  lockWhileUnwinding, skipRepack),
     std::move(inoutArgs),
     std::move(asyncEagerLabel),
     ctx

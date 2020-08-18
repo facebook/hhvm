@@ -225,10 +225,10 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     genericsBitmap,
     fca.hasGenerics(),
     fca.hasUnpack(),
+    fca.skipRepack,
     dynamicCall,
     asyncEagerReturn,
-    env.formingRegion,
-    fca.skipNumArgsCheck
+    env.formingRegion
   };
   return gen(env, Call, data, sp(env), fp(env), callee, objOrClass);
 }
@@ -444,7 +444,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     nullptr,  // inout-ness already checked
     fca.asyncEagerOffset,
     fca.lockWhileUnwinding,
-    fca.skipNumArgsCheck,
+    fca.skipRepack,
     fca.context
   ));
 }

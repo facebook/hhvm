@@ -128,12 +128,12 @@ struct FCallArgsBase {
     HasUnpack | HasGenerics | SupportsAsyncEagerReturn;
 
   explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets,
-                         bool lockWhileUnwinding, bool skipNumArgsCheck)
+                         bool lockWhileUnwinding, bool skipRepack)
     : numArgs(numArgs)
     , numRets(numRets)
     , flags(flags)
     , lockWhileUnwinding(lockWhileUnwinding)
-    , skipNumArgsCheck(skipNumArgsCheck)
+    , skipRepack(skipRepack)
   {
     assertx(!(flags & ~kInternalFlags));
     assertx(!(supportsAsyncEagerReturn() && lockWhileUnwinding));
@@ -150,16 +150,16 @@ struct FCallArgsBase {
   uint32_t numRets;
   Flags flags;
   bool lockWhileUnwinding;
-  bool skipNumArgsCheck;
+  bool skipRepack;
 };
 
 struct FCallArgs : FCallArgsBase {
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
                      const uint8_t* inoutArgs, Offset asyncEagerOffset,
-                     bool lockWhileUnwinding, bool skipNumArgsCheck,
+                     bool lockWhileUnwinding, bool skipRepack,
                      const StringData* context)
     : FCallArgsBase(flags, numArgs, numRets,
-                    lockWhileUnwinding, skipNumArgsCheck)
+                    lockWhileUnwinding, skipRepack)
     , asyncEagerOffset(asyncEagerOffset)
     , inoutArgs(inoutArgs)
     , context(context) {
@@ -177,7 +177,7 @@ struct FCallArgs : FCallArgsBase {
     return FCallArgs(
       static_cast<Flags>(flags | Flags::HasGenerics),
       numArgs, numRets, inoutArgs, asyncEagerOffset, lockWhileUnwinding,
-      skipNumArgsCheck, context);
+      skipRepack, context);
   }
   Offset asyncEagerOffset;
   const uint8_t* inoutArgs;

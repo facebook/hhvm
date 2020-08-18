@@ -810,10 +810,10 @@ struct CallData : IRExtraData {
                     uint32_t genericsBitmap,
                     bool hasGenerics,
                     bool hasUnpack,
+                    bool skipRepack,
                     bool dynamicCall,
                     bool asyncEagerReturn,
-                    bool formingRegion,
-                    bool skipNumArgsCheck)
+                    bool formingRegion)
     : spOffset(spOffset)
     , numArgs(numArgs)
     , numOut(numOut)
@@ -821,10 +821,10 @@ struct CallData : IRExtraData {
     , genericsBitmap(genericsBitmap)
     , hasGenerics(hasGenerics)
     , hasUnpack(hasUnpack)
+    , skipRepack(skipRepack)
     , dynamicCall(dynamicCall)
     , asyncEagerReturn(asyncEagerReturn)
     , formingRegion(formingRegion)
-    , skipNumArgsCheck(skipNumArgsCheck)
   {}
 
   std::string show() const {
@@ -834,10 +834,10 @@ struct CallData : IRExtraData {
         ? folly::sformat(",hasGenerics({})", genericsBitmap)
         : std::string{},
       hasUnpack ? ",unpack" : "",
+      skipRepack ? ",skipRepack" : "",
       dynamicCall ? ",dynamicCall" : "",
       asyncEagerReturn ? ",asyncEagerReturn" : "",
-      formingRegion ? ",formingRegion" : "",
-      skipNumArgsCheck ? ",skipNumArgsCheck" : ""
+      formingRegion ? ",formingRegion" : ""
     );
   }
 
@@ -852,10 +852,10 @@ struct CallData : IRExtraData {
   uint32_t genericsBitmap;
   bool hasGenerics;
   bool hasUnpack;
+  bool skipRepack;
   bool dynamicCall;
   bool asyncEagerReturn;
   bool formingRegion;
-  bool skipNumArgsCheck;
 
   // Set if the catch trace for this call has a SyncReturnBC instruction because
   // an inline frame was elided around it.

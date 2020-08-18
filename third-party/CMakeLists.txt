@@ -57,14 +57,13 @@ list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/forks/folly/src")
 # Fatal is a header-only library, so there's nothing to build.
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/fatal")
 
+add_subdirectory(brotli) # Required by fizz
+
 list(APPEND THIRD_PARTY_MODULES fizz)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/fizz/src")
 
 list(APPEND THIRD_PARTY_MODULES wangle)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/wangle/src")
-
-list(APPEND THIRD_PARTY_MODULES brotli)
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/brotli/src/c/include")
 
 list(APPEND THIRD_PARTY_MODULES proxygen)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/proxygen/src")

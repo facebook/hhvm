@@ -6,6 +6,12 @@ class Baz {
 }
 
 function foo($x) {
+  $ed = darray[];
+  var_dump(HH\is_array_marked_legacy($ed));
+  var_dump($ed);
+  $ev = varray[];
+  var_dump(HH\is_array_marked_legacy($ev));
+  var_dump($ev);
   $a = darray['a' => $x];
   var_dump(HH\is_array_marked_legacy($a));
   var_dump($a);

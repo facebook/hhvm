@@ -634,6 +634,9 @@ private:
   struct DArrayInitializer;
   static DArrayInitializer s_darr_initializer;
 
+  struct MarkedDictArrayInitializer;
+  static MarkedDictArrayInitializer s_marked_dict_initializer;
+
   int64_t  m_nextKI;        // Next integer key to use for append.
 };
 

@@ -210,8 +210,17 @@ void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
   if (arr->empty() && LIKELY(!requested_tag)) {
     if (arr->isVArray())     return replace(staticEmptyVArray());
     if (arr->isDArray())     return replace(staticEmptyDArray());
-    if (arr->isVecType())    return replace(staticEmptyVec());
-    if (arr->isDictType())   return replace(staticEmptyDictArray());
+    if (arr->isVecType()) {
+      return replace(
+        arr->isLegacyArray() ? staticEmptyMarkedVec() : staticEmptyVec()
+      );
+    }
+    if (arr->isDictType()) {
+      return replace(
+        arr->isLegacyArray() ? staticEmptyMarkedDictArray() :
+                               staticEmptyDictArray()
+      );
+    }
     if (arr->isKeysetType()) return replace(staticEmptyKeysetArray());
     return replace(staticEmptyArray());
   }

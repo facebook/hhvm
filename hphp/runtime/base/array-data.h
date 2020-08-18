@@ -752,8 +752,11 @@ constexpr size_t kEmptySetArraySize = 96;
  */
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVec;
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVArray;
+extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyMarkedVec;
 extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
 extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDArray;
+extern
+std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyMarkedDictArray;
 extern std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
 
 /*
@@ -767,7 +770,9 @@ ArrayData* staticEmptyArray();
 ArrayData* staticEmptyVArray();
 ArrayData* staticEmptyDArray();
 ArrayData* staticEmptyVec();
+ArrayData* staticEmptyMarkedVec();
 ArrayData* staticEmptyDictArray();
+ArrayData* staticEmptyMarkedDictArray();
 ArrayData* staticEmptyKeysetArray();
 
 /*

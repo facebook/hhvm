@@ -45,6 +45,7 @@ namespace HPHP {
 
 std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVec;
 std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVArray;
+std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyMarkedVec;
 
 struct PackedArray::VecInitializer {
   VecInitializer() {
@@ -68,6 +69,16 @@ struct PackedArray::VArrayInitializer {
 };
 PackedArray::VArrayInitializer PackedArray::s_varr_initializer;
 
+struct PackedArray::MarkedVecInitializer {
+  MarkedVecInitializer() {
+    auto const aux = packSizeIndexAndAuxBits(0, ArrayData::kLegacyArray);
+    auto const ad = reinterpret_cast<ArrayData*>(&s_theEmptyMarkedVec);
+    ad->m_sizeAndPos = 0;
+    ad->initHeader_16(HeaderKind::Vec, StaticValue, aux);
+    assertx(checkInvariants(ad));
+  }
+};
+PackedArray::MarkedVecInitializer PackedArray::s_marked_vec_initializer;
 //////////////////////////////////////////////////////////////////////
 
 namespace {

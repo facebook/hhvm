@@ -275,6 +275,9 @@ private:
 
   struct VArrayInitializer;
   static VArrayInitializer s_varr_initializer;
+
+  struct MarkedVecInitializer;
+  static MarkedVecInitializer s_marked_vec_initializer;
 };
 
 //////////////////////////////////////////////////////////////////////

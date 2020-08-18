@@ -32,7 +32,7 @@ RangeArenaStorage g_lowArena{};
 RangeArenaStorage g_highArena{};
 RangeArenaStorage g_coldArena{};
 RangeArenaStorage g_lowColdArena{};
-RangeStateStorage g_ranges[3];
+RangeStateStorage g_ranges[4];
 ArenaArray g_arenas;
 PreMappedArena* g_arena0;               // arena 0, if we end up injecting pages
 std::vector<PreMappedArena*> g_local_arenas; // keyed by numa node id
@@ -54,6 +54,8 @@ NEVER_INLINE RangeState& getRange(AddrRangeClass index) {
         RangeState(2ull << 30, kLowArenaMaxAddr);
       new (&(g_ranges[AddrRangeClass::Uncounted]))
         RangeState(kLowArenaMaxAddr, kHighArenaMaxAddr);
+      new (&(g_ranges[AddrRangeClass::UncountedCold]))
+        RangeState(kHighArenaMaxAddr, kUncountedMaxAddr);
     }
     lock.clear(std::memory_order_release);
     assertx(result->high());

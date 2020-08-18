@@ -29,6 +29,11 @@
 #ifdef HAVE_NUMA
 #include <numaif.h>
 #endif
+#include <fcntl.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #if USE_JEMALLOC_EXTENT_HOOKS
 
@@ -122,7 +127,6 @@ bool Bump2MMapper::addMappingImpl() {
   return true;
 }
 
-
 template<Direction D>
 bool BumpNormalMapper<D>::addMappingImpl() {
   std::lock_guard<RangeState> _(m_state);
@@ -158,6 +162,41 @@ bool BumpNormalMapper<D>::addMappingImpl() {
   } else {
     m_state.high_map.store(newPageStart, std::memory_order_release);
   }
+  return true;
+}
+
+bool BumpFileMapper::setDirectory(const char* dir) {
+  auto const len = strlen(dir);
+  if (len >= sizeof(m_dirName)) {
+    return false;
+  }
+  memcpy(m_dirName, dir, len + 1);
+  return true;
+}
+
+bool BumpFileMapper::addMappingImpl() {
+  std::lock_guard<RangeState> _(m_state);
+  if (m_fd) return false;               // already initialized
+  if (!m_dirName[0]) return false;      // setDirectory() not done successfully
+  // Create a temporary file and map it in upon the first request.
+  m_fd = open(m_dirName,
+              O_TMPFILE | O_DIRECTORY | O_RDWR | O_CLOEXEC,
+              S_IRUSR | S_IWUSR);
+  if (m_fd == -1) {
+    return false;
+  }
+  if (ftruncate(m_fd, m_state.capacity())) {
+    return false;
+  }
+  auto const addr = mmap(reinterpret_cast<void*>(m_state.low()),
+                         m_state.capacity(),
+                         PROT_READ | PROT_WRITE,
+                         MAP_FIXED | MAP_SHARED,
+                         m_fd, 0);
+  if (addr == (void*)-1) {
+    return false;
+  }
+  m_state.low_map.store(m_state.high(), std::memory_order_release);
   return true;
 }
 

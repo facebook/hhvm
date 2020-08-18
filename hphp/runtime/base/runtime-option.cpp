@@ -962,6 +962,11 @@ static inline bool reuseTCDefault() {
   return hhvm_reuse_tc && !RuntimeOption::RepoAuthoritative;
 }
 
+static inline bool useFileBackedArenaDefault() {
+  return RuntimeOption::RepoAuthoritative &&
+    RuntimeOption::ServerExecutionMode();
+}
+
 static inline bool hugePagesSoundNice() {
   return RuntimeOption::ServerExecutionMode();
 }

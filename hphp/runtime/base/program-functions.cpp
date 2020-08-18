@@ -1896,6 +1896,10 @@ static int execute_program_impl(int argc, char** argv) {
     setup_arena0({RuntimeOption::EvalNum1GPagesForA0,
                   RuntimeOption::EvalNum2MPagesForA0});
   }
+  if (RuntimeOption::EvalFileBackedColdArena) {
+    set_cold_file_dir(RuntimeOption::EvalColdArenaFileDir.c_str());
+    enable_high_cold_file();
+  }
 #endif
 
   auto const addTypeToEmbeddedPath = [&](std::string path, const char* type) {

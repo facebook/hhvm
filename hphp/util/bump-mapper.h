@@ -135,6 +135,32 @@ struct BumpNormalMapper : public RangeMapper {
   bool addMappingImpl() override;
 };
 
+// Create mappings backed by a file
+struct BumpFileMapper : public RangeMapper {
+ public:
+  template<typename... Args>
+  explicit BumpFileMapper(Args&&... args)
+    : RangeMapper(std::forward<Args>(args)...) {
+    m_failed = true;                    // disabled initially
+  }
+  void enable() {
+    m_failed = false;
+  }
+  bool setDirectory(const char* dir);
+
+ protected:
+  Direction direction() const override { return Direction::LowToHigh; }
+  bool addMappingImpl() override;
+ private:
+  int m_fd{0};
+  // PATH_MAX feels like a waste of memory, so use something smaller and make it
+  // configurable at build time.
+#ifndef TMPDIRMAXLEN
+#define TMPDIRMAXLEN 80
+#endif
+  char m_dirName[TMPDIRMAXLEN]{};
+};
+
 }}
 
 #endif

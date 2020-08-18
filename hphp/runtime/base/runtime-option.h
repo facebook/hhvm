@@ -969,6 +969,8 @@ struct RuntimeOption {
   F(bool, DumpTargetProfiles,          false)                           \
   F(bool, MapTgtCacheHuge,             false)                           \
   F(bool, NewTHPHotText,               false)                           \
+  F(bool, FileBackedColdArena,         useFileBackedArenaDefault())     \
+  F(string, ColdArenaFileDir,          "/tmp")                          \
   F(uint32_t, MaxHotTextHugePages,     hotTextHugePagesDefault())       \
   F(uint32_t, MaxLowMemHugePages,      hugePagesSoundNice() ? 8 : 0)    \
   F(uint32_t, MaxHighArenaHugePages,   0)                               \

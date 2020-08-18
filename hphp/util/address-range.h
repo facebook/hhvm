@@ -35,7 +35,8 @@ constexpr uintptr_t kLowArenaMinAddr = 1ull << 30;
 constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
 constexpr unsigned kUncountedMaxShift = 38;
 constexpr uintptr_t kUncountedMaxAddr = 1ull << kUncountedMaxShift;
-constexpr uintptr_t kHighArenaMaxAddr = kUncountedMaxAddr;
+constexpr size_t kHighColdCap = 4ull << 30;
+constexpr uintptr_t kHighArenaMaxAddr = kUncountedMaxAddr - kHighColdCap;
 constexpr size_t kLowArenaMaxCap = kLowArenaMaxAddr - kLowArenaMinAddr;
 constexpr size_t kHighArenaMaxCap = kHighArenaMaxAddr - kLowArenaMaxAddr;
 
@@ -51,9 +52,10 @@ namespace alloc {
 
 // List of address ranges ManagedArena can manage.
 enum AddrRangeClass : uint32_t {
-  VeryLow = 0,                          // 31-bit address
-  Low,                                  // 2G - 4G, 32-bit address
-  Uncounted,                            // 4G - kUncountedMaxAddr
+  VeryLow = 0,                     // below 2G, 31-bit address
+  Low,                             // [2G, 4G), 32-bit address
+  Uncounted,                       // [4G, kHighArenaMaxAddr)
+  UncountedCold,                   // [kHighArenaMaxAddr, kUncountedMaxAddr)
 };
 
 // Direction of the bump allocator.

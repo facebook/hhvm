@@ -151,6 +151,9 @@ ssize_t get_free_slab_bytes();
 void low_2m_pages(uint32_t pages);
 void high_2m_pages(uint32_t pages);
 
+void set_cold_file_dir(const char* dir);
+void enable_high_cold_file();
+
 /**
  * Safe memory allocation.
  */

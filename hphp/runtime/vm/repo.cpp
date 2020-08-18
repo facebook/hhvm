@@ -77,9 +77,8 @@ static SimpleMutex s_lock;
 static std::atomic<unsigned> s_nRepos;
 
 bool Repo::prefork() {
-  if (num_1g_pages() > 0) {
-    // We put data on the 1G huge pages, and we don't want to do COW upon
-    // fork().  If you need to fork(), configure HHVM not to use 1G pages.
+  if (num_1g_pages() > 0 || RuntimeOption::EvalFileBackedColdArena) {
+    // We put data on shared pages, which won't work with fork().
     return true;
   }
   if (!t_dh.isNull()) {

@@ -174,6 +174,7 @@ std::atomic_uint g_highArenaRecentlyFreed;
 
 alloc::Bump2MMapper* low_2m_mapper = nullptr;
 alloc::Bump2MMapper* high_2m_mapper = nullptr;
+alloc::BumpFileMapper* cold_file_mapper = nullptr;
 
 // Customized hooks to use 1g pages for jemalloc metadata.
 static extent_hooks_t huge_page_metadata_hooks;
@@ -316,16 +317,20 @@ void setup_high_arena(unsigned n1GPages) {
   } else {
     high_2m_mapper = dynamic_cast<Bump2MMapper*>(mapper->next());
   }
-  auto coldMapper =
-    new BumpNormalMapper<Direction::HighToLow>(range, 0, numa_node_set);
-  range.setHighMapper(coldMapper);
 
   auto arena = HighArena::CreateAt(&g_highArena);
   arena->appendMapper(range.getLowMapper());
   high_arena = arena->id();
 
+  auto& fileRange = getRange(AddrRangeClass::UncountedCold);
+  cold_file_mapper = new BumpFileMapper(fileRange);
+  fileRange.setLowMapper(cold_file_mapper);
+  auto coldMapper =
+    new BumpNormalMapper<Direction::HighToLow>(range, 0, numa_node_set);
+  range.setHighMapper(coldMapper);
   auto coldArena = HighArena::CreateAt(&g_coldArena);
-  coldArena->appendMapper(range.getHighMapper());
+  coldArena->appendMapper(cold_file_mapper);
+  coldArena->appendMapper(coldMapper);
   high_cold_arena = coldArena->id();
   high_cold_arena_flags = MALLOCX_ARENA(high_cold_arena) | MALLOCX_TCACHE_NONE;
 }
@@ -782,6 +787,22 @@ void high_2m_pages(uint32_t pages) {
 #if USE_JEMALLOC_EXTENT_HOOKS
   if (high_2m_mapper) {
     high_2m_mapper->setMaxPages(pages);
+  }
+#endif
+}
+
+void enable_high_cold_file() {
+#if USE_JEMALLOC_EXTENT_HOOKS
+  if (cold_file_mapper) {
+    cold_file_mapper->enable();
+  }
+#endif
+}
+
+void set_cold_file_dir(const char* dir) {
+#if USE_JEMALLOC_EXTENT_HOOKS
+  if (cold_file_mapper) {
+    cold_file_mapper->setDirectory(dir);
   }
 #endif
 }

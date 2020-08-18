@@ -794,6 +794,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo,
                      [&](const std::unique_ptr<php::Func>& f) {
                        return f.get() == func;
                      }));
+      func.release();
       return;
     }
   }

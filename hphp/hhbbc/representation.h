@@ -265,7 +265,7 @@ private:
    *
    * Use WideFunc to access this data.
    */
-  BlockVec rawBlocks;
+  copy_ptr<CompactVector<char>> rawBlocks;
 
   friend struct WideFunc;
 };

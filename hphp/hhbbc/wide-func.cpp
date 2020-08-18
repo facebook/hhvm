@@ -84,7 +84,7 @@ T decode_as_bytes(const Buffer& buffer, size_t& pos) {
 template <typename T>
 T decode(const Buffer& buffer, size_t& pos) {
   assertx(pos < buffer.size());
-  ITRACE(4, "at {}: {}\n", pos, name(typeid(T)));
+  ITRACE(5, "at {}: {}\n", pos, name(typeid(T)));
   Trace::Indent _;
 
   if constexpr (std::is_same<T, FCallArgs>::value) {
@@ -176,7 +176,7 @@ void encode_as_bytes(Buffer& buffer, const T& data) {
 
 template <typename T>
 void encode(Buffer& buffer, const T& data) {
-  ITRACE(4, "at {}: {}\n", buffer.size(), name(typeid(T)));
+  ITRACE(5, "at {}: {}\n", buffer.size(), name(typeid(T)));
   Trace::Indent _;
 
   if constexpr (std::is_same<T, FCallArgs>::value) {
@@ -261,7 +261,7 @@ void encode(Buffer& buffer, const T& data) {
 #define IMM_SIX(x, y, z, n, m, o) IMM_FIVE(x, y, z, n, m) IMM(o, 6)
 
 BytecodeVec decodeBytecodeVec(const Buffer& buffer, size_t& pos) {
-  FTRACE(2, "\ndecodeBytecodeVec: {} bytes\n", buffer.size());
+  FTRACE(3, "\ndecodeBytecodeVec: {} bytes\n", buffer.size());
   Trace::Indent _;
   auto bcs = BytecodeVec{};
 
@@ -280,7 +280,7 @@ BytecodeVec decodeBytecodeVec(const Buffer& buffer, size_t& pos) {
   for (auto& inst : bcs) {
     inst.op = decode<Op>(buffer, pos);
     inst.srcLoc = safe_cast<int32_t>(decode<uint32_t>(buffer, pos)) + kNoSrcLoc;
-    ITRACE(3, "at {}: {}:\n", pos, opcodeToName(inst.op));
+    ITRACE(4, "at {}: {}:\n", pos, opcodeToName(inst.op));
     Trace::Indent _;
 #define O(op, ...) \
   case Op::op: new (&inst.op) bc::op(decode_##op()); break;
@@ -291,7 +291,7 @@ BytecodeVec decodeBytecodeVec(const Buffer& buffer, size_t& pos) {
 }
 
 void encodeBytecodeVec(Buffer& buffer, const BytecodeVec& bcs) {
-  FTRACE(2, "\nencodeBytecodeVec: {} elements\n", bcs.size());
+  FTRACE(3, "\nencodeBytecodeVec: {} elements\n", bcs.size());
   Trace::Indent _;
 
 #define IMM(type, n) encode(buffer, data.IMM_NAME_##type(n));
@@ -307,7 +307,7 @@ void encodeBytecodeVec(Buffer& buffer, const BytecodeVec& bcs) {
   for (auto const& inst : bcs) {
     encode(buffer, inst.op);
     encode(buffer, safe_cast<uint32_t>(inst.srcLoc - kNoSrcLoc));
-    ITRACE(3, "at {}: {}\n", buffer.size(), opcodeToName(inst.op));
+    ITRACE(4, "at {}: {}\n", buffer.size(), opcodeToName(inst.op));
     Trace::Indent _;
 #define O(op, ...) case Op::op: encode_##op(inst.op); break;
     switch (inst.op) { OPCODES }
@@ -423,6 +423,45 @@ void testCompression(Program& program) {
 
   TRACE(1, "Overall compression ratio: %.2f\n",
         1.0 * total_full_size / std::max(total_compressed_size, size_t{1}));
+}
+
+//////////////////////////////////////////////////////////////////////
+
+WideFunc::WideFunc(const Func* func, bool mut)
+    : m_func(const_cast<Func*>(func)) , m_mut(mut) {
+  DEBUG_ONLY auto const cls = m_func ? m_func->cls : nullptr;
+  TRACE(2, "WideFunc::%s(0x%lx): %s%s%s\n", m_mut ? "mut" : "cns",
+        uintptr_t(m_func), cls ? m_func->cls->name->data() : "",
+        cls ? "::" : "", m_func ? m_func->name->data() : "NULL");
+  if (!m_func || !m_func->rawBlocks) return;
+  assertx(!m_func->rawBlocks->empty());
+  auto pos = size_t{0};
+  m_blocks = decodeBlockVec(*func->rawBlocks, pos);
+  assertx(pos == func->rawBlocks->size());
+}
+
+WideFunc::~WideFunc() {
+  DEBUG_ONLY auto const cls = m_func ? m_func->cls : nullptr;
+  TRACE(2, "~WideFunc::%s(0x%lx): %s%s%s\n", m_mut ? "mut" : "cns",
+        uintptr_t(m_func), cls ? m_func->cls->name->data() : "",
+        cls ? "::" : "", m_func ? m_func->name->data() : "NULL");
+  if (!m_mut) return;
+  if (m_blocks.empty()) {
+    if (m_func) m_func->rawBlocks.reset();
+    return;
+  }
+  auto buffer = Buffer{};
+  encodeBlockVec(buffer, m_blocks);
+  if (!m_func->rawBlocks || buffer != *m_func->rawBlocks) {
+    TRACE(2, "~WideFunc::mut(0x%lx): updating blocks!\n", uintptr_t(m_func));
+    m_func->rawBlocks.emplace(std::move(buffer));
+  }
+}
+
+void WideFunc::release() {
+  m_func = nullptr;
+  m_mut = false;
+  m_blocks.clear();
 }
 
 //////////////////////////////////////////////////////////////////////

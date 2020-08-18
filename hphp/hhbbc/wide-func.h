@@ -63,27 +63,33 @@ struct WideFunc {
   WideFunc& operator=(WideFunc&&) = delete;
   WideFunc& operator=(const WideFunc&) = delete;
 
-  static WideFunc mut(Func* f) { return WideFunc(f); }
-  static const WideFunc cns(const Func* f) {
-    return WideFunc(const_cast<Func*>(f));
-  }
+  static WideFunc mut(Func* func) { return WideFunc(func, true); }
+  static const WideFunc cns(const Func* func) { return WideFunc(func, false); }
+
+  ~WideFunc();
 
   operator Func*() { return m_func; }
   Func& operator*() { return *m_func; }
   Func* operator->() { return m_func; }
-  BlockVec& blocks() { return m_func->rawBlocks; }
+  BlockVec& blocks() { return m_blocks; }
 
   operator const Func*() const { return m_func; }
   const Func& operator*() const { return *m_func; }
   const Func* operator->() const { return m_func; }
-  const BlockVec& blocks() const { return m_func->rawBlocks; }
+  const BlockVec& blocks() const { return m_blocks; }
 
   operator bool() const { return m_func; }
-  auto blockRange() const { return IntLikeRange<BlockId>{m_func->rawBlocks}; }
+  auto blockRange() const { return IntLikeRange<BlockId>{m_blocks}; }
+
+  // Call release if the backing Func is destroyed while this WideFunc is live.
+  void release();
 
 private:
-  explicit WideFunc(Func* f) : m_func(f) {}
-  Func* m_func = nullptr;
+  WideFunc(const Func* func, bool mut);
+
+  Func* m_func;
+  BlockVec m_blocks;
+  bool m_mut;
 };
 
 //////////////////////////////////////////////////////////////////////

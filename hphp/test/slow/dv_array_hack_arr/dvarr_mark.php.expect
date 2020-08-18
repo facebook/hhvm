@@ -65,4 +65,22 @@ dict(1) {
   [1]=>
   int(1)
 }
+bool(true)
+darray(0) {
+}
+bool(true)
+darray(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+bool(true)
+varray(0) {
+}
+bool(true)
+varray(2) {
+  int(1)
+  int(2)
+}
 int(1)

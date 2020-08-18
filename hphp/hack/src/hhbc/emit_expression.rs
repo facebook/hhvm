@@ -2623,11 +2623,17 @@ fn emit_special_function(
                     instr::istypec(i),
                 ])),
                 _ => match get_call_builtin_func_info(e.options(), lower_fq_name) {
-                    Some((nargs, i)) if nargs == args.len() => Some(InstrSeq::gather(vec![
-                        emit_exprs(e, env, args)?,
-                        emit_pos(pos),
-                        instr::instr(i),
-                    ])),
+                    Some((nargs, i)) if nargs == args.len() => {
+                        let instrs = InstrSeq::gather(vec![
+                            emit_exprs(e, env, args)?,
+                            emit_pos(pos),
+                            instr::instr(i),
+                        ]);
+                        match lower_fq_name {
+                            "HH\\varray" | "HH\\darray" => Some(wrap_array_mark_legacy(e, instrs)),
+                            _ => Some(instrs),
+                        }
+                    }
                     _ => None,
                 },
             },

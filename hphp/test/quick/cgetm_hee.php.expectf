@@ -1,6 +1,6 @@
 NULL
 string(4) "woof"
-Undefined index: 2
+Out of bounds varray access: invalid index 2
 NULL
 string(4) "meow"
-Undefined index: 2
+Out of bounds varray access: invalid index 2

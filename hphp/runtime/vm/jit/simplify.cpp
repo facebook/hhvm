@@ -2810,10 +2810,9 @@ SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
     if (auto const result = arrKeyImpl(env, inst)) return result;
     auto const mode = inst->extra<ArrayGet>()->mode;
     if (mode == MOpMode::None) return cns(env, TInitNull);
-    auto const data = ArrayGetExceptionData { mode == MOpMode::InOut };
     auto const op = inst->src(1)->isA(TInt) ? ThrowArrayIndexException
                                             : ThrowArrayKeyException;
-    gen(env, op, data, inst->taken(), inst->src(1));
+    gen(env, op, inst->taken(), inst->src(0), inst->src(1));
     return cns(env, TBottom);
   }
   return nullptr;

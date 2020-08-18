@@ -1,2 +1,2 @@
-Undefined index: 5
-Undefined index: 5
+Out of bounds varray access: invalid index 5
+Out of bounds varray access: invalid index 5

@@ -1,4 +1,4 @@
 bool(true)
 bool(true)
 bool(true)
-Undefined index: 2
+Out of bounds varray access: invalid index 2

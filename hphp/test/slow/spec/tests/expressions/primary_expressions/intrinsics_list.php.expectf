@@ -37,7 +37,7 @@ bool(true)
 int(100)
 bool(true)
 int(67)
-Undefined index: 2
+Out of bounds varray access: invalid index 2
 $min: 0, $max: 100, $avg: 67
 Array
 (
@@ -51,7 +51,7 @@ int(100)
 bool(true)
 int(67)
 --------- test with sufficient array elements but not consecutive keys -------------
-Undefined index: 1
+Out of bounds darray access: invalid index 1
 $min: 0, $max: 100, $avg: 100
 Array
 (
@@ -78,7 +78,7 @@ Array
     [2] => 50
 )
 --------- test with non-numeric array -------------
-Undefined index: 2
+Out of bounds darray access: invalid index 2
 $min: 10, $max: 30, $avg: 50
 Array
 (
@@ -90,7 +90,7 @@ bool(true)
 bool(true)
 bool(true)
 --------- test with array element being an array -------------
-Undefined index: 2
+Out of bounds varray access: invalid index 2
 Array
 (
     [0] => 0
@@ -153,4 +153,3 @@ Array
     [1] => 100
     [2] => 67
 )
-

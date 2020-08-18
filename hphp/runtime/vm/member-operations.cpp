@@ -85,22 +85,6 @@ void throw_cannot_use_newelem_for_lval_read_record() {
   );
 }
 
-void throw_inout_undefined_index(TypedValue tv) {
-  if (tv.m_type == KindOfInt64) {
-    throwArrayIndexException(tv.m_data.num, true);
-  }
-  assertx(isStringType(tv.m_type));
-  throwArrayKeyException(tv.m_data.pstr, true);
-}
-
-void throw_inout_undefined_index(int64_t i) {
-  throwArrayIndexException(i, true);
-}
-
-void throw_inout_undefined_index(const StringData* sd) {
-  throwArrayKeyException(sd, true);
-}
-
 TypedValue incDecBodySlow(IncDecOp op, tv_lval fr) {
   assertx(tvIsPlausible(*fr));
   assertx(type(fr) != KindOfUninit);

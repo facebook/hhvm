@@ -111,8 +111,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
 
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
 
-  static arr_lval LvalIntVec(ArrayData*, int64_t);
-  static arr_lval LvalStrVec(ArrayData*, StringData*);
   static ArrayData* ToVArrayVec(ArrayData*, bool);
   static constexpr auto ToDictVec = &ToDict;
   static ArrayData* ToVecVec(ArrayData*, bool);
@@ -155,6 +153,8 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto OnSetEvalScalarVec = &OnSetEvalScalar;
   static constexpr auto ToKeysetVec = &ArrayCommon::ToKeyset;
   static constexpr auto ToDArrayVec = &ToDArray;
+  static constexpr auto LvalIntVec = &LvalInt;
+  static constexpr auto LvalStrVec = &LvalStr;
 
   //////////////////////////////////////////////////////////////////////
 

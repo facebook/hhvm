@@ -595,8 +595,7 @@ SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
   if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
     ifThen(env, check, [&] {
       hint(env, Block::Hint::Unlikely);
-      auto const data = ArrayGetExceptionData { mode == MOpMode::InOut };
-      gen(env, ThrowArrayIndexException, data, key);
+      gen(env, ThrowArrayIndexException, base, key);
     });
     return result();
   }
@@ -710,13 +709,15 @@ SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
     [&] (SSATmp* key) {
       if (mode == MOpMode::None) return cns(env, TInitNull);
       assertx(mode == MOpMode::InOut || mode == MOpMode::Warn);
-      auto const data = ArrayGetExceptionData { mode == MOpMode::InOut };
-      if (key->isA(TInt)) {
-        gen(env, ThrowArrayIndexException, data, key);
-      } else {
-        assertx(key->isA(TStr));
-        gen(env, ThrowArrayKeyException, data, key);
-      }
+      auto const op = [&] {
+        if (key->isA(TInt)) {
+          return ThrowArrayIndexException;
+        } else {
+          assertx(key->isA(TStr));
+          return ThrowArrayKeyException;
+        }
+      }();
+      gen(env, op, base, key);
       return cns(env, TBottom);
     },
     [&] (SSATmp* key, SizeHintData data) {
@@ -1288,13 +1289,15 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
       [&] (SSATmp* key) {
         if (unset || mode == MOpMode::None) return ptrToInitNull(env);
         assertx(mode == MOpMode::InOut || mode == MOpMode::Warn);
-        auto const data = ArrayGetExceptionData { mode == MOpMode::InOut };
-        if (key->isA(TInt)) {
-          gen(env, ThrowArrayIndexException, data, key);
-        } else {
-          assertx(key->isA(TStr));
-          gen(env, ThrowArrayKeyException, data, key);
-        }
+        auto const op = [&] {
+          if (key->isA(TInt)) {
+            return ThrowArrayIndexException;
+          } else {
+            assertx(key->isA(TStr));
+            return ThrowArrayKeyException;
+          }
+        }();
+        gen(env, op, base, key);
         return cns(env, TBottom);
       },
       [&] (SSATmp* key, SizeHintData) {

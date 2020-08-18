@@ -615,12 +615,6 @@ auto MutableOpInt(ArrayData* adIn, int64_t k, bool copy, FoundFn found) {
 
 arr_lval PackedArray::LvalInt(ArrayData* adIn, int64_t k) {
   assertx(checkInvariants(adIn));
-  if (!ExistsInt(adIn, k)) throwMissingElementException("Lval");
-  auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
-  return { ad, LvalUncheckedInt(ad, k) };
-}
-
-arr_lval PackedArray::LvalIntVec(ArrayData* adIn, int64_t k) {
   return MutableOpInt(adIn, k, adIn->cowCheck(),
     [&] (ArrayData* ad) { return arr_lval { ad, LvalUncheckedInt(ad, k) }; }
   );
@@ -633,15 +627,10 @@ tv_lval PackedArray::LvalUncheckedInt(ArrayData* ad, int64_t k) {
   return &packedData(ad)[k];
 }
 
-arr_lval PackedArray::LvalStr(ArrayData* adIn, StringData*) {
+arr_lval PackedArray::LvalStr(ArrayData* adIn, StringData* key) {
   assertx(checkInvariants(adIn));
-  throwMissingElementException("Lval");
-}
-
-arr_lval PackedArray::LvalStrVec(ArrayData* adIn, StringData* key) {
-  assertx(checkInvariants(adIn));
-  assertx(adIn->isVecKind());
-  throwInvalidArrayKeyException(key, adIn);
+  adIn->isVecKind() ? throwInvalidArrayKeyException(key, adIn)
+                    : throwOOBArrayKeyException(key, adIn);
 }
 
 tv_lval PackedArray::LvalNewInPlace(ArrayData* ad) {

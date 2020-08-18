@@ -8,5 +8,5 @@ varray(3) {
 }
 int(5)
 int(1)
-Undefined index: 123
+Out of bounds darray access: invalid index "123"
 string(1) "6"

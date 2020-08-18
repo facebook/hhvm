@@ -6,7 +6,7 @@ varray(1) {
   }
 }
 string(3) "abc"
-Undefined index: 0
+Out of bounds varray access: invalid index 0
 varray(1) {
   int(10)
 }

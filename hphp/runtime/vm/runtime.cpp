@@ -181,15 +181,12 @@ void raiseNotice(const StringData* sd) {
   raise_notice("%s", sd->data());
 }
 
-void throwArrayIndexException(const int64_t index, bool isInOut) {
-  SystemLib::throwOutOfBoundsExceptionObject(folly::sformat(
-    "Undefined index{}: {}", isInOut ? " on inout parameter" : "", index));
+void throwArrayIndexException(const ArrayData* ad, const int64_t index) {
+  throwOOBArrayKeyException(index, ad);
 }
 
-void throwArrayKeyException(const StringData* key, bool isInOut) {
-  SystemLib::throwOutOfBoundsExceptionObject(folly::sformat(
-    "Undefined index{}: {}", isInOut ? " on inout parameter" : "",
-    key->data()));
+void throwArrayKeyException(const ArrayData* ad, const StringData* key) {
+  throwOOBArrayKeyException(key, ad);
 }
 
 std::string formatParamInOutMismatch(const char* fname, uint32_t index,

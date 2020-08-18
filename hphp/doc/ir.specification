@@ -3184,15 +3184,13 @@ fields of that struct for holding intermediate values.
 
   Returns true iff S0 is in the range [0, S1).
 
-| ThrowArrayIndexException<isInOut>, ND, S(Int), T
+| ThrowArrayIndexException, ND, S(ArrLike) S(Int), T
 
   Throws an out of bounds exception if S0 is an undefined index for an array.
-  The isInOut option indicates that the access was for an inout parameter.
 
-| ThrowArrayKeyException<isInOut>, ND, S(Str), T
+| ThrowArrayKeyException, ND, S(ArrLike) S(Str), T
 
   Throws an out of bounds exception if S0 is an undefined key for an array.
-  The isInOut option indicates that the access was for an inout parameter.
 
 | ThrowOutOfBounds, ND, S(ArrLike|Obj) S(Cell), T|LA
 

@@ -11,5 +11,5 @@ object(T) (2) {
 varray(1) {
   int(6)
 }
-OutOfBoundsException: Lval on missing array element
+OutOfBoundsException: Out of bounds varray access: invalid index 17
 Test end

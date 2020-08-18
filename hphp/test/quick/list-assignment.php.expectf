@@ -13,7 +13,7 @@ f
 int(4)
 int(5)
 int(6)
-Undefined index: 1
+Out of bounds varray access: invalid index 1
 int(4)
 int(5)
 int(1)

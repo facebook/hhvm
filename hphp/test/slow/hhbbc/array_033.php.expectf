@@ -1,4 +1,4 @@
-Undefined index: z
+Out of bounds darray access: invalid index "z"
 bool(true)
 bool(false)
 bool(true)

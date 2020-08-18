@@ -95,7 +95,7 @@ void emitClassGetTS(IRGS& env) {
       );
     },
     [&] (SSATmp* key) {
-      gen(env, ThrowArrayKeyException, ArrayGetExceptionData { false }, key);
+      gen(env, ThrowArrayKeyException, ts, key);
       return cns(env, TBottom);
     },
     [&] (SSATmp* key, SizeHintData) {

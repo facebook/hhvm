@@ -1,5 +1,5 @@
-Undefined index: 0
-Undefined index: 0
+Out of bounds darray access: invalid index "0"
+Out of bounds darray access: invalid index 0
 
 1
 woo

@@ -1,6 +1,6 @@
 ******* ad-hoc tests ********************************
 =============== get ================================
-Undefined index: 10
+Out of bounds darray access: invalid index "10"
 =============== isset===============================
 bool(false)
 =============== akey-exists=========================
@@ -11,7 +11,7 @@ NULL
 string(3) "def"
 =============== set ================================
 =============== get ================================
-Undefined index: 10
+Out of bounds darray access: invalid index 10
 =============== isset===============================
 bool(false)
 =============== akey-exists=========================
@@ -22,7 +22,7 @@ NULL
 string(3) "def"
 =============== set ================================
 =============== get ================================
-Undefined index: 2
+Out of bounds darray access: invalid index "2"
 =============== isset===============================
 bool(false)
 =============== akey-exists=========================
@@ -44,7 +44,7 @@ int(3)
 int(3)
 =============== set ================================
 =============== get ================================
-Undefined index: 10
+Out of bounds darray access: invalid index "10"
 =============== isset===============================
 bool(false)
 =============== akey-exists=========================
@@ -68,7 +68,7 @@ string(3) "abc"
 
 ******* constant string tests ***********************
 =============== get ================================
-Undefined index: 2
+Out of bounds darray access: invalid index "2"
 =============== isset===============================
 bool(false)
 =============== akey-exists=========================
@@ -79,7 +79,7 @@ NULL
 string(3) "def"
 =============== set ================================
 =============== get ================================
-Undefined index: 2
+Out of bounds darray access: invalid index "2"
 =============== isset===============================
 bool(false)
 =============== akey-exists=========================
@@ -90,7 +90,7 @@ NULL
 string(3) "def"
 =============== set ================================
 =============== get ================================
-Undefined index: 2
+Out of bounds darray access: invalid index "2"
 =============== isset===============================
 bool(false)
 =============== akey-exists=========================
@@ -103,7 +103,7 @@ string(3) "def"
 
 ******* constant int tests **************************
 =============== get ================================
-Undefined index: 2
+Out of bounds darray access: invalid index 2
 =============== isset===============================
 bool(false)
 =============== akey-exists=========================

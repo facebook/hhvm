@@ -8,11 +8,11 @@ darray(4) {
   [10]=>
   int(5)
 }
-Undefined index: 0
-Undefined index: 1
-Undefined index: 7
-Undefined index: 10
-Undefined index: 01
-Undefined index: 007
-Undefined index: 08
-Undefined index: 0xa
+Out of bounds darray access: invalid index "0"
+Out of bounds darray access: invalid index "1"
+Out of bounds darray access: invalid index "7"
+Out of bounds darray access: invalid index "10"
+Out of bounds darray access: invalid index "01"
+Out of bounds darray access: invalid index "007"
+Out of bounds darray access: invalid index "08"
+Out of bounds darray access: invalid index "0xa"

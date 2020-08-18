@@ -2668,7 +2668,11 @@ static inline void baseGImpl(tv_rval key, MOpMode mode) {
 
   if (!baseVal) {
     assertx(mode != MOpMode::Define);
-    if (mode == MOpMode::Warn) throwArrayKeyException(name, false);
+    if (mode == MOpMode::Warn) {
+      SystemLib::throwOutOfBoundsExceptionObject(
+        folly::sformat("Undefined index: {}", name)
+      );
+    }
     tvWriteNull(mstate.tvTempBase);
     mstate.base = &mstate.tvTempBase;
     return;

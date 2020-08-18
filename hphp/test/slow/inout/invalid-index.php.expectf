@@ -1,11 +1,11 @@
-Undefined index on inout parameter: 10
-Undefined index on inout parameter: banana
+Out of bounds darray access: invalid index 10
+Out of bounds darray access: invalid index "banana"
 int(5)
-string(38) "Undefined index on inout parameter: 50"
-Caught: Undefined index on inout parameter: 10
-Caught: Undefined index on inout parameter: banana
+string(45) "Out of bounds darray access: invalid index 50"
+Caught: Out of bounds darray access: invalid index 10
+Caught: Out of bounds darray access: invalid index "banana"
 int(5)
-Caught: Undefined index on inout parameter: 50
+Caught: Out of bounds darray access: invalid index 50
 darray(1) {
   ["apple"]=>
   darray(1) {
@@ -14,7 +14,7 @@ darray(1) {
   }
 }
 Caught: Out of bounds dict access: invalid index 10
-Caught: Undefined index on inout parameter: banana
+Caught: Out of bounds darray access: invalid index "banana"
 int(5)
 Caught: Out of bounds dict access: invalid index 50
 dict(1) {

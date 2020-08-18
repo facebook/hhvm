@@ -1,4 +1,4 @@
-Undefined index: baz
+Out of bounds darray access: invalid index "baz"
 darray(1) {
   ["e"]=>
   darray(1) {
@@ -17,7 +17,7 @@ darray(1) {
   }
 }
 int(40)
-Undefined index: baz
+Out of bounds darray access: invalid index "baz"
 darray(1) {
   ["y"]=>
   darray(1) {
@@ -27,7 +27,7 @@ darray(1) {
 }
 NULL
 NULL
-Undefined index: baz
+Out of bounds darray access: invalid index "baz"
 darray(1) {
   ["y"]=>
   darray(1) {
@@ -37,5 +37,5 @@ darray(1) {
 }
 NULL
 NULL
-Undefined index: 0
+Out of bounds darray access: invalid index 0
 int(30)

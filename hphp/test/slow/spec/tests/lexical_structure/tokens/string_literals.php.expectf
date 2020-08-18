@@ -61,12 +61,12 @@ string(0) ""
 string(9) "5.67E+14+"
 >$1|$&<
 Array to string conversion
-Undefined index: 1
+Out of bounds varray access: invalid index "1"
 Array to string conversion
-Undefined index: 1
-Undefined index: 01
-Undefined index: 0x1
-Undefined index: 0X1
+Out of bounds varray access: invalid index "1"
+Out of bounds varray access: invalid index "01"
+Out of bounds varray access: invalid index "0x1"
+Out of bounds varray access: invalid index "0X1"
 $colors[2] contains >blue<
 Array to string conversion
 $myC->p1 = >2<

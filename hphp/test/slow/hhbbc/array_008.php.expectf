@@ -1,5 +1,5 @@
 bool(true)
 bool(true)
 bool(true)
-Undefined index: 13
-Undefined index: 13foo
+Out of bounds darray access: invalid index "13"
+Out of bounds darray access: invalid index "13foo"

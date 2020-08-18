@@ -1,6 +1,6 @@
 varray(0) {
 }
-Undefined index: 0
+Out of bounds varray access: invalid index 0
 varray(2) {
   int(0)
   int(1)

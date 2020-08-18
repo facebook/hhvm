@@ -8,7 +8,7 @@ darray(2) {
   ["10"]=>
   int(5)
 }
-Undefined index: 42
+Out of bounds darray access: invalid index 42
 int(10)
 darray(2) {
   ["42"]=>

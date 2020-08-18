@@ -913,14 +913,13 @@ const StaticString
 // helpers
 
 void ArrayData::getNotFound(int64_t k) const {
-  if (isHackArrayType()) throwOOBArrayKeyException(k, this);
-  throwArrayIndexException(k, false);
+  throwOOBArrayKeyException(k, this);
 }
 
 void ArrayData::getNotFound(const StringData* k) const {
+  // For vecs (and not varrays), we throw an InvalidArgumentException
   if (isVecType()) throwInvalidArrayKeyException(k, this);
-  if (isHackArrayType()) throwOOBArrayKeyException(k, this);
-  throwArrayKeyException(k, false);
+  throwOOBArrayKeyException(k, this);
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
@@ -1065,6 +1064,8 @@ void throwOOBArrayKeyException(TypedValue key, const ArrayData* ad) {
     if (ad->isDictType()) return "dict";
     if (ad->isKeysetType()) return "keyset";
     assertx(ad->isPHPArrayType());
+    if (ad->isVArray()) return "varray";
+    if (ad->isDArray()) return "darray";
     return "array";
   }();
   SystemLib::throwOutOfBoundsExceptionObject(

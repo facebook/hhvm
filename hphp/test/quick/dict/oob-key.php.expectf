@@ -28,7 +28,7 @@ dict(6) {
 Caught Out of bounds dict access: invalid index "bar"
 string(5) "hello"
 Caught Out of bounds dict access: invalid index 2
-Undefined index: 256
+Out of bounds varray access: invalid index 256
 darray(1) {
   ["foo"]=>
   dict(3) {

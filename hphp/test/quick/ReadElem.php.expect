@@ -1,9 +1,9 @@
 10
 20
 30
-Undefined index: 3
-Undefined index: 0
-Undefined index: x
+Out of bounds varray access: invalid index 3
+Out of bounds varray access: invalid index "0"
+Out of bounds varray access: invalid index "x"
 a
 b
 c

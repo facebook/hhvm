@@ -681,9 +681,6 @@ public:
     return f;
   }
 
-  /////////////////////////////////////////////////////////////////////////////
-
-protected:
   /*
    * Throw an out of bounds exception if 'k' is undefined. The text of the
    * message depends on the array's type.
@@ -691,6 +688,9 @@ protected:
   [[noreturn]] void getNotFound(int64_t k) const;
   [[noreturn]] void getNotFound(const StringData* k) const;
 
+  /////////////////////////////////////////////////////////////////////////////
+
+protected:
   /*
    * Is `k' of an arraykey type (i.e., int or string)?
    */

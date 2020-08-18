@@ -1,1 +1,1 @@
-Undefined index: bogus
+Out of bounds darray access: invalid index "bogus"

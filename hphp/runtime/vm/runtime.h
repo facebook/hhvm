@@ -50,8 +50,8 @@ void print_boolean(bool val);
 
 void raiseWarning(const StringData* sd);
 void raiseNotice(const StringData* sd);
-[[noreturn]] void throwArrayIndexException(int64_t index, bool isInOut);
-[[noreturn]] void throwArrayKeyException(const StringData* key, bool isInOut);
+[[noreturn]] void throwArrayIndexException(const ArrayData *ad, int64_t index);
+[[noreturn]] void throwArrayKeyException(const ArrayData *ad, const StringData* key);
 std::string formatParamInOutMismatch(const char* fname, uint32_t index,
                                    bool funcByRef);
 [[noreturn]] void throwParamInOutMismatch(const Func* func, uint32_t index);

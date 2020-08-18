@@ -151,10 +151,6 @@ inline ObjectData* instanceFromTv(tv_rval tv) {
 
 [[noreturn]] void unknownBaseType(DataType);
 
-[[noreturn]] void throw_inout_undefined_index(TypedValue);
-[[noreturn]] void throw_inout_undefined_index(int64_t i);
-[[noreturn]] void throw_inout_undefined_index(const StringData* sd);
-
 namespace detail {
 
 inline void raiseFalseyPromotion(tv_rval base) {
@@ -218,11 +214,8 @@ inline TypedValue ElemArray(ArrayData* base, key_type<keyType> key) {
   auto const result = ElemArrayPre(base, key);
 
   if (UNLIKELY(!result.is_init())) {
-    if (mode == MOpMode::Warn) {
-      auto const scratch = initScratchKey(key);
-      throwArrayKeyException(tvAsCVarRef(&scratch).toString().get(), false);
-    } else if (mode == MOpMode::InOut) {
-      throw_inout_undefined_index(initScratchKey(key));
+    if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
+      throwOOBArrayKeyException(key, base);
     }
     return ElemEmptyish();
   }
@@ -294,12 +287,7 @@ inline TypedValue ElemDict(ArrayData* base, key_type<keyType> key) {
   auto const result = ElemDictPre(base, key);
   if (UNLIKELY(!result.is_init())) {
     if (mode != MOpMode::Warn && mode != MOpMode::InOut) return ElemEmptyish();
-    assertx(IMPLIES(base->isDictType(), base->isDictKind()));
-    if (base->isDictKind()) {
-      throwOOBArrayKeyException(key, base);
-    } else {
-      throwArrayKeyException(tvCastToStringData(initScratchKey(key)), false);
-    }
+    throwOOBArrayKeyException(key, base);
   }
   assertx(result.type() != KindOfUninit);
   return result;

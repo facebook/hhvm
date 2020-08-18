@@ -1,4 +1,4 @@
-Undefined index: 8589934592
+Out of bounds varray access: invalid index 8589934592
 varray(1) {
   string(5) "value"
 }

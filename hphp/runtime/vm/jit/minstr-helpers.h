@@ -41,7 +41,11 @@ tv_lval baseGImpl(TypedValue key) {
 
   auto base = env->lookup(name);
   if (base == nullptr) {
-    if (mode == MOpMode::Warn) throwArrayKeyException(name, false);
+    if (mode == MOpMode::Warn) {
+      SystemLib::throwOutOfBoundsExceptionObject(
+        folly::sformat("Undefined index: {}", name)
+      );
+    }
     if (mode == MOpMode::Define) {
       auto tv = make_tv<KindOfNull>();
       env->set(name, &tv);
@@ -451,23 +455,13 @@ ELEM_ARRAY_U_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-// Keep these error handlers in sync with ArrayData::getNotFound();
-[[noreturn]]
-void arrayGetNotFound(int64_t k);
-[[noreturn]]
-void arrayGetNotFound(const StringData* k);
-
 template<KeyType keyType, MOpMode mode>
 TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
   auto const result = a->get(key);
   if (result.is_init()) return result;
   if (mode == MOpMode::None) return make_tv<KindOfNull>();
-  if (mode == MOpMode::InOut) {
-    throw_inout_undefined_index(key);
-    return make_tv<KindOfNull>();
-  }
-  assertx(mode == MOpMode::Warn);
-  arrayGetNotFound(key);
+  assertx(mode == MOpMode::InOut || mode == MOpMode::Warn);
+  a->getNotFound(key);
 }
 
 #define ARRAYGET_HELPER_TABLE(m)                  \

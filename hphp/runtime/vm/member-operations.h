@@ -215,6 +215,12 @@ inline TypedValue ElemArray(ArrayData* base, key_type<keyType> key) {
 
   if (UNLIKELY(!result.is_init())) {
     if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
+      auto const ckey = tvToKey(initScratchKey(key), base);
+      if (RO::EvalHackArrCompatNotices && tvIsString(ckey) && base->isVArray()) {
+        raise_hackarr_compat_notice(
+          "Raising OutOfBoundsException for accessing string index of varray"
+        );
+      }
       throwOOBArrayKeyException(key, base);
     }
     return ElemEmptyish();

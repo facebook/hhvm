@@ -16,14 +16,22 @@ InvalidArgumentException: Invalid vec key: expected a key of type int, string gi
 varray:
 test
 OutOfBoundsException: Out of bounds varray access: invalid index 1
+
+Notice: Hack Array Compat: Raising OutOfBoundsException for accessing string index of varray in %s/array_exceptions.php on line %d
 OutOfBoundsException: Out of bounds varray access: invalid index "abc"
+
+Notice: Hack Array Compat: Raising OutOfBoundsException for accessing string index of varray in %s/array_exceptions.php on line %d
 OutOfBoundsException: Out of bounds varray access: invalid index "def"
 OutOfBoundsException: Out of bounds varray access: invalid index 1
 InvalidArgumentException: Invalid varray key: expected a key of type int, string given
 InvalidArgumentException: Invalid varray key: expected a key of type int, string given
 test
 OutOfBoundsException: Out of bounds varray access: invalid index 1
+
+Notice: Hack Array Compat: Raising OutOfBoundsException for accessing string index of varray in %s/array_exceptions.php on line %d
 OutOfBoundsException: Out of bounds varray access: invalid index "abc"
+
+Notice: Hack Array Compat: Raising OutOfBoundsException for accessing string index of varray in %s/array_exceptions.php on line %d
 OutOfBoundsException: Out of bounds varray access: invalid index "def"
 OutOfBoundsException: Out of bounds varray access: invalid index 1
 InvalidArgumentException: Invalid varray key: expected a key of type int, string given

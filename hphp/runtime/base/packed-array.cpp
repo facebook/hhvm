@@ -629,8 +629,16 @@ tv_lval PackedArray::LvalUncheckedInt(ArrayData* ad, int64_t k) {
 
 arr_lval PackedArray::LvalStr(ArrayData* adIn, StringData* key) {
   assertx(checkInvariants(adIn));
-  adIn->isVecKind() ? throwInvalidArrayKeyException(key, adIn)
-                    : throwOOBArrayKeyException(key, adIn);
+  if (adIn->isVecKind()) {
+    throwInvalidArrayKeyException(key, adIn);
+  } else {
+    if (RO::EvalHackArrCompatNotices) {
+      raise_hackarr_compat_notice(
+        "Raising OutOfBoundsException for accessing string index of varray"
+      );
+    }
+    throwOOBArrayKeyException(key, adIn);
+  }
 }
 
 tv_lval PackedArray::LvalNewInPlace(ArrayData* ad) {

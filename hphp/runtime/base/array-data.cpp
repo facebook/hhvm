@@ -919,6 +919,11 @@ void ArrayData::getNotFound(int64_t k) const {
 void ArrayData::getNotFound(const StringData* k) const {
   // For vecs (and not varrays), we throw an InvalidArgumentException
   if (isVecType()) throwInvalidArrayKeyException(k, this);
+  if (RO::EvalHackArrCompatNotices) {
+    raise_hackarr_compat_notice(
+      "Raising OutOfBoundsException for accessing string index of varray"
+    );
+  }
   throwOOBArrayKeyException(k, this);
 }
 
@@ -1059,19 +1064,11 @@ void throwMissingElementException(const char* op) {
 }
 
 void throwOOBArrayKeyException(TypedValue key, const ArrayData* ad) {
-  const char* type = [&]{
-    if (ad->isVecType()) return "vec";
-    if (ad->isDictType()) return "dict";
-    if (ad->isKeysetType()) return "keyset";
-    assertx(ad->isPHPArrayType());
-    if (ad->isVArray()) return "varray";
-    if (ad->isDArray()) return "darray";
-    return "array";
-  }();
   SystemLib::throwOutOfBoundsExceptionObject(
     folly::sformat(
       "Out of bounds {} access: invalid index {}",
-      type, describeKeyValue(key)
+      getDataTypeString(ad->toDataType()).data(),
+      describeKeyValue(key)
     )
   );
 }

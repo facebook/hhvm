@@ -225,7 +225,7 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     genericsBitmap,
     fca.hasGenerics(),
     fca.hasUnpack(),
-    fca.skipRepack,
+    fca.skipRepack(),
     dynamicCall,
     asyncEagerReturn,
     env.formingRegion
@@ -438,12 +438,12 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   if (generics) push(env, generics);
 
   doCall(FCallArgs(
-    static_cast<FCallArgs::Flags>(fca.flags | FCallArgs::Flags::HasUnpack),
+    static_cast<FCallArgs::Flags>(
+      fca.flags | FCallArgs::Flags::HasUnpack | FCallArgs::Flags::SkipRepack),
     callee->numNonVariadicParams(),
     fca.numRets,
     nullptr,  // inout-ness already checked
     fca.asyncEagerOffset,
-    fca.skipRepack,
     fca.context
   ));
 }
@@ -1814,7 +1814,7 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
   }
 
   auto const fca = FCallArgs(FCallArgs::Flags::None, numParams, 1, nullptr,
-                             kInvalidOffset, false, nullptr);
+                             kInvalidOffset, nullptr);
   prepareAndCallKnown(env, callee, fca, nullptr, false, false);
 }
 

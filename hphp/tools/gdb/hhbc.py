@@ -339,27 +339,24 @@ class HHBC(object):
             flags = ptr.cast(T('uint8_t').pointer()).dereference()
             size = 1
 
-            skipRepack = " skipRepack"
-            if flags & V('HPHP::FCallArgs::NoArgs'):
-                num_args = 0
-            else:
-                iva = HHBC.decode_iva(ptr + size)
-                v = int(iva['value'])
-                if (v % 2) == 0:
-                    skipRepack = ""
-                num_args = v // 2
-                size += iva['size']
+            flagList = []
+            if flags & 0x1: flagList.append('Unpack')
+            if flags & 0x2: flagList.append('Generics')
+            if flags & 0x4: flagList.append('LockWhileUnwinding')
+            if flags & 0x8: flagList.append('SkipRepack')
 
-            has_unpack = '1' if (flags & 0x1) else '0'
+            iva = HHBC.decode_iva(ptr + size)
+            numArgs = int(iva['value'])
+            size += iva['size']
 
-            num_rets = '1'
+            numRets = 1
             if flags & V('HPHP::FCallArgs::HasInOut'):
                 iva = HHBC.decode_iva(ptr + size)
-                num_rets = str(iva['value'])
+                numRets = int(iva['value'])
                 size += iva['size']
 
             if flags & V('HPHP::FCallArgs::EnforceInOut'):
-                size += (num_args + 7) // 8
+                size += (numArgs + 7) // 8
 
             asyncEagerOffset = ''
             if flags & V('HPHP::FCallArgs::HasAsyncEagerOffset'):
@@ -370,13 +367,13 @@ class HHBC(object):
             context = ''
             if flags & V('HPHP::FCallArgs::ExplicitContext'):
                 id = (ptr + size).cast(T('uint32_t').pointer()).dereference()
-                context = ' context: ' + str(HHBC.try_lookup_litstr(id))
+                context = ' context:' + str(HHBC.try_lookup_litstr(id))
                 size += 4
 
             info['size'] = size
-            info['value'] = (str(num_args) + ' ' + has_unpack
-                             + ' ' + num_rets + asyncEagerOffset + skipRepack
-                             + context)
+            info['value'] = ('<' + ','.join(flagList) + '> '
+                             + str(numArgs) + ' ' + str(numRets)
+                             + asyncEagerOffset + context)
 
         else:
             table_name = 'HPHP::immSizeTable'

@@ -101,7 +101,7 @@ T decode(const Buffer& buffer, size_t& pos) {
     }
     return FCallArgs(static_cast<FCA::Flags>(base.flags & FCA::kInternalFlags),
                      base.numArgs, base.numRets, std::move(inout), aeTarget,
-                     base.skipRepack, context);
+                     context);
   }
 
   if constexpr (std::is_same<T, IterArgs>::value) {

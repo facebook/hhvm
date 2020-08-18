@@ -1314,10 +1314,8 @@ IterArgs read_iter_args(AsmState& as) {
   return IterArgs(IterArgs::Flags::None, iterId, keyId, valId);
 }
 
-std::tuple<FCallArgs::Flags, bool>
-read_fcall_flags(AsmState& as, Op thisOpcode) {
+FCallArgs::Flags read_fcall_flags(AsmState& as, Op thisOpcode) {
   uint8_t flags = 0;
-  bool skipRepack = false;
 
   as.in.skipSpaceTab();
   as.in.expect('<');
@@ -1334,13 +1332,13 @@ read_fcall_flags(AsmState& as, Op thisOpcode) {
     }
     if (flag == "Unpack") { flags |= FCallArgs::HasUnpack; continue; }
     if (flag == "Generics") { flags |= FCallArgs::HasGenerics; continue; }
-    if (flag == "SkipRepack") { skipRepack = true; continue; }
+    if (flag == "SkipRepack") { flags |= FCallArgs::SkipRepack; continue; }
 
     as.error("unrecognized FCall flag `" + flag + "'");
   }
   as.in.expectWs('>');
 
-  return std::make_tuple(static_cast<FCallArgs::Flags>(flags), skipRepack);
+  return static_cast<FCallArgs::Flags>(flags);
 }
 
 // Read a vector of booleans formatted as a quoted string of '0' and '1'.
@@ -1378,16 +1376,14 @@ const StringData* read_fca_context(AsmState& as) {
 std::tuple<FCallArgsBase, std::unique_ptr<uint8_t[]>, std::string,
            const StringData*>
 read_fcall_args(AsmState& as, Op thisOpcode) {
-  FCallArgs::Flags flags;
-  bool skipRepack;
-  std::tie(flags, skipRepack) = read_fcall_flags(as, thisOpcode);
+  auto const flags = read_fcall_flags(as, thisOpcode);
   auto const numArgs = read_opcode_arg<uint32_t>(as);
   auto const numRets = read_opcode_arg<uint32_t>(as);
   auto inoutArgs = read_inouts(as, numArgs);
   auto asyncEagerLabel = read_opcode_arg<std::string>(as);
   auto const ctx = read_fca_context(as);
   return std::make_tuple(
-    FCallArgsBase(flags, numArgs, numRets, skipRepack),
+    FCallArgsBase(flags, numArgs, numRets),
     std::move(inoutArgs),
     std::move(asyncEagerLabel),
     ctx
@@ -1530,8 +1526,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 
 #define O(name, imm, pop, push, flags)                                 \
   void parse_opcode_##name(AsmState& as) {                             \
-    UNUSED auto immFCA = FCallArgsBase(FCallArgsBase::None, -1, -1,    \
-                                       false);                         \
+    UNUSED auto immFCA = FCallArgsBase(FCallArgsBase::None, -1, -1);   \
     UNUSED uint32_t immIVA[kMaxHhbcImms];                              \
     UNUSED auto const thisOpcode = Op::name;                           \
     UNUSED const Offset curOpcodeOff = as.ue->bcPos();                 \

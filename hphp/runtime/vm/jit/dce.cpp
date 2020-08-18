@@ -282,6 +282,8 @@ bool canDCE(IRInstruction* inst) {
   case StrictlyIntegerConv:
   case SetLegacyDict:
   case SetLegacyVec:
+  case UnsetLegacyDict:
+  case UnsetLegacyVec:
   case GetMemoKeyScalar:
   case LookupSPropSlot:
   case ConstructClosure:

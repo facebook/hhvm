@@ -49,6 +49,8 @@ Array HHVM_FUNCTION(sys_getloadavg);
 String HHVM_FUNCTION(hphp_to_string, const Variant& v);
 Variant HHVM_FUNCTION(array_mark_legacy, const Variant& v,
                       bool recursive = false);
+Variant HHVM_FUNCTION(array_unmark_legacy, const Variant& v,
+                      bool recursive = false);
 bool HHVM_FUNCTION(is_array_marked_legacy, const Variant& v);
 Variant HHVM_FUNCTION(SystemLib_max2, const Variant& arg1, const Variant& arg2);
 Variant HHVM_FUNCTION(SystemLib_min2, const Variant& arg1, const Variant& arg2);

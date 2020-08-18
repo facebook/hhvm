@@ -482,7 +482,7 @@ ArrayData* apply_mutation(TypedValue tv, State& state,
   return result == in ? nullptr : result;
 }
 
-TypedValue markTvImpl(TypedValue in, bool recursive) {
+TypedValue markTvImpl(TypedValue in, bool legacy, bool recursive) {
   // Closure state: whether or not we've raised notices for array-likes.
   auto raised_hack_array_notice = false;
   auto raised_non_hack_array_notice = false;
@@ -514,16 +514,36 @@ TypedValue markTvImpl(TypedValue in, bool recursive) {
 
     if (!RO::EvalHackArrDVArrs) assertx(ad->isDVArray());
     if (RO::EvalHackArrDVArrs) assertx(ad->isVecType() || ad->isDictType());
-    if (ad->isLegacyArray()) return ad;
+    if (ad->isLegacyArray()) return nullptr;
 
     auto result = copy_if_needed(ad, cow);
     result->setLegacyArray(true);
     return cow ? result : nullptr;
   };
 
-  auto state = MutationState<decltype(mark_tv)>{
-    mark_tv, "array_mark_legacy", recursive};
-  auto const ad = apply_mutation(in, state);
+  // Unmark legacy vecs/dicts to silence logging,
+  // e.g. while casting to regular vecs or dicts.
+  auto const unmark_tv = [&](ArrayData* ad, bool cow) -> ArrayData* {
+    if (!ad->isVecType() && !ad->isDictType()) return nullptr;
+    if (!ad->isLegacyArray()) return nullptr;
+
+    auto result = copy_if_needed(ad, cow);
+    result->setLegacyArray(false);
+    return cow ? result : nullptr;
+  };
+
+  auto const ad = [&] {
+    if (legacy) {
+      auto state = MutationState<decltype(mark_tv)>{
+        mark_tv, "array_mark_legacy", recursive};
+      return apply_mutation(in, state);
+    } else {
+      auto state = MutationState<decltype(unmark_tv)>{
+        unmark_tv, "array_unmark_legacy", recursive};
+      state.raised_object_notice = true;
+      return apply_mutation(in, state);
+    }
+  }();
   return ad ? make_array_like_tv(ad) : tvReturn(tvAsCVarRef(&in));
 }
 
@@ -555,12 +575,12 @@ TypedValue tagTvRecursively(TypedValue in, int64_t flags) {
   return tagTvImpl(in, flags);
 }
 
-TypedValue markTvRecursively(TypedValue in) {
-  return markTvImpl(in, /*recursive=*/true);
+TypedValue markTvRecursively(TypedValue in, bool legacy) {
+  return markTvImpl(in, legacy, /*recursive=*/true);
 }
 
-TypedValue markTvShallow(TypedValue in) {
-  return markTvImpl(in, /*recursive=*/false);
+TypedValue markTvShallow(TypedValue in, bool legacy) {
+  return markTvImpl(in, legacy, /*recursive=*/false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

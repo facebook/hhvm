@@ -532,6 +532,8 @@ pub mod std_lib_functions {
     pub const TYPE_STRUCTURE: &str = "\\HH\\type_structure";
 
     pub const ARRAY_MARK_LEGACY: &str = "\\HH\\array_mark_legacy";
+
+    pub const ARRAY_UNMARK_LEGACY: &str = "\\HH\\array_unmark_legacy";
 }
 
 pub mod typehints {

@@ -51,7 +51,7 @@ function convert_from($v) {
   var_dump($v);
   echo "----------------------------------------------------\n";
   var_dump(darray($v));
-  var_dump(dict($v));
+  var_dump(dict(HH\array_unmark_legacy($v)));
 
   try {
     var_dump(keyset($v));
@@ -84,7 +84,7 @@ function convert_to($from) {
   var_dump($from);
   echo "----------------------------------------------------\n";
   try {
-    var_dump(vec($from));
+    var_dump(vec(HH\array_unmark_legacy($from)));
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
   }

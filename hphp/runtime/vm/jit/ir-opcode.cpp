@@ -927,6 +927,8 @@ bool opcodeMayRaise(Opcode opc) {
   case Select:
   case SetLegacyDict:
   case SetLegacyVec:
+  case UnsetLegacyDict:
+  case UnsetLegacyVec:
   case Shl:
   case Shr:
   case Sqrt:

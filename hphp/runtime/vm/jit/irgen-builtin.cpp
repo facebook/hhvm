@@ -1143,6 +1143,17 @@ SSATmp* opt_array_mark_legacy(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
+SSATmp* opt_array_unmark_legacy(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const value = params[0].value;
+  if (value->isA(TVec)) {
+    return gen(env, UnsetLegacyVec, value);
+  } else if (value->isA(TDict)) {
+    return gen(env, UnsetLegacyDict, value);
+  }
+  return nullptr;
+}
+
 SSATmp* opt_is_meth_caller(IRGS& env, const ParamPrep& params) {
   if (params.size() != 1) return nullptr;
   auto const value = params[0].value;
@@ -1220,6 +1231,7 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"HH\\is_meth_caller", opt_is_meth_caller},
   {"HH\\tag_provenance_here", opt_tag_provenance_here},
   {"HH\\array_mark_legacy", opt_array_mark_legacy},
+  {"HH\\array_unmark_legacy", opt_array_unmark_legacy},
   {"HH\\meth_caller_get_class", opt_meth_caller_get_class},
   {"HH\\meth_caller_get_method", opt_meth_caller_get_method},
 };

@@ -92,20 +92,20 @@ void cgCheckVecBounds(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
-ArrayData* setLegacyHelper(ArrayData* arr) {
+ArrayData* setLegacyHelper(ArrayData* arr, bool set) {
   if (arr->cowCheck()) {
     auto ad = arr->copy();
     arr->decRefCount();
-    ad->setLegacyArray(true);
+    ad->setLegacyArray(set);
     return ad;
   } else {
-    arr->setLegacyArray(true);
+    arr->setLegacyArray(set);
     return arr;
   }
 }
 
-void setLegacyImpl(IRLS& env, const IRInstruction* inst) {
-  auto const args = argGroup(env, inst).ssa(0);
+void setLegacyImpl(IRLS& env, const IRInstruction* inst, bool set) {
+  auto const args = argGroup(env, inst).ssa(0).imm(set);
 
   cgCallHelper(vmain(env),
                env,
@@ -118,11 +118,19 @@ void setLegacyImpl(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgSetLegacyVec(IRLS& env, const IRInstruction* inst) {
-  setLegacyImpl(env, inst);
+  setLegacyImpl(env, inst, true);
 }
 
 void cgSetLegacyDict(IRLS& env, const IRInstruction* inst) {
-  setLegacyImpl(env, inst);
+  setLegacyImpl(env, inst, true);
+}
+
+void cgUnsetLegacyVec(IRLS& env, const IRInstruction* inst) {
+  setLegacyImpl(env, inst, false);
+}
+
+void cgUnsetLegacyDict(IRLS& env, const IRInstruction* inst) {
+  setLegacyImpl(env, inst, false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

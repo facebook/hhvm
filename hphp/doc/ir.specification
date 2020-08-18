@@ -3323,8 +3323,12 @@ fields of that struct for holding intermediate values.
 
 | SetLegacyDict, D(Dict), S(Dict), CRc|PRc
 
-  Enable the legacy bit on the vec/dict in S0, copying it if necessary and
-  returning the tagged array.
+| UnsetLegacyVec, D(Vec), S(Vec), CRc|PRc
+
+| UnsetLegacyDict, D(Dict), S(Dict), CRc|PRc
+
+  Enable/disable the legacy bit on the vec/dict in S0, copying it if necessary 
+  and returning the tagged array.
 
 
 18. Exception/unwinding support

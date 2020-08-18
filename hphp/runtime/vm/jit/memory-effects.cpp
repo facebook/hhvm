@@ -1951,6 +1951,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowParamInOutMismatchRange:
   case SetLegacyDict:
   case SetLegacyVec:
+  case UnsetLegacyDict:
+  case UnsetLegacyVec:
   case SetOpTV:
   case OutlineSetOp:
   case ThrowAsTypeStructException:

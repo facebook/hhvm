@@ -62,7 +62,9 @@ struct APCArray {
            handle->kind() == APCKind::SharedVArray ||
            handle->kind() == APCKind::SharedDArray ||
            handle->kind() == APCKind::SharedVec ||
+           handle->kind() == APCKind::SharedLegacyVec ||
            handle->kind() == APCKind::SharedDict ||
+           handle->kind() == APCKind::SharedLegacyDict ||
            handle->kind() == APCKind::SharedKeyset);
     static_assert(offsetof(APCArray, m_handle) == 0, "");
     return reinterpret_cast<APCArray*>(handle);
@@ -75,7 +77,9 @@ struct APCArray {
            handle->kind() == APCKind::SharedVArray ||
            handle->kind() == APCKind::SharedDArray ||
            handle->kind() == APCKind::SharedVec ||
+           handle->kind() == APCKind::SharedLegacyVec ||
            handle->kind() == APCKind::SharedDict ||
+           handle->kind() == APCKind::SharedLegacyDict ||
            handle->kind() == APCKind::SharedKeyset);
     static_assert(offsetof(APCArray, m_handle) == 0, "");
     return reinterpret_cast<const APCArray*>(handle);
@@ -98,7 +102,13 @@ struct APCArray {
     return MixedArray::MakeDArrayFromAPC(this);
   }
   ArrayData* toLocalVec() const { return PackedArray::MakeVecFromAPC(this); }
+  ArrayData* toLocalLegacyVec() const {
+    return PackedArray::MakeVecFromAPC(this, /*isLegacy=*/true);
+  }
   ArrayData* toLocalDict() const { return MixedArray::MakeDictFromAPC(this); }
+  ArrayData* toLocalLegacyDict() const {
+    return MixedArray::MakeDictFromAPC(this, /*isLegacy=*/true);
+  }
   ArrayData* toLocalKeyset() const { return SetArray::MakeSetFromAPC(this); }
 
   //
@@ -144,6 +154,7 @@ struct APCArray {
       k == APCKind::SharedPackedArray ||
       k == APCKind::SharedVArray ||
       k == APCKind::SharedVec ||
+      k == APCKind::SharedLegacyVec ||
       k == APCKind::SharedKeyset;
   }
 
@@ -152,7 +163,8 @@ struct APCArray {
     return
       k == APCKind::SharedArray ||
       k == APCKind::SharedDArray ||
-      k == APCKind::SharedDict;
+      k == APCKind::SharedDict ||
+      k == APCKind::SharedLegacyDict;
   }
 
   bool isPHPArray() const {

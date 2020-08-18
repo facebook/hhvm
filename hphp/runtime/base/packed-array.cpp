@@ -484,7 +484,7 @@ ArrayData* PackedArray::MakeUninitializedVec(uint32_t size) {
   return tagArrProv(ad);
 }
 
-ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc) {
+ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc, bool isLegacy) {
   assertx(apc->isPacked());
   auto const apcSize = apc->size();
   VecInit init{apcSize};
@@ -492,6 +492,7 @@ ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc) {
     init.append(apc->getValue(i)->toLocal());
   }
   auto const ad = init.create();
+  ad->setLegacyArray(isLegacy);
   return tagArrProv(ad, apc);
 }
 

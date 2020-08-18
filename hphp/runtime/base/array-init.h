@@ -483,6 +483,9 @@ struct VArrayInit {
     , m_expectedCount(n)
 #endif
   {
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      m_arr->setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
+    }
     assertx(m_arr->hasExactlyOneRef());
   }
 
@@ -581,6 +584,9 @@ struct DArrayInit {
 #endif
   {
     assertx(m_arr->hasExactlyOneRef());
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      m_arr->setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
+    }
   }
 
   DArrayInit(size_t, CheckAllocation);

@@ -267,7 +267,7 @@ public:
       ArrayData* array, size_t extra, DataWalker::PointerMap* seen = nullptr
   ) = delete;
 
-  static ArrayData* MakeDictFromAPC(const APCArray* apc);
+  static ArrayData* MakeDictFromAPC(const APCArray* apc, bool isLegacy = false);
   static ArrayData* MakeDArrayFromAPC(const APCArray* apc);
 
   static bool DictEqual(const ArrayData*, const ArrayData*);

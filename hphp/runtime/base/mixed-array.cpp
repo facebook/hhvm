@@ -576,7 +576,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
   return tagArrProv(ad, array);
 }
 
-ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc) {
+ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc, bool isLegacy) {
   assertx(apc->isHashed());
   auto const apcSize = apc->size();
   DictInit init{apcSize};
@@ -584,6 +584,7 @@ ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc) {
     init.setValidKey(apc->getKey(i), apc->getValue(i)->toLocal());
   }
   auto const ad = init.create();
+  ad->setLegacyArray(isLegacy);
   return tagArrProv(ad, apc);
 }
 

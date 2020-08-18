@@ -104,7 +104,9 @@ size_t getMemSize(const APCHandle* handle) {
     case APCKind::SharedArray:
     case APCKind::SharedPackedArray:
     case APCKind::SharedVec:
+    case APCKind::SharedLegacyVec:
     case APCKind::SharedDict:
+    case APCKind::SharedLegacyDict:
     case APCKind::SharedKeyset:
     case APCKind::SharedVArray:
     case APCKind::SharedDArray:
@@ -625,9 +627,11 @@ APCDetailedStats::counterFor(const APCHandle* handle) {
       return m_apcArray;
 
     case APCKind::SharedVec:
+    case APCKind::SharedLegacyVec:
       return m_apcVec;
 
     case APCKind::SharedDict:
+    case APCKind::SharedLegacyDict:
       return m_apcDict;
 
     case APCKind::SharedKeyset:

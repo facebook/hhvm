@@ -1003,7 +1003,11 @@ struct Variant : private TypedValue {
   }
 
   Array toVArray() const {
-    if (RuntimeOption::EvalHackArrDVArrs) return toVec();
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      auto a = toVec();
+      a.setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
+      return a;
+    }
     if (isArrayLikeType(m_type)) return asCArrRef().toVArray();
     auto copy = *this;
     tvCastToVArrayInPlace(copy.asTypedValue());
@@ -1012,7 +1016,11 @@ struct Variant : private TypedValue {
   }
 
   Array toDArray() const {
-    if (RuntimeOption::EvalHackArrDVArrs) return toDict();
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      auto a = toDict();
+      a.setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
+      return a;
+    }
     if (isArrayLikeType(m_type)) return asCArrRef().toDArray();
     auto copy = *this;
     tvCastToDArrayInPlace(copy.asTypedValue());

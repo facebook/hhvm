@@ -246,9 +246,17 @@ Variant APCHandle::toLocalHelper() const {
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalVec()
       );
+    case APCKind::SharedLegacyVec:
+      return Variant::attach(
+        APCArray::fromHandle(this)->toLocalLegacyVec()
+      );
     case APCKind::SharedDict:
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalDict()
+      );
+    case APCKind::SharedLegacyDict:
+      return Variant::attach(
+        APCArray::fromHandle(this)->toLocalLegacyDict()
       );
     case APCKind::SharedKeyset:
       return Variant::attach(
@@ -307,7 +315,9 @@ void APCHandle::deleteShared() {
     case APCKind::SharedPackedArray:
     case APCKind::SharedArray:
     case APCKind::SharedVec:
+    case APCKind::SharedLegacyVec:
     case APCKind::SharedDict:
+    case APCKind::SharedLegacyDict:
     case APCKind::SharedKeyset:
       APCArray::Delete(this);
       return;
@@ -390,7 +400,9 @@ bool APCHandle::checkInvariants() const {
     case APCKind::SharedArray:
     case APCKind::SharedPackedArray:
     case APCKind::SharedVec:
+    case APCKind::SharedLegacyVec:
     case APCKind::SharedDict:
+    case APCKind::SharedLegacyDict:
     case APCKind::SharedKeyset:
     case APCKind::SharedObject:
     case APCKind::SharedCollection:

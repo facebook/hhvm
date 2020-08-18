@@ -117,8 +117,10 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
     case APCKind::SerializedKeyset:
       return EntryInfo::Type::SerializedKeyset;
     case APCKind::SharedVec:
+    case APCKind::SharedLegacyVec:
       return EntryInfo::Type::APCVec;
     case APCKind::SharedDict:
+    case APCKind::SharedLegacyDict:
       return EntryInfo::Type::APCDict;
     case APCKind::SharedKeyset:
       return EntryInfo::Type::APCKeyset;

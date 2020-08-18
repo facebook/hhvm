@@ -130,7 +130,11 @@ APCArray::MakeSharedVec(ArrayData* vec, APCHandleLevel level,
   return MakeSharedImpl(
     vec,
     level,
-    [&] { return MakePacked(vec, APCKind::SharedVec, unserializeObj); },
+    [&] {
+      return MakePacked(vec,
+          vec->isLegacyArray() ? APCKind::SharedLegacyVec : APCKind::SharedVec,
+          unserializeObj);
+    },
     [&](DataWalker::PointerMap* m) { return MakeUncountedVec(vec, m); },
     [&](StringData* s) { return APCString::MakeSerializedVec(s); }
   );
@@ -147,7 +151,12 @@ APCArray::MakeSharedDict(ArrayData* dict, APCHandleLevel level,
   return MakeSharedImpl(
     dict,
     level,
-    [&] { return MakeHash(dict, APCKind::SharedDict, unserializeObj); },
+    [&] {
+      return MakeHash(
+        dict,
+        dict->isLegacyArray() ? APCKind::SharedLegacyDict : APCKind::SharedDict,
+        unserializeObj);
+    },
     [&](DataWalker::PointerMap* m) { return MakeUncountedDict(dict, m); },
     [&](StringData* s) { return APCString::MakeSerializedDict(s); }
   );

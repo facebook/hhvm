@@ -969,19 +969,6 @@ void fcallFuncRFunc(IRGS& env, const FCallArgs& fca) {
   auto const func = gen(env, LdFuncFromRFunc, rfunc);
   auto const generics = gen(env, LdGenericsFromRFunc, rfunc);
 
-  auto const new_fca = FCallArgs(
-    static_cast<FCallArgsBase::Flags>(
-      fca.flags | FCallArgsBase::Flags::HasGenerics
-    ),
-    fca.numArgs,
-    fca.numRets,
-    fca.inoutArgs,
-    fca.asyncEagerOffset,
-    fca.lockWhileUnwinding,
-    fca.skipNumArgsCheck,
-    fca.context
-  );
-
   gen(env, IncRef, generics);
   push(env, generics);
 
@@ -989,7 +976,7 @@ void fcallFuncRFunc(IRGS& env, const FCallArgs& fca) {
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  prepareAndCallProfiled(env, func, new_fca, nullptr, false, false);
+  prepareAndCallProfiled(env, func, fca.withGenerics(), nullptr, false, false);
 }
 
 void fcallFuncClsMeth(IRGS& env, const FCallArgs& fca) {
@@ -1009,19 +996,6 @@ void fcallFuncRClsMeth(IRGS& env, const FCallArgs& fca) {
   auto const func = gen(env, LdFuncFromRClsMeth, rclsMeth);
   auto const generics = gen(env, LdGenericsFromRClsMeth, rclsMeth);
 
-  auto const new_fca = FCallArgs(
-    static_cast<FCallArgsBase::Flags>(
-      fca.flags | FCallArgsBase::Flags::HasGenerics
-    ),
-    fca.numArgs,
-    fca.numRets,
-    fca.inoutArgs,
-    fca.asyncEagerOffset,
-    fca.lockWhileUnwinding,
-    fca.skipNumArgsCheck,
-    fca.context
-  );
-
   gen(env, IncRef, generics);
   push(env, generics);
 
@@ -1029,7 +1003,7 @@ void fcallFuncRClsMeth(IRGS& env, const FCallArgs& fca) {
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  prepareAndCallProfiled(env, func, new_fca, cls, false, false);
+  prepareAndCallProfiled(env, func, fca.withGenerics(), cls, false, false);
 }
 
 void fcallFuncStr(IRGS& env, const FCallArgs& fca) {

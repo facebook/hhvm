@@ -172,6 +172,13 @@ struct FCallArgs : FCallArgsBase {
     assertx(enforceInOut());
     return inoutArgs[i / 8] & (1 << (i % 8));
   }
+  FCallArgs withGenerics() const {
+    assertx(!hasGenerics());
+    return FCallArgs(
+      static_cast<Flags>(flags | Flags::HasGenerics),
+      numArgs, numRets, inoutArgs, asyncEagerOffset, lockWhileUnwinding,
+      skipNumArgsCheck, context);
+  }
   Offset asyncEagerOffset;
   const uint8_t* inoutArgs;
   const StringData* context;

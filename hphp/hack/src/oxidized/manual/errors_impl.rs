@@ -79,7 +79,7 @@ impl<'a> std::fmt::Display for DisplayRaw<'a> {
         let code = DisplayErrorCode(*code);
         write!(f, "{}\n{} ({})", pos.string(), msg, code)?;
         for (pos, msg) in messages.iter().skip(1) {
-            write!(f, "  {}\n{}", pos.string(), msg)?;
+            write!(f, "\n  {}\n  {}", pos.string(), msg)?;
         }
         Ok(())
     }

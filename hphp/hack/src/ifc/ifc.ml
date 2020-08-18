@@ -720,6 +720,36 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
         (env, pty)
       | _ -> fail "unhandled method call on %a" Pp.ptype obj_pty
     end
+  | A.Efun (fun_, captured_ids)
+  | A.Lfun (fun_, captured_ids) ->
+    (* Stash the cenv so it can be restored later *)
+    let pre_cenv = Env.get_cenv env in
+    (* Drop all conts except for Next and drop the local PC because we are
+     * entering a new scope of execution. Freshen all the local variables since
+     * their changes are not visible outside of the lambda's scope
+     *)
+    let env = Env.filter_conts env (K.equal K.Next) in
+    let env = Env.set_pc env K.Next PCSet.empty in
+    let env =
+      let freshen = adjust ~pos ~adjustment:Aweaken in
+      Env.freshen_cenv ~freshen renv env captured_ids
+    in
+
+    let pc = Env.new_policy_var renv.re_proto "pc" in
+    let self = Env.new_policy_var renv.re_proto "lambda" in
+    let (env, ptys) = add_params renv env fun_.A.f_params in
+    let exn = class_ptype None renv.re_proto [] Decl.exception_id in
+    let ret = ptype ~prefix:"ret" None renv.re_proto (fst fun_.A.f_ret) in
+    let renv = { renv with re_ret = ret; re_exn = exn; re_gpc = pc } in
+
+    let env = block renv env fun_.A.f_body.A.fb_ast in
+
+    (* Restore conts now that we exit the lambda's scope *)
+    let env = Env.set_cenv env pre_cenv in
+    let ty =
+      Tfun { f_pc = pc; f_self = self; f_args = ptys; f_ret = ret; f_exn = exn }
+    in
+    (env, ty)
   (* --- expressions below are not yet supported *)
   | A.Darray (_, _)
   | A.Varray (_, _)
@@ -750,8 +780,6 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
   | A.Is (_, _)
   | A.As (_, _, _)
   | A.Record (_, _)
-  | A.Efun (_, _)
-  | A.Lfun (_, _)
   | A.Xml (_, _, _)
   | A.Callconv (_, _)
   | A.Import (_, _)
@@ -769,7 +797,7 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
   | A.Any ->
     fail "expr"
 
-let rec stmt renv env ((pos, s) : Tast.stmt) =
+and stmt renv env ((pos, s) : Tast.stmt) =
   let expr = expr renv in
   let subtype = subtype renv.re_proto.pre_meta in
   match s with

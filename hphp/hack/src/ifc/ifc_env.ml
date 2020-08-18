@@ -11,6 +11,7 @@ open Ifc_types
 module Logic = Ifc_logic
 module Utils = Ifc_utils
 module K = Typing_cont_key
+module LSet = Local_id.Set
 
 (* Only elementary logic about the (read-only) environment should
    be in this file to avoid circular dependencies;
@@ -147,9 +148,12 @@ let merge_conts_from ~union env from_cenv =
   in
   List.fold ~f ~init:env
 
+let filter_conts env pred =
+  let pred k _ = pred k in
+  set_cenv env @@ KMap.filter pred env.e_cont
+
 let drop_conts env ks =
-  let f m k = KMap.remove k m in
-  set_cenv env @@ List.fold ~f ~init:env.e_cont ks
+  filter_conts env @@ fun k -> not @@ List.mem ~equal:K.equal ks k
 
 (* Merge conts and then clear them *)
 let move_conts_into ~union env ks k_to =
@@ -163,3 +167,16 @@ let merge_pcs_into env ks k_to =
   | None -> env
   | Some lenv ->
     set_cont env k_to { lenv with le_pc = PCSet.union pc lenv.le_pc }
+
+(* Freshen lids and drop all other locals *)
+let freshen_cenv ~freshen renv env lids =
+  let lids = List.map ~f:snd lids |> LSet.of_list in
+  let freshen_lenv env _ lenv =
+    let (env, vars) =
+      LMap.filter (fun lid _ -> LSet.mem lid lids) lenv.le_vars
+      |> LMap.map_env (fun e _ -> freshen renv e) env
+    in
+    (env, { lenv with le_vars = vars })
+  in
+  let (env, cenv) = KMap.map_env freshen_lenv env env.e_cont in
+  { env with e_cont = cenv }

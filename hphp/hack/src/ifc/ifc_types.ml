@@ -286,3 +286,7 @@ type callable_result = {
 type adjustment =
   | Astrengthen
   | Aweaken
+
+type call_type =
+  | Cglobal of string
+  | Clocal of fun_

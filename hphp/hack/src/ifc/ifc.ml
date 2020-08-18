@@ -364,7 +364,17 @@ and ptype ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
         id
     in
     ptype ty
-  (* ---  types below are not yet unpported *)
+  | T.Tfun fun_ty ->
+    Tfun
+      {
+        f_pc = get_policy lump_pol_opt proto_renv ~prefix:"pc";
+        f_self = get_policy lump_pol_opt proto_renv ?prefix;
+        f_args =
+          List.map ~f:(fun p -> ptype p.T.fp_type.T.et_type) fun_ty.T.ft_params;
+        f_ret = ptype fun_ty.T.ft_ret.T.et_type;
+        f_exn = class_ptype None proto_renv [] Decl.exception_id;
+      }
+  (* ---  types below are not yet supported *)
   | T.Tdependent (_, _ty) -> fail "Tdependent"
   | T.Tdarray (_keyty, _valty) -> fail "Tdarray"
   | T.Tvarray _ty -> fail "Tvarray"
@@ -374,7 +384,6 @@ and ptype ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
   | T.Tnonnull -> fail "Tnonnull"
   | T.Tdynamic -> fail "Tdynamic"
   | T.Toption _ty -> fail "Toption"
-  | T.Tfun _fun_ty -> fail "Tfun"
   | T.Tshape (_sh_kind, _sh_type_map) -> fail "Tshape"
   | T.Tnewtype (_name, _ty_list, _as_bound) -> fail "Tnewtype"
   | T.Tobject -> fail "Tobject"
@@ -459,12 +468,17 @@ let rec set_policy p = function
         f_exn = set_policy p f.f_exn;
       }
 
-let call ~pos renv env callable_name that_pty_opt args_pty ret_ty =
-  let ret_pty =
-    let prefix = callable_name ^ "_ret" in
-    ptype ~prefix None renv.re_proto ret_ty
+let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
+  let (callee, ret_pty) =
+    let name =
+      match call_type with
+      | Cglobal callable_name -> callable_name
+      | Clocal _ -> "anonymous"
+    in
+    let ret_pty = ptype ~prefix:(name ^ "_ret") None renv.re_proto ret_ty in
+    let callee = Env.new_policy_var renv.re_proto name in
+    (callee, ret_pty)
   in
-  let callee = Env.new_policy_var renv.re_proto callable_name in
   let callee_exn_policy = Env.new_policy_var renv.re_proto "exn" in
   let callee_exn =
     class_ptype (Some callee_exn_policy) renv.re_proto [] Decl.exception_id
@@ -487,22 +501,34 @@ let call ~pos renv env callable_name that_pty_opt args_pty ret_ty =
     }
   in
   let env =
-    match SMap.find_opt callable_name renv.re_proto.pre_decl.de_fun with
-    | Some { fd_kind = FDCIPP } ->
-      let cipp_policy = Env.new_policy_var renv.re_proto "implicit" in
-      let cipp_ty = set_policy cipp_policy (Tfun hole_ty) in
-      Env.acc env @@ subtype ~pos renv.re_proto.pre_meta cipp_ty (Tfun hole_ty)
-    (* TODO(T68007489): Temporarily infer everything for every function call.
-     * switch back to using InferFlows annotation when scaling is an issue.
-     *)
-    | Some _ ->
-      let fp =
-        { fp_name = callable_name; fp_this = that_pty_opt; fp_type = hole_ty }
-      in
-      Env.acc env (fun acc -> Chole (pos, fp) :: acc)
-    | None -> fail "unknown function '%s'" callable_name
+    match call_type with
+    | Clocal fty ->
+      Env.acc env
+      @@ subtype ~pos renv.re_proto.pre_meta (Tfun fty) (Tfun hole_ty)
+    | Cglobal callable_name ->
+      begin
+        match SMap.find_opt callable_name renv.re_proto.pre_decl.de_fun with
+        | Some { fd_kind = FDCIPP } ->
+          let cipp_policy = Env.new_policy_var renv.re_proto "implicit" in
+          let cipp_ty = set_policy cipp_policy (Tfun hole_ty) in
+          Env.acc env
+          @@ subtype ~pos renv.re_proto.pre_meta cipp_ty (Tfun hole_ty)
+        (* TODO(T68007489): Temporarily infer everything for every function call.
+         * switch back to using InferFlows annotation when scaling is an issue.
+         *)
+        | Some _ ->
+          let fp =
+            {
+              fp_name = callable_name;
+              fp_this = that_pty_opt;
+              fp_type = hole_ty;
+            }
+          in
+          let env = Env.add_dep env callable_name in
+          Env.acc env (fun acc -> Chole (pos, fp) :: acc)
+        | None -> fail "unknown function '%s'" callable_name
+      end
   in
-  let env = Env.add_dep env callable_name in
   let env = Env.acc env @@ add_dependencies ~pos [callee] ret_pty in
   (* Any function call may throw, so we need to update the current PC and
    * exception dependencies based on the callee's exception policy
@@ -618,20 +644,34 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
     | Some ptype -> (env, ptype)
     | None -> fail "encountered $this outside of a class context")
   | A.BracedExpr e -> expr env e
-  | A.Call (_call_type, (_, A.Id (_, name)), _type_args, args, _extra_args) ->
+  (* TODO(T68414656): Support calls with type arguments *)
+  | A.Call (_call_type, e, _type_args, args, _extra_args) ->
     let (env, args_pty) = List.map_env ~f:expr env args in
-    let callable_name = Decl.make_callable_name None name in
-    call ~pos renv env callable_name None args_pty ety
-  | A.Call (_, (_, A.Obj_get (obj, (_, A.Id (_, meth_name)), _)), _, args, _) ->
-    let (env, args_pty) = List.map_env ~f:expr env args in
-    let (env, obj_pty) = expr env obj in
-    (match obj_pty with
-    | Tclass class_ ->
-      let callable_name =
-        Decl.make_callable_name (Some class_.c_name) meth_name
-      in
-      call ~pos renv env callable_name (Some obj_pty) args_pty ety
-    | _ -> fail "unhandled method call on %a" Pp.ptype obj_pty)
+    begin
+      match e with
+      | (_, A.Id (_, name)) ->
+        let call_type = Cglobal (Decl.make_callable_name None name) in
+        call ~pos renv env call_type None args_pty ety
+      | (_, A.Obj_get (obj, (_, A.Id (_, meth_name)), _)) ->
+        let (env, obj_pty) = expr env obj in
+        begin
+          match obj_pty with
+          | Tclass class_ ->
+            let call_type =
+              Cglobal (Decl.make_callable_name (Some class_.c_name) meth_name)
+            in
+            call ~pos renv env call_type (Some obj_pty) args_pty ety
+          | _ -> fail "unhandled method call on %a" Pp.ptype obj_pty
+        end
+      | _ ->
+        let (env, func_ty) = expr env e in
+        let fty =
+          match func_ty with
+          | Tfun fty -> fty
+          | _ -> failwith "calling something that is not a function"
+        in
+        call ~pos renv env (Clocal fty) None args_pty ety
+    end
   | A.ValCollection (A.Vec, _, exprs) ->
     (* We require each collection element to be a subtype of the vector
      * element parameter. *)
@@ -674,7 +714,7 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
         in
         let lty = T.mk (Typing_reason.Rnone, T.Tprim A.Tvoid) in
         let (env, _) =
-          call ~pos renv env callable_name (Some obj_pty) args_pty lty
+          call ~pos renv env (Cglobal callable_name) (Some obj_pty) args_pty lty
         in
         let pty = ptype ?prefix:(Some "constr") None renv.re_proto ety in
         (env, pty)
@@ -694,7 +734,6 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
   | A.Obj_get (_, _, _)
   | A.Class_get (_, _)
   | A.Class_const (_, _)
-  | A.Call (_, _, _, _, _)
   | A.FunctionPointer (_, _)
   | A.String2 _
   | A.PrefixedString (_, _)

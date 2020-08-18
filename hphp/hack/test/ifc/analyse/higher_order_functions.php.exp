@@ -1,0 +1,20 @@
+Analyzing \apply:
+* pc: pc
+* This: None
+* Return: <ret>
+* Exception: \Exception<\Exception, lump>
+* Params:
+  lvars:
+    { $f -> <pc'1, $f'2>(<$f'1>): <$f> [\Exception<\Exception'1, lump'1>] }
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars:
+      { $f -> <pc'1, $f'2>(<$f'1>): <$f> [\Exception<\Exception'1, lump'1>] }
+    pc: exn
+Constraints:
+  [anonymous < pcjoin, pc < pcjoin, PUBLIC < $f'1, pcjoin < pc'1,
+   $f'2 < anonymous, $f < anonymous_ret, lump'1 = exn, \Exception'1 < exn,
+   anonymous < anonymous_ret, exn = lump, exn < \Exception, exn < \Exception,
+   exn < ret, anonymous_ret < ret]
+

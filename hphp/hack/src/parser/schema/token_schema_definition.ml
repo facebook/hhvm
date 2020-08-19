@@ -256,6 +256,7 @@ let given_text_tokens =
     make_token_node "LessThanSlash" "</" ();
     make_token_node "LessThanQuestion" "<?" ();
     make_token_node "ColonAt" ":@" ();
+    make_token_node "Backtick" "`" ();
     make_token_node "XHP" "xhp" ~allowed_as_identifier:true ();
   ]
 

@@ -100,6 +100,21 @@ let schema : schema_node list =
       fields = [("name", Token); ("str", Token)];
     };
     {
+      kind_name = "PrefixedCodeExpression";
+      type_name = "prefixed_code_expression";
+      func_name = "prefixed_code_expression";
+      description = "prefixed_code";
+      prefix = "prefixed_code";
+      aggregates = [Expression; ConstructorExpression; LambdaBody];
+      fields =
+        [
+          ("prefix", Token);
+          ("left_backtick", Token);
+          ("expression", Aggregate Expression);
+          ("right_backtick", Token);
+        ];
+    };
+    {
       kind_name = "VariableExpression";
       type_name = "variable_expression";
       func_name = "variable_expression";

@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2020-08-14-0000",
+  "version" : "2020-08-17-0000",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -379,6 +379,8 @@
       "token_text" : "<?" },
     { "token_kind" : "ColonAt",
       "token_text" : ":@" },
+    { "token_kind" : "Backtick",
+      "token_text" : "`" },
     { "token_kind" : "XHP",
       "token_text" : "xhp" },
 
@@ -478,6 +480,16 @@
       "fields" : [
         { "field_name" : "name" },
         { "field_name" : "str" }
+      ] },
+    { "kind_name" : "PrefixedCodeExpression",
+      "type_name" : "prefixed_code_expression",
+      "description" : "prefixed_code",
+      "prefix" : "prefixed_code",
+      "fields" : [
+        { "field_name" : "prefix" },
+        { "field_name" : "left_backtick" },
+        { "field_name" : "expression" },
+        { "field_name" : "right_backtick" }
       ] },
     { "kind_name" : "VariableExpression",
       "type_name" : "variable_expression",

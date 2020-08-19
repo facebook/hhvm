@@ -66,6 +66,7 @@ module WithToken(Token: TokenType) = struct
       | SimpleTypeSpecifier               _ -> SyntaxKind.SimpleTypeSpecifier
       | LiteralExpression                 _ -> SyntaxKind.LiteralExpression
       | PrefixedStringExpression          _ -> SyntaxKind.PrefixedStringExpression
+      | PrefixedCodeExpression            _ -> SyntaxKind.PrefixedCodeExpression
       | VariableExpression                _ -> SyntaxKind.VariableExpression
       | PipeVariableExpression            _ -> SyntaxKind.PipeVariableExpression
       | FileAttributeSpecification        _ -> SyntaxKind.FileAttributeSpecification
@@ -257,6 +258,7 @@ module WithToken(Token: TokenType) = struct
     let is_simple_type_specifier                = has_kind SyntaxKind.SimpleTypeSpecifier
     let is_literal_expression                   = has_kind SyntaxKind.LiteralExpression
     let is_prefixed_string_expression           = has_kind SyntaxKind.PrefixedStringExpression
+    let is_prefixed_code_expression             = has_kind SyntaxKind.PrefixedCodeExpression
     let is_variable_expression                  = has_kind SyntaxKind.VariableExpression
     let is_pipe_variable_expression             = has_kind SyntaxKind.PipeVariableExpression
     let is_file_attribute_specification         = has_kind SyntaxKind.FileAttributeSpecification
@@ -533,6 +535,17 @@ module WithToken(Token: TokenType) = struct
       } ->
          let acc = f acc prefixed_string_name in
          let acc = f acc prefixed_string_str in
+         acc
+      | PrefixedCodeExpression {
+        prefixed_code_prefix;
+        prefixed_code_left_backtick;
+        prefixed_code_expression;
+        prefixed_code_right_backtick;
+      } ->
+         let acc = f acc prefixed_code_prefix in
+         let acc = f acc prefixed_code_left_backtick in
+         let acc = f acc prefixed_code_expression in
+         let acc = f acc prefixed_code_right_backtick in
          acc
       | VariableExpression {
         variable_expression;
@@ -2364,6 +2377,17 @@ module WithToken(Token: TokenType) = struct
         prefixed_string_name;
         prefixed_string_str;
       ]
+      | PrefixedCodeExpression {
+        prefixed_code_prefix;
+        prefixed_code_left_backtick;
+        prefixed_code_expression;
+        prefixed_code_right_backtick;
+      } -> [
+        prefixed_code_prefix;
+        prefixed_code_left_backtick;
+        prefixed_code_expression;
+        prefixed_code_right_backtick;
+      ]
       | VariableExpression {
         variable_expression;
       } -> [
@@ -4194,6 +4218,17 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "prefixed_string_name";
         "prefixed_string_str";
+      ]
+      | PrefixedCodeExpression {
+        prefixed_code_prefix;
+        prefixed_code_left_backtick;
+        prefixed_code_expression;
+        prefixed_code_right_backtick;
+      } -> [
+        "prefixed_code_prefix";
+        "prefixed_code_left_backtick";
+        "prefixed_code_expression";
+        "prefixed_code_right_backtick";
       ]
       | VariableExpression {
         variable_expression;
@@ -6086,6 +6121,18 @@ module WithToken(Token: TokenType) = struct
         PrefixedStringExpression {
           prefixed_string_name;
           prefixed_string_str;
+        }
+      | (SyntaxKind.PrefixedCodeExpression, [
+          prefixed_code_prefix;
+          prefixed_code_left_backtick;
+          prefixed_code_expression;
+          prefixed_code_right_backtick;
+        ]) ->
+        PrefixedCodeExpression {
+          prefixed_code_prefix;
+          prefixed_code_left_backtick;
+          prefixed_code_expression;
+          prefixed_code_right_backtick;
         }
       | (SyntaxKind.VariableExpression, [
           variable_expression;
@@ -8144,6 +8191,21 @@ module WithToken(Token: TokenType) = struct
         let syntax = PrefixedStringExpression {
           prefixed_string_name;
           prefixed_string_str;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_prefixed_code_expression
+        prefixed_code_prefix
+        prefixed_code_left_backtick
+        prefixed_code_expression
+        prefixed_code_right_backtick
+      =
+        let syntax = PrefixedCodeExpression {
+          prefixed_code_prefix;
+          prefixed_code_left_backtick;
+          prefixed_code_expression;
+          prefixed_code_right_backtick;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

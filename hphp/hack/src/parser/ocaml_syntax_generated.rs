@@ -126,6 +126,28 @@ where
       Self { syntax, value }
     }
 
+    fn make_prefixed_code_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self) -> Self {
+      let children = [
+          &arg0.value, 
+          &arg1.value, 
+          &arg2.value, 
+          &arg3.value
+      ];
+      let value = V::from_values(&children);
+      let syntax = Self::make(
+          ctx,
+          SyntaxKind::PrefixedCodeExpression,
+          &value,
+          &[
+              arg0.syntax, 
+              arg1.syntax, 
+              arg2.syntax, 
+              arg3.syntax
+          ],
+      );
+      Self { syntax, value }
+    }
+
     fn make_variable_expression(ctx: &C, arg0: Self) -> Self {
       let children = [
           &arg0.value

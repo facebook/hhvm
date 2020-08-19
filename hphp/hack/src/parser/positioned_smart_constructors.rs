@@ -93,6 +93,10 @@ where
         <Self as SyntaxSmartConstructors<'src, S, State>>::make_prefixed_string_expression(self, arg0, arg1)
     }
 
+    fn make_prefixed_code_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<'src, S, State>>::make_prefixed_code_expression(self, arg0, arg1, arg2, arg3)
+    }
+
     fn make_variable_expression(&mut self, arg0: Self::R) -> Self::R {
         <Self as SyntaxSmartConstructors<'src, S, State>>::make_variable_expression(self, arg0)
     }

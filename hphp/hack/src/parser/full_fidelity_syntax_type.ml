@@ -160,6 +160,12 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { prefixed_string_name                               : t
     ; prefixed_string_str                                : t
     }
+  | PrefixedCodeExpression            of
+    { prefixed_code_prefix                               : t
+    ; prefixed_code_left_backtick                        : t
+    ; prefixed_code_expression                           : t
+    ; prefixed_code_right_backtick                       : t
+    }
   | VariableExpression                of
     { variable_expression                                : t
     }
@@ -1189,6 +1195,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and expression =
   | ExprLiteral                      of literal_expression
   | ExprPrefixedString               of prefixed_string_expression
+  | ExprPrefixedCode                 of prefixed_code_expression
   | ExprVariable                     of variable_expression
   | ExprPipeVariable                 of pipe_variable_expression
   | ExprDecorated                    of decorated_expression
@@ -1306,6 +1313,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and lambda_body =
   | LambdaLiteral                      of literal_expression
   | LambdaPrefixedString               of prefixed_string_expression
+  | LambdaPrefixedCode                 of prefixed_code_expression
   | LambdaVariable                     of variable_expression
   | LambdaPipeVariable                 of pipe_variable_expression
   | LambdaDecorated                    of decorated_expression
@@ -1354,6 +1362,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and constructor_expression =
   | CExprLiteral                      of literal_expression
   | CExprPrefixedString               of prefixed_string_expression
+  | CExprPrefixedCode                 of prefixed_code_expression
   | CExprVariable                     of variable_expression
   | CExprPipeVariable                 of pipe_variable_expression
   | CExprDecorated                    of decorated_expression
@@ -1437,6 +1446,12 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and prefixed_string_expression =
     { prefixed_string_name: Token.t value
     ; prefixed_string_str: Token.t value
+    }
+  and prefixed_code_expression =
+    { prefixed_code_prefix: Token.t value
+    ; prefixed_code_left_backtick: Token.t value
+    ; prefixed_code_expression: expression value
+    ; prefixed_code_right_backtick: Token.t value
     }
   and variable_expression =
     { variable_expression: Token.t value

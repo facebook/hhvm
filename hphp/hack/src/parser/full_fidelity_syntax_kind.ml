@@ -27,6 +27,7 @@ type t =
   | SimpleTypeSpecifier
   | LiteralExpression
   | PrefixedStringExpression
+  | PrefixedCodeExpression
   | VariableExpression
   | PipeVariableExpression
   | FileAttributeSpecification
@@ -208,6 +209,7 @@ let to_string kind =
   | SimpleTypeSpecifier               -> "simple_type_specifier"
   | LiteralExpression                 -> "literal"
   | PrefixedStringExpression          -> "prefixed_string"
+  | PrefixedCodeExpression            -> "prefixed_code"
   | VariableExpression                -> "variable"
   | PipeVariableExpression            -> "pipe_variable"
   | FileAttributeSpecification        -> "file_attribute_specification"

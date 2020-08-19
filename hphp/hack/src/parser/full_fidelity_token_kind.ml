@@ -201,6 +201,7 @@ type t =
   | LessThanSlash
   | LessThanQuestion
   | ColonAt
+  | Backtick
   | XHP
   (* Variable text tokens *)
   | ErrorToken
@@ -415,6 +416,7 @@ let from_string keyword ~only_reserved =
   | "</"                                  -> Some LessThanSlash
   | "<?"                                  -> Some LessThanQuestion
   | ":@"                                  -> Some ColonAt
+  | "`"                                   -> Some Backtick
   | "xhp"          when not only_reserved -> Some XHP
   | _              -> None
 
@@ -603,6 +605,7 @@ let to_string kind =
   | LessThanSlash                 -> "</"
   | LessThanQuestion              -> "<?"
   | ColonAt                       -> ":@"
+  | Backtick                      -> "`"
   | XHP                           -> "xhp"
   (* Variable text tokens *)
   | ErrorToken                    -> "error_token"

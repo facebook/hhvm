@@ -74,6 +74,17 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_prefixed_code_expression(_: &C, prefixed_code_prefix: Self, prefixed_code_left_backtick: Self, prefixed_code_expression: Self, prefixed_code_right_backtick: Self) -> Self {
+        let syntax = SyntaxVariant::PrefixedCodeExpression(Box::new(PrefixedCodeExpressionChildren {
+            prefixed_code_prefix,
+            prefixed_code_left_backtick,
+            prefixed_code_expression,
+            prefixed_code_right_backtick,
+        }));
+        let value = V::from_syntax(&syntax);
+        Self::make(syntax, value)
+    }
+
     fn make_variable_expression(_: &C, variable_expression: Self) -> Self {
         let syntax = SyntaxVariant::VariableExpression(Box::new(VariableExpressionChildren {
             variable_expression,
@@ -1939,6 +1950,14 @@ where
                 let acc = f(prefixed_string_str, acc);
                 acc
             },
+            SyntaxVariant::PrefixedCodeExpression(x) => {
+                let PrefixedCodeExpressionChildren { prefixed_code_prefix, prefixed_code_left_backtick, prefixed_code_expression, prefixed_code_right_backtick } = *x;
+                let acc = f(prefixed_code_prefix, acc);
+                let acc = f(prefixed_code_left_backtick, acc);
+                let acc = f(prefixed_code_expression, acc);
+                let acc = f(prefixed_code_right_backtick, acc);
+                acc
+            },
             SyntaxVariant::VariableExpression(x) => {
                 let VariableExpressionChildren { variable_expression } = *x;
                 let acc = f(variable_expression, acc);
@@ -3266,6 +3285,7 @@ where
             SyntaxVariant::SimpleTypeSpecifier {..} => SyntaxKind::SimpleTypeSpecifier,
             SyntaxVariant::LiteralExpression {..} => SyntaxKind::LiteralExpression,
             SyntaxVariant::PrefixedStringExpression {..} => SyntaxKind::PrefixedStringExpression,
+            SyntaxVariant::PrefixedCodeExpression {..} => SyntaxKind::PrefixedCodeExpression,
             SyntaxVariant::VariableExpression {..} => SyntaxKind::VariableExpression,
             SyntaxVariant::PipeVariableExpression {..} => SyntaxKind::PipeVariableExpression,
             SyntaxVariant::FileAttributeSpecification {..} => SyntaxKind::FileAttributeSpecification,
@@ -3463,6 +3483,13 @@ where
              (SyntaxKind::PrefixedStringExpression, 2) => SyntaxVariant::PrefixedStringExpression(Box::new(PrefixedStringExpressionChildren {
                  prefixed_string_str: ts.pop().unwrap(),
                  prefixed_string_name: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::PrefixedCodeExpression, 4) => SyntaxVariant::PrefixedCodeExpression(Box::new(PrefixedCodeExpressionChildren {
+                 prefixed_code_right_backtick: ts.pop().unwrap(),
+                 prefixed_code_expression: ts.pop().unwrap(),
+                 prefixed_code_left_backtick: ts.pop().unwrap(),
+                 prefixed_code_prefix: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::VariableExpression, 1) => SyntaxVariant::VariableExpression(Box::new(VariableExpressionChildren {
@@ -4644,6 +4671,14 @@ pub struct LiteralExpressionChildren<T, V> {
 pub struct PrefixedStringExpressionChildren<T, V> {
     pub prefixed_string_name: Syntax<T, V>,
     pub prefixed_string_str: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct PrefixedCodeExpressionChildren<T, V> {
+    pub prefixed_code_prefix: Syntax<T, V>,
+    pub prefixed_code_left_backtick: Syntax<T, V>,
+    pub prefixed_code_expression: Syntax<T, V>,
+    pub prefixed_code_right_backtick: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -5970,6 +6005,7 @@ pub enum SyntaxVariant<T, V> {
     SimpleTypeSpecifier(Box<SimpleTypeSpecifierChildren<T, V>>),
     LiteralExpression(Box<LiteralExpressionChildren<T, V>>),
     PrefixedStringExpression(Box<PrefixedStringExpressionChildren<T, V>>),
+    PrefixedCodeExpression(Box<PrefixedCodeExpressionChildren<T, V>>),
     VariableExpression(Box<VariableExpressionChildren<T, V>>),
     PipeVariableExpression(Box<PipeVariableExpressionChildren<T, V>>),
     FileAttributeSpecification(Box<FileAttributeSpecificationChildren<T, V>>),
@@ -6198,6 +6234,16 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 get_index(2).and_then(|index| { match index {
                         0 => Some(&x.prefixed_string_name),
                     1 => Some(&x.prefixed_string_str),
+                        _ => None,
+                    }
+                })
+            },
+            PrefixedCodeExpression(x) => {
+                get_index(4).and_then(|index| { match index {
+                        0 => Some(&x.prefixed_code_prefix),
+                    1 => Some(&x.prefixed_code_left_backtick),
+                    2 => Some(&x.prefixed_code_expression),
+                    3 => Some(&x.prefixed_code_right_backtick),
                         _ => None,
                     }
                 })

@@ -999,6 +999,7 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptCls:
   case T::OptClsMeth:
   case T::OptRecord:
+  case T::OptLazyCls:
   case T::OptUncArrKey:
   case T::OptArrKey:
   case T::OptUncArrKeyCompat:
@@ -1029,6 +1030,7 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::Cls:
   case T::ClsMeth:
   case T::Record:
+  case T::LazyCls:
     return;
 
   case T::OptSArr:

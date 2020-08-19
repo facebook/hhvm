@@ -114,6 +114,7 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::OptCls:
   case T::OptClsMeth:
   case T::OptRecord:
+  case T::OptLazyCls:
   case T::OptArrKey:
   case T::OptUncArrKey:
   case T::OptStrLike:
@@ -144,6 +145,7 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::Cls:
   case T::ClsMeth:
   case T::Record:
+  case T::LazyCls:
     return true;
 
   case T::SVec:
@@ -249,6 +251,9 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
   case T::OptRecord:    if (initNull) return true;
                         // fallthrough
   case T::Record:       return tv.m_type == KindOfRecord;
+  case T::OptLazyCls:   if (initNull) return true;
+                        // fallthrough
+  case T::LazyCls:      return tv.m_type == KindOfLazyClass;
 
   case T::OptSStr:
     if (initNull) return true;
@@ -507,14 +512,14 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     // fallthrough
   case T::StrLike:
     return isStringType(tv.m_type) ||
-      tv.m_type == KindOfClass;
+      tv.m_type == KindOfClass || tv.m_type == KindOfLazyClass;
 
   case T::OptUncStrLike:
     if (initNull) return true;
     // fallthrough
   case T::UncStrLike:
     return (isStringType(tv.m_type) && !tv.m_data.pstr->isRefCounted()) ||
-      tv.m_type == KindOfClass;
+      tv.m_type == KindOfClass || tv.m_type == KindOfLazyClass;
 
   case T::OptArrKeyCompat:
     if (initNull) return true;
@@ -522,14 +527,16 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
   case T::ArrKeyCompat:
     return isStringType(tv.m_type) ||
            tv.m_type == KindOfInt64 ||
-           isClassType(tv.m_type);
+           isClassType(tv.m_type) ||
+           isLazyClassType(tv.m_type);
 
   case T::OptUncArrKeyCompat:
     if (initNull) return true;
     // fallthrough
   case T::UncArrKeyCompat:
     return (isStringType(tv.m_type) && !tv.m_data.pstr->isRefCounted()) ||
-           tv.m_type == KindOfInt64 || isClassType(tv.m_type);
+           tv.m_type == KindOfInt64 ||
+           isClassType(tv.m_type) || isLazyClassType(tv.m_type);
 
   case T::InitCell:
     if (tv.m_type == KindOfUninit) return false;
@@ -555,6 +562,7 @@ std::string show(RepoAuthType rat) {
   case T::OptCls:        return "?Cls";
   case T::OptClsMeth:    return "?ClsMeth";
   case T::OptRecord:     return "?Record";
+  case T::OptLazyCls:    return "?LazyCls";
   case T::OptUncArrKey:  return "?UncArrKey";
   case T::OptArrKey:     return "?ArrKey";
   case T::OptUncStrLike: return "?UncStrLike";
@@ -585,6 +593,7 @@ std::string show(RepoAuthType rat) {
   case T::Cls:           return "Cls";
   case T::ClsMeth:       return "ClsMeth";
   case T::Record:        return "Record";
+  case T::LazyCls:       return "LazyCls";
 
   case T::OptSArr:
   case T::OptArr:

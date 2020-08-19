@@ -313,6 +313,7 @@ auto const primitives = folly::lazy([] {
     TRClsMeth,
     TFunc,
     TRFunc,
+    TLazyCls
   };
 });
 
@@ -367,6 +368,7 @@ auto const optionals = folly::lazy([] {
     TOptArrLikeN,
     TOptArrLike,
     TOptRFunc,
+    TOptLazyCls
   };
 });
 
@@ -429,7 +431,6 @@ auto const non_opt_unions = folly::lazy([] {
     TStrLike,
     TUncStrLike,
     TFuncLike,
-    TFuncOrCls,
     TClsMethLike,
     TTop
   };
@@ -672,7 +673,6 @@ TEST(Type, Prim) {
     { TFuncLike, TPrim },
     { TCls, TInitPrim },
     { TFunc,    TInitPrim },
-    { TFuncOrCls, TInitPrim },
   };
 
   const std::initializer_list<std::pair<Type, Type>> couldbe_true{
@@ -699,7 +699,6 @@ TEST(Type, Prim) {
     { TPrim, TRFunc },
     { TPrim, TFunc },
     { TPrim, TFuncLike },
-    { TPrim, TFuncOrCls },
     { TPrim, TStrLike },
   };
 
@@ -764,7 +763,6 @@ TEST(Type, Unc) {
   EXPECT_TRUE(TDbl.subtypeOf(BInitUnc));
   EXPECT_TRUE(TDbl.subtypeOf(BUnc));
   EXPECT_TRUE(dval(3.0).subtypeOf(BInitUnc));
-  EXPECT_TRUE(TFuncOrCls.subtypeOf(BInitUnc));
   EXPECT_TRUE(TUncStrLike.subtypeOf(BInitUnc));
 
   if (use_lowptr) {
@@ -799,7 +797,6 @@ TEST(Type, Unc) {
     { TUncArrKeyCompat, TUncArrKey, true },
     { TStrLike, TInitUnc, true },
     { TUncStrLike, TInitUnc, true },
-    { TFuncOrCls, TInitUnc, true },
     { TClsMeth, TInitUnc, use_lowptr },
     { TVArrCompat, TInitUnc, true },
     { TVecCompat, TInitUnc, true },
@@ -899,6 +896,10 @@ TEST(Type, Option) {
   EXPECT_TRUE(TInitNull.subtypeOf(BOptRClsMeth));
   EXPECT_TRUE(!TUninit.subtypeOf(BOptRClsMeth));
 
+  EXPECT_TRUE(TLazyCls.subtypeOf(BOptLazyCls));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptLazyCls));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptLazyCls));
+
   EXPECT_TRUE(TArrKey.subtypeOf(BOptArrKey));
   EXPECT_TRUE(TInitNull.subtypeOf(BOptArrKey));
   EXPECT_TRUE(!TUninit.subtypeOf(BOptArrKey));
@@ -985,8 +986,6 @@ TEST(Type, OptUnionOf) {
   EXPECT_EQ(TOptFuncLike, union_of(TFunc, TOptRFunc));
   EXPECT_EQ(TOptFuncLike, union_of(TRFunc, TOptFunc));
 
-  EXPECT_EQ(TOptFuncOrCls, union_of(TInitNull, TFuncOrCls));
-  EXPECT_EQ(TOptFuncOrCls, union_of(TFunc, TOptCls));
 
   EXPECT_EQ(TOptStrLike, union_of(TOptCls, TStr));
   EXPECT_EQ(TOptUncStrLike, union_of(TOptCls, TSStr));
@@ -2524,8 +2523,8 @@ TEST(Type, ArrKey) {
   EXPECT_TRUE(unopt(TOptArrKey) == TArrKey);
   EXPECT_TRUE(unopt(TOptUncArrKey) == TUncArrKey);
 
-  EXPECT_TRUE(union_of(TArrKey, TCls) == TArrKeyCompat);
-  EXPECT_TRUE(union_of(TUncArrKey, TCls) == TUncArrKeyCompat);
+  EXPECT_TRUE(union_of(union_of(TArrKey, TCls), TLazyCls) == TArrKeyCompat);
+  EXPECT_TRUE(union_of(union_of(TUncArrKey, TCls), TLazyCls) == TUncArrKeyCompat);
   EXPECT_TRUE(union_of(TArrKeyCompat, TInitNull) == TOptArrKeyCompat);
   EXPECT_TRUE(union_of(TUncArrKeyCompat, TInitNull) == TOptUncArrKeyCompat);
 }
@@ -2599,7 +2598,6 @@ TEST(Type, LoosenStaticness) {
     { sarr_map(test_map), arr_map(test_map) },
     { TClsMeth, TClsMeth },
     { TFuncLike, TFuncLike },
-    { TFuncOrCls, TFuncOrCls },
     { TStrLike, TStrLike },
     { TUncStrLike, TStrLike },
     { TVArrCompat, TVArrCompat },
@@ -3057,7 +3055,6 @@ TEST(Type, RemoveCounted) {
       sarr_map(test_map_a, TSStr, aempty())
     },
     { TClsMeth, use_lowptr ? TClsMeth : TBottom },
-    { TFuncOrCls, TFuncOrCls },
     { TVArrCompat, use_lowptr ? TVArrCompatSA : TSVArr },
     { TVArrCompatSA, use_lowptr ? TVArrCompatSA : TSVArr },
     { TVecCompat, use_lowptr ? TVecCompatSA : TSVec },
@@ -3141,7 +3138,6 @@ TEST(Type, MustBeCounted) {
     { arr_map(test_map_a, TStr, TObj), false },
     { arr_map(test_map_b, TSStr, TInt), true },
     { arr_map(test_map_a, TSStr, TInt), false },
-    { TFuncOrCls, false },
     { TClsMeth, !use_lowptr },
     { TVArrCompat, false },
     { TVArrCompatSA, false },

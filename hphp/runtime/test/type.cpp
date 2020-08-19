@@ -832,12 +832,12 @@ TEST(Type, Const) {
   auto constKeyset = Type::cns(keysetData);
   EXPECT_TRUE(constKeyset < TKeyset);
 
-  auto constLCls = Type::cns(LazyClassData(makeStaticString("Foo")));
-  EXPECT_TRUE(constLCls < TLazyCls);
-  EXPECT_TRUE(constLCls.hasConstVal());
+  auto constLazyCls = Type::cns(LazyClassData(makeStaticString("Foo")));
+  EXPECT_TRUE(constLazyCls < TLazyCls);
+  EXPECT_TRUE(constLazyCls.hasConstVal());
   EXPECT_FALSE(TLazyCls.hasConstVal());
-  EXPECT_EQ(TLazyCls | TBool, constLCls | True);
-  EXPECT_EQ(TBottom, constLCls & True);
+  EXPECT_EQ(TLazyCls | TBool, constLazyCls | True);
+  EXPECT_EQ(TBottom, constLazyCls & True);
 }
 
 TEST(Type, DVArray) {

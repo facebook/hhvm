@@ -189,8 +189,6 @@ bool mayHaveData(trep bits) {
   case BUnc:
   case BArrKey:
   case BUncArrKey:
-  case BFuncOrCls:
-  case BOptFuncOrCls:
   case BStrLike:
   case BUncStrLike:
   case BArrKeyCompat:
@@ -222,6 +220,8 @@ bool mayHaveData(trep bits) {
   case BOptClsMeth:
   case BRClsMeth:
   case BOptRClsMeth:
+  case BLazyCls:  // Lazy classes will have data in future (T70712990)
+  case BOptLazyCls:
   case BClsMethLike:
   case BOptClsMethLike:
   case BInitCell:
@@ -266,6 +266,7 @@ bool canBeOptional(trep bits) {
   case BClsMethLike:
   case BRecord:
   case BRFunc:
+  case BLazyCls:
   case BFuncLike:
     return true;
 
@@ -294,7 +295,6 @@ bool canBeOptional(trep bits) {
   case BStr:
   case BUncArrKey:
   case BArrKey:
-  case BFuncOrCls:
   case BUncStrLike:
   case BStrLike:
   case BUncArrKeyCompat:
@@ -385,7 +385,6 @@ bool canBeOptional(trep bits) {
   case BOptRes:
   case BOptUncArrKey:
   case BOptArrKey:
-  case BOptFuncOrCls:
   case BOptUncStrLike:
   case BOptStrLike:
   case BOptUncArrKeyCompat:
@@ -402,6 +401,7 @@ bool canBeOptional(trep bits) {
   case BOptRClsMeth:
   case BOptClsMethLike:
   case BOptRecord:
+  case BOptLazyCls:
   case BOptArrLikeE:
   case BOptArrLikeN:
   case BOptArrLike:
@@ -4608,7 +4608,6 @@ Type union_of(Type a, Type b) {
   Y(ArrKey)
 
   Y(FuncLike)
-  Y(FuncOrCls)
 
   Y(UncStrLike)
   Y(StrLike)

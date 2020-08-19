@@ -71,6 +71,8 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::OptRecord:
   case T::Cls:
   case T::OptCls:
+  case T::LazyCls:
+  case T::OptLazyCls:
   case T::UncArrKey:
   case T::ArrKey:
   case T::OptUncArrKey:

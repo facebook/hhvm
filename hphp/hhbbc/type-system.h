@@ -246,6 +246,8 @@ enum trep : uint64_t {
   BRFunc    = 1ULL << 38, // Reified function
   BRClsMeth = 1ULL << 39, // Reified class method
 
+  BLazyCls     = 1ULL << 41,
+
   // NOTE: We only have kTRepBitsStored = 48 bits available.
   // We can bump that to 56 bits, at the cost of a taking a few
   // more instructions to load or store the Type::m_bits field.
@@ -352,6 +354,7 @@ enum trep : uint64_t {
   BOptRecord   = BInitNull | BRecord,
   BOptRFunc    = BInitNull | BRFunc,
   BOptRClsMeth = BInitNull | BRClsMeth,
+  BOptLazyCls     = BInitNull | BLazyCls,
 
   BOptSPArrE   = BInitNull | BSPArrE,
   BOptCPArrE   = BInitNull | BCPArrE,
@@ -390,8 +393,6 @@ enum trep : uint64_t {
 
   BFuncLike     = BFunc | BRFunc,
   BOptFuncLike  = BInitNull | BFuncLike,
-  BFuncOrCls    = BFunc | BCls,
-  BOptFuncOrCls = BInitNull | BFuncOrCls,
 
   BClsMethLike    = BClsMeth | BRClsMeth,
   BOptClsMethLike = BInitNull | BClsMethLike,
@@ -402,8 +403,8 @@ enum trep : uint64_t {
   BOptStrLike    = BInitNull | BStrLike,
   BOptUncStrLike = BInitNull | BUncStrLike,
 
-  BUncArrKeyCompat = BUncArrKey | BCls,
-  BArrKeyCompat    = BArrKey | BCls,
+  BUncArrKeyCompat = BUncArrKey | BCls | BLazyCls,
+  BArrKeyCompat    = BArrKey | BCls | BLazyCls,
   BOptUncArrKeyCompat = BInitNull | BUncArrKeyCompat,
   BOptArrKeyCompat = BInitNull | BArrKeyCompat,
 
@@ -455,10 +456,10 @@ enum trep : uint64_t {
 
   BPrim     = BInitPrim | BUninit,
   BInitUnc  = BInitPrim | BSStr | BSArr | BSVec | BSDict | BSKeyset |
-              BCls | BFunc | (use_lowptr ? BClsMeth : 0),
+              BCls | BLazyCls | BFunc | (use_lowptr ? BClsMeth : 0),
   BUnc      = BInitUnc | BUninit,
   BInitCell = BInitNull | BBool | BInt | BDbl | BStr | BArr | BObj | BRes |
-              BVec | BDict | BKeyset | BFunc | BCls | BClsMeth |
+              BVec | BDict | BKeyset | BFunc | BCls | BLazyCls | BClsMeth |
               BRecord | BRFunc | BRClsMeth,
   BCell     = BUninit | BInitCell,
 
@@ -1017,6 +1018,7 @@ X(RFunc)                                        \
 X(ClsMeth)                                      \
 X(RClsMeth)                                     \
 X(Record)                                       \
+X(LazyCls)                                      \
 X(SVecE)                                        \
 X(SVecN)                                        \
 X(SDictE)                                       \
@@ -1064,7 +1066,6 @@ X(DArr)                                         \
 X(UncArrKey)                                    \
 X(ArrKey)                                       \
 X(FuncLike)                                     \
-X(FuncOrCls)                                    \
 X(ClsMethLike)                                  \
 X(UncStrLike)                                   \
 X(StrLike)                                      \
@@ -1101,6 +1102,7 @@ X(OptCls)                                       \
 X(OptClsMeth)                                   \
 X(OptRClsMeth)                                  \
 X(OptRecord)                                    \
+X(OptLazyCls)                                   \
 X(OptSVecE)                                     \
 X(OptSVecN)                                     \
 X(OptSVec)                                      \
@@ -1140,7 +1142,6 @@ X(OptDArr)                                      \
 X(OptUncArrKey)                                 \
 X(OptArrKey)                                    \
 X(OptFuncLike)                                  \
-X(OptFuncOrCls)                                 \
 X(OptClsMethLike)                               \
 X(OptUncStrLike)                                \
 X(OptStrLike)                                   \

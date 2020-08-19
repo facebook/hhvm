@@ -148,7 +148,7 @@ std::string Type::constValString() const {
     return folly::format("Cls({})", m_clsVal->name()->data()).str();
   }
   if (*this <= TLazyCls) {
-    return folly::format("LCls({})", m_lclsVal.name()->data()).str();
+    return folly::format("LazyCls({})", m_lclsVal.name()->data()).str();
   }
   if (*this <= TClsMeth) {
     return folly::format("ClsMeth({},{})",
@@ -251,7 +251,7 @@ std::string Type::toString() const {
       return folly::sformat("Cls={}", m_clsVal->name()->data());
     }
     if (*this <= TLazyCls) {
-      return folly::sformat("LCls={}", m_lclsVal.name()->data());
+      return folly::sformat("LazyCls={}", m_lclsVal.name()->data());
     }
     if (*this <= TRecDesc) {
       return folly::sformat("RecDesc={}", m_recVal->name()->data());
@@ -949,18 +949,19 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
     case T::OptObj:         return TObj        | TInitNull;
     case T::OptFunc:        return TFunc       | TInitNull;
     case T::OptCls:         return TCls        | TInitNull;
+    case T::OptLazyCls:     return TLazyCls    | TInitNull;
     case T::OptClsMeth:     return TClsMeth    | TInitNull;
     case T::OptRecord:      return TRecord     | TInitNull;
     case T::OptArrKey:      return TInt | TStr | TInitNull;
     case T::OptUncArrKey:   return TInt | TPersistentStr | TInitNull;
     case T::OptUncStrLike:
-      return TCls | TPersistentStr | TInitNull;
+      return TCls | TLazyCls | TPersistentStr | TInitNull;
     case T::OptStrLike:
-      return TCls | TStr | TInitNull;
+      return TCls | TLazyCls | TStr | TInitNull;
     case T::OptArrKeyCompat:
-      return TInt | TStr | TCls | TInitNull;
+      return TInt | TStr | TCls | TLazyCls | TInitNull;
     case T::OptUncArrKeyCompat:
-      return TInt | TPersistentStr | TCls | TInitNull;
+      return TInt | TPersistentStr | TCls | TLazyCls | TInitNull;
 
     case T::Uninit:         return TUninit;
     case T::InitNull:       return TInitNull;
@@ -974,6 +975,7 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
     case T::Obj:            return TObj;
     case T::Func:           return TFunc;
     case T::Cls:            return TCls;
+    case T::LazyCls:        return TLazyCls;
     case T::ClsMeth:        return TClsMeth;
     case T::Record:         return TRecord;
 
@@ -981,13 +983,13 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
     case T::UncArrKey:      return TInt | TPersistentStr;
     case T::ArrKey:         return TInt | TStr;
     case T::UncStrLike:
-      return TCls | TPersistentStr;
+      return TCls | TLazyCls | TPersistentStr;
     case T::StrLike:
-      return TCls | TStr;
+      return TCls | TLazyCls | TStr;
     case T::UncArrKeyCompat:
-      return TInt | TPersistentStr | TCls;
+      return TInt | TPersistentStr | TCls | TLazyCls;
     case T::ArrKeyCompat:
-      return TInt | TStr | TCls;
+      return TInt | TStr | TCls | TLazyCls;
     case T::InitUnc:        return TUncountedInit;
     case T::Unc:            return TUncounted;
     case T::InitCell:       return TInitCell;

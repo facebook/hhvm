@@ -1274,9 +1274,6 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     config |> ServerConfig.version |> Config_file.version_to_string_opt
   in
   List.iter (ServerConfig.ignored_paths config) ~f:FilesToIgnore.ignore_path;
-  List.iter
-    (ServerConfig.coroutine_whitelist_paths config)
-    ~f:Coroutine_check.whitelist_path;
   let prechecked_files =
     ServerPrecheckedFiles.should_use options local_config
   in

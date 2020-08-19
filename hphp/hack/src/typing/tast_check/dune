@@ -6,8 +6,5 @@
     core_kernel
     nast
     tast
-    utils_core
-    (select coroutine_check.ml from
-    (facebook -> facebook/coroutine_check.ml)
-    (-> ../../stubs/coroutine_check.ml)))
+    utils_core)
   (preprocess (pps ppx_deriving.std)))

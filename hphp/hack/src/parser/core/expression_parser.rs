@@ -399,6 +399,13 @@ where
                         str_maybe, StringLiteralKind::LiteralDoubleQuoted);
                         S!(make_prefixed_string_expression, self, qualified_name, str_)
                     }
+                    | TokenKind::Backtick => {
+                        let prefix = S!(make_simple_type_specifier, self, qualified_name);
+                        let left_backtick = self.require_token(TokenKind::Backtick, Errors::error1065);
+                        let expr = self.parse_expression_with_reset_precedence();
+                        let right_backtick = self.require_token(TokenKind::Backtick, Errors::error1065);
+                        S!(make_prefixed_code_expression, self, prefix, left_backtick, expr, right_backtick)
+                    }
                     | _ => {
                         // Not a prefixed string or an attempt at one
                         self.parse_name_or_collection_literal_expression(qualified_name)

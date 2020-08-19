@@ -72,6 +72,7 @@ enum BinopAllowsAwaitInPositions {
 enum UnstableFeatures {
     UnionIntersectionTypeHints,
     ClassLevelWhere,
+    ExpressionTrees,
 }
 
 use BinopAllowsAwaitInPositions::*;
@@ -426,6 +427,7 @@ where
                 parser_options.tco_union_intersection_type_hints
             }
             UnstableFeatures::ClassLevelWhere => parser_options.po_enable_class_level_where_clauses,
+            _ => false,
         } || self.env.context.active_unstable_features.contains(feature);
         if !enabled {
             self.errors.push(Self::make_error_from_node(
@@ -5663,6 +5665,9 @@ where
                 ),
                 _ => (),
             },
+            PrefixedCodeExpression(_) => {
+                self.check_can_use_feature(node, &UnstableFeatures::ExpressionTrees)
+            }
             _ => (),
         }
 

@@ -1632,6 +1632,10 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             ch if '1' <= ch && ch <= '9' => self.scan_decimal_or_float(),
             '\'' => self.scan_single_quote_string_literal(),
             '"' => self.scan_double_quote_like_string_literal_from_start(),
+            '`' => {
+                self.advance(1);
+                TokenKind::Backtick
+            }
             '\\' => {
                 self.advance(1);
                 TokenKind::Backslash

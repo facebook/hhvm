@@ -97,7 +97,8 @@ constexpr int kStatsBump = 50;
 
 //////////////////////////////////////////////////////////////////////
 
-void profile_memory(const char* what, const char* when, const std::string& );
+void profile_memory(const char* what, const char* when, const std::string&);
+void summarize_memory();
 
 struct trace_time {
   using clock      = std::chrono::system_clock;

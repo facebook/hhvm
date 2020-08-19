@@ -612,6 +612,8 @@ void whole_program(php::ProgramPtr program,
   ueq.push(nullptr);
   cleanup_pre.join();
   cleanup_post.join();
+
+  summarize_memory();
 }
 
 //////////////////////////////////////////////////////////////////////

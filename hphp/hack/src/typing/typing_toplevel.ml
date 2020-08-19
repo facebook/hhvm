@@ -800,7 +800,8 @@ and class_def_ env c tc =
   in
   let ctx = Env.get_ctx env in
   if
-    Ast_defs.(equal_class_kind c.c_kind Cnormal)
+    ( Ast_defs.(equal_class_kind c.c_kind Cnormal)
+    || Ast_defs.(equal_class_kind c.c_kind Cabstract) )
     && not (shallow_decl_enabled ctx)
   then (
     (* This check is only for eager mode. The same check is performed

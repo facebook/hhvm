@@ -18,7 +18,6 @@
 #include <limits>
 #include <sstream>
 
-#include <folly/Memory.h>
 
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/type-alias.h"

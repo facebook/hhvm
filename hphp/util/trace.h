@@ -164,6 +164,7 @@ namespace Trace {
       TM(objprof)       \
       TM(perf_mem_event) \
       TM(pgo)           \
+      TM(print_profiles)  \
       TM(printir)       \
       TM(printir_json)  \
       TM(prof_branch)   \

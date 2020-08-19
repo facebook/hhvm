@@ -896,6 +896,30 @@ struct SymbolFixup : boost::static_visitor<void> {
     } else {
       read_raw(ser, &prof.value(), size);
     }
+    if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::print_profiles, 1)) {
+      auto const pd = profData();
+      assertx(pd != nullptr);
+      if (isValidTransID(pt.transId)) {
+        auto const ptr = pd->transRec(pt.transId);
+        if (ptr) {
+          auto const srcKey = ptr->srcKey();
+          auto const func = srcKey.func();
+          auto const unit = srcKey.unit();
+          const char *filePath = "";
+          if (unit->filepath()->data() && unit->filepath()->size()) {
+            filePath = unit->filepath()->data();
+          }
+          folly::dynamic targetProfileInfo = folly::dynamic::object;
+          targetProfileInfo["trans_id"] = pt.transId;
+          targetProfileInfo["profile_raw_name"] = name->toCppString();
+          targetProfileInfo["profile"] = prof.value().toDynamic();
+          targetProfileInfo["file_path"] = filePath;
+          targetProfileInfo["line_number"] = unit->getLineNumber(srcKey.offset());
+          targetProfileInfo["function_name"] = func->fullName()->data();
+          HPHP::Trace::traceRelease("json:%s\n", folly::toJson(targetProfileInfo).c_str());
+        }
+      }
+    }
   }
 
   void operator()(rds::Profile& pt) {

@@ -317,12 +317,23 @@ let sort err =
     | (_x_messages, []) -> -1
     | ([], _y_messages) -> 1
     | (x_message :: x_messages, y_message :: y_messages) ->
-      (* The primary sort order is position *)
-      let comparison = Pos.compare (fst x_message) (fst y_message) in
-      (* If the positions are the same, sort by error code *)
+      (* The primary sort order is by file *)
+      let comparison =
+        Relative_path.compare
+          (fst x_message |> Pos.filename)
+          (fst y_message |> Pos.filename)
+      in
+      (* Then within each file, sort by phase *)
       let comparison =
         if comparison = 0 then
-          Int.compare x_code y_code
+          Int.compare (x_code / 1000) (y_code / 1000)
+        else
+          comparison
+      in
+      (* If the error codes are the same, sort by position *)
+      let comparison =
+        if comparison = 0 then
+          Pos.compare (fst x_message) (fst y_message)
         else
           comparison
       in

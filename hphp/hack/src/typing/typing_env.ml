@@ -324,16 +324,21 @@ let get_tpenv env =
 
 let get_global_tpenv env = env.global_tpenv
 
-let get_lower_bounds env name =
+let get_tparam_info_of_generic env name =
+  match TPEnv.get name (get_tpenv env) with
+  | Some tparam_info -> Some tparam_info
+  | None -> TPEnv.get name env.global_tpenv
+
+let get_lower_bounds env name tyargs =
   let tpenv = get_tpenv env in
-  let local = TPEnv.get_lower_bounds tpenv name in
-  let global = TPEnv.get_lower_bounds env.global_tpenv name in
+  let local = TPEnv.get_lower_bounds tpenv name tyargs in
+  let global = TPEnv.get_lower_bounds env.global_tpenv name tyargs in
   TySet.union local global
 
-let get_upper_bounds env name =
+let get_upper_bounds env name tyargs =
   let tpenv = get_tpenv env in
-  let local = TPEnv.get_upper_bounds tpenv name in
-  let global = TPEnv.get_upper_bounds env.global_tpenv name in
+  let local = TPEnv.get_upper_bounds tpenv name tyargs in
+  let global = TPEnv.get_upper_bounds env.global_tpenv name tyargs in
   TySet.union local global
 
 let get_reified env name =
@@ -362,9 +367,9 @@ let get_newable env name =
   local || global
 
 (* Get bounds that are both an upper and lower of a given generic *)
-let get_equal_bounds env name =
-  let lower = get_lower_bounds env name in
-  let upper = get_upper_bounds env name in
+let get_equal_bounds env name tyargs =
+  let lower = get_lower_bounds env name tyargs in
+  let upper = get_upper_bounds env name tyargs in
   TySet.inter lower upper
 
 let env_with_tpenv env tpenv =
@@ -465,6 +470,7 @@ let add_fresh_generic_parameter env prefix ~reified ~enforceable ~newable =
              reified;
              enforceable;
              newable;
+             parameters = [];
            }
          (get_tpenv env))
   in
@@ -510,6 +516,8 @@ let get_tpenv_tparams env =
               reified = _;
               enforceable = _;
               newable = _;
+              (* FIXME what to do here? it seems dangerous to just traverse *)
+              parameters = _;
             }
           acc ->
       let folder ty acc =

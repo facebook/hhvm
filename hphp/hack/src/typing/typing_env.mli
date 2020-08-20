@@ -234,9 +234,12 @@ val get_tpenv : env -> TPEnv.t
 
 val get_global_tpenv : env -> TPEnv.t
 
-val get_lower_bounds : env -> string -> TPEnv.tparam_bounds
+val get_tparam_info_of_generic :
+  env -> string -> Type_parameter_env.tparam_info option
 
-val get_upper_bounds : env -> string -> TPEnv.tparam_bounds
+val get_lower_bounds : env -> string -> locl_ty list -> TPEnv.tparam_bounds
+
+val get_upper_bounds : env -> string -> locl_ty list -> TPEnv.tparam_bounds
 
 val get_reified : env -> string -> Aast.reify_kind
 
@@ -258,7 +261,7 @@ val add_lower_bound :
   locl_ty ->
   env
 
-val get_equal_bounds : env -> string -> TPEnv.tparam_bounds
+val get_equal_bounds : env -> string -> locl_ty list -> TPEnv.tparam_bounds
 
 val get_tparams : env -> locl_ty -> SSet.t
 

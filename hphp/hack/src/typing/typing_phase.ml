@@ -315,8 +315,8 @@ let rec localize ~ety_env env (dty : decl_ty) =
      * with this approximation: if no upper bounds info is available,
      * localization will return a Tpu
      *)
-    let guess_if_pu env tp =
-      let upper_bounds = Env.get_upper_bounds env tp in
+    let guess_if_pu env tp targs =
+      let upper_bounds = Env.get_upper_bounds env tp targs in
       let res =
         Typing_set.fold
           (fun bound res ->
@@ -330,10 +330,9 @@ let rec localize ~ety_env env (dty : decl_ty) =
     in
     let (env, base) = localize ~ety_env env dbase in
     (match deref base with
-    | (r, Tgeneric (tp, _targs)) ->
-      (* TODO(T69551141) handle type arguments *)
+    | (r, Tgeneric (tp, targs)) ->
       let member = (Reason.to_pos r, tp) in
-      if guess_if_pu env tp then
+      if guess_if_pu env tp targs then
         (env, mk (r, Tpu_type_access (member, enum_or_tyname)))
       else
         (env, mk (r, Tpu (base, enum_or_tyname)))

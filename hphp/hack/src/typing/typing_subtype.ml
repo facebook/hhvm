@@ -142,7 +142,8 @@ let get_tpu_type_param_upper_bounds env tparam tyname =
     (env, List.rev_append acc ltys)
   in
   (* Get upper bounds of the tparam generic *)
-  let upper_bounds = Env.get_upper_bounds env tparam in
+  (* TODO(T70090664): added dummy [] here as type arguments *)
+  let upper_bounds = Env.get_upper_bounds env tparam [] in
   Typing_set.fold
     (fun bound (env, acc) ->
       match get_node bound with
@@ -504,8 +505,9 @@ and simplify_subtype_i
               ~f:(fun res ty_sub ->
                 let ty_sub = LoclType ty_sub in
                 res ||| simplify_subtype_i ~subtype_env ~this_ty ty_sub ty_super))
-        | (_, Tgeneric (name_sub, _tyargs)) ->
-          (* TODO(T69551141) handle type arguments *)
+        | (_, Tgeneric (name_sub, tyargs)) ->
+          (* TODO(T69551141) handle type arguments. right now, just passin tyargs to
+             Env.get_upper_bounds *)
           (match subtype_env.seen_generic_params with
           | None -> default ()
           | Some seen ->
@@ -565,7 +567,8 @@ and simplify_subtype_i
               in
               env
               |> try_bounds
-                   (Typing_set.elements (Env.get_upper_bounds env name_sub)))
+                   (Typing_set.elements
+                      (Env.get_upper_bounds env name_sub tyargs)))
           |> (* Turn error into a generic error about the type parameter *)
           if_unsat invalid
         | (_, Tdynamic) when subtype_env.treat_dynamic_as_bottom -> valid ()
@@ -1259,8 +1262,9 @@ and simplify_subtype_i
           else
             simplify_subtype ~subtype_env ~this_ty bound_sub ty_super env
         | _ -> default_subtype env))
-    | (_, Tgeneric (name_super, _tyargs)) ->
-      (* TODO(T69551141) handle type arguments *)
+    | (_, Tgeneric (name_super, tyargs_super)) ->
+      (* TODO(T69551141) handle type arguments. Right now, only passing tyargs_super to
+         Env.get_lower_bounds *)
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       (* If subtype and supertype are the same generic parameter, we're done *)
@@ -1268,7 +1272,7 @@ and simplify_subtype_i
         (match get_node ty_sub with
         | Tgeneric (name_sub, _tyargs) when String.equal name_sub name_super ->
           valid ()
-        (* TODO(T69551141) handle type arguments *)
+        (* TODO(T69551141) handle type arguments. *)
         (* When decomposing subtypes for the purpose of adding bounds on generic
          * parameters to the context, (so seen_generic_params = None), leave
          * subtype so that the bounds get added *)
@@ -1301,7 +1305,8 @@ and simplify_subtype_i
               (* Turn error into a generic error about the type parameter *)
               env
               |> try_bounds
-                   (Typing_set.elements (Env.get_lower_bounds env name_super))
+                   (Typing_set.elements
+                      (Env.get_lower_bounds env name_super tyargs_super))
               |> if_unsat invalid)))
     | (_, Tnonnull) ->
       (match ety_sub with
@@ -3262,8 +3267,9 @@ let decompose_subtype_add_bound
   match (get_node ty_sub, get_node ty_super) with
   | (_, Tany _) -> env
   (* name_sub <: ty_super so add an upper bound on name_sub *)
-  | (Tgeneric (name_sub, _targs), _) when not (phys_equal ty_sub ty_super) ->
-    (* TODO(T69551141) handle type arguments *)
+  | (Tgeneric (name_sub, targs), _) when not (phys_equal ty_sub ty_super) ->
+    (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
+      but the add_upper_bound call must be adapted *)
     log_subtype
       ~level:2
       ~this_ty:None
@@ -3271,15 +3277,16 @@ let decompose_subtype_add_bound
       env
       ty_sub
       ty_super;
-    let tys = Env.get_upper_bounds env name_sub in
+    let tys = Env.get_upper_bounds env name_sub targs in
     (* Don't add the same type twice! *)
     if Typing_set.mem ty_super tys then
       env
     else
       Env.add_upper_bound ~intersect:(try_intersect env) env name_sub ty_super
   (* ty_sub <: name_super so add a lower bound on name_super *)
-  | (_, Tgeneric (name_super, _targs)) when not (phys_equal ty_sub ty_super) ->
-    (* TODO(T69551141) handle type arguments *)
+  | (_, Tgeneric (name_super, targs)) when not (phys_equal ty_sub ty_super) ->
+    (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
+      but the add_lower_bound call must be adapted *)
     log_subtype
       ~level:2
       ~this_ty:None
@@ -3287,7 +3294,7 @@ let decompose_subtype_add_bound
       env
       ty_sub
       ty_super;
-    let tys = Env.get_lower_bounds env name_super in
+    let tys = Env.get_lower_bounds env name_super targs in
     (* Don't add the same type twice! *)
     if Typing_set.mem ty_sub tys then
       env
@@ -3423,11 +3430,13 @@ let add_constraint
             ~init:env
             ~f:(fun env x ->
               List.fold_left
-                (Typing_set.elements (Env.get_lower_bounds env x))
+                (* TODO(T70068435) always using [] as args for now *)
+                (Typing_set.elements (Env.get_lower_bounds env x []))
                 ~init:env
                 ~f:(fun env ty_sub' ->
                   List.fold_left
-                    (Typing_set.elements (Env.get_upper_bounds env x))
+                    (* TODO(T70068435) always using [] as args for now *)
+                    (Typing_set.elements (Env.get_upper_bounds env x []))
                     ~init:env
                     ~f:(fun env ty_super' ->
                       decompose_subtype

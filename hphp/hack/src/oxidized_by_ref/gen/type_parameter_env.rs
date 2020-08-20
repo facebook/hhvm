@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9d8c12454a223c57a3bef143c7e99fee>>
+// @generated SignedSource<<db4d5a43405094a4b56067a0acd49c06>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -40,6 +40,8 @@ pub struct TparamInfo<'a> {
     pub reified: oxidized::aast::ReifyKind,
     pub enforceable: bool,
     pub newable: bool,
+    /// If this is non-empty, the type parameter is higher-kinded
+    pub parameters: &'a [(aast::Sid<'a>, &'a TparamInfo<'a>)],
 }
 impl<'a> TrivialDrop for TparamInfo<'a> {}
 

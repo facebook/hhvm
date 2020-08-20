@@ -15,6 +15,8 @@ type tparam_info = {
   reified: Aast.reify_kind;
   enforceable: bool;
   newable: bool;
+  parameters: (Aast.sid * tparam_info) list;
+      (** If this is non-empty, the type parameter is higher-kinded *)
 }
 
 type t
@@ -45,9 +47,12 @@ val merge_env :
     'env * tparam_info option) ->
   'env * t
 
-val get_lower_bounds : t -> string -> tparam_bounds
+val get_lower_bounds : t -> string -> Typing_defs.locl_ty list -> tparam_bounds
 
-val get_upper_bounds : t -> string -> tparam_bounds
+val get_upper_bounds : t -> string -> Typing_defs.locl_ty list -> tparam_bounds
+
+(* value > 0 indicates higher-kinded type parameter *)
+val get_arity : t -> string -> int
 
 val get_reified : t -> string -> Aast.reify_kind
 
@@ -88,5 +93,7 @@ val remove_lower_bound : t -> string -> Typing_defs.locl_ty -> t
 val remove_upper_bound : t -> string -> Typing_defs.locl_ty -> t
 
 val remove : t -> string -> t
+
+val get_parameter_names : tparam_info -> string list
 
 val pp : Format.formatter -> t -> unit

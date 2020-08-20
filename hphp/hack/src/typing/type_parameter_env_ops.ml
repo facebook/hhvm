@@ -76,9 +76,9 @@ let join env tpenv1 tpenv2 =
       | (_, Some info) -> (env, Some info)
       | (_, _) -> (env, None))
 
-let get_tpenv_equal_bounds env name =
-  let lower = TP.get_lower_bounds env name in
-  let upper = TP.get_upper_bounds env name in
+let get_tpenv_equal_bounds env name tyargs =
+  let lower = TP.get_lower_bounds env name tyargs in
+  let upper = TP.get_upper_bounds env name tyargs in
   TySet.inter lower upper
 
 (** Given a list of type parameter names, attempt to simplify away those
@@ -111,9 +111,9 @@ let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
         match p_opt with
         | None -> (env, tpenv, substs)
         | Some (tp, tparam_name) ->
-          let equal_bounds = get_tpenv_equal_bounds tpenv tparam_name in
-          let lower_bounds = TP.get_lower_bounds tpenv tparam_name in
-          let upper_bounds = TP.get_upper_bounds tpenv tparam_name in
+          let equal_bounds = get_tpenv_equal_bounds tpenv tparam_name [] in
+          let lower_bounds = TP.get_lower_bounds tpenv tparam_name [] in
+          let upper_bounds = TP.get_upper_bounds tpenv tparam_name [] in
           let (env, lower_bound) = union_lower_bounds env reason lower_bounds in
           let (env, upper_bound) =
             intersect_upper_bounds env reason upper_bounds

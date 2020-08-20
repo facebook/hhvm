@@ -56,20 +56,14 @@ let rec check_expr env (_, e) =
           | Tclass ((_, c), _, _) -> check_prop env c pid None
           | _ -> ()
         end
-      | Tgeneric (name, []) ->
-        let upper_bounds = Env.get_upper_bounds env name in
+      | Tgeneric (name, targs) ->
+        let upper_bounds = Env.get_upper_bounds env name targs in
         let check_class bound =
           match get_node bound with
           | Tclass ((_, c), _, _) -> check_prop env c pid None
           | _ -> ()
         in
         Typing_set.iter check_class upper_bounds
-      | Tgeneric (_name, _targs) ->
-        (* TODO(T70068435) handle non-empty type arguments once we have a version
-          of Tast_env.get_upper_bounds for HK types / have bounds on HK types.
-          Unitl then we ignore the case with arguments, as the HK generic var
-          cannot have bounds, yet. *)
-        ()
       | _ -> ()
     end
   | Obj_get (((_, cty), _), (_, Id id), _) ->

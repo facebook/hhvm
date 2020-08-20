@@ -95,7 +95,8 @@ let valid_newable_hint env tp (pos, hint) =
 
 let verify_has_consistent_bound env (tparam : Tast.tparam) =
   let upper_bounds =
-    Typing_set.elements (Env.get_upper_bounds env (snd tparam.tp_name))
+    (* a newable type parameter cannot be higher-kinded/require arguments *)
+    Typing_set.elements (Env.get_upper_bounds env (snd tparam.tp_name) [])
   in
   let bound_classes =
     List.filter_map upper_bounds ~f:(fun ty ->

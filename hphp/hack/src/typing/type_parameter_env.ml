@@ -28,6 +28,8 @@ type tparam_info = {
   reified: Aast.reify_kind;
   enforceable: bool;
   newable: bool;
+  parameters: (Aast.sid * tparam_info) list;
+      (** If this is non-empty, the type parameter is higher-kinded *)
 }
 
 let tparam_info_size tpinfo =
@@ -53,6 +55,7 @@ let union tpenv1 tpenv2 =
     consistent = tpenv1.consistent && tpenv2.consistent;
   }
 
+(* TODO(T70068435): needs to learn about parameters if higher-kinded? *)
 let size tpenv =
   SMap.fold
     (fun _ tpinfo count -> tparam_info_size tpinfo + count)
@@ -67,15 +70,34 @@ let merge_env env tpenv1 tpenv2 ~combine =
   in
   (env, { tparams; consistent = tpenv1.consistent && tpenv2.consistent })
 
-let get_lower_bounds tpenv name =
-  match get name tpenv with
-  | None -> empty_bounds
-  | Some { lower_bounds; _ } -> lower_bounds
+let get_lower_bounds tpenv name tyargs =
+  (* TODO(T70068435) For now, anything with tyargs cannot have bounds.
+     Eventually, we need to instantiate the parameters with the provided args.
+     We must support the case here that the number of provided tyargs does not
+     match the number of expected arguments for the named type parameter. In this
+     case, chop off superfluous argumnents and fill in Tany for missing ones.  *)
+  match (get name tpenv, tyargs) with
+  | (_, _ :: _)
+  | (None, _) ->
+    empty_bounds
+  | (Some { lower_bounds; _ }, _) -> lower_bounds
 
-let get_upper_bounds tpenv name =
+let get_upper_bounds tpenv name tyargs =
+  (* TODO(T70068435) For now, anything with tyargs cannot have bounds.
+     Eventually, we need to instantiate the parameters with the provided args.
+     We must support the case here that the number of provided tyargs does not
+     match the number of expected arguments for the named type parameter. In this
+     case, chop off superfluous argumnents and fill in Tany for missing ones. *)
+  match (get name tpenv, tyargs) with
+  | (_, _ :: _)
+  | (None, _) ->
+    empty_bounds
+  | (Some { upper_bounds; _ }, _) -> upper_bounds
+
+let get_arity tpenv name =
   match get name tpenv with
-  | None -> empty_bounds
-  | Some { upper_bounds; _ } -> upper_bounds
+  | None -> 0
+  | Some { parameters; _ } -> List.length parameters
 
 let get_reified tpenv name =
   match get name tpenv with
@@ -120,6 +142,7 @@ let add_upper_bound_ tpenv name ty =
           reified = Aast.Erased;
           enforceable = false;
           newable = false;
+          parameters = [];
         }
       | Some tp -> { tp with upper_bounds = TySet.add ty tp.upper_bounds }
     in
@@ -140,6 +163,7 @@ let add_lower_bound_ tpenv name ty =
           reified = Aast.Erased;
           enforceable = false;
           newable = false;
+          parameters = [];
         }
       | Some tp -> { tp with lower_bounds = TySet.add ty tp.lower_bounds }
     in
@@ -167,19 +191,26 @@ let add_upper_bound ?intersect env_tpenv name ty =
   match intersect with
   | None -> add_upper_bound_ env_tpenv name ty
   | Some intersect ->
-    let tyl = intersect ty (TySet.elements (get_upper_bounds env_tpenv name)) in
+    let tyl =
+      intersect ty (TySet.elements (get_upper_bounds env_tpenv name []))
+    in
     let add_generic ty tys =
       if is_generic_param ~elide_nullable:true ty name then
         tys
       else
         TySet.add ty tys
     in
+
     let upper_bounds = List.fold_right ~init:TySet.empty ~f:add_generic tyl in
-    let lower_bounds = get_lower_bounds env_tpenv name in
+    let lower_bounds = get_lower_bounds env_tpenv name [] in
     let reified = get_reified env_tpenv name in
     let enforceable = get_enforceable env_tpenv name in
     let newable = get_newable env_tpenv name in
-    add name { lower_bounds; upper_bounds; reified; enforceable; newable } tpenv
+    let parameters = [] in
+    add
+      name
+      { lower_bounds; upper_bounds; reified; enforceable; newable; parameters }
+      tpenv
 
 (* Add a single new upper lower [ty] to generic parameter [name] in the
  * local type parameter environment [env].
@@ -203,13 +234,17 @@ let add_lower_bound ?union env_tpenv name ty =
   match union with
   | None -> add_lower_bound_ env_tpenv name ty
   | Some union ->
-    let tyl = union ty (TySet.elements (get_lower_bounds env_tpenv name)) in
+    let tyl = union ty (TySet.elements (get_lower_bounds env_tpenv name [])) in
     let lower_bounds = List.fold_right ~init:TySet.empty ~f:TySet.add tyl in
-    let upper_bounds = get_upper_bounds env_tpenv name in
+    let upper_bounds = get_upper_bounds env_tpenv name [] in
     let reified = get_reified env_tpenv name in
     let enforceable = get_enforceable env_tpenv name in
     let newable = get_newable env_tpenv name in
-    add name { lower_bounds; upper_bounds; reified; enforceable; newable } tpenv
+    let parameters = [] in
+    add
+      name
+      { lower_bounds; upper_bounds; reified; enforceable; newable; parameters }
+      tpenv
 
 let remove_upper_bound tpenv name bound =
   match get name tpenv with
@@ -233,14 +268,14 @@ let remove tpenv name =
   (* TODO(T70068435) Revisit this function when implementing bounds on HK generic vars,
     in particular, look at the two Tgeneric below. *)
   let tparam = mk (Typing_reason.Rnone, Tgeneric (name, [])) in
-  let lower_bounds = get_lower_bounds tpenv name in
+  let lower_bounds = get_lower_bounds tpenv name [] in
   let remove_from_upper_bounds_of ty tpenv =
     match get_node ty with
     | Tgeneric (name, _tyargs) -> remove_upper_bound tpenv name tparam
     | _ -> tpenv
   in
   let tpenv = TySet.fold remove_from_upper_bounds_of lower_bounds tpenv in
-  let upper_bounds = get_upper_bounds tpenv name in
+  let upper_bounds = get_upper_bounds tpenv name [] in
   let remove_from_lower_bounds_of ty tpenv =
     match get_node ty with
     | Tgeneric (name, _tyargs) -> remove_lower_bound tpenv name tparam
@@ -252,29 +287,38 @@ let remove tpenv name =
 (* Add type parameters to environment, initially with no bounds.
  * Existing type parameters with the same name will be overridden. *)
 let add_generic_parameters tpenv tparaml =
-  let add_empty_bounds
-      tpenv { tp_name = (_, name); tp_reified = reified; tp_user_attributes; _ }
-      =
+  let rec make_param_info ast_tparam =
+    let { tp_user_attributes; tp_tparams; _ } = ast_tparam in
     let enforceable =
       Naming_attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes
     in
     let newable =
       Naming_attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
     in
-    let tpinfo =
-      {
-        lower_bounds = empty_bounds;
-        upper_bounds = empty_bounds;
-        reified;
-        enforceable;
-        newable;
-      }
+    let nested_params =
+      List.map tp_tparams ~f:(fun tp -> (tp.tp_name, make_param_info tp))
     in
-    add name tpinfo tpenv
-  in
-  List.fold_left tparaml ~f:add_empty_bounds ~init:tpenv
 
-let pp_tparam_info fmt tpi =
+    {
+      lower_bounds = empty_bounds;
+      upper_bounds = empty_bounds;
+      reified = ast_tparam.tp_reified;
+      enforceable;
+      newable;
+      parameters = nested_params;
+    }
+  in
+
+  let add_top tpenv ast_tparam =
+    let (_, name) = ast_tparam.tp_name in
+    add name (make_param_info ast_tparam) tpenv
+  in
+  List.fold_left tparaml ~f:add_top ~init:tpenv
+
+let get_parameter_names tpi =
+  List.map tpi.parameters (fun (name, _) -> snd name)
+
+let rec pp_tparam_info fmt tpi =
   Format.fprintf fmt "@[<hv 2>{ ";
 
   Format.fprintf fmt "@[%s =@ " "lower_bounds";
@@ -300,6 +344,20 @@ let pp_tparam_info fmt tpi =
   Format.fprintf fmt "@[%s =@ " "newable";
   Format.pp_print_bool fmt tpi.newable;
   Format.fprintf fmt "@]";
+
+  Format.fprintf fmt "(@[parameters: (@,";
+  ignore
+    (List.fold_left
+       ~f:(fun sep (name, x) ->
+         if sep then Format.fprintf fmt ";@ ";
+         let () = Aast.pp_sid fmt name in
+         Format.fprintf fmt ":@ ";
+         pp_tparam_info fmt x;
+         true)
+       ~init:false
+       tpi.parameters);
+  Format.fprintf fmt "@,]@]";
+  Format.fprintf fmt "@,))@]";
 
   Format.fprintf fmt " }@]"
 

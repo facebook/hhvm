@@ -21,8 +21,7 @@ let get_transitive_upper_bounds env ty =
     | ty :: tyl ->
       let (env, ety) = Env.expand_type env ty in
       (match get_node ety with
-      | Tgeneric (n, _tyargs) ->
-        (* TODO(T69551141) handle type arguments *)
+      | Tgeneric (n, tyargs) ->
         if SSet.mem n seen then
           iter seen env acc tyl
         else
@@ -30,7 +29,7 @@ let get_transitive_upper_bounds env ty =
             (SSet.add n seen)
             env
             acc
-            (TySet.elements (Env.get_upper_bounds env n) @ tyl)
+            (TySet.elements (Env.get_upper_bounds env n tyargs) @ tyl)
       | _ -> iter seen env (TySet.add ty acc) tyl)
   in
   let (env, resl) = iter SSet.empty env TySet.empty [ty] in

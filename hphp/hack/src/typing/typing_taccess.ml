@@ -75,7 +75,7 @@ let tp_name class_name id = class_name ^ "::" ^ snd id
    creating is known to be equal to some other type *)
 let make_abstract env id name namel bnd =
   let tp_name = tp_name name id in
-  if not (Typing_set.is_empty (Env.get_equal_bounds env tp_name)) then
+  if not (Typing_set.is_empty (Env.get_equal_bounds env tp_name [])) then
     (* If the resulting abstract type is exactly equal to something,
        mark the result as exact.
        For example, if we have the following
@@ -241,8 +241,7 @@ let rec expand ctx env root =
     in
     let ctx = { ctx with allow_abstract } in
     create_root_from_type_constant ctx env root cls opt_class_def
-  | Tgeneric (s, _tyargs) ->
-    (* TODO(T69551141) handle type arguments *)
+  | Tgeneric (s, tyargs) ->
     let ctx =
       let generics_seen = TySet.add root ctx.generics_seen in
       let base = Some (Option.value ctx.base ~default:root) in
@@ -280,7 +279,7 @@ let rec expand ctx env root =
     in
     (* Ignore seen bounds to avoid infinite loops *)
     let upper_bounds =
-      TySet.diff (Env.get_upper_bounds env s) ctx.generics_seen
+      TySet.diff (Env.get_upper_bounds env s tyargs) ctx.generics_seen
     in
     (match last_res None err (TySet.elements upper_bounds) with
     | (Some (env, res), _) -> (env, update_class_name env ctx.id s res)

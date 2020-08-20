@@ -148,8 +148,13 @@ val localize_with_self :
   Typing_defs.decl_ty ->
   env * Tast.ty
 
-(** Get the upper bounds of the type parameter with the given name. *)
-val get_upper_bounds : env -> string -> Type_parameter_env.tparam_bounds
+(** Get the upper bounds of the type parameter with the given name.
+  FIXME: This function cannot return correct bounds at this time, because
+  during TAST checks, the Next continuation in the typing environment (which stores
+  information about type parameters) is gone.
+ *)
+val get_upper_bounds :
+  env -> string -> Typing_defs.locl_ty list -> Type_parameter_env.tparam_bounds
 
 (** Get the reification of the type parameter with the given name. *)
 val get_reified : env -> string -> Aast.reify_kind

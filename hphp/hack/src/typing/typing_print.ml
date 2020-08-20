@@ -587,18 +587,29 @@ module Full = struct
 
   (* For a given type parameter, construct a list of its constraints *)
   let get_constraints_on_tparam env tparam =
-    let lower = Env.get_lower_bounds env tparam in
-    let upper = Env.get_upper_bounds env tparam in
-    let equ = Env.get_equal_bounds env tparam in
-    (* If we have an equality we can ignore the other bounds *)
-    if not (TySet.is_empty equ) then
-      List.map (TySet.elements equ) (fun ty ->
-          (tparam, Ast_defs.Constraint_eq, ty))
-    else
-      List.map (TySet.elements lower) (fun ty ->
-          (tparam, Ast_defs.Constraint_super, ty))
-      @ List.map (TySet.elements upper) (fun ty ->
-            (tparam, Ast_defs.Constraint_as, ty))
+    let kind_opt = Env.get_tparam_info_of_generic env tparam in
+    match kind_opt with
+    | None -> []
+    | Some kind ->
+      (* Use the names of the parameters themselves to present bounds
+         depending on other parameters *)
+      let param_names = Type_parameter_env.get_parameter_names kind in
+      let params =
+        List.map param_names (fun name ->
+            Typing_make_type.generic Reason.none name)
+      in
+      let lower = Env.get_lower_bounds env tparam params in
+      let upper = Env.get_upper_bounds env tparam params in
+      let equ = Env.get_equal_bounds env tparam params in
+      (* If we have an equality we can ignore the other bounds *)
+      if not (TySet.is_empty equ) then
+        List.map (TySet.elements equ) (fun ty ->
+            (tparam, Ast_defs.Constraint_eq, ty))
+      else
+        List.map (TySet.elements lower) (fun ty ->
+            (tparam, Ast_defs.Constraint_super, ty))
+        @ List.map (TySet.elements upper) (fun ty ->
+              (tparam, Ast_defs.Constraint_as, ty))
 
   let to_string ~ty to_doc env x =
     ty to_doc ISet.empty env x

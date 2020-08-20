@@ -462,9 +462,8 @@ let strip_condition_type_in_return env ty =
   else
     let (env, ety) = Env.expand_type env ty in
     match get_node ety with
-    | Tgeneric (n, _targs) when Option.is_some (Env.get_condition_type env n) ->
-      (* TODO(T69551141) handle type arguments *)
-      let upper_bounds = Env.get_upper_bounds env n in
+    | Tgeneric (n, targs) when Option.is_some (Env.get_condition_type env n) ->
+      let upper_bounds = Env.get_upper_bounds env n targs in
       begin
         match Typing_set.elements upper_bounds with
         | [ty] -> ty

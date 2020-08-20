@@ -293,7 +293,8 @@ let merge_decl_header_with_hints ~params ~ret ~variadic decl_header env =
  *)
 let check_pu_in_locl_ty env lty =
   let check env tp candidate =
-    let upper_bounds = Env.get_upper_bounds env tp in
+    (* TODO(T70090664): added dummy [] here as type arguments *)
+    let upper_bounds = Env.get_upper_bounds env tp [] in
     Typing_set.fold
       (fun bound (env, is_pu, is_pu_type_access) ->
         match get_node bound with
@@ -1332,6 +1333,8 @@ and pu_enum_def
               enforceable = false;
               (* TODO(T35357243) improve to support that *)
               newable = false (* TODO(T35357243) improve to support that *);
+              (* TODO(T70090664) Is this correct? *)
+              parameters = [];
             }
         in
         TPEnv.add name tpinfo tpenv)

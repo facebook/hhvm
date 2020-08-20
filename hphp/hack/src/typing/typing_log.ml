@@ -325,9 +325,16 @@ let tyset_as_value env tys =
        tys
        SSet.empty)
 
-let tparam_info_as_value env tpinfo =
+let rec tparam_info_as_value env tpinfo =
   let Type_parameter_env.
-        { lower_bounds; upper_bounds; reified; enforceable; newable } =
+        {
+          lower_bounds;
+          upper_bounds;
+          reified;
+          enforceable;
+          newable;
+          parameters;
+        } =
     tpinfo
   in
   make_map
@@ -337,7 +344,16 @@ let tparam_info_as_value env tpinfo =
       ("reified", reify_kind_as_value reified);
       ("enforceable", bool_as_value enforceable);
       ("newable", bool_as_value newable);
+      ("parameters", named_tparam_info_list_as_value env parameters);
     ]
+
+and named_tparam_info_list_as_value env parameters =
+  let param_values =
+    List.map parameters ~f:(fun (name, param) ->
+        list_as_value
+          [string_as_value (snd name); tparam_info_as_value env param])
+  in
+  list_as_value param_values
 
 let tpenv_as_value env tpenv =
   make_map

@@ -1411,3 +1411,5 @@ val illegal_information_flow :
 
 val context_implicit_policy_leakage :
   Pos.t -> Pos.t list -> Pos.t list * string -> Pos.t list * string -> unit
+
+val reified_function_reference : Pos.t -> unit

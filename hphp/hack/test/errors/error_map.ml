@@ -637,4 +637,5 @@ DuplicateInterface = 4377
 TypeParameterNameAlreadyUsedNonShadow = 4378
 IllegalInformationFlow = 4379
 ContextImplicitPolicyLeakage = 4380
+ReifiedFunctionReference = 4381
   |}]

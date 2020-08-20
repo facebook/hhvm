@@ -180,6 +180,17 @@ let handler =
       | ((call_pos, _), Class_get ((_, CI (_, t)), _)) ->
         if equal_reify_kind (Env.get_reified env t) Reified then
           Errors.class_get_reified call_pos
+      | ((pos, fun_ty), Method_caller _)
+      | ((pos, fun_ty), Fun_id _)
+      | ((pos, fun_ty), Method_id _)
+      | ((pos, fun_ty), Smethod_id _) ->
+        begin
+          match get_node fun_ty with
+          | Tfun { ft_tparams; _ } ->
+            if tparams_has_reified ft_tparams then
+              Errors.reified_function_reference pos
+          | _ -> ()
+        end
       | ((pos, fun_ty), FunctionPointer (_, targs)) ->
         begin
           match get_node fun_ty with

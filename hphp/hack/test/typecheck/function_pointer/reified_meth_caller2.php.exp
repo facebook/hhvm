@@ -1,0 +1,2 @@
+File "reified_meth_caller2.php", line 8, characters 3-36:
+Invalid function reference. This function requires reified generics. Prefer using a lambda instead. (Typing[4381])

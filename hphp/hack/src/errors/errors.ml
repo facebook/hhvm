@@ -5255,6 +5255,12 @@ let context_implicit_policy_leakage
   in
   add_list (Typing.err_code Typing.ContextImplicitPolicyLeakage) reasons
 
+let reified_function_reference call_pos =
+  add
+    (Typing.err_code Typing.ReifiedFunctionReference)
+    call_pos
+    "Invalid function reference. This function requires reified generics. Prefer using a lambda instead."
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

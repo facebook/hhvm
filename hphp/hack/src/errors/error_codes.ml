@@ -645,7 +645,8 @@ module Typing = struct
     | DuplicateInterface
     | TypeParameterNameAlreadyUsedNonShadow
     | IllegalInformationFlow
-    | ContextImplicitPolicyLeakage (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | ContextImplicitPolicyLeakage
+    | ReifiedFunctionReference (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

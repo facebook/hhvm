@@ -11,6 +11,6 @@ But got `Bar`
 File "this_ret_bad2.php", line 25, characters 27-29:
 Considering that this type argument is invariant with respect to Foo
 File "this_ret_bad2.php", line 33, characters 15-17:
-Since Bar is not final
+Since `Bar` is not final
 File "this_ret_bad2.php", line 25, characters 27-29:
-this might not be a Bar
+this might not be a `Bar`

@@ -1,7 +1,7 @@
 File "covariance_decl_conflict_4.php", line 7, characters 31-31:
 Illegal usage of a contravariant type parameter (Typing[4121])
 File "covariance_decl_conflict_4.php", line 7, characters 12-12:
-This is where the parameter was declared as contravariant (-)
+This is where the parameter was declared as contravariant `-`
 File "covariance_decl_conflict_4.php", line 7, characters 31-31:
 This position is covariant (+) because it is the composition of (-)(-)
 The rest of the error messages decomposes the inference of the variance.

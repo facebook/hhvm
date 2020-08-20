@@ -1,4 +1,4 @@
 File "trait_const_attribute.php", line 12, characters 10-10:
 Was expecting a return type hint (Typing[4030])
 File "trait_const_attribute.php", line 14, characters 7-7:
-Cannot mutate a __Const property (Typing[4196])
+Cannot mutate a `__Const` property (Typing[4196])

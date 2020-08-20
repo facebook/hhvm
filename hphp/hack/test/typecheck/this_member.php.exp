@@ -7,6 +7,6 @@ File "this_member.php", line 16, characters 5-9:
 File "this_member.php", line 16, characters 13-17:
 But got `X`
 File "this_member.php", line 15, characters 24-24:
-Since X is not final
+Since `X` is not final
 File "this_member.php", line 16, characters 13-17:
-this might not be a X
+this might not be a `X`

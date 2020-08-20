@@ -7,10 +7,10 @@ Invalid reified hint (Typing[4305])
 File "valid_targ_wildcard_new.php", line 8, characters 11-11:
 This is a wildcard, it cannot be used as a reified type argument
 File "valid_targ_wildcard_new.php", line 4, characters 15-16:
-Tc is reified
+`Tc` is reified
 File "valid_targ_wildcard_new.php", line 8, characters 11-11:
 Invalid reified hint (Typing[4305])
 File "valid_targ_wildcard_new.php", line 8, characters 11-11:
 This is a wildcard, it cannot be used as a reified type argument
 File "valid_targ_wildcard_new.php", line 4, characters 15-16:
-Tc is reified
+`Tc` is reified

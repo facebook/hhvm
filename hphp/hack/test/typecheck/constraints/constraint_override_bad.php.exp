@@ -1,9 +1,9 @@
 File "constraint_override_bad.php", line 10, characters 19-21:
-The method foo has the wrong type (Typing[4341])
+The method `foo` has the wrong type (Typing[4341])
 File "constraint_override_bad.php", line 10, characters 31-31:
 Some type constraint(s) are violated here
 File "constraint_override_bad.php", line 10, characters 23-23:
-T is a constrained type parameter
+`T` is a constrained type parameter
 File "constraint_override_bad.php", line 10, characters 23-23:
 Expected `T`
 File "constraint_override_bad.php", line 10, characters 31-31:

@@ -46,14 +46,14 @@ class C extends B {
 let c_errors =
   "
 File \"/C.php\", line 5, characters 19-21:
-C has no parent class with a method `foo` to override (Typing[4087])
+`C` has no parent class with a method `foo` to override (Typing[4087])
 "
 
 let c_diagnostics =
   "
 /C.php:
 File \"/C.php\", line 5, characters 19-21:
-C has no parent class with a method `foo` to override (Typing[4087])
+`C` has no parent class with a method `foo` to override (Typing[4087])
 "
 
 let c_clear_diagnostics = "

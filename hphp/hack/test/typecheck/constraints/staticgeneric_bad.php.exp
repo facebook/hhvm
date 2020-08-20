@@ -3,7 +3,7 @@ Invalid argument (Typing[4323])
 File "staticgeneric_bad.php", line 4, characters 14-21:
 Some type constraint(s) are violated here
 File "staticgeneric_bad.php", line 4, characters 9-9:
-T is a constrained type parameter
+`T` is a constrained type parameter
 File "staticgeneric_bad.php", line 4, characters 14-21:
 Expected `arraykey`
 File "staticgeneric_bad.php", line 14, characters 14-17:

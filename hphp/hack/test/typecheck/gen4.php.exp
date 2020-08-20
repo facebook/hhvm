@@ -1,9 +1,9 @@
 File "gen4.php", line 20, characters 19-21:
-The method foo has the wrong type (Typing[4341])
+The method `foo` has the wrong type (Typing[4341])
 File "gen4.php", line 20, characters 28-28:
 Some type constraint(s) are violated here
 File "gen4.php", line 20, characters 23-23:
-T is a constrained type parameter
+`T` is a constrained type parameter
 File "gen4.php", line 20, characters 28-28:
 Expected `B`
 File "gen4.php", line 20, characters 23-23:

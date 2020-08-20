@@ -1,2 +1,2 @@
 File "async_function_explicit_null_return_wrong_type.php", line 16, characters 16-24:
-Was expecting an Awaitable return type hint (Typing[4174])
+Was expecting an `Awaitable` return type hint (Typing[4174])

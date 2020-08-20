@@ -1,8 +1,8 @@
 File "early_return.php", line 21, characters 3-22:
-Data with policy SECRET appears in context PUBLIC. (Typing[4379])
+Data with policy `SECRET` appears in context `PUBLIC`. (Typing[4379])
 File "early_return.php", line 13, characters 17-21:
-The data source with policy SECRET
+The data source with policy `SECRET`
 File "early_return.php", line 6, characters 19-23:
-The data sink with policy PUBLIC
+The data sink with policy `PUBLIC`
 File "early_return.php", line 18, characters 7-14:
 Another program point contributing to the illegal flow

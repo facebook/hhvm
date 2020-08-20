@@ -1,9 +1,9 @@
 File "exception_multi_function.php", line 28, characters 5-17:
-Data with policy A appears in context B. (Typing[4379])
+Data with policy `A` appears in context `B`. (Typing[4379])
 File "exception_multi_function.php", line 6, characters 14-19:
-The data source with policy A
+The data source with policy `A`
 File "exception_multi_function.php", line 9, characters 14-19:
-The data sink with policy B
+The data sink with policy `B`
 File "exception_multi_function.php", line 14, characters 5-13:
 Another program point contributing to the illegal flow
 File "exception_multi_function.php", line 13, characters 7-15:
@@ -11,11 +11,11 @@ Another program point contributing to the illegal flow
 File "exception_multi_function.php", line 25, characters 5-14:
 Another program point contributing to the illegal flow
 File "exception_multi_function.php", line 38, characters 5-17:
-Data with policy A appears in context B. (Typing[4379])
+Data with policy `A` appears in context `B`. (Typing[4379])
 File "exception_multi_function.php", line 6, characters 14-19:
-The data source with policy A
+The data source with policy `A`
 File "exception_multi_function.php", line 9, characters 14-19:
-The data sink with policy B
+The data sink with policy `B`
 File "exception_multi_function.php", line 19, characters 3-12:
 Another program point contributing to the illegal flow
 File "exception_multi_function.php", line 14, characters 5-13:

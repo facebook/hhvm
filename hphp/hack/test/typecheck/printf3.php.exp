@@ -1,4 +1,4 @@
 File "printf3.php", line 19, characters 5-8:
-Invalid format string %s in "%s" (Typing[4038])
+Invalid format string `%s` in `"%s"` (Typing[4038])
 File "printf3.php", line 15, characters 29-29:
-You can add a new format specifier by adding format_s() to X
+You can add a new format specifier by adding `format_s()` to `X`

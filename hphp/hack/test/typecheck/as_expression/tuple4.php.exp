@@ -5,6 +5,6 @@ Expected `int`
 File "tuple4.php", line 6, characters 9-54:
 But got `((function(int): ?int), (function(int): ?int))`
 File "tuple4.php", line 6, characters 9-54:
-Invalid "as" expression hint (Typing[4195])
+Invalid `as` expression hint (Typing[4195])
 File "tuple4.php", line 6, characters 10-30:
-The "as" operator cannot be used with a function type
+The `as` operator cannot be used with a function type

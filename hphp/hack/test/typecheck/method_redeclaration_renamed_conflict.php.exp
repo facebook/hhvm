@@ -1,14 +1,14 @@
 File "method_redeclaration_renamed_conflict.php", line 22, characters 7-7:
-Class C does not correctly implement all required members  (Typing[4340])
+Class `C` does not correctly implement all required members  (Typing[4340])
 File "method_redeclaration_renamed_conflict.php", line 23, characters 11-12:
-Some members are incompatible with those declared in type T2
+Some members are incompatible with those declared in type `T2`
 File "method_redeclaration_renamed_conflict.php", line 17, characters 19-19:
-The method f has the wrong type
+The method `f` has the wrong type
 File "method_redeclaration_renamed_conflict.php", line 17, characters 19-19:
-T3 and T2 both declare ambiguous implementations of f.
+`T3` and `T2` both declare ambiguous implementations of `f`.
 File "method_redeclaration_renamed_conflict.php", line 17, characters 19-19:
-T3's definition is here.
+`T3`'s definition is here.
 File "method_redeclaration_renamed_conflict.php", line 11, characters 19-19:
-T2's definition is here.
+`T2`'s definition is here.
 File "method_redeclaration_renamed_conflict.php", line 17, characters 19-19:
-Redeclare f in C with a compatible signature.
+Redeclare `f` in `C` with a compatible signature.

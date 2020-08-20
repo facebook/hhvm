@@ -1,5 +1,5 @@
 File "constraint_gen_fail3.php", line 24, characters 19-21:
-The method get has the wrong type (Typing[4341])
+The method `get` has the wrong type (Typing[4341])
 File "constraint_gen_fail3.php", line 20, characters 26-27:
 Expected `?A`
 File "constraint_gen_fail3.php", line 23, characters 9-9:

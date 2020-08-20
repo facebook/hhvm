@@ -1,4 +1,4 @@
 File "assignment1.php", line 14, characters 14-22:
-You are trying to access the method 'getLength' but this is a darray (Typing[4062])
+You are trying to access the method `getLength` but this is a darray (Typing[4062])
 File "assignment1.php", line 13, characters 10-17:
 Definition is here

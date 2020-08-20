@@ -1,5 +1,5 @@
 File "trait_matching1.php", line 25, characters 20-21:
-The property x has the wrong type (Typing[4341])
+The property `x` has the wrong type (Typing[4341])
 File "trait_matching1.php", line 25, characters 20-21:
 Typing error
 File "trait_matching1.php", line 13, characters 14-16:

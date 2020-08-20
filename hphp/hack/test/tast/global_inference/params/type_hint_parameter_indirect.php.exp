@@ -1,5 +1,5 @@
 Errors:
-  [12:7-10] You are trying to access the property 'foo' on a value whose class is unknown.
+  [12:7-10] You are trying to access the property `foo` on a value whose class is unknown.
   [11:19-21] It is unknown
 [(Fun
     { f_span = [3:1-5:2]; f_annotation = (); f_mode = Mpartial;

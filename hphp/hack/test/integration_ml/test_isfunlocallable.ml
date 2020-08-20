@@ -195,7 +195,7 @@ let tests : ((string * int * int) * string) list =
       {|
     {"position":{"file":"/f2.php","line":2,"character":10},
     "result":false,"errors":[{"message":[
-    {"descr":"This value has Awaitable type. Awaitable typed values in reactive code must be immediately await'ed.",
+    {"descr":"This value has `Awaitable` type. `Awaitable` typed values in reactive code must be immediately `await`ed.",
     "path":"/f2.php","line":3,"start":8,"end":16,"code":4248}]}]}
   |}
     );
@@ -205,7 +205,7 @@ let tests : ((string * int * int) * string) list =
     "result":false,"errors":[{"message":[{
       "descr":"Invalid argument","path":"/f3.php","line":3,"start":8,"end":14,"code":4260
      },{
-      "descr":"This parameter is marked with <<__OwnedMutable>>","path":"/f3.php","line":9,"start":36,"end":37,"code":4260
+      "descr":"This parameter is marked with `<<__OwnedMutable>>`","path":"/f3.php","line":9,"start":36,"end":37,"code":4260
      },{
       "descr":"But this expression is not owned mutable","path":"/f3.php","line":3,"start":8,"end":14,"code":4260
      }]}]}
@@ -225,9 +225,9 @@ let tests : ((string * int * int) * string) list =
       {|
     {"position":{"file":"/f6.php","line":2,"character":10},
     "result":false,"errors":[{"message":[{
-      "descr":"Cannot assign to element of Hack Collection object via [] in a reactive context. Instead, use the 'set' method.",
+      "descr":"Cannot assign to element of Hack Collection object via `[]` in a reactive context. Instead, use the `set` method.",
       "path":"/f6.php","line":3,"start":3,"end":20,"code":4201}]},{"message":[{
-      "descr":"Cannot append to a Hack Collection object in a reactive context. Instead, use the 'add' method.",
+      "descr":"Cannot append to a Hack Collection object in a reactive context. Instead, use the `add` method.",
       "path":"/f6.php","line":4,"start":3,"end":19,"code":4201}]}]}
   |}
     );
@@ -235,7 +235,7 @@ let tests : ((string * int * int) * string) list =
       {|
     {"position":{"file":"/f7.php","line":2,"character":10},
     "result":false,"errors":[{"message":[{
-      "descr":"Cannot use result of function annotated with <<__ReturnsVoidToRx>> in reactive context",
+      "descr":"Cannot use result of function annotated with `<<__ReturnsVoidToRx>>` in reactive context",
       "path":"/f7.php","line":3,"start":8,"end":10,"code":4247},{
       "descr":"This is function declaration.",
       "path":"/f7.php","line":8,"start":10,"end":10,"code":4247}]}]}
@@ -258,7 +258,7 @@ let tests : ((string * int * int) * string) list =
       {|
     {"position":{"file":"/f10.php","line":2,"character":10},
     "result":false,"errors":[{"message":[{
-      "descr":"This object's property is being mutated(used as an lvalue)\nYou cannot set non-mutable object properties in reactive functions",
+      "descr":"This object's property is being mutated (used as an lvalue)\nYou cannot set non-mutable object properties in reactive functions",
       "path":"/f10.php","line":4,"start":3,"end":7,"code":4202}]}]}
   |}
     );
@@ -266,7 +266,7 @@ let tests : ((string * int * int) * string) list =
       {|
     {"position":{"file":"/f11.php","line":3,"character":19},
     "result":false,"errors":[{"message":[{
-      "descr":"Neither a Mutable nor MaybeMutable object may be captured by an anonymous function.",
+      "descr":"Neither a `Mutable` nor `MaybeMutable` object may be captured by an anonymous function.",
       "path":"/f11.php","line":4,"start":23,"end":27,"code":4283}]}]}  |}
     );
   ]

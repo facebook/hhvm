@@ -1,6 +1,6 @@
 File "inst_meth8.php", line 19, characters 22-25:
-No method 'f1' in A (did you mean static method 'f1'?) (Typing[4053])
+No method `f1` in `A` (did you mean static method `f1`?) (Typing[4053])
 File "inst_meth8.php", line 18, characters 14-14:
 This is why I think it is an object of type A
 File "inst_meth8.php", line 12, characters 7-7:
-Declaration of A is here
+Declaration of `A` is here

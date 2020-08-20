@@ -1,5 +1,5 @@
 File "trait_priv_extends3.php", line 14, characters 11-13:
-The property c has the wrong type (Typing[4341])
+The property `c` has the wrong type (Typing[4341])
 File "trait_priv_extends3.php", line 14, characters 11-13:
 Typing error
 File "trait_priv_extends3.php", line 8, characters 12-13:

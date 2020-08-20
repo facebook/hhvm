@@ -7,6 +7,6 @@ File "this_tparam_bad1.php", line 36, characters 3-6:
 File "this_tparam_bad1.php", line 36, characters 17-19:
 But got `Foo`
 File "this_tparam_bad1.php", line 34, characters 14-16:
-Since Foo is not final
+Since `Foo` is not final
 File "this_tparam_bad1.php", line 36, characters 17-19:
-this might not be a Foo
+this might not be a `Foo`

@@ -1,4 +1,4 @@
 File "fake_members11.php", line 22, characters 7-23:
-This is not an object of type KeyedContainer, this is a nullable type (Typing[4370])
+This is not an object of type `KeyedContainer`, this is a nullable type (Typing[4370])
 File "fake_members11.php", line 13, characters 11-22:
 Definition is here

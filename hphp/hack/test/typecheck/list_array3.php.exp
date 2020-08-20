@@ -1,6 +1,6 @@
 File "list_array3.php", line 13, characters 3-19:
 Invalid assignment (Typing[4357])
 File "list_array3.php", line 13, characters 3-14:
-This expression cannot be destructured with a list(...) expression
+This expression cannot be destructured with a `list(...)` expression
 File "list_array3.php", line 12, characters 16-30:
-This is darray<int, int>
+This is `darray<int, int>`

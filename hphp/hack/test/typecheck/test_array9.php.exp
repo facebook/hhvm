@@ -1,6 +1,6 @@
 File "test_array9.php", line 16, characters 16-30:
-No method 'unknownFunction' in A (Typing[4053])
+No method `unknownFunction` in `A` (Typing[4053])
 File "test_array9.php", line 15, characters 45-45:
 This is why I think it is an object of type A
 File "test_array9.php", line 12, characters 7-7:
-Declaration of A is here
+Declaration of `A` is here

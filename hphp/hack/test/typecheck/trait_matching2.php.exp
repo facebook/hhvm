@@ -1,5 +1,5 @@
 File "trait_matching2.php", line 23, characters 22-24:
-The method lol has the wrong type (Typing[4341])
+The method `lol` has the wrong type (Typing[4341])
 File "trait_matching2.php", line 13, characters 38-40:
 Expected `int`
 File "trait_matching2.php", line 23, characters 29-34:

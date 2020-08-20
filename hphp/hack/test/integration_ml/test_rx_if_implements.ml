@@ -39,7 +39,7 @@ class B extends A {
 let errors =
   {|
 File "/B.php", line 10, characters 19-19:
-The method f has the wrong type (Typing[4341])
+The method `f` has the wrong type (Typing[4341])
 File "/B.php", line 4, characters 19-19:
 This function is conditionally reactive (condition type: \Rx).
 File "/B.php", line 10, characters 19-19:

@@ -1,6 +1,6 @@
 Errors:
-  [14:5-27] You are calling Shapes::idx() on a field known to not exist
-  [4:45-52] The field 'foo' is not defined in this shape
+  [14:5-27] You are calling `Shapes::idx()` on a field known to not exist
+  [4:45-52] The field `foo` is not defined in this shape
 [(Fun
     { f_span = [4:1-6:2]; f_annotation = (); f_mode = Mstrict;
       f_ret =

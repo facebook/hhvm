@@ -1,8 +1,8 @@
 File "exceptions.php", line 16, characters 3-18:
-Data with policy PRIVATE appears in context PUBLIC. (Typing[4379])
+Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
 File "exceptions.php", line 5, characters 66-72:
-The data source with policy PRIVATE
+The data source with policy `PRIVATE`
 File "exceptions.php", line 9, characters 65-71:
-The data sink with policy PUBLIC
+The data sink with policy `PUBLIC`
 File "exceptions.php", line 13, characters 7-21:
 Another program point contributing to the illegal flow

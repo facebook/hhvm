@@ -43,6 +43,6 @@ File "bad_type_structure_function.php", line 33, characters 3-31:
 File "bad_type_structure_function.php", line 36, characters 3-22:
   TypeStructureKind
 File "bad_type_structure_function.php", line 11, characters 15-25:
-The field classname is undefined (Typing[4108])
+The field `classname` is undefined (Typing[4108])
 File "typestructure.hhi", line 55, characters 29-698:
 Definition is here

@@ -1,2 +1,2 @@
 File "test_obj_set3.php", line 9, characters 3-17:
-Cannot append to a Hack Collection object in a reactive context. Instead, use the 'add' method. (Typing[4201])
+Cannot append to a Hack Collection object in a reactive context. Instead, use the `add` method. (Typing[4201])

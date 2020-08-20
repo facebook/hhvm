@@ -1,7 +1,7 @@
 File "tapply_is_typedef.php", line 8, characters 18-39:
 Some type constraint(s) here are violated (Typing[4323])
 File "tapply_is_typedef.php", line 3, characters 22-22:
-'T' is a constrained type parameter
+`T` is a constrained type parameter
 File "tapply_is_typedef.php", line 3, characters 27-29:
 Expected `num`
 File "tapply_is_typedef.php", line 8, characters 34-38:

@@ -1,4 +1,4 @@
 File "trait_priv_extends2.php", line 15, characters 20-20:
-This member visibility is: private (Typing[4113])
+This member visibility is: `private` (Typing[4113])
 File "trait_priv_extends2.php", line 5, characters 28-28:
-public was expected
+`public` was expected

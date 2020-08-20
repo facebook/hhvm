@@ -1,6 +1,6 @@
 File "bad_inout_hint_parent1.php", line 8, characters 19-21:
-The method foo has the wrong type (Typing[4341])
+The method `foo` has the wrong type (Typing[4341])
 File "bad_inout_hint_parent1.php", line 4, characters 47-49:
-This is an inout parameter
+This is an `inout` parameter
 File "bad_inout_hint_parent1.php", line 8, characters 41-43:
 It is incompatible with a normal parameter

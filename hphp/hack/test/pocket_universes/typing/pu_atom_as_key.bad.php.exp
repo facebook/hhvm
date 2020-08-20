@@ -1,5 +1,5 @@
 File "pu_atom_as_key.bad.php", line 5, characters 15-20:
-The field tata is undefined (Typing[4108])
+The field `tata` is undefined (Typing[4108])
 File "pu_atom_as_key.bad.php", line 4, characters 12-30:
 Definition is here
 File "pu_atom_as_key.bad.php", line 17, characters 10-20:

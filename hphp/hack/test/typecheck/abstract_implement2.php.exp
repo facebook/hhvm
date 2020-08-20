@@ -1,5 +1,5 @@
 File "abstract_implement2.php", line 21, characters 19-21:
-The method foo has the wrong type (Typing[4341])
+The method `foo` has the wrong type (Typing[4341])
 File "abstract_implement2.php", line 20, characters 29-32:
 Expected `bool`
 File "abstract_implement2.php", line 18, characters 43-43:

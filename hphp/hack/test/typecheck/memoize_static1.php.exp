@@ -1,4 +1,4 @@
 File "memoize_static1.php", line 5, characters 16-21:
-Can't use new static() for NotFinal; __construct arguments are not guaranteed to be consistent in child classes (Typing[4060])
+Can't use `new static()` for `NotFinal`; `__construct` arguments are not guaranteed to be consistent in child classes (Typing[4060])
 File "memoize_static1.php", line 2, characters 7-14:
-This declaration is neither final nor uses the <<__ConsistentConstruct>> attribute
+This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute

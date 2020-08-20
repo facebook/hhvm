@@ -1,9 +1,9 @@
 File "hierarchy_method.php", line 9, characters 16-18:
-This object access to get is ambiguous (Typing[4256])
+This object access to `get` is ambiguous (Typing[4256])
 File "hierarchy_method.php", line 4, characters 20-22:
-You will access the private instance declared in A
+You will access the private instance declared in `A`
 File "hierarchy_method.php", line 15, characters 19-21:
-Instead of the public instance declared in C
+Instead of the public instance declared in `C`
 File "hierarchy_method.php", line 9, characters 12-20:
 Invalid return type (Typing[4110])
 File "hierarchy_method.php", line 8, characters 33-38:

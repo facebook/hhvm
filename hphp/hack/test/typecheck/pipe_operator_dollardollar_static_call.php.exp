@@ -1,4 +1,4 @@
 File "pipe_operator_dollardollar_static_call.php", line 11, characters 15-26:
-No static method `doesNotExist` in `Foo` (did you mean 'fooMeth'?) (Typing[4090])
+No static method `doesNotExist` in `Foo` (did you mean `fooMeth`?) (Typing[4090])
 File "pipe_operator_dollardollar_static_call.php", line 3, characters 7-9:
 Declaration of `Foo` is here

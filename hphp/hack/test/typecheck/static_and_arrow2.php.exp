@@ -1,6 +1,6 @@
 File "static_and_arrow2.php", line 19, characters 11-12:
-No method 'f2' in Bar (did you mean static method 'f2'?) (Typing[4053])
+No method `f2` in `Bar` (did you mean static method `f2`?) (Typing[4053])
 File "static_and_arrow2.php", line 18, characters 16-18:
 This is why I think it is an object of type Bar
 File "static_and_arrow2.php", line 12, characters 7-9:
-Declaration of Bar is here
+Declaration of `Bar` is here

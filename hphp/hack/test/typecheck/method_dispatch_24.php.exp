@@ -1,6 +1,6 @@
 File "method_dispatch_24.php", line 25, characters 12-13:
-No method 'f2' in B (did you mean static method 'f2'?) (Typing[4053])
+No method `f2` in `B` (did you mean static method `f2`?) (Typing[4053])
 File "method_dispatch_24.php", line 25, characters 5-9:
 This is why I think it is an object of type B
 File "method_dispatch_24.php", line 21, characters 7-7:
-Declaration of B is here
+Declaration of `B` is here

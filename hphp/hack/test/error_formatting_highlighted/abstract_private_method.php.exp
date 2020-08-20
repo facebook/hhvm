@@ -15,7 +15,7 @@ abstract_private_method.php:4:3
 [1] 4 |   private abstract function f(): void;
     5 | }
 
-Typing[4047] This class must be declared abstract, or provide an implementation for the abstract method 'f' [1]
+Typing[4047] This class must be declared abstract, or provide an implementation for the abstract method f [1]
 -> Declaration is here [2]
 
 abstract_private_method.php:3:7

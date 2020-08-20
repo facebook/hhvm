@@ -1,17 +1,17 @@
 File "cipp_calls.php", line 42, characters 3-17:
-Context-implicit policy leaks into PUBLIC via pc. (Typing[4380])
+Context-implicit policy leaks into `PUBLIC` via `pc`. (Typing[4380])
 File "cipp_calls.php", line 31, characters 3-13:
 Another program point contributing to the leakage
 File "cipp_calls.php", line 6, characters 14-23:
 Leakage sink
 File "cipp_calls.php", line 42, characters 3-17:
-Context-implicit policy leaks into PUBLIC via pc. (Typing[4380])
+Context-implicit policy leaks into `PUBLIC` via `pc`. (Typing[4380])
 File "cipp_calls.php", line 25, characters 3-12:
 Another program point contributing to the leakage
 File "cipp_calls.php", line 6, characters 14-23:
 Leakage sink
 File "cipp_calls.php", line 42, characters 3-17:
-Context-implicit policy leaks into PUBLIC via $x. (Typing[4380])
+Context-implicit policy leaks into `PUBLIC` via `$x`. (Typing[4380])
 File "cipp_calls.php", line 25, characters 3-12:
 Another program point contributing to the leakage
 File "cipp_calls.php", line 6, characters 14-23:

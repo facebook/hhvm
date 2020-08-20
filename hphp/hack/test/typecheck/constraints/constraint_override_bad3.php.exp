@@ -1,5 +1,5 @@
 File "constraint_override_bad3.php", line 24, characters 19-21:
-The method foo has the wrong type (Typing[4341])
+The method `foo` has the wrong type (Typing[4341])
 File "constraint_override_bad3.php", line 24, characters 73-73:
 Expected `B`
 File "constraint_override_bad3.php", line 23, characters 14-15:

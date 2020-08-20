@@ -3,7 +3,7 @@ Invalid return type (Typing[4323])
 File "super_constraint_2.php", line 10, characters 32-32:
 Some type constraint(s) are violated here
 File "super_constraint_2.php", line 10, characters 23-24:
-Tu is a constrained type parameter
+`Tu` is a constrained type parameter
 File "super_constraint_2.php", line 26, characters 6-18:
 Expected `FooDerived123`
 File "super_constraint_2.php", line 10, characters 32-32:

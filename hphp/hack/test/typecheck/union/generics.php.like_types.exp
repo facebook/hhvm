@@ -79,8 +79,8 @@ But got `string`
 File "generics.php--file2.php", line 20, characters 47-50:
 An abstract type constant is not allowed in this position. (Typing[4352])
 File "generics.php--file2.php", line 4, characters 23-26:
-Tabs is abstract here.
+`Tabs` is abstract here.
 File "generics.php--file2.php", line 20, characters 62-66:
 An abstract type constant is not allowed in this position. (Typing[4352])
 File "generics.php--file2.php", line 5, characters 23-27:
-Tcstr is abstract here.
+`Tcstr` is abstract here.

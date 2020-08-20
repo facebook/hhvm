@@ -19,4 +19,4 @@ File "lambda.php", line 86, characters 3-13:
 File "lambda.php", line 87, characters 3-13:
   (exact A | exact B | exact C | exact E)
 File "lambda.php", line 48, characters 11-19:
-continue can only be used inside loops (NastCheck[3023])
+`continue` can only be used inside loops (NastCheck[3023])

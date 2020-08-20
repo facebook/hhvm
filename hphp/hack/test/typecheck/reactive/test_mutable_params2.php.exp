@@ -1,4 +1,4 @@
 File "test_mutable_params2.php", line 12, characters 8-24:
-Invalid argument - freeze() takes a single mutable variable (Typing[4211])
+Invalid argument - `freeze()` takes a single mutable variable (Typing[4211])
 File "test_mutable_params2.php", line 12, characters 22-23:
 This variable is mutably-borrowed

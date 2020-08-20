@@ -5,6 +5,6 @@ Expected `this`
 File "this_param.php", line 21, characters 24-26:
 But got `Foo`
 File "this_param.php", line 12, characters 7-9:
-Since Foo is not final
+Since `Foo` is not final
 File "this_param.php", line 21, characters 24-26:
-this might not be a Foo
+this might not be a `Foo`

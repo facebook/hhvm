@@ -7,6 +7,6 @@ Expected `int`
 File "callable.php", line 6, characters 9-29:
 But got `(function(int): ?int)`
 File "callable.php", line 6, characters 9-29:
-Invalid "as" expression hint (Typing[4195])
+Invalid `as` expression hint (Typing[4195])
 File "callable.php", line 6, characters 9-29:
-The "as" operator cannot be used with a function type
+The `as` operator cannot be used with a function type

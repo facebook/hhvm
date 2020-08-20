@@ -9,6 +9,6 @@ But got `Foo`
 File "this_tparam_bad2.php", line 18, characters 33-35:
 Considering that this type argument is invariant with respect to SomethingElse
 File "this_tparam_bad2.php", line 20, characters 15-17:
-Since Foo is not final
+Since `Foo` is not final
 File "this_tparam_bad2.php", line 18, characters 33-35:
-this might not be a Foo
+this might not be a `Foo`

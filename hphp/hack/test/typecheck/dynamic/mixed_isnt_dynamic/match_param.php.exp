@@ -1,5 +1,5 @@
 File "match_param.php", line 14, characters 19-20:
-The method do has the wrong type (Typing[4341])
+The method `do` has the wrong type (Typing[4341])
 File "match_param.php", line 14, characters 22-28:
 Expected `dynamic`
 File "match_param.php", line 13, characters 33-37:

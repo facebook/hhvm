@@ -464,7 +464,7 @@ trait LazyIterable implements \HH\Iterable {
     return new LazyFilterIterable($this, $callback);
   }
   public function zip($iterable) {
-    if (is_array($iterable)) {
+    if (HH\is_any_array($iterable)) {
       $iterable = new ImmMap($iterable);
     }
     return new LazyZipIterable($this, $iterable);
@@ -485,7 +485,7 @@ trait LazyIterable implements \HH\Iterable {
     return new LazySliceIterable($this, $start, $len);
   }
   public function concat($iterable) {
-    if (is_array($iterable)) {
+    if (HH\is_any_array($iterable)) {
       $iterable = new ImmMap($iterable);
     }
     return new LazyConcatIterable($this, $iterable);
@@ -565,7 +565,7 @@ trait LazyKeyedIterable implements \HH\KeyedIterable {
     return new LazyFilterWithKeyIterable($this, $callback);
   }
   public function zip($iterable) {
-    if (is_array($iterable)) {
+    if (HH\is_any_array($iterable)) {
       $iterable = new ImmMap($iterable);
     }
     return new LazyZipKeyedIterable($this, $iterable);
@@ -586,7 +586,7 @@ trait LazyKeyedIterable implements \HH\KeyedIterable {
     return new LazySliceKeyedIterable($this, $start, $len);
   }
   public function concat($iterable) {
-    if (is_array($iterable)) {
+    if (HH\is_any_array($iterable)) {
       $iterable = new ImmMap($iterable);
     }
     return new LazyConcatIterable($this, $iterable);
@@ -1755,7 +1755,7 @@ class LazyIterableView implements \HH\Iterable {
     return new LazyFilterIterable($this->iterable, $callback);
   }
   public function zip($iterable) {
-    if (is_array($iterable)) {
+    if (HH\is_any_array($iterable)) {
       $iterable = new ImmMap($iterable);
     }
     return new LazyZipIterable($this->iterable, $iterable);
@@ -1776,7 +1776,7 @@ class LazyIterableView implements \HH\Iterable {
     return new LazySliceIterable($this->iterable, $start, $len);
   }
   public function concat($iterable) {
-    if (is_array($iterable)) {
+    if (HH\is_any_array($iterable)) {
       $iterable = new ImmMap($iterable);
     }
     return new LazyConcatIterable($this->iterable, $iterable);
@@ -1860,7 +1860,7 @@ class LazyKeyedIterableView implements \HH\KeyedIterable {
     return new LazyFilterWithKeyIterable($this->iterable, $callback);
   }
   public function zip($iterable) {
-    if (is_array($iterable)) {
+    if (HH\is_any_array($iterable)) {
       $iterable = new ImmMap($iterable);
     }
     return new LazyZipKeyedIterable($this->iterable, $iterable);
@@ -1881,7 +1881,7 @@ class LazyKeyedIterableView implements \HH\KeyedIterable {
     return new LazySliceKeyedIterable($this->iterable, $start, $len);
   }
   public function concat($iterable) {
-    if (is_array($iterable)) {
+    if (HH\is_any_array($iterable)) {
       $iterable = new ImmMap($iterable);
     }
     return new LazyConcatIterable($this->iterable, $iterable);

@@ -448,7 +448,7 @@ namespace HH\ExperimentalParserUtils {
     (function (varray_or_darray): ?varray_or_darray) $predicate,
     (function (varray_or_darray): bool) $skip_node,
   ): ?varray_or_darray {
-    if (!\is_array($json)) {
+    if (!\HH\is_any_array($json)) {
       return null;
     }
 

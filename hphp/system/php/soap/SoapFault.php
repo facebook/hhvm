@@ -22,7 +22,7 @@ class SoapFault extends Exception {
     $fault_code = null;
     if (is_string($code)) {
       $fault_code = $code;
-    } else if (is_array($code) && count($code) == 2) {
+    } else if (HH\is_any_array($code) && count($code) == 2) {
       $code = array_values($code);
       $fault_ns = $code[0];
       $fault_code = $code[1];

@@ -84,7 +84,7 @@ class APCIterator implements Iterator{
     }
     ++$this->index;
     if ($this->search !== null) {
-      if (is_array($this->search)) {
+      if (HH\is_any_array($this->search)) {
         while ($this->valid() &&
                !$this->preg_match_recursive($this->search, $this->key())) {
           ++$this->index;
@@ -187,7 +187,7 @@ class APCIterator implements Iterator{
     $info = $this->getInfo();
     foreach ($info as $list) {
       if ($this->search !== null) {
-        if (is_array($this->search)) {
+        if (HH\is_any_array($this->search)) {
           while (!$this->preg_match_recursive($this->search,
                                               $list['info'])) {
             continue;
@@ -231,7 +231,7 @@ class APCIterator implements Iterator{
     }
     foreach ($this->info as $key) {
       if ($this->search !== null) {
-        if (is_array($this->search)) {
+        if (HH\is_any_array($this->search)) {
           while (!$this->preg_match_recursive($this->search,
                                               $key['info'])) {
             continue;

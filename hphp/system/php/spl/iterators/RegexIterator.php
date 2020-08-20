@@ -99,7 +99,7 @@ class RegexIterator extends FilterIterator
    * @return boolean TRUE if a match, FALSE otherwise.
    */
   public function accept() {
-    if (is_array(parent::current())) {
+    if (HH\is_any_array(parent::current())) {
       return false;
     }
 

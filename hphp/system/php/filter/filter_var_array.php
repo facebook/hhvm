@@ -22,10 +22,10 @@ function _filter_var_array_single($value, $filter, $options = darray[]) {
   $ret = filter_var($value, (int) $filter, $options);
 
   $flags = isset($options['flags']) ? $options['flags'] : 0;
-  if ($flags & FILTER_FORCE_ARRAY && !is_array($ret)) {
+  if ($flags & FILTER_FORCE_ARRAY && !HH\is_any_array($ret)) {
     return varray[$ret];
   }
-  if ($flags & FILTER_REQUIRE_SCALAR && is_array($ret)) {
+  if ($flags & FILTER_REQUIRE_SCALAR && HH\is_any_array($ret)) {
     return false;
   }
   if ($flags & FILTER_REQUIRE_ARRAY && is_null($ret)) {
@@ -66,14 +66,14 @@ function _filter_var_array_single($value, $filter, $options = darray[]) {
    */
   <<__Pure>>
 function filter_var_array($data, $definition = null, $add_empty = true) {
-  if (!is_array($data)) {
+  if (!HH\is_any_array($data)) {
     trigger_error('filter_var_array() expects parameter 1 to be array, '.
       gettype($data).' given', E_WARNING);
     return null;
   }
 
   $default_filter = null;
-  if (!is_array($definition)) {
+  if (!HH\is_any_array($definition)) {
     if ($definition === null) {
       $default_filter = FILTER_DEFAULT;
     } else if (is_int($definition)) {
@@ -112,7 +112,7 @@ function filter_var_array($data, $definition = null, $add_empty = true) {
       continue;
     }
 
-    if (!is_array($def)) {
+    if (!HH\is_any_array($def)) {
       $ret[$key] = _filter_var_array_single($value, $def);
       continue;
     }

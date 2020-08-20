@@ -107,7 +107,10 @@ type prop =
 module Flow = struct
   type t = policy * policy
 
-  let compare = compare
+  let compare (a, b) (c, d) =
+    match compare_policy a c with
+    | 0 -> compare_policy b d
+    | x -> x
 end
 
 module FlowSet = Set.Make (Flow)
@@ -117,7 +120,7 @@ type security_lattice = FlowSet.t
 module Policy = struct
   type t = policy
 
-  let compare = compare
+  let compare = compare_policy
 end
 
 module PCSet = Set.Make (Policy)

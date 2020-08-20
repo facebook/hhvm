@@ -464,7 +464,7 @@ let get_files_to_recheck
   let deps = Typing_deps.DepSet.union deps to_recheck in
   Typing_deps.get_files deps
 
-(* We start of with a list of files that have changed since the state was
+(* We start off with a list of files that have changed since the state was
  * saved (dirty_files), and two maps of the class / function declarations
  * -- one made when the state was saved (old_fast) and one made for the
  * current files in the repository (new_fast). We grab the declarations from

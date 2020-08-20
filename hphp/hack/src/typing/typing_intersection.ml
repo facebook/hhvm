@@ -151,10 +151,10 @@ let rec intersect env ~r ty1 ty2 =
             | (_, (_, Tintersection tyl)) -> intersect_lists env r [ty1] tyl
             | ((r1, Tunion tyl1), (r2, Tunion tyl2)) ->
               (* Factorize common types, for example
-           (A | B) & (A | C) = A | (B & C)
-        and
-           (A | B | C1 | D1) & (A | B | C2 | D2) = A | B | ((C1 | D1) & (C2 | D2))
-        *)
+                (A | B) & (A | C) = A | (B & C)
+              and
+                (A | B | C1 | D1) & (A | B | C2 | D2) = A | B | ((C1 | D1) & (C2 | D2))
+              *)
               let tys1 = TySet.of_list tyl1 in
               let tys2 = TySet.of_list tyl2 in
               let common_tys = TySet.inter tys1 tys2 in

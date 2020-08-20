@@ -3,6 +3,7 @@ module Types = struct
 
   type hg_rev = string [@@deriving eq, show]
 
+  (** This is a monotonically increasing revision number. *)
   type global_rev = int [@@deriving eq, show]
 
   type rev =

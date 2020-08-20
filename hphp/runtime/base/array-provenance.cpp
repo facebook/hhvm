@@ -524,7 +524,10 @@ TypedValue markTvImpl(TypedValue in, bool legacy, bool recursive) {
   // Unmark legacy vecs/dicts to silence logging,
   // e.g. while casting to regular vecs or dicts.
   auto const unmark_tv = [&](ArrayData* ad, bool cow) -> ArrayData* {
-    if (!ad->isVecType() && !ad->isDictType()) return nullptr;
+    if (RO::EvalHackArrDVArrs && !ad->isVecType() && !ad->isDictType()) {
+      return nullptr;
+    }
+    if (!RO::EvalHackArrDVArrs && !ad->isDVArray()) return nullptr;
     if (!ad->isLegacyArray()) return nullptr;
 
     auto result = copy_if_needed(ad, cow);

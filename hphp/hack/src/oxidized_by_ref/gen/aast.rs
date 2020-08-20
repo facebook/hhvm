@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d1228704d5dbcaabb2e6d5c93ecff093>>
+// @generated SignedSource<<9e54d618a358f170b0e86b4934239f6d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -411,7 +411,7 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
     MethodId(&'a (Expr<'a, Ex, Fb, En, Hi>, Pstring<'a>)),
     /// meth_caller('Class name', 'method name')
     MethodCaller(&'a (Sid<'a>, Pstring<'a>)),
-    SmethodId(&'a (Sid<'a>, Pstring<'a>)),
+    SmethodId(&'a (ClassId<'a, Ex, Fb, En, Hi>, Pstring<'a>)),
     Pair(
         &'a (
             Option<(Targ<'a, Hi>, Targ<'a, Hi>)>,

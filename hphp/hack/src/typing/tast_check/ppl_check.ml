@@ -165,7 +165,7 @@ let handler =
       match x with
       | Call (_, e, _, _, _) -> on_call_expr env e
       (* class_meth *)
-      | Smethod_id ((_, classname), _) ->
+      | Smethod_id ((_, CI (_, classname)), _) ->
         check_ppl_meth_pointers env p classname "class_meth"
       (* meth_caller *)
       | Method_caller ((_, classname), _) ->

@@ -99,11 +99,11 @@ class visitor =
           |> List.map ~f:(fun cid -> self#method_call env Constructor cid mid)
           |> List.fold ~init:self#zero ~f:self#plus
         | Tast.Fun_id (pos, name) -> self#fun_call env Function name pos
+        | Tast.Smethod_id (((_, ty), _), mid)
         | Tast.Method_id (((_, ty), _), mid) ->
           Tast_env.get_class_ids env ty
           |> List.map ~f:(fun cid -> self#method_call env Method cid mid)
           |> List.fold ~init:self#zero ~f:self#plus
-        | Tast.Smethod_id ((_, cid), mid)
         | Tast.Method_caller ((_, cid), mid) ->
           self#method_call env Method cid mid
         | _ -> self#zero

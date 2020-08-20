@@ -2113,8 +2113,9 @@ and expr_ env p (e : Nast.expr_) =
           match (expr env e1, expr env e2) with
           | ((pc, N.String cl), (pm, N.String meth)) ->
             let () = check_name (pc, cl) in
-            N.Smethod_id ((pc, cl), (pm, meth))
-          | ((_, N.Id (_, const)), (pm, N.String meth))
+            let cid = N.CI (pc, cl) in
+            N.Smethod_id ((pc, cid), (pm, meth))
+          | ((_, N.Id (pc, const)), (pm, N.String meth))
             when String.equal const SN.PseudoConsts.g__CLASS__ ->
             (* All of these that use current_cls aren't quite correct
              * inside a trait, as the class should be the using class.
@@ -2123,7 +2124,9 @@ and expr_ env p (e : Nast.expr_) =
              * declarations).
              *)
             (match (fst env).current_cls with
-            | Some (cid, _, true) -> N.Smethod_id ((p, snd cid), (pm, meth))
+            | Some (cid, _, true) ->
+              let cid = N.CI (pc, snd cid) in
+              N.Smethod_id ((p, cid), (pm, meth))
             | Some (cid, kind, false) ->
               let is_trait = Ast_defs.is_c_trait kind in
               Errors.class_meth_non_final_CLASS p is_trait (snd cid);
@@ -2131,24 +2134,26 @@ and expr_ env p (e : Nast.expr_) =
             | None ->
               Errors.illegal_class_meth p;
               N.Any)
-          | ((_, N.Class_const ((_, N.CI cl), (_, mem))), (pm, N.String meth))
+          | ((_, N.Class_const ((pc, N.CI cl), (_, mem))), (pm, N.String meth))
             when String.equal mem SN.Members.mClass ->
             let () = check_name cl in
-            N.Smethod_id (cl, (pm, meth))
-          | ((p, N.Class_const ((_, N.CIself), (_, mem))), (pm, N.String meth))
+            let cid = N.CI cl in
+            N.Smethod_id ((pc, cid), (pm, meth))
+          | ((p, N.Class_const ((pc, N.CIself), (_, mem))), (pm, N.String meth))
             when String.equal mem SN.Members.mClass ->
             (match (fst env).current_cls with
-            | Some (cid, _, true) -> N.Smethod_id (cid, (pm, meth))
+            | Some (_cid, _, true) -> N.Smethod_id ((pc, N.CIself), (pm, meth))
             | Some (cid, _, false) ->
               Errors.class_meth_non_final_self p (snd cid);
               N.Any
             | None ->
               Errors.illegal_class_meth p;
               N.Any)
-          | ((p, N.Class_const ((_, N.CIstatic), (_, mem))), (pm, N.String meth))
+          | ( (p, N.Class_const ((pc, N.CIstatic), (_, mem))),
+              (pm, N.String meth) )
             when String.equal mem SN.Members.mClass ->
             (match (fst env).current_cls with
-            | Some (cid, _, _) -> N.Smethod_id (cid, (pm, meth))
+            | Some (_cid, _, _) -> N.Smethod_id ((pc, N.CIstatic), (pm, meth))
             | None ->
               Errors.illegal_class_meth p;
               N.Any)

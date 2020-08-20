@@ -475,7 +475,7 @@ module Visitor_DEPRECATED = struct
 
       method on_method_id : 'a -> expr -> pstring -> 'a
 
-      method on_smethod_id : 'a -> sid -> pstring -> 'a
+      method on_smethod_id : 'a -> class_id -> pstring -> 'a
 
       method on_method_caller : 'a -> sid -> pstring -> 'a
 
@@ -790,7 +790,7 @@ module Visitor_DEPRECATED = struct
         | Fun_id sid -> this#on_fun_id acc sid
         | Method_id (expr, pstr) -> this#on_method_id acc expr pstr
         | Method_caller (sid, pstr) -> this#on_method_caller acc sid pstr
-        | Smethod_id (sid, pstr) -> this#on_smethod_id acc sid pstr
+        | Smethod_id (cid, pstr) -> this#on_smethod_id acc cid pstr
         | Yield_break -> this#on_yield_break acc
         | Yield e -> this#on_yield acc e
         | Await e -> this#on_await acc e

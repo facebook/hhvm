@@ -1415,3 +1415,6 @@ val context_implicit_policy_leakage :
   Pos.t -> Pos.t list -> Pos.t list * string -> Pos.t list * string -> unit
 
 val reified_function_reference : Pos.t -> unit
+
+val class_meth_abstract_call :
+  string -> string -> Pos.t -> Pos.t -> unit

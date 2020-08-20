@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<01ebe94fd7b9ebaa509f5696c312a1f6>>
+// @generated SignedSource<<7fdb86b386486485106ffea9d9eb0bc4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1106,7 +1106,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_method_caller(p0: Sid, p1: Pstring) -> Self {
         Expr_::MethodCaller(Box::new((p0, p1)))
     }
-    pub fn mk_smethod_id(p0: Sid, p1: Pstring) -> Self {
+    pub fn mk_smethod_id(p0: ClassId<Ex, Fb, En, Hi>, p1: Pstring) -> Self {
         Expr_::SmethodId(Box::new((p0, p1)))
     }
     pub fn mk_pair(
@@ -1817,7 +1817,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_smethod_id(&self) -> Option<(&Sid, &Pstring)> {
+    pub fn as_smethod_id(&self) -> Option<(&ClassId<Ex, Fb, En, Hi>, &Pstring)> {
         match self {
             Expr_::SmethodId(p0) => Some((&p0.0, &p0.1)),
             _ => None,
@@ -2224,7 +2224,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_smethod_id_mut(&mut self) -> Option<(&mut Sid, &mut Pstring)> {
+    pub fn as_smethod_id_mut(&mut self) -> Option<(&mut ClassId<Ex, Fb, En, Hi>, &mut Pstring)> {
         match self {
             Expr_::SmethodId(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -2597,7 +2597,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_smethod_id_into(self) -> Option<(Sid, Pstring)> {
+    pub fn as_smethod_id_into(self) -> Option<(ClassId<Ex, Fb, En, Hi>, Pstring)> {
         match self {
             Expr_::SmethodId(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,

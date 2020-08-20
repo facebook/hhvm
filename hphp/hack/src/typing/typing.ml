@@ -1743,18 +1743,28 @@ and expr_
       p
       (Aast.FunctionPointer (FP_class_const (ce, meth), tal))
       fpty
-  | Smethod_id (c, meth) ->
+  | Smethod_id ((pc, cid), meth) ->
     (* Smethod_id is used when creating a "method pointer" using the magic
      * class_meth function.
      *
      * Typing this is pretty simple, we just need to check that c::meth is
      * public+static and then return its type.
      *)
-    let class_ = Env.get_class env (snd c) in
+    let (class_, classname) =
+      match cid with
+      | CIself
+      | CIstatic ->
+        (Env.get_self_class env, Env.get_self_id env)
+      | CI (_, const) when String.equal const SN.PseudoConsts.g__CLASS__ ->
+        (Env.get_self_class env, Env.get_self_id env)
+      | CI (_, id) -> (Env.get_class env id, Some id)
+      | _ -> (None, None)
+    in
+    let classname = Option.value classname ~default:"" in
     (match class_ with
     | None ->
       (* The class given as a static string was not found. *)
-      unbound_name env c outer
+      unbound_name env (pc, classname) outer
     | Some class_ ->
       let smethod = Env.get_static_member true env class_ (snd meth) in
       (match smethod with
@@ -1769,11 +1779,17 @@ and expr_
           Errors.unify_error;
         expr_error env Reason.Rnone outer
       | Some ({ ce_type = (lazy ty); ce_pos = (lazy ce_pos); _ } as ce) ->
-        let cid = CI c in
+        let () =
+          if get_ce_abstract ce then
+            match cid with
+            | CIstatic -> ()
+            | _ -> Errors.class_meth_abstract_call classname (snd meth) p ce_pos
+        in
+        let cid = CI (pc, classname) in
         let ce_visibility = ce.ce_visibility in
         let ce_deprecated = ce.ce_deprecated in
-        let (env, _tal, _te, cid_ty) =
-          static_class_id ~check_constraints:true (fst c) env [] cid
+        let (env, _tal, te, cid_ty) =
+          static_class_id ~check_constraints:true pc env [] cid
         in
         let (env, cid_ty) = Env.expand_type env cid_ty in
         let tyargs =
@@ -1826,7 +1842,7 @@ and expr_
           let use_pos = fst meth in
           TVis.check_deprecated ~use_pos ~def_pos ce_deprecated;
           (match ce_visibility with
-          | Vpublic -> make_result env p (Aast.Smethod_id (c, meth)) ty
+          | Vpublic -> make_result env p (Aast.Smethod_id (te, meth)) ty
           | Vprivate _ ->
             Errors.private_class_meth ~def_pos ~use_pos;
             expr_error env r outer

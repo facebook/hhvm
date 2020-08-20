@@ -5274,6 +5274,20 @@ let reified_function_reference call_pos =
     call_pos
     "Invalid function reference. This function requires reified generics. Prefer using a lambda instead."
 
+let class_meth_abstract_call cname meth_name call_pos decl_pos =
+  let cname = strip_ns cname in
+  add_list
+    (Typing.err_code Typing.ClassMethAbstractCall)
+    [
+      ( call_pos,
+        "Cannot create a class_meth of "
+        ^ cname
+        ^ "::"
+        ^ meth_name
+        ^ "; it is abstract." );
+      (decl_pos, "Declaration is here");
+    ]
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

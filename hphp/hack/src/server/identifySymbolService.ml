@@ -198,14 +198,9 @@ let visitor =
         | Aast.Method_id (((_, ty), _), mid) ->
           process_fun_id (pos, SN.AutoimportedFunctions.inst_meth)
           + typed_method env ty (remove_apostrophes_from_function_eval mid)
-        | Aast.Smethod_id (((_, cid) as pcid), mid) ->
+        | Aast.Smethod_id (((_, ty), _), mid) ->
           process_fun_id (pos, SN.AutoimportedFunctions.class_meth)
-          + process_class_id pcid
-          + process_member
-              cid
-              (remove_apostrophes_from_function_eval mid)
-              ~is_method:true
-              ~is_const:false
+          + typed_method env ty (remove_apostrophes_from_function_eval mid)
         | Aast.Method_caller (((_, cid) as pcid), mid) ->
           process_fun_id (pos, SN.AutoimportedFunctions.meth_caller)
           + process_class_id pcid

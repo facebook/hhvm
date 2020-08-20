@@ -321,7 +321,6 @@ let handler ctx =
         let () = check_fun_name env id in
         env
       | Aast.Method_caller (id, _)
-      | Aast.Smethod_id (id, _)
       | Aast.Xml (id, _, _) ->
         let () =
           check_type_name

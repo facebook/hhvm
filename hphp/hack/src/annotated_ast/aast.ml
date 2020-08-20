@@ -210,7 +210,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
   | Method_id of ('ex, 'fb, 'en, 'hi) expr * pstring
   | Method_caller of sid * pstring
       (** meth_caller('Class name', 'method name') *)
-  | Smethod_id of sid * pstring
+  | Smethod_id of ('ex, 'fb, 'en, 'hi) class_id * pstring
   | Pair of
       ('hi targ * 'hi targ) option
       * ('ex, 'fb, 'en, 'hi) expr

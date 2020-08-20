@@ -280,7 +280,14 @@ let rec class_ tenv c =
             if not (SMap.is_empty class_uninit_props) then
               Errors.not_initialized
                 (p, snd c.c_name)
-                (SMap.bindings class_uninit_props |> List.map ~f:fst)
+                ( SMap.bindings class_uninit_props
+                |> List.map ~f:(fun (name, ty) ->
+                       let ty_str =
+                         match ty with
+                         | Some ty -> Typing_print.full_strip_ns_decl tenv ty
+                         | None -> "YourTypeHere"
+                       in
+                       (name, ty_str)) )
       in
       let check_throws_or_init_all inits =
         match inits with

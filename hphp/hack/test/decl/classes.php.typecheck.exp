@@ -1,10 +1,9 @@
 File "classes.php", line 4, characters 25-39:
 Please assign a value (Typing[4055])
 File "classes.php", line 9, characters 19-29:
-Class `MyClass` does not initialize all of its members; `instanceProperty` `protectedProperty` are not always initialized.
-Make sure you systematically set `$this->instanceProperty` `$this->protectedProperty` when the method `__construct` is called.
-Alternatively, you can define the members as nullable with `?YourTypeHere`
- (NastCheck[3015])
+Class `MyClass` does not initialize all of its members; `instanceProperty`, `protectedProperty` are not always initialized.
+Make sure you systematically set `$this->instanceProperty`, `$this->protectedProperty` when the method `__construct` is called.
+Alternatively, you can define the members as nullable with `?string $instanceProperty`, `?int $protectedProperty`. (NastCheck[3015])
 File "classes.php", line 41, characters 31-37:
 Reactive functions can only call other reactive functions. (Typing[4200])
 File "classes.php", line 9, characters 19-29:

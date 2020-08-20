@@ -684,7 +684,7 @@ val no_construct_parent : Pos.t -> unit
 
 val constructor_required : Pos.t * string -> string list -> unit
 
-val not_initialized : Pos.t * string -> string list -> unit
+val not_initialized : Pos.t * string -> (string * string) list -> unit
 
 val call_before_init : Pos.t -> string -> unit
 

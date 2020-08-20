@@ -1780,14 +1780,10 @@ let constructor_required (pos, name) prop_names =
     ^ " does not initialize its private member(s): "
     ^ props_str )
 
-let not_initialized (pos, cname) prop_names =
+let not_initialized (pos, cname) props =
   let cname = strip_ns cname in
-  let props_str =
-    List.fold_right
-      prop_names
-      ~f:(fun x acc -> md_codify x ^ " " ^ acc)
-      ~init:""
-  in
+  let prop_names = List.map ~f:fst props in
+  let props_str = List.map prop_names ~f:md_codify |> String.concat ~sep:", " in
   let (members, verb) =
     if 1 = List.length prop_names then
       ("member", "is")
@@ -1795,10 +1791,12 @@ let not_initialized (pos, cname) prop_names =
       ("members", "are")
   in
   let setters_str =
-    List.fold_right
-      prop_names
-      ~f:(fun x acc -> md_codify ("$this->" ^ x) ^ " " ^ acc)
-      ~init:""
+    List.map prop_names ~f:(fun x -> md_codify ("$this->" ^ x))
+    |> String.concat ~sep:", "
+  in
+  let nullable_tys =
+    List.map props ~f:(fun (name, ty) -> md_codify ("?" ^ ty ^ " $" ^ name))
+    |> String.concat ~sep:", "
   in
   add
     (NastCheck.err_code NastCheck.NotInitialized)
@@ -1809,14 +1807,17 @@ let not_initialized (pos, cname) prop_names =
          md_codify cname;
          " does not initialize all of its members; ";
          props_str;
+         " ";
          verb;
          " not always initialized.";
          "\nMake sure you systematically set ";
          setters_str;
-         "when the method `__construct` is called.";
+         " when the method `__construct` is called.";
          "\nAlternatively, you can define the ";
          members;
-         " as nullable with `?YourTypeHere`\n";
+         " as nullable with ";
+         nullable_tys;
+         ".";
        ])
 
 let call_before_init pos cv =

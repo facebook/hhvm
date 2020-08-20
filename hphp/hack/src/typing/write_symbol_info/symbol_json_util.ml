@@ -9,6 +9,7 @@
 open Aast
 open Ast_defs
 open Decl_env
+open Full_fidelity_source_text
 open Hh_json
 open Hh_prelude
 open Symbol_builder_types
@@ -50,6 +51,13 @@ let strip_tparams name =
   match String.index name '<' with
   | None -> name
   | Some i -> String.sub name 0 i
+
+(* True if source text ends in a newline *)
+let ends_in_newline sourceText =
+  let last_char =
+    Full_fidelity_source_text.get sourceText (sourceText.length - 1)
+  in
+  phys_equal '\n' last_char || phys_equal '\r' last_char
 
 let rec find_fid fid_list pred =
   match fid_list with

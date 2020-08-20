@@ -394,7 +394,7 @@ let add_file_lines_fact filepath sourceText progress =
   let lineLengths =
     Line_break_map.offsets_to_line_lengths sourceText.offset_map
   in
-  let endsInNewline = false (* TODO *) in
+  let endsInNewline = ends_in_newline sourceText in
   let hasUnicodeOrTabs = false (* TODO *) in
   let json_fact =
     build_file_lines_json filepath lineLengths endsInNewline hasUnicodeOrTabs

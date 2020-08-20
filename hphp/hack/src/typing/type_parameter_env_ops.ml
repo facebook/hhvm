@@ -65,15 +65,23 @@ let join_upper_bounds env u1 u2 =
     (env, TySet.singleton new_upper)
 
 let join env tpenv1 tpenv2 =
+  let merge_pos p1 p2 =
+    if Pos.equal p1 Pos.none then
+      p2
+    else
+      p1
+  in
+
   TP.merge_env env tpenv1 tpenv2 ~combine:(fun env _tparam info1 info2 ->
       match (info1, info2) with
-      | ( Some (TP.{ lower_bounds = l1; upper_bounds = u1; _ } as info1),
-          Some TP.{ lower_bounds = l2; upper_bounds = u2; _ } ) ->
+      | ( Some (pos1, (TP.{ lower_bounds = l1; upper_bounds = u1; _ } as info1)),
+          Some (pos2, TP.{ lower_bounds = l2; upper_bounds = u2; _ }) ) ->
         let (env, lower_bounds) = join_lower_bounds env l1 l2 in
         let (env, upper_bounds) = join_upper_bounds env u1 u2 in
-        (env, Some TP.{ info1 with lower_bounds; upper_bounds })
-      | (Some info, _) -> (env, Some info)
-      | (_, Some info) -> (env, Some info)
+        let pos = merge_pos pos1 pos2 in
+        (env, Some (pos, TP.{ info1 with lower_bounds; upper_bounds }))
+      | (Some (pos, info), _) -> (env, Some (pos, info))
+      | (_, Some (pos, info)) -> (env, Some (pos, info))
       | (_, _) -> (env, None))
 
 let get_tpenv_equal_bounds env name tyargs =

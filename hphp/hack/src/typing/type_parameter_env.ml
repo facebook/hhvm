@@ -36,7 +36,10 @@ let tparam_info_size tpinfo =
   TySet.cardinal tpinfo.lower_bounds + TySet.cardinal tpinfo.upper_bounds
 
 type t = {
-  tparams: tparam_info SMap.t;
+  tparams: (Pos.t * tparam_info) SMap.t;
+      (** The position indicates where the type parameter was defined.
+          It may be Pos.none if the type parameter denotes a fresh type variable
+          (i.e., without a source location that defines it) *)
   consistent: bool;
 }
 
@@ -44,10 +47,12 @@ let empty = { tparams = SMap.empty; consistent = true }
 
 let mem name tpenv = SMap.mem name tpenv.tparams
 
-let get name tpenv = SMap.find_opt name tpenv.tparams
+let get_with_pos name tpenv = SMap.find_opt name tpenv.tparams
 
-let add name tpinfo tpenv =
-  { tpenv with tparams = SMap.add name tpinfo tpenv.tparams }
+let get name tpenv = Option.map (get_with_pos name tpenv) snd
+
+let add ?(def_pos = Pos.none) name tpinfo tpenv =
+  { tpenv with tparams = SMap.add name (def_pos, tpinfo) tpenv.tparams }
 
 let union tpenv1 tpenv2 =
   {
@@ -58,11 +63,15 @@ let union tpenv1 tpenv2 =
 (* TODO(T70068435): needs to learn about parameters if higher-kinded? *)
 let size tpenv =
   SMap.fold
-    (fun _ tpinfo count -> tparam_info_size tpinfo + count)
+    (fun _ (_, tpinfo) count -> tparam_info_size tpinfo + count)
     tpenv.tparams
     0
 
-let fold f tpenv accu = SMap.fold f tpenv.tparams accu
+let fold f tpenv accu =
+  SMap.fold
+    (fun name (_, tparam_info) acc -> f name tparam_info acc)
+    tpenv.tparams
+    accu
 
 let merge_env env tpenv1 tpenv2 ~combine =
   let (env, tparams) =
@@ -310,8 +319,8 @@ let add_generic_parameters tpenv tparaml =
   in
 
   let add_top tpenv ast_tparam =
-    let (_, name) = ast_tparam.tp_name in
-    add name (make_param_info ast_tparam) tpenv
+    let (pos, name) = ast_tparam.tp_name in
+    add ~def_pos:pos name (make_param_info ast_tparam) tpenv
   in
   List.fold_left tparaml ~f:add_top ~init:tpenv
 
@@ -365,7 +374,8 @@ let pp_tpenv fmt tpenv =
   Format.fprintf fmt "@[<hv 2>{ ";
 
   Format.fprintf fmt "@[%s =@ " "tparams";
-  SMap.pp pp_tparam_info fmt tpenv.tparams;
+  (* FiXME: also print position? *)
+  SMap.pp (fun fmt (_, tpi) -> pp_tparam_info fmt tpi) fmt tpenv.tparams;
 
   Format.fprintf fmt "@[%s =@ " "consistent";
   Format.pp_print_bool fmt tpenv.consistent;

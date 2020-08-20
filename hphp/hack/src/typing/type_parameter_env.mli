@@ -27,7 +27,9 @@ val mem : string -> t -> bool
 
 val get : string -> t -> tparam_info option
 
-val add : string -> tparam_info -> t -> t
+val get_with_pos : string -> t -> (Pos.t * tparam_info) option
+
+val add : ?def_pos:Pos.t -> string -> tparam_info -> t -> t
 
 val union : t -> t -> t
 
@@ -42,9 +44,9 @@ val merge_env :
   combine:
     ('env ->
     string ->
-    tparam_info option ->
-    tparam_info option ->
-    'env * tparam_info option) ->
+    (Pos.t * tparam_info) option ->
+    (Pos.t * tparam_info) option ->
+    'env * (Pos.t * tparam_info) option) ->
   'env * t
 
 val get_lower_bounds : t -> string -> Typing_defs.locl_ty list -> tparam_bounds

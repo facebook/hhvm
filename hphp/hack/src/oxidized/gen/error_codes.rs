@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c119555652088726f6a004c746820433>>
+// @generated SignedSource<<026fa4a19467f87f84d5a688b0d11706>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -173,6 +173,7 @@ pub enum Naming {
     ClassMethNonFinalSelf,
     ParentInFunctionPointer,
     SelfInNonFinalFunctionPointer,
+    ClassMethNonFinalCLASS,
 }
 impl TrivialDrop for Naming {}
 

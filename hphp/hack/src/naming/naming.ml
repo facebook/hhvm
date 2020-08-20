@@ -2123,7 +2123,11 @@ and expr_ env p (e : Nast.expr_) =
              * declarations).
              *)
             (match (fst env).current_cls with
-            | Some (cid, _, _) -> N.Smethod_id (cid, (pm, meth))
+            | Some (cid, _, true) -> N.Smethod_id ((p, snd cid), (pm, meth))
+            | Some (cid, kind, false) ->
+              let is_trait = Ast_defs.is_c_trait kind in
+              Errors.class_meth_non_final_CLASS p is_trait (snd cid);
+              N.Any
             | None ->
               Errors.illegal_class_meth p;
               N.Any)

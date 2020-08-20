@@ -166,6 +166,7 @@ PocketUniversesLocalization = 2110
 ClassMethNonFinalSelf = 2111
 ParentInFunctionPointer = 2112
 SelfInNonFinalFunctionPointer = 2113
+ClassMethNonFinalCLASS = 2114
 
 NastCheck Errors:
 AbstractBody = 3001

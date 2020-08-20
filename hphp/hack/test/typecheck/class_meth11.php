@@ -6,9 +6,6 @@ class C {
   }
 
   public function test() {
-    $f = class_meth(__CLASS__, 'aStaticMeth');
-    hh_show($f);
-    echo $f(), ' ';
     $h = class_meth(static::class, 'aStaticMeth');
     hh_show($h);
     echo $h(), ' ';
@@ -33,10 +30,6 @@ trait MyTr {
   }
 
   public function test() {
-    // __CLASS__ is the 'use'r class at runtime
-    $f = class_meth(__CLASS__, 'aStaticMeth');
-    hh_show($f);
-    echo $f(), ' ';
     // static::class is the 'use'r class at runtime
     $h = class_meth(static::class, 'aStaticMeth');
     hh_show($h);

@@ -1370,6 +1370,19 @@ let class_meth_non_final_self pos class_name =
   in
   add (Naming.err_code Naming.ClassMethNonFinalSelf) pos msg
 
+let class_meth_non_final_CLASS pos is_trait class_name =
+  let suggestion =
+    if not is_trait then
+      "Use `" ^ strip_ns class_name ^ "::class` explicitly"
+    else
+      ""
+  in
+  let msg =
+    "`class_meth` with `__CLASS__` in non-final classes is not allowed.\n"
+    ^ suggestion
+  in
+  add (Naming.err_code Naming.ClassMethNonFinalCLASS) pos msg
+
 let assert_arity pos =
   add
     (Naming.err_code Naming.AssertArity)

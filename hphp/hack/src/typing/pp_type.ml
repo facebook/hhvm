@@ -80,6 +80,10 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit =
     Format.fprintf fmt ",@ ";
     pp_ty_list fmt a1;
     Format.fprintf fmt "@,)@]"
+  | Tunapplied_alias a0 ->
+    Format.fprintf fmt "(@[<2>Tunappliedalias@ ";
+    Format.fprintf fmt "%S" a0;
+    Format.fprintf fmt "@])"
   | Taccess a0 ->
     Format.fprintf fmt "(@[<2>Taccess@ ";
     pp_taccess_type fmt a0;

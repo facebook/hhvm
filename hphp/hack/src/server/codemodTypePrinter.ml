@@ -73,7 +73,9 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
       | Open_shape -> fields @ ["..."]
     in
     Printf.sprintf "shape(%s)" (String.concat ~sep:", " fields)
-  | Tnewtype (name, [], _) -> Utils.strip_ns name
+  | Tunapplied_alias name
+  | Tnewtype (name, [], _) ->
+    Utils.strip_ns name
   | Tnewtype (name, tyl, _) ->
     Utils.strip_ns name ^ "<" ^ print_tyl_exn tyl ^ ">"
   | Tclass ((_, name), _, []) -> strip_ns name

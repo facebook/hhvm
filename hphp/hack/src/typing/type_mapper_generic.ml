@@ -46,6 +46,8 @@ class type ['env] type_mapper_type =
     method on_tgeneric :
       'env -> Reason.t -> string -> locl_ty list -> 'env * locl_ty
 
+    method on_tunapplied_alias : 'env -> Reason.t -> string -> 'env * locl_ty
+
     method on_tnewtype :
       'env -> Reason.t -> string -> locl_ty list -> locl_ty -> 'env * locl_ty
 
@@ -109,6 +111,8 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_tgeneric env r name args = (env, mk (r, Tgeneric (name, args)))
 
+    method on_tunapplied_alias env r name = (env, mk (r, Tunapplied_alias name))
+
     method on_tnewtype env r name tyl ty =
       (env, mk (r, Tnewtype (name, tyl, ty)))
 
@@ -161,6 +165,7 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tvarray ty -> this#on_tvarray env r ty
       | Tdarray (ty1, ty2) -> this#on_tdarray env r ty1 ty2
       | Tvarray_or_darray (ty1, ty2) -> this#on_tvarray_or_darray env r ty1 ty2
+      | Tunapplied_alias name -> this#on_tunapplied_alias env r name
 
     method on_locl_ty_list env tyl = List.map_env env tyl ~f:this#on_type
   end

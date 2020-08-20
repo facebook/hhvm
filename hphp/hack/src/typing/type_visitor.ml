@@ -226,6 +226,8 @@ class type ['a] locl_type_visitor_type =
     method on_tclass : 'a -> Reason.t -> Aast.sid -> exact -> locl_ty list -> 'a
 
     method on_tlist : 'a -> Reason.t -> locl_ty list -> 'a
+
+    method on_tunapplied_alias : 'a -> Reason.t -> string -> 'a
   end
 
 class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
@@ -306,6 +308,8 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
 
     method on_tpu_type_access acc _ _ _ = acc
 
+    method on_tunapplied_alias acc _ _ = acc
+
     method on_type acc ty =
       let (r, x) = deref ty in
       match x with
@@ -332,6 +336,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Tpu (base, enum) -> this#on_tpu acc r base enum
       | Tpu_type_access (member, tyname) ->
         this#on_tpu_type_access acc r member tyname
+      | Tunapplied_alias n -> this#on_tunapplied_alias acc r n
   end
 
 class type ['a] internal_type_visitor_type =

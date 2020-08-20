@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<da542d3054ffac2f5d2210af1d9f6c71>>
+// @generated SignedSource<<2e606c8ae9da5f26610e199bd76b47be>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -454,6 +454,14 @@ pub enum Ty_<'a> {
     Tvarray(Ty<'a>),
     /// Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>"
     TvarrayOrDarray(&'a (Ty<'a>, Ty<'a>)),
+    /// This represents a type alias that lacks necessary type arguments. Given
+    /// type Foo<T1,T2> = ...
+    /// Tunappliedalias "Foo" stands for usages of plain Foo, without supplying
+    /// further type arguments. In particular, Tunappliedalias always stands for
+    /// a higher-kinded type. It is never used for an alias like
+    /// type Foo2 = ...
+    /// that simply doesn't require type arguments.
+    TunappliedAlias(&'a str),
     /// The type of an opaque type (e.g. a "newtype" outside of the file where it
     /// was defined) or enum. They are "opaque", which means that they only unify with
     /// themselves. However, it is possible to have a constraint that allows us to

@@ -389,6 +389,7 @@ and ptype ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
   | T.Tobject -> fail "Tobject"
   | T.Tpu (_locl_ty, _sid) -> fail "Tpu"
   | T.Tpu_type_access (_sid1, _sid2) -> fail "Tpu_type_access"
+  | T.Tunapplied_alias _ -> fail "Tunapplied_alias"
 
 (* Uses a Hack-inferred type to update the flow type of a local
    variable *)

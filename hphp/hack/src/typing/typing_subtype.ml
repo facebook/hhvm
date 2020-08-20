@@ -1169,6 +1169,8 @@ and simplify_subtype_i
            * widening and transitivity.  Therefore, this step preserves the set
            * of solutions.
            *)
+          | ((_, Tunapplied_alias _), _) ->
+            Typing_defs.error_Tunapplied_alias_in_illegal_context ()
           | ( ( _,
                 ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
                 | Tobject | Tclass _ | Tvarray _ | Tdarray _
@@ -1534,6 +1536,13 @@ and simplify_subtype_i
                   env
               | None -> invalid ()
             end
+        | _ -> default_subtype env))
+    | (_, Tunapplied_alias n_sup) ->
+      (match ety_sub with
+      | ConstraintType _ -> default_subtype env
+      | LoclType lty ->
+        (match deref lty with
+        | (_, Tunapplied_alias n_sub) when String.equal n_sub n_sup -> valid ()
         | _ -> default_subtype env))
     | (r_super, Tclass (((_, class_name) as x_super), exact_super, tyl_super))
       ->

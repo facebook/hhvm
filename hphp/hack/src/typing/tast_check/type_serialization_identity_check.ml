@@ -81,6 +81,8 @@ let rec strip_ty ty =
       Tshape (shape_kind, shape_fields)
     | Tpu (base, enum) -> Tpu (strip_ty base, enum)
     | Tpu_type_access (_, _) -> ty
+    | Tunapplied_alias _ ->
+      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
   in
   mk (reason, ty)
 

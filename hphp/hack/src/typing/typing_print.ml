@@ -416,6 +416,7 @@ module Full = struct
         | Exact when !debug_mode -> Concat [text "exact"; Space; d]
         | _ -> d
       end
+    | Tunapplied_alias s
     | Tnewtype (s, [], _)
     | Tgeneric (s, []) ->
       to_doc s
@@ -797,6 +798,12 @@ module ErrorString = struct
       ^ tyname
       ^ " associated with the type parameter"
       ^ member
+    | Tunapplied_alias _ ->
+      (* FIXME it seems like this function is only for
+         fully-applied types? Tunapplied_alias should only appear
+         in a type argument position then, which inst below
+         prints with a different function (namely Full.locl_ty)  *)
+      failwith "Tunapplied_alias is not a type"
 
   and inst env tyl =
     if List.is_empty tyl then
@@ -933,6 +940,7 @@ module Json = struct
     | (p, Tgeneric (s, _tyargs)) ->
       (* TODO(T69551141) handle type arguments *)
       obj @@ kind p "generic" @ is_array true @ name s
+    | (p, Tunapplied_alias s) -> obj @@ kind p "unapplied_alias" @ name s
     | (p, Tnewtype (s, _, ty)) when Typing_env.is_enum env s ->
       obj @@ kind p "enum" @ name s @ as_type ty
     | (p, Tnewtype (s, tys, ty)) ->
@@ -1066,6 +1074,16 @@ module Json = struct
         | "enum" ->
           get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
           aux_as json ~keytrace >>= fun as_ty -> ty (Tnewtype (name, [], as_ty))
+        | "unapplied_alias" ->
+          get_string "name" (json, keytrace) >>= fun (name, name_keytrace) ->
+          begin
+            match Decl_provider.get_typedef ctx name with
+            | Some _typedef -> ty (Tunapplied_alias name)
+            | None ->
+              deserialization_error
+                ~message:("Unknown type alias: " ^ name)
+                ~keytrace:name_keytrace
+          end
         | "newtype" ->
           get_string "name" (json, keytrace) >>= fun (name, name_keytrace) ->
           begin

@@ -422,6 +422,7 @@ let is_union_or_inter_type (ty : locl_ty) =
   | Tclass _
   | Tvarray _
   | Tdarray _
+  | Tunapplied_alias _
   | Tvarray_or_darray _ ->
     false
 
@@ -541,6 +542,7 @@ let ty_con_ordinal ty_ =
   | Tvarray _ -> 20
   | Tdarray _ -> 21
   | Tvarray_or_darray _ -> 22
+  | Tunapplied_alias _ -> 23
 
 (* Ordinal value for type constructor, for decl types *)
 let decl_ty_con_ordinal ty_ =
@@ -655,6 +657,7 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
       (match String.compare (snd n1) (snd n2) with
       | 0 -> String.compare (snd t1) (snd t2)
       | n -> n)
+    | (Tunapplied_alias n1, Tunapplied_alias n2) -> String.compare n1 n2
     | _ -> ty_con_ordinal ty_1 - ty_con_ordinal ty_2
   and shape_field_type_compare sft1 sft2 =
     match ty_compare sft1.sft_ty sft2.sft_ty with
@@ -1075,3 +1078,13 @@ let make_ce_flags
   let flags = set_bit ce_flags_dynamicallycallable dynamicallycallable flags in
   let flags = Int.bit_or flags (xhp_attr_to_ce_flags xhp_attr) in
   flags
+
+(** Tunapplied_alias is a locl phase constructor that always stands for a higher-kinded type.
+  We use this function in cases where Tunapplied_alias appears in a context where we expect
+  a fully applied type, rather than a type constructor. Seeing Tunapplied_alias in such a context
+  always indicates a kinding error, which means that during localization, we should have
+  created Terr rather than Tunapplied_alias. Hence, this is an *internal* error, because
+  something went wrong during localization. Kind mismatches in code are reported to users
+  elsewhere. *)
+let error_Tunapplied_alias_in_illegal_context () =
+  failwith "Found Tunapplied_alias in a context where it must not occur"

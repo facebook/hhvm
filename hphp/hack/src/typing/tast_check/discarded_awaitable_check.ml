@@ -59,6 +59,8 @@ let rec enforce_not_awaitable env p ty =
   | Tpu _
   | Tpu_type_access _ ->
     ()
+  | Tunapplied_alias _ ->
+    Typing_defs.error_Tunapplied_alias_in_illegal_context ()
 
 type ctx = {
   (* Is a supertype of ?Awaitable<t> allowed in a given

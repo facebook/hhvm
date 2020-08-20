@@ -313,6 +313,8 @@ let rec expand ctx env root =
   | Tvar n ->
     let (env, ty) = Typing_subtype_tconst.get_tyvar_type_const env n ctx.id in
     (env, Exact ty)
+  | Tunapplied_alias _ ->
+    Typing_defs.error_Tunapplied_alias_in_illegal_context ()
   | Tpu _
   | Tpu_type_access _
   | Tobject

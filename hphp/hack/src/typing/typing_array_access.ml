@@ -467,6 +467,8 @@ let rec array_get
               ty2
           | _ -> error_array env expr_pos ty1
         end
+      | Tunapplied_alias _ ->
+        Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | Tnonnull
       | Tprim _
       | Tfun _
@@ -558,6 +560,8 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
           error_assign_array_append env expr_pos ty1
         else
           (env, ty1)
+      | (_, Tunapplied_alias _) ->
+        Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | ( _,
           ( Tnonnull | Tdarray _ | Tvarray_or_darray _ | Toption _ | Tprim _
           | Tvar _ | Tfun _ | Tclass _ | Ttuple _ | Tshape _ | Tunion _
@@ -793,6 +797,8 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
           error
         ) else
           (env, ety1)
+      | Tunapplied_alias _ ->
+        Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | Toption _
       | Tnonnull
       | Tprim _

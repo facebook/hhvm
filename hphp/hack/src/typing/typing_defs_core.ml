@@ -268,6 +268,14 @@ and _ ty_ =
   | Tvarray_or_darray : 'phase ty * 'phase ty -> 'phase ty_
       (** Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>" *)
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
+  | Tunapplied_alias : string -> locl_phase ty_
+      (** This represents a type alias that lacks necessary type arguments. Given
+           type Foo<T1,T2> = ...
+         Tunappliedalias "Foo" stands for usages of plain Foo, without supplying
+         further type arguments. In particular, Tunappliedalias always stands for
+         a higher-kinded type. It is never used for an alias like
+           type Foo2 = ...
+         that simply doesn't require type arguments. *)
   | Tnewtype : string * locl_ty list * locl_ty -> locl_phase ty_
       (** The type of an opaque type (e.g. a "newtype" outside of the file where it
        * was defined) or enum. They are "opaque", which means that they only unify with

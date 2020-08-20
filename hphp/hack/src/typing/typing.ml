@@ -3985,6 +3985,8 @@ and call_parent_construct pos env el unpacked_element =
           Errors.undefined_parent pos;
         default
       | None -> assert false)
+    | Tunapplied_alias _ ->
+      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | Terr
     | Tany _
     | Tnonnull
@@ -5371,6 +5373,8 @@ and class_get_
                 Errors.unify_error
           in
           (env, (member_ty, tal))))
+  | (_, Tunapplied_alias _) ->
+    Typing_defs.error_Tunapplied_alias_in_illegal_context ()
   | ( _,
       ( Tvar _ | Tnonnull | Tvarray _ | Tdarray _ | Tvarray_or_darray _
       | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tobject | Tshape _ | Tpu _
@@ -5420,6 +5424,8 @@ and class_id_for_new
               else
                 get_info res tyl
             | _ -> get_info ((sid, class_info, ty) :: res) tyl))
+        | Tunapplied_alias _ ->
+          Typing_defs.error_Tunapplied_alias_in_illegal_context ()
         | Tany _
         | Terr
         | Tnonnull
@@ -5556,6 +5562,8 @@ and static_class_id
           []
           Aast.CIparent
           (mk (r, TUtils.this_of (mk (r, get_node parent)))))
+    | Tunapplied_alias _ ->
+      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | Terr
     | Tany _
     | Tnonnull
@@ -5668,6 +5676,8 @@ and static_class_id
       | (r, Tvar _) ->
         Errors.unknown_type "an object" p (Reason.to_string "It is unknown" r);
         (env, err_witness env p)
+      | (_, Tunapplied_alias _) ->
+        Typing_defs.error_Tunapplied_alias_in_illegal_context ()
       | ( _,
           ( Tany _ | Tnonnull | Tvarray _ | Tdarray _ | Tvarray_or_darray _
           | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tnewtype _ | Tdependent _
@@ -6925,6 +6935,8 @@ and class_get_pu_ env cty name =
   | Tgeneric _ ->
     (* TODO(T69551141) handle type arguments *)
     (env, None)
+  | Tunapplied_alias _ ->
+    Typing_defs.error_Tunapplied_alias_in_illegal_context ()
   | Tvar _
   | Tnonnull
   | Tvarray _

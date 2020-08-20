@@ -1373,7 +1373,9 @@ and get_tyvars_i env (ty : internal_type) =
       let (env, positive2, negative2) = get_tyvars env ty2 in
       (env, ISet.union positive1 positive2, ISet.union negative1 negative2)
     | Tpu (base, _) -> get_tyvars env base
-    | Tpu_type_access (_, _) -> (env, ISet.empty, ISet.empty))
+    | Tpu_type_access (_, _)
+    | Tunapplied_alias _ ->
+      (env, ISet.empty, ISet.empty))
   | ConstraintType ty ->
     (match deref_constraint_type ty with
     | (_, Tdestructure { d_required; d_optional; d_variadic; d_kind = _ }) ->

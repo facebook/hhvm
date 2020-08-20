@@ -286,6 +286,8 @@ and simplify_union_ env ty1 ty2 r =
     | ((_, Tfun ft1), (_, Tfun ft2)) ->
       let (env, ft) = union_funs env ft1 ft2 in
       (env, Some (mk (r, Tfun ft)))
+    | ((_, Tunapplied_alias _), _) ->
+      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     (* TODO with Tclass, union type arguments if covariant *)
     | ( ( _,
           ( ( Tprim _ | Tdynamic | Tgeneric _ | Tnewtype _ | Tdependent _

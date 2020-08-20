@@ -76,6 +76,8 @@ let check_valid_array_key_type f_fail ~allow_any env p t =
         (env, None)
       else
         (env, Option.value ~default:None (List.find errors ~f:Option.is_some))
+    | Tunapplied_alias _ ->
+      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | Terr
     | Tany _
     | Tnonnull

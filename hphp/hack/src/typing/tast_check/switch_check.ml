@@ -113,6 +113,8 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
   | Tshape _
   | Tdynamic ->
     env
+  | Tunapplied_alias _ ->
+    Typing_defs.error_Tunapplied_alias_in_illegal_context ()
 
 let check_exhaustiveness env pos ty caselist =
   ignore (check_exhaustiveness_ env pos ty caselist false)

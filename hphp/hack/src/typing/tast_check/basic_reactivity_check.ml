@@ -75,7 +75,10 @@ let rec is_byval_collection_or_string_or_any_type env ty =
     | Tpu _
     | Tpu_type_access _ ->
       false
+    | Tunapplied_alias _ ->
+      Typing_defs.error_Tunapplied_alias_in_illegal_context ()
   in
+
   let (_, tl) = Tast_env.get_concrete_supertypes env ty in
   List.for_all tl ~f:check
 

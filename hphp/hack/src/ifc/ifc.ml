@@ -643,7 +643,9 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
     (match renv.re_this with
     | Some ptype -> (env, ptype)
     | None -> fail "encountered $this outside of a class context")
-  | A.BracedExpr e -> expr env e
+  | A.ExpressionTree (_, e)
+  | A.BracedExpr e ->
+    expr env e
   (* TODO(T68414656): Support calls with type arguments *)
   | A.Call (_call_type, e, _type_args, args, _extra_args) ->
     let (env, args_pty) = List.map_env ~f:expr env args in

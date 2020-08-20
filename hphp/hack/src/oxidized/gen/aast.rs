@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6b8ff00f33c1a467655e4baef5bce635>>
+// @generated SignedSource<<a0e71f5ee527a47811bea08cc8cfc8ac>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -344,6 +344,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     Collection(Box<(Sid, Option<CollectionTarg<Hi>>, Vec<Afield<Ex, Fb, En, Hi>>)>),
     BracedExpr(Box<Expr<Ex, Fb, En, Hi>>),
     ParenthesizedExpr(Box<Expr<Ex, Fb, En, Hi>>),
+    ExpressionTree(Box<(Hint, Expr<Ex, Fb, En, Hi>)>),
     Lplaceholder(Box<Pos>),
     FunId(Box<Sid>),
     MethodId(Box<(Expr<Ex, Fb, En, Hi>, Pstring)>),

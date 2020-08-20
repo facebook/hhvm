@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0ec6a3d813bdf5368a0221861f557239>>
+// @generated SignedSource<<ec1012cb4be0061e0bbea6044abccbd8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -915,6 +915,11 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::Fb, P::En, P::Hi> {
             }
             Expr_::ParenthesizedExpr(a0) => {
                 a0.accept(c, v)?;
+                Ok(())
+            }
+            Expr_::ExpressionTree(a) => {
+                a.0.accept(c, v)?;
+                a.1.accept(c, v)?;
                 Ok(())
             }
             Expr_::Lplaceholder(a0) => {

@@ -2463,6 +2463,9 @@ and expr_
     in
     let (env, ty) = Phase.localize_hint_with_self env hint in
     make_result env p (Aast.Cast (hint, te)) ty
+  | ExpressionTree (hint, e) ->
+    let (env, te, ty) = expr env e in
+    make_result env p (Aast.ExpressionTree (hint, te)) ty
   | Is (e, hint) ->
     let (env, te, _) = expr env e in
     make_result env p (Aast.Is (te, hint)) (MakeType.bool (Reason.Rwitness p))

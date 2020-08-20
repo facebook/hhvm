@@ -529,6 +529,8 @@ module Visitor_DEPRECATED = struct
 
       method on_cast : 'a -> hint -> expr -> 'a
 
+      method on_expression_tree : 'a -> hint -> expr -> 'a
+
       method on_unop : 'a -> Ast_defs.uop -> expr -> 'a
 
       method on_binop : 'a -> Ast_defs.bop -> expr -> expr -> 'a
@@ -809,6 +811,7 @@ module Visitor_DEPRECATED = struct
         | PrefixedString (_, e) -> this#on_expr acc e
         | Pair (ta, e1, e2) -> this#on_pair acc ta e1 e2
         | Cast (hint, e) -> this#on_cast acc hint e
+        | ExpressionTree (hint, e) -> this#on_expression_tree acc hint e
         | Unop (uop, e) -> this#on_unop acc uop e
         | Binop (bop, e1, e2) -> this#on_binop acc bop e1 e2
         | Pipe (id, e1, e2) -> this#on_pipe acc id e1 e2
@@ -988,6 +991,8 @@ module Visitor_DEPRECATED = struct
         acc
 
       method on_cast acc _ e = this#on_expr acc e
+
+      method on_expression_tree acc _ e = this#on_expr acc e
 
       method on_unop acc _ e = this#on_expr acc e
 

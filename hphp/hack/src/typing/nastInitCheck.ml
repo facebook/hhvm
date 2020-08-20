@@ -599,6 +599,7 @@ and expr_ env acc p e =
         end
       ~init:acc
       fdm
+  | ExpressionTree _ -> acc
   | Omitted -> acc
   | Import _ -> acc
   | Collection _ -> acc

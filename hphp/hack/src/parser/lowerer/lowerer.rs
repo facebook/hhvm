@@ -2079,6 +2079,10 @@ where
                 Self::p_hint(&c.cast_type, env)?,
                 Self::p_expr(&c.cast_operand, env)?,
             )),
+            PrefixedCodeExpression(c) => Ok(E_::mk_expression_tree(
+                Self::p_hint(&c.prefixed_code_prefix, env)?,
+                Self::p_expr(&c.prefixed_code_expression, env)?,
+            )),
             ConditionalExpression(c) => {
                 let alter = Self::p_expr(&c.conditional_alternative, env)?;
                 let consequence = Self::mp_optional(Self::p_expr, &c.conditional_consequence, env)?;

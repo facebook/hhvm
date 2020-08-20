@@ -2247,6 +2247,7 @@ and expr_ env p (e : Nast.expr_) =
         h
     in
     N.Cast (ty, expr env e2)
+  | Aast.ExpressionTree (ty, e2) -> N.ExpressionTree (hint env ty, expr env e2)
   | Aast.Unop (uop, e) -> N.Unop (uop, expr env e)
   | Aast.Binop ((Ast_defs.Eq None as op), lv, e2) ->
     let e2 = expr env e2 in

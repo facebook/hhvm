@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<de1534285060d83f50ba76a834c6ce1c>>
+// @generated SignedSource<<6198ecd41c5c1de5580fe640f9810923>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -17,6 +17,7 @@ use serde::Serialize;
 use crate::*;
 
 pub use typing_defs::*;
+pub use typing_kinding_defs::*;
 
 pub use crate::typing_set as ty_set;
 

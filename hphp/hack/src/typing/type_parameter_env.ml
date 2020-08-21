@@ -14,6 +14,7 @@ open Hh_prelude
 [@@@warning "+33"]
 
 open Typing_defs
+open Typing_kinding_defs
 module TySet = Typing_set
 
 type tparam_bounds = TySet.t
@@ -22,15 +23,7 @@ let empty_bounds = TySet.empty
 
 let singleton_bound ty = TySet.singleton ty
 
-type tparam_info = Typing_kinding_defs.kind = {
-  lower_bounds: tparam_bounds;
-  upper_bounds: tparam_bounds;
-  reified: Aast.reify_kind;
-  enforceable: bool;
-  newable: bool;
-  parameters: (Aast.sid * tparam_info) list;
-      (** If this is non-empty, the type parameter is higher-kinded *)
-}
+type tparam_info = Typing_kinding_defs.kind
 
 let tparam_info_size tpinfo =
   TySet.cardinal tpinfo.lower_bounds + TySet.cardinal tpinfo.upper_bounds

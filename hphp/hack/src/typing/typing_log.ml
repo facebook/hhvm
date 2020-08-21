@@ -326,7 +326,7 @@ let tyset_as_value env tys =
        SSet.empty)
 
 let rec tparam_info_as_value env tpinfo =
-  let Type_parameter_env.
+  let Typing_kinding_defs.
         {
           lower_bounds;
           upper_bounds;

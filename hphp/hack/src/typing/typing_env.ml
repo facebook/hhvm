@@ -24,6 +24,7 @@ module Cls = Decl_provider.Class
 module Fake = Typing_fake_members
 module ITySet = Internal_type_set
 module TPEnv = Type_parameter_env
+module KDefs = Typing_kinding_defs
 module TySet = Typing_set
 
 let show_env _ = "<env>"
@@ -463,7 +464,7 @@ let add_fresh_generic_parameter_by_kind env prefix kind =
 
 let add_fresh_generic_parameter env prefix ~reified ~enforceable ~newable =
   let kind =
-    TPEnv.
+    KDefs.
       {
         lower_bounds = empty_bounds;
         upper_bounds = empty_bounds;
@@ -508,7 +509,7 @@ let get_tpenv_tparams env =
   TPEnv.fold
     begin
       fun _x
-          TPEnv.
+          KDefs.
             {
               lower_bounds;
               upper_bounds;

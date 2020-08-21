@@ -1325,7 +1325,7 @@ and pu_enum_def
       ~f:(fun tpenv { tp_name; tp_reified; _ } ->
         let name = snd tp_name in
         let tpinfo =
-          TPEnv.
+          Typing_kinding_defs.
             {
               lower_bounds = TySet.empty;
               upper_bounds = TySet.empty;

@@ -9,15 +9,7 @@
 
 type tparam_bounds = Typing_set.t
 
-type tparam_info = Typing_kinding_defs.kind = {
-  lower_bounds: tparam_bounds;
-  upper_bounds: tparam_bounds;
-  reified: Aast.reify_kind;
-  enforceable: bool;
-  newable: bool;
-  parameters: (Aast.sid * tparam_info) list;
-      (** If this is non-empty, the type parameter is higher-kinded *)
-}
+type tparam_info = Typing_kinding_defs.kind
 
 type t
 

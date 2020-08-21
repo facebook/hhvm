@@ -8,6 +8,7 @@
  *)
 
 module TP = Type_parameter_env
+module KDefs = Typing_kinding_defs
 module TySet = Typing_set
 module Env = Typing_env
 open Hh_prelude
@@ -74,12 +75,13 @@ let join env tpenv1 tpenv2 =
 
   TP.merge_env env tpenv1 tpenv2 ~combine:(fun env _tparam info1 info2 ->
       match (info1, info2) with
-      | ( Some (pos1, (TP.{ lower_bounds = l1; upper_bounds = u1; _ } as info1)),
-          Some (pos2, TP.{ lower_bounds = l2; upper_bounds = u2; _ }) ) ->
+      | ( Some
+            (pos1, (KDefs.{ lower_bounds = l1; upper_bounds = u1; _ } as info1)),
+          Some (pos2, KDefs.{ lower_bounds = l2; upper_bounds = u2; _ }) ) ->
         let (env, lower_bounds) = join_lower_bounds env l1 l2 in
         let (env, upper_bounds) = join_upper_bounds env u1 u2 in
         let pos = merge_pos pos1 pos2 in
-        (env, Some (pos, TP.{ info1 with lower_bounds; upper_bounds }))
+        (env, Some (pos, KDefs.{ info1 with lower_bounds; upper_bounds }))
       | (Some (pos, info), _) -> (env, Some (pos, info))
       | (_, Some (pos, info)) -> (env, Some (pos, info))
       | (_, _) -> (env, None))

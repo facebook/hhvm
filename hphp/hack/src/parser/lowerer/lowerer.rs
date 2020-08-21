@@ -1768,6 +1768,7 @@ where
                             ParenthesizedExpression(_) => Some(Self::p_pos(recv, env)),
                             _ => None,
                         };
+                        let is_splice = Self::text_str(recv, env) == special_functions::SPLICE;
                         let recv = Self::p_expr(recv, env)?;
                         let recv = match (&recv.1, pos_if_has_parens) {
                             (E_::ObjGet(_), Some(p)) => E::new(p, E_::mk_parenthesized_expr(recv)),
@@ -1777,6 +1778,13 @@ where
                             _ => recv,
                         };
                         let (args, varargs) = split_args_vararg(args, env)?;
+                        if is_splice {
+                            if args.len() == 1 && targs.len() == 0 && varargs == None {
+                                if let Some(e) = args.first() {
+                                    return Ok(E_::mk_etsplice(e.to_owned()));
+                                }
+                            }
+                        }
                         Ok(E_::mk_call(
                             ast::CallType::Cnormal,
                             recv,

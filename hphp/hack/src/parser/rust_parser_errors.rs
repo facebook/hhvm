@@ -179,6 +179,7 @@ struct Context<'a, Syntax> {
     pub active_is_rx_or_enclosing_for_lambdas: bool,
     pub active_const: Option<&'a Syntax>,
     pub active_unstable_features: HashSet<UnstableFeatures>,
+    pub active_expression_tree: bool,
 }
 
 // TODO: why can't this be auto-derived?
@@ -192,6 +193,7 @@ impl<'a, Syntax> std::clone::Clone for Context<'a, Syntax> {
             active_is_rx_or_enclosing_for_lambdas: self.active_is_rx_or_enclosing_for_lambdas,
             active_const: self.active_const,
             active_unstable_features: self.active_unstable_features.clone(),
+            active_expression_tree: self.active_expression_tree,
         }
     }
 }
@@ -3328,7 +3330,19 @@ where
                 for p in Self::syntax_to_list_no_separators(arg_list) {
                     self.function_call_argument_errors(false, p)
                 }
-                self.function_call_on_xhp_name_errors(&x.function_call_receiver);
+
+                let recv = &x.function_call_receiver;
+
+                self.function_call_on_xhp_name_errors(recv);
+
+                if self.text(recv) == sn::special_functions::SPLICE
+                    && !self.env.context.active_expression_tree
+                {
+                    self.errors.push(Self::make_error_from_node(
+                        recv,
+                        errors::reserved_et_keyword,
+                    ))
+                }
             }
             ListExpression(x) if x.list_members.is_missing() && self.env.is_hhvm_compat() => {
                 if let Some(Syntax {
@@ -5651,6 +5665,14 @@ where
                 self.names.functions = functions;
                 self.names.constants = constants;
             }
+            PrefixedCodeExpression(_) => {
+                self.check_can_use_feature(node, &UnstableFeatures::ExpressionTrees);
+
+                prev_context = Some(self.env.context.clone());
+                self.env.context.active_expression_tree = true;
+
+                self.fold_child_nodes(node)
+            }
             _ => self.fold_child_nodes(node),
         }
 
@@ -5665,9 +5687,6 @@ where
                 ),
                 _ => (),
             },
-            PrefixedCodeExpression(_) => {
-                self.check_can_use_feature(node, &UnstableFeatures::ExpressionTrees)
-            }
             _ => (),
         }
 
@@ -5722,6 +5741,7 @@ where
                 active_is_rx_or_enclosing_for_lambdas: false,
                 active_const: None,
                 active_unstable_features: HashSet::new(),
+                active_expression_tree: false,
             },
             hhvm_compat_mode,
             hhi_mode,

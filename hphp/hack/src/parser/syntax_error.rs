@@ -971,3 +971,6 @@ pub fn invalid_use_of_enable_unstable_feature(message: &str) -> Error {
         message.to_string()
     ))
 }
+
+pub const reserved_et_keyword: Error =
+    Cow::Borrowed("This is a reserved keyword for expression trees that cannot be used");

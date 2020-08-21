@@ -1268,9 +1268,22 @@ and simplify_subtype_i
       (* If subtype and supertype are the same generic parameter, we're done *)
       | LoclType ty_sub ->
         (match get_node ty_sub with
-        | Tgeneric (name_sub, _tyargs) when String.equal name_sub name_super ->
-          valid env
-        (* TODO(T69551141) handle type arguments *)
+        | Tgeneric (name_sub, tyargs_sub) when String.equal name_sub name_super
+          ->
+          if List.is_empty tyargs_super then
+            valid env
+          else
+            (* TODO(T69931993) Type parameter env must carry variance information *)
+            let variance_reifiedl =
+              List.map tyargs_sub (fun _ -> (Ast_defs.Invariant, Aast.Erased))
+            in
+            simplify_subtype_variance
+              ~subtype_env
+              name_sub
+              variance_reifiedl
+              tyargs_sub
+              tyargs_super
+              env
         (* When decomposing subtypes for the purpose of adding bounds on generic
          * parameters to the context, (so seen_generic_params = None), leave
          * subtype so that the bounds get added *)

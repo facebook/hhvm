@@ -136,7 +136,7 @@ XhpRequiredWithDefault = 2080
 VariableVariablesDisallowedDEPRECATED = 2081
 ArrayTypehintsDisallowed = 2082
 ArrayLiteralsDisallowedDEPRECATED = 2083
-WildcardDisallowed = 2084
+WildcardHintDisallowed = 2084
 AttributeClassNameConflict = 2085
 MethodNeedsVisibility = 2086
 ReferenceInStrictModeDEPRECATED = 2087
@@ -167,6 +167,7 @@ ClassMethNonFinalSelf = 2111
 ParentInFunctionPointer = 2112
 SelfInNonFinalFunctionPointer = 2113
 ClassMethNonFinalCLASS = 2114
+WildcardTypeParamDisallowed = 2115
 
 NastCheck Errors:
 AbstractBody = 3001

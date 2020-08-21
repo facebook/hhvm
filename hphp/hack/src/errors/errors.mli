@@ -231,7 +231,9 @@ val xhp_required_with_default : Pos.t -> string -> unit
 
 val array_typehints_disallowed : Pos.t -> unit
 
-val wildcard_disallowed : Pos.t -> unit
+val wildcard_hint_disallowed : Pos.t -> unit
+
+val wildcard_param_disallowed : Pos.t -> unit
 
 val object_cast : Pos.t -> unit
 

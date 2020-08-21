@@ -18,10 +18,16 @@ type tparam_info = (pos * bool * bool) SMap.t
 let error_if_is_this (pos, name) =
   if String.equal (String.lowercase name) "this" then Errors.this_reserved pos
 
-let error_if_does_not_start_with_T (pos, name) =
-  (* TODO(T70222059) Support _ here in nested case eventually *)
-  if String.is_empty name || not (Char.equal name.[0] 'T') then
-    Errors.start_with_T pos
+let error_if_invalid_tparam_name ~nested ~is_hk (pos, name) =
+  match
+    ( String.equal name Naming_special_names.Typehints.wildcard,
+      nested && not is_hk )
+  with
+  | (true, false) -> Errors.wildcard_param_disallowed pos
+  | (true, true) -> ()
+  | _ ->
+    if String.is_empty name || not (Char.equal name.[0] 'T') then
+      Errors.start_with_T pos
 
 let error_if_reified ~because_nested (pos, name) = function
   | Erased -> ()
@@ -51,8 +57,9 @@ let error_if_constraints_present ~because_nested (pos, name) constraints =
 
 let rec check_tparam ~nested (seen : tparam_info) tparam =
   let name = tparam.tp_name in
+  let is_higher_kinded = not (List.is_empty tparam.tp_parameters) in
   error_if_is_this name;
-  error_if_does_not_start_with_T name;
+  error_if_invalid_tparam_name ~nested ~is_hk:is_higher_kinded name;
 
   if nested then begin
     error_if_constraints_present ~because_nested:true name tparam.tp_constraints;
@@ -61,7 +68,7 @@ let rec check_tparam ~nested (seen : tparam_info) tparam =
     error_if_not_invariant ~because_nested:true name tparam.tp_variance
   end;
 
-  if not (List.is_empty tparam.tp_parameters) then begin
+  if is_higher_kinded then begin
     error_if_constraints_present
       ~because_nested:false
       name
@@ -80,17 +87,24 @@ and check_tparams ~nested (seen : tparam_info) tparams =
   let bring_into_scope (seen : tparam_info) tparam =
     let is_hk = not (List.is_empty tparam.tp_parameters) in
     let (pos, name) = tparam.tp_name in
-    (match SMap.find_opt name seen with
-    | Some (seen_pos, true, _) -> Errors.shadowed_type_param pos seen_pos name
-    | Some (_, false, _) -> Errors.tparam_non_shadowing_reuse pos name
-    | None -> ());
-    SMap.add name (pos, true, is_hk) seen
+    if String.equal name Naming_special_names.Typehints.wildcard then
+      seen
+    else begin
+      (match SMap.find_opt name seen with
+      | Some (seen_pos, true, _) -> Errors.shadowed_type_param pos seen_pos name
+      | Some (_, false, _) -> Errors.tparam_non_shadowing_reuse pos name
+      | None -> ());
+      SMap.add name (pos, true, is_hk) seen
+    end
   in
   let remove_from_scope (seen : tparam_info) tparam =
     let (pos, name) = tparam.tp_name in
-    (* Using a dummy value for the higher-kindedness, we don't care once
+    if String.equal name Naming_special_names.Typehints.wildcard then
+      seen
+    else
+      (* Using a dummy value for the higher-kindedness, we don't care once
        it's out of scope *)
-    SMap.add name (pos, false, false) seen
+      SMap.add name (pos, false, false) seen
   in
 
   let seen = List.fold_left tparams ~f:bring_into_scope ~init:seen in

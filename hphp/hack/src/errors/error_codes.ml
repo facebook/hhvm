@@ -135,7 +135,7 @@ module Naming = struct
     | VariableVariablesDisallowedDEPRECATED
     | ArrayTypehintsDisallowed
     | ArrayLiteralsDisallowedDEPRECATED
-    | WildcardDisallowed
+    | WildcardHintDisallowed
     | AttributeClassNameConflict
     | MethodNeedsVisibility
     | ReferenceInStrictModeDEPRECATED
@@ -165,7 +165,8 @@ module Naming = struct
     | ClassMethNonFinalSelf
     | ParentInFunctionPointer
     | SelfInNonFinalFunctionPointer
-    | ClassMethNonFinalCLASS (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | ClassMethNonFinalCLASS
+    | WildcardTypeParamDisallowed (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

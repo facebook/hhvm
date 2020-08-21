@@ -1565,11 +1565,17 @@ let array_typehints_disallowed pos =
     pos
     "Array typehints are no longer legal; use `varray` or `darray` instead"
 
-let wildcard_disallowed pos =
+let wildcard_hint_disallowed pos =
   add
-    (Naming.err_code Naming.WildcardDisallowed)
+    (Naming.err_code Naming.WildcardHintDisallowed)
     pos
     "Wildcard typehints are not allowed in this position"
+
+let wildcard_param_disallowed pos =
+  add
+    (Naming.err_code Naming.WildcardTypeParamDisallowed)
+    pos
+    "Cannot use anonymous type parameter in this position."
 
 let misplaced_mutability_hint pos =
   add

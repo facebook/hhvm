@@ -694,7 +694,7 @@ and hint_id
           ) else
             N.Happly (id, [])
         else (
-          Errors.wildcard_disallowed p;
+          Errors.wildcard_hint_disallowed p;
           N.Herr
         )
       | x

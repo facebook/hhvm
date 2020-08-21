@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c69e7bed9200a398407d1ace47b9e609>>
+// @generated SignedSource<<b537f34850e3a0b4c4c610c558b9eb21>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -143,7 +143,7 @@ pub enum Naming {
     VariableVariablesDisallowedDEPRECATED,
     ArrayTypehintsDisallowed,
     ArrayLiteralsDisallowedDEPRECATED,
-    WildcardDisallowed,
+    WildcardHintDisallowed,
     AttributeClassNameConflict,
     MethodNeedsVisibility,
     ReferenceInStrictModeDEPRECATED,
@@ -174,6 +174,7 @@ pub enum Naming {
     ParentInFunctionPointer,
     SelfInNonFinalFunctionPointer,
     ClassMethNonFinalCLASS,
+    WildcardTypeParamDisallowed,
 }
 impl TrivialDrop for Naming {}
 

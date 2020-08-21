@@ -32,9 +32,9 @@ let ( &&& ) (env, p1) (f : env -> env * TL.subtype_prop) =
     let (env, p2) = f env in
     (env, TL.conj p1 p2)
 
-let if_unsat (f : unit -> env * TL.subtype_prop) (env, p) =
+let if_unsat (f : env -> env * TL.subtype_prop) (env, p) =
   if TL.is_unsat p then
-    f ()
+    f env
   else
     (env, p)
 

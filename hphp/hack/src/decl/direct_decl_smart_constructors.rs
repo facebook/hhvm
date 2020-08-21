@@ -33,7 +33,7 @@ use oxidized_by_ref::{
     typing_defs::{
         EnumType, FunArity, FunElt, FunParam, FunParams, FunType, ParamMode, ParamMutability,
         PossiblyEnforcedTy, Reactivity, ShapeFieldType, ShapeKind, Tparam, Ty, Ty_,
-        TypeconstAbstractKind, TypedefType,
+        TypeconstAbstractKind, TypedefType, XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
@@ -197,6 +197,13 @@ pub fn empty_decls() -> InProgressDecls<'static> {
 fn prefix_slash<'a>(arena: &'a Bump, name: &str) -> &'a str {
     let mut s = String::with_capacity_in(1 + name.len(), arena);
     s.push('\\');
+    s.push_str(name);
+    s.into_bump_str()
+}
+
+fn prefix_colon<'a>(arena: &'a Bump, name: &str) -> &'a str {
+    let mut s = String::with_capacity_in(1 + name.len(), arena);
+    s.push(':');
     s.push_str(name);
     s.into_bump_str()
 }
@@ -529,6 +536,21 @@ pub struct PropertyNode<'a> {
 }
 
 #[derive(Clone, Debug)]
+pub struct XhpClassAttributeDeclarationNode<'a> {
+    xhp_attr_decls: &'a [ShallowProp<'a>],
+    xhp_attr_uses_decls: &'a [Node<'a>],
+}
+
+#[derive(Clone, Debug)]
+pub struct XhpClassAttributeNode<'a> {
+    name: Id<'a>,
+    tag: Option<XhpAttrTag>,
+    needs_init: bool,
+    nullable: bool,
+    hint: Node<'a>,
+}
+
+#[derive(Clone, Debug)]
 pub struct ShapeFieldNode<'a> {
     name: &'a ShapeField<'a>,
     type_: &'a ShapeFieldType<'a>,
@@ -562,6 +584,10 @@ pub enum Node<'a> {
     Method(&'a MethodNode<'a>),
     Property(&'a PropertyNode<'a>),
     TraitUse(&'a Node<'a>),
+    XhpClassAttributeDeclaration(&'a XhpClassAttributeDeclarationNode<'a>),
+    XhpClassAttribute(&'a XhpClassAttributeNode<'a>),
+    XhpAttributeUse(&'a Node<'a>),
+    XhpEnumType(&'a Node<'a>),
     TypeConstant(&'a ShallowTypeconst<'a>),
     RequireClause(&'a RequireClause<'a>),
     ClassishBody(&'a &'a [Node<'a>]),
@@ -1076,6 +1102,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 self.alloc(Reason::hint(pos)),
                 self.alloc(Ty_::Tprim(self.alloc(aast::Tprim::Tnull))),
             )),
+            Node::XhpEnumType(enum_values) => {
+                enum_values.iter().next().map(|x| self.node_to_ty(*x))?
+            }
             node => {
                 let Id(pos, name) = self.get_name("", node)?;
                 let reason = self.alloc(Reason::hint(pos));
@@ -1579,6 +1608,8 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
     fn is_zero(s: &Self::S) -> bool {
         match s {
             Node::Token(TokenKind::Yield) => false,
+            Node::Token(TokenKind::Required) => false,
+            Node::Token(TokenKind::Lateinit) => false,
             Node::List(inner) => inner.iter().all(Self::is_zero),
             _ => true,
         }
@@ -1650,7 +1681,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Tuple
             | TokenKind::Classname
             | TokenKind::SelfToken => Node::Name(self.alloc((token_text(self), token_pos(self)))),
-            TokenKind::XHPClassName | TokenKind::XHP => {
+            TokenKind::XHPClassName | TokenKind::XHP | TokenKind::XHPElementName => {
                 Node::XhpName(self.alloc((token_text(self), token_pos(self))))
             }
             TokenKind::SingleQuotedStringLiteral => Node::StringLiteral(self.alloc((
@@ -1774,7 +1805,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Public
             | TokenKind::Reify
             | TokenKind::Static
-            | TokenKind::Trait => Node::Token(kind),
+            | TokenKind::Trait
+            | TokenKind::Lateinit
+            | TokenKind::Required => Node::Token(kind),
             _ => Node::Ignored,
         };
         self.state.previous_token_kind = kind;
@@ -2588,6 +2621,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         };
 
         let mut uses_len = 0;
+        let mut xhp_attr_uses_len = 0;
         let mut req_extends_len = 0;
         let mut req_implements_len = 0;
         let mut consts_len = 0;
@@ -2608,6 +2642,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         for element in body.iter().copied() {
             match element {
                 Node::TraitUse(names) => uses_len += names.len(),
+                Node::XhpClassAttributeDeclaration(&XhpClassAttributeDeclarationNode {
+                    xhp_attr_decls,
+                    xhp_attr_uses_decls,
+                }) => {
+                    props_len += xhp_attr_decls.len();
+                    xhp_attr_uses_len += xhp_attr_uses_decls.len();
+                }
                 Node::TypeConstant(..) => typeconsts_len += 1,
                 Node::RequireClause(require) => match require.require_type {
                     Node::Token(TokenKind::Extends) => req_extends_len += 1,
@@ -2639,6 +2680,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let mut constructor = None;
 
         let mut uses = Vec::with_capacity_in(uses_len, self.state.arena);
+        let mut xhp_attr_uses = Vec::with_capacity_in(xhp_attr_uses_len, self.state.arena);
         let mut req_extends = Vec::with_capacity_in(req_extends_len, self.state.arena);
         let mut req_implements = Vec::with_capacity_in(req_implements_len, self.state.arena);
         let mut consts = Vec::with_capacity_in(consts_len, self.state.arena);
@@ -2659,11 +2701,23 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         // though it's the reverse of the syntactic ordering).
         user_attributes.reverse();
 
+        // xhp props go after regular props, regardless of their order in file
+        let mut xhp_props = vec![];
+
         for element in body.iter().copied() {
             match element {
                 Node::TraitUse(names) => {
                     for name in names.iter() {
                         uses.push(unwrap_or_return!(self.node_to_ty(*name)));
+                    }
+                }
+                Node::XhpClassAttributeDeclaration(&XhpClassAttributeDeclarationNode {
+                    xhp_attr_decls,
+                    xhp_attr_uses_decls,
+                }) => {
+                    xhp_props.extend(xhp_attr_decls);
+                    for xhp_attr_use in xhp_attr_uses_decls {
+                        xhp_attr_uses.push(unwrap_or_return!(self.node_to_ty(*xhp_attr_use)))
                     }
                 }
                 Node::TypeConstant(constant) => typeconsts.push(constant.clone()),
@@ -2703,7 +2757,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             }
         }
 
+        props.extend(xhp_props.into_iter().cloned());
+
         let uses = uses.into_bump_slice();
+        let xhp_attr_uses = xhp_attr_uses.into_bump_slice();
         let req_extends = req_extends.into_bump_slice();
         let req_implements = req_implements.into_bump_slice();
         let consts = consts.into_bump_slice();
@@ -2742,7 +2799,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             extends,
             uses,
             method_redeclarations: &[],
-            xhp_attr_uses: &[],
+            xhp_attr_uses,
             req_extends,
             req_implements,
             implements,
@@ -2811,6 +2868,106 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             decls: declarators,
             is_static: modifiers.is_static,
         }))
+    }
+
+    fn make_xhp_class_attribute_declaration(
+        &mut self,
+        _arg0: Self::R,
+        attributes: Self::R,
+        _arg2: Self::R,
+    ) -> Self::R {
+        let xhp_attr_decls = unwrap_or_return!(self.maybe_slice_from_iter(
+            attributes
+                .iter()
+                .filter_map(|x| match x {
+                    Node::XhpClassAttribute(x) => Some(x),
+                    _ => None,
+                })
+                .map(|node| {
+                    let Id(pos, name) = node.name;
+                    let name = prefix_colon(self.state.arena, name);
+
+                    let type_ = self.node_to_ty(node.hint);
+                    let type_ = if node.nullable && node.tag.is_none() {
+                        type_.and_then(|x| match x {
+                            Ty(_, Ty_::Toption(_)) => type_, // already nullable
+                            _ => self.node_to_ty(self.hint_ty(x.get_pos()?, Ty_::Toption(x))), // make nullable
+                        })
+                    } else {
+                        type_
+                    };
+                    Some(ShallowProp {
+                        abstract_: false,
+                        const_: false,
+                        fixme_codes: ISet::empty(),
+                        lateinit: false,
+                        lsb: false,
+                        name: Id(pos, name),
+                        needs_init: node.needs_init,
+                        visibility: aast::Visibility::Public,
+                        type_,
+                        xhp_attr: Some(shallow_decl_defs::XhpAttr {
+                            tag: node.tag,
+                            has_default: !node.needs_init,
+                        }),
+                    })
+                })
+        ));
+
+        let xhp_attr_uses_decls = self.slice_from_iter(
+            attributes
+                .iter()
+                .filter_map(|x| match x {
+                    Node::XhpAttributeUse(name) => Some(name.clone()),
+                    _ => None,
+                })
+                .copied(),
+        );
+
+        Node::XhpClassAttributeDeclaration(self.alloc(XhpClassAttributeDeclarationNode {
+            xhp_attr_decls,
+            xhp_attr_uses_decls,
+        }))
+    }
+
+    fn make_xhp_enum_type(
+        &mut self,
+        _arg0: Self::R,
+        _arg1: Self::R,
+        _arg2: Self::R,
+        xhp_enum_values: Self::R,
+        _arg4: Self::R,
+    ) -> Self::R {
+        Node::XhpEnumType(self.alloc(xhp_enum_values))
+    }
+
+    fn make_xhp_class_attribute(
+        &mut self,
+        type_: Self::R,
+        name: Self::R,
+        initializer: Self::R,
+        tag: Self::R,
+    ) -> Self::R {
+        unwrap_or_return!((|| Some(Node::XhpClassAttribute(self.alloc(
+            XhpClassAttributeNode {
+                name: self.get_name("", name)?,
+                hint: type_,
+                needs_init: !initializer.is_present(),
+                tag: match tag {
+                    Node::Token(TokenKind::Required) => Some(XhpAttrTag::Required),
+                    Node::Token(TokenKind::Lateinit) => Some(XhpAttrTag::Lateinit),
+                    _ => None,
+                },
+                nullable: match initializer {
+                    Node::Null(_) => true,
+                    _ => !initializer.is_present(),
+                },
+            }
+        ))))())
+    }
+
+    fn make_xhp_simple_class_attribute(&mut self, name: Self::R) -> Self::R {
+        Node::XhpAttributeUse(self.alloc(name))
     }
 
     fn make_property_declarator(&mut self, name: Self::R, initializer: Self::R) -> Self::R {

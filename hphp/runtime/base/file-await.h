@@ -8,6 +8,8 @@
 #include <atomic>
 #include <chrono>
 #include <memory>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
@@ -49,12 +51,32 @@ struct FileAwait : AsioExternalThreadEvent {
   FileAwait(int fd, uint16_t events, std::chrono::nanoseconds timeout);
   ~FileAwait();
   void unserialize(TypedValue& c) override;
-  void setFinished(int64_t status);
+
+  /**
+   * This should be called from the web request thread when the file descriptor
+   * is closed. It does any necessary cleanup, marks the associated wait handle
+   * as finished and sets the return value to FileAwait::CLOSED.
+   *
+   * If this isn't called, closing the file descriptor may result in undefined
+   * behavior for any pending FileAwaits, depending on the exact platform,
+   * backend, type of the file descriptor and events. For example, pending
+   * FileAwaits will hang forever on Linux with libevent when a server file
+   * descriptor is closed (https://github.com/facebook/hhvm/issues/8716).
+   */
+  static void closeAllForFD(int fd);
+
  private:
-  std::unique_ptr<FileEventHandler> m_file;
-  std::unique_ptr<FileTimeoutHandler> m_timeout;
+  void setFinished(int64_t status, bool remove_from_map);
+  static std::unordered_map<int, std::unordered_set<FileAwait*>>&
+    fdToFileAwaits();
+
+  int m_fd;
+  FileEventHandler m_eventHandler;
+  FileTimeoutHandler m_timeoutHandler;
   int m_result{-1};
-  std::atomic<bool> m_finished{false};
+
+  friend struct FileEventHandler;
+  friend struct FileTimeoutHandler;
 };
 
 /////////////////////////////////////////////////////////////////////////////

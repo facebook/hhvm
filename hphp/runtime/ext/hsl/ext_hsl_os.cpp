@@ -392,6 +392,7 @@ struct HSLFileDescriptor {
   void close() {
     switch (m_type) {
       case Type::FD:
+        FileAwait::closeAllForFD(m_fd);
         throw_errno_if_minus_one(::close(fd()));
         s_fds_to_close->erase(m_fd);
         m_fd = -1;

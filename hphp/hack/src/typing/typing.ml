@@ -2914,8 +2914,10 @@ and expr_
     (* TODO(T36532263): Pocket Universes *)
     let s = enum ^ ":@" ^ atom in
     Errors.pu_typing p "identifier" s;
-
     expr_error env (Reason.Rwitness p) outer
+  | ET_Splice e ->
+    let (env, te, ty) = expr env e in
+    make_result env p (Aast.ET_Splice te) ty
 
 (* let ty = err_witness env cst_pos in *)
 and class_const ?(incl_tc = false) env p ((cpos, cid), mid) =

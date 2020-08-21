@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<450cb88238988b9f5676f1f757561b08>>
+// @generated SignedSource<<bca50f89e1a5b8a572865f5c0e12d80d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -361,6 +361,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     Assert(Box<AssertExpr<Ex, Fb, En, Hi>>),
     PUAtom(String),
     PUIdentifier(Box<(ClassId<Ex, Fb, En, Hi>, Pstring, Pstring)>),
+    ETSplice(Box<Expr<Ex, Fb, En, Hi>>),
     Any,
 }
 

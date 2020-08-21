@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ec1012cb4be0061e0bbea6044abccbd8>>
+// @generated SignedSource<<fcc03d2ed22c329d640b2f1d14a1b1c0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -963,6 +963,10 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::Fb, P::En, P::Hi> {
                 a.0.accept(c, v)?;
                 a.1.accept(c, v)?;
                 a.2.accept(c, v)?;
+                Ok(())
+            }
+            Expr_::ETSplice(a0) => {
+                a0.accept(c, v)?;
                 Ok(())
             }
             Expr_::Any => Ok(()),

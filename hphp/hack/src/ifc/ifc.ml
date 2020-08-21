@@ -644,6 +644,7 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
     (match renv.re_this with
     | Some ptype -> (env, ptype)
     | None -> fail "encountered $this outside of a class context")
+  | A.ET_Splice e
   | A.ExpressionTree (_, e)
   | A.BracedExpr e ->
     expr env e

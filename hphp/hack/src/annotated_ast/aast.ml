@@ -218,6 +218,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
   | Assert of ('ex, 'fb, 'en, 'hi) assert_expr
   | PU_atom of string
   | PU_identifier of ('ex, 'fb, 'en, 'hi) class_id * pstring * pstring
+  | ET_Splice of ('ex, 'fb, 'en, 'hi) expr
   | Any
 
 and ('ex, 'fb, 'en, 'hi) class_get_expr =

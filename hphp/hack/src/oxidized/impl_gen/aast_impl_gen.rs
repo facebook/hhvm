@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7fdb86b386486485106ffea9d9eb0bc4>>
+// @generated SignedSource<<fe8a3658bd4821bfc342d4ffa500d56f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1125,6 +1125,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_puidentifier(p0: ClassId<Ex, Fb, En, Hi>, p1: Pstring, p2: Pstring) -> Self {
         Expr_::PUIdentifier(Box::new((p0, p1, p2)))
     }
+    pub fn mk_etsplice(p0: Expr<Ex, Fb, En, Hi>) -> Self {
+        Expr_::ETSplice(Box::new(p0))
+    }
     pub fn mk_any() -> Self {
         Expr_::Any
     }
@@ -1473,6 +1476,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn is_puidentifier(&self) -> bool {
         match self {
             Expr_::PUIdentifier(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_etsplice(&self) -> bool {
+        match self {
+            Expr_::ETSplice(..) => true,
             _ => false,
         }
     }
@@ -1850,6 +1859,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_puidentifier(&self) -> Option<(&ClassId<Ex, Fb, En, Hi>, &Pstring, &Pstring)> {
         match self {
             Expr_::PUIdentifier(p0) => Some((&p0.0, &p0.1, &p0.2)),
+            _ => None,
+        }
+    }
+    pub fn as_etsplice(&self) -> Option<&Expr<Ex, Fb, En, Hi>> {
+        match self {
+            Expr_::ETSplice(p0) => Some(&p0),
             _ => None,
         }
     }
@@ -2262,6 +2277,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
+    pub fn as_etsplice_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En, Hi>> {
+        match self {
+            Expr_::ETSplice(p0) => Some(p0.as_mut()),
+            _ => None,
+        }
+    }
     pub fn as_darray_into(
         self,
     ) -> Option<(
@@ -2630,6 +2651,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_puidentifier_into(self) -> Option<(ClassId<Ex, Fb, En, Hi>, Pstring, Pstring)> {
         match self {
             Expr_::PUIdentifier(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
+            _ => None,
+        }
+    }
+    pub fn as_etsplice_into(self) -> Option<Expr<Ex, Fb, En, Hi>> {
+        match self {
+            Expr_::ETSplice(p0) => Some(*p0),
             _ => None,
         }
     }

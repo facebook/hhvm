@@ -607,6 +607,7 @@ and expr_ env acc p e =
   | ParenthesizedExpr _ -> acc
   | PU_identifier _ -> acc
   | FunctionPointer _ -> acc
+  | ET_Splice e -> expr acc e
 
 and case env acc = function
   | Default (_, b)

@@ -624,6 +624,8 @@ module Visitor_DEPRECATED = struct
 
       method on_function_ptr_id :
         'a -> (Pos.t, func_body_ann, unit, unit) function_ptr_id -> 'a
+
+      method on_et_splice : 'a -> expr -> 'a
     end
 
   (*****************************************************************************)
@@ -834,6 +836,7 @@ module Visitor_DEPRECATED = struct
         | ParenthesizedExpr e -> this#on_expr acc e
         | PU_atom sid -> this#on_pu_atom acc sid
         | PU_identifier (e, s1, s2) -> this#on_pu_identifier acc e s1 s2
+        | ET_Splice e -> this#on_et_splice acc e
 
       method on_collection acc tal afl =
         let acc =
@@ -1205,6 +1208,8 @@ module Visitor_DEPRECATED = struct
         match fpi with
         | FP_id sid -> this#on_id acc sid
         | FP_class_const (cid, _) -> this#on_class_id acc cid
+
+      method on_et_splice acc e = this#on_expr acc e
 
       method on_typedef acc t =
         let acc = this#on_id acc t.t_name in

@@ -492,7 +492,12 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       Concat
         [
           Span (transform_fn_decl_name env modifiers kw name type_params leftp);
-          transform_fn_decl_args env params rightp colon ret_type where;
+          transform_fn_decl_args env params rightp;
+          t env colon;
+          when_present colon space;
+          t env ret_type;
+          when_present where space;
+          t env where;
         ]
     | Syntax.WhereClause
         { where_clause_keyword = where; where_clause_constraints = constraints }
@@ -2759,7 +2764,7 @@ and transform_fn_decl_name env modifiers kw name type_params leftp =
   let mods = handle_possible_list env ~after_each:(fun _ -> Space) modifiers in
   [mods; t env kw; Space; t env name; t env type_params; t env leftp; Split]
 
-and transform_fn_decl_args env params rightp colon ret_type where =
+and transform_fn_decl_args env params rightp =
   (* It is a syntax error to follow a variadic parameter with a trailing
    * comma, so suppress trailing commas in that case. *)
   let allow_trailing =
@@ -2800,28 +2805,18 @@ and transform_fn_decl_args env params rightp colon ret_type where =
   in
   WithRule
     ( Rule.Parental,
-      Concat
-        [
-          transform_possible_comma_list env ~allow_trailing params rightp;
-          t env colon;
-          when_present colon space;
-          t env ret_type;
-          when_present where space;
-          t env where;
-        ] )
+      Concat [transform_possible_comma_list env ~allow_trailing params rightp]
+    )
 
 and transform_argish_with_return_type env left_p params right_p colon ret_type =
   Concat
     [
       t env left_p;
       when_present params split;
-      transform_fn_decl_args
-        env
-        params
-        right_p
-        colon
-        ret_type
-        (Syntax.make_missing SourceText.empty 0);
+      transform_fn_decl_args env params right_p;
+      t env colon;
+      when_present colon space;
+      t env ret_type;
     ]
 
 and transform_argish

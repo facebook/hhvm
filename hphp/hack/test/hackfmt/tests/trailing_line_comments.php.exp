@@ -170,16 +170,14 @@ function f(
   // ...
 }
 
-function getArray(
-): array<
+function getArray(): array<
   string, // strings
   string // strings
 > {
   return darray["foo" => "bar"];
 }
 
-function getArray(
-): array<
+function getArray(): array<
   string // strings
   ,
   string // strings
@@ -187,16 +185,14 @@ function getArray(
   return darray["foo" => "bar"];
 }
 
-function getDict(
-): dict<
+function getDict(): dict<
   string, // strings
   string, // strings
 > {
   return dict["foo" => "bar"];
 }
 
-function getDict(
-): dict<
+function getDict(): dict<
   string // strings
   ,
   string, // strings

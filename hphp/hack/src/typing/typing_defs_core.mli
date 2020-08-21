@@ -71,13 +71,13 @@ type param_mode =
 type xhp_attr_tag =
   | Required
   | Lateinit
-[@@deriving eq]
+[@@deriving eq, show]
 
 type xhp_attr = {
   xa_tag: xhp_attr_tag option;
   xa_has_default: bool;
 }
-[@@deriving eq]
+[@@deriving eq, show]
 
 (* Denotes the categories of requirements we apply to constructor overrides.
  *

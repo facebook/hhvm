@@ -579,23 +579,6 @@ and pp_fun_params : type a. Format.formatter -> a ty fun_params -> unit =
 and show_fun_params : type a. a ty fun_params -> string =
  (fun x -> Format.asprintf "%a" pp_fun_params x)
 
-and pp_xhp_attr : Format.formatter -> xhp_attr -> unit =
- fun fmt x ->
-  Format.fprintf fmt "@[<2>{ ";
-
-  Format.fprintf fmt "@[%s =@ " "xa_tag";
-  (match x.xa_tag with
-  | None -> Format.pp_print_string fmt "None"
-  | Some Required -> Format.pp_print_string fmt "Required"
-  | Some Lateinit -> Format.pp_print_string fmt "Lateinit");
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
-  Format.fprintf fmt "@ }@]"
-
-and show_xhp_attr : xhp_attr -> string =
- (fun x -> Format.asprintf "%a" pp_xhp_attr x)
-
 and pp_class_elt : Format.formatter -> class_elt -> unit =
  fun fmt x ->
   Format.fprintf fmt "@[<2>{ ";

@@ -21,7 +21,7 @@ class C<T> {}
 class D<T> extends C<T> {}
 
 function g<Tx, Ty>(C<Tx> $x): D<Ty> {
-  if ($x is D) {
+  if ($x is D<_>) {
     return $x;
   }
 

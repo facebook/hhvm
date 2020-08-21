@@ -1801,43 +1801,18 @@ let constructor_required (pos, name) prop_names =
 
 let not_initialized (pos, cname) props =
   let cname = strip_ns cname in
-  let prop_names = List.map ~f:fst props in
-  let props_str = List.map prop_names ~f:md_codify |> String.concat ~sep:", " in
-  let (members, verb) =
-    if 1 = List.length prop_names then
-      ("member", "is")
-    else
-      ("members", "are")
+  let prop_msgs =
+    List.map props ~f:(fun (pos, prop) ->
+        (pos, md_codify ("$this->" ^ prop) ^ " is not initialized."))
   in
-  let setters_str =
-    List.map prop_names ~f:(fun x -> md_codify ("$this->" ^ x))
-    |> String.concat ~sep:", "
-  in
-  let nullable_tys =
-    List.map props ~f:(fun (name, ty) -> md_codify ("?" ^ ty ^ " $" ^ name))
-    |> String.concat ~sep:", "
-  in
-  add
+  add_list
     (NastCheck.err_code NastCheck.NotInitialized)
-    pos
-    (Utils.sl
-       [
-         "Class ";
-         md_codify cname;
-         " does not initialize all of its members; ";
-         props_str;
-         " ";
-         verb;
-         " not always initialized.";
-         "\nMake sure you systematically set ";
-         setters_str;
-         " when the method `__construct` is called.";
-         "\nAlternatively, you can define the ";
-         members;
-         " as nullable with ";
-         nullable_tys;
-         ".";
-       ])
+    ( ( pos,
+        "Class "
+        ^ md_codify cname
+        ^ " has properties that cannot be null and aren't always set in `__construct`."
+      )
+    :: prop_msgs )
 
 let call_before_init pos cv =
   add

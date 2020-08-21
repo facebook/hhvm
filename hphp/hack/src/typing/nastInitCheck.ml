@@ -226,6 +226,29 @@ let is_whitelisted = function
 let is_lateinit cv =
   Naming_attributes.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes
 
+let class_prop_pos class_name prop_name ctx : Pos.t =
+  match Decl_provider.get_class ctx class_name with
+  | None -> Pos.none
+  | Some decl ->
+    (match Decl_provider.Class.get_prop decl prop_name with
+    | None -> Pos.none
+    | Some elt ->
+      let member_origin = elt.Typing_defs.ce_origin in
+      let get_class_by_name ctx x =
+        let open Option.Monad_infix in
+        Naming_provider.get_type_path ctx x >>= fun fn ->
+        Ide_parser_cache.with_ide_cache @@ fun () ->
+        Ast_provider.find_class_in_file ctx fn x
+      in
+      (match get_class_by_name ctx member_origin with
+      | None -> Pos.none
+      | Some cls ->
+        let cv =
+          List.find_exn cls.c_vars ~f:(fun cv ->
+              String.equal (snd cv.cv_id) prop_name)
+        in
+        fst cv.cv_id))
+
 let rec class_ tenv c =
   if FileInfo.(equal_mode c.c_mode Mdecl) then
     ()
@@ -281,13 +304,14 @@ let rec class_ tenv c =
               Errors.not_initialized
                 (p, snd c.c_name)
                 ( SMap.bindings class_uninit_props
-                |> List.map ~f:(fun (name, ty) ->
-                       let ty_str =
-                         match ty with
-                         | Some ty -> Typing_print.full_strip_ns_decl tenv ty
-                         | None -> "YourTypeHere"
+                |> List.map ~f:(fun (name, _) ->
+                       let pos =
+                         class_prop_pos
+                           (snd c.c_name)
+                           name
+                           (Typing_env.get_ctx tenv)
                        in
-                       (name, ty_str)) )
+                       (pos, name)) )
       in
       let check_throws_or_init_all inits =
         match inits with

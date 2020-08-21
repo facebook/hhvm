@@ -1,4 +1,4 @@
 File "missing_init_tany.php", line 15, characters 7-7:
-Class `C` does not initialize all of its members; `li` is not always initialized.
-Make sure you systematically set `$this->li` when the method `__construct` is called.
-Alternatively, you can define the member as nullable with `?~int $li`. (NastCheck[3015])
+Class `C` has properties that cannot be null and aren't always set in `__construct`. (NastCheck[3015])
+File "missing_init_tany.php", line 20, characters 15-17:
+`$this->li` is not initialized.

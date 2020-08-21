@@ -200,13 +200,12 @@ let handler =
           | _ -> ()
         end
       | ((pos, _), Call (_, ((_, fun_ty), _), targs, _, _)) ->
-        begin
-          match get_node fun_ty with
-          | Tfun ({ ft_tparams; _ } as ty)
-            when not @@ get_ft_is_function_pointer ty ->
-            verify_call_targs env pos (get_pos fun_ty) ft_tparams targs
-          | _ -> ()
-        end
+        let (env, efun_ty) = Env.expand_type env fun_ty in
+        (match get_node efun_ty with
+        | Tfun ({ ft_tparams; _ } as ty)
+          when not @@ get_ft_is_function_pointer ty ->
+          verify_call_targs env pos (get_pos efun_ty) ft_tparams targs
+        | _ -> ())
       | ((pos, _), New (((_, ty), CI (_, class_id)), targs, _, _, _)) ->
         let (env, ty) = Env.expand_type env ty in
         (match get_node ty with

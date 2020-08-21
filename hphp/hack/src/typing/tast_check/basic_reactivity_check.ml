@@ -377,15 +377,17 @@ let enforce_mutable_call (env : Env.env) (te : expr) =
   (* static methods/lambdas *)
   | Call (_, ((_, fun_ty), Class_const _), _, el, _)
   | Call (_, ((_, fun_ty), Lvar _), _, el, _) ->
-    check_mutability_fun_params env Borrowable_args.empty fun_ty el
+    let (env, efun_ty) = Env.expand_type env fun_ty in
+    check_mutability_fun_params env Borrowable_args.empty efun_ty el
   (* $x->method() where method is mutable *)
   | Call (_, ((pos, fun_ty), Obj_get (expr, _, _)), _, el, _) ->
+    let (env, efun_ty) = Env.expand_type env fun_ty in
     begin
-      match get_node fun_ty with
+      match get_node efun_ty with
       | Tfun fty ->
         (* do not check receiver mutability when calling non-reactive function *)
         if not (equal_reactivity fty.ft_reactive Nonreactive) then (
-          let fpos = get_pos fun_ty in
+          let fpos = get_pos efun_ty in
           (* OwnedMutable annotation is not allowed on methods so
        we ignore it here since it already syntax error *)
           begin
@@ -429,7 +431,7 @@ let enforce_mutable_call (env : Env.env) (te : expr) =
                   k
                   (get_position expr, get_ft_param_mutable fty))
           in
-          check_mutability_fun_params env mut_args fun_ty el
+          check_mutability_fun_params env mut_args efun_ty el
         )
       | _ -> ()
     end

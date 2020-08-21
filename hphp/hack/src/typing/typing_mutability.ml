@@ -20,6 +20,8 @@ module type Env_S = sig
   val env_reactivity : env -> reactivity
 
   val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
+
+  val expand_type : env -> locl_ty -> env * locl_ty
 end
 
 module Shared (Env : Env_S) = struct
@@ -49,7 +51,8 @@ module Shared (Env : Env_S) = struct
     | T.Call (_, ((_, fun_ty), T.Obj_get _), _, _, _)
     | T.Call (_, ((_, fun_ty), T.Class_const _), _, _, _)
     | T.Call (_, ((_, fun_ty), T.Lvar _), _, _, _) ->
-      fun_ty_returns_mutable fun_ty
+      let (_, efun_ty) = Env.expand_type env fun_ty in
+      fun_ty_returns_mutable efun_ty
     | _ -> false
 end
 
@@ -59,6 +62,8 @@ include Shared (struct
   let env_reactivity = Typing_env_types.env_reactivity
 
   let get_fun = Typing_env.get_fun
+
+  let expand_type = Typing_env.expand_type
 end)
 
 let handle_value_in_return

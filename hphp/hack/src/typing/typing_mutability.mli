@@ -13,6 +13,8 @@ module type Env_S = sig
   val env_reactivity : env -> Typing_defs.reactivity
 
   val get_fun : env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
+
+  val expand_type : env -> Typing_defs.locl_ty -> env * Typing_defs.locl_ty
 end
 
 module Shared (Env : Env_S) : sig

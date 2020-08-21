@@ -46,6 +46,7 @@ BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
   hphp/hack/src/typing/typing_env_types.ml                                    \
   hphp/hack/src/typing/typing_fake_members.ml                                 \
   hphp/hack/src/typing/typing_inference_env.ml                                \
+  hphp/hack/src/typing/typing_kinding_defs.ml                                 \
   hphp/hack/src/typing/typing_local_types.ml                                  \
   hphp/hack/src/typing/typing_mutability_env.ml                               \
   hphp/hack/src/typing/typing_per_cont_env.ml                                 \

@@ -324,10 +324,10 @@ let get_tpenv env =
 
 let get_global_tpenv env = env.global_tpenv
 
-let get_tparam_info_of_generic env name =
-  match TPEnv.get name (get_tpenv env) with
-  | Some tparam_info -> Some tparam_info
-  | None -> TPEnv.get name env.global_tpenv
+let get_pos_and_kind_of_generic env name =
+  match TPEnv.get_with_pos name (get_tpenv env) with
+  | Some r -> Some r
+  | None -> TPEnv.get_with_pos name env.global_tpenv
 
 let get_lower_bounds env name tyargs =
   let tpenv = get_tpenv env in
@@ -448,7 +448,7 @@ let mark_inconsistent env =
 
 (* Generate a fresh generic parameter with a specified prefix but distinct
  * from all generic parameters in the environment *)
-let add_fresh_generic_parameter env prefix ~reified ~enforceable ~newable =
+let add_fresh_generic_parameter_by_kind env prefix kind =
   let rec iterate i =
     let name = Printf.sprintf "%s#%d" prefix i in
     if is_generic_parameter env name then
@@ -458,23 +458,22 @@ let add_fresh_generic_parameter env prefix ~reified ~enforceable ~newable =
   in
   let name = iterate 1 in
   let env = { env with fresh_typarams = SSet.add name env.fresh_typarams } in
-  let env =
-    env_with_tpenv
-      env
-      (TPEnv.add
-         name
-         TPEnv.
-           {
-             lower_bounds = empty_bounds;
-             upper_bounds = empty_bounds;
-             reified;
-             enforceable;
-             newable;
-             parameters = [];
-           }
-         (get_tpenv env))
-  in
+  let env = env_with_tpenv env (TPEnv.add name kind (get_tpenv env)) in
   (env, name)
+
+let add_fresh_generic_parameter env prefix ~reified ~enforceable ~newable =
+  let kind =
+    TPEnv.
+      {
+        lower_bounds = empty_bounds;
+        upper_bounds = empty_bounds;
+        reified;
+        enforceable;
+        newable;
+        parameters = [];
+      }
+  in
+  add_fresh_generic_parameter_by_kind env prefix kind
 
 let is_fresh_generic_parameter name =
   String.contains name '#' && not (DependentKind.is_generic_dep_ty name)

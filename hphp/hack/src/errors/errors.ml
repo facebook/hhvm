@@ -5288,6 +5288,56 @@ let class_meth_abstract_call cname meth_name call_pos decl_pos =
       (decl_pos, "Declaration is here");
     ]
 
+let higher_kinded_partial_application pos count =
+  add
+    (Naming.err_code Naming.HigherKindedTypesUnsupportedFeature)
+    pos
+    ( "A higher-kinded type is expected here."
+    ^ " We do not not support partial applications to yield higher-kinded types, but you are providing "
+    ^ string_of_int count
+    ^ " type arguments." )
+
+let wildcard_for_higher_kinded_type pos =
+  add
+    (Naming.err_code Naming.HigherKindedTypesUnsupportedFeature)
+    pos
+    ( "You are supplying _ where a higher-kinded type is expected."
+    ^ " We cannot infer higher-kinded type arguments at this time, please state the actual type."
+    )
+
+(* This is only to be used in a context where we expect something higher-kinded,
+  meaning that expected_kind_repr should never just be * *)
+let kind_mismatch
+    ~use_pos
+    ~def_pos
+    ~tparam_name
+    ~expected_kind_repr
+    ~actual_is_fully_applied
+    ~actual_kind_repr =
+  let use_site_desc =
+    if actual_is_fully_applied then
+      "This is a fully-applied type, but a type constructor of kind "
+      ^ expected_kind_repr
+      ^ " was expected here."
+    else
+      "This type constructor has kind "
+      ^ actual_kind_repr
+      ^ ", but a type constructor of kind "
+      ^ expected_kind_repr
+      ^ " was expected here."
+  in
+  add_list
+    (Typing.err_code Typing.KindMismatch)
+    [
+      (use_pos, use_site_desc);
+      ( def_pos,
+        "We are expecting a type constructor of kind "
+        ^ expected_kind_repr
+        ^ " due to the definition of "
+        ^ tparam_name
+        ^ " here." );
+    ]
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

@@ -588,10 +588,10 @@ module Full = struct
 
   (* For a given type parameter, construct a list of its constraints *)
   let get_constraints_on_tparam env tparam =
-    let kind_opt = Env.get_tparam_info_of_generic env tparam in
+    let kind_opt = Env.get_pos_and_kind_of_generic env tparam in
     match kind_opt with
     | None -> []
-    | Some kind ->
+    | Some (_pos, kind) ->
       (* Use the names of the parameters themselves to present bounds
          depending on other parameters *)
       let param_names = Type_parameter_env.get_parameter_names kind in

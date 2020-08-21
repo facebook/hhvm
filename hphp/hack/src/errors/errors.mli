@@ -1416,5 +1416,17 @@ val context_implicit_policy_leakage :
 
 val reified_function_reference : Pos.t -> unit
 
-val class_meth_abstract_call :
-  string -> string -> Pos.t -> Pos.t -> unit
+val class_meth_abstract_call : string -> string -> Pos.t -> Pos.t -> unit
+
+val higher_kinded_partial_application : Pos.t -> int -> unit
+
+val wildcard_for_higher_kinded_type : Pos.t -> unit
+
+val kind_mismatch :
+  use_pos:Pos.t ->
+  def_pos:Pos.t ->
+  tparam_name:string ->
+  expected_kind_repr:string ->
+  actual_is_fully_applied:bool ->
+  actual_kind_repr:string ->
+  unit

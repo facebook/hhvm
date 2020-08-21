@@ -10,5 +10,3 @@ File "tparam_with_targ_in_new.php", line 13, characters 7-7:
 Expected no type parameter (Typing[4029])
 File "tparam_with_targ_in_new.php", line 13, characters 7-7:
 Definition is here
-File "tparam_with_targ_in_new.php", line 13, characters 3-12:
-`T` is a type parameter. Type parameters cannot take type arguments (e.g. `T<int>` isn't allowed) (Naming[2047])

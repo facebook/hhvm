@@ -75,6 +75,7 @@
     typing_generic_rules
     typing_local_types
     typing_intersection
+    typing_kinding
     typing_log
     typing_logic_helpers
     typing_mutability
@@ -201,6 +202,7 @@
   (modules
     internal_type_set
     tast
+    typing_kinding_defs
     type_parameter_env
     typing_log_value
     typing_logic

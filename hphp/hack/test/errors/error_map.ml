@@ -640,4 +640,5 @@ IllegalInformationFlow = 4379
 ContextImplicitPolicyLeakage = 4380
 ReifiedFunctionReference = 4381
 ClassMethAbstractCall = 4382
+KindMismatch = 4383
   |}]

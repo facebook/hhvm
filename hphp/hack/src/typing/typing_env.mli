@@ -234,8 +234,8 @@ val get_tpenv : env -> TPEnv.t
 
 val get_global_tpenv : env -> TPEnv.t
 
-val get_tparam_info_of_generic :
-  env -> string -> Type_parameter_env.tparam_info option
+val get_pos_and_kind_of_generic :
+  env -> string -> (Pos.t * Typing_kinding_defs.kind) option
 
 val get_lower_bounds : env -> string -> locl_ty list -> TPEnv.tparam_bounds
 
@@ -370,6 +370,9 @@ val copy_tyvar_from_genv_to_env :
 val get_all_tyvars : env -> Ident.t list
 
 val error_if_reactive_context : env -> (unit -> unit) -> unit
+
+val add_fresh_generic_parameter_by_kind :
+  env -> string -> Typing_kinding_defs.kind -> env * string
 
 val add_fresh_generic_parameter :
   env ->

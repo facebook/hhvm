@@ -213,9 +213,13 @@ let handler =
           (* ignoring type arguments here: If we get a Tgeneric here, the underlying type
              parameter must have been newable and reified, neither of which his allowed for
              higher-kinded type-parameters *)
-          if not (Env.get_newable env ci) then Errors.new_without_newable pos ci;
-          if not (List.is_empty targs) then
-            Errors.typaram_applied_to_type pos ci
+          if not (Env.get_newable env ci) then Errors.new_without_newable pos ci
+        (* No need to report a separate error here if targs is non-empty:
+             If targs is not empty then there are two cases:
+             - ci is indeed higher-kinded, in which case it is not allowed to be newable
+               (yielding an error above)
+             - ci is not higher-kinded. Typing_phase.localize_targs_* is called
+               on the the type arguments, reporting the arity mismatch *)
         | _ ->
           (match Env.get_class env class_id with
           | Some cls ->

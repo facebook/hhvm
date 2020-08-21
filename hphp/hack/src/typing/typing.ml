@@ -6788,11 +6788,12 @@ and type_param env t =
   let (env, user_attributes) =
     List.map_env env t.tp_user_attributes user_attribute
   in
+  let (env, tp_parameters) = List.map_env env t.tp_parameters type_param in
   ( env,
     {
       Aast.tp_variance = t.tp_variance;
       Aast.tp_name = t.tp_name;
-      Aast.tp_parameters = [];
+      Aast.tp_parameters;
       Aast.tp_constraints = t.tp_constraints;
       Aast.tp_reified = reify_kind t.tp_reified;
       Aast.tp_user_attributes = user_attributes;

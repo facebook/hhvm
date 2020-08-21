@@ -22,7 +22,7 @@ let empty_bounds = TySet.empty
 
 let singleton_bound ty = TySet.singleton ty
 
-type tparam_info = {
+type tparam_info = Typing_kinding_defs.kind = {
   lower_bounds: tparam_bounds;
   upper_bounds: tparam_bounds;
   reified: Aast.reify_kind;

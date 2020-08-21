@@ -96,7 +96,6 @@ Returns a set of substitutions mapping each type parameter name to the type
 to which it is equal if found, otherwise to itself. *)
 let simplify_tpenv env (tparams : ((_ * string) option * locl_ty) list) r =
   (* TODO(T70068435)
-    TODO(T69927003)
     TODO(T70087549)
     This currently assumes that [tparams] only contains non-HK type paramters.
     (as seen in the Tgenerics created within and their arguments ignored)

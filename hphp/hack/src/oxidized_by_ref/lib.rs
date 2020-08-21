@@ -56,6 +56,7 @@ pub use gen::typing_env_return_info;
 pub use gen::typing_env_types;
 pub use gen::typing_fake_members;
 pub use gen::typing_inference_env;
+pub use gen::typing_kinding_defs;
 pub use gen::typing_local_types;
 pub use gen::typing_mutability_env;
 pub use gen::typing_per_cont_env;

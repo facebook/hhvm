@@ -226,6 +226,7 @@ and class_ tenv c =
   List.iter c.c_typeconsts (typeconst (env, c.c_tparams.c_tparam_list));
   List.iter c_static_vars (class_var env);
   List.iter c_vars (class_var env);
+  List.iter c.c_consts (const env);
   List.iter c_statics (method_ env);
   List.iter c_methods (method_ env);
   List.iter c.c_pu_enums (pu_enum env (snd c.c_name))
@@ -233,6 +234,8 @@ and class_ tenv c =
 and typeconst (env, _) tconst =
   maybe hint env tconst.c_tconst_type;
   maybe hint env tconst.c_tconst_constraint
+
+and const env class_const = maybe hint env class_const.cc_type
 
 and class_var env cv = maybe hint env (hint_of_type_hint cv.cv_type)
 

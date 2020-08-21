@@ -48,6 +48,16 @@ let time verbosity msg f =
     Printf.printf "%s: %f ms\n" msg ((after -. before) *. 1000.);
   ret
 
+let colon = Str.regexp ":"
+
+let dash = Str.regexp "-"
+
+let mangle_xhp x =
+  x
+  |> Str.replace_first colon "xhp_"
+  |> Str.global_replace colon "__"
+  |> Str.global_replace dash "_"
+
 let compare_decl ctx verbosity fn =
   let fn = Path.to_string fn in
   let text = RealDisk.cat fn in
@@ -100,7 +110,8 @@ let compare_decl ctx verbosity fn =
       compare
         "class(es)"
         (Facts.InvSMap.keys facts.Facts.types)
-        (SMap.keys decls.classes @ SMap.keys decls.typedefs);
+        ( List.map (SMap.keys decls.classes) ~f:mangle_xhp
+        @ SMap.keys decls.typedefs );
     ]
     |> List.reduce_exn ~f:( && )
   in

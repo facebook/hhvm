@@ -1650,7 +1650,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Tuple
             | TokenKind::Classname
             | TokenKind::SelfToken => Node::Name(self.alloc((token_text(self), token_pos(self)))),
-            TokenKind::XHPClassName => {
+            TokenKind::XHPClassName | TokenKind::XHP => {
                 Node::XhpName(self.alloc((token_text(self), token_pos(self))))
             }
             TokenKind::SingleQuotedStringLiteral => Node::StringLiteral(self.alloc((
@@ -1767,7 +1767,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Interface
             | TokenKind::Newtype
             | TokenKind::Type
-            | TokenKind::XHP
             | TokenKind::Yield
             | TokenKind::Semicolon
             | TokenKind::Private
@@ -2560,6 +2559,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let Id(pos, name) = unwrap_or_return!(
             self.get_name(self.state.namespace_builder.current_namespace(), name)
         );
+        let (is_xhp, name) = if name.starts_with(":") {
+            (true, prefix_slash(self.state.arena, name))
+        } else {
+            (false, name)
+        };
 
         let mut class_kind = match class_keyword {
             Node::Token(TokenKind::Interface) => ClassKind::Cinterface,
@@ -2726,7 +2730,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 FileModeBuilder::Set(mode) => mode,
             },
             final_,
-            is_xhp: false,
+            is_xhp,
             has_xhp_keyword: match xhp_keyword {
                 Node::Token(TokenKind::XHP) => true,
                 _ => false,

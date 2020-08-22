@@ -99,12 +99,10 @@ void keysetReleaseWrapper(ArrayData* ad) noexcept {
 }
 
 void mixedReleaseWrapper(ArrayData* ad) noexcept {
-  static_assert(MixedArray::Release == MixedArray::ReleaseDict, "");
   ad->isVanilla() ? MixedArray::Release(ad) : BespokeArray::Release(ad);
 }
 
 void packedReleaseWrapper(ArrayData* ad) noexcept {
-  static_assert(PackedArray::Release == PackedArray::ReleaseVec, "");
   ad->isVanilla() ? PackedArray::Release(ad) : BespokeArray::Release(ad);
 }
 

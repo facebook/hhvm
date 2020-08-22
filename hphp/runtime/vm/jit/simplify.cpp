@@ -2936,10 +2936,10 @@ SSATmp* simplify##Name(State& env, const IRInstruction* inst) {       \
   return hackArr##Action##Impl(                                       \
     env, inst,                                                        \
     [](SSATmp* a, int64_t k) {                                        \
-      return MixedArray::NvGetIntDict(a->arrLikeVal(), k);            \
+      return MixedArray::NvGetInt(a->arrLikeVal(), k);                \
     },                                                                \
     [](SSATmp* a, const StringData* k) {                              \
-      return MixedArray::NvGetStrDict(a->arrLikeVal(), k);            \
+      return MixedArray::NvGetStr(a->arrLikeVal(), k);                \
     }                                                                 \
   );                                                                  \
 }
@@ -3178,7 +3178,7 @@ SSATmp* simplifyLdVecElem(State& env, const IRInstruction* inst) {
     auto const arr = src0->arrLikeVal();
     auto const idx = src1->intVal();
     assertx(arr->hasVanillaPackedLayout());
-    auto const tv = PackedArray::NvGetIntVec(arr, idx);
+    auto const tv = PackedArray::NvGetInt(arr, idx);
     return tv.is_init() ? cns(env, tv) : nullptr;
   }
   return nullptr;

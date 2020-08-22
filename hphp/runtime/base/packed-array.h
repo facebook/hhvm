@@ -66,9 +66,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static TypedValue NvGetInt(const ArrayData*, int64_t ki);
   static TypedValue NvGetStr(const ArrayData*, const StringData*);
   static ssize_t NvGetIntPos(const ArrayData*, int64_t k);
-  static constexpr auto NvGetIntPosVec = &NvGetIntPos;
   static ssize_t NvGetStrPos(const ArrayData*, const StringData* k);
-  static constexpr auto NvGetStrPosVec = &NvGetStrPos;
   static TypedValue GetPosKey(const ArrayData*, ssize_t pos);
   static TypedValue GetPosVal(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
@@ -108,53 +106,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* ToVec(ArrayData*, bool);
   static ArrayData* Renumber(ArrayData* ad) { return ad; }
   static void OnSetEvalScalar(ArrayData*);
-
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
-
-  static ArrayData* ToVArrayVec(ArrayData*, bool);
-  static constexpr auto ToDictVec = &ToDict;
-  static ArrayData* ToVecVec(ArrayData*, bool);
-
-  static constexpr auto MergeVec = &Merge;
-  static constexpr auto ReleaseVec = &Release;
-  static constexpr auto NvGetIntVec = &NvGetInt;
-  static constexpr auto NvGetStrVec = &NvGetStr;
-  static constexpr auto GetPosKeyVec = &GetPosKey;
-  static constexpr auto GetPosValVec = &GetPosVal;
-  static constexpr auto VsizeVec = &Vsize;
-  static constexpr auto IsVectorDataVec = &IsVectorData;
-  static constexpr auto ExistsIntVec = &ExistsInt;
-  static constexpr auto ExistsStrVec = &ExistsStr;
-  static constexpr auto SetIntVec = &SetInt;
-  static constexpr auto SetIntMoveVec = &SetIntMove;
-  static constexpr auto SetStrVec = &SetStr;
-  static constexpr auto SetStrMoveVec = &SetStr;
-  static constexpr auto RemoveIntVec = &RemoveInt;
-  static constexpr auto RemoveStrVec = &RemoveStr;
-  static constexpr auto IterBeginVec = &IterBegin;
-  static constexpr auto IterLastVec = &IterLast;
-  static constexpr auto IterEndVec = &IterEnd;
-  static constexpr auto IterAdvanceVec = &IterAdvance;
-  static constexpr auto IterRewindVec = &IterRewind;
-  static constexpr auto EscalateForSortVec = &EscalateForSort;
-  static constexpr auto KsortVec = &Ksort;
-  static constexpr auto SortVec = &Sort;
-  static constexpr auto AsortVec = &Asort;
-  static constexpr auto UksortVec = &Uksort;
-  static constexpr auto UsortVec = &Usort;
-  static constexpr auto UasortVec = &Uasort;
-  static constexpr auto CopyVec = &Copy;
-  static constexpr auto CopyStaticVec = &CopyStatic;
-  static constexpr auto AppendVec = &Append;
-  static constexpr auto PopVec = &Pop;
-  static constexpr auto DequeueVec = &Dequeue;
-  static constexpr auto PrependVec = &Prepend;
-  static constexpr auto RenumberVec = &Renumber;
-  static constexpr auto OnSetEvalScalarVec = &OnSetEvalScalar;
-  static constexpr auto ToKeysetVec = &ArrayCommon::ToKeyset;
-  static constexpr auto ToDArrayVec = &ToDArray;
-  static constexpr auto LvalIntVec = &LvalInt;
-  static constexpr auto LvalStrVec = &LvalStr;
 
   //////////////////////////////////////////////////////////////////////
 

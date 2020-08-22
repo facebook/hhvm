@@ -1496,13 +1496,7 @@ ArrayData* MixedArray::ToDArrayImpl(const MixedArray* ad) {
 }
 
 ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
-  assertx(in->isDArray());
-  assertx(!RO::EvalHackArrDVArrs);
-  return in;
-}
-
-ArrayData* MixedArray::ToDArrayDict(ArrayData* in, bool copy) {
-  if (RuntimeOption::EvalHackArrDVArrs) return in;
+  if (RuntimeOption::EvalHackArrDVArrs || in->isDArray()) return in;
   auto a = asMixed(in);
 
   auto const size = a->getSize();
@@ -1517,9 +1511,11 @@ ArrayData* MixedArray::ToDArrayDict(ArrayData* in, bool copy) {
 }
 
 ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
-  auto a = asMixed(ad);
-  assertx(a->isPHPArrayType());
+  assertx(ad->hasVanillaMixedLayout());
+  assertx(asMixed(ad)->checkInvariants());
+  if (ad->isDictKind()) return ad;
 
+  auto a = asMixed(ad);
   if (a->empty() && a->m_nextKI == 0) return ArrayData::CreateDict();
 
   if (copy) return CopyMixed(*a, AllocMode::Request, HeaderKind::Dict);
@@ -1528,12 +1524,6 @@ ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
   if (RO::EvalArrayProvenance) arrprov::clearTag(a);
   assertx(a->checkInvariants());
   return a;
-}
-
-ArrayData* MixedArray::ToDictDict(ArrayData* ad, bool) {
-  assertx(asMixed(ad)->checkInvariants());
-  assertx(ad->isDictKind());
-  return ad;
 }
 
 ArrayData* MixedArray::Renumber(ArrayData* adIn) {
@@ -1632,10 +1622,10 @@ bool MixedArray::DictEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
       if (UNLIKELY(elm->isTombstone())) continue;
       auto const other_tv = [&] {
         if (elm->hasIntKey()) {
-          return NvGetIntDict(ad2, elm->ikey);
+          return NvGetInt(ad2, elm->ikey);
         } else {
           assertx(elm->hasStrKey());
-          return NvGetStrDict(ad2, elm->skey);
+          return NvGetStr(ad2, elm->skey);
         }
       }();
       if (!other_tv.is_init() ||

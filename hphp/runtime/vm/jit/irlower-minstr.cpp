@@ -829,7 +829,7 @@ LvalPtrs implPackedLayoutElemAddr(IRLS& env, Vloc arrLoc,
 }
 
 void implVecSet(IRLS& env, const IRInstruction* inst) {
-  auto const target = CallSpec::direct(PackedArray::SetIntMoveVec);
+  auto const target = CallSpec::direct(PackedArray::SetIntMove);
   auto const args = argGroup(env, inst).ssa(0).ssa(1).typedValue(2);
 
   auto& v = vmain(env);

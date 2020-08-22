@@ -206,7 +206,7 @@ inline void raiseVecVArrayStringKey(ArrayData* base, StringData *key) {
  */
 template<MOpMode mode>
 inline TypedValue ElemVecPre(ArrayData* base, int64_t key) {
-  return PackedArray::NvGetIntVec(base, key);
+  return PackedArray::NvGetInt(base, key);
 }
 
 template<MOpMode mode>
@@ -241,11 +241,11 @@ inline TypedValue ElemVec(ArrayData* base, key_type<keyType> key) {
  * Elem when base is a Dict
  */
 inline TypedValue ElemDictPre(ArrayData* base, int64_t key) {
-  return MixedArray::NvGetIntDict(base, key);
+  return MixedArray::NvGetInt(base, key);
 }
 
 inline TypedValue ElemDictPre(ArrayData* base, StringData* key) {
-  return MixedArray::NvGetStrDict(base, key);
+  return MixedArray::NvGetStr(base, key);
 }
 
 inline TypedValue ElemDictPre(ArrayData* base, TypedValue key) {
@@ -259,8 +259,6 @@ inline TypedValue ElemDictPre(ArrayData* base, TypedValue key) {
 template<MOpMode mode, KeyType keyType>
 inline TypedValue ElemDict(ArrayData* base, key_type<keyType> key) {
   assertx(base->hasVanillaMixedLayout());
-  static_assert(MixedArray::NvGetInt == MixedArray::NvGetIntDict, "");
-  static_assert(MixedArray::NvGetStr == MixedArray::NvGetStrDict, "");
   auto const result = ElemDictPre(base, key);
   if (UNLIKELY(!result.is_init())) {
     if (mode != MOpMode::Warn && mode != MOpMode::InOut) return ElemEmptyish();
@@ -587,7 +585,7 @@ inline tv_lval ElemDBespoke(tv_lval base, key_type<keyType> key) {
  */
 inline tv_lval ElemDVecPre(tv_lval base, int64_t key) {
   auto const oldArr = base.val().parr;
-  auto const lval = PackedArray::LvalIntVec(oldArr, key);
+  auto const lval = PackedArray::LvalInt(oldArr, key);
 
   if (lval.arr != oldArr) {
     base.type() = dt_with_rc(base.type());
@@ -898,14 +896,14 @@ inline tv_lval ElemUBespoke(tv_lval base, key_type<keyType> key) {
  */
 inline tv_lval ElemUVecPre(tv_lval base, int64_t key) {
   auto const oldArr = val(base).parr;
-  if (UNLIKELY(!PackedArray::ExistsIntVec(oldArr, key))) {
+  if (UNLIKELY(!PackedArray::ExistsInt(oldArr, key))) {
     return ElemUEmptyish();
   }
 
   auto const newArr = [&]{
     if (!oldArr->cowCheck()) return oldArr;
     decRefArr(oldArr);
-    auto const newArr = PackedArray::CopyVec(oldArr);
+    auto const newArr = PackedArray::Copy(oldArr);
     type(base) = dt_with_rc(type(base));
     val(base).parr = newArr;
     assertx(tvIsPlausible(*base));
@@ -1417,7 +1415,7 @@ inline void SetElemArray(tv_lval base, key_type<keyType> key, TypedValue* value)
  * SetElem when base is a Vec
  */
 inline ArrayData* SetElemVecPre(ArrayData* a, int64_t key, TypedValue* value) {
-  return PackedArray::SetIntVec(a, key, *value);
+  return PackedArray::SetInt(a, key, *value);
 }
 
 inline ArrayData*
@@ -1447,12 +1445,12 @@ inline void SetElemVec(tv_lval base, key_type<keyType> key, TypedValue* value) {
  * SetElem when base is a Dict
  */
 inline ArrayData* SetElemDictPre(ArrayData* a, int64_t key, TypedValue* value) {
-  return MixedArray::SetIntDict(a, key, *value);
+  return MixedArray::SetInt(a, key, *value);
 }
 
 inline ArrayData*
 SetElemDictPre(ArrayData* a, StringData* key, TypedValue* value) {
-  return MixedArray::SetStrDict(a, key, *value);
+  return MixedArray::SetStr(a, key, *value);
 }
 
 inline ArrayData*
@@ -1667,7 +1665,7 @@ inline void SetNewElemVec(tv_lval base, TypedValue* value) {
   assertx(tvIsVecOrVArray(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
-  auto a2 = PackedArray::AppendVec(a, *value);
+  auto a2 = PackedArray::Append(a, *value);
   if (a2 != a) {
     type(base) = dt_with_rc(type(base));
     val(base).parr = a2;
@@ -1683,7 +1681,7 @@ inline void SetNewElemDict(tv_lval base, TypedValue* value) {
   assertx(tvIsDictOrDArray(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
-  auto a2 = MixedArray::AppendDict(a, *value);
+  auto a2 = MixedArray::Append(a, *value);
   if (a2 != a) {
     type(base) = dt_with_rc(type(base));
     val(base).parr = a2;
@@ -2181,7 +2179,7 @@ inline void UnsetElemArray(tv_lval base, key_type<keyType> key) {
  */
 
 inline ArrayData* UnsetElemVecPre(ArrayData* a, int64_t key) {
-  return PackedArray::RemoveIntVec(a, key);
+  return PackedArray::RemoveInt(a, key);
 }
 
 inline ArrayData*
@@ -2218,11 +2216,11 @@ inline void UnsetElemVec(tv_lval base, key_type<keyType> key) {
  */
 
 inline ArrayData* UnsetElemDictPre(ArrayData* a, int64_t key) {
-  return MixedArray::RemoveIntDict(a, key);
+  return MixedArray::RemoveInt(a, key);
 }
 
 inline ArrayData* UnsetElemDictPre(ArrayData* a, StringData* key) {
-  return MixedArray::RemoveStrDict(a, key);
+  return MixedArray::RemoveStr(a, key);
 }
 
 inline ArrayData* UnsetElemDictPre(ArrayData* a, TypedValue key) {

@@ -189,12 +189,12 @@ struct DArray {
 
 struct Vec {
   static constexpr auto MakeReserve = &PackedArray::MakeReserveVec;
-  static constexpr auto Release = PackedArray::ReleaseVec;
+  static constexpr auto Release = PackedArray::Release;
 };
 
 struct DictArray {
   static constexpr auto MakeReserve = &MixedArray::MakeReserveDict;
-  static constexpr auto Release = MixedArray::ReleaseDict;
+  static constexpr auto Release = MixedArray::Release;
 };
 
 }
@@ -380,7 +380,7 @@ struct DictInit : ArrayInitBase<detail::DictArray, KindOfDict> {
   /////////////////////////////////////////////////////////////////////////////
 
   DictInit& append(TypedValue tv) {
-    performOp([&]{ return MixedArray::AppendDict(m_arr, tvToInit(tv)); });
+    performOp([&]{ return MixedArray::Append(m_arr, tvToInit(tv)); });
     return *this;
   }
   DictInit& append(const Variant& v) {

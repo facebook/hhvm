@@ -333,7 +333,7 @@ protected:
       m_arr = PackedArray::AppendInPlace(oldAd, tv);
     } else {
       dropImmCopy();
-      m_arr = PackedArray::AppendVec(oldAd, tv);
+      m_arr = PackedArray::Append(oldAd, tv);
     }
     if (m_arr != oldAd) {
       decRefArr(oldAd);

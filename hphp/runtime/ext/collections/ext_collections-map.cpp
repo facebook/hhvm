@@ -29,7 +29,7 @@ void BaseMap::throwBadKeyType() {
 BaseMap::~BaseMap() {
   auto const mixed = MixedArray::asMixed(arrayData());
   // Avoid indirect call, as we know it is a MixedArray
-  if (mixed->decReleaseCheck()) MixedArray::ReleaseDict(mixed);
+  if (mixed->decReleaseCheck()) MixedArray::Release(mixed);
 }
 
 template<typename TMap>

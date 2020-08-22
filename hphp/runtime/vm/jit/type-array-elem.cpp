@@ -232,11 +232,11 @@ std::pair<Type, bool> dictElemType(Type arr, Type idx) {
     // If both the array and idx are known statically, we can resolve it to the
     // precise type.
     if (idx.hasConstVal(TInt)) {
-      auto const tv = MixedArray::NvGetIntDict(arr.arrLikeVal(), idx.intVal());
+      auto const tv = MixedArray::NvGetInt(arr.arrLikeVal(), idx.intVal());
       if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     } else if (idx.hasConstVal(TStr)) {
-      auto const tv = MixedArray::NvGetStrDict(arr.arrLikeVal(), idx.strVal());
+      auto const tv = MixedArray::NvGetStr(arr.arrLikeVal(), idx.strVal());
       if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     }

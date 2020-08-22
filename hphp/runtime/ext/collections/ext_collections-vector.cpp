@@ -270,7 +270,7 @@ bool BaseVector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
 void BaseVector::addFront(TypedValue tv) {
   dropImmCopy();
   auto oldAd = arrayData();
-  m_arr = PackedArray::PrependVec(oldAd, tv);
+  m_arr = PackedArray::Prepend(oldAd, tv);
   if (m_arr != oldAd) {
     decRefArr(oldAd);
   }
@@ -339,12 +339,12 @@ void BaseVector::reserve(uint32_t sz) {
 BaseVector::~BaseVector() {
   // Avoid indirect call, as we know it is a vec array.
   auto const vec = arrayData();
-  if (vec->decReleaseCheck()) PackedArray::ReleaseVec(vec);
+  if (vec->decReleaseCheck()) PackedArray::Release(vec);
 }
 
 void BaseVector::mutateImpl() {
   auto oldAd = arrayData();
-  m_arr = PackedArray::CopyVec(oldAd);
+  m_arr = PackedArray::Copy(oldAd);
   assertx(!oldAd->decWillRelease());
   oldAd->decRefCount();
 }

@@ -94,7 +94,7 @@ void setNewElemDict(tv_lval base, TypedValue val) {
 
 ArrayData* addNewElemVec(ArrayData* vec, TypedValue v) {
   assertx(vec->hasVanillaPackedLayout());
-  auto out = PackedArray::AppendVec(vec, v);
+  auto out = PackedArray::Append(vec, v);
   if (vec != out) decRefArr(vec);
   return out;
 }
@@ -117,7 +117,7 @@ ArrayData* convArrToVecHelper(ArrayData* adIn) {
 
 ArrayData* convDictToVecHelper(ArrayData* adIn) {
   assertx(adIn->isDictKind());
-  auto a = MixedArray::ToVecDict(adIn, adIn->cowCheck());
+  auto a = MixedArray::ToVec(adIn, adIn->cowCheck());
   assertx(a != adIn);
   decRefArr(adIn);
   return a;
@@ -147,7 +147,7 @@ ArrayData* convArrToDictHelper(ArrayData* adIn) {
 
 ArrayData* convVecToDictHelper(ArrayData* adIn) {
   assertx(adIn->isVecKind());
-  auto a = PackedArray::ToDictVec(adIn, adIn->cowCheck());
+  auto a = PackedArray::ToDict(adIn, adIn->cowCheck());
   assertx(a != adIn);
   decRefArr(adIn);
   return a;
@@ -176,7 +176,7 @@ ArrayData* convArrToKeysetHelper(ArrayData* adIn) {
 
 ArrayData* convVecToKeysetHelper(ArrayData* adIn) {
   assertx(adIn->isVecKind());
-  auto a = PackedArray::ToKeysetVec(adIn, adIn->cowCheck());
+  auto a = PackedArray::ToKeyset(adIn, adIn->cowCheck());
   assertx(a != adIn);
   decRefArr(adIn);
   return a;
@@ -184,7 +184,7 @@ ArrayData* convVecToKeysetHelper(ArrayData* adIn) {
 
 ArrayData* convDictToKeysetHelper(ArrayData* adIn) {
   assertx(adIn->isDictKind());
-  auto a = MixedArray::ToKeysetDict(adIn, adIn->cowCheck());
+  auto a = MixedArray::ToKeyset(adIn, adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
   return a;
 }
@@ -505,16 +505,14 @@ TypedValue arrayIdxScan(ArrayData* a, StringData* key, TypedValue def) {
 // This helper may also be used when we know we have a MixedArray in the JIT.
 TypedValue dictIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->hasVanillaMixedLayout());
-  static_assert(MixedArray::NvGetInt == MixedArray::NvGetIntDict, "");
-  return getDefaultIfMissing(MixedArray::NvGetIntDict(a, key), def);
+  return getDefaultIfMissing(MixedArray::NvGetInt(a, key), def);
 }
 
 // This helper is also used for MixedArrays.
 NEVER_INLINE
 TypedValue dictIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->hasVanillaMixedLayout());
-  static_assert(MixedArray::NvGetStr == MixedArray::NvGetStrDict, "");
-  return getDefaultIfMissing(MixedArray::NvGetStrDict(a, key), def);
+  return getDefaultIfMissing(MixedArray::NvGetStr(a, key), def);
 }
 
 // This helper is also used for MixedArrays.
@@ -541,7 +539,7 @@ TypedValue vecFirstLast(ArrayData* a) {
   assertx(a->isVecKind() || a->isPackedKind());
   auto const size = a->getSize();
   if (UNLIKELY(size == 0)) return make_tv<KindOfNull>();
-  return PackedArray::NvGetIntVec(a, isFirst ? 0 : size - 1);
+  return PackedArray::NvGetInt(a, isFirst ? 0 : size - 1);
 }
 
 template TypedValue vecFirstLast<true>(ArrayData*);

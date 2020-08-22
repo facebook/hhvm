@@ -283,9 +283,9 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
     BespokeArray::entry,     /* bespoke darray */ \
     PackedArray::entry,      /* varray */         \
     BespokeArray::entry,     /* bespoke varray */ \
-    MixedArray::entry##Dict, /* dict */           \
+    MixedArray::entry,       /* dict */           \
     BespokeArray::entry,     /* bespoke dict */   \
-    PackedArray::entry##Vec, /* vec */            \
+    PackedArray::entry,      /* vec */            \
     BespokeArray::entry,     /* bespoke vec */    \
     SetArray::entry,         /* keyset */         \
     BespokeArray::entry,     /* bespoke keyset */ \

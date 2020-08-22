@@ -302,7 +302,7 @@ bool BaseSet::Equals(const ObjectData* obj1, const ObjectData* obj2) {
 BaseSet::~BaseSet() {
   auto const mixed = MixedArray::asMixed(arrayData());
   // Avoid indirect call, as we know it is a MixedArray
-  if (mixed->decReleaseCheck()) MixedArray::ReleaseDict(mixed);
+  if (mixed->decReleaseCheck()) MixedArray::Release(mixed);
 }
 
 void BaseSet::throwBadValueType() {

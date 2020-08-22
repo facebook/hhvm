@@ -288,7 +288,7 @@ static ArrayData* convArrToVArrImpl(ArrayData* adIn) {
 static ArrayData* convVecToVArrImpl(ArrayData* adIn) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   assertx(adIn->isVecKind());
-  auto a = PackedArray::ToVArrayVec(adIn, adIn->cowCheck());
+  auto a = PackedArray::ToVArray(adIn, adIn->cowCheck());
   assertx(a->isPackedKind());
   assertx(a->isVArray());
   if (a != adIn) decRefArr(adIn);
@@ -298,7 +298,7 @@ static ArrayData* convVecToVArrImpl(ArrayData* adIn) {
 static ArrayData* convDictToVArrImpl(ArrayData* adIn) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   assertx(adIn->isDictKind());
-  auto a = MixedArray::ToVArrayDict(adIn, adIn->cowCheck());
+  auto a = MixedArray::ToVArray(adIn, adIn->cowCheck());
   assertx(a != adIn);
   assertx(a->isPackedKind());
   assertx(a->isVArray());
@@ -379,7 +379,7 @@ static ArrayData* convArrToDArrImpl(ArrayData* adIn) {
 static ArrayData* convVecToDArrImpl(ArrayData* adIn) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   assertx(adIn->isVecKind());
-  auto a = PackedArray::ToDArrayVec(adIn, adIn->cowCheck());
+  auto a = PackedArray::ToDArray(adIn, adIn->cowCheck());
   assertx(a != adIn);
   assertx(a->isMixedKind());
   assertx(a->isDArray());
@@ -390,7 +390,7 @@ static ArrayData* convVecToDArrImpl(ArrayData* adIn) {
 static ArrayData* convDictToDArrImpl(ArrayData* adIn) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   assertx(adIn->isDictKind());
-  auto a = MixedArray::ToDArrayDict(adIn, adIn->cowCheck());
+  auto a = MixedArray::ToDArray(adIn, adIn->cowCheck());
   assertx(a->isMixedKind());
   assertx(a->isDArray());
   if (a != adIn) decRefArr(adIn);

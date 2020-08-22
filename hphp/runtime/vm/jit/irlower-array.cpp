@@ -187,8 +187,6 @@ void cgAKExistsDict(IRLS& env, const IRInstruction* inst) {
   auto const keyTy = inst->src(1)->type();
   auto& v = vmain(env);
 
-  static_assert(MixedArray::ExistsInt == MixedArray::ExistsIntDict);
-  static_assert(MixedArray::ExistsStr == MixedArray::ExistsStrDict);
   auto const target = (keyTy <= TInt)
     ? CallSpec::direct(MixedArray::ExistsInt)
     : CallSpec::direct(MixedArray::ExistsStr);

@@ -350,54 +350,6 @@ public:
   static bool Usort(ArrayData*, const Variant& cmp_function);
   static bool Uasort(ArrayData*, const Variant& cmp_function);
 
-  static constexpr auto NvGetIntDict = &NvGetInt;
-  static constexpr auto NvGetStrDict = &NvGetStr;
-  static constexpr auto NvGetIntPosDict = &NvGetIntPos;
-  static constexpr auto NvGetStrPosDict = &NvGetStrPos;
-  static constexpr auto ReleaseDict = &Release;
-  static constexpr auto GetPosKeyDict = &GetPosKey;
-  static constexpr auto GetPosValDict = &GetPosVal;
-  static constexpr auto SetIntDict = &SetInt;
-  static constexpr auto SetIntMoveDict = &SetIntMove;
-  static constexpr auto SetStrDict = &SetStr;
-  static constexpr auto SetStrMoveDict = &SetStrMove;
-  static constexpr auto AddIntDict = &AddInt;
-  static constexpr auto AddStrDict = &AddStr;
-  static constexpr auto VsizeDict = &Vsize;
-  static constexpr auto IsVectorDataDict = &IsVectorData;
-  static constexpr auto ExistsIntDict = &ExistsInt;
-  static constexpr auto ExistsStrDict = &ExistsStr;
-  static constexpr auto LvalIntDict = &LvalInt;
-  static constexpr auto LvalStrDict = &LvalStr;
-  static constexpr auto RemoveIntDict = &RemoveInt;
-  static constexpr auto RemoveStrDict = &RemoveStr;
-  static constexpr auto IterBeginDict = &IterBegin;
-  static constexpr auto IterLastDict = &IterLast;
-  static constexpr auto IterEndDict = &IterEnd;
-  static constexpr auto IterAdvanceDict = &IterAdvance;
-  static constexpr auto IterRewindDict = &IterRewind;
-  static constexpr auto EscalateForSortDict = &EscalateForSort;
-  static constexpr auto KsortDict = &Ksort;
-  static constexpr auto SortDict = &Sort;
-  static constexpr auto AsortDict = &Asort;
-  static constexpr auto UksortDict = &Uksort;
-  static constexpr auto UsortDict = &Usort;
-  static constexpr auto UasortDict = &Uasort;
-  static constexpr auto CopyDict = &Copy;
-  static constexpr auto CopyStaticDict = &CopyStatic;
-  static constexpr auto AppendDict = &Append;
-  static constexpr auto MergeDict = &Merge;
-  static constexpr auto PopDict = &Pop;
-  static constexpr auto DequeueDict = &Dequeue;
-  static constexpr auto PrependDict = &Prepend;
-  static constexpr auto RenumberDict = &Renumber;
-  static constexpr auto OnSetEvalScalarDict = &OnSetEvalScalar;
-  static ArrayData* ToDictDict(ArrayData*, bool);
-  static constexpr auto ToVecDict = &ArrayCommon::ToVec;
-  static constexpr auto ToKeysetDict = &ArrayCommon::ToKeyset;
-  static constexpr auto ToVArrayDict = &ArrayCommon::ToVArray;
-  static ArrayData* ToDArrayDict(ArrayData*, bool);
-
   //////////////////////////////////////////////////////////////////////
 
   // Helpers used by ArrayInit to update MixedArrays without refcount ops.

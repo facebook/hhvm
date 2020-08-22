@@ -826,9 +826,16 @@ ArrayData* PackedArray::Prepend(ArrayData* adIn, TypedValue v) {
 
 ArrayData* PackedArray::ToVArray(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
-  assertx(adIn->isPackedKind());
-  assertx(adIn->isVArray());
-  return adIn;
+  assertx(adIn->hasVanillaPackedLayout());
+  if (RuntimeOption::EvalHackArrDVArrs || adIn->isVArray()) return adIn;
+
+  if (adIn->getSize() == 0) return ArrayData::CreateVArray();
+  auto const ad = copy ? Copy(adIn) : adIn;
+  ad->m_kind = HeaderKind::Packed;
+  ad->setLegacyArray(false);
+  if (RO::EvalArrayProvenance) arrprov::reassignTag(ad);
+  assertx(checkInvariants(ad));
+  return ad;
 }
 
 ArrayData* PackedArray::ToDArray(ArrayData* adIn, bool /*copy*/) {
@@ -838,19 +845,6 @@ ArrayData* PackedArray::ToDArray(ArrayData* adIn, bool /*copy*/) {
   DArrayInit init{size};
   for (int64_t i = 0; i < size; ++i) init.add(i, GetPosVal(adIn, i));
   return init.create();
-}
-
-ArrayData* PackedArray::ToVArrayVec(ArrayData* adIn, bool copy) {
-  assertx(checkInvariants(adIn));
-  assertx(adIn->isVecKind());
-  if (RuntimeOption::EvalHackArrDVArrs) return adIn;
-  if (adIn->getSize() == 0) return ArrayData::CreateVArray();
-  auto const ad = copy ? Copy(adIn) : adIn;
-  ad->m_kind = HeaderKind::Packed;
-  ad->setLegacyArray(false);
-  if (RO::EvalArrayProvenance) arrprov::reassignTag(ad);
-  assertx(checkInvariants(ad));
-  return ad;
 }
 
 ArrayData* PackedArray::ToDict(ArrayData* ad, bool copy) {
@@ -865,8 +859,9 @@ ArrayData* PackedArray::ToDict(ArrayData* ad, bool copy) {
 
 ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
-  assertx(adIn->isPackedKind());
+  assertx(adIn->hasVanillaPackedLayout());
 
+  if (adIn->isVecKind()) return adIn;
   if (adIn->empty()) return ArrayData::CreateVec();
 
   ArrayData* ad;
@@ -890,12 +885,6 @@ ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
   assertx(ad->m_pos == adIn->m_pos);
   assertx(ad->hasExactlyOneRef());
   assertx(checkInvariants(ad));
-  return ad;
-}
-
-ArrayData* PackedArray::ToVecVec(ArrayData* ad, bool) {
-  assertx(checkInvariants(ad));
-  assertx(ad->isVecKind());
   return ad;
 }
 

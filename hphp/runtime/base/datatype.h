@@ -305,6 +305,22 @@ inline bool isPHPArrayType(MaybeDataType t) {
   return t && isPHPArrayType(*t);
 }
 
+constexpr bool isVecOrVArrayType(DataType t) {
+  auto const dt = static_cast<DataType>(dt_t(t) & ~kRefCountedBit);
+  return dt == KindOfPersistentVArray || dt == KindOfPersistentVec;
+}
+inline bool isVecOrVArrayType(MaybeDataType t) {
+  return t && isVecOrVArrayType(*t);
+}
+
+constexpr bool isDictOrDArrayType(DataType t) {
+  auto const dt = static_cast<DataType>(dt_t(t) & ~kRefCountedBit);
+  return dt == KindOfPersistentDArray || dt == KindOfPersistentDict;
+}
+inline bool isDictOrDArrayType(MaybeDataType t) {
+  return t && isDictOrDArrayType(*t);
+}
+
 /*
  * Currently matches any PHP dvarray. This method will go away.
  */

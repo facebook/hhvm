@@ -427,61 +427,6 @@ ELEMU_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-#define ELEM_ARRAY_D_HELPER_TABLE(m)  \
-  /* name           keyType */        \
-  m(elemArraySD,    KeyType::Str)     \
-  m(elemArrayID,    KeyType::Int)     \
-
-#define X(nm, keyType)                                   \
-inline tv_lval nm(tv_lval base, key_type<keyType> key) { \
-  assertx(isArrayType(type(base)));                      \
-  return ElemDArray<keyType>(base, key);                 \
-}
-ELEM_ARRAY_D_HELPER_TABLE(X)
-#undef X
-
-#define ELEM_ARRAY_U_HELPER_TABLE(m)  \
-  /* name         keyType */          \
-  m(elemArraySU,  KeyType::Str)       \
-  m(elemArrayIU,  KeyType::Int)       \
-
-#define X(nm, keyType)                                     \
-inline tv_lval nm(tv_lval base, key_type<keyType> key) {   \
-  assertx(isArrayType(type(base)));                       \
-  return ElemUArray<keyType>(base, key);                  \
-}
-ELEM_ARRAY_U_HELPER_TABLE(X)
-#undef X
-
-//////////////////////////////////////////////////////////////////////
-
-template<KeyType keyType, MOpMode mode>
-TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
-  auto const result = a->get(key);
-  if (result.is_init()) return result;
-  if (mode == MOpMode::None) return make_tv<KindOfNull>();
-  assertx(mode == MOpMode::InOut || mode == MOpMode::Warn);
-  a->getNotFound(key);
-}
-
-#define ARRAYGET_HELPER_TABLE(m)                  \
-  /* name           keyType       mode */         \
-  m(arrayGetS,      KeyType::Str, MOpMode::None)  \
-  m(arrayGetI,      KeyType::Int, MOpMode::None)  \
-  m(arrayGetS_W,    KeyType::Str, MOpMode::Warn)  \
-  m(arrayGetI_W,    KeyType::Int, MOpMode::Warn)  \
-  m(arrayGetS_IO,   KeyType::Str, MOpMode::InOut) \
-  m(arrayGetI_IO,   KeyType::Int, MOpMode::InOut) \
-
-#define X(nm, keyType, mode)                                \
-inline TypedValue nm(ArrayData* a, key_type<keyType> key) { \
-  return arrayGetImpl<keyType, mode>(a, key);               \
-}
-ARRAYGET_HELPER_TABLE(X)
-#undef X
-
-//////////////////////////////////////////////////////////////////////
-
 #define ELEM_DICT_D_HELPER_TABLE(m) \
   /* name          keyType       */ \
   m(elemDictSD,    KeyType::Str)    \
@@ -489,7 +434,7 @@ ARRAYGET_HELPER_TABLE(X)
 
 #define X(nm, keyType)                                   \
 inline tv_lval nm(tv_lval base, key_type<keyType> key) { \
-  assertx(isDictType(type(base)));                       \
+  assertx(tvIsDictOrDArray(base));                       \
   return ElemDDict<keyType>(base, key);                  \
 }
 ELEM_DICT_D_HELPER_TABLE(X)
@@ -502,7 +447,7 @@ ELEM_DICT_D_HELPER_TABLE(X)
 
 #define X(nm, keyType)                                   \
 inline tv_lval nm(tv_lval base, key_type<keyType> key) { \
-  assertx(isDictType(type(base)));                       \
+  assertx(tvIsDictOrDArray(base));                       \
   return ElemUDict<keyType>(base, key);                  \
 }
 ELEM_DICT_U_HELPER_TABLE(X)

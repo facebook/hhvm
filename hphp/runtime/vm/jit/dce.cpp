@@ -253,7 +253,6 @@ bool canDCE(IRInstruction* inst) {
   case LdMBase:
   case MethodExists:
   case LdTVAux:
-  case ArrayIdx:
   case ArrayIsset:
   case DictGetQuiet:
   case DictGetK:
@@ -629,8 +628,6 @@ bool canDCE(IRInstruction* inst) {
   case CheckDictOffset:
   case ProfileKeysetAccess:
   case CheckKeysetOffset:
-  case ElemArrayD:
-  case ElemArrayU:
   case ElemMixedArrayK:
   case ElemVecD:
   case ElemVecU:
@@ -641,7 +638,6 @@ bool canDCE(IRInstruction* inst) {
   case ElemKeysetK:
   case ElemDX:
   case ElemUX:
-  case ArrayGet:
   case MixedArrayGetK:
   case DictGet:
   case KeysetGet:

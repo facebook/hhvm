@@ -409,8 +409,8 @@ struct KeyedIndexData : IRExtraData {
  * Used to optimize array accesses. Does not change semantics, but changes how
  * we do the lookup - e.g. we scan small static arrays for static string keys.
  *
- * NOTE: Currently, we only use this hint in ArrayIdx and DictIdx. We may want
- * to use it for ArrayExists / ArrayGet / etc.
+ * NOTE: Currently, we only use this hint in DictIdx. We may want
+ * to use it for ArrayExists / etc.
  */
 struct SizeHintData : IRExtraData {
   enum SizeHint {
@@ -1637,7 +1637,6 @@ struct MethCallerData : IRExtraData {
   static_assert(boost::has_trivial_destructor<data>::value,           \
                 "IR extra data type must be trivially destructible")
 
-X(ArrayIdx,                     SizeHintData);
 X(DictIdx,                      SizeHintData);
 X(LdBindAddr,                   LdBindAddrData);
 X(ProfileSwitchDest,            ProfileSwitchData);
@@ -1776,7 +1775,6 @@ X(ElemDX,                       MOpModeData);
 X(ElemUX,                       MOpModeData);
 X(CGetProp,                     MOpModeData);
 X(CGetElem,                     MOpModeData);
-X(ArrayGet,                     MOpModeData);
 X(MemoGetStaticValue,           MemoValueStaticData);
 X(MemoSetStaticValue,           MemoValueStaticData);
 X(MemoGetStaticCache,           MemoCacheStaticData);

@@ -2307,14 +2307,7 @@ To string conversions:
   Identical to GetMemoKey but only accepts scalar types and cannot produce
   errors.
 
-| ArrayIdx<sizeHint>, DArrElem, S(Arr) S(Int,Str) S(Cell), NF
-
-  Checks if S0 contains the key S1, and returns the result if found. Otherwise
-  S2 is returned. The optimization data `sizeHint` doesn't affect semantics.
-  (`sizeHint` describes S0; it's one of {Default, SmallStatic}. Default is a
-  hash lookup. For SmallStatic, we'll do a linear scan for static string keys.)
-
-| DictIdx<sizeHint>, DDictElem, S(Dict) S(Int,Str) S(Cell), NF
+| DictIdx<sizeHint>, DDictElem, S(DArr,Dict) S(Int,Str) S(Cell), NF
 
   Checks if S0 contains the key S1 and returns the result if found. Otherwise
   S2 is returned. The optimization data `sizeHint` doesn't affect semantics.
@@ -2875,11 +2868,11 @@ fields of that struct for holding intermediate values.
 
   Check that S0 has a refcount of exactly 1; if not, branch to B.
 
-| ProfileDictAccess, ND, S(Dict) S(Int,Str), NF
+| ProfileDictAccess, ND, S(DArr,Dict) S(Int,Str), NF
 
   Profile access of the element keyed by S1 in S0, tracking sizes and offsets.
 
-| CheckDictOffset<pos>, ND, S(Dict) S(Int,Str), B
+| CheckDictOffset<pos>, ND, S(DArr,Dict) S(Int,Str), B
 
   Check that `pos' is within the usage bounds of S0 (including tombstones), and
   that S1 exactly matches the element key of S0 at `pos'.  If any of the checks
@@ -2901,33 +2894,26 @@ fields of that struct for holding intermediate values.
   If S1 may be present, branches to block B. If we branch here, the key may or
   may not be present.
 
-| ElemArrayD, D(LvalToElemInitCell), S(LvalToArr) S(Int,Str), MElem
-
-| ElemArrayU, D(LvalToMembInitCell), S(LvalToArr) S(Int,Str), MElem
-
-  Similar to ElemDX and ElemUX, but specialized for when the base S0 is an
-  array and the key S1 is an int/str.
-
 | ElemMixedArrayK, D(LvalToElemInitCell), S(DArr) S(Int,Str) S(Int), NF
 
   Returns an lval to the element of MixedArray S0 at the known position S2 in S1.
 
-| ElemVecD, D(LvalToElemInitCell), S(LvalToVec) S(Int), MElem
+| ElemVecD, D(LvalToElemInitCell), S(LvalToVArr,LvalToVec) S(Int), MElem
 
-| ElemVecU, D(LvalToMembInitCell), S(LvalToVec) S(Int), MElem
+| ElemVecU, D(LvalToMembInitCell), S(LvalToVArr,LvalToVec) S(Int), MElem
 
   Similar to ElemX, but the base S0 is a vec and the key S1 is an int. ElemVecD
   is for Define member instrs and ElemVecU is for Unset. (Other variations can
   be implemented without special IR instructions).
 
-| ElemDictD, D(LvalToElemInitCell), S(LvalToDict) S(Int,Str), MElem
+| ElemDictD, D(LvalToElemInitCell), S(LvalToDArr,LvalToDict) S(Int,Str), MElem
 
-| ElemDictU, D(LvalToMembInitCell), S(LvalToDict) S(Int,Str), MElem
+| ElemDictU, D(LvalToMembInitCell), S(LvalToDArr,LvalToDict) S(Int,Str), MElem
 
   Similar to ElemDX and ElemUX, but specialized for when the base S0 is a
   dict and the key S1 is an int/str.
 
-| ElemDictK, D(LvalToElemInitCell), S(Dict) S(Int,Str) S(Int), NF
+| ElemDictK, D(LvalToElemInitCell), S(DArr,Dict) S(Int,Str) S(Int), NF
 
   Returns an lval to the element of dict S0 at the known position S2 in S1.
 
@@ -2950,24 +2936,20 @@ fields of that struct for holding intermediate values.
   Like ElemX, but used for intermediate element lookups that may modify the
   base as part of an unset operation.
 
-| ArrayGet, DArrElem, S(Arr) S(Int,Str), NF
-
-  Get element with key S1 from base S0.
-
 | MixedArrayGetK, DArrElem, S(DArr) S(Int,Str) S(Int), NF
 
   Like ArrayGet, but the element for S1 is at a known position S2 in S0.
 
-| DictGet, DDictElem, S(Dict) S(Int,Str), NF
+| DictGet, DDictElem, S(DArr,Dict) S(Int,Str), NF
 
   Get element with key S1 from base S0, throwing if the element is not present.
 
-| DictGetQuiet, DDictElem, S(Dict) S(Int,Str), NF
+| DictGetQuiet, DDictElem, S(DArr,Dict) S(Int,Str), NF
 
   Get element with key S1 from base S0, returning null if the element is not
   present.
 
-| DictGetK, DDictElem, S(Dict) S(Int,Str) S(Int), NF
+| DictGetK, DDictElem, S(DArr,Dict) S(Int,Str) S(Int), NF
 
   Like DictGet, but the element for S1 is at a known position S2 in S0.
 
@@ -3260,7 +3242,7 @@ fields of that struct for holding intermediate values.
   assumes that the vec actually contains an element at that offset (IE, the
   array has the proper length).
 
-| LdVecElem, DVecElem, S(Vec) S(Int), NF
+| LdVecElem, DVecElem, S(VArr,Vec) S(Int), NF
 
   Loads the element of the vec array in S0 at offset S1. This instruction
   assumes that the vec actually contains an element at that offset (IE, the vec

@@ -159,7 +159,7 @@ AliasClass pointee(
     if (type <= TMemToMembCell) {
       // Takes a PtrToCell as its first operand, so we can't easily grab an
       // array base.
-      if (sinst->is(ElemArrayU, ElemVecU, ElemDictU, ElemKeysetU)) {
+      if (sinst->is(ElemVecU, ElemDictU, ElemKeysetU)) {
         return AElemAny;
       }
 
@@ -1279,9 +1279,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AKExistsArr:
     return may_load_store(AElemAny, AEmpty);
 
-  case ArrayIdx:
-    return may_load_store(AElemAny, AEmpty);
-
   case SameArr:
   case NSameArr:
     return may_load_store(AEmpty, AEmpty);
@@ -1352,8 +1349,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetNewElemVec:
   case SetNewElemKeyset:
   case UnsetElem:
-  case ElemArrayD:
-  case ElemArrayU:
   case ElemVecD:
   case ElemVecU:
   case ElemDictD:
@@ -1912,7 +1907,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case OrdStrIdx:      // raise_notice
   case AddNewElem:         // can re-enter
   case AddNewElemKeyset:   // can re-enter
-  case ArrayGet:       // kVPackedKind warnings
   case ArraySet:       // kVPackedKind warnings
   case DictGet:
   case KeysetGet:

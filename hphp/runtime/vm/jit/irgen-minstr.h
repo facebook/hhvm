@@ -91,10 +91,11 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
   // versions of GCC that cause the hhvm-cmake build to fail. See the issue:
   // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80543
   bool is_dict = arr->isA(TDict);
+  bool is_darr = arr->isA(TDArr);
   bool is_keyset = arr->isA(TKeyset);
   bool is_define = mode == MOpMode::Define;
   bool cow_check = mode == MOpMode::Define || mode == MOpMode::Unset;
-  assertx(is_dict || is_keyset || arr->isA(TArr));
+  assertx(is_dict || is_darr || is_keyset || arr->isA(TArr));
 
   // If the base and key are static, the access will likely get simplified away.
   // Likewise, if the base is a non-darray PHP array, we can't optimize it.
@@ -110,15 +111,15 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
   auto const profile = TargetProfile<ArrayAccessProfile> {
     env.context,
     env.irb->curMarker(),
-    is_dict ? s_DictAccess.get() :
+    is_dict || is_darr ? s_DictAccess.get() :
     is_keyset ? s_KeysetAccess.get() :
     s_MixedArrayAccess.get()
   };
 
   if (profile.profiling()) {
-    auto const op = is_dict ? ProfileDictAccess
-                            : is_keyset ? ProfileKeysetAccess
-                                        : ProfileMixedArrayAccess;
+    auto const op = is_dict || is_darr ?  ProfileDictAccess
+                                       : is_keyset ? ProfileKeysetAccess
+                                                   : ProfileMixedArrayAccess;
     auto const data = ArrayAccessProfileData { profile.handle(), cow_check };
     gen(env, op, data, arr, key);
   }
@@ -151,7 +152,7 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
   if (!is_define && result.empty != Action::None) {
     return missingCond(result.empty, [&] (Block* taken) {
       auto const count = [&] {
-        if (is_dict) return gen(env, CountDict, arr);
+        if (is_dict || is_darr) return gen(env, CountDict, arr);
         if (is_keyset) return gen(env, CountKeyset, arr);
         return gen(env, CountArray, arr);
       }();
@@ -165,8 +166,9 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
       auto const skey = key->isA(TStaticStr) ? key :
         gen(env, CheckType, TStaticStr, taken, key);
       gen(env, CheckMissingKeyInArrLike, taken, arr, skey);
-      auto const t = is_dict ? TStaticDict :
-                      is_keyset ? TStaticKeyset : TStaticArr;
+      auto const t = arr->isA(TDict) ? TStaticDict :
+                     arr->isA(TDArr) ? TStaticDArr :
+                     is_keyset ? TStaticKeyset : TStaticArr;
       gen(env, AssertType, t, arr);
     });
   }
@@ -176,9 +178,9 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
   return cond(
     env,
     [&] (Block* taken) {
-      auto const op = is_dict ? CheckDictOffset
-                              : is_keyset ? CheckKeysetOffset
-                                          : CheckMixedArrayOffset;
+      auto const op = is_dict || is_darr ? CheckDictOffset
+                                         : is_keyset ? CheckKeysetOffset
+                                                     : CheckMixedArrayOffset;
       gen(env, op, IndexData { result.offset.second }, taken, arr, key);
       if (cow_check) gen(env, CheckArrayCOW, taken, arr);
     },

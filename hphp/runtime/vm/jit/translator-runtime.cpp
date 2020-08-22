@@ -839,7 +839,16 @@ void throwOOBException(TypedValue base, TypedValue key) {
 }
 
 void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key) {
-  throwInvalidArrayKeyException(&key, ad);
+  if (ad->isVArray() && tvIsString(key)) {
+    if (RO::EvalHackArrCompatNotices) {
+      raise_hackarr_compat_notice(
+        "Raising OutOfBoundsException for accessing string index of varray"
+      );
+    }
+    throwOOBArrayKeyException(key, ad);
+  } else {
+    throwInvalidArrayKeyException(&key, ad);
+  }
 }
 
 namespace MInstrHelpers {
@@ -880,7 +889,7 @@ TypedValue incDecElem(tv_lval base, TypedValue key, IncDecOp op) {
 }
 
 tv_lval elemVecIU(tv_lval base, int64_t key) {
-  assertx(isVecType(type(base)));
+  assertx(tvIsVecOrVArray(base));
   return ElemUVec<KeyType::Int>(base, key);
 }
 

@@ -993,17 +993,15 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
   auto const def = defType <= TUninit ? cns(env, TInitNull) : params[2].value;
 
   // params[0] is a ?darray, which may be a ?Dict or a ?DArr based on options.
-  bool is_dict;
   auto const arrType = params[0].value->type();
-  if (RuntimeOption::EvalHackArrDVArrs && arrType <= TDict) {
-    is_dict = true;
-  } else if (!RuntimeOption::EvalHackArrDVArrs && arrType <= TDArr) {
-    is_dict = false;
-  } else if (arrType <= TNull) {
-    gen(env, IncRef, def);
-    return def;
-  } else {
-    return nullptr;
+  if (!(RuntimeOption::EvalHackArrDVArrs ?
+        arrType <= TDict : arrType <= TDArr)) {
+    if (arrType <= TNull) {
+      gen(env, IncRef, def);
+      return def;
+    } else {
+      return nullptr;
+    }
   }
 
   // Do the array access, using array offset profiling to optimize it.
@@ -1014,13 +1012,11 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
   auto const elm = profiledArrayAccess(
     env, arr, key, MOpMode::None,
     [&] (SSATmp* arr, SSATmp* key, SSATmp* pos) {
-      auto const op = is_dict ? DictGetK : MixedArrayGetK;
-      return gen(env, op, arr, key, pos);
+      return gen(env, DictGetK, arr, key, pos);
     },
     [&] (SSATmp*) { return def; },
     [&] (SSATmp* key, SizeHintData data) {
-      auto const op = is_dict ? DictIdx : ArrayIdx;
-      return gen(env, op, data, arr, key, def);
+      return gen(env, DictIdx, data, arr, key, def);
     }
   );
   env.irb->fs().decBCSPDepth(nparams);
@@ -2259,56 +2255,6 @@ Type builtinReturnType(const Func* builtin) {
 
 namespace {
 
-void implArrayIdx(IRGS& env) {
-  // These types are just used to decide what to do; once we know what we're
-  // actually doing we constrain the values with the popC()s later on in this
-  // function.
-  auto const keyType = topC(env, BCSPRelOffset{1}, DataTypeGeneric)->type();
-
-  if (keyType <= TNull) {
-    auto const def = popC(env, DataTypeGeneric);
-    auto const key = popC(env);
-    auto const base = popC(env);
-
-    // if the key is null it will not be found so just return the default
-    push(env, def);
-    decRef(env, base);
-    decRef(env, key);
-    return;
-  }
-  if (!(keyType <= TInt || keyType <= TStr)) {
-    interpOne(env, TCell, 3);
-    return;
-  }
-
-  // A helper will decref it but the translated code doesn't care about the type
-  auto const def = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
-  auto const key = topC(env, BCSPRelOffset{1});
-  auto const base = topC(env, BCSPRelOffset{2});
-
-  auto const elem = profiledArrayAccess(
-    env, base, key, MOpMode::None,
-    [&] (SSATmp* arr, SSATmp* key, SSATmp* pos) {
-      return gen(env, MixedArrayGetK, arr, key, pos);
-    },
-    [&] (SSATmp*) { return def; },
-    [&] (SSATmp* key, SizeHintData data) {
-      return gen(env, ArrayIdx, data, base, key, def);
-    }
-  );
-
-  auto finish = [&](SSATmp* tmp) {
-    popC(env); popC(env); popC(env);
-    pushIncRef(env, tmp);
-    decRef(env, base);
-    decRef(env, key);
-    decRef(env, def);
-  };
-
-  auto const pelem = profiledType(env, elem, [&] { finish(elem); });
-  finish(pelem);
-}
-
 void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {
   auto const def = popC(env);
   auto const key = popC(env);
@@ -2336,7 +2282,7 @@ void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {
   auto const use_base = loaded_collection_vec
     ? loaded_collection_vec
     : stack_base;
-  assertx(use_base->isA(TVec));
+  assertx(use_base->type().subtypeOfAny(TVec, TVArr));
 
   auto const elem = cond(
     env,
@@ -2382,7 +2328,8 @@ void implDictKeysetIdx(IRGS& env,
   auto const use_base = loaded_collection_dict
     ? loaded_collection_dict
     : stack_base;
-  assertx(use_base->isA(is_dict ? TDict : TKeyset));
+  assertx(is_dict ? use_base->type().subtypeOfAny(TDict, TDArr)
+                  : use_base->isA(TKeyset));
 
   auto const elem = profiledArrayAccess(
     env, use_base, key, MOpMode::None,
@@ -2433,18 +2380,14 @@ GuardConstraint idxBaseConstraint(Type baseType, Type keyType,
 
 void emitArrayIdx(IRGS& env) {
   auto const arrType = topC(env, BCSPRelOffset{2}, DataTypeGeneric)->type();
-  if (arrType <= TVec) return implVecIdx(env, nullptr);
-  if (arrType <= TDict) return implDictKeysetIdx(env, true, nullptr);
+  if (arrType.subtypeOfAny(TVec, TVArr)) return implVecIdx(env, nullptr);
+  if (arrType.subtypeOfAny(TDict, TDArr)) {
+    return implDictKeysetIdx(env, true, nullptr);
+  }
   if (arrType <= TKeyset) return implDictKeysetIdx(env, false, nullptr);
   if (arrType <= TClsMeth) PUNT(ArrayIdx_clsmeth);
 
-  if (!(arrType <= TArr)) {
-    // raise fatal
-    interpOne(env, TCell, 3);
-    return;
-  }
-
-  implArrayIdx(env);
+  interpOne(env, TCell, 3);
 }
 
 void emitIdx(IRGS& env) {
@@ -2453,8 +2396,10 @@ void emitIdx(IRGS& env) {
   auto const keyType  = key->type();
   auto const baseType = base->type();
 
-  if (baseType <= TVec) return implVecIdx(env, nullptr);
-  if (baseType <= TDict) return implDictKeysetIdx(env, true, nullptr);
+  if (baseType.subtypeOfAny(TVec, TVArr)) return implVecIdx(env, nullptr);
+  if (baseType.subtypeOfAny(TDict, TDArr)) {
+    return implDictKeysetIdx(env, true, nullptr);
+  }
   if (baseType <= TKeyset) return implDictKeysetIdx(env, false, nullptr);
 
   if (keyType <= TNull || !baseType.maybe(TArr | TObj | TStr)) {
@@ -2469,11 +2414,6 @@ void emitIdx(IRGS& env) {
 
   if (!(keyType <= TInt || keyType <= TStr)) {
     interpOne(env, TCell, 3);
-    return;
-  }
-
-  if (baseType <= TArr) {
-    implArrayIdx(env);
     return;
   }
 

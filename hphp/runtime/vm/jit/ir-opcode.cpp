@@ -301,7 +301,6 @@ bool opcodeMayRaise(Opcode opc) {
   case AKExistsObj:
   case AllocObj:
   case AllocObjReified:
-  case ArrayGet:
   case ArraySet:
   case BaseG:
   case Call:
@@ -357,8 +356,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CreateAAWH:
   case DictGet:
   case DictSet:
-  case ElemArrayD:
-  case ElemArrayU:
   case ElemDictD:
   case ElemDictU:
   case ElemDX:
@@ -530,7 +527,6 @@ bool opcodeMayRaise(Opcode opc) {
   case AllocVArray:
   case AllocVec:
   case AndInt:
-  case ArrayIdx:
   case ArrayIsset:
   case AssertLoc:
   case AssertMBase:

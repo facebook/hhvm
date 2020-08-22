@@ -161,7 +161,7 @@ std::pair<Type, bool> arrElemType(Type arr, Type idx, const Class* ctx) {
 }
 
 std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
-  assertx(arr <= TVec);
+  assertx(arr.subtypeOfAny(TVec, TVArr));
   assertx(idx <= TInt);
 
   if (idx.hasConstVal()) {
@@ -173,23 +173,23 @@ std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
     // If both the array and idx are known statically, we can resolve it to the
     // precise type.
     if (idx.hasConstVal()) {
-      auto const tv = PackedArray::NvGetIntVec(arr.vecVal(), idx.intVal());
+      auto const tv = PackedArray::NvGetInt(arr.arrLikeVal(), idx.intVal());
       if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     }
 
     // Otherwise we can constrain the type according to the union of all the
-    // types present in the vec.
+    // types present in the vec/varray.
     auto type = TBottom;
     PackedArray::IterateV(
-      arr.vecVal(),
+      arr.arrLikeVal(),
       [&](TypedValue v) { type |= Type::cns(v); }
     );
     return {type, false};
   }
 
-  // Vecs always contain initialized cells
-  auto type = (arr <= TPersistentVec) ? TUncountedInit : TInitCell;
+  // Array-likes always contain initialized cells.
+  auto type = arr <= TPersistent ? TUncountedInit : TInitCell;
 
   auto const arrTy = arr.arrSpec().type();
   if (!arrTy) return {type, false};
@@ -225,18 +225,18 @@ std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
 }
 
 std::pair<Type, bool> dictElemType(Type arr, Type idx) {
-  assertx(arr <= TDict);
+  assertx(arr.subtypeOfAny(TDict, TDArr));
   assertx(idx <= (TInt | TStr));
 
   if (arr.hasConstVal()) {
     // If both the array and idx are known statically, we can resolve it to the
     // precise type.
     if (idx.hasConstVal(TInt)) {
-      auto const tv = MixedArray::NvGetIntDict(arr.vecVal(), idx.intVal());
+      auto const tv = MixedArray::NvGetIntDict(arr.arrLikeVal(), idx.intVal());
       if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     } else if (idx.hasConstVal(TStr)) {
-      auto const tv = MixedArray::NvGetStrDict(arr.vecVal(), idx.strVal());
+      auto const tv = MixedArray::NvGetStrDict(arr.arrLikeVal(), idx.strVal());
       if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     }
@@ -245,7 +245,7 @@ std::pair<Type, bool> dictElemType(Type arr, Type idx) {
     // types present in the dict.
     auto type = TBottom;
     MixedArray::IterateKV(
-      MixedArray::asMixed(arr.dictVal()),
+      MixedArray::asMixed(arr.arrLikeVal()),
       [&](TypedValue k, TypedValue v) {
         // Ignore values which can't correspond to the key's type
         if (isIntType(k.m_type)) {
@@ -258,8 +258,8 @@ std::pair<Type, bool> dictElemType(Type arr, Type idx) {
     return {type, false};
   }
 
-  // Dicts always contain initialized cells
-  auto const type = (arr <= TPersistentDict) ? TUncountedInit : TInitCell;
+  // Array-likes always contain initialized cells.
+  auto const type = arr <= TPersistent ? TUncountedInit : TInitCell;
   return {type, false};
 }
 

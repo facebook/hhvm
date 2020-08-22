@@ -69,7 +69,6 @@ bool loadsCell(const IRInstruction& inst) {
   case LdContField:
   case InitClsCns:
   case CGetProp:
-  case ArrayGet:
   case DictGet:
   case DictGetQuiet:
   case DictGetK:
@@ -78,7 +77,6 @@ bool loadsCell(const IRInstruction& inst) {
   case KeysetGetK:
   case MapGet:
   case CGetElem:
-  case ArrayIdx:
   case DictIdx:
   case KeysetIdx:
   case MemoGetStaticValue:

@@ -315,15 +315,11 @@ Type arrSetReturn(const IRInstruction* inst) {
 }
 
 Type arrElemReturn(const IRInstruction* inst) {
-  assertx(inst->is(ArrayGet, MixedArrayGetK, ArrayIdx, LdPackedElem));
+  assertx(inst->is(MixedArrayGetK, LdPackedElem));
   assertx(inst->src(0)->isA(TArr));
 
   auto elem =
     arrElemType(inst->src(0)->type(), inst->src(1)->type(), inst->ctx());
-  if (!elem.second) {
-    if (inst->is(ArrayGet)) elem.first |= TInitNull;
-    if (inst->is(ArrayIdx)) elem.first |= inst->src(2)->type();
-  }
   if (inst->hasTypeParam()) elem.first &= inst->typeParam();
   return elem.first;
 }
@@ -375,7 +371,7 @@ Type keysetFirstLastReturn(const IRInstruction* inst, bool first) {
 
 Type vecElemReturn(const IRInstruction* inst) {
   assertx(inst->is(LdVecElem));
-  assertx(inst->src(0)->isA(TVec));
+  assertx(inst->src(0)->type().subtypeOfAny(TVec, TVArr));
   assertx(inst->src(1)->isA(TInt));
 
   auto resultType =
@@ -386,7 +382,7 @@ Type vecElemReturn(const IRInstruction* inst) {
 
 Type dictElemReturn(const IRInstruction* inst) {
   assertx(inst->is(DictGet, DictGetK, DictGetQuiet, DictIdx));
-  assertx(inst->src(0)->isA(TDict));
+  assertx(inst->src(0)->type().subtypeOfAny(TDict, TDArr));
   assertx(inst->src(1)->isA(TInt | TStr));
 
   auto elem = dictElemType(inst->src(0)->type(), inst->src(1)->type());

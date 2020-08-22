@@ -57,8 +57,6 @@ namespace {
 
 enum class SimpleOp {
   None,
-  Array,
-  PackedArray,
   Vec,
   Dict,
   Keyset,
@@ -247,8 +245,6 @@ folly::Optional<GuardConstraint> simpleOpConstraint(SimpleOp op) {
     case SimpleOp::None:
       return folly::none;
 
-    case SimpleOp::Array:
-    case SimpleOp::PackedArray:
     case SimpleOp::Vec:
     case SimpleOp::Dict:
     case SimpleOp::Keyset:
@@ -558,7 +554,7 @@ void checkCollectionBounds(IRGS& env, SSATmp* base,
 }
 
 void checkVecBounds(IRGS& env, SSATmp* base, SSATmp* idx) {
-  assertx(base->isA(TVec));
+  assertx(base->type().subtypeOfAny(TVec, TVArr));
 
   ifThen(
     env,
@@ -573,44 +569,8 @@ void checkVecBounds(IRGS& env, SSATmp* base, SSATmp* idx) {
 }
 
 template<class Finish>
-SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
-                           Finish finish) {
-  assertx(base->isA(TVArr) && key->isA(TInt));
-
-  auto finishMe = [&](SSATmp* elem) {
-    gen(env, IncRef, elem);
-    return elem;
-  };
-
-  auto check = [&] (Block* taken) {
-    gen(env, CheckVecBounds, taken, base, key);
-  };
-
-  auto result = [&] {
-    auto const res = gen(env, LdPackedElem, base, key);
-    auto const pres = profiledType(env, res, [&] { finish(finishMe(res)); });
-    return finishMe(pres);
-  };
-
-  if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
-    ifThen(env, check, [&] {
-      hint(env, Block::Hint::Unlikely);
-      gen(env, ThrowArrayIndexException, base, key);
-    });
-    return result();
-  }
-
-  return cond(env, check, result,
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      return cns(env, TInitNull);
-    }
-  );
-}
-
-template<class Finish>
 SSATmp* emitVecGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
-  assertx(base->isA(TVec));
+  assertx(base->type().subtypeOfAny(TVec, TVArr));
 
   if (!key->isA(TInt)) {
     gen(env, ThrowInvalidArrayKey, base, key);
@@ -631,7 +591,7 @@ SSATmp* emitVecGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
 
 template<class Finish>
 SSATmp* emitVecQuietGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
-  assertx(base->isA(TVec));
+  assertx(base->type().subtypeOfAny(TVec, TVArr));
 
   if (key->isA(TStr)) return cns(env, TInitNull);
   if (!key->isA(TInt)) {
@@ -660,7 +620,8 @@ SSATmp* emitVecQuietGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
 template<class Finish>
 SSATmp* emitDictKeysetGet(IRGS& env, SSATmp* base, SSATmp* key,
                           bool quiet, bool is_dict, Finish finish) {
-  assertx(base->isA(is_dict ? TDict : TKeyset));
+  assertx(is_dict ? base->type().subtypeOfAny(TDict, TDArr)
+                  : base->isA(TKeyset));
 
   if (!key->isA(TInt | TStr)) {
     gen(env, ThrowInvalidArrayKey, base, key);
@@ -694,40 +655,6 @@ SSATmp* emitDictKeysetGet(IRGS& env, SSATmp* base, SSATmp* key,
       );
     }
   );
-  auto const pelem = profiledType(env, elem, [&] { finish(finishMe(elem)); });
-  return finishMe(pelem);
-}
-
-template<class Finish>
-SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
-                     Finish finish) {
-  auto const elem = profiledArrayAccess(
-    env, base, key, mode,
-    [&] (SSATmp* arr, SSATmp* key, SSATmp* pos) {
-      return gen(env, MixedArrayGetK, arr, key, pos);
-    },
-    [&] (SSATmp* key) {
-      if (mode == MOpMode::None) return cns(env, TInitNull);
-      assertx(mode == MOpMode::InOut || mode == MOpMode::Warn);
-      auto const op = [&] {
-        if (key->isA(TInt)) {
-          return ThrowArrayIndexException;
-        } else {
-          assertx(key->isA(TStr));
-          return ThrowArrayKeyException;
-        }
-      }();
-      gen(env, op, base, key);
-      return cns(env, TBottom);
-    },
-    [&] (SSATmp* key, SizeHintData data) {
-      return gen(env, ArrayGet, MOpModeData { mode }, base, key);
-    }
-  );
-  auto finishMe = [&](SSATmp* element) {
-    gen(env, IncRef, element);
-    return element;
-  };
   auto const pelem = profiledType(env, elem, [&] { finish(finishMe(elem)); });
   return finishMe(pelem);
 }
@@ -771,33 +698,8 @@ SSATmp* emitPairGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
   return profres;
 }
 
-SSATmp* emitPackedArrayIsset(IRGS& env, SSATmp* base, SSATmp* key) {
-  assertx(base->isA(TVArr) && key->isA(TInt));
-
-  auto const elem = arrElemType(base->type(), key->type(), curClass(env));
-  if (elem.first <= TNull) {
-    return cns(env, false);
-  } else if (elem.second) {
-    return cns(env, true);
-  }
-
-  return cond(
-    env,
-    [&] (Block* taken) {
-      gen(env, CheckVecBounds, taken, base, key);
-    },
-    [&] { // Next:
-      auto const packedElem = gen(env, LdPackedElem, base, key);
-      return gen(env, IsNType, TNull, packedElem);
-    },
-    [&] { // Taken:
-      return cns(env, false);
-    }
-  );
-}
-
 SSATmp* emitVecIsset(IRGS& env, SSATmp* base, SSATmp* key) {
-  assertx(base->isA(TVec));
+  assertx(base->type().subtypeOfAny(TVec, TVArr));
 
   if (key->isA(TStr)) return cns(env, false);
   if (!key->isA(TInt)) {
@@ -819,12 +721,12 @@ SSATmp* emitVecIsset(IRGS& env, SSATmp* base, SSATmp* key) {
 }
 
 SSATmp* emitDictIsset(IRGS& env, SSATmp* base, SSATmp* key) {
-  assertx(base->isA(TDict));
+  assertx(base->type().subtypeOfAny(TDict, TDArr));
   if (!key->isA(TInt | TStr)) {
     gen(env, ThrowInvalidArrayKey, base, key);
     return cns(env, TBottom);
   }
-  return gen(env, DictIsset, base, key);
+  return gen(env, base->isA(TDict) ? DictIsset : ArrayIsset, base, key);
 }
 
 SSATmp* emitKeysetIsset(IRGS& env, SSATmp* base, SSATmp* key) {
@@ -866,10 +768,6 @@ SSATmp* emitCGetElem(IRGS& env, SSATmp* base, SSATmp* key,
                      MOpMode mode, SimpleOp simpleOp, Finish finish) {
   assertx(mode == MOpMode::Warn || mode == MOpMode::InOut);
   switch (simpleOp) {
-    case SimpleOp::Array:
-      return emitArrayGet(env, base, key, mode, finish);
-    case SimpleOp::PackedArray:
-      return emitPackedArrayGet(env, base, key, mode, finish);
     case SimpleOp::Vec:
       return emitVecGet(env, base, key, finish);
     case SimpleOp::Dict:
@@ -905,10 +803,6 @@ SSATmp* emitCGetElemQuiet(IRGS& env, SSATmp* base, SSATmp* key,
       return emitDictKeysetGet(env, base, key, true, true, finish);
     case SimpleOp::Keyset:
       return emitDictKeysetGet(env, base, key, true, false, finish);
-    case SimpleOp::Array:
-      return emitArrayGet(env, base, key, mode, finish);
-    case SimpleOp::PackedArray:
-      return emitPackedArrayGet(env, base, key, mode, finish);
     case SimpleOp::String:
     case SimpleOp::Vector:
     case SimpleOp::Pair:
@@ -922,10 +816,6 @@ SSATmp* emitCGetElemQuiet(IRGS& env, SSATmp* base, SSATmp* key,
 
 SSATmp* emitIssetElem(IRGS& env, SSATmp* base, SSATmp* key, SimpleOp simpleOp) {
   switch (simpleOp) {
-  case SimpleOp::Array:
-    return gen(env, ArrayIsset, base, key);
-  case SimpleOp::PackedArray:
-    return emitPackedArrayIsset(env, base, key);
   case SimpleOp::Vec:
     return emitVecIsset(env, base, key);
   case SimpleOp::Dict:
@@ -955,14 +845,10 @@ SimpleOp simpleCollectionOp(Type baseType, Type keyType, bool readInst,
                             bool inOut) {
   if (inOut && !(baseType <= TArrLike)) return SimpleOp::None;
 
-  if (baseType <= TArr) {
-    if (!keyType.subtypeOfAny(TInt, TStr)) return SimpleOp::None;
-    auto const isPacked = (baseType <= TVArr) && (keyType <= TInt);
-    return isPacked ? SimpleOp::PackedArray : SimpleOp::Array;
-  } else if (baseType <= TVec) {
-    return SimpleOp::Vec;
-  } else if (baseType <= TDict) {
+  if (baseType.subtypeOfAny(TDict, TDArr)) {
     return SimpleOp::Dict;
+  } else if (baseType.subtypeOfAny(TVec, TVArr)) {
+    return SimpleOp::Vec;
   } else if (baseType <= TKeyset) {
     return SimpleOp::Keyset;
   } else if (baseType <= TStr) {
@@ -1114,7 +1000,7 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe) {
 }
 
 SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
-  assertx(baseType <= TVec);
+  assertx(baseType.subtypeOfAny(TVec, TVArr));
   assertx(key->isA(TInt) || key->isA(TStr) ||
           !key->type().maybe(TInt | TStr));
 
@@ -1178,7 +1064,7 @@ SSATmp* vecElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
 }
 
 SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
-  assertx(baseType <= TDict);
+  assertx(baseType.subtypeOfAny(TDict, TDArr));
 
   auto const unset = mode == MOpMode::Unset;
   auto const define = mode == MOpMode::Define;
@@ -1274,47 +1160,13 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
   assertx(!define || !unset);
   assertx(!define || !warn);
 
-  if (baseType <= TVec) return vecElemImpl(env, mode, baseType, key);
-  if (baseType <= TDict) return dictElemImpl(env, mode, baseType, key);
-  if (baseType <= TKeyset) return keysetElemImpl(env, mode, baseType, key);
-
-  if (baseType <= TArr && key->type().subtypeOfAny(TInt, TStr)) {
-    auto const base = extractBase(env);
-
-    return profiledArrayAccess(
-      env, base, key, mode,
-      [&] (SSATmp* arr, SSATmp* key, SSATmp* pos) {
-        return gen(env, ElemMixedArrayK, arr, key, pos);
-      },
-      [&] (SSATmp* key) {
-        if (unset || mode == MOpMode::None) return ptrToInitNull(env);
-        assertx(mode == MOpMode::InOut || mode == MOpMode::Warn);
-        auto const op = [&] {
-          if (key->isA(TInt)) {
-            return ThrowArrayIndexException;
-          } else {
-            assertx(key->isA(TStr));
-            return ThrowArrayKeyException;
-          }
-        }();
-        gen(env, op, base, key);
-        return cns(env, TBottom);
-      },
-      [&] (SSATmp* key, SizeHintData) {
-        if (define || unset) {
-          return gen(env, unset ? ElemArrayU : ElemArrayD,
-                     base->type(), ldMBase(env), key);
-        }
-        assertx(
-          mode == MOpMode::Warn ||
-          mode == MOpMode::None ||
-          mode == MOpMode::InOut
-        );
-        auto const value = gen(env, ArrayGet, MOpModeData { mode }, base, key);
-        return baseValueToLval(env, value);
-      }
-    );
+  if (baseType.subtypeOfAny(TVec, TVArr)) {
+    return vecElemImpl(env, mode, baseType, key);
   }
+  if (baseType.subtypeOfAny(TDict, TDArr)) {
+    return dictElemImpl(env, mode, baseType, key);
+  }
+  if (baseType <= TKeyset) return keysetElemImpl(env, mode, baseType, key);
 
   if (unset) {
     constrainBase(env);
@@ -1497,10 +1349,11 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
 
   auto const isVec = baseType <= TVec;
   auto const isDict = baseType <= TDict;
+  auto const isDArr = baseType <= TDArr;
   auto const isKeyset = baseType <= TKeyset;
 
   if ((isVec && !key->isA(TInt)) ||
-      (isDict && !key->isA(TInt | TStr))) {
+      ((isDict || isDArr) && !key->isA(TInt | TStr))) {
     gen(env, ThrowInvalidArrayKey, base, key);
     return cns(env, TBottom);
   }
@@ -1555,9 +1408,9 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
   return value;
 }
 
-void setNewElemPackedArrayDataImpl(IRGS& env, uint32_t nDiscard,
-                                   SSATmp* basePtr, Type baseType,
-                                   SSATmp* value) {
+void setNewElemVecImpl(IRGS& env, uint32_t nDiscard,
+                       SSATmp* basePtr, Type baseType,
+                       SSATmp* value) {
   ifThen(
     env,
     [&](Block* taken) {
@@ -1601,7 +1454,7 @@ SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
   auto const basePtr = ldMBase(env);
 
   if (baseType.subtypeOfAny(TVArr, TVec)) {
-    setNewElemPackedArrayDataImpl(env, nDiscard, basePtr, baseType, value);
+    setNewElemVecImpl(env, nDiscard, basePtr, baseType, value);
   } else if (baseType <= TArr) {
     constrainBase(env);
     gen(env, SetNewElemArray, makeCatchSet(env, nDiscard), basePtr, value);
@@ -1645,8 +1498,6 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
       gen(env, IncRef, value);
       break;
 
-    case SimpleOp::Array:
-    case SimpleOp::PackedArray:
     case SimpleOp::Vec:
     case SimpleOp::Dict:
     case SimpleOp::Keyset:

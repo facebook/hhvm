@@ -216,13 +216,11 @@ bool canDCE(IRInstruction* inst) {
   case DefCallCtx:
   case LdRetVal:
   case Mov:
-  case CountArray:
   case CountVec:
   case CountDict:
   case CountKeyset:
   case CountCollection:
   case Nop:
-  case AKExistsArr:
   case AKExistsDict:
   case AKExistsKeyset:
   case LdBindAddr:
@@ -252,7 +250,6 @@ bool canDCE(IRInstruction* inst) {
   case LdMBase:
   case MethodExists:
   case LdTVAux:
-  case ArrayIsset:
   case DictGetQuiet:
   case DictGetK:
   case DictIsset:
@@ -306,7 +303,6 @@ bool canDCE(IRInstruction* inst) {
   case ConcatStrStr:
   case ConcatStr3:
   case ConcatStr4:
-  case AddNewElem:
   case AddNewElemKeyset:
   case AddNewElemVec:
     return true;
@@ -619,7 +615,6 @@ bool canDCE(IRInstruction* inst) {
   case IncDecProp:
   case IssetProp:
   case ElemX:
-  case ProfileMixedArrayAccess:
   case CheckMixedArrayOffset:
   case CheckMissingKeyInArrLike:
   case CheckArrayCOW:
@@ -637,14 +632,12 @@ bool canDCE(IRInstruction* inst) {
   case ElemKeysetK:
   case ElemDX:
   case ElemUX:
-  case MixedArrayGetK:
   case DictGet:
   case KeysetGet:
   case StringGet:
   case OrdStrIdx:
   case MapGet:
   case CGetElem:
-  case ArraySet:
   case VecSet:
   case DictSet:
   case MapSet:
@@ -656,7 +649,7 @@ bool canDCE(IRInstruction* inst) {
   case SetOpElem:
   case IncDecElem:
   case SetNewElem:
-  case SetNewElemArray:
+  case SetNewElemDict:
   case SetNewElemVec:
   case SetNewElemKeyset:
   case ReserveVecNewElem:
@@ -684,6 +677,7 @@ bool canDCE(IRInstruction* inst) {
   case JmpPlaceholder:
   case ThrowOutOfBounds:
   case ThrowInvalidArrayKey:
+  case ThrowInvalidArrayKeyForSet:
   case ThrowInvalidOperation:
   case ThrowCallReifiedFunctionWithoutGenerics:
   case ThrowDivisionByZeroException:

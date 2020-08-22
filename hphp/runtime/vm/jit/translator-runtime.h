@@ -44,7 +44,11 @@ namespace jit {
 
 /* Helper functions for translated code */
 
-ArrayData* addNewElemHelper(ArrayData* a, TypedValue value);
+void setNewElem(tv_lval base, TypedValue val);
+void setNewElemVec(tv_lval base, TypedValue val);
+void setNewElemDict(tv_lval base, TypedValue val);
+ArrayData* addNewElemVec(ArrayData* keyset, TypedValue v);
+ArrayData* addNewElemKeyset(ArrayData* keyset, TypedValue v);
 ArrayData* addElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
 ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,
                                   TypedValue val);
@@ -192,11 +196,10 @@ ArrayData* recordReifiedGenericsAndGetTSList(ArrayData*);
 
 [[noreturn]] void throwOOBException(TypedValue base, TypedValue key);
 [[noreturn]] void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key);
+[[noreturn]] void invalidArrayKeyForSetHelper(const ArrayData* ad,
+                                              TypedValue key);
 
 namespace MInstrHelpers {
-void setNewElem(tv_lval base, TypedValue val);
-void setNewElemArray(tv_lval base, TypedValue val);
-void setNewElemVec(tv_lval base, TypedValue val);
 TypedValue setOpElem(tv_lval base, TypedValue key, TypedValue val, SetOpOp op);
 StringData* stringGetI(StringData*, uint64_t);
 uint64_t pairIsset(c_Pair*, int64_t);

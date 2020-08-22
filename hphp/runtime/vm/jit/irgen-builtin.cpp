@@ -2440,6 +2440,9 @@ void emitAKExists(IRGS& env) {
   auto const arr = popC(env);
   auto key = convertClassKey(env, popC(env));
   if (key->isA(TFunc)) PUNT(AKExists_func_key);
+  if (!arr->type().subtypeOfAny(TKeyset, TVec, TVArr, TDict, TDArr, TObj)) {
+    PUNT(AKExists_unknown_array_or_obj_type);
+  }
 
   auto throwBadKey = [&] {
     // TODO(T11019533): Fix the underlying issue with unreachable code rather
@@ -2475,8 +2478,8 @@ void emitAKExists(IRGS& env) {
     return throwBadKey();
   }
 
-  if (arr->isA(TDict) || arr->isA(TDArr) || arr->isA(TKeyset)) {
-    if (!key->isA(TInt) && !key->isA(TStr)) {
+  if (arr->type().subtypeOfAny(TDict, TDArr, TKeyset)) {
+    if (!key->type().subtypeOfAny(TInt, TStr)) {
       return throwBadKey();
     }
     auto const op = arr->isA(TKeyset) ? AKExistsKeyset : AKExistsDict;
@@ -2485,12 +2488,6 @@ void emitAKExists(IRGS& env) {
     decRef(env, arr);
     decRef(env, key);
     return;
-  }
-
-  if (!arr->isA(TArr) && !arr->isA(TObj)) PUNT(AKExists_badArray);
-
-  if (key->isA(TInitNull) && arr->isA(TArr)) {
-    return throwBadKey();
   }
 
   if (!key->isA(TStr) && !key->isA(TInt)) PUNT(AKExists_badKey);
@@ -2505,8 +2502,7 @@ void emitAKExists(IRGS& env) {
     return;
   }
 
-  auto const val =
-    gen(env, arr->isA(TArr) ? AKExistsArr : AKExistsObj, arr, key);
+  auto const val = gen(env, AKExistsObj, arr, key);
   push(env, val);
   decRef(env, arr);
   decRef(env, key);

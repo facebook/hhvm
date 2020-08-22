@@ -78,15 +78,35 @@ namespace jit {
 
 //////////////////////////////////////////////////////////////////////
 
-ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
-  assertx(a->isPHPArrayType());
-
-  auto r = a->append(*tvAssertPlausible(&value));
-  if (UNLIKELY(r != a)) {
-    decRefArr(a);
-  }
-  return r;
+void setNewElem(tv_lval base, TypedValue val) {
+  HPHP::SetNewElem<false>(base, &val);
 }
+
+void setNewElemVec(tv_lval base, TypedValue val) {
+  HPHP::SetNewElemVec(base, &val);
+}
+
+void setNewElemDict(tv_lval base, TypedValue val) {
+  HPHP::SetNewElemDict(base, &val);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+ArrayData* addNewElemVec(ArrayData* vec, TypedValue v) {
+  assertx(vec->hasVanillaPackedLayout());
+  auto out = PackedArray::AppendVec(vec, v);
+  if (vec != out) decRefArr(vec);
+  return out;
+}
+
+ArrayData* addNewElemKeyset(ArrayData* keyset, TypedValue v) {
+  assertx(keyset->isKeysetKind());
+  auto out = SetArray::Append(keyset, v);
+  if (keyset != out) decRefArr(keyset);
+  return out;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 ArrayData* convArrToVecHelper(ArrayData* adIn) {
   assertx(adIn->isPHPArrayType());
@@ -851,11 +871,12 @@ void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key) {
   }
 }
 
-namespace MInstrHelpers {
-
-void setNewElemArray(tv_lval base, TypedValue val) {
-  HPHP::SetNewElemArray(base, &val);
+void invalidArrayKeyForSetHelper(const ArrayData* ad, TypedValue key) {
+  throwInvalidArrayKeyException(&key, ad);
 }
+
+
+namespace MInstrHelpers {
 
 TypedValue setOpElem(tv_lval base, TypedValue key,
                      TypedValue val, SetOpOp op) {

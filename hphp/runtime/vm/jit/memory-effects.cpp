@@ -1205,7 +1205,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(frame, AEmpty);
   }
 
-  case MixedArrayGetK:
   case DictGetK:
   case KeysetGetK: {
     auto const base = inst.src(0);
@@ -1268,15 +1267,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckDictOffset:
   case CheckKeysetOffset:
   case CheckMissingKeyInArrLike:
-  case ProfileMixedArrayAccess:
   case ProfileDictAccess:
   case ProfileKeysetAccess:
   case CheckArrayCOW:
     return may_load_store(AHeapAny, AEmpty);
-
-  case ArrayIsset:
-  case AKExistsArr:
-    return may_load_store(AElemAny, AEmpty);
 
   case SameArr:
   case NSameArr:
@@ -1344,7 +1338,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetOpElem:
   case SetOpProp:
   case SetProp:
-  case SetNewElemArray:
+  case SetNewElemDict:
   case SetNewElemVec:
   case SetNewElemKeyset:
   case UnsetElem:
@@ -1701,7 +1695,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ContPreNext:
   case ContStartedCheck:
   case ConvArrToDbl:
-  case CountArray:
   case CountVec:
   case CountDict:
   case CountKeyset:
@@ -1904,9 +1897,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LookupFuncCached: // autoload
   case StringGet:      // raise_notice
   case OrdStrIdx:      // raise_notice
-  case AddNewElem:         // can re-enter
   case AddNewElemKeyset:   // can re-enter
-  case ArraySet:       // kVPackedKind warnings
   case DictGet:
   case KeysetGet:
   case VecSet:
@@ -1932,6 +1923,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvObjToKeyset:
   case ThrowOutOfBounds:
   case ThrowInvalidArrayKey:
+  case ThrowInvalidArrayKeyForSet:
   case ThrowInvalidOperation:
   case ThrowCallReifiedFunctionWithoutGenerics:
   case ThrowDivisionByZeroException:

@@ -1347,13 +1347,14 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
   auto const base = extractBase(env);
   assertx(baseType <= TArrLike);
 
-  auto const isVec = baseType <= TVec;
+  auto const isVec = baseType.subtypeOfAny(TVec, TVArr);
   auto const isDict = baseType.subtypeOfAny(TDict, TDArr);
   auto const isKeyset = baseType <= TKeyset;
+  assertx(isVec || isDict || isKeyset);
 
   if ((isVec && !key->isA(TInt)) ||
       (isDict && !key->isA(TInt | TStr))) {
-    gen(env, ThrowInvalidArrayKey, base, key);
+    gen(env, ThrowInvalidArrayKeyForSet, base, key);
     return cns(env, TBottom);
   }
 
@@ -1383,7 +1384,7 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
     }
   }
 
-  auto const op = isVec ? VecSet : isDict ? DictSet : ArraySet;
+  auto const op = isVec ? VecSet : DictSet;
   auto const newArr = gen(env, op, base, key, value);
 
   // Update the base's location with the new array.
@@ -1415,8 +1416,8 @@ void setNewElemVecImpl(IRGS& env, uint32_t nDiscard,
     [&](Block* taken) {
       auto const base = extractBase(env);
 
-      if ((baseType <= TArr && value->type() <= TArr) ||
-          (baseType <= TVec && value->type() <= TVec)) {
+      if ((baseType.maybe(TVArr) && value->type().maybe(TVArr)) ||
+          (baseType.maybe(TVec) && value->type().maybe(TVec))) {
         auto const appendToSelf = gen(env, EqArrayDataPtr, base, value);
         gen(env, JmpNZero, taken, appendToSelf);
       }
@@ -1433,13 +1434,7 @@ void setNewElemVecImpl(IRGS& env, uint32_t nDiscard,
       gen(env, StMem, elemPtr, value);
     },
     [&] {
-      if (baseType <= TVArr) {
-        gen(env, SetNewElemArray, makeCatchSet(env, nDiscard), basePtr, value);
-      } else if (baseType <= TVec) {
-        gen(env, SetNewElemVec, makeCatchSet(env, nDiscard), basePtr, value);
-      } else {
-        always_assert(false);
-      }
+      gen(env, SetNewElemVec, makeCatchSet(env, nDiscard), basePtr, value);
     }
   );
 }
@@ -1454,9 +1449,9 @@ SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
 
   if (baseType.subtypeOfAny(TVArr, TVec)) {
     setNewElemVecImpl(env, nDiscard, basePtr, baseType, value);
-  } else if (baseType <= TArr) {
+  } else if (baseType.subtypeOfAny(TDArr, TDict)) {
     constrainBase(env);
-    gen(env, SetNewElemArray, makeCatchSet(env, nDiscard), basePtr, value);
+    gen(env, SetNewElemDict, makeCatchSet(env, nDiscard), basePtr, value);
   } else if (baseType <= TKeyset) {
     constrainBase(env);
     value = convertClassKey(env, value);
@@ -1503,7 +1498,7 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
       if (auto result = emitArrayLikeSet(env, key, value)) {
         return result;
       }
-      // If we couldn't emit ArraySet, fall through to the generic path.
+      // If we couldn't emit a specialized op, fall through to the generic path.
 
     case SimpleOp::Pair:
     case SimpleOp::None:

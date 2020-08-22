@@ -1399,10 +1399,8 @@ OPTBLD_INLINE void iopAddElemC() {
 OPTBLD_INLINE void iopAddNewElemC() {
   TypedValue* c1 = vmStack().topC();
   TypedValue* c2 = vmStack().indC(1);
-  auto const okay = tvIsArrayLike(c2) && !tvIsDict(c2);
-  assertx(okay == (tvIsArray(c2) || tvIsVec(c2) || tvIsKeyset(c2)));
-  if (!okay) {
-    raise_error("AddNewElemC: $2 must be an array, vec, or keyset");
+  if (!tvIsVecOrVArray(c2) && !tvIsKeyset(c2)) {
+    raise_error("AddNewElemC: $2 must be an varray, vec, or keyset");
   }
   tvAsVariant(*c2).asArrRef().append(tvAsCVarRef(c1));
   assertx(tvIsPlausible(*c2));

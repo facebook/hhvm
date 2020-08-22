@@ -1661,31 +1661,15 @@ inline void SetNewElemBespoke(tv_lval base, TypedValue* value) {
 }
 
 /**
- * SetNewElem when base is an Array
- */
-inline void SetNewElemArray(tv_lval base, TypedValue* value) {
-  assertx(tvIsArray(base));
-  assertx(tvIsPlausible(*base));
-  auto a = val(base).parr;
-  auto a2 = a->append(*value);
-  if (a2 != a) {
-    assertx(a2->isPHPArrayType());
-    type(base) = a2->toDataType();
-    val(base).parr = a2;
-    a->decRefAndRelease();
-  }
-}
-
-/**
  * SetNewElem when base is a Vec
  */
 inline void SetNewElemVec(tv_lval base, TypedValue* value) {
-  assertx(tvIsVec(base));
+  assertx(tvIsVecOrVArray(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
   auto a2 = PackedArray::AppendVec(a, *value);
   if (a2 != a) {
-    type(base) = KindOfVec;
+    type(base) = dt_with_rc(type(base));
     val(base).parr = a2;
     assertx(tvIsPlausible(*base));
     a->decRefAndRelease();
@@ -1696,12 +1680,12 @@ inline void SetNewElemVec(tv_lval base, TypedValue* value) {
  * SetNewElem when base is a Dict
  */
 inline void SetNewElemDict(tv_lval base, TypedValue* value) {
-  assertx(tvIsDict(base));
+  assertx(tvIsDictOrDArray(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
   auto a2 = MixedArray::AppendDict(a, *value);
   if (a2 != a) {
-    type(base) = KindOfDict;
+    type(base) = dt_with_rc(type(base));
     val(base).parr = a2;
     assertx(tvIsPlausible(*base));
     a->decRefAndRelease();
@@ -1762,29 +1746,24 @@ inline void SetNewElem(tv_lval base, TypedValue* value) {
     case KindOfPersistentString:
     case KindOfString:
       return SetNewElemString(base);
+    case KindOfPersistentVArray:
+    case KindOfVArray:
     case KindOfPersistentVec:
     case KindOfVec:
       return SetNewElemVec(base, value);
+    case KindOfPersistentDArray:
+    case KindOfDArray:
     case KindOfPersistentDict:
     case KindOfDict:
       return SetNewElemDict(base, value);
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       return SetNewElemKeyset(base, value);
-    case KindOfPersistentDArray:
-    case KindOfDArray:
-    case KindOfPersistentVArray:
-    case KindOfVArray:
-      return SetNewElemArray(base, value);
     case KindOfObject:
       return SetNewElemObject(base, value);
     case KindOfClsMeth:
       detail::promoteClsMeth(base);
-      if (RO::EvalHackArrDVArrs) {
-        return SetNewElemVec(base, value);
-      } else {
-        return SetNewElemArray(base, value);
-      }
+      return SetNewElemVec(base, value);
     case KindOfRecord:
       raise_error(Strings::OP_NOT_SUPPORTED_RECORD);
   }

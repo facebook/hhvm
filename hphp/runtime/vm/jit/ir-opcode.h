@@ -61,8 +61,6 @@ struct SSATmp;
                       on configuration
  *     DDArr        single dst is either a mixed array type or dict, depending
                       on configuration
- *     DArrElem     single dst has type based on reading an array element,
- *                    intersected with an optional type parameter
  *     DVecElem    single dst has type based on reading a vec element,
  *                    intersected with an optional type parameter
  *     DDictElem   single dst has type based on reading a dict element,

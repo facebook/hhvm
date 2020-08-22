@@ -522,10 +522,10 @@ void emitAddElemC(IRGS& env) {
     return;
   }
 
-  // ArraySet and DictSet teleport the value from the stack into the base,
+  // VecSet and DictSet teleport the value from the stack into the base,
   // and they dec-ref the old base on copy / escalation, so we only need to
   // to do refcount ops on the key.
-  auto const op = (at.subtypeOfAny(TDict, TDArr)) ? DictSet : ArraySet;
+  auto const op = at.subtypeOfAny(TDict, TDArr) ? DictSet : VecSet;
   auto const val = popC(env, DataTypeGeneric);
   auto const key = convertClassKey(env, popC(env));
   auto const arr = popC(env);
@@ -535,7 +535,8 @@ void emitAddElemC(IRGS& env) {
 
 void emitAddNewElemC(IRGS& env) {
   auto const arrType = topC(env, BCSPRelOffset{1})->type();
-  if (!arrType.subtypeOfAny(TArr, TKeyset, TVec)) {
+  // This operation is not defined for TDict and TDArr
+  if (!arrType.subtypeOfAny(TKeyset, TVec, TVArr)) {
     return interpOne(env);
   }
   auto const val = popC(env, DataTypeCountness);
@@ -545,9 +546,8 @@ void emitAddNewElemC(IRGS& env) {
     gen(
       env,
       [&]{
-        if (arr->isA(TArr))    return AddNewElem;
-        if (arr->isA(TKeyset)) return AddNewElemKeyset;
-        if (arr->isA(TVec))    return AddNewElemVec;
+        if (arr->type().subtypeOfAny(TVArr, TVec))  return AddNewElemVec;
+        if (arr->isA(TKeyset))                      return AddNewElemKeyset;
         always_assert(false);
       }(),
       arr,

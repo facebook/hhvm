@@ -174,7 +174,6 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
       // Consume the value being stored, not the thing it's being stored into
       return srcNo == 1;
 
-    case ArraySet:
     case VecSet:
     case DictSet:
       // Consumes the reference to its input array, and moves input value
@@ -185,7 +184,6 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
       // Moves input value
       return move == Consume && srcNo == 2;
 
-    case AddNewElem:
     case AddNewElemKeyset:
     case AddNewElemVec:
       // Only consumes the reference to its input array
@@ -308,25 +306,15 @@ Type allocObjReturn(const IRInstruction* inst) {
   }
 }
 
-Type arrSetReturn(const IRInstruction* inst) {
-  assertx(inst->is(AddNewElem, ArraySet));
-  assertx(inst->src(0)->type().subtypeOfAny(TVArr, TDArr));
-  return inst->src(0)->type().modified();
-}
-
-Type arrElemReturn(const IRInstruction* inst) {
-  assertx(inst->is(MixedArrayGetK));
-  assertx(inst->src(0)->isA(TArr));
-
-  auto elem =
-    arrElemType(inst->src(0)->type(), inst->src(1)->type(), inst->ctx());
-  if (inst->hasTypeParam()) elem.first &= inst->typeParam();
-  return elem.first;
-}
-
 Type dictSetReturn(const IRInstruction* inst) {
   assertx(inst->is(DictSet));
   assertx(inst->src(0)->type().subtypeOfAny(TDict, TDArr));
+  return inst->src(0)->type().modified();
+}
+
+Type vecSetReturn(const IRInstruction* inst) {
+  assertx(inst->is(VecSet, AddNewElemVec));
+  assertx(inst->src(0)->type().subtypeOfAny(TVec, TVArr));
   return inst->src(0)->type().modified();
 }
 
@@ -583,11 +571,10 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
   return TCls;                                                     \
 }
 #define DAllocObj       return allocObjReturn(inst);
-#define DArrSet         return arrSetReturn(inst);
-#define DArrElem        return arrElemReturn(inst);
 #define DVecElem        return vecElemReturn(inst);
 #define DDictElem       return dictElemReturn(inst);
 #define DDictSet        return dictSetReturn(inst);
+#define DVecSet         return vecSetReturn(inst);
 #define DKeysetElem     return keysetElemReturn(inst);
 // Get the type of first or last element for different array type
 #define DVecFirstElem     return vecFirstLastReturn(inst, true);
@@ -636,11 +623,10 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DParam
 #undef DLdObjCls
 #undef DAllocObj
-#undef DArrSet
-#undef DArrElem
 #undef DVecElem
 #undef DDictElem
 #undef DDictSet
+#undef DVecSet
 #undef DKeysetElem
 #undef DVecFirstElem
 #undef DVecLastElem

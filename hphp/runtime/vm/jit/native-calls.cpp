@@ -209,8 +209,6 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
     {ConcatStr4,         concat_s4, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
-    {AddNewElem,         addNewElemHelper, DSSA, SSync,
-                           {{SSA, 0}, {TV, 1}}},
     {Clone,              &ObjectData::clone, DSSA, SSync, {{SSA, 0}}},
     {NewRFunc,           RFuncData::newInstance, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}}},
@@ -455,9 +453,16 @@ static CallMap s_callMap {
     {AFWHPrepareChild,   &c_AsyncFunctionWaitHandle::PrepareChild, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}}},
 
+    /* SetNewElem helpers */
+    {SetNewElemDict, setNewElemDict, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
+    {SetNewElemVec,  setNewElemVec, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
+    {SetNewElem,     setNewElem, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
+
+    /* AddNewElem helpers */
+    {AddNewElemKeyset,   addNewElemKeyset, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
+    {AddNewElemVec,      addNewElemVec, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
+
     /* MInstrTranslator helpers */
-    {SetNewElemArray, MInstrHelpers::setNewElemArray, DNone, SSync,
-                      {{SSA, 0}, {TV, 1}}},
     {StringGet, MInstrHelpers::stringGetI, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
 
     {PairIsset, MInstrHelpers::pairIsset, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
@@ -466,6 +471,8 @@ static CallMap s_callMap {
     {ElemVecU, MInstrHelpers::elemVecIU, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {ThrowOutOfBounds, throwOOBException, DNone, SSync, {{TV, 0}, {TV, 1}}},
     {ThrowInvalidArrayKey, invalidArrayKeyHelper, DNone, SSync,
+                 {{SSA, 0}, {TV, 1}}},
+    {ThrowInvalidArrayKeyForSet, invalidArrayKeyForSetHelper, DNone, SSync,
                  {{SSA, 0}, {TV, 1}}},
 
     /* instanceof checks */

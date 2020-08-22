@@ -521,11 +521,10 @@ using TypeNames::TCA;
                        );
 #define DLdObjCls
 #define DAllocObj
-#define DArrSet
-#define DArrElem
 #define DVecElem
 #define DDictElem
 #define DDictSet
+#define DVecSet
 #define DKeysetElem
 #define DVecFirstElem
 #define DVecLastElem
@@ -582,11 +581,10 @@ using TypeNames::TCA;
 #undef DParam
 #undef DLdObjCls
 #undef DAllocObj
-#undef DArrSet
-#undef DArrElem
 #undef DVecElem
 #undef DDictElem
 #undef DDictSet
+#undef DVecSet
 #undef DKeysetElem
 #undef DVecFirstElem
 #undef DVecLastElem

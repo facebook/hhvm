@@ -2207,10 +2207,6 @@ SSATmp* simplifyConvTVToBool(State& env, const IRInstruction* inst) {
 
   if (srcType <= TBool) return src;
   if (srcType <= TNull) return cns(env, false);
-  if (srcType <= TArr) {
-    auto const length = gen(env, CountArray, src);
-    return gen(env, NeqInt, length, cns(env, 0));
-  }
   if (srcType.subtypeOfAny(TVec, TVArr)) {
     auto const length = gen(env, CountVec, src);
     return gen(env, NeqInt, length, cns(env, 0));
@@ -2805,22 +2801,6 @@ SSATmp* arrKeyImpl(State& env, const IRInstruction* inst) {
   return tv.is_init() ? cns(env, tv) : nullptr;
 }
 
-SSATmp* simplifyArrayIsset(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
-    auto const result = arrKeyImpl(env, inst);
-    return cns(env, result && !result->isA(TInitNull));
-  }
-  return nullptr;
-}
-
-SSATmp* simplifyAKExistsArr(State& env, const IRInstruction* inst) {
-  if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
-    auto const result = arrKeyImpl(env, inst);
-    return cns(env, (bool)result);
-  }
-  return nullptr;
-}
-
 namespace {
 
 SSATmp* arrGetKImpl(State& env, const IRInstruction* inst) {
@@ -2993,10 +2973,6 @@ X(AKExistsKeyset, AKExists)
 
 #undef X
 
-SSATmp* simplifyMixedArrayGetK(State& env, const IRInstruction* inst) {
-  return arrGetKImpl(env, inst);
-}
-
 SSATmp* simplifyDictGetK(State& env, const IRInstruction* inst) {
   return arrGetKImpl(env, inst);
 }
@@ -3164,7 +3140,6 @@ SSATmp* simplify##Name(State& env, const IRInstruction* inst) { \
   return simplifyCountHelper(env, inst);                        \
 }
 
-X(CountArray)
 X(CountVec)
 X(CountDict)
 X(CountKeyset)
@@ -3549,7 +3524,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConvKeysetToDArr)
   X(DblAsBits)
   X(Count)
-  X(CountArray)
   X(CountVec)
   X(CountDict)
   X(CountKeyset)
@@ -3681,7 +3655,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(EqCls)
   X(EqStrPtr)
   X(EqArrayDataPtr)
-  X(MixedArrayGetK)
   X(DictGet)
   X(DictGetQuiet)
   X(DictGetK)
@@ -3696,10 +3669,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckKeysetOffset)
   X(CheckArrayCOW)
   X(CheckMissingKeyInArrLike)
-  X(ArrayIsset)
   X(DictIsset)
   X(KeysetIsset)
-  X(AKExistsArr)
   X(DictIdx)
   X(AKExistsDict)
   X(KeysetIdx)

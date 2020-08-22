@@ -1965,8 +1965,6 @@ To string conversions:
   computed by returning the value of their count method. Objects that do not
   implement Countable have a count of 1.
 
-| CountArray,      D(Int), S(Arr),    NF
-
 | CountVec,        D(Int), S(VArr,Vec),    NF
 
 | CountDict,       D(Int), S(DArr,Dict),   NF
@@ -2132,7 +2130,7 @@ To string conversions:
 
   Raise a notice for an undefined property named S1 on the class of S0.
 
-| RaiseTooManyArg<func>, ND, S(Arr,Vec), CRc|LA
+| RaiseTooManyArg<func>, ND, S(VArr,Vec), CRc|LA
 
   Raise a too many argument warning because extra arguments stored in S0 were
   passed to function func.
@@ -2266,20 +2264,14 @@ To string conversions:
 
   Concatenate S0, S1, S2, and S3.
 
-| AddNewElem,       DArrSet,   S(VArr,DArr) S(Cell), CRc|PRc
-
 | AddNewElemKeyset, D(Keyset), S(Keyset) S(Cell), CRc|PRc
 
-| AddNewElemVec,    D(Vec),    S(Vec) S(Cell),    CRc|PRc
+| AddNewElemVec,    DVecSet,   S(VArr,Vec) S(Cell),    CRc|PRc
 
   Add S1 as a new element to the array/keyset/vec S0.  (Note: S1 must actually
   be a subtype of InitCell for array invariants, but we can't assert this yet
   in the IR because many eval stack slots are not entirely typed wrt initness
   right now.)
-
-| AKExistsArr, D(Bool), S(Arr) S(Int,Str), NF
-
-  Has the effects of array_key_exists(S0, S1).
 
 | AKExistsDict, D(Bool), S(DArr,Dict) S(Int,Str), NF
 
@@ -2846,10 +2838,6 @@ fields of that struct for holding intermediate values.
   Get intermediate element with key S1 from base S0. The base will not be
   modified and the result will not be inc-ref-ed.
 
-| ProfileMixedArrayAccess, ND, S(Arr) S(Int,Str), NF
-
-  Profile access of the element keyed by S1 in S0, tracking sizes and offsets.
-
 | CheckDictKeys<T>, ND, S(DArr,Dict), B
 
   Check that the given mixed array is free of tombstones and that all of its
@@ -2935,10 +2923,6 @@ fields of that struct for holding intermediate values.
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base as part of an unset operation.
-
-| MixedArrayGetK, DArrElem, S(DArr) S(Int,Str) S(Int), NF
-
-  Like ArrayGet, but the element for S1 is at a known position S2 in S0.
 
 | DictGet, DDictElem, S(DArr,Dict) S(Int,Str), NF
 
@@ -3065,12 +3049,7 @@ fields of that struct for holding intermediate values.
 
   Initialize the memoization instance slots for object S0 of the given class.
 
-| ArraySet, DArrSet, S(VArr,DArr) S(Int,Str) S(Cell), PRc|CRc
-
-  Set element with key S1 in S0 to S2. The dest will be a new Array that should
-  replace S0, which may be further constrained by the type of S0.
-
-| VecSet, D(Vec), S(Vec) S(Int) S(Cell), PRc|CRc
+| VecSet, DVecSet, S(VArr,Vec) S(Int) S(Cell), PRc|CRc
 
   Set element with key S1 in S0 to S2. The dest will be a new Vec that should
   replace S0.
@@ -3122,17 +3101,13 @@ fields of that struct for holding intermediate values.
 
   Append the value in S1 to S0.
 
-| SetNewElemArray,  ND, S(LvalToArr) S(Cell),       MElem
+| SetNewElemDict,   ND, S(LvalToDArr,LvalToDict) S(Cell),      MElem
 
-| SetNewElemVec,    ND, S(LvalToVec) S(Cell),       MElem
+| SetNewElemVec,    ND, S(LvalToVArr,LvalToVec)  S(Cell),       MElem
 
 | SetNewElemKeyset, ND, S(LvalToKeyset) S(Int,Str), MElem
 
-  Specializations of SetNewElem for pointers to arrays, vecs, and keysets.
-
-| ArrayIsset, D(Bool), S(Arr) S(Int,Str), NF
-
-  Returns true iff the element at key S1 in the base S0 is set.
+  Specializations of SetNewElem for pointers to dicts, vecs, and keysets.
 
 | DictIsset, D(Bool), S(DArr,Dict) S(Int,Str), NF
 
@@ -3180,6 +3155,12 @@ fields of that struct for holding intermediate values.
   S1.
 
 | ThrowInvalidArrayKey, ND, S(ArrLike) S(Cell), T|LA
+
+  Throws an InvalidArgumentException corresponding to an access of S0 with the
+  key S1, which has a type invalid for that array. For varrays, an
+  OutOfBoundsException will be thrown instead for compatibility.
+
+| ThrowInvalidArrayKeyForSet, ND, S(ArrLike) S(Cell), T|LA
 
   Throws an InvalidArgumentException corresponding to an access of S0 with the
   key S1, which has a type invalid for that array.

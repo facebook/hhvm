@@ -1756,7 +1756,6 @@ X(CountWHNotDone,               CountWHNotDoneData);
 X(CheckMixedArrayOffset,        IndexData);
 X(CheckDictOffset,              IndexData);
 X(CheckKeysetOffset,            IndexData);
-X(ProfileMixedArrayAccess,      ArrayAccessProfileData);
 X(ProfileDictAccess,            ArrayAccessProfileData);
 X(ProfileKeysetAccess,          ArrayAccessProfileData);
 X(ProfileType,                  RDSHandleData);

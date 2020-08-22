@@ -1785,7 +1785,6 @@ and expr_
             | CIstatic -> ()
             | _ -> Errors.class_meth_abstract_call classname (snd meth) p ce_pos
         in
-        let cid = CI (pc, classname) in
         let ce_visibility = ce.ce_visibility in
         let ce_deprecated = ce.ce_deprecated in
         let (env, _tal, te, cid_ty) =

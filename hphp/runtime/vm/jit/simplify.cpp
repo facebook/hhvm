@@ -2951,45 +2951,45 @@ SSATmp* hackArrAKExistsImpl(State& env, const IRInstruction* inst,
 
 }
 
-#define X(Name, Action, Get)                                          \
+#define X(Name, Action)                                               \
 SSATmp* simplify##Name(State& env, const IRInstruction* inst) {       \
   return hackArr##Action##Impl(                                       \
     env, inst,                                                        \
     [](SSATmp* a, int64_t k) {                                        \
-      return MixedArray::NvGetIntDict(a->Get(), k);                   \
+      return MixedArray::NvGetIntDict(a->arrLikeVal(), k);            \
     },                                                                \
     [](SSATmp* a, const StringData* k) {                              \
-      return MixedArray::NvGetStrDict(a->Get(), k);                   \
+      return MixedArray::NvGetStrDict(a->arrLikeVal(), k);            \
     }                                                                 \
   );                                                                  \
 }
 
-X(DictGet, Get, arrLikeVal)
-X(DictGetQuiet, GetQuiet, arrLikeVal)
-X(DictIsset, Isset, dictVal)
-X(DictIdx, Idx, arrLikeVal)
-X(AKExistsDict, AKExists, arrLikeVal)
+X(DictGet, Get)
+X(DictGetQuiet, GetQuiet)
+X(DictIsset, Isset)
+X(DictIdx, Idx)
+X(AKExistsDict, AKExists)
 
 #undef X
 
-#define X(Name, Action, Get)                                          \
+#define X(Name, Action)                                               \
 SSATmp* simplify##Name(State& env, const IRInstruction* inst) {       \
   return hackArr##Action##Impl(                                       \
     env, inst,                                                        \
     [](SSATmp* a, int64_t k) {                                        \
-      return SetArray::NvGetInt(a->Get(), k);                         \
+      return SetArray::NvGetInt(a->keysetVal(), k);                   \
     },                                                                \
     [](SSATmp* a, const StringData* k) {                              \
-      return SetArray::NvGetStr(a->Get(), k);                         \
+      return SetArray::NvGetStr(a->keysetVal(), k);                   \
     }                                                                 \
   );                                                                  \
 }
 
-X(KeysetGet, Get, keysetVal)
-X(KeysetGetQuiet, GetQuiet, keysetVal)
-X(KeysetIsset, Isset, keysetVal)
-X(KeysetIdx, Idx, keysetVal)
-X(AKExistsKeyset, AKExists, keysetVal)
+X(KeysetGet, Get)
+X(KeysetGetQuiet, GetQuiet)
+X(KeysetIsset, Isset)
+X(KeysetIdx, Idx)
+X(AKExistsKeyset, AKExists)
 
 #undef X
 

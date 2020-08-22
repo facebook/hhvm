@@ -3075,7 +3075,7 @@ fields of that struct for holding intermediate values.
   Set element with key S1 in S0 to S2. The dest will be a new Vec that should
   replace S0.
 
-| DictSet, D(Dict), S(Dict) S(Int,Str) S(Cell), PRc|CRc
+| DictSet, DDictSet, S(DArr,Dict) S(Int,Str) S(Cell), PRc|CRc
 
   Set element with key S1 in S0 to S2. The dest will be a new Dict that should
   replace S0.
@@ -3134,7 +3134,7 @@ fields of that struct for holding intermediate values.
 
   Returns true iff the element at key S1 in the base S0 is set.
 
-| DictIsset, D(Bool), S(Dict) S(Int,Str), NF
+| DictIsset, D(Bool), S(DArr,Dict) S(Int,Str), NF
 
   Returns true iff the element at key S1 in the base S0 is set.
 

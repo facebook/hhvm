@@ -531,16 +531,16 @@ CGETELEM_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 inline ArrayData* dictSetImplPre(ArrayData* a, int64_t i, TypedValue val) {
-  return MixedArray::SetIntMoveDict(a, i, val);
+  return MixedArray::SetIntMove(a, i, val);
 }
 inline ArrayData* dictSetImplPre(ArrayData* a, StringData* s, TypedValue val) {
-  return MixedArray::SetStrMoveDict(a, s, val);
+  return MixedArray::SetStrMove(a, s, val);
 }
 
 template<KeyType keyType>
 auto dictSetImpl(ArrayData* a, key_type<keyType> key, TypedValue value) {
   assertx(tvIsPlausible(value));
-  assertx(a->isDictKind());
+  assertx(a->hasVanillaMixedLayout());
   return dictSetImplPre(a, key, value);
 }
 

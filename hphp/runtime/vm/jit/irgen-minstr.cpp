@@ -726,7 +726,7 @@ SSATmp* emitDictIsset(IRGS& env, SSATmp* base, SSATmp* key) {
     gen(env, ThrowInvalidArrayKey, base, key);
     return cns(env, TBottom);
   }
-  return gen(env, base->isA(TDict) ? DictIsset : ArrayIsset, base, key);
+  return gen(env, DictIsset, base, key);
 }
 
 SSATmp* emitKeysetIsset(IRGS& env, SSATmp* base, SSATmp* key) {
@@ -1348,12 +1348,11 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
   assertx(baseType <= TArrLike);
 
   auto const isVec = baseType <= TVec;
-  auto const isDict = baseType <= TDict;
-  auto const isDArr = baseType <= TDArr;
+  auto const isDict = baseType.subtypeOfAny(TDict, TDArr);
   auto const isKeyset = baseType <= TKeyset;
 
   if ((isVec && !key->isA(TInt)) ||
-      ((isDict || isDArr) && !key->isA(TInt | TStr))) {
+      (isDict && !key->isA(TInt | TStr))) {
     gen(env, ThrowInvalidArrayKey, base, key);
     return cns(env, TBottom);
   }

@@ -55,6 +55,7 @@ TRACE_SET_MOD(hhir);
 #define DArrElem       HasDest
 #define DVecElem       HasDest
 #define DDictElem      HasDest
+#define DDictSet       HasDest
 #define DKeysetElem    HasDest
 #define DVecFirstElem     HasDest
 #define DVecLastElem      HasDest
@@ -130,6 +131,7 @@ OpInfo g_opInfo[] = {
 #undef DArrElem
 #undef DVecElem
 #undef DDictElem
+#undef DDictSet
 #undef DKeysetElem
 #undef DVecFirstElem
 #undef DVecLastElem

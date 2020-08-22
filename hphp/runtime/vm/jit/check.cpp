@@ -525,6 +525,7 @@ using TypeNames::TCA;
 #define DArrElem
 #define DVecElem
 #define DDictElem
+#define DDictSet
 #define DKeysetElem
 #define DVecFirstElem
 #define DVecLastElem
@@ -585,6 +586,7 @@ using TypeNames::TCA;
 #undef DArrElem
 #undef DVecElem
 #undef DDictElem
+#undef DDictSet
 #undef DKeysetElem
 #undef DVecFirstElem
 #undef DVecLastElem

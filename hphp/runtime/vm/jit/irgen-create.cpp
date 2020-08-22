@@ -525,7 +525,7 @@ void emitAddElemC(IRGS& env) {
   // ArraySet and DictSet teleport the value from the stack into the base,
   // and they dec-ref the old base on copy / escalation, so we only need to
   // to do refcount ops on the key.
-  auto const op = (at <= TArr) ? ArraySet : DictSet;
+  auto const op = (at.subtypeOfAny(TDict, TDArr)) ? DictSet : ArraySet;
   auto const val = popC(env, DataTypeGeneric);
   auto const key = convertClassKey(env, popC(env));
   auto const arr = popC(env);

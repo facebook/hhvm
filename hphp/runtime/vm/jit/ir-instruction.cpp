@@ -324,6 +324,12 @@ Type arrElemReturn(const IRInstruction* inst) {
   return elem.first;
 }
 
+Type dictSetReturn(const IRInstruction* inst) {
+  assertx(inst->is(DictSet));
+  assertx(inst->src(0)->type().subtypeOfAny(TDict, TDArr));
+  return inst->src(0)->type().modified();
+}
+
 /*
 * Analyze the type of return element (key or value) for different container.
 */
@@ -581,6 +587,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DArrElem        return arrElemReturn(inst);
 #define DVecElem        return vecElemReturn(inst);
 #define DDictElem       return dictElemReturn(inst);
+#define DDictSet        return dictSetReturn(inst);
 #define DKeysetElem     return keysetElemReturn(inst);
 // Get the type of first or last element for different array type
 #define DVecFirstElem     return vecFirstLastReturn(inst, true);
@@ -633,6 +640,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DArrElem
 #undef DVecElem
 #undef DDictElem
+#undef DDictSet
 #undef DKeysetElem
 #undef DVecFirstElem
 #undef DVecLastElem

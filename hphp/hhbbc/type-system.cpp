@@ -3689,7 +3689,8 @@ R tvImpl(const Type& t) {
   case BFalse:       return H::template make<KindOfBoolean>(false);
   case BPArrE:
   case BSPArrE:
-    return H::makePersistentArray(staticEmptyArray());
+    // TODO(kshaunak): Eliminate PArr from HHBBC.
+    return H::makePersistentArray(staticEmptyDArray());
   case BVArrE:
   case BSVArrE:
     assertx(!RuntimeOption::EvalHackArrDVArrs);

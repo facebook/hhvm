@@ -166,7 +166,7 @@ TypedValue tv(const StaticString& s) { return tv(s.get()); }
 TypedValue tv(int64_t i) { return make_tv<KindOfInt64>(i); }
 
 auto const test_empty_array = folly::lazy([] {
-  return staticEmptyArray();
+  return staticEmptyDArray();
 });
 
 auto const test_array_map_value = folly::lazy([] {

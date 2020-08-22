@@ -278,6 +278,9 @@ private:
 
   struct MarkedVecInitializer;
   static MarkedVecInitializer s_marked_vec_initializer;
+
+  struct MarkedVArrayInitializer;
+  static MarkedVArrayInitializer s_marked_varr_initializer;
 };
 
 //////////////////////////////////////////////////////////////////////

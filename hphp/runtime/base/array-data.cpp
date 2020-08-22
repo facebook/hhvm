@@ -208,21 +208,23 @@ void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
   };
 
   if (arr->empty() && LIKELY(!requested_tag)) {
-    if (arr->isVArray())     return replace(staticEmptyVArray());
-    if (arr->isDArray())     return replace(staticEmptyDArray());
-    if (arr->isVecType()) {
-      return replace(
-        arr->isLegacyArray() ? staticEmptyMarkedVec() : staticEmptyVec()
-      );
-    }
-    if (arr->isDictType()) {
-      return replace(
-        arr->isLegacyArray() ? staticEmptyMarkedDictArray() :
-                               staticEmptyDictArray()
-      );
-    }
-    if (arr->isKeysetType()) return replace(staticEmptyKeysetArray());
-    return replace(staticEmptyArray());
+    return replace([&]{
+      auto const legacy = arr->isLegacyArray();
+      switch (arr->toDataType()) {
+        case KindOfVArray:
+          return legacy ? staticEmptyMarkedVArray() : staticEmptyVArray();
+        case KindOfDArray:
+          return legacy ? staticEmptyMarkedDArray() : staticEmptyDArray();
+        case KindOfVec:
+          return legacy ? staticEmptyMarkedVec() : staticEmptyVec();
+        case KindOfDict:
+          return legacy ? staticEmptyMarkedDictArray() : staticEmptyDictArray();
+        case KindOfKeyset:
+          return staticEmptyKeysetArray();
+        default:
+          always_assert(false);
+      }
+    }());
   }
 
   arr->onSetEvalScalar();

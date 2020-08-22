@@ -752,12 +752,14 @@ constexpr size_t kEmptySetArraySize = 96;
  */
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVec;
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVArray;
-extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyMarkedVec;
 extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
 extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDArray;
-extern
-std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyMarkedDictArray;
 extern std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
+
+extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyMarkedVArray;
+extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyMarkedDArray;
+extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyMarkedVec;
+extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyMarkedDictArray;
 
 /*
  * Return the static empty array, for PHP and Hack arrays.
@@ -766,14 +768,20 @@ extern std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
  * is needed. We should avoid using these methods, as these arrays don't have
  * provenance information; use ArrayData::CreateDArray and friends instead.
  */
-ArrayData* staticEmptyArray();
 ArrayData* staticEmptyVArray();
 ArrayData* staticEmptyDArray();
 ArrayData* staticEmptyVec();
-ArrayData* staticEmptyMarkedVec();
 ArrayData* staticEmptyDictArray();
-ArrayData* staticEmptyMarkedDictArray();
 ArrayData* staticEmptyKeysetArray();
+
+/*
+ * Static empty marked arrays; they're common enough (due to constant-folding)
+ * that it's useful to keep a singleton value for them, too.
+ */
+ArrayData* staticEmptyMarkedVArray();
+ArrayData* staticEmptyMarkedDArray();
+ArrayData* staticEmptyMarkedVec();
+ArrayData* staticEmptyMarkedDictArray();
 
 /*
  * Call arr->decRefAndRelease().

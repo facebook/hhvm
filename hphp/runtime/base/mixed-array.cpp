@@ -61,9 +61,10 @@ static_assert(MixedArray::computeAllocBytes(MixedArray::SmallScale) ==
 std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
 std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDArray;
 std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyMarkedDictArray;
+std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyMarkedDArray;
 
-struct MixedArray::Initializer {
-  Initializer() {
+struct MixedArray::DictInitializer {
+  DictInitializer() {
     auto const ad = reinterpret_cast<MixedArray*>(&s_theEmptyDictArray);
     ad->initHash(1);
     ad->m_sizeAndPos = 0;
@@ -73,7 +74,7 @@ struct MixedArray::Initializer {
     assertx(ad->checkInvariants());
   }
 };
-MixedArray::Initializer MixedArray::s_initializer;
+MixedArray::DictInitializer MixedArray::s_dict_initializer;
 
 struct MixedArray::DArrayInitializer {
   DArrayInitializer() {
@@ -100,6 +101,20 @@ struct MixedArray::MarkedDictArrayInitializer {
   }
 };
 MixedArray::MarkedDictArrayInitializer MixedArray::s_marked_dict_initializer;
+
+struct MixedArray::MarkedDArrayInitializer {
+  MarkedDArrayInitializer() {
+    auto const ad = reinterpret_cast<MixedArray*>(&s_theEmptyMarkedDArray);
+    ad->initHash(1);
+    ad->m_sizeAndPos = 0;
+    ad->m_scale_used = 1;
+    ad->m_nextKI = 0;
+    ad->initHeader_16(HeaderKind::Mixed, StaticValue, ArrayData::kLegacyArray);
+    assertx(RuntimeOption::EvalHackArrDVArrs || ad->checkInvariants());
+  }
+};
+MixedArray::MarkedDArrayInitializer MixedArray::s_marked_darr_initializer;
+
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE

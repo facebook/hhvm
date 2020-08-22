@@ -38,10 +38,6 @@ inline ArrayData::ArrayData(ArrayKind kind, RefCount initial_count)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE ArrayData* staticEmptyArray() {
-  return staticEmptyDArray();
-}
-
 ALWAYS_INLINE ArrayData* staticEmptyVArray() {
   void* vp1 = &s_theEmptyVArray;
   void* vp2 = &s_theEmptyVec;
@@ -51,6 +47,12 @@ ALWAYS_INLINE ArrayData* staticEmptyVArray() {
     RuntimeOption::EvalHackArrDVArrMark ? vp3 : vp2
     : vp1
   );
+}
+
+ALWAYS_INLINE ArrayData* staticEmptyMarkedVArray() {
+  void* vp1 = &s_theEmptyMarkedVArray;
+  void* vp2 = &s_theEmptyMarkedVec;
+  return static_cast<ArrayData*>(RO::EvalHackArrDVArrs ? vp2 : vp1);
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyVec() {
@@ -72,6 +74,12 @@ ALWAYS_INLINE ArrayData* staticEmptyDArray() {
     RuntimeOption::EvalHackArrDVArrMark ? vp3 : vp2
     : vp1
   );
+}
+
+ALWAYS_INLINE ArrayData* staticEmptyMarkedDArray() {
+  void* vp1 = &s_theEmptyMarkedDArray;
+  void* vp2 = &s_theEmptyMarkedDictArray;
+  return static_cast<ArrayData*>(RO::EvalHackArrDVArrs ? vp2 : vp1);
 }
 
 ALWAYS_INLINE ArrayData* staticEmptyDictArray() {

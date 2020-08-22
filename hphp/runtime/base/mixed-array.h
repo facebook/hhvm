@@ -37,6 +37,7 @@ struct APCHandle;
 struct MemoryProfile;
 
 //////////////////////////////////////////////////////////////////////
+
 struct MixedArrayElm {
   using hash_t = strhash_t;
 
@@ -628,14 +629,17 @@ public:
   void scan(type_scan::Scanner&) const; // in mixed-array-defs.h
 
 private:
-  struct Initializer;
-  static Initializer s_initializer;
+  struct DictInitializer;
+  static DictInitializer s_dict_initializer;
 
   struct DArrayInitializer;
   static DArrayInitializer s_darr_initializer;
 
   struct MarkedDictArrayInitializer;
   static MarkedDictArrayInitializer s_marked_dict_initializer;
+
+  struct MarkedDArrayInitializer;
+  static MarkedDArrayInitializer s_marked_darr_initializer;
 
   int64_t  m_nextKI;        // Next integer key to use for append.
 };

@@ -60,7 +60,6 @@ bool loadsCell(const IRInstruction& inst) {
     return arch_allows && (!wide_tv_val || inst.src(0)->isA(TPtrToCell));
 
   case LdVecElem:
-  case LdPackedElem:
     static_assert(PackedArray::stores_typed_values, "");
     return arch_allows;
 

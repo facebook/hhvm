@@ -806,7 +806,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdObjInvoke:
   case LdOutAddr:
   case LdVecElemAddr:
-  case LdPackedElem:
   case LdPairElem:
   case LdPropAddr:
   case LdRDSAddr:

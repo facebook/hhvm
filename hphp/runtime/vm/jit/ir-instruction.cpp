@@ -315,7 +315,7 @@ Type arrSetReturn(const IRInstruction* inst) {
 }
 
 Type arrElemReturn(const IRInstruction* inst) {
-  assertx(inst->is(MixedArrayGetK, LdPackedElem));
+  assertx(inst->is(MixedArrayGetK));
   assertx(inst->src(0)->isA(TArr));
 
   auto elem =

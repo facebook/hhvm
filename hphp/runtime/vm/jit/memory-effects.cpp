@@ -1091,8 +1091,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureStore { AElemS { arr, key }, val, arr };
   }
 
-  case LdVecElem:
-  case LdPackedElem: {
+  case LdVecElem: {
     auto const base = inst.src(0);
     auto const key  = inst.src(1);
     return PureLoad {

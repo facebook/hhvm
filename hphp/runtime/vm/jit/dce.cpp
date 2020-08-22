@@ -201,7 +201,6 @@ bool canDCE(IRInstruction* inst) {
   case LdMethCallerName:
   case LdStrLen:
   case LdVecElem:
-  case LdPackedElem:
   case LdVecElemAddr:
   case NewInstanceRaw:
   case NewLoggingArray:

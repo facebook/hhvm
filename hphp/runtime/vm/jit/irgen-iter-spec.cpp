@@ -364,8 +364,7 @@ struct PackedAccessor : public Accessor {
 
   SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
     if (is_ptr_iter) return gen(env, LdPtrIterVal, TInt, elm);
-    auto const op = is_hack_arr ? LdVecElem : LdPackedElem;
-    return gen(env, op, arr, elm);
+    return gen(env, LdVecElem, arr, elm);
   }
 
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {

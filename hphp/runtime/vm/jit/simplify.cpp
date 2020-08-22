@@ -3196,9 +3196,7 @@ SSATmp* simplifyLdStrLen(State& env, const IRInstruction* inst) {
   return src->hasConstVal(TStr) ? cns(env, src->strVal()->size()) : nullptr;
 }
 
-namespace {
-
-SSATmp* packedLayoutLoadImpl(State& env, const IRInstruction* inst) {
+SSATmp* simplifyLdVecElem(State& env, const IRInstruction* inst) {
   auto const src0 = inst->src(0);
   auto const src1 = inst->src(1);
   if (src0->hasConstVal() && src1->hasConstVal(TInt)) {
@@ -3209,16 +3207,6 @@ SSATmp* packedLayoutLoadImpl(State& env, const IRInstruction* inst) {
     return tv.is_init() ? cns(env, tv) : nullptr;
   }
   return nullptr;
-}
-
-}
-
-SSATmp* simplifyLdVecElem(State& env, const IRInstruction* inst) {
-  return packedLayoutLoadImpl(env, inst);
-}
-
-SSATmp* simplifyLdPackedElem(State& env, const IRInstruction* inst) {
-  return packedLayoutLoadImpl(env, inst);
 }
 
 template <class F>
@@ -3597,7 +3585,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdClsMethod)
   X(LdStrLen)
   X(LdVecElem)
-  X(LdPackedElem)
   X(MethodExists)
   X(FuncHasAttr)
   X(IsClsDynConstructible)

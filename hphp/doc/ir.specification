@@ -3236,12 +3236,6 @@ fields of that struct for holding intermediate values.
   increments the array size and returns the index of the new last element
   (which you must initialize); else jumps to the taken branch.
 
-| LdPackedElem, DArrElem, S(VArr) S(Int), NF
-
-  Loads the element of the packed array in S0 at offset S1. This instruction
-  assumes that the vec actually contains an element at that offset (IE, the
-  array has the proper length).
-
 | LdVecElem, DVecElem, S(VArr,Vec) S(Int), NF
 
   Loads the element of the vec array in S0 at offset S1. This instruction

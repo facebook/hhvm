@@ -98,6 +98,21 @@ struct stringHashCompare {
   }
 };
 
+template <typename T, typename U, typename THash, typename UHash>
+struct pairHashCompare {
+  THash thash;
+  UHash uhash;
+
+  using PairType = std::pair<T, U>;
+  size_t hash(const PairType& pair) const {
+    return hash_int64_pair(thash.hash(pair.first), uhash.hash(pair.second));
+  }
+
+  bool equal(const PairType& a, const PairType& b) const {
+    return thash.equal(a.first, b.first) && uhash.equal(a.second, b.second);
+  }
+};
+
 struct int64_hash {
   size_t operator() (const int64_t v) const {
     return hash_int64(v);

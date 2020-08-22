@@ -458,6 +458,10 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
 
       // Tear down the callee frame, then push the return value.
       stack.trim((TypedValue*)(ar + 1));
+
+      // Until the caller frame is loaded, remove references to the dead ActRec
+      vmfp() = nullptr;
+      vmpc() = nullptr;
     };
 
     if (UNLIKELY(func->takesInOutParams())) {

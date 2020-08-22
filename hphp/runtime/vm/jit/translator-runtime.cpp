@@ -83,7 +83,7 @@ void setNewElem(tv_lval base, TypedValue val) {
 }
 
 void setNewElemVec(tv_lval base, TypedValue val) {
-  HPHP::SetNewElemVec(base, &val);
+  HPHP::SetNewElemVecMove(base, &val);
 }
 
 void setNewElemDict(tv_lval base, TypedValue val) {

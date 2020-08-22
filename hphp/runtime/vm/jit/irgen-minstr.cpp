@@ -1408,19 +1408,18 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
   return value;
 }
 
-void setNewElemVecImpl(IRGS& env, uint32_t nDiscard,
-                       SSATmp* basePtr, Type baseType,
-                       SSATmp* value) {
+void setNewElemVecImpl(IRGS& env, uint32_t nDiscard, SSATmp* basePtr,
+                       Type baseType, SSATmp* value) {
+  assertx(baseType.subtypeOfAny(TVArr, TVec));
+  auto const maybeCyclic = value->type().maybe(baseType);
+
+  if (maybeCyclic) gen(env, IncRef, value);
+
   ifThen(
     env,
     [&](Block* taken) {
       auto const base = extractBase(env);
 
-      if ((baseType.maybe(TVArr) && value->type().maybe(TVArr)) ||
-          (baseType.maybe(TVec) && value->type().maybe(TVec))) {
-        auto const appendToSelf = gen(env, EqArrayDataPtr, base, value);
-        gen(env, JmpNZero, taken, appendToSelf);
-      }
       gen(env, CheckArrayCOW, taken, base);
       auto const offset = gen(env, ReserveVecNewElem, taken, base);
       auto const elemPtr = gen(
@@ -1430,13 +1429,14 @@ void setNewElemVecImpl(IRGS& env, uint32_t nDiscard,
         base,
         offset
       );
-      gen(env, IncRef, value);
       gen(env, StMem, elemPtr, value);
     },
     [&] {
       gen(env, SetNewElemVec, makeCatchSet(env, nDiscard), basePtr, value);
     }
   );
+
+  if (!maybeCyclic) gen(env, IncRef, value);
 }
 
 SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {

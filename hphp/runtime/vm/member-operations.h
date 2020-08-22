@@ -1675,6 +1675,23 @@ inline void SetNewElemVec(tv_lval base, TypedValue* value) {
 }
 
 /**
+ * SetNewElem when base is a Vec (moves value)
+ */
+inline void SetNewElemVecMove(tv_lval base, TypedValue* value) {
+  assertx(tvIsVecOrVArray(base));
+  assertx(tvIsPlausible(*base));
+  auto a = val(base).parr;
+  auto a2 = PackedArray::AppendMove(a, *value);
+  if (a2 != a) {
+    type(base) = dt_with_rc(type(base));
+    val(base).parr = a2;
+    assertx(tvIsPlausible(*base));
+    a->decRefAndRelease();
+  }
+}
+
+
+/**
  * SetNewElem when base is a Dict
  */
 inline void SetNewElemDict(tv_lval base, TypedValue* value) {

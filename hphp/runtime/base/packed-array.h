@@ -96,6 +96,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static bool Usort(ArrayData*, const Variant&);
   static bool Uasort(ArrayData*, const Variant&);
   static ArrayData* Append(ArrayData*, TypedValue v);
+  static ArrayData* AppendMove(ArrayData*, TypedValue v);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
@@ -220,7 +221,10 @@ private:
   static bool VecEqualHelper(const ArrayData*, const ArrayData*, bool);
   static int64_t VecCmpHelper(const ArrayData*, const ArrayData*);
 
-  static ArrayData* AppendImpl(ArrayData*, TypedValue v, bool copy);
+  // By default, this method will inc-ref the value being inserted. If move is
+  // true, no refcounting operations will be performed.
+  static ArrayData* AppendImpl(ArrayData*, TypedValue v, bool copy,
+                               bool move = false);
 
   struct VecInitializer;
   static VecInitializer s_vec_initializer;

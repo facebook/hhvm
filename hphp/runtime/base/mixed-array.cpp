@@ -162,7 +162,7 @@ ArrayData* MixedArray::MakeReserveDArray(uint32_t size) {
 ArrayData* MixedArray::MakeReserveDict(uint32_t size) {
   auto ad = MakeReserveImpl(size, HeaderKind::Dict);
   assertx(ad->isDictKind());
-  return tagArrProv(ad);
+  return ad;
 }
 
 ALWAYS_INLINE
@@ -216,8 +216,7 @@ MixedArray* MixedArray::MakeStructImpl(uint32_t size,
 MixedArray* MixedArray::MakeStructDict(uint32_t size,
                                        const StringData* const* keys,
                                        const TypedValue* values) {
-  auto const ad = MakeStructImpl(size, keys, values, HeaderKind::Dict);
-  return asMixed(tagArrProv(ad));
+  return MakeStructImpl(size, keys, values, HeaderKind::Dict);
 }
 
 MixedArray* MixedArray::MakeStructDArray(uint32_t size,
@@ -266,8 +265,7 @@ MixedArray* MixedArray::AllocStructImpl(uint32_t size,
 }
 
 MixedArray* MixedArray::AllocStructDict(uint32_t size, const int32_t* hash) {
-  auto const ad = AllocStructImpl(size, hash, HeaderKind::Dict);
-  return asMixed(tagArrProv(ad));
+  return AllocStructImpl(size, hash, HeaderKind::Dict);
 }
 
 MixedArray* MixedArray::AllocStructDArray(uint32_t size, const int32_t* hash) {
@@ -349,7 +347,7 @@ MixedArray* MixedArray::MakeDArray(uint32_t size, const TypedValue* kvs) {
 MixedArray* MixedArray::MakeDict(uint32_t size, const TypedValue* kvs) {
   auto const ad = MakeMixedImpl<HeaderKind::Dict>(size, kvs);
   assertx(ad == nullptr || ad->kind() == kDictKind);
-  return ad ? asMixed(tagArrProv(ad)) : nullptr;
+  return ad;
 }
 
 MixedArray* MixedArray::MakeDArrayNatural(uint32_t size,
@@ -600,7 +598,7 @@ ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc, bool isLegacy) {
   }
   auto const ad = init.create();
   ad->setLegacyArray(isLegacy);
-  return tagArrProv(ad, apc);
+  return ad;
 }
 
 ArrayData* MixedArray::MakeDArrayFromAPC(const APCArray* apc) {
@@ -1524,15 +1522,12 @@ ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
 
   if (a->empty() && a->m_nextKI == 0) return ArrayData::CreateDict();
 
-  if (copy) {
-    auto const out = CopyMixed(*a, AllocMode::Request, HeaderKind::Dict);
-    return tagArrProv(out);
-  } else {
-    a->m_kind = HeaderKind::Dict;
-    if (RO::EvalArrayProvenance) arrprov::reassignTag(a);
-    assertx(a->checkInvariants());
-    return tagArrProv(a);
-  }
+  if (copy) return CopyMixed(*a, AllocMode::Request, HeaderKind::Dict);
+
+  a->m_kind = HeaderKind::Dict;
+  if (RO::EvalArrayProvenance) arrprov::clearTag(a);
+  assertx(a->checkInvariants());
+  return a;
 }
 
 ArrayData* MixedArray::ToDictDict(ArrayData* ad, bool) {

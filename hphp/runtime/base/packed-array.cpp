@@ -409,7 +409,7 @@ ArrayData* PackedArray::MakeReserveVec(uint32_t capacity) {
   assertx(ad->m_size == 0);
   assertx(ad->m_pos == 0);
   assertx(checkInvariants(ad));
-  return tagArrProv(ad);
+  return ad;
 }
 
 template<bool reverse>
@@ -457,7 +457,7 @@ ArrayData* PackedArray::MakeVec(uint32_t size, const TypedValue* values) {
   // grows down.
   auto ad = MakePackedImpl<true>(size, values, HeaderKind::Vec);
   assertx(ad->isVecKind());
-  return tagArrProv(ad);
+  return ad;
 }
 
 ArrayData* PackedArray::MakeVArrayNatural(uint32_t size, const TypedValue* values) {
@@ -472,7 +472,7 @@ ArrayData* PackedArray::MakeVArrayNatural(uint32_t size, const TypedValue* value
 ArrayData* PackedArray::MakeVecNatural(uint32_t size, const TypedValue* values) {
   auto ad = MakePackedImpl<false>(size, values, HeaderKind::Vec);
   assertx(ad->isVecKind());
-  return tagArrProv(ad);
+  return ad;
 }
 
 ArrayData* PackedArray::MakeUninitializedVArray(uint32_t size) {
@@ -494,7 +494,7 @@ ArrayData* PackedArray::MakeUninitializedVec(uint32_t size) {
   assertx(ad->m_size == size);
   assertx(ad->m_pos == 0);
   assertx(checkInvariants(ad));
-  return tagArrProv(ad);
+  return ad;
 }
 
 ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc, bool isLegacy) {
@@ -506,7 +506,7 @@ ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc, bool isLegacy) {
   }
   auto const ad = init.create();
   ad->setLegacyArray(isLegacy);
-  return tagArrProv(ad, apc);
+  return ad;
 }
 
 ArrayData* PackedArray::MakeVArrayFromAPC(const APCArray* apc) {
@@ -882,7 +882,7 @@ ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
     adIn->m_kind = HeaderKind::Vec;
     ad = adIn;
   }
-  if (RO::EvalArrayProvenance) arrprov::reassignTag(ad);
+  if (RO::EvalArrayProvenance) arrprov::clearTag(ad);
 
   assertx(ad->isVecKind());
   assertx(capacity(ad) == capacity(adIn));
@@ -890,7 +890,7 @@ ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
   assertx(ad->m_pos == adIn->m_pos);
   assertx(ad->hasExactlyOneRef());
   assertx(checkInvariants(ad));
-  return tagArrProv(ad);
+  return ad;
 }
 
 ArrayData* PackedArray::ToVecVec(ArrayData* ad, bool) {

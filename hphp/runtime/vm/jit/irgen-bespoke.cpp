@@ -124,6 +124,19 @@ Locations getVanillaLocations(const IRGS& env, SrcKey sk) {
   always_assert(false);
 }
 
+// Returns a type `t` such that if the input is a subtype of `t`, the cast
+// is trivial. For non-casts, or casts we don't care about, returns TBottom.
+Type getTypeForCast(Op op) {
+  switch (op) {
+    case Op::CastVec:    return TVec;
+    case Op::CastDict:   return TDict;
+    case Op::CastKeyset: return TKeyset;
+    case Op::CastVArray: return TVArr;
+    case Op::CastDArray: return TDArr;
+    default:             return TBottom;
+  }
+}
+
 void guardToVanilla(IRGS& env, SrcKey sk, Location loc) {
   auto const& type = env.irb->typeOf(loc, DataTypeSpecific);
   if (!(type.isKnownDataType() && type <= TArrLike)) return;
@@ -146,9 +159,13 @@ bool skipVanillaGuards(IRGS& env, SrcKey sk, const Locations& locs) {
     return isArrayLikeType(dt) || isClsMethType(dt);
   };
 
-  if (sk.op() == Op::Same || sk.op() == Op::NSame) {
+  auto const op = sk.op();
+  if (op == Op::Same || op == Op::NSame) {
     assertx(locs.size() == 2);
     return !is_arrlike(locs[0]) || !is_arrlike(locs[1]);
+  } else if (isCast(op)) {
+    assertx(locs.size() == 1);
+    return env.irb->fs().typeOf(locs[0]) <= getTypeForCast(op);
   }
   return false;
 }

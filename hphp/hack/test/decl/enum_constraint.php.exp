@@ -12,11 +12,11 @@ Parsed decls:
              (Tapply (([3:6-7], "\\A"), [])))]
            )))
         ];
-      sc_uses = []; sc_method_redeclarations = []; sc_xhp_attr_uses = [];
-      sc_req_extends = []; sc_req_implements = []; sc_implements = [];
-      sc_consts = []; sc_typeconsts = []; sc_pu_enums = []; sc_props = [];
-      sc_sprops = []; sc_constructor = None; sc_static_methods = [];
-      sc_methods = []; sc_user_attributes = [];
+      sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
+      sc_req_implements = []; sc_implements = []; sc_consts = [];
+      sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+      sc_constructor = None; sc_static_methods = []; sc_methods = [];
+      sc_user_attributes = [];
       sc_enum_type =
       (Some { te_base =
               (Rhint (root|enum_constraint.php line 3, characters 10-15),
@@ -37,11 +37,11 @@ Parsed decls:
              (Tapply (([5:6-7], "\\B"), [])))]
            )))
         ];
-      sc_uses = []; sc_method_redeclarations = []; sc_xhp_attr_uses = [];
-      sc_req_extends = []; sc_req_implements = []; sc_implements = [];
-      sc_consts = []; sc_typeconsts = []; sc_pu_enums = []; sc_props = [];
-      sc_sprops = []; sc_constructor = None; sc_static_methods = [];
-      sc_methods = []; sc_user_attributes = [];
+      sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
+      sc_req_implements = []; sc_implements = []; sc_consts = [];
+      sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+      sc_constructor = None; sc_static_methods = []; sc_methods = [];
+      sc_user_attributes = [];
       sc_enum_type =
       (Some { te_base =
               (Rhint (root|enum_constraint.php line 5, characters 10-12),

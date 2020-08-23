@@ -4,10 +4,9 @@
       c_kind = Cnormal; c_name = ([3:7-10], "\\One");
       c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
       c_extends = []; c_uses = []; c_use_as_alias = [];
-      c_insteadof_alias = []; c_method_redeclarations = [];
-      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
-      c_implements = []; c_where_constraints = []; c_consts = [];
-      c_typeconsts = []; c_vars = [];
+      c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
+      c_reqs = []; c_implements = []; c_where_constraints = [];
+      c_consts = []; c_typeconsts = []; c_vars = [];
       c_methods =
       [{ m_span = [4:3-6:4]; m_annotation = (); m_final = false;
          m_abstract = false; m_static = false; m_visibility = Public;
@@ -37,10 +36,9 @@
       c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
       c_extends = [([3:21-24], (Happly (([3:21-24], "\\Two"), [])))];
       c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
-      c_method_redeclarations = []; c_xhp_attr_uses = [];
-      c_xhp_category = None; c_reqs = []; c_implements = [];
-      c_where_constraints = []; c_consts = []; c_typeconsts = [];
-      c_vars = [];
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
+      c_implements = []; c_where_constraints = []; c_consts = [];
+      c_typeconsts = []; c_vars = [];
       c_methods =
       [{ m_span = [4:3-6:4]; m_annotation = (); m_final = false;
          m_abstract = false; m_static = false; m_visibility = Public;
@@ -70,10 +68,9 @@
       c_tparams = { c_tparam_list = []; c_tparam_constraints = {} };
       c_extends = [([3:19-22], (Happly (([3:19-22], "\\One"), [])))];
       c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
-      c_method_redeclarations = []; c_xhp_attr_uses = [];
-      c_xhp_category = None; c_reqs = []; c_implements = [];
-      c_where_constraints = []; c_consts = []; c_typeconsts = [];
-      c_vars = [];
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
+      c_implements = []; c_where_constraints = []; c_consts = [];
+      c_typeconsts = []; c_vars = [];
       c_methods =
       [{ m_span = [4:3-6:4]; m_annotation = (); m_final = false;
          m_abstract = false; m_static = false; m_visibility = Public;

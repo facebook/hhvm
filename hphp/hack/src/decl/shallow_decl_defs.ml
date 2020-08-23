@@ -73,19 +73,6 @@ type shallow_method = {
 }
 [@@deriving eq, show]
 
-type shallow_method_redeclaration = {
-  smr_abstract: bool;
-  smr_final: bool;
-  smr_static: bool;
-  smr_name: Aast.sid;
-  smr_type: decl_ty;
-  smr_visibility: Aast.visibility;
-  smr_trait: Aast.hint;
-  smr_method: Aast.pstring;
-  smr_fixme_codes: ISet.t;
-}
-[@@deriving eq, show]
-
 type shallow_class = {
   sc_mode: FileInfo.mode;
   sc_final: bool;
@@ -97,7 +84,6 @@ type shallow_class = {
   sc_where_constraints: decl_where_constraint list;
   sc_extends: decl_ty list;
   sc_uses: decl_ty list;
-  sc_method_redeclarations: shallow_method_redeclaration list;
   sc_xhp_attr_uses: decl_ty list;
   sc_req_extends: decl_ty list;
   sc_req_implements: decl_ty list;

@@ -37,7 +37,6 @@ pub struct HhasClass<'a> {
     )>,
     // Deprecated - kill please
     pub use_precedences: Vec<(class::Type<'a>, class::Type<'a>, Vec<class::Type<'a>>)>,
-    pub method_trait_resolutions: Vec<(&'a tast::MethodRedeclaration, class::Type<'a>)>,
     pub enum_type: Option<hhas_type::Info>,
     pub methods: Vec<HhasMethod<'a>>,
     pub properties: Vec<HhasProperty<'a>>,

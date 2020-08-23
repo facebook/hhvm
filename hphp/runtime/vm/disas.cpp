@@ -750,19 +750,13 @@ void print_cls_used_traits(Output& out, const PreClass* cls) {
     }
 
     for (auto& alias : aliasRules) {
-      out.fmtln("{}{} as{}{}{}{};",
+      out.fmtln("{}{} as{}{};",
         alias.traitName()->empty()
           ? std::string{}
           : folly::format("{}::", alias.traitName()).str(),
         alias.origMethodName()->data(),
-        alias.strict()
-          ? std::string(" strict")
-          : std::string{},
-        alias.async() && alias.strict()
-          ? std::string(" async")
-          : std::string{},
         opt_attrs(AttrContext::TraitImport, alias.modifiers()),
-        alias.strict() || (alias.newMethodName() != alias.origMethodName())
+        alias.newMethodName() != alias.origMethodName()
           ? std::string(" ") + alias.newMethodName()->data()
           : std::string{}
       );

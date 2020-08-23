@@ -10,11 +10,10 @@
           ];
         c_tparam_constraints = { "T" -> (Erased, []) } };
       c_extends = []; c_uses = []; c_use_as_alias = [];
-      c_insteadof_alias = []; c_method_redeclarations = [];
-      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
-      c_implements = []; c_where_constraints = []; c_consts = [];
-      c_typeconsts = []; c_vars = []; c_methods = []; c_attributes = [];
-      c_xhp_children = []; c_xhp_attrs = [];
+      c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
+      c_reqs = []; c_implements = []; c_where_constraints = [];
+      c_consts = []; c_typeconsts = []; c_vars = []; c_methods = [];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
@@ -34,8 +33,8 @@
            ];
          c_tparam_constraints = { "T" -> (Erased, []) } };
        c_extends = []; c_uses = []; c_use_as_alias = [];
-       c_insteadof_alias = []; c_method_redeclarations = [];
-       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
+       c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
+       c_reqs = [];
        c_implements =
        [([6:23-27],
          (Happly (([6:23-24], "\\I"), [([6:25-26], (Habstr ("T", [])))])))];

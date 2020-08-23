@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2049ab501c3b06e4ffb1b9cc7bf7216a>>
+// @generated SignedSource<<571045829f83418c04f5cbff35a74b04>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -896,7 +896,6 @@ pub struct Class_<'a, Ex, Fb, En, Hi> {
     pub uses: &'a [TraitHint<'a>],
     pub use_as_alias: &'a [UseAsAlias<'a>],
     pub insteadof_alias: &'a [InsteadofAlias<'a>],
-    pub method_redeclarations: &'a [MethodRedeclaration<'a, Ex, Fb, En, Hi>],
     pub xhp_attr_uses: &'a [XhpAttrHint<'a>],
     pub xhp_category: Option<(&'a Pos<'a>, &'a [Pstring<'a>])>,
     pub reqs: &'a [(ClassHint<'a>, oxidized::aast::IsExtends)],
@@ -1158,39 +1157,6 @@ pub struct Method_<'a, Ex, Fb, En, Hi> {
 }
 impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
     for Method_<'a, Ex, Fb, En, Hi>
-{
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct MethodRedeclaration<'a, Ex, Fb, En, Hi> {
-    pub final_: bool,
-    pub abstract_: bool,
-    pub static_: bool,
-    pub visibility: oxidized::aast::Visibility,
-    pub name: Sid<'a>,
-    pub tparams: &'a [Tparam<'a, Ex, Fb, En, Hi>],
-    pub where_constraints: &'a [WhereConstraint<'a>],
-    pub variadic: FunVariadicity<'a, Ex, Fb, En, Hi>,
-    pub params: &'a [&'a FunParam<'a, Ex, Fb, En, Hi>],
-    pub fun_kind: oxidized::ast_defs::FunKind,
-    pub ret: TypeHint<'a, Hi>,
-    pub trait_: TraitHint<'a>,
-    pub method: Pstring<'a>,
-    pub user_attributes: &'a [UserAttribute<'a, Ex, Fb, En, Hi>],
-}
-impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
-    for MethodRedeclaration<'a, Ex, Fb, En, Hi>
 {
 }
 

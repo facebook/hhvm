@@ -124,90 +124,38 @@ TraitMethodImportData<TraitMethod, Ops>
 }
 
 template <class TraitMethod, class Ops>
-template <typename Iter>
 inline void
 TraitMethodImportData<TraitMethod, Ops>
-::applyAliasRules(Iter it_begin, Iter it_end,
-                  typename TraitMethod::class_type ctx) {
-  std::map<String, TraitMethod> newBindings;
+::applyAliasRule(const PreClass::TraitAliasRule& rule,
+                 typename TraitMethod::class_type ctx) {
+  auto traitName    = rule.traitName();
+  auto origMethName = rule.origMethodName();
+  auto newMethName  = rule.newMethodName();
+  auto modifiers    = rule.modifiers();
 
-  for (auto it = it_begin; it != it_end; it++) {
-    auto const& rule = *it;
-    auto traitName    = rule.traitName();
-    auto origMethName = rule.origMethodName();
-    auto newMethName  = rule.newMethodName();
-    auto modifiers    = rule.modifiers();
-
-    typename TraitMethod::class_type traitCls;
-    if (traitName->empty()) {
-      traitCls = Ops::findSingleTraitWithMethod(ctx, origMethName);
-    } else {
-      traitCls = Ops::findTraitClass(ctx, traitName);
-    }
-
-    if (!traitCls || !Ops::isTrait(traitCls)) {
-      Ops::errorUnknownTrait(traitName);
-    }
-
-    Ops::addTraitAlias(ctx, rule, traitCls);
-
-    auto traitMeth = Ops::findTraitMethod(traitCls, origMethName);
-    if (!traitMeth) {
-      Ops::errorUnknownMethod(origMethName);
-    }
-
-    /**
-     * When considering each redeclaration T1::f as strict g, first remove the
-     * value T1::f from binding "f" => [..., T1::f, ...] in preclass, then build
-     * up a new map "g" => T1::f. When all redeclaration rules have been
-     * processed, record the new map's rules. This allows redeclaration rules
-     * not to run over each other.
-     */
-    if (rule.strict()) { // as strict semantics
-      auto& methods = m_dataForName[origMethName].methods;
-      for (auto next = methods.begin(); next != methods.end(); ) {
-        auto const cur = next++;
-        auto const curName = Ops::clsName(cur->trait);
-        if (curName == traitName) {
-          methods.erase(cur);
-        }
-      }
-
-      // check async and static must match
-      if (Ops::isAsync(traitMeth) != rule.async()) {
-        Ops::errorInconsistentAttr(traitName, origMethName, "async");
-      }
-
-      bool ruleStatic = modifiers & AttrStatic;
-      if (Ops::isStatic(traitMeth) != ruleStatic) {
-        Ops::errorInconsistentAttr(traitName, origMethName, "static");
-      }
-      // if trait method is final, method rewrite must be final as well
-      // but if trait is not final, rewrite can be final
-      if (Ops::isFinal(traitMeth) && !(modifiers & AttrFinal)) {
-        Ops::errorRedeclaredNotFinal(traitName, origMethName);
-      }
-
-      newBindings.emplace(
-        rule.newMethodName(),
-        TraitMethod { traitCls, traitMeth, modifiers }
-      );
-    } else { // as semantics
-      if (origMethName == newMethName) {
-        setModifiers(origMethName, traitCls, modifiers);
-      } else {
-        add(Ops::traitMethod(traitCls, traitMeth, rule),
-            newMethName, origMethName);
-      }
-    }
+  typename TraitMethod::class_type traitCls;
+  if (traitName->empty()) {
+    traitCls = Ops::findSingleTraitWithMethod(ctx, origMethName);
+  } else {
+    traitCls = Ops::findTraitClass(ctx, traitName);
   }
 
-  for (auto const& pair : newBindings) {
-    auto const newName = pair.first;
-    m_dataForName[newName].methods.clear();
-    auto const method = pair.second;
-    auto const oldName = Ops::methName(method.method);
-    add(method, newName, oldName);
+  if (!traitCls || !Ops::isTrait(traitCls)) {
+    Ops::errorUnknownTrait(traitName);
+  }
+
+  Ops::addTraitAlias(ctx, rule, traitCls);
+
+  auto traitMeth = Ops::findTraitMethod(traitCls, origMethName);
+  if (!traitMeth) {
+    Ops::errorUnknownMethod(origMethName);
+  }
+
+  if (origMethName == newMethName) {
+    setModifiers(origMethName, traitCls, modifiers);
+  } else {
+    add(Ops::traitMethod(traitCls, traitMeth, rule),
+        newMethName, origMethName);
   }
 }
 

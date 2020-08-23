@@ -1,6 +1,0 @@
-File "method_redeclaration_contravariant_param_error.php", line 12, characters 19-19:
-The method `f` has the wrong type (Typing[4341])
-File "method_redeclaration_contravariant_param_error.php", line 4, characters 21-23:
-Expected `int`
-File "method_redeclaration_contravariant_param_error.php", line 12, characters 21-23:
-But got `num`

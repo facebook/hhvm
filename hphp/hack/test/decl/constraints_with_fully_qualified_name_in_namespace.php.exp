@@ -48,7 +48,6 @@ Parsed decls:
     sc_where_constraints = [];
     sc_extends = [];
     sc_uses = [];
-    sc_method_redeclarations = [];
     sc_xhp_attr_uses = [];
     sc_req_extends = [];
     sc_req_implements = [];

@@ -34,8 +34,6 @@ class type virtual ['env] nast_visitor_with_state =
 
     method at_typedef : 'env -> Nast.typedef -> 'env
 
-    method at_method_redeclaration : 'env -> Nast.method_redeclaration -> 'env
-
     method at_gconst : 'env -> Nast.gconst -> 'env
 
     method at_file_attribute : 'env -> Nast.file_attribute -> 'env
@@ -85,8 +83,6 @@ class virtual ['env] default_nast_visitor_with_state :
     method at_hint env _ = env
 
     method at_typedef env _ = env
-
-    method at_method_redeclaration env _ = env
 
     method at_gconst env _ = env
 
@@ -141,9 +137,6 @@ let combine_visitors =
       method at_hint = visit visitor1#at_hint visitor2#at_hint
 
       method at_typedef = visit visitor1#at_typedef visitor2#at_typedef
-
-      method at_method_redeclaration =
-        visit visitor1#at_method_redeclaration visitor2#at_method_redeclaration
 
       method at_gconst = visit visitor1#at_gconst visitor2#at_gconst
 
@@ -219,10 +212,6 @@ let checker (visitor : 'env nast_visitor_with_state) =
     method! on_typedef env td =
       let env = visitor#at_typedef env td in
       super#on_typedef env td
-
-    method! on_method_redeclaration env mr =
-      let env = visitor#at_method_redeclaration env mr in
-      super#on_method_redeclaration env mr
 
     method! on_gconst env gc =
       let env = visitor#at_gconst env gc in

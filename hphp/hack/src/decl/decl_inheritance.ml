@@ -90,26 +90,13 @@ let methods ~static child_class_name lin =
           else
             cls.sc_methods
         in
-        let redecls = cls.sc_method_redeclarations in
-        let redecls =
-          List.filter ~f:(fun x -> Bool.equal x.smr_static static) redecls
-        in
-        let methods_from_redecls = DTT.redecl_list_to_method_seq redecls in
         let cid = mro.mro_name in
         let methods_seq =
-          Sequence.append (Sequence.of_list methods) methods_from_redecls
+          Sequence.of_list methods
           |> Sequence.filter ~f:(fun sm ->
                  not (SPairSet.mem removed (cid, snd sm.sm_name)))
           |> Sequence.map
                ~f:(DTT.shallow_method_to_telt child_class_name mro subst)
-        in
-        (* "Remove" all trait methods which were redeclared. If we encounter any
-         of these trait methods later in the linearization, just ignore them. *)
-        let removed =
-          List.fold redecls ~init:removed ~f:(fun acc mr ->
-              let (_, trait, _) = Decl_utils.unwrap_class_hint mr.smr_trait in
-              let (_, trait_method) = mr.smr_method in
-              SPairSet.add acc (trait, trait_method))
         in
         Some (methods_seq, (removed, rest)))
   |> Sequence.concat

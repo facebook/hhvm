@@ -142,11 +142,6 @@ let tco_experimental_coroutines = "coroutines"
 let tco_experimental_type_param_shadowing = "type_param_shadowing"
 
 (**
- * Enable trait method redeclarations, i.e. public function f(): void = T1::f;
- *)
-let tco_experimental_trait_method_redeclarations = "trait_method_redeclarations"
-
-(**
  * Enable abstract const type with default syntax, i.e.
  * abstract const type T as num = int;
  *)
@@ -163,7 +158,6 @@ let tco_experimental_all =
          tco_experimental_forbid_nullable_cast;
          tco_experimental_coroutines;
          tco_experimental_disallow_static_memoized;
-         tco_experimental_trait_method_redeclarations;
          tco_experimental_abstract_type_const_with_default;
        ]
 

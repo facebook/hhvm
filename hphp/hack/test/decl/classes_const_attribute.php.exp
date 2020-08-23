@@ -6,9 +6,9 @@ Parsed decls:
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cabstract;
       sc_name = ([4:16-17], "\\A"); sc_tparams = [];
       sc_where_constraints = []; sc_extends = []; sc_uses = [];
-      sc_method_redeclarations = []; sc_xhp_attr_uses = [];
-      sc_req_extends = []; sc_req_implements = []; sc_implements = [];
-      sc_consts = []; sc_typeconsts = []; sc_pu_enums = [];
+      sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+      sc_implements = []; sc_consts = []; sc_typeconsts = [];
+      sc_pu_enums = [];
       sc_props =
       [{ Shallow_decl_defs.sp_const = true; sp_xhp_attr = None;
          sp_lateinit = false; sp_lsb = false; sp_name = ([5:40-42], "p");
@@ -28,9 +28,9 @@ Parsed decls:
       sc_extends =
       [(Rhint (root|classes_const_attribute.php line 8, characters 17-17),
         (Tapply (([8:17-18], "\\A"), [])))];
-      sc_uses = []; sc_method_redeclarations = []; sc_xhp_attr_uses = [];
-      sc_req_extends = []; sc_req_implements = []; sc_implements = [];
-      sc_consts = []; sc_typeconsts = []; sc_pu_enums = [];
+      sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
+      sc_req_implements = []; sc_implements = []; sc_consts = [];
+      sc_typeconsts = []; sc_pu_enums = [];
       sc_props =
       [{ Shallow_decl_defs.sp_const = true; sp_xhp_attr = None;
          sp_lateinit = false; sp_lsb = false; sp_name = ([9:26-28], "p");

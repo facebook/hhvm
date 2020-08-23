@@ -30,39 +30,6 @@ type tagged_elt = {
   elt: class_elt;
 }
 
-let method_redeclaration_to_shallow_method smr =
-  let {
-    smr_abstract = sm_abstract;
-    smr_final = sm_final;
-    smr_static = _;
-    smr_name = sm_name;
-    smr_type = sm_type;
-    smr_visibility = sm_visibility;
-    smr_trait = _;
-    smr_method = _;
-    smr_fixme_codes = sm_fixme_codes;
-  } =
-    smr
-  in
-  {
-    sm_abstract;
-    sm_final;
-    sm_memoizelsb = false;
-    sm_name;
-    sm_override = false;
-    sm_dynamicallycallable = false;
-    sm_reactivity = None;
-    sm_type;
-    sm_visibility;
-    sm_fixme_codes;
-    sm_deprecated = None;
-  }
-
-let redecl_list_to_method_seq redecls =
-  redecls
-  |> Sequence.of_list
-  |> Sequence.map ~f:method_redeclaration_to_shallow_method
-
 let base_visibility origin_class_name = function
   | Public -> Vpublic
   | Private -> Vprivate origin_class_name

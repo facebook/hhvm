@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1b80480644885ad9cc5fbc7b312766bc>>
+// @generated SignedSource<<fc7ac3275fc61b6a9ab0425696785786>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_rc/regen.sh
@@ -82,9 +82,6 @@ pub type Case = aast::Case<std::rc::Rc<pos::Pos>, FuncBodyAnn, (), ()>;
 pub type Field = aast::Field<std::rc::Rc<pos::Pos>, FuncBodyAnn, (), ()>;
 
 pub type Afield = aast::Afield<std::rc::Rc<pos::Pos>, FuncBodyAnn, (), ()>;
-
-pub type MethodRedeclaration =
-    aast::MethodRedeclaration<std::rc::Rc<pos::Pos>, FuncBodyAnn, (), ()>;
 
 pub type PuEnum = aast::PuEnum<std::rc::Rc<pos::Pos>, FuncBodyAnn, (), ()>;
 

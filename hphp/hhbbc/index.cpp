@@ -1362,16 +1362,6 @@ struct TMIOps {
     return modifiers & AttrAbstract;
   }
 
-  static bool isAsync(method_type meth) {
-    return meth->isAsync;
-  }
-  static bool isStatic(method_type meth) {
-    return meth->attrs & AttrStatic;
-  }
-  static bool isFinal(method_type meth) {
-    return meth->attrs & AttrFinal;
-  }
-
   // Whether to exclude methods with name `methName' when adding.
   static bool exclude(string_type methName) {
     return Func::isSpecial(methName);
@@ -1453,22 +1443,6 @@ struct TMIOps {
     throw TMIException(folly::sformat("MultiplyExcluded: {}::{}",
                                       traitName, methName));
   }
-  static void errorInconsistentAttr(string_type traitName,
-                                    string_type methName,
-                                    const char* attr) {
-    throw TMIException(folly::sformat(
-      "Redeclaration of trait method '{}::{}' is inconsistent about '{}'",
-      traitName, methName, attr
-    ));
-  }
-  static void errorRedeclaredNotFinal(string_type traitName,
-                                      string_type methName) {
-    throw TMIException(folly::sformat(
-      "Redeclaration of final trait method '{}::{}' must also be final",
-      traitName, methName
-    ));
-  }
-
 };
 
 using TMIData = TraitMethodImportData<TraitMethod,
@@ -1739,8 +1713,9 @@ bool build_class_methods(BuildClsInfo& info) {
     for (auto const& precRule : info.rleaf->cls->traitPrecRules) {
       tmid.applyPrecRule(precRule, info.rleaf);
     }
-    auto const& aliasRules = info.rleaf->cls->traitAliasRules;
-    tmid.applyAliasRules(aliasRules.begin(), aliasRules.end(), info.rleaf);
+    for (auto const& aliasRule : info.rleaf->cls->traitAliasRules) {
+      tmid.applyAliasRule(aliasRule, info.rleaf);
+    }
     auto traitMethods = tmid.finish(info.rleaf);
     // Import the methods.
     for (auto const& mdata : traitMethods) {

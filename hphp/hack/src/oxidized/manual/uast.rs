@@ -98,12 +98,6 @@ pub type Gconst<A> =
     aast::Gconst<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
 pub type Method_<A> =
     aast::Method_<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
-pub type MethodRedeclaration<A> = aast::MethodRedeclaration<
-    <A as Annot>::Ex,
-    <A as Annot>::Fb,
-    <A as Annot>::En,
-    <A as Annot>::Hi,
->;
 pub type Program<A> =
     aast::Program<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
 pub type PuEnum<A> =

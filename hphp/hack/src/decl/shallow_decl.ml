@@ -228,47 +228,6 @@ let method_type env m =
         ~returns_void_to_rx;
   }
 
-let method_redeclaration_type env m =
-  check_params m.mt_params;
-  let params = make_params env ~is_lambda:false m.mt_params in
-  let ret =
-    ret_from_fun_kind
-      ~is_lambda:false
-      ~is_constructor:(String.equal (snd m.mt_name) SN.Members.__construct)
-      env
-      (fst m.mt_name)
-      m.mt_fun_kind
-      (hint_of_type_hint m.mt_ret)
-  in
-  let arity =
-    match m.mt_variadic with
-    | FVvariadicArg param ->
-      assert param.param_is_variadic;
-      assert (Option.is_none param.param_expr);
-      Fvariadic (make_param_ty env ~is_lambda:false param)
-    | FVellipsis p -> Fvariadic (make_ellipsis_param_ty p)
-    | FVnonVariadic -> Fstandard
-  in
-  let tparams = List.map m.mt_tparams (type_param env) in
-  let where_constraints =
-    List.map m.mt_where_constraints (where_constraint env)
-  in
-  {
-    ft_arity = arity;
-    ft_tparams = tparams;
-    ft_where_constraints = where_constraints;
-    ft_params = params;
-    ft_ret = { et_type = ret; et_enforced = false };
-    ft_reactive = Nonreactive;
-    ft_flags =
-      make_ft_flags
-        m.mt_fun_kind
-        None
-        ~return_disposable:false
-        ~returns_void_to_rx:false
-        ~returns_mutable:false;
-  }
-
 let method_ env c m =
   let override = Attrs.mem SN.UserAttributes.uaOverride m.m_user_attributes in
   let (pos, id) = m.m_name in
@@ -333,20 +292,6 @@ let method_ env c m =
     sm_deprecated;
   }
 
-let method_redeclaration env m =
-  let ft = method_redeclaration_type env m in
-  {
-    smr_abstract = m.mt_abstract;
-    smr_final = m.mt_final;
-    smr_static = m.mt_static;
-    smr_name = m.mt_name;
-    smr_type = mk (Reason.Rwitness (fst m.mt_name), Tfun ft);
-    smr_visibility = m.mt_visibility;
-    smr_trait = m.mt_trait;
-    smr_method = m.mt_method;
-    smr_fixme_codes = Fixme_provider.get_fixme_codes_for_pos (fst m.mt_name);
-  }
-
 let enum_type hint e =
   { te_base = hint e.e_base; te_constraint = Option.map e.e_constraint hint }
 
@@ -391,8 +336,6 @@ let class_ env c =
     sc_where_constraints = where_constraints;
     sc_extends;
     sc_uses;
-    sc_method_redeclarations =
-      List.map c.c_method_redeclarations (method_redeclaration env);
     sc_xhp_attr_uses = List.map ~f:hint c.c_xhp_attr_uses;
     sc_req_extends;
     sc_req_implements;

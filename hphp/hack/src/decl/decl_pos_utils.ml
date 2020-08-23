@@ -352,7 +352,6 @@ struct
       sc_where_constraints = List.map sc.sc_where_constraints where_constraint;
       sc_extends = List.map sc.sc_extends ty;
       sc_uses = List.map sc.sc_uses ty;
-      sc_method_redeclarations = sc.sc_method_redeclarations;
       sc_xhp_attr_uses = List.map sc.sc_xhp_attr_uses ty;
       sc_req_extends = List.map sc.sc_req_extends ty;
       sc_req_implements = List.map sc.sc_req_implements ty;

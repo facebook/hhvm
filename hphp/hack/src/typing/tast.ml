@@ -105,9 +105,6 @@ type func_body = (Pos.t * ty, unit, saved_env, ty) Aast.func_body
 
 type method_ = (Pos.t * ty, unit, saved_env, ty) Aast.method_
 
-type method_redeclaration =
-  (Pos.t * ty, unit, saved_env, ty) Aast.method_redeclaration
-
 type class_var = (Pos.t * ty, unit, saved_env, ty) Aast.class_var
 
 type class_tparams = (Pos.t * ty, unit, saved_env, ty) Aast.class_tparams

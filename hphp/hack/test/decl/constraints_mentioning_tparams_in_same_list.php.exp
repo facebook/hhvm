@@ -120,12 +120,12 @@ Parsed decls:
         (Tgeneric ("Ta", []))),
     (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 16, characters 34-35),
      (Tgeneric ("Tb", []))))))])]; sc_where_constraints = [];
-sc_extends = []; sc_uses = []; sc_method_redeclarations = [];
-sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
-sc_implements = []; sc_consts = []; sc_typeconsts = []; sc_pu_enums = [];
-sc_props = []; sc_sprops = []; sc_constructor = None; sc_static_methods = [];
-sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
-sc_decl_errors = <opaque> } }; funs = {}; typedefs = {}; consts = {}
+sc_extends = []; sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
+sc_req_implements = []; sc_implements = []; sc_consts = [];
+sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+sc_constructor = None; sc_static_methods = []; sc_methods = [];
+sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque> } };
+funs = {}; typedefs = {}; consts = {}
 }
 
 They matched!

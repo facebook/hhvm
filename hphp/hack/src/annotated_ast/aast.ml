@@ -379,7 +379,6 @@ and ('ex, 'fb, 'en, 'hi) class_ = {
   c_uses: trait_hint list;
   c_use_as_alias: use_as_alias list;
   c_insteadof_alias: insteadof_alias list;
-  c_method_redeclarations: ('ex, 'fb, 'en, 'hi) method_redeclaration list;
   c_xhp_attr_uses: xhp_attr_hint list;
   c_xhp_category: (pos * pstring list) option;
   c_reqs: (class_hint * is_extends) list;
@@ -499,23 +498,6 @@ and ('ex, 'fb, 'en, 'hi) method_ = {
       (** true if this declaration has no body because it is an external method
           declaration (e.g. from an HHI file) *)
   m_doc_comment: doc_comment option;
-}
-
-and ('ex, 'fb, 'en, 'hi) method_redeclaration = {
-  mt_final: bool;
-  mt_abstract: bool;
-  mt_static: bool;
-  mt_visibility: visibility;
-  mt_name: sid;
-  mt_tparams: ('ex, 'fb, 'en, 'hi) tparam list;
-  mt_where_constraints: where_constraint list;
-  mt_variadic: ('ex, 'fb, 'en, 'hi) fun_variadicity;
-  mt_params: ('ex, 'fb, 'en, 'hi) fun_param list;
-  mt_fun_kind: Ast_defs.fun_kind;
-  mt_ret: 'hi type_hint;
-  mt_trait: trait_hint;
-  mt_method: pstring;
-  mt_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
 }
 
 and nsenv = (Namespace_env.env[@visitors.opaque])

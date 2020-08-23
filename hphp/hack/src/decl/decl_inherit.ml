@@ -261,25 +261,6 @@ let add_inherited inherited acc =
     ih_smethods = add_methods inherited.ih_smethods acc.ih_smethods;
   }
 
-let remove_trait_redeclared (methods, smethods) m =
-  let (pos, trait, _) = Decl_utils.unwrap_class_hint m.smr_trait in
-  let (_, trait_method) = m.smr_method in
-  let remove_from map =
-    match SMap.find_opt trait_method map with
-    | Some decls ->
-      let decls =
-        List.filter ~f:(fun d -> String.( <> ) d.elt_origin trait) decls
-      in
-      SMap.add trait_method decls map
-    | None ->
-      Errors.redeclaring_missing_method pos trait_method;
-      map
-  in
-  if m.smr_static then
-    (methods, remove_from smethods)
-  else
-    (remove_from methods, smethods)
-
 let collapse_trait_inherited methods smethods acc =
   let collapse_methods name sigs acc =
     (* fold_right because when traits get considered in order
@@ -531,12 +512,6 @@ let make env c =
       ~f:(from_trait env c)
       ~init:(acc, SMap.empty, SMap.empty)
       c.sc_uses
-  in
-  let (methods, smethods) =
-    List.fold_left
-      ~f:remove_trait_redeclared
-      ~init:(methods, smethods)
-      c.sc_method_redeclarations
   in
   let acc = collapse_trait_inherited methods smethods acc in
   let acc =

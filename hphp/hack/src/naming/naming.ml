@@ -957,9 +957,6 @@ let rec class_ ctx c =
   let methods = List.map ~f:(method_ (fst env)) methods in
   let uses = List.map ~f:(hint env) c.Aast.c_uses in
   let pu_enums = List.map ~f:(class_pu_enum env) c.Aast.c_pu_enums in
-  let redeclarations =
-    List.map ~f:(method_redeclaration env) c.Aast.c_method_redeclarations
-  in
   let xhp_attr_uses = List.map ~f:(hint env) c.Aast.c_xhp_attr_uses in
   let (c_req_extends, c_req_implements) = Aast.split_reqs c in
   if
@@ -1021,7 +1018,6 @@ let rec class_ ctx c =
      *)
     N.c_use_as_alias = [];
     N.c_insteadof_alias = [];
-    N.c_method_redeclarations = redeclarations;
     N.c_xhp_attr_uses = xhp_attr_uses;
     N.c_xhp_category = c.Aast.c_xhp_category;
     N.c_reqs = req_extends @ req_implements;
@@ -1461,43 +1457,6 @@ and method_ genv m =
     N.m_user_attributes = attrs;
     N.m_external = m.Aast.m_external;
     N.m_doc_comment = m.Aast.m_doc_comment;
-  }
-
-and method_redeclaration env mt =
-  if
-    not
-      (TypecheckerOptions.experimental_feature_enabled
-         (Provider_context.get_tcopt (fst env).ctx)
-         TypecheckerOptions.experimental_trait_method_redeclarations)
-  then
-    Errors.experimental_feature
-      (fst mt.Aast.mt_name)
-      "trait method redeclarations";
-  let genv = extend_params (fst env) mt.Aast.mt_tparams in
-  let env = (genv, Env.empty_local None) in
-  let (variadicity, paraml) = fun_paraml env mt.Aast.mt_params in
-  let tparam_l = type_paraml env mt.Aast.mt_tparams in
-  let where_constraints =
-    type_where_constraints env mt.Aast.mt_where_constraints
-  in
-  let ret =
-    Aast.type_hint_option_map ~f:(hint ~allow_retonly:true env) mt.Aast.mt_ret
-  in
-  {
-    N.mt_final = mt.Aast.mt_final;
-    N.mt_visibility = mt.Aast.mt_visibility;
-    N.mt_abstract = mt.Aast.mt_abstract;
-    N.mt_static = mt.Aast.mt_static;
-    N.mt_name = mt.Aast.mt_name;
-    N.mt_tparams = tparam_l;
-    N.mt_where_constraints = where_constraints;
-    N.mt_params = paraml;
-    N.mt_fun_kind = mt.Aast.mt_fun_kind;
-    N.mt_ret = ret;
-    N.mt_variadic = variadicity;
-    N.mt_trait = hint env mt.Aast.mt_trait;
-    N.mt_method = mt.Aast.mt_method;
-    N.mt_user_attributes = [];
   }
 
 and fun_paraml env paraml =

@@ -456,8 +456,6 @@ val tco_experimental_disallow_static_memoized : string
 
 val tco_experimental_type_param_shadowing : string
 
-val tco_experimental_trait_method_redeclarations : string
-
 val tco_experimental_abstract_type_const_with_default : string
 
 val tco_experimental_all : SSet.t

@@ -3945,12 +3945,6 @@ where
             }
             false
         };
-        let has_fun_header_mtr = |m: &MethodishTraitResolutionChildren<T, V>| {
-            if let FunctionDeclarationHeader(_) = m.methodish_trait_function_decl_header.syntax {
-                return true;
-            }
-            false
-        };
         let p_method_vis = |node: &Syntax<T, V>,
                             name_pos: &Pos,
                             env: &mut Env|
@@ -4195,42 +4189,6 @@ where
                 };
                 class.vars.append(&mut member_def);
                 Ok(class.methods.push(method))
-            }
-            MethodishTraitResolution(c) if has_fun_header_mtr(c) => {
-                let header = &c.methodish_trait_function_decl_header;
-                let h = match &header.syntax {
-                    FunctionDeclarationHeader(h) => h,
-                    _ => panic!(),
-                };
-                let hdr = Self::p_fun_hdr(header, env)?;
-                let kind = Self::p_kinds(&h.function_modifiers, env)?;
-                let (qualifier, name) = match &c.methodish_trait_name.syntax {
-                    ScopeResolutionExpression(c) => (
-                        Self::p_hint(&c.scope_resolution_qualifier, env)?,
-                        Self::p_pstring(&c.scope_resolution_name, env)?,
-                    ),
-                    _ => Self::missing_syntax("trait method redeclaration", node, env)?,
-                };
-                let user_attributes = Self::p_user_attributes(&c.methodish_trait_attribute, env)?;
-                let visibility = p_method_vis(&h.function_modifiers, &hdr.name.0, env)?;
-                let mtr = ast::MethodRedeclaration {
-                    final_: kind.has(modifier::FINAL),
-                    abstract_: kind.has(modifier::ABSTRACT),
-                    static_: kind.has(modifier::STATIC),
-                    visibility,
-                    name: hdr.name,
-                    tparams: hdr.type_parameters,
-                    where_constraints: hdr.constrs,
-                    variadic: Self::determine_variadicity(&hdr.parameters),
-                    params: hdr.parameters,
-                    fun_kind: Self::mk_fun_kind(hdr.suspension_kind, false),
-                    ret: ast::TypeHint((), hdr.return_type),
-                    trait_: qualifier,
-                    method: name,
-                    user_attributes,
-                };
-                class.method_redeclarations.push(mtr);
-                Ok(())
             }
             TraitUseConflictResolution(c) => {
                 type Ret = Result<Either<ast::InsteadofAlias, ast::UseAsAlias>>;
@@ -4722,7 +4680,6 @@ where
                     uses: vec![],
                     use_as_alias: vec![],
                     insteadof_alias: vec![],
-                    method_redeclarations: vec![],
                     xhp_attr_uses: vec![],
                     xhp_category: None,
                     reqs: vec![],
@@ -4856,7 +4813,6 @@ where
                     uses: vec![],
                     use_as_alias: vec![],
                     insteadof_alias: vec![],
-                    method_redeclarations: vec![],
                     xhp_attr_uses: vec![],
                     xhp_category: None,
                     reqs: vec![],

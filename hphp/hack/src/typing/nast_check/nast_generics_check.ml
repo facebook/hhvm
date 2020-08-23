@@ -151,9 +151,7 @@ let check_class class_ =
     check_where_constraints seen method_where_cstrs
   in
   List.iter class_.c_methods ~f:(fun m ->
-      check_method m.m_tparams m.m_where_constraints);
-  List.iter class_.c_method_redeclarations ~f:(fun m ->
-      check_method m.mt_tparams m.mt_where_constraints)
+      check_method m.m_tparams m.m_where_constraints)
 
 let handler =
   object

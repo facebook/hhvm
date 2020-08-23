@@ -233,12 +233,6 @@ let handler ctx =
         type_params = extend_type_params env.type_params m.Aast.m_tparams;
       }
 
-    method! at_method_redeclaration env mt =
-      {
-        env with
-        type_params = extend_type_params env.type_params mt.Aast.mt_tparams;
-      }
-
     method! at_pu_enum env pu_enum =
       let pu_case_types =
         List.fold_left

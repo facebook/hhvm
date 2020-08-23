@@ -1,1 +1,0 @@
-Fatal error: Redeclaration of trait method 'T::b' is inconsistent about 'async' in %s/async_mismatch.php on line 8

@@ -12,11 +12,8 @@
 (* uses a trait.                                                             *)
 (*****************************************************************************)
 
-open Hh_prelude
-
 val check_implements :
   Typing_env_types.env ->
-  string list String.Map.t ->
   (* The parent (interface, base type, or trait) *)
   Typing_defs.decl_ty ->
   (* The type to be checked, instantiated at its generic parameters *)

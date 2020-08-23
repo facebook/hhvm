@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bd2a801b5d2403c45c6391e911a2d628>>
+// @generated SignedSource<<05f7f961fd86963689b84efe92a2fbee>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -165,31 +165,6 @@ impl<'a> TrivialDrop for ShallowMethod<'a> {}
     Serialize,
     ToOcamlRep
 )]
-pub struct ShallowMethodRedeclaration<'a> {
-    pub abstract_: bool,
-    pub final_: bool,
-    pub static_: bool,
-    pub name: aast::Sid<'a>,
-    pub type_: Ty<'a>,
-    pub visibility: oxidized::aast::Visibility,
-    pub trait_: aast::Hint<'a>,
-    pub method: aast::Pstring<'a>,
-    pub fixme_codes: i_set::ISet<'a>,
-}
-impl<'a> TrivialDrop for ShallowMethodRedeclaration<'a> {}
-
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
 pub struct ShallowClass<'a> {
     pub mode: oxidized::file_info::Mode,
     pub final_: bool,
@@ -201,7 +176,6 @@ pub struct ShallowClass<'a> {
     pub where_constraints: &'a [WhereConstraint<'a>],
     pub extends: &'a [Ty<'a>],
     pub uses: &'a [Ty<'a>],
-    pub method_redeclarations: &'a [ShallowMethodRedeclaration<'a>],
     pub xhp_attr_uses: &'a [Ty<'a>],
     pub req_extends: &'a [Ty<'a>],
     pub req_implements: &'a [Ty<'a>],

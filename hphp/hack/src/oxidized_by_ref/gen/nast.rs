@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<364b920e964ccfe318685b2c97048c76>>
+// @generated SignedSource<<0cf70ed03715a2a36251116e611b81ec>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -95,9 +95,6 @@ pub type Case<'a> = aast::Case<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
 pub type Field<'a> = aast::Field<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
 
 pub type Afield<'a> = aast::Afield<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
-
-pub type MethodRedeclaration<'a> =
-    aast::MethodRedeclaration<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
 
 pub type PuEnum<'a> = aast::PuEnum<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
 

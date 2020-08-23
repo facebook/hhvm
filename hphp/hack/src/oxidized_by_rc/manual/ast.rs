@@ -53,7 +53,6 @@ pub type FunParam = aast::FunParam<Ex, Fb, En, Hi>;
 pub type FunVariadicity = aast::FunVariadicity<Ex, Fb, En, Hi>;
 pub type Gconst = aast::Gconst<Ex, Fb, En, Hi>;
 pub type Method_ = aast::Method_<Ex, Fb, En, Hi>;
-pub type MethodRedeclaration = aast::MethodRedeclaration<Ex, Fb, En, Hi>;
 pub type Program = aast::Program<Ex, Fb, En, Hi>;
 pub type PuEnum = aast::PuEnum<Ex, Fb, En, Hi>;
 pub type PuMember = aast::PuMember<Ex, Fb, En, Hi>;

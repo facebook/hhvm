@@ -7,9 +7,9 @@ Parsed decls:
       sc_name = ([3:7-10], "\\Bag");
       sc_tparams = [(Invariant, ([3:11-12], "T"), [])];
       sc_where_constraints = []; sc_extends = []; sc_uses = [];
-      sc_method_redeclarations = []; sc_xhp_attr_uses = [];
-      sc_req_extends = []; sc_req_implements = []; sc_implements = [];
-      sc_consts = []; sc_typeconsts = []; sc_pu_enums = [];
+      sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+      sc_implements = []; sc_consts = []; sc_typeconsts = [];
+      sc_pu_enums = [];
       sc_props =
       [{ Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
          sp_lateinit = false; sp_lsb = false; sp_name = ([4:13-18], "data");
@@ -84,9 +84,8 @@ Parsed decls:
   sc_name = ([15:7-23], "\\ContravariantBag");
   sc_tparams = [(Contravariant, ([15:25-26], "T"), [])];
   sc_where_constraints = []; sc_extends = []; sc_uses = [];
-  sc_method_redeclarations = []; sc_xhp_attr_uses = []; sc_req_extends = [];
-  sc_req_implements = []; sc_implements = []; sc_consts = [];
-  sc_typeconsts = []; sc_pu_enums = [];
+  sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+  sc_implements = []; sc_consts = []; sc_typeconsts = []; sc_pu_enums = [];
   sc_props =
   [{ Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
      sp_lateinit = false; sp_lsb = false; sp_name = ([16:13-18], "data");
@@ -139,9 +138,8 @@ sc_enum_type = None; sc_decl_errors = <opaque> };
   sc_name = ([23:7-19], "\\CovariantBag");
   sc_tparams = [(Covariant, ([23:21-22], "T"), [])];
   sc_where_constraints = []; sc_extends = []; sc_uses = [];
-  sc_method_redeclarations = []; sc_xhp_attr_uses = []; sc_req_extends = [];
-  sc_req_implements = []; sc_implements = []; sc_consts = [];
-  sc_typeconsts = []; sc_pu_enums = [];
+  sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+  sc_implements = []; sc_consts = []; sc_typeconsts = []; sc_pu_enums = [];
   sc_props =
   [{ Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
      sp_lateinit = false; sp_lsb = false; sp_name = ([24:13-18], "data");

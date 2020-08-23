@@ -1,1 +1,0 @@
-Fatal error: Redeclaration of trait method 'T::b' is inconsistent about 'static' in %s/static_mismatch.php on line 8

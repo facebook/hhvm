@@ -3974,16 +3974,6 @@ struct TMIOps {
     return modifiers & AttrAbstract;
   }
 
-  static bool isAsync(const Func* method) {
-    return method->isAsync();
-  }
-  static bool isStatic(const Func* method) {
-    return method->attrs() & AttrStatic;
-  }
-  static bool isFinal(const Func* method) {
-    return method->attrs() & AttrFinal;
-  }
-
   // Whether to exclude methods with name `methName' when adding.
   static bool exclude(const StringData* methName) {
     return Func::isSpecial(methName);
@@ -4003,9 +3993,7 @@ struct TMIOps {
     PreClass::TraitAliasRule newRule { traitCls->name(),
         rule.origMethodName(),
         rule.newMethodName(),
-        rule.modifiers(),
-        rule.strict(),
-        rule.async() };
+        rule.modifiers() };
     cls->addTraitAlias(newRule);
   }
 
@@ -4078,17 +4066,6 @@ struct TMIOps {
     raise_error(Strings::MULTIPLY_EXCLUDED,
                 traitName->data(), methName->data());
   }
-  static void errorInconsistentAttr(const StringData* traitName,
-                                    const StringData* methName,
-                                    const char* attr) {
-    raise_error(Strings::TRAIT_REDECLARED_METHOD_INCONSISTENT_ATTRIBUTES,
-                traitName->data(), methName->data(), attr);
-  }
-  static void errorRedeclaredNotFinal(const StringData* traitName,
-                                      const StringData* methName) {
-    raise_error(Strings::TRAIT_REDECLARED_FINAL_METHOD,
-                traitName->data(), methName->data());
-  }
 };
 
 using TMIData = TraitMethodImportData<TraitMethod, TMIOps>;
@@ -4097,8 +4074,9 @@ void applyTraitRules(Class* cls, TMIData& tmid) {
   for (auto const& precRule : cls->preClass()->traitPrecRules()) {
     tmid.applyPrecRule(precRule, cls);
   }
-  auto const& aliasRules = cls->preClass()->traitAliasRules();
-  tmid.applyAliasRules(aliasRules.begin(), aliasRules.end(), cls);
+  for (auto const& aliasRule : cls->preClass()->traitAliasRules()) {
+    tmid.applyAliasRule(aliasRule, cls);
+  }
 }
 
 void importTraitMethod(Class* cls,

@@ -12,8 +12,8 @@ Parsed decls:
              (Tapply (([4:6-7], "\\E"), [])))]
            )))
         ];
-      sc_uses = []; sc_method_redeclarations = []; sc_xhp_attr_uses = [];
-      sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+      sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
+      sc_req_implements = []; sc_implements = [];
       sc_consts =
       [{ Shallow_decl_defs.scc_abstract = false;
          scc_expr = (Some ([5:7-10], (String "A")));

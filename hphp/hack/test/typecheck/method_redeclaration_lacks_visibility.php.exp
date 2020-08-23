@@ -1,2 +1,0 @@
-File "method_redeclaration_lacks_visibility.php", line 10, characters 12-12:
-Methods need to be marked public, private, or protected. (Naming[2086])

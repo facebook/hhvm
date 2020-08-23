@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<38c814fdc7d3a6afee40982672044362>>
+// @generated SignedSource<<0891cc6db5e42414b49868bafc6b1ef9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_rc/regen.sh
@@ -94,21 +94,6 @@ pub struct ShallowMethod {
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
-pub struct ShallowMethodRedeclaration {
-    pub abstract_: bool,
-    pub final_: bool,
-    pub static_: bool,
-    pub name: aast::Sid,
-    pub type_: Ty,
-    pub visibility: oxidized::aast::Visibility,
-    pub trait_: aast::Hint,
-    pub method: aast::Pstring,
-    pub fixme_codes: i_set::ISet,
-}
-
-#[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
-)]
 pub struct ShallowClass {
     pub mode: oxidized::file_info::Mode,
     pub final_: bool,
@@ -120,7 +105,6 @@ pub struct ShallowClass {
     pub where_constraints: Vec<WhereConstraint>,
     pub extends: Vec<Ty>,
     pub uses: Vec<Ty>,
-    pub method_redeclarations: Vec<ShallowMethodRedeclaration>,
     pub xhp_attr_uses: Vec<Ty>,
     pub req_extends: Vec<Ty>,
     pub req_implements: Vec<Ty>,

@@ -144,19 +144,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let env = extend_tparams env m.m_tparams in
       super#on_method_ env m
 
-    method! on_method_redeclaration env mt =
-      let env = extend_tparams env mt.mt_tparams in
-      (* Codegen does not elaborate traits in the trait redeclaration node.
-       * TODO: This should be changed if this feature is to be shipped.
-       * Also change: class_method_trait_resolution in emit_class.ml
-       * T56629465
-       *)
-      if in_codegen env then
-        let mr_new = super#on_method_redeclaration env mt in
-        { mr_new with mt_trait = mt.mt_trait }
-      else
-        super#on_method_redeclaration env mt
-
     method! on_pu_enum env pue =
       let type_params =
         List.fold

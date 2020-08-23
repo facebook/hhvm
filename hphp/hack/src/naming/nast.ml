@@ -78,9 +78,6 @@ type field = (Pos.t, func_body_ann, unit, unit) Aast.field
 
 type afield = (Pos.t, func_body_ann, unit, unit) Aast.afield
 
-type method_redeclaration =
-  (Pos.t, func_body_ann, unit, unit) Aast.method_redeclaration
-
 type pu_enum = (Pos.t, func_body_ann, unit, unit) Aast.pu_enum
 
 type pu_member = (Pos.t, func_body_ann, unit, unit) Aast.pu_member

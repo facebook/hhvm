@@ -573,16 +573,7 @@ and class_decl
   let props =
     List.fold_left ~f:(prop_decl ~write_shmem:true c) ~init:props c.sc_props
   in
-  let (redecl_smethods, redecl_methods) =
-    List.partition_tf ~f:(fun x -> x.smr_static) c.sc_method_redeclarations
-  in
   let m = inherited.Decl_inherit.ih_methods in
-  let m =
-    List.fold_left
-      ~f:(method_redecl_acc ~write_shmem:true c)
-      ~init:m
-      redecl_methods
-  in
   let (m, condition_types) =
     List.fold_left
       ~f:(method_decl_acc ~write_shmem:true ~is_static:false c)
@@ -615,12 +606,6 @@ and class_decl
   let sprops = inherited.Decl_inherit.ih_sprops in
   let sprops = List.fold_left c.sc_sprops ~f:sclass_var ~init:sprops in
   let sm = inherited.Decl_inherit.ih_smethods in
-  let sm =
-    List.fold_left
-      ~f:(method_redecl_acc ~write_shmem:true c)
-      ~init:sm
-      redecl_smethods
-  in
   let (sm, condition_types) =
     List.fold_left
       c.sc_static_methods
@@ -1052,55 +1037,6 @@ and typeconst_fold
     in
     let typeconsts = SMap.add (snd stc.stc_name) tc typeconsts in
     (typeconsts, consts)
-
-and method_redecl_acc
-    ~(write_shmem : bool)
-    (c : Shallow_decl_defs.shallow_class)
-    (acc : Decl_defs.element SMap.t)
-    (m : Shallow_decl_defs.shallow_method_redeclaration) :
-    Decl_defs.element SMap.t =
-  let (pos, id) = m.smr_name in
-  let vis =
-    match (SMap.find_opt id acc, m.smr_visibility) with
-    | (Some { elt_visibility = Vprotected _ as parent_vis; _ }, Protected) ->
-      parent_vis
-    | _ -> visibility (snd c.sc_name) m.smr_visibility
-  in
-  let elt =
-    {
-      elt_flags =
-        make_ce_flags
-          ~xhp_attr:None
-          ~final:m.smr_final
-          ~abstract:m.smr_abstract
-          ~const:false
-          ~lateinit:false
-          ~lsb:false
-          ~override:false
-          ~memoizelsb:false
-          ~synthesized:false
-          ~dynamicallycallable:false;
-      elt_visibility = vis;
-      elt_origin = snd c.sc_name;
-      elt_reactivity = None;
-      elt_fixme_codes = m.smr_fixme_codes;
-      elt_deprecated = None;
-    }
-  in
-  let fe =
-    {
-      fe_pos = pos;
-      fe_deprecated = None;
-      fe_type = m.smr_type;
-      fe_decl_errors = None;
-    }
-  in
-  if write_shmem then
-    if m.smr_static then
-      Decl_heap.StaticMethods.add (elt.elt_origin, id) fe
-    else
-      Decl_heap.Methods.add (elt.elt_origin, id) fe;
-  SMap.add id elt acc
 
 and method_decl_acc
     ~(write_shmem : bool)

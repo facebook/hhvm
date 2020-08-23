@@ -172,25 +172,6 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
         m.recurse(&mut env, self.object())
     }
 
-    // Codegen does not elaborate traits in the trait redeclaration node.
-    // TODO: This should be changed if this feature is to be shipped.
-    // Also change: class_method_trait_resolution in emit_class
-    // T56629465
-    fn visit_method_redeclaration(
-        &mut self,
-        env: &mut Env,
-        mt: &mut MethodRedeclaration,
-    ) -> Result<(), ()> {
-        if env.in_codegen() {
-            let old_trait = mt.trait_.clone();
-            mt.recurse(env, self.object())?;
-            mt.trait_ = old_trait;
-            Ok(())
-        } else {
-            mt.recurse(env, self.object())
-        }
-    }
-
     fn visit_pu_enum(&mut self, env: &mut Env, pue: &mut PuEnum) -> Result<(), ()> {
         let mut env = env.clone();
         env.extend_tparams(&pue.case_types);

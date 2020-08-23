@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4550300bba36bc8e55ff379003f1dbf4>>
+// @generated SignedSource<<074466ddf1bdebb8c6ed0c4d28edc938>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_rc/regen.sh
@@ -269,6 +269,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     Assert(std::rc::Rc<AssertExpr<Ex, Fb, En, Hi>>),
     PUAtom(std::rc::Rc<std::rc::Rc<String>>),
     PUIdentifier(std::rc::Rc<(ClassId<Ex, Fb, En, Hi>, Pstring, Pstring)>),
+    ETSplice(std::rc::Rc<Expr<Ex, Fb, En, Hi>>),
     Any,
 }
 
@@ -490,7 +491,6 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub uses: Vec<TraitHint>,
     pub use_as_alias: Vec<UseAsAlias>,
     pub insteadof_alias: Vec<InsteadofAlias>,
-    pub method_redeclarations: Vec<MethodRedeclaration<Ex, Fb, En, Hi>>,
     pub xhp_attr_uses: Vec<XhpAttrHint>,
     pub xhp_category: Option<(std::rc::Rc<Pos>, Vec<Pstring>)>,
     pub reqs: Vec<(ClassHint, oxidized::aast::IsExtends)>,
@@ -638,26 +638,6 @@ pub struct Method_<Ex, Fb, En, Hi> {
     /// declaration (e.g. from an HHI file)
     pub external: bool,
     pub doc_comment: Option<DocComment>,
-}
-
-#[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
-)]
-pub struct MethodRedeclaration<Ex, Fb, En, Hi> {
-    pub final_: bool,
-    pub abstract_: bool,
-    pub static_: bool,
-    pub visibility: oxidized::aast::Visibility,
-    pub name: Sid,
-    pub tparams: Vec<Tparam<Ex, Fb, En, Hi>>,
-    pub where_constraints: Vec<WhereConstraint>,
-    pub variadic: FunVariadicity<Ex, Fb, En, Hi>,
-    pub params: Vec<FunParam<Ex, Fb, En, Hi>>,
-    pub fun_kind: oxidized::ast_defs::FunKind,
-    pub ret: TypeHint<Hi>,
-    pub trait_: TraitHint,
-    pub method: Pstring,
-    pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
 }
 
 pub type Nsenv = ocamlrep::rc::RcOc<namespace_env::Env>;

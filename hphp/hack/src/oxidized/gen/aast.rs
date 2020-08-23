@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bca50f89e1a5b8a572865f5c0e12d80d>>
+// @generated SignedSource<<1474e427767a5bff5edbb9deb7842f04>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -798,7 +798,6 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub uses: Vec<TraitHint>,
     pub use_as_alias: Vec<UseAsAlias>,
     pub insteadof_alias: Vec<InsteadofAlias>,
-    pub method_redeclarations: Vec<MethodRedeclaration<Ex, Fb, En, Hi>>,
     pub xhp_attr_uses: Vec<XhpAttrHint>,
     pub xhp_category: Option<(Pos, Vec<Pstring>)>,
     pub reqs: Vec<(ClassHint, IsExtends)>,
@@ -1072,36 +1071,6 @@ pub struct Method_<Ex, Fb, En, Hi> {
     /// declaration (e.g. from an HHI file)
     pub external: bool,
     pub doc_comment: Option<DocComment>,
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub struct MethodRedeclaration<Ex, Fb, En, Hi> {
-    pub final_: bool,
-    pub abstract_: bool,
-    pub static_: bool,
-    pub visibility: Visibility,
-    pub name: Sid,
-    pub tparams: Vec<Tparam<Ex, Fb, En, Hi>>,
-    pub where_constraints: Vec<WhereConstraint>,
-    pub variadic: FunVariadicity<Ex, Fb, En, Hi>,
-    pub params: Vec<FunParam<Ex, Fb, En, Hi>>,
-    pub fun_kind: ast_defs::FunKind,
-    pub ret: TypeHint<Hi>,
-    pub trait_: TraitHint,
-    pub method: Pstring,
-    pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
 }
 
 pub type Nsenv = ocamlrep::rc::RcOc<namespace_env::Env>;

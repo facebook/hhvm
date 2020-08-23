@@ -65,9 +65,6 @@ enum Attr {
   AttrAbstract             = (1u <<  5), //    X  |          |    X    //
   AttrFinal                = (1u <<  6), //    X  |          |    X    //
                                          //       |          |         //
-  // This attribute is specifically for storing that a redeclared method
-  // `as strict` is async, to check consistency with the trait method
-  AttrAsync                = (1u <<  7), //       |          |    X    //
   // Is this class an interface?         //       |          |         //
   AttrInterface            = (1u <<  7), //    X  |          |         //
                                          //       |          |         //
@@ -80,9 +77,6 @@ enum Attr {
   // was set by the caller.
   AttrSupportsAsyncEagerReturn
                            = (1u <<  7), //       |          |    X    //
-  // This is a virtual attribute that distinguishes `as` from `as strict` in
-  // HHAS code dealing with trait method redeclaration
-  AttrStrict               = (1u <<  8), //       |          |    X    //
   // Is this class a trait?  On methods, or properties, this indicates that
   // the method was imported from a trait.
   AttrTrait                = (1u <<  8), //    X  |    X     |    X    //

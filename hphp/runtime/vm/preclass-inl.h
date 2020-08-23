@@ -90,23 +90,12 @@ inline
 PreClass::TraitAliasRule::TraitAliasRule(const StringData* traitName,
                                          const StringData* origMethodName,
                                          const StringData* newMethodName,
-                                         Attr modifiers,
-                                         bool strict,
-                                         bool async)
+                                         Attr modifiers)
   : m_traitName(traitName)
   , m_origMethodName(origMethodName)
   , m_newMethodName(newMethodName)
-{
-  if (async) {
-    modifiers |= AttrAsync;
-  }
-
-  if (strict) {
-    modifiers |= AttrStrict;
-  }
-
-  this->m_modifiers = modifiers;
-}
+  , m_modifiers(modifiers)
+{}
 
 ///////////////////////////////////////////////////////////////////////////////
 // PreClass::ClassRequirement.

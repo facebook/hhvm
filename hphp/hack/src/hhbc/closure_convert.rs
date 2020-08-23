@@ -524,7 +524,6 @@ fn make_closure(
         uses: vec![],
         use_as_alias: vec![],
         insteadof_alias: vec![],
-        method_redeclarations: vec![],
         xhp_attr_uses: vec![],
         xhp_category: None,
         reqs: vec![],

@@ -1,4 +1,0 @@
-Dog
-Cat
-
-Fatal error: Call to private C::f() from invalid context in %s/promote_both_ways.php on line 19

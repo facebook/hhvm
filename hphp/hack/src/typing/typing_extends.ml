@@ -471,7 +471,6 @@ let filter_privates members =
 let check_members
     check_private
     env
-    removals
     (parent_class, psubst, parent_ty)
     (class_, subst, class_ty)
     on_error
@@ -508,49 +507,36 @@ let check_members
     ~init:env
     parent_members
     ~f:(fun env (member_name, parent_class_elt) ->
-      (* for this particular member, check to see if the parent considered
-      is a trait that was removed, otherwise subtype with the declaration in
-      that parent *)
-      let removed =
-        match String.Map.find removals member_name with
-        | Some traits ->
-          List.mem traits parent_class_elt.ce_origin ~equal:String.equal
-        | None -> false
-      in
-      if not removed then
-        match get_member member_name with
-        (* We can skip this check if the class elements have the same origin, as we are
-         * essentially comparing a method against itself *)
-        | Some class_elt
-          when String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin ->
-          let parent_class_elt = Inst.instantiate_ce psubst parent_class_elt in
-          let class_elt = Inst.instantiate_ce subst class_elt in
-          let check_member_unique =
-            should_check_member_unique class_elt parent_class_elt
-          in
-          let dep =
-            match mem_source with
-            | `FromMethod -> Dep.Method (parent_class_elt.ce_origin, member_name)
-            | `FromSMethod ->
-              Dep.SMethod (parent_class_elt.ce_origin, member_name)
-            | `FromSProp -> Dep.SProp (parent_class_elt.ce_origin, member_name)
-            | `FromProp -> Dep.Prop (parent_class_elt.ce_origin, member_name)
-            | `FromConstructor -> Dep.Cstr parent_class_elt.ce_origin
-          in
-          Typing_deps.add_idep (Dep.Class (Cls.name class_)) dep;
-          check_override
-            ~check_member_unique
-            env
-            member_name
-            mem_source
-            (parent_class, parent_ty)
-            (class_, class_ty)
-            parent_class_elt
-            class_elt
-            on_error
-        | _ -> env
-      else
-        env)
+      match get_member member_name with
+      (* We can skip this check if the class elements have the same origin, as we are
+       * essentially comparing a method against itself *)
+      | Some class_elt
+        when String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin ->
+        let parent_class_elt = Inst.instantiate_ce psubst parent_class_elt in
+        let class_elt = Inst.instantiate_ce subst class_elt in
+        let check_member_unique =
+          should_check_member_unique class_elt parent_class_elt
+        in
+        let dep =
+          match mem_source with
+          | `FromMethod -> Dep.Method (parent_class_elt.ce_origin, member_name)
+          | `FromSMethod -> Dep.SMethod (parent_class_elt.ce_origin, member_name)
+          | `FromSProp -> Dep.SProp (parent_class_elt.ce_origin, member_name)
+          | `FromProp -> Dep.Prop (parent_class_elt.ce_origin, member_name)
+          | `FromConstructor -> Dep.Cstr parent_class_elt.ce_origin
+        in
+        Typing_deps.add_idep (Dep.Class (Cls.name class_)) dep;
+        check_override
+          ~check_member_unique
+          env
+          member_name
+          mem_source
+          (parent_class, parent_ty)
+          (class_, class_ty)
+          parent_class_elt
+          class_elt
+          on_error
+      | _ -> env)
 
 (*****************************************************************************)
 (* Before checking that a class implements an interface, we have to
@@ -876,7 +862,7 @@ let check_consts env parent_class class_ psubst subst on_error =
  * message pointing at the class being checked.
  *)
 let check_class_implements
-    env removals (parent_class, parent_ty) (class_, class_ty) on_error =
+    env (parent_class, parent_ty) (class_, class_ty) on_error =
   let env = check_typeconsts env parent_class class_ on_error in
   let (parent_pos, parent_class, parent_tparaml) = parent_class in
   let (pos, class_, tparaml) = class_ in
@@ -903,7 +889,6 @@ let check_class_implements
       check_members
         check_privates
         env
-        removals
         (parent_class, psubst, parent_ty)
         (class_, subst, class_ty)
         on_error)
@@ -912,7 +897,7 @@ let check_class_implements
 (* The externally visible function *)
 (*****************************************************************************)
 
-let check_implements env removals parent_type type_to_be_checked =
+let check_implements env parent_type type_to_be_checked =
   let (_, parent_name, parent_tparaml) = TUtils.unwrap_class_type parent_type in
   let (_, name, tparaml) = TUtils.unwrap_class_type type_to_be_checked in
   let (name_pos, name_str) = name in
@@ -928,7 +913,6 @@ let check_implements env removals parent_type type_to_be_checked =
     let class_ = (name_pos, class_, tparaml) in
     check_class_implements
       env
-      removals
       (parent_class, parent_type)
       (class_, type_to_be_checked)
       (fun ?code:_ errorl ->

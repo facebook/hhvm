@@ -132,8 +132,6 @@ class type handler =
 
     method at_typedef : env -> Nast.typedef -> unit
 
-    method at_method_redeclaration : env -> Nast.method_redeclaration -> unit
-
     method at_gconst : env -> Nast.gconst -> unit
   end
 
@@ -154,8 +152,6 @@ class virtual handler_base : handler =
     method at_hint _ _ = ()
 
     method at_typedef _ _ = ()
-
-    method at_method_redeclaration _ _ = ()
 
     method at_gconst _ _ = ()
   end
@@ -195,10 +191,6 @@ let iter_with (handlers : handler list) : iter =
     method! on_typedef env t =
       List.iter handlers (fun v -> v#at_typedef env t);
       super#on_typedef env t
-
-    method! on_method_redeclaration env mr =
-      List.iter handlers (fun v -> v#at_method_redeclaration env mr);
-      super#on_method_redeclaration env mr
 
     method! on_gconst env gconst =
       List.iter handlers (fun v -> v#at_gconst env gconst);

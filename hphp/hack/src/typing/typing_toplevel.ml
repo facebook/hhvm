@@ -927,26 +927,8 @@ and class_def_ env c tc =
       check_static_class_element (Cls.get_method tc) ~elt_type:`Method id p);
   List.iter methods ~f:(fun { m_name = (p, id); _ } ->
       check_dynamic_class_element (Cls.get_smethod tc) ~elt_type:`Method id p);
-
-  (* get a map of method names to list of traits from which they were removed *)
-  let alist =
-    List.map c.c_method_redeclarations ~f:(fun m ->
-        let (_, name) = m.mt_method in
-        let (_, trait, _) = Decl_utils.unwrap_class_hint m.mt_trait in
-        (name, trait))
-  in
-  let removals =
-    String.Map.of_alist_fold alist ~init:[] ~f:(Fn.flip List.cons)
-  in
   let env =
-    List.fold ~init:env impl ~f:(fun env ->
-        class_implements_type env c removals)
-  in
-  let env =
-    List.fold
-      c.c_method_redeclarations
-      ~init:env
-      ~f:(supertype_redeclared_method tc)
+    List.fold ~init:env impl ~f:(fun env -> class_implements_type env c)
   in
   if Cls.is_disposable tc then
     List.iter
@@ -958,7 +940,6 @@ and class_def_ env c tc =
   let (typed_vars, vars_global_inference_envs) =
     List.unzip typed_vars_and_global_inference_envs
   in
-  let typed_method_redeclarations = [] in
   let (typed_methods, methods_global_inference_envs) =
     List.filter_map methods (method_def env tc) |> List.unzip
   in
@@ -1014,7 +995,6 @@ and class_def_ env c tc =
        *)
       Aast.c_use_as_alias = [];
       Aast.c_insteadof_alias = [];
-      Aast.c_method_redeclarations = typed_method_redeclarations;
       Aast.c_xhp_attr_uses = c.c_xhp_attr_uses;
       Aast.c_xhp_category = c.c_xhp_category;
       Aast.c_reqs = c.c_reqs;
@@ -1421,7 +1401,7 @@ and class_constr_def env cls constructor =
   let env = { env with inside_constructor = true } in
   Option.bind constructor (method_def env cls)
 
-and class_implements_type env c1 removals ctype2 =
+and class_implements_type env c1 ctype2 =
   let params =
     List.map c1.c_tparams.c_tparam_list (fun { tp_name = (p, s); _ } ->
         (* TODO(T69551141) handle type arguments *)
@@ -1429,7 +1409,7 @@ and class_implements_type env c1 removals ctype2 =
   in
   let r = Reason.Rwitness (fst c1.c_name) in
   let ctype1 = mk (r, Tapply (c1.c_name, params)) in
-  Typing_extends.check_implements env removals ctype2 ctype1
+  Typing_extends.check_implements env ctype2 ctype1
 
 (* Type-check a property declaration, with optional initializer *)
 and class_var_def ~is_static cls env cv =
@@ -1522,48 +1502,6 @@ and class_var_def ~is_static cls env cv =
         Aast.cv_span = cv.cv_span;
       },
       (cv.cv_span, global_inference_env) ) )
-
-and supertype_redeclared_method tc env m =
-  let (pos, name) = m.mt_name in
-  let get_method =
-    if m.mt_static then
-      Env.get_static_member
-    else
-      Env.get_member
-  in
-  let class_member_opt = get_method true env tc name in
-  let (_, trait, _) = Decl_utils.unwrap_class_hint m.mt_trait in
-  let (_, trait_method) = m.mt_method in
-  Option.(
-    let trait_member_opt =
-      Env.get_class env trait >>= fun trait_tc ->
-      get_method true env trait_tc trait_method
-    in
-    map2 trait_member_opt class_member_opt ~f:(fun trait_member class_member ->
-        let ((lazy ty_child), (lazy ty_parent)) =
-          (trait_member.ce_type, class_member.ce_type)
-        in
-        match (deref ty_child, deref ty_parent) with
-        | ((r_child, Tfun ft_child), (r_parent, Tfun ft_parent)) ->
-          Typing_subtype_method.(
-            subtype_method_decl
-              ~check_return:true
-              ~extra_info:
-                Typing_subtype.
-                  {
-                    method_info = None;
-                    class_ty = None;
-                    parent_class_ty = None;
-                  }
-              env
-              r_child
-              ft_child
-              r_parent
-              ft_parent)
-            (fun ?code:_ errorl ->
-              Errors.bad_method_override pos name errorl Errors.unify_error)
-        | _ -> env)
-    |> Option.value ~default:env)
 
 let gconst_def ctx cst =
   Errors.run_with_span cst.cst_span @@ fun () ->

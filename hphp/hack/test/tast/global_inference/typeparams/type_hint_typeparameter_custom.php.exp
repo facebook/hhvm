@@ -13,10 +13,9 @@ Errors:
           ];
         c_tparam_constraints = { "T" -> (Erased, []) } };
       c_extends = []; c_uses = []; c_use_as_alias = [];
-      c_insteadof_alias = []; c_method_redeclarations = [];
-      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
-      c_implements = []; c_where_constraints = []; c_consts = [];
-      c_typeconsts = [];
+      c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
+      c_reqs = []; c_implements = []; c_where_constraints = [];
+      c_consts = []; c_typeconsts = [];
       c_vars =
       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false;
          cv_visibility = Public;

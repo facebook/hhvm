@@ -217,20 +217,12 @@ struct PreClass : AtomicCountable {
     TraitAliasRule(const StringData* traitName,
                    const StringData* origMethodName,
                    const StringData* newMethodName,
-                   Attr modifiers,
-                   bool strict,
-                   bool async);
+                   Attr modifiers);
 
     const StringData* traitName()      const { return m_traitName; }
     const StringData* origMethodName() const { return m_origMethodName; }
     const StringData* newMethodName()  const { return m_newMethodName; }
     Attr              modifiers()      const { return m_modifiers; }
-    bool strict() const {
-      return (m_modifiers & AttrStrict) != AttrNone;
-    }
-    bool async() const {
-      return (m_modifiers & AttrAsync) != AttrNone;
-    }
 
     template<class SerDe> void serde(SerDe& sd) {
       sd(m_traitName)(m_origMethodName)(m_newMethodName)(m_modifiers);

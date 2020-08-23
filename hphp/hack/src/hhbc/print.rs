@@ -650,30 +650,8 @@ fn print_use_alias<W: Write>(
     w.write(";")
 }
 
-fn print_method_trait_resolutions<W: Write>(
-    ctx: &mut Context,
-    w: &mut W,
-    (mtr, kind_as_tring): &(&ast::MethodRedeclaration, class::Type),
-) -> Result<(), W::Error> {
-    ctx.newline(w)?;
-    write!(
-        w,
-        "{}::{} as strict ",
-        kind_as_tring.to_raw_string(),
-        mtr.method.1
-    )?;
-    w.write_if(mtr.fun_kind.is_async(), "async ")?;
-    square(w, |w| {
-        w.write_if(mtr.final_, "final ")?;
-        w.write(mtr.visibility.to_string())?;
-        w.write_if(mtr.abstract_, " abstract")?;
-        w.write_if(mtr.static_, " static")
-    })?;
-    write!(w, " {};", mtr.name.1)
-}
-
 fn print_uses<W: Write>(ctx: &mut Context, w: &mut W, c: &HhasClass) -> Result<(), W::Error> {
-    if c.uses.is_empty() && c.method_trait_resolutions.is_empty() {
+    if c.uses.is_empty() {
         Ok(())
     } else {
         let unique_ids: IndexSet<&str> = c.uses.iter().map(|e| strip_global_ns(e)).collect();
@@ -683,10 +661,7 @@ fn print_uses<W: Write>(ctx: &mut Context, w: &mut W, c: &HhasClass) -> Result<(
         w.write("  .use ")?;
         concat_by(w, " ", unique_ids, |w, id| w.write(id))?;
 
-        if c.use_aliases.is_empty()
-            && c.use_precedences.is_empty()
-            && c.method_trait_resolutions.is_empty()
-        {
+        if c.use_aliases.is_empty() && c.use_precedences.is_empty() {
             w.write(";")
         } else {
             w.write(" {")?;
@@ -696,9 +671,6 @@ fn print_uses<W: Write>(ctx: &mut Context, w: &mut W, c: &HhasClass) -> Result<(
                 }
                 for x in &c.use_aliases {
                     print_use_alias(ctx, w, x)?;
-                }
-                for x in &c.method_trait_resolutions {
-                    print_method_trait_resolutions(ctx, w, x)?;
                 }
                 Ok(())
             })?;

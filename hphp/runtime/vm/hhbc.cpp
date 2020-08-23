@@ -605,6 +605,8 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 }
 
 void staticArrayStreamer(const ArrayData* ad, std::string& out) {
+  if (ad->isLegacyArray()) out += "legacy_";
+
   if (ad->isVecType()) out += "vec(";
   else if (ad->isDictType()) out += "dict(";
   else if (ad->isKeysetType()) out += "keyset(";

@@ -858,32 +858,25 @@ void VariableUnserializer::unserializeVariant(
       tvMove(make_array_like_tv(a.detach()), self);
     }
     return; // array has '}' terminating
-  case 'x': // legacy dict
-    {
-      // Check stack depth to avoid overflow.
-      check_recursion_throw();
-      auto a = unserializeDict();
-      a.setLegacyArray(true);
-      tvMove(make_array_like_tv(a.detach()), self);
-    }
-    return; // array has '}' terminating
+  case 'x': // MarkedDArray
   case 'Y': // DArray
     {
       // Check stack depth to avoid overflow.
       check_recursion_throw();
       auto a = unserializeDArray();
-      if (UNLIKELY(m_markLegacyArrays)) {
+      if (UNLIKELY(m_markLegacyArrays || type == 'x')) {
         a.setLegacyArray(true);
       }
       tvMove(make_array_like_tv(a.detach()), self);
     }
     return; // array has '}' terminating
+  case 'X': // MarkedVArray
   case 'y': // VArray
     {
       // Check stack depth to avoid overflow.
       check_recursion_throw();
       auto a = unserializeVArray();
-      if (UNLIKELY(m_markLegacyArrays)) {
+      if (UNLIKELY(m_markLegacyArrays || type == 'X')) {
         a.setLegacyArray(true);
       }
       tvMove(make_array_like_tv(a.detach()), self);
@@ -897,15 +890,6 @@ void VariableUnserializer::unserializeVariant(
       tvMove(make_tv<KindOfVec>(a.detach()), self);
     }
     return; // array has '}' terminating
-  case 'X': // legacy vec
-  {
-    // Check stack depth to avoid overflow.
-    check_recursion_throw();
-    auto a = unserializeVec();
-    a.setLegacyArray(true);
-    tvMove(make_tv<KindOfVec>(a.detach()), self);
-  }
-  return; // array has '}' terminating
   case 'k': // Keyset
     {
       // Check stack depth to avoid overflow.

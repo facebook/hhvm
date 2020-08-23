@@ -115,24 +115,30 @@ VariableSerializer::getKind(const ArrayData* arr) const {
     always_assert(false);
   }();
 
-  auto const differentiateLegacy =
-    getType() == Type::Internal || getType() == Type::VarDump;
-
+  // TODO(dneiter): this is broken, fix this
   if (RuntimeOption::EvalHackArrDVArrs &&
       respectsLegacyBit &&
       !arr->isLegacyArray()) {
     return VariableSerializer::ArrayKind::PHP;
   }
-  if (arr->isDictType()) {
-    return differentiateLegacy && arr->isLegacyArray()
-      ? VariableSerializer::ArrayKind::LegacyDict
-      : VariableSerializer::ArrayKind::Dict;
+
+  auto const differentiateLegacy =
+    getType() == Type::Internal || getType() == Type::VarDump;
+
+  if (differentiateLegacy && arr->isLegacyArray()) {
+    if (arr->isDictType()) return VariableSerializer::ArrayKind::MarkedDArray;
+    if (arr->isVecType()) return VariableSerializer::ArrayKind::MarkedVArray;
+    assertx(!arr->isKeysetType());
+    if (m_keepDVArrays) {
+      if (arr->isVArray()) return VariableSerializer::ArrayKind::MarkedVArray;
+      if (arr->isDArray()) return VariableSerializer::ArrayKind::MarkedDArray;
+    }
+    assertx(arr->isPHPArrayType());
+    return VariableSerializer::ArrayKind::MarkedDArray;
   }
-  if (arr->isVecType()) {
-    return differentiateLegacy && arr->isLegacyArray()
-      ? VariableSerializer::ArrayKind::LegacyVec
-      : VariableSerializer::ArrayKind::Vec;
-  }
+
+  if (arr->isDictType()) return VariableSerializer::ArrayKind::Dict;
+  if (arr->isVecType()) return VariableSerializer::ArrayKind::Vec;
   if (arr->isKeysetType())   return VariableSerializer::ArrayKind::Keyset;
   assertx(arr->isPHPArrayType());
   if (m_keepDVArrays) {
@@ -827,11 +833,9 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     } else {
       switch (kind) {
       case ArrayKind::Dict:
-      case ArrayKind::LegacyDict:
         m_buf->append("Dict\n");
         break;
       case ArrayKind::Vec:
-      case ArrayKind::LegacyVec:
         m_buf->append("Vec\n");
         break;
       case ArrayKind::Keyset:
@@ -840,6 +844,8 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       case ArrayKind::PHP:
       case ArrayKind::VArray:
       case ArrayKind::DArray:
+      case ArrayKind::MarkedVArray:
+      case ArrayKind::MarkedDArray:
         m_buf->append("Array\n");
         break;
       }
@@ -870,7 +876,6 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     } else {
       switch (kind) {
       case ArrayKind::Dict:
-      case ArrayKind::LegacyDict:
         if (m_type == Type::PHPOutput && m_dvOverrides) {
           m_buf->append(
             (*m_dvOverrides)[m_dvOverridesIndex] ? "darray [\n" : "dict [\n"
@@ -881,7 +886,6 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         }
         break;
       case ArrayKind::Vec:
-      case ArrayKind::LegacyVec:
         if (m_type == Type::PHPOutput && m_dvOverrides) {
           m_buf->append(
             (*m_dvOverrides)[m_dvOverridesIndex] ? "varray [\n" : "vec [\n"
@@ -903,6 +907,9 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       case ArrayKind::DArray:
         m_buf->append(m_type == Type::PHPOutput ? "darray [\n" : "array (\n");
         break;
+      case ArrayKind::MarkedVArray:
+      case ArrayKind::MarkedDArray:
+        always_assert(0);
       }
     }
     m_indent += (info.indent_delta = 2);
@@ -926,19 +933,17 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
         switch (kind) {
           case ArrayKind::Dict:
             return "dict";
-          case ArrayKind::LegacyDict:
-            return RuntimeOption::EvalHackArrDVArrVarDump ? "darray" : "dict";
           case ArrayKind::Vec:
             return "vec";
-          case ArrayKind::LegacyVec:
-            return RuntimeOption::EvalHackArrDVArrVarDump ? "varray" : "vec";
           case ArrayKind::Keyset:
             return "keyset";
           case ArrayKind::PHP:
             return "array";
           case ArrayKind::VArray:
+          case ArrayKind::MarkedVArray:
             return RuntimeOption::EvalHackArrDVArrVarDump ? "varray" : "array";
           case ArrayKind::DArray:
+          case ArrayKind::MarkedDArray:
             return RuntimeOption::EvalHackArrDVArrVarDump ? "darray" : "array";
         }
         not_reached();
@@ -988,10 +993,10 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       case ArrayKind::Vec:
         m_buf->append("v:");
         break;
-      case ArrayKind::LegacyDict:
+      case ArrayKind::MarkedDArray:
         m_buf->append("x:");
         break;
-      case ArrayKind::LegacyVec:
+      case ArrayKind::MarkedVArray:
         m_buf->append("X:");
         break;
       case ArrayKind::Keyset:
@@ -1130,7 +1135,7 @@ void VariableSerializer::writeArrayKey(
   case Type::VarDump:
   case Type::DebugDump:
     if (kind == AK::Vec || kind == AK::Keyset) return;
-    if ((kind == AK::VArray || kind == AK::LegacyVec) &&
+    if ((kind == AK::VArray || kind == AK::MarkedVArray) &&
         RuntimeOption::EvalHackArrDVArrVarDump) {
       return;
     }
@@ -1160,7 +1165,7 @@ void VariableSerializer::writeArrayKey(
   case Type::Serialize:
   case Type::Internal:
   case Type::DebuggerSerialize:
-    if (kind == AK::Vec || kind == AK::LegacyVec ||
+    if (kind == AK::Vec || kind == AK::MarkedVArray ||
         kind == AK::Keyset || kind == AK::VArray) return;
     write(key);
     break;
@@ -1310,9 +1315,7 @@ void VariableSerializer::writeArrayFooter(
     } else if (m_rsrcName.empty()) { // for rsrc, only write NULL in arrayHeader
       switch (kind) {
       case ArrayKind::Dict:
-      case ArrayKind::LegacyDict:
       case ArrayKind::Vec:
-      case ArrayKind::LegacyVec:
       case ArrayKind::Keyset:
         m_buf->append(']');
         break;
@@ -1322,6 +1325,10 @@ void VariableSerializer::writeArrayFooter(
       case ArrayKind::VArray:
       case ArrayKind::DArray:
         m_buf->append(m_type == Type::PHPOutput ? ']' : ')');
+        break;
+      case ArrayKind::MarkedVArray:
+      case ArrayKind::MarkedDArray:
+        always_assert(0);
       }
     }
     break;

@@ -33,10 +33,6 @@ module GEnv = Naming_global.GEnv
  *)
 type positioned_ident = Pos.t * Local_id.t
 
-(* <T as A>, A is a type constraint *)
-type type_constraint =
-  Aast.reify_kind * (Ast_defs.constraint_kind * Aast.hint) list
-
 type is_final = bool
 
 type genv = {
@@ -49,7 +45,7 @@ type genv = {
   (* In function foo<T1, ..., Tn> or class<T1, ..., Tn>, the field
    * type_params knows T1 .. Tn. It is able to find out about the
    * constraint on these parameters. *)
-  type_params: type_constraint SMap.t;
+  type_params: SSet.t;
   (* The current class, None if we are in a function *)
   current_cls: (Ast_defs.id * Ast_defs.class_kind * is_final) option;
   (* Namespace environment, e.g., what namespace we're in and what use
@@ -66,16 +62,13 @@ module Env : sig
 
   val empty_local : unbound_handler option -> lenv
 
-  val make_class_env :
-    Provider_context.t -> type_constraint SMap.t -> Nast.class_ -> genv * lenv
+  val make_class_env : Provider_context.t -> Nast.class_ -> genv * lenv
 
-  val make_typedef_env :
-    Provider_context.t -> type_constraint SMap.t -> Nast.typedef -> genv * lenv
+  val make_typedef_env : Provider_context.t -> Nast.typedef -> genv * lenv
 
   val make_top_level_env : Provider_context.t -> genv * lenv
 
-  val make_fun_decl_genv :
-    Provider_context.t -> type_constraint SMap.t -> Nast.fun_ -> genv
+  val make_fun_decl_genv : Provider_context.t -> Nast.fun_ -> genv
 
   val make_file_attributes_env :
     Provider_context.t -> FileInfo.mode -> Aast.nsenv -> genv * lenv
@@ -131,6 +124,12 @@ end = struct
     goto_targets: Pos.t SMap.t ref;
   }
 
+  let get_tparam_names paraml =
+    List.fold_right
+      ~init:SSet.empty
+      ~f:(fun { Aast.tp_name = (_, x); _ } acc -> SSet.add x acc)
+      paraml
+
   let empty_local unbound_handler =
     {
       locals = ref SMap.empty;
@@ -144,12 +143,12 @@ end = struct
       in_mode = mode;
       ctx;
       in_ppl = is_ppl;
-      type_params = tparams;
+      type_params = get_tparam_names tparams;
       current_cls = Some (cid, ckind, final);
       namespace;
     }
 
-  let make_class_env ctx tparams c =
+  let make_class_env ctx c =
     let is_ppl =
       List.exists c.Aast.c_user_attributes ~f:(fun { Aast.ua_name; _ } ->
           String.equal (snd ua_name) SN.UserAttributes.uaProbabilisticModel)
@@ -157,7 +156,7 @@ end = struct
     let genv =
       make_class_genv
         ctx
-        tparams
+        c.Aast.c_tparams
         c.Aast.c_mode
         (c.Aast.c_name, c.Aast.c_kind)
         c.Aast.c_namespace
@@ -167,18 +166,20 @@ end = struct
     let lenv = empty_local None in
     (genv, lenv)
 
-  let make_typedef_genv ctx cstrs tdef_namespace =
+  let make_typedef_genv ctx tparams tdef_namespace =
     {
       in_mode = FileInfo.Mstrict;
       ctx;
       in_ppl = false;
-      type_params = cstrs;
+      type_params = get_tparam_names tparams;
       current_cls = None;
       namespace = tdef_namespace;
     }
 
-  let make_typedef_env ctx cstrs tdef =
-    let genv = make_typedef_genv ctx cstrs tdef.Aast.t_namespace in
+  let make_typedef_env ctx tdef =
+    let genv =
+      make_typedef_genv ctx tdef.Aast.t_tparams tdef.Aast.t_namespace
+    in
     let lenv = empty_local None in
     (genv, lenv)
 
@@ -187,20 +188,20 @@ end = struct
       in_mode = f_mode;
       ctx;
       in_ppl = false;
-      type_params = params;
+      type_params = get_tparam_names params;
       current_cls = None;
       namespace = f_namespace;
     }
 
-  let make_fun_decl_genv ctx params f =
-    make_fun_genv ctx params f.Aast.f_mode f.Aast.f_namespace
+  let make_fun_decl_genv ctx f =
+    make_fun_genv ctx f.Aast.f_tparams f.Aast.f_mode f.Aast.f_namespace
 
   let make_const_genv ctx cst =
     {
       in_mode = cst.Aast.cst_mode;
       ctx;
       in_ppl = false;
-      type_params = SMap.empty;
+      type_params = SSet.empty;
       current_cls = None;
       namespace = cst.Aast.cst_namespace;
     }
@@ -210,7 +211,7 @@ end = struct
       in_mode = FileInfo.Mpartial;
       ctx;
       in_ppl = false;
-      type_params = SMap.empty;
+      type_params = SSet.empty;
       current_cls = None;
       namespace = Namespace_env.empty_with_default;
     }
@@ -226,7 +227,7 @@ end = struct
       in_mode = mode;
       ctx;
       in_ppl = false;
-      type_params = SMap.empty;
+      type_params = SSet.empty;
       current_cls = None;
       namespace;
     }
@@ -750,7 +751,7 @@ and hint_id
       | _ when String.(lowercase x = SN.Typehints.this) ->
         Errors.lowercase_this p x;
         N.Herr
-      | _ when SMap.mem x params ->
+      | _ when SSet.mem x params ->
         let tcopt = Provider_context.get_tcopt (fst env).ctx in
         let hl =
           if
@@ -916,8 +917,7 @@ let ensure_name_not_dynamic env e =
 
 (* Naming of a class *)
 let rec class_ ctx c =
-  let constraints = make_constraints c.Aast.c_tparams in
-  let env = Env.make_class_env ctx constraints c in
+  let env = Env.make_class_env ctx c in
   let c =
     elaborate_namespaces#on_class_
       (Naming_elaborate_namespaces_endo.make_env (fst env).namespace)
@@ -1400,7 +1400,7 @@ and typeconst env t =
     }
 
 and method_ genv m =
-  let genv = extend_params genv m.Aast.m_tparams in
+  let genv = extend_tparams genv m.Aast.m_tparams in
   let env = (genv, Env.empty_local None) in
   (* Cannot use 'this' if it is a public instance method *)
   let (variadicity, paraml) = fun_paraml env m.Aast.m_params in
@@ -1496,32 +1496,17 @@ and fun_param env (param : Nast.fun_param) =
     param_visibility = param.Aast.param_visibility;
   }
 
-and make_constraints paraml =
-  List.fold_right
-    ~init:SMap.empty
-    ~f:(fun { Aast.tp_name = (_, x); tp_constraints; tp_reified; _ } acc ->
-      SMap.add x (tp_reified, tp_constraints) acc)
-    paraml
-
-and extend_params genv paraml =
+and extend_tparams genv paraml =
   let params =
     List.fold_right
       paraml
       ~init:genv.type_params
-      ~f:(fun {
-                Aast.tp_name = (_, x);
-                tp_constraints = cstr_list;
-                tp_reified = r;
-                _;
-              }
-              acc
-              -> SMap.add x (r, cstr_list) acc)
+      ~f:(fun { Aast.tp_name = (_, x); _ } acc -> SSet.add x acc)
   in
   { genv with type_params = params }
 
 and fun_ ctx f =
-  let tparams = make_constraints f.Aast.f_tparams in
-  let genv = Env.make_fun_decl_genv ctx tparams f in
+  let genv = Env.make_fun_decl_genv ctx f in
   let lenv = Env.empty_local None in
   let env = (genv, lenv) in
   let f =
@@ -2478,7 +2463,7 @@ and class_pu_enum env pu_enum =
   *)
   let env_with_case_types =
     let (genv, lenv) = env in
-    (extend_params genv pu_case_types, lenv)
+    (extend_tparams genv pu_case_types, lenv)
   in
   let pu_case_values =
     List.map
@@ -2508,7 +2493,7 @@ and class_pu_enum env pu_enum =
           }
         in
         let (genv, lenv) = env in
-        (extend_params genv (List.map ~f:make_tparam pum_types), lenv)
+        (extend_tparams genv (List.map ~f:make_tparam pum_types), lenv)
       in
       let pum_exprs =
         List.map ~f:(fun (s, e) -> (s, expr env_with_mapped_types e)) pum_exprs
@@ -2566,8 +2551,7 @@ let record_def ctx rd =
 (**************************************************************************)
 
 let typedef ctx tdef =
-  let cstrs = make_constraints tdef.Aast.t_tparams in
-  let env = Env.make_typedef_env ctx cstrs tdef in
+  let env = Env.make_typedef_env ctx tdef in
   let tdef =
     elaborate_namespaces#on_typedef
       (Naming_elaborate_namespaces_endo.make_env (fst env).namespace)

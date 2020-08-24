@@ -776,7 +776,7 @@ let get_class_declaration class_ =
     | Ast_defs.Ctrait -> "trait"
     | Ast_defs.Cenum -> "enum"
   in
-  let tparams = string_of_tparams class_.c_tparams.c_tparam_list in
+  let tparams = string_of_tparams class_.c_tparams in
   let extends =
     match class_.c_extends with
     | [] -> ""

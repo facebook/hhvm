@@ -916,7 +916,7 @@ let ensure_name_not_dynamic env e =
 
 (* Naming of a class *)
 let rec class_ ctx c =
-  let constraints = make_constraints c.Aast.c_tparams.Aast.c_tparam_list in
+  let constraints = make_constraints c.Aast.c_tparams in
   let env = Env.make_class_env ctx constraints c in
   let c =
     elaborate_namespaces#on_class_
@@ -977,9 +977,7 @@ let rec class_ ctx c =
   (* Setting a class type parameters constraint to the 'this' type is weird
    * so lets forbid it for now.
    *)
-  let tparam_l =
-    type_paraml ~forbid_this:true env c.Aast.c_tparams.Aast.c_tparam_list
-  in
+  let tparam_l = type_paraml ~forbid_this:true env c.Aast.c_tparams in
   let consts = List.map ~f:(class_const env) c.Aast.c_consts in
   let typeconsts = List.map ~f:(typeconst env) c.Aast.c_typeconsts in
   let implements =
@@ -993,9 +991,7 @@ let rec class_ ctx c =
   let file_attributes =
     file_attributes ctx c.Aast.c_mode c.Aast.c_file_attributes
   in
-  let c_tparams =
-    { N.c_tparam_list = tparam_l; N.c_tparam_constraints = constraints }
-  in
+  let c_tparams = tparam_l in
   let methods =
     match constructor with
     | None -> smethods @ methods

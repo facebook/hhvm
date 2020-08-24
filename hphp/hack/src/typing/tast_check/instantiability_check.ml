@@ -144,7 +144,7 @@ let handler =
         Option.iter (hint_of_type_hint cvar.cv_type) (check_hint env)
       in
       List.iter c.c_vars check_class_vars;
-      check_tparams env c.c_tparams.c_tparam_list
+      check_tparams env c.c_tparams
 
     method! at_fun_ env f =
       check_tparams env f.f_tparams;

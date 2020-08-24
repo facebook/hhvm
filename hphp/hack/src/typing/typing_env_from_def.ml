@@ -29,7 +29,7 @@ let fun_env ctx f =
  * class instantiated at its generic parameters. *)
 let get_self_from_c c =
   let tparams =
-    List.map c.c_tparams.c_tparam_list (fun { tp_name = (p, s); _ } ->
+    List.map c.c_tparams (fun { tp_name = (p, s); _ } ->
         (* TODO(T69551141) handle type arguments *)
         mk (Reason.Rwitness p, Tgeneric (s, [])))
   in

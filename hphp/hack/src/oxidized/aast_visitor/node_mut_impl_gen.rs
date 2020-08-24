@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a37fb2d832c6e6e5d4b3d8f372133d1b>>
+// @generated SignedSource<<ebc9347d27258555558bee0f41d263c2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -389,24 +389,6 @@ impl<P: Params> NodeMut<P> for ClassKind {
             ClassKind::Ctrait => Ok(()),
             ClassKind::Cenum => Ok(()),
         }
-    }
-}
-impl<P: Params> NodeMut<P> for ClassTparams<P::Ex, P::Fb, P::En, P::Hi> {
-    fn accept<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_class_tparams(c, self)
-    }
-    fn recurse<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        self.list.accept(c, v)?;
-        self.constraints.accept(c, v)?;
-        Ok(())
     }
 }
 impl<P: Params> NodeMut<P> for ClassTypeconst<P::Ex, P::Fb, P::En, P::Hi> {

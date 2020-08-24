@@ -37,7 +37,7 @@ let handler =
           (Pos.filename c.c_span |> Relative_path.prefix |> Relative_path.is_hhi)
       then
         let reified_params =
-          List.filter_map c.c_tparams.c_tparam_list (function tp ->
+          List.filter_map c.c_tparams (function tp ->
               if not (equal_reify_kind tp.tp_reified Erased) then
                 Some (snd tp.tp_name)
               else

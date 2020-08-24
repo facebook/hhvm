@@ -342,16 +342,6 @@ and ('ex, 'fb, 'en, 'hi) tparam = {
   tp_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
 }
 
-and ('ex, 'fb, 'en, 'hi) class_tparams = {
-  c_tparam_list: ('ex, 'fb, 'en, 'hi) tparam list;
-  c_tparam_constraints:
-    (reify_kind * (Ast_defs.constraint_kind * hint) list) SMap.t;
-      [@visitors.opaque]
-      (** keeping around the ast version of the constraint only
-       * for the purposes of Naming.class_meth_bodies
-       * TODO: remove this and use tp_constraints *)
-}
-
 and use_as_alias = sid option * pstring * sid option * use_as_visibility list
 
 and insteadof_alias = sid * pstring * sid list
@@ -373,7 +363,7 @@ and ('ex, 'fb, 'en, 'hi) class_ = {
   c_has_xhp_keyword: bool;
   c_kind: Ast_defs.class_kind;
   c_name: sid;
-  c_tparams: ('ex, 'fb, 'en, 'hi) class_tparams;
+  c_tparams: ('ex, 'fb, 'en, 'hi) tparam list;
       (** The type parameters of a class A<T> (T is the parameter) *)
   c_extends: class_hint list;
   c_uses: trait_hint list;

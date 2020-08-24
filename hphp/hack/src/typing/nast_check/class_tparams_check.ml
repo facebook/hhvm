@@ -39,7 +39,7 @@ let handler =
     inherit Nast_visitor.handler_base
 
     method! at_class_ env c =
-      let state = { class_tparams = c.c_tparams.c_tparam_list } in
+      let state = { class_tparams = c.c_tparams } in
       let on_hint = visitor#on_hint (env, state) in
       List.iter c.c_typeconsts (fun t ->
           Option.iter t.c_tconst_type on_hint;

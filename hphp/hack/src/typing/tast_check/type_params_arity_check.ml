@@ -119,7 +119,7 @@ let handler =
       List.iter c.c_uses (check_hint env);
       List.iter c.c_extends (check_hint env);
       List.iter c.c_implements (check_hint env);
-      let c_tparam_list = c.c_tparams.c_tparam_list in
+      let c_tparam_list = c.c_tparams in
       List.iter c_tparam_list (fun t ->
           List.iter t.tp_constraints (fun (_, h) -> check_hint env h));
       List.iter c.c_typeconsts (fun t ->

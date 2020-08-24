@@ -76,8 +76,8 @@ impl<'a> Class<'a> {
         Self::new_rc_(x, Class_::new)
     }
 
-    pub(in crate) fn get_tparams(&self) -> &ast::ClassTparams {
-        self.either(|x| &x.tparams, |x| &x.tparams)
+    pub(in crate) fn get_tparams(&self) -> &[ast::Tparam] {
+        self.either(|x| &x.tparams[..], |x| &x.tparams[..])
     }
 
     pub fn get_span(&self) -> &Pos {
@@ -181,7 +181,7 @@ impl<'a> Method<'a> {
 pub struct Class_ {
     name: ast::Id,
     span: Pos,
-    tparams: ast::ClassTparams,
+    tparams: Vec<ast::Tparam>,
     vars: Vec<ast::ClassVar>,
     mode: file_info::Mode,
     kind: ast::ClassKind,

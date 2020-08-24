@@ -179,7 +179,6 @@ pub fn from_ast<'a>(
     } else {
         let class_tparam_names = class
             .tparams
-            .list
             .iter()
             .map(|tp| (tp.name).1.as_str())
             .collect::<Vec<_>>();

@@ -6,26 +6,15 @@ Errors:
       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
       c_kind = Cnormal; c_name = ([3:7-8], "\\D");
       c_tparams =
-      { c_tparam_list =
-        [{ tp_variance = Invariant; tp_name = ([3:9-11], "Ta");
-           tp_parameters = [];
-           tp_constraints = [(Constraint_as, ([3:15-18], (Hprim Tint)))];
-           tp_reified = Erased; tp_user_attributes = [] };
-          { tp_variance = Invariant; tp_name = ([3:20-22], "Tb");
-            tp_parameters = [];
-            tp_constraints =
-            [(Constraint_super, ([3:29-35], (Hprim Tstring)))];
-            tp_reified = Erased; tp_user_attributes = [] }
-          ];
-        c_tparam_constraints =
-        { "Ta" ->
-          (Erased,
-           [(Constraint_as, ([3:15-18], (Happly (([3:15-18], "int"), []))))]);
-          "Tb" ->
-          (Erased,
-           [(Constraint_super,
-             ([3:29-35], (Happly (([3:29-35], "string"), []))))]) }
-        };
+      [{ tp_variance = Invariant; tp_name = ([3:9-11], "Ta");
+         tp_parameters = [];
+         tp_constraints = [(Constraint_as, ([3:15-18], (Hprim Tint)))];
+         tp_reified = Erased; tp_user_attributes = [] };
+        { tp_variance = Invariant; tp_name = ([3:20-22], "Tb");
+          tp_parameters = [];
+          tp_constraints = [(Constraint_super, ([3:29-35], (Hprim Tstring)))];
+          tp_reified = Erased; tp_user_attributes = [] }
+        ];
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
       c_reqs = []; c_implements = []; c_where_constraints = [];

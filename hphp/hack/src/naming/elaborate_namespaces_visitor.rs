@@ -140,7 +140,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             &cd.user_attributes,
         );
         env.namespace = cd.namespace.clone();
-        env.extend_tparams(&cd.tparams.list);
+        env.extend_tparams(&cd.tparams);
         cd.recurse(&mut env, self.object())
     }
 

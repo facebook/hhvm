@@ -10,10 +10,8 @@ use oxidized::{
     ast,
     ast_defs::{FunKind, Id},
     pos::Pos,
-    s_map,
 };
 use rx_rust as rx;
-use std::borrow::Cow;
 
 #[derive(Clone, Default, Debug)]
 pub struct Scope<'a> {
@@ -78,7 +76,7 @@ impl<'a> Scope<'a> {
         for scope_item in self.iter() {
             match scope_item {
                 ScopeItem::Class(cd) => {
-                    extend_shallowly(&cd.get_tparams().list[..]);
+                    extend_shallowly(cd.get_tparams());
                 }
                 ScopeItem::Function(fd) => {
                     extend_shallowly(fd.get_tparams());
@@ -110,16 +108,13 @@ impl<'a> Scope<'a> {
         &[]
     }
 
-    pub fn get_class_tparams(&self) -> Cow<ast::ClassTparams> {
+    pub fn get_class_tparams(&self) -> &[ast::Tparam] {
         for scope_item in self.iter() {
             if let ScopeItem::Class(cd) = scope_item {
-                return Cow::Borrowed(&cd.get_tparams());
+                return cd.get_tparams();
             }
         }
-        Cow::Owned(ast::ClassTparams {
-            list: vec![],
-            constraints: s_map::SMap::new(),
-        })
+        &[]
     }
 
     pub fn has_this(&self) -> bool {

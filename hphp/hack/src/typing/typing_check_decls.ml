@@ -210,7 +210,7 @@ and class_ tenv c =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       (fst c.c_name)
       tenv
-      c.c_tparams.c_tparam_list
+      c.c_tparams
       c.c_where_constraints
   in
   let env = { env with tenv } in
@@ -218,12 +218,12 @@ and class_ tenv c =
   let (c_static_vars, c_vars) = split_vars c in
   if not Ast_defs.(equal_class_kind c.c_kind Cinterface) then
     maybe method_ env c_constructor;
-  List.iter c.c_tparams.c_tparam_list (tparam env);
+  List.iter c.c_tparams (tparam env);
   List.iter c.c_where_constraints (where_constr env);
   List.iter c.c_extends (hint env);
   List.iter c.c_implements (hint env);
   List.iter c.c_uses (hint env);
-  List.iter c.c_typeconsts (typeconst (env, c.c_tparams.c_tparam_list));
+  List.iter c.c_typeconsts (typeconst (env, c.c_tparams));
   List.iter c_static_vars (class_var env);
   List.iter c_vars (class_var env);
   List.iter c.c_consts (const env);

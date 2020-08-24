@@ -381,7 +381,6 @@ fn emit_reified_init_method<'a>(
 
     let num_reified = ast_class
         .tparams
-        .list
         .iter()
         .filter(|x| x.reified != ReifyKind::Erased)
         .count();
@@ -469,8 +468,7 @@ pub fn emit_class<'a>(emitter: &mut Emitter, ast_class: &'a tast::Class_) -> Res
 
     let mut attributes = emit_attribute::from_asts(emitter, namespace, &ast_class.user_attributes)?;
     if !is_closure {
-        attributes
-            .extend(emit_attribute::add_reified_attribute(&ast_class.tparams.list).into_iter());
+        attributes.extend(emit_attribute::add_reified_attribute(&ast_class.tparams).into_iter());
         attributes.extend(
             emit_attribute::add_reified_parent_attribute(&env, &ast_class.extends).into_iter(),
         )
@@ -555,7 +553,6 @@ pub fn emit_class<'a>(emitter: &mut Emitter, ast_class: &'a tast::Class_) -> Res
 
     let tparams: Vec<&str> = ast_class
         .tparams
-        .list
         .iter()
         .map(|x| x.name.1.as_ref())
         .collect();
@@ -727,7 +724,7 @@ pub fn emit_class<'a>(emitter: &mut Emitter, ast_class: &'a tast::Class_) -> Res
     let mut methods = emit_method::from_asts(emitter, ast_class, &ast_class.methods)?;
     methods.extend(additional_methods.into_iter());
     let type_constants = from_class_elt_typeconsts(emitter, ast_class)?;
-    let upper_bounds = emit_body::emit_generics_upper_bounds(&ast_class.tparams.list, &[], false);
+    let upper_bounds = emit_body::emit_generics_upper_bounds(&ast_class.tparams, &[], false);
 
     if !no_xhp_attributes {
         properties.extend(emit_xhp::properties_for_cache(

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<074466ddf1bdebb8c6ed0c4d28edc938>>
+// @generated SignedSource<<76e3fd1a4edd73fa297ea73500826f3c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_rc/regen.sh
@@ -443,20 +443,6 @@ pub struct Tparam<Ex, Fb, En, Hi> {
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
-pub struct ClassTparams<Ex, Fb, En, Hi> {
-    pub list: Vec<Tparam<Ex, Fb, En, Hi>>,
-    /// keeping around the ast version of the constraint only
-    /// for the purposes of Naming.class_meth_bodies
-    /// TODO: remove this and use tp_constraints
-    pub constraints: s_map::SMap<(
-        oxidized::aast::ReifyKind,
-        Vec<(oxidized::ast_defs::ConstraintKind, Hint)>,
-    )>,
-}
-
-#[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
-)]
 pub struct UseAsAlias(
     pub Option<Sid>,
     pub Pstring,
@@ -486,7 +472,7 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub kind: oxidized::ast_defs::ClassKind,
     pub name: Sid,
     /// The type parameters of a class A<T> (T is the parameter)
-    pub tparams: ClassTparams<Ex, Fb, En, Hi>,
+    pub tparams: Vec<Tparam<Ex, Fb, En, Hi>>,
     pub extends: Vec<ClassHint>,
     pub uses: Vec<TraitHint>,
     pub use_as_alias: Vec<UseAsAlias>,

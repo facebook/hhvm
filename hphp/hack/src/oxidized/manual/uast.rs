@@ -68,8 +68,6 @@ pub type ClassId<A> =
     aast::ClassId<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
 pub type ClassId_<A> =
     aast::ClassId_<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
-pub type ClassTparams<A> =
-    aast::ClassTparams<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
 pub type ClassTypeconst<A> =
     aast::ClassTypeconst<<A as Annot>::Ex, <A as Annot>::Fb, <A as Annot>::En, <A as Annot>::Hi>;
 pub type ClassVar<A> =

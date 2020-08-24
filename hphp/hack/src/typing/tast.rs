@@ -33,7 +33,6 @@ pub type ClassConst<'a> = aast::ClassConst<Ex<'a>, (), En, Hi<'a>>;
 pub type ClassGetExpr<'a> = aast::ClassGetExpr<Ex<'a>, (), En, Hi<'a>>;
 pub type ClassId<'a> = aast::ClassId<Ex<'a>, (), En, Hi<'a>>;
 pub type ClassId_<'a> = aast::ClassId_<Ex<'a>, (), En, Hi<'a>>;
-pub type ClassTparams<'a> = aast::ClassTparams<Ex<'a>, (), En, Hi<'a>>;
 pub type ClassTypeconst<'a> = aast::ClassTypeconst<Ex<'a>, (), En, Hi<'a>>;
 pub type ClassVar<'a> = aast::ClassVar<Ex<'a>, (), En, Hi<'a>>;
 pub type CollectionTarg<'a> = aast::CollectionTarg<Hi<'a>>;

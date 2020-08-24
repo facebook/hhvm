@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e8fc40b00fea0984561811bc6931c72f>>
+// @generated SignedSource<<135b33c837c818be0c30d33a37521983>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -389,24 +389,6 @@ impl<P: Params> Node<P> for ClassKind {
             ClassKind::Ctrait => Ok(()),
             ClassKind::Cenum => Ok(()),
         }
-    }
-}
-impl<P: Params> Node<P> for ClassTparams<P::Ex, P::Fb, P::En, P::Hi> {
-    fn accept<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_class_tparams(c, self)
-    }
-    fn recurse<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        self.list.accept(c, v)?;
-        self.constraints.accept(c, v)?;
-        Ok(())
     }
 }
 impl<P: Params> Node<P> for ClassTypeconst<P::Ex, P::Fb, P::En, P::Hi> {

@@ -126,7 +126,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
           c.c_user_attributes
       in
       let env = { env with namespace = c.c_namespace; in_ppl } in
-      let env = extend_tparams env c.c_tparams.c_tparam_list in
+      let env = extend_tparams env c.c_tparams in
       super#on_class_ env c
 
     method! on_typedef env td =

@@ -142,7 +142,7 @@ let check_where_constraints (seen : tparam_info) cstrs =
 
 let check_class class_ =
   let seen_class_tparams =
-    check_tparams ~nested:false SMap.empty class_.c_tparams.c_tparam_list
+    check_tparams ~nested:false SMap.empty class_.c_tparams
   in
 
   (* Due to ~nested:false above, the class tparams are still marked as in scope *)

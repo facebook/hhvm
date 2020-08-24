@@ -182,8 +182,7 @@ let handler ctx =
           env with
           droot = Typing_deps.Dep.Class (snd c.Aast.c_name);
           mode = c.Aast.c_mode;
-          type_params =
-            extend_type_params SMap.empty c.Aast.c_tparams.Aast.c_tparam_list;
+          type_params = extend_type_params SMap.empty c.Aast.c_tparams;
           in_ppl = is_ppl;
         }
       in

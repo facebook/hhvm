@@ -332,7 +332,7 @@ let class_ env c =
     sc_has_xhp_keyword = c.c_has_xhp_keyword;
     sc_kind = c.c_kind;
     sc_name = c.c_name;
-    sc_tparams = List.map c.c_tparams.c_tparam_list (type_param env);
+    sc_tparams = List.map c.c_tparams (type_param env);
     sc_where_constraints = where_constraints;
     sc_extends;
     sc_uses;

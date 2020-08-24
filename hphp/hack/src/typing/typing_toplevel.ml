@@ -753,15 +753,8 @@ let shallow_decl_enabled (ctx : Provider_context.t) : bool =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
 let class_type_param env ct =
-  let (env, tparam_list) =
-    List.map_env env ct.c_tparam_list Typing.type_param
-  in
-  ( env,
-    {
-      Aast.c_tparam_list = tparam_list;
-      Aast.c_tparam_constraints =
-        SMap.map (Tuple.T2.map_fst ~f:reify_kind) ct.c_tparam_constraints;
-    } )
+  let (env, tparam_list) = List.map_env env ct Typing.type_param in
+  (env, tparam_list)
 
 let rec class_def ctx c =
   Errors.run_with_span c.c_span @@ fun () ->
@@ -860,7 +853,7 @@ and class_def_ env c tc =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       (fst c.c_name)
       env
-      c.c_tparams.c_tparam_list
+      c.c_tparams
       c.c_where_constraints
   in
   let env =
@@ -1403,7 +1396,7 @@ and class_constr_def env cls constructor =
 
 and class_implements_type env c1 ctype2 =
   let params =
-    List.map c1.c_tparams.c_tparam_list (fun { tp_name = (p, s); _ } ->
+    List.map c1.c_tparams (fun { tp_name = (p, s); _ } ->
         (* TODO(T69551141) handle type arguments *)
         mk (Reason.Rwitness p, Tgeneric (s, [])))
   in

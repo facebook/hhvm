@@ -1787,7 +1787,7 @@ pub fn emit_reified_targs(e: &mut Emitter, env: &Env, pos: &Pos, targs: &[&tast:
         instr::cgetl(local::Type::Named(
             string_utils::reified::GENERICS_LOCAL_NAME.into(),
         ))
-    } else if !is_in_lambda && same_as_targs(&current_cls_tparams.list[..]) {
+    } else if !is_in_lambda && same_as_targs(&current_cls_tparams[..]) {
         InstrSeq::gather(vec![
             instr::checkthis(),
             instr::baseh(),
@@ -3123,7 +3123,6 @@ fn emit_new(
             Some(ast_defs::Id(_, n)) if string_utils::is_self(n) => env
                 .scope
                 .get_class_tparams()
-                .list
                 .iter()
                 .all(|tp| tp.reified.is_erased()),
             Some(ast_defs::Id(_, n)) if string_utils::is_parent(n) => {
@@ -4513,7 +4512,7 @@ pub fn is_reified_tparam(env: &Env, is_fun: bool, name: &str) -> Option<(usize, 
     if is_fun {
         is(env.scope.get_fun_tparams())
     } else {
-        is(&env.scope.get_class_tparams().list[..])
+        is(&env.scope.get_class_tparams()[..])
     }
 }
 
@@ -5761,7 +5760,6 @@ pub fn emit_reified_arg(
         .fold(HashSet::<&str>::new(), |acc, t| f(acc, &*t));
     let class_tparams = env.scope.get_class_tparams();
     let current_tags = class_tparams
-        .list
         .iter()
         .fold(current_tags, |acc, t| f(acc, &*t));
     let mut collector = Collector {

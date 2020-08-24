@@ -369,7 +369,6 @@ fn add_generic(env: &mut Env, st: &mut State, var: &str) {
         } else {
             env.scope
                 .get_class_tparams()
-                .list
                 .iter()
                 .position(is_reified_var)
         }
@@ -461,7 +460,7 @@ fn make_closure(
     st: &State,
     lambda_vars: Vec<String>,
     fun_tparams: Vec<Tparam>,
-    class_tparams: ClassTparams,
+    class_tparams: Vec<Tparam>,
     is_static: bool,
     mut fd: Fun_,
 ) -> (Fun_, Class_) {
@@ -733,7 +732,7 @@ fn convert_lambda<'a>(
     };
 
     let fun_tparams = lambda_env.scope.get_fun_tparams().to_vec();
-    let class_tparams = lambda_env.scope.get_class_tparams();
+    let class_tparams = lambda_env.scope.get_class_tparams().to_vec();
     let class_num = total_class_count(lambda_env, st);
 
     let is_static = if is_long_lambda {
@@ -757,7 +756,7 @@ fn convert_lambda<'a>(
         st,
         lambda_vars,
         fun_tparams,
-        class_tparams.into_owned(),
+        class_tparams,
         is_static,
         fd,
     );
@@ -965,8 +964,8 @@ fn convert_function_like_body<'a>(
     Ok(function_state)
 }
 
-fn add_reified_property(tparams: &ClassTparams, vars: &mut Vec<ClassVar>) {
-    if !tparams.list.iter().all(|t| t.reified == ReifyKind::Erased) {
+fn add_reified_property(tparams: &Vec<Tparam>, vars: &mut Vec<ClassVar>) {
+    if !tparams.iter().all(|t| t.reified == ReifyKind::Erased) {
         let p = Pos::make_none();
         // varray/vec that holds a list of type structures
         // this prop will be initilized during runtime

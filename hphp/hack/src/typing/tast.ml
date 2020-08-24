@@ -107,8 +107,6 @@ type method_ = (Pos.t * ty, unit, saved_env, ty) Aast.method_
 
 type class_var = (Pos.t * ty, unit, saved_env, ty) Aast.class_var
 
-type class_tparams = (Pos.t * ty, unit, saved_env, ty) Aast.class_tparams
-
 type class_const = (Pos.t * ty, unit, saved_env, ty) Aast.class_const
 
 type tparam = (Pos.t * ty, unit, saved_env, ty) Aast.tparam

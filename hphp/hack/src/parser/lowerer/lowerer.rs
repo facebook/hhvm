@@ -4644,10 +4644,7 @@ where
                 };
                 let name = Self::pos_name(&c.classish_name, env)?;
                 *env.cls_reified_generics() = HashSet::new();
-                let tparams = ast::ClassTparams {
-                    list: Self::p_tparam_l(true, &c.classish_type_parameters, env)?,
-                    constraints: s_map::SMap::new(),
-                };
+                let tparams = Self::p_tparam_l(true, &c.classish_type_parameters, env)?;
                 let extends = Self::could_map(Self::p_hint, &c.classish_extends_list, env)?;
                 *env.parent_maybe_reified() = match extends.first().map(|h| h.1.as_ref()) {
                     Some(ast::Hint_::Happly(_, hl)) => !hl.is_empty(),
@@ -4794,10 +4791,7 @@ where
                     is_xhp: false,
                     has_xhp_keyword: false,
                     name: Self::pos_name(&c.enum_name, env)?,
-                    tparams: ast::ClassTparams {
-                        list: vec![],
-                        constraints: s_map::SMap::new(),
-                    },
+                    tparams: vec![],
                     extends: vec![],
                     implements: vec![],
                     where_constraints: vec![],

@@ -3,12 +3,10 @@
       c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
       c_kind = Cnormal; c_name = ([12:7-19], "\\SingleConstr");
       c_tparams =
-      { c_tparam_list =
-        [{ tp_variance = Invariant; tp_name = ([12:21-22], "T");
-           tp_parameters = []; tp_constraints = []; tp_reified = Erased;
-           tp_user_attributes = [] }
-          ];
-        c_tparam_constraints = { "T" -> (Erased, []) } };
+      [{ tp_variance = Invariant; tp_name = ([12:21-22], "T");
+         tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+         tp_user_attributes = [] }
+        ];
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
       c_reqs = []; c_implements = [];
@@ -32,12 +30,10 @@
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
        c_kind = Cnormal; c_name = ([14:7-18], "\\ListConstrs");
        c_tparams =
-       { c_tparam_list =
-         [{ tp_variance = Invariant; tp_name = ([14:20-21], "T");
-            tp_parameters = []; tp_constraints = []; tp_reified = Erased;
-            tp_user_attributes = [] }
-           ];
-         c_tparam_constraints = { "T" -> (Erased, []) } };
+       [{ tp_variance = Invariant; tp_name = ([14:20-21], "T");
+          tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+          tp_user_attributes = [] }
+         ];
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
        c_reqs = []; c_implements = [];
@@ -61,16 +57,13 @@
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
        c_kind = Cnormal; c_name = ([16:7-19], "\\MultiConstrs");
        c_tparams =
-       { c_tparam_list =
-         [{ tp_variance = Invariant; tp_name = ([16:21-22], "T");
-            tp_parameters = []; tp_constraints = []; tp_reified = Erased;
-            tp_user_attributes = [] };
-           { tp_variance = Invariant; tp_name = ([16:24-26], "Tu");
-             tp_parameters = []; tp_constraints = []; tp_reified = Erased;
-             tp_user_attributes = [] }
-           ];
-         c_tparam_constraints = { "T" -> (Erased, []); "Tu" -> (Erased, []) }
-         };
+       [{ tp_variance = Invariant; tp_name = ([16:21-22], "T");
+          tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+          tp_user_attributes = [] };
+         { tp_variance = Invariant; tp_name = ([16:24-26], "Tu");
+           tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+           tp_user_attributes = [] }
+         ];
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
        c_reqs = []; c_implements = [];
@@ -96,12 +89,10 @@
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
        c_kind = Cnormal; c_name = ([18:7-15], "\\AsConstr");
        c_tparams =
-       { c_tparam_list =
-         [{ tp_variance = Invariant; tp_name = ([18:17-18], "T");
-            tp_parameters = []; tp_constraints = []; tp_reified = Erased;
-            tp_user_attributes = [] }
-           ];
-         c_tparam_constraints = { "T" -> (Erased, []) } };
+       [{ tp_variance = Invariant; tp_name = ([18:17-18], "T");
+          tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+          tp_user_attributes = [] }
+         ];
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
        c_reqs = []; c_implements = [];
@@ -122,12 +113,10 @@
        c_final = false; c_is_xhp = false; c_has_xhp_keyword = false;
        c_kind = Cnormal; c_name = ([20:7-18], "\\SuperConstr");
        c_tparams =
-       { c_tparam_list =
-         [{ tp_variance = Invariant; tp_name = ([20:20-21], "T");
-            tp_parameters = []; tp_constraints = []; tp_reified = Erased;
-            tp_user_attributes = [] }
-           ];
-         c_tparam_constraints = { "T" -> (Erased, []) } };
+       [{ tp_variance = Invariant; tp_name = ([20:20-21], "T");
+          tp_parameters = []; tp_constraints = []; tp_reified = Erased;
+          tp_user_attributes = [] }
+         ];
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_xhp_attr_uses = []; c_xhp_category = None;
        c_reqs = []; c_implements = [];

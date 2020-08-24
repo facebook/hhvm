@@ -23,7 +23,7 @@ let add_container_decl_fact decl_pred name progress =
 
 let add_container_defn_fact ctx source_map clss decl_id member_decls prog =
   let tparams =
-    List.map clss.c_tparams.c_tparam_list (build_type_param_json ctx source_map)
+    List.map clss.c_tparams (build_type_param_json ctx source_map)
   in
   let common_fields =
     [

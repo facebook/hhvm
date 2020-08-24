@@ -53,11 +53,23 @@ let strip_tparams name =
   | Some i -> String.sub name 0 i
 
 (* True if source text ends in a newline *)
-let ends_in_newline sourceText =
+let ends_in_newline source_text =
   let last_char =
-    Full_fidelity_source_text.get sourceText (sourceText.length - 1)
+    Full_fidelity_source_text.get source_text (source_text.length - 1)
   in
   phys_equal '\n' last_char || phys_equal '\r' last_char
+
+(* True if the source text contains tab characters, multibyte
+UTF-8 codepoints, or malformed UTF-8 *)
+let has_tabs_or_multibyte_codepoints source_text =
+  let check_codepoint (num, found) _index = function
+    | `Uchar u -> (num + 1, found || Uchar.equal u (Uchar.of_char '\t'))
+    | `Malformed _ -> (num + 1, true)
+  in
+  let (num_chars, found_tab_or_malformed) =
+    Uutf.String.fold_utf_8 check_codepoint (0, false) source_text.text
+  in
+  found_tab_or_malformed || num_chars < source_text.length
 
 let rec find_fid fid_list pred =
   match fid_list with

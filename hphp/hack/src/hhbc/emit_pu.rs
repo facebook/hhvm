@@ -120,7 +120,7 @@ fn lvar(pos: Pos, name: impl Into<String>) -> Tast::Expr {
 }
 
 fn str_(pos: Pos, name: String) -> Tast::Expr {
-    let ename = Tast::Expr_::String(name);
+    let ename = Tast::Expr_::String(name.into());
     Tast::Expr(pos, ename)
 }
 
@@ -708,7 +708,7 @@ impl<'ast> VisitorMut<'ast> for EraseBodyVisitor {
 
     fn visit_expr_(&mut self, c: &mut Ctx, e: &mut Tast::Expr_) -> Result<(), ()> {
         match e {
-            Tast::Expr_::PUAtom(atom) => Ok(*e = Tast::Expr_::String(atom.to_string())),
+            Tast::Expr_::PUAtom(atom) => Ok(*e = Tast::Expr_::String(atom.clone().into())),
             Tast::Expr_::PUIdentifier(pui) => {
                 let class_id = pui.0.clone();
                 let pfield = &pui.1;

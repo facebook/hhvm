@@ -554,9 +554,7 @@ fn make_closure(
 fn convert_id(env: &Env, Id(p, s): Id) -> Expr_ {
     let ret = |newstr| Expr_::mk_string(newstr);
     let name = |c: &ast_scope::Class| {
-        Expr_::mk_string(string_utils::mangle_xhp_id(
-            strip_id(c.get_name()).to_string(),
-        ))
+        Expr_::mk_string(string_utils::mangle_xhp_id(strip_id(c.get_name()).to_string()).into())
     };
 
     match s {
@@ -586,19 +584,19 @@ fn convert_id(env: &Env, Id(p, s): Id) -> Expr_ {
                 .next();
 
             match scope {
-                Some(ScopeItem::Function(fd)) => ret(prefix + strip_id(fd.get_name())),
-                Some(ScopeItem::Method(md)) => ret(prefix + strip_id(md.get_name())),
+                Some(ScopeItem::Function(fd)) => ret((prefix + strip_id(fd.get_name())).into()),
+                Some(ScopeItem::Method(md)) => ret((prefix + strip_id(md.get_name())).into()),
                 Some(ScopeItem::Lambda(_)) | Some(ScopeItem::LongLambda(_)) => {
-                    ret(prefix + "{closure}")
+                    ret((prefix + "{closure}").into())
                 }
                 // PHP weirdness: __METHOD__ inside a class outside a method returns class name
-                Some(ScopeItem::Class(cd)) => ret(strip_id(cd.get_name()).to_string()),
+                Some(ScopeItem::Class(cd)) => ret(strip_id(cd.get_name()).into()),
                 _ => ret("".into()),
             }
         }
         _ if s.eq_ignore_ascii_case(pseudo_consts::G__FUNCTION__) => match env.scope.items.last() {
-            Some(ScopeItem::Function(fd)) => ret(strip_id(fd.get_name()).to_string()),
-            Some(ScopeItem::Method(md)) => ret(strip_id(md.get_name()).to_string()),
+            Some(ScopeItem::Function(fd)) => ret(strip_id(fd.get_name()).into()),
+            Some(ScopeItem::Method(md)) => ret(strip_id(md.get_name()).into()),
             Some(ScopeItem::Lambda(_)) | Some(ScopeItem::LongLambda(_)) => ret("{closure}".into()),
             _ => ret("".into()),
         },
@@ -827,9 +825,9 @@ fn convert_meth_caller_to_func_ptr<'a>(
     st: &mut ClosureConvertVisitor,
     pos: &Pos,
     pc: &Pos,
-    cls: &String,
+    cls: &str,
     pf: &Pos,
-    fname: &String,
+    fname: &str,
 ) -> Expr_ {
     fn get_scope_fmode(scope: &Scope) -> Mode {
         scope
@@ -854,7 +852,7 @@ fn convert_meth_caller_to_func_ptr<'a>(
         CallType::Cnormal,
         expr_id("\\__systemlib\\meth_caller".into()),
         vec![],
-        vec![Expr(pos(), Expr_::mk_string(mangle_name.clone()))],
+        vec![Expr(pos(), Expr_::mk_string(mangle_name.clone().into()))],
         None,
     );
     if st.state.named_hoisted_functions.contains_key(&mangle_name) {
@@ -885,7 +883,7 @@ fn convert_meth_caller_to_func_ptr<'a>(
                 ),
                 Expr(
                     pos(),
-                    Expr_::String(format!("object must be an instance of ({})", cls)),
+                    Expr_::String(format!("object must be an instance of ({})", cls).into()),
                 ),
             ],
             None,
@@ -902,7 +900,7 @@ fn convert_meth_caller_to_func_ptr<'a>(
                 pos(),
                 Expr_::ObjGet(Box::new((
                     obj_lvar,
-                    Expr(pos(), Expr_::mk_id(Id(pf.clone(), fname.clone()))),
+                    Expr(pos(), Expr_::mk_id(Id(pf.clone(), fname.to_owned()))),
                     OgNullFlavor::OGNullthrows,
                 ))),
             ),
@@ -1194,17 +1192,20 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                                 {
                                     let id = cid.as_ciexpr().unwrap().as_id().unwrap();
                                     let mangled_class_name =
-                                        class::Type::from_ast_name(id.as_ref())
-                                            .to_raw_string()
-                                            .into();
+                                        class::Type::from_ast_name(id.as_ref());
+                                    let mangled_class_name = mangled_class_name.to_raw_string();
                                     convert_meth_caller_to_func_ptr(
                                         env,
                                         self,
                                         &*pos,
                                         pc,
-                                        &mangled_class_name,
+                                        mangled_class_name,
                                         pf,
-                                        fname,
+                                        // FIXME: This is not safe--string literals are binary strings.
+                                        // There's no guarantee that they're valid UTF-8.
+                                        unsafe {
+                                            std::str::from_utf8_unchecked(fname.as_slice().into())
+                                        },
                                     )
                                 }
                                 _ => {
@@ -1219,7 +1220,17 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                             ));
                         }
                         (Expr_::String(cls_name), Some(fname)) => convert_meth_caller_to_func_ptr(
-                            env, self, &*pos, pc, &cls_name, pf, fname,
+                            env,
+                            self,
+                            &*pos,
+                            pc,
+                            // FIXME: This is not safe--string literals are binary strings.
+                            // There's no guarantee that they're valid UTF-8.
+                            unsafe { std::str::from_utf8_unchecked(cls_name.as_slice().into()) },
+                            pf,
+                            // FIXME: This is not safe--string literals are binary strings.
+                            // There's no guarantee that they're valid UTF-8.
+                            unsafe { std::str::from_utf8_unchecked(fname.as_slice().into()) },
                         ),
 
                         // For other cases, fallback to create __SystemLib\MethCallerHelper

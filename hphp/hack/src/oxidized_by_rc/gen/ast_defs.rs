@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8b17a71d2f52261a904259e429950673>>
+// @generated SignedSource<<4532d3d68bf0cc9aaa1306e6d4a2a3fc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_rc/regen.sh
@@ -25,12 +25,16 @@ pub struct Id(pub std::rc::Rc<Pos>, pub std::rc::Rc<String>);
 
 pub type Pstring = (std::rc::Rc<Pos>, std::rc::Rc<String>);
 
+pub type ByteString = std::rc::Rc<String>;
+
+pub type PositionedByteString = (std::rc::Rc<Pos>, std::rc::Rc<bstr::BString>);
+
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub enum ShapeFieldName {
     SFlitInt(Pstring),
-    SFlitStr(Pstring),
+    SFlitStr(PositionedByteString),
     SFclassConst(Id, Pstring),
 }
 

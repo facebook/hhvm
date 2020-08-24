@@ -62,9 +62,13 @@ pub fn emit_function<'a>(e: &mut Emitter, f: &'a tast::Fun_) -> Result<Vec<HhasF
                 params,
             }] if s == "__MethCaller" => match &params[..] {
                 [tast::Expr(_, tast::Expr_::String(ref ctx))] if !ctx.is_empty() => Some(
-                    hhbc_id::class::Type::from_ast_name(ctx)
-                        .to_raw_string()
-                        .into(),
+                    hhbc_id::class::Type::from_ast_name(
+                        // FIXME: This is not safe--string literals are binary strings.
+                        // There's no guarantee that they're valid UTF-8.
+                        unsafe { std::str::from_utf8_unchecked(ctx.as_slice().into()) },
+                    )
+                    .to_raw_string()
+                    .into(),
                 ),
                 _ => None,
             },

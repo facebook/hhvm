@@ -12,6 +12,7 @@ use std::mem::size_of;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
+use bstr::{BStr, BString};
 use bumpalo::Bump;
 
 use crate::{block, from};
@@ -733,6 +734,39 @@ impl ToOcamlRep for Vec<u8> {
 impl FromOcamlRep for Vec<u8> {
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
         Ok(Vec::from(bytes_from_ocamlrep(value)?))
+    }
+}
+
+impl ToOcamlRep for BString {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
+        alloc.add(self.as_slice())
+    }
+}
+
+impl FromOcamlRep for BString {
+    fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
+        Ok(Vec::from_ocamlrep(value)?.into())
+    }
+}
+
+impl ToOcamlRep for BStr {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
+        bytes_to_ocamlrep(self, alloc)
+    }
+}
+
+impl ToOcamlRep for &'_ BStr {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
+        alloc.memoized(self.as_ptr() as usize, self.len(), |alloc| {
+            (**self).to_ocamlrep(alloc)
+        })
+    }
+}
+
+impl<'a> FromOcamlRepIn<'a> for &'a BStr {
+    fn from_ocamlrep_in<'b>(value: Value<'b>, alloc: &'a Bump) -> Result<Self, FromError> {
+        let slice: &[u8] = alloc.alloc_slice_copy(bytes_from_ocamlrep(value)?);
+        Ok(slice.into())
     }
 }
 

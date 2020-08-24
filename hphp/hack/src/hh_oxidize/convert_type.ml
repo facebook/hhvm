@@ -73,6 +73,11 @@ let owned_builtins =
 let is_owned_builtin = SSet.mem owned_builtins
 
 let rec core_type ?(seen_indirection = false) ct =
+  let is_by_box =
+    match Configuration.mode () with
+    | Configuration.ByBox -> true
+    | _ -> false
+  in
   let is_by_ref =
     match Configuration.mode () with
     | Configuration.ByRef -> true
@@ -95,6 +100,12 @@ let rec core_type ?(seen_indirection = false) ct =
   | Ptyp_constr ({ txt = Lident "string"; _ }, []) when is_by_ref -> "&'a str"
   | Ptyp_constr ({ txt = Lident "string"; _ }, []) when is_by_rc ->
     "std::rc::Rc<String>"
+  | Ptyp_constr ({ txt = Lident "byte_string"; _ }, []) when is_by_box ->
+    "bstr::BString"
+  | Ptyp_constr ({ txt = Lident "byte_string"; _ }, []) when is_by_ref ->
+    "&'a bstr::BStr"
+  | Ptyp_constr ({ txt = Lident "byte_string"; _ }, []) when is_by_rc ->
+    "std::rc::Rc<bstr::BString>"
   | Ptyp_constr (id, args) ->
     let id =
       match id.txt with

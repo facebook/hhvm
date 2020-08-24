@@ -20,6 +20,20 @@ pub fn add_ns(s: &str) -> Cow<str> {
 }
 
 /**
+ * A\B\C -> \A\B\C
+ */
+pub fn add_ns_bstr(s: &[u8]) -> Cow<[u8]> {
+    if !s.starts_with(b"\\") {
+        let mut new_str = Vec::with_capacity(1 + s.len());
+        new_str.push(b'\\');
+        new_str.extend(s);
+        Cow::Owned(new_str)
+    } else {
+        Cow::Borrowed(s)
+    }
+}
+
+/**
  * \A\B\C -> A\B\C
  */
 pub fn strip_ns(s: &str) -> &str {

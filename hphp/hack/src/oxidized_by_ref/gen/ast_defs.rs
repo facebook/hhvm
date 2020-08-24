@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6dc52d5982ae0a3823cd8ec594b15e74>>
+// @generated SignedSource<<97361c4a8a68c29fefa713e0c5a5b1f8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -37,6 +37,10 @@ impl<'a> TrivialDrop for Id<'a> {}
 
 pub type Pstring<'a> = (&'a Pos<'a>, &'a str);
 
+pub type ByteString<'a> = &'a str;
+
+pub type PositionedByteString<'a> = (&'a Pos<'a>, &'a bstr::BStr);
+
 #[derive(
     Clone,
     Debug,
@@ -51,7 +55,7 @@ pub type Pstring<'a> = (&'a Pos<'a>, &'a str);
 )]
 pub enum ShapeFieldName<'a> {
     SFlitInt(Pstring<'a>),
-    SFlitStr(Pstring<'a>),
+    SFlitStr(PositionedByteString<'a>),
     SFclassConst(Id<'a>, Pstring<'a>),
 }
 impl<'a> TrivialDrop for ShapeFieldName<'a> {}

@@ -604,14 +604,14 @@ fn emit_xhp(
             .iter()
             .fold((0, vec![]), |(mut spread_id, mut attrs), attr| {
                 match attr {
-                    XhpAttribute::XhpSimple(name, v) => {
-                        attrs.push((SF::SFlitStr(name.clone()), v.clone()));
+                    XhpAttribute::XhpSimple((pos, name), v) => {
+                        attrs.push((SF::SFlitStr((pos.clone(), name.clone().into())), v.clone()));
                     }
                     XhpAttribute::XhpSpread(expr) => {
                         attrs.push((
                             SF::SFlitStr((
                                 expr.0.clone(),
-                                format!("...${}", spread_id.to_string()),
+                                format!("...${}", spread_id.to_string()).into(),
                             )),
                             expr.clone(),
                         ));
@@ -751,7 +751,7 @@ fn emit_import(
         ImportFlavor::RequireOnce => {
             match inc.into_doc_root_relative(e.options().hhvm.include_roots.get()) {
                 IncludePath::DocRootRelative(path) => {
-                    let expr = tast::Expr(pos.clone(), tast::Expr_::String(path.to_owned()));
+                    let expr = tast::Expr(pos.clone(), tast::Expr_::String(path.into()));
                     (emit_expr(e, env, &expr)?, instr::reqdoc())
                 }
                 _ => (emit_expr(e, env, expr)?, instr::reqonce()),
@@ -1325,7 +1325,7 @@ fn is_struct_init(
     allow_numerics: bool,
 ) -> Result<bool> {
     let mut are_all_keys_non_numeric_strings = true;
-    let mut uniq_keys = std::collections::HashSet::<String>::new();
+    let mut uniq_keys = std::collections::HashSet::<bstr::BString>::new();
     for f in fields.iter() {
         if let tast::Afield::AFkvalue(key, _) = f {
             // TODO(hrust): if key is String, don't clone and call fold_expr
@@ -1333,8 +1333,12 @@ fn is_struct_init(
             ast_constant_folder::fold_expr(&mut key, e, &env.namespace)
                 .map_err(|e| unrecoverable(format!("{}", e)))?;
             if let tast::Expr(_, tast::Expr_::String(s)) = key {
-                are_all_keys_non_numeric_strings =
-                    are_all_keys_non_numeric_strings && non_numeric(&s);
+                are_all_keys_non_numeric_strings = are_all_keys_non_numeric_strings
+                    && non_numeric(
+                        // FIXME: This is not safe--string literals are binary strings.
+                        // There's no guarantee that they're valid UTF-8.
+                        unsafe { std::str::from_utf8_unchecked(s.as_slice().into()) },
+                    );
                 uniq_keys.insert(s);
             } else {
                 are_all_keys_non_numeric_strings = false;
@@ -1363,13 +1367,23 @@ fn emit_struct_array<C: FnOnce(&mut Emitter, Vec<String>) -> Result<InstrSeq>>(
         .iter()
         .map(|f| match f {
             tast::Afield::AFkvalue(k, v) => match k {
-                E(_, E_::String(s)) => Ok((s.clone(), emit_expr(e, env, v)?)),
+                E(_, E_::String(s)) => Ok((
+                    // FIXME: This is not safe--string literals are binary strings.
+                    // There's no guarantee that they're valid UTF-8.
+                    unsafe { String::from_utf8_unchecked(s.clone().into()) },
+                    emit_expr(e, env, v)?,
+                )),
                 _ => {
                     let mut k = k.clone();
                     ast_constant_folder::fold_expr(&mut k, e, &env.namespace)
                         .map_err(|e| unrecoverable(format!("{}", e)))?;
                     match k {
-                        E(_, E_::String(s)) => Ok((s.clone(), emit_expr(e, env, v)?)),
+                        E(_, E_::String(s)) => Ok((
+                            // FIXME: This is not safe--string literals are binary strings.
+                            // There's no guarantee that they're valid UTF-8.
+                            unsafe { String::from_utf8_unchecked(s.clone().into()) },
+                            emit_expr(e, env, v)?,
+                        )),
                         _ => Err(unrecoverable("Key must be a string")),
                     }
                 }
@@ -1907,7 +1921,15 @@ fn emit_call_lhs_and_fcall(
                 };
             match o.as_ref() {
                 (obj, E(_, E_::String(id)), null_flavor) => {
-                    emit_id(e, obj, id, null_flavor, fcall_args)
+                    emit_id(
+                        e,
+                        obj,
+                        // FIXME: This is not safe--string literals are binary strings.
+                        // There's no guarantee that they're valid UTF-8.
+                        unsafe { std::str::from_utf8_unchecked(id.as_slice().into()) },
+                        null_flavor,
+                        fcall_args,
+                    )
                 }
                 (obj, E(_, E_::Id(id)), null_flavor) => {
                     emit_id(e, obj, &id.1, null_flavor, fcall_args)
@@ -2454,7 +2476,9 @@ fn emit_special_function(
                             env,
                             pos,
                             &vec![ /* targs */ ],
-                            func_name,
+                            // FIXME: This is not safe--string literals are binary strings.
+                            // There's no guarantee that they're valid UTF-8.
+                            unsafe { std::str::from_utf8_unchecked(func_name.as_slice().into()) },
                         )?))
                     }
                     _ => Err(emit_fatal::raise_fatal_runtime(
@@ -2478,7 +2502,13 @@ fn emit_special_function(
             match args {
                 [E(_, E_::String(ref func_name))] => Ok(Some(instr::resolve_meth_caller(
                     // TODO(hrust) should accept functions::from_raw_string(func_name)
-                    string_utils::strip_global_ns(func_name).to_string().into(),
+                    string_utils::strip_global_ns(
+                        // FIXME: This is not safe--string literals are binary strings.
+                        // There's no guarantee that they're valid UTF-8.
+                        unsafe { std::str::from_utf8_unchecked(func_name.as_slice().into()) },
+                    )
+                    .to_string()
+                    .into(),
                 ))),
                 _ => Err(emit_fatal::raise_fatal_runtime(
                     pos,
@@ -2704,7 +2734,13 @@ fn emit_class_meth(e: &mut Emitter, env: &Env, cls: &tast::Expr, meth: &tast::Ex
         if let Some(class_name) = cls.1.as_string() {
             return Ok(instr::resolveclsmethodd(
                 // TODO(hrust) should accept class::Type::from_raw_string(class_name)
-                string_utils::strip_global_ns(class_name).to_string().into(),
+                string_utils::strip_global_ns(
+                    // FIXME: This is not safe--string literals are binary strings.
+                    // There's no guarantee that they're valid UTF-8.
+                    unsafe { std::str::from_utf8_unchecked(class_name.as_slice().into()) },
+                )
+                .to_string()
+                .into(),
                 method_id,
             ));
         }
@@ -2965,7 +3001,10 @@ fn emit_call_expr(
     use {tast::Expr as E, tast::Expr_ as E_};
     match (&expr.1, &args[..], uarg) {
         (E_::Id(id), [E(_, E_::String(data))], None) if id.1 == special_functions::HHAS_ADATA => {
-            let v = TypedValue::HhasAdata(data.into());
+            // FIXME: This is not safe--string literals are binary strings.
+            // There's no guarantee that they're valid UTF-8.
+            let v =
+                TypedValue::HhasAdata(unsafe { String::from_utf8_unchecked(data.clone().into()) });
             Ok(emit_pos_then(pos, instr::typedvalue(v)))
         }
         (E_::Id(id), _, None) if id.1 == pseudo_functions::ISSET => {
@@ -3335,7 +3374,13 @@ fn emit_prop_expr(
         tast::Expr_::String(name) => {
             // TODO(hrust) enable `let pid = prop::Type::from_ast_name(name);`,
             // `from_ast_name` should be able to accpet Cow<str>
-            let pid: prop::Type = string_utils::strip_global_ns(&name).to_string().into();
+            let pid: prop::Type = string_utils::strip_global_ns(
+                // FIXME: This is not safe--string literals are binary strings.
+                // There's no guarantee that they're valid UTF-8.
+                unsafe { std::str::from_utf8_unchecked(name.as_slice().into()) },
+            )
+            .to_string()
+            .into();
             match nullflavor {
                 ast_defs::OgNullFlavor::OGNullthrows => MemberKey::PT(pid),
                 ast_defs::OgNullFlavor::OGNullsafe => MemberKey::QT(pid),
@@ -3689,7 +3734,14 @@ fn get_elem_member_key(
                 }
             }
             // Special case for literal string
-            E_::String(s) => Ok((MemberKey::ET(s.clone()), instr::empty())),
+            E_::String(s) => {
+                Ok((
+                    // FIXME: This is not safe--string literals are binary strings.
+                    // There's no guarantee that they're valid UTF-8.
+                    MemberKey::ET(unsafe { String::from_utf8_unchecked(s.clone().into()) }),
+                    instr::empty(),
+                ))
+            }
             // Special case for class name
             E_::ClassConst(x)
                 if is_special_class_constant_accessed_with_class_id(&(x.0).1, &(x.1).1) =>

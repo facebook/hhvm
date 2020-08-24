@@ -19,9 +19,13 @@ and id = pos * string
 
 and pstring = pos * string
 
+and byte_string = string
+
+and positioned_byte_string = pos * byte_string
+
 and shape_field_name =
   | SFlit_int of pstring
-  | SFlit_str of pstring
+  | SFlit_str of positioned_byte_string
   | SFclass_const of id * pstring
 
 and variance =

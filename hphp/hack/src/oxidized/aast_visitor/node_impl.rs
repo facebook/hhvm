@@ -20,6 +20,7 @@ macro_rules! leaf_node {
 leaf_node!(bool);
 leaf_node!(isize);
 leaf_node!(String);
+leaf_node!(bstr::BString);
 leaf_node!(crate::pos::Pos);
 leaf_node!(crate::file_info::Mode);
 leaf_node!(crate::namespace_env::Env);

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<50ab78feee54b02027a3bfd80c9f1047>>
+// @generated SignedSource<<b2e126e9e768f57ea02032a6a5312eda>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -340,7 +340,7 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
     FunctionPointer(&'a (FunctionPtrId<'a, Ex, Fb, En, Hi>, &'a [Targ<'a, Hi>])),
     Int(&'a str),
     Float(&'a str),
-    String(&'a str),
+    String(&'a bstr::BStr),
     String2(&'a [Expr<'a, Ex, Fb, En, Hi>]),
     PrefixedString(&'a (&'a str, Expr<'a, Ex, Fb, En, Hi>)),
     Yield(&'a Afield<'a, Ex, Fb, En, Hi>),

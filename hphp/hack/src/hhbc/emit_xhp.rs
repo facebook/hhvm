@@ -200,7 +200,7 @@ fn get_category_array(categories: &[&String]) -> Expr_ {
             .into_iter()
             .map(|&s| {
                 (
-                    mk_expr(Expr_::String(s.into())),
+                    mk_expr(Expr_::String(s.clone().into())),
                     mk_expr(Expr_::Int("1".into())),
                 )
             })
@@ -288,13 +288,13 @@ fn emit_xhp_child_decl(unary: &str, child: &XhpChild) -> Result<Expr_> {
                 get_array3(
                     Expr_::Int(unary.into()),
                     Expr_::Int("4".into()),
-                    Expr_::String(string_utils::mangle(name[1..].into())),
+                    Expr_::String(string_utils::mangle(name[1..].into()).into()),
                 )
             } else {
                 get_array3(
                     Expr_::Int(unary.into()),
                     Expr_::Int("3".into()),
-                    Expr_::String(string_utils::mangle(name.into())),
+                    Expr_::String(string_utils::mangle(name.into()).into()),
                 )
             }
         }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a5691174531dabfcf2fc05eb5d0b245e>>
+// @generated SignedSource<<6c8858ff1bc09c6f97e38e69604bd553>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -13,7 +13,7 @@ impl ShapeFieldName {
     pub fn mk_sflit_int(p0: Pstring) -> Self {
         ShapeFieldName::SFlitInt(p0)
     }
-    pub fn mk_sflit_str(p0: Pstring) -> Self {
+    pub fn mk_sflit_str(p0: PositionedByteString) -> Self {
         ShapeFieldName::SFlitStr(p0)
     }
     pub fn mk_sfclass_const(p0: Id, p1: Pstring) -> Self {
@@ -43,7 +43,7 @@ impl ShapeFieldName {
             _ => None,
         }
     }
-    pub fn as_sflit_str(&self) -> Option<&Pstring> {
+    pub fn as_sflit_str(&self) -> Option<&PositionedByteString> {
         match self {
             ShapeFieldName::SFlitStr(p0) => Some(p0),
             _ => None,
@@ -61,7 +61,7 @@ impl ShapeFieldName {
             _ => None,
         }
     }
-    pub fn as_sflit_str_mut(&mut self) -> Option<&mut Pstring> {
+    pub fn as_sflit_str_mut(&mut self) -> Option<&mut PositionedByteString> {
         match self {
             ShapeFieldName::SFlitStr(p0) => Some(p0),
             _ => None,
@@ -79,7 +79,7 @@ impl ShapeFieldName {
             _ => None,
         }
     }
-    pub fn as_sflit_str_into(self) -> Option<Pstring> {
+    pub fn as_sflit_str_into(self) -> Option<PositionedByteString> {
         match self {
             ShapeFieldName::SFlitStr(p0) => Some(p0),
             _ => None,

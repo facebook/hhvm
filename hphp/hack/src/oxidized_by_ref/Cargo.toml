@@ -15,6 +15,7 @@ ocamlrep = { path = "../ocamlrep" }
 ocamlrep_derive = { path = "../ocamlrep_derive" }
 oxidized = { path = "../oxidized" }
 bitflags = "1.2"
+bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.2.1", features = ["collections"] }
 serde = { version = "1.0", features = ["derive", "rc"] }
 

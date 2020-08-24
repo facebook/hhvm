@@ -6,6 +6,7 @@
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
+use bstr::BStr;
 use bumpalo::{
     collections::{String, Vec},
     Bump,
@@ -213,6 +214,14 @@ fn concat<'a>(arena: &'a Bump, str1: &str, str2: &str) -> &'a str {
     result.push_str(str1);
     result.push_str(str2);
     result.into_bump_str()
+}
+
+fn str_from_utf8<'a>(arena: &'a Bump, slice: &'a [u8]) -> &'a str {
+    if let Ok(s) = std::str::from_utf8(slice) {
+        s
+    } else {
+        String::from_utf8_lossy_in(slice, arena).into_bump_str()
+    }
 }
 
 fn strip_dollar_prefix<'a>(name: &'a str) -> &'a str {
@@ -567,11 +576,11 @@ pub enum Node<'a> {
     Array(&'a Pos<'a>),
     Darray(&'a Pos<'a>),
     Varray(&'a Pos<'a>),
-    StringLiteral(&'a (&'a str, &'a Pos<'a>)), // For shape keys and const expressions.
-    IntLiteral(&'a (&'a str, &'a Pos<'a>)),    // For const expressions.
+    StringLiteral(&'a (&'a BStr, &'a Pos<'a>)), // For shape keys and const expressions.
+    IntLiteral(&'a (&'a str, &'a Pos<'a>)),     // For const expressions.
     FloatingLiteral(&'a (&'a str, &'a Pos<'a>)), // For const expressions.
     BooleanLiteral(&'a (&'a str, &'a Pos<'a>)), // For const expressions.
-    Null(&'a Pos<'a>),                         // For const expressions.
+    Null(&'a Pos<'a>),                          // For const expressions.
     Ty(&'a Ty<'a>),
     TypeconstAccess(&'a (Cell<&'a Pos<'a>>, Ty<'a>, RefCell<Vec<'a, Id<'a>>>)),
     Backslash(&'a Pos<'a>), // This needs a pos since it shows up in names.
@@ -855,9 +864,11 @@ impl<'a> Node<'a> {
                     "__MutableReturn" => attributes.returns_mutable = true,
                     "__ReturnsVoidToRx" => attributes.returns_void_to_rx = true,
                     "__Deprecated" => {
-                        fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut String<'a>) {
+                        fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut Vec<'a, u8>) {
                             match expr {
-                                &aast::Expr(_, aast::Expr_::String(val)) => acc.push_str(val),
+                                &aast::Expr(_, aast::Expr_::String(val)) => {
+                                    acc.extend_from_slice(val)
+                                }
                                 &aast::Expr(_, aast::Expr_::Binop(&(Bop::Dot, e1, e2))) => {
                                     fold_string_concat(&e1, acc);
                                     fold_string_concat(&e2, acc);
@@ -865,16 +876,20 @@ impl<'a> Node<'a> {
                                 _ => (),
                             }
                         }
-                        attributes.deprecated = attribute.params.first().and_then(|expr| match expr
-                        {
-                            &aast::Expr(_, aast::Expr_::String(val)) => Some(val),
-                            &aast::Expr(_, aast::Expr_::Binop(_)) => {
-                                let mut acc = String::new_in(arena);
-                                fold_string_concat(expr, &mut acc);
-                                Some(acc.into_bump_str())
-                            }
-                            _ => None,
-                        })
+                        attributes.deprecated = attribute
+                            .params
+                            .first()
+                            .and_then(|expr| match expr {
+                                &aast::Expr(_, aast::Expr_::String(val)) => Some(val.as_ref()),
+                                &aast::Expr(_, aast::Expr_::Binop(_)) => {
+                                    let mut acc = Vec::new_in(arena);
+                                    fold_string_concat(expr, &mut acc);
+                                    let bytes = acc.into_bump_slice();
+                                    Some(bytes)
+                                }
+                                _ => None,
+                            })
+                            .map(|bytes| str_from_utf8(arena, bytes))
                     }
                     "__Reifiable" => attributes.reifiable = Some(attribute.name.0),
                     "__LateInit" => {
@@ -992,11 +1007,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     // the same data. Otherwise, copy the slice into our arena using
     // String::from_utf8_lossy_in, and return a reference to the arena str.
     fn str_from_utf8(&self, slice: &'a [u8]) -> &'a str {
-        if let Ok(s) = std::str::from_utf8(slice) {
-            s
-        } else {
-            String::from_utf8_lossy_in(slice, self.state.arena).into_bump_str()
-        }
+        str_from_utf8(self.state.arena, slice)
     }
 
     fn node_to_expr(&self, node: Node<'a>) -> Option<nast::Expr<'a>> {
@@ -1366,13 +1377,13 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
     }
 
-    fn make_shape_field_name(name: Node<'a>) -> Option<ShapeFieldName<'a>> {
+    fn make_shape_field_name(&self, name: Node<'a>) -> Option<ShapeFieldName<'a>> {
         Some(match name {
             Node::StringLiteral(&(s, pos)) => ShapeFieldName::SFlitStr((pos, s)),
             // TODO: OCaml decl produces SFlitStr here instead of SFlitInt, so
             // we must also. Looks like int literal keys have become a parse
             // error--perhaps that's why.
-            Node::IntLiteral(&(s, pos)) => ShapeFieldName::SFlitStr((pos, s)),
+            Node::IntLiteral(&(s, pos)) => ShapeFieldName::SFlitStr((pos, s.into())),
             Node::Expr(aast::Expr(
                 _,
                 aast::Expr_::ClassConst(&(
@@ -1684,38 +1695,44 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::XHPClassName | TokenKind::XHP | TokenKind::XHPElementName => {
                 Node::XhpName(self.alloc((token_text(self), token_pos(self))))
             }
-            TokenKind::SingleQuotedStringLiteral => Node::StringLiteral(self.alloc((
-                unwrap_or_return!(escaper::unescape_single_in(
+            TokenKind::SingleQuotedStringLiteral => Node::StringLiteral(
+                self.alloc((
+                    unwrap_or_return!(escaper::unescape_single_in(
                         self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
                         self.state.arena,
                     )
-                    .ok()),
-                token_pos(self),
-            ))),
+                    .ok())
+                    .into(),
+                    token_pos(self),
+                )),
+            ),
             TokenKind::DoubleQuotedStringLiteral => Node::StringLiteral(self.alloc((
-                self.str_from_utf8(unwrap_or_return!(escaper::unescape_double_in(
+                unwrap_or_return!(escaper::unescape_double_in(
                             self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
                             self.state.arena,
                         )
-                        .ok())),
+                        .ok()),
                 token_pos(self),
             ))),
             TokenKind::HeredocStringLiteral => Node::StringLiteral(self.alloc((
-                self.str_from_utf8(unwrap_or_return!(escaper::unescape_heredoc_in(
-                        self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
-                        self.state.arena,
-                    )
-                    .ok())),
-                token_pos(self),
-            ))),
-            TokenKind::NowdocStringLiteral => Node::StringLiteral(self.alloc((
-                unwrap_or_return!(escaper::unescape_nowdoc_in(
+                unwrap_or_return!(escaper::unescape_heredoc_in(
                         self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
                         self.state.arena,
                     )
                     .ok()),
                 token_pos(self),
             ))),
+            TokenKind::NowdocStringLiteral => Node::StringLiteral(
+                self.alloc((
+                    unwrap_or_return!(escaper::unescape_nowdoc_in(
+                        self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
+                        self.state.arena,
+                    )
+                    .ok())
+                    .into(),
+                    token_pos(self),
+                )),
+            ),
             TokenKind::DecimalLiteral
             | TokenKind::OctalLiteral
             | TokenKind::HexadecimalLiteral
@@ -3225,7 +3242,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             unwrap_or_return!(
                 self.maybe_slice_from_iter(fields.iter().map(|node| match node {
                     Node::ListItem(&(key, value)) => {
-                        let key = Self::make_shape_field_name(key)?;
+                        let key = self.make_shape_field_name(key)?;
                         let value = self.node_to_expr(value)?;
                         Some((key, value))
                     }
@@ -3326,7 +3343,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         type_: Self::R,
     ) -> Self::R {
         let optional = question_token.is_present();
-        let name = unwrap_or_return!(Self::make_shape_field_name(name));
+        let name = unwrap_or_return!(self.make_shape_field_name(name));
         Node::ShapeFieldSpecifier(self.alloc(ShapeFieldNode {
             name: self.alloc(ShapeField(name)),
             type_: self.alloc(ShapeFieldType {

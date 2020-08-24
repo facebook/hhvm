@@ -117,7 +117,15 @@ fn is_resolved_classname(s: &str) -> bool {
 fn shape_field_name(sf: &ShapeFieldName) -> (String, bool) {
     use oxidized::ast_defs::{Id, ShapeFieldName::*};
     match sf {
-        SFlitInt((_, s)) | SFlitStr((_, s)) => (s.to_string(), false),
+        SFlitInt((_, s)) => (s.to_string(), false),
+        SFlitStr((_, s)) => {
+            (
+                // FIXME: This is not safe--string literals are binary strings.
+                // There's no guarantee that they're valid UTF-8.
+                unsafe { String::from_utf8_unchecked(s.clone().into()) },
+                false,
+            )
+        }
         SFclassConst(Id(_, cname), (_, s)) => {
             let id = class::Type::from_ast_name(&cname);
             (format!("{}::{}", id.to_raw_string(), s), true)

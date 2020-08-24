@@ -75,7 +75,7 @@ impl<Fb, En, Hi> Expr<Pos, Fb, En, Hi> {
 
 impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn make_string(s: Vec<u8>) -> Self {
-        Expr_::String(unsafe { String::from_utf8_unchecked(s) })
+        Expr_::String(s.into())
     }
 }
 

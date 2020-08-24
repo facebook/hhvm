@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3c3c648bb48eb77608759c9c10fb19ef>>
+// @generated SignedSource<<00b57534892e019b3ef33251b59a5459>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -39,6 +39,10 @@ pub struct Id(pub Pos, pub String);
 
 pub type Pstring = (Pos, String);
 
+pub type ByteString = String;
+
+pub type PositionedByteString = (Pos, bstr::BString);
+
 #[derive(
     Clone,
     Debug,
@@ -54,7 +58,7 @@ pub type Pstring = (Pos, String);
 )]
 pub enum ShapeFieldName {
     SFlitInt(Pstring),
-    SFlitStr(Pstring),
+    SFlitStr(PositionedByteString),
     SFclassConst(Id, Pstring),
 }
 

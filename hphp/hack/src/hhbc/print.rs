@@ -2407,7 +2407,8 @@ fn print_shape_field_name<W: Write>(
     use ast::ShapeFieldName as S;
     match field {
         S::SFlitInt((_, s)) => print_expr_int(w, s),
-        S::SFlitStr((_, s)) | S::SFclassConst(_, (_, s)) => print_expr_string(w, s),
+        S::SFlitStr((_, s)) => print_expr_string(w, s),
+        S::SFclassConst(_, (_, s)) => print_expr_string(w, s.as_bytes()),
     }
 }
 
@@ -2418,7 +2419,7 @@ fn print_expr_int<W: Write>(w: &mut W, i: &String) -> Result<(), W::Error> {
     }
 }
 
-fn print_expr_string<W: Write>(w: &mut W, s: &String) -> Result<(), W::Error> {
+fn print_expr_string<W: Write>(w: &mut W, s: &[u8]) -> Result<(), W::Error> {
     fn escape_char(c: u8) -> Option<Cow<'static, [u8]>> {
         match c {
             b'\n' => Some((&b"\\\\n"[..]).into()),
@@ -2436,6 +2437,9 @@ fn print_expr_string<W: Write>(w: &mut W, s: &String) -> Result<(), W::Error> {
             }
         }
     }
+    // FIXME: This is not safe--string literals are binary strings.
+    // There's no guarantee that they're valid UTF-8.
+    let s = unsafe { std::str::from_utf8_unchecked(s) };
     wrap_by(w, "\\\"", |w| w.write(escape_by(s.into(), escape_char)))
 }
 
@@ -2578,7 +2582,7 @@ fn print_expr<W: Write>(
                     if is_array_get {
                         print_expr_id(w, env, s1)?
                     } else {
-                        print_expr_string(w, s1)?
+                        print_expr_string(w, s1.as_bytes())?
                     }
                 }))
             }
@@ -2878,7 +2882,9 @@ fn print_xml<W: Write>(
         attr: &ast::XhpAttribute,
         spread_id: usize,
     ) -> Result<(), W::Error> {
-        let key_printer = |_: &mut Context, w: &mut W, _: &ExprEnv, k| print_expr_string(w, k);
+        let key_printer = |_: &mut Context, w: &mut W, _: &ExprEnv, k: &String| {
+            print_expr_string(w, k.as_bytes())
+        };
         match attr {
             ast::XhpAttribute::XhpSimple((_, s), e) => {
                 print_key_value_(ctx, w, env, s, key_printer, e)

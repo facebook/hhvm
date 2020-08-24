@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fe8a3658bd4821bfc342d4ffa500d56f>>
+// @generated SignedSource<<209ced9466f01802f00e19b3e0fefc78>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -995,7 +995,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_float(p0: String) -> Self {
         Expr_::Float(p0)
     }
-    pub fn mk_string(p0: String) -> Self {
+    pub fn mk_string(p0: bstr::BString) -> Self {
         Expr_::String(p0)
     }
     pub fn mk_string2(p0: Vec<Expr<Ex, Fb, En, Hi>>) -> Self {
@@ -1618,7 +1618,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_string(&self) -> Option<&String> {
+    pub fn as_string(&self) -> Option<&bstr::BString> {
         match self {
             Expr_::String(p0) => Some(p0),
             _ => None,
@@ -2014,7 +2014,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_string_mut(&mut self) -> Option<&mut String> {
+    pub fn as_string_mut(&mut self) -> Option<&mut bstr::BString> {
         match self {
             Expr_::String(p0) => Some(p0),
             _ => None,
@@ -2412,7 +2412,7 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_string_into(self) -> Option<String> {
+    pub fn as_string_into(self) -> Option<bstr::BString> {
         match self {
             Expr_::String(p0) => Some(p0),
             _ => None,

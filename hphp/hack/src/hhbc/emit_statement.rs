@@ -1524,7 +1524,7 @@ pub fn emit_markup(
         } else {
             emit_ignored_call_expr(
                 fname,
-                tast::Expr(Pos::make_none(), tast::Expr_::mk_string(expr_str)),
+                tast::Expr(Pos::make_none(), tast::Expr_::mk_string(expr_str.into())),
             )
         }
     };

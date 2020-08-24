@@ -3,14 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use bstr::BStr;
+
 use crate::ast_defs::*;
 use crate::pos::Pos;
 
 impl ShapeFieldName {
-    pub fn get_name(&self) -> &str {
+    pub fn get_name(&self) -> &BStr {
         use ShapeFieldName::*;
         match self {
-            SFlitInt((_, name)) | SFlitStr((_, name)) | SFclassConst(_, (_, name)) => name.as_str(),
+            SFlitInt((_, name)) | SFclassConst(_, (_, name)) => name.as_bytes().into(),
+            SFlitStr((_, name)) => name.as_ref(),
         }
     }
 

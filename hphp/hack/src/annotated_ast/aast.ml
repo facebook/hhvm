@@ -162,7 +162,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
   | FunctionPointer of ('ex, 'fb, 'en, 'hi) function_ptr_id * 'hi targ list
   | Int of string
   | Float of string
-  | String of string
+  | String of byte_string
   | String2 of ('ex, 'fb, 'en, 'hi) expr list
   | PrefixedString of string * ('ex, 'fb, 'en, 'hi) expr
   | Yield of ('ex, 'fb, 'en, 'hi) afield

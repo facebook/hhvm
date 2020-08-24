@@ -122,6 +122,7 @@ let derived_traits ty =
 
 let blacklisted_types =
   [
+    ("aast_defs", "ByteString");
     ("decl_defs", "Linearization");
     ("errors", "Marker");
     ("errors", "MarkedMessage");
@@ -150,7 +151,12 @@ let renamed_types = [(("typing_reason", "TypingReason"), "Reason")]
    adds some meaning, and generate a new tuple struct type named after the
    alias. In some cases, the alias adds no meaning and we should also use an
    alias in Rust. *)
-let tuple_aliases = [("ast_defs", "Pstring"); ("errors", "Message")]
+let tuple_aliases =
+  [
+    ("ast_defs", "Pstring");
+    ("ast_defs", "PositionedByteString");
+    ("errors", "Message");
+  ]
 
 (*
 A list of (<module>, <ty1>) where ty1 is enum and all non-empty variant fields should
@@ -175,6 +181,7 @@ let should_box_variant ty =
    should be two words or less (the size of a slice). *)
 let unbox_field ty =
   ty = "String"
+  || ty = "bstr::BString"
   || String.is_prefix ty ~prefix:"Vec<"
   || String.is_prefix ty ~prefix:"Block<"
   || String.is_prefix ty ~prefix:"&'a "

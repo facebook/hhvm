@@ -277,7 +277,11 @@ fn shape_to_typed_value(
                         }
                     }
                 }
-                ast_defs::ShapeFieldName::SFlitStr(id) => TypedValue::String(id.1.clone()),
+                ast_defs::ShapeFieldName::SFlitStr(id) => {
+                    // FIXME: This is not safe--string literals are binary
+                    // strings. There's no guarantee that they're valid UTF-8.
+                    TypedValue::String(unsafe { String::from_utf8_unchecked(id.1.clone().into()) })
+                }
                 ast_defs::ShapeFieldName::SFclassConst(class_id, id) => class_const_to_typed_value(
                     emitter,
                     &tast::ClassId(Pos::make_none(), tast::ClassId_::CI(class_id.clone())),
@@ -332,7 +336,13 @@ pub fn expr_to_typed_value_(
         tast::Expr_::True => Ok(TypedValue::Bool(true)),
         False => Ok(TypedValue::Bool(false)),
         Null => Ok(TypedValue::Null),
-        String(s) => Ok(TypedValue::String(s.to_owned())),
+        String(s) => {
+            // FIXME: This is not safe--string literals are binary strings.
+            // There's no guarantee that they're valid UTF-8.
+            Ok(TypedValue::String(unsafe {
+                std::string::String::from_utf8_unchecked(s.clone().into())
+            }))
+        }
         Float(s) => {
             if s == math::INF {
                 Ok(TypedValue::float(std::f64::INFINITY))
@@ -356,7 +366,11 @@ pub fn expr_to_typed_value_(
         {
             match &id.3[..] {
                 &[tast::Expr(_, tast::Expr_::String(ref data))] => {
-                    Ok(TypedValue::HhasAdata(data.into()))
+                    // FIXME: This is not safe--string literals are binary strings.
+                    // There's no guarantee that they're valid UTF-8.
+                    Ok(TypedValue::HhasAdata(unsafe {
+                        std::string::String::from_utf8_unchecked(data.clone().into())
+                    }))
                 }
                 _ => Err(Error::NotLiteral),
             }
@@ -540,7 +554,7 @@ fn value_to_expr_(v: TypedValue) -> Result<tast::Expr_, Error> {
         Float(i) => Expr_::Float(hhbc_string_utils_rust::float::to_string(i)),
         Bool(false) => Expr_::False,
         Bool(true) => Expr_::True,
-        String(s) => Expr_::String(s),
+        String(s) => Expr_::String(s.into()),
         Null => Expr_::Null,
         Uninit => return Err(Error::unrecoverable("value_to_expr: uninit value")),
         Vec(_) => return Err(Error::unrecoverable("value_to_expr: vec NYI")),

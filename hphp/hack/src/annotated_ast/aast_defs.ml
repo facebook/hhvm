@@ -14,6 +14,8 @@ type 'a shape_map = 'a ShapeMap.t [@@deriving eq, show]
 
 type pos = Ast_defs.pos [@@deriving eq, show, ord]
 
+type byte_string = Ast_defs.byte_string [@@deriving eq, show, ord]
+
 type local_id = (Local_id.t[@visitors.opaque])
 
 and lid = pos * local_id
@@ -242,6 +244,9 @@ let string_of_use_as_visibility vis =
   | UseAsFinal -> "final"
 
 type pstring = Ast_defs.pstring [@@deriving eq, show]
+
+type positioned_byte_string = Ast_defs.positioned_byte_string
+[@@deriving eq, show]
 
 type og_null_flavor = Ast_defs.og_null_flavor =
   | OG_nullthrows

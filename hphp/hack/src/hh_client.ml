@@ -56,6 +56,7 @@ let () =
   let root = ClientArgs.root command in
   HackEventLogger.client_init
     ~init_id
+    ~custom_columns:(ClientCommand.get_custom_telemetry_data command)
     (Option.value root ~default:Path.dummy_path);
   Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
   Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;

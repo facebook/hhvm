@@ -27,3 +27,11 @@ type command_keyword =
   | CKDebug
   | CKDownloadSavedState
   | CKRage
+
+let get_custom_telemetry_data command =
+  match command with
+  | CCheck { ClientEnv.custom_telemetry_data; _ } -> custom_telemetry_data
+  | CStart { ClientStart.custom_telemetry_data; _ }
+  | CRestart { ClientStart.custom_telemetry_data; _ } ->
+    custom_telemetry_data
+  | _ -> []

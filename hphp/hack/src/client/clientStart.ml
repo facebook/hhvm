@@ -41,23 +41,46 @@ type env = {
   dynamic_view: bool;
   prechecked: bool option;
   config: (string * string) list;
+  custom_telemetry_data: (string * string) list;
   allow_non_opt_build: bool;
 }
 
-let start_server env =
+let start_server (env : env) =
+  let {
+    root;
+    from;
+    no_load;
+    watchman_debug_logging;
+    log_inference_constraints;
+    profile_log;
+    silent;
+    exit_on_failure;
+    ai_mode;
+    debug_port;
+    ignore_hh_version;
+    saved_state_ignore_hhconfig;
+    dynamic_view;
+    prechecked;
+    config;
+    custom_telemetry_data;
+    allow_non_opt_build;
+  } =
+    env
+  in
   (* Create a pipe for synchronization with the server: we will wait
      until the server finishes its initialisation phase. *)
   let (in_fd, out_fd) = Unix.pipe () in
   Unix.set_close_on_exec in_fd;
   let ic = Unix.in_channel_of_descr in_fd in
-  let serialize_config_overrides config =
-    config
+  let serialize_key_value_options
+      (option : string) (keyvalues : (string * string) list) =
+    keyvalues
     |> List.map ~f:(fun (key, value) ->
-           [| "--config"; Printf.sprintf "%s=%s" key value |])
+           [| option; Printf.sprintf "%s=%s" key value |])
     |> Array.concat
   in
   let ai_options =
-    match env.ai_mode with
+    match ai_mode with
     | Some ai -> [| "--ai"; ai |]
     | None -> [||]
   in
@@ -65,24 +88,24 @@ let start_server env =
   let hh_server_args =
     Array.concat
       [
-        [| hh_server; "-d"; Path.to_string env.root |];
-        ( if String.equal env.from "" then
+        [| hh_server; "-d"; Path.to_string root |];
+        ( if String.equal from "" then
           [||]
         else
-          [| "--from"; env.from |] );
-        ( if env.no_load then
+          [| "--from"; from |] );
+        ( if no_load then
           [| "--no-load" |]
         else
           [||] );
-        ( if env.watchman_debug_logging then
+        ( if watchman_debug_logging then
           [| "--watchman-debug-logging" |]
         else
           [||] );
-        ( if env.log_inference_constraints then
+        ( if log_inference_constraints then
           [| "--log-inference-constraints" |]
         else
           [||] );
-        ( if env.profile_log then
+        ( if profile_log then
           [| "--profile-log" |]
         else
           [||] );
@@ -94,39 +117,39 @@ let start_server env =
          * Note: Yes, the FD is available in the monitor process as well, but
          * it doesn't, and shouldn't, use it. *)
         [| "--waiting-client"; string_of_int (Handle.get_handle out_fd) |];
-        ( if env.ignore_hh_version then
+        ( if ignore_hh_version then
           [| "--ignore-hh-version" |]
         else
           [||] );
-        ( if env.saved_state_ignore_hhconfig then
+        ( if saved_state_ignore_hhconfig then
           [| "--saved-state-ignore-hhconfig" |]
         else
           [||] );
-        ( if env.dynamic_view then
+        ( if dynamic_view then
           [| "--dynamic-view" |]
         else
           [||] );
-        (match env.prechecked with
+        (match prechecked with
         | Some true -> [| "--prechecked" |]
         | _ -> [||]);
-        (match env.prechecked with
+        (match prechecked with
         | Some false -> [| "--no-prechecked" |]
         | _ -> [||]);
-        ( if not (List.is_empty env.config) then
-          serialize_config_overrides env.config
-        else
-          [||] );
-        ( if env.allow_non_opt_build then
+        serialize_key_value_options "--config" config;
+        serialize_key_value_options
+          "--custom-telemetry-data"
+          custom_telemetry_data;
+        ( if allow_non_opt_build then
           [| "--allow-non-opt-build" |]
         else
           [||] );
-        (match env.debug_port with
+        (match debug_port with
         | None -> [||]
         | Some fd ->
           [| "--debug-client"; string_of_int @@ Handle.get_handle fd |]);
       ]
   in
-  if not env.silent then
+  if not silent then
     Printf.eprintf
       "Server launched with the following command:\n\t%s\n%!"
       (String.concat
@@ -134,7 +157,7 @@ let start_server env =
          (Array.to_list (Array.map ~f:Filename.quote hh_server_args)));
 
   let (stdin, stdout, stderr) =
-    if env.silent then
+    if silent then
       let nfd = Unix.openfile Sys_utils.null_path [Unix.O_RDWR] 0 in
       (nfd, nfd, nfd)
     else
@@ -151,17 +174,17 @@ let start_server env =
       assert (String.equal (Stdlib.input_line ic) ServerMonitorUtils.ready);
       Stdlib.close_in ic
     | (_, Unix.WEXITED i) ->
-      if not env.silent then
+      if not silent then
         Printf.eprintf
           "Starting hh_server failed. Exited with status code: %d!\n"
           i;
-      if env.exit_on_failure then exit 77
+      if exit_on_failure then exit 77
     | _ ->
-      if not env.silent then Printf.eprintf "Could not start hh_server!\n";
-      if env.exit_on_failure then exit 77
+      if not silent then Printf.eprintf "Could not start hh_server!\n";
+      if exit_on_failure then exit 77
   with _ ->
-    if not env.silent then Printf.eprintf "Could not start hh_server!\n";
-    if env.exit_on_failure then exit 77
+    if not silent then Printf.eprintf "Could not start hh_server!\n";
+    if exit_on_failure then exit 77
 
 let should_start env =
   let root_s = Path.to_string env.root in

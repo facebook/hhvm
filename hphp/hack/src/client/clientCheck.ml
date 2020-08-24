@@ -93,31 +93,63 @@ let parse_position_string arg =
     raise Exit_status.(Exit_with Input_error)
 
 let connect ?(use_priority_pipe = false) args =
-  ClientConnect.connect
-    {
-      ClientConnect.root = args.root;
-      from = args.from;
-      autostart = args.autostart;
-      force_dormant_start = args.force_dormant_start;
-      deadline = args.deadline;
-      no_load = args.no_load;
-      watchman_debug_logging = args.watchman_debug_logging;
-      log_inference_constraints = args.log_inference_constraints;
-      profile_log = args.profile_log;
-      remote = args.remote;
-      ai_mode = args.ai_mode;
-      progress_callback =
-        Option.some_if
-          args.show_spinner
-          (ClientConnect.tty_progress_reporter ());
-      do_post_handoff_handshake = true;
-      ignore_hh_version = args.ignore_hh_version;
-      saved_state_ignore_hhconfig = args.saved_state_ignore_hhconfig;
-      use_priority_pipe;
-      prechecked = args.prechecked;
-      config = args.config;
-      allow_non_opt_build = args.allow_non_opt_build;
-    }
+  let {
+    root;
+    from;
+    autostart;
+    force_dormant_start;
+    deadline;
+    no_load;
+    watchman_debug_logging;
+    log_inference_constraints;
+    profile_log;
+    remote;
+    ai_mode;
+    show_spinner;
+    ignore_hh_version;
+    saved_state_ignore_hhconfig;
+    prechecked;
+    config;
+    allow_non_opt_build;
+    custom_telemetry_data;
+    dynamic_view = _;
+    error_format = _;
+    gen_saved_ignore_type_errors = _;
+    paths = _;
+    max_errors = _;
+    mode = _;
+    output_json = _;
+    replace_state_after_saving = _;
+    sort_results = _;
+    stdin_name = _;
+  } =
+    args
+  in
+  ClientConnect.(
+    connect
+      {
+        root;
+        from;
+        autostart;
+        force_dormant_start;
+        deadline;
+        no_load;
+        watchman_debug_logging;
+        log_inference_constraints;
+        profile_log;
+        remote;
+        ai_mode;
+        progress_callback =
+          Option.some_if show_spinner (ClientConnect.tty_progress_reporter ());
+        do_post_handoff_handshake = true;
+        ignore_hh_version;
+        saved_state_ignore_hhconfig;
+        use_priority_pipe;
+        prechecked;
+        config;
+        custom_telemetry_data;
+        allow_non_opt_build;
+      })
 
 (* This is a function, because server closes the connection after each command,
  * so we need to be able to reconnect to retry. *)

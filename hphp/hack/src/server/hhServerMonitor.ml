@@ -49,6 +49,7 @@ let monitor_daemon_main
     in
     HackEventLogger.init_monitor
       ~from:(ServerArgs.from options)
+      ~custom_columns:(ServerArgs.custom_telemetry_data options)
       ~proc_stack
       ~search_chunk_size:local_config.ServerLocalConfig.search_chunk_size
       ~prechecked_files:(ServerPrecheckedFiles.should_use options local_config)

@@ -32,6 +32,7 @@ let bad_exit _ _ _ ~is_oom:_ = ()
 let init
     ~root:_
     ~hhconfig_version:_
+    ~custom_columns:_
     ~init_id:_
     ~informant_managed:_
     ~time:_
@@ -53,6 +54,7 @@ let init
 let init_worker
     ~root:_
     ~hhconfig_version:_
+    ~custom_columns:_
     ~init_id:_
     ~time:_
     ~profile_type_check_duration_threshold:_
@@ -63,6 +65,7 @@ let init_worker
 
 let init_monitor
     ~from:_
+    ~custom_columns:_
     ~proc_stack:_
     ~search_chunk_size:_
     ~prechecked_files:_
@@ -109,7 +112,7 @@ let out_of_date _ = ()
 
 let lock_stolen _ = ()
 
-let client_init ~init_id:_ _ = ()
+let client_init ~init_id:_ ~custom_columns:_ _ = ()
 
 let serverless_ide_init ~init_id:_ = ()
 

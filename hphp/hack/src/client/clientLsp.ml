@@ -1149,6 +1149,7 @@ let start_server ~(env : env) (root : Path.t) : unit =
       dynamic_view = !cached_toggle_state;
       prechecked = None;
       config = env.config;
+      custom_telemetry_data = [];
       allow_non_opt_build = false;
     }
   in
@@ -1195,6 +1196,7 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
         use_priority_pipe = not env.use_serverless_ide;
         prechecked = None;
         config = env.config;
+        custom_telemetry_data = [];
         allow_non_opt_build = false;
       }
     in

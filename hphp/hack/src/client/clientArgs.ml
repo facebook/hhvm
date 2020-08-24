@@ -20,6 +20,13 @@ module Common_argspecs = struct
       " override arbitrary value from hh.conf and .hhconfig (format: <key>=<value>)"
     )
 
+  let custom_telemetry_data value_ref =
+    ( "--custom-telemetry-data",
+      Arg.String
+        (fun s -> value_ref := String_utils.split2_exn '=' s :: !value_ref),
+      "Add a custom column to all logged telemetry samples (format: <column>=<value>)"
+    )
+
   let force_dormant_start value_ref =
     ( "--force-dormant-start",
       Arg.Bool (fun x -> value_ref := x),
@@ -86,6 +93,7 @@ let parse_check_args cmd =
   let ai_mode = ref None in
   let autostart = ref true in
   let config = ref [] in
+  let custom_telemetry_data = ref [] in
   let dynamic_view = ref false in
   let error_format = ref Errors.Highlighted in
   let force_dormant_start = ref false in
@@ -206,6 +214,7 @@ let parse_check_args cmd =
           end,
         " Run CST search on this set of files,"
         ^ " rather than all the files in the codebase." );
+      Common_argspecs.custom_telemetry_data custom_telemetry_data;
       (* Delete an existing checkpoint.
        * Exitcode will be non-zero if no checkpoint is found *)
       ( "--delete-checkpoint",
@@ -736,6 +745,7 @@ let parse_check_args cmd =
       ai_mode = !ai_mode;
       autostart = !autostart;
       config = !config;
+      custom_telemetry_data = !custom_telemetry_data;
       dynamic_view = !dynamic_view;
       error_format = !error_format;
       force_dormant_start = !force_dormant_start;
@@ -785,6 +795,7 @@ let parse_start_env command =
   let prechecked = ref None in
   let from = ref "" in
   let config = ref [] in
+  let custom_telemetry_data = ref [] in
   let allow_non_opt_build = ref false in
   let wait_deprecation_msg () =
     Printf.eprintf
@@ -796,6 +807,7 @@ let parse_start_env command =
       ("--ai", Arg.String (fun x -> ai_mode := Some x), " run ai with options ");
       Common_argspecs.allow_non_opt_build allow_non_opt_build;
       Common_argspecs.config config;
+      Common_argspecs.custom_telemetry_data custom_telemetry_data;
       Common_argspecs.from from;
       ( "--ignore-hh-version",
         Arg.Set ignore_hh_version,
@@ -832,6 +844,7 @@ let parse_start_env command =
   {
     ClientStart.ai_mode = !ai_mode;
     config = !config;
+    custom_telemetry_data = !custom_telemetry_data;
     debug_port = None;
     dynamic_view = false;
     exit_on_failure = true;
@@ -1119,7 +1132,7 @@ invocations of `hh` faster.|}
       replay_token = !replay_token;
     }
 
-let parse_args ~(init_id : string) =
+let parse_args ~(init_id : string) : command =
   match parse_command () with
   | (CKNone | CKCheck) as cmd -> parse_check_args cmd
   | CKStart -> parse_start_args ()

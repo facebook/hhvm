@@ -22,6 +22,7 @@ type options = {
   ai_mode: Ai_options.t option;
   check_mode: bool;
   config: (string * string) list;
+  custom_telemetry_data: (string * string) list;
   dump_fanout: bool;
   dynamic_view: bool;
   from: string;
@@ -142,10 +143,11 @@ let print_json_version () =
 (* The main entry point *)
 (*****************************************************************************)
 
-let parse_options () =
+let parse_options () : options =
   let ai_mode = ref None in
   let check_mode = ref false in
   let config = ref [] in
+  let custom_telemetry_data = ref [] in
   let dump_fanout = ref false in
   let dynamic_view = ref false in
   let from = ref "" in
@@ -192,6 +194,13 @@ let parse_options () =
       ( "--config",
         Arg.String (fun s -> config := String_utils.split2_exn '=' s :: !config),
         Messages.config );
+      ( "--custom-telemetry-data",
+        Arg.String
+          (fun s ->
+            custom_telemetry_data :=
+              String_utils.split2_exn '=' s :: !custom_telemetry_data),
+        "Add a custom column to all logged telemetry samples (format: <column>=<value>)"
+      );
       ("--daemon", Arg.Set should_detach, Messages.daemon);
       ("--dump-fanout", Arg.Set dump_fanout, Messages.dump_fanout);
       ("--dynamic-view", Arg.Set dynamic_view, Messages.dynamic_view);
@@ -310,6 +319,7 @@ let parse_options () =
     ai_mode = !ai_mode;
     check_mode;
     config = !config;
+    custom_telemetry_data = !custom_telemetry_data;
     dump_fanout = !dump_fanout;
     dynamic_view = !dynamic_view;
     from = !from;
@@ -343,6 +353,7 @@ let default_options ~root =
     ai_mode = None;
     check_mode = false;
     config = [];
+    custom_telemetry_data = [];
     dump_fanout = false;
     dynamic_view = false;
     from = "";
@@ -384,6 +395,8 @@ let ai_mode options = options.ai_mode
 let check_mode options = options.check_mode
 
 let config options = options.config
+
+let custom_telemetry_data options = options.custom_telemetry_data
 
 let dump_fanout options = options.dump_fanout
 
@@ -465,6 +478,7 @@ let to_string
       ai_mode;
       check_mode;
       config;
+      custom_telemetry_data;
       dump_fanout;
       dynamic_view;
       from;
@@ -544,6 +558,12 @@ let to_string
            ~f:(fun (key, value) -> Printf.sprintf "%s=%s" key value)
            config )
   in
+  let custom_telemetry_data_str =
+    custom_telemetry_data
+    |> List.map ~f:(fun (column, value) -> Printf.sprintf "%s=%s" column value)
+    |> String.concat ~sep:", "
+    |> Printf.sprintf "[%s]"
+  in
   [
     "ServerArgs.options({";
     "ai_mode: ";
@@ -554,6 +574,8 @@ let to_string
     ", ";
     "config: ";
     config_str;
+    "custom_telemetry_data: ";
+    custom_telemetry_data_str;
     "dump_fanout: ";
     string_of_bool dump_fanout;
     ", ";

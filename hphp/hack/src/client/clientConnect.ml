@@ -41,6 +41,7 @@ type env = {
   use_priority_pipe: bool;
   prechecked: bool option;
   config: (string * string) list;
+  custom_telemetry_data: (string * string) list;
   allow_non_opt_build: bool;
 }
 
@@ -359,25 +360,51 @@ let rec connect
     | SMUtils.Server_missing_timeout _ ->
       log ~tracker "connect: autostart=%b" env.autostart;
       if env.autostart then (
-        ClientStart.start_server
-          {
-            ClientStart.root = env.root;
-            from = env.from;
-            no_load = env.no_load;
-            watchman_debug_logging = env.watchman_debug_logging;
-            log_inference_constraints = env.log_inference_constraints;
-            profile_log = env.profile_log;
-            silent = false;
-            exit_on_failure = false;
-            ai_mode = env.ai_mode;
-            debug_port = None;
-            ignore_hh_version = env.ignore_hh_version;
-            saved_state_ignore_hhconfig = env.saved_state_ignore_hhconfig;
-            dynamic_view = false;
-            prechecked = env.prechecked;
-            config = env.config;
-            allow_non_opt_build = env.allow_non_opt_build;
-          };
+        let {
+          root;
+          from;
+          autostart = _;
+          force_dormant_start = _;
+          deadline = _;
+          no_load;
+          watchman_debug_logging;
+          log_inference_constraints;
+          profile_log;
+          remote = _;
+          ai_mode;
+          progress_callback = _;
+          do_post_handoff_handshake = _;
+          ignore_hh_version;
+          saved_state_ignore_hhconfig;
+          use_priority_pipe = _;
+          prechecked;
+          config;
+          custom_telemetry_data;
+          allow_non_opt_build;
+        } =
+          env
+        in
+        ClientStart.(
+          start_server
+            {
+              root;
+              from;
+              no_load;
+              watchman_debug_logging;
+              log_inference_constraints;
+              profile_log;
+              silent = false;
+              exit_on_failure = false;
+              ai_mode;
+              debug_port = None;
+              ignore_hh_version;
+              saved_state_ignore_hhconfig;
+              dynamic_view = false;
+              prechecked;
+              config;
+              custom_telemetry_data;
+              allow_non_opt_build;
+            });
         connect env start_time
       ) else (
         Printf.eprintf

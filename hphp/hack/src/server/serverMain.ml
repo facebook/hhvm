@@ -1296,6 +1296,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
         ~root
         ~hhconfig_version
         ~init_id
+        ~custom_columns:(ServerArgs.custom_telemetry_data options)
         ~time:(Unix.gettimeofday ())
         ~profile_type_check_duration_threshold
         ~profile_owner
@@ -1306,6 +1307,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
         ~root
         ~hhconfig_version
         ~init_id
+        ~custom_columns:(ServerArgs.custom_telemetry_data options)
         ~informant_managed
         ~time:(Unix.gettimeofday ())
         ~search_chunk_size

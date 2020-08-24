@@ -10,7 +10,7 @@ is_marked = 0
 varray(0) {
 }
 is_marked = 1
-X:0:{}
+x:0:{}
 varray(0) {
 }
 is_marked = 1
@@ -34,7 +34,7 @@ is_marked = 0
 darray(0) {
 }
 is_marked = 1
-x:0:{}
+X:0:{}
 darray(0) {
 }
 is_marked = 1
@@ -67,7 +67,7 @@ varray(3) {
   int(3)
 }
 is_marked = 1
-X:3:{i:1;i:2;i:3;}
+x:3:{i:1;i:2;i:3;}
 varray(3) {
   int(1)
   int(2)
@@ -106,7 +106,7 @@ darray(1) {
   int(0)
 }
 is_marked = 1
-x:1:{i:0;i:0;}
+X:1:{i:0;i:0;}
 darray(1) {
   [0]=>
   int(0)

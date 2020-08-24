@@ -993,10 +993,10 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
       case ArrayKind::Vec:
         m_buf->append("v:");
         break;
-      case ArrayKind::MarkedDArray:
+      case ArrayKind::MarkedVArray:
         m_buf->append("x:");
         break;
-      case ArrayKind::MarkedVArray:
+      case ArrayKind::MarkedDArray:
         m_buf->append("X:");
         break;
       case ArrayKind::Keyset:

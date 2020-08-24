@@ -858,25 +858,25 @@ void VariableUnserializer::unserializeVariant(
       tvMove(make_array_like_tv(a.detach()), self);
     }
     return; // array has '}' terminating
-  case 'x': // MarkedDArray
+  case 'X': // MarkedDArray
   case 'Y': // DArray
     {
       // Check stack depth to avoid overflow.
       check_recursion_throw();
       auto a = unserializeDArray();
-      if (UNLIKELY(m_markLegacyArrays || type == 'x')) {
+      if (UNLIKELY(m_markLegacyArrays || type == 'X')) {
         a.setLegacyArray(true);
       }
       tvMove(make_array_like_tv(a.detach()), self);
     }
     return; // array has '}' terminating
-  case 'X': // MarkedVArray
+  case 'x': // MarkedVArray
   case 'y': // VArray
     {
       // Check stack depth to avoid overflow.
       check_recursion_throw();
       auto a = unserializeVArray();
-      if (UNLIKELY(m_markLegacyArrays || type == 'X')) {
+      if (UNLIKELY(m_markLegacyArrays || type == 'x')) {
         a.setLegacyArray(true);
       }
       tvMove(make_array_like_tv(a.detach()), self);

@@ -1715,35 +1715,44 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr,
     }
   };
 
+  auto const write_file_line_tag = [&](
+      const char* format_tag,
+      const arrprov::Tag& tag
+  ) {
+    auto const line = tag.line();
+    auto const filename = tag.filename();
+    m_buf->append(format_tag);
+    write(line);
+    write_filename(filename);
+  };
+
   if (m_type == Type::Internal && arrprov::arrayWantsTag(arr)) {
     auto const tag = arrprov::getTag(arr);
     if (tag.valid()) {
       switch (tag.kind()) {
       case arrprov::Tag::Kind::Invalid: always_assert(false);
-      case arrprov::Tag::Kind::Known: {
-        auto const line = tag.line();
-        auto const filename = tag.filename();
-        m_buf->append("p:");
-        write(line);
-        write_filename(filename);
+      case arrprov::Tag::Kind::Known:
+        write_file_line_tag("p:", tag);
         break;
-      };
       case arrprov::Tag::Kind::UnknownRepo: {
-        m_buf->append("P;");
+        m_buf->append("pu;");
         break;
       }
       case arrprov::Tag::Kind::KnownTraitMerge: {
-        m_buf->append("r:");
+        m_buf->append("pr:");
         write_filename(tag.filename());
         break;
       }
       case arrprov::Tag::Kind::KnownLargeEnum: {
-        m_buf->append("e:");
+        m_buf->append("pe:");
         write_filename(tag.filename());
         break;
       }
       case arrprov::Tag::Kind::RuntimeLocation:
+        write_file_line_tag("pc:", tag);
+        break;
       case arrprov::Tag::Kind::RuntimeLocationPoison:
+        write_file_line_tag("pz:", tag);
         break;
       }
     }

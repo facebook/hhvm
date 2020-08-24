@@ -1246,9 +1246,7 @@ arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
     }
   };
 
-  if (type() != VariableUnserializer::Type::Internal) return {};
-  if (peek() == 'p') {
-    expectChar('p');
+  auto const read_file_line = [&]() -> std::pair<const StringData*, int> {
     expectChar(':');
     expectChar('i');
     expectChar(':');
@@ -1256,11 +1254,25 @@ arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
     expectChar(';');
     auto const filename = read_filename();
     expectChar(';');
+    return std::make_pair(filename, line);
+  };
+
+  if (type() != VariableUnserializer::Type::Internal) {
+    return {};
+  }
+
+  if (peek() != 'p') {
+    return {};
+  }
+  expectChar('p');
+
+  if (peek() == ':') {
+    auto const [filename, line] = read_file_line();
     return finish(
       arrprov::Tag { filename, line }
     );
-  } else if (peek() == 'P') {
-    expectChar('P');
+  } else if (peek() == 'u') {
+    expectChar('u');
     expectChar(';');
     return finish(
       arrprov::Tag::RepoUnion()
@@ -1280,6 +1292,18 @@ arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
     expectChar(';');
     return finish(
       arrprov::Tag::LargeEnum(filename)
+    );
+  } if (peek() == 'c') {
+    expectChar('c');
+    auto const [filename, line] = read_file_line();
+    return finish(
+        arrprov::Tag::RuntimeLocation(filename, line)
+    );
+  } if (peek() == 'z') {
+    expectChar('z');
+    auto const [filename, line] = read_file_line();
+    return finish(
+        arrprov::Tag::RuntimeLocationPoison(filename, line)
     );
   } else {
     return {};

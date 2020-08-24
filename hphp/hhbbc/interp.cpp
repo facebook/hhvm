@@ -3567,6 +3567,19 @@ void in(ISS& env, const bc::UnsetG& /*op*/) {
   if (!t1.couldBe(BObj | BRes)) nothrow(env);
 }
 
+bool fcallCanSkipRepack(ISS& env, const FCallArgs& fca, const res::Func& func) {
+  // Can't skip repack if potentially calling a function with too many args.
+  if (fca.numArgs() > func.minNonVariadicParams()) return false;
+  // Repack not needed if not unpacking and not having too many arguments.
+  if (!fca.hasUnpack()) return true;
+  // Can't skip repack if unpack args are in a wrong position.
+  if (fca.numArgs() != func.maxNonVariadicParams()) return false;
+
+  // Repack not needed if unpack args have the correct type.
+  auto const unpackArgs = topC(env, fca.hasGenerics() ? 1 : 0);
+  return unpackArgs.subtypeOf(RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr);
+}
+
 template<class FCallWithFCA>
 bool fcallOptimizeChecks(
   ISS& env,
@@ -3626,7 +3639,7 @@ bool fcallOptimizeChecks(
     }
   }
 
-  if (!fca.skipRepack() && fca.numArgs() <= func.minNonVariadicParams()) {
+  if (!fca.skipRepack() && fcallCanSkipRepack(env, fca, func)) {
     reduce(env, fcallWithFCA(fca.withoutRepack()));
     return true;
   }

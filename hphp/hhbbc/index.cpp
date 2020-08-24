@@ -1003,24 +1003,43 @@ bool Func::mightBeBuiltin() const {
   );
 }
 
-uint32_t Func::minNonVariadicParams() const {
-  auto const count = [] (const php::Func& f) -> uint32_t {
-    for (size_t i = 0; i < f.params.size(); ++i) {
-      if (f.params[i].isVariadic) return i;
-    }
-    return f.params.size();
-  };
+namespace {
 
+uint32_t numNVArgs(const php::Func& f) {
+  uint32_t cnt = f.params.size();
+  return cnt && f.params[cnt - 1].isVariadic ? cnt - 1 : cnt;
+}
+
+}
+
+uint32_t Func::minNonVariadicParams() const {
   return match<uint32_t>(
     val,
     [&] (FuncName) { return 0; },
     [&] (MethodName) { return 0; },
-    [&] (FuncInfo* fi) { return count(*fi->func); },
-    [&] (const MethTabEntryPair* mte) { return count(*mte->second.func); },
+    [&] (FuncInfo* fi) { return numNVArgs(*fi->func); },
+    [&] (const MethTabEntryPair* mte) { return numNVArgs(*mte->second.func); },
     [&] (FuncFamily* fa) {
       auto c = std::numeric_limits<uint32_t>::max();
       for (auto const pf : fa->possibleFuncs()) {
-        c = std::min(c, count(*pf->second.func));
+        c = std::min(c, numNVArgs(*pf->second.func));
+      }
+      return c;
+    }
+  );
+}
+
+uint32_t Func::maxNonVariadicParams() const {
+  return match<uint32_t>(
+    val,
+    [&] (FuncName) { return std::numeric_limits<uint32_t>::max(); },
+    [&] (MethodName) { return std::numeric_limits<uint32_t>::max(); },
+    [&] (FuncInfo* fi) { return numNVArgs(*fi->func); },
+    [&] (const MethTabEntryPair* mte) { return numNVArgs(*mte->second.func); },
+    [&] (FuncFamily* fa) {
+      uint32_t c = 0;
+      for (auto const pf : fa->possibleFuncs()) {
+        c = std::max(c, numNVArgs(*pf->second.func));
       }
       return c;
     }

@@ -2467,6 +2467,24 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         }))
     }
 
+    fn make_variadic_parameter(&mut self, _: Self::R, hint: Self::R, _: Self::R) -> Self::R {
+        Node::FunParam(
+            self.alloc(FunParamDecl {
+                attributes: Node::Ignored,
+                visibility: Node::Ignored,
+                kind: ParamMode::FPnormal,
+                hint,
+                id: Id(
+                    hint.get_pos(self.state.arena)
+                        .unwrap_or_else(|| Pos::none()),
+                    "".into(),
+                ),
+                variadic: true,
+                initializer: Node::Ignored,
+            }),
+        )
+    }
+
     fn make_function_declaration(
         &mut self,
         attributes: Self::R,
@@ -3656,6 +3674,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             })
         };
 
+        let arity = args
+            .iter()
+            .find_map(|&node| match node {
+                Node::FunParam(fp) if fp.variadic => Some(FunArity::Fvariadic(make_param(fp))),
+                _ => None,
+            })
+            .unwrap_or(FunArity::Fstandard);
+
         let params = self.slice_from_iter(args.iter().filter_map(|&node| match node {
             Node::FunParam(fp) if !fp.variadic => Some(make_param(fp)),
             _ => None,
@@ -3677,7 +3703,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         self.hint_ty(
             pos,
             Ty_::Tfun(self.alloc(FunType {
-                arity: FunArity::Fstandard,
+                arity,
                 tparams: &[],
                 where_constraints: &[],
                 params,

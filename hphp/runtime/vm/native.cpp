@@ -212,7 +212,6 @@ void callFunc(const Func* const func,
               const ActRec* fp,
               const void* const ctx,
               TypedValue* args,
-              const int numNonDefault,
               TypedValue& ret,
               bool isFCallBuiltin) {
   auto const f = func->nativeFuncPtr();
@@ -322,12 +321,11 @@ void callFunc(const Func* const func,
 namespace {
 
 template <typename F>
-void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
-                         const Func* func, F args) {
+void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
   assertx(func->isBuiltin() && "func is not a builtin");
   assertx(numArgs == func->numParams());
 
-  for (int32_t i = 0; (i < numNonDefault) && (i < numArgs); i++) {
+  for (int32_t i = 0; i < numArgs; i++) {
     const Func::ParamInfo& pi = func->params()[i];
 
     auto const tv = args(i);
@@ -405,19 +403,19 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
 }
 
 void coerceFCallArgsFromLocals(const ActRec* fp,
-                               int32_t numArgs, int32_t numNonDefault,
+                               int32_t numArgs,
                                const Func* func) {
   coerceFCallArgsImpl(
-    numArgs, numNonDefault, func,
+    numArgs, func,
     [&] (int32_t idx) { return frame_local(fp, idx); }
   );
 }
 
 void coerceFCallArgsFromStack(TypedValue* args,
-                              int32_t numArgs, int32_t numNonDefault,
+                              int32_t numArgs,
                               const Func* func) {
   coerceFCallArgsImpl(
-    numArgs, numNonDefault, func,
+    numArgs, func,
     [&] (int32_t idx) { return &args[-idx]; }
   );
 }
@@ -429,14 +427,13 @@ TypedValue* functionWrapper(ActRec* ar) {
   assertx(ar);
   auto func = ar->func();
   auto numArgs = func->numParams();
-  auto numNonDefault = ar->numArgs();
   TypedValue* args = ((TypedValue*)ar) - 1;
 
-  coerceFCallArgsFromLocals(ar, numArgs, numNonDefault, func);
+  coerceFCallArgsFromLocals(ar, numArgs, func);
 
   TypedValue rv;
   rv.m_type = KindOfUninit;
-  callFunc(func, ar, nullptr, args, numNonDefault, rv, false);
+  callFunc(func, ar, nullptr, args, rv, false);
 
   assertx(rv.m_type != KindOfUninit);
   frame_free_locals_no_this_inl(ar, func->numLocals(), &rv);
@@ -449,11 +446,10 @@ TypedValue* methodWrapper(ActRec* ar) {
   assertx(ar);
   auto func = ar->func();
   auto numArgs = func->numParams();
-  auto numNonDefault = ar->numArgs();
   bool isStatic = func->isStatic();
   TypedValue* args = ((TypedValue*)ar) - 1;
 
-  coerceFCallArgsFromLocals(ar, numArgs, numNonDefault, func);
+  coerceFCallArgsFromLocals(ar, numArgs, func);
 
   // Prepend a context arg for methods
   // Class when it's being called statically Foo::bar()
@@ -473,7 +469,7 @@ TypedValue* methodWrapper(ActRec* ar) {
 
   TypedValue rv;
   rv.m_type = KindOfUninit;
-  callFunc(func, ar, ctx, args, numNonDefault, rv, false);
+  callFunc(func, ar, ctx, args, rv, false);
 
   assertx(rv.m_type != KindOfUninit);
   if (isStatic) {

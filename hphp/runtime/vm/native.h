@@ -222,11 +222,9 @@ enum Attr {
  */
 void coerceFCallArgsFromLocals(const ActRec* fp,
                                int32_t numArgs,
-                               int32_t numNonDefault,
                                const Func* func);
 void coerceFCallArgsFromStack(TypedValue* args,
                               int32_t numArgs,
-                              int32_t numNonDefault,
                               const Func* func);
 
 /**
@@ -238,7 +236,6 @@ void callFunc(const Func* func,
               const ActRec* fp,
               const void* ctx,
               TypedValue* args,
-              int32_t numNonDefault,
               TypedValue& ret,
               bool isFCallBuiltin);
 

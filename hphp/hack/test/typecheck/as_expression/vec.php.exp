@@ -1,13 +1,13 @@
+File "vec.php", line 4, characters 9-11:
+Wrong number of type arguments (expected 1, got 0) (Typing[4101])
+File "hackarray.hhi", line 15, characters 22-24:
+Definition is here
 File "vec.php", line 6, characters 15-16:
 Invalid argument (Typing[4110])
 File "vec.php", line 22, characters 26-31:
 Expected `string`
 File "vec.php", line 4, characters 3-4:
 But got `mixed` from this "as" assertion
-File "vec.php", line 4, characters 9-11:
-Wrong number of type arguments (expected 1, got 0) (Typing[4101])
-File "hackarray.hhi", line 15, characters 22-24:
-Definition is here
 File "vec.php", line 12, characters 15-16:
 Invalid argument (Typing[4110])
 File "vec.php", line 22, characters 26-31:

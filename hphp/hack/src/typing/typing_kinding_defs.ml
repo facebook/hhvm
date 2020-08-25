@@ -17,13 +17,19 @@ type kind = {
 
 and named_kind = Aast.sid * kind
 
+let dummy_name = (Pos.none, "")
+
+let with_dummy_name k = (dummy_name, k)
+
+let get_arity k = List.length k.parameters
+
 let string_of_kind (kind : kind) =
   let rec stringify toplevel k =
     match k.parameters with
-    | [] -> "*"
+    | [] -> "Type"
     | params ->
       let parts = List.map params (fun (_, pk) -> stringify false pk) in
-      let res = String.concat ~sep:" -> " parts ^ " -> *" in
+      let res = String.concat ~sep:" -> " parts ^ " -> Type" in
       if toplevel then
         res
       else
@@ -31,7 +37,22 @@ let string_of_kind (kind : kind) =
   in
   stringify true kind
 
-let get_arity k = List.length k.parameters
+let description_of_kind kind =
+  match kind.parameters with
+  | [] -> "a fully-applied type"
+  | params
+    when List.for_all params ~f:(fun (_, param) ->
+             Int.( = ) 0 (get_arity param)) ->
+    (* no higher-order arguments *)
+    let param_count = List.length params in
+    let args_desc =
+      if Int.( = ) 1 param_count then
+        "a single (fully-applied) type argument"
+      else
+        string_of_int param_count ^ "(fully-applied) type arguments"
+    in
+    "a type constructor expecting " ^ args_desc
+  | _ -> "a type constructor of kind " ^ string_of_kind kind
 
 let rec remove_bounds kind =
   {
@@ -61,6 +82,8 @@ module Simple = struct
   (* let without_wildcard_bounds k = (k, None) *)
 
   let string_of_kind (k, _) = string_of_kind k
+
+  let description_of_kind (k, _) = description_of_kind k
 
   let get_arity sk = get_arity (fst sk)
 
@@ -131,4 +154,6 @@ module Simple = struct
        The fact that the bounds are still there is hidden behind this  module's interface, which
        denies access to them *)
     (fk, wildcard_bounds)
+
+  let with_dummy_name = with_dummy_name
 end

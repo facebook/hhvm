@@ -1250,7 +1250,7 @@ and make_result env p te ty =
 
 and localize_targ env ta =
   let pos = fst ta in
-  let (env, targ) = Phase.localize_targ env ta in
+  let (env, targ) = Phase.localize_targ ~check_well_kinded:true env ta in
   (env, targ, ExpectedTy.make pos Reason.URhint (fst targ))
 
 and set_function_pointer ty =
@@ -1814,6 +1814,7 @@ and expr_
           let def_pos = ce_pos in
           let (env, tal) =
             Phase.localize_targs
+              ~check_well_kinded:true
               ~is_method:true
               ~def_pos:ce_pos
               ~use_pos:p
@@ -2482,9 +2483,11 @@ and expr_
     let (env, te, ty) = expr env e in
     make_result env p (Aast.ExpressionTree (hint, te)) ty
   | Is (e, hint) ->
+    Typing_kinding.Simple.check_well_kinded_hint env hint;
     let (env, te, _) = expr env e in
     make_result env p (Aast.Is (te, hint)) (MakeType.bool (Reason.Rwitness p))
   | As (e, hint, is_nullable) ->
+    Typing_kinding.Simple.check_well_kinded_hint env hint;
     let refine_type env lpos lty rty =
       let reason = Reason.Ras lpos in
       let (env, rty) = Env.expand_type env rty in
@@ -5023,6 +5026,7 @@ and fun_type_of_id env x tal el =
       let ety_env = Phase.env_with_self env in
       let (env, tal) =
         Phase.localize_targs
+          ~check_well_kinded:true
           ~is_method:true
           ~def_pos:fe_pos
           ~use_pos:(fst x)
@@ -5325,6 +5329,7 @@ and class_get_
             | (r, Tfun ft) when is_method ->
               let (env, explicit_targs) =
                 Phase.localize_targs
+                  ~check_well_kinded:true
                   ~is_method:true
                   ~def_pos
                   ~use_pos:p
@@ -5408,7 +5413,14 @@ and class_id_for_new
     ~exact p env (cid : Nast.class_id_) (explicit_targs : Nast.targ list) :
     env * Tast.targ list * Tast.class_id * (sid * Cls.t * locl_ty) list =
   let (env, tal, te, cid_ty) =
-    static_class_id ~exact ~check_constraints:false p env explicit_targs cid
+    static_class_id
+      ~check_targs_well_kinded:true
+      ~exact
+      ~check_constraints:false
+      p
+      env
+      explicit_targs
+      cid
   in
   (* Need to deal with union case *)
   let rec get_info res tyl =
@@ -5539,6 +5551,7 @@ and this_for_method env cid default_ty =
 (** Resolve class expressions like `parent`, `self`, `static`, classnames
     and others. *)
 and static_class_id
+    ?(check_targs_well_kinded = false)
     ?(exact = Nonexact)
     ~(check_constraints : bool)
     (p : pos)
@@ -5631,6 +5644,7 @@ and static_class_id
     if Env.is_generic_parameter env id then
       let (env, tal) =
         Phase.localize_targs
+          ~check_well_kinded:check_targs_well_kinded
           ~is_method:true
           ~def_pos:p
           ~use_pos:p
@@ -5652,6 +5666,7 @@ and static_class_id
           List.map ~f:snd tal
           |> Phase.localize_targs_and_check_constraints
                ~exact
+               ~check_well_kinded:check_targs_well_kinded
                ~check_constraints
                ~def_pos:(Cls.pos class_)
                ~use_pos:p

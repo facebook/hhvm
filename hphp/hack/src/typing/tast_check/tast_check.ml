@@ -46,7 +46,6 @@ let visitor ctx =
         Instantiability_check.handler;
         Static_memoized_check.handler;
         Abstract_class_check.handler;
-        Type_params_arity_check.handler;
         Class_parent_check.handler;
         Method_type_param_check.handler;
         Foreach_collection_reactivity_check.handler;

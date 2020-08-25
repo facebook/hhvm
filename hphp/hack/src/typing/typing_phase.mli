@@ -61,6 +61,7 @@ val localize_hint_with_self : env -> Aast.hint -> env * locl_ty
  * (for the use-site) and `use_name` (the name of the constructor or function).
  *)
 val localize_targs :
+  check_well_kinded:bool ->
   is_method:bool ->
   def_pos:Pos.t ->
   use_pos:Pos.t ->
@@ -71,7 +72,8 @@ val localize_targs :
   env * Tast.targ list
 
 (* Declare and localize a single explicit type argument *)
-val localize_targ : env -> Aast.hint -> env * Tast.targ
+val localize_targ :
+  check_well_kinded:bool -> env -> Aast.hint -> env * Tast.targ
 
 val localize_hint : ety_env:expand_env -> env -> Aast.hint -> env * locl_ty
 
@@ -96,6 +98,7 @@ val locl : locl_ty -> phase_ty
 
 val localize_targs_and_check_constraints :
   exact:exact ->
+  check_well_kinded:bool ->
   check_constraints:bool ->
   def_pos:Pos.t ->
   use_pos:Pos.t ->

@@ -1174,12 +1174,10 @@ and type_param ~forbid_this ((genv, _) as env) t =
           Errors.error_name_already_bound name canonical pos def_pos
         | None -> ())
   end;
-  ( if
-    (not
-       (TypecheckerOptions.higher_kinded_types
-          (Provider_context.get_tcopt genv.ctx)))
-    && (not @@ List.is_empty t.Aast.tp_parameters)
-  then
+  let hk_types_enabled =
+    TypecheckerOptions.higher_kinded_types (Provider_context.get_tcopt genv.ctx)
+  in
+  ( if (not hk_types_enabled) && (not @@ List.is_empty t.Aast.tp_parameters) then
     let (pos, name) = t.Aast.tp_name in
     Errors.tparam_with_tparam pos name );
 
@@ -1187,9 +1185,11 @@ and type_param ~forbid_this ((genv, _) as env) t =
       parameter environment for the nested calls of type_param so that hint_ can correctly
       convert between Happly and Habstr in constraints *)
   let tp_parameters =
-    List.map t.Aast.tp_parameters (type_param ~forbid_this env)
+    if hk_types_enabled then
+      List.map t.Aast.tp_parameters (type_param ~forbid_this env)
+    else
+      []
   in
-
   {
     N.tp_variance = t.Aast.tp_variance;
     tp_name = t.Aast.tp_name;

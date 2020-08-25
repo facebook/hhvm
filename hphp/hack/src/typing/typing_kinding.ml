@@ -3,6 +3,8 @@ open Common
 open Typing_defs
 open Typing_kinding_defs
 module Env = Typing_env
+module Cls = Decl_provider.Class
+module KindDefs = Typing_kinding_defs
 
 module Locl_Inst = struct
   let rec instantiate subst (ty : locl_ty) =
@@ -141,21 +143,233 @@ module Locl_Inst = struct
     { et_type = instantiate subst et.et_type; et_enforced = et.et_enforced }
 end
 
-let is_subkind_simple _env ~(sub : Simple.kind) ~(sup : Simple.kind) =
-  let rec is_subk subk superk =
-    let param_compare =
-      List.fold2
-        (Simple.get_named_parameter_kinds subk)
-        (Simple.get_named_parameter_kinds superk)
-        ~init:true
-        ~f:(fun ok (_, param_sub) (_, param_sup) ->
-          (* Treating parameters contravariantly here. For simple subkinding, it doesn't make
+let report_kind_error ~use_pos ~def_pos ~tparam_name ~expected ~actual =
+  let actual_kind_repr = Simple.description_of_kind actual in
+  let expected_kind_repr = Simple.description_of_kind expected in
+  Errors.kind_mismatch
+    ~use_pos
+    ~def_pos
+    ~tparam_name
+    ~expected_kind_repr
+    ~actual_kind_repr
+
+module Simple = struct
+  (* TODO(T70068435) Once we support constraints on higher-kinded types, this should only be used
+  during the localization of declaration site types, everything else should be doing full
+  kind-checking (including constraints) *)
+
+  let is_subkind _env ~(sub : Simple.kind) ~(sup : Simple.kind) =
+    let rec is_subk subk superk =
+      let param_compare =
+        List.fold2
+          (Simple.get_named_parameter_kinds subk)
+          (Simple.get_named_parameter_kinds superk)
+          ~init:true
+          ~f:(fun ok (_, param_sub) (_, param_sup) ->
+            (* Treating parameters contravariantly here. For simple subkinding, it doesn't make
              a difference, though *)
-          ok && is_subk param_sup param_sub)
+            ok && is_subk param_sup param_sub)
+      in
+      let open List.Or_unequal_lengths in
+      match param_compare with
+      | Unequal_lengths -> false
+      | Ok r -> r
     in
-    let open List.Or_unequal_lengths in
-    match param_compare with
-    | Unequal_lengths -> false
-    | Ok r -> r
-  in
-  is_subk sub sup
+    is_subk sub sup
+
+  let rec check_targs_well_kinded
+      ~allow_missing_targs
+      ~def_pos
+      ~use_pos
+      env
+      (tyargs : decl_ty list)
+      (nkinds : Simple.named_kind list) =
+    let exp_len = List.length nkinds in
+    let act_len = List.length tyargs in
+    let arity_mistmach_okay =
+      Int.equal act_len 0
+      && ( allow_missing_targs
+         || (* 4101 is Error_codes.Typing.TypeArityMismatch error code *)
+         (not (Partial_provider.should_check_error (Env.get_mode env) 4101))
+         && not
+              (TypecheckerOptions.experimental_feature_enabled
+                 (Env.get_tcopt env)
+                 TypecheckerOptions.experimental_generics_arity) )
+    in
+    if Int.( <> ) exp_len act_len && not arity_mistmach_okay then
+      Errors.type_arity use_pos def_pos ~expected:exp_len ~actual:act_len;
+    let length = min exp_len act_len in
+    let (tyargs, nkinds) = (List.take tyargs length, List.take nkinds length) in
+    List.iter2_exn tyargs nkinds ~f:(check_targ_well_kinded env)
+
+  and check_targ_well_kinded env tyarg (nkind : Simple.named_kind) =
+    let kind = snd nkind in
+    match get_node tyarg with
+    | Tapply ((_, x), _argl) when String.equal x SN.Typehints.wildcard ->
+      let is_higher_kinded = Simple.get_arity kind > 0 in
+      if is_higher_kinded then (
+        let pos = get_reason tyarg |> Reason.to_pos in
+        Errors.wildcard_for_higher_kinded_type pos;
+        check_well_kinded env tyarg nkind
+      )
+    | _ -> check_well_kinded env tyarg nkind
+
+  and check_possibly_enforced_ty env enf_ty =
+    check_well_kinded_type ~allow_missing_targs:false env enf_ty.et_type
+
+  and check_well_kinded_type ~allow_missing_targs env (ty : decl_ty) =
+    let check_opt =
+      Option.value_map
+        ~default:()
+        ~f:(check_well_kinded_type ~allow_missing_targs:false env)
+    in
+    let (r, ty_) = deref ty in
+    let check = check_well_kinded_type ~allow_missing_targs:false env in
+    let check_against_tparams def_pos tyargs tparams =
+      let kinds = Simple.named_kinds_of_decl_tparams tparams in
+      let use_pos = Reason.to_pos r in
+      check_targs_well_kinded
+        ~allow_missing_targs
+        ~def_pos
+        ~use_pos
+        env
+        tyargs
+        kinds
+    in
+    match ty_ with
+    | Terr
+    | Tany _
+    | Tvar _
+    (* Tvar must not be higher-kinded yet *)
+    | Tnonnull
+    | Tprim _
+    | Tdynamic
+    | Tmixed
+    | Tthis ->
+      ()
+    | Tarray (ty1, ty2) ->
+      check_opt ty1;
+      check_opt ty2
+    | Tdarray (tk, tv) ->
+      check tk;
+      check tv
+    | Tvarray tv -> check tv
+    | Tvarray_or_darray (tk, tv) ->
+      check tk;
+      check tv
+    | Tpu_access (ty, _)
+    | Tlike ty
+    | Toption ty ->
+      check ty
+    | Ttuple tyl
+    | Tunion tyl
+    | Tintersection tyl ->
+      List.iter tyl check
+    | Taccess (ty, _) ->
+      (* Because type constants cannot depend on type parameters,
+       we allow Foo::the_type even if Foo has type parameters *)
+      check_well_kinded_type ~allow_missing_targs:true env ty
+    | Tshape (_, map) -> Nast.ShapeMap.iter (fun _ sft -> check sft.sft_ty) map
+    | Tfun ft ->
+      check_possibly_enforced_ty env ft.ft_ret;
+      List.iter ft.ft_params (fun p -> check_possibly_enforced_ty env p.fp_type)
+    (* FIXME shall we inspect tparams and where_constraints *)
+    (* List.iter ft.ft_where_constraints (fun (ty1, _, ty2) -> check ty1; check ty2 ); *)
+    | Tgeneric (name, targs) ->
+      begin
+        match Env.get_pos_and_kind_of_generic env name with
+        | Some (def_pos, gen_kind) ->
+          let param_nkinds =
+            Simple.from_full_kind gen_kind |> Simple.get_named_parameter_kinds
+          in
+          let use_pos = Reason.to_pos r in
+          check_targs_well_kinded
+            ~allow_missing_targs:false
+            ~def_pos
+            ~use_pos
+            env
+            targs
+            param_nkinds
+        | None -> ()
+      end
+    | Tapply ((_p, cid), argl) ->
+      begin
+        match Env.get_class env cid with
+        | Some class_info ->
+          let tparams = Cls.tparams class_info in
+          check_against_tparams (Cls.pos class_info) argl tparams
+        | None ->
+          begin
+            match Env.get_typedef env cid with
+            | Some typedef ->
+              check_against_tparams typedef.td_pos argl typedef.td_tparams
+            | None -> ()
+          end
+      end
+
+  and check_well_kinded env (ty : decl_ty) (expected_nkind : Simple.named_kind)
+      =
+    let (expected_name, expected_kind) = expected_nkind in
+    let r = get_reason ty in
+    let kind_error actual_kind =
+      let (def_pos, tparam_name) = expected_name in
+      let use_pos = Reason.to_pos r in
+      report_kind_error
+        ~use_pos
+        ~def_pos
+        ~tparam_name
+        ~actual:actual_kind
+        ~expected:expected_kind
+    in
+    let check_against_tparams tparams =
+      let overall_kind = Simple.type_with_params_to_simple_kind tparams in
+      if not (is_subkind env ~sub:overall_kind ~sup:expected_kind) then
+        kind_error overall_kind
+    in
+
+    if Int.( = ) (Simple.get_arity expected_kind) 0 then
+      check_well_kinded_type ~allow_missing_targs:false env ty
+    else
+      match get_node ty with
+      | Tapply ((_pos, name), []) ->
+        begin
+          match Env.get_class env name with
+          | Some class_info ->
+            let tparams = Cls.tparams class_info in
+            check_against_tparams tparams
+          | None ->
+            begin
+              match Env.get_typedef env name with
+              | Some typedef ->
+                let tparams = typedef.td_tparams in
+                check_against_tparams tparams
+              | None -> ()
+            end
+        end
+      | Tgeneric (name, []) ->
+        begin
+          match Env.get_pos_and_kind_of_generic env name with
+          | Some (_pos, gen_kind) ->
+            let get_kind = Simple.from_full_kind gen_kind in
+            if not (is_subkind env ~sub:get_kind ~sup:expected_kind) then
+              kind_error get_kind
+          | None -> ()
+        end
+      | Tgeneric (_, targs)
+      | Tapply (_, targs) ->
+        Errors.higher_kinded_partial_application
+          (Reason.to_pos r)
+          (List.length targs)
+      | Terr
+      | Tany _ ->
+        ()
+      | _ -> kind_error (Simple.fully_applied_type ())
+
+  (* Export the version that doesn't expose allow_missing_targs *)
+  let check_well_kinded_type env (ty : decl_ty) =
+    check_well_kinded_type ~allow_missing_targs:false env ty
+
+  let check_well_kinded_hint env hint =
+    let decl_ty = Decl_hint.hint env.Typing_env_types.decl_env hint in
+    check_well_kinded_type env decl_ty
+end

@@ -287,6 +287,7 @@ and obj_get_concrete_ty
                  * parameters. *)
                 let (env, explicit_targs) =
                   Phase.localize_targs
+                    ~check_well_kinded:true
                     ~is_method
                     ~use_pos:id_pos
                     ~def_pos:mem_pos

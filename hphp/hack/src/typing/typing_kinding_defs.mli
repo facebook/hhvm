@@ -26,6 +26,10 @@ type kind = {
 
 and named_kind = Aast.sid * kind
 
+(** This can be used in situations where we don't have a name for a type
+  parameter at hand. All error functions must be aware of this and not print the dummy name. *)
+val dummy_name : Aast.sid
+
 (** Simple kinds are used in situations where we want to check well-kindedness, but
   ignore type constraints. Most importantly, this is used in Typing_phase.
   In other words, simple kinds can be seen as kinds that are just built from * and ->,
@@ -59,7 +63,11 @@ module Simple : sig
         wc_upper: tparam_bounds;
       }
 
+  (** Creates a general description of a kind, built from "Type" and "->". *)
   val string_of_kind : kind -> string
+
+  (** Creates a human-readable representation of a kind, suitable for error messages. *)
+  val description_of_kind : kind -> string
 
   val get_arity : kind -> int
 
@@ -88,4 +96,6 @@ module Simple : sig
   val get_named_parameter_kinds : kind -> named_kind list
 
   val from_full_kind : full_kind -> kind
+
+  val with_dummy_name : kind -> named_kind
 end

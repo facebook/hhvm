@@ -5276,7 +5276,7 @@ let higher_kinded_partial_application pos count =
     ( "A higher-kinded type is expected here."
     ^ " We do not not support partial applications to yield higher-kinded types, but you are providing "
     ^ string_of_int count
-    ^ " type arguments." )
+    ^ " type argument(s)." )
 
 let wildcard_for_higher_kinded_type pos =
   add
@@ -5286,33 +5286,42 @@ let wildcard_for_higher_kinded_type pos =
     ^ " We cannot infer higher-kinded type arguments at this time, please state the actual type."
     )
 
+let implicit_type_argument_for_higher_kinded_type ~use_pos ~def_pos param_name =
+  let param_desc =
+    (* This should be Naming_special_names.Typehints.wildcard, but its not available in this
+       module *)
+    if String.equal param_name "_" then
+      "the anonymous generic parameter"
+    else
+      "the generic parameter " ^ param_name
+  in
+  add_list
+    (Naming.err_code Naming.HigherKindedTypesUnsupportedFeature)
+    [
+      ( use_pos,
+        "You left out the type arguments here such that they may be inferred."
+        ^ " However, a higher-kinded type is expected in place of "
+        ^ param_desc
+        ^ ", meaning that the type arguments cannot be inferred."
+        ^ " Please provide the type arguments explicitly." );
+      (def_pos, param_desc ^ " was declared to be higher-kinded here.");
+    ]
+
 (* This is only to be used in a context where we expect something higher-kinded,
   meaning that expected_kind_repr should never just be * *)
 let kind_mismatch
-    ~use_pos
-    ~def_pos
-    ~tparam_name
-    ~expected_kind_repr
-    ~actual_is_fully_applied
-    ~actual_kind_repr =
-  let use_site_desc =
-    if actual_is_fully_applied then
-      "This is a fully-applied type, but a type constructor of kind "
-      ^ expected_kind_repr
-      ^ " was expected here."
-    else
-      "This type constructor has kind "
-      ^ actual_kind_repr
-      ^ ", but a type constructor of kind "
-      ^ expected_kind_repr
-      ^ " was expected here."
-  in
+    ~use_pos ~def_pos ~tparam_name ~expected_kind_repr ~actual_kind_repr =
   add_list
     (Typing.err_code Typing.KindMismatch)
     [
-      (use_pos, use_site_desc);
+      ( use_pos,
+        "This is "
+        ^ actual_kind_repr
+        ^ ", but "
+        ^ expected_kind_repr
+        ^ " was expected here." );
       ( def_pos,
-        "We are expecting a type constructor of kind "
+        "We are expecting "
         ^ expected_kind_repr
         ^ " due to the definition of "
         ^ tparam_name

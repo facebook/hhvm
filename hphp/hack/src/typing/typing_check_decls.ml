@@ -35,6 +35,10 @@ type env = {
 
 let get_ctx env = Env.get_ctx env.tenv
 
+let check_hint_wellkindedness env hint =
+  let decl_ty = Decl_hint.hint env.decl_env hint in
+  Typing_kinding.Simple.check_well_kinded_type env decl_ty
+
 let rec fun_ tenv f =
   let env = { typedef_tparams = []; tenv } in
   let (p, _) = f.f_name in
@@ -51,7 +55,8 @@ let rec fun_ tenv f =
   maybe hint env (hint_of_type_hint f.f_ret);
 
   List.iter f.f_tparams (tparam env);
-  List.iter f.f_params (fun_param env)
+  List.iter f.f_params (fun_param env);
+  variadic_param env f.f_variadic
 
 and tparam env t = List.iter t.tp_constraints (fun (_, h) -> hint env h)
 
@@ -59,9 +64,16 @@ and where_constr env (h1, _, h2) =
   hint env h1;
   hint env h2
 
-and hint env (p, h) = hint_ env p h
+and hint env (p, h) =
+  (* Do not use this one recursively to avoid quadratic runtime! *)
+  check_hint_wellkindedness env.tenv (p, h);
+  hint_ env p h
 
-and hint_ env p = function
+and hint_no_kind_check env (p, h) = hint_ env p h
+
+and hint_ env p h_ =
+  let hint env (p, h) = hint_ env p h in
+  match h_ with
   | Hany
   | Herr
   | Hmixed
@@ -229,7 +241,8 @@ and class_ tenv c =
   List.iter c.c_consts (const env);
   List.iter c_statics (method_ env);
   List.iter c_methods (method_ env);
-  List.iter c.c_pu_enums (pu_enum env (snd c.c_name))
+  List.iter c.c_pu_enums (pu_enum env (snd c.c_name));
+  maybe enum env c.c_enum
 
 and typeconst (env, _) tconst =
   maybe hint env tconst.c_tconst_type;
@@ -251,11 +264,17 @@ and method_ env m =
   in
   let env = { env with tenv } in
   List.iter m.m_params (fun_param env);
+  variadic_param env m.m_variadic;
   List.iter m.m_tparams (tparam env);
   maybe hint env (hint_of_type_hint m.m_ret)
 
 and fun_param env param =
   maybe hint env (hint_of_type_hint param.param_type_hint)
+
+and variadic_param env vparam =
+  match vparam with
+  | FVvariadicArg p -> fun_param env p
+  | _ -> ()
 
 and pu_enum env c_name pu =
   (* PU case type definitions can be constrained, e.g.
@@ -312,7 +331,25 @@ and pu_enum env c_name pu =
   List.iter ~f:(fun (_, h) -> hint env h) pu.pu_case_values;
   List.iter ~f:pu_member pu.pu_members
 
+and enum env e =
+  hint env e.e_base;
+  maybe hint env e.e_constraint
+
 let typedef tenv t =
+  (* We don't allow constraints on typdef parameters, but we still
+     need to record their kinds in the generic var environment *)
+  let tparams =
+    List.map t.t_tparams (Decl_hint.aast_tparam_to_decl_tparam tenv.decl_env)
+  in
+  let tenv_with_typedef_tparams =
+    Phase.localize_and_add_generic_parameters (fst t.t_name) tenv tparams
+  in
+  (* For typdefs, we do want to do the simple kind checks on the body
+     (e.g., arities match up), but no constraint checks. We need to check the
+     kinds of typedefs separately, because check_happly replaces all the generic
+     parameters of typedefs by Tany, which makes the kind check moot *)
+  maybe check_hint_wellkindedness tenv_with_typedef_tparams t.t_constraint;
+  check_hint_wellkindedness tenv_with_typedef_tparams t.t_kind;
   let env =
     {
       (* Since typedefs cannot have constraints we shouldn't check
@@ -323,5 +360,6 @@ let typedef tenv t =
       tenv;
     }
   in
-  maybe hint env t.t_constraint;
-  hint env t.t_kind
+  (* We checked the kinds already above.  *)
+  maybe hint_no_kind_check env t.t_constraint;
+  hint_no_kind_check env t.t_kind

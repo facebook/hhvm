@@ -912,8 +912,7 @@ static void prepareFuncEntry(ActRec *ar, Array&& generics) {
   const int nparams = func->numNonVariadicParams();
   auto& stack = vmStack();
 
-  auto const nargs = ar->numArgs();
-  assertx(((TypedValue*)ar - stack.top()) == nargs);
+  auto const nargs = (TypedValue*)ar - stack.top();
 
   if (UNLIKELY(nargs > nparams)) {
     // All extra arguments are expected to be packed in a varray.
@@ -4500,7 +4499,6 @@ bool doFCallUnpackTC(PC origpc, int32_t numInputs, CallFlags callFlags,
   tl_regState = VMRegState::CLEAN;
   auto const ar = vmStack().indA(numInputs);
   if (callFlags.hasGenerics()) --numInputs;
-  assertx(ar->numArgs() == numInputs);
   ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper, false);
   ar->setJitReturn(retAddr);
   auto const ret = doFCall(ar, numInputs - 1, true, callFlags);

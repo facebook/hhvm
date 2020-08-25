@@ -808,6 +808,9 @@ impl<'a> Node<'a> {
             at_most_rx_as_func: false,
             enforceable: None,
             returns_void_to_rx: false,
+            accept_disposable: false,
+            dynamically_callable: false,
+            returns_disposable: false,
         };
 
         let mut reactivity_condition_type = None;
@@ -851,6 +854,9 @@ impl<'a> Node<'a> {
                     }
                     "__RxLocal" => {
                         attributes.reactivity = Reactivity::Local(reactivity_condition_type.take())
+                    }
+                    "__Pure" => {
+                        attributes.reactivity = Reactivity::Pure(reactivity_condition_type.take());
                     }
                     "__Mutable" => {
                         attributes.param_mutability = Some(ParamMutability::ParamBorrowedMutable)
@@ -913,6 +919,15 @@ impl<'a> Node<'a> {
                     "__Enforceable" => {
                         attributes.enforceable = Some(attribute.name.0);
                     }
+                    "__AcceptDisposable" => {
+                        attributes.accept_disposable = true;
+                    }
+                    "__DynamicallyCallable" => {
+                        attributes.dynamically_callable = true;
+                    }
+                    "__ReturnDisposable" => {
+                        attributes.returns_disposable = true;
+                    }
                     _ => (),
                 }
             } else {
@@ -946,6 +961,9 @@ struct Attributes<'a> {
     at_most_rx_as_func: bool,
     enforceable: Option<&'a Pos<'a>>,
     returns_void_to_rx: bool,
+    accept_disposable: bool,
+    dynamically_callable: bool,
+    returns_disposable: bool,
 }
 
 impl<'a> DirectDeclSmartConstructors<'a> {
@@ -1209,6 +1227,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         if attributes.returns_mutable {
             flags |= FunTypeFlags::RETURNS_MUTABLE;
         }
+        if attributes.returns_disposable {
+            flags |= FunTypeFlags::RETURN_DISPOSABLE;
+        }
         if attributes.returns_void_to_rx {
             flags |= FunTypeFlags::RETURNS_VOID_TO_RX;
         }
@@ -1284,7 +1305,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                 properties.push(ShallowProp {
                                     const_: false,
                                     xhp_attr: None,
-                                    lateinit: false,
+                                    lateinit: attributes.late_init,
                                     lsb: false,
                                     name: Id(pos, name),
                                     needs_init: true,
@@ -1334,6 +1355,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                 }
                                 None => FunParamFlags::empty(),
                             };
+                            if attributes.accept_disposable {
+                                flags |= FunParamFlags::ACCEPT_DISPOSABLE
+                            }
                             match kind {
                                 ParamMode::FPinout => {
                                     flags |= FunParamFlags::INOUT;
@@ -3073,12 +3097,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 Reactivity::Reactive(condition_type) => Some(MethodReactivity::MethodReactive(
                     get_condition_type_name(condition_type),
                 )),
-                Reactivity::Nonreactive
-                | Reactivity::MaybeReactive(_)
-                | Reactivity::RxVar(_)
-                | Reactivity::Pure(_) => None,
+                Reactivity::Pure(condition_type) => Some(MethodReactivity::MethodPure(
+                    get_condition_type_name(condition_type),
+                )),
+                Reactivity::Nonreactive | Reactivity::MaybeReactive(_) | Reactivity::RxVar(_) => {
+                    None
+                }
             },
-            dynamicallycallable: false,
+            dynamicallycallable: attributes.dynamically_callable,
             type_: ty,
             visibility: modifiers.visibility,
             fixme_codes: ISet::empty(),

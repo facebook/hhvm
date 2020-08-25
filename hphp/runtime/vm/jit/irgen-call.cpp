@@ -199,6 +199,7 @@ void callUnpack(IRGS& env, SSATmp* callee, const FCallArgs& fca,
 SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                  SSATmp* objOrClass, bool dynamicCall, bool asyncEagerReturn) {
   assertx(!fca.hasUnpack() ||
+          !callee->hasConstVal() ||
           callee->funcVal()->numNonVariadicParams() == fca.numArgs);
 
   // TODO: extend hhbc with bitmap of passed generics, or even better, use one
@@ -469,7 +470,7 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  if (fca.hasUnpack()) {
+  if (fca.hasUnpack() && !fca.skipRepack()) {
     return callUnpack(env, callee, fca, objOrClass, dynamicCall, unlikely);
   }
 

@@ -10,7 +10,12 @@ function variadic($a, ...$args) {
   var_dump($a, $args);
 }
 
-class C {
+interface I {
+  public function regular($a, $b, $c);
+  public function variadic($a, ...$args);
+}
+
+class C implements I {
   public function __construct($a, $b, $c) {
     echo '* ', __METHOD__, "\n";
     var_dump($a, $b, $c);
@@ -35,6 +40,11 @@ class C {
     echo '* ', __METHOD__, "\n";
     var_dump($a, $args);
   }
+}
+
+class D implements I {
+  public function regular($a, $b, $c) {}
+  public function variadic($a, ...$args) {}
 }
 
 function test_call_array_equivalent($args) {
@@ -103,6 +113,40 @@ function test_param_mix($args) {
   echo "\n";
 }
 
+function test_param_mix_typed(varray $args, I $iface) {
+  echo "= ", __FUNCTION__, " =", "\n";
+  var_dump($args);
+  echo "\n";
+
+  $prefix = 'passed regularly';
+  regular($prefix, ...$args);
+  variadic($prefix, ...$args);
+  C::stRegular($prefix, ...$args);
+  C::stVariadic($prefix, ...$args);
+  $inst = new C($prefix, ...$args);
+  $inst->regular($prefix, ...$args);
+  $inst->variadic($prefix, ...$args);
+  $iface->regular($prefix, ...$args);
+  $iface->variadic($prefix, ...$args);
+  echo "\n";
+
+  $prefix2 = 'also passed regularly';
+  $prefix3 = 'arg that ensures more args passed than declared';
+  variadic($prefix, $prefix2, $prefix3, ...$args);
+  variadic_with_func_get_args($prefix, $prefix2, ...$args);
+  regular($prefix, $prefix2, ...$args);
+  regular($prefix, $prefix2, ...$args);
+  variadic($prefix, $prefix2, ...$args);
+  C::stRegular($prefix, $prefix2, ...$args);
+  C::stVariadic($prefix, $prefix2, ...$args);
+  $inst = new C($prefix, $prefix2, ...$args);
+  $inst->regular($prefix, $prefix2, ...$args);
+  $inst->variadic($prefix, $prefix2, ...$args);
+  $iface->regular($prefix, $prefix2, ...$args);
+  $iface->variadic($prefix, $prefix2, ...$args);
+  echo "\n";
+}
+
 function main() {
   $a = varray['a', 'b', 'c'];
   $v = Vector {'a', 'b', 'c'};
@@ -120,6 +164,8 @@ function main() {
   test_param_mix($a);
   test_param_mix($v);
   // test_param_mix($t);
+
+  test_param_mix_typed($a, new C('a', 'b', 'c'));
 
   echo "Done\n";
 }

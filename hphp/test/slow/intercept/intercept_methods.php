@@ -1,6 +1,7 @@
 <?hh
 
 class A {
+  <<__NEVER_INLINE>>
   function foo() { return 1; }
 }
 

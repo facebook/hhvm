@@ -134,9 +134,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(LambdaPrefix, ini, config,
                "CodeGeneration.LambdaPrefix", LambdaPrefix);
 
-  Config::Bind(RuntimeOption::DynamicInvokeFunctions,
-               ini, config, "DynamicInvokeFunctions",
-               RuntimeOption::DynamicInvokeFunctions);
   Config::Bind(VolatileClasses, ini, config, "VolatileClasses");
 
   Config::GetBool(ini, config, "FlattenTraits");

@@ -1,1 +1,2 @@
--vDynamicInvokeFunctions.*=test1 -vDynamicInvokeFunctions.*=test2 -d hhvm.php7.all=0
+-d hhvm.php7.all=0
+-vJitEnableRenameFunction=true

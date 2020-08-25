@@ -296,18 +296,6 @@ void Func::setFullName(int /*numParams*/) {
       setNamedEntity(NamedEntity::get(m_name));
     }
   }
-
-  if (!RuntimeOption::RepoAuthoritative) {
-    std::string tmp;
-    const char* fn = [&] () -> const char* {
-      if (!clazz) return m_name->data();
-      tmp = std::string(clazz->name()->data()) + "::" + m_name->data();
-      return tmp.data();
-    }();
-    if (RuntimeOption::DynamicInvokeFunctions.count(fn)) {
-      m_attrs = Attr(m_attrs | AttrInterceptable);
-    }
-  }
 }
 
 void Func::appendParam(bool ref, const Func::ParamInfo& info,

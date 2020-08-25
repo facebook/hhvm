@@ -481,16 +481,6 @@ Attr FuncEmitter::fix_attrs(Attr a) const {
   if (RuntimeOption::EvalJitEnableRenameFunction) {
     return a | AttrInterceptable;
   }
-
-  if (!RuntimeOption::DynamicInvokeFunctions.empty()) {
-    auto const fullName = [&] {
-      if (m_pce) return folly::sformat("{}::{}", m_pce->name(), name);
-      return name->toCppString();
-    }();
-    if (RuntimeOption::DynamicInvokeFunctions.count(fullName)) {
-      return a | AttrInterceptable;
-    }
-  }
   return a;
 }
 

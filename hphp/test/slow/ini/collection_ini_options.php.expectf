@@ -21,9 +21,5 @@ darray(2) {
   ["TFBENV"]=>
   string(1) "1"
 }
-varray(2) {
-  string(4) "dyno"
-  string(4) "mite"
-}
 varray(0) {
 }

@@ -1092,7 +1092,6 @@ using std::string;
   type RuntimeOption::Eval ## name = type(def);
 EVALFLAGS();
 #undef F
-std::set<string, stdltistr> RuntimeOption::DynamicInvokeFunctions;
 hphp_string_imap<TypedValue> RuntimeOption::ConstantFunctions;
 
 bool RuntimeOption::RecordCodeCoverage = false;
@@ -1492,9 +1491,6 @@ void RuntimeOption::Load(
     auto configIdCounter = ServiceData::createCounter("vm.config.id");
     configIdCounter->setValue(ConfigId);
   }
-
-  Config::Bind(DynamicInvokeFunctions, ini, config, "DynamicInvokeFunctions",
-               DynamicInvokeFunctions);
 
   {
     // Logging

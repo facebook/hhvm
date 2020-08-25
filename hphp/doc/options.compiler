@@ -221,16 +221,6 @@ Deprecating. These are options for specifying which methods may be called
 dynamically. This turned out to be hard to configure, and it's replaced by
 AllDynamics.
 
-= DynamicInvokeFunctions
-
-This is a list of functions which we should assume can be used with
-fb_rename_function or fb_intercept in RepoAuthoritative mode.  (Note
-that they can be used with fb_rename_function even if
-EvalJitEnableRenameFunction is false at runtime.)
-
-We should probably rename this option to something like
-InterceptableFunctions, but we haven't yet.
-
 = ConstantFunctions
 
 This is a list of functions and static class methods that may be assumed to

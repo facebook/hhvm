@@ -1,1 +1,2 @@
--vDynamicInvokeFunctions.0=Other::insert -d hhvm.php7.all=0
+-d hhvm.php7.all=0
+-vJitEnableRenameFunction=true

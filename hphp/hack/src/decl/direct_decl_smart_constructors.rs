@@ -2987,7 +2987,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     } else {
                         strip_dollar_prefix(name)
                     };
-                    let ty = self.node_to_ty(hint)?;
+                    let ty = self.node_to_ty(hint);
                     Some(ShallowProp {
                         const_: attributes.const_,
                         xhp_attr: None,
@@ -2995,7 +2995,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         lsb: attributes.lsb,
                         name: Id(pos, name),
                         needs_init: initializer.is_ignored(),
-                        type_: Some(ty),
+                        type_: ty,
                         abstract_: modifiers.is_abstract,
                         visibility: modifiers.visibility,
                         fixme_codes: ISet::empty(),

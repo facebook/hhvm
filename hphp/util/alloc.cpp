@@ -172,8 +172,6 @@ __thread int local_arena_flags = 0;
 // arena when it is disabled, so that we know when to reenable it.
 std::atomic_uint g_highArenaRecentlyFreed;
 
-alloc::Bump2MMapper* low_2m_mapper = nullptr;
-alloc::Bump2MMapper* high_2m_mapper = nullptr;
 alloc::BumpFileMapper* cold_file_mapper = nullptr;
 
 // Customized hooks to use 1g pages for jemalloc metadata.
@@ -251,6 +249,27 @@ RangeMapper* getMapperChain(RangeState& range, unsigned n1GPages,
   return head;
 }
 
+// Find the first 2M mapper for the range, and grant it some 2M page budget.
+// Return the actual number of pages granted. The actual number can be different
+// from the input, because some part of the range may have already been mapped
+// in.
+unsigned allocate2MPagesToRange(AddrRangeClass c, unsigned pages) {
+  auto& range = getRange(c);
+  auto mapper = range.getLowMapper();
+  if (!mapper) return 0;
+  // Search for the first 2M mapper.
+  do {
+    if (auto mapper2m = dynamic_cast<Bump2MMapper*>(mapper)) {
+      const unsigned maxPages = (range.capacity() - range.mapped()) / size2m;
+      auto const assigned = std::min(pages, maxPages);
+      mapper2m->setMaxPages(assigned);
+      return assigned;
+    }
+    mapper = mapper->next();
+  } while (mapper);
+  return 0;
+}
+
 void setup_low_arena(unsigned n1GPages) {
   assert(reinterpret_cast<uintptr_t>(sbrk(0)) <= kLowArenaMinAddr);
   // Initialize mappers for the VeryLow and Low address ranges.
@@ -270,13 +289,6 @@ void setup_low_arena(unsigned n1GPages) {
                    numa_node_set, 1);
   veryLowRange.setLowMapper(veryLowMapper);
   lowRange.setLowMapper(lowMapper);
-  if (n1GPages == 0) {
-    low_2m_mapper = dynamic_cast<Bump2MMapper*>(veryLowMapper);
-  } else if (n1GPages == 1) {
-    low_2m_mapper = dynamic_cast<Bump2MMapper*>(lowMapper);
-  } else {
-    low_2m_mapper = dynamic_cast<Bump2MMapper*>(lowMapper->next());
-  }
 
   auto veryLowColdMapper =
     new BumpNormalMapper<Direction::HighToLow>(veryLowRange, 0, numa_node_set);
@@ -312,11 +324,6 @@ void setup_high_arena(unsigned n1GPages) {
                                numa_node_set,
                                num_numa_nodes() / 2 + 1);
   range.setLowMapper(mapper);
-  if (n1GPages == 0) {
-    high_2m_mapper = dynamic_cast<Bump2MMapper*>(mapper);
-  } else {
-    high_2m_mapper = dynamic_cast<Bump2MMapper*>(mapper->next());
-  }
 
   auto arena = HighArena::CreateAt(&g_highArena);
   arena->appendMapper(range.getLowMapper());
@@ -777,17 +784,14 @@ static JEMallocInitializer initJEMalloc MAX_CONSTRUCTOR_PRIORITY;
 
 void low_2m_pages(uint32_t pages) {
 #if USE_JEMALLOC_EXTENT_HOOKS
-  if (low_2m_mapper) {
-    low_2m_mapper->setMaxPages(pages);
-  }
+  pages -= allocate2MPagesToRange(AddrRangeClass::VeryLow, pages);
+  allocate2MPagesToRange(AddrRangeClass::Low, pages);
 #endif
 }
 
 void high_2m_pages(uint32_t pages) {
 #if USE_JEMALLOC_EXTENT_HOOKS
-  if (high_2m_mapper) {
-    high_2m_mapper->setMaxPages(pages);
-  }
+  allocate2MPagesToRange(AddrRangeClass::Uncounted, pages);
 #endif
 }
 

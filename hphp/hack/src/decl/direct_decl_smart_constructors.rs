@@ -1186,6 +1186,34 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
     }
 
+    fn ret_from_fun_kind(&self, kind: FunKind, type_: Ty<'a>) -> Ty<'a> {
+        let pos = type_.get_pos().unwrap_or_else(|| Pos::none());
+        match kind {
+            FunKind::FAsyncGenerator => Ty(
+                self.alloc(Reason::RretFunKind(pos, kind)),
+                self.alloc(Ty_::Tapply(self.alloc((
+                    Id(pos, naming_special_names::classes::ASYNC_GENERATOR),
+                    self.alloc([type_, type_, type_]),
+                )))),
+            ),
+            FunKind::FGenerator => Ty(
+                self.alloc(Reason::RretFunKind(pos, kind)),
+                self.alloc(Ty_::Tapply(self.alloc((
+                    Id(pos, naming_special_names::classes::GENERATOR),
+                    self.alloc([type_, type_, type_]),
+                )))),
+            ),
+            FunKind::FAsync => Ty(
+                self.alloc(Reason::RretFunKind(pos, kind)),
+                self.alloc(Ty_::Tapply(self.alloc((
+                    Id(pos, naming_special_names::classes::AWAITABLE),
+                    self.alloc([type_]),
+                )))),
+            ),
+            _ => type_,
+        }
+    }
+
     fn is_type_param_in_scope(&self, name: &str) -> bool {
         self.state
             .type_parameters
@@ -1252,6 +1280,11 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             } else {
                 FunKind::FSync
             }
+        };
+        let type_ = if !header.ret_hint.is_present() {
+            self.ret_from_fun_kind(fun_kind, type_)
+        } else {
+            type_
         };
         let attributes = attributes.as_attributes(self.state.arena)?;
         // TODO(hrust) Put this in a helper. Possibly do this for all flags.

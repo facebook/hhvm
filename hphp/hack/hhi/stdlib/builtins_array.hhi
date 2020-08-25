@@ -233,14 +233,6 @@ function shuffle(inout $array);
   'doesn\'t suggest that it\'s counting bytes.'), __PHPStdLib, __Pure>>
 function sizeof($var);
 <<__PHPStdLib>>
-function current($array);
-<<__PHPStdLib>>
-function reset(inout $array);
-<<__PHPStdLib>>
-function end(inout $array);
-<<__PHPStdLib>>
-function key($array);
-<<__PHPStdLib>>
 function hphp_get_iterator($iterable);
 <<__PHPStdLib, __Pure>>
 function in_array($needle, $haystack, bool $strict = false);

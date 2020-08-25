@@ -718,11 +718,9 @@ void specializeIterInit(IRGS& env, Offset doneOffset,
   iter_type.base_const = !local || (data.flags & IterArgs::Flags::BaseConst);
   iter_type.output_key = data.hasKey();
 
-  // Check that the profiled type is specialized, that we have key type info
-  // (for key-value iters), and if the type agrees with any other IterInit.
-  auto const array_key = IterSpecialization::ArrayKey;
+  // Check that the profiled type is specialized and that it agrees with
+  // any other IterInits that are part of this iter group.
   if (!iter_type.specialized ||
-      (iter_type.output_key && iter_type.key_types == array_key) ||
       (iter != nullptr && iter->iter_type.as_byte != iter_type.as_byte)) {
     return despecialize();
   }

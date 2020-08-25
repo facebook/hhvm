@@ -176,6 +176,21 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
         Some(result.into_bump_slice())
     }
+
+    fn unwrap_mutability(hint: Node<'a>) -> (Node<'a>, Option<ParamMutability>) {
+        match hint {
+            Node::Ty(Ty(_, Ty_::Tapply((hn, [t])))) if hn.1 == "\\Mutable" => {
+                (Node::Ty(t), Some(ParamMutability::ParamBorrowedMutable))
+            }
+            Node::Ty(Ty(_, Ty_::Tapply((hn, [t])))) if hn.1 == "\\OwnedMutable" => {
+                (Node::Ty(t), Some(ParamMutability::ParamOwnedMutable))
+            }
+            Node::Ty(Ty(_, Ty_::Tapply((hn, [t])))) if hn.1 == "\\MaybeMutable" => {
+                (Node::Ty(t), Some(ParamMutability::ParamMaybeMutable))
+            }
+            _ => (hint, None),
+        }
+    }
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -1177,6 +1192,28 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             .any(|tps| tps.contains(name))
     }
 
+    fn param_mutability_to_fun_type_flags(
+        param_mutability: Option<ParamMutability>,
+    ) -> FunTypeFlags {
+        match param_mutability {
+            Some(ParamMutability::ParamBorrowedMutable) => FunTypeFlags::MUTABLE_FLAGS_BORROWED,
+            Some(ParamMutability::ParamOwnedMutable) => FunTypeFlags::MUTABLE_FLAGS_OWNED,
+            Some(ParamMutability::ParamMaybeMutable) => FunTypeFlags::MUTABLE_FLAGS_MAYBE,
+            None => FunTypeFlags::empty(),
+        }
+    }
+
+    fn param_mutability_to_fun_param_flags(
+        param_mutability: Option<ParamMutability>,
+    ) -> FunParamFlags {
+        match param_mutability {
+            Some(ParamMutability::ParamBorrowedMutable) => FunParamFlags::MUTABLE_FLAGS_BORROWED,
+            Some(ParamMutability::ParamOwnedMutable) => FunParamFlags::MUTABLE_FLAGS_OWNED,
+            Some(ParamMutability::ParamMaybeMutable) => FunParamFlags::MUTABLE_FLAGS_MAYBE,
+            None => FunParamFlags::empty(),
+        }
+    }
+
     fn function_into_ty(
         &mut self,
         namespace: &'a str,
@@ -1233,18 +1270,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         if attributes.returns_void_to_rx {
             flags |= FunTypeFlags::RETURNS_VOID_TO_RX;
         }
-        match attributes.param_mutability {
-            Some(ParamMutability::ParamBorrowedMutable) => {
-                flags |= FunTypeFlags::MUTABLE_FLAGS_BORROWED;
-            }
-            Some(ParamMutability::ParamOwnedMutable) => {
-                flags |= FunTypeFlags::MUTABLE_FLAGS_OWNED;
-            }
-            Some(ParamMutability::ParamMaybeMutable) => {
-                flags |= FunTypeFlags::MUTABLE_FLAGS_MAYBE;
-            }
-            None => (),
-        };
+
+        flags |= Self::param_mutability_to_fun_type_flags(attributes.param_mutability);
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(header.type_params);
         let ft = self.alloc(FunType {
@@ -3575,24 +3602,33 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         right_paren: Self::R,
     ) -> Self::R {
         let params = unwrap_or_return!(self.maybe_slice_from_iter(args.iter().map(|&node| {
+            let mut flags = FunParamFlags::empty();
+            let (hint, mutability) = Self::unwrap_mutability(node);
+            flags |= Self::param_mutability_to_fun_param_flags(mutability);
             Some(self.alloc(FunParam {
                 pos: node.get_pos(self.state.arena)?,
                 name: None,
                 type_: PossiblyEnforcedTy {
                     enforced: false,
-                    type_: self.node_to_ty(node)?,
+                    type_: self.node_to_ty(hint)?,
                 },
-                flags: FunParamFlags::empty(),
+                flags,
                 rx_annotation: None,
             }))
         })));
-        let ret = unwrap_or_return!(self.node_to_ty(ret_hint));
+        let (hint, mutability) = Self::unwrap_mutability(ret_hint);
+        let ret = unwrap_or_return!(self.node_to_ty(hint));
         let pos = unwrap_or_return!(Pos::merge(
             self.state.arena,
             unwrap_or_return!(left_paren.get_pos(self.state.arena)),
             unwrap_or_return!(right_paren.get_pos(self.state.arena)),
         )
         .ok());
+        let mut flags = FunTypeFlags::empty();
+        if mutability.is_some() {
+            flags |= FunTypeFlags::RETURNS_MUTABLE;
+        }
+
         self.hint_ty(
             pos,
             Ty_::Tfun(self.alloc(FunType {
@@ -3605,7 +3641,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     type_: ret,
                 },
                 reactive: Reactivity::Nonreactive,
-                flags: FunTypeFlags::empty(),
+                flags,
             })),
         )
     }

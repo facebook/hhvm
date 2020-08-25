@@ -3629,21 +3629,38 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         ret_hint: Self::R,
         right_paren: Self::R,
     ) -> Self::R {
-        let params = unwrap_or_return!(self.maybe_slice_from_iter(args.iter().map(|&node| {
+        let make_param = |fp: &'a FunParamDecl<'a>| -> &'a FunParam<'a> {
             let mut flags = FunParamFlags::empty();
-            let (hint, mutability) = Self::unwrap_mutability(node);
+            let (hint, mutability) = Self::unwrap_mutability(fp.hint);
             flags |= Self::param_mutability_to_fun_param_flags(mutability);
-            Some(self.alloc(FunParam {
-                pos: node.get_pos(self.state.arena)?,
+
+            match fp.kind {
+                ParamMode::FPinout => {
+                    flags |= FunParamFlags::INOUT;
+                }
+                ParamMode::FPnormal => {}
+            };
+
+            self.alloc(FunParam {
+                pos: fp
+                    .hint
+                    .get_pos(self.state.arena)
+                    .unwrap_or_else(|| Pos::none()),
                 name: None,
                 type_: PossiblyEnforcedTy {
                     enforced: false,
-                    type_: self.node_to_ty(hint)?,
+                    type_: self.node_to_ty(hint).unwrap_or_else(|| tany()),
                 },
                 flags,
                 rx_annotation: None,
-            }))
-        })));
+            })
+        };
+
+        let params = self.slice_from_iter(args.iter().filter_map(|&node| match node {
+            Node::FunParam(fp) if !fp.variadic => Some(make_param(fp)),
+            _ => None,
+        }));
+
         let (hint, mutability) = Self::unwrap_mutability(ret_hint);
         let ret = unwrap_or_return!(self.node_to_ty(hint));
         let pos = unwrap_or_return!(Pos::merge(
@@ -3674,8 +3691,20 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         )
     }
 
-    fn make_closure_parameter_type_specifier(&mut self, _arg0: Self::R, name: Self::R) -> Self::R {
-        name
+    fn make_closure_parameter_type_specifier(&mut self, inout: Self::R, hint: Self::R) -> Self::R {
+        let kind = match inout {
+            Node::Token(TokenKind::Inout) => ParamMode::FPinout,
+            _ => ParamMode::FPnormal,
+        };
+        Node::FunParam(self.alloc(FunParamDecl {
+            attributes: Node::Ignored,
+            visibility: Node::Ignored,
+            kind,
+            hint,
+            id: Id(hint.get_pos(self.state.arena).unwrap(), "".into()),
+            variadic: false,
+            initializer: Node::Ignored,
+        }))
     }
 
     fn make_type_const_declaration(

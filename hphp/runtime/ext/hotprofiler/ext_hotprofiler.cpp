@@ -1113,7 +1113,7 @@ struct MemoProfiler final : Profiler {
     if (ar->func()->cls() && ar->hasThis()) {
       auto& memo = m_memos[symbol];
       if (!memo.m_ignore) {
-        auto args = hhvm_get_frame_args(ar, 0);
+        auto args = hhvm_get_frame_args(ar);
         args.append((int64_t)(ar->getThis())); // Use the pointer not the obj
         VariableSerializer vs(VariableSerializer::Type::DebuggerSerialize);
         String sdata;

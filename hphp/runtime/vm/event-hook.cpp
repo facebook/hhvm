@@ -194,7 +194,7 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
 
   auto frameinfo = make_darray_tagged(ARRPROV_HERE(),
                                       s_args,
-                                      hhvm_get_frame_args(ar, 0));
+                                      hhvm_get_frame_args(ar));
   addFramePointers(ar, frameinfo, true);
 
   const auto params = make_vec_array(
@@ -236,38 +236,6 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
   vm_call_user_func(g_context->m_setprofileCallback, params);
 }
 
-static Array get_frame_args(const ActRec* ar) {
-  int numNonVariadic = ar->func()->numNonVariadicParams();
-  int numArgs = ar->numArgs();
-  auto const variadic = ar->func()->hasVariadicCaptureParam();
-  if (variadic && numArgs > numNonVariadic) {
-    auto const arr = frame_local(ar, numNonVariadic);
-    if (tvIsHAMSafeVArray(arr)) {
-      numArgs = numNonVariadic + val(arr).parr->size();
-    } else {
-      numArgs = numNonVariadic;
-    }
-  }
-
-  VArrayInit retArray(numArgs);
-
-  int i = 0;
-  for (; i < numArgs && i < numNonVariadic; ++i) {
-    retArray.append(tvAsCVarRef(*frame_local(ar, i)));
-  }
-
-  if (i < numArgs) {
-    assertx(ar->func()->hasVariadicCaptureParam());
-    // If there are still args that haven't been accounted for, they have
-    // been shuffled into a packed array stored in the variadic capture
-    // param.
-    for (ArrayIter iter(tvAsCVarRef(*frame_local(ar, i))); iter; ++iter) {
-      retArray.append(iter.secondVal());
-    }
-  }
-  return retArray.toArray();
-}
-
 static Variant call_intercept_handler(
   const Variant& function,
   const Variant& called,
@@ -299,7 +267,7 @@ static Variant call_intercept_handler(
     );
   }
 
-  args = get_frame_args(ar);
+  args = hhvm_get_frame_args(ar);
 
   VArrayInit par{newCallback ? 3u : 5u};
   par.append(called);
@@ -345,7 +313,7 @@ static Variant call_intercept_handler_callback(
     SystemLib::throwRuntimeExceptionObject(
       Variant("The callback for fb_intercept2 cannot have inout parameters"));
   }
-  auto const curArgs = get_frame_args(ar);
+  auto const curArgs = hhvm_get_frame_args(ar);
   VArrayInit args(prepend_this + curArgs.size());
   if (prepend_this) {
     auto const thiz = [&] {

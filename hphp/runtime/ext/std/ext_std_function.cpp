@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <vector>
 
-#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -99,40 +99,32 @@ Variant HHVM_FUNCTION(call_user_func_array, const Variant& function,
 const StaticString s_call_user_func("call_user_func");
 const StaticString s_call_user_func_array("call_user_func_array");
 
-Array hhvm_get_frame_args(const ActRec* ar, int offset) {
+Array hhvm_get_frame_args(const ActRec* ar) {
   ARRPROV_USE_RUNTIME_LOCATION();
   while (ar && (ar->func()->name()->isame(s_call_user_func.get()) ||
                 ar->func()->name()->isame(s_call_user_func_array.get()))) {
     ar = g_context->getPrevVMState(ar);
   }
-  if (ar == nullptr) {
-    return Array::CreateVArray();
-  }
-  int numParams = ar->func()->numNonVariadicParams();
-  int numArgs = ar->numArgs();
-  bool variadic = ar->func()->hasVariadicCaptureParam();
-  if (variadic && numArgs > numParams) {
-    auto const arr = frame_local(ar, numParams);
-    if (tvIsHAMSafeVArray(arr)) {
-      numArgs = numParams + val(arr).parr->size();
-    } else {
-      numArgs = numParams;
-    }
-  }
 
-  VArrayInit retInit(std::max(numArgs - offset, 0));
-  for (int i = offset; i < numArgs; ++i) {
-    if (i < numParams) {
-      // This corresponds to one of the function's formal parameters
-      retInit.append(tvAsCVarRef(*frame_local(ar, i)));
-    } else {
-      assertx(variadic);
-      auto const lval = frame_local(ar, numParams);
-      retInit.append(tvAsCVarRef(*lval).asCArrRef()[i - numParams]);
-    }
-  }
+  auto ret = Array::CreateVArray();
+  if (!ar) return ret;
 
-  return retInit.toArray();
+  int numNonVariadic = ar->func()->numNonVariadicParams();
+  for (int i = 0; i < numNonVariadic; ++i) {
+    auto const val = frame_local(ar, i);
+    // If there's a default argument that is not passed, variadic arguments
+    // must be empty
+    if (type(val) == KindOfUninit) return ret;
+    ret.append(tvAsCVarRef(*val));
+  }
+  if (!ar->func()->hasVariadicCaptureParam()) return ret;
+  assertx(numNonVariadic == ret.size());
+  auto const arr = frame_local(ar, numNonVariadic);
+  assertx(tvIsHAMSafeVArray(arr));
+  // If there are still args that haven't been accounted for, they have
+  // been shuffled into a packed array stored in the variadic capture param.
+  IterateVNoInc(val(arr).parr, [&](TypedValue v) { ret.append(v); });
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,4 @@
+-vDynamicInvokeFunctions.f=f
+-vDynamicInvokeFunctions.g=g
+-vDynamicInvokeFunctions.h=h
+-d hhvm.php7.all=0

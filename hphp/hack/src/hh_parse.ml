@@ -72,6 +72,7 @@ module FullFidelityParseArgs = struct
     disallow_discarded_nullable_awaitables: bool;
     enable_first_class_function_pointers: bool;
     disable_xhp_element_mangling: bool;
+    allow_unstable_features: bool;
     enable_xhp_class_modifier: bool;
   }
 
@@ -111,6 +112,7 @@ module FullFidelityParseArgs = struct
       disallow_discarded_nullable_awaitables
       enable_first_class_function_pointers
       disable_xhp_element_mangling
+      allow_unstable_features
       enable_xhp_class_modifier =
     {
       full_fidelity_json;
@@ -148,6 +150,7 @@ module FullFidelityParseArgs = struct
       disallow_discarded_nullable_awaitables;
       enable_first_class_function_pointers;
       disable_xhp_element_mangling;
+      allow_unstable_features;
       enable_xhp_class_modifier;
     }
 
@@ -202,6 +205,7 @@ module FullFidelityParseArgs = struct
     let disallow_discarded_nullable_awaitables = ref false in
     let enable_first_class_function_pointers = ref false in
     let disable_xhp_element_mangling = ref false in
+    let allow_unstable_features = ref false in
     let enable_xhp_class_modifier = ref false in
     let options =
       [
@@ -345,6 +349,9 @@ No errors are filtered out."
           Arg.Set disable_xhp_element_mangling,
           "Disable mangling of XHP elements :foo. That is, :foo:bar is now \\foo\\bar, not xhp_foo__bar"
         );
+        ( "--allow-unstable-features",
+          Arg.Set allow_unstable_features,
+          "Enables the __EnableUnstableFeatures attribute" );
       ]
     in
     Arg.parse options push_file usage;
@@ -400,6 +407,7 @@ No errors are filtered out."
       !disallow_discarded_nullable_awaitables
       !enable_first_class_function_pointers
       !disable_xhp_element_mangling
+      !allow_unstable_features
       !enable_xhp_class_modifier
 end
 
@@ -484,6 +492,9 @@ let handle_existing_file args filename =
     ParserOptions.with_disable_xhp_element_mangling
       popt
       args.disable_xhp_element_mangling
+  in
+  let popt =
+    ParserOptions.with_allow_unstable_features popt args.allow_unstable_features
   in
   let popt =
     ParserOptions.with_enable_xhp_class_modifier

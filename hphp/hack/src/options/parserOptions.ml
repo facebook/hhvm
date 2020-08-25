@@ -96,6 +96,11 @@ let disable_xhp_element_mangling = GlobalOptions.po_disable_xhp_element_mangling
 let with_disable_xhp_element_mangling po b =
   { po with GlobalOptions.po_disable_xhp_element_mangling = b }
 
+let allow_unstable_features = GlobalOptions.po_allow_unstable_features
+
+let with_allow_unstable_features po b =
+  { po with GlobalOptions.po_allow_unstable_features = b }
+
 let disable_xhp_children_declarations =
   GlobalOptions.po_disable_xhp_children_declarations
 
@@ -140,6 +145,7 @@ let make
     ~disallow_func_ptrs_in_constants
     ~enable_xhp_class_modifier
     ~disable_xhp_element_mangling
+    ~allow_unstable_features
     ~disable_xhp_children_declarations
     ~enable_first_class_function_pointers
     ~disable_modes
@@ -167,6 +173,7 @@ let make
       po_disallow_func_ptrs_in_constants = disallow_func_ptrs_in_constants;
       po_enable_xhp_class_modifier = enable_xhp_class_modifier;
       po_disable_xhp_element_mangling = disable_xhp_element_mangling;
+      po_allow_unstable_features = allow_unstable_features;
       po_disable_xhp_children_declarations = disable_xhp_children_declarations;
       po_enable_first_class_function_pointers =
         enable_first_class_function_pointers;
@@ -179,6 +186,7 @@ let make
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
+  * bool
   * bool
   * bool
   * bool
@@ -215,4 +223,5 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     disable_modes po,
     disable_array po,
     const_default_lambda_args po,
-    disable_array_typehint po )
+    disable_array_typehint po,
+    allow_unstable_features po )

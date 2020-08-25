@@ -34,7 +34,7 @@ use oxidized_by_ref::{
     typing_defs::{
         EnumType, FunArity, FunElt, FunParam, FunParams, FunType, ParamMode, ParamMutability,
         PossiblyEnforcedTy, Reactivity, ShapeFieldType, ShapeKind, Tparam, Ty, Ty_,
-        TypeconstAbstractKind, TypedefType, XhpAttrTag,
+        TypeconstAbstractKind, TypedefType, WhereConstraint, XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
@@ -624,6 +624,7 @@ pub enum Node<'a> {
     Construct(&'a Pos<'a>),
     This(&'a Pos<'a>), // This needs a pos since it shows up in Taccess.
     TypeParameters(&'a &'a [Tparam<'a>]),
+    WhereConstraint(&'a WhereConstraint<'a>),
 
     // For cases where the position of a node is included in some outer
     // position, but we do not need to track any further information about that
@@ -2669,6 +2670,28 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         Node::NamespaceUseClause(self.alloc(NamespaceUseClause { id, as_ }))
     }
 
+    fn make_where_clause(&mut self, _: Self::R, where_constraints: Self::R) -> Self::R {
+        where_constraints
+    }
+
+    fn make_where_constraint(
+        &mut self,
+        left_type: Self::R,
+        operator: Self::R,
+        right_type: Self::R,
+    ) -> Self::R {
+        Node::WhereConstraint(self.alloc(WhereConstraint(
+            self.node_to_ty(left_type).unwrap_or_else(|| tany()),
+            match operator {
+                Node::Operator((_, TokenKind::Equal)) => ConstraintKind::ConstraintEq,
+                Node::Token(TokenKind::As) => ConstraintKind::ConstraintAs,
+                Node::Token(TokenKind::Super) => ConstraintKind::ConstraintSuper,
+                _ => ConstraintKind::ConstraintAs,
+            },
+            self.node_to_ty(right_type).unwrap_or_else(|| tany()),
+        )))
+    }
+
     fn make_classish_declaration(
         &mut self,
         attributes: Self::R,
@@ -2681,7 +2704,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         extends: Self::R,
         _arg7: Self::R,
         implements: Self::R,
-        _arg9: Self::R,
+        where_clause: Self::R,
         body: Self::R,
     ) -> Self::R {
         let Id(pos, name) = unwrap_or_return!(
@@ -2709,6 +2732,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         }
 
         let attributes = attributes;
+        let where_constraints =
+            self.slice_from_iter(where_clause.iter().copied().filter_map(|x| match x {
+                Node::WhereConstraint(x) => Some(shallow_decl_defs::WhereConstraint(x.0, x.1, x.2)),
+                _ => None,
+            }));
 
         let body = match body {
             Node::ClassishBody(body) => body,
@@ -2890,7 +2918,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             kind: class_kind,
             name: Id(pos, name),
             tparams,
-            where_constraints: &[],
+            where_constraints,
             extends,
             uses,
             xhp_attr_uses,

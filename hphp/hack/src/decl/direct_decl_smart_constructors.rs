@@ -1408,7 +1408,34 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         let type_arguments =
             unwrap_or_return!(self
                 .maybe_slice_from_iter(type_arguments.iter().map(|&node| self.node_to_ty(node))));
-        let ty_ = Ty_::Tapply(self.alloc((base_ty, type_arguments)));
+
+        let ty_ = match (base_ty, type_arguments) {
+            (Id(_, name), &[Ty(_, Ty_::Tfun(f))]) if name == "\\Pure" => {
+                Ty_::Tfun(self.alloc(FunType {
+                    reactive: Reactivity::Pure(None),
+                    ..(*f).clone()
+                }))
+            }
+            (Id(_, name), &[Ty(_, Ty_::Tfun(f))]) if name == "\\Rx" => {
+                Ty_::Tfun(self.alloc(FunType {
+                    reactive: Reactivity::Reactive(None),
+                    ..(*f).clone()
+                }))
+            }
+            (Id(_, name), &[Ty(_, Ty_::Tfun(f))]) if name == "\\RxShallow" => {
+                Ty_::Tfun(self.alloc(FunType {
+                    reactive: Reactivity::Shallow(None),
+                    ..(*f).clone()
+                }))
+            }
+            (Id(_, name), &[Ty(_, Ty_::Tfun(f))]) if name == "\\RxLocal" => {
+                Ty_::Tfun(self.alloc(FunType {
+                    reactive: Reactivity::Local(None),
+                    ..(*f).clone()
+                }))
+            }
+            _ => Ty_::Tapply(self.alloc((base_ty, type_arguments))),
+        };
         let pos = match pos_to_merge {
             Some(p) => unwrap_or_return!(Pos::merge(self.state.arena, base_ty.0, p).ok()),
             None => base_ty.0,

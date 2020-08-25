@@ -3228,10 +3228,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     abstract_: false,
                     expr: Some(self.node_to_expr(value)?),
                     name: self.get_name("", name)?,
-                    type_: Ty(
-                        self.alloc(Reason::witness(value.get_pos(self.state.arena)?)),
-                        hint.1,
-                    ),
+                    type_: self.node_to_ty(value).unwrap_or_else(|| tany()),
                 }),
                 n => panic!("Expected an enum case, got {:?}", n),
             }

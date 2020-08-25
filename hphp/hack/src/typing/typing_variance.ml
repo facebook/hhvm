@@ -36,10 +36,9 @@ module Cls = Decl_provider.Class
 type position_descr =
   | Rtypedef
   | Rmember (* Instance variable  *)
-  | Rtype_parameter (* The declaration site of a type-parameter
-                                   *)
-  | Rfun_parameter of [ `Static | `Instance ]
-  | Rfun_return of [ `Static | `Instance ]
+  | Rtype_parameter (* The declaration site of a type-parameter *)
+  | Rfun_parameter
+  | Rfun_return
   | Rtype_argument of string (* The argument of a parametric class or
                               * typedef:
                               * A<T1, ..>, T1 is (Rtype_argument "A")
@@ -50,7 +49,7 @@ type position_descr =
   | Rwhere_as
   | Rwhere_super
   | Rwhere_eq
-  | Rfun_inout_parameter of [ `Static | `Instance ]
+  | Rfun_inout_parameter
 
 type position_variance =
   | Pcovariant
@@ -121,12 +120,8 @@ let reason_to_string ~sign (_, descr, variance) =
   | Rmember -> "A non private class member is always invariant"
   | Rtype_parameter ->
     "The type parameter was declared as " ^ variance_to_string variance
-  | Rfun_parameter `Instance -> "Function parameters are contravariant"
-  | Rfun_parameter `Static ->
-    "Function parameters in non-final static functions are contravariant"
-  | Rfun_return `Instance -> "Function return types are covariant"
-  | Rfun_return `Static ->
-    "Function return types in non-final static functions are covariant"
+  | Rfun_parameter -> "Function parameters are contravariant"
+  | Rfun_return -> "Function return types are covariant"
   | Rtype_argument name ->
     Printf.sprintf
       "This type parameter was declared as %s (cf '%s')"
@@ -142,7 +137,7 @@ let reason_to_string ~sign (_, descr, variance) =
   | Rwhere_eq -> "`where _ = _` constraints are invariant on the left and right"
   | Rwhere_super ->
     "`where _ super _` constraints are contravariant on the left, covariant on the right"
-  | Rfun_inout_parameter _ ->
+  | Rfun_inout_parameter ->
     "Inout/ref function parameters are both covariant and contravariant"
 
 let detailed_message variance pos stack =
@@ -363,61 +358,25 @@ and class_method tcopt root static env (_method_name, method_) =
        and contravariant type parameters in any position in the type *)
     if get_ce_final method_ && phys_equal static `Static then
       ()
-    else (
-      match method_.ce_type with
-      | (lazy ty) ->
-        begin
-          match get_node ty with
-          | Tfun
-              {
-                ft_tparams;
-                ft_params;
-                ft_arity;
-                ft_ret;
-                ft_where_constraints;
-                _;
-              } ->
-            let env =
-              List.fold_left
-                ft_tparams
-                ~f:
-                  begin
-                    fun env t ->
-                    SMap.remove (snd t.tp_name) env
-                  end
-                ~init:env
-            in
-            List.iter
-              ft_params
-              ~f:(fun_param tcopt root (Vcovariant []) static env);
-            fun_arity tcopt root (Vcovariant []) static env ft_arity;
-            List.iter ft_tparams ~f:(fun_tparam tcopt root env);
-            List.iter
-              ft_where_constraints
-              ~f:(fun_where_constraint tcopt root env);
-            fun_ret tcopt root (Vcovariant []) static env ft_ret.et_type
-          | _ -> assert false
-        end
-    )
+    else
+      let (lazy ty) = method_.ce_type in
+      type_ tcopt root (Vcovariant []) env ty
 
-and fun_arity tcopt root variance static env arity =
+and fun_arity tcopt root variance env arity =
   match arity with
   | Fstandard -> ()
-  | Fvariadic fp -> fun_param tcopt root variance static env fp
+  | Fvariadic fp -> fun_param tcopt root variance env fp
 
 and fun_param
-    tcopt root variance static env ({ fp_type = { et_type = ty; _ }; _ } as fp)
-    =
+    tcopt root variance env ({ fp_type = { et_type = ty; _ }; _ } as fp) =
   let pos = get_pos ty in
   match get_fp_mode fp with
   | FPnormal ->
-    let reason = (pos, Rfun_parameter static, Pcontravariant) in
+    let reason = (pos, Rfun_parameter, Pcontravariant) in
     let variance = flip reason variance in
     type_ tcopt root variance env ty
   | FPinout ->
-    let variance =
-      make_variance (Rfun_inout_parameter static) pos Ast_defs.Invariant
-    in
+    let variance = make_variance Rfun_inout_parameter pos Ast_defs.Invariant in
     type_ tcopt root variance env ty
 
 and fun_tparam tcopt root env t =
@@ -444,9 +403,9 @@ and fun_where_constraint tcopt root env (ty1, ck, ty2) =
     type_ tcopt root var1 env ty1;
     type_ tcopt root var2 env ty2
 
-and fun_ret tcopt root variance static env ty =
+and fun_ret tcopt root variance env ty =
   let pos = get_pos ty in
-  let reason_covariant = (pos, Rfun_return static, Pcovariant) in
+  let reason_covariant = (pos, Rfun_return, Pcovariant) in
   let variance =
     match variance with
     | Vcovariant stack -> Vcovariant (reason_covariant :: stack)
@@ -540,9 +499,21 @@ and type_ ctx root variance env ty =
   | Tlike ty -> type_ ctx root variance env ty
   | Tprim _ -> ()
   | Tfun ft ->
-    List.iter ft.ft_params ~f:(fun_param ctx root variance `Instance env);
-    fun_arity ctx root variance `Instance env ft.ft_arity;
-    fun_ret ctx root variance `Instance env ft.ft_ret.et_type
+    let env =
+      List.fold_left
+        ft.ft_tparams
+        ~f:
+          begin
+            fun env t ->
+            SMap.remove (snd t.tp_name) env
+          end
+        ~init:env
+    in
+    List.iter ft.ft_params ~f:(fun_param ctx root variance env);
+    fun_arity ctx root variance env ft.ft_arity;
+    List.iter ft.ft_tparams ~f:(fun_tparam ctx root env);
+    List.iter ft.ft_where_constraints ~f:(fun_where_constraint ctx root env);
+    fun_ret ctx root variance env ft.ft_ret.et_type
   | Tapply (_, []) -> ()
   | Tapply (((_, name) as pos_name), tyl) ->
     let variancel = get_class_variance ctx root pos_name in

@@ -1,6 +1,0 @@
-File "factor_incorrect_outside_ppl.php", line 25, characters 12-12:
-Invalid argument (Typing[4110])
-File "factor_incorrect_outside_ppl.php", line 6, characters 17-22:
-Expected `string`
-File "factor_incorrect_outside_ppl.php", line 25, characters 12-12:
-But got `int`

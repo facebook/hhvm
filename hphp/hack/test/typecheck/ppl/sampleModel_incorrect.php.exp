@@ -1,6 +1,0 @@
-File "sampleModel_incorrect.php", line 35, characters 18-21:
-Invalid argument (Typing[4110])
-File "sampleModel_incorrect.php", line 27, characters 32-34:
-Expected `int`
-File "sampleModel_incorrect.php", line 35, characters 18-21:
-But got `string`

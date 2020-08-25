@@ -1,6 +1,0 @@
-File "special_functions_namespaced_incorrect2.php--PPL.php", line 16, characters 17-17:
-Invalid argument (Typing[4110])
-File "special_functions_namespaced_incorrect2.php--Infer.php", line 4, characters 26-31:
-Expected `string`
-File "special_functions_namespaced_incorrect2.php--PPL.php", line 16, characters 17-17:
-But got `int`

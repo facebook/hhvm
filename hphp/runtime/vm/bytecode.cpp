@@ -1267,28 +1267,28 @@ OPTBLD_INLINE void iopString(const StringData* s) {
 OPTBLD_INLINE void iopArray(const ArrayData* a) {
   assertx(a->isPHPArrayType());
   assertx(!RuntimeOption::EvalHackArrDVArrs || a->isNotDVArray());
-  vmStack().pushStaticArray(bespoke::maybeEnableLogging(a));
+  vmStack().pushStaticArray(bespoke::maybeMakeLoggingArray(a));
 }
 
 OPTBLD_INLINE void iopVec(const ArrayData* a) {
   assertx(a->isVecType());
-  vmStack().pushStaticVec(bespoke::maybeEnableLogging(a));
+  vmStack().pushStaticVec(bespoke::maybeMakeLoggingArray(a));
 }
 
 OPTBLD_INLINE void iopDict(const ArrayData* a) {
   assertx(a->isDictType());
-  vmStack().pushStaticDict(bespoke::maybeEnableLogging(a));
+  vmStack().pushStaticDict(bespoke::maybeMakeLoggingArray(a));
 }
 
 OPTBLD_INLINE void iopKeyset(const ArrayData* a) {
   assertx(a->isKeysetType());
-  vmStack().pushStaticKeyset(bespoke::maybeEnableLogging(a));
+  vmStack().pushStaticKeyset(bespoke::maybeMakeLoggingArray(a));
 }
 
 OPTBLD_INLINE void iopNewDictArray(uint32_t capacity) {
   auto const ad = capacity ? MixedArray::MakeReserveDict(capacity)
                            : ArrayData::CreateDict();
-  vmStack().pushDictNoRc(bespoke::maybeEnableLogging(ad));
+  vmStack().pushDictNoRc(bespoke::maybeMakeLoggingArray(ad));
 }
 
 namespace {
@@ -1316,26 +1316,26 @@ ArrayData* newStructArrayImpl(imm_array<int32_t> ids, F f) {
 OPTBLD_INLINE void iopNewStructDArray(imm_array<int32_t> ids) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   auto const ad = newStructArrayImpl(ids, MixedArray::MakeStructDArray);
-  vmStack().pushArrayNoRc(bespoke::maybeEnableLogging(ad));
+  vmStack().pushArrayNoRc(bespoke::maybeMakeLoggingArray(ad));
 }
 
 OPTBLD_INLINE void iopNewStructDict(imm_array<int32_t> ids) {
   auto const ad = newStructArrayImpl(ids, MixedArray::MakeStructDict);
-  vmStack().pushDictNoRc(bespoke::maybeEnableLogging(ad));
+  vmStack().pushDictNoRc(bespoke::maybeMakeLoggingArray(ad));
 }
 
 OPTBLD_INLINE void iopNewVec(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto const ad = PackedArray::MakeVec(n, vmStack().topC());
   vmStack().ndiscard(n);
-  vmStack().pushVecNoRc(bespoke::maybeEnableLogging(ad));
+  vmStack().pushVecNoRc(bespoke::maybeMakeLoggingArray(ad));
 }
 
 OPTBLD_INLINE void iopNewKeysetArray(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto const ad = SetArray::MakeSet(n, vmStack().topC());
   vmStack().ndiscard(n);
-  vmStack().pushKeysetNoRc(bespoke::maybeEnableLogging(ad));
+  vmStack().pushKeysetNoRc(bespoke::maybeMakeLoggingArray(ad));
 }
 
 OPTBLD_INLINE void iopNewVArray(uint32_t n) {
@@ -1343,14 +1343,14 @@ OPTBLD_INLINE void iopNewVArray(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto const ad = PackedArray::MakeVArray(n, vmStack().topC());
   vmStack().ndiscard(n);
-  vmStack().pushArrayNoRc(bespoke::maybeEnableLogging(ad));
+  vmStack().pushArrayNoRc(bespoke::maybeMakeLoggingArray(ad));
 }
 
 OPTBLD_INLINE void iopNewDArray(uint32_t capacity) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   auto const ad = capacity ? MixedArray::MakeReserveDArray(capacity)
                            : ArrayData::CreateDArray();
-  vmStack().pushArrayNoRc(bespoke::maybeEnableLogging(ad));
+  vmStack().pushArrayNoRc(bespoke::maybeMakeLoggingArray(ad));
 }
 
 namespace {

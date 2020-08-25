@@ -258,7 +258,7 @@ void setLoggingEnabled(bool val) {
   g_loggingEnabled.store(val, std::memory_order_relaxed);
 }
 
-ArrayData* maybeEnableLogging(ArrayData* ad) {
+ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
   if (!g_loggingEnabled.load(std::memory_order_relaxed)) return ad;
   auto const sk = getSrcKey();
   if (!sk.valid()) {
@@ -292,8 +292,8 @@ ArrayData* maybeEnableLogging(ArrayData* ad) {
   }
 }
 
-const ArrayData* maybeEnableLogging(const ArrayData* ad) {
-  return maybeEnableLogging(const_cast<ArrayData*>(ad));
+const ArrayData* maybeMakeLoggingArray(const ArrayData* ad) {
+  return maybeMakeLoggingArray(const_cast<ArrayData*>(ad));
 }
 
 //////////////////////////////////////////////////////////////////////////////

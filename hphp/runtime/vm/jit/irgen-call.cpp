@@ -197,7 +197,8 @@ void callUnpack(IRGS& env, SSATmp* callee, const FCallArgs& fca,
 }
 
 SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
-                 SSATmp* objOrClass, bool dynamicCall, bool asyncEagerReturn) {
+                 SSATmp* objOrClass, bool skipRepack, bool dynamicCall,
+                 bool asyncEagerReturn) {
   assertx(!fca.hasUnpack() ||
           !callee->hasConstVal() ||
           callee->funcVal()->numNonVariadicParams() == fca.numArgs);
@@ -226,7 +227,7 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     genericsBitmap,
     fca.hasGenerics(),
     fca.hasUnpack(),
-    fca.skipRepack(),
+    skipRepack,
     dynamicCall,
     asyncEagerReturn,
     env.formingRegion
@@ -360,15 +361,17 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   }
   emitCallerRxChecksKnown(env, callee);
 
-  auto const doCall = [&](const FCallArgs& fca) {
-    assertx(fca.numArgs <= callee->numNonVariadicParams());
-    assertx(!fca.hasUnpack() || fca.numArgs == callee->numNonVariadicParams());
+  auto const doCall = [&](const FCallArgs& fca, bool skipRepack) {
+    assertx(
+      !skipRepack ||
+      (!fca.hasUnpack() && fca.numArgs <= callee->numNonVariadicParams()) ||
+      (fca.hasUnpack() && fca.numArgs == callee->numNonVariadicParams()));
 
     // We may have updated the stack, make sure Call can set up its Catch.
     updateMarker(env);
     env.irb->exceptionStackBoundary();
 
-    if (isFCall(curSrcKey(env).op())) {
+    if (isFCall(curSrcKey(env).op()) && skipRepack) {
       if (irGenTryInlineFCall(env, callee, fca, objOrClass, dynamicCall)) {
         return;
       }
@@ -378,7 +381,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
       fca.asyncEagerOffset != kInvalidOffset &&
       callee->supportsAsyncEagerReturn();
     auto const retVal = callImpl(env, cns(env, callee), fca, objOrClass,
-                                 dynamicCall, asyncEagerReturn);
+                                 skipRepack, dynamicCall, asyncEagerReturn);
     handleCallReturn(env, callee, fca, retVal, asyncEagerReturn,
                      false /* unlikely */);
   };
@@ -390,23 +393,25 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     env.irb->exceptionStackBoundary();
 
     if (fca.numArgs == callee->numNonVariadicParams()) {
+      if (fca.skipRepack()) return doCall(fca, true /* skipRepack */);
+
       auto const unpackOff = BCSPRelOffset{fca.hasGenerics() ? 1 : 0};
       auto const unpack = topC(env, unpackOff);
       auto const doConvertAndCallImpl = [&](SSATmp* converted) {
         auto const offset = offsetFromIRSP(env, unpackOff);
         gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), converted);
-        doCall(fca);
+        doCall(fca, true /* skipRepack */);
       };
       auto const doConvertAndCall = [&](Opcode op) {
         doConvertAndCallImpl(gen(env, op, unpack));
       };
       if (RuntimeOption::EvalHackArrDVArrs) {
-        if (unpack->isA(TVec)) return doCall(fca);
+        if (unpack->isA(TVec)) return doCall(fca, true /* skipRepack */);
         if (unpack->isA(TArr)) return doConvertAndCall(ConvArrToVec);
         if (unpack->isA(TDict)) return doConvertAndCall(ConvDictToVec);
         if (unpack->isA(TKeyset)) return doConvertAndCall(ConvKeysetToVec);
       } else {
-        if (unpack->isA(TVArr)) return doCall(fca);
+        if (unpack->isA(TVArr)) return doCall(fca, true /* skipRepack */);
         if (unpack->isA(TDArr)) return doConvertAndCall(ConvArrToVArr);
         if (unpack->isA(TArr)) return doConvertAndCall(ConvArrToVArr);
         if (unpack->isA(TVec)) return doConvertAndCall(ConvVecToVArr);
@@ -415,13 +420,15 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
       }
     }
 
+    assertx(!fca.skipRepack());
+
     // Slow path. TODO: remove and use interpreter once confirmed this is cold
     return callUnpack(env, cns(env, callee), fca, objOrClass, dynamicCall,
                       false /* unlikely */);
   }
 
   if (fca.numArgs <= callee->numNonVariadicParams()) {
-    return doCall(fca);
+    return doCall(fca, true /* skipRepack */);
   }
 
   // Pack extra arguments. The prologue can handle this even if the function
@@ -446,7 +453,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
     nullptr,  // inout-ness already checked
     fca.asyncEagerOffset,
     fca.context
-  ));
+  ), true /* skipRepack */);
 }
 
 void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
@@ -476,8 +483,8 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
 
   // Okay to request async eager return even if it is not supported.
   auto const asyncEagerReturn = fca.asyncEagerOffset != kInvalidOffset;
-  auto const retVal = callImpl(env, callee, fca, objOrClass, dynamicCall,
-                               asyncEagerReturn);
+  auto const retVal = callImpl(env, callee, fca, objOrClass, fca.skipRepack(),
+                               dynamicCall, asyncEagerReturn);
   handleCallReturn(env, nullptr, fca, retVal, asyncEagerReturn, unlikely);
 }
 

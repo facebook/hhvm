@@ -73,6 +73,13 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const ctx = srcLoc(env, inst, 3).reg();
   auto const extra = inst->extra<Call>();
   auto const numArgsInclUnpack = extra->numArgs + (extra->hasUnpack ? 1 : 0);
+  auto const func = inst->src(2)->hasConstVal(TFunc)
+    ? inst->src(2)->funcVal() : nullptr;
+  // Upgrade skipRepack if HHIR opts inferred the callee. We can't do this for
+  // unpack, as it is not guaranteed to be a varray.
+  auto const skipRepack = extra->skipRepack || (
+    func && !extra->hasUnpack && extra->numArgs <= func->numNonVariadicParams()
+  );
 
   auto& v = vmain(env);
 
@@ -105,17 +112,16 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   v << syncvmsp{ssp};
 
   auto const done = v.makeBlock();
-  if (inst->src(2)->hasConstVal(TFunc) &&
-      extra->numArgs <= inst->src(2)->funcVal()->numNonVariadicParams()) {
+  if (skipRepack && func) {
     // Emit a smashable call that initially calls a recyclable service request
     // stub.  The stub and the eventual targets take rvmfp() as an argument,
     // pointing to the callee ActRec.
-    auto const func = inst->src(2)->funcVal();
-    assertx(!extra->hasUnpack ||
-            extra->numArgs == func->numNonVariadicParams());
+    assertx(
+      (!extra->hasUnpack && extra->numArgs <= func->numNonVariadicParams()) ||
+      (extra->hasUnpack && extra->numArgs == func->numNonVariadicParams()));
     v << callphp{tc::ustubs().immutableBindCallStub, php_call_regs(withCtx),
                  func, numArgsInclUnpack};
-  } else if (extra->skipRepack) {
+  } else if (skipRepack) {
     // If we've statically determined the provided number of arguments
     // doesn't exceed what the target expects, we can skip the stub
     // and call the prologue directly.

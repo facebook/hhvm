@@ -37,8 +37,7 @@ let add_rcoc_between = [("file_info", "Pos", "relative_path::RelativePath")]
 let should_add_rcoc ty =
   match Configuration.mode () with
   | Configuration.ByRef -> false
-  | Configuration.ByBox
-  | Configuration.ByRc ->
+  | Configuration.ByBox ->
     List.mem add_rcoc_between (curr_module_name (), self (), ty) ~equal:( = )
 
 let should_add_reference ty =
@@ -46,19 +45,7 @@ let should_add_reference ty =
     match Configuration.mode () with
     | Configuration.ByRef ->
       ["Pos"; "pos::Pos"; "reason::Reason"; "FunParam"; "FunType"]
-    | Configuration.ByBox
-    | Configuration.ByRc ->
-      []
-  in
-  List.mem tyl ty ~equal:String.equal
-
-let should_add_rc ty =
-  let tyl =
-    match Configuration.mode () with
-    | Configuration.ByRc -> ["Pos"; "pos::Pos"; "reason::Reason"]
-    | Configuration.ByBox
-    | Configuration.ByRef ->
-      []
+    | Configuration.ByBox -> []
   in
   List.mem tyl ty ~equal:String.equal
 
@@ -83,11 +70,6 @@ let rec core_type ?(seen_indirection = false) ct =
     | Configuration.ByRef -> true
     | _ -> false
   in
-  let is_by_rc =
-    match Configuration.mode () with
-    | Configuration.ByRc -> true
-    | _ -> false
-  in
   match ct.ptyp_desc with
   | Ptyp_var "ty" when is_by_ref -> "Ty<'a>"
   | Ptyp_var name -> convert_type_name name
@@ -98,14 +80,10 @@ let rec core_type ?(seen_indirection = false) ct =
     let arg = core_type ~seen_indirection:true arg in
     sprintf "&'a [%s]" arg
   | Ptyp_constr ({ txt = Lident "string"; _ }, []) when is_by_ref -> "&'a str"
-  | Ptyp_constr ({ txt = Lident "string"; _ }, []) when is_by_rc ->
-    "std::rc::Rc<String>"
   | Ptyp_constr ({ txt = Lident "byte_string"; _ }, []) when is_by_box ->
     "bstr::BString"
   | Ptyp_constr ({ txt = Lident "byte_string"; _ }, []) when is_by_ref ->
     "&'a bstr::BStr"
-  | Ptyp_constr ({ txt = Lident "byte_string"; _ }, []) when is_by_rc ->
-    "std::rc::Rc<bstr::BString>"
   | Ptyp_constr (id, args) ->
     let id =
       match id.txt with
@@ -152,8 +130,6 @@ let rec core_type ?(seen_indirection = false) ct =
     let args = type_args ~seen_indirection ~add_lifetime args in
     if should_add_reference id then
       sprintf "&'a %s%s" id args
-    else if should_add_rc id then
-      sprintf "std::rc::Rc<%s%s>" id args
     else if should_add_rcoc id then
       sprintf "ocamlrep::rc::RcOc<%s%s>" id args
     (* Direct or indirect recursion *)
@@ -162,7 +138,6 @@ let rec core_type ?(seen_indirection = false) ct =
       match Configuration.mode () with
       | Configuration.ByRef -> sprintf "&'a %s%s" id args
       | Configuration.ByBox -> sprintf "Box<%s%s>" id args
-      | Configuration.ByRc -> sprintf "std::rc::Rc<%s%s>" id args
     else
       id ^ args
   | Ptyp_any -> raise (Skip_type_decl "cannot convert type Ptyp_any")

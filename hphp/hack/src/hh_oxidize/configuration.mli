@@ -16,7 +16,6 @@ type mode =
           &strs rather than Boxes, Vecs, and Strings. The emitted type
           definitions are intended to be suitable for arena-allocation
           (i.e., all types have a no-op implementation of Drop). *)
-  | ByRc  (** Emit recursive definitions using Rcs. *)
 
 type t = {
   mode: mode;

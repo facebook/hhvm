@@ -201,9 +201,6 @@ let parse_args () =
       ( "--by-ref",
         Arg.Unit (fun () -> mode := Configuration.ByRef),
         " Use references instead of Box, slices instead of Vec and String" );
-      ( "--by-rc",
-        Arg.Unit (fun () -> mode := Configuration.ByRc),
-        " Use Rc instead of Box." );
       ( "--extern-types-file",
         Arg.String (fun s -> extern_types_file := Some s),
         " Use the types listed in this file rather than assuming all types"

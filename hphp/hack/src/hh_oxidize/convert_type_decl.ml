@@ -20,9 +20,7 @@ open Convert_type
 let default_implements () =
   match Configuration.mode () with
   | Configuration.ByRef -> [(Some "arena_trait", "TrivialDrop")]
-  | Configuration.ByBox
-  | Configuration.ByRc ->
-    []
+  | Configuration.ByBox -> []
 
 let implements_traits _name = default_implements ()
 
@@ -30,8 +28,7 @@ let default_derives () =
   (match Configuration.mode () with
   | Configuration.ByBox ->
     [(Some "ocamlrep_derive", "FromOcamlRep"); (Some "serde", "Deserialize")]
-  | Configuration.ByRef -> [(Some "ocamlrep_derive", "FromOcamlRepIn")]
-  | Configuration.ByRc -> [])
+  | Configuration.ByRef -> [(Some "ocamlrep_derive", "FromOcamlRepIn")])
   @ [
       (None, "Clone");
       (None, "Debug");
@@ -63,9 +60,7 @@ let derive_copy ty =
     | "typing_defs_core::Ty_" ->
       true
     | _ -> false)
-  | Configuration.ByBox
-  | Configuration.ByRc ->
-    false
+  | Configuration.ByBox -> false
 
 let additional_derives ty : (string option * string) list =
   ( if derive_copy ty then
@@ -85,11 +80,9 @@ let additional_derives ty : (string option * string) list =
   | _ -> []
 
 let derive_blacklist ty =
-  let is_by_ref_or_rc =
+  let is_by_ref =
     match Configuration.mode () with
-    | Configuration.ByRef
-    | Configuration.ByRc ->
-      true
+    | Configuration.ByRef -> true
     | Configuration.ByBox -> false
   in
   match ty with
@@ -103,12 +96,12 @@ let derive_blacklist ty =
    * don't care about comparison or hashing on environments *)
   | "typing_env_types::Env" -> ["Eq"; "Hash"; "Ord"]
   | "typing_env_types::Genv" -> ["Eq"; "Hash"; "Ord"]
-  | "ast_defs::Id" when Configuration.(mode () = ByRef) -> ["Debug"]
-  | "errors::Errors" when Configuration.(mode () = ByRef) -> ["Debug"]
-  | "typing_defs_core::Ty" when is_by_ref_or_rc ->
+  | "ast_defs::Id" when is_by_ref -> ["Debug"]
+  | "errors::Errors" when is_by_ref -> ["Debug"]
+  | "typing_defs_core::Ty" when is_by_ref ->
     ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
-  | "typing_defs_core::Ty_" when Configuration.(mode () = ByRef) -> ["Debug"]
-  | "typing_defs_core::ConstraintType" when is_by_ref_or_rc ->
+  | "typing_defs_core::Ty_" when is_by_ref -> ["Debug"]
+  | "typing_defs_core::ConstraintType" when is_by_ref ->
     ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
   | _ -> []
 
@@ -166,9 +159,7 @@ let box_variant () =
   (match Configuration.mode () with
   | Configuration.ByRef ->
     [("nast", "FuncBodyAnn"); ("typing_defs_core", "Ty_")]
-  | Configuration.ByBox
-  | Configuration.ByRc ->
-    [])
+  | Configuration.ByBox -> [])
   @ [("aast", "Expr_"); ("aast", "Stmt_"); ("aast", "Def")]
 
 let should_box_variant ty =
@@ -190,15 +181,13 @@ let unbox_field ty =
   | Configuration.ByRef ->
     ty = "tany_sentinel::TanySentinel" || ty = "ident::Ident" || ty = "Ty<'a>"
   | Configuration.ByBox -> false
-  | Configuration.ByRc -> false
 
 let add_rcoc = [("aast", "Nsenv")]
 
 let should_add_rcoc ty =
   match Configuration.mode () with
   | Configuration.ByRef -> false
-  | Configuration.ByBox
-  | Configuration.ByRc ->
+  | Configuration.ByBox ->
     List.mem add_rcoc (curr_module_name (), ty) ~equal:( = )
 
 let blacklisted ty_name =
@@ -280,9 +269,7 @@ let type_params ?bound name params =
         ""
       else
         "<'a>"
-    | Configuration.ByBox
-    | Configuration.ByRc ->
-      ""
+    | Configuration.ByBox -> ""
   else
     let bound =
       match bound with
@@ -298,9 +285,7 @@ let type_params ?bound name params =
         sprintf "<%s>" params
       else
         sprintf "<'a, %s>" params
-    | Configuration.ByBox
-    | Configuration.ByRc ->
-      sprintf "<%s>" params
+    | Configuration.ByBox -> sprintf "<%s>" params
 
 let record_label_declaration ?(pub = false) ?(prefix = "") ld =
   let doc = doc_comment_of_attribute_list ld.pld_attributes in
@@ -348,13 +333,11 @@ let constructor_arguments ?(box_fields = false) = function
           match Configuration.mode () with
           | Configuration.ByRef -> sprintf "(&'a %s)" ty
           | Configuration.ByBox -> sprintf "(Box<%s>)" ty
-          | Configuration.ByRc -> sprintf "(std::rc::Rc<%s>)" ty
         )
       | _ ->
         (match Configuration.mode () with
         | Configuration.ByRef -> sprintf "(&'a %s)" (tuple types)
-        | Configuration.ByBox -> sprintf "(Box<%s>)" (tuple types)
-        | Configuration.ByRc -> sprintf "(std::rc::Rc<%s>)" (tuple types))
+        | Configuration.ByBox -> sprintf "(Box<%s>)" (tuple types))
     )
   | Pcstr_record labels -> record_declaration labels
 

@@ -12,7 +12,6 @@ open Reordered_argument_collections
 type mode =
   | ByBox
   | ByRef
-  | ByRc
 
 type t = {
   mode: mode;

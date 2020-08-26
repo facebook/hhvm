@@ -164,7 +164,7 @@ printir::Instr DynamicConverter<printir::Instr>::convert(const dynamic& d) {
   auto const offset = convertTo<Offset>(d.getDefault("offset", {}));
   auto profileData = convertTo<vector<printir::Profile>>(
     d.getDefault("profileData", {}));
-
+  auto const startLine = convertTo<int>(d.getDefault("startLine", {}));
   auto tcRanges = convertTo<vector<printir::TCRange>>(
     d.getDefault("tc_ranges", dynamic::array));
   for (auto& tcr : tcRanges) tcr.parentInstrId = id;
@@ -190,7 +190,7 @@ printir::Instr DynamicConverter<printir::Instr>::convert(const dynamic& d) {
                         opcode, std::move(typeParam), std::move(guard),
                         std::move(extra), std::move(taken), std::move(tcRanges),
                         std::move(dsts), offset, std::move(profileData),
-                        std::move(srcs), std::move(counterName)};
+                        std::move(srcs), std::move(counterName), startLine};
 }
 
 printir::Block DynamicConverter<printir::Block>::convert(const dynamic& d) {
@@ -241,9 +241,10 @@ printir::SrcKey DynamicConverter<printir::SrcKey>::convert(const dynamic& d) {
   auto const maybeResumeMode = nameToResumeMode(rawResumeMode);
   if (!maybeResumeMode) enumError("ResumeMode", rawResumeMode);
   auto const resumeMode = *maybeResumeMode;
+  auto const startLine = convertTo<int>(d.getDefault("startLine", {}));
 
   return printir::SrcKey{std::move(funcStr), std::move(unitStr), prologue,
-                         offset, resumeMode, hasThis};
+                         offset, resumeMode, hasThis, startLine};
 }
 
 printir::TransContext DynamicConverter<printir::TransContext>::convert(
@@ -357,6 +358,7 @@ dynamic DynamicConstructor<printir::Instr>::construct(const printir::Instr& i) {
                         ("tcRanges", toDynamic(i.tcRanges))
                         ("dsts", toDynamic(i.dsts))
                         ("offset", i.offset)
+                        ("startLine", i.startLine)
                         ("profileData", toDynamic(i.profileData))
                         ("srcs", toDynamic(i.srcs))
                         ("counterName", toDynamic(i.counterName));
@@ -383,7 +385,8 @@ dynamic DynamicConstructor<printir::SrcKey>::construct(
                         ("prologue", s.prologue)
                         ("offset", s.offset)
                         ("resumeMode", resumeModeShortName(s.resumeMode))
-                        ("hasThis", s.hasThis);
+                        ("hasThis", s.hasThis)
+                        ("startLine", s.startLine);
 }
 
 dynamic DynamicConstructor<printir::TransContext>::construct(

@@ -84,6 +84,7 @@ struct Instr {
   // Only one of these two should be present, they are mutually exclusive
   const folly::Optional<std::vector<SSATmp>> srcs;
   const folly::Optional<std::string> counterName;
+  const int startLine;
 
   BlockId parentBlockId;
 };
@@ -106,6 +107,7 @@ struct SrcKey {
   const int offset;
   const ResumeMode resumeMode;
   const bool hasThis;
+  const int startLine;
 };
 
 struct TransContext {

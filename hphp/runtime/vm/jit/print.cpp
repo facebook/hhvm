@@ -285,12 +285,15 @@ dynamic getIRInstruction(const IRInstruction& inst,
   const dynamic takenObj = taken ? getLabel(taken) : dynamic(nullptr);
 
   auto const offset = inst.marker().bcOff() + inst.iroff();
+  auto const startLine = newMarker.sk().unit()->getLineNumber(offset);
+
   result.update(dynamic::merge(getOpcode(&inst, guards),
                                dynamic::object("id", id)
                                               ("taken", takenObj)
                                               ("srcs", getSrcs(&inst))
                                               ("dsts", getDsts(&inst))
-                                              ("offset", offset)));
+                                              ("offset", offset)
+                                              ("startLine", startLine)));
   return result;
 }
 
@@ -455,12 +458,14 @@ dynamic getBlock(const Block* block,
 }
 
 dynamic getSrcKey(const SrcKey& sk) {
+  auto const unit = sk.unit();
   return dynamic::object("func", sk.func()->name()->slice())
-                        ("unit", sk.unit()->filepath()->slice())
+                        ("unit", unit->filepath()->slice())
                         ("prologue", sk.prologue())
                         ("offset", sk.offset())
                         ("resumeMode", resumeModeShortName(sk.resumeMode()))
-                        ("hasThis", sk.hasThis());
+                        ("hasThis", sk.hasThis())
+                        ("startLine", unit->getLineNumber(sk.offset()));
 }
 
 dynamic getTransContext(const TransContext& ctx) {

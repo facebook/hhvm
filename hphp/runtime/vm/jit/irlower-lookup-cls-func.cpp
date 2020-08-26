@@ -74,7 +74,7 @@ TRACE_SET_MOD(irlower);
 namespace {
 
 template<class TargetCache>
-void implLdMeta(IRLS& env, const IRInstruction* inst) {
+void implLdMeta(IRLS& env, const IRInstruction* inst, Vout& v, Vreg dst) {
   auto const is_func = std::is_same<TargetCache,FuncCache>::value;
 
   auto const ch = TargetCache::alloc();
@@ -83,10 +83,10 @@ void implLdMeta(IRLS& env, const IRInstruction* inst) {
 
   auto args = argGroup(env, inst).imm(ch).ssa(0 /* name */);
   cgCallHelper(
-    vmain(env),
+    v,
     env,
     CallSpec::direct(TargetCache::lookup),
-    callDest(env, inst),
+    callDest(dst),
     SyncOptions::Sync,
     args
   );
@@ -104,11 +104,43 @@ const Func* loadUnknownFuncHelper(const StringData* name,
 }
 
 void cgLdCls(IRLS& env, const IRInstruction* inst) {
-  implLdMeta<ClassCache>(env, inst);
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+
+  if (!RO::RepoAuthoritative) {
+    return implLdMeta<ClassCache>(env, inst, vmain(env), dst);
+  }
+
+  auto& v = vmain(env);
+  auto& vc = vcold(env);
+  auto done = v.makeBlock();
+  auto then = vc.makeBlock();
+
+  auto const sf1 = v.makeReg();
+  auto const sf2 = v.makeReg();
+  auto const low = v.makeReg();
+  auto const cls1 = v.makeReg();
+  auto const cls2 = v.makeReg();
+
+  v << testbim{1, src[StringData::isSymbolOffset()], sf1};
+  fwdJcc(v, env, CC_E, sf1, then);
+  v << loadl{src[StringData::cachedClassOffset()], low};
+  v << testl{low, low, sf2};
+  fwdJcc(v, env, CC_E, sf2, then);
+  v << movzlq{low, cls1};
+  v << phijmp{done, v.makeTuple({cls1})};
+
+  vc = then;
+  implLdMeta<ClassCache>(env, inst, vc, cls2);
+  vc << phijmp{done, vc.makeTuple({cls2})};
+
+  v = done;
+  v << phidef{v.makeTuple({dst})};
 }
 
 void cgLdFunc(IRLS& env, const IRInstruction* inst) {
-  implLdMeta<FuncCache>(env, inst);
+  auto const dst = dstLoc(env, inst, 0).reg();
+  implLdMeta<FuncCache>(env, inst, vmain(env), dst);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

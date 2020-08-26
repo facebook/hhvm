@@ -116,6 +116,14 @@ void StringData::setNamedEntity(NamedEntity* ne) {
   prefix->ne = ne;
 }
 
+ptrdiff_t StringData::isSymbolOffset() {
+  return offsetof(StringData, m_aux16) + 1;
+}
+
+ptrdiff_t StringData::cachedClassOffset() {
+  return offsetof(SymbolPrefix, cls) - sizeof(SymbolPrefix);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 // Create either a static or an uncounted string.

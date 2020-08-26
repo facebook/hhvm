@@ -105,10 +105,15 @@ inline CallDest callDestTV(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void fwdJcc(Vout& v, IRLS& env, ConditionCode cc,
-                   Vreg sf, Block* target) {
+                   Vreg sf, Vlabel target) {
   auto const next = v.makeBlock();
-  v << jcc{cc, sf, {next, label(env, target)}};
+  v << jcc{cc, sf, {next, target}};
   v = next;
+}
+
+inline void fwdJcc(Vout& v, IRLS& env, ConditionCode cc,
+                   Vreg sf, Block* target) {
+  fwdJcc(v, env, cc, sf, label(env, target));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

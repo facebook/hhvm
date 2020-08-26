@@ -434,6 +434,12 @@ struct StringData final : MaybeCountable,
   void setNamedEntity(NamedEntity* ne);
 
   /*
+   * Helpers used to JIT access to the symbol cache.
+   */
+  static ptrdiff_t isSymbolOffset();
+  static ptrdiff_t cachedClassOffset();
+
+  /*
    * Type conversion functions.
    */
   bool toBoolean() const;

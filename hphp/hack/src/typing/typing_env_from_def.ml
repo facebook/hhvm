@@ -30,7 +30,6 @@ let fun_env ctx f =
 let get_self_from_c c =
   let tparams =
     List.map c.c_tparams (fun { tp_name = (p, s); _ } ->
-        (* TODO(T69551141) handle type arguments *)
         mk (Reason.Rwitness p, Tgeneric (s, [])))
   in
   mk (Reason.Rwitness (fst c.c_name), Tapply (c.c_name, tparams))

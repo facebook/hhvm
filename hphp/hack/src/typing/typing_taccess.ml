@@ -186,7 +186,6 @@ let rec type_of_result ctx env root res =
     ) else
       let generic_name = tp_name name id in
       let reason = make_reason env Reason.Rnone id root in
-      (* TODO(T69551141) handle type arguments *)
       let ty = MakeType.generic reason generic_name in
       let env =
         Option.fold bnd ~init:env ~f:(fun env bnd ->

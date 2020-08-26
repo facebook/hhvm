@@ -5642,41 +5642,49 @@ and static_class_id
     in
     make_result env [] Aast.CIself (mk (Reason.Rwitness p, self))
   | CI ((p, id) as c) as e1 ->
-    if Env.is_generic_parameter env id then
-      let (env, tal) =
-        Phase.localize_targs
-          ~check_well_kinded:check_targs_well_kinded
-          ~is_method:true
-          ~def_pos:p
-          ~use_pos:p
-          ~use_name:(strip_ns (snd c))
-          env
-          []
-          (List.map ~f:snd tal)
-      in
-      let r = Reason.Rhint p in
-      (* TODO(T69551141) handle type arguments for Tgeneric *)
-      let tgeneric = MakeType.generic r id in
-      make_result env tal (Aast.CI c) tgeneric
-    else
-      let class_ = Env.get_class env id in
-      (match class_ with
-      | None -> make_result env [] (Aast.CI c) (Typing_utils.mk_tany env p)
-      | Some class_ ->
-        let (env, ty, tal) =
-          List.map ~f:snd tal
-          |> Phase.localize_targs_and_check_constraints
-               ~exact
-               ~check_well_kinded:check_targs_well_kinded
-               ~check_constraints
-               ~def_pos:(Cls.pos class_)
-               ~use_pos:p
-               env
-               c
-               e1
-               (Cls.tparams class_)
+    begin
+      match Env.get_pos_and_kind_of_generic env id with
+      | Some (def_pos, kind) ->
+        let simple_kind = Typing_kinding_defs.Simple.from_full_kind kind in
+        let param_nkinds =
+          Typing_kinding_defs.Simple.get_named_parameter_kinds simple_kind
         in
-        make_result env tal (Aast.CI c) ty)
+        let (env, tal) =
+          Phase.localize_targs_with_kinds
+            ~check_well_kinded:check_targs_well_kinded
+            ~is_method:true
+            ~def_pos
+            ~use_pos:p
+            ~use_name:(strip_ns (snd c))
+            env
+            param_nkinds
+            (List.map ~f:snd tal)
+        in
+        let r = Reason.Rhint p in
+        let type_args = List.map tal fst in
+        let tgeneric = MakeType.generic ~type_args r id in
+        make_result env tal (Aast.CI c) tgeneric
+      | None ->
+        (* Not a type parameter *)
+        let class_ = Env.get_class env id in
+        (match class_ with
+        | None -> make_result env [] (Aast.CI c) (Typing_utils.mk_tany env p)
+        | Some class_ ->
+          let (env, ty, tal) =
+            List.map ~f:snd tal
+            |> Phase.localize_targs_and_check_constraints
+                 ~exact
+                 ~check_well_kinded:check_targs_well_kinded
+                 ~check_constraints
+                 ~def_pos:(Cls.pos class_)
+                 ~use_pos:p
+                 env
+                 c
+                 e1
+                 (Cls.tparams class_)
+          in
+          make_result env tal (Aast.CI c) ty)
+    end
   | CIexpr ((p, _) as e) ->
     let (env, te, ty) = expr env e in
     let rec resolve_ety env ty =

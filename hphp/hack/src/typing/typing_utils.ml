@@ -521,7 +521,6 @@ let get_class_ids env ty =
       List.fold tys ~init:acc ~f:(aux seen)
     | Tgeneric (name, targs) when not (List.mem ~equal:String.equal seen name)
       ->
-      (* TODO(T69551141) handle type arguments *)
       let seen = name :: seen in
       let upper_bounds = Env.get_upper_bounds env name targs in
       TySet.fold (fun ty acc -> aux seen acc ty) upper_bounds acc

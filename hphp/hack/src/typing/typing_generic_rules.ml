@@ -97,7 +97,6 @@ let apply_rules ?(ignore_type_structure = false) env ty f =
     | (_, (Tnewtype (_, _, ty) | Tdependent (_, ty))) -> iter ~is_nonnull env ty
     (* For type parameters with upper bounds, delegate to intersection of the upper bounds *)
     | (r, Tgeneric _) ->
-      (* TODO(T69551141) handle type arguments? *)
       let (env, tyl) = get_transitive_upper_bounds env ty in
       if List.is_empty tyl then
         default ()

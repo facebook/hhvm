@@ -47,11 +47,7 @@ val log_prop :
   unit
 
 val log_tparam_instantiation :
-  Typing_env_types.env ->
-  Pos.t ->
-  'a Typing_defs.tparam ->
-  Typing_defs.locl_ty ->
-  unit
+  Typing_env_types.env -> Pos.t -> string -> Typing_defs.locl_ty -> unit
 
 val log_new_tvar_for_new_object :
   Typing_env_types.env ->

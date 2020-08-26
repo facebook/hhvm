@@ -651,9 +651,9 @@ let log_new_tvar env p tvar message =
   log_with_level env "prop" 2 (fun () ->
       log_types p env [Log_head (message, [Log_type ("type variable", tvar)])])
 
-let log_tparam_instantiation env p tparam tvar =
+let log_tparam_instantiation env p tparam_name tvar =
   let message =
-    Printf.sprintf "Instantiating type parameter %s with" (snd tparam.tp_name)
+    Printf.sprintf "Instantiating type parameter %s with" tparam_name
   in
   log_new_tvar env p tvar message
 

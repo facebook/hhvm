@@ -937,9 +937,8 @@ module Json = struct
       obj @@ kind p "any"
     | (p, Tnonnull) -> obj @@ kind p "nonnull"
     | (p, Tdynamic) -> obj @@ kind p "dynamic"
-    | (p, Tgeneric (s, _tyargs)) ->
-      (* TODO(T69551141) handle type arguments *)
-      obj @@ kind p "generic" @ is_array true @ name s
+    | (p, Tgeneric (s, tyargs)) ->
+      obj @@ kind p "generic" @ is_array true @ name s @ args tyargs
     | (p, Tunapplied_alias s) -> obj @@ kind p "unapplied_alias" @ name s
     | (p, Tnewtype (s, _, ty)) when Typing_env.is_enum env s ->
       obj @@ kind p "enum" @ name s @ as_type ty
@@ -1066,9 +1065,10 @@ module Json = struct
           get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
           get_bool "is_array" (json, keytrace)
           >>= fun (is_array, _is_array_keytrace) ->
+          get_array "args" (json, keytrace) >>= fun (args, args_keytrace) ->
+          aux_args args ~keytrace:args_keytrace >>= fun args ->
           if is_array then
-            (* TODO(T69551141) handle type arguments *)
-            ty (Tgeneric (name, []))
+            ty (Tgeneric (name, args))
           else
             wrong_phase ~message:"Tgeneric is a decl-phase type." ~keytrace
         | "enum" ->

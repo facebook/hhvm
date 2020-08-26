@@ -71,6 +71,18 @@ val localize_targs :
   Aast.hint list ->
   env * Tast.targ list
 
+(** Like localize_targs, but acts on kinds. *)
+val localize_targs_with_kinds :
+  check_well_kinded:bool ->
+  is_method:bool ->
+  def_pos:Pos.t ->
+  use_pos:Pos.t ->
+  use_name:string ->
+  env ->
+  Typing_kinding_defs.Simple.named_kind list ->
+  Aast.hint list ->
+  env * Tast.targ list
+
 (* Declare and localize a single explicit type argument *)
 val localize_targ :
   check_well_kinded:bool -> env -> Aast.hint -> env * Tast.targ

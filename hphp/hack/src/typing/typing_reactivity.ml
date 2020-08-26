@@ -61,9 +61,7 @@ let rec condition_type_from_reactivity r =
 let get_associated_condition_type env ~is_self ty =
   let (env, ty) = Env.expand_type env ty in
   match get_node ty with
-  | Tgeneric (n, _) ->
-    (* TODO(T69551141) handle type arguments *)
-    Env.get_condition_type env n
+  | Tgeneric (n, _) -> Env.get_condition_type env n
   | Tdependent (DTthis, _) ->
     condition_type_from_reactivity (env_reactivity env)
   | _ when is_self -> condition_type_from_reactivity (env_reactivity env)

@@ -608,10 +608,9 @@ and localize_targ ~check_well_kinded env hint =
   localize_targ_with_kind ~check_well_kinded env hint named_kind
 
 (* See signature in .mli file for details *)
-and localize_targs
-    ~check_well_kinded ~is_method ~def_pos ~use_pos ~use_name env tparaml targl
-    =
-  let tparam_count = List.length tparaml in
+and localize_targs_with_kinds
+    ~check_well_kinded ~is_method ~def_pos ~use_pos ~use_name env nkinds targl =
+  let tparam_count = List.length nkinds in
   let targ_count = List.length targl in
   (* If there are explicit type arguments but too few or too many then
    * report an error *)
@@ -632,7 +631,6 @@ and localize_targs
     else
       targl
   in
-  let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparaml in
   let (env, explicit_targs) =
     List.map2_env
       env
@@ -642,11 +640,7 @@ and localize_targs
   in
   (* Generate fresh type variables for the remainder *)
   let (env, implicit_targs) =
-    List.map2_env
-      env
-      (List.drop tparaml targ_count)
-      (List.drop nkinds targ_count)
-      (fun env tparam nkind ->
+    List.map_env env (List.drop nkinds targ_count) (fun env nkind ->
         let (name, kind) = nkind in
         let is_higher_kinded = KindDefs.Simple.get_arity kind > 0 in
         let wildcard_hint =
@@ -666,13 +660,26 @@ and localize_targs
           let (env, tvar) =
             Env.fresh_type_reason
               env
-              (Reason.Rtype_variable_generics
-                 (use_pos, snd tparam.tp_name, use_name))
+              (Reason.Rtype_variable_generics (use_pos, snd name, use_name))
           in
-          Typing_log.log_tparam_instantiation env use_pos tparam tvar;
+          Typing_log.log_tparam_instantiation env use_pos (snd name) tvar;
           (env, (tvar, wildcard_hint)))
   in
   (env, explicit_targs @ implicit_targs)
+
+and localize_targs
+    ~check_well_kinded ~is_method ~def_pos ~use_pos ~use_name env tparaml targl
+    =
+  let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparaml in
+  localize_targs_with_kinds
+    ~check_well_kinded
+    ~is_method
+    ~def_pos
+    ~use_pos
+    ~use_name
+    env
+    nkinds
+    targl
 
 (* For the majority of cases when we localize a function type we instantiate
  * the function's type parameters to Tvars. There are two cases where we do not do this.
@@ -1009,7 +1016,8 @@ let localize_generic_parameters_with_bounds
   let env = Env.add_generic_parameters env tparams in
   let localize_bound
       env ({ tp_name = (pos, name); tp_constraints = cstrl; _ } : decl_tparam) =
-    (* TODO(T69551141) handle type arguments for Tgeneric *)
+    (* TODO(T70068435) This may have to be touched when adding support for constraints on HK
+      types *)
     let tparam_ty = mk (Reason.Rwitness pos, Tgeneric (name, [])) in
     List.map_env env cstrl (fun env (ck, cstr) ->
         let (env, ty) = localize env cstr ~ety_env in

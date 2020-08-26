@@ -77,10 +77,19 @@ let rec freshen_inside_ty env ty =
   | Terr
   | Tdynamic
   | Tobject
-  | Tprim _
-  | Tgeneric _ ->
-    (* TODO(T69551141) handle type arguments *)
+  | Tprim _ ->
     default ()
+  | Tgeneric (name, tyl) ->
+    if List.is_empty tyl then
+      default ()
+    else
+      (* TODO(T69931993) Replace Invariant here once we support arbitrary variances
+        on HK generics *)
+      let variancel =
+        List.replicate ~num:(List.length tyl) Ast_defs.Invariant
+      in
+      let (env, tyl) = freshen_tparams env variancel tyl in
+      (env, mk (r, Tnewtype (name, tyl, ty)))
   | Tdependent _ -> default ()
   (* Nullable is covariant *)
   | Toption ty ->

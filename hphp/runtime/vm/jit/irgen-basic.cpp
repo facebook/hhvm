@@ -58,7 +58,9 @@ void emitClassGetC(IRGS& env) {
     return;
   }
 
-  if (!name->hasConstVal()) gen(env, RaiseStrToClassNotice, name);
+  if (!name->hasConstVal() && RO::EvalRaiseStrToClsConversionWarning) {
+    gen(env, RaiseStrToClassNotice, name);
+  }
 
   auto const cls = ldCls(env, name);
   decRef(env, name);

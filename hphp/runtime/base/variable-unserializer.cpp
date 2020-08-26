@@ -1193,14 +1193,21 @@ Array VariableUnserializer::unserializeArray() {
   int64_t size = readInt();
   expectChar(':');
   expectChar('{');
-  if (size == 0) {
-    expectChar('}');
-    return m_forceDArrays || type() == Type::Serialize
-      ? Array::CreateDArray()
-      : Array::Create();
-  }
+
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
+  }
+
+  auto provTag = unserializeProvenanceTag();
+  if (!RO::EvalArrayProvenance) provTag = {};
+
+  if (size == 0) {
+    expectChar('}');
+    auto arr =  m_forceDArrays || type() == Type::Serialize
+      ? Array::CreateDArray()
+      : Array::Create();
+    if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), provTag);
+    return arr;
   }
   // For large arrays, do a naive pre-check for OOM.
   auto const allocsz = MixedArray::computeAllocBytesFromMaxElms(size);
@@ -1225,6 +1232,7 @@ Array VariableUnserializer::unserializeArray() {
 
   check_non_safepoint_surprise();
   expectChar('}');
+  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), provTag);
   return arr;
 }
 
@@ -1257,7 +1265,8 @@ arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
     return std::make_pair(filename, line);
   };
 
-  if (type() != VariableUnserializer::Type::Internal) {
+  if (type() != VariableUnserializer::Type::Internal &&
+      type() != VariableUnserializer::Type::Serialize) {
     return {};
   }
 
@@ -1317,14 +1326,15 @@ Array VariableUnserializer::unserializeDict() {
   expectChar(':');
   expectChar('{');
 
+  if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
+    throwArraySizeOutOfBounds();
+  }
+
   unserializeProvenanceTag();
 
   if (size == 0) {
     expectChar('}');
     return Array::attach(staticEmptyDictArray());
-  }
-  if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
-    throwArraySizeOutOfBounds();
   }
 
   // For large arrays, do a naive pre-check for OOM.
@@ -1354,14 +1364,15 @@ Array VariableUnserializer::unserializeVec() {
   expectChar(':');
   expectChar('{');
 
+  if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
+    throwArraySizeOutOfBounds();
+  }
+
   unserializeProvenanceTag();
 
   if (size == 0) {
     expectChar('}');
     return Array::attach(staticEmptyVec());
-  }
-  if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
-    throwArraySizeOutOfBounds();
   }
   auto const sizeClass = PackedArray::capacityToSizeIndex(size);
   auto const allocsz = MemoryManager::sizeIndex2Size(sizeClass);
@@ -1390,6 +1401,10 @@ Array VariableUnserializer::unserializeVArray() {
   expectChar(':');
   expectChar('{');
 
+  if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
+    throwArraySizeOutOfBounds();
+  }
+
   auto provTag = unserializeProvenanceTag();
   if (!RO::EvalArrayProvenance) provTag = {};
 
@@ -1410,9 +1425,6 @@ Array VariableUnserializer::unserializeVArray() {
           ? arrprov::tagStaticArr(staticEmptyVArray(), provTag)
           : staticEmptyVArray()
         );
-  }
-  if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
-    throwArraySizeOutOfBounds();
   }
 
   auto const oomCheck = [&](size_t allocsz) {
@@ -1461,6 +1473,10 @@ Array VariableUnserializer::unserializeDArray() {
   expectChar(':');
   expectChar('{');
 
+  if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
+    throwArraySizeOutOfBounds();
+  }
+
   auto provTag = unserializeProvenanceTag();
   if (!RO::EvalArrayProvenance) provTag = {};
 
@@ -1470,9 +1486,6 @@ Array VariableUnserializer::unserializeDArray() {
       ? arrprov::tagStaticArr(staticEmptyDArray(), provTag)
       : staticEmptyDArray()
     );
-  }
-  if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
-    throwArraySizeOutOfBounds();
   }
 
   // For large arrays, do a naive pre-check for OOM.

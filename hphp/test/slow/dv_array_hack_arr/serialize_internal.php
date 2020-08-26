@@ -7,6 +7,16 @@ function serialize_internal(mixed $thing): string {
   );
 }
 
+function serialize_provenance(mixed $thing, bool $keepDVArrays): string {
+  return HH\serialize_with_options(
+    $thing,
+    dict[
+      'serializeProvenanceAndLegacy' => true,
+      'keepDVArrays' => $keepDVArrays
+    ],
+  );
+}
+
 <<__EntryPoint>>
 function main(): void {
   $inputs = vec[
@@ -31,6 +41,13 @@ function main(): void {
     printf("is_marked = %d\n", HH\is_array_marked_legacy($input));
     $serialized = serialize_internal($input);
     printf("%s\n", $serialized);
+
+    invariant(
+      $serialized === serialize_provenance($input, true),
+      'Expected serialize_provenance to match serialize_internal',
+    );
+    printf("%s\n", serialize_provenance($input, false));
+
     $unserialized = unserialize($serialized);
     var_dump($unserialized);
     printf("is_marked = %d\n", HH\is_array_marked_legacy($unserialized));

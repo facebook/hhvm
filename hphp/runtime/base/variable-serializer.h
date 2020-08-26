@@ -115,6 +115,13 @@ struct VariableSerializer {
   // ignore uninitialized late init props and do not attempt to serialize them
   void setIgnoreLateInit() { m_ignoreLateInit = true; }
 
+  // Serialize legacy bit and provenance tag, using same format as
+  // Type::Internal serializer. This is only supported Type::Serialize.
+  void setSerializeProvenanceAndLegacy() {
+    assertx(getType() == Type::Serialize);
+    m_serializeProvenanceAndLegacy = true;
+  }
+
   // MarkedVArray and MarkedDArray are used for serialization formats, which
   // can distinguish between all 3 possible array states (unmarked varray,
   // unmarked vec, marked varray/vec).
@@ -266,6 +273,8 @@ private:
   int m_valueCount{0};           // current ref index
   bool m_keepDVArrays;           // serialize d/varrays as themselves or arrays
   bool m_forcePHPArrays{false};  // serialize PHP and Hack arrays as PHP arrays
+  bool m_serializeProvenanceAndLegacy{false}; // serialize provenance tags and
+                                              // legacy bit
   bool m_hackWarn{false};        // warn when attempting on Hack arrays
   bool m_dictWarn{false};        // warn when attempting on dicts
   bool m_keysetWarn{false};        // warn when attempting on keysets

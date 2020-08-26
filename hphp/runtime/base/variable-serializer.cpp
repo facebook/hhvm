@@ -115,25 +115,27 @@ VariableSerializer::getKind(const ArrayData* arr) const {
     always_assert(false);
   }();
 
+  auto const differentiateLegacy =
+    getType() == Type::Internal || getType() == Type::VarDump ||
+    (getType() == Type::Serialize && m_serializeProvenanceAndLegacy);
+
   // TODO(dneiter): this is broken, fix this
   if (RuntimeOption::EvalHackArrDVArrs &&
-      respectsLegacyBit &&
+      respectsLegacyBit && !differentiateLegacy &&
       !arr->isLegacyArray()) {
     return VariableSerializer::ArrayKind::PHP;
   }
 
-  auto const differentiateLegacy =
-    getType() == Type::Internal || getType() == Type::VarDump;
-
   if (differentiateLegacy && arr->isLegacyArray()) {
-    if (arr->isDictType()) return VariableSerializer::ArrayKind::MarkedDArray;
-    if (arr->isVecType()) return VariableSerializer::ArrayKind::MarkedVArray;
     assertx(!arr->isKeysetType());
     if (m_keepDVArrays) {
-      if (arr->isVArray()) return VariableSerializer::ArrayKind::MarkedVArray;
-      if (arr->isDArray()) return VariableSerializer::ArrayKind::MarkedDArray;
+      if (arr->isDictType() || arr->isDArray()) {
+        return VariableSerializer::ArrayKind::MarkedDArray;
+      }
+      if (arr->isVecType() || arr->isVArray()) {
+        return VariableSerializer::ArrayKind::MarkedVArray;
+      }
     }
-    assertx(arr->isPHPArrayType());
     return VariableSerializer::ArrayKind::MarkedDArray;
   }
 
@@ -1726,7 +1728,8 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr,
     write_filename(filename);
   };
 
-  if (m_type == Type::Internal && arrprov::arrayWantsTag(arr)) {
+  if ((m_type == Type::Internal || m_serializeProvenanceAndLegacy) &&
+      arrprov::arrayWantsTag(arr)) {
     auto const tag = arrprov::getTag(arr);
     if (tag.valid()) {
       switch (tag.kind()) {
@@ -1792,7 +1795,8 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
 
   const bool isVectorData = arr->isVectorData();
 
-  if (UNLIKELY(!m_forcePHPArrays && arrprov::arrayWantsTag(arr))) {
+  if (UNLIKELY(!m_forcePHPArrays && !m_serializeProvenanceAndLegacy &&
+               arrprov::arrayWantsTag(arr))) {
     auto const source = [&]() -> folly::Optional<SerializationSite> {
       switch (getType()) {
       case VariableSerializer::Type::JSON:
@@ -1813,7 +1817,7 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
     if (source) raise_array_serialization_notice(*source, arr);
   }
 
-  if (arr->size() == 0 && LIKELY(!RO::EvalArrayProvenance)) {
+  if (arr->size() == 0 && LIKELY(!arrprov::arrayWantsTag(arr))) {
     auto const kind = getKind(arr);
     writeArrayHeader(0, isVectorData, kind);
     writeArrayFooter(kind);

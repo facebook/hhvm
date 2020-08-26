@@ -434,18 +434,23 @@ const StaticString
   s_EmptyDictArray("D:0:{}"),
   s_EmptyKeysetArray("k:0:{}");
 
+struct SerializeOptions {
+  bool keepDVArrays = false;
+  bool forcePHPArrays = false;
+  bool warnOnHackArrays = false;
+  bool warnOnPHPArrays = false;
+  bool ignoreLateInit = false;
+  bool serializeProvenanceAndLegacy = false;
+};
+
 ALWAYS_INLINE String serialize_impl(const Variant& value,
-                                    bool keepDVArrays,
-                                    bool forcePHPArrays,
-                                    bool hackWarn,
-                                    bool phpWarn,
-                                    bool ignoreLateInit) {
+                                    const SerializeOptions& opts) {
   auto const empty_hack = [&](const ArrayData* arr, const StaticString& empty) {
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices &&
-                 hackWarn)) {
+                 opts.warnOnHackArrays)) {
       raise_hack_arr_compat_serialize_notice(arr);
     }
-    return forcePHPArrays ? s_EmptyArray : empty;
+    return opts.forcePHPArrays ? s_EmptyArray : empty;
   };
 
   switch (value.getType()) {
@@ -490,7 +495,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfVec: {
       ArrayData* arr = value.getArrayData();
       assertx(arr->isVecType());
-      if (arr->empty()) {
+      if (arr->empty() && LIKELY(!opts.serializeProvenanceAndLegacy)) {
         return UNLIKELY(RuntimeOption::EvalHackArrDVArrs &&
                         !arr->isLegacyArray())
           ? s_EmptyArray
@@ -503,7 +508,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfDict: {
       ArrayData* arr = value.getArrayData();
       assertx(arr->isDictType());
-      if (arr->empty()) {
+      if (arr->empty() && LIKELY(!opts.serializeProvenanceAndLegacy)) {
         return UNLIKELY(RuntimeOption::EvalHackArrDVArrs &&
                         !arr->isLegacyArray())
           ? s_EmptyArray
@@ -527,12 +532,12 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
       ArrayData *arr = value.getArrayData();
       assertx(arr->isPHPArrayType());
       assertx(!RO::EvalHackArrDVArrs);
-      if (arr->empty()) {
+      if (arr->empty() && LIKELY(!opts.serializeProvenanceAndLegacy)) {
         if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices &&
-                     phpWarn)) {
+                     opts.warnOnPHPArrays)) {
           raise_hack_arr_compat_serialize_notice(arr);
         }
-        if (keepDVArrays && !forcePHPArrays) {
+        if (opts.keepDVArrays && !opts.forcePHPArrays) {
           assertx(arr->isDVArray());
           return arr->isVArray() ? s_EmptyVArray : s_EmptyDArray;
         }
@@ -548,13 +553,13 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfRecord:
       break;
   }
-
   VariableSerializer vs(VariableSerializer::Type::Serialize);
-  if (keepDVArrays)   vs.keepDVArrays();
-  if (forcePHPArrays) vs.setForcePHPArrays();
-  if (hackWarn)       vs.setHackWarn();
-  if (phpWarn)        vs.setPHPWarn();
-  if (ignoreLateInit) vs.setIgnoreLateInit();
+  if (opts.keepDVArrays)        vs.keepDVArrays();
+  if (opts.forcePHPArrays)      vs.setForcePHPArrays();
+  if (opts.warnOnHackArrays)    vs.setHackWarn();
+  if (opts.warnOnPHPArrays)     vs.setPHPWarn();
+  if (opts.ignoreLateInit)      vs.setIgnoreLateInit();
+  if (opts.serializeProvenanceAndLegacy) vs.setSerializeProvenanceAndLegacy();
   // Keep the count so recursive calls to serialize() embed references properly.
   return vs.serialize(value, true, true);
 }
@@ -562,7 +567,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
 }
 
 String HHVM_FUNCTION(serialize, const Variant& value) {
-  return serialize_impl(value, false, false, false, false, false);
+  return serialize_impl(value, SerializeOptions());
 }
 
 const StaticString
@@ -570,39 +575,39 @@ const StaticString
   s_keepDVArrays("keepDVArrays"),
   s_warnOnHackArrays("warnOnHackArrays"),
   s_warnOnPHPArrays("warnOnPHPArrays"),
-  s_ignoreLateInit("ignoreLateInit");
+  s_ignoreLateInit("ignoreLateInit"),
+  s_serializeProvenanceAndLegacy("serializeProvenanceAndLegacy");
 
 String HHVM_FUNCTION(HH_serialize_with_options,
                      const Variant& value, const Array& options) {
-  return serialize_impl(
-    value,
-    options.exists(s_keepDVArrays) &&
-      options[s_keepDVArrays].toBoolean(),
-    options.exists(s_forcePHPArrays) &&
-      options[s_forcePHPArrays].toBoolean(),
-    options.exists(s_warnOnHackArrays) &&
-      options[s_warnOnHackArrays].toBoolean(),
-    options.exists(s_warnOnPHPArrays) &&
-      options[s_warnOnPHPArrays].toBoolean(),
-    options.exists(s_ignoreLateInit) &&
-      options[s_ignoreLateInit].toBoolean()
-  );
+  SerializeOptions opts;
+  opts.keepDVArrays = options.exists(s_keepDVArrays) &&
+    options[s_keepDVArrays].toBoolean();
+  opts.forcePHPArrays = options.exists(s_forcePHPArrays) &&
+    options[s_forcePHPArrays].toBoolean();
+  opts.warnOnHackArrays = options.exists(s_warnOnHackArrays) &&
+    options[s_warnOnHackArrays].toBoolean();
+  opts.warnOnPHPArrays = options.exists(s_warnOnPHPArrays) &&
+    options[s_warnOnPHPArrays].toBoolean();
+  opts.ignoreLateInit = options.exists(s_ignoreLateInit) &&
+    options[s_ignoreLateInit].toBoolean();
+  opts.serializeProvenanceAndLegacy =
+    options.exists(s_serializeProvenanceAndLegacy) &&
+    options[s_serializeProvenanceAndLegacy].toBoolean();
+  return serialize_impl(value, opts);
 }
 
 String serialize_keep_dvarrays(const Variant& value) {
-  return serialize_impl(
-      value,
-      /* keepDVArrays */ true,
-      false,
-      false,
-      false,
-      false
-  );
+  SerializeOptions opts;
+  opts.keepDVArrays = true;
+  return serialize_impl(value, opts);
 }
 
 String HHVM_FUNCTION(hhvm_intrinsics_serialize_keep_dvarrays,
                      const Variant& value) {
-  return serialize_impl(value, true, false, false, false, false);
+  SerializeOptions opts;
+  opts.keepDVArrays = true;
+  return serialize_impl(value, opts);
 }
 
 Variant HHVM_FUNCTION(unserialize, const String& str,

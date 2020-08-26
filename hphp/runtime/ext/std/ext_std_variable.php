@@ -245,6 +245,12 @@ namespace HH {
   * forcePHPArrays   - If true, serialize all Hack arrays as PHP arrays
   * keepDVArrays     - If true, use custom HHVM-specific serialization format,
   *                    which preserves varray and darray intact.
+  * serializeProvenanceAndLegacy - If true, use unstable HHVM-specific format to
+  *                    serialize provenance tag and legacy bit (hack array
+  *                    migration primitives). The format, produced by this
+  *                    option may change between HHVM releases in
+  *                    non-backward-compatible manner, so it's not safe for
+  *                    serialized data to leave HHVM process.
   */
   <<__Native, __IsFoldable>>
   function serialize_with_options(mixed $value, dict $options = dict[]): string;

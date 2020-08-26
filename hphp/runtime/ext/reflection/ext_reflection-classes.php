@@ -50,7 +50,7 @@ trait ReflectionLegacyAttribute {
 }
 
 trait ReflectionTypedAttribute {
-  <<__Pure, __MaybeMutable>>
+  <<__Pure, __MaybeMutable, __ProvenanceSkipFrame>>
   final public function getAttributeClass(classname $c) {
     $attrs = $this->getAttributesNamespaced();
     $args = hphp_array_idx($attrs, $c, null);

@@ -9,6 +9,7 @@ namespace __SystemLib {
       $this->class = $class;
       $this->method = $method;
     }
+    <<__ProvenanceSkipFrame>>
     public function __invoke($x, ...$args) {
       invariant(
         \is_a($x, $this->class),

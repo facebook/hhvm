@@ -107,7 +107,7 @@ trait BaseException {
    *
    * @return     mixed   Returns the Exception stack trace as an array.
    */
-  <<__Pure, __MaybeMutable>>
+  <<__Pure, __MaybeMutable, __ProvenanceSkipFrame>>
   final public function getTrace() {
     if (\is_resource($this->trace)) {
       $this->trace = \__SystemLib\extract_trace($this->trace);

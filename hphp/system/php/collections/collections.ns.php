@@ -1720,6 +1720,7 @@ class LazyIterableView implements \HH\Iterable {
 
   public function __construct($iterable) { $this->iterable = $iterable; }
   public function getIterator() { return $this->iterable->getIterator(); }
+  <<__ProvenanceSkipFrame>>
   public function toArray() {
     $arr = varray[];
     foreach ($this->iterable as $v) {
@@ -1727,6 +1728,7 @@ class LazyIterableView implements \HH\Iterable {
     }
     return $arr;
   }
+  <<__ProvenanceSkipFrame>>
   public function toValuesArray() {
     return $this->toArray();
   }

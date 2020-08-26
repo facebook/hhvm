@@ -550,6 +550,7 @@ and stmt_ env pos st =
     let env = LEnv.update_next_from_conts env [C.Next; C.Goto label] in
     (env, Aast.Noop)
   | Noop -> (env, Aast.Noop)
+  | AssertEnv _ -> (env, Aast.Noop)
   | Expr e ->
     let (env, te, _) = expr env e in
     let env =

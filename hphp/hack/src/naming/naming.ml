@@ -1587,6 +1587,7 @@ and stmt env (pos, st) =
     | Aast.Fallthrough -> N.Fallthrough
     | Aast.Noop -> N.Noop
     | Aast.Markup _ -> N.Noop
+    | Aast.AssertEnv _ -> N.Noop
     | Aast.Break -> Aast.Break
     | Aast.Continue -> Aast.Continue
     | Aast.Throw e -> N.Throw (expr env e)

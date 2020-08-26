@@ -8,6 +8,7 @@
  *)
 
 module SM = Ast_defs.ShapeMap
+module LM = Local_id.Map
 
 class ['self] iter_defs_base =
   object (self : 'self)
@@ -22,6 +23,10 @@ class ['self] iter_defs_base =
       fun f env key data ->
         self#on_shape_field_name env key;
         f env data
+
+    method private on_local_id_map
+        : 'a. ('env -> 'a -> unit) -> 'env -> 'a LM.t -> unit =
+      (fun f env -> LM.iter (fun _ -> f env))
 
     method on_'fb _ _ = ()
 
@@ -49,6 +54,11 @@ class virtual ['self] reduce_defs_base =
       fun f env key data ->
         self#plus (self#on_shape_field_name env key) (f env data)
 
+    method private on_local_id_map
+        : 'a. ('env -> 'a -> 'acc) -> 'env -> 'a LM.t -> 'acc =
+      fun f env x ->
+        LM.fold (fun _ d acc -> self#plus acc (f env d)) x self#zero
+
     method on_'fb _env _ = self#zero
 
     method on_'ex _env _ = self#zero
@@ -71,6 +81,10 @@ class ['self] map_defs_base =
           SM.add key data acc
         in
         SM.fold map_entry x SM.empty
+
+    method private on_local_id_map
+        : 'a 'b. ('env -> 'a -> 'b) -> 'env -> 'a LM.t -> 'b LM.t =
+      (fun f env -> LM.map (f env))
   end
 
 class ['self] endo_defs_base =
@@ -88,4 +102,8 @@ class ['self] endo_defs_base =
           SM.add key data acc
         in
         SM.fold map_entry x SM.empty
+
+    method private on_local_id_map
+        : 'a 'b. ('env -> 'a -> 'b) -> 'env -> 'a LM.t -> 'b LM.t =
+      (fun f env -> LM.map (f env))
   end

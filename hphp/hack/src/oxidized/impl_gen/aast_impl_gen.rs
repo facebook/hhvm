@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<209ced9466f01802f00e19b3e0fefc78>>
+// @generated SignedSource<<ff1bcac2bf258451ada5c046a94210cb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -90,6 +90,9 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
     }
     pub fn mk_markup(p0: Pstring) -> Self {
         Stmt_::Markup(Box::new(p0))
+    }
+    pub fn mk_assert_env(p0: EnvAnnot, p1: LocalIdMap<OxidizedHack<Ex>>) -> Self {
+        Stmt_::AssertEnv(Box::new((p0, p1)))
     }
     pub fn is_fallthrough(&self) -> bool {
         match self {
@@ -208,6 +211,12 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
     pub fn is_markup(&self) -> bool {
         match self {
             Stmt_::Markup(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_assert_env(&self) -> bool {
+        match self {
+            Stmt_::AssertEnv(..) => true,
             _ => false,
         }
     }
@@ -334,6 +343,12 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
     pub fn as_markup(&self) -> Option<&Pstring> {
         match self {
             Stmt_::Markup(p0) => Some(&p0),
+            _ => None,
+        }
+    }
+    pub fn as_assert_env(&self) -> Option<(&EnvAnnot, &LocalIdMap<OxidizedHack<Ex>>)> {
+        match self {
+            Stmt_::AssertEnv(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
@@ -467,6 +482,14 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
+    pub fn as_assert_env_mut(
+        &mut self,
+    ) -> Option<(&mut EnvAnnot, &mut LocalIdMap<OxidizedHack<Ex>>)> {
+        match self {
+            Stmt_::AssertEnv(p0) => Some((&mut p0.0, &mut p0.1)),
+            _ => None,
+        }
+    }
     pub fn as_expr_into(self) -> Option<Expr<Ex, Fb, En, Hi>> {
         match self {
             Stmt_::Expr(p0) => Some(*p0),
@@ -591,6 +614,32 @@ impl<Ex, Fb, En, Hi> Stmt_<Ex, Fb, En, Hi> {
         match self {
             Stmt_::Markup(p0) => Some(*p0),
             _ => None,
+        }
+    }
+    pub fn as_assert_env_into(self) -> Option<(EnvAnnot, LocalIdMap<OxidizedHack<Ex>>)> {
+        match self {
+            Stmt_::AssertEnv(p0) => Some(((*p0).0, (*p0).1)),
+            _ => None,
+        }
+    }
+}
+impl EnvAnnot {
+    pub fn mk_join() -> Self {
+        EnvAnnot::Join
+    }
+    pub fn mk_refinement() -> Self {
+        EnvAnnot::Refinement
+    }
+    pub fn is_join(&self) -> bool {
+        match self {
+            EnvAnnot::Join => true,
+            _ => false,
+        }
+    }
+    pub fn is_refinement(&self) -> bool {
+        match self {
+            EnvAnnot::Refinement => true,
+            _ => false,
         }
     }
 }

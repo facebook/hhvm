@@ -195,7 +195,8 @@ let rec check_stmt env (stmt : ETast.stmt) (gamma : gamma) : delta =
   | Goto _
   | GotoLabel _
   | Block _
-  | Markup _ ->
+  | Markup _
+  | AssertEnv _ ->
     raise Cant_check
 
 and check_block env (block : ETast.block) gamma =

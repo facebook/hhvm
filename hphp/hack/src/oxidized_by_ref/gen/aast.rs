@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b2e126e9e768f57ea02032a6a5312eda>>
+// @generated SignedSource<<0fe2534fc687a986b251f3a7928532ba>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -108,11 +108,37 @@ pub enum Stmt_<'a, Ex, Fb, En, Hi> {
     Noop,
     Block(Block<'a, Ex, Fb, En, Hi>),
     Markup(&'a Pstring<'a>),
+    AssertEnv(
+        &'a (
+            oxidized::aast::EnvAnnot,
+            LocalIdMap<'a, OxidizedHack<'a, Ex>>,
+        ),
+    ),
 }
 impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
     for Stmt_<'a, Ex, Fb, En, Hi>
 {
 }
+
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct OxidizedHack<'a, Ex> {
+    pub annot: Ex,
+    pub dummy: &'a str,
+}
+impl<'a, Ex: TrivialDrop> TrivialDrop for OxidizedHack<'a, Ex> {}
+
+pub use oxidized::aast::EnvAnnot;
 
 #[derive(
     Clone,

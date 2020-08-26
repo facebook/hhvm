@@ -87,12 +87,16 @@ fn derive_from_ocamlrep_in(mut s: synstructure::Structure) -> TokenStream {
             }
         })
         .collect();
+    let tparams = s.ast().generics.type_params();
+    let tparams_implement_trivialdrop: TokenStream = tparams
+        .map(|t| quote!(#t : ::arena_trait::TrivialDrop,))
+        .collect();
 
     let from_in_body = from_ocamlrep_in_body(&s);
     s.gen_impl(quote! {
         gen impl<'__ocamlrep_derive_allocator> ::ocamlrep::FromOcamlRepIn<'__ocamlrep_derive_allocator> for @Self
         where
-            #lifetimes
+            #tparams_implement_trivialdrop #lifetimes
         {
             fn from_ocamlrep_in(
                 value: ::ocamlrep::Value<'_>,

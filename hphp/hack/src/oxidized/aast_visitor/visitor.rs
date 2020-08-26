@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c32fa468ed3c4d120603b7d12aeab768>>
+// @generated SignedSource<<64a9dd8e75fae9f2757818576cdf2ebd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -293,6 +293,13 @@ pub trait Visitor<'node> {
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }
+    fn visit_env_annot(
+        &mut self,
+        c: &mut <Self::P as Params>::Context,
+        p: &'node EnvAnnot,
+    ) -> Result<(), <Self::P as Params>::Error> {
+        p.recurse(c, self.object())
+    }
     fn visit_expr(
         &mut self,
         c: &mut <Self::P as Params>::Context,
@@ -513,6 +520,13 @@ pub trait Visitor<'node> {
         &mut self,
         c: &mut <Self::P as Params>::Context,
         p: &'node OgNullFlavor,
+    ) -> Result<(), <Self::P as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_oxidized_hack(
+        &mut self,
+        c: &mut <Self::P as Params>::Context,
+        p: &'node OxidizedHack<<Self::P as Params>::Ex>,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }

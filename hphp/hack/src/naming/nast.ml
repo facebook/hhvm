@@ -766,6 +766,7 @@ module Visitor_DEPRECATED = struct
         | Awaitall (el, b) -> this#on_awaitall acc el b
         | Block b -> this#on_block acc b
         | Markup s -> this#on_markup acc s
+        | AssertEnv _ -> this#on_noop acc
 
       method on_expr acc (_, e) = this#on_expr_ acc e
 

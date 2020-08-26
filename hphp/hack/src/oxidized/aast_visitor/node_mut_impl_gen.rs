@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ebc9347d27258555558bee0f41d263c2>>
+// @generated SignedSource<<25a8b5cd72019693513bf39e50513ca6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -649,6 +649,25 @@ impl<P: Params> NodeMut<P> for Enum_ {
         self.base.accept(c, v)?;
         self.constraint.accept(c, v)?;
         Ok(())
+    }
+}
+impl<P: Params> NodeMut<P> for EnvAnnot {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_env_annot(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            EnvAnnot::Join => Ok(()),
+            EnvAnnot::Refinement => Ok(()),
+        }
     }
 }
 impl<P: Params> NodeMut<P> for Expr<P::Ex, P::Fb, P::En, P::Hi> {
@@ -1516,6 +1535,24 @@ impl<P: Params> NodeMut<P> for OgNullFlavor {
         }
     }
 }
+impl<P: Params> NodeMut<P> for OxidizedHack<P::Ex> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_oxidized_hack(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_ex(c, &mut self.annot)?;
+        self.dummy.accept(c, v)?;
+        Ok(())
+    }
+}
 impl<P: Params> NodeMut<P> for ParamKind {
     fn accept<'node>(
         &'node mut self,
@@ -1820,6 +1857,11 @@ impl<P: Params> NodeMut<P> for Stmt_<P::Ex, P::Fb, P::En, P::Hi> {
             }
             Stmt_::Markup(a0) => {
                 a0.accept(c, v)?;
+                Ok(())
+            }
+            Stmt_::AssertEnv(a) => {
+                a.0.accept(c, v)?;
+                a.1.accept(c, v)?;
                 Ok(())
             }
         }

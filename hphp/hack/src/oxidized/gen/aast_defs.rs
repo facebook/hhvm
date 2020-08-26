@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<10df4570472fe5a172c56f96ca92ac20>>
+// @generated SignedSource<<a02b5ee295bdeb310346a5244ebcb325>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -26,6 +26,8 @@ pub use ast_defs::PositionedByteString;
 pub use ast_defs::Pstring;
 pub use local_id::LocalId;
 pub use shape_map::ShapeMap;
+
+pub type LocalIdMap<A> = local_id::map::Map<A>;
 
 #[derive(
     Clone,

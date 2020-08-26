@@ -12,6 +12,10 @@ module ShapeMap = Ast_defs.ShapeMap
 
 type 'a shape_map = 'a ShapeMap.t [@@deriving eq, show]
 
+type 'a local_id_map = 'a Local_id.Map.t [@@deriving eq]
+
+let pp_local_id_map _ fmt _ = Format.pp_print_string fmt "<local_id_map>"
+
 type pos = Ast_defs.pos [@@deriving eq, show, ord]
 
 type byte_string = Ast_defs.byte_string [@@deriving eq, show, ord]

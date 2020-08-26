@@ -244,9 +244,6 @@ class cursor ~client_id ~cursor_state =
         (ctx : Provider_context.t)
         (_workers : MultiWorker.worker list)
         (changed_paths : Relative_path.Set.t) : cursor =
-      let changed_paths =
-        Relative_path.Set.union changed_paths self#get_files_to_typecheck
-      in
       let changed_files =
         Relative_path.Set.fold
           changed_paths

@@ -102,13 +102,7 @@ Fanout calculation on line 55
                                                     'outgoing_files': ['uses_foo.php',
                                                                        'foo.php'],
                                                     'type': 'FileInfo.Class'}],
-                              'removed_symbols': []},
-                  'uses_foo.php': {'added_symbols': [],
-                                   'modified_symbols': [{'name': '\\uses_foo',
-                                                         'num_outgoing_edges': 1,
-                                                         'outgoing_files': ['uses_foo.php'],
-                                                         'type': 'FileInfo.Fun'}],
-                                   'removed_symbols': []}},
+                              'removed_symbols': []}},
  'files': ['foo.php', 'uses_foo.php'],
  'telemetry': '<telemetry-redacted-for-test>'}
 

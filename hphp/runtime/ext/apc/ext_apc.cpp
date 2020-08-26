@@ -327,6 +327,8 @@ Variant HHVM_FUNCTION(apc_store,
                       int64_t ttl /* = 0 */) {
   if (!apcExtension::Enable) return Variant(false);
 
+  ARRPROV_USE_RUNTIME_LOCATION();
+
   if (key_or_array.isArray()) {
     Array valuesArr = key_or_array.toArray();
 
@@ -392,6 +394,8 @@ Variant HHVM_FUNCTION(apc_add,
                       const Variant& var /* = null */,
                       int64_t ttl /* = 0 */) {
   if (!apcExtension::Enable) return false;
+
+  ARRPROV_USE_RUNTIME_LOCATION();
 
   if (key_or_array.isArray()) {
     auto valuesArr = key_or_array.asCArrRef();

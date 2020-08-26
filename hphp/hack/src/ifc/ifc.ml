@@ -105,15 +105,16 @@ let rec subtype ~pos meta t1 t2 acc =
     | Some zip ->
       List.fold zip ~init:acc ~f:(fun acc (t1, t2) -> subtype t1 t2 acc)
     | None -> fail "incompatible tuple types")
-  | (Tclass cl1, Tclass cl2) when String.equal cl1.c_name cl2.c_name ->
-    let policied_properties_zip =
-      match
-        List.zip
-          (SMap.values cl1.c_property_map)
-          (SMap.values cl2.c_property_map)
-      with
-      | Some zip -> zip
-      | None -> fail "same class with differing policied properties"
+  | (Tclass cl1, Tclass cl2) ->
+    (* Nominal subtyping records flows in properties and the type parameters
+     * common to both classes. The typechecker ensures that the subtyping
+     * relation holds so we only need to record the flows in inherited entities.
+     *)
+    let policied_property_subtype acc _ pty1_opt pty2_opt =
+      match (pty1_opt, pty2_opt) with
+      | (Some pty1, Some pty2) ->
+        (equivalent (Lazy.force pty1) (Lazy.force pty2) acc, None)
+      | _ -> (acc, None)
     in
     let tparams_subtype acc =
       let tparam_subtype acc pty1 pty2 variance =
@@ -144,8 +145,12 @@ let rec subtype ~pos meta t1 t2 acc =
      * through policied properties (enforcement still to be done, see T68078692)
      * ensures termination here.
      *)
-    List.fold policied_properties_zip ~init:acc ~f:(fun acc (t1, t2) ->
-        equivalent (Lazy.force t1) (Lazy.force t2) acc)
+    SMap.merge_env
+      acc
+      cl1.c_property_map
+      cl2.c_property_map
+      ~combine:policied_property_subtype
+    |> fst
     (* Use the declared variance for subtyping constraints of
      * type parameters *)
     |> tparams_subtype

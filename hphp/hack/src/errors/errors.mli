@@ -87,6 +87,8 @@ val codes_not_raised_partial : ISet.t ref
 (* Error codes that should be treated strictly, regardless of their file mode. *)
 val error_codes_treated_strictly : ISet.t ref
 
+val report_pos_from_reason : bool ref
+
 val is_strict_code : int -> bool
 
 val set_allow_errors_in_default_path : bool -> unit

@@ -441,7 +441,14 @@ let rec to_string prefix r =
   | Rglobal_fun_param p -> [(p, prefix)]
   | Rglobal_fun_ret p -> [(p, prefix)]
 
-and to_pos = function
+and to_pos r =
+  if !Errors.report_pos_from_reason then
+    Pos.set_from_reason (to_raw_pos r)
+  else
+    to_raw_pos r
+
+and to_raw_pos r =
+  match r with
   | Rnone -> Pos.none
   | Rwitness p -> p
   | Ridx (p, _) -> p
@@ -467,21 +474,21 @@ and to_pos = function
   | Ryield_asyncgen p -> p
   | Ryield_asyncnull p -> p
   | Ryield_send p -> p
-  | Rlost_info (_, r, _) -> to_pos r
+  | Rlost_info (_, r, _) -> to_raw_pos r
   | Rformat (p, _, _) -> p
   | Rclass_class (p, _) -> p
   | Runknown_class p -> p
   | Rvar_param p -> p
   | Runpack_param (p, _, _) -> p
   | Rinout_param p -> p
-  | Rinstantiate (_, _, r) -> to_pos r
+  | Rinstantiate (_, _, r) -> to_raw_pos r
   | Rtypeconst (Rnone, (p, _), _, _)
   | Rarray_filter (p, _) ->
     p
   | Rtypeconst (r, _, _, _)
   | Rtype_access (r, _) ->
-    to_pos r
-  | Rexpr_dep_type (r, _, _) -> to_pos r
+    to_raw_pos r
+  | Rexpr_dep_type (r, _, _) -> to_raw_pos r
   | Rnullsafe_op p -> p
   | Rtconst_no_cstr (p, _) -> p
   | Rpredicated (p, _) -> p
@@ -495,8 +502,8 @@ and to_pos = function
   | Rmissing_required_field (p, _) -> p
   | Rmissing_optional_field (p, _) -> p
   | Runset_field (p, _) -> p
-  | Rcontravariant_generic (r, _) -> to_pos r
-  | Rinvariant_generic (r, _) -> to_pos r
+  | Rcontravariant_generic (r, _) -> to_raw_pos r
+  | Rinvariant_generic (r, _) -> to_raw_pos r
   | Rregex p -> p
   | Rimplicit_upper_bound (p, _) -> p
   | Rarith_ret_float (p, _, _) -> p
@@ -623,7 +630,7 @@ let to_constructor_string r =
   | Rglobal_fun_ret _ -> "Rglobal_fun_ret"
 
 let pp fmt r =
-  let pos = to_pos r in
+  let pos = to_raw_pos r in
   Format.pp_print_string fmt
   @@ Printf.sprintf
        "%s (%s)"
@@ -726,7 +733,7 @@ let compare r1 r2 =
   if Int.( <> ) d 0 then
     d
   else
-    Pos.compare (to_pos r1) (to_pos r2)
+    Pos.compare (to_raw_pos r1) (to_raw_pos r2)
 
 let none = Rnone
 

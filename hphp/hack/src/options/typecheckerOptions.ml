@@ -141,3 +141,5 @@ let enable_systemlib_annotations =
 let higher_kinded_types = GlobalOptions.tco_higher_kinded_types
 
 let method_call_inference = GlobalOptions.tco_method_call_inference
+
+let report_pos_from_reason = GlobalOptions.tco_report_pos_from_reason

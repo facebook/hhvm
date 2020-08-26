@@ -266,6 +266,10 @@ type t = {
   tco_higher_kinded_types: bool;
   (* Controls if method-call inference is supported *)
   tco_method_call_inference: bool;
+  (* If set, then positions derived from reason information are tainted, and primary errors
+   * with such positions are flagged
+   *)
+  tco_report_pos_from_reason: bool;
 }
 [@@deriving eq, show]
 
@@ -369,6 +373,7 @@ val make :
   ?tco_pu_enabled_paths:bool * Relative_path.t list ->
   ?tco_higher_kinded_types:bool ->
   ?tco_method_call_inference:bool ->
+  ?tco_report_pos_from_reason:bool ->
   unit ->
   t
 
@@ -595,3 +600,5 @@ val tco_pu_enabled_paths : t -> bool * Relative_path.t list
 val tco_higher_kinded_types : t -> bool
 
 val tco_method_call_inference : t -> bool
+
+val tco_report_pos_from_reason : t -> bool

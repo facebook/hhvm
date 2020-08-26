@@ -476,6 +476,8 @@ let to_absolute_for_test error =
   in
   (code, msg_l)
 
+let report_pos_from_reason = ref false
+
 let to_string ?(indent = false) (error : Pos.absolute error_) : string =
   let (error_code, msgl) = (get_code error, to_list error) in
   let buf = Buffer.create 50 in
@@ -486,7 +488,18 @@ let to_string ?(indent = false) (error : Pos.absolute error_) : string =
       buf
       begin
         let error_code = error_code_to_string error_code in
-        Printf.sprintf "%s\n%s (%s)\n" (Pos.string pos1) msg1 error_code
+        let reason_msg =
+          if !report_pos_from_reason && Pos.get_from_reason pos1 then
+            " [FROM REASON INFO]"
+          else
+            ""
+        in
+        Printf.sprintf
+          "%s\n%s (%s)%s\n"
+          (Pos.string pos1)
+          msg1
+          error_code
+          reason_msg
       end;
     let indentstr =
       if indent then
@@ -686,6 +699,11 @@ and add_list code pos_msg_l =
     add_error_impl (make_error code pos_msg_l)
   else if Relative_path.(is_hhi (prefix (Pos.filename pos))) then
     add_applied_fixme code pos
+  else if !report_pos_from_reason && Pos.get_from_reason pos then
+    let explanation =
+      "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress an error whose position was derived from reason information"
+    in
+    add_error_with_fixme_error code explanation pos_msg_l
   else if !is_hh_fixme_disallowed pos code then
     let explanation =
       Printf.sprintf

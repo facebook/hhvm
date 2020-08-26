@@ -440,6 +440,7 @@ let load ~silent config_filename options =
             ( false,
               List.map ~f:(fun suffix -> Relative_path.from_root ~suffix) l ))
       ?tco_method_call_inference:(bool_opt "method_call_inference" config)
+      ?tco_report_pos_from_reason:(bool_opt "report_pos_from_reason" config)
       ()
   in
   Errors.allowed_fixme_codes_strict :=
@@ -450,6 +451,8 @@ let load ~silent config_filename options =
     GlobalOptions.codes_not_raised_partial global_opts;
   Errors.error_codes_treated_strictly :=
     GlobalOptions.error_codes_treated_strictly global_opts;
+  Errors.report_pos_from_reason :=
+    GlobalOptions.tco_report_pos_from_reason global_opts;
   ( {
       version;
       load_script_timeout;

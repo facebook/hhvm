@@ -144,3 +144,7 @@ val print_verbose_absolute : absolute -> string
 val print_verbose_relative : t -> string
 
 val pessimize_enabled : t -> float -> bool
+
+val set_from_reason : 'a pos -> 'a pos
+
+val get_from_reason : 'a pos -> bool

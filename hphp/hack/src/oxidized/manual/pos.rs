@@ -34,6 +34,7 @@ enum PosImpl {
         start: Box<FilePosLarge>,
         end: Box<FilePosLarge>,
     },
+    FromReason(Box<PosImpl>),
 }
 
 use PosImpl::*;
@@ -64,9 +65,9 @@ impl Pos {
 
     pub fn is_none(&self) -> bool {
         match self {
-            Pos(PosImpl::Small { file, start, end }) => {
-                start.is_dummy() && end.is_dummy() && file.is_empty()
-            }
+            Pos(PosImpl::Small {
+                file, start, end, ..
+            }) => start.is_dummy() && end.is_dummy() && file.is_empty(),
             _ => false,
         }
     }
@@ -81,6 +82,7 @@ impl Pos {
         match &self.0 {
             Small { file, .. } => &file,
             Large { file, .. } => &file,
+            FromReason(_p) => unimplemented!(),
         }
     }
 
@@ -103,6 +105,7 @@ impl Pos {
         match &self.0 {
             Small { start, end, .. } => compute(start, end),
             Large { start, end, .. } => compute(start.as_ref(), end.as_ref()),
+            FromReason(_p) => unimplemented!(),
         }
     }
 
@@ -111,6 +114,7 @@ impl Pos {
         let line_end = match &self.0 {
             Small { end, .. } => end.line_column_beg(),
             Large { end, .. } => (*end).line_column_beg(),
+            FromReason(_p) => unimplemented!(),
         }
         .0;
         (line_begin, line_end, start, end)
@@ -124,6 +128,7 @@ impl Pos {
         match &self.0 {
             Small { start, .. } => start.line(),
             Large { start, .. } => start.line(),
+            FromReason(_p) => unimplemented!(),
         }
     }
 
@@ -154,6 +159,7 @@ impl Pos {
         match &self.0 {
             Small { start, end, .. } => (start.line_beg_offset(), end.line_beg_offset()),
             Large { start, end, .. } => (start.line_beg_offset(), end.line_beg_offset()),
+            FromReason(_p) => unimplemented!(),
         }
     }
 
@@ -207,6 +213,7 @@ impl Pos {
                 start,
                 end: Box::new(Self::small_to_large_file_pos(&end)),
             },
+            _ => unimplemented!(),
         };
         Pos(inner)
     }
@@ -326,6 +333,7 @@ impl Pos {
                     end: Box::new(Self::small_to_large_file_pos(&end)),
                 }),
             ),
+            _ => unimplemented!(),
         }
     }
 
@@ -344,6 +352,7 @@ impl Pos {
                     start: end.clone(),
                     end: end.clone(),
                 },
+                FromReason(_p) => unimplemented!(),
             }))
         }
     }
@@ -369,6 +378,7 @@ impl Pos {
                         end: Box::new(start),
                     }
                 }
+                FromReason(_p) => unimplemented!(),
             }))
         }
     }
@@ -377,6 +387,7 @@ impl Pos {
         match &self.0 {
             Small { end, .. } => end.offset(),
             Large { end, .. } => end.offset(),
+            FromReason(_p) => unimplemented!(),
         }
     }
 
@@ -384,6 +395,7 @@ impl Pos {
         match &self.0 {
             Small { start, .. } => start.offset(),
             Large { start, .. } => start.offset(),
+            FromReason(_p) => unimplemented!(),
         }
     }
 }
@@ -406,8 +418,13 @@ impl std::fmt::Display for Pos {
             }
         }
         match &self.0 {
-            Small { file, start, end } => do_fmt(f, file, start, end),
-            Large { file, start, end } => do_fmt(f, file, &**start, &**end),
+            Small {
+                file, start, end, ..
+            } => do_fmt(f, file, start, end),
+            Large {
+                file, start, end, ..
+            } => do_fmt(f, file, &**start, &**end),
+            FromReason(_p) => unimplemented!(),
         }
     }
 }

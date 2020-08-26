@@ -1,8 +1,5 @@
 *** Testing natcasesort() : usage variations ***
 
--- Initial Position of Internal Pointer: --
-0 => img13
-
 -- Call natcasesort() --
 bool(true)
 darray(4) {
@@ -15,7 +12,4 @@ darray(4) {
   [1]=>
   string(5) "img20"
 }
-
--- Position of Internal Pointer in Passed Array: --
-3 => img1
 Done

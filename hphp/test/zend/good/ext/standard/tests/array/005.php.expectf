@@ -188,14 +188,4 @@ Array
 
 Output after shift is :
 int(2)
-
-*** Checking for internal array pointer being reset when shift is called ***
-
-Current Element is : int(1)
-
-End Element is : int(9)
-
-shifted Element is : int(1)
-
-Current Element after shift operation is: int(2)
 Done

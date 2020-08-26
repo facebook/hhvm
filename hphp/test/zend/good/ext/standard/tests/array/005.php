@@ -56,21 +56,5 @@ foreach( $mixed_array as $sub_array ) {
   $counter++;
 }
 
-/*Checking for internal array pointer beint reset when shift is called */
-
-echo"\n*** Checking for internal array pointer being reset when shift is called ***\n";
-
-echo "\nCurrent Element is : ";
-var_dump( current($mixed_array1) );
-
-echo "\nEnd Element is : ";
-var_dump( end(inout $mixed_array1) );
-
-echo "\nshifted Element is : ";
-var_dump( array_shift(inout $mixed_array1) );
-
-echo "\nCurrent Element after shift operation is: ";
-var_dump( current($mixed_array1) );
-
 echo"Done";
 }

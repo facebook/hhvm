@@ -2,18 +2,6 @@
 Notice: Implicit clsmeth to vec conversion for shuffle() in %s/container_builtins_warn.php on line %d
 bool(false)
 
-Warning: Invalid operand type was used: key() expects array, was clsmeth in %s/container_builtins_warn.php on line %d
-bool(false)
-
-Warning: Invalid operand type was used: reset() expects array, was clsmeth in %s/container_builtins_warn.php on line %d
-bool(false)
-
-Warning: Invalid operand type was used: current() expects array, was clsmeth in %s/container_builtins_warn.php on line %d
-bool(false)
-
-Warning: Invalid operand type was used: end() expects array, was clsmeth in %s/container_builtins_warn.php on line %d
-bool(false)
-
 Warning: array_diff() expects parameter 1 to be an array or collection, clsmeth given in %s/container_builtins_warn.php on line %d
 NULL
 

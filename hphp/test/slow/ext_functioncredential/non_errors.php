@@ -16,7 +16,7 @@ function run_test(
   $function_name = $cred->getFunctionName();
   $file_name_pieces = $cred->getFileName()
     |> explode('/', $$);
-  $file_name_stripped = end(inout $file_name_pieces);
+  $file_name_stripped = $file_name_pieces[count($file_name_pieces) - 1];
 
   if ($class_name !== $expectations['class_name']) {
     $errors[] = "Expected Class Name ".

@@ -8,7 +8,7 @@ function f($a) {
  }
 function test($a) {
   $f = f($a);
-  return reset(inout $f);
+  return $f[0];
 }
 
 <<__EntryPoint>>

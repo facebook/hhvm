@@ -2,7 +2,7 @@
 
 function main() {
   $unpack = unpack("l", pack("l", hexdec("ff3a68be")));
-  return reset(inout $unpack);
+  foreach ($unpack as $v) { return $v; }
 }
 
 

@@ -96,19 +96,9 @@ function with_keyset($k1) {
   var_dump($k);
   echo "array_sum: ";
   var_dump(array_sum($k1));
-  echo "current 1: ";
-  var_dump(current($k));
-  echo "end: ";
-  var_dump(end(inout $k));
-  echo "current 2: ";
-  var_dump(current($k));
   echo "in_array: ";
   var_dump(varray[in_array('x', $k1), in_array('q', $k1)]);
-  echo "key: ";
-  var_dump(key($k));
   // list() could be tested here, but it's just weird with keysets
-  echo "reset: ";
-  var_dump(reset(inout $k));
   echo "count: ";
   var_dump(count($k1));
   echo "array_pad 1: ";

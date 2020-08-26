@@ -16,8 +16,5 @@ $input = darray ['one' => 'un', 'two' => 'deux', 'three' => 'trois'];
 echo "\n-- Call array_key_exists() --\n";
 var_dump($result = array_key_exists('one', $input));
 
-echo "\n-- Position of Internal Pointer in Original Array: --\n";
-echo key($input) . " => " . current($input) . "\n";
-
 echo "Done";
 }

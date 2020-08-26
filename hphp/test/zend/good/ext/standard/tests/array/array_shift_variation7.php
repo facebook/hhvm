@@ -14,9 +14,5 @@ $stack = darray ['one' => 'un', 'two' => 'deux'];
 
 echo "\n-- Call array_shift() --\n";
 var_dump($result = array_shift(inout $stack));
-
-echo "\n-- Position of Internal Pointer in Passed Array: --\n";
-echo key($stack) . " => " . current($stack) . "\n";
-
 echo "Done";
 }

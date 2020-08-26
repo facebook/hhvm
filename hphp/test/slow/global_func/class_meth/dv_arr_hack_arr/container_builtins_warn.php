@@ -11,10 +11,6 @@ class A {
  */
 function test_warning($c, $f, $cmp) {
   $x = CM($c, $f); var_dump(shuffle(inout $x));
-  $x = CM($c, $f); var_dump(key($x));
-  $x = CM($c, $f); var_dump(reset(inout $x));
-  $x = CM($c, $f); var_dump(current($x));
-  $x = CM($c, $f); var_dump(end(inout $x));
 
   var_dump(array_diff(CM($c, $f), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[$f])));
   var_dump(array_udiff(CM($c, $f), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[$f]), $cmp));

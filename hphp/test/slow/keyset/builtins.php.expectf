@@ -303,15 +303,10 @@ keyset(4) {
   string(1) "t"
 }
 array_sum: float(0)
-current 1: string(1) "u"
-end: string(1) "t"
-current 2: string(1) "t"
 in_array: varray(2) {
   bool(false)
   bool(true)
 }
-key: string(1) "t"
-reset: string(1) "u"
 count: int(6)
 array_pad 1: darray(7) {
   ["q"]=>
@@ -585,15 +580,10 @@ keyset(2) {
   int(8)
 }
 array_sum: int(30)
-current 1: int(7)
-end: int(8)
-current 2: int(8)
 in_array: varray(2) {
   bool(false)
   bool(false)
 }
-key: int(8)
-reset: int(7)
 count: int(4)
 array_pad 1: darray(7) {
   [5]=>
@@ -851,15 +841,10 @@ keyset(2) {
   string(1) "8"
 }
 array_sum: int(30)
-current 1: string(1) "7"
-end: string(1) "8"
-current 2: string(1) "8"
 in_array: varray(2) {
   bool(false)
   bool(false)
 }
-key: string(1) "8"
-reset: string(1) "7"
 count: int(4)
 array_pad 1: darray(7) {
   ["5"]=>
@@ -1022,15 +1007,10 @@ array_shift: NULL
 keyset(0) {
 }
 array_sum: int(0)
-current 1: bool(false)
-end: bool(false)
-current 2: bool(false)
 in_array: varray(2) {
   bool(false)
   bool(false)
 }
-key: NULL
-reset: bool(false)
 count: int(0)
 array_pad 1: darray(7) {
   [0]=>

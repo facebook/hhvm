@@ -6,9 +6,4 @@ varray(3) {
   string(4) "deux"
   string(5) "trois"
 }
--- Position of Internal Pointer in Result: --
-0 => un
-
--- Position of Internal Pointer in Original Array: --
-one => un
 Done

@@ -15,10 +15,5 @@ $input = darray['one' => 'un', 'two' => 'deux', 23 => 'twenty-three', 24 => 'zer
 echo "\n-- Call array_slice() --\n";
 var_dump($result = array_slice($input, 2));
 
-echo "-- Position of Internal Pointer in Result: --\n";
-echo key($result) . " => " . current($result) . "\n";
-echo "\n-- Position of Internal Pointer in Original Array: --\n";
-echo key($input) . " => " . current($input) . "\n";
-
 echo "Done";
 }

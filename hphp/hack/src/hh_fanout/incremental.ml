@@ -9,8 +9,21 @@
 module Hh_bucket = Bucket
 open Core_kernel
 
+type client_id = Client_id of string
+
+type cursor_id = Cursor_id of string
+
+type dep_graph_delta = (Typing_deps.Dep.t * Typing_deps.Dep.t) HashSet.t
+
+type client_config = {
+  client_id: string;
+  dep_table_saved_state_path: Path.t;
+  errors_saved_state_path: Path.t;
+  naming_table_saved_state_path: Naming_sqlite.db_path;
+}
+
 type typecheck_result = {
-  fanout_files_deps: Incremental.dep_graph_delta;
+  fanout_files_deps: dep_graph_delta;
       (** The delta to the dependency graph saved-state. This field is not
       cumulative, so it must be merged with any previous `fanout_files_deps`.
       *)
@@ -41,18 +54,61 @@ type cursor_state =
           (** The result of typechecking the fanout. *)
     }
 
-type persistent_state = {
-  max_cursor_id: int ref;
-  cursors:
-    ( Incremental.cursor_id,
-      Incremental.client_id * Incremental.cursor )
-    Hashtbl.t;
-  clients: (Incremental.client_id, Incremental.client_config) Hashtbl.t;
-}
+let make_client_id (client_config : client_config) : client_id =
+  let client_id =
+    Printf.sprintf
+      "client,%s,%d"
+      client_config.client_id
+      (Hashtbl.hash client_config)
+  in
+  Client_id client_id
+
+(** Construct the cursor ID exposed to the user.
+
+For debugging purposes, the `from` and `client_config` fields are also
+included in the cursor, even though we could store them in the state and
+recover them from the ID.
+
+For convenience during debugging, we try to ensure that cursors are
+lexicographically-orderable by the time ordering. For that reason, it's
+important that the first field in the cursor ID is the
+monotonically-increasing ID.
+
+The choice of `,` as a delimiter is important. Watchman uses `:`, which is
+inappropriate for this goal, because the ASCII value of `,` is less than that
+of all the numerals, while `:` is greater than that of all the numerals.
+
+Using this delimiter ensures that a string like `cursor,1,foo` is less than a
+string like `cursor,10,foo` by the ASCII lexicographical ordering, which is
+not true for `cursor:1:foo` vs. `cursor:10:foo`.
+
+Some reasoning about delimiter choice:
+
+  * `-` is likely to appear in `from` strings.
+  * `+` would contrast strangely with `-` in `from` strings.
+  * `#` is interpreted as a comment in the shell.
+  * `$` and `!` may accidentally interpolate values in the shell.
+  * `&` launched background processes in Bash.
+  * `(`, `)`, `'`, and `"` are usually paired, and have special meaning in
+  the shell. Also, in this OCaml comment I have to write this " to close the
+  previous double-quote, or this comment is a syntax-error.
+  * '/' suggests a hierarchical relationship or an actual file.
+  * `%` and `*` look a little strange in my opinion.
+  * `.` and  `,` are fine.
+*)
+let make_cursor_id (id : int) (client_config : client_config) : cursor_id =
+  let cursor_id =
+    Printf.sprintf
+      "cursor,%d,%s,%d"
+      id
+      client_config.client_id
+      (Hashtbl.hash client_config)
+  in
+  Cursor_id cursor_id
 
 let typecheck_and_get_deps_and_errors_job
     (ctx : Provider_context.t) _acc (paths : Relative_path.t list) :
-    Errors.t * Incremental.dep_graph_delta =
+    Errors.t * dep_graph_delta =
   List.fold
     paths
     ~init:(Errors.empty, HashSet.create ())
@@ -82,7 +138,7 @@ let get_state_file_path (state_dir : Path.t) : Path.t =
 
 class cursor ~client_id ~cursor_state =
   object (self)
-    val client_id : Incremental.client_id = client_id
+    val client_id : client_id = client_id
 
     val cursor_state : cursor_state = cursor_state
 
@@ -129,7 +185,7 @@ class cursor ~client_id ~cursor_state =
         changed_file_infos
         naming_table_path
 
-    method get_dep_graph_delta : Incremental.dep_graph_delta =
+    method get_dep_graph_delta : dep_graph_delta =
       let rec helper cursor_state acc =
         match cursor_state with
         | Saved_state _ -> acc
@@ -141,7 +197,7 @@ class cursor ~client_id ~cursor_state =
       in
       helper cursor_state (HashSet.create ())
 
-    method get_client_id : Incremental.client_id = client_id
+    method get_client_id : client_id = client_id
 
     method private find_cursors_since_last_typecheck : cursor_state list =
       let rec helper cursor_state =
@@ -274,26 +330,30 @@ class cursor ~client_id ~cursor_state =
         (errors, Some cursor)
   end
 
+type persistent_state = {
+  max_cursor_id: int ref;
+  cursors: (cursor_id, client_id * cursor) Hashtbl.t;
+  clients: (client_id, client_config) Hashtbl.t;
+}
+
+let save_state ~(state_path : Path.t) ~(persistent_state : persistent_state) :
+    unit =
+  Out_channel.with_file ~binary:true (Path.to_string state_path) ~f:(fun oc ->
+      Marshal.to_channel oc persistent_state [Marshal.Closures])
+
 class state ~state_path ~persistent_state =
-  object (self)
+  object
     val state_path : Path.t = state_path
 
     val persistent_state : persistent_state = persistent_state
 
-    method save : unit =
-      Out_channel.with_file
-        ~binary:true
-        (Path.to_string state_path)
-        ~f:(fun oc -> Marshal.to_channel oc persistent_state [Marshal.Closures])
-
-    method look_up_client_id (client_config : Incremental.client_config)
-        : Incremental.client_id =
-      let client_id = Incremental_utils.make_client_id client_config in
+    method look_up_client_id (client_config : client_config) : client_id =
+      let client_id = make_client_id client_config in
       Hashtbl.set persistent_state.clients client_id client_config;
       client_id
 
-    method make_default_cursor (client_id : Incremental.client_id)
-        : (cursor, string) result =
+    method make_default_cursor (client_id : client_id) : (cursor, string) result
+        =
       match Hashtbl.find persistent_state.clients client_id with
       | Some client_config ->
         Ok
@@ -303,38 +363,35 @@ class state ~state_path ~persistent_state =
                (Saved_state
                   {
                     dep_table_saved_state_path =
-                      client_config.Incremental.dep_table_saved_state_path;
+                      client_config.dep_table_saved_state_path;
                     dep_table_errors_saved_state_path =
-                      client_config.Incremental.errors_saved_state_path;
+                      client_config.errors_saved_state_path;
                     naming_table_saved_state_path =
-                      client_config.Incremental.naming_table_saved_state_path;
+                      client_config.naming_table_saved_state_path;
                   }))
       | None ->
-        let (Incremental.Client_id client_id) = client_id in
+        let (Client_id client_id) = client_id in
         Error (Printf.sprintf "Client ID %s could not be found" client_id)
 
-    method look_up_cursor
-        ~(client_id : Incremental.client_id option) ~(cursor_id : string)
+    method look_up_cursor ~(client_id : client_id option) ~(cursor_id : string)
         : (cursor, string) result =
       let cursor_opt =
-        Hashtbl.find persistent_state.cursors (Incremental.Cursor_id cursor_id)
+        Hashtbl.find persistent_state.cursors (Cursor_id cursor_id)
       in
       match (client_id, cursor_opt) with
-      | (None, Some (Incremental.Client_id _existing_client_id, cursor)) ->
-        Ok cursor
-      | ( Some (Incremental.Client_id client_id),
-          Some (Incremental.Client_id existing_client_id, cursor) )
+      | (None, Some (Client_id _existing_client_id, cursor)) -> Ok cursor
+      | (Some (Client_id client_id), Some (Client_id existing_client_id, cursor))
         when String.equal client_id existing_client_id ->
         Ok cursor
-      | ( Some (Incremental.Client_id client_id),
-          Some (Incremental.Client_id existing_client_id, _cursor) ) ->
+      | ( Some (Client_id client_id),
+          Some (Client_id existing_client_id, _cursor) ) ->
         Error
           (Printf.sprintf
              "Client ID %s was provided, but cursor %s is associated with client ID %s"
              client_id
              cursor_id
              existing_client_id)
-      | (Some (Incremental.Client_id client_id), None) ->
+      | (Some (Client_id client_id), None) ->
         Error
           (Printf.sprintf
              "Cursor with ID %s not found (for client ID %s)"
@@ -343,35 +400,45 @@ class state ~state_path ~persistent_state =
       | (None, None) ->
         Error (Printf.sprintf "Cursor with ID %s not found)" cursor_id)
 
-    method add_cursor (cursor : cursor) : Incremental.cursor_id =
+    method add_cursor (cursor : cursor) : cursor_id =
       let client_id = cursor#get_client_id in
       let client_config = Hashtbl.find_exn persistent_state.clients client_id in
       let cursor_id =
-        Incremental_utils.make_cursor_id
-          !(persistent_state.max_cursor_id)
-          client_config
+        make_cursor_id !(persistent_state.max_cursor_id) client_config
       in
       incr persistent_state.max_cursor_id;
       Hashtbl.set persistent_state.cursors cursor_id (client_id, cursor);
-      self#save;
+      save_state ~state_path ~persistent_state;
       cursor_id
   end
 
-let make (state_dir : Path.t) : Incremental.state =
-  Incremental_utils.init_state_dir state_dir ~populate_dir:(fun temp_dir ->
+let init_state_dir (state_dir : Path.t) ~(populate_dir : Path.t -> unit) : unit
+    =
+  Disk.mkdir_p (state_dir |> Path.dirname |> Path.to_string);
+  if not (Path.file_exists state_dir) then
+    Tempfile.with_tempdir (fun temp_dir ->
+        populate_dir temp_dir;
+        try
+          Disk.rename (Path.to_string temp_dir) (Path.to_string state_dir)
+        with
+        | Disk.Rename_target_already_exists _
+        | Disk.Rename_target_dir_not_empty _ ->
+          (* Assume that the directory was initialized by another process
+          before us, so we don't need to do anything further. *)
+          ())
+
+let make_reference_implementation (state_dir : Path.t) : state =
+  init_state_dir state_dir ~populate_dir:(fun temp_dir ->
       let temp_state_path = get_state_file_path temp_dir in
       if not (Path.file_exists temp_state_path) then
-        let state =
-          new state
-            ~state_path:temp_state_path
-            ~persistent_state:
-              {
-                max_cursor_id = ref 0;
-                cursors = Hashtbl.Poly.create ();
-                clients = Hashtbl.Poly.create ();
-              }
-        in
-        state#save);
+        save_state
+          ~state_path:temp_state_path
+          ~persistent_state:
+            {
+              max_cursor_id = ref 0;
+              cursors = Hashtbl.Poly.create ();
+              clients = Hashtbl.Poly.create ();
+            });
   let state_path = get_state_file_path state_dir in
   let (persistent_state : persistent_state) =
     try
@@ -389,4 +456,4 @@ let make (state_dir : Path.t) : Incremental.state =
       Exception.reraise e
   in
   let state = new state ~state_path ~persistent_state in
-  (state :> Incremental.state)
+  (state :> state)

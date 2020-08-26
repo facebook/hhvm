@@ -17,6 +17,5 @@
     sys_utils
     temp_file
     utils_core)
-  (modules_without_implementation incremental)
   (preprocess
     (pps lwt_ppx ppx_let)))

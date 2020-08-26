@@ -9,8 +9,6 @@
 module Hh_daemon = Daemon
 open Core
 
-type state_backend = OCaml_state_backend
-
 type env = {
   from: string;
   client_id: string;
@@ -22,7 +20,6 @@ type env = {
   watchman_sockname: Path.t option;
   changed_files: Relative_path.Set.t;
   state_path: Path.t option;
-  state_backend: state_backend;
 }
 
 type setup_result = {
@@ -197,8 +194,7 @@ let get_state_path ~(env : env) : Path.t =
 let make_incremental_state ~(env : env) : Incremental.state =
   let state_path = get_state_path env in
   Hh_logger.log "State path: %s" (Path.to_string state_path);
-  match env.state_backend with
-  | OCaml_state_backend -> Incremental_ocaml.make state_path
+  Incremental.make_reference_implementation state_path
 
 let advance_cursor
     ~(env : env)
@@ -482,20 +478,6 @@ let parse_env () =
       ~doc:
         ( "PATH The path to the persistent state on disk. "
         ^ "If not provided, will use the default path for the repository." )
-  and state_backend =
-    flag
-      "--state-backend"
-      (optional_with_default
-         OCaml_state_backend
-         (Command.Arg_type.create (fun state_backend ->
-              match state_backend with
-              | "ocaml" -> OCaml_state_backend
-              | _ ->
-                failwith
-                  (Printf.sprintf
-                     "Unrecognized state backend: %s"
-                     state_backend))))
-      ~doc:"The implementation of persistent state to use."
   in
   let root =
     match root with
@@ -542,7 +524,6 @@ let parse_env () =
     watchman_sockname;
     changed_files;
     state_path;
-    state_backend;
   }
 
 let clean_subcommand =

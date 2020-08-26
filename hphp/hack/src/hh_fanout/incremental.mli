@@ -106,3 +106,12 @@ class type state =
     (** Add the given cursor to the state, committing any changes to disk. *)
     method add_cursor : cursor -> cursor_id
   end
+
+(** Reference implementation using OCaml blobs to store state. Loads the
+state from the given path on disk.
+
+If the path does not exist, it is atomically created and loaded.
+
+Currently not production-usable -- it is not safe for concurrent consumers.
+*)
+val make_reference_implementation : Path.t -> state

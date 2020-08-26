@@ -130,8 +130,8 @@ struct Vunit;
   O(syncvmrettype, Inone, U(type), Dn)\
   O(phplogue, Inone, U(fp), Dn)\
   O(phpret, Inone, U(fp) U(args), Dn)\
-  O(callphp, I(stub), U(args), Dn)\
   O(callphpr, Inone, U(target) U(args), Dn)\
+  O(callphps, I(target), U(args), Dn)\
   O(callunpack, I(target), U(args), Dn)\
   O(vcallunpack, I(target), U(args) U(extraArgs), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
@@ -643,7 +643,7 @@ struct vinvoke { CallSpec call; VcallArgsId args; Vtuple d; Vlabel targets[2];
 /*
  * C++ function call using the native ABI.
  *
- * Comes in five flavors:
+ * Comes in four flavors:
  *    call:  direct call
  *    callm: indirect call via memory operand
  *    callr: indirect call via register
@@ -821,7 +821,7 @@ struct syncvmsp { Vreg s; };
  * Copy the PHP return value from the return registers into `data' and `type'.
  *
  * Used right after an instruction that makes a PHP call (like the
- * suggestively-named callphp{}) to receive the values as Vregs.
+ * suggestively-named callphps{}) to receive the values as Vregs.
  */
 struct defvmretdata { Vreg data; };
 struct defvmrettype { Vreg type; };
@@ -875,19 +875,17 @@ struct phpret { Vreg fp; RegSet args; bool noframe; };
 /*
  * Call a PHP function.
  *
- * This is a smashable call that begins its life as a request to translate the
- * callee, and winds up as a direct call to the callee's func guard or
- * prologue.
- */
-struct callphp { TCA stub; RegSet args; const Func* func; uint32_t nargs; };
-
-/*
- * Like callphp, but an indirect call through a register
+ * Comes in two flavors:
+ *    callr: indirect call via register
+ *    calls: direct call with smashable target that begins its life as a request
+ *           to translate the callee, and winds up as a direct call to the
+ *           callee's prologue
  */
 struct callphpr { Vreg64 target; RegSet args; };
+struct callphps { TCA target; RegSet args; const Func* func; uint32_t nargs; };
 
 /*
- * Non-smashable PHP function call with (almost) the same ABI as callphp{}.
+ * Non-smashable PHP function call with (almost) the same ABI as callphps{}.
  *
  * NB: The only difference is that callunpack preserves vmfp.  Currently only
  * used by the CallUnpack instruction.

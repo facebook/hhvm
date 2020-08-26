@@ -119,8 +119,8 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     assertx(
       (!extra->hasUnpack && extra->numArgs <= func->numNonVariadicParams()) ||
       (extra->hasUnpack && extra->numArgs == func->numNonVariadicParams()));
-    v << callphp{tc::ustubs().immutableBindCallStub, php_call_regs(withCtx),
-                 func, numArgsInclUnpack};
+    v << callphps{tc::ustubs().immutableBindCallStub, php_call_regs(withCtx),
+                  func, numArgsInclUnpack};
   } else if (skipRepack) {
     // If we've statically determined the provided number of arguments
     // doesn't exceed what the target expects, we can skip the stub
@@ -137,8 +137,8 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     // stub that will pack any extra arguments and transfer control to the
     // appropriate prologue.
     assertx(!extra->hasUnpack);
-    v << callphp{tc::ustubs().funcPrologueRedispatch, php_call_regs(withCtx),
-                 nullptr, extra->numArgs};
+    v << callphps{tc::ustubs().funcPrologueRedispatch, php_call_regs(withCtx),
+                  nullptr, extra->numArgs};
   }
 
   // The prologue is responsible for unwinding all inputs. We could have

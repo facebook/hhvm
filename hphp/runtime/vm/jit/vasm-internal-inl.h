@@ -106,7 +106,7 @@ template <class Inst>
 bool emit(Venv& /*env*/, const Inst&) {
   return false;
 }
-bool emit(Venv& env, const callphp& i);
+bool emit(Venv& env, const callphps& i);
 bool emit(Venv& env, const bindjmp& i);
 bool emit(Venv& env, const bindjcc& i);
 bool emit(Venv& env, const bindaddr& i);

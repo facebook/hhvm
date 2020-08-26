@@ -180,8 +180,8 @@ void registerFallbackJump(Venv& env, TCA jmp, ConditionCode cc) {
 
 }
 
-bool emit(Venv& env, const callphp& i) {
-  const auto call = emitSmashableCall(*env.cb, env.meta, i.stub);
+bool emit(Venv& env, const callphps& i) {
+  const auto call = emitSmashableCall(*env.cb, env.meta, i.target);
   setJmpTransID(env, call);
   // If the callee is known, keep metadata to be able to eagerly smash the call.
   if (i.func != nullptr) {

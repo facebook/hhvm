@@ -124,8 +124,8 @@ checkCalls(const Vunit& unit, const jit::vector<Vlabel>& blocks) {
         case Vinstr::callm:
         case Vinstr::callr:
         case Vinstr::calls:
-        case Vinstr::callphp:
         case Vinstr::callphpr:
+        case Vinstr::callphps:
         case Vinstr::callstub:
         case Vinstr::callunpack:
         case Vinstr::contenter:

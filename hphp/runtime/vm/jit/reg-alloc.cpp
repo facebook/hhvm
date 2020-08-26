@@ -211,8 +211,8 @@ void getEffects(const Abi& abi, const Vinstr& i,
       defs = abi.all() - abi.calleeSaved - abi.gpUnreserved - (rvmfp() | rsp());
       break;
 
-    case Vinstr::callphp:
     case Vinstr::callphpr:
+    case Vinstr::callphps:
     case Vinstr::callunpack:
     case Vinstr::contenter:
       defs = abi.all() - (rvmfp() | rvmtl() | rsp());

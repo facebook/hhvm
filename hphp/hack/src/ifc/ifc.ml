@@ -374,6 +374,9 @@ and ptype ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
         f_ret = ptype fun_ty.T.ft_ret.T.et_type;
         f_exn = class_ptype None proto_renv [] Decl.exception_id;
       }
+  | T.Tdependent (T.DTthis, ty) ->
+    (* TODO(T72024862): This treatment ignores late static binding. *)
+    ptype ty
   (* ---  types below are not yet supported *)
   | T.Tdependent (_, _ty) -> fail "Tdependent"
   | T.Tdarray (_keyty, _valty) -> fail "Tdarray"
@@ -651,22 +654,51 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
   (* TODO(T68414656): Support calls with type arguments *)
   | A.Call (_call_type, e, _type_args, args, _extra_args) ->
     let (env, args_pty) = List.map_env ~f:expr env args in
+    let call env call_type this_pty =
+      call ~pos renv env call_type this_pty args_pty ety
+    in
     begin
       match e with
       | (_, A.Id (_, name)) ->
-        let call_type = Cglobal (Decl.make_callable_name None name) in
-        call ~pos renv env call_type None args_pty ety
+        let call_id = Decl.make_callable_name None name in
+        call env (Cglobal call_id) None
       | (_, A.Obj_get (obj, (_, A.Id (_, meth_name)), _)) ->
         let (env, obj_pty) = expr env obj in
         begin
           match obj_pty with
-          | Tclass class_ ->
-            let call_type =
-              Cglobal (Decl.make_callable_name (Some class_.c_name) meth_name)
-            in
-            call ~pos renv env call_type (Some obj_pty) args_pty ety
+          | Tclass { c_name; _ } ->
+            let call_id = Decl.make_callable_name (Some c_name) meth_name in
+            call env (Cglobal call_id) (Some obj_pty)
           | _ -> fail "unhandled method call on %a" Pp.ptype obj_pty
         end
+      | (_, A.Class_const (((_, ty), cid), (_, meth_name))) ->
+        let env =
+          match cid with
+          | A.CIexpr e -> fst @@ expr env e
+          | A.CIstatic ->
+            (* TODO(T72024862): Handle late static binding *)
+            fail "late static binding is not supported"
+          | _ -> env
+        in
+        let rec find_class_name ty =
+          match T.get_node ty with
+          | T.Tdependent (T.DTthis, ty) -> find_class_name ty
+          | T.Tclass ((_, class_name), _, _) -> class_name
+          | _ -> fail "unhandled method call on a non-class"
+        in
+        let class_name = find_class_name ty in
+        let call_id = Decl.make_callable_name (Some class_name) meth_name in
+        let this_pty =
+          if String.equal meth_name Decl.construct_id then begin
+            (* The only legal class id is `parent` which is invoked as if it
+               is invoked on the object being constructed, hence it uses the same
+               `$this` as the caller. *)
+            assert (Option.is_some renv.re_this);
+            renv.re_this
+          end else
+            None
+        in
+        call env (Cglobal call_id) this_pty
       | _ ->
         let (env, func_ty) = expr env e in
         let fty =
@@ -674,7 +706,7 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
           | Tfun fty -> fty
           | _ -> failwith "calling something that is not a function"
         in
-        call ~pos renv env (Clocal fty) None args_pty ety
+        call env (Clocal fty) None
     end
   | A.ValCollection (A.Vec, _, exprs) ->
     (* We require each collection element to be a subtype of the vector
@@ -703,22 +735,22 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
    *)
   | A.New (((_, lty), cid), _targs, args, _extra_args, _) ->
     let (env, args_pty) = List.map_env ~f:expr env args in
-    let (env, obj_pty) =
+    let env =
       match cid with
-      | A.CIexpr e -> expr env e
-      | A.CI (_, _) -> (env, ptype None renv.re_proto lty)
-      (* TODO(T70140005) support additional types of constructor calls *)
-      | _ -> fail "could not find class name for constructor"
+      | A.CIexpr e -> fst @@ expr env e
+      | A.CIstatic ->
+        (* TODO(T72024862): Handle late static binding *)
+        fail "late static binding is not supported"
+      | _ -> env
     in
+    let obj_pty = ptype None renv.re_proto lty in
     begin
       match obj_pty with
-      | Tclass cls ->
-        let callable_name =
-          Decl.make_callable_name (Some cls.c_name) "__construct"
-        in
+      | Tclass { c_name; _ } ->
+        let call_id = Decl.make_callable_name (Some c_name) Decl.construct_id in
         let lty = T.mk (Typing_reason.Rnone, T.Tprim A.Tvoid) in
         let (env, _) =
-          call ~pos renv env (Cglobal callable_name) (Some obj_pty) args_pty lty
+          call ~pos renv env (Cglobal call_id) (Some obj_pty) args_pty lty
         in
         let pty = ptype ?prefix:(Some "constr") None renv.re_proto ety in
         (env, pty)
@@ -938,7 +970,17 @@ let governs ~pos meta p fp acc =
   let prop = quantify acc |> Logic.simplify in
   Logic.entailment_violations lattice prop
 
-let callable span meta decl_env class_name_opt name saved_env params body lrty =
+let analyse_callable
+    ?class_name
+    ~pos
+    ~meta
+    ~decl_env
+    ~is_static
+    ~saved_env
+    name
+    params
+    body
+    return =
   try
     (* Setup the read-only environment *)
     let scope = Scope.alloc () in
@@ -950,8 +992,13 @@ let callable span meta decl_env class_name_opt name saved_env params body lrty =
     (* Here, we ignore the type parameters of this because at the moment we
      * lack Tgeneric policy type. This will be fixed (T68414656) in the future.
      *)
-    let this_ty = Option.map class_name_opt (class_ptype None proto_renv []) in
-    let ret_ty = ptype ~prefix:"ret" None proto_renv lrty in
+    let this_ty =
+      match class_name with
+      | Some cname when not is_static ->
+        Some (class_ptype None proto_renv [] cname)
+      | _ -> None
+    in
+    let ret_ty = ptype ~prefix:"ret" None proto_renv return in
     let renv = Env.new_renv proto_renv this_ty ret_ty global_pc exn in
 
     (* Initialise the mutable environment *)
@@ -972,12 +1019,12 @@ let callable span meta decl_env class_name_opt name saved_env params body lrty =
       Format.printf "@."
     end;
 
-    let callable_name = Decl.make_callable_name class_name_opt name in
+    let callable_name = Decl.make_callable_name class_name name in
     let f_self = Env.new_policy_var proto_renv callable_name in
 
     let proto =
       {
-        fp_name = Decl.make_callable_name class_name_opt name;
+        fp_name = callable_name;
         fp_this = this_ty;
         fp_type =
           {
@@ -994,14 +1041,14 @@ let callable span meta decl_env class_name_opt name saved_env params body lrty =
       match SMap.find_opt callable_name decl_env.de_fun with
       | Some { fd_kind = FDCIPP } ->
         let implicit = Env.new_policy_var proto_renv "implicit" in
-        governs ~pos:span meta implicit proto
+        governs ~pos meta implicit proto
       | _ -> const []
     in
 
     (* Return the results *)
     let res =
       {
-        res_span = span;
+        res_span = pos;
         res_proto = proto;
         res_scope = scope;
         res_constraint = Logic.conjoin env.e_acc;
@@ -1022,13 +1069,24 @@ let walk_tast meta decl_env =
           f_annotation = saved_env;
           f_params = params;
           f_body = body;
-          f_ret = (lrty, _);
-          f_span = span;
+          f_ret = (return, _);
+          f_span = pos;
           _;
         } ->
-      Option.map
-        ~f:(fun x -> [x])
-        (callable span meta decl_env None name saved_env params body lrty)
+      let is_static = false in
+      let callable_res =
+        analyse_callable
+          ~pos
+          ~meta
+          ~decl_env
+          ~is_static
+          ~saved_env
+          name
+          params
+          body
+          return
+      in
+      Option.map ~f:(fun x -> [x]) callable_res
     | A.Class { A.c_name = (_, class_name); c_methods = methods; _ } ->
       let handle_method
           {
@@ -1036,12 +1094,22 @@ let walk_tast meta decl_env =
             m_annotation = saved_env;
             m_params = params;
             m_body = body;
-            m_ret = (lrty, _);
-            m_span = span;
+            m_ret = (return, _);
+            m_span = pos;
+            m_static = is_static;
             _;
           } =
-        let c_name = Some class_name in
-        callable span meta decl_env c_name name saved_env params body lrty
+        analyse_callable
+          ~class_name
+          ~pos
+          ~meta
+          ~decl_env
+          ~is_static
+          ~saved_env
+          name
+          params
+          body
+          return
       in
       Some (List.filter_map ~f:handle_method methods)
     | _ -> None

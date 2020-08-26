@@ -28,6 +28,8 @@ let exception_id = "\\Exception"
 
 let cipp_id = "\\Cipp"
 
+let construct_id = "__construct"
+
 let make_callable_name cls_name_opt name =
   match cls_name_opt with
   | None -> name
@@ -51,20 +53,11 @@ let callable_decl attrs =
   in
   { fd_kind }
 
-let callable class_name_opt name attrs =
-  let callable_name =
-    match class_name_opt with
-    | None -> name
-    | Some class_name -> class_name ^ "#" ^ name
-  in
-  let fun_decl = callable_decl attrs in
-  (callable_name, fun_decl)
-
 let fun_ { A.f_name = (_, name); f_user_attributes = attrs; _ } =
-  callable None name attrs
+  (make_callable_name None name, callable_decl attrs)
 
 let meth class_name { A.m_name = (_, name); m_user_attributes = attrs; _ } =
-  callable (Some class_name) name attrs
+  (make_callable_name (Some class_name) name, callable_decl attrs)
 
 let immediate_supers { A.c_uses; A.c_extends; _ } =
   let id_of_hint = function

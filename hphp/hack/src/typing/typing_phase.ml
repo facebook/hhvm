@@ -1059,3 +1059,7 @@ let localize_and_add_ast_generic_parameters_and_where_constraints
   env
 
 let () = TUtils.localize_with_self_ref := localize_with_self
+
+let () = TUtils.localize_ref := localize
+
+let () = TUtils.env_with_self_ref := env_with_self

@@ -1436,3 +1436,15 @@ val kind_mismatch :
   expected_kind_repr:string ->
   actual_kind_repr:string ->
   unit
+
+val class_with_constraints_used_as_hk_type : Pos.t -> string -> unit
+
+val alias_with_implicit_constraints_as_hk_type :
+  use_pos:Pos.t ->
+  typedef_pos:Pos.t ->
+  used_class_in_def_pos:Pos.t ->
+  typedef_name:string ->
+  typedef_tparam_name:string ->
+  used_class_in_def_name:string ->
+  used_class_tparam_name:string ->
+  unit

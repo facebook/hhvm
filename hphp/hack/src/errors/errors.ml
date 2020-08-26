@@ -5347,6 +5347,48 @@ let kind_mismatch
         ^ " here." );
     ]
 
+let class_with_constraints_used_as_hk_type use_pos class_name =
+  add
+    (Naming.err_code Naming.HigherKindedTypesUnsupportedFeature)
+    use_pos
+    ( "The class "
+    ^ strip_ns class_name
+    ^ " imposes constraints on some of its type parameters. Classes that do this cannot be used as higher-kinded types at this time."
+    )
+
+let alias_with_implicit_constraints_as_hk_type
+    ~use_pos
+    ~typedef_pos
+    ~used_class_in_def_pos
+    ~typedef_name
+    ~typedef_tparam_name
+    ~used_class_in_def_name
+    ~used_class_tparam_name =
+  add_list
+    (Naming.err_code Naming.HigherKindedTypesUnsupportedFeature)
+    [
+      ( use_pos,
+        "The type "
+        ^ strip_ns typedef_name
+        ^ " implicitly imposes constraints on its type parameters. Therefore, it cannot be used as a higher-kinded type at this time."
+      );
+      (typedef_pos, "The definition of " ^ strip_ns typedef_name ^ " is here.");
+      ( used_class_in_def_pos,
+        "The definition of "
+        ^ strip_ns typedef_name
+        ^ " relies on "
+        ^ strip_ns used_class_in_def_name
+        ^ " and the constraints that "
+        ^ strip_ns used_class_in_def_name
+        ^ " imposes on its type parameter "
+        ^ strip_ns used_class_tparam_name
+        ^ " then become implicit constraints on the type parameter "
+        ^ typedef_tparam_name
+        ^ " of "
+        ^ strip_ns typedef_name
+        ^ "." );
+    ]
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

@@ -1,10 +1,14 @@
 open Hh_prelude
 open Common
+open Utils
 open Typing_defs
 open Typing_kinding_defs
 module Env = Typing_env
 module Cls = Decl_provider.Class
 module KindDefs = Typing_kinding_defs
+module TGenConstraint = Typing_generic_constraint
+module TUtils = Typing_utils
+module Subst = Decl_subst
 
 module Locl_Inst = struct
   let rec instantiate subst (ty : locl_ty) =
@@ -143,6 +147,108 @@ module Locl_Inst = struct
     { et_type = instantiate subst et.et_type; et_enforced = et.et_enforced }
 end
 
+(* TODO(T70068435)
+  This is a workaround for the problem that alias and newtype definitions do not spell out
+  the constraints they may implicitly impose on their parameters.
+  Consider:
+  class Foo<T1 as num> {...}
+  type Bar<T2> = Foo<T2>;
+
+  Here, T2 of Bar implicitly has the bound T2 as num. However, in the current design, we only
+  ever check that when expaning Bar, the argument in place of T2 satisfies all the
+  implicit bounds.
+  However, this is not feasible for using aliases and newtypes as higher-kinded types, where we
+  use them without expanding them.
+  In the long-term, we would like to be able to infer the implicit bounds and use those for
+  the purposes of kind-checking. For now, we just detect if there *are* implicit bounds, and
+  if so reject using the alias/newtype as an HK type.
+  *)
+let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
+  let report_constraint violating_type used_class used_class_tparam_name =
+    let tparams_in_ty = Typing_env.get_tparams env violating_type in
+    let tparams_of_typedef =
+      List.fold typedef_info.td_tparams ~init:SSet.empty ~f:(fun s tparam ->
+          SSet.add (snd tparam.tp_name) s)
+    in
+    let intersection = SSet.inter tparams_in_ty tparams_of_typedef in
+    if SSet.is_empty intersection then
+      (* Just violated constraints inside the typedef that do not involve
+      the type parameters of the typedef we are looking at. Nothing to report at this point *)
+      ()
+    else
+      (* We choose an arbitrary element. If a constraint violation were to contain multiple
+      tparams of the typedef, we can live with only showing the user one of them. *)
+      let typedef_tparam_name = SSet.min_elt intersection in
+      let (used_class_in_def_pos, used_class_in_def_name) = used_class in
+      let typedef_pos = typedef_info.td_pos in
+      Errors.alias_with_implicit_constraints_as_hk_type
+        ~use_pos
+        ~typedef_pos
+        ~used_class_in_def_pos
+        ~typedef_name
+        ~typedef_tparam_name
+        ~used_class_in_def_name
+        ~used_class_tparam_name
+  in
+  let check_tapply r class_sid type_args =
+    let decl_ty = Typing_make_type.apply r class_sid type_args in
+    let (env, locl_ty) = TUtils.localize_with_self env decl_ty in
+    match get_node (TUtils.get_base_type env locl_ty) with
+    | Tclass (cls_name, _, tyl) ->
+      (match Env.get_class env (snd cls_name) with
+      | Some cls ->
+        let tc_tparams = Cls.tparams cls in
+        let ety_env =
+          {
+            (TUtils.env_with_self env) with
+            substs = Subst.make_locl tc_tparams tyl;
+          }
+        in
+        iter2_shortest
+          begin
+            fun { tp_name = (_p, x); tp_constraints = cstrl; _ } ty ->
+            List.iter cstrl (fun (ck, cstr_ty) ->
+                let (env, cstr_ty) = TUtils.localize ~ety_env env cstr_ty in
+                let (_ : Typing_env_types.env) =
+                  TGenConstraint.check_constraint
+                    env
+                    ck
+                    ty
+                    ~cstr_ty
+                    (fun ?code:_ _l -> report_constraint ty cls_name x)
+                in
+                ())
+          end
+          tc_tparams
+          tyl
+      | _ -> ())
+    | _ -> ()
+  in
+
+  let visitor =
+    object
+      inherit [unit] Type_visitor.decl_type_visitor
+
+      method! on_tapply _ r name args = check_tapply r name args
+    end
+  in
+  visitor#on_type () typedef_info.td_type;
+  maybe visitor#on_type () typedef_info.td_constraint
+
+(* TODO(T70068435)
+  This is a workaround until we support proper kind-checking of HK types that impose constraints
+  on their arguments.
+  For now, we reject using any class as a HK type that has any constraints on its type parameters.
+  *)
+let check_class_usable_as_hk_type use_pos class_info =
+  let name = Cls.name class_info in
+  let tparams = Cls.tparams class_info in
+  let has_tparam_constraints =
+    List.exists tparams (fun tp -> not (List.is_empty tp.tp_constraints))
+  in
+  if has_tparam_constraints then
+    Errors.class_with_constraints_used_as_hk_type use_pos name
+
 let report_kind_error ~use_pos ~def_pos ~tparam_name ~expected ~actual =
   let actual_kind_repr = Simple.description_of_kind actual in
   let expected_kind_repr = Simple.description_of_kind expected in
@@ -224,10 +330,11 @@ module Simple = struct
         ~f:(check_well_kinded_type ~allow_missing_targs:false env)
     in
     let (r, ty_) = deref ty in
+    let use_pos = Reason.to_pos r in
     let check = check_well_kinded_type ~allow_missing_targs:false env in
     let check_against_tparams def_pos tyargs tparams =
       let kinds = Simple.named_kinds_of_decl_tparams tparams in
-      let use_pos = Reason.to_pos r in
+
       check_targs_well_kinded
         ~allow_missing_targs
         ~def_pos
@@ -282,7 +389,6 @@ module Simple = struct
           let param_nkinds =
             Simple.from_full_kind gen_kind |> Simple.get_named_parameter_kinds
           in
-          let use_pos = Reason.to_pos r in
           check_targs_well_kinded
             ~allow_missing_targs:false
             ~def_pos
@@ -311,9 +417,10 @@ module Simple = struct
       =
     let (expected_name, expected_kind) = expected_nkind in
     let r = get_reason ty in
+    let use_pos = Reason.to_pos r in
     let kind_error actual_kind =
       let (def_pos, tparam_name) = expected_name in
-      let use_pos = Reason.to_pos r in
+
       report_kind_error
         ~use_pos
         ~def_pos
@@ -336,12 +443,14 @@ module Simple = struct
           match Env.get_class env name with
           | Some class_info ->
             let tparams = Cls.tparams class_info in
+            check_class_usable_as_hk_type use_pos class_info;
             check_against_tparams tparams
           | None ->
             begin
               match Env.get_typedef env name with
               | Some typedef ->
                 let tparams = typedef.td_tparams in
+                check_typedef_usable_as_hk_type env use_pos name typedef;
                 check_against_tparams tparams
               | None -> ()
             end

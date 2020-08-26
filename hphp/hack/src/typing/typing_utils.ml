@@ -201,6 +201,22 @@ let (localize_with_self_ref : localize_with_self ref) =
 
 let localize_with_self x = !localize_with_self_ref x
 
+type localize = ety_env:expand_env -> env -> decl_ty -> env * locl_ty
+
+let (localize_ref : localize ref) =
+  ref (fun ~ety_env:_ -> not_implemented "localize")
+
+let localize x = !localize_ref x
+
+type env_with_self =
+  ?pos:Pos.t -> ?quiet:bool -> ?report_cycle:Pos.t * string -> env -> expand_env
+
+let env_with_self_ref : env_with_self ref =
+  ref (fun ?pos:_ ?quiet:_ ?report_cycle:_ -> not_implemented "env_with_self")
+
+let env_with_self ?pos ?quiet ?report_cycle x =
+  !env_with_self_ref ?pos ?quiet ?report_cycle x
+
 (* Convenience function for creating `this` types *)
 let this_of ty = Tdependent (DTthis, ty)
 

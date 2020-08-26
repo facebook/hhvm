@@ -643,68 +643,6 @@ function sizeof(
 ): int;
 
 /**
- * Every array has an internal pointer to its "current" element, which is
- *   initialized to the first element inserted into the array.
- *
- * @param mixed $array - The array.
- *
- * @return mixed - The current() function simply returns the value of the
- *   array element that's currently being pointed to by the internal pointer. It
- *   does not move the pointer in any way. If the internal pointer points beyond
- *   the end of the elements list or the array is empty, current() returns
- *   FALSE. WarningThis function may return Boolean FALSE, but may also return a
- *   non-Boolean value which evaluates to FALSE, such as 0 or "". Please read
- *   the section on Booleans for more information. Use the === operator for
- *   testing the return value of this function.
- *
- */
-<<__Native>>
-function current(mixed $array): mixed;
-
-/**
- * reset() rewinds array's internal pointer to the first element and returns
- *   the value of the first array element.
- *
- * @param mixed $array - The input array.
- *
- * @return mixed - Returns the value of the first array element, or FALSE if
- *   the array is empty.
- *
- */
-<<__Native>>
-function reset(inout mixed $array): mixed;
-
-/**
- * end() advances array's internal pointer to the last element, and returns
- *   its value.
- *
- * @param mixed $array - The array. This array is passed by reference because
- *   it is modified by the function. This means you must pass it a real variable
- *   and not a function returning an array because only actual variables may be
- *   passed by reference.
- *
- * @return mixed - Returns the value of the last element or FALSE for empty
- *   array.
- *
- */
-<<__Native>>
-function end(inout mixed $array): mixed;
-
-/**
- * key() returns the index element of the current array position.
- *
- * @param mixed $array - The array.
- *
- * @return mixed - The key() function simply returns the key of the array
- *   element that's currently being pointed to by the internal pointer. It does
- *   not move the pointer in any way. If the internal pointer points beyond the
- *   end of the elements list or the array is empty, key() returns NULL.
- *
- */
-<<__Native>>
-function key(mixed $array): mixed;
-
-/**
  * Searches haystack for needle.
  *
  * @param mixed $needle - The searched value. If needle is a string, the

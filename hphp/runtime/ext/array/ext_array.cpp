@@ -1135,7 +1135,6 @@ TypedValue HHVM_FUNCTION(array_unshift,
         }
       }
       arr_array = std::move(newArray);
-      arr_array->reset();
     }
     return make_tv<KindOfInt64>(arr_array.size());
   }
@@ -1305,88 +1304,6 @@ int64_t HHVM_FUNCTION(count,
 int64_t HHVM_FUNCTION(sizeof,
                       const Variant& var) {
   return HHVM_FN(count)(var, 0);
-}
-
-namespace {
-
-enum class NoCow {};
-template<class DoCow = void, class NonArrayRet, class OpPtr>
-static Variant iter_op_impl(Variant& refParam, OpPtr op,
-                            NonArrayRet nonArray,
-                            const std::string& fnName,
-                            bool(ArrayData::*pred)() const =
-                              &ArrayData::isInvalid) {
-  auto& cell = *refParam.asTypedValue();
-  if (!isArrayLikeType(cell.m_type)) {
-    raise_bad_type_warning("%s() expects array, was %s",
-                             fnName.c_str(),
-                             getDataTypeString(refParam.getType()).c_str());
-    return Variant(nonArray);
-  }
-
-  // In order to perform an operation that mutates an array's internal cursor,
-  // we escalate bespoke arrays to vanilla and copy arrays that need CoW.
-  auto const orig = cell.m_data.parr;
-  auto const ad = [&]{
-    auto ad = orig;
-    if (std::is_same<DoCow, NoCow>::value) return ad;
-    if (!ad->cowCheck() && ad->isVanilla()) return ad;
-    if ((ad->*pred)()) return ad;
-
-    // If !ad->noCopyOnWrite, ad->copy is a no-op, so we don't need to check it.
-    if (!ad->isVanilla()) ad = BespokeArray::ToVanilla(ad, "internal iterator");
-    return ad->cowCheck() ? ad->copy() : ad;
-  }();
-  if (ad != orig) refParam = Variant::attach(ad);
-  return (ad->*op)();
-}
-
-}
-
-Variant HHVM_FUNCTION(current,
-                      const Variant& refParam) {
-  return iter_op_impl<NoCow>(
-    // NoCow version never actually modifies refParam but
-    // yet still requires non-const reference
-    const_cast<Variant&>(refParam),
-    &ArrayData::current,
-    false,
-    "current"
-  );
-}
-
-Variant HHVM_FUNCTION(key,
-                      const Variant& refParam) {
-  return iter_op_impl<NoCow>(
-    // NoCow version never actually modifies refParam but
-    // yet still requires non-const reference
-    const_cast<Variant&>(refParam),
-    &ArrayData::key,
-    false,
-    "key"
-  );
-}
-
-Variant HHVM_FUNCTION(reset,
-                      Variant& refParam) {
-  return iter_op_impl(
-    refParam,
-    &ArrayData::reset,
-    false,
-    "reset",
-    &ArrayData::isHead
-  );
-}
-
-Variant HHVM_FUNCTION(end,
-                      Variant& refParam) {
-  return iter_op_impl(
-    refParam,
-    &ArrayData::end,
-    false,
-    "end",
-    &ArrayData::isTail
-  );
 }
 
 bool HHVM_FUNCTION(in_array,
@@ -3403,10 +3320,6 @@ struct ArrayExtension final : Extension {
     HHVM_FE(shuffle);
     HHVM_FE(count);
     HHVM_FE(sizeof);
-    HHVM_FE(current);
-    HHVM_FE(reset);
-    HHVM_FE(end);
-    HHVM_FE(key);
     HHVM_FE(in_array);
     HHVM_FE(range);
     HHVM_FE(array_diff);

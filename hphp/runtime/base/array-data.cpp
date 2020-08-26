@@ -879,38 +879,6 @@ bool ArrayData::same(const ArrayData* v2) const {
   return SetArray::Same(this, v2);
 }
 
-Variant ArrayData::reset() {
-  setPosition(iter_begin());
-  auto const cur_pos = getPosition();
-  return cur_pos != iter_end() ? getValue(cur_pos) : Variant(false);
-}
-
-Variant ArrayData::end() {
-  setPosition(iter_last());
-  auto const cur_pos = getPosition();
-  return cur_pos != iter_end() ? getValue(cur_pos) : Variant(false);
-}
-
-Variant ArrayData::key() const {
-  auto const cur_pos = getPosition();
-  if (RO::EvalHackArrCompatNotices && cur_pos != iter_begin()) {
-    raise_hackarr_compat_notice("key() called for position != begin");
-  }
-  return cur_pos != iter_end() ? getKey(cur_pos) : uninit_null();
-}
-
-Variant ArrayData::current() const {
-  auto const cur_pos = getPosition();
-  if (RO::EvalHackArrCompatNotices && cur_pos != iter_begin()) {
-    raise_hackarr_compat_notice("current() called for position != begin");
-  }
-  return cur_pos != iter_end() ? getValue(cur_pos) : Variant(false);
-}
-
-const StaticString
-  s_value("value"),
-  s_key("key");
-
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 

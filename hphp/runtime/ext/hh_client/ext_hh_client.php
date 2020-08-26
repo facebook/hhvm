@@ -101,8 +101,7 @@ function typecheck_impl(string $input_client_name): TypecheckResult {
   } else {
     $errors = \hphp_array_idx($json, 'errors', null);
     if ($errors) {
-      $first_msg = \reset(inout $errors)['message'];
-      $first_msg = \reset(inout $first_msg);
+      $first_msg = $errors[0]['message'][0];
       $error_text = \sprintf(
         'Hack type error: %s at %s line %d',
         $first_msg['descr'],

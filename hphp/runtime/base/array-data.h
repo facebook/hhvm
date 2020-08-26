@@ -476,25 +476,6 @@ public:
   ssize_t iter_rewind(ssize_t prev) const;
 
   /*
-   * Get the value or key currently referenced by the arrays' internal cursor.
-   *
-   * If the cursor is invalid, return:
-   *  - current(): false
-   *  - key(): uninit null
-   */
-  Variant current() const;
-  Variant key() const;
-
-  /*
-   * Reset the array's internal cursor to the first or last element and return
-   * its value.
-   *
-   * Return false if the array is empty.
-   */
-  Variant reset();
-  Variant end();
-
-  /*
    * Like getValue(), except if `pos' is specifically the canonical invalid
    * position (i.e., iter_end()), return false.
    */

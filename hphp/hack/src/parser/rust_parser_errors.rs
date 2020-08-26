@@ -966,12 +966,6 @@ where
         is_abstract && has_private
     }
 
-    fn methodish_abstract_inside_interface(&self, node: &'a Syntax<Token, Value>) -> bool {
-        let is_abstract = Self::has_modifier_abstract(node);
-        let is_in_interface = self.methodish_inside_interface();
-        is_abstract && is_in_interface
-    }
-
     fn using_statement_function_scoped_is_legal(&self) -> bool {
         // using is allowed in the toplevel, and also in toplevel async blocks
         let len = self.parents.len();
@@ -1890,7 +1884,7 @@ where
 
                 if self.is_inside_interface() {
                     self.invalid_modifier_errors("Interface methods", node, |kind| {
-                        kind != TokenKind::Final
+                        kind != TokenKind::Final && kind != TokenKind::Abstract
                     });
                 };
 
@@ -1951,12 +1945,6 @@ where
                     );
                 }
 
-                self.produce_error(
-                    |self_, x| self_.methodish_abstract_inside_interface(x),
-                    node,
-                    || errors::error2045,
-                    modifiers,
-                );
                 self.methodish_memoize_lsb_on_non_static(node);
                 let async_annotation =
                     Self::extract_keyword(|x| x.is_async(), node).unwrap_or(node);

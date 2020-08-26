@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/config.h"
@@ -2875,6 +2876,7 @@ void hphp_process_exit() noexcept {
   LOG_AND_IGNORE(Xenon::getInstance().stop())
   LOG_AND_IGNORE(jit::mcgen::joinWorkerThreads())
   LOG_AND_IGNORE(jit::tc::processExit())
+  LOG_AND_IGNORE(bespoke::stopExportProfiles())
   LOG_AND_IGNORE(PageletServer::Stop())
   LOG_AND_IGNORE(XboxServer::Stop())
   // Debugger::Stop() needs an execution context

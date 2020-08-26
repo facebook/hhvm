@@ -39,6 +39,8 @@ struct Layout;
 ArrayData* maybeMakeLoggingArray(ArrayData*);
 const ArrayData* maybeMakeLoggingArray(const ArrayData*);
 void setLoggingEnabled(bool);
+void exportProfiles();
+void stopExportProfiles();
 }
 
 /*

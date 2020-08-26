@@ -689,7 +689,10 @@ void checkRetranslateAll(bool force) {
     return;
   }
 
-  if (!shouldTestBespokeArrayLikes()) bespoke::setLoggingEnabled(false);
+  if (!shouldTestBespokeArrayLikes()) {
+    bespoke::setLoggingEnabled(false);
+    Treadmill::enqueue([] { bespoke::exportProfiles(); });
+  }
 
   if (!force && RuntimeOption::ServerExecutionMode()) {
     // We schedule a one-time call to retranslateAll() via the treadmill.  We

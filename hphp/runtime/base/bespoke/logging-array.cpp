@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/server/memory-stats.h"
@@ -30,6 +31,7 @@
 #include <folly/String.h>
 #include <tbb/concurrent_hash_map.h>
 
+#include <algorithm>
 #include <atomic>
 #include <sstream>
 
@@ -107,10 +109,12 @@ std::string assembleKey(const std::string& opBase) {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct LoggingProfile {
+  using EventMapKey = std::pair<SrcKey, std::string>;
   using EventMapHasher = pairHashCompare<
     SrcKey, std::string, SrcKey::TbbHashCompare, stringHashCompare>;
-  using EventMap = tbb::concurrent_hash_map<std::pair<SrcKey, std::string>,
-                                            uint64_t, EventMapHasher>;
+  // Values in the event map are sampled counts
+  using EventMap = tbb::concurrent_hash_map<EventMapKey, uint64_t,
+                                            EventMapHasher>;
 
   explicit LoggingProfile(SrcKey key)
     : srckey(key)
@@ -133,6 +137,13 @@ struct LoggingProfile {
     FTRACE(6, "{} -> {}: {} [count={}]\n", srckey.getSymbol(),
            (usageSk.valid() ? usageSk.getSymbol() : "<unknown>"), key,
            it->second);
+  }
+
+  uint64_t sampledOpCount() {
+    uint64_t total = 0;
+    for (auto const &event : profileEvents) total += event.second;
+
+    return total;
   }
 };
 
@@ -563,5 +574,131 @@ void LoggingLayout::setLegacyArrayInPlace(ArrayData* ad, bool legacy) const {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+namespace {
+std::atomic<bool> s_exportStarted = false;
+std::thread s_exportProfilesThread;
+
+using EventData = std::pair<LoggingProfile::EventMapKey, uint64_t>;
+using SrcKeyData = std::pair<SrcKey, std::vector<EventData>>;
+
+void exportSortedProfiles(FILE* file,
+                          const std::vector<SrcKeyData>& sourceVec) {
+  for (auto const& sourceProfile : sourceVec) {
+    auto const sourceSk = sourceProfile.first;
+
+    if (RO::EvalExportLoggingArrayDataToFile) {
+      auto const logEntry = folly::sformat("{}:\n", sourceSk.getSymbol());
+      if (fwrite(logEntry.data(), 1, logEntry.length(), file)
+          != logEntry.length()) {
+        return;
+      }
+    }
+
+    for (auto const& entry : sourceProfile.second) {
+      auto const sinkSk = entry.first.first;
+      auto const event = entry.first.second;
+      auto const count = entry.second;
+
+      if (RO::EvalExportLoggingArrayDataToFile) {
+        auto const logEntry =
+          folly::sformat("  {: >9}x {} at {}\n", count, event,
+                         sinkSk.valid() ? sinkSk.getSymbol()
+                                        : "<invalid SrcKey>");
+
+        if (fwrite(logEntry.data(), 1, logEntry.length(), file)
+            != logEntry.length()) {
+          return;
+        }
+      }
+
+      if (RO::EvalExportLoggingArrayDataToStructuredLog) {
+        StructuredLogEntry sle;
+        sle.setStr("source", sourceSk.getSymbol());
+        sle.setStr("sink", sinkSk.valid() ? sinkSk.getSymbol()
+                                          : "<invalid SrcKey>");
+        sle.setStr("event", event);
+        sle.setInt("count", count);
+
+        StructuredLog::log("hhvm_classypgo_array_logs_test", sle);
+      }
+    }
+  }
+}
+
+std::vector<SrcKeyData> sortProfileData() {
+  using OriginalSrcKeyData = std::pair<SrcKey, LoggingProfile*>;
+  std::vector<OriginalSrcKeyData>
+    presortVec(s_profileMap.begin(), s_profileMap.end());
+
+  std::sort(
+    presortVec.begin(),
+    presortVec.end(),
+    [&](OriginalSrcKeyData a, OriginalSrcKeyData b) {
+      return a.second->sampledOpCount() > b.second->sampledOpCount();
+    }
+  );
+
+  std::vector<SrcKeyData> sourceVec;
+  sourceVec.reserve(s_profileMap.size());
+
+  std::transform(
+    presortVec.begin(), presortVec.end(), std::back_inserter(sourceVec),
+    [](OriginalSrcKeyData srcKeyProfile) {
+      std::vector<EventData> events(srcKeyProfile.second->profileEvents.begin(),
+                                    srcKeyProfile.second->profileEvents.end());
+
+      std::sort(
+        events.begin(),
+        events.end(),
+        [&](EventData a, EventData b) {
+          return a.second > b.second;
+        }
+      );
+
+      return std::make_pair(srcKeyProfile.first, events);
+    }
+  );
+
+  return sourceVec;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+}
+//////////////////////////////////////////////////////////////////////////////
+
+void exportProfiles() {
+  if (!RO::EvalExportLoggingArrayDataToStructuredLog
+      && !RO::EvalExportLoggingArrayDataToFile) {
+    return;
+  }
+
+  s_exportStarted.store(true, std::memory_order_relaxed);
+  s_exportProfilesThread = std::thread([] {
+    hphp_thread_init();
+
+    auto const sourceVec = sortProfileData();
+
+    if (RO::EvalExportLoggingArrayDataToFile) {
+      auto const filename = folly::to<std::string>(
+        RO::EvalExportLoggingArrayDataPath,
+        "/log_array_dump"
+      );
+      auto const file = fopen(filename.c_str(), "w");
+      if (file == nullptr) return;
+      SCOPE_EXIT { fclose(file); };
+
+      exportSortedProfiles(file, sourceVec);
+    } else {
+      exportSortedProfiles(nullptr, sourceVec);
+    }
+  });
+}
+
+void stopExportProfiles() {
+  if (s_exportStarted.load(std::memory_order_relaxed)) {
+    s_exportProfilesThread.join();
+  }
+}
 
 }}

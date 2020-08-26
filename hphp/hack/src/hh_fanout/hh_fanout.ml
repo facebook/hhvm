@@ -208,7 +208,7 @@ let advance_cursor
       {
         Incremental.client_id = env.client_id;
         dep_table_saved_state_path = saved_state_result.dep_table_path;
-        errors_saved_state_path = saved_state_result.errors_path;
+        dep_table_errors_saved_state_path = saved_state_result.errors_path;
         naming_table_saved_state_path =
           Naming_sqlite.Db_path
             (Path.to_string saved_state_result.naming_table_path);

@@ -19,7 +19,7 @@ type dep_graph_delta = (Typing_deps.Dep.t * Typing_deps.Dep.t) HashSet.t
 type client_config = {
   client_id: string;
   dep_table_saved_state_path: Path.t;
-  errors_saved_state_path: Path.t;
+  dep_table_errors_saved_state_path: Path.t;
   naming_table_saved_state_path: Naming_sqlite.db_path;
 }
 

@@ -18,7 +18,7 @@ type dep_graph_delta = (Typing_deps.Dep.t * Typing_deps.Dep.t) HashSet.t
 type client_config = {
   client_id: string;
   dep_table_saved_state_path: Path.t;
-  errors_saved_state_path: Path.t;
+  dep_table_errors_saved_state_path: Path.t;
   naming_table_saved_state_path: Naming_sqlite.db_path;
 }
 
@@ -34,11 +34,7 @@ type typecheck_result = {
 }
 
 type cursor_state =
-  | Saved_state of {
-      dep_table_saved_state_path: Path.t;
-      dep_table_errors_saved_state_path: Path.t;
-      naming_table_saved_state_path: Naming_sqlite.db_path;
-    }
+  | Saved_state of client_config
   | Saved_state_delta of {
       previous: cursor_state;  (** The cursor before this one. *)
       changed_files: Naming_sqlite.file_deltas;
@@ -353,19 +349,7 @@ class state ~state_path ~persistent_state =
         =
       match Hashtbl.find persistent_state.clients client_id with
       | Some client_config ->
-        Ok
-          (new cursor
-             ~client_id
-             ~cursor_state:
-               (Saved_state
-                  {
-                    dep_table_saved_state_path =
-                      client_config.dep_table_saved_state_path;
-                    dep_table_errors_saved_state_path =
-                      client_config.errors_saved_state_path;
-                    naming_table_saved_state_path =
-                      client_config.naming_table_saved_state_path;
-                  }))
+        Ok (new cursor ~client_id ~cursor_state:(Saved_state client_config))
       | None ->
         let (Client_id client_id) = client_id in
         Error (Printf.sprintf "Client ID %s could not be found" client_id)

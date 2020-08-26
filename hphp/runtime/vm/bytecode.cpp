@@ -1807,19 +1807,23 @@ ArrayData* resolveAndVerifyTypeStructureHelper(
                                       calledCls, suppress, isOrAsOp);
 }
 
-ALWAYS_INLINE ArrayData* maybeResolveAndErrorOnTypeStructure(
+ALWAYS_INLINE Array maybeResolveAndErrorOnTypeStructure(
   TypeStructResolveOp op,
   bool suppress
 ) {
   auto const a = vmStack().topC();
   isValidTSType(*a, true);
+  auto const arr = a->m_data.parr;
 
   if (op == TypeStructResolveOp::Resolve) {
-    return resolveAndVerifyTypeStructureHelper(1, vmStack().topC(),
-                                               suppress, true);
+    auto const result = resolveAndVerifyTypeStructureHelper(1, vmStack().topC(),
+                                                            suppress, true);
+    if (arr == result) return ArrNR(arr);
+    return Array::attach(result);
+
   }
-  errorOnIsAsExpressionInvalidTypes(ArrNR(a->m_data.parr), false);
-  return a->m_data.parr;
+  errorOnIsAsExpressionInvalidTypes(ArrNR(arr), false);
+  return ArrNR(arr);
 }
 
 } // namespace
@@ -1827,8 +1831,8 @@ ALWAYS_INLINE ArrayData* maybeResolveAndErrorOnTypeStructure(
 OPTBLD_INLINE void iopIsTypeStructC(TypeStructResolveOp op) {
   auto const c = vmStack().indC(1);
   auto const ts = maybeResolveAndErrorOnTypeStructure(op, true);
-  auto b = checkTypeStructureMatchesTV(ArrNR(ts), *c);
-  vmStack().popC(); // pop ts
+  auto b = checkTypeStructureMatchesTV(ts, *c);
+  vmStack().popC(); // pop c
   vmStack().replaceC<KindOfBoolean>(b);
 }
 
@@ -1837,9 +1841,9 @@ OPTBLD_INLINE void iopThrowAsTypeStructException() {
   auto const ts =
     maybeResolveAndErrorOnTypeStructure(TypeStructResolveOp::Resolve, false);
   std::string givenType, expectedType, errorKey;
-  if (!checkTypeStructureMatchesTV(ArrNR(ts), *c, givenType, expectedType,
-                                     errorKey)) {
-    vmStack().popC(); // pop ts
+  if (!checkTypeStructureMatchesTV(ts, *c,
+                                   givenType, expectedType, errorKey)) {
+    vmStack().popC(); // pop c
     throwTypeStructureDoesNotMatchTVException(
       givenType, expectedType, errorKey);
   }

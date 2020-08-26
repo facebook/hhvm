@@ -459,7 +459,9 @@ let add_fresh_generic_parameter_by_kind env prefix kind =
   in
   let name = iterate 1 in
   let env = { env with fresh_typarams = SSet.add name env.fresh_typarams } in
-  let env = env_with_tpenv env (TPEnv.add name kind (get_tpenv env)) in
+  let env =
+    env_with_tpenv env (TPEnv.add ~def_pos:Pos.none name kind (get_tpenv env))
+  in
   (env, name)
 
 let add_fresh_generic_parameter env prefix ~reified ~enforceable ~newable =

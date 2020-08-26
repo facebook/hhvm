@@ -189,13 +189,18 @@ let adjust ?(prefix = "weak") ~pos ~adjustment renv env ty =
     | Aweaken -> Astrengthen
   in
   let freshen_policy adjustment acc policy =
-    let new_policy = Env.new_policy_var renv.re_proto prefix in
-    let prop =
-      match adjustment with
-      | Astrengthen -> L.(new_policy < policy) ~pos
-      | Aweaken -> L.(policy < new_policy) ~pos
-    in
-    (prop acc, new_policy)
+    match (adjustment, policy) with
+    | (Astrengthen, Pbot _)
+    | (Aweaken, Ptop _) ->
+      (acc, policy)
+    | (Astrengthen, _) ->
+      let new_policy = Env.new_policy_var renv.re_proto prefix in
+      let prop = L.(new_policy < policy) ~pos in
+      (prop acc, new_policy)
+    | (Aweaken, _) ->
+      let new_policy = Env.new_policy_var renv.re_proto prefix in
+      let prop = L.(policy < new_policy) ~pos in
+      (prop acc, new_policy)
   in
   let rec freshen adjustment acc ty =
     let freshen_cov = freshen adjustment in

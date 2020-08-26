@@ -4,15 +4,10 @@ function test($arr) {
   echo "\n\n----------------------------------------\n";
   var_dump($arr);
   echo "*** without legacy bit ***\n";
-  echo serialize($arr) . "\n";
+  echo var_export($arr, true) . "\n";
   echo "*** with legacy bit ***\n";
   $arr = HH\array_mark_legacy($arr);
-  echo serialize($arr) . "\n";
-  echo HH\serialize_with_options($arr, dict['keepDVArrays' => true]) . "\n";
-  echo "*** after a CoW ***\n";
-  $arr[] = "blarghghg!";
-  echo serialize($arr) . "\n";
-  echo HH\serialize_with_options($arr, dict['keepDVArrays' => true]) . "\n";
+  echo var_export($arr, true) . "\n";
 }
 
 <<__EntryPoint>>
@@ -22,9 +17,10 @@ function main() {
     vec[],
     dict[],
     vec[1, 2, 3],
+    dict[0 => 1, 1 => 2, 2 => 3],
     dict["hello" => 42, "baz" => 100],
     dict[1000 => "no", "potato" => vec[]],
-  ];
+    ];
 
   foreach ($arrays as $arr) {
     test($arr);

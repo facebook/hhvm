@@ -125,5 +125,5 @@ function round_trip_tests() {
 function main_serialize() {
 serialize_tests();
 unserialize_tests();
-# round_trip_tests();
+round_trip_tests();
 }

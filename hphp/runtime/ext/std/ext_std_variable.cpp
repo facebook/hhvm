@@ -496,10 +496,13 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
       ArrayData* arr = value.getArrayData();
       assertx(arr->isVecType());
       if (arr->empty() && LIKELY(!opts.serializeProvenanceAndLegacy)) {
-        return UNLIKELY(RuntimeOption::EvalHackArrDVArrs &&
-                        !arr->isLegacyArray())
-          ? s_EmptyArray
-          : empty_hack(arr, s_EmptyVec);
+        if (UNLIKELY(RuntimeOption::EvalHackArrDVArrs &&
+                     arr->isLegacyArray())) {
+          return opts.keepDVArrays && !opts.forcePHPArrays
+            ? s_EmptyVArray
+            : s_EmptyArray;
+        }
+        return empty_hack(arr, s_EmptyVec);
       }
       break;
     }
@@ -509,10 +512,13 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
       ArrayData* arr = value.getArrayData();
       assertx(arr->isDictType());
       if (arr->empty() && LIKELY(!opts.serializeProvenanceAndLegacy)) {
-        return UNLIKELY(RuntimeOption::EvalHackArrDVArrs &&
-                        !arr->isLegacyArray())
-          ? s_EmptyArray
-          : empty_hack(arr, s_EmptyDictArray);
+        if (UNLIKELY(RuntimeOption::EvalHackArrDVArrs &&
+                     arr->isLegacyArray())) {
+          return opts.keepDVArrays && !opts.forcePHPArrays
+            ? s_EmptyDArray
+            : s_EmptyArray;
+        }
+        return empty_hack(arr, s_EmptyDictArray);
       }
       break;
     }

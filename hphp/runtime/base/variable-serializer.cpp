@@ -99,12 +99,12 @@ VariableSerializer::getKind(const ArrayData* arr) const {
   auto const respectsLegacyBit = [&] {
     switch (getType()) {
     case Type::PrintR:
+    case Type::VarDump:
     case Type::VarExport:
     case Type::Serialize:
     case Type::JSON:
       return true;
     case Type::Internal:
-    case Type::VarDump:
     case Type::DebugDump:
     case Type::DebuggerDump:
     case Type::PHPOutput:
@@ -115,18 +115,10 @@ VariableSerializer::getKind(const ArrayData* arr) const {
     always_assert(false);
   }();
 
-  auto const differentiateLegacy =
-    getType() == Type::Internal || getType() == Type::VarDump ||
+  auto const serializesLegacyBit = getType() == Type::Internal ||
     (getType() == Type::Serialize && m_serializeProvenanceAndLegacy);
 
-  // TODO(dneiter): this is broken, fix this
-  if (RuntimeOption::EvalHackArrDVArrs &&
-      respectsLegacyBit && !differentiateLegacy &&
-      !arr->isLegacyArray()) {
-    return VariableSerializer::ArrayKind::PHP;
-  }
-
-  if (differentiateLegacy && arr->isLegacyArray()) {
+  if (serializesLegacyBit && arr->isLegacyArray()) {
     assertx(!arr->isKeysetType());
     if (m_keepDVArrays) {
       if (arr->isDictType() || arr->isDArray()) {
@@ -137,6 +129,17 @@ VariableSerializer::getKind(const ArrayData* arr) const {
       }
     }
     return VariableSerializer::ArrayKind::MarkedDArray;
+  }
+
+  if (RuntimeOption::EvalHackArrDVArrs &&
+      respectsLegacyBit &&
+      arr->isLegacyArray()) {
+    assertx(!arr->isKeysetType());
+    if (m_keepDVArrays) {
+      if (arr->isVecType()) return VariableSerializer::ArrayKind::VArray;
+      if (arr->isDictType()) return VariableSerializer::ArrayKind::DArray;
+    }
+    return VariableSerializer::ArrayKind::PHP;
   }
 
   if (arr->isDictType()) return VariableSerializer::ArrayKind::Dict;

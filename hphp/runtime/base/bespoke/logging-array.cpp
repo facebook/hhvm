@@ -394,11 +394,9 @@ TypedValue LoggingLayout::getStr(const ArrayData* ad, const StringData* k) const
   return LoggingArray::asLogging(ad)->wrapped->get(k);
 }
 TypedValue LoggingLayout::getKey(const ArrayData* ad, ssize_t pos) const {
-  LOG_EVENT1(ad, pos);
   return LoggingArray::asLogging(ad)->wrapped->nvGetKey(pos);
 }
 TypedValue LoggingLayout::getVal(const ArrayData* ad, ssize_t pos) const {
-  LOG_EVENT1(ad, pos);
   return LoggingArray::asLogging(ad)->wrapped->nvGetVal(pos);
 }
 ssize_t LoggingLayout::getIntPos(const ArrayData* ad, int64_t k) const {
@@ -471,11 +469,11 @@ ssize_t LoggingLayout::iterEnd(const ArrayData* ad) const {
   return LoggingArray::asLogging(ad)->wrapped->iter_end();
 }
 ssize_t LoggingLayout::iterAdvance(const ArrayData* ad, ssize_t prev) const {
-  LOG_EVENT1(ad, prev);
+  LOG_EVENT0(ad);
   return LoggingArray::asLogging(ad)->wrapped->iter_advance(prev);
 }
 ssize_t LoggingLayout::iterRewind(const ArrayData* ad, ssize_t prev) const {
-  LOG_EVENT1(ad, prev);
+  LOG_EVENT0(ad);
   return LoggingArray::asLogging(ad)->wrapped->iter_rewind(prev);
 }
 

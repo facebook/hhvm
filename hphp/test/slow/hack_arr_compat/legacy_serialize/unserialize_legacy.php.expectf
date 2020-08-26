@@ -10,6 +10,14 @@ varray(0) {
 true
 darray(0) {
 }
+=== x:0:{} ===
+true
+varray(0) {
+}
+=== X:0:{} ===
+true
+darray(0) {
+}
 === v:0:{} ===
 false
 vec(0) {

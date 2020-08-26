@@ -17,6 +17,8 @@ function main(): void {
   test_case('a:0:{}');
   test_case('y:0:{}');
   test_case('Y:0:{}');
+  test_case('x:0:{}');
+  test_case('X:0:{}');
   // these should not
   test_case('v:0:{}');
   test_case('D:0:{}');

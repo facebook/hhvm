@@ -66,7 +66,6 @@ const int64_t k_JSON_FB_WARN_VEC_LIKE_DARRAYS = 1ll << 31;
 const int64_t k_JSON_FB_WARN_DICT_LIKE_DARRAYS = 1ll << 32;
 const int64_t k_JSON_FB_IGNORE_LATEINIT = 1ll << 33;
 const int64_t k_JSON_FB_THRIFT_SIMPLE_JSON = 1ll << 34;
-const int64_t k_JSON_FB_LEGACY_HACK_ARRAYS = 1ll << 35;
 const int64_t k_JSON_FB_WARN_KEYSETS       = 1ll << 36;
 
 const int64_t k_JSON_ERROR_NONE
@@ -191,8 +190,7 @@ TypedValue HHVM_FUNCTION(json_decode, const String& json,
     k_JSON_FB_HACK_ARRAYS |
     k_JSON_FB_DARRAYS |
     k_JSON_FB_DARRAYS_AND_VARRAYS |
-    k_JSON_FB_THRIFT_SIMPLE_JSON |
-    k_JSON_FB_LEGACY_HACK_ARRAYS;
+    k_JSON_FB_THRIFT_SIMPLE_JSON;
   int64_t parser_options = options & supported_options;
   Variant z;
   const auto ok =
@@ -332,7 +330,6 @@ struct JsonExtension final : Extension {
                 k_JSON_FB_WARN_DICT_LIKE_DARRAYS);
     HHVM_RC_INT(JSON_FB_IGNORE_LATEINIT, k_JSON_FB_IGNORE_LATEINIT);
     HHVM_RC_INT(JSON_FB_THRIFT_SIMPLE_JSON, k_JSON_FB_THRIFT_SIMPLE_JSON);
-    HHVM_RC_INT(JSON_FB_LEGACY_HACK_ARRAYS, k_JSON_FB_LEGACY_HACK_ARRAYS);
     HHVM_RC_INT(JSON_FB_WARN_KEYSETS, k_JSON_FB_WARN_KEYSETS);
 
     HHVM_RC_INT(JSON_ERROR_NONE, k_JSON_ERROR_NONE);

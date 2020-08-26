@@ -57,7 +57,6 @@ extern const int64_t k_JSON_FB_STABLE_MAPS;
 extern const int64_t k_JSON_BIGINT_AS_STRING;
 extern const int64_t k_JSON_FB_DARRAYS_AND_VARRAYS;
 extern const int64_t k_JSON_FB_THRIFT_SIMPLE_JSON;
-extern const int64_t k_JSON_FB_LEGACY_HACK_ARRAYS;
 
 extern const int64_t k_JSON_ERROR_NONE;
 extern const int64_t k_JSON_ERROR_DEPTH;

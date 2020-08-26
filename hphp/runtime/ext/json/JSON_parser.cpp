@@ -514,7 +514,6 @@ struct SimpleParser {
     auto const slice = folly::StringPiece(start, len);
     start[len] = '\0';
     if (container_type != JSONContainerType::HACK_ARRAYS &&
-        container_type != JSONContainerType::LEGACY_HACK_ARRAYS &&
         is_strictly_integer(start, len, num)) {
       pushInt64(num);
     } else if (auto const str = lookupStaticString(slice)) {
@@ -542,13 +541,6 @@ struct SimpleParser {
         return top == fp
           ? ArrayData::CreateVec()
           : PackedArray::MakeVecNatural(top - fp, fp);
-      }
-      if (container_type == JSONContainerType::LEGACY_HACK_ARRAYS) {
-        auto ret = top == fp
-          ? staticEmptyVec()->copy()
-          : PackedArray::MakeVecNatural(top - fp, fp);
-        ret->setLegacyArray(true);
-        return ret;
       }
       if (container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
         return top == fp
@@ -585,13 +577,6 @@ struct SimpleParser {
         return top == fp
           ? ArrayData::CreateDict()
           : MixedArray::MakeDict((top - fp) >> 1, fp)->asArrayData();
-      }
-      if (container_type == JSONContainerType::LEGACY_HACK_ARRAYS) {
-        auto ret = top == fp
-          ? staticEmptyDictArray()->copy()
-          : MixedArray::MakeDict((top - fp) >> 1, fp)->asArrayData();
-        ret->setLegacyArray(true);
-        return ret;
       }
       assertx(container_type == JSONContainerType::DARRAYS ||
               container_type == JSONContainerType::DARRAYS_AND_VARRAYS);
@@ -1044,8 +1029,7 @@ static void object_set(const json_parser* json,
     if (container_type == JSONContainerType::COLLECTIONS) {
       auto keyTV = make_tv<KindOfString>(key.get());
       collections::set(var.getObjectData(), &keyTV, value.asTypedValue());
-    } else if (container_type == JSONContainerType::HACK_ARRAYS ||
-               container_type == JSONContainerType::LEGACY_HACK_ARRAYS) {
+    } else if (container_type == JSONContainerType::HACK_ARRAYS) {
       forceToDict(var).set(key, value);
     } else {
       int64_t i;
@@ -1101,10 +1085,6 @@ JSONContainerType get_container_type_from_options(int64_t options) {
 
   if (options & k_JSON_FB_DARRAYS_AND_VARRAYS) {
     return JSONContainerType::DARRAYS_AND_VARRAYS;
-  }
-
-  if (options & k_JSON_FB_LEGACY_HACK_ARRAYS) {
-    return JSONContainerType::LEGACY_HACK_ARRAYS;
   }
 
   return JSONContainerType::DARRAYS;
@@ -1167,8 +1147,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
                              k_JSON_FB_DARRAYS |
                              k_JSON_FB_DARRAYS_AND_VARRAYS |
                              k_JSON_FB_HACK_ARRAYS |
-                             k_JSON_FB_THRIFT_SIMPLE_JSON |
-                             k_JSON_FB_LEGACY_HACK_ARRAYS)) &&
+                             k_JSON_FB_THRIFT_SIMPLE_JSON)) &&
       depth >= SimpleParser::kMaxArrayDepth &&
       length <= RuntimeOption::EvalSimpleJsonMaxLength &&
       SimpleParser::TryParse(p, length, json->tl_buffer.tv, z,
@@ -1319,11 +1298,6 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             {
               top = Array::CreateDArray();
             /* </fb> */
-            } else if (
-              container_type == JSONContainerType::LEGACY_HACK_ARRAYS) {
-              auto arr = staticEmptyDictArray()->copy();
-              arr->setLegacyArray(true);
-              top = arr;
             } else {
               top = Array::CreateDArray();
             }
@@ -1399,10 +1373,6 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
             top = Array::CreateVArray();
           } else if (container_type == JSONContainerType::DARRAYS) {
             top = Array::CreateDArray();
-          } else if (container_type == JSONContainerType::LEGACY_HACK_ARRAYS) {
-            auto arr = staticEmptyVec()->copy();
-            arr->setLegacyArray(true);
-            top = arr;
           } else {
             top = Array::CreateDArray();
           }

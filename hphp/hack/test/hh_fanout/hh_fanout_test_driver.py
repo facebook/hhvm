@@ -326,7 +326,7 @@ def main() -> None:
 
                 assert (
                     saved_state_info is not None
-                ), f"Must call `generate-saved-state` before `calculate-errors` on line {i + 1}"
+                ), f"Must call `generate-saved-state` before `calculate-fanout` on line {i + 1}"
                 cursor = run_fanout_test(
                     env=env,
                     saved_state_info=saved_state_info,

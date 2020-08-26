@@ -1,28 +1,28 @@
 File "vec.php", line 14, characters 5-28:
 Data with policy `I` appears in context `V`. (Typing[4379])
 File "vec.php", line 5, characters 14-19:
-The data source with policy `I`
+This may be the data source with policy `I`
 File "vec.php", line 7, characters 19-28:
-The data sink with policy `V`
+This may be the data sink with policy `V`
 File "vec.php", line 20, characters 5-25:
 Data with policy `V` appears in context `I`. (Typing[4379])
 File "vec.php", line 7, characters 19-28:
-The data source with policy `V`
+This may be the data source with policy `V`
 File "vec.php", line 5, characters 14-19:
-The data sink with policy `I`
+This may be the data sink with policy `I`
 File "vec.php", line 18, characters 5-28:
 Another program point contributing to the illegal flow
 File "vec.php", line 10, characters 5-26:
 Data with policy `I` appears in context `V`. (Typing[4379])
 File "vec.php", line 5, characters 14-19:
-The data source with policy `I`
+This may be the data source with policy `I`
 File "vec.php", line 7, characters 19-28:
-The data sink with policy `V`
+This may be the data sink with policy `V`
 File "vec.php", line 38, characters 5-19:
 Data with policy `X` appears in context `VX`. (Typing[4379])
 File "vec.php", line 27, characters 16-17:
-The data source with policy `X`
+This may be the data source with policy `X`
 File "vec.php", line 31, characters 21-23:
-The data sink with policy `VX`
+This may be the data sink with policy `VX`
 File "vec.php", line 37, characters 5-20:
 Another program point contributing to the illegal flow

@@ -1,70 +1,70 @@
 File "multiple_sources.php", line 44, characters 5-26:
 Data with policy `B` appears in context `A`. (Typing[4379])
 File "multiple_sources.php", line 8, characters 16-18:
-The data source with policy `B`
+This may be the data source with policy `B`
 File "multiple_sources.php", line 6, characters 16-17:
-The data sink with policy `A`
+This may be the data sink with policy `A`
 File "multiple_sources.php", line 20, characters 5-41:
 Data with policy `B` appears in context `PUBLIC`. (Typing[4379])
 File "multiple_sources.php", line 8, characters 16-18:
-The data source with policy `B`
+This may be the data source with policy `B`
 File "multiple_sources.php", line 12, characters 16-22:
-The data sink with policy `PUBLIC`
+This may be the data sink with policy `PUBLIC`
 File "multiple_sources.php", line 20, characters 5-41:
 Data with policy `A` appears in context `PUBLIC`. (Typing[4379])
 File "multiple_sources.php", line 6, characters 16-17:
-The data source with policy `A`
+This may be the data source with policy `A`
 File "multiple_sources.php", line 12, characters 16-22:
-The data sink with policy `PUBLIC`
+This may be the data sink with policy `PUBLIC`
 File "multiple_sources.php", line 29, characters 5-30:
 Data with policy `B` appears in context `PUBLIC`. (Typing[4379])
 File "multiple_sources.php", line 8, characters 16-18:
-The data source with policy `B`
+This may be the data source with policy `B`
 File "multiple_sources.php", line 12, characters 16-22:
-The data sink with policy `PUBLIC`
+This may be the data sink with policy `PUBLIC`
 File "multiple_sources.php", line 28, characters 5-37:
 Another program point contributing to the illegal flow
 File "multiple_sources.php", line 29, characters 5-30:
 Data with policy `A` appears in context `PUBLIC`. (Typing[4379])
 File "multiple_sources.php", line 6, characters 16-17:
-The data source with policy `A`
+This may be the data source with policy `A`
 File "multiple_sources.php", line 12, characters 16-22:
-The data sink with policy `PUBLIC`
+This may be the data sink with policy `PUBLIC`
 File "multiple_sources.php", line 28, characters 5-37:
 Another program point contributing to the illegal flow
 File "multiple_sources.php", line 34, characters 5-42:
 Data with policy `B` appears in context `PUBLIC`. (Typing[4379])
 File "multiple_sources.php", line 8, characters 16-18:
-The data source with policy `B`
+This may be the data source with policy `B`
 File "multiple_sources.php", line 12, characters 16-22:
-The data sink with policy `PUBLIC`
+This may be the data sink with policy `PUBLIC`
 File "multiple_sources.php", line 34, characters 5-42:
 Data with policy `A` appears in context `PUBLIC`. (Typing[4379])
 File "multiple_sources.php", line 6, characters 16-17:
-The data source with policy `A`
+This may be the data source with policy `A`
 File "multiple_sources.php", line 12, characters 16-22:
-The data sink with policy `PUBLIC`
+This may be the data sink with policy `PUBLIC`
 File "multiple_sources.php", line 33, characters 5-25:
 Another program point contributing to the illegal flow
 File "multiple_sources.php", line 40, characters 5-42:
 Data with policy `B` appears in context `PUBLIC`. (Typing[4379])
 File "multiple_sources.php", line 8, characters 16-18:
-The data source with policy `B`
+This may be the data source with policy `B`
 File "multiple_sources.php", line 12, characters 16-22:
-The data sink with policy `PUBLIC`
+This may be the data sink with policy `PUBLIC`
 File "multiple_sources.php", line 39, characters 5-26:
 Another program point contributing to the illegal flow
 File "multiple_sources.php", line 40, characters 5-42:
 Data with policy `A` appears in context `PUBLIC`. (Typing[4379])
 File "multiple_sources.php", line 6, characters 16-17:
-The data source with policy `A`
+This may be the data source with policy `A`
 File "multiple_sources.php", line 12, characters 16-22:
-The data sink with policy `PUBLIC`
+This may be the data sink with policy `PUBLIC`
 File "multiple_sources.php", line 38, characters 5-25:
 Another program point contributing to the illegal flow
 File "multiple_sources.php", line 24, characters 5-42:
 Data with policy `B` appears in context `PUBLIC`. (Typing[4379])
 File "multiple_sources.php", line 8, characters 16-18:
-The data source with policy `B`
+This may be the data source with policy `B`
 File "multiple_sources.php", line 12, characters 16-22:
-The data sink with policy `PUBLIC`
+This may be the data sink with policy `PUBLIC`

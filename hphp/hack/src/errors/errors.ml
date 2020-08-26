@@ -5215,14 +5215,15 @@ let illegal_information_flow
   let source = md_codify source in
   let sink = md_codify sink in
   let reasons =
-    let sprintf = Printf.sprintf "Data with policy %s appears in context %s." in
-    let sprintf_source = Printf.sprintf "The data source with policy %s" in
-    let sprintf_sink = Printf.sprintf "The data sink with policy %s" in
+    let sprintf = Printf.sprintf in
+    let sprintf_main = sprintf "Data with policy %s appears in context %s." in
+    let sprintf_source = sprintf "This may be the data source with policy %s" in
+    let sprintf_sink = sprintf "This may be the data sink with policy %s" in
     let other_occurrences =
       let f p = (p, "Another program point contributing to the illegal flow") in
       List.map ~f secondaries
     in
-    [(primary, sprintf source sink)]
+    [(primary, sprintf_main source sink)]
     |> explain source_poss source sprintf_source
     |> explain sink_poss sink sprintf_sink
     |> List.append other_occurrences

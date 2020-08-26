@@ -1,9 +1,9 @@
 File "long_dataflow.php", line 39, characters 3-32:
 Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
 File "long_dataflow.php", line 8, characters 16-23:
-The data source with policy `PRIVATE`
+This may be the data source with policy `PRIVATE`
 File "long_dataflow.php", line 6, characters 16-22:
-The data sink with policy `PUBLIC`
+This may be the data sink with policy `PUBLIC`
 File "long_dataflow.php", line 32, characters 3-14:
 Another program point contributing to the illegal flow
 File "long_dataflow.php", line 30, characters 3-23:

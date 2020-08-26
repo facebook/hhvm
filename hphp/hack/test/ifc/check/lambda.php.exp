@@ -1,17 +1,17 @@
 File "lambda.php", line 62, characters 19-20:
 Data with policy `B` appears in context `A`. (Typing[4379])
 File "lambda.php", line 9, characters 14-19:
-The data source with policy `B`
+This may be the data source with policy `B`
 File "lambda.php", line 6, characters 14-19:
-The data sink with policy `A`
+This may be the data sink with policy `A`
 File "lambda.php", line 62, characters 3-29:
 Another program point contributing to the illegal flow
 File "lambda.php", line 67, characters 3-21:
 Data with policy `B` appears in context `A`. (Typing[4379])
 File "lambda.php", line 9, characters 14-19:
-The data source with policy `B`
+This may be the data source with policy `B`
 File "lambda.php", line 6, characters 14-19:
-The data sink with policy `A`
+This may be the data sink with policy `A`
 File "lambda.php", line 66, characters 3-18:
 Another program point contributing to the illegal flow
 File "lambda.php", line 66, characters 16-17:
@@ -19,9 +19,9 @@ Another program point contributing to the illegal flow
 File "lambda.php", line 57, characters 5-15:
 Data with policy `A` appears in context `B`. (Typing[4379])
 File "lambda.php", line 6, characters 14-19:
-The data source with policy `A`
+This may be the data source with policy `A`
 File "lambda.php", line 9, characters 14-19:
-The data sink with policy `B`
+This may be the data sink with policy `B`
 File "lambda.php", line 48, characters 3-72:
 Another program point contributing to the illegal flow
 File "lambda.php", line 50, characters 7-15:
@@ -31,9 +31,9 @@ Another program point contributing to the illegal flow
 File "lambda.php", line 44, characters 3-15:
 Data with policy `A` appears in context `B`. (Typing[4379])
 File "lambda.php", line 6, characters 14-19:
-The data source with policy `A`
+This may be the data source with policy `A`
 File "lambda.php", line 9, characters 14-19:
-The data sink with policy `B`
+This may be the data sink with policy `B`
 File "lambda.php", line 39, characters 7-15:
 Another program point contributing to the illegal flow
 File "lambda.php", line 42, characters 5-18:
@@ -41,9 +41,9 @@ Another program point contributing to the illegal flow
 File "lambda.php", line 44, characters 3-15:
 Data with policy `A` appears in context `B`. (Typing[4379])
 File "lambda.php", line 6, characters 14-19:
-The data source with policy `A`
+This may be the data source with policy `A`
 File "lambda.php", line 9, characters 14-19:
-The data sink with policy `B`
+This may be the data sink with policy `B`
 File "lambda.php", line 39, characters 7-15:
 Another program point contributing to the illegal flow
 File "lambda.php", line 40, characters 5-18:
@@ -51,9 +51,9 @@ Another program point contributing to the illegal flow
 File "lambda.php", line 24, characters 3-16:
 Data with policy `B` appears in context `A`. (Typing[4379])
 File "lambda.php", line 9, characters 14-19:
-The data source with policy `B`
+This may be the data source with policy `B`
 File "lambda.php", line 6, characters 14-19:
-The data sink with policy `A`
+This may be the data sink with policy `A`
 File "lambda.php", line 14, characters 3-13:
 Another program point contributing to the illegal flow
 File "lambda.php", line 13, characters 3-14:
@@ -65,9 +65,9 @@ Another program point contributing to the illegal flow
 File "lambda.php", line 35, characters 3-16:
 Data with policy `B` appears in context `A`. (Typing[4379])
 File "lambda.php", line 9, characters 14-19:
-The data source with policy `B`
+This may be the data source with policy `B`
 File "lambda.php", line 6, characters 14-19:
-The data sink with policy `A`
+This may be the data sink with policy `A`
 File "lambda.php", line 14, characters 3-13:
 Another program point contributing to the illegal flow
 File "lambda.php", line 13, characters 3-14:
@@ -81,9 +81,9 @@ Another program point contributing to the illegal flow
 File "lambda.php", line 35, characters 3-16:
 Data with policy `B` appears in context `A`. (Typing[4379])
 File "lambda.php", line 9, characters 14-19:
-The data source with policy `B`
+This may be the data source with policy `B`
 File "lambda.php", line 6, characters 14-19:
-The data sink with policy `A`
+This may be the data sink with policy `A`
 File "lambda.php", line 14, characters 3-13:
 Another program point contributing to the illegal flow
 File "lambda.php", line 13, characters 3-14:

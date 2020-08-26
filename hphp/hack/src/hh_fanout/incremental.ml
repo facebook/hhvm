@@ -17,6 +17,7 @@ type dep_graph_delta = (Typing_deps.Dep.t * Typing_deps.Dep.t) HashSet.t
 
 type client_config = {
   client_id: string;
+  ignore_hh_version: bool;
   dep_table_saved_state_path: Path.t;
   dep_table_errors_saved_state_path: Path.t;
   naming_table_saved_state_path: Naming_sqlite.db_path;
@@ -186,6 +187,23 @@ class cursor ~client_id ~cursor_state =
 
     method get_client_id : client_id = client_id
 
+    method get_client_config : client_config =
+      let rec helper = function
+        | Saved_state client_config -> client_config
+        | Saved_state_delta { previous; _ }
+        | Typecheck_result { previous; _ } ->
+          helper previous
+      in
+      helper cursor_state
+
+    method private load_dep_table : unit =
+      let { dep_table_saved_state_path; ignore_hh_version; _ } =
+        self#get_client_config
+      in
+      SharedMem.load_dep_table_sqlite
+        (Path.to_string dep_table_saved_state_path)
+        ignore_hh_version
+
     method private find_cursors_since_last_typecheck : cursor_state list =
       let rec helper cursor_state =
         match cursor_state with
@@ -263,6 +281,7 @@ class cursor ~client_id ~cursor_state =
       let new_naming_table =
         Naming_table.update_from_deltas old_naming_table changed_files
       in
+      let () = self#load_dep_table in
       let fanout_result =
         Calculate_fanout.go
           ~detail_level

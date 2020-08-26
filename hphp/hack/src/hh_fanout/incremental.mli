@@ -18,6 +18,7 @@ type dep_graph_delta = (Typing_deps.Dep.t * Typing_deps.Dep.t) HashSet.t
 (** Any options which would affect the results of the returned fanouts. *)
 type client_config = {
   client_id: string;
+  ignore_hh_version: bool;
   dep_table_saved_state_path: Path.t;
   dep_table_errors_saved_state_path: Path.t;
   naming_table_saved_state_path: Naming_sqlite.db_path;
@@ -45,6 +46,12 @@ class type cursor =
 
     (** Get the client ID that owns this cursor. *)
     method get_client_id : client_id
+
+    (** Get the client configuration associated with this cursor.
+
+    In particular, this contains information about the saved-state that this
+    cursor was initialized with. *)
+    method get_client_config : client_config
 
     (** Process the provided set of changed files and advance the cursor.
 

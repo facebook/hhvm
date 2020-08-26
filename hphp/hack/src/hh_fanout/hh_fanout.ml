@@ -35,6 +35,10 @@ type saved_state_result = {
   saved_state_changed_files: Relative_path.Set.t;
 }
 
+type previous_cursor =
+  | Previous_cursor_from_saved_state of saved_state_result
+  | Previous_cursor_id of string
+
 let set_up_global_environment (env : env) : setup_result =
   let server_args =
     ServerArgs.default_options_with_check_mode ~root:(Path.to_string env.root)
@@ -141,9 +145,6 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
         FindUtils.file_filter (Relative_path.to_absolute path))
   in
 
-  SharedMem.load_dep_table_sqlite
-    (Path.to_string dep_table_path)
-    env.ignore_hh_version;
   let naming_table =
     Naming_table.load_from_sqlite
       setup_result.ctx
@@ -199,30 +200,33 @@ let make_incremental_state ~(env : env) : Incremental.state =
 let advance_cursor
     ~(env : env)
     ~(setup_result : setup_result)
-    ~(saved_state_result : saved_state_result)
     ~(incremental_state : Incremental.state)
-    ~(input_files : Relative_path.Set.t)
-    ~(cursor_id : string option) : Incremental.cursor =
-  let client_id =
-    incremental_state#make_client_id
-      {
-        Incremental.client_id = env.client_id;
-        dep_table_saved_state_path = saved_state_result.dep_table_path;
-        dep_table_errors_saved_state_path = saved_state_result.errors_path;
-        naming_table_saved_state_path =
-          Naming_sqlite.Db_path
-            (Path.to_string saved_state_result.naming_table_path);
-      }
-  in
+    ~(previous_cursor : previous_cursor)
+    ~(input_files : Relative_path.Set.t) : Incremental.cursor =
   let (cursor, cursor_changed_files) =
-    match cursor_id with
-    | None ->
-      let cursor = incremental_state#make_default_cursor client_id in
-      let cursor = Result.ok_or_failwith cursor in
-      (cursor, saved_state_result.saved_state_changed_files)
-    | Some cursor_id ->
+    match previous_cursor with
+    | Previous_cursor_from_saved_state saved_state_result ->
+      let client_id =
+        incremental_state#make_client_id
+          {
+            Incremental.client_id = env.client_id;
+            ignore_hh_version = env.ignore_hh_version;
+            dep_table_saved_state_path = saved_state_result.dep_table_path;
+            dep_table_errors_saved_state_path = saved_state_result.errors_path;
+            naming_table_saved_state_path =
+              Naming_sqlite.Db_path
+                (Path.to_string saved_state_result.naming_table_path);
+          }
+      in
       let cursor =
-        incremental_state#look_up_cursor ~client_id:(Some client_id) ~cursor_id
+        incremental_state#make_default_cursor client_id |> Result.ok_or_failwith
+      in
+      (cursor, saved_state_result.saved_state_changed_files)
+    | Previous_cursor_id cursor_id ->
+      let cursor =
+        incremental_state#look_up_cursor
+          ~client_id:(Some (Incremental.Client_id env.client_id))
+          ~cursor_id
         |> Result.ok_or_failwith
       in
       (cursor, Relative_path.Set.empty)
@@ -250,7 +254,13 @@ let mode_calculate
     unit Lwt.t =
   let telemetry = Telemetry.create () in
   let setup_result = set_up_global_environment env in
-  let%lwt saved_state_result = load_saved_state ~env ~setup_result in
+  let%lwt previous_cursor =
+    match cursor_id with
+    | None ->
+      let%lwt saved_state_result = load_saved_state ~env ~setup_result in
+      Lwt.return (Previous_cursor_from_saved_state saved_state_result)
+    | Some cursor_id -> Lwt.return (Previous_cursor_id cursor_id)
+  in
 
   let input_files =
     Path.Set.fold input_files ~init:Relative_path.Set.empty ~f:(fun path acc ->
@@ -262,10 +272,9 @@ let mode_calculate
     advance_cursor
       ~env
       ~setup_result
-      ~saved_state_result
       ~incremental_state
+      ~previous_cursor
       ~input_files
-      ~cursor_id
   in
 
   let calculate_fanout_result = cursor#get_calculate_fanout_result in
@@ -593,6 +602,15 @@ let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
   let%lwt ({ naming_table = old_naming_table; _ } as saved_state_result) =
     load_saved_state ~env ~setup_result
   in
+  let previous_cursor =
+    match cursor_id with
+    | Some _ ->
+      Hh_logger.warn
+        ( "A cursor ID was passed to `debug`, "
+        ^^ "but loading from a previous cursor is not yet implemented." );
+      Previous_cursor_from_saved_state saved_state_result
+    | None -> Previous_cursor_from_saved_state saved_state_result
+  in
 
   let path = Relative_path.create_detect_prefix (Path.to_string path) in
   let input_files = Relative_path.Set.singleton path in
@@ -601,10 +619,9 @@ let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
     advance_cursor
       ~env
       ~setup_result
-      ~saved_state_result
       ~incremental_state
+      ~previous_cursor
       ~input_files
-      ~cursor_id
   in
   let file_deltas = cursor#get_file_deltas in
   let new_naming_table =

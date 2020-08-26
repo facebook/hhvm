@@ -69,6 +69,55 @@ std::aligned_storage<
 
 //////////////////////////////////////////////////////////////////////
 
+namespace {
+struct SymbolPrefix {
+  AtomicLowPtr<NamedEntity> ne;
+  AtomicLowPtr<Class> cls;
+};
+std::atomic<bool> s_symbols_loaded;
+
+static_assert(sizeof(SymbolPrefix) % alignof(StringData) == 0, "");
+
+SymbolPrefix* getSymbolPrefix(StringData* sd) {
+  assertx(sd->isSymbol());
+  return reinterpret_cast<SymbolPrefix*>(sd) - 1;
+}
+const SymbolPrefix* getSymbolPrefix(const StringData* sd) {
+  assertx(sd->isSymbol());
+  return getSymbolPrefix(const_cast<StringData*>(sd));
+}
+}
+
+bool StringData::isSymbol() const {
+  return m_aux16 >> 8;
+}
+
+void StringData::markSymbolsLoaded() {
+  s_symbols_loaded.store(true, std::memory_order_release);
+}
+
+Class* StringData::getCachedClass() const {
+  return getSymbolPrefix(this)->cls;
+}
+
+NamedEntity* StringData::getNamedEntity() const {
+  return getSymbolPrefix(this)->ne;
+}
+
+void StringData::setCachedClass(Class* cls) {
+  auto const prefix = getSymbolPrefix(this);
+  assertx(IMPLIES(prefix->cls, prefix->cls == cls));
+  prefix->cls = cls;
+}
+
+void StringData::setNamedEntity(NamedEntity* ne) {
+  auto const prefix = getSymbolPrefix(this);
+  assertx(IMPLIES(prefix->ne, prefix->ne == ne));
+  prefix->ne = ne;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 // Create either a static or an uncounted string.
 // Diffrence between static and uncounted is in the lifetime
 // of the string. Static are alive for the lifetime of the process.
@@ -79,17 +128,28 @@ StringData* StringData::MakeShared(folly::StringPiece sl) {
     raiseStringLengthExceededError(sl.size());
   }
 
-  auto const allocSize = sl.size() + kStringOverhead;
-  StringData* sd = reinterpret_cast<StringData*>(
-    trueStatic ? lower_malloc(allocSize) : uncounted_malloc(allocSize)
+  auto const symbol =
+    trueStatic && !s_symbols_loaded.load(std::memory_order_acquire);
+
+  auto const extra = symbol ? sizeof(SymbolPrefix) : 0;
+  auto const bytes = sl.size() + kStringOverhead + extra;
+  auto const alloc = reinterpret_cast<char*>(
+    trueStatic ? lower_malloc(bytes) : uncounted_malloc(bytes)
   );
+  auto const sd = reinterpret_cast<StringData*>(alloc + extra);
   auto const data = reinterpret_cast<char*>(sd + 1);
 
 #ifndef NO_M_DATA
   sd->m_data = data;
 #endif
   auto const count = trueStatic ? StaticValue : UncountedValue;
-  sd->initHeader(HeaderKind::String, count);
+  if (symbol) {
+    sd->initHeader_16(HeaderKind::String, count, 1 << 8);
+    getSymbolPrefix(sd)->cls = nullptr;
+    getSymbolPrefix(sd)->ne = nullptr;
+  } else {
+    sd->initHeader(HeaderKind::String, count);
+  }
   sd->m_len = sl.size(); // m_hash is computed soon.
 
   data[sl.size()] = 0;
@@ -101,6 +161,7 @@ StringData* StringData::MakeShared(folly::StringPiece sl) {
   assertx(ret == sd);
   assertx(ret->isFlat());
   assertx(trueStatic ? ret->isStatic() : ret->isUncounted());
+  assertx(ret->isSymbol() == symbol);
   assertx(ret->checkSane());
   return ret;
 }
@@ -117,9 +178,7 @@ StringData* StringData::MakeUncounted(folly::StringPiece sl) {
 }
 
 StringData* StringData::MakeEmpty() {
-  void* vpEmpty = &s_theEmptyString;
-
-  auto const sd = static_cast<StringData*>(vpEmpty);
+  auto const sd = staticEmptyString();
   auto const data = reinterpret_cast<char*>(sd + 1);
 
 #ifndef NO_M_DATA
@@ -135,6 +194,7 @@ StringData* StringData::MakeEmpty() {
   assertx(sd->m_kind == HeaderKind::String);
   assertx(sd->isFlat());
   assertx(sd->isStatic());
+  assertx(!sd->isSymbol());
   assertx(sd->checkSane());
   return sd;
 }
@@ -142,7 +202,11 @@ StringData* StringData::MakeEmpty() {
 void StringData::destructStatic() {
   assertx(checkSane() && isStatic());
   assertx(isFlat());
-  lower_free(this);
+  if (isSymbol()) {
+    lower_free(reinterpret_cast<SymbolPrefix*>(this) - 1);
+  } else {
+    lower_free(this);
+  }
 }
 
 void StringData::ReleaseUncounted(const StringData* str) {
@@ -983,6 +1047,7 @@ bool StringData::checkSane() const {
   assertx(kindIsValid());
   assertx(uint32_t(size()) <= MaxSize);
   assertx(size() >= 0);
+  assertx(IMPLIES(isSymbol(), isStatic()));
   if (isImmutable()) {
     assertx(capacity() == 0);
   } else {

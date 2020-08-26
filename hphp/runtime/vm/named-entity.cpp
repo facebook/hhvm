@@ -214,27 +214,38 @@ NamedEntity* insertNamedEntity(const StringData* str) {
 NamedEntity* NamedEntity::get(const StringData* str,
                               bool allowCreate /* = true */,
                               String* normalizedStr /* = nullptr */) {
+  if (str->isSymbol()) {
+    if (auto const result = str->getNamedEntity()) return result;
+  }
+
   if (UNLIKELY(!s_namedDataMap)) {
     initializeNamedDataMap();
   }
 
-  auto it = s_namedDataMap->find(str);
-  if (LIKELY(it != s_namedDataMap->end())) {
-    return &it->second;
-  }
-
-  if (needsNSNormalization(str)) {
-    auto normStr = normalizeNS(StrNR(str).asString());
-    if (normalizedStr) {
-      *normalizedStr = normStr;
+  auto const result = [&]() -> NamedEntity* {
+    auto it = s_namedDataMap->find(str);
+    if (LIKELY(it != s_namedDataMap->end())) {
+      return &it->second;
     }
-    return get(normStr.get(), allowCreate, normalizedStr);
-  }
 
-  if (LIKELY(allowCreate)) {
-    return insertNamedEntity(str);
+    if (needsNSNormalization(str)) {
+      auto normStr = normalizeNS(StrNR(str).asString());
+      if (normalizedStr) {
+        *normalizedStr = normStr;
+      }
+      return get(normStr.get(), allowCreate, normalizedStr);
+    }
+
+    if (LIKELY(allowCreate)) {
+      return insertNamedEntity(str);
+    }
+    return nullptr;
+  }();
+
+  if (str->isSymbol() && result) {
+    const_cast<StringData*>(str)->setNamedEntity(result);
   }
-  return nullptr;
+  return result;
 }
 
 NamedEntity::Map* NamedEntity::table() {

@@ -98,7 +98,7 @@ inline char* StringData::mutableData() const {
 inline int StringData::size() const { return m_len; }
 inline bool StringData::empty() const { return size() == 0; }
 inline uint32_t StringData::capacity() const {
-  return kSizeIndex2StringCapacity[m_aux16];
+  return kSizeIndex2StringCapacity[m_aux16 & 0xff];
 }
 
 inline size_t StringData::heapSize() const {

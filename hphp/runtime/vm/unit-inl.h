@@ -290,18 +290,30 @@ inline const Class* Unit::lookupUniqueClassInContext(const StringData* name,
 }
 
 inline Class* Unit::loadClass(const StringData* name) {
-  String normStr;
-  auto ne = NamedEntity::get(name, true, &normStr);
+  if (name->isSymbol()) {
+    if (auto const result = name->getCachedClass()) return result;
+  }
+  auto const orig = name;
 
-  // Try to fetch from cache
-  Class* class_ = ne->getCachedClass();
-  if (LIKELY(class_ != nullptr)) return class_;
+  auto const result = [&]() -> Class* {
+    String normStr;
+    auto ne = NamedEntity::get(name, true, &normStr);
 
-  // Normalize the namespace
-  if (normStr) name = normStr.get();
+    // Try to fetch from cache
+    Class* class_ = ne->getCachedClass();
+    if (LIKELY(class_ != nullptr)) return class_;
 
-  // Autoload the class
-  return loadClass(ne, name);
+    // Normalize the namespace
+    if (normStr) name = normStr.get();
+
+    // Autoload the class
+    return loadClass(ne, name);
+  }();
+
+  if (orig->isSymbol() && result && classHasPersistentRDS(result)) {
+    const_cast<StringData*>(orig)->setCachedClass(result);
+  }
+  return result;
 }
 
 inline Class* Unit::getClass(const StringData* name, bool tryAutoload) {

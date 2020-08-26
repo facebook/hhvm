@@ -150,7 +150,7 @@ enum class GCBits : uint8_t {};
  * [ cnt | kind | marks | arrBits      | sizeClass ] Packed, Vec
  * [ cnt | kind | marks | arrBits      | keyTypes  ] Mixed, Dict
  * [ cnt | kind | marks |                          ] Empty, Globals, Keyset
- * [ cnt | kind | marks | sizeClass:16             ] String
+ * [ cnt | kind | marks | sizeClass    | isSymbol  ] String
  * [ cnt | kind | marks | heapSize:16              ] Resource (ResourceHdr)
  * [ cnt | kind | marks | Attribute    |           ] Object..ImmSet (ObjectData)
  *

@@ -91,6 +91,7 @@ void ProcessInit() {
     LitstrTable::init();
     Repo::get().loadGlobalData();
   }
+  StringData::markSymbolsLoaded();
 
   rds::requestInit();
   std::string hhas;

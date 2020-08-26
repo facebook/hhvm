@@ -1,4 +1,2 @@
--vDynamicInvokeFunctions.f=f
--vDynamicInvokeFunctions.g=g
--vDynamicInvokeFunctions.h=h
+-vJitEnableRenameFunction=true
 -d hhvm.php7.all=0

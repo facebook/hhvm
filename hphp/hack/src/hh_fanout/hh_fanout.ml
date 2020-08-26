@@ -204,7 +204,7 @@ let advance_cursor
     ~(input_files : Relative_path.Set.t)
     ~(cursor_id : string option) : Incremental.cursor =
   let client_id =
-    incremental_state#look_up_client_id
+    incremental_state#make_client_id
       {
         Incremental.client_id = env.client_id;
         dep_table_saved_state_path = saved_state_result.dep_table_path;

@@ -50,15 +50,6 @@ type cursor_state =
           (** The result of typechecking the fanout. *)
     }
 
-let make_client_id (client_config : client_config) : client_id =
-  let client_id =
-    Printf.sprintf
-      "client,%s,%d"
-      client_config.client_id
-      (Hashtbl.hash client_config)
-  in
-  Client_id client_id
-
 (** Construct the cursor ID exposed to the user.
 
 For debugging purposes, the `from` and `client_config` fields are also
@@ -340,8 +331,8 @@ class state ~state_path ~persistent_state =
 
     val persistent_state : persistent_state = persistent_state
 
-    method look_up_client_id (client_config : client_config) : client_id =
-      let client_id = make_client_id client_config in
+    method make_client_id (client_config : client_config) : client_id =
+      let client_id = Client_id client_config.client_id in
       Hashtbl.set persistent_state.clients client_id client_config;
       client_id
 

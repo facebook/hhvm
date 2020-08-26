@@ -81,7 +81,7 @@ class type state =
 
     If no such client already exists, one is created. This operation is
     idempotent. *)
-    method look_up_client_id : client_config -> client_id
+    method make_client_id : client_config -> client_id
 
     (** Construct the cursor corresponding to the saved-state.
 

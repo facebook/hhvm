@@ -137,8 +137,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     // stub that will pack any extra arguments and transfer control to the
     // appropriate prologue.
     assertx(!extra->hasUnpack);
-    v << callphps{tc::ustubs().funcPrologueRedispatch, php_call_regs(withCtx),
-                  nullptr, extra->numArgs};
+    v << callphp{tc::ustubs().funcPrologueRedispatch, php_call_regs(withCtx)};
   }
 
   // The prologue is responsible for unwinding all inputs. We could have

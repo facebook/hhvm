@@ -119,7 +119,7 @@ struct UniqueStubs {
    * Dynamically dispatch to the appropriate func prologue based on the
    * information in php_call_regs.
    *
-   * @reached:  callphps from TC
+   * @reached:  callphp from TC
    * @context:  func guard
    */
   TCA funcPrologueRedispatch;
@@ -133,7 +133,8 @@ struct UniqueStubs {
    * prologue succeeds, we update the prologue table to point to the new
    * prologue instead of this stub.
    *
-   * @reached:  callphps from TC
+   * @reached:  callphpr from TC
+   *            callphps from TC
    *            jmp from immutableBindCallStub
    *            jmp from funcPrologueRedispatch
    * @context:  func prologue

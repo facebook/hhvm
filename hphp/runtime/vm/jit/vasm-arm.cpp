@@ -262,8 +262,12 @@ struct Vgen {
   void emit(const callfaststub& i);
 
   // php function abi
+  void emit(const callphp& i) {
+    emit(call{i.target, i.args});
+    setCallFuncId(env, a->frontier());
+  }
   void emit(const callphpr& i) {
-    a->Blr(X(i.target));
+    emit(callr{i.target, i.args});
     setCallFuncId(env, a->frontier());
   }
   void emit(const callunpack& i);

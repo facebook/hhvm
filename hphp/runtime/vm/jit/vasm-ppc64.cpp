@@ -466,8 +466,12 @@ struct Vgen {
   void emit(const callr& i);
   void emit(const calls& i);
   void emit(const callstub& i);
+  void emit(const callphp& i) {
+    emit(call{i.target, i.args});
+    setCallFuncId(env, a.frontier());
+  }
   void emit(const callphpr& i) {
-    emit(callr{i.target});
+    emit(callr{i.target, i.args});
     setCallFuncId(env, a.frontier());
   }
   void emit(const cmovq&);

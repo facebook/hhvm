@@ -220,6 +220,40 @@ Result withVMRegsForCall(CallFlags callFlags, const Func* func,
   }
 }
 
+uint32_t fcallRepackHelper(CallFlags callFlags, const Func* func,
+                           uint32_t numArgsInclUnpack, TCA savedRip) {
+  assert_native_stack_aligned();
+  return withVMRegsForCall<uint32_t>(
+      callFlags, func, numArgsInclUnpack - 1, true, savedRip,
+      [&] (Stack& stack, TypedValue* calleeFP) {
+    // Check for stack overflow as we may unpack arbitrary number of arguments.
+    if (checkCalleeStackOverflow(calleeFP, func)) {
+      throw_stack_overflow();
+    }
+
+    // Stash generics.
+    auto generics = callFlags.hasGenerics()
+      ? Array::attach(stack.topC()->m_data.parr) : Array();
+    if (callFlags.hasGenerics()) stack.discard();
+
+    // Repack arguments.
+    auto const numNewArgs =
+      prepareUnpackArgs(func, numArgsInclUnpack - 1, true);
+    assertx(numNewArgs <= func->numNonVariadicParams() + 1);
+
+    // Repush generics.
+    if (!generics.isNull()) {
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        stack.pushVecNoRc(generics.detach());
+      } else {
+        stack.pushArrayNoRc(generics.detach());
+      }
+    }
+
+    return numNewArgs;
+  });
+}
+
 bool fcallHelper(CallFlags callFlags, Func* func, uint32_t numArgsInclUnpack,
                  void* ctx, TCA savedRip) {
   assert_native_stack_aligned();
@@ -356,6 +390,67 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
                  dest, sizeof(LowPtr<uint8_t>));
     v << tailcallstubr{dest, php_call_regs(true)};
   });
+}
+
+TCA emitFuncPrologueRedispatchUnpack(CodeBlock& main, CodeBlock& cold,
+                                     DataBlock& data, UniqueStubs& us) {
+  alignCacheLine(main);
+  CGMeta meta;
+
+  auto const start = vwrap2(main, cold, data, meta, [&] (Vout& v, Vout& vc) {
+    v << stublogue{false};
+
+    // Save all inputs.
+    auto const flags = v.makeReg();
+    auto const func = v.makeReg();
+    auto const numArgs = v.makeReg();
+    auto const savedRip = v.makeReg();
+    v << copy{r_php_call_flags(), flags};
+    v << copy{r_php_call_func(), func};
+    v << copy{r_php_call_num_args(), numArgs};
+    v << loadstubret{savedRip};
+
+    // Call C++ helper to repack arguments.
+    auto const numNewArgs = v.makeReg();
+    storeVMRegs(v);
+    {
+      PhysRegSaver prs{v, RegSet{r_php_call_ctx()}};
+      auto const done = v.makeBlock();
+      auto const ctch = vc.makeBlock();
+      v << vinvoke{
+        CallSpec::direct(fcallRepackHelper),
+        v.makeVcallArgs({{flags, func, numArgs, savedRip}}),
+        v.makeTuple({numNewArgs}),
+        {done, ctch},
+        Fixup{makeIndirectFixup(prs.dwordsPushed())},
+        DestType::SSA
+      };
+
+      vc = ctch;
+      emitStubCatch(vc, us, [&] (Vout& v) {
+        v << lea{rsp()[prs.dwordsPushed() * sizeof(uintptr_t)], rsp()};
+        loadVmfp(v);
+      });
+
+      v = done;
+    }
+
+    // Restore all inputs.
+    v << copy{flags, r_php_call_flags()};
+    v << copy{func, r_php_call_func()};
+    v << copy{numNewArgs, r_php_call_num_args()};
+
+    // Call the numNewArgs prologue.
+    auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
+    auto const ptrSize = safe_cast<int32_t>(sizeof(LowPtr<uint8_t>));
+    auto const dest = v.makeReg();
+    emitLdLowPtr(v, func[numNewArgs * ptrSize + pTabOff], dest,
+                 sizeof(LowPtr<uint8_t>));
+    v << tailcallstubr{dest, php_call_regs(true)};
+  });
+
+  meta.process(nullptr);
+  return start;
 }
 
 TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data,
@@ -1253,6 +1348,9 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(funcPrologueRedispatch,
       hotView(),
       emitFuncPrologueRedispatch(hot(), data));
+  ADD(funcPrologueRedispatchUnpack,
+      hotView(),
+      emitFuncPrologueRedispatchUnpack(hot(), cold, data, *this));
   ADD(funcBodyHelperThunk,    view, emitFuncBodyHelperThunk(cold, data));
   ADD(functionEnterHelper,
       hotView(),

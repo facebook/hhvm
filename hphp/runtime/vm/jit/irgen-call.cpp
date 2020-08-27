@@ -176,33 +176,9 @@ void emitCallerRxChecksUnknown(IRGS& env, SSATmp* callee) {
 
 //////////////////////////////////////////////////////////////////////
 
-void callUnpack(IRGS& env, SSATmp* callee, const FCallArgs& fca,
-                SSATmp* objOrClass, bool dynamicCall, bool unlikely) {
-  assertx(fca.hasUnpack());
-
-  if (objOrClass == nullptr) objOrClass = cns(env, TNullptr);
-  assertx(objOrClass->isA(TNullptr) || objOrClass->isA(TObj|TCls));
-
-  auto const data = CallUnpackData {
-    spOffBCFromIRSP(env),
-    fca.numArgs,
-    fca.numRets - 1,
-    bcOff(env),
-    fca.hasGenerics(),
-    dynamicCall,
-    env.formingRegion
-  };
-  push(env, gen(env, CallUnpack, data, sp(env), fp(env), callee, objOrClass));
-  if (unlikely) gen(env, Jmp, makeExit(env, nextBcOff(env)));
-}
-
 SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
                  SSATmp* objOrClass, bool skipRepack, bool dynamicCall,
                  bool asyncEagerReturn) {
-  assertx(!fca.hasUnpack() ||
-          !callee->hasConstVal() ||
-          callee->funcVal()->numNonVariadicParams() == fca.numArgs);
-
   // TODO: extend hhbc with bitmap of passed generics, or even better, use one
   // stack value per generic argument and extend hhbc with their count
   auto const genericsBitmap = [&] {
@@ -387,8 +363,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   };
 
   if (fca.hasUnpack()) {
-    // We may have updated the stack, make sure the conversions below plus
-    // CallUnpack can set up its Catch.
+    // We may have updated the stack, make sure the conversion and Call
+    // instructions below can set up their Catch.
     updateMarker(env);
     env.irb->exceptionStackBoundary();
 
@@ -420,11 +396,9 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
       }
     }
 
+    // Slow path. Uses funcPrologueRedispatchUnpack to repack the arguments.
     assertx(!fca.skipRepack());
-
-    // Slow path. TODO: remove and use interpreter once confirmed this is cold
-    return callUnpack(env, cns(env, callee), fca, objOrClass, dynamicCall,
-                      false /* unlikely */);
+    return doCall(fca, false /* skipRepack */);
   }
 
   if (fca.numArgs <= callee->numNonVariadicParams()) {
@@ -476,10 +450,6 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   // We may have updated the stack, make sure Call opcode can set up its Catch.
   updateMarker(env);
   env.irb->exceptionStackBoundary();
-
-  if (fca.hasUnpack() && !fca.skipRepack()) {
-    return callUnpack(env, callee, fca, objOrClass, dynamicCall, unlikely);
-  }
 
   // Okay to request async eager return even if it is not supported.
   auto const asyncEagerReturn = fca.asyncEagerOffset != kInvalidOffset;

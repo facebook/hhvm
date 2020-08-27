@@ -117,12 +117,13 @@ struct UniqueStubs {
 
   /*
    * Dynamically dispatch to the appropriate func prologue based on the
-   * information in php_call_regs.
+   * information in php_call_regs, while repacking arguments as needed.
    *
    * @reached:  callphp from TC
    * @context:  func guard
    */
   TCA funcPrologueRedispatch;
+  TCA funcPrologueRedispatchUnpack;
 
   /*
    * Look up or emit a func prologue and jump to it---or, failing that, call
@@ -137,6 +138,7 @@ struct UniqueStubs {
    *            callphps from TC
    *            jmp from immutableBindCallStub
    *            jmp from funcPrologueRedispatch
+   *            jmp from funcPrologueRedispatchUnpack
    * @context:  func prologue
    */
   TCA fcallHelperThunk;

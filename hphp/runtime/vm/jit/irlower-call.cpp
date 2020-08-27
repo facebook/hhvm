@@ -132,12 +132,16 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
                  dest, sizeof(LowPtr<uint8_t>));
     v << callphpr{dest, php_call_regs(withCtx)};
   } else {
-    // If the callee is not known statically, or it was determined later, but
-    // we have too many arguments for prologue to handle, go to the redispatch
-    // stub that will pack any extra arguments and transfer control to the
-    // appropriate prologue.
-    assertx(!extra->hasUnpack);
-    v << callphp{tc::ustubs().funcPrologueRedispatch, php_call_regs(withCtx)};
+    // It was not statically determined that the arguments are passed in a way
+    // the callee expects. Use the redispatch stub to repack them as needed and
+    // transfer control to the appropriate prologue. This can happen due to:
+    // - the callee not being statically known
+    // - the callee inferred later in HHIR opts, but arguments mispacked
+    // - unpack used in a different position than callee's variadic param
+    auto const stub = !extra->hasUnpack
+      ? tc::ustubs().funcPrologueRedispatch
+      : tc::ustubs().funcPrologueRedispatchUnpack;
+    v << callphp{stub, php_call_regs(withCtx)};
   }
 
   // The prologue is responsible for unwinding all inputs. We could have

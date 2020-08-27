@@ -80,7 +80,12 @@ std::string toStringForKey(const TypedValue& tv) {
 }
 
 std::string assembleKey(ArrayOp op) {
-  return op;
+  switch (op) {
+#define X(name) case ArrayOp::name: return #name;
+ARRAY_OPS
+#undef X
+  }
+  always_assert(false);
 }
 
 template <typename T, typename... Ts>
@@ -88,7 +93,7 @@ std::string assembleKey(ArrayOp op, T&& arg, Ts&&... args) {
   auto const paramStr =
     folly::join(", ", {toStringForKey(std::forward<T>(arg)),
                        toStringForKey(std::forward<Ts>(args))...});
-  return folly::sformat("{}: {}", op, paramStr);
+  return folly::sformat("{}: {}", assembleKey(op), paramStr);
 }
 
 //////////////////////////////////////////////////////////////////////////////

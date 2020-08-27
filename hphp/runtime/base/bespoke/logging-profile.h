@@ -32,8 +32,47 @@ namespace HPHP { namespace bespoke {
 
 struct LoggingArray;
 
-// We'll replace this definition with an enum next.
-using ArrayOp = const char*;
+#define ARRAY_OPS \
+  X(Scan) \
+  X(EscalateToVanilla) \
+  X(ConvertToUncounted) \
+  X(ReleaseUncounted) \
+  X(Release) \
+  X(Size) \
+  X(IsVectorData) \
+  X(GetInt) \
+  X(GetStr) \
+  X(GetIntPos) \
+  X(GetStrPos) \
+  X(LvalInt) \
+  X(LvalStr) \
+  X(SetInt) \
+  X(SetStr) \
+  X(RemoveInt) \
+  X(RemoveStr) \
+  X(IterBegin) \
+  X(IterLast) \
+  X(IterEnd) \
+  X(IterAdvance) \
+  X(IterRewind) \
+  X(Append) \
+  X(Prepend) \
+  X(Merge) \
+  X(Pop) \
+  X(Dequeue) \
+  X(Renumber) \
+  X(Copy) \
+  X(ToVArray) \
+  X(ToDArray) \
+  X(ToVec) \
+  X(ToDict) \
+  X(ToKeyset)
+
+enum class ArrayOp : uint8_t {
+#define X(name) name,
+ARRAY_OPS
+#undef X
+};
 
 // We'll store a LoggingProfile for each array construction site SrcKey.
 // It tracks the operations that happen on arrays coming from that site.

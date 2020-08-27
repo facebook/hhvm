@@ -568,7 +568,7 @@ bool Package::parseImpl(const std::string* fileName) {
     Native::s_noNativeFuncs, false, options);
   assertx(uc);
   try {
-    auto ue = uc->compile(true, mode);
+    auto ue = uc->compile(mode);
     if (ue && !ue->m_ICE) {
       if (is_symlink) {
         ue = createSymlinkWrapper(fullPath, *fileName, std::move(ue));

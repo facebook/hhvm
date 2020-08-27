@@ -162,4 +162,17 @@ function rqtrace_create_scoped_events(
 <<__Native>>
 function hhbbc_fail_verification(): void;
 
+/* Test if the unit given by the path has been loaded. Only valid in
+ * non-RepoAuth mode */
+<<__Native>>
+function is_unit_loaded(string $path): bool;
+
+/*
+ * Block until there's no outstanding unit prefetches. This can block
+ * indefinitely if we keep trying to prefetch units, so use with
+ * care.
+ */
+<<__Native>>
+function drain_unit_prefetcher(): void;
+
 }

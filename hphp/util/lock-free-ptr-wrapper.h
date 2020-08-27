@@ -113,6 +113,13 @@ struct LockFreePtrWrapper {
    * want to change the value), or unlock (if you don't).
    */
   void lock_for_update();
+
+  /*
+   * Like lock_for_update(), but returns false if it fails to acquire
+   * the lock rather than blocking. Returns true on success.
+   */
+  bool try_lock_for_update();
+
   /*
    * Unlock it.
    */
@@ -265,6 +272,16 @@ void LockFreePtrWrapper<T>::lock_for_update() {
       lockBit = kLockWithWaitersBit;
     }
   }
+}
+
+template<typename T>
+bool LockFreePtrWrapper<T>::try_lock_for_update() {
+  auto c = raw() & kPtrMask;
+  return bits.compare_exchange_weak(
+    c,
+    c + kLockNoWaitersBit,
+    std::memory_order_relaxed
+  );
 }
 
 template<class T>

@@ -45,15 +45,8 @@ std::unique_ptr<UnitEmitter> assemble_string(
   const char* filename,
   const SHA1&,
   const Native::FuncTable&,
-  bool swallowErrors = true,
-  bool wantsSymbolRefs = false
+  bool swallowErrors = true
 );
-
-enum class AsmResult {
-  NoResult,
-  ValuePushed,
-  Unreachable
-};
 
 struct AssemblerFatal : std::runtime_error {
   explicit AssemblerFatal(const std::string& msg) : std::runtime_error(msg) {}

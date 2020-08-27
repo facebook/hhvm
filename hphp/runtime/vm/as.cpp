@@ -530,9 +530,7 @@ struct HashSymbolRef {
 };
 
 struct AsmState {
-  explicit AsmState(std::istream& in, bool wants_symbol_refs = false)
-    : in{in}
-    , wants_symbol_refs{wants_symbol_refs}
+  explicit AsmState(std::istream& in) : in{in}
   {
     currentStackDepth->setBase(*this, 0);
   }
@@ -782,7 +780,6 @@ struct AsmState {
   hphp_fast_map<SymbolRef,
                 CompactVector<std::string>,
                 HashSymbolRef> symbol_refs;
-  bool wants_symbol_refs;
 };
 
 void StackDepth::adjust(AsmState& as, int delta) {
@@ -3445,22 +3442,15 @@ void parse_fatal(AsmState& as) {
 void parse_symbol_refs(AsmState& as, SymbolRef symbol_kind) {
   as.in.expectWs('{');
 
-  if (as.wants_symbol_refs) {
-    while (true) {
-      as.in.skipWhitespace();
-      std::string symbol;
-      as.in.consumePred(!boost::is_any_of(" \t\r\n#}"),
-                        std::back_inserter(symbol));
-      if (symbol.empty()) {
-        break;
-      }
-      as.symbol_refs[symbol_kind].push_back(symbol);
+  while (true) {
+    as.in.skipWhitespace();
+    std::string symbol;
+    as.in.consumePred(!boost::is_any_of(" \t\r\n#}"),
+                      std::back_inserter(symbol));
+    if (symbol.empty()) {
+      break;
     }
-  } else {
-    while (as.in.peek() != '}') {
-      as.in.skipWhitespace();
-      if (!as.in.skipPred(!boost::is_any_of("#}"))) break;
-    }
+    as.symbol_refs[symbol_kind].push_back(symbol);
   }
 
   as.in.expect('}');
@@ -3594,8 +3584,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   const char* filename,
   const SHA1& sha1,
   const Native::FuncTable& nativeFuncs,
-  bool swallowErrors,
-  bool wantsSymbolRefs
+  bool swallowErrors
 ) {
   tracing::Block _{
     "assemble",
@@ -3622,7 +3611,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   try {
     auto const mode = std::istringstream::binary | std::istringstream::in;
     std::istringstream instr(std::string(code, codeLen), mode);
-    AsmState as(instr, wantsSymbolRefs);
+    AsmState as{instr};
     as.ue = ue.get();
     parse(as);
   } catch (const FatalUnitError& e) {

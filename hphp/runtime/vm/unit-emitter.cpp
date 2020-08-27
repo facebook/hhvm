@@ -695,6 +695,17 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
               [] (const Func* a, const Func* b) {
                 return a->past() < b->past();
               });
+
+    // If prefetching is enabled, store the symbol refs in the Unit so
+    // the prefetcher can claim them. Reset the atomic flag to mark
+    // them available. Otherwise set the atomic flag was already
+    // claimed as a shortcut.
+    if (!RO::RepoAuthoritative && unitPrefetchingEnabled()) {
+      ux->m_symbolRefsForPrefetch = m_symbol_refs;
+      ux->m_symbolRefsPrefetched.clear();
+    } else {
+      ux->m_symbolRefsPrefetched.test_and_set();
+    }
   } else {
     assertx(!m_litstrs.size());
     assertx(m_arrayTypeTable.empty());

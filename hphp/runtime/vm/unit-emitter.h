@@ -66,13 +66,6 @@ size_t hhbc_arena_capacity();
  */
 bool needs_extended_line_table();
 
-enum class SymbolRef : uint8_t {
-  Include,
-  Class,
-  Function,
-  Constant
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -405,8 +398,7 @@ public:
   bool m_fatalUnit{false}; // parse/runtime error
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;
-  CompactVector<
-    std::pair<SymbolRef, CompactVector<std::string>>> m_symbol_refs;
+  SymbolRefs m_symbol_refs;
   /*
    * name=>NativeFuncInfo for native funcs in this unit
    */

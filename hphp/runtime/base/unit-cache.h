@@ -17,9 +17,11 @@
 #ifndef incl_HPHP_UNIT_CACHE_H_
 #define incl_HPHP_UNIT_CACHE_H_
 
-#include <folly/String.h>
 #include <string>
 #include <vector>
+
+#include <folly/String.h>
+#include <folly/synchronization/AtomicNotification.h>
 
 struct stat;
 
@@ -127,6 +129,41 @@ void clearUnitCacheForExit();
  * Currently only works in !RepoAuthoritative mode.
  */
 Unit* getLoadedUnit(StringData* path);
+
+/*
+ * Attempt to (asynchronously) prefetch a Unit given by the given
+ * path. Unit prefetching must be enabled, and RepoAuthoritative mode
+ * must not be active. This request is "best effort", it may do
+ * nothing, the Unit load can fail, or the prefetch can be arbitrarily
+ * delayed.
+ *
+ * `path' is a path where the Unit can be found. It does not have to
+ * be canonicalized. It must be a static string.
+ *
+ * If `gate' is non-nullptr, it will be incremented for every enqueued
+ * prefetch request, and decremented for each finished request. This
+ * can be used to fire off a number of requests, then block until they
+ * complete (by waiting for the gate to reach 0). If the gate is
+ * decremented to zero, an atomic_notify() will be issued on it to
+ * wake up any waiters.
+ *
+ * If `loadingUnit' is provided, then any paths which resolve to the
+ * canonical path of that Unit will be skipped. This avoids attempting
+ * to prefetch a Unit which you're in the process of loading already.
+ */
+void prefetchUnit(StringData* path,
+                  std::shared_ptr<folly::atomic_uint_fast_wait_t> gate,
+                  const Unit* loadingUnit);
+
+/*
+ * Block until all outstanding Unit prefetch attempts finish. Note
+ * that if a new attempt is queued while we are blocked here, we will
+ * wait for that to finish as well. This means this can block
+ * indefinitely if there's a steady stream of incoming prefetch
+ * requests. Unit prefetching must be enabled, and RepoAuthoritative
+ * mode must not be active.
+ */
+void drainUnitPrefetcher();
 
 //////////////////////////////////////////////////////////////////////
 

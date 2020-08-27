@@ -453,7 +453,6 @@ struct CompilerPool {
                          const SHA1& sha1,
                          const Native::FuncTable& nativeFuncs,
                          bool forDebuggerEval,
-                         bool wantsSymbolRefs,
                          bool& internal_error,
                          const RepoOptions& options,
                          CompileAbortMode mode);
@@ -614,7 +613,6 @@ CompilerResult CompilerPool::compile(const char* code,
                                      const SHA1& sha1,
                                      const Native::FuncTable& nativeFuncs,
                                      bool forDebuggerEval,
-                                     bool wantsSymbolRefs,
                                      bool& internal_error,
                                      const RepoOptions& options,
                                      CompileAbortMode mode) {
@@ -647,8 +645,7 @@ CompilerResult CompilerPool::compile(const char* code,
           filename,
           sha1,
           nativeFuncs,
-          false /* swallow errors */,
-          wantsSymbolRefs
+          false /* swallow errors */
         );
       } catch (const FatalErrorException&) {
         throw;
@@ -1069,7 +1066,6 @@ CompilerResult hackc_compile(
   const SHA1& sha1,
   const Native::FuncTable& nativeFuncs,
   bool forDebuggerEval,
-  bool wantsSymbolRefs,
   bool& internal_error,
   const RepoOptions& options,
   CompileAbortMode mode
@@ -1081,7 +1077,6 @@ CompilerResult hackc_compile(
     sha1,
     nativeFuncs,
     forDebuggerEval,
-    wantsSymbolRefs,
     internal_error,
     options,
     mode
@@ -1274,9 +1269,7 @@ UnitCompiler::create(const char* code,
   }
 }
 
-std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
-  bool wantsSymbolRefs,
-  CompileAbortMode mode) {
+std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(CompileAbortMode mode) {
   bool ice = false;
   auto res = hackc_compile(m_code,
                            m_codeLen,
@@ -1284,7 +1277,6 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
                            m_sha1,
                            m_nativeFuncs,
                            m_forDebuggerEval,
-                           wantsSymbolRefs,
                            ice,
                            m_options,
                            mode);
@@ -1327,8 +1319,7 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
 }
 
 std::unique_ptr<UnitEmitter>
-CacheUnitCompiler::compile(bool wantsSymbolRefs,
-                           CompileAbortMode mode) {
+CacheUnitCompiler::compile(CompileAbortMode mode) {
   assertx(g_unit_emitter_cache_hook);
   return g_unit_emitter_cache_hook(
     m_filename,
@@ -1338,7 +1329,6 @@ CacheUnitCompiler::compile(bool wantsSymbolRefs,
       if (!m_fallback) m_fallback = m_makeFallback();
       assertx(m_fallback);
       return m_fallback->compile(
-        wantsSymbolRefs,
         wantsICE ? mode : CompileAbortMode::AllErrorsNull
       );
     },

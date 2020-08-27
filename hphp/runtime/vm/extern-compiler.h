@@ -121,7 +121,6 @@ struct UnitCompiler {
     const RepoOptions& options);
 
   virtual std::unique_ptr<UnitEmitter> compile(
-    bool wantsSymbolRefs = false,
     CompileAbortMode = CompileAbortMode::Never) = 0;
 
   virtual const char* getName() const = 0;
@@ -140,7 +139,6 @@ struct HackcUnitCompiler : public UnitCompiler {
   using UnitCompiler::UnitCompiler;
 
   virtual std::unique_ptr<UnitEmitter> compile(
-    bool wantsSymbolRefs = false,
     CompileAbortMode = CompileAbortMode::Never) override;
 
   virtual const char* getName() const override { return "HackC"; }
@@ -166,7 +164,6 @@ struct CacheUnitCompiler : public UnitCompiler {
     , m_makeFallback{std::move(makeFallback)} {}
 
   virtual std::unique_ptr<UnitEmitter> compile(
-      bool wantsSymbolRefs = false,
       CompileAbortMode = CompileAbortMode::Never) override;
 
   virtual const char* getName() const override { return "Cache"; }

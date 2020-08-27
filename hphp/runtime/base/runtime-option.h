@@ -1308,6 +1308,11 @@ struct RuntimeOption {
   /* Should we use the autoload map from the repo */                    \
   F(bool, UseRepoAutoloadMap, true)                                     \
   F(bool, LogOnIsArrayFunction, false)                                  \
+  /* Unit prefetching options */                                        \
+  F(uint32_t, UnitPrefetcherMaxThreads, 0)                              \
+  F(uint32_t, UnitPrefetcherMinThreads, 0)                              \
+  F(uint32_t, UnitPrefetcherIdleThreadTimeoutSecs, 60)                  \
+  /* */
 
 private:
   using string = std::string;
@@ -1432,6 +1437,10 @@ inline bool isJitDeserializing() {
 inline bool isJitSerializing() {
   auto const m = RuntimeOption::EvalJitSerdesMode;
   return static_cast<std::underlying_type<JitSerdesMode>::type>(m) & 0x1;
+}
+
+inline bool unitPrefetchingEnabled() {
+  return RO::EvalUnitPrefetcherMaxThreads > 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

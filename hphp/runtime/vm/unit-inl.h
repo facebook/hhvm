@@ -60,6 +60,15 @@ inline UnitExtended* Unit::getExtended() {
   return static_cast<UnitExtended*>(this);
 }
 
+inline SymbolRefs* Unit::claimSymbolRefsForPrefetch() {
+  if (!m_extended) return nullptr; // No symbol refs
+  auto extended = getExtended();
+  // Atomically mark them as taken and check if they were already
+  // taken
+  if (extended->m_symbolRefsPrefetched.test_and_set()) return nullptr;
+  return &extended->m_symbolRefsForPrefetch;
+}
+
 inline const UnitExtended* Unit::getExtended() const {
   assertx(m_extended);
   return static_cast<const UnitExtended*>(this);

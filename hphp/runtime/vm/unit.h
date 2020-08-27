@@ -85,6 +85,22 @@ struct FatalInfo {
   std::string m_fatalMsg;
 };
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Symbol references
+
+// Symbols referenced by an Unit. Used during prod builds to
+// automatically important files, and in Sandboxes to prefetch units.
+enum class SymbolRef : uint8_t {
+  Include,
+  Class,
+  Function,
+  Constant
+};
+
+using SymbolRefs =
+  CompactVector<std::pair<SymbolRef, CompactVector<std::string>>>;
+
 /*
  * Table specializations.
  */
@@ -760,6 +776,15 @@ public:
 
   UserAttributeMap metaData() const;
 
+  /*
+   * Atomically "claim" the symbol refs in this Unit for
+   * prefetching. Returns nullptr if no symbol refs are present, or if
+   * they have already been claimed. If a valid pointer is returned,
+   * you have exclusive access to the symbol refs and no future call
+   * to this function will return them.
+   */
+  SymbolRefs* claimSymbolRefsForPrefetch();
+
   // Return true, and set the m_serialized flag, iff this Unit hasn't
   // been serialized yet (see prof-data-serialize.cpp).
   bool serialize() const {
@@ -846,6 +871,9 @@ struct UnitExtended : Unit {
   NamedEntityPairTable m_namedInfo;
   ArrayTypeTable m_arrayTypeTable;
   FuncTable m_funcTable;
+
+  SymbolRefs m_symbolRefsForPrefetch;
+  std::atomic_flag m_symbolRefsPrefetched;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

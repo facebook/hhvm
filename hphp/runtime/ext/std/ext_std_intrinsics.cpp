@@ -21,6 +21,8 @@
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/unit-cache.h"
+
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/inlining-decider.h"
@@ -344,6 +346,17 @@ Variant HHVM_FUNCTION(create_clsmeth_pointer, StringArg cls, StringArg meth) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool HHVM_FUNCTION(is_unit_loaded, StringArg path) {
+  return getLoadedUnit(path.get()) != nullptr;
+}
+
+void HHVM_FUNCTION(drain_unit_prefetcher) {
+  if (RO::RepoAuthoritative || !unitPrefetchingEnabled()) return;
+  drainUnitPrefetcher();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 void StandardExtension::initIntrinsics() {
@@ -390,6 +403,9 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\create_class_pointer, create_class_pointer);
   HHVM_FALIAS(__hhvm_intrinsics\\create_clsmeth_pointer,
               create_clsmeth_pointer);
+
+  HHVM_FALIAS(__hhvm_intrinsics\\is_unit_loaded, is_unit_loaded);
+  HHVM_FALIAS(__hhvm_intrinsics\\drain_unit_prefetcher, drain_unit_prefetcher);
 
   loadSystemlib("std_intrinsics");
 }

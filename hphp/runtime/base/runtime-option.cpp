@@ -887,10 +887,7 @@ static inline bool eagerGcDefault() {
 }
 
 static inline std::string hackCompilerArgsDefault() {
-  return folly::sformat(
-    "--daemon{}",
-    RuntimeOption::RepoAuthoritative ? " --dump-symbol-refs" : ""
-  );
+  return "--daemon --dump-symbol-refs";
 }
 
 static inline std::string hackCompilerCommandDefault() {

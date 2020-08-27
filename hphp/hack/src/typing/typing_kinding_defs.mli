@@ -11,9 +11,8 @@ type tparam_bounds = TySet.t
   (i.e., r stands for kind * -> * -> * ).
   Here, n1 and n2 are the names of those parameters. The names are then bound
   and can be used in the involved constraints (unless the name is the wildcarf name _ ).
-  In the example above, this means that n1 is bound in the bounds of r1 and r2, as well as
+  In the example above, this means that n1 and n2 are bound in the constraints of r1 and r2, as well as
   r.upper_bounds and r.lower_bounds.
-  The parameter name n2 is only bound in k2 and r.upper_bounds and r.lower_bounds.
   *)
 type kind = {
   lower_bounds: tparam_bounds;

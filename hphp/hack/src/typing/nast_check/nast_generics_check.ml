@@ -83,6 +83,7 @@ let rec check_tparam ~nested (seen : tparam_info) tparam =
 
   check_tparams ~nested:true seen tparam.tp_parameters
 
+(* See not on Naming.type_param about scoping of type parameters *)
 and check_tparams ~nested (seen : tparam_info) tparams =
   let bring_into_scope (seen : tparam_info) tparam =
     let is_hk = not (List.is_empty tparam.tp_parameters) in

@@ -144,6 +144,13 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let env = extend_tparams env m.m_tparams in
       super#on_method_ env m
 
+    method! on_tparam env tparam =
+      (* Make sure that the nested tparams are in scope while traversing the rest
+        of the tparam, in particular the constraints.
+        See Naming.type_param for description of nested tparam scoping *)
+      let env_with_nested = extend_tparams env tparam.tp_parameters in
+      super#on_tparam env_with_nested tparam
+
     method! on_pu_enum env pue =
       let type_params =
         List.fold

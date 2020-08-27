@@ -1150,7 +1150,18 @@ and enum_ env e =
 and type_paraml ?(forbid_this = false) env tparams =
   List.map tparams ~f:(type_param ~forbid_this env)
 
-and type_param ~forbid_this ((genv, _) as env) t =
+(*
+  We need to be careful regarding the scoping of type variables:
+  Type parameters are always in scope simultaneously: Given
+  class C<T1 ... , T2 ... , Tn ...>,
+  all type parameters are in scope in the constraints of all other ones (and the where constraints,
+  in case of functions).
+  For consitency, the same holds for nested type parameters (i.e., type parameters of type
+  parameters). Given
+  class Foo<T<T1 ... , ...., Tn ... > ... >
+  every Ti is in scope of the constraints of all other Tj, and in the constraints on T itself.
+*)
+and type_param ~forbid_this (genv, lenv) t =
   begin
     if
     TypecheckerOptions.experimental_feature_enabled
@@ -1181,21 +1192,24 @@ and type_param ~forbid_this ((genv, _) as env) t =
     let (pos, name) = t.Aast.tp_name in
     Errors.tparam_with_tparam pos name );
 
-  (* TODO(T70068435) Once we allow constraints on nested parameters, we must update the type
-      parameter environment for the nested calls of type_param so that hint_ can correctly
-      convert between Happly and Habstr in constraints *)
+  (* Bring all type parameters into scope at once before traversing nested tparams,
+    as per the note above *)
+  let env = (extend_tparams genv t.Aast.tp_parameters, lenv) in
   let tp_parameters =
     if hk_types_enabled then
       List.map t.Aast.tp_parameters (type_param ~forbid_this env)
     else
       []
   in
+  (* Use the env with all nested tparams still in scope *)
+  let tp_constraints =
+    List.map t.Aast.tp_constraints (constraint_ ~forbid_this env)
+  in
   {
     N.tp_variance = t.Aast.tp_variance;
     tp_name = t.Aast.tp_name;
     tp_parameters;
-    tp_constraints =
-      List.map t.Aast.tp_constraints (constraint_ ~forbid_this env);
+    tp_constraints;
     tp_reified = t.Aast.tp_reified;
     tp_user_attributes = user_attributes env t.Aast.tp_user_attributes;
   }

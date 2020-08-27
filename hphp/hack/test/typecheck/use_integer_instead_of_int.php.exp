@@ -1,2 +1,2 @@
 File "use_integer_instead_of_int.php", line 12, characters 23-29:
-Invalid type hint 'integer'. Use 'int' instead (Parsing[1002])
+Invalid type hint `integer`. Use `int` instead (Parsing[1002])

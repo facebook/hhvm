@@ -1,1 +1,1 @@
-Fatal error: Cannot redeclare foo() (previously declared in %s/redefine_function.php:5) in %s/redefine_function.php on line 9
+Fatal error: Cannot redeclare `foo()` (previously declared in %s/redefine_function.php:5) in %s/redefine_function.php on line 9

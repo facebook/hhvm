@@ -7,7 +7,7 @@ error_pos_outside_range1.php:3:11
     4 |   return 3;
     5 | }
 
-Parsing[1002] Encountered unexpected text 'return', was expecting a type hint. [1]
+Parsing[1002] Encountered unexpected text return, was expecting a type hint. [1]
 
 error_pos_outside_range1.php:4:3
     2 | 

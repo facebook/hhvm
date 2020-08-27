@@ -1,2 +1,2 @@
 File "final_property.php", line 4, characters 11-15:
-Properties cannot be declared final (Parsing[1002])
+Properties cannot be declared `final` (Parsing[1002])

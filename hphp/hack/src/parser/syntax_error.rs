@@ -772,34 +772,35 @@ pub const using_st_function_scoped_top_level: Error = Cow::Borrowed(concat!(
 pub const double_variadic: Error = Cow::Borrowed("Parameter redundantly marked as variadic `...`.");
 pub fn conflicting_trait_require_clauses(name: &str) -> Error {
     Cow::Owned(format!(
-        "Conflicting requirements for '{}'",
+        "Conflicting requirements for `{}`",
         name.to_string(),
     ))
 }
 pub const shape_type_ellipsis_without_trailing_comma: Error =
-    Cow::Borrowed("A comma is required before the ... in a shape type");
+    Cow::Borrowed("A comma is required before the `...` in a shape type");
 pub const yield_in_magic_methods: Error =
-    Cow::Borrowed("'yield' is not allowed in constructors or magic methods");
-pub const yield_outside_function: Error = Cow::Borrowed("Yield can only be used inside a function");
+    Cow::Borrowed("`yield` is not allowed in constructors or magic methods");
+pub const yield_outside_function: Error =
+    Cow::Borrowed("`yield` can only be used inside a function");
 pub const coloncolonclass_on_dynamic: Error =
-    Cow::Borrowed("Dynamic class names are not allowed in compile-time ::class fetch");
+    Cow::Borrowed("Dynamic class names are not allowed in compile-time `::class` fetch");
 pub const this_in_static: Error =
-    Cow::Borrowed("Don't use $this in a static method, use static:: instead");
+    Cow::Borrowed("Don't use `$this` in a static method, use `static::` instead");
 pub fn async_magic_method(name: &str) -> Error {
     Cow::Owned(format!(
-        "cannot declare constructors and magic methods such as '{}' async",
+        "Cannot declare constructors and magic methods such as `{}` async",
         name.to_string(),
     ))
 }
 pub fn unsupported_magic_method(name: &str) -> Error {
     Cow::Owned(format!(
-        "Magic {} methods are no longer supported",
+        "Magic `{}` methods are no longer supported",
         name.to_string(),
     ))
 }
 pub fn reserved_keyword_as_class_name(class_name: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot use '{}' as class name as it is reserved",
+        "Cannot use `{}` as class name as it is reserved",
         class_name.to_string(),
     ))
 }
@@ -808,23 +809,24 @@ pub const xhp_class_multiple_category_decls: Error =
 pub const xhp_class_multiple_children_decls: Error =
     Cow::Borrowed("An XHP class cannot have multiple children declarations");
 pub const inout_param_in_generator: Error =
-    Cow::Borrowed("Parameters may not be marked inout on generators");
+    Cow::Borrowed("Parameters may not be marked `inout` on generators");
 pub const inout_param_in_async_generator: Error =
-    Cow::Borrowed("Parameters may not be marked inout on async generators");
+    Cow::Borrowed("Parameters may not be marked `inout` on `async` generators");
 pub const inout_param_in_async: Error =
-    Cow::Borrowed("Parameters may not be marked inout on async functions");
+    Cow::Borrowed("Parameters may not be marked `inout` on `async` functions");
 pub const inout_param_in_construct: Error =
-    Cow::Borrowed("Parameters may not be marked inout on constructors");
+    Cow::Borrowed("Parameters may not be marked `inout` on constructors");
 pub const fun_arg_inout_set: Error =
-    Cow::Borrowed("You cannot set an inout decorated argument while calling a function");
-pub const fun_arg_inout_const: Error = Cow::Borrowed("You cannot decorate a constant as inout");
-pub const fun_arg_invalid_arg: Error = Cow::Borrowed("You cannot decorate this argument as inout");
+    Cow::Borrowed("You cannot set an `inout` decorated argument while calling a function");
+pub const fun_arg_inout_const: Error = Cow::Borrowed("You cannot decorate a constant as `inout`");
+pub const fun_arg_invalid_arg: Error =
+    Cow::Borrowed("You cannot decorate this argument as `inout`");
 pub const fun_arg_inout_containers: Error = Cow::Borrowed(concat!(
-    "Parameters marked inout must be contained in locals, vecs, dicts, keysets,",
+    "Parameters marked `inout` must be contained in locals, vecs, dicts, keysets,",
     " and arrays",
 ));
 pub const memoize_with_inout: Error =
-    Cow::Borrowed("<<__Memoize>> cannot be used on functions with inout parameters");
+    Cow::Borrowed("`<<__Memoize>>` cannot be used on functions with `inout` parameters");
 pub const method_calls_on_xhp_attributes: Error =
     Cow::Borrowed("Method calls are not allowed on XHP attributes");
 pub const method_calls_on_xhp_expression: Error =
@@ -832,27 +834,27 @@ pub const method_calls_on_xhp_expression: Error =
 pub fn class_with_abstract_method(name: &str) -> Error {
     Cow::Owned(format!(
         concat!(
-            "Class {} contains an abstract method and must ",
-            "therefore be declared abstract",
+            "Class `{}` contains an abstract method and must ",
+            "therefore be declared `abstract`",
         ),
         name.to_string(),
     ))
 }
 pub const interface_has_private_method: Error =
-    Cow::Borrowed("Interface methods must be public or protected");
+    Cow::Borrowed("Interface methods must be `public` or `protected`");
 pub fn redeclaration_of_function(name: &str, loc: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot redeclare {}() (previously declared in {})",
+        "Cannot redeclare `{}()` (previously declared in {})",
         name.to_string(),
         loc.to_string()
     ))
 }
 pub fn redeclaration_of_method(name: &str) -> Error {
-    Cow::Owned(format!("Redeclared method {}", name.to_string(),))
+    Cow::Owned(format!("Redeclared method `{}`", name.to_string(),))
 }
 pub fn self_or_parent_colon_colon_class_outside_of_class(name: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot access {}::class when no class scope is active",
+        "Cannot access `{}::class` when no class scope is active",
         name.to_string(),
     ))
 }
@@ -863,17 +865,17 @@ pub fn invalid_is_as_expression_hint(n: &str, hint: &str) -> Error {
         n.to_string(),
     ))
 }
-pub const elvis_operator_space: Error = Cow::Borrowed("An Elvis operator ('?:') is expected here.");
+pub const elvis_operator_space: Error = Cow::Borrowed("An Elvis operator `?:` is expected here.");
 pub fn clone_takes_no_arguments(class_name: &str, method_name: &str) -> Error {
     Cow::Owned(format!(
-        "Method {}::{} cannot accept any arguments",
+        "Method `{}::{}` cannot accept any arguments",
         class_name.to_string(),
         method_name.to_string(),
     ))
 }
 pub fn clone_cannot_be_static(class_name: &str, method_name: &str) -> Error {
     Cow::Owned(format!(
-        "Clone method {}::{}() cannot be static",
+        "Clone method `{}::{}()` cannot be static",
         class_name.to_string(),
         method_name.to_string(),
     ))
@@ -881,12 +883,12 @@ pub fn clone_cannot_be_static(class_name: &str, method_name: &str) -> Error {
 pub const namespace_not_a_classname: Error =
     Cow::Borrowed("Namespace cannot be used as a classname");
 pub const for_with_as_expression: Error =
-    Cow::Borrowed("For loops can not use as-expressions. Did you mean foreach?");
-pub const sealed_final: Error = Cow::Borrowed("Classes cannot be both final and sealed.");
+    Cow::Borrowed("For loops can not use as-expressions. Did you mean `foreach`?");
+pub const sealed_final: Error = Cow::Borrowed("Classes cannot be both `final` and `sealed`.");
 pub const interface_implements: Error =
     Cow::Borrowed("Interfaces may not implement other interfaces or classes");
 pub const memoize_on_lambda: Error =
-    Cow::Borrowed("<<__Memoize>> attribute is not allowed on lambdas or anonymous functions.");
+    Cow::Borrowed("`<<__Memoize>>` attribute is not allowed on lambdas or anonymous functions.");
 pub fn declared_final(elt: &str) -> Error {
     Cow::Owned(format!("{} cannot be declared final.", elt.to_string(),))
 }
@@ -896,19 +898,20 @@ pub fn invalid_xhp_classish(elt: &str) -> Error {
 pub const empty_method_name: Error = Cow::Borrowed("Expected a method name");
 pub fn lowering_parsing_error(text: &str, syntax: &str) -> Error {
     Cow::Owned(format!(
-        "Encountered unexpected text '{}', was expecting a {}.",
+        "Encountered unexpected text `{}`, was expecting a {}.",
         text.to_string(),
         syntax.to_string(),
     ))
 }
 pub const xhp_class_attribute_type_constant: Error =
     Cow::Borrowed("Type constants are not allowed on xhp class attributes");
-pub const globals_without_subscript: Error = Cow::Borrowed("$GLOBALS access requires a subscript.");
+pub const globals_without_subscript: Error =
+    Cow::Borrowed("`$GLOBALS` access requires a subscript.");
 pub const invalid_await_position_pipe: Error =
-    Cow::Borrowed("Await cannot be used as an expression right of a pipe operator.");
+    Cow::Borrowed("`await` cannot be used as an expression right of a pipe operator.");
 pub fn invalid_modifier_for_declaration(decl: &str, modifier: &str) -> Error {
     Cow::Owned(format!(
-        "{} cannot be declared {}",
+        "{} cannot be declared `{}`",
         decl.to_string(),
         modifier.to_string(),
     ))
@@ -926,10 +929,10 @@ pub fn multiple_visibility_modifiers_for_declaration(decl: &str) -> Error {
     ))
 }
 pub const break_continue_n_not_supported: Error =
-    Cow::Borrowed("Break/continue N operators are not supported.");
+    Cow::Borrowed("`break`/`continue N` operators are not supported.");
 pub fn invalid_typehint_alias(alias: &str, hint: &str) -> Error {
     Cow::Owned(format!(
-        "Invalid type hint '{}'. Use '{}' instead",
+        "Invalid type hint `{}`. Use `{}` instead",
         alias.to_string(),
         hint.to_string(),
     ))
@@ -937,42 +940,42 @@ pub fn invalid_typehint_alias(alias: &str, hint: &str) -> Error {
 
 pub const function_pointer_bad_recv: Error =
     Cow::Borrowed(concat!(
-        "Function pointers <> can only be created with toplevel functions and explicitly named static methods. ",
-        "Use lambdas (...) ==> {...} for other cases."
+        "Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. ",
+        "Use lambdas `(...) ==> {...}` for other cases."
     ));
 
 pub const local_variable_with_type: Error =
     Cow::Borrowed("Local variables cannot have type annotations in Hack.");
 
 pub const function_pointers_disabled: Error = Cow::Borrowed(
-    "Function pointers are not enabled. Use the hhvm.hack.lang.enable_first_class_function_pointers parser flag",
+    "Function pointers are not enabled. Use the `hhvm.hack.lang.enable_first_class_function_pointers` parser flag",
 );
 
 pub const empty_expression_illegal: Error =
-    Cow::Borrowed("The empty() expression has been removed from Hack.");
+    Cow::Borrowed("The `empty()` expression has been removed from Hack.");
 
 pub const empty_switch_cases: Error =
-    Cow::Borrowed("Switch statements need to have at least one case or a default block");
+    Cow::Borrowed("`switch` statements need to have at least one `case` or a `default` block");
 
 pub const preceding_backslash: Error = Cow::Borrowed("Unnecessary preceding backslash");
 
 pub fn multiple_entrypoints(loc: &str) -> Error {
     Cow::Owned(format!(
-        "Only one __EntryPoint annotation is permitted per file (previous __EntryPoint annotation in {})",
+        "Only one `__EntryPoint` annotation is permitted per file (previous `__EntryPoint` annotation in {})",
         loc.to_string()
     ))
 }
 
 pub fn cannot_use_feature(feature: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot use unstable feature: '{}'",
+        "Cannot use unstable feature: `{}`",
         feature.to_string()
     ))
 }
 
 pub fn invalid_use_of_enable_unstable_feature(message: &str) -> Error {
     Cow::Owned(format!(
-        "This is an invalid use of '__EnableUnstableFeatures' because {}",
+        "This is an invalid use of `__EnableUnstableFeatures` because {}",
         message.to_string()
     ))
 }

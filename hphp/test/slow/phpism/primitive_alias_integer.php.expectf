@@ -1,1 +1,1 @@
-Fatal error: Invalid type hint 'integer'. Use 'int' instead in %s on line %d
+Fatal error: Invalid type hint `integer`. Use `int` instead in %s on line %d

@@ -1,4 +1,4 @@
 File "bad_inout_decl_async_generator.php", line 5, characters 25-29:
-Parameters may not be marked inout on async functions (Parsing[1002])
+Parameters may not be marked `inout` on `async` functions (Parsing[1002])
 File "bad_inout_decl_async_generator.php", line 7, characters 3-10:
-Parameters may not be marked inout on async generators (Parsing[1002])
+Parameters may not be marked `inout` on `async` generators (Parsing[1002])

@@ -1,2 +1,2 @@
 File "function_static_bad.php", line 4, characters 7-12:
-Top-level functions cannot be declared static (Parsing[1002])
+Top-level functions cannot be declared `static` (Parsing[1002])

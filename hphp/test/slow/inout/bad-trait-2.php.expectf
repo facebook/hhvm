@@ -1,2 +1,2 @@
 
-Fatal error: Parameters may not be marked inout on constructors in %s on line %i
+Fatal error: Parameters may not be marked `inout` on constructors in %s on line %i

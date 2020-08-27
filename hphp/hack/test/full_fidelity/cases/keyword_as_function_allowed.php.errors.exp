@@ -1,4 +1,4 @@
-(59,10)-(60,1) The empty() expression has been removed from Hack.
+(59,10)-(60,1) The `empty()` expression has been removed from Hack.
 (61,5)-(61,5) A name is expected here.
 (61,6)-(61,6) A type specifier is expected here.
 (61,7)-(61,7) A left brace `{` is expected here.

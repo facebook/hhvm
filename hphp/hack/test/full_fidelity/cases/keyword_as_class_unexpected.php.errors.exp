@@ -149,7 +149,7 @@
 (80,9)-(80,9) An expression is expected here.
 (81,5)-(81,11) Unexpected node on right hand side of `new` or `instanceof`: `token`
 (81,11)-(81,11) An expression is expected here.
-(82,5)-(82,5) The empty() expression has been removed from Hack.
+(82,5)-(82,5) The `empty()` expression has been removed from Hack.
 (82,5)-(82,10) Unexpected node on right hand side of `new` or `instanceof`: `token`
 (83,5)-(83,11) Unexpected node on right hand side of `new` or `instanceof`: `token`
 (83,11)-(83,11) An expression is expected here.
@@ -241,7 +241,7 @@
 (126,8)-(126,8) An expression is expected here.
 (127,5)-(127,10) Unexpected node on right hand side of `new` or `instanceof`: `token`
 (127,10)-(127,10) An expression is expected here.
-(128,5)-(128,12) Yield can only be used inside a function
+(128,5)-(128,12) `yield` can only be used inside a function
 (128,5)-(128,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new yield()()`?
 (128,5)-(128,12) Unexpected node on right hand side of `new` or `instanceof`: `yield_expression`
 (128,12)-(128,12) An expression is expected here.

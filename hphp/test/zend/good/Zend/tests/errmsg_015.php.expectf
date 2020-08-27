@@ -1,2 +1,2 @@
 
-Fatal error: Method test::__clone cannot accept any arguments in %s/errmsg_015.php on line 4
+Fatal error: Method `test::__clone` cannot accept any arguments in %s/errmsg_015.php on line 4

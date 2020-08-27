@@ -1,1 +1,1 @@
-Fatal error: Don't use $this in a static method, use static:: instead in %s/static_this.php on line 12
+Fatal error: Don't use `$this` in a static method, use `static::` instead in %s/static_this.php on line 12

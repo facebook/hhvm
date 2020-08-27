@@ -1,2 +1,2 @@
 
-Fatal error: You cannot decorate this argument as inout in %s/constants_error_007.php on line 10
+Fatal error: You cannot decorate this argument as `inout` in %s/constants_error_007.php on line 10

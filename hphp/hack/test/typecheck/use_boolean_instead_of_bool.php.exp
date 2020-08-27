@@ -1,2 +1,2 @@
 File "use_boolean_instead_of_bool.php", line 12, characters 11-17:
-Invalid type hint 'boolean'. Use 'bool' instead (Parsing[1002])
+Invalid type hint `boolean`. Use `bool` instead (Parsing[1002])

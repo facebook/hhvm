@@ -1,2 +1,2 @@
 File "await_in_expressions10.php", line 4, characters 16-23:
-Await cannot be used as an expression right of a pipe operator. (Parsing[1002])
+`await` cannot be used as an expression right of a pipe operator. (Parsing[1002])

@@ -1,2 +1,2 @@
 File "double_cast.php", line 13, characters 11-16:
-Invalid type hint 'double'. Use 'float' instead (Parsing[1002])
+Invalid type hint `double`. Use `float` instead (Parsing[1002])

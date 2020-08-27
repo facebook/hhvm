@@ -1,3 +1,0 @@
-File "this_in_static.php", line 14, characters 12-16:
-Don't use $this in a static method, use static:: instead (Parsing[1002])
-

@@ -1,2 +1,2 @@
 File "magic_isset.php", line 4, characters 3-32:
-Magic __isset methods are no longer supported (Parsing[1002])
+Magic `__isset` methods are no longer supported (Parsing[1002])

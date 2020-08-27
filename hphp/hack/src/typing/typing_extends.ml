@@ -302,26 +302,32 @@ let check_override
     in
     let (lazy fty_child) = class_elt.ce_type in
     let (lazy fty_parent) = parent_class_elt.ce_type in
+    if
+      check_member_unique
+      && (is_method || get_ce_const class_elt)
+      && (not (get_ce_abstract parent_class_elt))
+      && not (get_ce_abstract class_elt)
+    then
+      (* Multiple concrete trait definitions, error *)
+      Errors.multiple_concrete_defs
+        pos
+        parent_pos
+        class_elt.ce_origin
+        parent_class_elt.ce_origin
+        member_name
+        (Cls.name class_)
+        on_error;
     match (deref fty_parent, deref fty_child) with
+    | ((_, Tany _), (_, Tany _)) -> env
+    | ((_, Tany _), _) ->
+      Errors.decl_override_missing_hint parent_pos on_error;
+      env
+    | (_, (_, Tany _)) ->
+      Errors.decl_override_missing_hint pos on_error;
+      env
     | ((r_parent, Tfun ft_parent), (r_child, Tfun ft_child)) ->
       let is_static = Cls.has_smethod parent_class member_name in
       let check (r1, ft1) (r2, ft2) () =
-        ( if check_member_unique then
-          match
-            (get_ce_abstract parent_class_elt, get_ce_abstract class_elt)
-          with
-          | (false, false) ->
-            (* Multiple concrete trait definitions, error *)
-            Errors.multiple_concrete_defs
-              pos
-              parent_pos
-              class_elt.ce_origin
-              parent_class_elt.ce_origin
-              member_name
-              (Cls.name class_)
-              on_error
-          | _ -> () );
-
         match mem_source with
         | `FromConstructor ->
           (* we don't check that constructor signatures follow
@@ -356,28 +362,7 @@ let check_override
         class_elt.ce_origin
         on_error
     | _ ->
-      (match (get_node fty_parent, get_node fty_child) with
-      | (Tany _, Tany _) -> ()
-      | (Tany _, _) -> Errors.decl_override_missing_hint parent_pos on_error
-      | (_, Tany _) -> Errors.decl_override_missing_hint pos on_error
-      | (_, _) -> ());
-      if (not (get_ce_abstract parent_class_elt)) && get_ce_abstract class_elt
-      then
-        Errors.abstract_concrete_override pos parent_pos `property;
-      if get_ce_const class_elt then (
-        if
-          check_member_unique
-          && (not (get_ce_abstract class_elt))
-          && not (get_ce_abstract parent_class_elt)
-        then
-          Errors.multiple_concrete_defs
-            pos
-            parent_pos
-            class_elt.ce_origin
-            parent_class_elt.ce_origin
-            member_name
-            (Cls.name class_)
-            on_error;
+      if get_ce_const class_elt then
         Typing_ops.sub_type_decl_on_error
           pos
           Typing_reason.URnone
@@ -385,7 +370,7 @@ let check_override
           on_error
           fty_child
           fty_parent
-      ) else
+      else
         Typing_ops.unify_decl
           pos
           Typing_reason.URnone

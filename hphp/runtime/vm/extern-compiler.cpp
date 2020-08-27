@@ -28,6 +28,7 @@
 #include <folly/DynamicConverter.h>
 #include <folly/json.h>
 #include <folly/FileUtil.h>
+#include <folly/system/ThreadName.h>
 
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/vm/native.h"
@@ -234,7 +235,9 @@ struct LogThread {
   LogThread(int pid, FILE* file)
     : m_pid(pid), m_file(file), m_signalPipe(true)
   {
-    m_thread = std::make_unique<std::thread>([&]() {
+    m_thread = std::make_unique<std::thread>([this]() {
+        folly::setThreadName("extern-compiler-log");
+
         int ret = 0;
         auto pid = m_pid;
         auto signalFD = m_signalPipe.remoteIn();
@@ -438,12 +441,10 @@ struct CompilerGuard;
 
 struct CompilerPool {
   explicit CompilerPool(CompilerOptions&& options)
-    : m_options(options)
-    , m_compilers(options.workers, nullptr)
-  {}
+    : m_options(std::move(options)) {}
 
-  std::pair<size_t, ExternCompiler*> getCompiler();
-  void releaseCompiler(size_t id, ExternCompiler* ptr);
+  std::unique_ptr<ExternCompiler> getCompiler();
+  void releaseCompiler(std::unique_ptr<ExternCompiler> ptr);
   void start();
   void shutdown(bool detach_compilers);
   CompilerResult compile(const char* code,
@@ -469,81 +470,70 @@ struct CompilerPool {
   }
  private:
   CompilerOptions m_options;
-  std::atomic<size_t> m_freeCount{0};
   std::mutex m_compilerLock;
   std::condition_variable m_compilerCv;
-  AtomicVector<ExternCompiler*> m_compilers;
+  std::vector<std::unique_ptr<ExternCompiler>> m_compilers;
   std::string m_version;
 };
 
 struct CompilerGuard final: public FactsParser {
   explicit CompilerGuard(CompilerPool& pool)
-    : m_pool(pool) {
-    std::tie(m_index, m_ptr) = m_pool.getCompiler();
+    : m_ptr{pool.getCompiler()}
+    , m_pool{pool} {}
+
+  ~CompilerGuard() {
+    m_pool.releaseCompiler(std::move(m_ptr));
   }
 
-  ~CompilerGuard() override {
-    m_pool.releaseCompiler(m_index, m_ptr);
-  }
-
+  CompilerGuard(const CompilerGuard&) = delete;
   CompilerGuard(CompilerGuard&&) = delete;
+  CompilerGuard& operator=(const CompilerGuard&) = delete;
   CompilerGuard& operator=(CompilerGuard&&) = delete;
 
-  ExternCompiler* operator->() const { return m_ptr; }
+  ExternCompiler* operator->() const { return m_ptr.get(); }
 
 private:
-  size_t m_index;
-  ExternCompiler* m_ptr;
+  std::unique_ptr<ExternCompiler> m_ptr;
   CompilerPool& m_pool;
 };
 
-std::pair<size_t, ExternCompiler*> CompilerPool::getCompiler() {
-  std::unique_lock<std::mutex> l(m_compilerLock);
+std::unique_ptr<ExternCompiler> CompilerPool::getCompiler() {
+  // If this is zero, we'll wait forever....
+  assertx(m_options.workers > 0);
 
-  m_compilerCv.wait(l, [&] {
-    return m_freeCount.load(std::memory_order_relaxed) != 0;
-  });
-  m_freeCount -= 1;
-
-  for (size_t id = 0; id < m_compilers.size(); ++id) {
-    auto ret = m_compilers.exchange(id, nullptr);
-    if (ret) return std::make_pair(id, ret);
-  }
-
-  not_reached();
+  std::unique_lock<std::mutex> l{m_compilerLock};
+  m_compilerCv.wait(l, [&] { return !m_compilers.empty(); });
+  auto compiler = std::move(m_compilers.back());
+  m_compilers.pop_back();
+  return compiler;
 }
 
-void CompilerPool::releaseCompiler(size_t id, ExternCompiler* ptr) {
+void CompilerPool::releaseCompiler(std::unique_ptr<ExternCompiler> c) {
   std::unique_lock<std::mutex> l(m_compilerLock);
-
-  m_compilers[id].store(ptr, std::memory_order_relaxed);
-  m_freeCount += 1;
-
-  l.unlock();
+  m_compilers.emplace_back(std::move(c));
   m_compilerCv.notify_one();
 }
 
 void CompilerPool::start() {
-  auto const nworkers = m_options.workers;
-  m_freeCount.store(nworkers, std::memory_order_relaxed);
-  for (int i = 0; i < nworkers; ++i) {
-    m_compilers[i].store(new ExternCompiler(m_options),
-        std::memory_order_relaxed);
+  always_assert(m_options.workers > 0);
+
+  {
+    std::unique_lock<std::mutex> l{m_compilerLock};
+    for (size_t i = 0; i < m_options.workers; ++i) {
+      m_compilers.emplace_back(std::make_unique<ExternCompiler>(m_options));
+    }
   }
 
-  CompilerGuard g(*this);
+  CompilerGuard g{*this};
   m_version = g->getVersionString();
 }
 
-void CompilerPool::shutdown(bool detach_compilers) {
-  for (int i = 0; i < m_compilers.size(); ++i) {
-    if (auto c = m_compilers.exchange(i, nullptr)) {
-      if (detach_compilers) {
-        c->detach_from_process();
-      }
-      delete c;
-    }
+void CompilerPool::shutdown(bool detach) {
+  std::unique_lock<std::mutex> l{m_compilerLock};
+  if (detach) {
+    for (auto const& c : m_compilers) c->detach_from_process();
   }
+  m_compilers.clear();
 }
 
 template<typename F>

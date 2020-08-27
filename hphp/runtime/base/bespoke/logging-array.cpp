@@ -19,21 +19,19 @@
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
-#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
-#include <folly/String.h>
 #include <tbb/concurrent_hash_map.h>
 
 #include <algorithm>
 #include <atomic>
-#include <sstream>
 
 namespace HPHP { namespace bespoke {
 
@@ -43,111 +41,7 @@ TRACE_SET_MOD(bespoke);
 
 namespace {
 
-std::string toStringForKey(const char* st) {
-  return st;
-}
-
-std::string toStringForKey(const StringData* sd) {
-  if (sd->isStatic()) {
-    return folly::sformat("[static string=\"{}\"]",
-                          folly::cEscape<std::string>(sd->data()));
-  } else {
-    return "[non-static string]";
-  }
-}
-
-std::string toStringForKey(const TypedValue& tv) {
-  auto const tvname = tname(tv.type());
-  switch (tv.type()) {
-    case KindOfBoolean:
-    case KindOfInt64:
-      if (tv.val().num < 256) {
-        return folly::sformat("[{}={}]", tvname, tv.val().num);
-      } else {
-        return folly::sformat("[{}>=256]", tvname);
-      }
-    case KindOfPersistentString:
-    case KindOfString:
-      if (tv.val().pstr->isStatic()) {
-        auto const escapedString =
-          folly::cEscape<std::string>(tv.val().pstr->data());
-        return folly::sformat("[{}, static=\"{}\"]", tvname, escapedString);
-      } else {
-        return folly::sformat("[{}, non-static]", tvname);
-      }
-    default:
-      return folly::sformat("[{}]", tvname);
-  }
-}
-
-std::string toStringForKey(uint64_t v) {
-  if (v < 256) {
-    return folly::sformat("[int={}]", v);
-  } else {
-    return "[int>=256]";
-  }
-}
-
-template <typename T, typename U>
-std::string toStringForKey(const std::pair<T, U>& p) {
-  return folly::sformat("{}={}", toStringForKey(p.first), toStringForKey(p.second));
-}
-
-template <typename T, typename... Ts>
-std::string assembleKey(const std::string& opBase, T&& arg, Ts&&... args) {
-  auto const paramStr =
-    folly::join(", ", {toStringForKey(std::forward<T>(arg)),
-                       toStringForKey(std::forward<Ts>(args))...});
-  return folly::sformat("{}: {}", opBase, paramStr);
-}
-
-std::string assembleKey(const std::string& opBase) {
-  return opBase;
-}
-///////////////////////////////////////////////////////////////////////////////
-}
-///////////////////////////////////////////////////////////////////////////////
-
-struct LoggingProfile {
-  using EventMapKey = std::pair<SrcKey, std::string>;
-  using EventMapHasher = pairHashCompare<
-    SrcKey, std::string, SrcKey::TbbHashCompare, stringHashCompare>;
-  // Values in the event map are sampled counts
-  using EventMap = tbb::concurrent_hash_map<EventMapKey, uint64_t,
-                                            EventMapHasher>;
-
-  explicit LoggingProfile(SrcKey key)
-    : srckey(key)
-    , sampleCount(0)
-    , staticArray(nullptr) {};
-
-  SrcKey srckey;
-  std::atomic<uint64_t> sampleCount;
-  LoggingArray* staticArray;
-  EventMap profileEvents;
-
-  void logEventKey(const SrcKey& usageSk, const std::string& key) {
-    EventMap::accessor it;
-    if (profileEvents.insert(it, std::make_pair(usageSk, key))) {
-      it->second = 1;
-    } else {
-      it->second++;
-    }
-
-    FTRACE(6, "{} -> {}: {} [count={}]\n", srckey.getSymbol(),
-           (usageSk.valid() ? usageSk.getSymbol() : "<unknown>"), key,
-           it->second);
-  }
-
-  uint64_t sampledOpCount() {
-    uint64_t total = 0;
-    for (auto const &event : profileEvents) total += event.second;
-
-    return total;
-  }
-};
-
-namespace {
+//////////////////////////////////////////////////////////////////////////////
 
 constexpr size_t kSizeIndex = 1;
 static_assert(kSizeIndex2Size[kSizeIndex] >= sizeof(LoggingArray),
@@ -159,28 +53,10 @@ static_assert(kSizeIndex == 0 ||
 LoggingLayout* s_layout = new LoggingLayout();
 std::atomic<bool> g_loggingEnabled;
 
-using ProfileMap =
-  tbb::concurrent_hash_map<SrcKey, LoggingProfile*, SrcKey::TbbHashCompare>;
-ProfileMap s_profileMap;
-
-// The bespoke kind for a vanilla kind. Assumes the kind supports bespokes.
+// The bespoke kind for a vanilla kind.
 HeaderKind getBespokeKind(ArrayData::ArrayKind kind) {
-  switch (kind) {
-    case ArrayData::kPackedKind: return HeaderKind::BespokeVArray;
-    case ArrayData::kMixedKind:  return HeaderKind::BespokeDArray;
-    case ArrayData::kVecKind:    return HeaderKind::BespokeVec;
-    case ArrayData::kDictKind:   return HeaderKind::BespokeDict;
-    case ArrayData::kKeysetKind: return HeaderKind::BespokeKeyset;
-
-    case ArrayData::kBespokeVArrayKind:
-    case ArrayData::kBespokeDArrayKind:
-    case ArrayData::kBespokeVecKind:
-    case ArrayData::kBespokeDictKind:
-    case ArrayData::kBespokeKeysetKind:
-    case ArrayData::kNumKinds:
-      always_assert(false);
-  }
-  not_reached();
+  assertx(!(kind & ArrayData::kBespokeKindMask));
+  return HeaderKind(kind | ArrayData::kBespokeKindMask);
 }
 
 LoggingArray* makeWithProfile(ArrayData* ad, LoggingProfile* prof) {
@@ -197,73 +73,42 @@ LoggingArray* makeWithProfile(ArrayData* ad, LoggingProfile* prof) {
   return lad;
 }
 
-SrcKey getSrcKey() {
-  VMRegAnchor _(VMRegAnchor::Soft);
-  if (tl_regState != VMRegState::CLEAN || vmfp() == nullptr) {
-    // If the anchor fails, use an invalid SrcKey for the sink
-    return SrcKey();
-  }
+// Loads the LoggingProfile for `sk`. If `ad` is static, this function ensures
+// that the staticArray field of the given profile is populated.
+LoggingProfile* profileForSrcKey(SrcKey sk, ArrayData* ad) {
+  auto const profile = getLoggingProfile(sk);
 
-  auto const fp = vmfp();
-  return SrcKey(fp->func(), vmpc(), resumeModeFromActRec(fp));
-}
-
-template <typename... Ts>
-void logEvent(const ArrayData* ad, const std::string& opBase, Ts&&... args) {
-  auto const eventKey = assembleKey(opBase, std::forward<Ts>(args)...);
-  auto const sk = getSrcKey();
-
-  LoggingArray::asLogging(ad)->profile->logEventKey(sk, eventKey);
-}
-
-#define EXPAND(var)
-#define STRING_ARG(x) std::make_pair(#x, x)
-#define LOG_EVENT0(ad) logEvent(ad, __func__)
-#define LOG_EVENT1(ad, x1) logEvent(ad, __func__, STRING_ARG(x1))
-#define LOG_EVENT2(ad, x1, x2) logEvent(ad, __func__, STRING_ARG(x1), \
-                                        STRING_ARG(x2))
-
-LoggingProfile* profileForSrcKey(SrcKey sk, ArrayData *ad) {
-  {
-    ProfileMap::const_accessor it;
-    if (s_profileMap.find(it, sk)) return it->second;
-  }
-
-  auto prof = std::make_unique<LoggingProfile>(sk);
-  if (ad->isStatic()) {
+  if (ad->isStatic() && !profile->staticArray.load(std::memory_order_relaxed)) {
     auto const size = sizeof(LoggingArray);
     auto lad = static_cast<LoggingArray*>(
         RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
-
     lad->initHeader_16(getBespokeKind(ad->kind()), StaticValue,
                        ad->isLegacyArray() ? ArrayData::kLegacyArray : 0);
     lad->setLayout(s_layout);
     lad->wrapped = ad;
-    lad->profile = prof.get();
+    lad->profile = profile;
 
-    prof->staticArray = lad;
-  }
-
-  ProfileMap::accessor insert;
-  if (s_profileMap.insert(insert, sk)) {
-    insert->second = prof.release();
-    MemoryStats::LogAlloc(AllocKind::StaticArray, sizeof(LoggingArray));
-  } else {
-    // Someone beat us; clean up
-    if (ad->isStatic()) {
-      if (RO::EvalLowStaticArrays) {
-        low_free(prof->staticArray);
-      } else {
-        uncounted_free(prof->staticArray);
-      }
+    LoggingArray* expected = nullptr;
+    if (profile->staticArray.compare_exchange_strong(expected, lad)) {
+      MemoryStats::LogAlloc(AllocKind::StaticArray, sizeof(LoggingArray));
+    } else {
+      RO::EvalLowStaticArrays ? low_free(lad) : uncounted_free(lad);
     }
   }
 
-  return insert->second;
+  return profile;
 }
-///////////////////////////////////////////////////////////////////////////////
+
+template <typename... Ts>
+void logEvent(const ArrayData* ad, ArrayOp op, const Ts&... args) {
+  LoggingArray::asLogging(ad)->profile->logEvent(op, args...);
 }
-///////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 void setLoggingEnabled(bool val) {
   g_loggingEnabled.store(val, std::memory_order_relaxed);
@@ -273,8 +118,7 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
   if (!g_loggingEnabled.load(std::memory_order_relaxed)) return ad;
   auto const sk = getSrcKey();
   if (!sk.valid()) {
-    // If the anchor fails, don't enable logging
-    FTRACE(5, "VMRegAnchor failed for maybleEnableLogging\n");
+    FTRACE(5, "VMRegAnchor failed for maybleEnableLogging.\n");
     return ad;
   }
 
@@ -295,7 +139,7 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
 
   if (shouldEmitBespoke) {
     FTRACE(5, "Emit bespoke at {}\n", sk.getSymbol());
-    return ad->isStatic() ? profile->staticArray
+    return ad->isStatic() ? profile->staticArray.load(std::memory_order_relaxed)
                           : makeWithProfile(ad, profile);
   } else {
     FTRACE(5, "Emit vanilla at {}\n", sk.getSymbol());
@@ -342,13 +186,13 @@ size_t LoggingLayout::heapSize(const ArrayData*) const {
   return sizeof(LoggingArray);
 }
 void LoggingLayout::scan(const ArrayData* ad, type_scan::Scanner& scan) const {
-  LOG_EVENT0(ad);
+  logEvent(ad, __func__);
   scan.scan(LoggingArray::asLogging(ad)->wrapped);
 }
 
 ArrayData* LoggingLayout::escalateToVanilla(
     const ArrayData* ad, const char* reason) const {
-  LOG_EVENT1(ad, reason);
+  logEvent(ad, __func__, makeStaticString(reason));
   auto wrapped = LoggingArray::asLogging(ad)->wrapped;
   wrapped->incRefCount();
   return wrapped;
@@ -356,7 +200,7 @@ ArrayData* LoggingLayout::escalateToVanilla(
 
 void LoggingLayout::convertToUncounted(
     ArrayData* ad, DataWalker::PointerMap* seen) const {
-  LOG_EVENT0(ad);
+  logEvent(ad, __func__);
   auto lad = LoggingArray::asLogging(ad);
   auto tv = make_array_like_tv(lad->wrapped);
   ConvertTvToUncounted(&tv, seen);
@@ -364,33 +208,35 @@ void LoggingLayout::convertToUncounted(
 }
 
 void LoggingLayout::releaseUncounted(ArrayData* ad) const {
-  LOG_EVENT0(ad);
+  logEvent(ad, __func__);
   auto tv = make_array_like_tv(LoggingArray::asLogging(ad)->wrapped);
   ReleaseUncountedTv(&tv);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
 void LoggingLayout::release(ArrayData* ad) const {
-  LOG_EVENT0(ad);
+  logEvent(ad, __func__);
   LoggingArray::asLogging(ad)->wrapped->decRefAndRelease();
   tl_heap->objFreeIndex(ad, kSizeIndex);
 }
+
+//////////////////////////////////////////////////////////////////////////////
+// Accessors
+
 size_t LoggingLayout::size(const ArrayData* ad) const {
-  LOG_EVENT0(ad);
+  logEvent(ad, __func__);
   return LoggingArray::asLogging(ad)->wrapped->size();
 }
 bool LoggingLayout::isVectorData(const ArrayData* ad) const {
-  LOG_EVENT0(ad);
+  logEvent(ad, __func__);
   return LoggingArray::asLogging(ad)->wrapped->isVectorData();
 }
 
 TypedValue LoggingLayout::getInt(const ArrayData* ad, int64_t k) const {
-  LOG_EVENT1(ad, k);
+  logEvent(ad, __func__, k);
   return LoggingArray::asLogging(ad)->wrapped->get(k);
 }
 TypedValue LoggingLayout::getStr(const ArrayData* ad, const StringData* k) const {
-  LOG_EVENT1(ad, k);
+  logEvent(ad, __func__, k);
   return LoggingArray::asLogging(ad)->wrapped->get(k);
 }
 TypedValue LoggingLayout::getKey(const ArrayData* ad, ssize_t pos) const {
@@ -400,16 +246,18 @@ TypedValue LoggingLayout::getVal(const ArrayData* ad, ssize_t pos) const {
   return LoggingArray::asLogging(ad)->wrapped->nvGetVal(pos);
 }
 ssize_t LoggingLayout::getIntPos(const ArrayData* ad, int64_t k) const {
-  LOG_EVENT1(ad, k);
+  logEvent(ad, __func__, k);
   return LoggingArray::asLogging(ad)->wrapped->nvGetIntPos(k);
 }
 ssize_t LoggingLayout::getStrPos(const ArrayData* ad, const StringData* k) const {
-  LOG_EVENT1(ad, k);
+  logEvent(ad, __func__, k);
   return LoggingArray::asLogging(ad)->wrapped->nvGetStrPos(k);
 }
 
-namespace {
+//////////////////////////////////////////////////////////////////////////////
+// Mutations
 
+namespace {
 ArrayData* escalate(LoggingArray* lad, ArrayData* result) {
   if (result == lad->wrapped) return lad;
   return makeWithProfile(result, lad->profile);
@@ -427,137 +275,132 @@ decltype(auto) mutate(ArrayData* ad, F&& f) {
   SCOPE_EXIT { if (cow) lad->wrapped->decRefCount(); };
   return escalate(lad, f(lad->wrapped));
 }
-///////////////////////////////////////////////////////////////////////////////
 }
-///////////////////////////////////////////////////////////////////////////////
 
 arr_lval LoggingLayout::lvalInt(ArrayData* ad, int64_t k) const {
-  LOG_EVENT1(ad, k);
+  logEvent(ad, __func__, k);
   return mutate(ad, [&](ArrayData* arr) { return arr->lval(k); });
 }
 arr_lval LoggingLayout::lvalStr(ArrayData* ad, StringData* k) const {
-  LOG_EVENT1(ad, k);
+  logEvent(ad, __func__, k);
   return mutate(ad, [&](ArrayData* arr) { return arr->lval(k); });
 }
 ArrayData* LoggingLayout::setInt(ArrayData* ad, int64_t k, TypedValue v) const {
-  LOG_EVENT2(ad, k, v);
+  logEvent(ad, __func__, k, v);
   return mutate(ad, [&](ArrayData* w) { return w->set(k, v); });
 }
 ArrayData* LoggingLayout::setStr(ArrayData* ad, StringData* k, TypedValue v) const {
-  LOG_EVENT2(ad, k, v);
+  logEvent(ad, __func__, k, v);
   return mutate(ad, [&](ArrayData* w) { return w->set(k, v); });
 }
 ArrayData* LoggingLayout::removeInt(ArrayData* ad, int64_t k) const {
-  LOG_EVENT1(ad, k);
+  logEvent(ad, __func__, k);
   return mutate(ad, [&](ArrayData* w) { return w->remove(k); });
 }
 ArrayData* LoggingLayout::removeStr(ArrayData* ad, const StringData* k) const {
-  LOG_EVENT1(ad, k);
+  logEvent(ad, __func__, k);
   return mutate(ad, [&](ArrayData* w) { return w->remove(k); });
 }
 
 ssize_t LoggingLayout::iterBegin(const ArrayData* ad) const {
-  LOG_EVENT0(ad);
+  logEvent(ad, __func__);
   return LoggingArray::asLogging(ad)->wrapped->iter_begin();
 }
 ssize_t LoggingLayout::iterLast(const ArrayData* ad) const {
-  LOG_EVENT0(ad);
+  logEvent(ad, __func__);
   return LoggingArray::asLogging(ad)->wrapped->iter_last();
 }
 ssize_t LoggingLayout::iterEnd(const ArrayData* ad) const {
-  LOG_EVENT0(ad);
+  logEvent(ad, __func__);
   return LoggingArray::asLogging(ad)->wrapped->iter_end();
 }
 ssize_t LoggingLayout::iterAdvance(const ArrayData* ad, ssize_t prev) const {
-  LOG_EVENT0(ad);
+  logEvent(ad, __func__);
   return LoggingArray::asLogging(ad)->wrapped->iter_advance(prev);
 }
 ssize_t LoggingLayout::iterRewind(const ArrayData* ad, ssize_t prev) const {
-  LOG_EVENT0(ad);
+  logEvent(ad, __func__);
   return LoggingArray::asLogging(ad)->wrapped->iter_rewind(prev);
 }
 
 ArrayData* LoggingLayout::append(ArrayData* ad, TypedValue v) const {
-  LOG_EVENT1(ad, v);
+  logEvent(ad, __func__, v);
   return mutate(ad, [&](ArrayData* w) { return w->append(v); });
 }
 ArrayData* LoggingLayout::prepend(ArrayData* ad, TypedValue v) const {
-  LOG_EVENT1(ad, v);
+  logEvent(ad, __func__, v);
   return mutate(ad, [&](ArrayData* w) { return w->prepend(v); });
 }
 ArrayData* LoggingLayout::merge(ArrayData* ad, const ArrayData* arr) const {
-  LOG_EVENT0(ad);
+  logEvent(ad, __func__);
   return mutate(ad, [&](ArrayData* w) { return w->merge(arr); });
 }
 ArrayData* LoggingLayout::pop(ArrayData* ad, Variant& ret) const {
-  LOG_EVENT0(ad);
+  logEvent(ad, __func__);
   return mutate(ad, [&](ArrayData* w) { return w->pop(ret); });
 }
 ArrayData* LoggingLayout::dequeue(ArrayData* ad, Variant& ret) const {
-  LOG_EVENT0(ad);
+  logEvent(ad, __func__);
   return mutate(ad, [&](ArrayData* w) { return w->dequeue(ret); });
 }
 ArrayData* LoggingLayout::renumber(ArrayData* ad) const {
-  LOG_EVENT0(ad);
+  logEvent(ad, __func__);
   return mutate(ad, [&](ArrayData* w) { return w->renumber(); });
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 namespace {
-
 template <typename F>
-ArrayData* conv(ArrayData* ad, F&& f) {
+ArrayData* convert(ArrayData* ad, F&& f) {
   auto const lad = LoggingArray::asLogging(ad);
-  auto const result = f(lad->wrapped);
+  auto const wrapped = lad->wrapped;
+  auto const result = f(wrapped);
 
-  if (result == lad->wrapped) {
-    // Reuse existing profile for in-place conversions
-    return lad->updateKind();
-  } else if ((lad->wrapped->hasVanillaMixedLayout() &&
-              result->hasVanillaMixedLayout()) ||
-             (lad->wrapped->hasVanillaPackedLayout() &&
-              result->hasVanillaPackedLayout())) {
-    // Reuse existing profile for vec<->varray and dict<->darray conversions
+  // Reuse existing profile for in-place conversions.
+  if (result == wrapped) return lad->updateKind();
+
+  // Reuse existing profile for conversions that don't change array layout.
+  if ((wrapped->hasVanillaMixedLayout() && result->hasVanillaMixedLayout()) ||
+      (wrapped->hasVanillaPackedLayout() && result->hasVanillaPackedLayout()) ||
+      (wrapped->isKeysetKind() && result->isKeysetKind())) {
     return makeWithProfile(result, lad->profile);
-  } else {
-    // Otherwise, make a fresh profile
-    auto const sk = getSrcKey();
-    if (!sk.valid()) {
-      // If the anchor fails, don't track the new array
-      FTRACE(5, "VMRegAnchor failed for convert operation\n");
-      return result;
-    }
-
-    return makeWithProfile(result, profileForSrcKey(sk, result));
   }
+
+  // If the layout has changed, make a fresh profile at the new creation site.
+  auto const sk = getSrcKey();
+  if (!sk.valid()) {
+    FTRACE(5, "VMRegAnchor failed for convert operation.\n");
+    return result;
+  }
+  return makeWithProfile(result, profileForSrcKey(sk, result));
 }
-///////////////////////////////////////////////////////////////////////////////
 }
-///////////////////////////////////////////////////////////////////////////////
 
 ArrayData* LoggingLayout::copy(const ArrayData* ad) const {
-  LOG_EVENT0(ad);
+  logEvent(ad, __func__);
   auto const lad = LoggingArray::asLogging(ad);
   return makeWithProfile(lad->wrapped->copy(), lad->profile);
 }
 ArrayData* LoggingLayout::toVArray(ArrayData* ad, bool copy) const {
-  LOG_EVENT0(ad);
-  return conv(ad, [=](ArrayData* w) { return w->toVArray(copy); });
+  logEvent(ad, __func__);
+  return convert(ad, [=](ArrayData* w) { return w->toVArray(copy); });
 }
 ArrayData* LoggingLayout::toDArray(ArrayData* ad, bool copy) const {
-  LOG_EVENT0(ad);
-  return conv(ad, [=](ArrayData* w) { return w->toDArray(copy); });
+  logEvent(ad, __func__);
+  return convert(ad, [=](ArrayData* w) { return w->toDArray(copy); });
 }
 ArrayData* LoggingLayout::toVec(ArrayData* ad, bool copy) const {
-  LOG_EVENT0(ad);
-  return conv(ad, [=](ArrayData* w) { return w->toVec(copy); });
+  logEvent(ad, __func__);
+  return convert(ad, [=](ArrayData* w) { return w->toVec(copy); });
 }
 ArrayData* LoggingLayout::toDict(ArrayData* ad, bool copy) const {
-  LOG_EVENT0(ad);
-  return conv(ad, [=](ArrayData* w) { return w->toDict(copy); });
+  logEvent(ad, __func__);
+  return convert(ad, [=](ArrayData* w) { return w->toDict(copy); });
 }
 ArrayData* LoggingLayout::toKeyset(ArrayData* ad, bool copy) const {
-  LOG_EVENT0(ad);
-  return conv(ad, [=](ArrayData* w) { return w->toKeyset(copy); });
+  logEvent(ad, __func__);
+  return convert(ad, [=](ArrayData* w) { return w->toKeyset(copy); });
 }
 
 void LoggingLayout::setLegacyArrayInPlace(ArrayData* ad, bool legacy) const {
@@ -569,134 +412,6 @@ void LoggingLayout::setLegacyArrayInPlace(ArrayData* ad, bool legacy) const {
     lad->wrapped = nad;
   }
   lad->wrapped->setLegacyArray(legacy);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-namespace {
-std::atomic<bool> s_exportStarted = false;
-std::thread s_exportProfilesThread;
-
-using EventData = std::pair<LoggingProfile::EventMapKey, uint64_t>;
-using SrcKeyData = std::pair<SrcKey, std::vector<EventData>>;
-
-void exportSortedProfiles(FILE* file,
-                          const std::vector<SrcKeyData>& sourceVec) {
-  for (auto const& sourceProfile : sourceVec) {
-    auto const sourceSk = sourceProfile.first;
-
-    if (RO::EvalExportLoggingArrayDataToFile) {
-      auto const logEntry = folly::sformat("{}:\n", sourceSk.getSymbol());
-      if (fwrite(logEntry.data(), 1, logEntry.length(), file)
-          != logEntry.length()) {
-        return;
-      }
-    }
-
-    for (auto const& entry : sourceProfile.second) {
-      auto const sinkSk = entry.first.first;
-      auto const event = entry.first.second;
-      auto const count = entry.second;
-
-      if (RO::EvalExportLoggingArrayDataToFile) {
-        auto const logEntry =
-          folly::sformat("  {: >9}x {} at {}\n", count, event,
-                         sinkSk.valid() ? sinkSk.getSymbol()
-                                        : "<invalid SrcKey>");
-
-        if (fwrite(logEntry.data(), 1, logEntry.length(), file)
-            != logEntry.length()) {
-          return;
-        }
-      }
-
-      if (RO::EvalExportLoggingArrayDataToStructuredLog) {
-        StructuredLogEntry sle;
-        sle.setStr("source", sourceSk.getSymbol());
-        sle.setStr("sink", sinkSk.valid() ? sinkSk.getSymbol()
-                                          : "<invalid SrcKey>");
-        sle.setStr("event", event);
-        sle.setInt("count", count);
-
-        StructuredLog::log("hhvm_classypgo_array_logs_test", sle);
-      }
-    }
-  }
-}
-
-std::vector<SrcKeyData> sortProfileData() {
-  using OriginalSrcKeyData = std::pair<SrcKey, LoggingProfile*>;
-  std::vector<OriginalSrcKeyData>
-    presortVec(s_profileMap.begin(), s_profileMap.end());
-
-  std::sort(
-    presortVec.begin(),
-    presortVec.end(),
-    [&](OriginalSrcKeyData a, OriginalSrcKeyData b) {
-      return a.second->sampledOpCount() > b.second->sampledOpCount();
-    }
-  );
-
-  std::vector<SrcKeyData> sourceVec;
-  sourceVec.reserve(s_profileMap.size());
-
-  std::transform(
-    presortVec.begin(), presortVec.end(), std::back_inserter(sourceVec),
-    [](OriginalSrcKeyData srcKeyProfile) {
-      std::vector<EventData> events(srcKeyProfile.second->profileEvents.begin(),
-                                    srcKeyProfile.second->profileEvents.end());
-
-      std::sort(
-        events.begin(),
-        events.end(),
-        [&](EventData a, EventData b) {
-          return a.second > b.second;
-        }
-      );
-
-      return std::make_pair(srcKeyProfile.first, events);
-    }
-  );
-
-  return sourceVec;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-}
-//////////////////////////////////////////////////////////////////////////////
-
-void exportProfiles() {
-  if (!RO::EvalExportLoggingArrayDataToStructuredLog
-      && !RO::EvalExportLoggingArrayDataToFile) {
-    return;
-  }
-
-  s_exportStarted.store(true, std::memory_order_relaxed);
-  s_exportProfilesThread = std::thread([] {
-    hphp_thread_init();
-
-    auto const sourceVec = sortProfileData();
-
-    if (RO::EvalExportLoggingArrayDataToFile) {
-      auto const filename = folly::to<std::string>(
-        RO::EvalExportLoggingArrayDataPath,
-        "/log_array_dump"
-      );
-      auto const file = fopen(filename.c_str(), "w");
-      if (file == nullptr) return;
-      SCOPE_EXIT { fclose(file); };
-
-      exportSortedProfiles(file, sourceVec);
-    } else {
-      exportSortedProfiles(nullptr, sourceVec);
-    }
-  });
-}
-
-void stopExportProfiles() {
-  if (s_exportStarted.load(std::memory_order_relaxed)) {
-    s_exportProfilesThread.join();
-  }
 }
 
 }}

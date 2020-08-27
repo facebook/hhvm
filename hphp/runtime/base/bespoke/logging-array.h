@@ -50,8 +50,8 @@ struct LoggingLayout : public Layout {
   void convertToUncounted(
     ArrayData*, DataWalker::PointerMap* seen) const final;
   void releaseUncounted(ArrayData*) const final;
-
   void release(ArrayData*) const final;
+
   size_t size(const ArrayData*) const final;
   bool isVectorData(const ArrayData*) const final;
 

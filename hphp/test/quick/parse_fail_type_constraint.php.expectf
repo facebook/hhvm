@@ -1,2 +1,2 @@
 
-Fatal error: A type alias declaration cannot both use 'type' and have a constraint. Did you mean 'newtype'? in %s/parse_fail_type_constraint.php on line 4
+Fatal error: A type alias declaration cannot both use `type` and have a constraint. Did you mean `newtype`? in %s/parse_fail_type_constraint.php on line 4

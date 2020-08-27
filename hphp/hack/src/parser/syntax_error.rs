@@ -190,22 +190,23 @@ pub const error1061: Error = Cow::Borrowed("A Pocket Universes operator `:@` is 
 pub const error1063: Error = Cow::Borrowed("Expected matching separator here.");
 pub const error1064: Error = Cow::Borrowed("XHP children declarations are no longer supported.");
 pub const error1065: Error = Cow::Borrowed("A backtick ``` is expected here.");
-pub const error2001: Error = Cow::Borrowed("A type annotation is required in strict mode.");
+pub const error2001: Error = Cow::Borrowed("A type annotation is required in `strict` mode.");
 pub const error2003: Error =
-    Cow::Borrowed("A case statement may only appear directly inside a switch.");
+    Cow::Borrowed("A `case` statement may only appear directly inside a `switch`.");
 pub const error2004: Error =
-    Cow::Borrowed("A default statement may only appear directly inside a switch.");
+    Cow::Borrowed("A `default` statement may only appear directly inside a `switch`.");
 pub const error2005: Error =
-    Cow::Borrowed("A break statement may only appear inside a switch or loop.");
-pub const error2006: Error = Cow::Borrowed("A continue statement may only appear inside a loop.");
-pub const error2007: Error = Cow::Borrowed("A try statement requires a catch or a finally clause.");
+    Cow::Borrowed("A `break` statement may only appear inside a `switch` or loop.");
+pub const error2006: Error = Cow::Borrowed("A `continue` statement may only appear inside a loop.");
+pub const error2007: Error =
+    Cow::Borrowed("A `try` statement requires a `catch` or a `finally` clause.");
 pub const error2008: Error = Cow::Borrowed(concat!(
-    "The first statement inside a switch statement must ",
-    "be a case or default label statement."
+    "The first statement inside a `switch` statement must ",
+    "be a `case` or `default` label statement."
 ));
 pub fn error2009(class_name: &str, method_name: &str) -> Error {
     Cow::Owned(format!(
-        "Constructor {}::{}() cannot be static",
+        "Constructor `{}::{}()` cannot be static",
         class_name.to_string(),
         method_name.to_string(),
     ))
@@ -217,32 +218,33 @@ pub const error2010: Error = Cow::Borrowed(concat!(
 pub const error2014: Error = Cow::Borrowed("An abstract method cannot have a method body.");
 pub fn error2015(class_name: &str, method_name: &str) -> Error {
     Cow::Owned(format!(
-        "Non-abstract method {}::{} must contain body",
+        "Non-abstract method `{}::{}` must contain body",
         class_name.to_string(),
         method_name.to_string(),
     ))
 }
 pub fn error2016(class_name: &str, method_name: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot declare abstract method `{}::{}` private",
+        "Cannot declare abstract method `{}::{}` `private`",
         class_name.to_string(),
         method_name.to_string(),
     ))
 }
-pub const error2018: Error = Cow::Borrowed("A constructor cannot have a non-void type annotation.");
+pub const error2018: Error =
+    Cow::Borrowed("A constructor cannot have a non-`void` type annotation.");
 pub fn error2019(class_name: &str, method_name: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot declare abstract method {}::{} final",
+        "Cannot declare abstract method `{}::{}` `final`",
         class_name.to_string(),
         method_name.to_string(),
     ))
 }
 pub const error2020: Error = Cow::Borrowed(concat!(
-    "Use of the '{}' subscript operator is deprecated; ",
-    " use '[]' instead."
+    "Use of the `{}` subscript operator is deprecated; ",
+    " use `[]` instead."
 ));
 pub const error2021: Error = Cow::Borrowed(concat!(
-    "A variadic parameter ('...') may only appear at the end of ",
+    "A variadic parameter `...` may only appear at the end of ",
     "a parameter list."
 ));
 pub const error2023: Error =
@@ -250,24 +252,24 @@ pub const error2023: Error =
 pub const error2024: Error =
     Cow::Borrowed("Traits or interfaces cannot have parameters with visibility modifiers");
 pub const error2022: Error =
-    Cow::Borrowed("A variadic parameter ('...') may not be followed by a comma.");
+    Cow::Borrowed("A variadic parameter `...` may not be followed by a comma.");
 pub fn error2025(class_name: &str, prop_name: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot redeclare {}::{}",
+        "Cannot redeclare `{}::{}`",
         class_name.to_string(),
         prop_name.to_string(),
     ))
 }
-pub const error2029: Error = Cow::Borrowed("Only traits and interfaces may use 'require extends'.");
-pub const error2030: Error = Cow::Borrowed("Only traits may use 'require implements'.");
-pub const error2032: Error = Cow::Borrowed("The array type is not allowed in strict mode.");
+pub const error2029: Error = Cow::Borrowed("Only traits and interfaces may use `require extends`.");
+pub const error2030: Error = Cow::Borrowed("Only traits may use `require implements`.");
+pub const error2032: Error = Cow::Borrowed("The array type is not allowed in `strict` mode.");
 pub const error2033: Error = Cow::Borrowed(concat!(
-    "The splat operator ('...') for unpacking variadic arguments ",
+    "The splat operator `...` for unpacking variadic arguments ",
     "may only appear at the end of an argument list."
 ));
 pub const error2034: Error = Cow::Borrowed(concat!(
-    "A type alias declaration cannot both use 'type' and have a ",
-    "constraint. Did you mean 'newtype'?"
+    "A type alias declaration cannot both use `type` and have a ",
+    "constraint. Did you mean `newtype`?"
 ));
 pub const error2035: Error = Cow::Borrowed("Only classes may implement interfaces.");
 pub const error2036: Error = Cow::Borrowed(concat!(
@@ -279,30 +281,30 @@ pub fn error2038(constructor_name: &str) -> Error {
     Cow::Owned(format!(
         concat!(
             "A constructor initializing an object must be passed a (possibly empty) ",
-            "list of arguments. Did you mean 'new {}()'?",
+            "list of arguments. Did you mean `new {}()`?",
         ),
         constructor_name.to_string(),
     ))
 }
 pub const error2040: Error = Cow::Borrowed(concat!(
-    "Invalid use of 'list(...)'. A list expression may only be ",
+    "Invalid use of `list(...)`. A list expression may only be ",
     "used as the left side of a simple assignment, the value clause of a ",
-    "foreach loop, or a list item nested inside another list expression."
+    "`foreach` loop, or a list item nested inside another list expression."
 ));
 pub const error2041: Error = Cow::Borrowed(concat!(
     "Unexpected method body: interfaces may contain only",
     " method signatures, and not method implementations."
 ));
-pub const error2042: Error = Cow::Borrowed("Interfaces may not be declared 'abstract'.");
-pub const error2043: Error = Cow::Borrowed("Traits may not be declared 'abstract'.");
+pub const error2042: Error = Cow::Borrowed("Interfaces may not be declared `abstract`.");
+pub const error2043: Error = Cow::Borrowed("Traits may not be declared `abstract`.");
 pub fn error2046(method_type: &str) -> Error {
     Cow::Owned(format!(
-        "'async' cannot be used on {}. Use an Awaitable<...> return type instead.",
+        "`async` cannot be used on {}. Use an `Awaitable<...>` return type instead.",
         method_type.to_string(),
     ))
 }
 
-pub const error2048: Error = Cow::Borrowed("Expected group use prefix to end with '\\'");
+pub const error2048: Error = Cow::Borrowed("Expected group use prefix to end with `\\`");
 pub const error2049: Error = Cow::Borrowed("A namespace use clause may not specify the kind here.");
 pub const error2050: Error =
     Cow::Borrowed("A concrete constant declaration must have an initializer.");
@@ -313,12 +315,12 @@ pub const error2052: Error = Cow::Borrowed(concat!(
     "unbracketed namespace declarations"
 ));
 pub const error2053: Error = Cow::Borrowed(concat!(
-    "Use of 'var' as synonym for 'public' in declaration disallowed in Hack. ",
-    "Use 'public' instead."
+    "Use of `var` as synonym for `public` in declaration disallowed in Hack. ",
+    "Use `public` instead."
 ));
 pub const error2054: Error = Cow::Borrowed(concat!(
     "Method declarations require a visibility modifier ",
-    "such as public, private or protected."
+    "such as `public`, `private` or `protected`."
 ));
 pub const error2055: Error = Cow::Borrowed("At least one enumerated item is expected.");
 pub const error2056: Error = Cow::Borrowed("First unbracketed namespace occurrence here");
@@ -332,28 +334,28 @@ pub const error2061: Error = Cow::Borrowed(concat!(
     "final classes."
 ));
 pub const error2062: Error =
-    Cow::Borrowed("Non-static methods are not allowed in abstract final classes.");
+    Cow::Borrowed("Non-static methods are not allowed in `abstract final` classes.");
 pub const error2063: Error = Cow::Borrowed("Expected integer or string literal.");
 pub const error2065: Error =
-    Cow::Borrowed("A variadic parameter ('...') must not have a default value.");
+    Cow::Borrowed("A variadic parameter `...` must not have a default value.");
 // This was typing error 4077.
 pub const error2066: Error = Cow::Borrowed(concat!(
     "A previous parameter has a default value. Remove all the ",
     "default values for the preceding parameters, or add a default value to ",
     "this one."
 ));
-pub const error2068: Error = Cow::Borrowed("hh blocks and php blocks cannot be mixed.");
+pub const error2068: Error = Cow::Borrowed("`hh` blocks and `php` blocks cannot be mixed.");
 pub const invalid_octal_integer: Error = Cow::Borrowed("Invalid octal integers");
 pub const prefixed_invalid_string_kind: Error =
     Cow::Borrowed("Only double-quoted strings may be prefixed.");
 pub const illegal_interpolated_brace_with_embedded_dollar_expression: Error =
     Cow::Borrowed(concat!(
-        "The only legal expressions inside a {$...}-expression embedded in a string are ",
+        "The only legal expressions inside a `{$...}`-expression embedded in a string are ",
         "variables, function calls, subscript expressions, and member access expressions"
     ));
-pub const expected_dotdotdot: Error = Cow::Borrowed("'...' is expected here.");
+pub const expected_dotdotdot: Error = Cow::Borrowed("`...` is expected here.");
 pub const invalid_foreach_element: Error = Cow::Borrowed(
-    "An arrow ('=>') or right parenthesis (')') \
+    "An arrow `=>` or right parenthesis `)` \
      is expected here.",
 );
 pub const inline_function_def: Error =
@@ -361,28 +363,28 @@ pub const inline_function_def: Error =
 pub const decl_outside_global_scope: Error =
     Cow::Borrowed("Declarations are not supported outside global scope");
 pub const pocket_universe_final_expected: Error =
-    Cow::Borrowed("The 'final' keyword is expected here.");
+    Cow::Borrowed("The `final` keyword is expected here.");
 pub const pocket_universe_enum_expected: Error =
-    Cow::Borrowed("The 'enum' keyword is expected here.");
+    Cow::Borrowed("The `enum` keyword is expected here.");
 pub const pocket_universe_invalid_field: Error =
     Cow::Borrowed("Invalid pocket universe field syntax.");
-pub const type_keyword: Error = Cow::Borrowed("The 'type' keyword is expected here.");
+pub const type_keyword: Error = Cow::Borrowed("The `type` keyword is expected here.");
 pub const expected_simple_offset_expression: Error =
     Cow::Borrowed("A simple offset expression is expected here");
 pub const expected_user_attribute: Error = Cow::Borrowed("A user attribute is expected here.");
 pub const expected_as_or_insteadof: Error =
-    Cow::Borrowed("The 'as' keyword or the 'insteadof' keyword is expected here.");
+    Cow::Borrowed("The `as` keyword or the `insteadof` keyword is expected here.");
 pub const missing_double_quote : Error = /* error0010 analogue */ Cow::Borrowed(
   "A double quote is expected here.");
 pub const instanceof_disabled: Error = Cow::Borrowed(
-    "The 'instanceof' operator is not supported in Hack; use the 'is' operator or 'is_a()'",
+    "The `instanceof` operator is not supported in Hack; use the `is` operator or `is_a()`",
 );
 pub const abstract_instance_property: Error =
     Cow::Borrowed("Instance property may not be abstract.");
 pub const memoize_lsb_on_non_static: Error =
-    Cow::Borrowed("<<__MemoizeLSB>> can only be applied to static methods");
+    Cow::Borrowed("`<<__MemoizeLSB>>` can only be applied to static methods");
 pub const memoize_lsb_on_non_method: Error =
-    Cow::Borrowed("<<__MemoizeLSB>> can only be applied to methods");
+    Cow::Borrowed("`<<__MemoizeLSB>>` can only be applied to methods");
 pub const expression_as_attribute_arguments: Error =
     Cow::Borrowed("Attribute arguments must be literals");
 pub const instanceof_invalid_scope_resolution: Error = Cow::Borrowed(concat!(

@@ -1,2 +1,2 @@
 
-Fatal error: 'async' cannot be used on a method in an interface. Use an Awaitable<...> return type instead. in %s/async_bad_if.php on line 3
+Fatal error: `async` cannot be used on a method in an interface. Use an `Awaitable<...>` return type instead. in %s/async_bad_if.php on line 3

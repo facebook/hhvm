@@ -132,7 +132,7 @@
 (70,9)-(70,9) An expression is expected here.
 (71,5)-(71,10) Unexpected node on right hand side of new or instanceof: token
 (71,10)-(71,10) An expression is expected here.
-(73,5)-(73,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new clone()()'?
+(73,5)-(73,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new clone()()`?
 (73,5)-(73,12) Unexpected node on right hand side of new or instanceof: prefix_unary_expression
 (73,12)-(73,12) An expression is expected here.
 (74,5)-(74,10) Unexpected node on right hand side of new or instanceof: token
@@ -161,7 +161,7 @@
 (87,14)-(87,14) An expression is expected here.
 (88,5)-(88,13) Unexpected node on right hand side of new or instanceof: token
 (88,13)-(88,13) An expression is expected here.
-(89,5)-(89,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new eval()()'?
+(89,5)-(89,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new eval()()`?
 (89,5)-(89,11) Unexpected node on right hand side of new or instanceof: eval_expression
 (89,11)-(89,11) An expression is expected here.
 (90,5)-(90,12) Unexpected node on right hand side of new or instanceof: token
@@ -174,7 +174,7 @@
 (93,8)-(93,8) An expression is expected here.
 (94,5)-(94,12) Unexpected node on right hand side of new or instanceof: token
 (94,12)-(94,12) An expression is expected here.
-(95,5)-(95,16) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new function();()'?
+(95,5)-(95,16) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new function();()`?
 (95,5)-(95,16) Unexpected node on right hand side of new or instanceof: anonymous_function
 (95,16)-(96,1) A semicolon `;` is expected here.
 (96,5)-(96,11) Unexpected node on right hand side of new or instanceof: token
@@ -185,10 +185,10 @@
 (98,7)-(98,7) An expression is expected here.
 (99,5)-(99,15) Unexpected node on right hand side of new or instanceof: token
 (99,15)-(99,15) An expression is expected here.
-(100,5)-(100,14) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new include()()'?
+(100,5)-(100,14) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new include()()`?
 (100,5)-(100,14) Unexpected node on right hand side of new or instanceof: inclusion_expression
 (100,14)-(100,14) An expression is expected here.
-(101,5)-(101,19) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new include_once()()'?
+(101,5)-(101,19) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new include_once()()`?
 (101,5)-(101,19) Unexpected node on right hand side of new or instanceof: inclusion_expression
 (101,19)-(101,19) An expression is expected here.
 (102,5)-(102,10) Unexpected node on right hand side of new or instanceof: token
@@ -197,16 +197,16 @@
 (103,15)-(103,15) An expression is expected here.
 (104,5)-(104,14) Unexpected node on right hand side of new or instanceof: token
 (104,14)-(104,14) An expression is expected here.
-(106,5)-(106,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new isset()()'?
+(106,5)-(106,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new isset()()`?
 (106,5)-(106,12) Unexpected node on right hand side of new or instanceof: isset_expression
-(107,5)-(107,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new list()()'?
+(107,5)-(107,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new list()()`?
 (107,5)-(107,11) Unexpected node on right hand side of new or instanceof: list_expression
 (108,5)-(108,14) Unexpected node on right hand side of new or instanceof: token
-(109,5)-(109,10) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new new()()'?
+(109,5)-(109,10) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new new()()`?
 (109,5)-(109,10) Unexpected node on right hand side of new or instanceof: object_creation_expression
-(109,8)-(109,10) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new ()()'?
+(109,8)-(109,10) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new ()()`?
 (109,10)-(109,10) An expression is expected here.
-(110,5)-(110,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new print()()'?
+(110,5)-(110,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new print()()`?
 (110,5)-(110,12) Unexpected node on right hand side of new or instanceof: prefix_unary_expression
 (110,12)-(110,12) An expression is expected here.
 (111,5)-(111,12) Unexpected node on right hand side of new or instanceof: token
@@ -215,15 +215,15 @@
 (112,14)-(112,14) An expression is expected here.
 (113,5)-(113,11) Unexpected node on right hand side of new or instanceof: token
 (113,11)-(113,11) An expression is expected here.
-(114,5)-(114,14) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new require()()'?
+(114,5)-(114,14) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new require()()`?
 (114,5)-(114,14) Unexpected node on right hand side of new or instanceof: inclusion_expression
 (114,14)-(114,14) An expression is expected here.
-(115,5)-(115,19) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new require_once()()'?
+(115,5)-(115,19) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new require_once()()`?
 (115,5)-(115,19) Unexpected node on right hand side of new or instanceof: inclusion_expression
 (115,19)-(115,19) An expression is expected here.
 (116,5)-(116,11) Unexpected node on right hand side of new or instanceof: token
 (116,11)-(116,11) An expression is expected here.
-(117,5)-(117,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new shape()()'?
+(117,5)-(117,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new shape()()`?
 (117,5)-(117,12) Unexpected node on right hand side of new or instanceof: shape_expression
 (119,5)-(119,11) Unexpected node on right hand side of new or instanceof: token
 (119,11)-(119,11) An expression is expected here.
@@ -242,6 +242,6 @@
 (127,5)-(127,10) Unexpected node on right hand side of new or instanceof: token
 (127,10)-(127,10) An expression is expected here.
 (128,5)-(128,12) Yield can only be used inside a function
-(128,5)-(128,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new yield()()'?
+(128,5)-(128,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean `new yield()()`?
 (128,5)-(128,12) Unexpected node on right hand side of new or instanceof: yield_expression
 (128,12)-(128,12) An expression is expected here.

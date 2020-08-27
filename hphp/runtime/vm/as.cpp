@@ -3632,10 +3632,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
     if (!swallowErrors) throw;
     ue = createFatalUnit(sd, sha1, FatalOp::Runtime, e.what());
   } catch (AssemblerError& e) {
-    if (!swallowErrors) {
-      e.hhas = std::string{code, (size_t)codeLen};
-      throw;
-    }
+    if (!swallowErrors) throw;
     ue = createFatalUnit(sd, sha1, FatalOp::Runtime, e.what());
   } catch (const AssemblerFatal& e) {
     if (!swallowErrors) throw;
@@ -3643,10 +3640,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   } catch (const std::exception& e) {
     if (!swallowErrors) {
       // assembler should throw only AssemblerErrors and FatalErrorExceptions
-      throw AssemblerError(
-        folly::sformat("AssemblerError: {}", e.what()),
-        std::string{code, (size_t)codeLen}
-      );
+      throw AssemblerError(folly::sformat("AssemblerError: {}", e.what()));
     }
     ue = createFatalUnit(sd, sha1, FatalOp::Runtime, e.what());
   }

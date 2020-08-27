@@ -31,6 +31,8 @@ struct LoggingProfile;
 struct LoggingArray : BespokeArray {
   static LoggingArray* asLogging(ArrayData* ad);
   static const LoggingArray* asLogging(const ArrayData* ad);
+  static LoggingArray* MakeStatic(ArrayData* ad, LoggingProfile* prof);
+  static void FreeStatic(LoggingArray* lad);
 
   // Updates m_kind in place to match the wrapped array's kind. Returns this.
   LoggingArray* updateKind();

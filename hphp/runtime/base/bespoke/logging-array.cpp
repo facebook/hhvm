@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
-#include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include <tbb/concurrent_hash_map.h>
@@ -51,7 +50,7 @@ static_assert(kSizeIndex == 0 ||
               "kSizeIndex must be the smallest size for LoggingArray");
 
 LoggingLayout* s_layout = new LoggingLayout();
-std::atomic<bool> g_loggingEnabled;
+std::atomic<bool> g_emitLoggingArrays;
 
 // The bespoke kind for a vanilla kind.
 HeaderKind getBespokeKind(ArrayData::ArrayKind kind) {
@@ -73,32 +72,6 @@ LoggingArray* makeWithProfile(ArrayData* ad, LoggingProfile* prof) {
   return lad;
 }
 
-// Loads the LoggingProfile for `sk`. If `ad` is static, this function ensures
-// that the staticArray field of the given profile is populated.
-LoggingProfile* profileForSrcKey(SrcKey sk, ArrayData* ad) {
-  auto const profile = getLoggingProfile(sk);
-
-  if (ad->isStatic() && !profile->staticArray.load(std::memory_order_relaxed)) {
-    auto const size = sizeof(LoggingArray);
-    auto lad = static_cast<LoggingArray*>(
-        RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
-    lad->initHeader_16(getBespokeKind(ad->kind()), StaticValue,
-                       ad->isLegacyArray() ? ArrayData::kLegacyArray : 0);
-    lad->setLayout(s_layout);
-    lad->wrapped = ad;
-    lad->profile = profile;
-
-    LoggingArray* expected = nullptr;
-    if (profile->staticArray.compare_exchange_strong(expected, lad)) {
-      MemoryStats::LogAlloc(AllocKind::StaticArray, sizeof(LoggingArray));
-    } else {
-      RO::EvalLowStaticArrays ? low_free(lad) : uncounted_free(lad);
-    }
-  }
-
-  return profile;
-}
-
 template <typename... Ts>
 void logEvent(const ArrayData* ad, ArrayOp op, const Ts&... args) {
   LoggingArray::asLogging(ad)->profile->logEvent(op, args...);
@@ -111,18 +84,19 @@ void logEvent(const ArrayData* ad, ArrayOp op, const Ts&... args) {
 //////////////////////////////////////////////////////////////////////////////
 
 void setLoggingEnabled(bool val) {
-  g_loggingEnabled.store(val, std::memory_order_relaxed);
+  g_emitLoggingArrays.store(val, std::memory_order_relaxed);
 }
 
 ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
-  if (!g_loggingEnabled.load(std::memory_order_relaxed)) return ad;
+  if (!g_emitLoggingArrays.load(std::memory_order_relaxed)) return ad;
   auto const sk = getSrcKey();
   if (!sk.valid()) {
     FTRACE(5, "VMRegAnchor failed for maybleEnableLogging.\n");
     return ad;
   }
 
-  auto const profile = profileForSrcKey(sk, ad);
+  auto const profile = getLoggingProfile(sk, ad);
+  if (!profile) return ad;
 
   auto const shouldEmitBespoke = [&] {
     if (shouldTestBespokeArrayLikes()) {
@@ -139,7 +113,7 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
 
   if (shouldEmitBespoke) {
     FTRACE(5, "Emit bespoke at {}\n", sk.getSymbol());
-    return ad->isStatic() ? profile->staticArray.load(std::memory_order_relaxed)
+    return ad->isStatic() ? profile->staticArray
                           : makeWithProfile(ad, profile);
   } else {
     FTRACE(5, "Emit vanilla at {}\n", sk.getSymbol());
@@ -152,6 +126,26 @@ const ArrayData* maybeMakeLoggingArray(const ArrayData* ad) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+LoggingArray* LoggingArray::MakeStatic(ArrayData *ad, LoggingProfile *prof) {
+  assertx(ad->isStatic());
+
+  auto const size = sizeof(LoggingArray);
+  auto lad = static_cast<LoggingArray*>(
+      RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
+  lad->initHeader_16(getBespokeKind(ad->kind()), StaticValue,
+                     ad->isLegacyArray() ? ArrayData::kLegacyArray : 0);
+  lad->setLayout(s_layout);
+  lad->wrapped = ad;
+  lad->profile = prof;
+
+  return lad;
+}
+
+void LoggingArray::FreeStatic(LoggingArray* lad) {
+  assertx(lad->wrapped->isStatic());
+  RO::EvalLowStaticArrays ? low_free(lad) : uncounted_free(lad);
+}
 
 bool LoggingArray::checkInvariants() const {
   assertx(!isVanilla());
@@ -373,7 +367,10 @@ ArrayData* convert(ArrayData* ad, F&& f) {
     FTRACE(5, "VMRegAnchor failed for convert operation.\n");
     return result;
   }
-  return makeWithProfile(result, profileForSrcKey(sk, result));
+  auto const prof = getLoggingProfile(sk, result);
+  if (!prof) return result;
+
+  return makeWithProfile(result, prof);
 }
 }
 

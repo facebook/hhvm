@@ -18,9 +18,12 @@
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/bespoke/logging-array.h"
+#include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include <folly/SharedMutex.h>
 #include <folly/String.h>
 #include <tbb/concurrent_hash_map.h>
 
@@ -37,6 +40,9 @@ TRACE_SET_MOD(bespoke);
 namespace {
 
 //////////////////////////////////////////////////////////////////////////////
+
+folly::SharedMutex s_exportStartedLock;
+std::atomic<bool> s_exportStarted{false};
 
 std::string toStringForKey(int64_t v) {
   if (v < 256) {
@@ -128,6 +134,11 @@ void LoggingProfile::logEvent(ArrayOp op, const StringData* k, TypedValue v) {
 }
 
 void LoggingProfile::logEventImpl(const std::string& key) {
+  // Hold the read mutex for the duration of the mutation so that export cannot
+  // begin until the mutation is complete.
+  folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
+  if (s_exportStarted.load(std::memory_order_relaxed)) return;
+
   EventMap::accessor it;
   auto const sink = getSrcKey();
   if (events.insert(it, {sink, key})) {
@@ -150,7 +161,6 @@ using ProfileMap = tbb::concurrent_hash_map<SrcKey, LoggingProfile*,
 
 ProfileMap s_profileMap;
 std::thread s_exportProfilesThread;
-std::atomic<bool> s_exportStarted{false};
 
 void exportSortedProfiles(FILE* file, const std::vector<SrcKeyData>& sources) {
   for (auto const& sourceProfile : sources) {
@@ -242,7 +252,11 @@ void exportProfiles() {
     return;
   }
 
-  s_exportStarted.store(true, std::memory_order_relaxed);
+  {
+    folly::SharedMutex::WriteHolder lock{s_exportStartedLock};
+    s_exportStarted.store(true, std::memory_order_relaxed);
+  }
+
   s_exportProfilesThread = std::thread([] {
     hphp_thread_init();
 
@@ -265,7 +279,7 @@ void exportProfiles() {
   });
 }
 
-void stopExportProfiles() {
+void waitOnExportProfiles() {
   if (s_exportStarted.load(std::memory_order_relaxed)) {
     s_exportProfilesThread.join();
   }
@@ -273,16 +287,33 @@ void stopExportProfiles() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-LoggingProfile* getLoggingProfile(SrcKey sk) {
+LoggingProfile* getLoggingProfile(SrcKey sk, ArrayData *ad) {
   {
     ProfileMap::const_accessor it;
-    if (s_profileMap.find(it, sk) && it->second) return it->second;
+    if (s_profileMap.find(it, sk)) return it->second;
   }
-  auto profile = std::make_unique<LoggingProfile>(sk);
+
+  // Hold the read mutex for the duration of the mutation so that export cannot
+  // begin until the mutation is complete.
+  folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
+  if (s_exportStarted.load(std::memory_order_relaxed)) return nullptr;
+
+  auto prof = std::make_unique<LoggingProfile>(sk);
+  if (ad->isStatic()) {
+    prof->staticArray = LoggingArray::MakeStatic(ad, prof.get());
+  }
+
   ProfileMap::accessor insert;
-  if (s_profileMap.insert(insert, {sk, profile.get()})) {
-    profile.release();
+  if (s_profileMap.insert(insert, sk)) {
+    insert->second = prof.release();
+    MemoryStats::LogAlloc(AllocKind::StaticArray, sizeof(LoggingArray));
+  } else {
+    // Someone beat us; clean up
+    if (ad->isStatic()) {
+      LoggingArray::FreeStatic(prof->staticArray);
+    }
   }
+
   return insert->second;
 }
 

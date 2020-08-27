@@ -104,13 +104,15 @@ private:
 public:
   SrcKey source;
   std::atomic<uint64_t> sampleCount = 0;
-  std::atomic<LoggingArray*> staticArray = nullptr;
+  LoggingArray* staticArray = nullptr;
   EventMap events;
 };
 
-// Return a profile for the given (valid) SrcKey. Callers are responsible
-// for populating staticArray if this array creation site is a static one.
-LoggingProfile* getLoggingProfile(SrcKey sk);
+// Return a profile for the given (valid) SrcKey. If no profile for the SrcKey
+// exists, a new one is created. *StaticLoggingArray helpers are used to
+// construct the shared LoggingArray if the ArrayData is static. May return
+// null if no profile exists and the the profile export has begun.
+LoggingProfile* getLoggingProfile(SrcKey sk, ArrayData* ad);
 
 // Attempt to get the current SrcKey. May fail and return an invalid SrcKey.
 SrcKey getSrcKey();

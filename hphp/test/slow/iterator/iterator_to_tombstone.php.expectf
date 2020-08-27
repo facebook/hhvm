@@ -1,0 +1,5 @@
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'Iterator is not valid' in %s:%d
+Stack trace:
+#0 %s/iterator_to_tombstone.php(%d): MapIterator->current()
+#1 (): main()
+#2 {main}

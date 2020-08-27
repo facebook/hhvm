@@ -182,12 +182,18 @@ struct HashCollection : ObjectData {
   // used instead.
 
   bool iter_valid(ssize_t pos) const {
-    return pos < (ssize_t)posLimit();
+    if (pos < (ssize_t)posLimit()) {
+      return !isTombstone(&(data()[pos]));
+    }
+    return false;
   }
 
   bool iter_valid(ssize_t pos, ssize_t limit) const {
     assertx(limit == (ssize_t)posLimit());
-    return pos < limit;
+    if (pos < limit) {
+      return !isTombstone(&(data()[pos]));
+    }
+    return false;
   }
 
   const Elm* iter_elm(ssize_t pos) const {

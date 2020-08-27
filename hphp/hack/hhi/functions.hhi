@@ -154,4 +154,6 @@ namespace HH {
   function disable_all_coverage(): void;
   function get_all_coverage_data(): dict<string, vec<int>>;
   function clear_all_coverage_data(): void;
+
+  function prefetch_units(keyset<string> $paths, bool $hint): void;
 }

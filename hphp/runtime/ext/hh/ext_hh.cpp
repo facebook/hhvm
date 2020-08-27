@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 
 #include <folly/json.h>
+#include <folly/synchronization/AtomicNotification.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-handler.h"
@@ -682,6 +683,8 @@ ArrayData* from_stats_list(T stats) {
   return init.create();
 }
 
+}
+
 bool HHVM_FUNCTION(is_enabled) {
   return g_context->getRequestTrace() != nullptr;
 }
@@ -744,6 +747,75 @@ Array HHVM_FUNCTION(get_compiled_units, int64_t kind) {
     }
   }
   return init.toArray();
+}
+
+void HHVM_FUNCTION(prefetch_units, const Array& paths, bool hint) {
+  if (!paths.isKeyset()) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Paths must be a keyset"
+    );
+  }
+
+  IterateV(
+    paths.get(),
+    [] (TypedValue v) {
+      if (!isStringType(v.m_type)) {
+        SystemLib::throwInvalidArgumentExceptionObject(
+          "Paths must contain only strings"
+        );
+      }
+    }
+  );
+
+  if (RO::RepoAuthoritative || !unitPrefetchingEnabled()) {
+    // Unit prefetching isn't enabled. If the caller has specified
+    // that this is a hint, just do nothing (since this is advisory).
+    if (hint) return;
+
+    // Otherwise this isn't a hint, and the caller wants us to
+    // definitely load these units. Do it inline.
+    IterateV(
+      paths.get(),
+      [&] (TypedValue v) {
+        assertx(isStringType(v.m_type));
+        lookupUnit(
+          File::TranslatePath(String{v.m_data.pstr}).get(),
+          "",
+          nullptr,
+          Native::s_noNativeFuncs,
+          false
+        );
+      }
+    );
+    return;
+  }
+
+  // Unit prefetching is enabled, so we can use that mechanism (which
+  // will be faster usually). If this is a hint, we'll just fire off
+  // the requests and let them finish asynchronously. If not, we
+  // cannot return until they're done, so use the prefetcher's gate
+  // mechanism.
+  auto gate = hint
+    ? nullptr
+    : std::make_shared<folly::atomic_uint_fast_wait_t>(0);
+
+  IterateV(
+    paths.get(),
+    [&] (TypedValue v) {
+      assertx(isStringType(v.m_type));
+      prefetchUnit(makeStaticString(v.m_data.pstr), gate, nullptr);
+    }
+  );
+
+  // If we passed in a gate, wait for it to signal completion of all
+  // the requests.
+  if (!gate) return;
+
+  while (true) {
+    auto const c = gate->load();
+    if (c == 0) break;
+    folly::atomic_wait(gate.get(), c);
+  }
 }
 
 namespace {
@@ -863,6 +935,8 @@ TypedValue HHVM_FUNCTION(dynamic_class_meth_force, StringArg cls,
   return dynamicClassMeth<DynamicAttr::Ignore, false>(cls.get(), meth.get());
 }
 
+namespace {
+
 const StaticString
   s_no_repo_mode("Cannot enable code coverage in Repo.Authoritative mode"),
   s_no_flag_set("Must set Eval.EnablePerFileCoverage");
@@ -907,6 +981,8 @@ std::vector<Unit*> loadUnits(ArrayData* files) {
     }
   );
   return units;
+}
+
 }
 
 void HHVM_FUNCTION(enable_per_file_coverage, ArrayArg files) {
@@ -1034,8 +1110,6 @@ int64_t HHVM_FUNCTION(set_implicit_context_by_index, int64_t index) {
   return prev_index;
 }
 
-} // namespace
-
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
   void moduleInit() override {
@@ -1060,6 +1134,7 @@ static struct HHExtension final : Extension {
     X(set_frame_metadata);
     X(get_request_count);
     X(get_compiled_units);
+    X(prefetch_units);
     X(dynamic_fun);
     X(dynamic_fun_force);
     X(dynamic_class_meth);

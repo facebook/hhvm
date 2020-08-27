@@ -189,6 +189,24 @@ function get_request_count(): int;
 function get_compiled_units(int $kind = 0): keyset;
 
 /**
+ * Prefetch units corresponding to the given sets of paths, before
+ * they are actually needed.
+ *
+ * - If $hint is true, this request is non-binding. That is, the
+ *   runtime may attempt to asynchronously prefetch the units in the
+ *   background, or maybe not do anything at all. The units may not
+ *   (and probably won't be) loaded when this function returns.
+ *
+ * - If $hint is false, the runtime will always attempt to prefetch
+ *   the units and will block until they have been. Therefore when
+ *   this function returns, the units have been loaded. Note:
+ *   depending on configuration, this may be slower than a non-binding
+ *   request.
+ */
+<<__Native>>
+function prefetch_units(keyset<string> $paths, bool $hint): void;
+
+/**
  * Construct a function pointer for the function with $name. The function should
  * be marked __DynamicallyCallable.
  */

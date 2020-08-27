@@ -3817,32 +3817,40 @@ void fold_remat_with_use(const State& state,
   invalidate_cached_operands(use);
 }
 
+struct SpillWithRematResult {
+  // How many instructions were added
+  size_t added;
+  // Whether rematerialization was performed
+  bool rematerialized;
+};
+
 namespace detail {
 
 // Helper function for spill_with_remat below. Try to emit the
 // appropriate spill[b,l,q]i instruction. Otherwise use a spill
 // instruction (if allowed).
 template <typename T, typename I>
-size_t try_immed_spill(I i,
-                       Vout& v,
-                       Vreg src,
-                       Vreg dst,
-                       const Vinstr& remat,
-                       bool srcIsSpilled) {
+SpillWithRematResult try_immed_spill(I i,
+                                     Vout& v,
+                                     Vreg src,
+                                     Vreg dst,
+                                     const Vinstr& remat,
+                                     bool useDst,
+                                     bool useSrc) {
   if (i.fits(sz::dword)) {
     v << T{i.l(), dst};
-    return 1;
+    return {1, true};
   }
-  if (src == dst) {
+  if (useDst) {
     v << remat;
     v << spill{dst, dst};
-    return 2;
+    return {2, true};
   }
-  if (!srcIsSpilled) {
+  if (useSrc) {
     v << spill{src, dst};
-    return 1;
+    return {1, false};
   }
-  return 0;
+  return {0, false};
 }
 
 }
@@ -3855,24 +3863,24 @@ size_t try_immed_spill(I i,
 //
 // `inReg' is the set of Vregs currently in registers (not spilled),
 // which is used to determine what rematerializations can be done.
-// Vout. If `srcIsSpilled' is set to false (the default), the src Vreg
-// represents a Vreg that is not already spilled. In that case, this
-// function always succeeds (generates some kind of spill). If
-// `srcIsSpilled' is set to true, the src Vreg is already spilled. In
-// that case, the function will only succeed if it can generate a
-// spill immediate instruction. This is used for the special case of
-// avoiding memory to memory copies.
+// Vout.
+//
+// If `useDst' is true, than the dst Vreg can be used as a target for
+// a rematerialization instruction. dst is then spilled to itself. If
+// false, the only rematerialization instructions allowed are the ones
+// which spill directly to the slot (without using an intermediate
+// register). If this isn't possible, a vanilla spill will be emitted.
+//
+// If `useSrc' is true, the src Vreg can be used as (non-spilled)
+// register. This is required to emit a spill instruction. If `useSrc'
+// is false, *only* rematerialization is allowed. If rematerialization
+// is not possible, than no instruction will be emitted (this is the
+// only time this function will fail to emit an instruction).
 //
 // The number of instructions thus inserted is returned, along with a
-// flag indicating if rematerialization happened (that is, if the Vreg
-// represented an immediate which could be spilled directly). If
-// `srcIsSpilled' is set to true, and no spill immediate instruction
-// could be generated, 0 is returned.
+// flag indicating if rematerialization happened. If `useSrc' is
+// false, and no spill instruction could be generated, 0 is returned.
 
-struct SpillWithRematResult {
-  size_t added;
-  bool rematerialized;
-};
 SpillWithRematResult spill_with_remat(State& state,
                                       Vout& v,
                                       Vlabel b,
@@ -3880,84 +3888,73 @@ SpillWithRematResult spill_with_remat(State& state,
                                       const VregSet& inReg,
                                       Vreg src,
                                       Vreg dst,
-                                      bool srcIsSpilled = false) {
+                                      bool useDst,
+                                      bool useSrc) {
   // Determine if this Vreg can be rematerialized at this current
   // program point.
   auto const remat = reload_with_remat(state, b, instIdx, inReg, src, dst);
-  auto const rematerialized = remat.op != Vinstr::reload;
 
   // We can't use the spill immediate instructions on non-X86 because
   // they'd have to be lowered (and that has to be done before
   // register allocation).
   if (arch() != Arch::X64) {
-    if (remat.op == Vinstr::reload || src != dst) {
-      if (srcIsSpilled) return {0, rematerialized};
+    if (remat.op == Vinstr::reload || !useDst) {
+      if (!useSrc) return {0, false};
       v << spill{src, dst};
-      return {1, rematerialized};
+      return {1, false};
     }
     v << remat;
     v << spill{dst, dst};
-    return {2, rematerialized};
+    return {2, true};
   }
 
   switch (remat.op) {
     // Rematerializable as an immediate. Try to use a spill immediate
     // instruction.
     case Vinstr::ldimmb:
-      return {
-        detail::try_immed_spill<spillbi>(
-          remat.ldimmb_.s, v, src, dst, remat, srcIsSpilled
-        ),
-        rematerialized
-      };
+      return detail::try_immed_spill<spillbi>(
+        remat.ldimmb_.s, v, src, dst, remat, useDst, useSrc
+      );
     case Vinstr::ldimml:
-      return {
-        detail::try_immed_spill<spillli>(
-          remat.ldimml_.s, v, src, dst, remat, srcIsSpilled
-        ),
-        rematerialized
-      };
+      return detail::try_immed_spill<spillli>(
+        remat.ldimml_.s, v, src, dst, remat, useDst, useSrc
+      );
     case Vinstr::ldimmq:
-      return {
-        detail::try_immed_spill<spillqi>(
-          remat.ldimmq_.s, v, src, dst, remat, srcIsSpilled
-        ),
-        rematerialized
-      };
+      return detail::try_immed_spill<spillqi>(
+        remat.ldimmq_.s, v, src, dst, remat, useDst, useSrc
+      );
     case Vinstr::ldundefq:
       v << spillundefq{dst};
-      return {1, rematerialized};
+      return {1, true};
+    case Vinstr::copy:
+      // Special case: if the Vreg comes from a copy, we can spill
+      // directly from the copy's source, saving an intermediate
+      // Vreg.
+      v << spill{remat.copy_.s, dst};
+      return {1, true};
     case Vinstr::reload:
       // Not rematerializable. Just emit a spill (if we can, fail
       // otherwise).
-      if (srcIsSpilled) return {0, rematerialized};
+      if (!useSrc) return {0, false};
       v << spill{src, dst};
-      return {1, rematerialized};
+      return {1, false};
     default:
       // Some other rematerializable instruction. We can't write it
       // directly to the spill slot, but we can rematerialize it into
-      // dst, and then spill dst to itself. For safety, we only do
-      // this if src and dst are the same. Otherwise we might extend
-      // srcs lifetime in an inconvenient way for the caller.
+      // dst, and then spill dst to itself. We can only do this if
+      // we're allowed to write to dst as a register (as opposed to
+      // just as a spill destination).
       assertx(isPure(remat));
-      if (src == dst) {
-        if (remat.op == Vinstr::copy) {
-          // Special case: if the Vreg comes from a copy, we can spill
-          // directly from the copy's source, saving an intermediate
-          // Vreg.
-          v << spill{remat.copy_.s, dst};
-          return {1, rematerialized};
-        } else {
-          v << remat;
-          v << spill{dst, dst};
-          return {2, rematerialized};
-        }
+      if (useDst) {
+        v << remat;
+        v << spill{dst, dst};
+        return {2, true};
       }
-      if (!srcIsSpilled) {
+      if (useSrc) {
         v << spill{src, dst};
-        return {1, rematerialized};
+        return {1, false};
       }
-      return {0, rematerialized};
+      return {0, false};
   }
 }
 
@@ -5381,7 +5378,8 @@ size_t process_phijmp_spills(State& state,
             rematAvail,
             p.first,
             p.second,
-            true // Src is spilled, so don't emit a spill instruction
+            false, // Dst is a spilled, so it can't be used as a remat target
+            false // Src is spilled, so don't emit a spill instruction
           );
           if (spillResults.rematerialized) results.rematerialized.add(p.first);
           assertx(state.spilled);
@@ -5404,7 +5402,9 @@ size_t process_phijmp_spills(State& state,
             instIdx,
             rematAvail,
             r,
-            r
+            r,
+            true,
+            true
           );
           added += spillResults.added;
           if (spillResults.rematerialized) results.rematerialized.add(r);
@@ -5879,8 +5879,10 @@ ProcessCopyResults process_copy_spills(State& state,
       unit, b, instIdx,
       [&] (Vout& v) {
         // First alias pairs, which don't change register pressure.
+        VregSet usedByAlias;
         for (auto const& p : aliasPairs) {
           v << ssaalias{p.first, p.second};
+          usedByAlias.add(p.first);
           ++addedBefore;
         }
 
@@ -5893,7 +5895,11 @@ ProcessCopyResults process_copy_spills(State& state,
             instIdx,
             rematAvail,
             p.first,
-            p.second
+            p.second,
+            false, // Dst has been spilled, so cannot be used as a
+                   // remat target without increasing register
+                   // pressure.
+            true
           );
           addedBefore += spillResults.added;
           if (spillResults.rematerialized) results.rematerialized.add(p.first);
@@ -5916,7 +5922,8 @@ ProcessCopyResults process_copy_spills(State& state,
             rematAvail,
             src,
             dst,
-            true // src is spilled, so don't emit a spill instruction
+            false, // dst is spilled, so cannot be used as a remat target
+            false // src is spilled, so don't emit a spill instruction
           );
           if (spillResults.rematerialized) results.rematerialized.add(src);
           assertx(state.spilled);
@@ -5941,7 +5948,12 @@ ProcessCopyResults process_copy_spills(State& state,
             instIdx,
             rematAvail,
             r,
-            r
+            r,
+            !usedByAlias[r], // r can only be used as a remat target if
+                             // it isn't used by a ssaalias (otherwise
+                             // it needs to be kept unchanged across the
+                             // spill)
+            true
           );
           addedBefore += spillResults.added;
           if (spillResults.rematerialized) results.rematerialized.add(r);
@@ -6180,7 +6192,9 @@ size_t process_inst_spills(State& state,
           instIdx,
           rematAvail,
           r,
-          r
+          r,
+          true,
+          true
         );
         added += spillResults.added;
         if (spillResults.rematerialized) results.rematerialized.add(r);
@@ -7402,8 +7416,10 @@ void fixup_spill_mismatches(State& state, SpillerResults& results) {
         unit, b, insertIdx,
         [&] (Vout& v) {
           // First the ssaaliases, which must come before anything else.
+          VregSet usedByAlias;
           for (auto const& p : mismatch.aliases) {
             v << ssaalias{p.first, p.second};
+            usedByAlias.add(p.first);
           }
 
           // Then the spills, which reduce register pressure.
@@ -7419,7 +7435,13 @@ void fixup_spill_mismatches(State& state, SpillerResults& results) {
               insertIdx,
               availForRemat,
               r,
-              r2
+              r2,
+              // Dst can only be used by remats if its the same as the
+              // src (otherwise we increase register pressure), and if
+              // it hasn't been used by a ssaalias (in which case we
+              // have to preserve the src).
+              r == r2 && !usedByAlias[r],
+              true
             );
             if (spillResults.rematerialized) results.rematerialized.add(r);
             state.spilled = true;

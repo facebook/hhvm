@@ -57,6 +57,21 @@ enum SortFunction {
   SORTFUNC_UASORT = SORTFUNC_ASORT | _SORTFUNC_SIGNMASK
 };
 
+inline const char* sortFunctionName(SortFunction sf) {
+  switch (sf) {
+  case SORTFUNC_KSORT:  return "ksort";
+  case SORTFUNC_KRSORT: return "krsort";
+  case SORTFUNC_UKSORT: return "uksort";
+  case SORTFUNC_SORT:   return "sort";
+  case SORTFUNC_RSORT:  return "rsort";
+  case SORTFUNC_USORT:  return "usort";
+  case SORTFUNC_ASORT:  return "asort";
+  case SORTFUNC_ARSORT: return "arsort";
+  case SORTFUNC_UASORT: return "uasort";
+  }
+  always_assert(false);
+}
+
 // Return true if the sorting has a user-defined comparison function
 inline bool hasUserDefinedCmp(SortFunction s) {
   return s < 0;

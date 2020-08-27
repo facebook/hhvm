@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/tv-refcount.h"
 
 namespace HPHP {
@@ -193,8 +194,9 @@ ssize_t BespokeArray::IterRewind(const ArrayData* ad, ssize_t pos) {
 
 // sorting
 ArrayData* BespokeArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
-  auto const reason = "BespokeArray::EscalateForSort";
-  auto const vad = asBespoke(ad)->layout()->escalateToVanilla(ad, reason);
+  auto const vad = asBespoke(ad)->layout()->escalateToVanilla(
+    ad, sortFunctionName(sf)
+  );
   return vad->escalateForSort(sf);
 }
 

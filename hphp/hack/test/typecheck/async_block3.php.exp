@@ -1,2 +1,2 @@
 File "async_block3.php", line 4, characters 15-43:
-Don't use () ==> async { ... }. Instead, use: async () ==> { ... } (Parsing[1002])
+Don't use `() ==> async { ... }`. Instead, use: `async () ==> { ... }` (Parsing[1002])

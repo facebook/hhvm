@@ -1,1 +1,1 @@
-Fatal error: Cannot use A\B as B because the name was explicitly used earlier via a `use' statement on line 3 in %s/double_use1.php on line 4
+Fatal error: Cannot use `A\B` as `B` because the name was explicitly used earlier via a `use` statement on line 3 in %s/double_use1.php on line 4

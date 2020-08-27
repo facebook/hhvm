@@ -1,2 +1,2 @@
 File "encapsed4.php", line 7, characters 10-17:
-The ${x} syntax is disallowed in Hack. Use {$x} instead. (Parsing[1002])
+The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. (Parsing[1002])

@@ -551,74 +551,79 @@ pub const mutability_annotation_on_inout_parameter: Error = Cow::Borrowed(
 pub fn mutable_parameter_in_memoize_function(is_this: bool) -> Error {
     Cow::Owned(format!(
         "Memoized functions cannot have mutable {}",
-        if is_this { "$this." } else { "parameters." }.to_string()
+        if is_this { "`$this`." } else { "parameters." }.to_string()
     ))
 }
 pub const mutable_return_in_memoize_function: Error =
     Cow::Borrowed("Memoized functions cannot return mutable objects.");
 pub const vararg_and_mutable: Error = Cow::Borrowed(
-      "__Mutable, __OwnedMutable and __MaybeMutable annotations cannot be used with variadic parameters."
+      "`__Mutable`, `__OwnedMutable` and `__MaybeMutable` annotations cannot be used with variadic parameters."
   );
 pub const tparams_in_tconst: Error =
     Cow::Borrowed("Type parameters are not allowed on class type constants");
 pub const targs_not_allowed: Error =
     Cow::Borrowed("Type arguments are not allowed in this position");
-pub const reified_attribute: Error =
-    Cow::Borrowed("__Reified and __HasReifiedParent attributes may not be provided by the user");
+pub const reified_attribute: Error = Cow::Borrowed(
+    "`__Reified` and `__HasReifiedParent` attributes may not be provided by the user",
+);
 pub const lval_as_expression: Error = Cow::Borrowed(
     "Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.",
 );
 pub fn elt_abstract_private(elt: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot declare abstract {} private.",
+        "Cannot declare abstract {} `private`.",
         elt.to_string(),
     ))
 }
-pub const only_soft_allowed: Error = Cow::Borrowed("Only the __Soft attribute is allowed here.");
-pub const soft_no_arguments: Error = Cow::Borrowed("The __Soft attribute does not take arguments.");
+pub const only_soft_allowed: Error = Cow::Borrowed("Only the `__Soft` attribute is allowed here.");
+pub const soft_no_arguments: Error =
+    Cow::Borrowed("The `__Soft` attribute does not take arguments.");
 pub const no_legacy_soft_typehints: Error = Cow::Borrowed(
-    "The @ syntax for soft typehints is not allowed. Use the __Soft attribute instead.",
+    "The `@` syntax for soft typehints is not allowed. Use the `__Soft` attribute instead.",
 );
 pub const outside_dollar_str_interp: Error =
-    Cow::Borrowed("The ${x} syntax is disallowed in Hack. Use {$x} instead.");
+    Cow::Borrowed("The `${x}` syntax is disallowed in Hack. Use `{$x}` instead.");
 pub const no_const_interfaces_traits_enums: Error =
-    Cow::Borrowed("Interfaces, traits and enums may not be declared __Const");
+    Cow::Borrowed("Interfaces, traits and enums may not be declared `__Const`");
 pub const no_const_late_init_props: Error =
-    Cow::Borrowed("__Const properties may not also be __LateInit");
-pub const no_const_static_props: Error = Cow::Borrowed("Static properties may not be __Const");
+    Cow::Borrowed("`__Const` properties may not also be `__LateInit`");
+pub const no_const_static_props: Error = Cow::Borrowed("Static properties may not be `__Const`");
 pub const no_const_abstract_final_class: Error =
-    Cow::Borrowed("Cannot apply __Const attribute to an abstract final class");
+    Cow::Borrowed("Cannot apply `__Const` attribute to an abstract final class");
 pub const no_legacy_attribute_syntax: Error = Cow::Borrowed(
-    "The <<...>> syntax for user attributes is not allowed. Use the @ syntax instead.",
+    "The `<<...>>` syntax for user attributes is not allowed. Use the `@` syntax instead.",
 );
-pub const no_silence: Error = Cow::Borrowed("The error suppression operator @ is not allowed");
+pub const no_silence: Error = Cow::Borrowed("The error suppression operator `@` is not allowed");
 pub const const_mutation: Error = Cow::Borrowed("Cannot mutate a class constant");
 pub const no_attributes_on_variadic_parameter: Error =
     Cow::Borrowed("Attributes on variadic parameters are not allowed");
 pub const invalid_constant_initializer: Error =
     Cow::Borrowed("Invalid expression in constant initializer");
 pub const parent_static_prop_decl: Error =
-    Cow::Borrowed("Cannot use static or parent::class in property declaration");
+    Cow::Borrowed("Cannot use `static` or `parent::class` in property declaration");
 pub fn error2070(open_tag: &str, close_tag: &str) -> Error {
     Cow::Owned(format!(
-        "XHP: mismatched tag: '{}' not the same as '{}'",
+        "XHP: mismatched tag: `{}` not the same as `{}`",
         close_tag.to_string(),
         open_tag.to_string(),
     ))
 }
 pub fn error2071(s: &str) -> Error {
-    Cow::Owned(format!("Decimal number is too big: {}", s.to_string(),))
+    Cow::Owned(format!("Decimal number is too big: `{}`", s.to_string(),))
 }
 pub fn error2072(s: &str) -> Error {
-    Cow::Owned(format!("Hexadecimal number is too big: {}", s.to_string(),))
+    Cow::Owned(format!(
+        "Hexadecimal number is too big: `{}`",
+        s.to_string(),
+    ))
 }
 pub const error2073: Error = Cow::Borrowed(concat!(
-    "A variadic parameter ('...') cannot have a modifier ",
-    "that changes the calling convention, like 'inout'.",
+    "A variadic parameter `...` cannot have a modifier ",
+    "that changes the calling convention, like `inout`.",
 ));
 pub fn error2074(call_modifier: &str) -> Error {
     Cow::Owned(format!(
-        "An '{}' parameter must not have a default value.",
+        "An `{}` parameter must not have a default value.",
         call_modifier.to_string(),
     ))
 }
@@ -629,32 +634,32 @@ pub fn not_allowed_in_write(what: &str) -> Error {
         what.to_string(),
     ))
 }
-pub const reassign_this: Error = Cow::Borrowed("Cannot re-assign $this");
-pub const enum_elem_name_is_class: Error = Cow::Borrowed("Enum element cannot be named 'class'");
+pub const reassign_this: Error = Cow::Borrowed("Cannot re-assign `$this`");
+pub const enum_elem_name_is_class: Error = Cow::Borrowed("Enum element cannot be named `class`");
 pub const sealed_enum: Error = Cow::Borrowed("Enums cannot be sealed.");
 pub const property_requires_visibility: Error = Cow::Borrowed(concat!(
     "Property declarations require a visibility modifier ",
-    "such as public, private or protected.",
+    "such as `public`, `private` or `protected`.",
 ));
 pub const abstract_prop_init: Error =
-    Cow::Borrowed("An abstract property must not have an initializer.");
+    Cow::Borrowed("An `abstract` property must not have an initializer.");
 pub const const_static_prop_init: Error =
-    Cow::Borrowed("A const static property must have an initializer.");
+    Cow::Borrowed("A `const static` property must have an initializer.");
 pub fn namespace_name_is_already_in_use(name: &str, short_name: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot use namespace {} as {} because the name is already in use",
+        "Cannot use namespace `{}` as `{}` because the name is already in use",
         name.to_string(),
         short_name.to_string()
     ))
 }
 pub const strict_namespace_hh: Error = Cow::Borrowed(concat!(
-    "To use strict Hack, place // strict after the open tag. ",
+    "To use strict Hack, place `// strict` after the open tag. ",
     "If it's already there, remove this line. ",
     "Hack is strict already.",
 ));
 pub fn name_is_already_in_use_hh(line_num: isize, name: &str, short_name: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot use {} as {} because the name was explicitly used earlier via a `use' statement on line {}",
+        "Cannot use `{}` as `{}` because the name was explicitly used earlier via a `use` statement on line {}",
         name.to_string(),
         short_name.to_string(),
         line_num.to_string(),
@@ -663,9 +668,9 @@ pub fn name_is_already_in_use_hh(line_num: isize, name: &str, short_name: &str) 
 pub fn name_is_already_in_use_implicit_hh(line_num: isize, name: &str, short_name: &str) -> Error {
     Cow::Owned(format!(
         concat!(
-            "Cannot use {} as {} because the name was implicitly used on line {}",
+            "Cannot use `{}` as `{}` because the name was implicitly used on line {}",
             "; implicit use of names from the HH namespace can be suppressed by adding an explicit",
-            " `use' statement earlier in the current namespace block",
+            " `use` statement earlier in the current namespace block",
         ),
         name.to_string(),
         short_name.to_string(),
@@ -674,7 +679,7 @@ pub fn name_is_already_in_use_implicit_hh(line_num: isize, name: &str, short_nam
 }
 pub fn name_is_already_in_use_php(name: &str, short_name: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot use {} as {} because the name is already in use",
+        "Cannot use `{}` as `{}` because the name is already in use",
         name.to_string(),
         short_name.to_string(),
     ))
@@ -682,21 +687,21 @@ pub fn name_is_already_in_use_php(name: &str, short_name: &str) -> Error {
 pub const original_definition: Error = Cow::Borrowed("Original definition");
 pub fn function_name_is_already_in_use(name: &str, short_name: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot use function {} as {} because the name is already in use",
+        "Cannot use function `{}` as `{}` because the name is already in use",
         name.to_string(),
         short_name.to_string(),
     ))
 }
 pub fn const_name_is_already_in_use(name: &str, short_name: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot use const {} as {} because the name is already in use",
+        "Cannot use const `{}` as `{}` because the name is already in use",
         name.to_string(),
         short_name.to_string(),
     ))
 }
 pub fn type_name_is_already_in_use(name: &str, short_name: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot use type {} as {} because the name is already in use",
+        "Cannot use type `{}` as `{}` because the name is already in use",
         name.to_string(),
         short_name.to_string(),
     ))
@@ -709,24 +714,24 @@ pub const code_outside_namespace: Error =
 pub const global_in_const_decl: Error =
     Cow::Borrowed("Cannot have globals in constant declaration");
 pub const parent_static_const_decl: Error =
-    Cow::Borrowed("Cannot use static or parent::class in constant declaration");
+    Cow::Borrowed("Cannot use `static` or `parent::class` in constant declaration");
 pub const no_async_before_lambda_body: Error =
-    Cow::Borrowed("Don't use () ==> async { ... }. Instead, use: async () ==> { ... }");
+    Cow::Borrowed("Don't use `() ==> async { ... }`. Instead, use: `async () ==> { ... }`");
 pub fn invalid_number_of_args(name: &str, n: usize) -> Error {
     Cow::Owned(format!(
-        "Method {} must take exactly {} arguments",
+        "Method `{}` must take exactly {} arguments",
         name.to_string(),
         n.to_string(),
     ))
 }
 pub fn invalid_inout_args(name: &str) -> Error {
     Cow::Owned(format!(
-        "Method {} cannot take inout arguments",
+        "Method `{}` cannot take inout arguments",
         name.to_string(),
     ))
 }
 pub fn redeclaration_error(name: &str) -> Error {
-    Cow::Owned(format!("Cannot redeclare {}", name.to_string(),))
+    Cow::Owned(format!("Cannot redeclare `{}`", name.to_string(),))
 }
 pub fn declared_name_is_already_in_use_implicit_hh(
     line_num: usize,
@@ -735,9 +740,9 @@ pub fn declared_name_is_already_in_use_implicit_hh(
 ) -> Error {
     Cow::Owned(format!(
         concat!(
-            "Cannot declare {} because the name was implicitly used on line {}; ",
+            "Cannot declare `{}` because the name was implicitly used on line {}; ",
             "implicit use of names from the HH namespace can be suppressed by adding an explicit ",
-            "`use' statement earlier in the current namespace block",
+            "`use` statement earlier in the current namespace block",
         ),
         name.to_string(),
         line_num.to_string(),
@@ -746,7 +751,7 @@ pub fn declared_name_is_already_in_use_implicit_hh(
 pub fn declared_name_is_already_in_use(line_num: usize, name: &str, _short_name: &str) -> Error {
     Cow::Owned(format!(
         concat!(
-            "Cannot declare {} because the name was explicitly used earlier via a `use' ",
+            "Cannot declare `{}` because the name was explicitly used earlier via a `use` ",
             "statement on line {}",
         ),
         name.to_string(),
@@ -757,15 +762,14 @@ pub const const_in_trait: Error = Cow::Borrowed("Traits cannot have constants");
 pub const sealed_val_not_classname: Error =
     Cow::Borrowed("Values in sealed whitelist must be classname constants.");
 pub const list_must_be_lvar: Error =
-    Cow::Borrowed("list() can only be used as an lvar. Did you mean to use tuple()?");
+    Cow::Borrowed("`list()` can only be used as an lvar. Did you mean to use `tuple()`?");
 pub const async_not_last: Error =
-    Cow::Borrowed("The 'async' modifier must be directly before the 'function' keyword.");
+    Cow::Borrowed("The `async` modifier must be directly before the `function` keyword.");
 pub const using_st_function_scoped_top_level: Error = Cow::Borrowed(concat!(
     "Using statement in function scoped form may only be used at the top ",
     "level of a function or a method",
 ));
-pub const double_variadic: Error =
-    Cow::Borrowed("Parameter redundantly marked as variadic ('...').");
+pub const double_variadic: Error = Cow::Borrowed("Parameter redundantly marked as variadic `...`.");
 pub fn conflicting_trait_require_clauses(name: &str) -> Error {
     Cow::Owned(format!(
         "Conflicting requirements for '{}'",

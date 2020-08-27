@@ -1,2 +1,2 @@
 File "string_expressions11.php", line 17, characters 20-30:
-The ${x} syntax is disallowed in Hack. Use {$x} instead. (Parsing[1002])
+The `${x}` syntax is disallowed in Hack. Use `{$x}` instead. (Parsing[1002])

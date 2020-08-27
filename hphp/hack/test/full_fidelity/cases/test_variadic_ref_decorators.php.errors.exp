@@ -1,5 +1,5 @@
 (5,18)-(5,19) Encountered unexpected token `&`.
-(7,23)-(7,33) Parameter redundantly marked as variadic ('...').
+(7,23)-(7,33) Parameter redundantly marked as variadic `...`.
 (9,21)-(9,21) A variable name is expected here.
 (9,23)-(9,23) An expression is expected here.
 (9,27)-(9,27) A semicolon `;` is expected here.

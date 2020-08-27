@@ -3305,10 +3305,8 @@ void parse_record(AsmState& as) {
  */
 void parse_filepath(AsmState& as) {
   auto const str = read_litstr(as);
-  if (!g_unit_emitter_compile_hook) {
-    // We don't want to use file path from cached data
-    as.ue->m_filepath = str;
-  }
+  // We don't want to use file path from cached data
+  as.ue->m_filepath = str;
   as.in.expectWs(';');
 }
 

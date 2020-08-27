@@ -51,7 +51,7 @@ namespace HPHP {
 
 TRACE_SET_MOD(extern_compiler);
 
-UnitEmitterCompileHook g_unit_emitter_compile_hook = nullptr;
+UnitEmitterCacheHook g_unit_emitter_cache_hook = nullptr;
 
 namespace {
 
@@ -361,52 +361,36 @@ struct ExternCompiler {
     bool wantsSymbolRefs,
     const RepoOptions& options
   ) {
-    tracing::BlockNoTrace _{"compile-unit-emitter"};
-
     try {
-      auto const compile = [&] {
-        auto const hhas = [&] {
-          tracing::Block _{
-            "extern-compiler-invoke",
-            [&] {
-              return tracing::Props{}
-                .add("filename", filename)
-                .add("code_size", code.size());
-            }
-          };
-          if (!isRunning()) start();
-          writeProgram(filename, sha1, code, forDebuggerEval, options);
-          StructuredLogEntry log;
-          auto const hhas = readResult(&log);
-          if (RuntimeOption::EvalLogExternCompilerPerf) {
-            log.setStr("filename", filename);
-            StructuredLog::log("hhvm_detailed_frontend_performance", log);
+      auto const hhas = [&] {
+        tracing::Block _{
+          "extern-compiler-invoke",
+          [&] {
+            return tracing::Props{}
+              .add("filename", filename)
+              .add("code_size", code.size());
           }
-          return hhas;
-        }();
+        };
+        if (!isRunning()) start();
+        writeProgram(filename, sha1, code, forDebuggerEval, options);
+        StructuredLogEntry log;
+        auto const hhas = readResult(&log);
+        if (RuntimeOption::EvalLogExternCompilerPerf) {
+          log.setStr("filename", filename);
+          StructuredLog::log("hhvm_detailed_frontend_performance", log);
+        }
+        return hhas;
+      }();
 
-        return assemble_string(
-          hhas.data(),
-          hhas.length(),
-          filename,
-          sha1,
-          nativeFuncs,
-          false /* swallow errors */,
-          wantsSymbolRefs
-        );
-      };
-
-      if (g_unit_emitter_compile_hook) {
-        return g_unit_emitter_compile_hook(
-          filename,
-          sha1,
-          code.size(),
-          compile,
-          nativeFuncs
-        );
-      } else {
-        return compile();
-      }
+      return assemble_string(
+        hhas.data(),
+        hhas.length(),
+        filename,
+        sha1,
+        nativeFuncs,
+        false /* swallow errors */,
+        wantsSymbolRefs
+      );
     } catch (const CompileException& ex) {
       stop();
       if (m_options.verboseErrors) {
@@ -599,7 +583,6 @@ void CompilerPool::shutdown(bool detach_compilers) {
   }
 }
 
-
 template<typename F>
 auto run_compiler(
   const CompilerGuard& compiler,
@@ -696,22 +679,27 @@ CompilerResult CompilerPool::compile(const char* code,
                                      const RepoOptions& options,
                                      CompileAbortMode mode
 ) {
-  auto compile = [&](const CompilerGuard& c) {
-    return c->compile(filename,
-                      sha1,
-                      folly::StringPiece(code, len),
-                      nativeFuncs,
-                      forDebuggerEval,
-                      wantsSymbolRefs,
-                      options);
+  tracing::BlockNoTrace _{"compile-unit-emitter"};
+
+  auto const compile = [&] (const CompilerGuard& c) {
+    return c->compile(
+      filename,
+      sha1,
+      folly::StringPiece(code, len),
+      nativeFuncs,
+      forDebuggerEval,
+      wantsSymbolRefs,
+      options
+    );
   };
   return run_compiler(
-    CompilerGuard(*this),
+    CompilerGuard{*this},
     m_options.maxRetries,
     m_options.verboseErrors,
     compile,
     internal_error,
-    mode);
+    mode
+  );
 }
 
 FfpResult CompilerPool::parse(
@@ -1268,23 +1256,40 @@ UnitCompiler::create(const char* code,
                      const SHA1& sha1,
                      const Native::FuncTable& nativeFuncs,
                      bool forDebuggerEval,
-                     const RepoOptions& options
-) {
-  s_manager.ensure_started();
-  return std::make_unique<HackcUnitCompiler>(
-    code,
-    codeLen,
-    filename,
-    sha1,
-    nativeFuncs,
-    forDebuggerEval,
-    options
-  );
+                     const RepoOptions& options) {
+  auto const make = [code, codeLen, filename, sha1, forDebuggerEval,
+                     &nativeFuncs, &options] {
+    s_manager.ensure_started();
+    return std::make_unique<HackcUnitCompiler>(
+      code,
+      codeLen,
+      filename,
+      sha1,
+      nativeFuncs,
+      forDebuggerEval,
+      options
+    );
+  };
+
+  if (g_unit_emitter_cache_hook && !forDebuggerEval) {
+    return std::make_unique<CacheUnitCompiler>(
+      code,
+      codeLen,
+      filename,
+      sha1,
+      nativeFuncs,
+      false,
+      options,
+      std::move(make)
+    );
+  } else {
+    return make();
+  }
 }
 
 std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
   bool wantsSymbolRefs,
-  CompileAbortMode mode) const {
+  CompileAbortMode mode) {
   bool ice = false;
   auto res = hackc_compile(m_code,
                            m_codeLen,
@@ -1296,15 +1301,17 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
                            ice,
                            m_options,
                            mode);
-  std::unique_ptr<UnitEmitter> unitEmitter;
-  match<void>(
+  auto unitEmitter = match<std::unique_ptr<UnitEmitter>>(
     res,
     [&] (std::unique_ptr<UnitEmitter>& ue) {
-      unitEmitter = std::move(ue);
+      return std::move(ue);
     },
     [&] (std::string& err) {
       switch (mode) {
-      case CompileAbortMode::Never: break;
+      case CompileAbortMode::Never:
+        break;
+      case CompileAbortMode::AllErrorsNull:
+        return std::unique_ptr<UnitEmitter>{};
       case CompileAbortMode::OnlyICE:
       case CompileAbortMode::VerifyErrors:
       case CompileAbortMode::AllErrors:
@@ -1319,16 +1326,37 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
           _Exit(1);
         }
       }
-      unitEmitter = createFatalUnit(
+      return createFatalUnit(
         makeStaticString(m_filename),
         m_sha1,
         FatalOp::Runtime,
-        err);
+        err
+      );
     }
   );
 
   if (unitEmitter) unitEmitter->m_ICE = ice;
   return unitEmitter;
+}
+
+std::unique_ptr<UnitEmitter>
+CacheUnitCompiler::compile(bool wantsSymbolRefs,
+                           CompileAbortMode mode) {
+  assertx(g_unit_emitter_cache_hook);
+  return g_unit_emitter_cache_hook(
+    m_filename,
+    m_sha1,
+    m_codeLen,
+    [&] (bool wantsICE) {
+      if (!m_fallback) m_fallback = m_makeFallback();
+      assertx(m_fallback);
+      return m_fallback->compile(
+        wantsSymbolRefs,
+        wantsICE ? mode : CompileAbortMode::AllErrorsNull
+      );
+    },
+    m_nativeFuncs
+  );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

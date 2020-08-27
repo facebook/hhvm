@@ -87,9 +87,10 @@ std::string hackc_version();
  * OnlyICE - internal errors (IPC and serializer) raise abort signals
  * VerifyErrors - internal errors and assembler verification errors raise aborts
  * AllErrors - internal, verification, and hackc errors raise aborts
+ * AllErrorsNull - like AllErrors, but returns nullptr instead of aborting
  */
 enum class CompileAbortMode {
-  Never, OnlyICE, VerifyErrors, AllErrors
+  Never, OnlyICE, VerifyErrors, AllErrors, AllErrorsNull
 };
 
 struct UnitCompiler {
@@ -108,7 +109,7 @@ struct UnitCompiler {
         m_forDebuggerEval(forDebuggerEval),
         m_options(options)
     {}
-  virtual ~UnitCompiler() {}
+  virtual ~UnitCompiler() = default;
 
   static std::unique_ptr<UnitCompiler> create(
     const char* code,
@@ -121,7 +122,7 @@ struct UnitCompiler {
 
   virtual std::unique_ptr<UnitEmitter> compile(
     bool wantsSymbolRefs = false,
-    CompileAbortMode = CompileAbortMode::Never) const = 0;
+    CompileAbortMode = CompileAbortMode::Never) = 0;
 
   virtual const char* getName() const = 0;
 
@@ -129,7 +130,7 @@ struct UnitCompiler {
   const char* m_code;
   int m_codeLen;
   const char* m_filename;
-  const SHA1& m_sha1;
+  SHA1 m_sha1;
   const Native::FuncTable& m_nativeFuncs;
   bool m_forDebuggerEval;
   const RepoOptions& m_options;
@@ -140,19 +141,50 @@ struct HackcUnitCompiler : public UnitCompiler {
 
   virtual std::unique_ptr<UnitEmitter> compile(
     bool wantsSymbolRefs = false,
-    CompileAbortMode = CompileAbortMode::Never) const override;
+    CompileAbortMode = CompileAbortMode::Never) override;
 
   virtual const char* getName() const override { return "HackC"; }
 };
 
-using UnitEmitterCompileHook =
+// UnitCompiler which first tries to retrieve the UnitEmitter via the
+// g_unit_emitter_cache_hook. If that fails, delegate to the
+// UnitCompiler produced by the "makeFallback" lambda (this avoids
+// having to create the fallback UnitEmitter until we need it). The
+// lambda will only be called once. Its output is cached afterwards.
+struct CacheUnitCompiler : public UnitCompiler {
+  explicit CacheUnitCompiler(
+      const char* code,
+      int codeLen,
+      const char* filename,
+      const SHA1& sha1,
+      const Native::FuncTable& nativeFuncs,
+      bool forDebuggerEval,
+      const RepoOptions& options,
+      std::function<std::unique_ptr<UnitCompiler>()> makeFallback)
+    : UnitCompiler{code, codeLen, filename, sha1,
+                   nativeFuncs, forDebuggerEval, options}
+    , m_makeFallback{std::move(makeFallback)} {}
+
+  virtual std::unique_ptr<UnitEmitter> compile(
+      bool wantsSymbolRefs = false,
+      CompileAbortMode = CompileAbortMode::Never) override;
+
+  virtual const char* getName() const override { return "Cache"; }
+private:
+  std::function<std::unique_ptr<UnitCompiler>()> m_makeFallback;
+  std::unique_ptr<UnitCompiler> m_fallback;
+};
+
+using UnitEmitterCacheHook =
   std::unique_ptr<UnitEmitter> (*)(
     const char*,
     const SHA1&,
     folly::StringPiece::size_type,
-    const std::function<std::unique_ptr<UnitEmitter>()>&,
+    // First parameter is whether ICE UEs are allowed. If not, a
+    // nullptr will be returned for ICE UEs instead.
+    const std::function<std::unique_ptr<UnitEmitter>(bool)>&,
     const Native::FuncTable&
   );
-extern UnitEmitterCompileHook g_unit_emitter_compile_hook;
+extern UnitEmitterCacheHook g_unit_emitter_cache_hook;
 
 }

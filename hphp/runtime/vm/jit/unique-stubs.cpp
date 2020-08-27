@@ -177,56 +177,80 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool fcallHelper(CallFlags callFlags, Func* func, int32_t numArgs, void* ctx,
-                 TCA savedRip) {
-  assert_native_stack_aligned();
-  assertx(numArgs <= func->numNonVariadicParams() + 1);
-
+template<class Result, class Handler>
+Result withVMRegsForCall(CallFlags callFlags, const Func* func,
+                         uint32_t numArgs, bool hasUnpack, TCA savedRip,
+                         Handler handler) {
   // The stub already synced the vmfp() and vmsp() registers, but the vmsp() is
-  // pointing to the space reserved for the ActRec. This space together with
-  // the space reserved for output args may contain random garbage, as the Call
-  // opcode promises to kill/write this space, so store-elim is allowed to
-  // optimize away these writes. So, write NullUninits over this space, adjust
-  // vmsp() and set vmpc()/vmJitReturnAddr().
+  // pointing to the space reserved for the ActRec. Adjust it to point to the
+  // top of the stack containing call inputs and set vmpc()/vmJitReturnAddr().
   assertx(tl_regState == VMRegState::DIRTY);
   auto& unsafeRegs = vmRegsUnsafe();
   auto const calleeFP = unsafeRegs.stack.top();
-  for (auto i = kNumActRecCells + func->numInOutParamsForArgs(numArgs); i--;) {
-    tvWriteUninit(calleeFP[i]);
-  }
+  auto const callerFP = unsafeRegs.fp;
 
-  unsafeRegs.stack.nalloc(numArgs + (callFlags.hasGenerics() ? 1 : 0));
-  unsafeRegs.pc = unsafeRegs.fp->func()->at(
-    unsafeRegs.fp->func()->base() + callFlags.callOffset());
+  unsafeRegs.stack.nalloc(
+    numArgs + (hasUnpack ? 1 : 0) + (callFlags.hasGenerics() ? 1 : 0));
+  unsafeRegs.pc = callerFP->func()->at(
+    callerFP->func()->base() + callFlags.callOffset());
   unsafeRegs.jitReturnAddr = savedRip;
   tl_regState = VMRegState::CLEAN;
 
-  // Check for stack overflow in the same place func prologues make their
-  // StackCheck::Early check (see irgen-func-prologue.cpp).
-  if (checkCalleeStackOverflow(calleeFP, func)) {
-    throw_stack_overflow();
+  try {
+    auto const result = handler(unsafeRegs.stack, calleeFP);
+    // If we did not throw, we are going to reenter TC, so set the registers
+    // as dirty.
+    tl_regState = VMRegState::DIRTY;
+    return result;
+  } catch (...) {
+    // Manually unwind the stack to the point expected by the Call opcode as
+    // defined by its fixup. Note that the callee frame must be either not
+    // initialized yet, or already unwound by the handler. In the first case
+    // the stack space needs to be discarded. In the second case, the stack
+    // does not contain that space anymore.
+    assertx(callerFP == vmfp());
+    auto& stack = vmStack();
+    while (stack.top() < calleeFP) stack.popTV();
+    if (stack.top() == calleeFP) stack.discardAR();
+    auto const numInOutParams = func->numInOutParamsForArgs(numArgs);
+    assertx(stack.top() <= calleeFP + numInOutParams + kNumActRecCells);
+    stack.ndiscard(calleeFP + numInOutParams + kNumActRecCells - stack.top());
+    assertx(stack.top() == calleeFP + numInOutParams + kNumActRecCells);
+    throw;
   }
+}
 
-  // Write ActRec.
-  ActRec* ar = reinterpret_cast<ActRec*>(calleeFP);
-  ar->m_sfp = vmfp();
-  ar->setJitReturn(savedRip);
-  ar->setFunc(func);
-  ar->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
-    callFlags.callOffset(),
-    callFlags.asyncEagerReturn() ? (1 << ActRec::AsyncEagerRet) : 0
-  );
-  ar->setNumArgs(numArgs);
-  ar->m_thisUnsafe = reinterpret_cast<ObjectData*>(ctx);
+bool fcallHelper(CallFlags callFlags, Func* func, uint32_t numArgsInclUnpack,
+                 void* ctx, TCA savedRip) {
+  assert_native_stack_aligned();
+  assertx(numArgsInclUnpack <= func->numNonVariadicParams() + 1);
+  auto const hasUnpack = numArgsInclUnpack == func->numNonVariadicParams() + 1;
+  auto const numArgs = numArgsInclUnpack - (hasUnpack ? 1 : 0);
+  return withVMRegsForCall<bool>(
+      callFlags, func, numArgs, hasUnpack, savedRip,
+      [&](Stack&, TypedValue* calleeFP) {
+    // Check for stack overflow in the same place func prologues make their
+    // StackCheck::Early check (see irgen-func-prologue.cpp).
+    if (checkCalleeStackOverflow(calleeFP, func)) {
+      throw_stack_overflow();
+    }
 
-  // If doFCall() returns false, we've been asked to skip the function body due
-  // to fb_intercept, so indicate that via the return value. If we did not
-  // throw, we are going to reenter TC, so set the registers as dirty.
-  auto const hasUnpack = numArgs == func->numNonVariadicParams() + 1;
-  if (hasUnpack) --numArgs;
-  auto const notIntercepted = doFCall(ar, numArgs, hasUnpack, callFlags);
-  tl_regState = VMRegState::DIRTY;
-  return notIntercepted;
+    // Write ActRec.
+    ActRec* ar = reinterpret_cast<ActRec*>(calleeFP);
+    ar->m_sfp = vmfp();
+    ar->setJitReturn(savedRip);
+    ar->setFunc(func);
+    ar->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
+      callFlags.callOffset(),
+      callFlags.asyncEagerReturn() ? (1 << ActRec::AsyncEagerRet) : 0
+    );
+    ar->setNumArgs(numArgsInclUnpack);
+    ar->m_thisUnsafe = reinterpret_cast<ObjectData*>(ctx);
+
+    // If doFCall() returns false, we've been asked to skip the function body
+    // due to fb_intercept, so indicate that via the return value.
+    return doFCall(ar, numArgs, hasUnpack, callFlags);
+  });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

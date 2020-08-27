@@ -1,4 +1,8 @@
 <?hh // strict
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
+
 // OK: T as return type too
 class PU14 {
   public static function id<T>(T $x): T {

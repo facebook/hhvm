@@ -1,4 +1,8 @@
 <?hh // strict
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
+
 // KO: refers to E instead of this:@E
 class PU {
   enum E {

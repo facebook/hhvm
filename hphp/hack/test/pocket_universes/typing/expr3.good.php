@@ -1,4 +1,8 @@
 <?hh // strict
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
+
 // OK: inherit case value
 class PU1 {
   enum E {

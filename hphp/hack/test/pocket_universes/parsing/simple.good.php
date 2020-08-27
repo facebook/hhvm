@@ -1,4 +1,7 @@
 <?hh // strict
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
 
 abstract class Foo {
   enum Field {

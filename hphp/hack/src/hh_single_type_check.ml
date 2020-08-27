@@ -671,7 +671,6 @@ let parse_options () =
       ~po_disable_modes:!disable_modes
       ~po_disable_hh_ignore_error:!disable_hh_ignore_error
       ~tco_enable_systemlib_annotations:!enable_systemlib_annotations
-      ~tco_pu_enabled_paths:(!enable_pocket_universes_syntax, [])
       ~tco_higher_kinded_types:!enable_higher_kinded_types
       ~po_allowed_decl_fixme_codes:!allowed_decl_fixme_codes
       ~po_allow_unstable_features:true

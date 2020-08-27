@@ -1,24 +1,24 @@
-File "nothing.bad.php", line 19, characters 22-23:
+File "nothing.bad.php", line 22, characters 22-23:
 Invalid argument (Typing[4326])
-File "nothing.bad.php", line 18, characters 34-40:
+File "nothing.bad.php", line 21, characters 34-40:
 Expected `nothing`
-File "nothing.bad.php", line 19, characters 10-20:
+File "nothing.bad.php", line 22, characters 10-20:
 But got `TP:@T`
-File "nothing.bad.php", line 19, characters 22-23:
+File "nothing.bad.php", line 22, characters 22-23:
   where 'TP:@T' is a type projected from this expression
-File "nothing.bad.php", line 23, characters 22-23:
+File "nothing.bad.php", line 26, characters 22-23:
 Invalid argument (Typing[4326])
-File "nothing.bad.php", line 22, characters 39-40:
+File "nothing.bad.php", line 25, characters 39-40:
 Expected `TR`
-File "nothing.bad.php", line 23, characters 10-20:
+File "nothing.bad.php", line 26, characters 10-20:
 But got `TP:@T`
-File "nothing.bad.php", line 23, characters 22-23:
+File "nothing.bad.php", line 26, characters 22-23:
   where 'TP:@T' is a type projected from this expression
-File "nothing.bad.php", line 27, characters 22-23:
+File "nothing.bad.php", line 30, characters 22-23:
 Invalid argument (Typing[4326])
-File "nothing.bad.php", line 26, characters 25-31:
+File "nothing.bad.php", line 29, characters 25-31:
 Expected `nothing`
-File "nothing.bad.php", line 27, characters 10-20:
+File "nothing.bad.php", line 30, characters 10-20:
 But got `<expr#1>:@T`
-File "nothing.bad.php", line 27, characters 22-23:
+File "nothing.bad.php", line 30, characters 22-23:
   where '<expr#1>' is a reference to this expression

@@ -1,4 +1,7 @@
 <?hh
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
 
 function testit(): void {
   $shape = shape("toto" => 42);

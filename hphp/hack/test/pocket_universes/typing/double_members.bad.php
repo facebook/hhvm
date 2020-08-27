@@ -1,4 +1,7 @@
 <?hh
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
 
 class PU2 {
   enum E {

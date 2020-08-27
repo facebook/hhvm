@@ -590,7 +590,6 @@ let hard_banned_codes =
       Typing.err_code Typing.NewStaticClassReified;
       Typing.err_code Typing.MemoizeReified;
       Typing.err_code Typing.ClassGetReified;
-      Typing.err_code Typing.PocketUniversesReservedSyntax;
     ]
 
 let allowed_fixme_codes_strict = ref ISet.empty
@@ -1740,15 +1739,6 @@ let pu_attribute_not_necessary pos class_name =
     (sprintf
        "Class/Trait %s does not need any `__Pu` attribute"
        (md_codify class_name))
-
-let pu_reserved_syntax pos =
-  add
-    (Typing.err_code Typing.PocketUniversesReservedSyntax)
-    pos
-    ( "This syntax is reserved for the Pocket Universes prototype.\n"
-    ^ "It can only be used in the directories specified by the\n"
-    ^ "  `pocket_universe_enabled_paths = nowhere|everywhere|dir1,..,dirn`\noption in .hhconfig"
-    )
 
 let illegal_use_of_dynamically_callable attr_pos meth_pos visibility =
   add_list

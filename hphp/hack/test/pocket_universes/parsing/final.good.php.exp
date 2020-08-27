@@ -57,6 +57,161 @@
           }
         },
         {
+          "kind":"file_attribute_specification",
+          "file_attribute_specification_left_double_angle":{
+            "kind":"token",
+            "token":{
+              "kind":"<<",
+              "text":"<<",
+              "offset":15,
+              "leading_width":0,
+              "width":2,
+              "trailing_width":0,
+              "leading":[],
+              "trailing":[],
+              "line_number":2
+            }
+          },
+          "file_attribute_specification_keyword":{
+            "kind":"token",
+            "token":{
+              "kind":"file",
+              "text":"file",
+              "offset":17,
+              "leading_width":0,
+              "width":4,
+              "trailing_width":0,
+              "leading":[],
+              "trailing":[],
+              "line_number":2
+            }
+          },
+          "file_attribute_specification_colon":{
+            "kind":"token",
+            "token":{
+              "kind":":",
+              "text":":",
+              "offset":21,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":0,
+              "leading":[],
+              "trailing":[],
+              "line_number":2
+            }
+          },
+          "file_attribute_specification_attributes":{
+            "kind":"list",
+            "elements":[
+              {
+                "kind":"list_item",
+                "list_item":{
+                  "kind":"constructor_call",
+                  "constructor_call_type":{
+                    "kind":"simple_type_specifier",
+                    "simple_type_specifier":{
+                      "kind":"token",
+                      "token":{
+                        "kind":"name",
+                        "text":"__EnableUnstableFeatures",
+                        "offset":22,
+                        "leading_width":0,
+                        "width":24,
+                        "trailing_width":0,
+                        "leading":[],
+                        "trailing":[],
+                        "line_number":2
+                      }
+                    }
+                  },
+                  "constructor_call_left_paren":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"(",
+                      "text":"(",
+                      "offset":46,
+                      "leading_width":0,
+                      "width":1,
+                      "trailing_width":1,
+                      "leading":[],
+                      "trailing":[{"kind":"end_of_line","text":"\n","offset":47,"width":1}],
+                      "line_number":2
+                    }
+                  },
+                  "constructor_call_argument_list":{
+                    "kind":"list",
+                    "elements":[
+                      {
+                        "kind":"list_item",
+                        "list_item":{
+                          "kind":"literal",
+                          "literal_expression":{
+                            "kind":"token",
+                            "token":{
+                              "kind":"single_quoted_string_literal",
+                              "text":"'pocket_universes'",
+                              "offset":48,
+                              "leading_width":4,
+                              "width":18,
+                              "trailing_width":0,
+                              "leading":[{"kind":"whitespace","text":"    ","offset":48,"width":4}],
+                              "trailing":[],
+                              "line_number":3
+                            }
+                          }
+                        },
+                        "list_separator":{
+                          "kind":"token",
+                          "token":{
+                            "kind":",",
+                            "text":",",
+                            "offset":70,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":1,
+                            "leading":[],
+                            "trailing":[{"kind":"end_of_line","text":"\n","offset":71,"width":1}],
+                            "line_number":3
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "constructor_call_right_paren":{
+                    "kind":"token",
+                    "token":{
+                      "kind":")",
+                      "text":")",
+                      "offset":72,
+                      "leading_width":0,
+                      "width":1,
+                      "trailing_width":0,
+                      "leading":[],
+                      "trailing":[],
+                      "line_number":4
+                    }
+                  }
+                },
+                "list_separator":{"kind":"missing"}
+              }
+            ]
+          },
+          "file_attribute_specification_right_double_angle":{
+            "kind":"token",
+            "token":{
+              "kind":">>",
+              "text":">>",
+              "offset":73,
+              "leading_width":0,
+              "width":2,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"end_of_line","text":"\n","offset":75,"width":1}],
+              "line_number":4
+            }
+          }
+        },
+        {
           "kind":"classish_declaration",
           "classish_attribute":{"kind":"missing"},
           "classish_modifiers":{"kind":"missing"},
@@ -66,13 +221,13 @@
             "token":{
               "kind":"class",
               "text":"class",
-              "offset":15,
+              "offset":76,
               "leading_width":1,
               "width":5,
               "trailing_width":1,
-              "leading":[{"kind":"end_of_line","text":"\n","offset":15,"width":1}],
-              "trailing":[{"kind":"whitespace","text":" ","offset":21,"width":1}],
-              "line_number":3
+              "leading":[{"kind":"end_of_line","text":"\n","offset":76,"width":1}],
+              "trailing":[{"kind":"whitespace","text":" ","offset":82,"width":1}],
+              "line_number":6
             }
           },
           "classish_name":{
@@ -80,13 +235,13 @@
             "token":{
               "kind":"name",
               "text":"Foo",
-              "offset":22,
+              "offset":83,
               "leading_width":0,
               "width":3,
               "trailing_width":1,
               "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":25,"width":1}],
-              "line_number":3
+              "trailing":[{"kind":"whitespace","text":" ","offset":86,"width":1}],
+              "line_number":6
             }
           },
           "classish_type_parameters":{"kind":"missing"},
@@ -102,13 +257,13 @@
               "token":{
                 "kind":"{",
                 "text":"{",
-                "offset":26,
+                "offset":87,
                 "leading_width":0,
                 "width":1,
                 "trailing_width":1,
                 "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":27,"width":1}],
-                "line_number":3
+                "trailing":[{"kind":"end_of_line","text":"\n","offset":88,"width":1}],
+                "line_number":6
               }
             },
             "classish_body_elements":{
@@ -125,13 +280,13 @@
                         "token":{
                           "kind":"final",
                           "text":"final",
-                          "offset":28,
+                          "offset":89,
                           "leading_width":2,
                           "width":5,
                           "trailing_width":1,
-                          "leading":[{"kind":"whitespace","text":"  ","offset":28,"width":2}],
-                          "trailing":[{"kind":"whitespace","text":" ","offset":35,"width":1}],
-                          "line_number":4
+                          "leading":[{"kind":"whitespace","text":"  ","offset":89,"width":2}],
+                          "trailing":[{"kind":"whitespace","text":" ","offset":96,"width":1}],
+                          "line_number":7
                         }
                       }
                     ]
@@ -141,13 +296,13 @@
                     "token":{
                       "kind":"enum",
                       "text":"enum",
-                      "offset":36,
+                      "offset":97,
                       "leading_width":0,
                       "width":4,
                       "trailing_width":1,
                       "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":40,"width":1}],
-                      "line_number":4
+                      "trailing":[{"kind":"whitespace","text":" ","offset":101,"width":1}],
+                      "line_number":7
                     }
                   },
                   "pocket_enum_name":{
@@ -155,13 +310,13 @@
                     "token":{
                       "kind":"name",
                       "text":"Field",
-                      "offset":41,
+                      "offset":102,
                       "leading_width":0,
                       "width":5,
                       "trailing_width":1,
                       "leading":[],
-                      "trailing":[{"kind":"whitespace","text":" ","offset":46,"width":1}],
-                      "line_number":4
+                      "trailing":[{"kind":"whitespace","text":" ","offset":107,"width":1}],
+                      "line_number":7
                     }
                   },
                   "pocket_enum_left_brace":{
@@ -169,13 +324,13 @@
                     "token":{
                       "kind":"{",
                       "text":"{",
-                      "offset":47,
+                      "offset":108,
                       "leading_width":0,
                       "width":1,
                       "trailing_width":1,
                       "leading":[],
-                      "trailing":[{"kind":"end_of_line","text":"\n","offset":48,"width":1}],
-                      "line_number":4
+                      "trailing":[{"kind":"end_of_line","text":"\n","offset":109,"width":1}],
+                      "line_number":7
                     }
                   },
                   "pocket_enum_fields":{
@@ -188,13 +343,13 @@
                           "token":{
                             "kind":"case",
                             "text":"case",
-                            "offset":49,
+                            "offset":110,
                             "leading_width":4,
                             "width":4,
                             "trailing_width":1,
-                            "leading":[{"kind":"whitespace","text":"    ","offset":49,"width":4}],
-                            "trailing":[{"kind":"whitespace","text":" ","offset":57,"width":1}],
-                            "line_number":5
+                            "leading":[{"kind":"whitespace","text":"    ","offset":110,"width":4}],
+                            "trailing":[{"kind":"whitespace","text":" ","offset":118,"width":1}],
+                            "line_number":8
                           }
                         },
                         "pocket_field_type_type":{
@@ -202,13 +357,13 @@
                           "token":{
                             "kind":"type",
                             "text":"type",
-                            "offset":58,
+                            "offset":119,
                             "leading_width":0,
                             "width":4,
                             "trailing_width":1,
                             "leading":[],
-                            "trailing":[{"kind":"whitespace","text":" ","offset":62,"width":1}],
-                            "line_number":5
+                            "trailing":[{"kind":"whitespace","text":" ","offset":123,"width":1}],
+                            "line_number":8
                           }
                         },
                         "pocket_field_type_type_parameter":{
@@ -221,13 +376,13 @@
                             "token":{
                               "kind":"name",
                               "text":"T",
-                              "offset":63,
+                              "offset":124,
                               "leading_width":0,
                               "width":1,
                               "trailing_width":0,
                               "leading":[],
                               "trailing":[],
-                              "line_number":5
+                              "line_number":8
                             }
                           },
                           "type_param_params":{"kind":"missing"},
@@ -238,13 +393,13 @@
                           "token":{
                             "kind":";",
                             "text":";",
-                            "offset":64,
+                            "offset":125,
                             "leading_width":0,
                             "width":1,
                             "trailing_width":1,
                             "leading":[],
-                            "trailing":[{"kind":"end_of_line","text":"\n","offset":65,"width":1}],
-                            "line_number":5
+                            "trailing":[{"kind":"end_of_line","text":"\n","offset":126,"width":1}],
+                            "line_number":8
                           }
                         }
                       },
@@ -255,13 +410,13 @@
                           "token":{
                             "kind":"case",
                             "text":"case",
-                            "offset":66,
+                            "offset":127,
                             "leading_width":4,
                             "width":4,
                             "trailing_width":1,
-                            "leading":[{"kind":"whitespace","text":"    ","offset":66,"width":4}],
-                            "trailing":[{"kind":"whitespace","text":" ","offset":74,"width":1}],
-                            "line_number":6
+                            "leading":[{"kind":"whitespace","text":"    ","offset":127,"width":4}],
+                            "trailing":[{"kind":"whitespace","text":" ","offset":135,"width":1}],
+                            "line_number":9
                           }
                         },
                         "pocket_field_type_expr_type":{
@@ -271,13 +426,13 @@
                             "token":{
                               "kind":"string",
                               "text":"string",
-                              "offset":75,
+                              "offset":136,
                               "leading_width":0,
                               "width":6,
                               "trailing_width":1,
                               "leading":[],
-                              "trailing":[{"kind":"whitespace","text":" ","offset":81,"width":1}],
-                              "line_number":6
+                              "trailing":[{"kind":"whitespace","text":" ","offset":142,"width":1}],
+                              "line_number":9
                             }
                           }
                         },
@@ -286,13 +441,13 @@
                           "token":{
                             "kind":"name",
                             "text":"ident",
-                            "offset":82,
+                            "offset":143,
                             "leading_width":0,
                             "width":5,
                             "trailing_width":0,
                             "leading":[],
                             "trailing":[],
-                            "line_number":6
+                            "line_number":9
                           }
                         },
                         "pocket_field_type_expr_semicolon":{
@@ -300,13 +455,13 @@
                           "token":{
                             "kind":";",
                             "text":";",
-                            "offset":87,
+                            "offset":148,
                             "leading_width":0,
                             "width":1,
                             "trailing_width":1,
                             "leading":[],
-                            "trailing":[{"kind":"end_of_line","text":"\n","offset":88,"width":1}],
-                            "line_number":6
+                            "trailing":[{"kind":"end_of_line","text":"\n","offset":149,"width":1}],
+                            "line_number":9
                           }
                         }
                       },
@@ -317,13 +472,13 @@
                           "token":{
                             "kind":"case",
                             "text":"case",
-                            "offset":89,
+                            "offset":150,
                             "leading_width":4,
                             "width":4,
                             "trailing_width":1,
-                            "leading":[{"kind":"whitespace","text":"    ","offset":89,"width":4}],
-                            "trailing":[{"kind":"whitespace","text":" ","offset":97,"width":1}],
-                            "line_number":7
+                            "leading":[{"kind":"whitespace","text":"    ","offset":150,"width":4}],
+                            "trailing":[{"kind":"whitespace","text":" ","offset":158,"width":1}],
+                            "line_number":10
                           }
                         },
                         "pocket_field_type_expr_type":{
@@ -333,13 +488,13 @@
                             "token":{
                               "kind":"name",
                               "text":"T",
-                              "offset":98,
+                              "offset":159,
                               "leading_width":0,
                               "width":1,
                               "trailing_width":1,
                               "leading":[],
-                              "trailing":[{"kind":"whitespace","text":" ","offset":99,"width":1}],
-                              "line_number":7
+                              "trailing":[{"kind":"whitespace","text":" ","offset":160,"width":1}],
+                              "line_number":10
                             }
                           }
                         },
@@ -348,13 +503,13 @@
                           "token":{
                             "kind":"name",
                             "text":"default_value",
-                            "offset":100,
+                            "offset":161,
                             "leading_width":0,
                             "width":13,
                             "trailing_width":0,
                             "leading":[],
                             "trailing":[],
-                            "line_number":7
+                            "line_number":10
                           }
                         },
                         "pocket_field_type_expr_semicolon":{
@@ -362,13 +517,13 @@
                           "token":{
                             "kind":";",
                             "text":";",
-                            "offset":113,
+                            "offset":174,
                             "leading_width":0,
                             "width":1,
                             "trailing_width":1,
                             "leading":[],
-                            "trailing":[{"kind":"end_of_line","text":"\n","offset":114,"width":1}],
-                            "line_number":7
+                            "trailing":[{"kind":"end_of_line","text":"\n","offset":175,"width":1}],
+                            "line_number":10
                           }
                         }
                       }
@@ -379,13 +534,13 @@
                     "token":{
                       "kind":"}",
                       "text":"}",
-                      "offset":115,
+                      "offset":176,
                       "leading_width":2,
                       "width":1,
                       "trailing_width":1,
-                      "leading":[{"kind":"whitespace","text":"  ","offset":115,"width":2}],
-                      "trailing":[{"kind":"end_of_line","text":"\n","offset":118,"width":1}],
-                      "line_number":8
+                      "leading":[{"kind":"whitespace","text":"  ","offset":176,"width":2}],
+                      "trailing":[{"kind":"end_of_line","text":"\n","offset":179,"width":1}],
+                      "line_number":11
                     }
                   }
                 }
@@ -396,13 +551,13 @@
               "token":{
                 "kind":"}",
                 "text":"}",
-                "offset":119,
+                "offset":180,
                 "leading_width":0,
                 "width":1,
                 "trailing_width":1,
                 "leading":[],
-                "trailing":[{"kind":"end_of_line","text":"\n","offset":120,"width":1}],
-                "line_number":9
+                "trailing":[{"kind":"end_of_line","text":"\n","offset":181,"width":1}],
+                "line_number":12
               }
             }
           }
@@ -414,19 +569,19 @@
             "token":{
               "kind":"end_of_file",
               "text":"",
-              "offset":121,
+              "offset":182,
               "leading_width":0,
               "width":0,
               "trailing_width":0,
               "leading":[],
               "trailing":[],
-              "line_number":10
+              "line_number":13
             }
           }
         }
       ]
     }
   },
-  "program_text":"<?hh // strict\n\nclass Foo {\n  final enum Field {\n    case type T;\n    case string ident;\n    case T default_value;\n  }\n}\n",
-  "version":"2020-06-23-0001"
+  "program_text":"<?hh // strict\n<<file:__EnableUnstableFeatures(\n    'pocket_universes',\n)>>\n\nclass Foo {\n  final enum Field {\n    case type T;\n    case string ident;\n    case T default_value;\n  }\n}\n",
+  "version":"2020-08-17-0000"
 }

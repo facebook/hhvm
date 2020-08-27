@@ -55,7 +55,6 @@ let visitor ctx =
         Invalid_arraykey_constraint_check.handler;
         Type_const_check.handler;
         Pocket_universes_runtime_check.handler;
-        Pocket_universes_path_check.handler;
         Static_method_generics_check.handler;
       ] )
 

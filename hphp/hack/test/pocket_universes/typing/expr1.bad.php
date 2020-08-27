@@ -1,4 +1,8 @@
 <?hh // strict
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
+
 // KO: wrong case value type
 class PU {
   enum E {

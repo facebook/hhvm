@@ -1,4 +1,7 @@
 <?hh
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
 
 function testit(): void {
   // be careful, this will create a dict<Tatom(my_message), string>

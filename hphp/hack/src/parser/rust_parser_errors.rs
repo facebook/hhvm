@@ -73,6 +73,7 @@ enum UnstableFeatures {
     UnionIntersectionTypeHints,
     ClassLevelWhere,
     ExpressionTrees,
+    PocketUniverses,
 }
 
 use BinopAllowsAwaitInPositions::*;
@@ -5667,6 +5668,16 @@ where
         match &node.syntax {
             UnionTypeSpecifier(_) | IntersectionTypeSpecifier(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::UnionIntersectionTypeHints)
+            }
+            PocketAtomExpression(_)
+            | PocketIdentifierExpression(_)
+            | PocketAtomMappingDeclaration(_)
+            | PocketEnumDeclaration(_)
+            | PocketFieldTypeExprDeclaration(_)
+            | PocketFieldTypeDeclaration(_)
+            | PocketMappingIdDeclaration(_)
+            | PocketMappingTypeDeclaration(_) => {
+                self.check_can_use_feature(node, &UnstableFeatures::PocketUniverses)
             }
             ClassishDeclaration(x) => match &x.classish_where_clause.syntax {
                 WhereClause(_) => self.check_can_use_feature(

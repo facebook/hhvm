@@ -1,4 +1,7 @@
 <?hh
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
 
 trait myTrait0 {
     enum E {

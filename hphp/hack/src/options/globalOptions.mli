@@ -256,12 +256,6 @@ type t = {
   po_disable_array_typehint: bool;
   (* Enable features used to typecheck systemlib *)
   tco_enable_systemlib_annotations: bool;
-  (* Controls if/where the pocket universe syntax is enabled
-   * if bool is set to true, then the PU syntax is enabled everywhere
-   * if bool is set to false, the PU syntax is enabled only inside the directories specified in the string list
-   * Paths are relative to the path of .hhconfig
-   *)
-  tco_pu_enabled_paths: bool * Relative_path.t list;
   (* Controls if higher-kinded types are supported *)
   tco_higher_kinded_types: bool;
   (* Controls if method-call inference is supported *)
@@ -370,7 +364,6 @@ val make :
   ?po_disable_array_typehint:bool ->
   ?po_allow_unstable_features:bool ->
   ?tco_enable_systemlib_annotations:bool ->
-  ?tco_pu_enabled_paths:bool * Relative_path.t list ->
   ?tco_higher_kinded_types:bool ->
   ?tco_method_call_inference:bool ->
   ?tco_report_pos_from_reason:bool ->
@@ -594,8 +587,6 @@ val po_disable_array : t -> bool
 val po_disable_array_typehint : t -> bool
 
 val tco_enable_systemlib_annotations : t -> bool
-
-val tco_pu_enabled_paths : t -> bool * Relative_path.t list
 
 val tco_higher_kinded_types : t -> bool
 

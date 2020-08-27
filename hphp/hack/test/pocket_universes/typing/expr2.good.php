@@ -1,4 +1,8 @@
 <?hh // strict
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
+
 // OK: apply atom to case value
 class PU {
   enum E {

@@ -1,4 +1,7 @@
 <?hh // strict
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
 
 function expect_int(int $_): void {}
 function expect_string(string $_): void {}

@@ -636,7 +636,7 @@ module Typing = struct
     | RedundantGeneric
     | PocketUniversesInvalidUpperBounds
     | PocketUniversesRefinement
-    | PocketUniversesReservedSyntax
+    | PocketUniversesReservedSyntaxDEPRECATED
     | ArrayAccessWrite
     | InvalidArrayKeyWrite
     | NullMemberWrite

@@ -1,14 +1,14 @@
-File "decl5.bad.php", line 19, characters 7-7:
+File "decl5.bad.php", line 23, characters 7-7:
 Pocket Universe instance `Y` is already declared in `PU12:@X` (Naming[2101])
-File "decl5.bad.php", line 17, characters 11-13:
+File "decl5.bad.php", line 21, characters 11-13:
 Unbound name: `unk` (a global constant) (Naming[2049])
-File "decl5.bad.php", line 21, characters 11-14:
+File "decl5.bad.php", line 25, characters 11-14:
 Unbound name: `this` (a global constant) (Naming[2049])
-File "decl5.bad.php", line 13, characters 19-24:
+File "decl5.bad.php", line 17, characters 19-24:
 No static method `stupid` in `PU12` (did you mean instance method `stupid`?) (Typing[4090])
-File "decl5.bad.php", line 3, characters 7-10:
+File "decl5.bad.php", line 7, characters 7-10:
 Declaration of `PU12` is here
-File "decl5.bad.php", line 17, characters 11-13:
+File "decl5.bad.php", line 21, characters 11-13:
 Unbound global constant (Typing) (Typing[4106])
-File "decl5.bad.php", line 21, characters 11-14:
+File "decl5.bad.php", line 25, characters 11-14:
 Unbound global constant (Typing) (Typing[4106])

@@ -1,4 +1,7 @@
 <?hh
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
 
 function expect_key(arraykey $_): void {}
 function expect_string(string $_): void {}

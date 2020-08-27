@@ -5,187 +5,187 @@
 .adata A_0 = """Y:2:{s:4:\"kind\";i:21;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
 .adata A_1 = """k:2:{s:1:\"A\";s:1:\"B\";}""";
 
-.class {} C (3,37) {
+.class {} C (6,40) {
   .property [private sys_initial_val] <"HH\\int" "HH\\int" extended_hint> x =
     """N;""";
-  .method {}{} [public] (6,8) <"" N > __construct(<"HH\\int" "HH\\int" > $x) {
-    .srcloc 6:10,8:63;
+  .method {}{} [public] (9,11) <"" N > __construct(<"HH\\int" "HH\\int" > $x) {
+    .srcloc 9:10,11:63;
     VerifyParamType $x
-    .srcloc 7:5,7:9;
+    .srcloc 10:5,10:9;
     CheckThis
-    .srcloc 7:17,7:18;
+    .srcloc 10:17,10:18;
     CGetL $x
     BaseH
-    .srcloc 7:5,7:13;
+    .srcloc 10:5,10:13;
     SetM 0 PL:$x
-    .srcloc 7:5,7:19;
+    .srcloc 10:5,10:19;
     PopC
-    .srcloc 8:4,8:4;
+    .srcloc 11:4,11:4;
     Null
     RetC
   }
-  .method {}{} [public] (10,12) <"HH\\int" "HH\\int" extended_hint> get() {
-    .srcloc 11:12,11:16;
+  .method {}{} [public] (13,15) <"HH\\int" "HH\\int" extended_hint> get() {
+    .srcloc 14:12,14:16;
     CheckThis
-    .srcloc 11:12,11:19;
+    .srcloc 14:12,14:19;
     BaseH
     QueryM 0 CGet PT:"x"
-    .srcloc 11:5,11:20;
+    .srcloc 14:5,14:20;
     VerifyRetTypeC
     RetC
   }
-  .method {}{} [private static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$Field$Members$memoize_impl() {
-    .srcloc 14:8,14:12;
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (17,17) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$Field$Members$memoize_impl() {
+    .srcloc 17:8,17:12;
     Keyset @A_1
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     Array @A_0
     VerifyRetTypeTS
     RetC
   }
-  .method {}{} [private static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\mixed" N > pu$Field$default_value$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
-    .srcloc 14:8,14:12;
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (17,17) <"HH\\mixed" N > pu$Field$default_value$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
+    .srcloc 17:8,17:12;
     VerifyParamType $atom
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     String "A"
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     CGetL2 $atom
     Eq
     JmpNZ L0
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     String "B"
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     CGetL2 $atom
     Eq
     JmpNZ L1
     Jmp L2
   L0:
-    .srcloc 25:23,25:24;
+    .srcloc 28:23,28:24;
     Int 42
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     RetC
   L1:
-    .srcloc 33:23,33:37;
+    .srcloc 36:23,36:37;
     String "default_value"
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     RetC
   L2:
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     NewObjD "Exception"
     Dup
     NullUninit
     NullUninit
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     String "\\C:@Field::default_value unknown atom access: "
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     CGetL $atom
     Concat
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
     PopC
     LockObj
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     Throw
-    .srcloc 14:13,14:13;
+    .srcloc 17:13,17:13;
     Null
     RetC
   }
-  .method {}{} [private static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\mixed" N > pu$Field$name$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
-    .srcloc 14:8,14:12;
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (17,17) <"HH\\mixed" N > pu$Field$name$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
+    .srcloc 17:8,17:12;
     VerifyParamType $atom
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     String "A"
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     CGetL2 $atom
     Eq
     JmpNZ L0
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     String "B"
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     CGetL2 $atom
     Eq
     JmpNZ L1
     Jmp L2
   L0:
-    .srcloc 24:14,24:16;
+    .srcloc 27:14,27:16;
     String "A"
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     RetC
   L1:
-    .srcloc 32:14,32:16;
+    .srcloc 35:14,35:16;
     String "B"
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     RetC
   L2:
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     NewObjD "Exception"
     Dup
     NullUninit
     NullUninit
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     String "\\C:@Field::name unknown atom access: "
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     CGetL $atom
     Concat
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
     PopC
     LockObj
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     Throw
-    .srcloc 14:13,14:13;
+    .srcloc 17:13,17:13;
     Null
     RetC
   }
-  .method {}{} [private static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\mixed" N > pu$Field$stuff$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
-    .srcloc 14:8,14:12;
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (17,17) <"HH\\mixed" N > pu$Field$stuff$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
+    .srcloc 17:8,17:12;
     VerifyParamType $atom
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     String "A"
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     CGetL2 $atom
     Eq
     JmpNZ L0
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     String "B"
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     CGetL2 $atom
     Eq
     JmpNZ L1
     Jmp L2
   L0:
-    .srcloc 26:15,26:21;
+    .srcloc 29:15,29:21;
     String "stuff"
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     RetC
   L1:
-    .srcloc 34:15,34:18;
+    .srcloc 37:15,37:18;
     Int 1664
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     RetC
   L2:
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     NewObjD "Exception"
     Dup
     NullUninit
     NullUninit
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     String "\\C:@Field::stuff unknown atom access: "
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     CGetL $atom
     Concat
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
     PopC
     LockObj
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     Throw
-    .srcloc 14:13,14:13;
+    .srcloc 17:13,17:13;
     Null
     RetC
   }
-  .method {}{} [public static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$Field$Members() {
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (17,17) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$Field$Members() {
     .ismemoizewrapper;
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     MemoGet L0 L:0+0
     RetC
   L0:
@@ -196,9 +196,9 @@
     MemoSet L:0+0
     RetC
   }
-  .method {}{} [public static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\mixed" N > pu$Field$default_value(<"HH\\string" "HH\\string" > $atom) {
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (17,17) <"HH\\mixed" N > pu$Field$default_value(<"HH\\string" "HH\\string" > $atom) {
     .ismemoizewrapper;
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     VerifyParamType $atom
     GetMemoKeyL $atom
     SetL _1
@@ -214,9 +214,9 @@
     MemoSet L:1+1
     RetC
   }
-  .method {}{} [public static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\mixed" N > pu$Field$name(<"HH\\string" "HH\\string" > $atom) {
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (17,17) <"HH\\mixed" N > pu$Field$name(<"HH\\string" "HH\\string" > $atom) {
     .ismemoizewrapper;
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     VerifyParamType $atom
     GetMemoKeyL $atom
     SetL _1
@@ -232,9 +232,9 @@
     MemoSet L:1+1
     RetC
   }
-  .method {}{} [public static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\mixed" N > pu$Field$stuff(<"HH\\string" "HH\\string" > $atom) {
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (17,17) <"HH\\mixed" N > pu$Field$stuff(<"HH\\string" "HH\\string" > $atom) {
     .ismemoizewrapper;
-    .srcloc 14:8,14:12;
+    .srcloc 17:8,17:12;
     VerifyParamType $atom
     GetMemoKeyL $atom
     SetL _1
@@ -251,5 +251,7 @@
     RetC
   }
 }
+
+.file_attributes ["__EnableUnstableFeatures"("""y:1:{s:16:\"pocket_universes\";}""")] ;
 
 # translate.good.php ends here

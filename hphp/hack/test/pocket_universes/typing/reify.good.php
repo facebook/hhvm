@@ -1,4 +1,7 @@
 <?hh // strict
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
 
 class Param<reify T> {
   public function __construct(public T $x) {}

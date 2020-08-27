@@ -5,38 +5,38 @@
 .adata A_0 = """Y:2:{s:4:\"kind\";i:21;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
 .adata A_1 = """k:0:{}""";
 
-.class {} C (4,13) {
-  .method {}{(TE as <"HH\\mixed" N upper_bound>)} [public static] (10,12) <"HH\\void" N > derive(<"TE" "TE" extended_hint type_var> $field) {
+.class {} C (7,16) {
+  .method {}{(TE as <"HH\\mixed" N upper_bound>)} [public static] (13,15) <"HH\\void" N > derive(<"TE" "TE" extended_hint type_var> $field) {
     .declvars $_;
-    .srcloc 10:17,12:116;
+    .srcloc 13:17,15:116;
     VerifyParamType $field
-    .srcloc 11:10,11:41;
+    .srcloc 14:10,14:41;
     NullUninit
     NullUninit
     NullUninit
-    .srcloc 11:35,11:40;
+    .srcloc 14:35,14:40;
     CGetL $field
-    .srcloc 11:10,11:41;
+    .srcloc 14:10,14:41;
     FCallClsMethodSD <> 1 1 "0" - "" "" Static "pu$Entry$generator"
-    .srcloc 11:5,11:41;
+    .srcloc 14:5,14:41;
     SetL $_
-    .srcloc 11:5,11:42;
+    .srcloc 14:5,14:42;
     PopC
-    .srcloc 12:4,12:4;
+    .srcloc 15:4,15:4;
     Null
     RetC
   }
-  .method {}{} [private static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$Entry$Members$memoize_impl() {
-    .srcloc 5:8,5:12;
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (8,8) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$Entry$Members$memoize_impl() {
+    .srcloc 8:8,8:12;
     Keyset @A_1
-    .srcloc 5:8,5:12;
+    .srcloc 8:8,8:12;
     Array @A_0
     VerifyRetTypeTS
     RetC
   }
-  .method {}{} [public static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$Entry$Members() {
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (8,8) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$Entry$Members() {
     .ismemoizewrapper;
-    .srcloc 5:8,5:12;
+    .srcloc 8:8,8:12;
     MemoGet L0 L:0+0
     RetC
   L0:
@@ -48,5 +48,7 @@
     RetC
   }
 }
+
+.file_attributes ["__EnableUnstableFeatures"("""y:1:{s:16:\"pocket_universes\";}""")] ;
 
 # closure.good.php ends here

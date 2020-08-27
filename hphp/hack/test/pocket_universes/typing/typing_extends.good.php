@@ -1,5 +1,8 @@
 <?hh // strict
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
 
 
 abstract class C {

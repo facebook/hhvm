@@ -1,4 +1,8 @@
 <?hh // strict
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
+
 // OK: refer to T inside mapping expression
 class PU13 {
   public static function id<T>(T $x): T {

@@ -1,4 +1,8 @@
 <?hh // strict
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
+
 // KO: reject dynamic/instance calls in definition of PU
 class PU12 {
   public function stupid<T>(T $x): T {

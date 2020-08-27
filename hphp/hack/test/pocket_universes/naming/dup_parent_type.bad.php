@@ -1,5 +1,8 @@
 //// file1.php
 <?hh // strict
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
 
 class C extends B {
   enum E {
@@ -15,6 +18,9 @@ class C extends B {
 
 //// file2.php
 <?hh // strict
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
 
 class B extends A {
   enum F {
@@ -26,6 +32,9 @@ class B extends A {
 
 //// file3.php
 <?hh // strict
+<<file:__EnableUnstableFeatures(
+    'pocket_universes',
+)>>
 
 class A {
   enum F {

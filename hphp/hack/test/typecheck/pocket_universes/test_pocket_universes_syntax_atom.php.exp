@@ -1,5 +1,2 @@
 File "test_pocket_universes_syntax_atom.php", line 6, characters 10-14:
-This syntax is reserved for the Pocket Universes prototype.
-It can only be used in the directories specified by the
-  `pocket_universe_enabled_paths = nowhere|everywhere|dir1,..,dirn`
-option in .hhconfig (Typing[4369])
+Cannot use unstable feature: `pocket_universes` (Parsing[1002])

@@ -364,27 +364,27 @@ struct ExternCompiler {
     tracing::BlockNoTrace _{"compile-unit-emitter"};
 
     try {
-      auto const compileHHAS = [&] {
-        tracing::Block _{
-          "extern-compiler-invoke",
-          [&] {
-            return tracing::Props{}
-              .add("filename", filename)
-              .add("code_size", code.size());
+      auto const compile = [&] {
+        auto const hhas = [&] {
+          tracing::Block _{
+            "extern-compiler-invoke",
+            [&] {
+              return tracing::Props{}
+                .add("filename", filename)
+                .add("code_size", code.size());
+            }
+          };
+          if (!isRunning()) start();
+          writeProgram(filename, sha1, code, forDebuggerEval, options);
+          StructuredLogEntry log;
+          auto const hhas = readResult(&log);
+          if (RuntimeOption::EvalLogExternCompilerPerf) {
+            log.setStr("filename", filename);
+            StructuredLog::log("hhvm_detailed_frontend_performance", log);
           }
-        };
-        if (!isRunning()) start();
-        writeProgram(filename, sha1, code, forDebuggerEval, options);
-        StructuredLogEntry log;
-        auto const hhas = readResult(&log);
-        if (RuntimeOption::EvalLogExternCompilerPerf) {
-          log.setStr("filename", filename);
-          StructuredLog::log("hhvm_detailed_frontend_performance", log);
-        }
-        return hhas;
-      };
+          return hhas;
+        }();
 
-      auto const assembleUE = [&] (const std::string& hhas) {
         return assemble_string(
           hhas.data(),
           hhas.length(),
@@ -401,13 +401,11 @@ struct ExternCompiler {
           filename,
           sha1,
           code.size(),
-          compileHHAS,
-          assembleUE,
-          options,
+          compile,
           nativeFuncs
         );
       } else {
-        return assembleUE(compileHHAS());
+        return compile();
       }
     } catch (const CompileException& ex) {
       stop();

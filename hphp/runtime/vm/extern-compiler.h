@@ -150,9 +150,7 @@ using UnitEmitterCompileHook =
     const char*,
     const SHA1&,
     folly::StringPiece::size_type,
-    const std::function<std::string()>&,
-    const std::function<std::unique_ptr<UnitEmitter>(const std::string&)>&,
-    const RepoOptions&,
+    const std::function<std::unique_ptr<UnitEmitter>()>&,
     const Native::FuncTable&
   );
 extern UnitEmitterCompileHook g_unit_emitter_compile_hook;

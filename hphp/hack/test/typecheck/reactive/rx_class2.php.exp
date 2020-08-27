@@ -1,2 +1,2 @@
 File "rx_class2.php", line 3, characters 3-13:
-Reactive annotations are not allowed on classes, interfaces or traits. (Parsing[1002])
+Reactive annotations `__Rx` are not allowed on classes, interfaces or traits. (Parsing[1002])

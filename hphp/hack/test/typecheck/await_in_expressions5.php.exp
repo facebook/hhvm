@@ -1,2 +1,2 @@
 File "await_in_expressions5.php", line 4, characters 11-18:
-Await cannot be used as an expression in this location because it's conditionally executed. (Parsing[1002])
+`await` cannot be used as an expression in this location because it's conditionally executed. (Parsing[1002])

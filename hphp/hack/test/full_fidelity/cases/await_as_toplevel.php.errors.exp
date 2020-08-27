@@ -1,3 +1,0 @@
-File "await_as_toplevel.php", line 3, characters 1-7:
-Await cannot be used in a toplevel statement (Parsing[1002])
-

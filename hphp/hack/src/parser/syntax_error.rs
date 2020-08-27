@@ -388,51 +388,52 @@ pub const memoize_lsb_on_non_method: Error =
 pub const expression_as_attribute_arguments: Error =
     Cow::Borrowed("Attribute arguments must be literals");
 pub const instanceof_invalid_scope_resolution: Error = Cow::Borrowed(concat!(
-    "A scope resolution (::) on the right side of an ",
-    "instanceof operator must start with a class name, `self`, `parent`, or `static`, and end with ",
+    "A scope resolution `::` on the right side of an ",
+    "`instanceof` operator must start with a class name, `self`, `parent`, or `static`, and end with ",
      "a variable",
 ));
 pub const instanceof_memberselection_inside_scoperesolution: Error = Cow::Borrowed(concat!(
-    "A scope resolution (::) on the right ",
-    "side of an instanceof operator cannot contain a member selection (->)",
+    "A scope resolution `::` on the right ",
+    "side of an instanceof operator cannot contain a member selection `->`",
 ));
 pub const instanceof_missing_subscript_index: Error = Cow::Borrowed(concat!(
-    "A subscript expression ([]) on the right side of an ",
+    "A subscript expression `[]` on the right side of an ",
     "instanceof operator must have an index",
 ));
 pub fn instanceof_new_unknown_node(msg: &str) -> Error {
     Cow::Owned(format!(
-        "Unexpected node on right hand side of new or instanceof: {}",
+        "Unexpected node on right hand side of `new` or `instanceof`: `{}`",
         msg.to_string(),
     ))
 }
-pub const invalid_await_use: Error = Cow::Borrowed("Await cannot be used as an expression");
-pub const toplevel_await_use: Error = Cow::Borrowed("Await cannot be used in a toplevel statement");
+pub const invalid_await_use: Error = Cow::Borrowed("`await` cannot be used as an expression");
+pub const toplevel_await_use: Error =
+    Cow::Borrowed("`await` cannot be used in a toplevel statement");
 pub const invalid_constructor_method_call: Error = Cow::Borrowed(
     "Method call following immediate constructor call requires parentheses around constructor call.",
 );
 pub const invalid_scope_resolution_qualifier: Error =
-    Cow::Borrowed("Only classnames and variables are allowed before '::'.");
+    Cow::Borrowed("Only classnames and variables are allowed before `::`.");
 pub const invalid_variable_name: Error = Cow::Borrowed(
     "A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores",
 );
 pub const invalid_variable_variable: Error = Cow::Borrowed("Variable Variables are not legal");
 pub const invalid_yield: Error =
-    Cow::Borrowed("Yield can only appear as a statement or on the right of an assignment");
+    Cow::Borrowed("`yield` can only appear as a statement or on the right of an assignment");
 pub const invalid_class_in_collection_initializer: Error =
     Cow::Borrowed("Cannot use collection initialization for non-collection class.");
 pub const invalid_brace_kind_in_collection_initializer: Error = Cow::Borrowed(
-    "Initializers of 'vec', 'dict' and 'keyset' should use '[...]' instead of '{...}'.",
+    "Initializers of `vec`, `dict` and `keyset` should use `[...]` instead of `{...}`.",
 );
 pub fn invalid_value_initializer(name: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot use value initializer for {}. It require key => value.",
+        "Cannot use value initializer for `{}`. It requires `key => value`.",
         name.to_string(),
     ))
 }
 pub fn invalid_key_value_initializer(name: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot use key value initializer for {}. It does not allow keys.",
+        "Cannot use key value initializer for `{}`. It does not allow keys.",
         name.to_string(),
     ))
 }
@@ -452,14 +453,14 @@ pub const collection_intrinsic_generic: Error =
 pub const collection_intrinsic_many_typeargs: Error =
     Cow::Borrowed("Collection expression must have less than three type arguments");
 pub const invalid_hack_mode: Error =
-    Cow::Borrowed("Incorrect comment; possible values include strict, partial, or empty");
+    Cow::Borrowed("Incorrect comment; possible values include `strict`, `partial`, or empty");
 pub const pair_initializer_needed: Error = Cow::Borrowed("Initializer needed for Pair object");
 pub const pair_initializer_arity: Error =
     Cow::Borrowed("Pair objects must have exactly 2 elements");
 pub const toplevel_statements: Error =
-    Cow::Borrowed("Toplevel statements are not allowed. Use __EntryPoint attribute instead");
+    Cow::Borrowed("Toplevel statements are not allowed. Use `__EntryPoint` attribute instead");
 pub const invalid_reified: Error =
-    Cow::Borrowed("Reify keyword can only appear at function or class type parameter position");
+    Cow::Borrowed("`reify` keyword can only appear at function or class type parameter position");
 pub fn reified_in_invalid_classish(s: &str) -> Error {
     Cow::Owned(format!(
         "Invalid to use a reified type within {}'s type parameters",
@@ -482,67 +483,70 @@ pub const no_generics_on_constructors: Error = Cow::Borrowed(
 pub const no_type_parameters_on_dynamic_method_calls: Error =
     Cow::Borrowed("Generics type parameters are disallowed on dynamic method calls");
 pub const dollar_unary: Error =
-    Cow::Borrowed("The dollar sign ('$') cannot be used as a unary operator");
+    Cow::Borrowed("The dollar sign `$` cannot be used as a unary operator");
 pub const type_alias_to_type_constant: Error =
     Cow::Borrowed("Type aliases to type constants are not supported");
 pub const interface_with_memoize: Error =
-    Cow::Borrowed("Memoize is not allowed on interface methods");
+    Cow::Borrowed("`__Memoize` is not allowed on interface methods");
 pub const multiple_reactivity_annotations: Error = Cow::Borrowed(
-    "Only one of following annotations is allowed: __Pure, __Rx, __RxShallow, __RxLocal, __NonRx.",
+    "Only one of following annotations is allowed: `__Pure`, `__Rx`, `__RxShallow`, `__RxLocal`, `__NonRx`.",
 );
 pub const functions_cannot_implement_reactive: Error =
-    Cow::Borrowed("__OnlyRxIfImpl annotations are only valid on class methods.");
+    Cow::Borrowed("`__OnlyRxIfImpl` annotations are only valid on class methods.");
 pub const missing_reactivity_for_condition: Error = Cow::Borrowed(concat!(
-    "__OnlyRxIfImpl and __AtMostRxAsArgs annotations cannot ",
-    "be used without __Rx, __RxShallow, or __RxLocal.",
+    "`__OnlyRxIfImpl` and `__AtMostRxAsArgs` annotations cannot ",
+    "be used without `__Rx`, `__RxShallow`, or `__RxLocal`.",
 ));
 pub const misplaced_owned_mutable: Error =
-    Cow::Borrowed("__OwnedMutable annotation can only be placed on parameters.");
+    Cow::Borrowed("`__OwnedMutable` annotation can only be placed on parameters.");
 pub const conflicting_mutable_and_owned_mutable_attributes: Error =
-    Cow::Borrowed("Parameter cannot have both __Mutable and __OwnedMutable annotations.");
+    Cow::Borrowed("Parameter cannot have both `__Mutable` and `__OwnedMutable` annotations.");
 pub const conflicting_mutable_and_maybe_mutable_attributes: Error =
-    Cow::Borrowed("Parameter cannot have both __Mutable and __MaybeMutable annotations.");
+    Cow::Borrowed("Parameter cannot have both `__Mutable` and `__MaybeMutable` annotations.");
 pub const conflicting_owned_mutable_and_maybe_mutable_attributes: Error =
-    Cow::Borrowed("Parameter cannot have both __OwnedMutable and __MaybeMutable annotations.");
+    Cow::Borrowed("Parameter cannot have both `__OwnedMutable` and `__MaybeMutable` annotations.");
 pub const mutably_owned_attribute_on_non_rx_function: Error =
-    Cow::Borrowed("__OwnedMutable annotated parameters are only allowed in reactive functions.");
-pub const invalid_non_rx_argument_for_lambda: Error = Cow::Borrowed(
-    "Invalid argument list for __NonRx attribute that is placed on anonymous function. Argument list for __NonRx attribute that is used in this position should be empty.",
-);
-pub const invalid_non_rx_argument_for_declaration: Error = Cow::Borrowed(
-    "Invalid argument list for __NonRx attribute that is placed on a declaration of function or method. Argument list for __NonRx attribute that is used in this position should contain only one string literal value.",
-);
-pub const nested_concurrent_blocks: Error = Cow::Borrowed("Concurrent blocks cannot be nested.");
+    Cow::Borrowed("`__OwnedMutable` annotated parameters are only allowed in reactive functions.");
+pub const invalid_non_rx_argument_for_lambda: Error = Cow::Borrowed(concat!(
+    "Invalid argument list for `__NonRx` attribute that is placed on anonymous function. ",
+    "Argument list for `__NonRx` attribute that is used in this position should be empty.",
+));
+pub const invalid_non_rx_argument_for_declaration: Error = Cow::Borrowed(concat!(
+    "Invalid argument list for `__NonRx` attribute that is placed on a declaration of function or method. ",
+    "Argument list for `__NonRx` attribute that is used in this position should contain only one string literal value.",
+));
+pub const nested_concurrent_blocks: Error = Cow::Borrowed("`concurrent` blocks cannot be nested.");
 pub const fewer_than_two_statements_in_concurrent_block: Error = Cow::Borrowed(concat!(
-    "Expected 2 or more statements in concurrent block. Concurrent wrapping ",
+    "Expected 2 or more statements in concurrent block. `concurrent` wrapping ",
     "nothing or a single statement is not useful or already implied.",
 ));
 pub const invalid_syntax_concurrent_block: Error = Cow::Borrowed(concat!(
-    "Concurrent block must contain a compound statement of two or ",
-    "more expression statements, IE concurrent { <expr>; <expr>; }.",
+    "`concurrent` block must contain a compound statement of two or ",
+    "more expression statements, IE concurrent `{ <expr>; <expr>; }`.",
 ));
 pub const statement_without_await_in_concurrent_block: Error =
-    Cow::Borrowed("Statement without an await in a concurrent block");
-pub const concurrent_is_disabled: Error = Cow::Borrowed("Concurrent is disabled");
+    Cow::Borrowed("Statement without an `await` in a concurrent block");
+pub const concurrent_is_disabled: Error = Cow::Borrowed("`concurrent` is disabled");
 pub const static_closures_are_disabled: Error =
     Cow::Borrowed("Static closures are not supported in Hack");
 pub const invalid_await_position: Error = Cow::Borrowed(concat!(
-    "Await cannot be used as an expression in this ",
+    "`await` cannot be used as an expression in this ",
     "location because it's conditionally executed.",
 ));
 pub const invalid_await_position_dependent: Error = Cow::Borrowed(concat!(
-    "Await cannot be used as an expression inside another await expression. ",
-    "Pull the inner await out into its own statement.",
+    "`await` cannot be used as an expression inside another await expression. ",
+    "Pull the inner `await` out into its own statement.",
 ));
 pub const misplaced_reactivity_annotation: Error =
-    Cow::Borrowed("Reactive annotations are not allowed on classes, interfaces or traits.");
+    Cow::Borrowed("Reactive annotations `__Rx` are not allowed on classes, interfaces or traits.");
 pub const mutability_annotation_on_constructor: Error = Cow::Borrowed(
-    "__Mutable, __MaybeMutable, and __MutableReturn annotations are not allowed on constructors.",
+    "`__Mutable`, `__MaybeMutable`, and `__MutableReturn` annotations are not allowed on constructors.",
 );
-pub const mutability_annotation_on_static_method: Error =
-    Cow::Borrowed("__Mutable and __MaybeMutable annotations are not allowed on static methods.");
+pub const mutability_annotation_on_static_method: Error = Cow::Borrowed(
+    "`__Mutable` and `__MaybeMutable` annotations are not allowed on static methods.",
+);
 pub const mutability_annotation_on_inout_parameter: Error = Cow::Borrowed(
-    "__Mutable, __MaybeMutable and __OwnedMutable annotations are not allowed on inout parameters.",
+    "`__Mutable`, `__MaybeMutable` and `__OwnedMutable` annotations are not allowed on inout parameters.",
 );
 pub fn mutable_parameter_in_memoize_function(is_this: bool) -> Error {
     Cow::Owned(format!(

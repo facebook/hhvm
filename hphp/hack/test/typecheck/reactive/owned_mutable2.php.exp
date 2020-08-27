@@ -1,2 +1,2 @@
 File "owned_mutable2.php", line 4, characters 3-20:
-__OwnedMutable annotation can only be placed on parameters. (Parsing[1002])
+`__OwnedMutable` annotation can only be placed on parameters. (Parsing[1002])

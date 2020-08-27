@@ -83,6 +83,7 @@ void raiseClsMethConvertWarningHelper(const char* toType) {
 }
 
 Array clsMethToVecHelper(ClsMethDataRef clsMeth) {
+  ARRPROV_USE_RUNTIME_LOCATION();
   return make_varray(clsMeth->getClsStr(), clsMeth->getFuncStr());
 }
 

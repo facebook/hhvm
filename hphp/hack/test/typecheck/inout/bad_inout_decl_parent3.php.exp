@@ -1,5 +1,5 @@
 File "bad_inout_decl_parent3.php", line 8, characters 27-27:
-Encountered unexpected token '&'. (Parsing[1002])
+Encountered unexpected token `&`. (Parsing[1002])
 File "bad_inout_decl_parent3.php", line 8, characters 19-21:
 The method `foo` has the wrong type (Typing[4341])
 File "bad_inout_decl_parent3.php", line 4, characters 33-34:

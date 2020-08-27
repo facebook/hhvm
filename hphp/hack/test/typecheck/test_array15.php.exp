@@ -1,2 +1,2 @@
 File "test_array15.php", line 20, characters 26-26:
-Encountered unexpected token '&'. (Parsing[1002])
+Encountered unexpected token `&`. (Parsing[1002])

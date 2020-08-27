@@ -4172,7 +4172,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "severity": 1,
                             "code": 1002,
                             "source": "Hack",
-                            "message": "A semicolon (';') is expected here.",
+                            "message": "A semicolon `;` is expected here.",
                             "relatedLocations": [],
                             "relatedInformation": [],
                         }
@@ -5598,7 +5598,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                             "severity": 1,
                             "code": 1002,
                             "source": "Hack",
-                            "message": "A semicolon (';') is expected here.",
+                            "message": "A semicolon `;` is expected here.",
                             "relatedLocations": [],
                             "relatedInformation": [],
                         }

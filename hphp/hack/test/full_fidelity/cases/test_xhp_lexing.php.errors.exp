@@ -8,9 +8,9 @@
 (7,12)-(7,13) A name is expected here.
 (8,8)-(13,30) XHP: mismatched tag: '' not the same as 'a'
 (8,12)-(8,13) A name is expected here.
-(8,27)-(8,27) A closing angle bracket ('>') is expected here.
+(8,27)-(8,27) A closing angle bracket `>` is expected here.
 (9,8)-(13,30) XHP: mismatched tag: '' not the same as 'a'
-(9,26)-(9,26) A closing angle bracket ('>') is expected here.
+(9,26)-(9,26) A closing angle bracket `>` is expected here.
 (10,12)-(10,13) A name is expected here.
 (11,12)-(11,13) A name is expected here.
 (12,12)-(12,13) A name is expected here.

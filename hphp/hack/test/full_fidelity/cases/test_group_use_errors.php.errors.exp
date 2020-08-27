@@ -3,4 +3,4 @@
 (17,15)-(17,21) A namespace use clause may not specify the kind here.
 (17,23)-(17,29) A namespace use clause may not specify the kind here.
 (29,15)-(29,15) A name is expected here.
-(29,15)-(29,20) Encountered unexpected token 'false'.
+(29,15)-(29,20) Encountered unexpected token `false`.

@@ -39,7 +39,7 @@ let bar_parse_error_diagnostics =
   "
 /bar.php:
 File \"/bar.php\", line 3, characters 2-2:
-A right brace ('}') is expected here. (Parsing[1002])
+A right brace `}` is expected here. (Parsing[1002])
 "
 
 let root = "/"

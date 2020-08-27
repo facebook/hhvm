@@ -1,2 +1,2 @@
 
-Fatal error: A right parenthesis (')') is expected here. in %s/trailing_comma_bad2.php on line 4
+Fatal error: A right parenthesis `)` is expected here. in %s/trailing_comma_bad2.php on line 4

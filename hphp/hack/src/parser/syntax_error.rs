@@ -87,66 +87,63 @@ pub const error0013: Error = Cow::Borrowed("This XHP body is not terminated.");
 pub const error0014: Error = Cow::Borrowed("This XHP comment is not terminated.");
 
 // Syntactic errors
-pub const error1001: Error = Cow::Borrowed("A .php file must begin with '<?hh'.");
-pub const error1003: Error = Cow::Borrowed("The 'function' keyword is expected here.");
+pub const error1001: Error = Cow::Borrowed("A .php file must begin with `<?hh`.");
+pub const error1003: Error = Cow::Borrowed("The `function` keyword is expected here.");
 pub const error1004: Error = Cow::Borrowed("A name is expected here.");
-pub const error1006: Error = Cow::Borrowed("A right brace ('}') is expected here.");
+pub const error1006: Error = Cow::Borrowed("A right brace `}` is expected here.");
 pub const error1007: Error = Cow::Borrowed("A type specifier is expected here.");
 pub const error1008: Error = Cow::Borrowed("A variable name is expected here.");
-pub const error1010: Error = Cow::Borrowed("A semicolon (';') is expected here.");
-pub const error1011: Error = Cow::Borrowed("A right parenthesis (')') is expected here.");
-pub const error1013: Error = Cow::Borrowed("A closing angle bracket ('>') is expected here.");
+pub const error1010: Error = Cow::Borrowed("A semicolon `;` is expected here.");
+pub const error1011: Error = Cow::Borrowed("A right parenthesis `)` is expected here.");
+pub const error1013: Error = Cow::Borrowed("A closing angle bracket `>` is expected here.");
 pub const error1014: Error =
-    Cow::Borrowed("A closing angle bracket ('>') or comma is expected here.");
+    Cow::Borrowed("A closing angle bracket `>` or comma is expected here.");
 pub const error1015: Error = Cow::Borrowed("An expression is expected here.");
 pub const error1016: Error = Cow::Borrowed("An assignment is expected here.");
 pub const error1017: Error = Cow::Borrowed("An XHP attribute value is expected here.");
-pub const error1018: Error = Cow::Borrowed("The 'while' keyword is expected here.");
-pub const error1019: Error = Cow::Borrowed("A left parenthesis ('(') is expected here.");
-pub const error1020: Error = Cow::Borrowed("A colon (':') is expected here.");
-pub const error1021: Error = Cow::Borrowed("An opening angle bracket ('<') is expected here.");
+pub const error1018: Error = Cow::Borrowed("The `while` keyword is expected here.");
+pub const error1019: Error = Cow::Borrowed("A left parenthesis `(` is expected here.");
+pub const error1020: Error = Cow::Borrowed("A colon `:` is expected here.");
+pub const error1021: Error = Cow::Borrowed("An opening angle bracket `<` is expected here.");
 // TODO: Remove this; redundant to 1009.
 pub const error1022: Error =
-    Cow::Borrowed("A right parenthesis (')') or comma (',') is expected here.");
-pub const error1023: Error = Cow::Borrowed("An 'as' keyword is expected here.");
+    Cow::Borrowed("A right parenthesis `)` or comma `,` is expected here.");
+pub const error1023: Error = Cow::Borrowed("An `as` keyword is expected here.");
 pub const error1025: Error = Cow::Borrowed("A shape field name is expected here.");
-pub const error1026: Error = Cow::Borrowed("An opening square bracket ('[') is expected here.");
-pub const error1028: Error = Cow::Borrowed("An arrow ('=>') is expected here.");
-pub const error1029: Error =
-    Cow::Borrowed("A closing double angle bracket ('>>') is expected here.");
+pub const error1026: Error = Cow::Borrowed("An opening square bracket `[` is expected here.");
+pub const error1028: Error = Cow::Borrowed("An arrow `=>` is expected here.");
+pub const error1029: Error = Cow::Borrowed("A closing double angle bracket `>>` is expected here.");
 pub const error1031: Error =
-    Cow::Borrowed("A comma (',') or a closing square bracket (']') is expected here.");
-pub const error1032: Error = Cow::Borrowed("A closing square bracket (']') is expected here.");
+    Cow::Borrowed("A comma `,` or a closing square bracket `]` is expected here.");
+pub const error1032: Error = Cow::Borrowed("A closing square bracket `]` is expected here.");
 // TODO: Break this up according to classish type
 pub const error1033: Error = Cow::Borrowed(concat!(
     "A class member, method, type, trait usage, trait require, ",
     "xhp attribute, xhp use, or xhp category is expected here."
 ));
-pub const error1034: Error = Cow::Borrowed("A left brace ('{') is expected here.");
-pub const error1035: Error = Cow::Borrowed("The 'class' keyword is expected here.");
-pub const error1036: Error = Cow::Borrowed("An equals sign ('=') is expected here.");
-pub const error1037: Error = Cow::Borrowed("The 'record' keyword is expected here.");
-pub const error1038: Error =
-    Cow::Borrowed("A semicolon (';') or a namespace body is expected here.");
+pub const error1034: Error = Cow::Borrowed("A left brace `{` is expected here.");
+pub const error1035: Error = Cow::Borrowed("The `class` keyword is expected here.");
+pub const error1036: Error = Cow::Borrowed("An equals sign `=` is expected here.");
+pub const error1037: Error = Cow::Borrowed("The `record` keyword is expected here.");
+pub const error1038: Error = Cow::Borrowed("A semicolon `;` or a namespace body is expected here.");
 pub const error1039: Error = Cow::Borrowed("A closing XHP tag is expected here.");
-pub const error1041: Error =
-    Cow::Borrowed("A function body or a semicolon (';') is expected here.");
+pub const error1041: Error = Cow::Borrowed("A function body or a semicolon `;` is expected here.");
 pub const error1044: Error = Cow::Borrowed("A name or `__construct` keyword is expected here.");
 pub const error1045: Error =
-    Cow::Borrowed("An 'extends' or 'implements' keyword is expected here.");
-pub const error1046: Error = Cow::Borrowed("A lambda arrow ('==>') is expected here.");
-pub const error1047: Error = Cow::Borrowed("A scope resolution operator ('::') is expected here.");
-pub const error1048: Error = Cow::Borrowed("A name, variable name or 'class' is expected here.");
+    Cow::Borrowed("An `extends` or `implements` keyword is expected here.");
+pub const error1046: Error = Cow::Borrowed("A lambda arrow `==>` is expected here.");
+pub const error1047: Error = Cow::Borrowed("A scope resolution operator `::` is expected here.");
+pub const error1048: Error = Cow::Borrowed("A name, variable name or `class` is expected here.");
 pub const error1050: Error = Cow::Borrowed("A name or variable name is expected here.");
 pub const error1051: Error =
-    Cow::Borrowed("The 'required' or 'lateinit' keyword is expected here.");
+    Cow::Borrowed("The `required` or `lateinit` keyword is expected here.");
 pub const error1052: Error =
-    Cow::Borrowed("An XHP category name beginning with a '%' is expected here.");
+    Cow::Borrowed("An XHP category name beginning with a `%` is expected here.");
 pub const error1053: Error = Cow::Borrowed("An XHP name or category name is expected here.");
-pub const error1054: Error = Cow::Borrowed("A comma (',') is expected here.");
+pub const error1054: Error = Cow::Borrowed("A comma `,` is expected here.");
 pub const error1055: Error = Cow::Borrowed(concat!(
     "A fallthrough directive can only appear at the end of",
-    " a switch section."
+    " a `switch` section."
 ));
 // TODO(20052790): use the specific token's text in the message body.
 pub const error1056: Error =
@@ -154,26 +151,26 @@ pub const error1056: Error =
 pub fn error1057(text: &str) -> Error {
     // TODO (kasper): T52404885: why does removing to_string() here segfaults
     Cow::Owned(format!(
-        "Encountered unexpected token '{}'.",
+        "Encountered unexpected token `{}`.",
         text.to_string()
     ))
 }
 pub fn uppercase_kw(text: &str) -> Error {
     Cow::Owned(format!(
-        "Keyword {} must be written in lowercase",
+        "Keyword `{}` must be written in lowercase",
         text.to_string()
     ))
 }
 pub fn error1058(received: &str, required: &str) -> Error {
     Cow::Owned(format!(
-        "Encountered unexpected token '{}'. Did you mean '{}'?",
+        "Encountered unexpected token `{}`. Did you mean `{}`?",
         received.to_string(),
         required.to_string()
     ))
 }
 pub fn error1059(terminator: TokenKind) -> Error {
     Cow::Owned(format!(
-        "An '{}' is required when using alternate block syntax.",
+        "An `{}` is required when using alternate block syntax.",
         terminator.to_string().to_string(),
     ))
 }
@@ -184,12 +181,12 @@ pub fn error1060(extension: &str) -> Error {
         "partial"
     };
     Cow::Owned(format!(
-        "Leading markup and `<?hh` are not permitted in `.{}` files, which are always {}.",
+        "Leading markup and `<?hh` are not permitted in `.{}` files, which are always `{}`.",
         extension.to_string(),
         kind.to_string()
     ))
 }
-pub const error1061: Error = Cow::Borrowed("A Pocket Universes operator (':@') is expected here.");
+pub const error1061: Error = Cow::Borrowed("A Pocket Universes operator `:@` is expected here.");
 pub const error1063: Error = Cow::Borrowed("Expected matching separator here.");
 pub const error1064: Error = Cow::Borrowed("XHP children declarations are no longer supported.");
 pub const error1065: Error = Cow::Borrowed("A backtick ``` is expected here.");

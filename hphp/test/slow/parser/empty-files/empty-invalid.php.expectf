@@ -1,1 +1,1 @@
-Fatal error: A semicolon (';') is expected here. in %s/test/slow/parser/empty-files/empty-invalid.php on line 2
+Fatal error: A semicolon `;` is expected here. in %s/test/slow/parser/empty-files/empty-invalid.php on line 2

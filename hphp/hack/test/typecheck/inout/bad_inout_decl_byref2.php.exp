@@ -1,2 +1,2 @@
 File "bad_inout_decl_byref2.php", line 3, characters 45-45:
-Encountered unexpected token '&'. (Parsing[1002])
+Encountered unexpected token `&`. (Parsing[1002])

@@ -1,5 +1,5 @@
 Errors:
-  [20:4-21:1] A semicolon (';') is expected here.
+  [20:4-21:1] A semicolon `;` is expected here.
 [(Fun
     { f_span = [12:1-25:2]; f_annotation = (); f_mode = Mstrict;
       f_ret = ((void), (Some ([12:17-21], (Hprim Tvoid))));

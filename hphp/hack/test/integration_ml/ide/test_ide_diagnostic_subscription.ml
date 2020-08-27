@@ -23,7 +23,7 @@ let foo_diagnostics =
   "
 /foo.php:
 File \"/foo.php\", line 2, characters 2-2:
-A right brace ('}') is expected here. (Parsing[1002])"
+A right brace `}` is expected here. (Parsing[1002])"
 
 let foo_clear_diagnostics = "
 /foo.php:

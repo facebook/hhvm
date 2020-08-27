@@ -6,11 +6,11 @@
 (68,11)-(68,12) A simple offset expression is expected here
 (69,11)-(69,12) A simple offset expression is expected here
 (70,11)-(70,12) A simple offset expression is expected here
-(72,15)-(72,15) A right brace ('}') is expected here.
-(73,13)-(73,14) A right brace ('}') is expected here.
-(74,13)-(74,15) A right brace ('}') is expected here.
-(76,12)-(76,12) A right brace ('}') is expected here.
-(77,13)-(77,13) A right brace ('}') is expected here.
+(72,15)-(72,15) A right brace `}` is expected here.
+(73,13)-(73,14) A right brace `}` is expected here.
+(74,13)-(74,15) A right brace `}` is expected here.
+(76,12)-(76,12) A right brace `}` is expected here.
+(77,13)-(77,13) A right brace `}` is expected here.
 (78,9)-(78,17) The only legal expressions inside a {$...}-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions
 (79,9)-(79,15) The only legal expressions inside a {$...}-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions
 (80,9)-(80,16) The only legal expressions inside a {$...}-expression embedded in a string are variables, function calls, subscript expressions, and member access expressions

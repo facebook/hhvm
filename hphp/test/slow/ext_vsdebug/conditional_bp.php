@@ -28,7 +28,7 @@ checkObjEqualRecursively($msg, darray[
   "body" => darray[
       "category" => "stdout"
   ]]);
-$expectedOutput = "Hit fatal : A semicolon (';') is expected here.";
+$expectedOutput = "Hit fatal : A semicolon `;` is expected here.";
 $result = fread($testProcess[1][1], strlen($expectedOutput));
 if ($result !== $expectedOutput) {
   throw new UnexpectedValueException("$result !== $expectedOutput");

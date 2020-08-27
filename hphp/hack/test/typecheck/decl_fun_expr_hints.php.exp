@@ -1,2 +1,2 @@
 File "decl_fun_expr_hints.php", line 16, characters 11-13:
-Encountered unexpected token '100'. (Parsing[1002])
+Encountered unexpected token `100`. (Parsing[1002])

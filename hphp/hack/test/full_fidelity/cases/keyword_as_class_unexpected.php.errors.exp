@@ -1,125 +1,125 @@
 (4,7)-(4,7) A name is expected here.
-(4,7)-(4,15) Encountered unexpected token 'abstract'.
+(4,7)-(4,15) Encountered unexpected token `abstract`.
 (5,7)-(5,7) A name is expected here.
-(5,7)-(5,12) Encountered unexpected token 'array'.
+(5,7)-(5,12) Encountered unexpected token `array`.
 (6,7)-(6,7) A name is expected here.
-(6,7)-(6,9) Encountered unexpected token 'as'.
+(6,7)-(6,9) Encountered unexpected token `as`.
 (7,7)-(7,7) A name is expected here.
-(7,7)-(7,12) Encountered unexpected token 'break'.
+(7,7)-(7,12) Encountered unexpected token `break`.
 (8,7)-(8,7) A name is expected here.
-(8,7)-(8,11) Encountered unexpected token 'case'.
+(8,7)-(8,11) Encountered unexpected token `case`.
 (9,7)-(9,7) A name is expected here.
-(9,7)-(9,12) Encountered unexpected token 'catch'.
+(9,7)-(9,12) Encountered unexpected token `catch`.
 (10,7)-(10,7) A name is expected here.
-(10,7)-(10,12) Encountered unexpected token 'class'.
+(10,7)-(10,12) Encountered unexpected token `class`.
 (11,7)-(11,7) A name is expected here.
-(11,7)-(11,12) Encountered unexpected token 'clone'.
+(11,7)-(11,12) Encountered unexpected token `clone`.
 (12,7)-(12,7) A name is expected here.
-(12,7)-(12,12) Encountered unexpected token 'const'.
+(12,7)-(12,12) Encountered unexpected token `const`.
 (13,7)-(13,7) A name is expected here.
-(13,7)-(13,15) Encountered unexpected token 'continue'.
+(13,7)-(13,15) Encountered unexpected token `continue`.
 (14,7)-(14,7) A name is expected here.
-(14,7)-(14,14) Encountered unexpected token 'default'.
+(14,7)-(14,14) Encountered unexpected token `default`.
 (15,7)-(15,7) A name is expected here.
-(15,7)-(15,9) Encountered unexpected token 'do'.
+(15,7)-(15,9) Encountered unexpected token `do`.
 (16,7)-(16,7) A name is expected here.
-(16,7)-(16,11) Encountered unexpected token 'echo'.
+(16,7)-(16,11) Encountered unexpected token `echo`.
 (17,7)-(17,7) A name is expected here.
-(17,7)-(17,11) Encountered unexpected token 'else'.
+(17,7)-(17,11) Encountered unexpected token `else`.
 (18,7)-(18,7) A name is expected here.
-(18,7)-(18,13) Encountered unexpected token 'elseif'.
+(18,7)-(18,13) Encountered unexpected token `elseif`.
 (19,7)-(19,7) A name is expected here.
-(19,7)-(19,12) Encountered unexpected token 'empty'.
+(19,7)-(19,12) Encountered unexpected token `empty`.
 (20,7)-(20,7) A name is expected here.
-(20,7)-(20,13) Encountered unexpected token 'endfor'.
+(20,7)-(20,13) Encountered unexpected token `endfor`.
 (21,7)-(21,7) A name is expected here.
-(21,7)-(21,17) Encountered unexpected token 'endforeach'.
+(21,7)-(21,17) Encountered unexpected token `endforeach`.
 (22,7)-(22,7) A name is expected here.
-(22,7)-(22,12) Encountered unexpected token 'endif'.
+(22,7)-(22,12) Encountered unexpected token `endif`.
 (23,7)-(23,7) A name is expected here.
-(23,7)-(23,16) Encountered unexpected token 'endswitch'.
+(23,7)-(23,16) Encountered unexpected token `endswitch`.
 (24,7)-(24,7) A name is expected here.
-(24,7)-(24,15) Encountered unexpected token 'endwhile'.
+(24,7)-(24,15) Encountered unexpected token `endwhile`.
 (25,7)-(25,7) A name is expected here.
-(25,7)-(25,11) Encountered unexpected token 'eval'.
+(25,7)-(25,11) Encountered unexpected token `eval`.
 (26,7)-(26,7) A name is expected here.
 (26,15)-(26,15) A type specifier is expected here.
 (27,7)-(27,7) A name is expected here.
-(27,7)-(27,12) Encountered unexpected token 'final'.
+(27,7)-(27,12) Encountered unexpected token `final`.
 (28,7)-(28,7) A name is expected here.
-(28,7)-(28,14) Encountered unexpected token 'finally'.
+(28,7)-(28,14) Encountered unexpected token `finally`.
 (29,7)-(29,7) A name is expected here.
-(29,7)-(29,10) Encountered unexpected token 'for'.
+(29,7)-(29,10) Encountered unexpected token `for`.
 (30,7)-(30,7) A name is expected here.
-(30,7)-(30,14) Encountered unexpected token 'foreach'.
+(30,7)-(30,14) Encountered unexpected token `foreach`.
 (31,7)-(31,7) A name is expected here.
-(31,7)-(31,15) Encountered unexpected token 'function'.
+(31,7)-(31,15) Encountered unexpected token `function`.
 (32,7)-(32,7) A name is expected here.
-(32,7)-(32,13) Encountered unexpected token 'global'.
+(32,7)-(32,13) Encountered unexpected token `global`.
 (33,7)-(33,7) A name is expected here.
-(33,7)-(33,11) Encountered unexpected token 'goto'.
+(33,7)-(33,11) Encountered unexpected token `goto`.
 (34,7)-(34,7) A name is expected here.
-(34,7)-(34,9) Encountered unexpected token 'if'.
+(34,7)-(34,9) Encountered unexpected token `if`.
 (35,7)-(35,7) A name is expected here.
 (35,18)-(35,18) A type specifier is expected here.
 (36,7)-(36,7) A name is expected here.
-(36,7)-(36,14) Encountered unexpected token 'include'.
+(36,7)-(36,14) Encountered unexpected token `include`.
 (37,7)-(37,7) A name is expected here.
-(37,7)-(37,19) Encountered unexpected token 'include_once'.
+(37,7)-(37,19) Encountered unexpected token `include_once`.
 (38,7)-(38,7) A name is expected here.
-(38,7)-(38,12) Encountered unexpected token 'inout'.
+(38,7)-(38,12) Encountered unexpected token `inout`.
 (39,7)-(39,7) A name is expected here.
-(39,7)-(39,17) Encountered unexpected token 'instanceof'.
+(39,7)-(39,17) Encountered unexpected token `instanceof`.
 (40,7)-(40,7) A name is expected here.
-(40,7)-(40,16) Encountered unexpected token 'insteadof'.
+(40,7)-(40,16) Encountered unexpected token `insteadof`.
 (41,7)-(41,7) A name is expected here.
-(41,7)-(41,16) Encountered unexpected token 'interface'.
+(41,7)-(41,16) Encountered unexpected token `interface`.
 (42,7)-(42,7) A name is expected here.
-(42,7)-(42,12) Encountered unexpected token 'isset'.
+(42,7)-(42,12) Encountered unexpected token `isset`.
 (43,7)-(43,7) A name is expected here.
-(43,7)-(43,11) Encountered unexpected token 'list'.
+(43,7)-(43,11) Encountered unexpected token `list`.
 (44,7)-(44,7) A name is expected here.
-(44,7)-(44,16) Encountered unexpected token 'namespace'.
+(44,7)-(44,16) Encountered unexpected token `namespace`.
 (45,7)-(45,7) A name is expected here.
-(45,7)-(45,10) Encountered unexpected token 'new'.
+(45,7)-(45,10) Encountered unexpected token `new`.
 (46,7)-(46,7) A name is expected here.
-(46,7)-(46,12) Encountered unexpected token 'print'.
+(46,7)-(46,12) Encountered unexpected token `print`.
 (47,7)-(47,7) A name is expected here.
-(47,7)-(47,14) Encountered unexpected token 'private'.
+(47,7)-(47,14) Encountered unexpected token `private`.
 (48,7)-(48,7) A name is expected here.
-(48,7)-(48,16) Encountered unexpected token 'protected'.
+(48,7)-(48,16) Encountered unexpected token `protected`.
 (49,7)-(49,7) A name is expected here.
-(49,7)-(49,13) Encountered unexpected token 'public'.
+(49,7)-(49,13) Encountered unexpected token `public`.
 (50,7)-(50,7) A name is expected here.
-(50,7)-(50,14) Encountered unexpected token 'require'.
+(50,7)-(50,14) Encountered unexpected token `require`.
 (51,7)-(51,7) A name is expected here.
-(51,7)-(51,19) Encountered unexpected token 'require_once'.
+(51,7)-(51,19) Encountered unexpected token `require_once`.
 (52,7)-(52,7) A name is expected here.
-(52,7)-(52,13) Encountered unexpected token 'return'.
+(52,7)-(52,13) Encountered unexpected token `return`.
 (53,7)-(53,7) A name is expected here.
-(53,7)-(53,12) Encountered unexpected token 'shape'.
+(53,7)-(53,12) Encountered unexpected token `shape`.
 (54,7)-(54,7) A name is expected here.
-(54,7)-(54,13) Encountered unexpected token 'static'.
+(54,7)-(54,13) Encountered unexpected token `static`.
 (55,7)-(55,7) A name is expected here.
-(55,7)-(55,13) Encountered unexpected token 'switch'.
+(55,7)-(55,13) Encountered unexpected token `switch`.
 (56,7)-(56,7) A name is expected here.
-(56,7)-(56,12) Encountered unexpected token 'throw'.
+(56,7)-(56,12) Encountered unexpected token `throw`.
 (57,7)-(57,7) A name is expected here.
-(57,7)-(57,12) Encountered unexpected token 'trait'.
+(57,7)-(57,12) Encountered unexpected token `trait`.
 (58,7)-(58,7) A name is expected here.
-(58,7)-(58,10) Encountered unexpected token 'try'.
+(58,7)-(58,10) Encountered unexpected token `try`.
 (59,7)-(59,7) A name is expected here.
-(59,7)-(59,12) Encountered unexpected token 'unset'.
+(59,7)-(59,12) Encountered unexpected token `unset`.
 (60,7)-(60,7) A name is expected here.
-(60,7)-(60,10) Encountered unexpected token 'use'.
+(60,7)-(60,10) Encountered unexpected token `use`.
 (61,7)-(61,7) A name is expected here.
-(61,7)-(61,12) Encountered unexpected token 'using'.
+(61,7)-(61,12) Encountered unexpected token `using`.
 (62,7)-(62,7) A name is expected here.
-(62,7)-(62,10) Encountered unexpected token 'var'.
+(62,7)-(62,10) Encountered unexpected token `var`.
 (63,7)-(63,7) A name is expected here.
-(63,7)-(63,12) Encountered unexpected token 'while'.
+(63,7)-(63,12) Encountered unexpected token `while`.
 (64,7)-(64,7) A name is expected here.
-(64,7)-(64,12) Encountered unexpected token 'yield'.
+(64,7)-(64,12) Encountered unexpected token `yield`.
 (66,5)-(66,13) Unexpected node on right hand side of new or instanceof: token
 (66,13)-(66,13) An expression is expected here.
 (67,5)-(67,10) Unexpected node on right hand side of new or instanceof: token
@@ -176,7 +176,7 @@
 (94,12)-(94,12) An expression is expected here.
 (95,5)-(95,16) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new function();()'?
 (95,5)-(95,16) Unexpected node on right hand side of new or instanceof: anonymous_function
-(95,16)-(96,1) A semicolon (';') is expected here.
+(95,16)-(96,1) A semicolon `;` is expected here.
 (96,5)-(96,11) Unexpected node on right hand side of new or instanceof: token
 (96,11)-(96,11) An expression is expected here.
 (97,5)-(97,9) Unexpected node on right hand side of new or instanceof: token

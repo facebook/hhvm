@@ -1,2 +1,2 @@
 File "disallow_two_type_parameters_for_varray.php", line 3, characters 30-32:
-Encountered unexpected token 'int'. (Parsing[1002])
+Encountered unexpected token `int`. (Parsing[1002])

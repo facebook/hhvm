@@ -1,4 +1,4 @@
-Parsing[1002] A right parenthesis (')') is expected here. [1]
+Parsing[1002] A right parenthesis ) is expected here. [1]
 
 error_pos_outside_range3.php:6:5
     4 | function main(): void {

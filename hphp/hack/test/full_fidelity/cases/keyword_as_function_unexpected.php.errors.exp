@@ -60,25 +60,25 @@
 (63,15)-(63,15) A name or `__construct` keyword is expected here.
 (66,6)-(66,6) An expression is expected here.
 (67,3)-(67,3) An expression is expected here.
-(68,8)-(68,8) A lambda arrow ('==>') is expected here.
+(68,8)-(68,8) A lambda arrow `==>` is expected here.
 (69,8)-(69,8) An expression is expected here.
-(70,6)-(70,6) A semicolon (';') is expected here.
+(70,6)-(70,6) A semicolon `;` is expected here.
 (70,8)-(70,8) An expression is expected here.
 (71,7)-(71,7) An expression is expected here.
-(71,7)-(71,8) A colon (':') is expected here.
+(71,7)-(71,8) A colon `:` is expected here.
 (71,8)-(72,1) A case statement may only appear directly inside a switch.
 (72,6)-(72,6) An expression is expected here.
 (74,8)-(74,8) An expression is expected here.
 (75,6)-(75,6) A name is expected here.
 (75,6)-(75,6) A concrete constant declaration must have an initializer.
 (75,8)-(75,8) An expression is expected here.
-(76,9)-(76,9) A semicolon (';') is expected here.
+(76,9)-(76,9) A semicolon `;` is expected here.
 (76,11)-(76,11) An expression is expected here.
-(78,8)-(78,8) A colon (':') is expected here.
+(78,8)-(78,8) A colon `:` is expected here.
 (78,10)-(78,10) An expression is expected here.
 (79,5)-(79,5) An expression is expected here.
-(79,6)-(80,1) The 'while' keyword is expected here.
-(80,1)-(80,5) Encountered unexpected token 'echo'.
+(79,6)-(80,1) The `while` keyword is expected here.
+(80,1)-(80,5) Encountered unexpected token `echo`.
 (80,7)-(80,7) An expression is expected here.
 (81,5)-(81,5) An expression is expected here.
 (82,7)-(82,7) An expression is expected here.
@@ -92,9 +92,9 @@
 (92,8)-(92,8) An expression is expected here.
 (93,6)-(93,6) An expression is expected here.
 (94,8)-(94,8) An expression is expected here.
-(95,12)-(96,1) A right parenthesis (')') is expected here.
+(95,12)-(96,1) A right parenthesis `)` is expected here.
 (96,7)-(96,7) An expression is expected here.
-(97,6)-(97,7) Encountered unexpected token ')'.
+(97,6)-(97,7) Encountered unexpected token `)`.
 (98,5)-(98,5) An expression is expected here.
 (99,11)-(99,11) An expression is expected here.
 (100,10)-(100,10) An expression is expected here.
@@ -115,8 +115,8 @@
 (113,10)-(113,10) An expression is expected here.
 (114,15)-(114,15) An expression is expected here.
 (115,9)-(115,9) An expression is expected here.
-(117,1)-(117,7) Encountered unexpected token 'static'.
-(117,9)-(117,9) A lambda arrow ('==>') is expected here.
+(117,1)-(117,7) Encountered unexpected token `static`.
+(117,9)-(117,9) A lambda arrow `==>` is expected here.
 (119,8)-(119,8) An expression is expected here.
 (122,4)-(122,4) A name is expected here.
 (122,6)-(122,6) An expression is expected here.

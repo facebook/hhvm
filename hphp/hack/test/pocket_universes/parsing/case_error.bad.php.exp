@@ -1,12 +1,12 @@
 (6,8)-(6,10) A type specifier is expected here.
 (7,13)-(7,13) A name is expected here.
-(7,13)-(7,15) Encountered unexpected token '15'.
+(7,13)-(7,15) Encountered unexpected token `15`.
 (8,8)-(8,13) A type specifier is expected here.
 (8,20)-(9,1) Invalid pocket universe field syntax.
-(8,20)-(9,1) A right brace ('}') is expected here.
+(8,20)-(9,1) A right brace `}` is expected here.
 (9,21)-(9,21) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (9,26)-(9,26) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (9,27)-(9,27) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (9,28)-(10,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
 (11,2)-(12,1) An expression is expected here.
-(11,2)-(12,1) A semicolon (';') is expected here.
+(11,2)-(12,1) A semicolon `;` is expected here.

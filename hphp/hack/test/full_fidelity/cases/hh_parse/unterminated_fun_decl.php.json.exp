@@ -1,4 +1,4 @@
-(3,17)-(4,1) A right brace ('}') is expected here.
+(3,17)-(4,1) A right brace `}` is expected here.
 {
   "parse_tree":{
     "kind":"script",
@@ -166,5 +166,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction foo() {\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-17-0000"
 }

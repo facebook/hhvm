@@ -298,7 +298,7 @@ void beginInlining(IRGS& env,
   meta.asyncEagerReturn = returnTarget.asyncEagerOffset != kInvalidOffset;
 
   gen(env, StFrameMeta, meta, calleeFP);
-  gen(env, StFrameFunc, calleeFP, cns(env, target));
+  gen(env, StFrameFunc, FuncData { target }, calleeFP);
 
   InlineCallData data;
   data.spOffset = calleeAROff;

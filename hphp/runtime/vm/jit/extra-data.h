@@ -1614,6 +1614,7 @@ X(StLoc,                        LocalId);
 X(StLocRange,                   LocalIdRange);
 X(AdvanceDictPtrIter,           IterOffsetData);
 X(AdvanceVecPtrIter,            IterOffsetData);
+X(StFrameFunc,                  FuncData);
 X(CheckIter,                    IterTypeData);
 X(StIterBase,                   IterId);
 X(StIterType,                   IterTypeData);

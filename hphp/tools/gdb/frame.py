@@ -14,6 +14,7 @@ import sqlite3
 import struct
 
 from gdbutils import *
+from lookup import lookup_func_from_fp
 import idx as idxs
 import repo
 
@@ -43,6 +44,7 @@ def is_jitted(fp, ip):
 # PHP frame info.
 
 def php_filename(func):
+    func = func.cast(T('HPHP::Func').pointer())
     filename = rawptr(rawptr(func['m_shared'])['m_originalFilename'])
 
     if filename == nullptr():
@@ -158,7 +160,7 @@ def create_php(idx, ar, rip='0x????????', pc=None):
 
     All arguments are expected to be gdb.Values, except `idx'.
     """
-    func = ar['m_func']
+    func = lookup_func_from_fp(ar)
     shared = rawptr(func['m_shared'])
     flags = shared['m_allFlags']
 
@@ -282,7 +284,7 @@ class JittedFrameDecorator(gdb.FrameDecorator.FrameDecorator):
         self.ar = frame.read_register(self.regs['fp']).cast(T('HPHP::ActRec').pointer())
         self.args = []
         try:
-            func = self.ar['m_func']
+            func = lookup_func_from_fp(self.ar)
             shared = rawptr(func['m_shared'])
             argptr = self.ar.cast(T('HPHP::TypedValue').pointer())
             nargs = func['m_paramCounts'] >> 1
@@ -305,7 +307,7 @@ class JittedFrameDecorator(gdb.FrameDecorator.FrameDecorator):
 
     def function(self):
         try:
-            func = self.ar['m_func']
+            func = lookup_func_from_fp(self.ar)
             shared = rawptr(func['m_shared'])
             flags = shared['m_allFlags']
 
@@ -325,7 +327,8 @@ class JittedFrameDecorator(gdb.FrameDecorator.FrameDecorator):
 
     def filename(self):
         try:
-            return php_filename(self.ar['m_func'])
+            func = lookup_func_from_fp(self.ar)
+            return php_filename(func)
         except:
             return None
 
@@ -334,9 +337,10 @@ class JittedFrameDecorator(gdb.FrameDecorator.FrameDecorator):
             inner = self.inferior_frame().newer()
             inner_ar = inner.read_register(self.regs['fp']).cast(
                 T('HPHP::ActRec').pointer())
-            shared = rawptr(self.ar['m_func']['m_shared'])
+            func = lookup_func_from_fp(self.ar)
+            shared = rawptr(func['m_shared'])
             pc = shared['m_base'] + (inner_ar['m_callOffAndFlags'] >> 2)
-            return php_line_number(self.ar['m_func'], pc)
+            return php_line_number(func, pc)
         except:
             return None
 
@@ -345,7 +349,7 @@ class JittedFrameDecorator(gdb.FrameDecorator.FrameDecorator):
 
     def frame_locals(self):
         try:
-            func = self.ar['m_func']
+            func = lookup_func_from_fp(self.ar)
             argptr = self.ar.cast(T('HPHP::TypedValue').pointer())
             nargs = func['m_paramCounts'] >> 1
             shared = rawptr(func['m_shared'])

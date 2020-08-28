@@ -102,10 +102,10 @@ void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
   // there.
   if (hasStepOuts() || hasStepResumable()) {
     TRACE(2, "CmdNext: checking internal breakpoint(s)\n");
-    if (atStepOutOffset(fp->m_func, offset)) {
+    if (atStepOutOffset(fp->func(), offset)) {
       if (deeper) return; // Recursion
       TRACE(2, "CmdNext: hit step-out\n");
-    } else if (atStepResumableOffset(fp->m_func, offset)) {
+    } else if (atStepResumableOffset(fp->func(), offset)) {
       if (m_stepResumableId != getResumableId(fp)) return;
       TRACE(2, "CmdNext: hit step-cont\n");
       // We're in the resumable we expect. This may be at a
@@ -275,7 +275,7 @@ void CmdNext::setupStepSuspend(ActRec* fp, PC pc) {
   m_stepResumableId = fp;
   TRACE(2, "CmdNext: patch for resumable step at '%s' offset %d\n",
         fp->func()->fullName()->data(), nextInst);
-  m_stepResumable = StepDestination(fp->m_func, nextInst);
+  m_stepResumable = StepDestination(fp->func(), nextInst);
 }
 
 // We were trying to step over an Await in an eagerly executed frame, and the

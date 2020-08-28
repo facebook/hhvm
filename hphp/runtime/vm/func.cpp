@@ -71,10 +71,10 @@ std::atomic<bool> Func::s_treadmill;
  * in TreadHashMap
  */
 static std::atomic<FuncId> s_nextFuncId{1};
-static AtomicVector<const Func*> s_funcVec{0, nullptr};
+AtomicVector<const Func*> Func::s_funcVec{0, nullptr};
 static InitFiniNode s_funcVecReinit([]{
   UnsafeReinitEmptyAtomicVector(
-    s_funcVec, RuntimeOption::EvalFuncCountHint);
+    Func::s_funcVec, RuntimeOption::EvalFuncCountHint);
 }, InitFiniNode::When::PostRuntimeOptions, "s_funcVec reinit");
 
 const AtomicVector<const Func*>& Func::getFuncVec() {

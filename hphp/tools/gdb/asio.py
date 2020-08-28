@@ -11,6 +11,7 @@ from itertools import count
 import re
 
 from gdbutils import *
+from lookup import lookup_func_from_fp
 import frame
 import idx
 from sizeof import sizeof
@@ -283,10 +284,10 @@ class InfoAsioCommand(gdb.Command):
 
         # Find the most recent join().
         for _i, fp in izip(count(), frame.gen_php(vmfp)):
-            if nameof(fp['m_func']) == r'HH\WaitHandle::join':
+            if nameof(lookup_func_from_fp(fp)) == r'HH\WaitHandle::join':
                 break
 
-        if nameof(fp['m_func']) != r'HH\WaitHandle::join':
+        if nameof(lookup_func_from_fp(fp)) != r'HH\WaitHandle::join':
             print("...but couldn't find join().  Something is wrong.\n")
             return
 

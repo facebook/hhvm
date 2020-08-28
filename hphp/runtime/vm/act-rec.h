@@ -75,7 +75,12 @@ struct ActRec {
   ActRec* m_sfp;       // Previous hardware frame pointer/ActRec
   uint64_t m_savedRip; // native (in-TC) return address
 #endif
-  const Func* m_func;  // Function.
+#ifdef USE_LOWPTR
+  LowPtr<const Func> m_func;
+#else
+  FuncId m_funcId;
+#endif
+  uint32_t m_thrash_DONT_USE1;
   // bit 0: LocalsDecRefd
   // bit 1: AsyncEagerRet
   // bits 2-31: bc offset of call opcode from caller func entry
@@ -85,13 +90,11 @@ struct ActRec {
     ObjectData* m_thisUnsafe; // This.
     Class* m_clsUnsafe;       // Late bound class.
   };
-  void* m_thrash_DONT_USE;
+  uint64_t m_thrash_DONT_USE2;
 
   TYPE_SCAN_CUSTOM_FIELD(m_thisUnsafe) {
-    if (m_func->implCls()) scanner.scan(m_thisUnsafe);
+    if (func()->implCls()) scanner.scan(m_thisUnsafe);
   }
-
-  TYPE_SCAN_IGNORE_FIELD(m_thrash_DONT_USE);
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -296,7 +299,12 @@ static_assert(offsetof(ActRec, m_sfp) == 0,
 /*
  * Size in bytes of the target architecture's call frame.
  */
+#ifdef USE_LOWPTR
 constexpr auto kNativeFrameSize = offsetof(ActRec, m_func);
+#else
+constexpr auto kNativeFrameSize = offsetof(ActRec, m_funcId);
+#endif
+static_assert(kNativeFrameSize % sizeof(TypedValue) == 0, "");
 
 /*
  * offset from frame ptr to return value slot after teardown
@@ -309,11 +317,6 @@ static_assert(kArRetOff % sizeof(TypedValue) == 0, "");
  * ActRec::m_savedRip to.
  */
 bool isReturnHelper(void* address);
-
-/* Offset of the m_func and m_thisUnsafe fields in cells */
-
-static_assert(offsetof(ActRec, m_func) % sizeof(TypedValue) == 0, "");
-static_assert(offsetof(ActRec, m_thisUnsafe) % sizeof(TypedValue) == 0, "");
 
 ///////////////////////////////////////////////////////////////////////////////
 

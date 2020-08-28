@@ -155,7 +155,7 @@ void CmdFlowControl::setupStepOuts() {
     // step outs. This will cause cmds like Next and Out to just let the program
     // run, which is appropriate.
     if (!fp) break;
-    PC callPC = fp->m_func->at(callOffset);
+    PC callPC = fp->func()->at(callOffset);
     TRACE(2, "CmdFlowControl::setupStepOuts: at '%s' offset %d opcode %s\n",
           fp->func()->fullName()->data(), callOffset,
           opcodeToName(peek_op(callPC)));
@@ -173,7 +173,7 @@ void CmdFlowControl::setupStepOuts() {
         Offset nextOffset = callOffset + instrLen(callPC);
         TRACE(2, "CmdFlowControl: step out to '%s' offset %d (fall-thru)\n",
               fp->func()->fullName()->data(), nextOffset);
-        m_stepOut1 = StepDestination(fp->m_func, nextOffset);
+        m_stepOut1 = StepDestination(fp->func(), nextOffset);
       }
       // Set an internal breakpoint at the target of a control flow instruction.
       // A good example of a control flow op that invokes PHP is IterNext.
@@ -184,17 +184,17 @@ void CmdFlowControl::setupStepOuts() {
           Offset targetOffset = callOffset + targets[0];
           TRACE(2, "CmdFlowControl: step out to '%s' offset %d (jump target)\n",
                 fp->func()->fullName()->data(), targetOffset);
-          m_stepOut2 = StepDestination(fp->m_func, targetOffset);
+          m_stepOut2 = StepDestination(fp->func(), targetOffset);
         }
       }
       // If we have no place to step out to, then unwind another frame and try
       // again. The most common case that leads here is Ret*, which does not
       // fall-thru and has no encoded target.
     } else {
-      auto const returnOffset = fp->m_func->offsetOf(skipCall(callPC));
+      auto const returnOffset = fp->func()->offsetOf(skipCall(callPC));
       TRACE(2, "CmdFlowControl: step out to '%s' offset %d\n",
             fp->func()->fullName()->data(), returnOffset);
-      m_stepOut1 = StepDestination(fp->m_func, returnOffset);
+      m_stepOut1 = StepDestination(fp->func(), returnOffset);
     }
   }
 }

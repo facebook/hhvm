@@ -120,6 +120,10 @@ struct EHEnt {
 struct Func final {
   friend struct FuncEmitter;
 
+  // DO NOT access it directly, instead use Func::getFuncVec()
+  // Exposed in the header file for gdb python macros
+  static AtomicVector<const Func*> s_funcVec;
+
   /////////////////////////////////////////////////////////////////////////////
   // Types.
 

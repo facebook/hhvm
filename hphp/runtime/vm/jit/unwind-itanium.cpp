@@ -383,9 +383,9 @@ void write_tc_cie(EHFrameWriter& ehfw, PersonalityFunc personality) {
   ehfw.begin_cie(dw_reg::IP, reinterpret_cast<const void*>(personality));
 
   // The part of the ActRec that mirrors the native frame record is the part
-  // below ActRec::m_func, which at a minimum includes the saved frame pointer
+  // below ActRec::m_funcId, which at a minimum includes the saved frame pointer
   // and the return address.
-  constexpr auto record_size = AROFF(m_func);
+  constexpr auto record_size = kNativeFrameSize;
   ehfw.def_cfa(dw_reg::FP, record_size);
 
   // The following calculation is related to the "top" of the record.  There is

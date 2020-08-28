@@ -1837,9 +1837,9 @@ To string conversions:
 
   Store object or class S1 on frame S0.
 
-| StFrameFunc, ND, S(FramePtr) S(Func), NF
+| StFrameFunc<func>, ND, S(FramePtr), NF
 
-  Store the Func* in m_func for S0.
+  Store the func in m_funcId/m_func for S0.
 
 | StFrameMeta<callBCOff,numArgs,flags>, ND, S(FramePtr), NF
 
@@ -2592,10 +2592,10 @@ To string conversions:
   When EvalHHIRGenerateAsserts is on, this instruction is inserted at the
   start of each region, to emit some sanity checking code.
 
-| DbgAssertFunc, ND, S(FramePtr) S(Func), NF
+| DbgAssertFunc, ND, S(FramePtr), NF
 
-  Assert that S1 is the current function in Frame S0. If the assertion fails,
-  execution is aborted via a hardware exception.
+  Assert that the func on the srckey is the current function in Frame S0.
+  If the assertion fails, execution is aborted via a hardware exception.
 
 | RBTraceEntry, ND, NA, NF
 

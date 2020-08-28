@@ -356,10 +356,14 @@ void cgEqFunc(IRLS& env, const IRInstruction* inst) {
 
 void cgDbgAssertFunc(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
-  auto const func = srcLoc(env, inst, 1).reg(0);
+  auto const func = inst->marker().func();
   auto& v = vmain(env);
   auto const sf = v.makeReg();
-  v << cmpqm{func, fp[AROFF(m_func)], sf};
+#ifdef USE_LOWPTR
+  emitCmpLowPtr<Func>(v, sf, v.cns(func), fp[AROFF(m_func)]);
+#else
+  v << cmplim{(int32_t)func->getFuncId(), fp[AROFF(m_funcId)], sf};
+#endif
   ifThen(v, CC_NE, sf, [&](Vout& v) { v << trap{TRAP_REASON}; });
 }
 

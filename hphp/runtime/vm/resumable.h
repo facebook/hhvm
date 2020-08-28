@@ -168,8 +168,9 @@ struct alignas(16) Resumable {
       // going to overwrite m_sfp and m_savedRip, so don't copy them here.
       auto src = reinterpret_cast<const char*>(fp);
       auto dst = reinterpret_cast<char*>(actRec());
-      const size_t offset = offsetof(ActRec, m_func);
-      wordcpy(dst + offset, src + offset, sizeof(ActRec) - offset);
+      wordcpy(dst + kNativeFrameSize,
+              src + kNativeFrameSize,
+              sizeof(ActRec) - kNativeFrameSize);
     }
 
     // Populate Resumable.

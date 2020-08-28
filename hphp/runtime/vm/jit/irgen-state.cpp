@@ -60,7 +60,7 @@ IRGS::IRGS(IRUnit& unit, const RegionDesc* region, int32_t budgetBCInstrs,
 
   if (RuntimeOption::EvalHHIRGenerateAsserts && !prologueSetup) {
     // Assert that we're in the correct function.
-    gen(*this, DbgAssertFunc, frame, cns(*this, bcState.func()));
+    gen(*this, DbgAssertFunc, frame);
   }
 }
 

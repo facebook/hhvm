@@ -4172,7 +4172,7 @@ class TestLsp(TestCase[LspTestDriver]):
                             "severity": 1,
                             "code": 1002,
                             "source": "Hack",
-                            "message": "A semicolon `;` is expected here.",
+                            "message": "A semicolon ; is expected here.",
                             "relatedLocations": [],
                             "relatedInformation": [],
                         }
@@ -5598,7 +5598,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                             "severity": 1,
                             "code": 1002,
                             "source": "Hack",
-                            "message": "A semicolon `;` is expected here.",
+                            "message": "A semicolon ; is expected here.",
                             "relatedLocations": [],
                             "relatedInformation": [],
                         }
@@ -6170,7 +6170,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                                         },
                                         "uri": "${php_file_uri}",
                                     },
-                                    "message": "Expected `int`",
+                                    "message": "Expected int",
                                 },
                                 {
                                     "location": {
@@ -6180,7 +6180,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                                         },
                                         "uri": "${php_file_uri}",
                                     },
-                                    "message": "But got `string`",
+                                    "message": "But got string",
                                 },
                             ],
                             "relatedLocations": [
@@ -6192,7 +6192,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                                         },
                                         "uri": "${php_file_uri}",
                                     },
-                                    "message": "Expected `int`",
+                                    "message": "Expected int",
                                 },
                                 {
                                     "location": {
@@ -6202,7 +6202,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                                         },
                                         "uri": "${php_file_uri}",
                                     },
-                                    "message": "But got `string`",
+                                    "message": "But got string",
                                 },
                             ],
                             "severity": 1,
@@ -6240,7 +6240,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                                         },
                                         "uri": "${php_file_uri}",
                                     },
-                                    "message": "Expected `int`",
+                                    "message": "Expected int",
                                 },
                                 {
                                     "location": {
@@ -6250,7 +6250,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                                         },
                                         "uri": "${php_file_uri}",
                                     },
-                                    "message": "But got `string`",
+                                    "message": "But got string",
                                 },
                             ],
                             "relatedLocations": [
@@ -6262,7 +6262,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                                         },
                                         "uri": "${php_file_uri}",
                                     },
-                                    "message": "Expected `int`",
+                                    "message": "Expected int",
                                 },
                                 {
                                     "location": {
@@ -6272,7 +6272,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                                         },
                                         "uri": "${php_file_uri}",
                                     },
-                                    "message": "But got `string`",
+                                    "message": "But got string",
                                 },
                             ],
                             "severity": 1,

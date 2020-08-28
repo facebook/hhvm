@@ -1059,7 +1059,7 @@ let hack_errors_to_lsp_diagnostic
       =
     let (pos, message) = error in
     let { uri; range } = hack_pos_to_lsp_location pos ~default_path:filename in
-    ({ Location.uri; range }, message)
+    ({ Location.uri; range }, Markdown_lite.render message)
   in
   let hack_error_to_lsp_diagnostic (error : Pos.absolute Errors.error_) =
     let all_messages = Errors.to_list error |> List.map ~f:location_message in

@@ -1653,18 +1653,6 @@ To string conversions:
   S3: number of passed arguments
   S4: call context
 
-| CallUnpack<spOffset,numParams,callOff,destroyLocals>,
-|   DCall,
-|   S(StkPtr) S(FramePtr) S(Func) S(Cls|Obj|Nullptr),
-|   CRc|PRc
-
-  Invoke function S2 corresponding to the current FPI with numParams arguments,
-  the last of which is an array of the remaining args. Used for FCall with
-  unpack. S0+spOffset points to the stack resulting after the ActRec for the
-  function and numParams arguments have been pushed. S3 is the context (nullptr,
-  $this or static::class). CallUnpack pops the array off the stack, pushes the
-  elements of the array as arguments, and invokes the function in the ActRec.
-
 | SyncReturnBC<spOffset,callBCOffset>, ND, S(StkPtr) S(FramePtr), NF
 
   Stores callBCOffset into the frame at spOffset from S0 as the call bytecode

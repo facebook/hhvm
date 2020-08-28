@@ -214,7 +214,6 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::callphp:
     case Vinstr::callphpr:
     case Vinstr::callphps:
-    case Vinstr::callunpack:
     case Vinstr::contenter:
       defs = abi.all() - (rvmfp() | rvmtl() | rsp());
       break;
@@ -251,7 +250,6 @@ void getEffects(const Abi& abi, const Vinstr& i,
 
     case Vinstr::vcall:
     case Vinstr::vinvoke:
-    case Vinstr::vcallunpack:
       always_assert(false && "Unsupported instruction in vxls");
 
     default:

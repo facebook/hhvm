@@ -748,94 +748,6 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
   });
 }
 
-TCA emitFCallUnpackHelper(CodeBlock& main, CodeBlock& cold,
-                          DataBlock& data, UniqueStubs& us) {
-  alignCacheLine(main);
-
-  CGMeta meta;
-
-  auto const ret = vwrap2(main, cold, data, meta, [&] (Vout& v, Vout& vc) {
-    // We reach fcallUnpackHelper in the same context as a func prologue, so
-    // this should really be a phplogue{}---but we don't need the return
-    // address in the ActRec until later, and in the event the callee is
-    // intercepted, we must save it on the stack because the callee frame will
-    // already have been popped.  So use a stublogue and "convert" it manually
-    // later.
-    v << stublogue{};
-
-    storeVMRegs(v);
-
-    auto const func = v.makeReg();
-    auto const unit = v.makeReg();
-    auto const bc = v.makeReg();
-
-    // Load fp->func()->m_unit->m_bc.
-    v << load{rvmfp()[AROFF(m_func)], func};
-    v << load{func[Func::unitOff()], unit};
-    v << load{unit[Unit::bcOff()], bc};
-
-    auto const pc = v.makeReg();
-
-    // Convert offsets into PCs, and sync the PC.
-    v << addq{bc, rarg(0), pc, v.makeReg()};
-    v << store{pc, rvmtl()[rds::kVmpcOff]};
-
-    auto const retAddr = v.makeReg();
-    v << loadstubret{retAddr};
-
-    auto const done = v.makeBlock();
-    auto const ctch = vc.makeBlock();
-    auto const should_continue = v.makeReg();
-    bool (*helper)(PC, int32_t, CallFlags, void*) = &doFCallUnpackTC;
-
-    v << vinvoke{
-      CallSpec::direct(helper),
-      v.makeVcallArgs({{pc, rarg(1), rarg(2), retAddr}}),
-      v.makeTuple({should_continue}),
-      {done, ctch},
-      Fixup{},
-      DestType::SSA
-    };
-    vc = ctch;
-    emitStubCatch(vc, us, [] (Vout& v) { loadVmfp(v); });
-
-    v = done;
-
-    // Load only rvmsp(); we need to wait to make sure we aren't skipping the
-    // callee before loading rvmfp().
-    v << load{rvmtl()[rds::kVmspOff], rvmsp()};
-
-    auto const sf = v.makeReg();
-    v << testb{should_continue, should_continue, sf};
-
-    unlikelyIfThen(v, vc, CC_Z, sf, [&] (Vout& v) {
-      // If false was returned, we should skip the callee.  The interpreter
-      // will have popped the pre-live ActRec already, so we can just return to
-      // the caller after syncing the return regs.
-      loadReturnRegs(v);
-      v << stubret{php_return_regs()};
-    });
-    loadVmfp(v);
-
-    // If true was returned, we're calling the callee, so undo the stublogue{}
-    // and convert to a phplogue{}.
-    v << stubtophp{};
-
-    auto const callee = v.makeReg();
-    auto const body = v.makeReg();
-
-    v << load{rvmfp()[AROFF(m_func)], callee};
-    emitLdLowPtr(v, callee[Func::funcBodyOff()], body, sizeof(LowPtr<uint8_t>));
-
-    // We jmp directly to the func body---this keeps the return stack buffer
-    // balanced between the call to this stub and the ret from the callee.
-    v << jmpr{body};
-  });
-
-  meta.process(nullptr);
-  return ret;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ResumeHelperEntryPoints {
@@ -1365,9 +1277,6 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(retInlHelper, hotView(), emitInterpRet(hot(), data));
 
   ADD(immutableBindCallStub, view, emitBindCallStub(cold, data));
-  ADD(fcallUnpackHelper,
-      hotView(),
-      emitFCallUnpackHelper(hot(), cold, data, *this));
 
   ADD(decRefGeneric,  hotView(), emitDecRefGeneric(hot(), data));
 

@@ -1078,7 +1078,6 @@ struct Func final {
   }
   OFF(attrs)
   OFF(name)
-  OFF(funcBody)
   OFF(maxStackCells)
   OFF(maybeIntercepted)
   OFF(paramCounts)

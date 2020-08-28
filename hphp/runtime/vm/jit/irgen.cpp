@@ -104,14 +104,10 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
         auto const extra = inst->extra<CallData>();
         return extra->numInputs() + kNumActRecCells + extra->numOut;
       }
-      if (inst->is(CallUnpack)) {
-        auto const extra = inst->extra<CallUnpackData>();
-        return extra->numInputs() + kNumActRecCells + extra->numOut;
-      }
       return 0;
     }();
     auto const catchMode = [&]() {
-      if (inst->is(Call, CallUnpack)) {
+      if (inst->is(Call)) {
         return EndCatchData::CatchMode::CallCatch;
       }
       if (inst->is(ReturnHook,

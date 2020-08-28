@@ -862,45 +862,6 @@ struct CallData : IRExtraData {
   bool hasInlFixup{false};
 };
 
-struct CallUnpackData : IRExtraData {
-  explicit CallUnpackData(IRSPRelOffset spOffset,
-                          uint32_t numArgs,
-                          uint32_t numOut,
-                          Offset callOffset,
-                          bool hasGenerics,
-                          bool dynamicCall,
-                          bool formingRegion)
-    : spOffset(spOffset)
-    , numArgs(numArgs)
-    , numOut(numOut)
-    , callOffset(callOffset)
-    , hasGenerics(hasGenerics)
-    , dynamicCall(dynamicCall)
-    , formingRegion(formingRegion)
-  {}
-
-  std::string show() const {
-    return folly::to<std::string>(
-      spOffset.offset, ',', numArgs, ',', numOut, ',', callOffset,
-      hasGenerics ? ",hasGenerics" : "",
-      dynamicCall ? ",dynamicCall" : "",
-      formingRegion ? ",formingRegion" : ""
-    );
-  }
-
-  uint32_t numInputs() const {
-    return numArgs + 1 + (hasGenerics ? 1 : 0);
-  }
-
-  IRSPRelOffset spOffset; // offset from StkPtr to bottom of call's ActRec+args
-  uint32_t numArgs;
-  uint32_t numOut;
-  Offset callOffset;  // offset from unit m_bc (unlike the one in CallData)
-  bool hasGenerics;
-  bool dynamicCall;
-  bool formingRegion;
-};
-
 struct RetCtrlData : IRExtraData {
   explicit RetCtrlData(IRSPRelOffset offset, bool suspendingResumed,
                        AuxUnion aux)
@@ -1703,7 +1664,6 @@ X(IncProfCounter,               TransIDData);
 X(DefFuncEntryFP,               FuncData);
 X(Call,                         CallData);
 X(CallBuiltin,                  CallBuiltinData);
-X(CallUnpack,                   CallUnpackData);
 X(RetCtrl,                      RetCtrlData);
 X(AsyncFuncRet,                 IRSPRelOffsetData);
 X(AsyncFuncRetSlow,             IRSPRelOffsetData);

@@ -176,13 +176,6 @@ inline RegSet php_return_regs() {
   return vm_regs_with_sp() | rret_data() | rret_type();
 }
 
-/*
- * Registers that are live on entry to fcallUnpackHelper.
- *
- * TODO(#2288359): We don't want this to include rvmsp() eventually.
- */
-inline RegSet fcall_unpack_regs() { return vm_regs_with_sp(); }
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

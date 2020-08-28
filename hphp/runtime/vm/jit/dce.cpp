@@ -481,7 +481,6 @@ bool canDCE(IRInstruction* inst) {
   case Clone:
   case InlineReturn:
   case InlineCall:
-  case CallUnpack:
   case Call:
   case NativeImpl:
   case CallBuiltin:

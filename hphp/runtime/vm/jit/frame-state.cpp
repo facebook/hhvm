@@ -344,26 +344,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     }
     break;
 
-  case CallUnpack:
-    {
-      auto const extra = inst->extra<CallUnpack>();
-      // Remove tracked state for the actrec and array arg.
-      uint32_t numCells = kNumActRecCells + extra->numInputs();
-      for (auto i = uint32_t{0}; i < numCells; ++i) {
-        setValue(stk(extra->spOffset + i), nullptr);
-      }
-      // Mark out parameter locations as being at least InitCell
-      auto const base = extra->spOffset + numCells;
-      for (auto i = uint32_t{0}; i < extra->numOut; ++i) {
-        setType(stk(base + i), TInitCell);
-      }
-      trackCall();
-      // A CallUnpack pops the ActRec, actual args, and an array arg.
-      assertx(cur().bcSPOff == inst->marker().spOff());
-      cur().bcSPOff -= numCells;
-    }
-    break;
-
   case CallBuiltin:
     {
       auto const extra = inst->extra<CallBuiltin>();

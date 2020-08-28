@@ -660,7 +660,6 @@ void resetCoverageCounters();
 using InterpOneFunc = jit::TCA (*) (ActRec*, TypedValue*, Offset);
 extern InterpOneFunc interpOneEntryPoints[];
 
-bool doFCallUnpackTC(PC origpc, int32_t numInputs, CallFlags callFlags, void*);
 bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack, CallFlags callFlags,
              Array* savedGenerics = nullptr);
 jit::TCA dispatchBB();

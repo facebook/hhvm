@@ -133,8 +133,6 @@ struct Vunit;
   O(callphp, I(target), U(args), Dn)\
   O(callphpr, Inone, U(target) U(args), Dn)\
   O(callphps, I(target), U(args), Dn)\
-  O(callunpack, I(target), U(args), Dn)\
-  O(vcallunpack, I(target), U(args) U(extraArgs), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
   /* vm entry intrinsics */\
   O(resumetc, Inone, U(target) U(args), Dn)\
@@ -760,9 +758,8 @@ struct stubunwind { Vreg d; };
  * the PHP frame's m_savedRip prior to the usage, as this instruction loses that
  * information.
  *
- * This is only used by fcallHelper and fcallUnpackHelper, which needs to begin
- * with a stublogue{} (see unique-stubs.cpp) and later perform the work of
- * phplogue{}.
+ * This is only used by fcallHelper, which needs to begin with a stublogue{}
+ * (see unique-stubs.cpp) and later perform the work of phplogue{}.
  */
 struct stubtophp {};
 
@@ -886,22 +883,6 @@ struct phpret { Vreg fp; RegSet args; bool noframe; };
 struct callphp { TCA target; RegSet args; };
 struct callphpr { Vreg64 target; RegSet args; };
 struct callphps { TCA target; RegSet args; const Func* func; uint32_t nargs; };
-
-/*
- * Non-smashable PHP function call with (almost) the same ABI as callphps{}.
- *
- * NB: The only difference is that callunpack preserves vmfp.  Currently only
- * used by the CallUnpack instruction.
- */
-struct callunpack { TCA target; RegSet args; };
-
-/*
- * High-level version of callunpack.
- *
- * Has exception edges and additional integer args (used by the `target' stub).
- */
-struct vcallunpack { TCA target; RegSet args; Vtuple extraArgs;
-                     Vlabel targets[2]; };
 
 /*
  * Enter a continuation (with exception edges).

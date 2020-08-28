@@ -164,59 +164,6 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   }
 }
 
-void cgCallUnpack(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<CallUnpack>();
-  auto const sp = srcLoc(env, inst, 0).reg();
-  auto const callee = srcLoc(env, inst, 2).reg();
-  auto const ctx = srcLoc(env, inst, 3).reg();
-  auto& v = vmain(env);
-
-  auto const calleeSP = sp[cellsToBytes(extra->spOffset.offset)];
-  auto const calleeAR = calleeSP + cellsToBytes(extra->numInputs());
-  v << store{callee, calleeAR + AROFF(m_func)};
-  v << storeli{safe_cast<int32_t>(extra->numArgs) + 1,
-               calleeAR + AROFF(m_numArgs)};
-
-  assertx(inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls) ||
-          inst->src(3)->isA(TNullptr));
-  if (inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls)) {
-    v << store{ctx, calleeAR + AROFF(m_thisUnsafe)};
-  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitImmStoreq(v, ActRec::kTrashedThisSlot, calleeAR + AROFF(m_thisUnsafe));
-  }
-
-  auto const syncSP = v.makeReg();
-  v << lea{sp[cellsToBytes(extra->spOffset.offset)], syncSP};
-  v << syncvmsp{syncSP};
-
-  auto const callFlags = CallFlags(
-    extra->hasGenerics,
-    extra->dynamicCall,
-    false,  // async eager return unsupported with unpack
-    0, // call offset passed differently to unpack
-    0  // generics bitmap not used with unpack
-  );
-
-  auto const target = tc::ustubs().fcallUnpackHelper;
-  auto const callOff = v.cns(extra->callOffset);
-  auto const args = v.makeTuple(
-    {callOff, v.cns(extra->numInputs()), v.cns(callFlags.value())});
-
-  auto const done = v.makeBlock();
-  v << vcallunpack{target, fcall_unpack_regs(), args,
-                   {done, label(env, inst->taken())}};
-  v = done;
-
-  auto const dst = dstLoc(env, inst, 0);
-  auto const type = inst->dst()->type();
-  if (!type.admitsSingleVal()) {
-    v << defvmretdata{dst.reg(0)};
-  }
-  if (type.needsReg()) {
-    v << defvmrettype{dst.reg(1)};
-  }
-}
-
 void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<CallBuiltin>();
   auto const callee = extra->callee;

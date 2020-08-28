@@ -119,7 +119,6 @@ struct Vgen {
     setCallFuncId(env, a.frontier());
   }
   void emit(const phpret& i);
-  void emit(const callunpack& i);
   void emit(const contenter& i);
 
   // vm entry abi
@@ -720,11 +719,6 @@ void Vgen<X64Asm>::emit(const phpret& i) {
     a.loadq(i.fp[AROFF(m_sfp)], rvmfp());
   }
   a.ret();
-}
-
-template<class X64Asm>
-void Vgen<X64Asm>::emit(const callunpack& i) {
-  emit(call{i.target, i.args});
 }
 
 template<class X64Asm>

@@ -723,32 +723,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyPropRecDesc:
     return may_load_store(AHeapAny | livefp(inst), AHeapAny);
 
-  case CallUnpack:
-    {
-      auto const extra = inst.extra<CallUnpack>();
-      return CallEffects {
-        // Kills. Everything on the stack below the incoming parameters.
-        stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
-        // Input arguments.
-        extra->numInputs() == 0 ? AEmpty : AStack {
-          inst.src(0),
-          extra->spOffset + extra->numInputs() - 1,
-          static_cast<int32_t>(extra->numInputs())
-        },
-        // ActRec.
-        actrec(inst.src(0), extra->spOffset + extra->numInputs()),
-        // Inout outputs.
-        extra->numOut == 0 ? AEmpty : AStack {
-          inst.src(0),
-          extra->spOffset + extra->numInputs() + kNumActRecCells +
-            extra->numOut - 1,
-          static_cast<int32_t>(extra->numOut)
-        },
-        // Locals.
-        backtrace_locals(inst) | livefp(inst.src(1))
-      };
-    }
-
   case ContEnter:
     {
       auto const extra = inst.extra<ContEnter>();

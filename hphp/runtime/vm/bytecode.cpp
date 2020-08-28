@@ -4496,20 +4496,6 @@ OPTBLD_INLINE void iopLockObj() {
   c1->m_data.pobj->lockObject();
 }
 
-bool doFCallUnpackTC(PC origpc, int32_t numInputs, CallFlags callFlags,
-                     void* retAddr) {
-  assert_native_stack_aligned();
-  assertx(tl_regState == VMRegState::DIRTY);
-  tl_regState = VMRegState::CLEAN;
-  auto const ar = vmStack().indA(numInputs);
-  if (callFlags.hasGenerics()) --numInputs;
-  ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper, false);
-  ar->setJitReturn(retAddr);
-  auto const ret = doFCall(ar, numInputs - 1, true, callFlags);
-  tl_regState = VMRegState::DIRTY;
-  return ret;
-}
-
 OPTBLD_INLINE
 void iopFCallBuiltin(
   uint32_t numArgs, uint32_t numNonDefault, uint32_t numOut, Id id

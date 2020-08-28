@@ -270,7 +270,6 @@ struct Vgen {
     emit(callr{i.target, i.args});
     setCallFuncId(env, a->frontier());
   }
-  void emit(const callunpack& i);
   void emit(const contenter& i);
   void emit(const phpret& i);
 
@@ -816,10 +815,6 @@ void Vgen::emit(const phpret& i) {
     a->Ldr(X(rlr()), X(i.fp)[AROFF(m_savedRip)]);
   }
   emit(ret{});
-}
-
-void Vgen::emit(const callunpack& i) {
-  emit(call{i.target, i.args});
 }
 
 void Vgen::emit(const contenter& i) {

@@ -183,7 +183,6 @@ bool isCallOp(Opcode opc) {
   // call a C++ helper and we can push/pop around it normally.)
   switch (opc) {
   case Call:
-  case CallUnpack:
   case ContEnter:
     return true;
   default:
@@ -303,7 +302,6 @@ bool opcodeMayRaise(Opcode opc) {
   case BaseG:
   case Call:
   case CallBuiltin:
-  case CallUnpack:
   case CGetElem:
   case CGetProp:
   case CGetPropQ:

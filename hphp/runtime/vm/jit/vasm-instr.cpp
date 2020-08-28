@@ -56,7 +56,6 @@ bool isBlockEnd(const Vinstr& inst) {
     // exception edges
     case Vinstr::unwind:
     case Vinstr::vinvoke:
-    case Vinstr::vcallunpack:
     case Vinstr::contenter:
     // terminal
     case Vinstr::trap:
@@ -74,7 +73,6 @@ bool isBlockEnd(const Vinstr& inst) {
 bool isCall(Vinstr::Opcode op) {
   switch (op) {
     case Vinstr::call:
-    case Vinstr::callunpack:
     case Vinstr::callfaststub:
     case Vinstr::callm:
     case Vinstr::callphp:
@@ -86,7 +84,6 @@ bool isCall(Vinstr::Opcode op) {
     case Vinstr::tailcallstub:
     case Vinstr::tailcallstubr:
     case Vinstr::vcall:
-    case Vinstr::vcallunpack:
     case Vinstr::vinvoke:
       return true;
     default:
@@ -169,8 +166,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::callphp:
     case Vinstr::callphpr:
     case Vinstr::callphps:
-    case Vinstr::callunpack:
-    case Vinstr::vcallunpack:
     case Vinstr::contenter:
     // vm entry abi
     case Vinstr::resumetc:

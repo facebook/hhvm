@@ -68,6 +68,8 @@ type tparam = (Pos.t, func_body_ann, unit, unit) Aast.tparam
 
 type gconst = (Pos.t, func_body_ann, unit, unit) Aast.gconst
 
+type class_const = (Pos.t, func_body_ann, unit, unit) Aast.class_const
+
 type class_id = (Pos.t, func_body_ann, unit, unit) Aast.class_id
 
 type catch = (Pos.t, func_body_ann, unit, unit) Aast.catch
@@ -575,8 +577,7 @@ module Visitor_DEPRECATED = struct
       method on_class_typeconst :
         'a -> (Pos.t, func_body_ann, unit, unit) class_typeconst -> 'a
 
-      method on_class_c_const :
-        'a -> (Pos.t, func_body_ann, unit, unit) class_const -> 'a
+      method on_class_c_const : 'a -> class_const -> 'a
 
       method on_class_var :
         'a -> (Pos.t, func_body_ann, unit, unit) class_var -> 'a

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<25a8b5cd72019693513bf39e50513ca6>>
+// @generated SignedSource<<246c4cf9f8cd9834a28d50bac9b16d6b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1533,24 +1533,6 @@ impl<P: Params> NodeMut<P> for OgNullFlavor {
             OgNullFlavor::OGNullthrows => Ok(()),
             OgNullFlavor::OGNullsafe => Ok(()),
         }
-    }
-}
-impl<P: Params> NodeMut<P> for OxidizedHack<P::Ex> {
-    fn accept<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_oxidized_hack(c, self)
-    }
-    fn recurse<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_ex(c, &mut self.annot)?;
-        self.dummy.accept(c, v)?;
-        Ok(())
     }
 }
 impl<P: Params> NodeMut<P> for ParamKind {

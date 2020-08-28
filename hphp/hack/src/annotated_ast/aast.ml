@@ -87,13 +87,7 @@ and ('ex, 'fb, 'en, 'hi) stmt_ =
   | Noop
   | Block of ('ex, 'fb, 'en, 'hi) block
   | Markup of pstring
-  | AssertEnv of env_annot * 'ex oxidized_hack local_id_map
-
-(* TODO(T74202605): Improve oxidize support for type parameters *)
-and 'ex oxidized_hack = {
-  oh_annot: 'ex;
-  oh_dummy: string;
-}
+  | AssertEnv of env_annot * 'ex local_id_map
 
 and env_annot =
   | Join

@@ -101,4 +101,33 @@ mod tests {
             e => assert!(false, "Expect Expr_::Null, but got {:?}", e),
         }
     }
+
+    #[test]
+    fn local_map_id() {
+        use crate::aast::*;
+        use crate::local_id::LocalId;
+        use crate::LocalIdMap;
+        use std::collections::BTreeMap;
+
+        impl<'ast> Visitor<'ast> for u8 {
+            type P = type_params_defaults::P<(), (), u8, (), (), ()>;
+            fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
+                self
+            }
+
+            fn visit_ex(&mut self, _: &mut (), p: &u8) -> Result<(), <Self::P as Params>::Error> {
+                Ok(*self += p)
+            }
+        }
+
+        let mut map: BTreeMap<LocalId, u8> = BTreeMap::new();
+        map.insert((0, "".into()), 1);
+        map.insert((1, "".into()), 3);
+        map.insert((2, "".into()), 5);
+        let stmt_: Stmt_<u8, (), (), ()> =
+            Stmt_::AssertEnv(Box::new((EnvAnnot::Join, LocalIdMap(map))));
+        let mut s = 0u8;
+        visitor::visit(&mut s, &mut (), &stmt_).unwrap();
+        assert_eq!(9, s);
+    }
 }

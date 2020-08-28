@@ -360,3 +360,32 @@ where
         self.3.accept(c, v)
     }
 }
+
+impl<P: Params> Node<P> for crate::LocalIdMap<P::Ex> {
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        Ok(for (key, value) in self.0.iter() {
+            key.accept(c, v)?;
+            v.visit_ex(c, value)?;
+        })
+    }
+}
+
+/// `NodeMut` implementation doesn't visit keys,
+/// mutating key requires re-constructing the underlaying map.
+/// There will be extra perf cost even keys are not mutated.
+/// Overriding its parent visit method can mutate keys economically.
+impl<P: Params> NodeMut<P> for crate::LocalIdMap<P::Ex> {
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        Ok(for value in self.0.values_mut() {
+            v.visit_ex(c, value)?
+        })
+    }
+}

@@ -14,6 +14,7 @@ pub mod ident;
 pub mod internal_type_set;
 pub mod lazy;
 pub mod local_id;
+pub mod local_id_map;
 pub mod opaque_digest;
 pub mod phase_map;
 pub mod pos;

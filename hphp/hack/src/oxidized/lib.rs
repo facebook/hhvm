@@ -17,6 +17,7 @@ pub use manual::global_options_impl;
 pub use manual::i_map;
 pub use manual::i_set;
 pub use manual::local_id;
+pub use manual::local_id_map::LocalIdMap;
 pub use manual::namespace_env_impl;
 pub use manual::phase_map;
 pub use manual::pos;

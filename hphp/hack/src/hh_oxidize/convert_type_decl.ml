@@ -115,6 +115,7 @@ let derived_traits ty =
 
 let blacklisted_types =
   [
+    ("aast_defs", "LocalIdMap");
     ("aast_defs", "ByteString");
     ("decl_defs", "Linearization");
     ("errors", "Marker");

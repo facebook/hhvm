@@ -555,11 +555,7 @@ inline arr_lval ElemDBespokePre(tv_lval base, TypedValue key) {
   auto const dt = key.m_type;
   if (isIntType(dt))    return ElemDBespokePre(base, key.m_data.num);
   if (isStringType(dt)) return ElemDBespokePre(base, key.m_data.pstr);
-  if (!tvIsArray(base)) throwInvalidArrayKeyException(&key, base.val().parr);
-  // PHP arrays may coerce keys. lval() handles refcounting, so we return an
-  // arr_lval with the original array here (even though lval() may escalate).
-  auto const ad = base.val().parr;
-  return arr_lval { ad, asArrRef(base).lval(key) };
+  throwInvalidArrayKeyException(&key, base.val().parr);
 }
 
 template <KeyType keyType>
@@ -865,12 +861,7 @@ inline arr_lval ElemUBespokePre(tv_lval base, TypedValue key) {
   auto const dt = key.m_type;
   if (isIntType(dt))    return ElemUBespokePre(base, key.m_data.num);
   if (isStringType(dt)) return ElemUBespokePre(base, key.m_data.pstr);
-  if (!tvIsArray(base)) throwInvalidArrayKeyException(&key, base.val().parr);
-  // PHP arrays may coerce keys. lval() handles refcounting, so we return an
-  // arr_lval with the original array here (even though lval() may escalate).
-  auto const ad = base.val().parr;
-  auto& arr = asArrRef(base);
-  return {ad, arr.exists(key) ? arr.lval(key) : ElemUEmptyish()};
+  throwInvalidArrayKeyException(&key, base.val().parr);
 }
 
 template <KeyType keyType>
@@ -1131,6 +1122,11 @@ inline tv_lval NewElemString(tv_lval base) {
 inline tv_lval NewElemArray(tv_lval base) {
   assertx(tvIsArray(base));
   assertx(tvIsPlausible(*base));
+  if (RO::EvalHackArrCompatNotices) {
+    raise_hackarr_compat_notice(
+      "Raising OutOfBoundsException for new-elem read"
+    );
+  }
   throwMissingElementException("Lval");
   return nullptr;
 }
@@ -1373,45 +1369,6 @@ void arraySetUpdateBase(ArrayData* oldData, ArrayData* newData, tv_lval base) {
 }
 
 /**
- * SetElem helper with Array base and Int64 key
- */
-inline ArrayData* SetElemArrayPre(ArrayData* a, int64_t key, TypedValue* value) {
-  return a->set(key, *value);
-}
-
-/**
- * SetElem helper with Array base and String key
- */
-inline ArrayData* SetElemArrayPre(ArrayData* a, StringData* key, TypedValue* value) {
-  assertx(a->isPHPArrayType());
-  return a->set(key, *value);
-}
-
-inline ArrayData* SetElemArrayPre(ArrayData* a, TypedValue key, TypedValue* value) {
-  if (tvIsInt(key))    return SetElemArrayPre(a, key.m_data.num, value);
-  if (tvIsString(key)) return SetElemArrayPre(a, key.m_data.pstr, value);
-
-  key = tvToKey(key, a);
-  assertx(tvIsInt(key) || tvIsString(key));
-  return tvIsInt(key) ? SetElemArrayPre(a, key.m_data.num, value)
-                      : SetElemArrayPre(a, key.m_data.pstr, value);
-}
-
-/**
- * SetElem when base is an Array
- */
-template <KeyType keyType>
-inline void SetElemArray(tv_lval base, key_type<keyType> key, TypedValue* value) {
-  assertx(tvIsArray(base));
-  assertx(tvIsPlausible(*base));
-
-  ArrayData* a = val(base).parr;
-  auto const newData = SetElemArrayPre(a, key, value);
-  assertx(newData->isPHPArrayType());
-  arraySetUpdateBase(a, newData, base);
-}
-
-/**
  * SetElem when base is a Vec
  */
 inline ArrayData* SetElemVecPre(ArrayData* a, int64_t key, TypedValue* value) {
@@ -1432,12 +1389,11 @@ SetElemVecPre(ArrayData* a, TypedValue key, TypedValue* value) {
 
 template <KeyType keyType>
 inline void SetElemVec(tv_lval base, key_type<keyType> key, TypedValue* value) {
-  assertx(tvIsVec(base));
+  assertx(tvIsVecOrVArray(base));
   assertx(tvIsPlausible(*base));
 
   ArrayData* a = val(base).parr;
   auto const newData = SetElemVecPre(a, key, value);
-  assertx(newData->isVecType());
   arraySetUpdateBase(a, newData, base);
 }
 
@@ -1463,12 +1419,11 @@ SetElemDictPre(ArrayData* a, TypedValue key, TypedValue* value) {
 template <KeyType keyType>
 inline void SetElemDict(tv_lval base, key_type<keyType> key,
                         TypedValue* value) {
-  assertx(tvIsDict(base));
+  assertx(tvIsDictOrDArray(base));
   assertx(tvIsPlausible(*base));
 
   ArrayData* a = val(base).parr;
   auto const newData = SetElemDictPre(a, key, value);
-  assertx(newData->isDictKind());
   arraySetUpdateBase(a, newData, base);
 }
 
@@ -1495,7 +1450,7 @@ inline ArrayData* SetElemBespokePre(
 template <KeyType keyType>
 inline void SetElemBespoke(
     tv_lval base, key_type<keyType> key, TypedValue* value) {
-  assertx(tvIsVec(base) || tvIsDict(base));
+  assertx(tvIsArrayLike(base));
   assertx(tvIsPlausible(*base));
 
   auto const oldArr = base.val().parr;
@@ -1562,11 +1517,7 @@ StringData* SetElemSlow(tv_lval base, key_type<keyType> key,
       return nullptr;
     case KindOfClsMeth:
       detail::promoteClsMeth(base);
-      if (RO::EvalHackArrDVArrs) {
-        SetElemVec<keyType>(base, key, value);
-      } else {
-        SetElemArray<keyType>(base, key, value);
-      }
+      SetElemVec<keyType>(base, key, value);
       return nullptr;
     case KindOfRecord:
       SetElemRecord<keyType>(base, key, value);
@@ -1583,16 +1534,12 @@ inline StringData* SetElem(tv_lval base, key_type<keyType> key,
                            TypedValue* value) {
   assertx(tvIsPlausible(*base));
 
-  if (LIKELY(tvIsArray(base))) {
-    SetElemArray<keyType>(base, key, value);
-    return nullptr;
-  }
-  if (LIKELY(tvIsVec(base))) {
+  if (LIKELY(tvIsVecOrVArray(base))) {
     base.val().parr->isVanilla() ? SetElemVec<keyType>(base, key, value)
                                  : SetElemBespoke<keyType>(base, key, value);
     return nullptr;
   }
-  if (LIKELY(tvIsDict(base))) {
+  if (LIKELY(tvIsDictOrDArray(base))) {
     base.val().parr->isVanilla() ? SetElemDict<keyType>(base, key, value)
                                  : SetElemBespoke<keyType>(base, key, value);
     return nullptr;
@@ -2148,50 +2095,6 @@ inline TypedValue IncDecNewElem(IncDecOp op, tv_lval base) {
 }
 
 /**
- * UnsetElemArray when key is an Int64
- */
-inline ArrayData* UnsetElemArrayPre(ArrayData* a, int64_t key) {
-  return a->remove(key);
-}
-
-/**
- * UnsetElemArray when key is a String
- */
-inline ArrayData* UnsetElemArrayPre(ArrayData* a, StringData* key) {
-  assertx(a->isPHPArrayType());
-  return a->remove(key);
-}
-
-inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key) {
-  if (tvIsInt(key))    return UnsetElemArrayPre(a, key.m_data.num);
-  if (tvIsString(key)) return UnsetElemArrayPre(a, key.m_data.pstr);
-
-  key = tvToKey(key, a);
-  assertx(tvIsInt(key) || tvIsString(key));
-  return tvIsInt(key) ? UnsetElemArrayPre(a, key.m_data.num)
-                      : UnsetElemArrayPre(a, key.m_data.pstr);
-}
-
-/**
- * UnsetElem when base is an Array
- */
-template <KeyType keyType>
-inline void UnsetElemArray(tv_lval base, key_type<keyType> key) {
-  assertx(tvIsArray(base));
-  assertx(tvIsPlausible(*base));
-  ArrayData* a = val(base).parr;
-  ArrayData* a2 = UnsetElemArrayPre(a, key);
-
-  if (a2 != a) {
-    assertx(a2->isPHPArrayType());
-    type(base) = a2->toDataType();
-    val(base).parr = a2;
-    assertx(tvIsPlausible(*base));
-    a->decRefAndRelease();
- }
-}
-
-/**
  * UnsetElem when base is a Vec
  */
 
@@ -2214,14 +2117,13 @@ inline ArrayData* UnsetElemVecPre(ArrayData* a, TypedValue key) {
 
 template <KeyType keyType>
 inline void UnsetElemVec(tv_lval base, key_type<keyType> key) {
-  assertx(tvIsVec(base));
+  assertx(tvIsVecOrVArray(base));
   assertx(tvIsPlausible(*base));
   ArrayData* a = val(base).parr;
   ArrayData* a2 = UnsetElemVecPre(a, key);
-  assertx(a2->isVecType() || a2->isDictType());
 
   if (a2 != a) {
-    type(base) = a2->toDataType();
+    type(base) = dt_with_rc(type(base));
     val(base).parr = a2;
     assertx(tvIsPlausible(*base));
     a->decRefAndRelease();
@@ -2249,13 +2151,13 @@ inline ArrayData* UnsetElemDictPre(ArrayData* a, TypedValue key) {
 
 template <KeyType keyType>
 inline void UnsetElemDict(tv_lval base, key_type<keyType> key) {
-  assertx(tvIsDict(base));
+  assertx(tvIsDictOrDArray(base));
   assertx(tvIsPlausible(*base));
   ArrayData* a = val(base).parr;
   ArrayData* a2 = UnsetElemDictPre(a, key);
 
   if (a2 != a) {
-    type(base) = KindOfDict;
+    type(base) = dt_with_rc(type(base));
     val(base).parr = a2;
     assertx(tvIsPlausible(*base));
     a->decRefAndRelease();
@@ -2320,7 +2222,6 @@ inline void UnsetElemBespoke(tv_lval base, key_type<keyType> key) {
 
   auto const oldArr = base.val().parr;
   assertx(!oldArr->isVanilla());
-  assertx(oldArr->isHackArrayType());
   auto const result = UnsetElemBespokePre(oldArr, key);
 
   if (result != oldArr) {
@@ -2367,27 +2268,18 @@ void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
       raise_error(Strings::CANT_UNSET_STRING);
       return;
 
+    // Handled in UnsetElem
     case KindOfPersistentVec:
     case KindOfVec:
-      UnsetElemVec<keyType>(base, key);
-      return;
-
     case KindOfPersistentDict:
     case KindOfDict:
-      UnsetElemDict<keyType>(base, key);
-      return;
-
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-      UnsetElemKeyset<keyType>(base, key);
-      return;
-
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      UnsetElemArray<keyType>(base, key);
-      return;
+      always_assert(false);
 
     case KindOfObject: {
       auto obj = val(base).pobj;
@@ -2399,11 +2291,7 @@ void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
 
     case KindOfClsMeth:
       detail::promoteClsMeth(base);
-      if (RO::EvalHackArrDVArrs) {
-        UnsetElemVec<keyType>(base, key);
-      } else {
-        UnsetElemArray<keyType>(base, key);
-      }
+      UnsetElemVec<keyType>(base, key);
       return;
 
     case KindOfRecord:
@@ -2419,15 +2307,11 @@ template <KeyType keyType = KeyType::Any>
 inline void UnsetElem(tv_lval base, key_type<keyType> key) {
   assertx(tvIsPlausible(*base));
 
-  if (LIKELY(tvIsArray(base))) {
-    return UnsetElemArray<keyType>(base, key);
-  }
   if (tvIsArrayLike(base)) {
     auto const ad = base.val().parr;
-    assertx(ad->isHackArrayType());
-    if (!ad->isVanilla()) return UnsetElemBespoke<keyType>(base, key);
-    if (tvIsVec(base))    return UnsetElemVec<keyType>(base, key);
-    if (tvIsDict(base))   return UnsetElemDict<keyType>(base, key);
+    if (!ad->isVanilla())       return UnsetElemBespoke<keyType>(base, key);
+    if (tvIsVecOrVArray(base))  return UnsetElemVec<keyType>(base, key);
+    if (tvIsDictOrDArray(base)) return UnsetElemDict<keyType>(base, key);
     return UnsetElemKeyset<keyType>(base, key);
   }
   return UnsetElemSlow<keyType>(base, key);

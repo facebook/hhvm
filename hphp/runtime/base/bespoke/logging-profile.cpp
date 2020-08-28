@@ -55,14 +55,14 @@ std::atomic<bool> s_exportStarted{false};
 // too fine, and our profiles will have too many entries; too coarse, and we
 // won't be able to make certain optimizations.
 struct alignas(8) EventKey {
-  EventKey(ArrayOp op);
+  explicit EventKey(ArrayOp op);
   EventKey(ArrayOp op, int64_t k);
   EventKey(ArrayOp op, const StringData* k);
   EventKey(ArrayOp op, TypedValue v);
   EventKey(ArrayOp op, int64_t k, TypedValue v);
   EventKey(ArrayOp op, const StringData* k, TypedValue v);
 
-  EventKey(uint64_t value) {
+  explicit EventKey(uint64_t value) {
     static_assert(sizeof(EventKey) == sizeof(uint64_t), "");
     memmove(this, &value, sizeof(EventKey));
   }

@@ -272,11 +272,11 @@ decltype(auto) mutate(ArrayData* ad, F&& f) {
 }
 
 arr_lval LoggingLayout::lvalInt(ArrayData* ad, int64_t k) const {
-  logEvent(ad, ArrayOp::LvalInt, k);
+  logEvent(ad, ArrayOp::LvalInt, k, getInt(ad, k));
   return mutate(ad, [&](ArrayData* arr) { return arr->lval(k); });
 }
 arr_lval LoggingLayout::lvalStr(ArrayData* ad, StringData* k) const {
-  logEvent(ad, ArrayOp::LvalStr, k);
+  logEvent(ad, ArrayOp::LvalStr, k, getStr(ad, k));
   return mutate(ad, [&](ArrayData* arr) { return arr->lval(k); });
 }
 ArrayData* LoggingLayout::setInt(ArrayData* ad, int64_t k, TypedValue v) const {

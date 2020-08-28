@@ -176,10 +176,21 @@ ARRAY_OPS
 
 //////////////////////////////////////////////////////////////////////////////
 
-size_t LoggingProfile::eventCount() const {
-  auto result = size_t{0};
-  for (auto const& pair : events) result += pair.second;
-  return result;
+double LoggingProfile::getSampleCountMultiplier() const {
+  if (loggingArraysEmitted == 0) return 0;
+
+  return sampleCount / (double) loggingArraysEmitted;
+}
+
+uint64_t LoggingProfile::getTotalEvents() const {
+  size_t total = 0;
+  for (auto const& event : events) total += event.second;
+
+  return total;
+}
+
+double LoggingProfile::getProfileWeight() const {
+  return getTotalEvents() * getSampleCountMultiplier();
 }
 
 void LoggingProfile::logEvent(ArrayOp op) {
@@ -224,26 +235,35 @@ void LoggingProfile::logEventImpl(const EventKey& key) {
 namespace {
 
 using EventData = std::pair<LoggingProfile::EventMapKey, size_t>;
-using SrcKeyData = std::pair<SrcKey, std::vector<EventData>>;
+using ProfileData = std::pair<LoggingProfile*, std::vector<EventData>>;
 using ProfileMap = tbb::concurrent_hash_map<SrcKey, LoggingProfile*,
                                             SrcKey::TbbHashCompare>;
 
 ProfileMap s_profileMap;
 std::thread s_exportProfilesThread;
 
-void exportSortedProfiles(FILE* file, const std::vector<SrcKeyData>& sources) {
-  for (auto const& sourceProfile : sources) {
-    auto const sourceSk = sourceProfile.first;
+void exportSortedProfiles(FILE* file, const std::vector<ProfileData>& sources) {
+  for (auto const& sourceProfilePair : sources) {
+    auto const sourceProfile = sourceProfilePair.first;
+    auto const sourceSk = sourceProfile->source;
 
     if (RO::EvalExportLoggingArrayDataToFile) {
-      auto const logEntry = folly::sformat("{}:\n", sourceSk.getSymbol());
+      auto const logEntry =
+        folly::sformat(
+          "{} [{}/{} logging arrays emitted, {} events, {:.2f} weight]:\n",
+           sourceSk.getSymbol(),
+           sourceProfile->loggingArraysEmitted.load(),
+           sourceProfile->sampleCount.load(),
+           sourceProfile->getTotalEvents(),
+           sourceProfile->getProfileWeight()
+         );
       if (fwrite(logEntry.data(), 1, logEntry.length(), file)
           != logEntry.length()) {
         return;
       }
     }
 
-    for (auto const& entry : sourceProfile.second) {
+    for (auto const& entry : sourceProfilePair.second) {
       auto const sinkSk = entry.first.first;
       auto const event = entry.first.second;
       auto const count = entry.second;
@@ -274,33 +294,33 @@ void exportSortedProfiles(FILE* file, const std::vector<SrcKeyData>& sources) {
   }
 }
 
-std::vector<SrcKeyData> sortProfileData() {
-  using OriginalData = std::pair<SrcKey, LoggingProfile*>;
-  using OriginalDataWithWeight = std::pair<OriginalData, size_t>;
-  std::vector<OriginalDataWithWeight> presortVec;
+std::vector<ProfileData> sortProfileData() {
+  using SrcKeyData = std::pair<SrcKey, LoggingProfile*>;
+  using SrcKeyDataWithWeight = std::pair<SrcKeyData, size_t>;
+  std::vector<SrcKeyDataWithWeight> presortVec;
   presortVec.reserve(s_profileMap.size());
 
   std::transform(
     s_profileMap.begin(), s_profileMap.end(), std::back_inserter(presortVec),
-    [](OriginalData data) {
-      return std::make_pair(data, data.second->eventCount());
+    [](SrcKeyData data) {
+      return std::make_pair(data, data.second->getProfileWeight());
     }
   );
 
   std::sort(
     presortVec.begin(), presortVec.end(),
-    [](const OriginalDataWithWeight& a,
-        const OriginalDataWithWeight& b) {
+    [](const SrcKeyDataWithWeight& a,
+        const SrcKeyDataWithWeight& b) {
       return a.second > b.second;
     }
   );
 
-  std::vector<SrcKeyData> sources;
+  std::vector<ProfileData> sources;
   sources.reserve(s_profileMap.size());
 
   std::transform(
     presortVec.begin(), presortVec.end(), std::back_inserter(sources),
-    [](const OriginalDataWithWeight& srcKeyProfilePair) {
+    [](const SrcKeyDataWithWeight& srcKeyProfilePair) {
       auto const srcKeyProfile = srcKeyProfilePair.first;
       std::vector<EventData> events(srcKeyProfile.second->events.begin(),
                                     srcKeyProfile.second->events.end());
@@ -313,7 +333,7 @@ std::vector<SrcKeyData> sortProfileData() {
         }
       );
 
-      return std::make_pair(srcKeyProfile.first, events);
+      return std::make_pair(srcKeyProfile.second, events);
     }
   );
 

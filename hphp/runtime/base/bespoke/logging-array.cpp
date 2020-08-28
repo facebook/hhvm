@@ -113,6 +113,7 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
 
   if (shouldEmitBespoke) {
     FTRACE(5, "Emit bespoke at {}\n", sk.getSymbol());
+    profile->loggingArraysEmitted++;
     return ad->isStatic() ? profile->staticArray
                           : makeWithProfile(ad, profile);
   } else {
@@ -127,7 +128,7 @@ const ArrayData* maybeMakeLoggingArray(const ArrayData* ad) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-LoggingArray* LoggingArray::MakeStatic(ArrayData *ad, LoggingProfile *prof) {
+LoggingArray* LoggingArray::MakeStatic(ArrayData* ad, LoggingProfile* prof) {
   assertx(ad->isStatic());
 
   auto const size = sizeof(LoggingArray);
@@ -367,8 +368,16 @@ ArrayData* convert(ArrayData* ad, F&& f) {
     FTRACE(5, "VMRegAnchor failed for convert operation.\n");
     return result;
   }
+
   auto const prof = getLoggingProfile(sk, result);
   if (!prof) return result;
+  // We expect 1 / (sample rate) logging arrays to make it here. Adjust
+  // accordingly.
+  uint64_t expected = 0;
+  if (!prof->sampleCount.compare_exchange_strong(expected, 2)) {
+    prof->sampleCount += RO::EvalEmitLoggingArraySampleRate;
+  }
+  prof->loggingArraysEmitted++;
 
   return makeWithProfile(result, prof);
 }

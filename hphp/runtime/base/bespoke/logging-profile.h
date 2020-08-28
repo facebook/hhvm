@@ -90,7 +90,9 @@ struct LoggingProfile {
 
   explicit LoggingProfile(SrcKey source) : source(source) {}
 
-  size_t eventCount() const;
+  double getSampleCountMultiplier() const;
+  uint64_t getTotalEvents() const;
+  double getProfileWeight() const;
 
   // We take specific inputs rather than templated inputs because we're going
   // to follow up soon with limitations on the number of arguments we can log.
@@ -107,6 +109,7 @@ private:
 public:
   SrcKey source;
   std::atomic<uint64_t> sampleCount = 0;
+  std::atomic<uint64_t> loggingArraysEmitted = 0;
   LoggingArray* staticArray = nullptr;
   EventMap events;
 };

@@ -132,3 +132,48 @@
     parser_schema
     collections
     utils_core))
+
+(alias
+  (name exe)
+  (deps
+    hackfmt.exe
+    hh_client.exe
+    hh_fanout/hh_fanout.exe
+    hh_parse.exe
+    hh_server.exe
+    hh_single_compile.exe
+    hh_single_type_check.exe
+    ))
+
+(alias
+  (name hh)
+  (deps
+    hh_server.exe
+    hh_client.exe))
+
+(alias
+  (name single)
+  (deps
+    hh_single_type_check.exe
+    hh_single_compile.exe
+    ))
+
+(alias
+  (name debug-single)
+  (deps
+    hh_single_type_check.bc
+    hh_single_compile.bc
+    ))
+
+(alias
+  (name debug)
+  (deps
+    hackfmt.bc
+    hh_client.bc
+    hh_fanout/hh_fanout.bc
+    hh_parse.bc
+    hh_server.bc
+    hh_single_compile.bc
+    hh_single_type_check.bc
+    ))
+

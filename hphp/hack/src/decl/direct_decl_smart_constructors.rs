@@ -2626,11 +2626,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 {
                     Node::Const(self.alloc(shallow_decl_defs::ShallowClassConst {
                         abstract_: modifiers.is_abstract,
-                        expr: match *initializer {
-                            Node::Expr(e) => Some(e.clone()),
-                            n if n.is_ignored() => None,
-                            n => self.node_to_expr(n),
-                        },
                         name: id,
                         type_: ty,
                     }))
@@ -3259,7 +3254,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             |node| match node {
                 Node::ListItem(&(name, value)) => Some(shallow_decl_defs::ShallowClassConst {
                     abstract_: false,
-                    expr: Some(self.node_to_expr(value)?),
                     name: self.get_name("", name)?,
                     type_: self.node_to_ty(value).unwrap_or_else(|| tany()),
                 }),

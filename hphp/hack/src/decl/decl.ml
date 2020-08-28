@@ -860,7 +860,6 @@ and class_const_fold
       cc_abstract = scc.scc_abstract;
       cc_pos = fst scc.scc_name;
       cc_type = scc.scc_type;
-      cc_expr = scc.scc_expr;
       cc_origin = c_name;
     }
   in
@@ -880,7 +879,6 @@ and class_class_decl (class_id : Ast_defs.id) : Typing_defs.class_const =
     cc_pos = pos;
     cc_synthesized = true;
     cc_type = classname_ty;
-    cc_expr = None;
     cc_origin = name;
   }
 
@@ -986,7 +984,6 @@ and typeconst_structure
     cc_pos = pos;
     cc_synthesized = true;
     cc_type = ts_ty;
-    cc_expr = None;
     cc_origin = snd c.sc_name;
   }
 

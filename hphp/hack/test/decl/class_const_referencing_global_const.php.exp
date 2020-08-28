@@ -10,15 +10,12 @@ Parsed decls:
       sc_implements = [];
       sc_consts =
       [{ Shallow_decl_defs.scc_abstract = false;
-         scc_expr = (Some ([5:23-32], (Id ([5:23-32], "\\INT32_MAX"))));
          scc_name = ([5:15-20], "MAX32");
          scc_type =
          (Rhint (root|class_const_referencing_global_const.php line 5, characters 11-13),
           (Tprim Tint))
          };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr =
-          (Some ([6:23-37], (Id ([6:23-37], "\\Math\\INT64_MAX"))));
           scc_name = ([6:15-20], "MAX64");
           scc_type =
           (Rhint (root|class_const_referencing_global_const.php line 6, characters 11-13),
@@ -38,15 +35,12 @@ Parsed decls:
       sc_implements = [];
       sc_consts =
       [{ Shallow_decl_defs.scc_abstract = false;
-         scc_expr = (Some ([11:25-34], (Id ([11:25-34], "\\NS\\INT32_MAX"))));
          scc_name = ([11:17-22], "MAX32");
          scc_type =
          (Rhint (root|class_const_referencing_global_const.php line 11, characters 13-15),
           (Tprim Tint))
          };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr =
-          (Some ([12:25-39], (Id ([12:25-39], "\\NS\\Math\\INT64_MAX"))));
           scc_name = ([12:17-22], "MAX64");
           scc_type =
           (Rhint (root|class_const_referencing_global_const.php line 12, characters 13-15),

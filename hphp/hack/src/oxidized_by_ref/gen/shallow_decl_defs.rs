@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<05f7f961fd86963689b84efe92a2fbee>>
+// @generated SignedSource<<8c3886dee669029a8f6ae8956ca5bdb5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -32,7 +32,6 @@ pub use typing_defs::*;
 )]
 pub struct ShallowClassConst<'a> {
     pub abstract_: bool,
-    pub expr: Option<nast::Expr<'a>>,
     pub name: aast::Sid<'a>,
     pub type_: Ty<'a>,
 }

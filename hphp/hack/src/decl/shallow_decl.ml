@@ -48,8 +48,7 @@ let class_const env c cc =
         let r = Reason.Rwitness pos in
         (mk (r, Typing_defs.make_tany ()), true)
     in
-    Some
-      { scc_abstract = abstract; scc_expr = e; scc_name = name; scc_type = ty }
+    Some { scc_abstract = abstract; scc_name = name; scc_type = ty }
 
 let typeconst_abstract_kind env = function
   | Aast.TCAbstract default ->

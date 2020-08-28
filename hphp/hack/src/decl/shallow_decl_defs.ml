@@ -12,7 +12,6 @@ open Pp_type
 
 type shallow_class_const = {
   scc_abstract: bool;
-  scc_expr: Nast.expr option;
   scc_name: Aast.sid;
   scc_type: decl_ty;
 }

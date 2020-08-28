@@ -9,28 +9,24 @@ Parsed decls:
       sc_req_extends = []; sc_req_implements = []; sc_implements = [];
       sc_consts =
       [{ Shallow_decl_defs.scc_abstract = false;
-         scc_expr = (Some ([4:30-32], (Int "42")));
          scc_name = ([4:13-27], "MY_DECIMAL_INT");
          scc_type =
          (Rhint (root|class_const_int_literals.php line 4, characters 9-11),
           (Tprim Tint))
          };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr = (Some ([5:28-32], (Int "0754")));
           scc_name = ([5:13-25], "MY_OCTAL_INT");
           scc_type =
           (Rhint (root|class_const_int_literals.php line 5, characters 9-11),
            (Tprim Tint))
           };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr = (Some ([6:26-30], (Int "0xFF")));
           scc_name = ([6:13-23], "MY_HEX_INT");
           scc_type =
           (Rhint (root|class_const_int_literals.php line 6, characters 9-11),
            (Tprim Tint))
           };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr = (Some ([7:29-35], (Int "0b1010")));
           scc_name = ([7:13-26], "MY_BINARY_INT");
           scc_type =
           (Rhint (root|class_const_int_literals.php line 7, characters 9-11),

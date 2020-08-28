@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0e98d2d87f023b7de9cf7cd2dad28192>>
+// @generated SignedSource<<0b3780b97972ce3d84a6856b4684cf47>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -99,7 +99,6 @@ pub struct ClassConst<'a> {
     pub abstract_: bool,
     pub pos: &'a pos::Pos<'a>,
     pub type_: Ty<'a>,
-    pub expr: Option<nast::Expr<'a>>,
     /// identifies the class from which this const originates
     pub origin: &'a str,
 }

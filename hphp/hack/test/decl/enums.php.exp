@@ -16,18 +16,14 @@ Parsed decls:
       sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
       sc_req_implements = []; sc_implements = [];
       sc_consts =
-      [{ Shallow_decl_defs.scc_abstract = false;
-         scc_expr = (Some ([4:9-10], (Int "1")));
-         scc_name = ([4:3-6], "FOO");
+      [{ Shallow_decl_defs.scc_abstract = false; scc_name = ([4:3-6], "FOO");
          scc_type =
          (Rwitness (root|enums.php line 4, characters 9-9), (Tprim Tint)) };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr = (Some ([5:9-10], (Int "2")));
           scc_name = ([5:3-6], "BAR");
           scc_type =
           (Rwitness (root|enums.php line 5, characters 9-9), (Tprim Tint)) };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr = (Some ([6:9-10], (Int "3")));
           scc_name = ([6:3-6], "BAZ");
           scc_type =
           (Rwitness (root|enums.php line 6, characters 9-9), (Tprim Tint)) }

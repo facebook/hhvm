@@ -9,7 +9,7 @@ Parsed decls:
       sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
       sc_implements = [];
       sc_consts =
-      [{ Shallow_decl_defs.scc_abstract = true; scc_expr = None;
+      [{ Shallow_decl_defs.scc_abstract = true;
          scc_name = ([13:22-35], "CABSTRACT_INT");
          scc_type =
          (Rhint (root|classes_const_keyword.php line 13, characters 18-20),
@@ -29,11 +29,6 @@ Parsed decls:
       sc_implements = [];
       sc_consts =
       [{ Shallow_decl_defs.scc_abstract = false;
-         scc_expr =
-         (Some ([22:39-58],
-                (Darray (None,
-                   [(([22:46-52], (String "test")), ([22:56-57], (Int "1")))]
-                   ))));
          scc_name = ([22:29-36], "CDARRAY");
          scc_type =
          (Rhint (root|classes_const_keyword.php line 22, characters 9-27),
@@ -45,11 +40,6 @@ Parsed decls:
              )))
          };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr =
-          (Some ([23:34-50],
-                 (ValCollection (Keyset, None,
-                    [([23:41-44], (String "a")); ([23:46-49], (String "b"))]
-                    ))));
           scc_name = ([23:24-31], "CKEYSET");
           scc_type =
           (Rhint (root|classes_const_keyword.php line 23, characters 9-22),
@@ -59,7 +49,6 @@ Parsed decls:
               )))
           };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr = (Some ([24:47-55], (ValCollection (Keyset, None, []))));
           scc_name = ([24:27-44], "CCLASSNAME_KEYSET");
           scc_type =
           (Rhint (root|classes_const_keyword.php line 24, characters 9-25),
@@ -69,12 +58,6 @@ Parsed decls:
               )))
           };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr =
-          (Some ([25:34-58],
-                 (Varray (None,
-                    [([25:41-48], (String "MAP_1"));
-                      ([25:50-57], (String "MAP_2"))]
-                    ))));
           scc_name = ([25:24-31], "CVARRAY");
           scc_type =
           (Rhint (root|classes_const_keyword.php line 25, characters 9-22),
@@ -96,39 +79,24 @@ Parsed decls:
       sc_implements = [];
       sc_consts =
       [{ Shallow_decl_defs.scc_abstract = false;
-         scc_expr =
-         (Some ([29:20-25],
-                (Binop (Plus, ([29:20-21], (Int "4")),
-                   ([29:24-25], (Int "5"))))));
          scc_name = ([29:13-17], "CINT");
          scc_type =
          (Rhint (root|classes_const_keyword.php line 29, characters 9-11),
           (Tprim Tint))
          };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr =
-          (Some ([30:24-33],
-                 (Binop (Minus, ([30:24-27], (Float "4.0")),
-                    ([30:30-33], (Float "5.0"))))));
           scc_name = ([30:15-21], "CFLOAT");
           scc_type =
           (Rhint (root|classes_const_keyword.php line 30, characters 9-13),
            (Tprim Tfloat))
           };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr =
-          (Some ([31:26-39],
-                 (Binop (Dot, ([31:26-32], (String "test")),
-                    ([31:33-39], (String "test"))))));
           scc_name = ([31:16-23], "CSTRING");
           scc_type =
           (Rhint (root|classes_const_keyword.php line 31, characters 9-14),
            (Tprim Tstring))
           };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr =
-          (Some ([32:22-35],
-                 (Binop (Barbar, ([32:22-26], True), ([32:30-35], False)))));
           scc_name = ([32:14-19], "CBOOL");
           scc_type =
           (Rhint (root|classes_const_keyword.php line 32, characters 9-12),
@@ -148,11 +116,6 @@ Parsed decls:
       sc_implements = [];
       sc_consts =
       [{ Shallow_decl_defs.scc_abstract = false;
-         scc_expr =
-         (Some ([45:45-63],
-                (Class_const (
-                   ([45:45-56], (CI ([45:45-56], "\\TupleConsts"))),
-                   ([45:58-63], "class")))));
          scc_name = ([45:32-42], "CCLASSNAME");
          scc_type =
          (Rhint (root|classes_const_keyword.php line 45, characters 9-30),
@@ -162,9 +125,6 @@ Parsed decls:
              )))
          };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr =
-          (Some ([46:50-61],
-                 (Class_const (([46:50-54], CIself), ([46:56-61], "class")))));
           scc_name = ([46:36-47], "CCLASSNAME2");
           scc_type =
           (Rhint (root|classes_const_keyword.php line 46, characters 9-34),
@@ -187,11 +147,6 @@ Parsed decls:
       sc_implements = [];
       sc_consts =
       [{ Shallow_decl_defs.scc_abstract = false;
-         scc_expr =
-         (Some ([5:35-53],
-                (KeyValCollection (Dict, None,
-                   [(([5:40-41], (Int "2")), ([5:45-52], (String "folly")))]
-                   ))));
          scc_name = ([5:27-32], "CDICT");
          scc_type =
          (Rhint (root|classes_const_keyword.php line 5, characters 9-25),
@@ -204,17 +159,6 @@ Parsed decls:
              )))
          };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr =
-          (Some ([7:5-34],
-                 (KeyValCollection (Dict, None,
-                    [(([7:10-11], (Int "2")),
-                      ([7:15-33],
-                       (KeyValCollection (Dict, None,
-                          [(([7:20-21], (Int "4")),
-                            ([7:25-32], (String "folly")))]
-                          ))))
-                      ]
-                    ))));
           scc_name = ([6:38-50], "CNESTED_DICT");
           scc_type =
           (Rhint (root|classes_const_keyword.php line 6, characters 9-36),
@@ -233,21 +177,6 @@ Parsed decls:
               )))
           };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr =
-          (Some ([9:5-44],
-                 (KeyValCollection (Dict, None,
-                    [(([9:10-11], (Int "2")),
-                      ([9:15-43],
-                       (KeyValCollection (Dict, None,
-                          [(([9:20-21], (Int "4")),
-                            ([9:25-32],
-                             (Unop (Uminus, ([9:26-32], (Float "4.5e10"))))));
-                            (([9:34-35], (Int "5")),
-                             ([9:39-42], (Float "5.0")))
-                            ]
-                          ))))
-                      ]
-                    ))));
           scc_name = ([8:37-55], "CNESTED_DICT_FLOAT");
           scc_type =
           (Rhint (root|classes_const_keyword.php line 8, characters 9-35),
@@ -279,15 +208,6 @@ Parsed decls:
       sc_implements = [];
       sc_consts =
       [{ Shallow_decl_defs.scc_abstract = false;
-         scc_expr =
-         (Some ([37:5-48],
-                (Shape
-                   [((SFlit_str ([37:11-14], "a")), ([37:18-20], (Int "42")));
-                     ((SFlit_str ([37:22-25], "b")),
-                      ([37:29-34], (String "foo")));
-                     ((SFlit_str ([37:36-39], "c")),
-                      ([37:43-47], (Float "3.14")))
-                     ])));
          scc_name = ([36:47-53], "CSHAPE");
          scc_type =
          (Rhint (root|classes_const_keyword.php line 36, characters 9-45),
@@ -320,9 +240,6 @@ Parsed decls:
       sc_implements = [];
       sc_consts =
       [{ Shallow_decl_defs.scc_abstract = false;
-         scc_expr =
-         (Some ([41:43-57],
-                (List [([41:49-50], (Int "7")); ([41:52-56], Null)])));
          scc_name = ([41:33-40], "COPTION");
          scc_type =
          (Rhint (root|classes_const_keyword.php line 41, characters 9-31),
@@ -354,12 +271,6 @@ Parsed decls:
       sc_implements = [];
       sc_consts =
       [{ Shallow_decl_defs.scc_abstract = false;
-         scc_expr =
-         (Some ([17:25-37],
-                (ValCollection (Vec, None,
-                   [([17:29-30], (Int "1")); ([17:32-33], (Int "2"));
-                     ([17:35-36], (Int "3"))]
-                   ))));
          scc_name = ([17:18-22], "CVEC");
          scc_type =
          (Rhint (root|classes_const_keyword.php line 17, characters 9-16),
@@ -369,17 +280,6 @@ Parsed decls:
              )))
          };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr =
-          (Some ([18:37-64],
-                 (ValCollection (Vec, None,
-                    [([18:41-47],
-                      (ValCollection (Vec, None, [([18:45-46], (Int "1"))])));
-                      ([18:49-55],
-                       (ValCollection (Vec, None, [([18:53-54], (Int "2"))])));
-                      ([18:57-63],
-                       (ValCollection (Vec, None, [([18:61-62], (Int "3"))])))
-                      ]
-                    ))));
           scc_name = ([18:23-34], "CNESTED_VEC");
           scc_type =
           (Rhint (root|classes_const_keyword.php line 18, characters 9-21),

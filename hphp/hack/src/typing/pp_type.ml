@@ -699,13 +699,6 @@ and pp_class_const : Format.formatter -> class_const -> unit =
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 
-  Format.fprintf fmt "@[%s =@ " "cc_expr";
-  (match x.cc_expr with
-  | None -> Format.pp_print_string fmt "None"
-  | Some x ->
-    Format.pp_print_string fmt "(Some ";
-    Nast.pp_expr fmt x;
-    Format.pp_print_string fmt ")");
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 

@@ -9,23 +9,18 @@ Parsed decls:
       sc_req_extends = []; sc_req_implements = []; sc_implements = [];
       sc_consts =
       [{ Shallow_decl_defs.scc_abstract = false;
-         scc_expr =
-         (Some ([4:15-17], (Unop (Uminus, ([4:16-17], (Int "1"))))));
          scc_name = ([4:9-12], "FOO");
          scc_type =
          (Rwitness (root|classes_inferred_constant_types.php line 4, characters 15-16),
           (Tprim Tint))
          };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr = (Some ([5:15-16], (Int "0")));
           scc_name = ([5:9-12], "BAR");
           scc_type =
           (Rwitness (root|classes_inferred_constant_types.php line 5, characters 15-15),
            (Tprim Tint))
           };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr =
-          (Some ([6:15-17], (Unop (Uplus, ([6:16-17], (Int "1"))))));
           scc_name = ([6:9-12], "BAZ");
           scc_type =
           (Rwitness (root|classes_inferred_constant_types.php line 6, characters 15-16),

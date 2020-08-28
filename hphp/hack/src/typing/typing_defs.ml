@@ -147,7 +147,6 @@ and class_const = {
   cc_abstract: bool;
   cc_pos: Pos.t;
   cc_type: decl_ty;
-  cc_expr: Nast.expr option;
   cc_origin: string;
       (** identifies the class from which this const originates *)
 }

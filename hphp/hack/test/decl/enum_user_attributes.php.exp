@@ -15,16 +15,12 @@ Parsed decls:
       sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
       sc_req_implements = []; sc_implements = [];
       sc_consts =
-      [{ Shallow_decl_defs.scc_abstract = false;
-         scc_expr = (Some ([5:7-10], (String "A")));
-         scc_name = ([5:3-4], "A");
+      [{ Shallow_decl_defs.scc_abstract = false; scc_name = ([5:3-4], "A");
          scc_type =
          (Rwitness (root|enum_user_attributes.php line 5, characters 7-9),
           (Tprim Tstring))
          };
-        { Shallow_decl_defs.scc_abstract = false;
-          scc_expr = (Some ([6:7-10], (String "B")));
-          scc_name = ([6:3-4], "B");
+        { Shallow_decl_defs.scc_abstract = false; scc_name = ([6:3-4], "B");
           scc_type =
           (Rwitness (root|enum_user_attributes.php line 6, characters 7-9),
            (Tprim Tstring))

@@ -15,12 +15,7 @@ Parsed decls:
       sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
       sc_req_implements = []; sc_implements = [];
       sc_consts =
-      [{ Shallow_decl_defs.scc_abstract = false;
-         scc_expr =
-         (Some ([7:9-19],
-                (Class_const (([7:9-12], (CI ([7:9-12], "\\Foo"))),
-                   ([7:14-19], "class")))));
-         scc_name = ([7:3-6], "FOO");
+      [{ Shallow_decl_defs.scc_abstract = false; scc_name = ([7:3-6], "FOO");
          scc_type = (Rnone (| line 0, characters 0-0), Tany) }
         ];
       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];

@@ -208,7 +208,6 @@ struct
       cc_abstract = cc.cc_abstract;
       cc_pos = pos cc.cc_pos;
       cc_type = ty cc.cc_type;
-      cc_expr = Option.map ~f:(pos_mapper#on_expr ()) cc.cc_expr;
       cc_origin = cc.cc_origin;
     }
 
@@ -372,7 +371,6 @@ struct
   and shallow_class_const scc =
     {
       scc_abstract = scc.scc_abstract;
-      scc_expr = Option.map scc.scc_expr (pos_mapper#on_expr ());
       scc_name = string_id scc.scc_name;
       scc_type = ty scc.scc_type;
     }

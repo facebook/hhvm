@@ -4,6 +4,7 @@
   (libraries
     ast
     ast_provider
+    decl_provider
     facts
     file_info
     full_fidelity

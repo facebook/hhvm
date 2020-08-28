@@ -10,7 +10,6 @@
     lru
     mutable_accumulator
     options_ffi
-    tast
     utils_php_escape))
 
 (library

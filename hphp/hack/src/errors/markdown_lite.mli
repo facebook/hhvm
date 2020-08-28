@@ -7,3 +7,11 @@
  *)
 
 val render : ?add_bold:bool -> ?color:Tty.raw_color -> string -> string
+
+val md_codify : string -> string
+
+val md_highlight : string -> string
+
+val md_bold : string -> string
+
+val md_italicize : string -> string

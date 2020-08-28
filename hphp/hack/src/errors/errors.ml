@@ -10,6 +10,7 @@
 open Hh_prelude
 open Reordered_argument_collections
 open String_utils
+open Markdown_lite
 
 type error_code = int [@@deriving eq]
 
@@ -144,8 +145,6 @@ let applied_fixmes : applied_fixme files_t ref = ref Relative_path.Map.empty
 let (error_map : error files_t ref) = ref Relative_path.Map.empty
 
 let accumulate_errors = ref false
-
-let md_codify s = "`" ^ s ^ "`"
 
 (* Some filename when declaring *)
 let in_lazy_decl = ref None

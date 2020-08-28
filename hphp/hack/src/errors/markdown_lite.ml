@@ -149,3 +149,11 @@ let rec render ?(add_bold = false) ?(color = Tty.Red) (msg : string) =
     | None ->
       failwith "Impossible: unable to parse a single character in error message"
     | Some (parsed, rest) -> parsed ^ render ~add_bold ~color rest
+
+let md_codify s = "`" ^ s ^ "`"
+
+let md_highlight s = "~~" ^ s ^ "~~"
+
+let md_bold s = "**" ^ s ^ "**"
+
+let md_italicize s = "*" ^ s ^ "*"

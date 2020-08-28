@@ -207,16 +207,23 @@ void exportSortedProfiles(FILE* file, const std::vector<SrcKeyData>& sources) {
 }
 
 std::vector<SrcKeyData> sortProfileData() {
-  using OriginalSrcKeyData = std::pair<SrcKey, LoggingProfile*>;
-  std::vector<OriginalSrcKeyData>
-    presortVec(s_profileMap.begin(), s_profileMap.end());
+  using OriginalData = std::pair<SrcKey, LoggingProfile*>;
+  using OriginalDataWithWeight = std::pair<OriginalData, size_t>;
+  std::vector<OriginalDataWithWeight> presortVec;
+  presortVec.reserve(s_profileMap.size());
 
-  // TODO: eventCount is not an O(1) op. Let's optimize further here.
+  std::transform(
+    s_profileMap.begin(), s_profileMap.end(), std::back_inserter(presortVec),
+    [](OriginalData data) {
+      return std::make_pair(data, data.second->eventCount());
+    }
+  );
+
   std::sort(
-    presortVec.begin(),
-    presortVec.end(),
-    [&](OriginalSrcKeyData a, OriginalSrcKeyData b) {
-      return a.second->eventCount() > b.second->eventCount();
+    presortVec.begin(), presortVec.end(),
+    [](const OriginalDataWithWeight& a,
+        const OriginalDataWithWeight& b) {
+      return a.second > b.second;
     }
   );
 
@@ -225,7 +232,8 @@ std::vector<SrcKeyData> sortProfileData() {
 
   std::transform(
     presortVec.begin(), presortVec.end(), std::back_inserter(sources),
-    [](OriginalSrcKeyData srcKeyProfile) {
+    [](const OriginalDataWithWeight& srcKeyProfilePair) {
+      auto const srcKeyProfile = srcKeyProfilePair.first;
       std::vector<EventData> events(srcKeyProfile.second->events.begin(),
                                     srcKeyProfile.second->events.end());
 

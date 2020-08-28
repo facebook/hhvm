@@ -2116,6 +2116,12 @@ let abstract_method_memoize pos =
     pos
     "Abstract methods cannot be memoized."
 
+let instance_property_in_abstract_final_class pos =
+  add
+    (NastCheck.err_code NastCheck.InstancePropertyInAbstractFinalClass)
+    pos
+    "Abstract final classes cannot have instance properties."
+
 let inout_params_special pos =
   add
     (NastCheck.err_code NastCheck.InoutParamsSpecial)

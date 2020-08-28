@@ -257,6 +257,7 @@ PhpLambdaDisallowed = 3084
 EntryPointArguments = 3085
 VariadicMemoize = 3086
 AbstractMethodMemoize = 3087
+InstancePropertyInAbstractFinalClass = 3088
 
 Typing Errors:
 AbstractClassFinalDEPRECATED = 4001

@@ -1,0 +1,2 @@
+File "abstract_final_instance_property.php", line 3, characters 14-20:
+Abstract final classes cannot have instance properties. (NastCheck[3088])

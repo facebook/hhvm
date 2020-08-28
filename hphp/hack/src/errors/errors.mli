@@ -1272,6 +1272,8 @@ val variadic_memoize : Pos.t -> unit
 
 val abstract_method_memoize : Pos.t -> unit
 
+val instance_property_in_abstract_final_class : Pos.t -> unit
+
 val reassign_maybe_mutable_var : in_collection:bool -> Pos.t -> unit
 
 val immutable_argument_mismatch : Pos.t -> Pos.t -> unit

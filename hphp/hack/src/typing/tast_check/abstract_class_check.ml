@@ -45,7 +45,13 @@ let check_class _ c =
     in
     let (c_constructor, _, c_methods) = split_methods c in
     List.iter c_methods err;
-    Option.iter c_constructor err
+    Option.iter c_constructor err;
+
+    let (_, c_instance_vars) = split_vars c in
+    c_instance_vars
+    |> List.filter ~f:(fun var -> Option.is_none var.cv_xhp_attr)
+    |> List.iter ~f:(fun var ->
+           Errors.instance_property_in_abstract_final_class (fst var.cv_id))
   )
 
 let handler =

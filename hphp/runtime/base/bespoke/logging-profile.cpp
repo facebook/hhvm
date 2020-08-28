@@ -38,72 +38,140 @@ TRACE_SET_MOD(bespoke);
 //////////////////////////////////////////////////////////////////////////////
 
 namespace {
-
-//////////////////////////////////////////////////////////////////////////////
+template <typename T, typename U>
+bool fits(U u) {
+  return u >= std::numeric_limits<T>::min() &&
+         u <= std::numeric_limits<T>::max();
+}
+constexpr int8_t kInt8Min = std::numeric_limits<int8_t>::min();
 
 folly::SharedMutex s_exportStartedLock;
 std::atomic<bool> s_exportStarted{false};
-
-std::string toStringForKey(int64_t v) {
-  if (v < 256) {
-    return folly::sformat("[int={}]", v);
-  } else {
-    return "[int>=256]";
-  }
-}
-
-std::string toStringForKey(const StringData* sd) {
-  if (sd->isStatic()) {
-    return folly::sformat("[static string=\"{}\"]",
-                          folly::cEscape<std::string>(sd->data()));
-  } else {
-    return "[non-static string]";
-  }
-}
-
-std::string toStringForKey(const TypedValue& tv) {
-  auto const tvname = tname(tv.type());
-  switch (tv.type()) {
-    case KindOfBoolean:
-    case KindOfInt64:
-      if (tv.val().num < 256) {
-        return folly::sformat("[{}={}]", tvname, tv.val().num);
-      } else {
-        return folly::sformat("[{}>=256]", tvname);
-      }
-    case KindOfPersistentString:
-    case KindOfString:
-      if (tv.val().pstr->isStatic()) {
-        auto const escapedString =
-          folly::cEscape<std::string>(tv.val().pstr->data());
-        return folly::sformat("[{}, static=\"{}\"]", tvname, escapedString);
-      } else {
-        return folly::sformat("[{}, non-static]", tvname);
-      }
-    default:
-      return folly::sformat("[{}]", tvname);
-  }
-}
-
-std::string assembleKey(ArrayOp op) {
-  switch (op) {
-#define X(name) case ArrayOp::name: return #name;
-ARRAY_OPS
-#undef X
-  }
-  always_assert(false);
-}
-
-template <typename T, typename... Ts>
-std::string assembleKey(ArrayOp op, T&& arg, Ts&&... args) {
-  auto const paramStr =
-    folly::join(", ", {toStringForKey(std::forward<T>(arg)),
-                       toStringForKey(std::forward<Ts>(args))...});
-  return folly::sformat("{}: {}", assembleKey(op), paramStr);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
+// The key for a sampled event. The granularity we choose is important here:
+// too fine, and our profiles will have too many entries; too coarse, and we
+// won't be able to make certain optimizations.
+struct alignas(8) EventKey {
+  EventKey(ArrayOp op);
+  EventKey(ArrayOp op, int64_t k);
+  EventKey(ArrayOp op, const StringData* k);
+  EventKey(ArrayOp op, TypedValue v);
+  EventKey(ArrayOp op, int64_t k, TypedValue v);
+  EventKey(ArrayOp op, const StringData* k, TypedValue v);
+
+  EventKey(uint64_t value) {
+    static_assert(sizeof(EventKey) == sizeof(uint64_t), "");
+    memmove(this, &value, sizeof(EventKey));
+  }
+  uint64_t toUInt64() const {
+    uint64_t value;
+    memmove(&value, this, sizeof(EventKey));
+    return value;
+  }
+
+  std::string toString() const;
+
+private:
+  // We specialize on certain subtypes that we can represent efficiently.
+  // Str32 is a static string with a 4-byte pointer, even in non-lowptr builds.
+  //
+  // Spec is strictly more specific than DataType, because we drop persistence
+  // when saving types to the event frequency map.
+  enum class Spec : uint8_t { None, Int8, Int16, Int32, Int64, Str32, Str };
+
+  Spec getSpec(TypedValue v) {
+    if (tvIsString(v)) {
+      if (!val(v).pstr->isStatic()) return Spec::Str;
+      auto const str = uintptr_t(val(v).pstr);
+      return fits<uint32_t>(str) ? Spec::Str32 : Spec::Str;
+    }
+    if (tvIsInt(v)) {
+      auto const num = val(v).num;
+      if (fits<int8_t>(num))  return Spec::Int8;
+      if (fits<int16_t>(num)) return Spec::Int16;
+      if (fits<int32_t>(num)) return Spec::Int32;
+      return Spec::Int64;
+    }
+    return Spec::None;
+  }
+
+  void setOp(ArrayOp op) {
+    m_op = op;
+  }
+  void setKey(int64_t k) {
+    m_key_spec = getSpec(make_tv<KindOfInt64>(k));
+    if (m_key_spec == Spec::Int8) m_key = safe_cast<uint32_t>(k - kInt8Min);
+  }
+  void setKey(const StringData* k) {
+    m_key_spec = getSpec(make_tv<KindOfString>(const_cast<StringData*>(k)));
+    if (m_key_spec == Spec::Str32) m_key = safe_cast<uint32_t>(uintptr_t(k));
+  }
+  void setVal(TypedValue v) {
+    m_val_spec = getSpec(v);
+    m_val_type = dt_modulo_persistence(type(v));
+  }
+
+  ArrayOp m_op;
+  Spec m_key_spec = Spec::None;
+  Spec m_val_spec = Spec::None;
+  DataType m_val_type = kInvalidDataType;
+  uint32_t m_key = 0; // Set for Spec::Int8 and Spec::Str32
+};
+
+// Dispatch to the setters above. There must be a better way...
+EventKey::EventKey(ArrayOp op) { setOp(op); }
+EventKey::EventKey(ArrayOp op, int64_t k) { setOp(op); setKey(k); }
+EventKey::EventKey(ArrayOp op, const StringData* k) { setOp(op); setKey(k); }
+EventKey::EventKey(ArrayOp op, TypedValue v) { setOp(op); setVal(v); }
+EventKey::EventKey(ArrayOp op, int64_t k, TypedValue v)
+  { setOp(op); setKey(k); setVal(v); }
+EventKey::EventKey(ArrayOp op, const StringData* k, TypedValue v)
+  { setOp(op); setKey(k); setVal(v); }
+
+std::string EventKey::toString() const {
+  auto const op = [&]{
+    switch (m_op) {
+#define X(name) case ArrayOp::name: return #name;
+ARRAY_OPS
+#undef X
+    }
+    not_reached();
+  }();
+  auto const specToStr = [](EventKey::Spec spec) {
+    switch (spec) {
+      case Spec::None:  return "none";
+      case Spec::Int8:  return "i8";
+      case Spec::Int16: return "i16";
+      case Spec::Int32: return "i32";
+      case Spec::Int64: return "i64";
+      case Spec::Str32: return "s32";
+      case Spec::Str:   return "str";
+    }
+    not_reached();
+  };
+  auto const key = [&]() -> std::string {
+    auto const spec = m_key_spec;
+    if (spec == Spec::None) return "";
+    if (spec == Spec::Int8) {
+      auto const i = safe_cast<int8_t>(safe_cast<int16_t>(m_key) + kInt8Min);
+      return folly::sformat(" key=[i8:{}]", i);
+    }
+    if (spec == Spec::Str32) {
+      auto const s = ((StringData*)safe_cast<uintptr_t>(m_key))->data();
+      return folly::sformat(" key=[s32:\"{}\"]", folly::cEscape<std::string>(s));
+    }
+    return folly::sformat(" key=[{}]", specToStr(spec));
+  }();
+  auto const val = [&]() -> std::string {
+    if (m_val_type == kInvalidDataType) return "";
+    auto const spec = m_val_spec;
+    return spec == Spec::None ? folly::sformat(" val=[{}]", tname(m_val_type))
+                              : folly::sformat(" val=[{}]", specToStr(spec));
+  }();
+  return folly::sformat("{}{}{}", op, key, val);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -115,25 +183,25 @@ size_t LoggingProfile::eventCount() const {
 }
 
 void LoggingProfile::logEvent(ArrayOp op) {
-  logEventImpl(assembleKey(op));
+  logEventImpl(EventKey(op));
 }
 void LoggingProfile::logEvent(ArrayOp op, int64_t k) {
-  logEventImpl(assembleKey(op, k));
+  logEventImpl(EventKey(op, k));
 }
 void LoggingProfile::logEvent(ArrayOp op, const StringData* k) {
-  logEventImpl(assembleKey(op, k));
+  logEventImpl(EventKey(op, k));
 }
 void LoggingProfile::logEvent(ArrayOp op, TypedValue v) {
-  logEventImpl(assembleKey(op, v));
+  logEventImpl(EventKey(op, v));
 }
 void LoggingProfile::logEvent(ArrayOp op, int64_t k, TypedValue v) {
-  logEventImpl(assembleKey(op, k, v));
+  logEventImpl(EventKey(op, k, v));
 }
 void LoggingProfile::logEvent(ArrayOp op, const StringData* k, TypedValue v) {
-  logEventImpl(assembleKey(op, k, v));
+  logEventImpl(EventKey(op, k, v));
 }
 
-void LoggingProfile::logEventImpl(const std::string& key) {
+void LoggingProfile::logEventImpl(const EventKey& key) {
   // Hold the read mutex for the duration of the mutation so that export cannot
   // begin until the mutation is complete.
   folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
@@ -141,13 +209,14 @@ void LoggingProfile::logEventImpl(const std::string& key) {
 
   EventMap::accessor it;
   auto const sink = getSrcKey();
-  if (events.insert(it, {sink, key})) {
+  if (events.insert(it, {sink, key.toUInt64()})) {
     it->second = 1;
   } else {
     it->second++;
   }
   FTRACE(6, "{} -> {}: {} [count={}]\n", source.getSymbol(),
-         (sink.valid() ? sink.getSymbol() : "<unknown>"), key, it->second);
+         (sink.valid() ? sink.getSymbol() : "<unknown>"),
+         EventKey(key).toString(), it->second);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -181,9 +250,9 @@ void exportSortedProfiles(FILE* file, const std::vector<SrcKeyData>& sources) {
 
       if (RO::EvalExportLoggingArrayDataToFile) {
         auto const logEntry =
-          folly::sformat("  {: >9}x {} at {}\n", count, event,
-                         sinkSk.valid() ? sinkSk.getSymbol()
-                                        : "<invalid SrcKey>");
+          folly::sformat("  {: >9}x {} at {}\n", count,
+                         EventKey(event).toString(),
+                         sinkSk.valid() ? sinkSk.getSymbol() : "<unknown>");
 
         if (fwrite(logEntry.data(), 1, logEntry.length(), file)
             != logEntry.length()) {
@@ -194,9 +263,8 @@ void exportSortedProfiles(FILE* file, const std::vector<SrcKeyData>& sources) {
       if (RO::EvalExportLoggingArrayDataToStructuredLog) {
         StructuredLogEntry sle;
         sle.setStr("source", sourceSk.getSymbol());
-        sle.setStr("sink", sinkSk.valid() ? sinkSk.getSymbol()
-                                          : "<invalid SrcKey>");
-        sle.setStr("event", event);
+        sle.setStr("sink", sinkSk.valid() ? sinkSk.getSymbol() : "<unknown>");
+        sle.setStr("event", EventKey(event).toString());
         sle.setInt("count", count);
 
         // TODO: Use a permament log category when our format is stabilized.

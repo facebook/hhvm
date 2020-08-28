@@ -74,12 +74,15 @@ ARRAY_OPS
 #undef X
 };
 
+// Internal storage detail of EventMap.
+struct EventKey;
+
 // We'll store a LoggingProfile for each array construction site SrcKey.
 // It tracks the operations that happen on arrays coming from that site.
 struct LoggingProfile {
-  using EventMapKey = std::pair<SrcKey, std::string>;
+  using EventMapKey = std::pair<SrcKey, uint64_t>;
   using EventMapHasher = pairHashCompare<
-    SrcKey, std::string, SrcKey::TbbHashCompare, stringHashCompare>;
+    SrcKey, uint64_t, SrcKey::TbbHashCompare, integralHashCompare<uint64_t>>;
 
   // Values in the event map are sampled event counts.
   using EventMap = tbb::concurrent_hash_map<
@@ -99,7 +102,7 @@ struct LoggingProfile {
   void logEvent(ArrayOp op, const StringData* k, TypedValue v);
 
 private:
-  void logEventImpl(const std::string& key);
+  void logEventImpl(const EventKey& key);
 
 public:
   SrcKey source;

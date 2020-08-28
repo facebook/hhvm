@@ -89,11 +89,23 @@ struct string_hash {
   }
 };
 
-struct stringHashCompare {
-  bool equal(const std::string &s1, const std::string &s2) const {
+template <typename T>
+struct integralHashCompare {
+  bool equal(T s1, T s2) const {
+    static_assert(std::is_integral<T>::value, "");
     return s1 == s2;
   }
-  size_t hash(const std::string &s) const {
+  size_t hash(T s) const {
+    static_assert(sizeof(T) <= sizeof(int64_t), "");
+    return hash_int64(int64_t(s));
+  }
+};
+
+struct stringHashCompare {
+  bool equal(const std::string& s1, const std::string& s2) const {
+    return s1 == s2;
+  }
+  size_t hash(const std::string& s) const {
     return hash_string_cs_unsafe(s.c_str(), s.size());
   }
 };

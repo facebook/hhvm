@@ -205,8 +205,6 @@ enum class SerializationSite {
   IsTuple,
   IsShape,
   IsArray,
-  IsVArray,
-  IsDArray,
   FBSerialize,
   FBCompactSerialize,
   Gettype,

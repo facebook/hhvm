@@ -18,25 +18,17 @@ Notice: Observing static empty darray in is_array from %s/is_array.php:50 in %s/
 bool(true)
 ---------------------- is_varray -------------------
 bool(false)
-
-Notice: Hack Array Compat: is_varray() called on vec in %s/is_array.php on line 55
 bool(false)
 bool(false)
 bool(false)
-
-Notice: Observing static empty varray in is_varray from %s/is_array.php:58 in %s/is_array.php on line 58
 bool(true)
 bool(false)
 ---------------------- is_darray -------------------
 bool(false)
 bool(false)
-
-Notice: Hack Array Compat: is_darray() called on dict in %s/is_array.php on line 65
 bool(false)
 bool(false)
 bool(false)
-
-Notice: Observing static empty darray in is_darray from %s/is_array.php:68 in %s/is_array.php on line 68
 bool(true)
 ---------------------- is_vec ----------------------
 bool(false)
@@ -91,25 +83,17 @@ Notice: Observing static empty darray in is_array from %s/is_array.php:113 in %s
 bool(true)
 ---------------------- is_varray ---------------------
 bool(false)
-
-Notice: Hack Array Compat: is_varray() called on vec in %s/is_array.php on line 8
 bool(false)
 bool(false)
 bool(false)
-
-Notice: Observing static empty varray in is_varray from %s/is_array.php:121 in %s/is_array.php on line 8
 bool(true)
 bool(false)
 ---------------------- is_darray ---------------------
 bool(false)
 bool(false)
-
-Notice: Hack Array Compat: is_darray() called on dict in %s/is_array.php on line 11
 bool(false)
 bool(false)
 bool(false)
-
-Notice: Observing static empty darray in is_darray from %s/is_array.php:131 in %s/is_array.php on line 11
 bool(true)
 ---------------------- is_vec ------------------------
 bool(false)
@@ -164,25 +148,17 @@ Notice: Observing static empty darray in is_array from %s/is_array.php:168 in %s
 bool(true)
 ---------------------- is_varray ---------------------
 bool(false)
-
-Notice: Hack Array Compat: is_varray() called on vec in %s/is_array.php on line 27
 bool(false)
 bool(false)
 bool(false)
-
-Notice: Observing static empty varray in is_varray from %s/is_array.php:176 in %s/is_array.php on line 27
 bool(true)
 bool(false)
 ---------------------- is_darray ---------------------
 bool(false)
 bool(false)
-
-Notice: Hack Array Compat: is_darray() called on dict in %s/is_array.php on line 30
 bool(false)
 bool(false)
 bool(false)
-
-Notice: Observing static empty darray in is_darray from %s/is_array.php:186 in %s/is_array.php on line 30
 bool(true)
 ---------------------- is_vec ------------------------
 bool(false)

@@ -276,8 +276,6 @@ const char* srcName(SerializationSite src) {
   case SerializationSite::IsTuple:            return "is_tuple";
   case SerializationSite::IsShape:            return "is_shape";
   case SerializationSite::IsArray:            return "is_array";
-  case SerializationSite::IsVArray:           return "is_varray";
-  case SerializationSite::IsDArray:           return "is_darray";
   case SerializationSite::FBSerialize:        return "fb_serialize";
   case SerializationSite::FBCompactSerialize: return "fb_compact_serialize";
   case SerializationSite::Gettype:            return "gettype";

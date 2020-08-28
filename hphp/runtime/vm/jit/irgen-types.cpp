@@ -561,11 +561,8 @@ SSATmp* isDVArrayImpl(IRGS& env, SSATmp* src, IsTypeOp subop) {
 
   assertx(subop == IsTypeOp::VArray || subop == IsTypeOp::DArray);
   auto const varray = subop == IsTypeOp::VArray;
-  auto const site = varray ? SerializationSite::IsVArray
-                           : SerializationSite::IsDArray;
 
   mc.ifTypeThen(src, varray ? TVArr : TDArr, [&](SSATmp* src) {
-    maybeLogSerialization(env, src, site);
     return cns(env, true);
   });
 
@@ -578,18 +575,6 @@ SSATmp* isDVArrayImpl(IRGS& env, SSATmp* src, IsTypeOp subop) {
       return cns(env, true);
     });
   }
-
-
-  auto const hacLogging = [&](const char* msg) {
-    if (!RO::EvalHackArrCompatIsVecDictNotices) return;
-    gen(env, RaiseHackArrCompatNotice, cns(env, makeStaticString(msg)));
-  };
-
-  mc.ifTypeThen(src, varray ? TVec : TDict, [&](SSATmp* src) {
-    hacLogging(varray ? Strings::HACKARR_COMPAT_VEC_IS_VARR
-                      : Strings::HACKARR_COMPAT_DICT_IS_DARR);
-    return cns(env, false);
-  });
 
   return mc.elseDo([&]{ return cns(env, false); });
 }

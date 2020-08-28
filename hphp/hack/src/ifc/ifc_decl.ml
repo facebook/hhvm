@@ -222,3 +222,8 @@ let collect_sigs defs =
     { de_class; de_fun }
   in
   List.fold ~f:add_class_decl ~init classes
+
+let find_core_class_decl meta class_name =
+  match Decl_provider.get_class meta.m_ctx class_name with
+  | Some class_decl -> class_decl
+  | None -> fail ("couldn't find the decl for " ^ class_name)

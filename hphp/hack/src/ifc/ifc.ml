@@ -16,6 +16,7 @@ module Logic = Ifc_logic
 module Opts = Ifc_options
 module Pp = Ifc_pretty
 module Lattice = Ifc_security_lattice
+module Lift = Ifc_lift
 module Solver = Ifc_solver
 module Utils = Ifc_utils
 module A = Aast
@@ -23,10 +24,6 @@ module T = Typing_defs
 module L = Logic.Infix
 module K = Typing_cont_key
 module TClass = Decl_provider.Class
-module TReason = Typing_reason
-module TPhase = Typing_phase
-module TEnv = Typing_env
-module TUtils = Typing_utils
 
 exception FlowInference of string
 
@@ -35,61 +32,10 @@ let should_print ~user_mode ~phase =
 
 let fail fmt = Format.kasprintf (fun s -> raise (FlowInference s)) fmt
 
-let empty_tenv meta = TEnv.empty meta.m_ctx meta.m_path None
-
-let find_class_decl meta class_name =
-  match Decl_provider.get_class meta.m_ctx class_name with
-  | Some class_decl -> class_decl
-  | None -> fail "couldn't find the decl for %s" class_name
-
 let find_variances meta class_name =
-  let class_decl = find_class_decl meta class_name in
+  let class_decl = Decl.find_core_class_decl meta class_name in
   let tparams = TClass.tparams class_decl in
   List.map ~f:(fun tparam -> tparam.T.tp_variance) tparams
-
-let find_ancestor_tparams proto_renv class_name (targs : T.locl_ty list) =
-  let class_decl = find_class_decl proto_renv.pre_meta class_name in
-  let tparam_names =
-    let tp_name tparam = snd tparam.T.tp_name in
-    List.map ~f:tp_name @@ TClass.tparams class_decl
-  in
-  let substitution =
-    match List.zip tparam_names targs with
-    | Some zipped -> SMap.of_list zipped
-    | None ->
-      fail "%s has uneven number of type parameters and arguments" class_name
-  in
-  let extract_tparams (ancestor_name, ancestor) =
-    let tenv = empty_tenv proto_renv.pre_meta in
-    (* Type localisation configuration. We use it for instantiating type parameters. *)
-    let ety_env =
-      let this_ty = T.mk (TReason.none, TUtils.this_of @@ TEnv.get_self tenv) in
-      {
-        T.type_expansions = [];
-        substs = substitution;
-        quiet = false;
-        on_error =
-          (fun ?code:_ _ ->
-            fail "something went wrong during generic substitution");
-        this_ty;
-        from_class = None;
-      }
-    in
-    let (_, ty) = TPhase.localize ~ety_env tenv ancestor in
-    match T.get_node ty with
-    | T.Tclass (_, _, targs) ->
-      if List.is_empty targs then
-        None
-      else
-        Some (ancestor_name, targs)
-    | _ ->
-      fail
-        "Tried to extract type parameters of %s, but it is not a class"
-        ancestor_name
-  in
-  TClass.all_ancestors class_decl
-  |> List.filter_map ~f:extract_tparams
-  |> SMap.of_list
 
 (* A constraint accumulator that registers a subtyping
    requirement t1 <: t2 *)
@@ -298,112 +244,6 @@ let mk_union t1 t2 =
   | [t] -> t
   | u -> Tunion u
 
-(* If there is a lump policy variable in effect, return that otherwise
-   generate a new policy variable. *)
-let get_policy ?prefix lump_pol_opt proto_renv =
-  match lump_pol_opt with
-  | Some lump_pol -> lump_pol
-  | None ->
-    let prefix = Option.value prefix ~default:"v" in
-    Env.new_policy_var proto_renv prefix
-
-let rec class_ptype lump_pol_opt proto_renv targs name =
-  let { cd_policied_properties } =
-    match SMap.find_opt name proto_renv.pre_decl.de_class with
-    | Some class_sig -> class_sig
-    | None -> fail "could not found a class policy signature for %s" name
-  in
-  let prop_ptype { pp_name; pp_type; pp_purpose; pp_pos; _ } =
-    (* Purpose of the property takes precedence over any lump policy. *)
-    let lump_pol_opt =
-      let pos = PosSet.singleton pp_pos in
-      Option.merge
-        (Option.map ~f:(Lattice.parse_policy pos) pp_purpose)
-        lump_pol_opt
-        ~f:(fun a _ -> a)
-    in
-    ( pp_name,
-      lazy (ptype ~prefix:("." ^ pp_name) lump_pol_opt proto_renv pp_type) )
-  in
-  let lump_pol = get_policy lump_pol_opt proto_renv ~prefix:"lump" in
-  let c_tparams =
-    let prefix = "tp" in
-    let ptype_tparam = ptype ~prefix lump_pol_opt proto_renv in
-    let tparams = find_ancestor_tparams proto_renv name targs in
-    let tparams =
-      if List.is_empty targs then
-        tparams
-      else
-        SMap.add name targs tparams
-    in
-    SMap.map (List.map ~f:ptype_tparam) tparams
-  in
-  Tclass
-    {
-      c_name = name;
-      c_self = get_policy lump_pol_opt proto_renv ~prefix:name;
-      c_lump = lump_pol;
-      c_property_map =
-        SMap.of_list (List.map ~f:prop_ptype cd_policied_properties);
-      c_tparams;
-    }
-
-(* Turns a locl_ty into a type with policy annotations;
-   the policy annotations are fresh policy variables *)
-and ptype ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
-  let ptype = ptype ?prefix lump_pol_opt proto_renv in
-  match T.get_node t with
-  | T.Tprim _ -> Tprim (get_policy lump_pol_opt proto_renv ?prefix)
-  | T.Tgeneric (_name, _targs) ->
-    (* TODO(T69551141) Handle type arguments *)
-    Tgeneric (get_policy lump_pol_opt proto_renv ?prefix)
-  | T.Ttuple tyl -> Ttuple (List.map ~f:ptype tyl)
-  | T.Tunion tyl -> Tunion (List.map ~f:ptype tyl)
-  | T.Tintersection tyl -> Tinter (List.map ~f:ptype tyl)
-  | T.Tclass ((_, name), _, tparams) ->
-    class_ptype lump_pol_opt proto_renv tparams name
-  | T.Tvar id ->
-    (* Drops the environment `expand_var` returns. This is logically
-     * correct, but threading the envrionment would lead to faster future
-     * `Tvar` lookups.
-     *)
-    let (_, ty) =
-      Typing_inference_env.expand_var
-        proto_renv.pre_tenv.Tast.inference_env
-        Typing_reason.Rnone
-        id
-    in
-    ptype ty
-  | T.Tfun fun_ty ->
-    Tfun
-      {
-        f_pc = get_policy lump_pol_opt proto_renv ~prefix:"pc";
-        f_self = get_policy lump_pol_opt proto_renv ?prefix;
-        f_args =
-          List.map ~f:(fun p -> ptype p.T.fp_type.T.et_type) fun_ty.T.ft_params;
-        f_ret = ptype fun_ty.T.ft_ret.T.et_type;
-        f_exn = class_ptype None proto_renv [] Decl.exception_id;
-      }
-  | T.Tdependent (T.DTthis, ty) ->
-    (* TODO(T72024862): This treatment ignores late static binding. *)
-    ptype ty
-  (* ---  types below are not yet supported *)
-  | T.Tdependent (_, _ty) -> fail "Tdependent"
-  | T.Tdarray (_keyty, _valty) -> fail "Tdarray"
-  | T.Tvarray _ty -> fail "Tvarray"
-  | T.Tvarray_or_darray (_keyty, _valty) -> fail "Tvarray_or_darray"
-  | T.Tany _sentinel -> fail "Tany"
-  | T.Terr -> fail "Terr"
-  | T.Tnonnull -> fail "Tnonnull"
-  | T.Tdynamic -> fail "Tdynamic"
-  | T.Toption _ty -> fail "Toption"
-  | T.Tshape (_sh_kind, _sh_type_map) -> fail "Tshape"
-  | T.Tnewtype (_name, _ty_list, _as_bound) -> fail "Tnewtype"
-  | T.Tobject -> fail "Tobject"
-  | T.Tpu (_locl_ty, _sid) -> fail "Tpu"
-  | T.Tpu_type_access (_sid1, _sid2) -> fail "Tpu_type_access"
-  | T.Tunapplied_alias _ -> fail "Tunapplied_alias"
-
 (* Uses a Hack-inferred type to update the flow type of a local
    variable *)
 let refresh_lvar_type ~pos renv env lid (ety : T.locl_ty) =
@@ -421,7 +261,7 @@ let refresh_lvar_type ~pos renv env lid (ety : T.locl_ty) =
     (env, pty)
   else
     let prefix = Local_id.to_string lid in
-    let new_pty = ptype None renv.re_proto ety ~prefix in
+    let new_pty = Lift.ty None renv.re_proto ety ~prefix in
     let env = Env.acc env (subtype ~pos renv.re_proto.pre_meta pty new_pty) in
     let env = Env.set_local_type env lid new_pty in
     (env, new_pty)
@@ -429,7 +269,7 @@ let refresh_lvar_type ~pos renv env lid (ety : T.locl_ty) =
 let add_params renv =
   let add_param env p =
     let prefix = p.A.param_name in
-    let pty = ptype None renv.re_proto (fst p.A.param_type_hint) ~prefix in
+    let pty = Lift.ty None renv.re_proto (fst p.A.param_type_hint) ~prefix in
     let lid = Local_id.make_unscoped p.A.param_name in
     let env = Env.set_local_type env lid pty in
     (env, pty)
@@ -453,7 +293,7 @@ let property_ptype proto_renv obj_ptype property property_ty =
   match SMap.find_opt property class_.c_property_map with
   | Some ptype -> Lazy.force ptype
   | None ->
-    ptype ~prefix:("." ^ property) (Some class_.c_lump) proto_renv property_ty
+    Lift.ty ~prefix:("." ^ property) (Some class_.c_lump) proto_renv property_ty
 
 let throw ~pos renv env exn_ty =
   let union env t1 t2 = (env, mk_union t1 t2) in
@@ -489,13 +329,13 @@ let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
       | Cglobal callable_name -> callable_name
       | Clocal _ -> "anonymous"
     in
-    let ret_pty = ptype ~prefix:(name ^ "_ret") None renv.re_proto ret_ty in
+    let ret_pty = Lift.ty ~prefix:(name ^ "_ret") None renv.re_proto ret_ty in
     let callee = Env.new_policy_var renv.re_proto name in
     (callee, ret_pty)
   in
   let callee_exn_policy = Env.new_policy_var renv.re_proto "exn" in
   let callee_exn =
-    class_ptype (Some callee_exn_policy) renv.re_proto [] Decl.exception_id
+    Lift.class_ty (Some callee_exn_policy) renv.re_proto [] Decl.exception_id
   in
   (* The PC of the function being called depends on the join of the current
    * PC dependencies, as well as the function's own self policy *)
@@ -568,7 +408,7 @@ let rec flux_target ~pos renv env ((_, lhs_ty), lhs_exp) =
   match lhs_exp with
   | A.Lvar (_, lid) ->
     let prefix = Local_id.to_string lid in
-    let local_pty = ptype None renv.re_proto lhs_ty ~prefix in
+    let local_pty = Lift.ty None renv.re_proto lhs_ty ~prefix in
     let env = Env.set_local_type env lid local_pty in
     (env, local_pty, Env.get_lpc_policy env K.Next)
   | A.Obj_get (obj, (_, A.Id (_, property)), _) ->
@@ -721,7 +561,7 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
   | A.ValCollection (A.Vec, _, exprs) ->
     (* We require each collection element to be a subtype of the vector
      * element parameter. *)
-    let vec_pty = ptype ~prefix:"vec" None renv.re_proto ety in
+    let vec_pty = Lift.ty ~prefix:"vec" None renv.re_proto ety in
     let element_pty = vec_element_pty vec_pty in
     let mk_element_subtype env exp =
       let (env, pty) = expr env exp in
@@ -753,7 +593,7 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
         fail "late static binding is not supported"
       | _ -> env
     in
-    let obj_pty = ptype None renv.re_proto lty in
+    let obj_pty = Lift.ty None renv.re_proto lty in
     begin
       match obj_pty with
       | Tclass { c_name; _ } ->
@@ -762,7 +602,7 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
         let (env, _) =
           call ~pos renv env (Cglobal call_id) (Some obj_pty) args_pty lty
         in
-        let pty = ptype ?prefix:(Some "constr") None renv.re_proto ety in
+        let pty = Lift.ty ?prefix:(Some "constr") None renv.re_proto ety in
         (env, pty)
       | _ -> fail "unhandled method call on %a" Pp.ptype obj_pty
     end
@@ -784,8 +624,8 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
     let pc = Env.new_policy_var renv.re_proto "pc" in
     let self = Env.new_policy_var renv.re_proto "lambda" in
     let (env, ptys) = add_params renv env fun_.A.f_params in
-    let exn = class_ptype None renv.re_proto [] Decl.exception_id in
-    let ret = ptype ~prefix:"ret" None renv.re_proto (fst fun_.A.f_ret) in
+    let exn = Lift.class_ty None renv.re_proto [] Decl.exception_id in
+    let ret = Lift.ty ~prefix:"ret" None renv.re_proto (fst fun_.A.f_ret) in
     let renv = { renv with re_ret = ret; re_exn = exn; re_gpc = pc } in
 
     let env = block renv env fun_.A.f_body.A.fb_ast in
@@ -904,7 +744,7 @@ and stmt renv env ((pos, s) : Tast.stmt) =
      * exceptions are catchable inside the block
      *)
     let try_renv =
-      let fresh_exn = class_ptype None renv.re_proto [] Decl.exception_id in
+      let fresh_exn = Lift.class_ty None renv.re_proto [] Decl.exception_id in
       { renv with re_exn = fresh_exn }
     in
     let env = block try_renv env try_blk in
@@ -997,7 +837,7 @@ let analyse_callable
     let proto_renv = Env.new_proto_renv meta saved_env scope decl_env in
 
     let global_pc = Env.new_policy_var proto_renv "pc" in
-    let exn = class_ptype None proto_renv [] Decl.exception_id in
+    let exn = Lift.class_ty None proto_renv [] Decl.exception_id in
 
     (* Here, we ignore the type parameters of this because at the moment we
      * lack Tgeneric policy type. This will be fixed (T68414656) in the future.
@@ -1005,10 +845,10 @@ let analyse_callable
     let this_ty =
       match class_name with
       | Some cname when not is_static ->
-        Some (class_ptype None proto_renv [] cname)
+        Some (Lift.class_ty None proto_renv [] cname)
       | _ -> None
     in
-    let ret_ty = ptype ~prefix:"ret" None proto_renv return in
+    let ret_ty = Lift.ty ~prefix:"ret" None proto_renv return in
     let renv = Env.new_renv proto_renv this_ty ret_ty global_pc exn in
 
     (* Initialise the mutable environment *)

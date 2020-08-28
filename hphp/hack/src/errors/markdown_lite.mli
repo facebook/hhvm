@@ -6,4 +6,4 @@
  *
  *)
 
-val render : ?add_bold:bool -> string -> string
+val render : ?add_bold:bool -> ?color:Tty.raw_color -> string -> string

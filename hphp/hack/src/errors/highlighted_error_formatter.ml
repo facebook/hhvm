@@ -489,14 +489,26 @@ let format_claim_highlighted
   let pretty_error_code =
     Tty.apply_color (Tty.Bold color) (Errors.error_code_to_string error_code)
   in
-  let pretty_msg = Markdown_lite.render ~add_bold:true msg in
+  (* The color of any highlighted text in the message itself should match
+     the marker color, unless it's a Lint message (Yellow), in which case
+     making it Red is fine because Red is not a color available on the color
+     wheel for subsequent reason messages (in addition, Lint messages don't
+     typically have subsequent reason messages anyway) *)
+  let color =
+    match color with
+    | Tty.Yellow -> Tty.Red
+    | _ -> color
+  in
+  let pretty_msg = Markdown_lite.render ~add_bold:true ~color msg in
   Printf.sprintf "%s %s %s" pretty_error_code pretty_msg suffix
 
 let format_reason_highlighted marked_msg : string =
   let suffix = single_marker_highlighted marked_msg.marker in
   let pretty_arrow = background_highlighted "->" in
   let pretty_msg =
-    Markdown_lite.render (Errors.get_message_str marked_msg.message)
+    Markdown_lite.render
+      ~color:(snd marked_msg.marker)
+      (Errors.get_message_str marked_msg.message)
   in
   Printf.sprintf "%s %s %s" pretty_arrow pretty_msg suffix
 

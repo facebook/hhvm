@@ -26,7 +26,6 @@ inline void exception_handler(Action action) {
   Trace::Indent _i;
   try {
     action();
-    vmpc() = 0;
     return;
   }
 

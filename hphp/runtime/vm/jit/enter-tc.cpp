@@ -53,6 +53,7 @@ ALWAYS_INLINE void postExit() {
   assertx(isValidVMStackAddress(vmsp()));
 
   vmfp() = nullptr;
+  vmpc() = nullptr;
 }
 
 }

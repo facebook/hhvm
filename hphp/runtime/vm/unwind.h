@@ -72,8 +72,9 @@ UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
  *
  * If the exception was not handled in this nesting of the VM, it will be
  * rethrown. Otherwise, either a catch or fault handler was identified and
- * the VM state has been prepared for entry to it, or end of execution was
- * reached and vmpc() will be zero.
+ * the VM state has been prepared for entry to it, or end of execution of
+ * the action callback was reached, in which case the VM state will be left
+ * in the same state as left by the callback.
  */
 template<class Action> void exception_handler(Action action);
 

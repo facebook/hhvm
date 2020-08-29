@@ -5871,6 +5871,7 @@ TCA dispatchImpl() {
     }                                                         \
     if (instrCanHalt(Op::name) && UNLIKELY(!pc)) {            \
       vmfp() = nullptr;                                       \
+      vmpc() = nullptr;                                       \
       /* We returned from the top VM frame in this nesting level. This means
        * m_savedRip in our ActRec must have been callToExit, which should've
        * been returned by jitReturnPost(), whether or not we were called from
@@ -5914,8 +5915,7 @@ DispatchSwitch:
 #undef OPCODE_COVER_BODY
 #undef OPCODE_MAIN_BODY
 
-  assertx(retAddr == nullptr);
-  return nullptr;
+  not_reached();
 }
 
 static void dispatch() {
@@ -6025,6 +6025,7 @@ PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
   // call & indirect branch: caller will jump to address returned in rax
   if (instrCanHalt(opcode) && !pc) {
     vmfp() = nullptr;
+    vmpc() = nullptr;
     // We returned from the top VM frame in this nesting level. This means
     // m_savedRip in our ActRec must have been callToExit, which should've
     // been returned by jitReturnPost(), whether or not we were called from

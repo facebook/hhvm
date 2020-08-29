@@ -673,6 +673,14 @@ jit::TCA dispatchBB();
 void pushFrameSlots(const Func* func, int nparams = 0);
 Array getDefinedVariables(const ActRec*);
 
+/*
+ * Start a new nested instance of VM either at the beginning of a function
+ * determined by the enterFnAr frame, or at the current vmpc() location.
+ *
+ * Execution finishes by either returning, awaiting or yielding from the top
+ * level frame, in which case vmfp()/vmpc() are set to nullptr, or by throwing
+ * an exception, which callers usually process via exception_handler().
+ */
 void enterVMAtFunc(ActRec* enterFnAr, Array&& generics, bool hasInOut,
                    bool dynamicCall, bool allowDynCallNoPointer);
 void enterVMAtCurPC();

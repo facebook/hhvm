@@ -4031,6 +4031,11 @@ void in(ISS& env, const bc::ResolveClass& op) {
   }
 }
 
+void in(ISS& env, const bc::LazyClass&) {
+  // TODO: T70712990: Specialize HHBBC types for lazy classes
+  push(env, TLazyCls);
+}
+
 namespace {
 
 Context getCallContext(const ISS& env, const FCallArgs& fca) {

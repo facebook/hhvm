@@ -2487,6 +2487,12 @@ OPTBLD_INLINE void iopResolveClass(Id id) {
   }
 }
 
+OPTBLD_INLINE void iopLazyClass(Id id) {
+  auto const cname = vmfp()->unit()->lookupLitstrId(id);
+  auto const lclass = LazyClassData::create(cname);
+  vmStack().pushLazyClass(lclass);
+}
+
 OPTBLD_INLINE void iopClassGetC() {
   auto const cell = vmStack().topC();
   if (isStringType(cell->m_type)) {

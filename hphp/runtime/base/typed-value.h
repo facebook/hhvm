@@ -302,6 +302,7 @@ X(KindOfClass,        Class*);
 X(KindOfClsMeth,      ClsMethDataRef);
 X(KindOfRClsMeth,     RClsMethData*);
 X(KindOfRecord,       RecordData*);
+X(KindOfLazyClass,    LazyClassData);
 
 #undef X
 
@@ -329,6 +330,12 @@ inline Value make_value(double d) { Value v; v.dbl = d; return v; }
 inline Value make_value(ClsMethDataRef clsMeth) {
   Value v;
   v.pclsmeth = clsMeth;
+  return v;
+}
+
+inline Value make_value(LazyClassData lclass) {
+  Value v;
+  v.plazyclass = lclass;
   return v;
 }
 

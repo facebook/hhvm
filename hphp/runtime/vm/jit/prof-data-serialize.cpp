@@ -1362,7 +1362,7 @@ LazyClassData read_lclass(ProfDataDeserializer& ser) {
   ITRACE(2, "LClass>\n");
   auto const name = read_raw_string(ser);
   ITRACE(2, "LClass: {}\n", name ? name : staticEmptyString());
-  return LazyClassData(name);
+  return LazyClassData::create(name);
 }
 
 void write_record(ProfDataSerializer& ser, const RecordDesc* rec) {

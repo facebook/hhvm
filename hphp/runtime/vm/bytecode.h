@@ -367,6 +367,13 @@ public:
     *m_top = make_tv<KindOfPersistentString>(s);
   }
 
+  ALWAYS_INLINE
+  void pushLazyClass(LazyClassData l) {
+    assertx(m_top != m_elms);
+    m_top--;
+    *m_top = make_tv<KindOfLazyClass>(l);
+  }
+
   // These should only be called directly when the caller has
   // already adjusted the refcount appropriately
   ALWAYS_INLINE

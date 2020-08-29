@@ -832,7 +832,7 @@ TEST(Type, Const) {
   auto constKeyset = Type::cns(keysetData);
   EXPECT_TRUE(constKeyset < TKeyset);
 
-  auto constLazyCls = Type::cns(LazyClassData(makeStaticString("Foo")));
+  auto constLazyCls = Type::cns(LazyClassData::create(makeStaticString("Foo")));
   EXPECT_TRUE(constLazyCls < TLazyCls);
   EXPECT_TRUE(constLazyCls.hasConstVal());
   EXPECT_FALSE(TLazyCls.hasConstVal());

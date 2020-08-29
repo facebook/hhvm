@@ -31,4 +31,8 @@ const StringData* lazyClassToStringHelper(const LazyClassData& lclass) {
   }
   return lclass.name();
 }
+
+LazyClassData LazyClassData::create(const StringData* cname) {
+  return LazyClassData(cname);
+}
 }

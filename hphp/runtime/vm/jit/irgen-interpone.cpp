@@ -183,7 +183,8 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutClass: return TCls;
     case OutClsMeth: return TClsMeth;
     case OutClsMethLike: return TClsMethLike;
- }
+    case OutLazyClass: return TLazyCls;
+  }
   not_reached();
 }
 

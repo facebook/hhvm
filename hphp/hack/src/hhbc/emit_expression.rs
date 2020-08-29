@@ -3938,6 +3938,8 @@ fn emit_class_const(
             Ok(if string_utils::is_class(&id.1) {
                 if e.options().emit_class_pointers() == 1 {
                     emit_pos_then(&pos, instr::resolveclass(cid))
+                } else if e.options().emit_class_pointers() == 2 {
+                    emit_pos_then(&pos, instr::lazyclass(cid))
                 } else {
                     emit_pos_then(&pos, instr::string(cname))
                 }

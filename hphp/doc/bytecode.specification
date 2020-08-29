@@ -680,6 +680,8 @@ descriptions:
   Obj - denotes the object type
   Rec - denotes the record type
   ArrLike - denotes array, vec, dict, or keyset
+  Class - denotes class pointer type
+  LazyClass - denotes lazy class type
 
 Multiple type annotations may be combined together using the "|" symbol. For
 example, the type annotation "Int|Dbl" means that a value is either integer or
@@ -832,6 +834,7 @@ Array <scalar array id>              []  ->  [C:Arr]
 Vec <scalar vec id>                  []  ->  [C:Vec]
 Dict <scalar dict id>                []  ->  [C:Dict]
 Keyset <scalar keyset id>            []  ->  [C:Keyset]
+LazyClass <litstr id>                []  ->  [C:LazyClass]
 
   Push immediate. Pushes %1 onto the stack.
 

@@ -24,13 +24,15 @@ struct StringData;
 
 struct LazyClassData {
   LazyClassData() = default;
-  explicit LazyClassData(const StringData* name);
+
+  static LazyClassData create(const StringData* name);
 
   const StringData* name() const {
     assertx(className);
     return className;
   }
 private:
+  explicit LazyClassData(const StringData* name);
   const StringData* className;
 };
 

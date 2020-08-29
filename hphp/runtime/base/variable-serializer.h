@@ -220,6 +220,7 @@ private:
   void serializeRFunc(const RFuncData* func);
   void serializeFunc(const Func* func);
   void serializeClass(const Class* cls);
+  void serializeLazyClass(LazyClassData);
   void serializeClsMeth(ClsMethDataRef clsMeth, bool skipNestCheck = false);
   void serializeRClsMeth(RClsMethData* rclsMeth);
 

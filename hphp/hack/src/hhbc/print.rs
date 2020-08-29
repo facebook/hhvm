@@ -2188,6 +2188,10 @@ fn print_op<W: Write>(w: &mut W, op: &InstructOperator) -> Result<(), W::Error> 
             w.write("ResolveClass ")?;
             print_class_id(w, id)
         }
+        I::LazyClass(id) => {
+            w.write("LazyClass ")?;
+            print_class_id(w, id)
+        }
         I::Fatal(fatal_op) => print_fatal_op(w, fatal_op),
     }
 }

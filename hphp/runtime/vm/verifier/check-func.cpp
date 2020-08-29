@@ -1480,6 +1480,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::NewCol:
     case Op::NewPair:
     case Op::ColFromArray:
+    case Op::LazyClass:
       return true;
 
     // constants

@@ -1520,6 +1520,39 @@ void VariableSerializer::serializeClass(const Class* cls) {
   }
 }
 
+void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
+  switch (getType()) {
+    case Type::VarExport:
+    case Type::PHPOutput:
+      m_buf->append("class(");
+      write(lcls.name()->data(), lcls.name()->size());
+      m_buf->append(')');
+      break;
+    case Type::VarDump:
+    case Type::DebugDump:
+      indent();
+      m_buf->append("class(");
+      m_buf->append(lcls.name());
+      m_buf->append(")\n");
+      break;
+    case Type::PrintR:
+    case Type::DebuggerDump:
+      m_buf->append("class(");
+      m_buf->append(lcls.name());
+      m_buf->append(')');
+      break;
+    case Type::JSON:
+      write(StrNR(lazyClassToStringHelper(lcls)));
+      break;
+    case Type::Serialize:
+    case Type::Internal:
+    case Type::APCSerialize:
+    case Type::DebuggerSerialize:
+      write(StrNR(lazyClassToStringHelper(lcls)));
+      break;
+  }
+}
+
 void VariableSerializer::serializeClsMeth(
   ClsMethDataRef clsMeth, bool skipNestCheck /* = false */) {
   auto const clsName = clsMeth->getCls()->name();
@@ -1668,7 +1701,11 @@ void VariableSerializer::serializeVariant(tv_rval tv,
       assertx(!isArrayKey);
       serializeRClsMeth(val(tv).prclsmeth);
 
-    case KindOfLazyClass: // TODO (T68823429)
+    case KindOfLazyClass:
+      assertx(!isArrayKey);
+      serializeLazyClass(val(tv).plazyclass);
+      return;
+
     case KindOfRecord:
       // TODO(T41025646): implement serialization of record
       always_assert(false);

@@ -312,6 +312,7 @@ pub enum InstructOperator {
     ResolveRClsMethodD(ClassId, MethodId),
     ResolveRClsMethodS(SpecialClsRef, MethodId),
     ResolveClass(ClassId),
+    LazyClass(ClassId),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

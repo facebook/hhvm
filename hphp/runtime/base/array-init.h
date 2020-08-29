@@ -474,18 +474,12 @@ using VecInit = PackedArrayInitBase<detail::Vec, KindOfVec>;
 
 struct VArrayInit {
   explicit VArrayInit(size_t n)
-    : m_arr(RuntimeOption::EvalHackArrDVArrs
-              ? PackedArray::MakeReserveVec(n)
-              : PackedArray::MakeReserveVArray(n)
-           )
+    : m_arr(PackedArray::MakeReserveVArray(n))
 #ifndef NDEBUG
     , m_addCount(0)
     , m_expectedCount(n)
 #endif
   {
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      m_arr->setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
-    }
     assertx(m_arr->hasExactlyOneRef());
   }
 
@@ -574,19 +568,13 @@ private:
 
 struct DArrayInit {
   explicit DArrayInit(size_t n)
-    : m_arr(RuntimeOption::EvalHackArrDVArrs
-              ? MixedArray::MakeReserveDict(n)
-              : MixedArray::MakeReserveDArray(n)
-           )
+    : m_arr(MixedArray::MakeReserveDArray(n))
 #ifndef NDEBUG
     , m_addCount(0)
     , m_expectedCount(n)
 #endif
   {
     assertx(m_arr->hasExactlyOneRef());
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      m_arr->setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
-    }
   }
 
   DArrayInit(size_t, CheckAllocation);

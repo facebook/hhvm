@@ -392,6 +392,12 @@ ArrayData* PackedArray::MakeReserveImpl(uint32_t cap, HeaderKind hk) {
 }
 
 ArrayData* PackedArray::MakeReserveVArray(uint32_t capacity) {
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    auto const ad =  MakeReserveVec(capacity);
+    ad->setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
+    return ad;
+  }
+
   auto ad = MakeReserveImpl(capacity, HeaderKind::Packed);
   ad->m_sizeAndPos = 0;
   assertx(ad->isPackedKind());
@@ -461,7 +467,11 @@ ArrayData* PackedArray::MakeVec(uint32_t size, const TypedValue* values) {
 }
 
 ArrayData* PackedArray::MakeVArrayNatural(uint32_t size, const TypedValue* values) {
-  if (RuntimeOption::EvalHackArrDVArrs) return MakeVecNatural(size, values);
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    auto const ad = MakeVecNatural(size, values);
+    ad->setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
+    return ad;
+  }
 
   auto ad = MakePackedImpl<false>(size, values, HeaderKind::Packed);
   assertx(ad->isPackedKind());
@@ -835,7 +845,15 @@ ArrayData* PackedArray::Prepend(ArrayData* adIn, TypedValue v) {
 ArrayData* PackedArray::ToVArray(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(adIn->hasVanillaPackedLayout());
-  if (RuntimeOption::EvalHackArrDVArrs || adIn->isVArray()) return adIn;
+  if (adIn->isVArray()) return adIn;
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    if (RuntimeOption::EvalHackArrDVArrMark && !adIn->isLegacyArray()) {
+      auto const ad = copy ? Copy(adIn) : adIn;
+      ad->setLegacyArray(true);
+      return ad;
+    }
+    return adIn;
+  }
 
   if (adIn->getSize() == 0) return ArrayData::CreateVArray();
   auto const ad = copy ? Copy(adIn) : adIn;

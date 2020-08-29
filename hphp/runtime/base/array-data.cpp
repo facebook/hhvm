@@ -928,9 +928,11 @@ std::string describeKeyType(const TypedValue* tv) {
   case KindOfPersistentString:
   case KindOfString:           return "string";
   case KindOfPersistentVec:
-  case KindOfVec:              return "vec";
+  case KindOfVec:
+    return val(*tv).parr->isLegacyArray() ? "array" : "vec";
   case KindOfPersistentDict:
-  case KindOfDict:             return "dict";
+  case KindOfDict:
+    return val(*tv).parr->isLegacyArray() ? "array" : "dict";
   case KindOfPersistentKeyset:
   case KindOfKeyset:           return "keyset";
 
@@ -1037,7 +1039,7 @@ void throwOOBArrayKeyException(TypedValue key, const ArrayData* ad) {
   SystemLib::throwOutOfBoundsExceptionObject(
     folly::sformat(
       "Out of bounds {} access: invalid index {}",
-      getDataTypeString(ad->toDataType()).data(),
+      getDataTypeString(ad->toDataType(), ad->isLegacyArray()).data(),
       describeKeyValue(key)
     )
   );

@@ -846,6 +846,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
     // Convert unpack args to the proper type.
     if (RuntimeOption::EvalHackArrDVArrs) {
       tvCastToVecInPlace(&unpackArgs);
+      tvSetLegacyArrayInPlace(&unpackArgs, RuntimeOption::EvalHackArrDVArrs);
       stack.pushVec(unpackArgs.m_data.parr);
     } else {
       tvCastToVArrayInPlace(&unpackArgs);

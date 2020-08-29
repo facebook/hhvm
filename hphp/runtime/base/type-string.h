@@ -500,7 +500,7 @@ struct StaticString : String {
   void construct(const char* s, size_t len);
 };
 
-StaticString getDataTypeString(DataType t);
+StaticString getDataTypeString(DataType t, bool isLegacy = false);
 
 //////////////////////////////////////////////////////////////////////
 

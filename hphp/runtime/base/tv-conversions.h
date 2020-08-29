@@ -66,6 +66,7 @@ template<typename T>
 enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv);
 template<typename T>
 enable_if_lval_t<T, void> tvCastToStringInPlace(T tv);
+void tvSetLegacyArrayInPlace(tv_lval tv, bool isLegacy);
 
 /*
  * Non-in-place casts.

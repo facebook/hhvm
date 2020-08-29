@@ -392,7 +392,7 @@ const StaticString
   s_record("record"),
   s_lclass("lazy class");
 
-StaticString getDataTypeString(DataType t) {
+StaticString getDataTypeString(DataType t, bool isLegacy) {
   switch (t) {
     case KindOfUninit:
     case KindOfNull:       return s_null;
@@ -402,9 +402,9 @@ StaticString getDataTypeString(DataType t) {
     case KindOfPersistentString:
     case KindOfString:     return s_string;
     case KindOfPersistentVec:
-    case KindOfVec:        return s_vec;
+    case KindOfVec:        return isLegacy ? s_varray : s_vec;
     case KindOfPersistentDict:
-    case KindOfDict:       return s_dict;
+    case KindOfDict:       return isLegacy ? s_darray : s_dict;
     case KindOfPersistentKeyset:
     case KindOfKeyset:     return s_keyset;
     case KindOfPersistentDArray:

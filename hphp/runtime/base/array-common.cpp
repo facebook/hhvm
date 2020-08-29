@@ -168,7 +168,7 @@ ArrayData* castObjToVec(ObjectData* obj) {
   return castObjToArrayLikeImpl(
     obj,
     Array::CreateVec,
-    [](const Array& arr) { return arr.toVec(); },
+    [](Array arr) { arr.setLegacyArray(false); return arr.toVec(); },
     [](Array& arr, ArrayIter& iter) { arr.append(iter.second()); },
     "Non-iterable object to vec conversion"
   );
@@ -178,7 +178,7 @@ ArrayData* castObjToDict(ObjectData* obj) {
   return castObjToArrayLikeImpl(
     obj,
     Array::CreateDict,
-    [](const Array& arr) { return arr.toDict(); },
+    [](Array arr) { arr.setLegacyArray(false); return arr.toDict(); },
     [](Array& arr, ArrayIter& iter) { arr.set(iter.first(), iter.second()); },
     "Non-iterable object to dict conversion"
   );

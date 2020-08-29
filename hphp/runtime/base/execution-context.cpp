@@ -1451,9 +1451,27 @@ void ExecutionContext::requestExit() {
   if (m_requestTrace) record_trace(std::move(*m_requestTrace));
 }
 
+/**
+ * Enter VM by calling action(), which invokes a function or resumes
+ * an async function. The 'ar' argument points to an ActRec of the
+ * invoked/resumed function.
+ */
 template<class Action>
 static inline void enterVM(ActRec* ar, Action action) {
-  enterVMCustomHandler(ar, [&] { exception_handler(action); });
+  assertx(ar);
+  assertx(!ar->sfp());
+  assertx(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
+  assertx(ar->callOffset() == 0);
+
+  vmFirstAR() = ar;
+  vmJitCalledFrame() = nullptr;
+  vmJitReturnAddr() = 0;
+
+  action();
+
+  while (vmpc()) {
+    exception_handler(enterVMAtCurPC);
+  }
 }
 
 /*
@@ -1515,7 +1533,9 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
     popVMState();
   };
 
-  enterVM(ar, [&] { doEnterVM(ar); });
+  enterVM(ar, [&] {
+    exception_handler([&] { doEnterVM(ar); });
+  });
 
   if (UNLIKELY(f->takesInOutParams())) {
     // This is OK (albeit ugly) since the return value should only be readable
@@ -1535,29 +1555,6 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
     auto const retval = *vmStack().topTV();
     vmStack().discard();
     return retval;
-  }
-}
-
-/**
- * Enter VM by calling action(), which invokes a function or resumes
- * an async function. The 'ar' argument points to an ActRec of the
- * invoked/resumed function.
- */
-template<class Action>
-static inline void enterVMCustomHandler(ActRec* ar, Action action) {
-  assertx(ar);
-  assertx(!ar->sfp());
-  assertx(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
-  assertx(ar->callOffset() == 0);
-
-  vmFirstAR() = ar;
-  vmJitCalledFrame() = nullptr;
-  vmJitReturnAddr() = 0;
-
-  action();
-
-  while (vmpc()) {
-    exception_handler(enterVMAtCurPC);
   }
 }
 
@@ -1720,15 +1717,17 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
   SCOPE_EXIT { popVMState(); };
 
   enterVM(fp, [&] {
-    prepareAsyncFuncEntry(fp, resumable, false);
+    exception_handler([&] {
+      prepareAsyncFuncEntry(fp, resumable, false);
 
-    const bool useJit = RID().getJit();
-    if (LIKELY(useJit && resumable->resumeAddr())) {
-      Stats::inc(Stats::VMEnter);
-      jit::enterTC(resumable->resumeAddr());
-    } else {
-      enterVMAtCurPC();
-    }
+      const bool useJit = RID().getJit();
+      if (LIKELY(useJit && resumable->resumeAddr())) {
+        Stats::inc(Stats::VMEnter);
+        jit::enterTC(resumable->resumeAddr());
+      } else {
+        enterVMAtCurPC();
+      }
+    });
   });
 }
 
@@ -1759,7 +1758,7 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
   pushVMState(vmStack().top());
   SCOPE_EXIT { popVMState(); };
 
-  enterVMCustomHandler(fp, [&] {
+  enterVM(fp, [&] {
     prepareAsyncFuncEntry(fp, resumable, true);
     unwindVM(exception);
     e.reset();

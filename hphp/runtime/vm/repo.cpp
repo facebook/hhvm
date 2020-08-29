@@ -288,6 +288,7 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
 
     RuntimeOption::EvalIsCompatibleClsMethType =
       s_globalData.IsCompatibleClsMethType;
+    RuntimeOption::EvalEmitClassPointers = s_globalData.EmitClassPointers;
     RuntimeOption::EvalEmitClsMethPointers = s_globalData.EmitClsMethPointers;
     RO::EvalForbidDynamicCallsWithAttr =
       s_globalData.ForbidDynamicCallsWithAttr;

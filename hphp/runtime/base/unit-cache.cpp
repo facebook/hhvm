@@ -1064,6 +1064,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalWidenIsArray ? '1' : '0')
     + (RuntimeOption::EvalWidenIsArrayLogs ? '1' : '0')
     + std::to_string(RuntimeOption::EvalAssemblerMaxScalarSize)
+    + std::to_string(RuntimeOption::EvalEmitClassPointers)
     + opts.cacheKeyRaw()
     + mangleExtension(fileName)
     + mangleUnitPHP7Options()

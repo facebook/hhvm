@@ -645,20 +645,29 @@ inline const Class* lookupUniqueClass(IRGS& env,
     name, curClass(env), trustUnit ? curUnit(env) : nullptr);
 }
 
-inline SSATmp* ldCls(IRGS& env, SSATmp* className, Block* ctrace = nullptr) {
-  assertx(className->isA(TStr));
-  if (className->hasConstVal()) {
-    if (auto const cls = lookupUniqueClass(env, className->strVal())) {
+inline SSATmp* ldCls(IRGS& env,
+                     SSATmp* lazyClassOrName,
+                     Block* ctrace = nullptr) {
+  auto const isLazy = lazyClassOrName->isA(TLazyCls);
+  assertx(lazyClassOrName->isA(TStr) || isLazy);
+  if (lazyClassOrName->hasConstVal()) {
+    auto const cnameStr = isLazy ? lazyClassOrName->lclsVal().name() :
+                                   lazyClassOrName->strVal();
+    if (auto const cls = lookupUniqueClass(env, cnameStr)) {
       if (!classIsPersistentOrCtxParent(env, cls)) {
-        gen(env, LdClsCached, ctrace, className);
+        auto const clsName = isLazy ? cns(env, cnameStr) : lazyClassOrName;
+        gen(env, LdClsCached, ctrace, clsName);
       }
       return cns(env, cls);
     }
-    return gen(env, LdClsCached, ctrace, className);
+    auto const clsName = isLazy ? cns(env, cnameStr) : lazyClassOrName;
+    return gen(env, LdClsCached, ctrace, clsName);
   }
   auto const ctxClass = curClass(env);
   auto const ctxTmp = ctxClass ? cns(env, ctxClass) : cns(env, nullptr);
-  return gen(env, LdCls, ctrace, className, ctxTmp);
+  auto const clsName =
+    isLazy ? gen(env, LdLazyClsName, lazyClassOrName) : lazyClassOrName;
+  return gen(env, LdCls, ctrace, clsName, ctxTmp);
 }
 
 //////////////////////////////////////////////////////////////////////

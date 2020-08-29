@@ -50,6 +50,7 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(AbortBuildOnVerifyError);
   SHOW(EnableArgsInBacktraces);
   SHOW(Signature);
+  SHOW(EmitClassPointers);
   SHOW(EmitClsMethPointers);
   SHOW(IsVecNotices);
   SHOW(IsCompatibleClsMethType);

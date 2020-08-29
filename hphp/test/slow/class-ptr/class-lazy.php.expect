@@ -1,6 +1,0 @@
-class(Bar)
-vec(2) {
-  class(Bar)
-  class(Fizz)
-}
-class(Foo)

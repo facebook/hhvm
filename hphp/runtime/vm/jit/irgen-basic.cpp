@@ -41,7 +41,7 @@ const StaticString s_new_instance_of_not_string(
 
 void emitClassGetC(IRGS& env) {
   auto const name = topC(env);
-  if (!name->type().subtypeOfAny(TObj, TCls, TStr)) {
+  if (!name->type().subtypeOfAny(TObj, TCls, TStr, TLazyCls)) {
     interpOne(env);
     return;
   }
@@ -58,7 +58,9 @@ void emitClassGetC(IRGS& env) {
     return;
   }
 
-  if (!name->hasConstVal() && RO::EvalRaiseStrToClsConversionWarning) {
+  if (name->isA(TStr) &&
+      !name->hasConstVal() &&
+      RO::EvalRaiseStrToClsConversionWarning) {
     gen(env, RaiseStrToClassNotice, name);
   }
 

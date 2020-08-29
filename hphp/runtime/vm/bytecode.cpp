@@ -1130,10 +1130,12 @@ static inline void lookup_sprop(ActRec* fp,
 
 static inline Class* lookupClsRef(TypedValue* input) {
   Class* class_ = nullptr;
-  if (isStringType(input->m_type)) {
-    class_ = Unit::loadClass(input->m_data.pstr);
+  if (isStringType(input->m_type) || isLazyClassType(input->m_type)) {
+    auto const cname = isStringType(input->m_type) ?
+      input->m_data.pstr : input->m_data.plazyclass.name();
+    class_ = Unit::loadClass(cname);
     if (class_ == nullptr) {
-      raise_error(Strings::UNKNOWN_CLASS, input->m_data.pstr->data());
+      raise_error(Strings::UNKNOWN_CLASS, cname->data());
     }
   } else if (input->m_type == KindOfObject) {
     class_ = input->m_data.pobj->getVMClass();

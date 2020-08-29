@@ -669,6 +669,9 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
                     escapeStringForCPP(tv->m_data.pstr->data(),
                                        tv->m_data.pstr->size()));
       return;
+    case KindOfLazyClass:
+      out += tv->m_data.plazyclass.name()->data();
+      return;
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
@@ -688,7 +691,6 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
-    case KindOfLazyClass:
     case KindOfRecord:
       break;
   }

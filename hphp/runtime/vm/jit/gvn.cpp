@@ -292,6 +292,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdClsPropAddrOrRaise:
   case LdObjClass:
   case LdClsName:
+  case LdLazyClsName:
   case LdARNumParams:
   case Mov:
   case LdContActRec:

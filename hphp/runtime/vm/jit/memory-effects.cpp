@@ -1593,6 +1593,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvPtrToLval:
   case ProfileProp:
   case ProfileIsTypeStruct:
+  case LdLazyClsName:
     return IrrelevantEffects {};
 
   case StClosureArg:

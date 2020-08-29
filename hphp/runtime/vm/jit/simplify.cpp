@@ -3151,6 +3151,12 @@ SSATmp* simplifyLdClsName(State& env, const IRInstruction* inst) {
   return src->hasConstVal(TCls) ? cns(env, src->clsVal()->name()) : nullptr;
 }
 
+SSATmp* simplifyLdLazyClsName(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  return src->hasConstVal(TLazyCls) ?
+    cns(env, src->lclsVal().name()) : nullptr;
+}
+
 SSATmp* simplifyLookupClsRDS(State& /*env*/, const IRInstruction* inst) {
   auto const name = inst->src(0);
   if (name->inst()->is(LdClsName)) {
@@ -3551,6 +3557,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(HasReifiedGenerics)
   X(LdCls)
   X(LdClsName)
+  X(LdLazyClsName)
   X(LdWHResult)
   X(LdWHState)
   X(LdWHNotDone)

@@ -305,6 +305,7 @@ std::vector<SString> load_input(F&& fun) {
   RO::EvalHackArrDVArrs = gd.HackArrDVArrs;
   RO::EvalAbortBuildOnVerifyError = gd.AbortBuildOnVerifyError;
   RO::EnableArgsInBacktraces = gd.EnableArgsInBacktraces;
+  RO::EvalEmitClassPointers = gd.EmitClassPointers;
   RO::EvalEmitClsMethPointers = gd.EmitClsMethPointers;
   RO::EvalIsVecNotices = gd.IsVecNotices;
   RO::EvalIsCompatibleClsMethType = gd.IsCompatibleClsMethType;
@@ -411,6 +412,7 @@ void write_global_data(
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =
     RuntimeOption::EvalInitialStaticStringTableSize;
+  gd.EmitClassPointers = RuntimeOption::EvalEmitClassPointers;
   gd.EmitClsMethPointers = RuntimeOption::EvalEmitClsMethPointers;
   gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
   gd.IsCompatibleClsMethType = RuntimeOption::EvalIsCompatibleClsMethType;

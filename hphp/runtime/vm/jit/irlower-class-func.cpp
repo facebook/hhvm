@@ -55,6 +55,13 @@ void cgLdClsName(IRLS& env, const IRInstruction* inst) {
                dst, sizeof(LowStringPtr));
 }
 
+void cgLdLazyClsName(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const lazyClsData = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << copy{lazyClsData, dst};
+}
+
 IMPL_OPCODE_CALL(MethodExists)
 
 void cgLdClsMethod(IRLS& env, const IRInstruction* inst) {

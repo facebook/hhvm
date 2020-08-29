@@ -761,6 +761,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsMethodCacheFunc:
   case LdClsMethodFCacheFunc:
   case LdClsName:
+  case LdLazyClsName:
   case LdCns:
   case LdColDict:
   case LdColVec:

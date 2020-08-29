@@ -22,6 +22,17 @@ let rec hint env (p, h) =
 and shape_field_info_to_shape_field_type env { sfi_optional; sfi_hint; _ } =
   { sft_optional = sfi_optional; sft_ty = hint env sfi_hint }
 
+and aast_user_attribute_to_decl_user_attribute { ua_name; ua_params } =
+  {
+    Typing_defs.ua_name;
+    ua_classname_params =
+      List.filter_map ua_params ~f:(function
+          | (_, Class_const ((_, CI (_, cls)), (_, name)))
+            when String.equal name SN.Members.mClass ->
+            Some cls
+          | _ -> None);
+  }
+
 and aast_tparam_to_decl_tparam env t =
   {
     tp_variance = t.Aast.tp_variance;
@@ -31,7 +42,10 @@ and aast_tparam_to_decl_tparam env t =
     tp_constraints =
       List.map ~f:(Tuple.T2.map_snd ~f:(hint env)) t.Aast.tp_constraints;
     tp_reified = t.Aast.tp_reified;
-    tp_user_attributes = t.Aast.tp_user_attributes;
+    tp_user_attributes =
+      List.map
+        ~f:aast_user_attribute_to_decl_user_attribute
+        t.Aast.tp_user_attributes;
   }
 
 and hint_ p env = function

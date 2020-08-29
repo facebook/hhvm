@@ -95,7 +95,7 @@ type shallow_class = {
   sc_constructor: shallow_method option;
   sc_static_methods: shallow_method list;
   sc_methods: shallow_method list;
-  sc_user_attributes: Nast.user_attribute list;
+  sc_user_attributes: user_attribute list;
   sc_enum_type: enum_type option;
   sc_decl_errors: Errors.t; [@opaque]
 }

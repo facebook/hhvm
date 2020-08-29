@@ -512,7 +512,7 @@ let get_reactivity_from_user_attributes user_attributes =
   let rec go attrs =
     match attrs with
     | [] -> None
-    | { ua_name = (_, n); _ } :: tl ->
+    | { Aast.ua_name = (_, n); _ } :: tl ->
       if String.equal n UA.uaPure then
         Some (Pure None)
       else if String.equal n UA.uaReactive then
@@ -748,7 +748,7 @@ let check_redundant_rx_condition env pos r =
 
 let error_on_attr env attrs attr f =
   let find x xs =
-    List.find xs (fun { ua_name; _ } -> String.equal x (snd ua_name))
+    List.find xs (fun { Aast.ua_name; _ } -> String.equal x (snd ua_name))
   in
   if not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env)) then
     match find attr attrs with

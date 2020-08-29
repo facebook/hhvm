@@ -110,10 +110,10 @@ module Simple = struct
       decl_tparam
     in
     let enforceable =
-      Naming_attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes
+      Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes
     in
     let newable =
-      Naming_attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
+      Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
     in
     let (st, _) = fully_applied_type ~reified ~enforceable ~newable () in
     ( tp_name,

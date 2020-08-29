@@ -6545,10 +6545,10 @@ and generate_fresh_tparams env class_info reason hint_tyl =
       tp
     in
     let enforceable =
-      Naming_attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes
+      Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes
     in
     let newable =
-      Naming_attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
+      Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
     in
     match hint_ty with
     | Some ty ->

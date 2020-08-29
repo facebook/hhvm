@@ -107,21 +107,6 @@ struct
     | Rglobal_fun_param p -> Rglobal_fun_param (pos p)
     | Rglobal_fun_ret p -> Rglobal_fun_ret (pos p)
 
-  let pos_mapper =
-    object
-      inherit [_] Aast.map
-
-      method! on_pos _ p = pos p
-
-      method on_'fb _ fb = fb
-
-      method on_'en _ en = en
-
-      method on_'ex _ ex = pos ex
-
-      method on_'hi _ hi = hi
-    end
-
   let rec ty t =
     let (p, x) = deref t in
     mk (reason p, ty_ x)
@@ -265,11 +250,8 @@ struct
       tpu_members = SMap.map pu_enum_member pu.tpu_members;
     }
 
-  and user_attribute ua =
-    {
-      Aast.ua_name = string_id ua.Aast.ua_name;
-      ua_params = List.map ~f:(pos_mapper#on_expr ()) ua.Aast.ua_params;
-    }
+  and user_attribute { ua_name; ua_classname_params } =
+    { ua_name = string_id ua_name; ua_classname_params }
 
   and type_param t =
     {

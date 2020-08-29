@@ -22,7 +22,7 @@ open Typing_defs
 open Typing_deps
 module Reason = Typing_reason
 module Inst = Decl_instantiate
-module Attrs = Naming_attributes
+module Attrs = Typing_defs.Attributes
 module SN = Naming_special_names
 
 let tracked_names : FileInfo.names option ref = ref None
@@ -736,17 +736,9 @@ and class_decl
   tc
 
 and get_sealed_whitelist (c : Shallow_decl_defs.shallow_class) : SSet.t option =
-  match Attrs.find SN.UserAttributes.uaSealed c.sc_user_attributes with
+  match Attributes.find SN.UserAttributes.uaSealed c.sc_user_attributes with
   | None -> None
-  | Some { ua_params = params; _ } ->
-    let add_class_name names param =
-      match param with
-      | (_, Class_const ((_, CI cls), (_, name)))
-        when String.equal name SN.Members.mClass ->
-        SSet.add (snd cls) names
-      | _ -> names
-    in
-    Some (List.fold_left params ~f:add_class_name ~init:SSet.empty)
+  | Some { ua_classname_params; _ } -> Some (SSet.of_list ua_classname_params)
 
 and get_implements (env : Decl_env.env) (ht : Typing_defs.decl_ty) :
     Typing_defs.decl_ty SMap.t =

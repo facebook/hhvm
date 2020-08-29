@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8c3886dee669029a8f6ae8956ca5bdb5>>
+// @generated SignedSource<<5c84e03ffae8d17eb8b0dfe02b4be01d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -187,7 +187,7 @@ pub struct ShallowClass<'a> {
     pub constructor: Option<ShallowMethod<'a>>,
     pub static_methods: &'a [ShallowMethod<'a>],
     pub methods: &'a [ShallowMethod<'a>],
-    pub user_attributes: &'a [nast::UserAttribute<'a>],
+    pub user_attributes: &'a [UserAttribute<'a>],
     pub enum_type: Option<EnumType<'a>>,
     pub decl_errors: errors::Errors<'a>,
 }

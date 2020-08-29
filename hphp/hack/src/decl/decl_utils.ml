@@ -121,7 +121,7 @@ let consistent_construct_kind cls =
       FinalClass
     else
       let consistent_attr_present =
-        Naming_attributes.mem
+        Attributes.mem
           SN.UserAttributes.uaConsistentConstruct
           cls.sc_user_attributes
       in

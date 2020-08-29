@@ -11,8 +11,11 @@ Parsed decls:
       sc_pu_enums = []; sc_props = []; sc_sprops = []; sc_constructor = None;
       sc_static_methods = []; sc_methods = [];
       sc_user_attributes =
-      [{ ua_name = ([10:10-15], "\\X\\Y\\Bar"); ua_params = [] };
-        { ua_name = ([10:5-8], "\\X\\Foo"); ua_params = [] }];
+      [{ Typing_defs_core.ua_name = ([10:10-15], "\\X\\Y\\Bar");
+         ua_classname_params = [] };
+        { Typing_defs_core.ua_name = ([10:5-8], "\\X\\Foo");
+          ua_classname_params = [] }
+        ];
       sc_enum_type = None; sc_decl_errors = <opaque> };
     "\\X\\Foo" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;

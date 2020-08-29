@@ -11,7 +11,7 @@ open Hh_prelude
 open Decl_inheritance
 open Shallow_decl_defs
 open Typing_defs
-module Attrs = Naming_attributes
+module Attrs = Typing_defs.Attributes
 module LSTable = Lazy_string_table
 module SN = Naming_special_names
 
@@ -253,18 +253,10 @@ module Api = struct
   let sealed_whitelist t =
     Counters.count_decl_accessor @@ fun () ->
     let get_sealed_whitelist sc =
-      let open Aast in
       match Attrs.find SN.UserAttributes.uaSealed sc.sc_user_attributes with
       | None -> None
-      | Some { ua_params; _ } ->
-        let add_class_name names param =
-          match param with
-          | (_, Class_const ((_, CI (_, cls)), (_, name)))
-            when String.equal name SN.Members.mClass ->
-            SSet.add cls names
-          | _ -> names
-        in
-        Some (List.fold_left ua_params ~f:add_class_name ~init:SSet.empty)
+      | Some { ua_classname_params; _ } ->
+        Some (SSet.of_list ua_classname_params)
     in
     match t with
     | Lazy lc -> get_sealed_whitelist lc.sc

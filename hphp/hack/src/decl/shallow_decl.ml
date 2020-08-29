@@ -347,7 +347,10 @@ let class_ env c =
     sc_constructor = Option.map ~f:(method_ env c) constructor;
     sc_static_methods = List.map ~f:(method_ env c) statics;
     sc_methods = List.map ~f:(method_ env c) rest;
-    sc_user_attributes = c.c_user_attributes;
+    sc_user_attributes =
+      List.map
+        c.c_user_attributes
+        ~f:Decl_hint.aast_user_attribute_to_decl_user_attribute;
     sc_enum_type = Option.map c.c_enum (enum_type hint);
     sc_decl_errors = Errors.empty;
   }

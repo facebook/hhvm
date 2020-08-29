@@ -145,14 +145,14 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         &self,
         node: Node<'a>,
         mut f: impl FnMut(Node<'a>) -> Option<T>,
-    ) -> Option<&'a [T]> {
+    ) -> &'a [T] {
         let mut result = Vec::with_capacity_in(node.len(), self.state.arena);
         for node in node.iter() {
             if let Some(mapped) = f(*node) {
                 result.push(mapped)
             }
         }
-        Some(result.into_bump_slice())
+        result.into_bump_slice()
     }
 
     fn slice_from_iter<T>(&self, iter: impl Iterator<Item = T>) -> &'a [T] {
@@ -580,6 +580,13 @@ pub struct ShapeFieldNode<'a> {
     type_: &'a ShapeFieldType<'a>,
 }
 
+#[derive(Clone, Debug)]
+pub struct UserAttributeNode<'a> {
+    name: Id<'a>,
+    classname_params: &'a [Id<'a>],
+    string_literal_params: &'a [&'a BStr], // this is only used for __Deprecated attribute message
+}
+
 #[derive(Copy, Clone, Debug)]
 pub enum Node<'a> {
     Ignored,
@@ -602,7 +609,7 @@ pub enum Node<'a> {
     ListItem(&'a (Node<'a>, Node<'a>)),
     Const(&'a ShallowClassConst<'a>),
     FunParam(&'a FunParamDecl<'a>),
-    Attribute(&'a nast::UserAttribute<'a>),
+    Attribute(&'a UserAttributeNode<'a>),
     FunctionHeader(&'a FunctionHeader<'a>),
     Constructor(&'a ConstructorNode<'a>),
     Method(&'a MethodNode<'a>),
@@ -834,20 +841,14 @@ impl<'a> Node<'a> {
             match attribute {
                 // If we see the attribute `__OnlyRxIfImpl(Foo::class)`, set
                 // `reactivity_condition_type` to `Foo`.
-                Node::Attribute(nast::UserAttribute {
+                Node::Attribute(UserAttributeNode {
                     name: Id(_, "__OnlyRxIfImpl"),
-                    params:
-                        [aast::Expr(
-                            pos,
-                            aast::Expr_::ClassConst((
-                                aast::ClassId(_, aast::ClassId_::CI(class_name)),
-                                (_, "class"),
-                            )),
-                        )],
+                    classname_params: &[class_name],
+                    ..
                 }) => {
                     reactivity_condition_type = Some(Ty(
-                        arena.alloc(Reason::hint(*pos)),
-                        arena.alloc(Ty_::Tapply(arena.alloc((*class_name, &[][..])))),
+                        arena.alloc(Reason::hint(class_name.0)),
+                        arena.alloc(Ty_::Tapply(arena.alloc((class_name, &[][..])))),
                     ));
                 }
                 _ => (),
@@ -886,32 +887,10 @@ impl<'a> Node<'a> {
                     "__MutableReturn" => attributes.returns_mutable = true,
                     "__ReturnsVoidToRx" => attributes.returns_void_to_rx = true,
                     "__Deprecated" => {
-                        fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut Vec<'a, u8>) {
-                            match expr {
-                                &aast::Expr(_, aast::Expr_::String(val)) => {
-                                    acc.extend_from_slice(val)
-                                }
-                                &aast::Expr(_, aast::Expr_::Binop(&(Bop::Dot, e1, e2))) => {
-                                    fold_string_concat(&e1, acc);
-                                    fold_string_concat(&e2, acc);
-                                }
-                                _ => (),
-                            }
-                        }
                         attributes.deprecated = attribute
-                            .params
+                            .string_literal_params
                             .first()
-                            .and_then(|expr| match expr {
-                                &aast::Expr(_, aast::Expr_::String(val)) => Some(val.as_ref()),
-                                &aast::Expr(_, aast::Expr_::Binop(_)) => {
-                                    let mut acc = Vec::new_in(arena);
-                                    fold_string_concat(expr, &mut acc);
-                                    let bytes = acc.into_bump_slice();
-                                    Some(bytes)
-                                }
-                                _ => None,
-                            })
-                            .map(|bytes| str_from_utf8(arena, bytes))
+                            .map(|&x| str_from_utf8(arena, x));
                     }
                     "__Reifiable" => attributes.reifiable = Some(attribute.name.0),
                     "__LateInit" => {
@@ -1656,6 +1635,16 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             _ => return None,
         }
     }
+
+    fn user_attribute_to_decl(
+        &self,
+        attr: &UserAttributeNode<'a>,
+    ) -> shallow_decl_defs::UserAttribute<'a> {
+        shallow_decl_defs::UserAttribute {
+            name: attr.name,
+            classname_params: self.slice_from_iter(attr.classname_params.iter().map(|Id(_, s)| *s)),
+        }
+    }
 }
 
 enum NodeIterHelper<'a: 'b, 'b> {
@@ -2385,12 +2374,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         tparam_params: Self::R,
         constraints: Self::R,
     ) -> Self::R {
-        let constraints =
-            unwrap_or_return!(self.filter_map_to_slice(constraints, |node| match node {
-                Node::TypeConstraint(&constraint) => Some(constraint),
-                n if n.is_ignored() => None,
-                n => panic!("Expected a type constraint, but was {:?}", n),
-            }));
+        let constraints = self.filter_map_to_slice(constraints, |node| match node {
+            Node::TypeConstraint(&constraint) => Some(constraint),
+            n if n.is_ignored() => None,
+            n => panic!("Expected a type constraint, but was {:?}", n),
+        });
 
         // TODO(T70068435) Once we add support for constraints on higher-kinded types
         // (in particular, constraints on nested type parameters), we need to ensure
@@ -2777,7 +2765,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             }
         }
 
-        let attributes = attributes;
         let where_constraints =
             self.slice_from_iter(where_clause.iter().copied().filter_map(|x| match x {
                 Node::WhereConstraint(x) => Some(shallow_decl_defs::WhereConstraint(x.0, x.1, x.2)),
@@ -2862,7 +2849,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let mut user_attributes = Vec::with_capacity_in(user_attributes_len, self.state.arena);
         for attribute in attributes.iter() {
             match attribute {
-                &Node::Attribute(&attr) => user_attributes.push(attr),
+                Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(&attr)),
                 _ => (),
             }
         }
@@ -2940,12 +2927,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let methods = methods.into_bump_slice();
         let user_attributes = user_attributes.into_bump_slice();
 
-        let extends =
-            unwrap_or_return!(self.filter_map_to_slice(extends, |node| { self.node_to_ty(node) }));
+        let extends = self.filter_map_to_slice(extends, |node| self.node_to_ty(node));
 
-        let implements = unwrap_or_return!(
-            self.filter_map_to_slice(implements, |node| { self.node_to_ty(node) })
-        );
+        let implements = self.filter_map_to_slice(implements, |node| self.node_to_ty(node));
 
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(tparams);
@@ -3265,7 +3249,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let mut user_attributes = Vec::with_capacity_in(attributes.len(), self.state.arena);
         for attribute in attributes.iter() {
             match attribute {
-                &Node::Attribute(&attr) => user_attributes.push(attr),
+                Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
                 _ => (),
             }
         }
@@ -3617,9 +3601,46 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         } else {
             unwrap_or_return!(self.get_name(self.state.namespace_builder.current_namespace(), name))
         };
-        Node::Attribute(self.alloc(nast::UserAttribute {
+        let classname_params = self.filter_map_to_slice(args, |node| match node {
+            Node::Expr(aast::Expr(
+                _,
+                aast::Expr_::ClassConst(&(
+                    aast::ClassId(_, aast::ClassId_::CI(class_name)),
+                    (_, "class"),
+                )),
+            )) => Some(class_name),
+            _ => None,
+        });
+
+        let string_literal_params = if name.1 == "__Deprecated" {
+            fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut Vec<'a, u8>) {
+                match expr {
+                    &aast::Expr(_, aast::Expr_::String(val)) => acc.extend_from_slice(val),
+                    &aast::Expr(_, aast::Expr_::Binop(&(Bop::Dot, e1, e2))) => {
+                        fold_string_concat(&e1, acc);
+                        fold_string_concat(&e2, acc);
+                    }
+                    _ => (),
+                }
+            }
+
+            self.filter_map_to_slice(args, |expr| match expr {
+                Node::StringLiteral((x, _)) => Some(*x),
+                Node::Expr(e @ aast::Expr(_, aast::Expr_::Binop(_))) => {
+                    let mut acc = Vec::new_in(self.state.arena);
+                    fold_string_concat(e, &mut acc);
+                    Some(acc.into_bump_slice().into())
+                }
+                _ => None,
+            })
+        } else {
+            &[]
+        };
+
+        Node::Attribute(self.alloc(UserAttributeNode {
             name,
-            params: unwrap_or_return!(self.map_to_slice(args, |node| self.node_to_expr(node))),
+            classname_params,
+            string_literal_params,
         }))
     }
 
@@ -3898,7 +3919,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         match attributes {
             Node::BracketedList((
                 ltlt_pos,
-                [Node::Attribute(nast::UserAttribute {
+                [Node::Attribute(UserAttributeNode {
                     name: Id(_, "__Soft"),
                     ..
                 })],

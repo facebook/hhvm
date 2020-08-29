@@ -23,9 +23,7 @@ let ft_redundant_tparams env root tparams tpenv ty =
       if
         equal_reify_kind t.tp_reified Erased
         && not
-             (Naming_attributes.mem
-                SN.UserAttributes.uaExplicit
-                t.tp_user_attributes)
+             (Attributes.mem SN.UserAttributes.uaExplicit t.tp_user_attributes)
       then
         let super_bounds =
           List.filter

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2e606c8ae9da5f26610e199bd76b47be>>
+// @generated SignedSource<<50d6b80daaf73b46ec00748f701fc649>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -285,13 +285,31 @@ impl TrivialDrop for DestructureKind {}
     Serialize,
     ToOcamlRep
 )]
+pub struct UserAttribute<'a> {
+    pub name: aast::Sid<'a>,
+    pub classname_params: &'a [&'a str],
+}
+impl<'a> TrivialDrop for UserAttribute<'a> {}
+
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 pub struct Tparam<'a> {
     pub variance: oxidized::ast_defs::Variance,
     pub name: ast_defs::Id<'a>,
     pub tparams: &'a [Tparam<'a>],
     pub constraints: &'a [(oxidized::ast_defs::ConstraintKind, Ty<'a>)],
     pub reified: oxidized::aast::ReifyKind,
-    pub user_attributes: &'a [nast::UserAttribute<'a>],
+    pub user_attributes: &'a [UserAttribute<'a>],
 }
 impl<'a> TrivialDrop for Tparam<'a> {}
 

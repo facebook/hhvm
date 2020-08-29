@@ -214,7 +214,7 @@ let remove_consistent_construct_attribute sc =
       List.filter sc.sc_user_attributes ~f:(fun ua ->
           not
             (String.equal
-               (snd ua.Aast.ua_name)
+               (snd ua.Typing_defs.ua_name)
                SN.UserAttributes.uaConsistentConstruct));
   }
 

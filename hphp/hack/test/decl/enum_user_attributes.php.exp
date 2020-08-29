@@ -29,9 +29,10 @@ Parsed decls:
       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
       sc_user_attributes =
-      [{ ua_name = ([3:18-21], "\\Bar"); ua_params = [] };
-        { ua_name = ([3:3-6], "\\Foo");
-          ua_params = [([3:7-10], (String "a")); ([3:12-15], (String "b"))] }
+      [{ Typing_defs_core.ua_name = ([3:18-21], "\\Bar");
+         ua_classname_params = [] };
+        { Typing_defs_core.ua_name = ([3:3-6], "\\Foo");
+          ua_classname_params = [] }
         ];
       sc_enum_type =
       (Some { te_base =

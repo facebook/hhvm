@@ -305,10 +305,10 @@ let add_generic_parameters tpenv tparaml =
   let rec make_param_info ast_tparam =
     let { tp_user_attributes; tp_tparams; _ } = ast_tparam in
     let enforceable =
-      Naming_attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes
+      Attributes.mem SN.UserAttributes.uaEnforceable tp_user_attributes
     in
     let newable =
-      Naming_attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
+      Attributes.mem SN.UserAttributes.uaNewable tp_user_attributes
     in
     let nested_params =
       List.map tp_tparams ~f:(fun tp -> (tp.tp_name, make_param_info tp))

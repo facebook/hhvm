@@ -127,9 +127,7 @@ let is_wildcard (_, hint) =
  * where Tf does not exist at runtime.
  *)
 let verify_targ_valid env reification tparam ((_, hint) as targ) =
-  if
-    Naming_attributes.mem UA.uaExplicit tparam.tp_user_attributes
-    && is_wildcard targ
+  if Attributes.mem UA.uaExplicit tparam.tp_user_attributes && is_wildcard targ
   then
     Errors.require_generic_explicit tparam.tp_name (fst hint);
 
@@ -144,13 +142,13 @@ let verify_targ_valid env reification tparam ((_, hint) as targ) =
       validator#validate_hint env (snd targ) ~reification emit_error
     | Nast.Erased -> () );
 
-  if Naming_attributes.mem UA.uaEnforceable tparam.tp_user_attributes then
+  if Attributes.mem UA.uaEnforceable tparam.tp_user_attributes then
     Enforceable_hint_check.validator#validate_hint
       env
       (snd targ)
       (Errors.invalid_enforceable_type "parameter" tparam.tp_name);
 
-  if Naming_attributes.mem UA.uaNewable tparam.tp_user_attributes then
+  if Attributes.mem UA.uaNewable tparam.tp_user_attributes then
     valid_newable_hint env tparam.tp_name (snd targ)
 
 let verify_call_targs env expr_pos decl_pos tparams targs =
@@ -267,7 +265,7 @@ let handler =
       | _ -> ()
 
     method! at_tparam env tparam =
-      (* Can't use Naming_attributes.mem here because of a conflict between Nast.user_attributes and Tast.user_attributes *)
+      (* Can't use Attributes.mem here because of a conflict between Nast.user_attributes and Tast.user_attributes *)
       if
         List.exists tparam.tp_user_attributes (fun { ua_name; _ } ->
             String.equal UA.uaNewable (snd ua_name))

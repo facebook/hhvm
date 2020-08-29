@@ -29,7 +29,7 @@ Parsed decls:
                (make_ft_flags sync none ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive =
-               Reactive {(Rhint (root|only_rx_if_impl_method.php line 6, characters 26-35),
+               Reactive {(Rhint (root|only_rx_if_impl_method.php line 6, characters 26-28),
                           (Tapply (([6:26-29], "\\IRx"), [])))}
                }));
          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }

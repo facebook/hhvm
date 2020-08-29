@@ -985,7 +985,7 @@ let equal_decl_tparam tp1 tp2 =
        tp2.tp_constraints
   && Aast.equal_reify_kind tp1.tp_reified tp2.tp_reified
   && List.equal
-       ~equal:Nast.equal_user_attribute
+       ~equal:equal_user_attribute
        tp1.tp_user_attributes
        tp2.tp_user_attributes
 
@@ -1087,3 +1087,11 @@ let make_ce_flags
   elsewhere. *)
 let error_Tunapplied_alias_in_illegal_context () =
   failwith "Found Tunapplied_alias in a context where it must not occur"
+
+module Attributes = struct
+  let mem x xs =
+    List.exists xs (fun { ua_name; _ } -> String.equal x (snd ua_name))
+
+  let find x xs =
+    List.find xs (fun { ua_name; _ } -> String.equal x (snd ua_name))
+end

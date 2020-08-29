@@ -1759,7 +1759,14 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
   SCOPE_EXIT { popVMState(); };
 
   enterVM(fp, [&] {
-    prepareAsyncFuncEntry(fp, resumable, true);
+    DEBUG_ONLY auto const success = exception_handler([&] {
+      prepareAsyncFuncEntry(fp, resumable, true);
+    });
+    // Function entry may fail only with a C++ exception thrown by the event
+    // hook, which would be rethrown by the exception_handler() after unwinding
+    // the current frame.
+    assertx(success);
+
     unwindVM(exception);
     e.reset();
   });

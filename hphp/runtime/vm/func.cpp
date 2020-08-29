@@ -71,13 +71,13 @@ std::atomic<bool> Func::s_treadmill;
  * in TreadHashMap
  */
 static std::atomic<FuncId> s_nextFuncId{1};
-AtomicVector<const Func*> Func::s_funcVec{0, nullptr};
+AtomicLowPtrVector<const Func> Func::s_funcVec{0, nullptr};
 static InitFiniNode s_funcVecReinit([]{
-  UnsafeReinitEmptyAtomicVector(
+  UnsafeReinitEmptyAtomicLowPtrVector(
     Func::s_funcVec, RuntimeOption::EvalFuncCountHint);
 }, InitFiniNode::When::PostRuntimeOptions, "s_funcVec reinit");
 
-const AtomicVector<const Func*>& Func::getFuncVec() {
+const AtomicLowPtrVector<const Func>& Func::getFuncVec() {
   return s_funcVec;
 }
 
@@ -154,8 +154,8 @@ void Func::destroy(Func* func) {
       jit::tc::reclaimFunction(func);
     }
 
-    DEBUG_ONLY auto oldVal = s_funcVec.exchange(func->m_funcId, nullptr);
-    assertx(oldVal == func);
+    assertx(s_funcVec.get(func->m_funcId) == func);
+    s_funcVec.set(func->m_funcId, nullptr);
     func->m_funcId = InvalidFuncId;
 
     if (RuntimeOption::EvalEnableReverseDataMap) {
@@ -183,8 +183,8 @@ void Func::freeClone() {
   }
 
   if (m_funcId != InvalidFuncId) {
-    DEBUG_ONLY auto oldVal = s_funcVec.exchange(m_funcId, nullptr);
-    assertx(oldVal == this);
+    assertx(s_funcVec.get(m_funcId) == this);
+    s_funcVec.set(m_funcId, nullptr);
     m_funcId = InvalidFuncId;
   }
 
@@ -373,8 +373,8 @@ void Func::setNewFuncId() {
   m_funcId = s_nextFuncId.fetch_add(1, std::memory_order_relaxed);
 
   s_funcVec.ensureSize(m_funcId + 1);
-  DEBUG_ONLY auto oldVal = s_funcVec.exchange(m_funcId, this);
-  assertx(oldVal == nullptr);
+  assertx(s_funcVec.get(m_funcId) == nullptr);
+  s_funcVec.set(m_funcId, this);
 }
 
 FuncId Func::nextFuncId() {

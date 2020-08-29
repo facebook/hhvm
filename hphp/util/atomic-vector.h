@@ -20,6 +20,7 @@
 #include <atomic>
 #include <memory>
 
+#include "hphp/util/low-ptr.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP {
@@ -124,6 +125,34 @@ struct AtomicVector : AtomicGrowableVector<std::atomic<T>, T> {
    */
   template<typename V>
   friend void UnsafeReinitEmptyAtomicVector(AtomicVector<V>& vec, size_t size);
+};
+
+template<typename T>
+struct AtomicLowPtrVector
+  : AtomicGrowableVector<AtomicLowPtr<T,
+                                      std::memory_order_acquire,
+                                      std::memory_order_release>,
+                         T*>
+{
+  AtomicLowPtrVector(size_t size, const T* def);
+
+  /*
+   * Accessors
+   */
+  T* get(size_t i) const;
+  void set(size_t i, const T* val);
+
+  /*
+   * Reconstruct a currently empty vector with new initial size. Thread-unsafe.
+   *
+   * A number of AtomicVectors have sizes that we'd like to control with runtime
+   * options, but these options are parsed after the relevant AtomicVectors are
+   * constructed. This method  allows us to reconstruct them once the options
+   * have been parsed.
+   */
+  template<typename V>
+  friend void UnsafeReinitEmptyAtomicLowPtrVector(AtomicLowPtrVector<V>& vec,
+                                                  size_t size);
 };
 
 }

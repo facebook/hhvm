@@ -31,7 +31,7 @@ LookupCommand()
 
 def lookup_func(val):
     funcid = val.cast(T('HPHP::FuncId'))
-    result = idx.atomic_vector_at(V('HPHP::Func::s_funcVec'), funcid)
+    result = idx.atomic_low_ptr_vector_at(V('HPHP::Func::s_funcVec'), funcid)
     return result.cast(T('HPHP::Func').pointer())
 
 

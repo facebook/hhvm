@@ -136,6 +136,15 @@ def atomic_vector_at(av, idx, hasher=None):
         return atomic_vector_at(atomic_get(av['m_next']), idx - size)
 
 
+def atomic_low_ptr_vector_at(av, idx, hasher=None):
+    size = av['m_size']
+
+    if idx < size:
+        return rawptr(rawptr(av['m_vals'])[idx])
+    else:
+        return atomic_low_ptr_vector_at(atomic_get(av['m_next']), idx - size)
+
+
 def fixed_vector_at(fv, idx, hasher=None):
     return rawptr(fv['m_sp'])[idx]
 
@@ -292,6 +301,7 @@ def idx_accessors():
         'tbb::interface5::'
         'concurrent_hash_map':      tbb_chm_at,
         'HPHP::AtomicVector':       atomic_vector_at,
+        'HPHP::AtomicLowPtrVector': atomic_low_ptr_vector_at,
         'HPHP::FixedVector':        fixed_vector_at,
         'HPHP::FixedStringMap':     fixed_string_map_at,
         'HPHP::IndexedStringMap':   indexed_string_map_at,

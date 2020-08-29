@@ -49,7 +49,7 @@ struct NamedEntity;
 struct PreClass;
 struct StringData;
 struct StructuredLogEntry;
-template <typename T> struct AtomicVector;
+template <typename T> struct AtomicLowPtrVector;
 
 /*
  * Signature for native functions called by the hhvm using the hhvm
@@ -122,7 +122,7 @@ struct Func final {
 
   // DO NOT access it directly, instead use Func::getFuncVec()
   // Exposed in the header file for gdb python macros
-  static AtomicVector<const Func*> s_funcVec;
+  static AtomicLowPtrVector<const Func> s_funcVec;
 
   /////////////////////////////////////////////////////////////////////////////
   // Types.
@@ -1050,7 +1050,7 @@ struct Func final {
   /*
    * Access to the global vector of funcs.  This maps FuncID's back to Func*'s.
    */
-  static const AtomicVector<const Func*>& getFuncVec();
+  static const AtomicLowPtrVector<const Func>& getFuncVec();
 
 
   /////////////////////////////////////////////////////////////////////////////

@@ -689,7 +689,7 @@ void checkRetranslateAll(bool force) {
     return;
   }
 
-  if (!shouldTestBespokeArrayLikes()) {
+  if (allowBespokeArrayLikes() && !shouldTestBespokeArrayLikes()) {
     bespoke::setLoggingEnabled(false);
     Treadmill::enqueue([] { bespoke::exportProfiles(); });
   }

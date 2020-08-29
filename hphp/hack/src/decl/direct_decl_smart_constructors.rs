@@ -1084,6 +1084,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         String(_) => Some(Ty_::Tprim(arena.alloc(aast::Tprim::Tstring))),
                         String2(_) => Some(Ty_::Tprim(arena.alloc(aast::Tprim::Tstring))),
                         PrefixedString(_) => Some(Ty_::Tprim(arena.alloc(aast::Tprim::Tstring))),
+                        Unop(&(Uop::Unot, _)) | Unop(&(Uop::Utild, _)) => Some(TANY_), //match OCaml behavior
                         Unop(&(_op, expr)) => expr_to_ty(arena, expr),
                         ParenthesizedExpr(&expr) => expr_to_ty(arena, expr),
                         Any => Some(TANY_),

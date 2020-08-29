@@ -1,0 +1,23 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {}; funs = {}; typedefs = {};
+  consts =
+  { "\\CBool" ->
+    (Rwitness (root|const_missing_hint.php line 4, characters 15-18),
+     (Tprim Tbool));
+    "\\CInt" ->
+    (Rwitness (root|const_missing_hint.php line 3, characters 14-14),
+     (Tprim Tint));
+    "\\Uminus" ->
+    (Rwitness (root|const_missing_hint.php line 9, characters 16-17),
+     (Tprim Tint));
+    "\\Unot" ->
+    (Rwitness (root|const_missing_hint.php line 7, characters 14-18), Tany);
+    "\\Uplus" ->
+    (Rwitness (root|const_missing_hint.php line 8, characters 15-16),
+     (Tprim Tint));
+    "\\Utild" ->
+    (Rwitness (root|const_missing_hint.php line 6, characters 15-16), Tany) }
+  }
+
+They matched!

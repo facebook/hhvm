@@ -10,17 +10,20 @@ Parsed decls:
         [(Constraint_as,
           (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 4, characters 9-16),
            (Tprim Tarraykey)))
-          ]);
+          ],
+        Erased);
         (Invariant, ([5:3-5], "Tb"),
          [(Constraint_as,
            (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 5, characters 9-10),
             (Tgeneric ("Ta", []))))
-         ]);
+         ],
+        Erased);
       (Invariant, ([6:3-5], "Tc"),
        [(Constraint_as,
          (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 6, characters 9-10),
           (Tgeneric ("Td", []))))
-       ]);
+       ],
+      Erased);
       (Invariant, ([7:3-5], "Td"),
        [(Constraint_as,
          (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 7, characters 9-17),
@@ -31,8 +34,9 @@ Parsed decls:
               (Tgeneric ("Tf", [])))
           ]
          ))))
-      ]);
-    (Invariant, ([8:3-5], "Tf"), []);
+      ],
+    Erased);
+    (Invariant, ([8:3-5], "Tf"), [], Erased);
     (Invariant, ([9:3-7], "Tarr"),
      [(Constraint_as,
        (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 9, characters 11-19),
@@ -40,21 +44,24 @@ Parsed decls:
            (Some (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 9, characters 17-18),
                   (Tgeneric ("Ta", [])))),
         None))))
-     ]);
+     ],
+    Erased);
   (Invariant, ([10:3-8], "Tlike"),
    [(Constraint_as,
      (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 10, characters 12-14),
       (Tlike
          (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 10, characters 13-14),
           (Tgeneric ("Ta", []))))))
-   ]);
+   ],
+  Erased);
   (Invariant, ([11:3-7], "Topt"),
    [(Constraint_as,
      (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 11, characters 11-13),
       (Toption
          (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 11, characters 12-13),
           (Tgeneric ("Ta", []))))))
-   ]);
+   ],
+  Erased);
 (Invariant, ([12:3-7], "Tfun"),
  [(Constraint_as,
    (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 12, characters 11-28),
@@ -83,7 +90,7 @@ Parsed decls:
     ft_flags =
     (make_ft_flags sync none ~return_disposable:false ~returns_mutable:false
       ~returns_void_to_rx:false);
-    ft_reactive = Nonreactive })))]);
+    ft_reactive = Nonreactive })))], Erased);
 (Invariant, ([13:3-9], "Tshape"),
  [(Constraint_as,
    (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 13, characters 13-28),
@@ -95,7 +102,7 @@ Parsed decls:
             (Tgeneric ("Ta", [])))
          } }
     ))))
- ]);
+ ], Erased);
 (Invariant, ([14:3-8], "Tdarr"),
  [(Constraint_as,
    (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 14, characters 12-25),
@@ -104,14 +111,14 @@ Parsed decls:
         (Tgeneric ("Ta", []))),
     (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 14, characters 23-24),
      (Tgeneric ("Tb", [])))
-   ))))]);
+   ))))], Erased);
 (Invariant, ([15:3-8], "Tvarr"),
  [(Constraint_as,
    (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 15, characters 12-21),
     (Tvarray
        (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 15, characters 19-20),
         (Tgeneric ("Ta", []))))))
- ]);
+ ], Erased);
 (Invariant, ([16:3-9], "Tvdarr"),
  [(Constraint_as,
    (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 16, characters 13-36),
@@ -119,7 +126,7 @@ Parsed decls:
        (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 16, characters 30-31),
         (Tgeneric ("Ta", []))),
     (Rhint (root|constraints_mentioning_tparams_in_same_list.php line 16, characters 34-35),
-     (Tgeneric ("Tb", []))))))])]; sc_where_constraints = [];
+     (Tgeneric ("Tb", []))))))], Erased)]; sc_where_constraints = [];
 sc_extends = []; sc_uses = []; sc_xhp_attr_uses = []; sc_req_extends = [];
 sc_req_implements = []; sc_implements = []; sc_consts = [];
 sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];

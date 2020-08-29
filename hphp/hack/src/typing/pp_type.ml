@@ -1048,8 +1048,8 @@ and pp_tparam : type a. Format.formatter -> a ty tparam -> unit =
        tp_name;
        tp_tparams;
        tp_constraints;
-       tp_reified = _;
-       tp_user_attributes = _;
+       tp_reified;
+       tp_user_attributes;
      } ->
   Format.fprintf fmt "(@[";
   Ast_defs.pp_variance fmt tp_variance;
@@ -1085,6 +1085,21 @@ and pp_tparam : type a. Format.formatter -> a ty tparam -> unit =
        ~init:false
        tp_constraints);
   Format.fprintf fmt "@,]@]";
+  Format.fprintf fmt ",@ ";
+  Aast.pp_reify_kind fmt tp_reified;
+
+  if not (List.is_empty tp_user_attributes) then begin
+    Format.fprintf fmt "@[<2><";
+    ignore
+      (List.fold_left
+         ~f:(fun sep x ->
+           if sep then Format.fprintf fmt ";@ ";
+           pp_user_attribute fmt x;
+           true)
+         ~init:false
+         tp_user_attributes);
+    Format.fprintf fmt "@,>@]"
+  end;
   Format.fprintf fmt "@])"
 
 and show_tparam : type a. a ty tparam -> string =

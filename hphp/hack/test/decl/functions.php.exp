@@ -181,8 +181,8 @@ Parsed decls:
               [(Constraint_as,
                 (Rhint (root|functions.php line 74, characters 30-36),
                  (Tunion [])))
-                ])
-              ];
+                ],
+              Erased)];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [74:42-44]; fp_name = (Some "$x");
@@ -466,7 +466,7 @@ Parsed decls:
     (Rwitness (root|functions.php line 37, characters 10-36),
      (Tfun
         { ft_arity = (Fstandard ());
-          ft_tparams = [(Invariant, ([37:38-40], "Tu"), [])];
+          ft_tparams = [(Invariant, ([37:38-40], "Tu"), [], Erased)];
           ft_where_constraints = [];
           ft_params =
           [{ fp_pos = [38:6-8]; fp_name = (Some "$x");
@@ -590,12 +590,14 @@ Parsed decls:
           [(Constraint_super,
             (Rhint (root|functions.php line 22, characters 48-50),
              (Tprim Tint)))
-            ]);
+            ],
+          Erased);
           (Invariant, ([22:53-55], "T2"),
            [(Constraint_as,
              (Rhint (root|functions.php line 22, characters 59-64),
               (Tprim Tstring)))
-             ])
+             ],
+           Erased)
           ];
         ft_where_constraints = [];
         ft_params =
@@ -637,7 +639,7 @@ Parsed decls:
   (Rwitness (root|functions.php line 18, characters 10-25),
    (Tfun
       { ft_arity = (Fstandard ());
-        ft_tparams = [(Invariant, ([18:27-28], "T"), [])];
+        ft_tparams = [(Invariant, ([18:27-28], "T"), [], Erased)];
         ft_where_constraints = [];
         ft_params =
         [{ fp_pos = [18:32-37]; fp_name = (Some "$arg1");

@@ -18,7 +18,7 @@ Parsed decls:
          (Rwitness (root|generic_method_tparam_scope.php line 4, characters 19-19),
           (Tfun
              { ft_arity = (Fstandard ());
-               ft_tparams = [(Invariant, ([4:21-23], "Ta"), [])];
+               ft_tparams = [(Invariant, ([4:21-23], "Ta"), [], Erased)];
                ft_where_constraints = [];
                ft_params =
                [{ fp_pos = [4:28-30]; fp_name = (Some "$a");
@@ -52,7 +52,7 @@ Parsed decls:
         (Rwitness (root|generic_method_tparam_scope.php line 8, characters 19-19),
          (Tfun
             { ft_arity = (Fstandard ());
-              ft_tparams = [(Invariant, ([8:21-23], "Tb"), [])];
+              ft_tparams = [(Invariant, ([8:21-23], "Tb"), [], Erased)];
               ft_where_constraints = [];
               ft_params =
               [{ fp_pos = [8:28-30]; fp_name = (Some "$b");

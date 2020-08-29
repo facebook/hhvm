@@ -11,7 +11,7 @@ Parsed decls:
       };
     "\\MyArray1" ->
     { td_pos = [11:6-14]; td_vis = Transparent;
-      td_tparams = [(Invariant, ([11:15-16], "T"), [])];
+      td_tparams = [(Invariant, ([11:15-16], "T"), [], Erased)];
       td_constraint = None;
       td_type =
       (Rhint (root|typedefs.php line 11, characters 20-27),
@@ -23,8 +23,8 @@ Parsed decls:
   "\\MyArray2" ->
   { td_pos = [12:6-14]; td_vis = Transparent;
     td_tparams =
-    [(Invariant, ([12:15-17], "TK"), []); (Invariant, ([12:19-21], "TV"), [])
-      ];
+    [(Invariant, ([12:15-17], "TK"), [], Erased);
+      (Invariant, ([12:19-21], "TV"), [], Erased)];
     td_constraint = None;
     td_type =
     (Rhint (root|typedefs.php line 12, characters 25-37),
@@ -48,7 +48,8 @@ Parsed decls:
 "\\MyDarray" ->
 { td_pos = [13:6-14]; td_vis = Transparent;
   td_tparams =
-  [(Invariant, ([13:15-17], "TK"), []); (Invariant, ([13:19-21], "TV"), [])];
+  [(Invariant, ([13:15-17], "TK"), [], Erased);
+    (Invariant, ([13:19-21], "TV"), [], Erased)];
   td_constraint = None;
   td_type =
   (Rhint (root|typedefs.php line 13, characters 25-38),
@@ -119,7 +120,8 @@ Parsed decls:
   (Rhint (root|typedefs.php line 16, characters 17-22), (Tprim Tstring)) };
 "\\MyVarray" ->
 { td_pos = [14:6-14]; td_vis = Transparent;
-  td_tparams = [(Invariant, ([14:15-16], "T"), [])]; td_constraint = None;
+  td_tparams = [(Invariant, ([14:15-16], "T"), [], Erased)];
+  td_constraint = None;
   td_type =
   (Rhint (root|typedefs.php line 14, characters 20-28),
    (Tvarray
@@ -129,7 +131,8 @@ Parsed decls:
 "\\MyVarrayOrDarray" ->
 { td_pos = [15:6-22]; td_vis = Transparent;
   td_tparams =
-  [(Invariant, ([15:23-25], "TK"), []); (Invariant, ([15:27-29], "TV"), [])];
+  [(Invariant, ([15:23-25], "TK"), [], Erased);
+    (Invariant, ([15:27-29], "TV"), [], Erased)];
   td_constraint = None;
   td_type =
   (Rhint (root|typedefs.php line 15, characters 33-56),

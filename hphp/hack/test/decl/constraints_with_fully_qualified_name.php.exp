@@ -10,7 +10,8 @@ Parsed decls:
         [(Constraint_as,
           (Rhint (root|constraints_with_fully_qualified_name.php line 7, characters 9-16),
            (Tprim Tarraykey)))
-          ]);
+          ],
+        Erased);
         (Invariant, ([8:3-5], "Tb"),
          [(Constraint_as,
            (Rhint (root|constraints_with_fully_qualified_name.php line 8, characters 9-19),
@@ -21,7 +22,8 @@ Parsed decls:
                 (Tgeneric ("Td", [])))
             ]
            ))))
-        ]);
+        ],
+      Erased);
       (Invariant, ([9:3-5], "Tc"),
        [(Constraint_as,
          (Rhint (root|constraints_with_fully_qualified_name.php line 9, characters 9-21),
@@ -32,8 +34,9 @@ Parsed decls:
                 (Tapply (([9:18-21], "\\Td"), [])))
                ]
              ))))
-         ]);
-      (Invariant, ([10:3-5], "Td"), [])];
+         ],
+       Erased);
+      (Invariant, ([10:3-5], "Td"), [], Erased)];
     sc_where_constraints = [];
     sc_extends = [];
     sc_uses = [];

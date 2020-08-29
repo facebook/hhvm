@@ -142,7 +142,7 @@ type 'ty tparam = {
   tp_reified: Aast.reify_kind;
   tp_user_attributes: user_attribute list;
 }
-[@@deriving eq]
+[@@deriving eq, show]
 
 type 'ty where_constraint = 'ty * Ast_defs.constraint_kind * 'ty [@@deriving eq]
 

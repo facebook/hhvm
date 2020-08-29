@@ -105,8 +105,8 @@ Parsed decls:
                  (Tlike
                     (Rhint (root|like_types.php line 6, characters 18-20),
                      (Tprim Tint)))))
-                ])
-              ];
+                ],
+              Erased)];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [6:25-27]; fp_name = (Some "$t");

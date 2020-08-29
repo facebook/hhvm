@@ -8,7 +8,7 @@ Parsed decls:
       (Rwitness (root|shapes.php line 15, characters 10-22),
        (Tfun
           { ft_arity = (Fstandard ());
-            ft_tparams = [(Invariant, ([15:24-25], "T"), [])];
+            ft_tparams = [(Invariant, ([15:24-25], "T"), [], Erased)];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [15:34-39]; fp_name = (Some "$arg1");

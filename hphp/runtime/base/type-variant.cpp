@@ -609,6 +609,7 @@ void Variant::setEvalScalar() {
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
+    case KindOfLazyClass:
       return;
 
     case KindOfString:
@@ -658,7 +659,6 @@ void Variant::setEvalScalar() {
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
-    case KindOfLazyClass:
       break;
 
     case KindOfRFunc:

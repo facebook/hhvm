@@ -217,6 +217,7 @@ pub enum InstructLitConst {
     Int(i64),
     Double(String),
     String(String),
+    LazyClass(ClassId),
     /// Pseudo instruction that will get translated into appropraite literal
     /// bytecode, with possible reference to .adata *)
     TypedValue(TypedValue),
@@ -312,7 +313,6 @@ pub enum InstructOperator {
     ResolveRClsMethodD(ClassId, MethodId),
     ResolveRClsMethodS(SpecialClsRef, MethodId),
     ResolveClass(ClassId),
-    LazyClass(ClassId),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

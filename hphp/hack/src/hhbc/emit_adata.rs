@@ -48,6 +48,7 @@ fn rewrite_typed_value(e: &mut Emitter, instr: &mut Instruct) -> Result<()> {
             TV::Bool(false) => False,
             TV::Int(i) => Int(*i),
             TV::String(s) => String(s.to_owned()),
+            TV::LazyClass(s) => LazyClass(hhbc_id_rust::class::Type::from_ast_name_and_mangle(s)),
             TV::Float(f) => Double(string_utils::float::to_string(*f)),
             TV::Keyset(_) => Keyset(get_array_identifier(e, tv)),
             TV::VArray(_) | TV::DArray(_) if !hack_arr_dv_arrs => {

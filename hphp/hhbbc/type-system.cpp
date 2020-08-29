@@ -4160,12 +4160,13 @@ Type from_cell(TypedValue cell) {
     always_assert(cell.m_data.parr->isPHPArrayType());
     return aval(cell.m_data.parr);
 
+  case KindOfLazyClass: return TLazyCls;
+
   case KindOfObject:
   case KindOfResource:
   case KindOfRFunc:
   case KindOfFunc:
   case KindOfClass:
-  case KindOfLazyClass:
   case KindOfClsMeth:
   case KindOfRClsMeth:
   case KindOfRecord:

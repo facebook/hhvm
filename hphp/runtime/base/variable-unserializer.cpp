@@ -817,6 +817,17 @@ void VariableUnserializer::unserializeVariant(
       tvSetDouble(negative ? -v : v, self);
     }
     break;
+  case 'l':
+    {
+      String c = unserializeString();
+      tvMove(
+        make_tv<KindOfLazyClass>(
+          LazyClassData::create(makeStaticString(c.get()))
+        ),
+        self
+      );
+    }
+    break;
   case 's':
     {
       String v = unserializeString();
@@ -1791,6 +1802,7 @@ void VariableUnserializer::reserialize(StringBuffer& buf) {
   case 'b':
   case 'i':
   case 'd':
+  case 'l':
     {
       buf.append(type);
       buf.append(sep);

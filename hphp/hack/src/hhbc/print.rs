@@ -1009,6 +1009,7 @@ fn print_adata<W: Write>(ctx: &mut Context, w: &mut W, tv: &TypedValue) -> Resul
         TypedValue::Uninit => w.write("uninit"),
         TypedValue::Null => w.write("N;"),
         TypedValue::String(s) => write!(w, "s:{}:{};", s.len(), quote_string_with_escape(s)),
+        TypedValue::LazyClass(s) => write!(w, "l:{}:{};", s.len(), quote_string_with_escape(s)),
         TypedValue::Float(f) => write!(w, "d:{};", float::to_string(*f)),
         TypedValue::Int(i) => write!(w, "i:{};", i),
         // TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why?
@@ -1976,6 +1977,10 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
             w.write("String ")?;
             quotes(w, |w| w.write(escape(s)))
         }
+        LC::LazyClass(id) => {
+            w.write("LazyClass ")?;
+            print_class_id(w, id)
+        }
         LC::True => w.write("True"),
         LC::False => w.write("False"),
         LC::Double(d) => concat_str_by(w, " ", ["Double", d.as_str()]),
@@ -2186,10 +2191,6 @@ fn print_op<W: Write>(w: &mut W, op: &InstructOperator) -> Result<(), W::Error> 
         }
         I::ResolveClass(id) => {
             w.write("ResolveClass ")?;
-            print_class_id(w, id)
-        }
-        I::LazyClass(id) => {
-            w.write("LazyClass ")?;
             print_class_id(w, id)
         }
         I::Fatal(fatal_op) => print_fatal_op(w, fatal_op),

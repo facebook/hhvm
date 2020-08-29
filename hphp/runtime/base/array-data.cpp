@@ -103,6 +103,7 @@ struct ScalarHash {
           case KindOfPersistentVec:
           case KindOfPersistentDict:
           case KindOfPersistentKeyset:
+          case KindOfLazyClass:
             ret = folly::hash::hash_combine(ret, v.m_data.num);
             break;
           case KindOfUninit:
@@ -117,7 +118,6 @@ struct ScalarHash {
           case KindOfRFunc:
           case KindOfFunc:
           case KindOfClass:
-          case KindOfLazyClass:
           case KindOfClsMeth:
           case KindOfRClsMeth:
           case KindOfRecord:

@@ -54,6 +54,7 @@ pub enum TypedValue {
     /// Both Hack/PHP and Caml floats are IEEE754 64-bit
     Float(float::F64),
     String(String),
+    LazyClass(String),
     Null,
     // Classic PHP arrays with explicit (key,value) entries
     HhasAdata(String),
@@ -90,6 +91,7 @@ impl From<TypedValue> for bool {
             TypedValue::Bool(b) => b,
             TypedValue::Null => false,
             TypedValue::String(s) => s != "" && s != "0",
+            TypedValue::LazyClass(_) => true,
             TypedValue::Int(i) => i != 0,
             TypedValue::Float(f) => f.to_f64() != 0.0,
             // Empty collections cast to false if empty, otherwise true
@@ -115,7 +117,8 @@ impl TryFrom<TypedValue> for i64 {
             TypedValue::Uninit => Err(()), // Should not happen
             // Unreachable - the only calliste of to_int is cast_to_arraykey, which never
             // calls it with String
-            TypedValue::String(_) => Err(()), // not worth it
+            TypedValue::String(_) => Err(()),    // not worth it
+            TypedValue::LazyClass(_) => Err(()), // not worth it
             TypedValue::Int(i) => Ok(i),
             TypedValue::Float(f) => match f.classify() {
                 FpCategory::Nan | FpCategory::Infinite => {
@@ -138,8 +141,9 @@ impl TryFrom<TypedValue> for f64 {
     type Error = CastError;
     fn try_from(v: TypedValue) -> Result<f64, Self::Error> {
         match v {
-            TypedValue::Uninit => Err(()),    // Should not happen
-            TypedValue::String(_) => Err(()), // not worth it
+            TypedValue::Uninit => Err(()),       // Should not happen
+            TypedValue::String(_) => Err(()),    // not worth it
+            TypedValue::LazyClass(_) => Err(()), // not worth it
             TypedValue::Int(i) => Ok(i as f64),
             TypedValue::Float(f) => Ok(f.into()),
             _ => Ok(if v.into() { 1.0 } else { 0.0 }),
@@ -159,6 +163,7 @@ impl TryFrom<TypedValue> for String {
             TypedValue::Null => Ok("".into()),
             TypedValue::Int(i) => Ok(i.to_string()),
             TypedValue::String(s) => Ok(s),
+            TypedValue::LazyClass(s) => Ok(s),
             _ => Err(()),
         }
     }

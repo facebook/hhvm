@@ -114,8 +114,13 @@ fn class_const_to_typed_value(
             cid,
         );
         if let ast_class_expr::ClassExpr::Id(ast_defs::Id(_, cname)) = cexpr {
-            let cname = hhbc_id_rust::class::Type::from_ast_name(&cname).into();
-            return Ok(TypedValue::String(cname));
+            if emitter.options().emit_class_pointers() == 2 {
+                let cname = hhbc_id_rust::class::Type::from_ast_name_and_mangle(&cname).into();
+                return Ok(TypedValue::LazyClass(cname));
+            } else {
+                let cname = hhbc_id_rust::class::Type::from_ast_name(&cname).into();
+                return Ok(TypedValue::String(cname));
+            }
         }
     }
     Err(Error::UserDefinedConstant)
@@ -555,6 +560,7 @@ fn value_to_expr_(v: TypedValue) -> Result<tast::Expr_, Error> {
         Bool(false) => Expr_::False,
         Bool(true) => Expr_::True,
         String(s) => Expr_::String(s.into()),
+        LazyClass(_) => return Err(Error::unrecoverable("value_to_expr: lazyclass NYI")),
         Null => Expr_::Null,
         Uninit => return Err(Error::unrecoverable("value_to_expr: uninit value")),
         Vec(_) => return Err(Error::unrecoverable("value_to_expr: vec NYI")),

@@ -1027,7 +1027,7 @@ pub mod instr {
     }
 
     pub fn lazyclass(class_id: ClassId) -> InstrSeq {
-        instr(Instruct::IOp(InstructOperator::LazyClass(class_id)))
+        instr(Instruct::ILitConst(InstructLitConst::LazyClass(class_id)))
     }
 
     pub fn oodeclexists(class_kind: ClassKind) -> InstrSeq {

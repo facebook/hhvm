@@ -49,7 +49,7 @@ SSATmp* staticTVCns(IRGS& env, const TypedValue* tv) {
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:        return cns(env, tv->m_data.parr);
-    case KindOfLazyClass:        return cns(env, tv->m_data.plazyclass.name());
+    case KindOfLazyClass:     return cns(env, tv->m_data.plazyclass);
 
     case KindOfUninit:
     case KindOfObject:

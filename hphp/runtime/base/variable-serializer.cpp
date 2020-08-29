@@ -1542,14 +1542,20 @@ void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
       m_buf->append(')');
       break;
     case Type::JSON:
-      write(StrNR(lazyClassToStringHelper(lcls)));
-      break;
     case Type::Serialize:
-    case Type::Internal:
-    case Type::APCSerialize:
     case Type::DebuggerSerialize:
       write(StrNR(lazyClassToStringHelper(lcls)));
       break;
+    case Type::Internal:
+    case Type::APCSerialize: {
+      auto cname = lcls.name();
+      m_buf->append("l:");
+      m_buf->append(cname->size());
+      m_buf->append(":\"");
+      m_buf->append(cname->data(), cname->size());
+      m_buf->append("\";");
+      break;
+    }
   }
 }
 

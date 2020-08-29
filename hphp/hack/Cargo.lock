@@ -558,6 +558,7 @@ dependencies = [
  "env 0.0.0",
  "hhas_adata_rust 0.0.0",
  "hhbc_ast_rust 0.0.0",
+ "hhbc_id_rust 0.0.0",
  "hhbc_string_utils_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "options 0.0.0",

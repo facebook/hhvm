@@ -415,9 +415,8 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   }
 
   if (doneFlag.toBoolean()) {
-    Offset pcOff;
-    bool vmEntry;
-    ActRec* outer = g_context->getPrevVMState(ar, &pcOff, nullptr, &vmEntry);
+    auto const sfp = ar->sfp();
+    auto const callOff = ar->callOffset();
 
     Stack& stack = vmStack();
     auto const trim = [&] {
@@ -462,10 +461,11 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     tvDup(*ret.asTypedValue(), *stack.allocTV());
     stack.topTV()->m_aux.u_asyncEagerReturnFlag = 0;
 
-    vmfp() = outer;
-    vmpc() = outer ? outer->func()->at(pcOff) : nullptr;
-    if (vmpc() && !vmEntry) vmpc() = skipCall(vmpc());
-
+    // Return to the caller or exit VM.
+    vmfp() = sfp;
+    vmpc() = LIKELY(sfp != nullptr)
+      ? skipCall(sfp->func()->entry() + callOff)
+      : nullptr;
     return false;
   }
   vmfp() = ar;

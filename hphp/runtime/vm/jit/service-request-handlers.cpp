@@ -177,21 +177,14 @@ TCA getFuncBody(Func* func) {
   tca = func->getFuncBody();
   if (tca != tc::ustubs().funcBodyHelperThunk) return tca;
 
-  auto const dvs = func->getDVFunclets();
-  if (dvs.size()) {
-    if (UNLIKELY(RID().isJittingDisabled())) {
-      TRACE(2, "punting because jitting code was disabled\n");
-      return nullptr;
-    }
-    auto const kind = tc::profileFunc(func) ? TransKind::ProfPrologue
-                                            : TransKind::LivePrologue;
-    tca = tc::emitFuncBodyDispatch(func, dvs, kind);
+  if (func->numRequiredParams() != func->numNonVariadicParams()) {
+    tca = tc::ustubs().resumeHelper;
   } else {
     SrcKey sk(func, func->base(), ResumeMode::None);
     tca = getTranslation(TransArgs{sk});
-    if (tca) func->setFuncBody(tca);
   }
 
+  if (tca) func->setFuncBody(tca);
   return tca;
 }
 

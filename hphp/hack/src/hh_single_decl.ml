@@ -27,7 +27,10 @@ let init root : Provider_context.t =
   in
   let ctx =
     Provider_context.empty_for_tool
-      ~popt:ParserOptions.default
+      ~popt:
+        (ParserOptions.with_disable_xhp_element_mangling
+           ParserOptions.default
+           false)
       ~tcopt
       ~backend:Provider_backend.Shared_memory
   in

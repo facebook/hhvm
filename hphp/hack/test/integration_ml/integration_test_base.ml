@@ -31,6 +31,7 @@ let server_config = ServerEnvBuild.default_genv.ServerEnv.config
 
 let global_opts =
   GlobalOptions.make
+    ~po_disable_xhp_element_mangling:false
     ~po_deregister_php_stdlib:true
     ~po_allow_goto:false
     ~tco_unsafe_rx:false

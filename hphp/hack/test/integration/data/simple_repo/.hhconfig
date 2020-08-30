@@ -5,3 +5,4 @@ allowed_fixme_codes_strict = 4110
 allowed_decl_fixme_codes = 4110
 
 auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
+disable_xhp_element_mangling=false

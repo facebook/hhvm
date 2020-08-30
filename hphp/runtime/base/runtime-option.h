@@ -89,8 +89,8 @@ struct RepoOptions {
   E(bool,           EmitFuncPointers,               true)             \
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
   H(bool,           AllowUnstableFeatures,          false)            \
-  H(bool,           EnableXHPClassModifier,         false)            \
-  H(bool,           DisableXHPElementMangling,      false)            \
+  H(bool,           EnableXHPClassModifier,         true)             \
+  H(bool,           DisableXHPElementMangling,      true)             \
   H(bool,           DisableArray,                   true)             \
   H(bool,           DisableArrayCast,               true)             \
   H(bool,           DisableArrayTypehint,           true)             \

@@ -111,15 +111,22 @@ ArrayData* maybeMakeLoggingArray(ArrayData* ad) {
     }
   }();
 
-  if (shouldEmitBespoke) {
-    FTRACE(5, "Emit bespoke at {}\n", sk.getSymbol());
-    profile->loggingArraysEmitted++;
-    return ad->isStatic() ? profile->staticArray
-                          : makeWithProfile(ad, profile);
-  } else {
+  if (!shouldEmitBespoke) {
     FTRACE(5, "Emit vanilla at {}\n", sk.getSymbol());
     return ad;
   }
+
+  FTRACE(5, "Emit bespoke at {}\n", sk.getSymbol());
+  profile->loggingArraysEmitted++;
+  if (ad->isStatic()) return profile->staticArray;
+
+  // Non-static array constructors are basically a sequence of sets or appends.
+  // We already log these events at the correct granularity; re-use that logic.
+  IterateKVNoInc(ad, [&](auto k, auto v) {
+    tvIsString(k) ? profile->logEvent(ArrayOp::ConstructStr, val(k).pstr, v)
+                  : profile->logEvent(ArrayOp::ConstructInt, val(k).num, v);
+  });
+  return makeWithProfile(ad, profile);
 }
 
 const ArrayData* maybeMakeLoggingArray(const ArrayData* ad) {
@@ -371,8 +378,12 @@ ArrayData* convert(ArrayData* ad, F&& f) {
 
   auto const prof = getLoggingProfile(sk, result);
   if (!prof) return result;
-  // We expect 1 / (sample rate) logging arrays to make it here. Adjust
-  // accordingly.
+
+  // We expect 1 / SampleRate LoggingArrays to make it here. Bump sampleCount
+  // for the cast site accordingly. Since we sample the second array created
+  // at each site, we start the count here at 2, not SampleRate.
+  //
+  // TODO(kshaunak): Treat this site like a constructor and log pseudo-ops.
   uint64_t expected = 0;
   if (!prof->sampleCount.compare_exchange_strong(expected, 2)) {
     prof->sampleCount += RO::EvalEmitLoggingArraySampleRate;

@@ -38,6 +38,7 @@ TRACE_SET_MOD(bespoke);
 //////////////////////////////////////////////////////////////////////////////
 
 namespace {
+
 template <typename T, typename U>
 bool fits(U u) {
   return u >= std::numeric_limits<T>::min() &&
@@ -50,7 +51,7 @@ std::atomic<bool> s_exportStarted{false};
 
 std::string arrayOpToString(ArrayOp op) {
   switch (op) {
-#define X(name) case ArrayOp::name: return #name;
+#define X(name, read) case ArrayOp::name: return #name;
 ARRAY_OPS
 #undef X
   }
@@ -59,42 +60,9 @@ ARRAY_OPS
 
 bool arrayOpIsRead(ArrayOp op) {
   switch (op) {
-    case ArrayOp::Scan:
-    case ArrayOp::Size:
-    case ArrayOp::IsVectorData:
-    case ArrayOp::GetInt:
-    case ArrayOp::GetStr:
-    case ArrayOp::GetIntPos:
-    case ArrayOp::GetStrPos:
-    case ArrayOp::IterBegin:
-    case ArrayOp::IterLast:
-    case ArrayOp::IterEnd:
-    case ArrayOp::IterAdvance:
-    case ArrayOp::IterRewind:
-    case ArrayOp::Copy:
-      return true;
-    case ArrayOp::EscalateToVanilla:
-    case ArrayOp::ConvertToUncounted:
-    case ArrayOp::ReleaseUncounted:
-    case ArrayOp::Release:
-    case ArrayOp::LvalInt:
-    case ArrayOp::LvalStr:
-    case ArrayOp::SetInt:
-    case ArrayOp::SetStr:
-    case ArrayOp::RemoveInt:
-    case ArrayOp::RemoveStr:
-    case ArrayOp::Append:
-    case ArrayOp::Prepend:
-    case ArrayOp::Merge:
-    case ArrayOp::Pop:
-    case ArrayOp::Dequeue:
-    case ArrayOp::Renumber:
-    case ArrayOp::ToVArray:
-    case ArrayOp::ToDArray:
-    case ArrayOp::ToVec:
-    case ArrayOp::ToDict:
-    case ArrayOp::ToKeyset:
-      return false;
+#define X(name, read) case ArrayOp::name: return read;
+ARRAY_OPS
+#undef X
   }
   not_reached();
 }

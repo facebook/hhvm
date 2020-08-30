@@ -667,8 +667,7 @@ void resetCoverageCounters();
 using InterpOneFunc = jit::TCA (*) (ActRec*, TypedValue*, Offset);
 extern InterpOneFunc interpOneEntryPoints[];
 
-bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack, CallFlags callFlags,
-             Array* savedGenerics = nullptr);
+bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack, CallFlags callFlags);
 jit::TCA dispatchBB();
 void pushFrameSlots(const Func* func, int nparams = 0);
 Array getDefinedVariables(const ActRec*);

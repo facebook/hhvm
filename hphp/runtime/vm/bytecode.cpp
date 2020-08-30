@@ -3665,23 +3665,15 @@ OPTBLD_INLINE void iopUnsetG() {
 }
 
 bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
-             CallFlags callFlags, Array* savedGenerics) {
+             CallFlags callFlags) {
   TRACE(3, "FCall: pc %p func %p base %d\n", vmpc(),
         vmfp()->unit()->entry(),
         int(vmfp()->func()->base()));
 
   try {
     assertx(!callFlags.hasGenerics() || tvIsHAMSafeVArray(vmStack().topC()));
-    auto generics = [&] () -> Array {
-        if (callFlags.hasGenerics()) {
-          assertx(savedGenerics == nullptr);
-          return Array::attach(vmStack().topC()->m_data.parr);
-        } else if (savedGenerics) {
-          return *savedGenerics;
-        } else {
-          return Array();
-        }
-      }();
+    auto generics = callFlags.hasGenerics()
+      ? Array::attach(vmStack().topC()->m_data.parr) : Array();
     if (callFlags.hasGenerics()) vmStack().discard();
 
     auto const func = ar->func();
@@ -3700,9 +3692,7 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
 
     prepareFuncEntry(ar, std::move(generics));
 
-    if (!savedGenerics) { // Checked when constructing the rfunc
-      checkForReifiedGenericsErrors(ar, callFlags.hasGenerics());
-    }
+    checkForReifiedGenericsErrors(ar, callFlags.hasGenerics());
     calleeDynamicCallChecks(ar->func(), callFlags.isDynamicCall());
     checkImplicitContextErrors(ar);
     return EventHook::FunctionCall(ar, EventHook::NormalFunc);
@@ -3749,8 +3739,7 @@ void* takeCtx(NoCtx) {
 
 template<bool dynamic, typename Ctx>
 void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
-               Ctx&& ctx, bool logAsDynamicCall = true,
-               Array* savedGenerics = nullptr) {
+               Ctx&& ctx, bool logAsDynamicCall = true) {
   if (fca.enforceInOut()) callerInOutChecks(func, fca);
   if (dynamic && logAsDynamicCall) callerDynamicCallChecks(func);
   callerRxChecks(vmfp(), func);
@@ -3773,7 +3762,7 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
     0  // generics bitmap not used by interpreter
   );
 
-  doFCall(ar, fca.numArgs, fca.hasUnpack(), callFlags, savedGenerics);
+  doFCall(ar, fca.numArgs, fca.hasUnpack(), callFlags);
   pc = vmpc();
 }
 
@@ -3886,12 +3875,17 @@ OPTBLD_INLINE void fcallFuncFunc(PC origpc, PC& pc, const FCallArgs& fca) {
 
 OPTBLD_INLINE void fcallFuncRFunc(PC origpc, PC& pc, FCallArgs& fca) {
   assertx(tvIsRFunc(vmStack().topC()));
-  auto rfunc = vmStack().topC()->m_data.prfunc;
+  auto const rfunc = vmStack().topC()->m_data.prfunc;
+  auto const func = rfunc->m_func;
+  vmStack().discard();
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    vmStack().pushVec(rfunc->m_arr);
+  } else {
+    vmStack().pushArray(rfunc->m_arr);
+  }
+  decRefRFunc(rfunc);
 
-  auto func = rfunc->m_func;
-  auto generics = Array(rfunc->m_arr);
-  vmStack().popC();
-  fcallImpl<false>(origpc, pc, fca, func, NoCtx{}, true, &generics);
+  fcallImpl<false>(origpc, pc, fca.withGenerics(), func, NoCtx{});
 }
 
 OPTBLD_INLINE void fcallFuncClsMeth(PC origpc, PC& pc, const FCallArgs& fca) {
@@ -3909,12 +3903,17 @@ OPTBLD_INLINE void fcallFuncClsMeth(PC origpc, PC& pc, const FCallArgs& fca) {
 OPTBLD_INLINE void fcallFuncRClsMeth(PC origpc, PC& pc, const FCallArgs& fca) {
   assertx(tvIsRClsMeth(vmStack().topC()));
   auto const rclsMeth = vmStack().topC()->m_data.prclsmeth;
-
   auto const cls = rclsMeth->m_cls;
   auto const func = rclsMeth->m_func;
-  auto generics = Array(rclsMeth->m_arr);
-  vmStack().popC();
-  fcallImpl<false>(origpc, pc, fca, func, cls, true, &generics);
+  vmStack().discard();
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    vmStack().pushVec(rclsMeth->m_arr);
+  } else {
+    vmStack().pushArray(rclsMeth->m_arr);
+  }
+  decRefRClsMeth(rclsMeth);
+
+  fcallImpl<false>(origpc, pc, fca.withGenerics(), func, cls);
 }
 
 Func* resolveFuncImpl(Id id) {

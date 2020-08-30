@@ -3664,11 +3664,24 @@ OPTBLD_INLINE void iopUnsetG() {
   vmStack().popC();
 }
 
-bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
-             CallFlags callFlags) {
+bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgs,
+             bool hasUnpack, void* ctx, TCA retAddr) {
   TRACE(3, "FCall: pc %p func %p base %d\n", vmpc(),
         vmfp()->unit()->entry(),
         int(vmfp()->func()->base()));
+
+  assertx(kNumActRecCells == 3);
+  ActRec* ar = vmStack().indA(
+    numArgs + (hasUnpack ? 1 : 0) + (callFlags.hasGenerics() ? 1 : 0));
+  ar->m_sfp = vmfp();
+  ar->setJitReturn(retAddr);
+  ar->setFunc(func);
+  ar->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
+    callFlags.callOffset(),
+    callFlags.asyncEagerReturn() ? (1 << ActRec::AsyncEagerRet) : 0
+  );
+  ar->setNumArgs(numArgs + (hasUnpack ? 1 : 0));
+  ar->setThisOrClassAllowNull(ctx);
 
   try {
     assertx(!callFlags.hasGenerics() || tvIsHAMSafeVArray(vmStack().topC()));
@@ -3745,24 +3758,16 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   callerRxChecks(vmfp(), func);
   checkStack(vmStack(), func, 0);
 
-  assertx(kNumActRecCells == 3);
-  ActRec* ar = vmStack().indA(fca.numInputs());
-  ar->setFunc(func);
-  ar->setNumArgs(fca.numArgs + (fca.hasUnpack() ? 1 : 0));
-  auto const asyncEagerReturn =
-    fca.asyncEagerOffset != kInvalidOffset && func->supportsAsyncEagerReturn();
-  ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper, asyncEagerReturn);
-  ar->setThisOrClassAllowNull(takeCtx(std::forward<Ctx>(ctx)));
-
   auto const callFlags = CallFlags(
     fca.hasGenerics(),
     dynamic,
-    asyncEagerReturn,
-    0, // call offset already set on the ActRec
+    fca.asyncEagerOffset != kInvalidOffset && func->supportsAsyncEagerReturn(),
+    Offset(origpc - vmfp()->func()->entry()),
     0  // generics bitmap not used by interpreter
   );
 
-  doFCall(ar, fca.numArgs, fca.hasUnpack(), callFlags);
+  doFCall(callFlags, func, fca.numArgs, fca.hasUnpack(),
+          takeCtx(std::forward<Ctx>(ctx)), jit::tc::ustubs().retHelper);
   pc = vmpc();
 }
 

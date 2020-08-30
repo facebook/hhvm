@@ -269,21 +269,9 @@ bool fcallHelper(CallFlags callFlags, Func* func, uint32_t numArgsInclUnpack,
       throw_stack_overflow();
     }
 
-    // Write ActRec.
-    ActRec* ar = reinterpret_cast<ActRec*>(calleeFP);
-    ar->m_sfp = vmfp();
-    ar->setJitReturn(savedRip);
-    ar->setFunc(func);
-    ar->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
-      callFlags.callOffset(),
-      callFlags.asyncEagerReturn() ? (1 << ActRec::AsyncEagerRet) : 0
-    );
-    ar->setNumArgs(numArgsInclUnpack);
-    ar->m_thisUnsafe = reinterpret_cast<ObjectData*>(ctx);
-
     // If doFCall() returns false, we've been asked to skip the function body
     // due to fb_intercept, so indicate that via the return value.
-    return doFCall(ar, numArgs, hasUnpack, callFlags);
+    return doFCall(callFlags, func, numArgs, hasUnpack, ctx, savedRip);
   });
 }
 

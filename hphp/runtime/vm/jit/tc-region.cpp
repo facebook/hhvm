@@ -350,16 +350,6 @@ void relocateOptFunc(FuncMetaInfo& info, SrcKeyTransMap& srcKeyTrans,
                      size_t* failedBytes = nullptr, CodeMetaLock* locker = nullptr) {
   auto const func = info.func;
 
-  // If the function had a body dispatch emitted during profiling, then emit it
-  // again right before the optimized prologues.
-  if (func->getFuncBody() != tc::ustubs().funcBodyHelperThunk &&
-      func->getDVFunclets().size() > 0) {
-    auto const loc = emitFuncBodyDispatchInternal(
-      func, func->getDVFunclets(), TransKind::OptPrologue, locker
-    );
-    info.bodyDispatch = std::make_unique<TcaRange>(loc.entryRange());
-  }
-
   // Relocate/emit all prologues and translations for func in order.
   size_t prologueIdx = 0;
   size_t translationIdx = 0;
@@ -448,15 +438,6 @@ void publishOptFuncCode(FuncMetaInfo& info,
                         jit::hash_set<TCA>* publishedSet = nullptr) {
   auto const func = info.func;
 
-  if (info.bodyDispatch) {
-    const auto start = info.bodyDispatch->start();
-    const auto   end = info.bodyDispatch->end();
-    always_assert(start);
-    // NB: this already calls func->setFuncBody() with the new start address
-    publishFuncBodyDispatch(func, start, end);
-    if (publishedSet) publishedSet->insert(start);
-  }
-
   // Publish all prologues and translations for func in order.
   size_t prologueIdx = 0;
   size_t translationIdx = 0;
@@ -487,8 +468,8 @@ void publishOptFuncCode(FuncMetaInfo& info,
         if (!loc.empty()) {
           publishTranslationCode(std::move(transInfo));
           if (publishedSet) publishedSet->insert(loc.entry());
-          if (regionSk.offset() == func->base() &&
-              func->getDVFunclets().size() == 0) {
+          if (regionSk == SrcKey{func, func->base(), ResumeMode::None} &&
+              func->numRequiredParams() == func->numNonVariadicParams()) {
             func->setFuncBody(loc.entry());
           }
         }

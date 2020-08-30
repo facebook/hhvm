@@ -1355,10 +1355,6 @@ To string conversions:
   instruction does not assume the loaded function will be called immediately,
   so it will raise a resolution failure error instead of a call failure error.
 
-| LdARNumParams, D(Int), S(FramePtr), NF
-
-  Loads the number of params from an ActRec. S0 is the address of the ActRec
-
 | LdFuncNumParams, D(Int), S(Func), NF
 
   Returns the value of func->numParams().

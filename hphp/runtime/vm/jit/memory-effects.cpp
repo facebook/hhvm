@@ -1457,7 +1457,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DefFuncEntryFP:
     return may_load_store(livefp(inst.src(0)), livefp(inst.dst()));
 
-  case LdARNumParams:
   case LdARFlags:
     return PureLoad { AFMeta { inst.src(0) }};
 

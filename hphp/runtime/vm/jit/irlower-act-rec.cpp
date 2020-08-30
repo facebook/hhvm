@@ -153,13 +153,6 @@ void cgLdARFlags(IRLS& env, const IRInstruction* inst) {
   vmain(env) << loadzlq{fp[AROFF(m_callOffAndFlags)], dst};
 }
 
-void cgLdARNumParams(IRLS& env, const IRInstruction* inst) {
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const fp = srcLoc(env, inst, 0).reg();
-  vmain(env) << loadzlq{fp[AROFF(m_numArgs)], dst};
-}
-
-
 void cgLdFrameThis(IRLS& env, const IRInstruction* inst) {
   assertx(!inst->func() || inst->ctx() || inst->func()->isClosureBody());
   auto const dst = dstLoc(env, inst, 0).reg();

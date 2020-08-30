@@ -60,16 +60,6 @@ genFuncPrologue(TransID transID, TransKind kind,
                 Func* func, int argc, CodeCache& code, CGMeta& fixups,
                 tc::CodeMetaLock* locker);
 
-/*
- * Emit a func body dispatch entry point to the TC.
- *
- * This entry point calls DV init funclets for any un-passed parameters, and
- * then performs a bindjmp to the function's actual entry point translation.
- */
-TransLoc genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
-                             TransKind kind, CodeCache& code,
-                             tc::CodeMetaLock* locker);
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

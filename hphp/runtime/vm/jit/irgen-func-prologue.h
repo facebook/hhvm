@@ -37,8 +37,6 @@ void emitPrologueLocals(IRGS& env, uint32_t argc, SSATmp* callFlags,
 
 void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID);
 
-void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs);
-
 void emitGenericsMismatchCheck(IRGS& env, SSATmp* callFlags);
 
 void emitCalleeDynamicCallCheck(IRGS& env, SSATmp* callFlags);

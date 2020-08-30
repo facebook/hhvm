@@ -54,19 +54,6 @@ bool publishFuncPrologueCode(Func* func, int nArgs, PrologueMetaInfo& info);
  */
 void smashFuncCallers(TCA start, ProfTransRec* rec);
 
-/*
- * Emit the prologue dispatch for func which contains dvs DV initializers, and
- * return its start address.  The `kind' of translation argument is used to
- * decide what area of the code cache will be used (hot, main, or prof).
- *
- * Precondition: calling thread owns both code and metadata locks, or
- *               passes a non-null locker param
- */
-TransLoc emitFuncBodyDispatchInternal(Func* func, const DVFuncletsVec& dvs,
-                                      TransKind kind, CodeMetaLock* locker);
-
-void publishFuncBodyDispatch(Func* func, TCA start, TCA end);
-
 }
 
 }}

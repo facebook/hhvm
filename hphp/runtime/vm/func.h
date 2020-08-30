@@ -66,11 +66,6 @@ using ArFunction = TypedValue* (*)(ActRec* ar);
 struct NativeArgs; // never defined
 using NativeFunction = void(*)(NativeArgs*);
 
-/*
- * Vector of pairs (param index, offset of corresponding DV funclet).
- */
-using DVFuncletsVec = std::vector<std::pair<int, Offset>>;
-
 ///////////////////////////////////////////////////////////////////////////////
 // EH table.
 
@@ -408,12 +403,6 @@ struct Func final {
    * Get the Op at `instrOffset'.
    */
   Op getOp(Offset instrOffset) const;
-
-  /*
-   * Return a vector of pairs of (param index, corresponding DV funclet
-   * offset).
-   */
-  DVFuncletsVec getDVFunclets() const;
 
   /*
    * Is there a main or default value entrypoint at the given offset?

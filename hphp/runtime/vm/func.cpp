@@ -397,18 +397,6 @@ bool Func::isFuncIdValid(FuncId id) {
 ///////////////////////////////////////////////////////////////////////////////
 // Bytecode.
 
-DVFuncletsVec Func::getDVFunclets() const {
-  DVFuncletsVec dvs;
-  int nParams = numParams();
-  for (int i = 0; i < nParams; ++i) {
-    const ParamInfo& pi = params()[i];
-    if (pi.hasDefaultValue()) {
-      dvs.push_back(std::make_pair(i, pi.funcletOff));
-    }
-  }
-  return dvs;
-}
-
 bool Func::isEntry(Offset offset) const {
   return offset == base() || isDVEntry(offset);
 }

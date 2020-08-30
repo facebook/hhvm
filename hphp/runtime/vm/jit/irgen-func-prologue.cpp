@@ -430,52 +430,6 @@ void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
   emitPrologueBody(env, argc, transID, callFlags, closure);
 }
 
-void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
-  auto const func = curFunc(env);
-  auto const num_args = gen(env, LdARNumParams, fp(env));
-
-  if (isProfiling(env.context.kind)) {
-    profData()->setProfiling(func->getFuncId());
-  }
-
-  for (auto const& dv : dvs) {
-    ifThen(
-      env,
-      [&] (Block* taken) {
-        auto const lte = gen(env, LteInt, num_args, cns(env, dv.first));
-        gen(env, JmpNZero, taken, lte);
-      },
-      [&] {
-        gen(
-          env,
-          ReqBindJmp,
-          ReqBindJmpData {
-            SrcKey { func, dv.second, ResumeMode::None },
-            FPInvOffset { func->numSlotsInFrame() },
-            spOffBCFromIRSP(env),
-            TransFlags{}
-          },
-          sp(env),
-          fp(env)
-        );
-      }
-    );
-  }
-
-  gen(
-    env,
-    ReqBindJmp,
-    ReqBindJmpData {
-      SrcKey { func, func->base(), ResumeMode::None },
-      FPInvOffset { func->numSlotsInFrame() },
-      spOffBCFromIRSP(env),
-      TransFlags{}
-    },
-    sp(env),
-    fp(env)
-  );
-}
-
 void emitGenericsMismatchCheck(IRGS& env, SSATmp* callFlags) {
   auto const func = curFunc(env);
   if (!func->hasReifiedGenerics()) return;

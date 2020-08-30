@@ -139,7 +139,6 @@ struct FuncMetaInfo {
   // vectors above, and it encodes the order in which they should be published.
   std::vector<Kind> order;
 
-  std::unique_ptr<TcaRange>     bodyDispatch;
   std::vector<PrologueMetaInfo> prologues;
   std::vector<TransMetaInfo>    translations;
 };
@@ -205,13 +204,6 @@ TCA emitFuncPrologue(Func* func, int argc, TransKind kind);
  * prologue.
  */
 void emitFuncPrologueOpt(ProfTransRec* rec);
-
-/*
- * Emit the prologue dispatch for func which contains dvs DV initializers, and
- * return its start address.  The `kind' of translation argument is used to
- * decide what area of the code cache will be used (hot, main, or prof).
- */
-TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs, TransKind kind);
 
 ////////////////////////////////////////////////////////////////////////////////
 

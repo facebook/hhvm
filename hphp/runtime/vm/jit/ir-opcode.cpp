@@ -744,7 +744,6 @@ bool opcodeMayRaise(Opcode opc) {
   case KillIter:
   case LdAFWHActRec:
   case LdARFlags:
-  case LdARNumParams:
   case LdBindAddr:
   case LdClosureCls:
   case LdClosureThis:

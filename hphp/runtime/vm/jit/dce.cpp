@@ -195,7 +195,6 @@ bool canDCE(IRInstruction* inst) {
   case LdObjClass:
   case LdClsName:
   case LdLazyClsName:
-  case LdARNumParams:
   case LdFuncCls:
   case LdFuncNumParams:
   case LdFuncName:

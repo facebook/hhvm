@@ -264,12 +264,6 @@ struct Class : AtomicCountable {
 
     template <bool is_const>
     struct Entry {
-      template <typename Dummy = void,
-                typename = std::enable_if_t<!is_const, Dummy>>
-      Entry& operator=(TypedValueAux);
-
-      operator TypedValueAux() const;
-
       tv_val<is_const> val;
       typename BitsetView<is_const>::bit_reference deepInit;
     };

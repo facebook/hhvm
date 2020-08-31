@@ -2369,14 +2369,17 @@ void Class::sortOwnProps(const PropMap::Builder& curPropMap,
 void Class::sortOwnPropsInitVec(uint32_t first, uint32_t past,
                                 const std::vector<uint16_t>& slotIndex) {
   auto const size = past - first;
-  std::vector<TypedValueAux> tmpPropInitVec(size);
+  std::vector<TypedValue> tmpPropInitVec(size);
+  std::vector<bool> tmpDeepInit(size);
   for (uint32_t i = first; i < past; i++) {
-    tmpPropInitVec[i - first] = m_declPropInit[i];
+    tvCopy(m_declPropInit[i].val.tv(), tmpPropInitVec[i - first]);
+    tmpDeepInit[i - first] = m_declPropInit[i].deepInit;
   }
   for (uint32_t slot = first; slot < past; slot++) {
     auto index = slotIndex[slot];
     FTRACE(3, "  - placing propInit for slot {} at index {}\n", slot, index);
-    m_declPropInit[index] = tmpPropInitVec[slot - first];
+    tvCopy(tmpPropInitVec[slot - first], m_declPropInit[index].val);
+    m_declPropInit[index].deepInit = tmpDeepInit[slot - first];
   }
 }
 

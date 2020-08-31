@@ -155,25 +155,6 @@ Class::PropInitVec::deepInitBits() const {
                           ObjectProps::sizeFor(cap)};
 }
 
-template <bool is_const>
-template <typename Dummy, typename>
-Class::PropInitVec::Entry<is_const>&
-Class::PropInitVec::Entry<is_const>::operator=(TypedValueAux tva) {
-  tvCopy(tva, val);
-  deepInit = tva.deepInit();
-  return *this;
-}
-
-template <bool is_const>
-Class::PropInitVec::Entry<is_const>::operator TypedValueAux() const {
-  TypedValueAux tva;
-
-  tvCopy(val.tv(), tva);
-  tva.deepInit() = deepInit;
-
-  return tva;
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Pre- and post-allocations.

@@ -109,8 +109,6 @@ union AuxUnion {
   int32_t u_hash;
   // Magic number for asserts in VarNR.
   VarNrFlag u_varNrFlag;
-  // Used by Class::initPropsImpl() for deep init.
-  bool u_deepInit;
   // Used by Class::Const.
   ConstModifiers u_constModifiers;
   // Used by InvokeResult.
@@ -164,9 +162,6 @@ struct TypedValueAux : TypedValue {
 
   const VarNrFlag& varNrFlag() const { return m_aux.u_varNrFlag; }
         VarNrFlag& varNrFlag()       { return m_aux.u_varNrFlag; }
-
-  const bool& deepInit() const { return m_aux.u_deepInit; }
-        bool& deepInit()       { return m_aux.u_deepInit; }
 
   const ConstModifiers& constModifiers() const {
     return m_aux.u_constModifiers;

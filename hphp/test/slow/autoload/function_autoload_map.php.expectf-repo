@@ -1,0 +1,1 @@
+Fatal error: Call to undefined function foo\test() in %s/function_autoload_map.php on line 11

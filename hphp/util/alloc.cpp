@@ -270,20 +270,20 @@ unsigned allocate2MPagesToRange(AddrRangeClass c, unsigned pages) {
   return 0;
 }
 
-void setup_low_arena(unsigned n1GPages) {
+void setup_low_arena(PageSpec s) {
   assert(reinterpret_cast<uintptr_t>(sbrk(0)) <= kLowArenaMinAddr);
   // Initialize mappers for the VeryLow and Low address ranges.
   auto& veryLowRange = getRange(AddrRangeClass::VeryLow);
   auto& lowRange = getRange(AddrRangeClass::Low);
   auto veryLowMapper =
     getMapperChain(veryLowRange,
-                   (n1GPages != 0) ? 1 : 0,
-                   true, 0,             // 2M
+                   (s.n1GPages != 0) ? 1 : 0,
+                   true, s.n2MPages,    // 2M
                    true,                // 4K
                    numa_node_set, 0);
   auto lowMapper =
     getMapperChain(lowRange,
-                   (n1GPages > 1) ? (n1GPages - 1) : 0,
+                   (s.n1GPages > 1) ? (s.n1GPages - 1) : 0,
                    true, 0,             // 2M
                    true,                // 4K
                    numa_node_set, 1);
@@ -316,11 +316,11 @@ void setup_low_arena(unsigned n1GPages) {
   low_cold_arena_flags = MALLOCX_ARENA(low_cold_arena) | MALLOCX_TCACHE_NONE;
 }
 
-void setup_high_arena(unsigned n1GPages) {
+void setup_high_arena(PageSpec s) {
   auto& range = getRange(AddrRangeClass::Uncounted);
-  auto mapper = getMapperChain(range, n1GPages,
-                               true, 0, // 2M pages can be added later
-                               true,    // use normal pages
+  auto mapper = getMapperChain(range, s.n1GPages,
+                               true, s.n2MPages, // 2M pages can be added later
+                               true,             // use normal pages
                                numa_node_set,
                                num_numa_nodes() / 2 + 1);
   range.setLowMapper(mapper);
@@ -714,6 +714,22 @@ struct JEMallocInitializer {
         abort();
       }
     }
+    unsigned low_2m_pages = 0;
+    if (char* buffer = getenv("HHVM_LOW_2M_PAGE")) {
+      if (!sscanf(buffer, "%u", &low_2m_pages)) {
+        fprintf(stderr,
+                "Bad environment variable HHVM_LOW_2M_PAGE: %s\n", buffer);
+        abort();
+      }
+    }
+    unsigned high_2m_pages = 0;
+    if (char* buffer = getenv("HHVM_HIGH_2M_PAGE")) {
+      if (!sscanf(buffer, "%u", &high_2m_pages)) {
+        fprintf(stderr,
+                "Bad environment variable HHVM_HIGH_2M_PAGE: %s\n", buffer);
+        abort();
+      }
+    }
 
     HugePageInfo info = get_huge1g_info();
     unsigned remaining = static_cast<unsigned>(info.nr_hugepages);
@@ -747,7 +763,7 @@ struct JEMallocInitializer {
               "using %u (specified %u) 1G huge pages for low arena\n",
               low_1g_pages, origLow1G);
     }
-    setup_low_arena(low_1g_pages);
+    setup_low_arena({low_1g_pages, low_2m_pages});
 
     if (high_1g_pages > remaining) {
       high_1g_pages = remaining;
@@ -757,7 +773,7 @@ struct JEMallocInitializer {
               "using %u (specified %u) 1G huge pages for high arena\n",
               high_1g_pages, origHigh1G);
     }
-    setup_high_arena(high_1g_pages);
+    setup_high_arena({high_1g_pages, high_2m_pages});
     // Make sure high/low arenas are available to the current thread.
     arenas_thread_init();
 #endif

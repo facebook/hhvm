@@ -178,7 +178,7 @@ let line_margin_highlighted position_group line_num col_width_raw : string =
       markers_string position_group line_num ~apply_color:false |> String.length
     in
     let line_num_raw_len = string_of_int line_num |> String.length in
-    col_width_raw - (markers_raw_len + line_num_raw_len)
+    max (col_width_raw - (markers_raw_len + line_num_raw_len)) 1
   in
   let markers_pretty = markers_string position_group line_num in
   let spaces = String.make nspaces ' ' in

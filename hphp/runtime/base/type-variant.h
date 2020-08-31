@@ -1376,25 +1376,25 @@ inline variant_ref& variant_ref::operator=(Variant &&rhs) noexcept {
 ///////////////////////////////////////////////////////////////////////////////
 // VarNR
 
-struct VarNR : private TypedValueAux {
+struct VarNR : private TypedValue {
   static VarNR MakeKey(const String& s) {
     if (s.empty()) return VarNR(staticEmptyString());
     return VarNR(s);
   }
 
   // Use to hold variant that do not need ref-counting
-  explicit VarNR(bool    v) { init(KindOfBoolean); m_data.num = (v?1:0);}
-  explicit VarNR(int     v) { init(KindOfInt64  ); m_data.num = v;}
+  explicit VarNR(bool      v) { m_type = KindOfBoolean; m_data.num = (v?1:0);}
+  explicit VarNR(int       v) { m_type = KindOfInt64;   m_data.num = v;}
   // The following two overloads will accept int64_t whether it's
   // implemented as long or long long.
-  explicit VarNR(long    v) { init(KindOfInt64  ); m_data.num = v;}
-  explicit VarNR(long long v) { init(KindOfInt64  ); m_data.num = v;}
-  explicit VarNR(uint64_t  v) { init(KindOfInt64  ); m_data.num = v;}
-  explicit VarNR(double  v) { init(KindOfDouble ); m_data.dbl = v;}
+  explicit VarNR(long      v) { m_type = KindOfInt64;   m_data.num = v;}
+  explicit VarNR(long long v) { m_type = KindOfInt64;   m_data.num = v;}
+  explicit VarNR(uint64_t  v) { m_type = KindOfInt64;   m_data.num = v;}
+  explicit VarNR(double    v) { m_type = KindOfDouble;  m_data.dbl = v;}
 
   explicit VarNR(const StaticString &v) {
     assertx(v.get() && !v.get()->isRefCounted());
-    init(KindOfPersistentString);
+    m_type = KindOfPersistentString;
     m_data.pstr = v.get();
   }
 
@@ -1405,7 +1405,7 @@ struct VarNR : private TypedValueAux {
   explicit VarNR(StringData *v);
   explicit VarNR(const StringData *v) {
     assertx(v && !v->isRefCounted());
-    init(KindOfPersistentString);
+    m_type = KindOfPersistentString;
     m_data.pstr = const_cast<StringData*>(v);
   }
   explicit VarNR(ArrayData *v);
@@ -1413,10 +1413,10 @@ struct VarNR : private TypedValueAux {
   explicit VarNR(ObjectData *v);
   explicit VarNR(const ObjectData*) = delete;
 
-  explicit VarNR(TypedValue tv) { init(tv.m_type); m_data = tv.m_data; }
+  explicit VarNR(TypedValue tv) { m_type = tv.m_type; m_data = tv.m_data; }
   explicit VarNR(const Variant& v) : VarNR{*v.asTypedValue()} {}
 
-  VarNR(const VarNR &v) : TypedValueAux(v) {}
+  VarNR(const VarNR &v) : TypedValue(v) {}
 
   explicit VarNR() { asVariant()->asTypedValue()->m_type = KindOfUninit; }
 
@@ -1438,10 +1438,6 @@ private:
   /* implicit */ VarNR(const char* v) = delete;
   /* implicit */ VarNR(const std::string & v) = delete;
 
-  void init(DataType dt) {
-    m_type = dt;
-    if (debug) varNrFlag() = NR_FLAG;
-  }
   const Variant *asVariant() const {
     return &tvAsCVarRef(static_cast<const TypedValue*>(this));
   }
@@ -1449,7 +1445,7 @@ private:
     return &tvAsVariant(static_cast<TypedValue*>(this));
   }
   void checkRefCount() {
-    assertx(isRefcountedType(m_type) ? varNrFlag() == NR_FLAG : true);
+    assertx(isRealType(m_type));
 
     switch (m_type) {
       DT_UNCOUNTED_CASE:

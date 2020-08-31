@@ -684,8 +684,8 @@ void Variant::setEvalScalar() {
 }
 
 VarNR::VarNR(StringData *v) {
-  init(KindOfString);
   if (v) {
+    m_type = KindOfString;
     m_data.pstr = v;
   } else {
     m_type = KindOfNull;
@@ -694,16 +694,16 @@ VarNR::VarNR(StringData *v) {
 
 VarNR::VarNR(ArrayData *v) {
   if (v) {
-    init(v->toDataType());
+    m_type = v->toDataType();
     m_data.parr = v;
   } else {
-    init(KindOfNull);
+    m_type = KindOfNull;
   }
 }
 
 VarNR::VarNR(ObjectData *v) {
-  init(KindOfObject);
   if (v) {
+    m_type = KindOfObject;
     m_data.pobj = v;
   } else {
     m_type = KindOfNull;

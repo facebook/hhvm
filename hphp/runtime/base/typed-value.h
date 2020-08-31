@@ -70,8 +70,6 @@ union Value {
   LazyClassData plazyclass;   // KindOfLazyClass
 };
 
-enum VarNrFlag { NR_FLAG = 1 << 29 };
-
 struct ConstModifiers {
   uint32_t rawData;
 
@@ -107,8 +105,6 @@ union AuxUnion {
   uint32_t u_asyncEagerReturnFlag;
   // Key type and hash for MixedArray.
   int32_t u_hash;
-  // Magic number for asserts in VarNR.
-  VarNrFlag u_varNrFlag;
   // Used by Class::Const.
   ConstModifiers u_constModifiers;
   // Used by InvokeResult.
@@ -159,9 +155,6 @@ struct TypedValueAux : TypedValue {
 
   const int32_t& hash() const { return m_aux.u_hash; }
         int32_t& hash()       { return m_aux.u_hash; }
-
-  const VarNrFlag& varNrFlag() const { return m_aux.u_varNrFlag; }
-        VarNrFlag& varNrFlag()       { return m_aux.u_varNrFlag; }
 
   const ConstModifiers& constModifiers() const {
     return m_aux.u_constModifiers;

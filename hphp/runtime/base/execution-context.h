@@ -512,11 +512,9 @@ public:
   template<class Fn> void sweepDynPropTable(Fn);
 
 private:
-  template<class FEnterVM>
-  TypedValue invokeFuncImpl(const Func* f,
-                            ObjectData* thiz, Class* cls,
-                            uint32_t numArgsInclUnpack,
-                            FEnterVM doEnterVM);
+  TypedValue invokeFuncImpl(const Func* f, ObjectData* thiz, Class* cls,
+                            uint32_t numArgsInclUnpack, Array&& generics,
+                            bool dynamic, bool allowDynCallNoPointer);
 
   struct ExcLoggerHook final : LoggerHook {
     explicit ExcLoggerHook(ExecutionContext& ec) : ec(ec) {}

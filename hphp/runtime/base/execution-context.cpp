@@ -1476,16 +1476,13 @@ static inline void enterVM(ActRec* ar, Action action) {
 
 /*
  * Shared implementation for invokeFunc{,Few}().
- *
- * The `doEnterVM' callback take an ActRec* argument corresponding to
- * the reentry frame.
  */
-template<class FEnterVM>
 ALWAYS_INLINE
 TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
                                             ObjectData* thiz, Class* cls,
                                             uint32_t numArgsInclUnpack,
-                                            FEnterVM doEnterVM) {
+                                            Array&& generics, bool dynamic,
+                                            bool allowDynCallNoPointer) {
   assertx(f);
   // If `f' is a regular function, `thiz' and `cls' must be null.
   assertx(IMPLIES(!f->implCls(), (!thiz && !cls)));
@@ -1534,7 +1531,10 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   };
 
   enterVM(ar, [&] {
-    exception_handler([&] { doEnterVM(ar); });
+    exception_handler([&] {
+      enterVMAtFunc(ar, std::move(generics), f->takesInOutParams(), dynamic,
+                    allowDynCallNoPointer);
+    });
   });
 
   if (UNLIKELY(f->takesInOutParams())) {
@@ -1602,12 +1602,8 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
   // Caller checks.
   if (dynamic) callerDynamicCallChecks(f, allowDynCallNoPointer);
 
-  auto const doEnterVM = [&] (ActRec* ar) {
-    enterVMAtFunc(ar, std::move(reifiedGenerics), f->takesInOutParams(),
-                  dynamic, allowDynCallNoPointer);
-  };
-
-  return invokeFuncImpl(f, thiz, cls, numArgs, doEnterVM);
+  return invokeFuncImpl(f, thiz, cls, numArgs, std::move(reifiedGenerics),
+                        dynamic, allowDynCallNoPointer);
 }
 
 TypedValue ExecutionContext::invokeFuncFew(
@@ -1657,14 +1653,8 @@ TypedValue ExecutionContext::invokeFuncFew(
   // Caller checks.
   if (dynamic) callerDynamicCallChecks(f, allowDynCallNoPointer);
 
-  auto const doEnterVM = [&] (ActRec* ar) {
-    enterVMAtFunc(ar, Array(), f->takesInOutParams(), dynamic, false);
-  };
-
-  return invokeFuncImpl(f,
-                        thisOrCls.left(),
-                        thisOrCls.right(),
-                        numArgs, doEnterVM);
+  return invokeFuncImpl(f, thisOrCls.left(), thisOrCls.right(), numArgs,
+                        Array(), dynamic, false);
 }
 
 static void prepareAsyncFuncEntry(ActRec* enterFnAr,

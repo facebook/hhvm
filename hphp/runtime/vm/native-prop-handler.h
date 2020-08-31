@@ -266,10 +266,6 @@ Variant setProp(const Object& obj, const String& name, const Variant& value);
 Variant issetProp(const Object& obj, const String& name);
 Variant unsetProp(const Object& obj, const String& name);
 
-inline bool isPropHandled(Variant& propResult) {
-  return propResult.isInitialized();
-}
-
 //////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Native
 

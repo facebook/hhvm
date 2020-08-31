@@ -107,8 +107,6 @@ union AuxUnion {
   int32_t u_hash;
   // Used by Class::Const.
   ConstModifiers u_constModifiers;
-  // Used by InvokeResult.
-  bool u_ok;
   // Used by system constants
   bool u_dynamic;
 };

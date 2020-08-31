@@ -131,17 +131,6 @@ private:
 };
 static_assert(sizeof(MemoSlot) == sizeof(TypedValue), "");
 
-struct InvokeResult {
-  TypedValue val;
-  InvokeResult() {}
-  InvokeResult(bool ok, TypedValue v) : val(v) {
-    val.m_aux.u_ok = ok;
-  }
-  InvokeResult(bool ok, Variant&& v);
-  bool ok() const { return val.m_aux.u_ok; }
-  explicit operator bool() const { return ok(); }
-};
-
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
@@ -527,11 +516,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   tv_lval propImpl(TypedValue* tvRef, const Class* ctx, const StringData* key);
 
   void setDynProp(const StringData* key, TypedValue val);
-
-  InvokeResult invokeNativeGetProp(const StringData* key);
-  bool invokeNativeSetProp(const StringData* key, TypedValue val);
-  InvokeResult invokeNativeIssetProp(const StringData* key);
-  bool invokeNativeUnsetProp(const StringData* key);
 
  public:
   tv_lval prop(TypedValue* tvRef, const Class* ctx, const StringData* key);

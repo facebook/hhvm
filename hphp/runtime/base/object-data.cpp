@@ -1185,49 +1185,6 @@ tv_lval ObjectData::getPropIgnoreAccessibility(const StringData* key) {
 
 //////////////////////////////////////////////////////////////////////
 
-inline InvokeResult::InvokeResult(bool ok, Variant&& v) :
-  val(*v.asTypedValue()) {
-  tvWriteUninit(*v.asTypedValue());
-  val.m_aux.u_ok = ok;
-}
-
-static InvokeResult guardedNativePropResult(Variant result) {
-  if (!Native::isPropHandled(result)) {
-    return {false, make_tv<KindOfUninit>()};
-  }
-  return InvokeResult{true, std::move(result)};
-}
-
-InvokeResult ObjectData::invokeNativeGetProp(const StringData* key) {
-  return guardedNativePropResult(
-      Native::getProp(Object{this}, StrNR(key))
-  );
-}
-
-bool ObjectData::invokeNativeSetProp(const StringData* key, TypedValue val) {
-  auto r = guardedNativePropResult(
-    Native::setProp(Object{this}, StrNR(key), tvAsCVarRef(&val))
-  );
-  tvDecRefGen(r.val);
-  return r.ok();
-}
-
-InvokeResult ObjectData::invokeNativeIssetProp(const StringData* key) {
-  return guardedNativePropResult(
-      Native::issetProp(Object{this}, StrNR(key))
-  );
-}
-
-bool ObjectData::invokeNativeUnsetProp(const StringData* key) {
-  auto r = guardedNativePropResult(
-      Native::unsetProp(Object{this}, StrNR(key))
-  );
-  tvDecRefGen(r.val);
-  return r.ok();
-}
-
-//////////////////////////////////////////////////////////////////////
-
 template<ObjectData::PropMode mode>
 ALWAYS_INLINE
 tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
@@ -1273,8 +1230,9 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
 
   // First see if native getter is implemented.
   if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
-    if (auto r = invokeNativeGetProp(key)) {
-      tvCopy(r.val, *tvRef);
+    auto r = Native::getProp(Object{this}, StrNR(key));
+    if (r.isInitialized()) {
+      tvCopy(r.detach(), *tvRef);
       return tvRef;
     }
   }
@@ -1332,10 +1290,8 @@ bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
   }
 
   if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
-    if (auto r = invokeNativeIssetProp(key)) {
-      tvCastToBooleanInPlace(&r.val);
-      return r.val.m_data.num;
-    }
+    auto r = Native::issetProp(Object{this}, StrNR(key));
+    if (r.isInitialized()) return r.toBoolean();
   }
 
   return false;
@@ -1361,9 +1317,9 @@ void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val) {
   }
 
   // First see if native setter is implemented.
-  if (m_cls->rtAttribute(Class::HasNativePropHandler) &&
-      invokeNativeSetProp(key, val)) {
-    return;
+  if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
+    auto r = Native::setProp(Object{this}, StrNR(key), tvAsCVarRef(&val));
+    if (r.isInitialized()) return;
   }
 
   if (prop) raise_error("Cannot access protected property");
@@ -1421,14 +1377,15 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
 
   // Native accessors.
   if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
-    if (auto r = invokeNativeGetProp(key)) {
-      tvCopy(r.val, tvRef);
-      setopBody(&tvRef, op, val);
-      if (invokeNativeSetProp(key, tvRef)) {
+    auto r = Native::getProp(Object{this}, StrNR(key));
+    if (r.isInitialized()) {
+      setopBody(r.asTypedValue(), op, val);
+      auto r2 = Native::setProp(Object{this}, StrNR(key), r);
+      if (r2.isInitialized()) {
+        tvCopy(r.detach(), tvRef);
         return &tvRef;
       }
     }
-    // XXX else, write tvRef = null?
   }
 
   if (prop) raise_error("Cannot access protected property");
@@ -1496,12 +1453,11 @@ TypedValue ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key
 
   // Native accessors.
   if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
-    if (auto r = invokeNativeGetProp(key)) {
-      SCOPE_EXIT { tvDecRefGen(r.val); };
-      auto const dest = IncDecBody(op, tvAssertPlausible(&r.val));
-      if (invokeNativeSetProp(key, tvAssertPlausible(r.val))) {
-        return dest;
-      }
+    auto r = Native::getProp(Object{this}, StrNR(key));
+    if (r.isInitialized()) {
+      auto const dest = IncDecBody(op, r.asTypedValue());
+      auto r2 = Native::setProp(Object{this}, StrNR(key), r);
+      if (r2.isInitialized()) return dest;
     }
   }
 
@@ -1537,9 +1493,9 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
   }
 
   // Native unset first.
-  if (m_cls->rtAttribute(Class::HasNativePropHandler) &&
-      invokeNativeUnsetProp(key)) {
-    return;
+  if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
+    auto r = Native::unsetProp(Object{this}, StrNR(key));
+    if (r.isInitialized()) return;
   }
 
   if (prop && !lookup.accessible) {

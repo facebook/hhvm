@@ -111,8 +111,6 @@ union AuxUnion {
   VarNrFlag u_varNrFlag;
   // Used by Class::initPropsImpl() for deep init.
   bool u_deepInit;
-  // Used by unit.cpp to squirrel away RDS handles.
-  int32_t u_rdsHandle;
   // Used by Class::Const.
   ConstModifiers u_constModifiers;
   // Used by InvokeResult.
@@ -169,9 +167,6 @@ struct TypedValueAux : TypedValue {
 
   const bool& deepInit() const { return m_aux.u_deepInit; }
         bool& deepInit()       { return m_aux.u_deepInit; }
-
-  const int32_t& rdsHandle() const { return m_aux.u_rdsHandle; }
-        int32_t& rdsHandle()       { return m_aux.u_rdsHandle; }
 
   const ConstModifiers& constModifiers() const {
     return m_aux.u_constModifiers;

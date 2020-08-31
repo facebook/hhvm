@@ -4,8 +4,12 @@
 //
 // This reads data from the stack data provided by the tracepoint.
 //
-// It records each frames data in a nomralization map, and creates a
+// It records each frames data in a normalization map, and creates a
 // stack of normalized IDs to pass through a perf buffer
+
+// Gate common stuff because our USDT functions will be included once per process
+#ifndef HACK_SAMPLE_BUFFERS
+#define HACK_SAMPLE_BUFFERS
 
 BPF_PERF_OUTPUT(hack_samples);
 BPF_PERCPU_ARRAY(hack_state, hack_state_t, 1);
@@ -26,9 +30,10 @@ static inline __attribute__((__always_inline__)) int64_t get_symbol_id(
   hack_symbols_map.update(&state->sym, &symbol_id);
   return symbol_id;
 }
+#endif
 
 // Hook me up to HHVM's hack_stack tracepoint
-int on_hhvm_event_hook(struct pt_regs* ctx) {
+int __USDT_PROBE_NAME__(struct pt_regs* ctx) {
   uint32_t zero = 0;
   hack_state_t* state = hack_state.lookup(&zero);
   if (!state) {

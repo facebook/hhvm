@@ -8,6 +8,8 @@
 #define HHVM_TRACING_FUNCTION_MAX HPHP::tracing::kFunctionMax
 #endif
 
+#if defined(HHVM_TRACING_MAX_STACK_FRAMES) && defined(HHVM_TRACING_FILE_NAME_MAX) && \
+    defined(HHVM_TRACING_CLASS_NAME_MAX) && defined(HHVM_TRACING_FUNCTION_MAX)
 // identical to backtrace_frame_t
 typedef struct {
   uint32_t line;
@@ -31,3 +33,5 @@ typedef struct {
   hack_symbol_t sym;
   hack_sample_t sample;
 } hack_state_t;
+
+#endif

@@ -13,6 +13,6 @@ No method `bar` in `C` (did you mean `foo`?) (Typing[4053])
 File "lambda_variadic_generic.php", line 16, characters 37-37:
 This is why I think it is an object of type C
 File "lambda_variadic_generic.php", line 11, characters 29-29:
-  via this generic T
+  via this generic `T`
 File "lambda_variadic_generic.php", line 3, characters 7-7:
 Declaration of `C` is here

@@ -7,4 +7,4 @@ Expected `num`
 File "tapply_is_typedef.php", line 8, characters 34-38:
 But got `mixed`
 File "tapply_is_typedef.php", line 5, characters 38-38:
-  via this generic T
+  via this generic `T`

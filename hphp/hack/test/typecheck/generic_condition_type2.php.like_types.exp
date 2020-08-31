@@ -1,6 +1,6 @@
 File "generic_condition_type2.php", line 9, characters 12-23:
-Invalid foreach (Typing[4110])
+Invalid `foreach` (Typing[4110])
 File "generic_condition_type2.php", line 9, characters 12-23:
-Expected `Traversable<[unresolved]>` because this is used in a foreach statement
+Expected `Traversable<[unresolved]>` because this is used in a `foreach` statement
 File "generic_condition_type2.php", line 5, characters 48-63:
 But got `~\HH\Traversable<Tv1>#\HH\Rx\Traversable`

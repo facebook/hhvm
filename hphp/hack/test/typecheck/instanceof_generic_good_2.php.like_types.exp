@@ -3,6 +3,6 @@ Invalid argument (Typing[4110])
 File "instanceof_generic_good_2.php", line 34, characters 27-54:
 Expected `TkInternal#2` from this `is` expression test
 File "instanceof_generic_good_2.php", line 15, characters 5-14:
-  via this generic TkInternal
+  via this generic `TkInternal`
 File "instanceof_generic_good_2.php", line 31, characters 3-8:
 But got `string`

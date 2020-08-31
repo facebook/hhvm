@@ -3,4 +3,4 @@ You are trying to access the method `assertIsFoo` but this object can be null. (
 File "eq_constraint.php", line 31, characters 40-43:
 This can be null
 File "eq_constraint.php", line 27, characters 30-35:
-  via this generic Tclass
+  via this generic `Tclass`

@@ -5,4 +5,4 @@ Expected `bool`
 File "yield_send4.php", line 5, characters 39-41:
 But got `int`
 File "yield_send4.php", line 5, characters 39-41:
-Considering that this type argument is contravariant with respect to Generator
+Considering that this type argument is contravariant with respect to `Generator`

@@ -5,4 +5,4 @@ Expected `dynamic`
 File "contravariant2.php", line 5, characters 18-22:
 But got `mixed`
 File "contravariant2.php", line 5, characters 18-22:
-Considering that this type argument is contravariant with respect to Foo
+Considering that this type argument is contravariant with respect to `Foo`

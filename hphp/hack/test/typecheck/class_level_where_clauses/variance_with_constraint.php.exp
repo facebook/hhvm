@@ -11,7 +11,7 @@ Expected `int`
 File "variance_with_constraint.php", line 26, characters 24-26:
 But got `num`
 File "variance_with_constraint.php", line 26, characters 24-26:
-Considering that this type argument is contravariant with respect to ContravarianceBase
+Considering that this type argument is contravariant with respect to `ContravarianceBase`
 File "variance_with_constraint.php", line 30, characters 10-15:
 Invalid return type (Typing[4110])
 File "variance_with_constraint.php", line 29, characters 27-29:
@@ -19,4 +19,4 @@ Expected `int`
 File "variance_with_constraint.php", line 29, characters 46-48:
 But got `num`
 File "variance_with_constraint.php", line 29, characters 46-48:
-Considering that this type argument is invariant with respect to Base
+Considering that this type argument is invariant with respect to `Base`

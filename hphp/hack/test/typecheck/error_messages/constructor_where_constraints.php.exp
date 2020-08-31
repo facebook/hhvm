@@ -7,4 +7,4 @@ Expected `nothing`
 File "constructor_where_constraints.php", line 11, characters 9-9:
 But got `X`
 File "constructor_where_constraints.php", line 6, characters 54-54:
-  via this generic T
+  via this generic `T`

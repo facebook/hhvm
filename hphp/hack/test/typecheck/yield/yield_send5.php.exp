@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
 File "yield_send5.php", line 3, characters 12-14:
 Expected `int`
 File "yield_send5.php", line 6, characters 8-27:
-But got `?int` ($generator->send() can always send a null back to a "yield")
+But got `?int` (`$generator->send()` can always send a `null` back to a `yield`)

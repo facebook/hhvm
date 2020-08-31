@@ -3,7 +3,7 @@ Invalid argument (Typing[4110])
 File "method_contravariant.php", line 12, characters 39-45:
 Expected `<expr#1>::T`
 File "method_contravariant.php", line 31, characters 3-4:
-  where '<expr#1>' is a reference to this expression
+  where `<expr#1>` is a reference to this expression
 File "method_contravariant.php", line 31, characters 14-15:
 But got `string`
 File "method_contravariant.php", line 18, characters 46-47:

@@ -27,7 +27,7 @@ Expected `arraykey`
 File "generic_method_constraint_bad.php", line 15, characters 14-18:
 But got `float`
 File "generic_method_constraint_bad.php", line 9, characters 49-50:
-  via this generic Td
+  via this generic `Td`
 File "generic_method_constraint_bad.php", line 19, characters 18-21:
 Invalid argument (Typing[4110])
 File "generic_method_constraint_bad.php", line 10, characters 62-69:

@@ -9,4 +9,4 @@ Expected `string`
 File "transitive_error_3.php", line 14, characters 22-24:
 But got `int`
 File "transitive_error_3.php", line 14, characters 22-24:
-Considering that this type argument is invariant with respect to Inv
+Considering that this type argument is invariant with respect to `Inv`

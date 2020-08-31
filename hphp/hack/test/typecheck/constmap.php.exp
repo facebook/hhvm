@@ -3,10 +3,10 @@ Invalid argument (Typing[4110])
 File "constmap.php", line 13, characters 20-25:
 Expected `string`
 File "collections/Map.hhi", line 54, characters 60-61:
-  via this generic Tk
+  via this generic `Tk`
 File "collections/interfaces.hhi", line 1136, characters 59-60:
-  via this generic Tk
+  via this generic `Tk`
 File "constmap.php", line 12, characters 30-37:
 But got `arraykey`
 File "constmap.php", line 12, characters 30-37:
-Considering that this type argument is invariant with respect to ConstMap
+Considering that this type argument is invariant with respect to `ConstMap`

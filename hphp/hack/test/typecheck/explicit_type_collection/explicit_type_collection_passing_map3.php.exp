@@ -5,6 +5,6 @@ Invalid argument (Typing[4110])
 File "explicit_type_collection_passing_map3.php", line 3, characters 21-26:
 Expected `string`
 File "explicit_type_collection_passing_map3.php", line 3, characters 21-26:
-Considering that this type argument is invariant with respect to Map
+Considering that this type argument is invariant with respect to `Map`
 File "explicit_type_collection_passing_map3.php", line 5, characters 12-19:
 But got `arraykey`

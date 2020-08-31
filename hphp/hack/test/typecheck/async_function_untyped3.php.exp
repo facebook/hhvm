@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
 File "async_function_untyped3.php", line 3, characters 20-22:
 Expected `int`
 File "async_function_untyped3.php", line 5, characters 16-16:
-But got `Awaitable<_>` (result of 'async function')
+But got `Awaitable<_>` (result of an `async` function)

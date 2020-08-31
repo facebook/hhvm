@@ -1,6 +1,6 @@
 File "printf.php", line 27, characters 16-18:
 Invalid argument (Typing[4110])
 File "printf.php", line 27, characters 5-13:
-Expected `string` because of the %s format specifier
+Expected `string` because of the `%s` format specifier
 File "printf.php", line 27, characters 16-18:
 But got `float`

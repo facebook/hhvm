@@ -5,8 +5,8 @@ File "gen7.php", line 21, characters 9-9:
 File "gen7.php", line 23, characters 19-19:
 Expected `D`
 File "gen7.php", line 21, characters 30-30:
-  via this generic T
+  via this generic `T`
 File "gen7.php", line 21, characters 16-16:
 But got `C`
 File "gen7.php", line 21, characters 16-16:
-Considering that this type argument is invariant with respect to A
+Considering that this type argument is invariant with respect to `A`

@@ -9,4 +9,4 @@ Expected `HH\ClassLikeAttribute`
 File "reflection.php", line 18, characters 26-30:
 But got `FAttr`
 File "reflection.php", line 18, characters 26-30:
-  where the class 'FAttr' was referenced here
+  where the class `FAttr` was referenced here

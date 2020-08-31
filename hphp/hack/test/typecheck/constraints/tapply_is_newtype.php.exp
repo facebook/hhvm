@@ -7,4 +7,4 @@ Expected `num`
 File "tapply_is_newtype.php--file2.php", line 4, characters 32-36:
 But got `mixed`
 File "tapply_is_newtype.php--file1.php", line 5, characters 40-40:
-  via this generic T
+  via this generic `T`

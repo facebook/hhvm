@@ -3,10 +3,10 @@ Typing error (Typing[4110])
 File "async_lambda2.php", line 12, characters 31-33:
 Expected `int`
 File "async_lambda2.php", line 13, characters 10-24:
-But got `Awaitable<[unresolved]>` (result of 'async function')
+But got `Awaitable<[unresolved]>` (result of an `async` function)
 File "async_lambda2.php", line 13, characters 10-24:
 Invalid return type (Typing[4110])
 File "async_lambda2.php", line 12, characters 31-33:
 Expected `int`
 File "async_lambda2.php", line 13, characters 10-24:
-But got `Awaitable<int>` (result of 'async function')
+But got `Awaitable<int>` (result of an `async` function)

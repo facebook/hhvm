@@ -3,6 +3,6 @@ The method `f` has the wrong type (Typing[4341])
 File "generic_incompatible_implementation.php", line 7, characters 26-26:
 Expected `T`
 File "generic_incompatible_implementation.php", line 7, characters 26-26:
-Considering that this type argument is invariant with respect to C
+Considering that this type argument is invariant with respect to `C`
 File "generic_incompatible_implementation.php", line 11, characters 26-26:
 But got `D`

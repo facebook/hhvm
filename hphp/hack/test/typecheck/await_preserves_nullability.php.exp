@@ -3,6 +3,6 @@ Invalid argument (Typing[4110])
 File "await_preserves_nullability.php", line 12, characters 11-11:
 Expected `T`
 File "await_preserves_nullability.php", line 20, characters 25-25:
-  via this generic T
+  via this generic `T`
 File "await_preserves_nullability.php", line 16, characters 10-20:
 But got `?T`

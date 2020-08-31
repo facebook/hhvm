@@ -5,4 +5,4 @@ Expected `J`
 File "merge_is_bad.php", line 22, characters 21-24:
 But got `T#2` from this `is` expression test
 File "merge_is_bad.php", line 11, characters 25-25:
-  via this generic T
+  via this generic `T`

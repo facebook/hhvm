@@ -3,11 +3,11 @@ Invalid argument (Typing[4110])
 File "this_tparam_bad2.php", line 14, characters 36-39:
 Expected `<expr#1>`
 File "this_tparam_bad2.php", line 26, characters 12-15:
-  where '<expr#1>' is a reference to this expression
+  where `<expr#1>` is a reference to this expression
 File "this_tparam_bad2.php", line 18, characters 33-35:
 But got `Foo`
 File "this_tparam_bad2.php", line 18, characters 33-35:
-Considering that this type argument is invariant with respect to SomethingElse
+Considering that this type argument is invariant with respect to `SomethingElse`
 File "this_tparam_bad2.php", line 20, characters 15-17:
 Since `Foo` is not final
 File "this_tparam_bad2.php", line 18, characters 33-35:

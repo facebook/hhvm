@@ -9,8 +9,8 @@ Invalid return type (Typing[4110])
 File "instance_of_tparam.php", line 23, characters 33-34:
 Expected `Ty`
 File "instance_of_tparam.php", line 23, characters 33-34:
-Considering that this type argument is invariant with respect to D
+Considering that this type argument is invariant with respect to `D`
 File "instance_of_tparam.php", line 24, characters 13-16:
 But got `Tx` from this `is` expression test
 File "instance_of_tparam.php", line 21, characters 22-22:
-  via this generic T
+  via this generic `T`

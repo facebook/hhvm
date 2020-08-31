@@ -3,7 +3,7 @@ Invalid argument (Typing[4110])
 File "wildcard_funcall.php", line 10, characters 7-7:
 Expected `T#1`
 File "wildcard_funcall.php", line 10, characters 7-7:
-Considering that this type argument is invariant with respect to A
+Considering that this type argument is invariant with respect to `A`
 File "wildcard_funcall.php", line 10, characters 17-19:
 But got `int`
 File "wildcard_funcall.php", line 11, characters 16-27:
@@ -11,7 +11,7 @@ Invalid argument (Typing[4110])
 File "wildcard_funcall.php", line 11, characters 7-12:
 Expected `string`
 File "wildcard_funcall.php", line 11, characters 7-12:
-Considering that this type argument is invariant with respect to A
+Considering that this type argument is invariant with respect to `A`
 File "wildcard_funcall.php", line 11, characters 22-24:
 But got `int`
 File "wildcard_funcall.php", line 14, characters 11-25:
@@ -19,7 +19,7 @@ Invalid argument (Typing[4110])
 File "wildcard_funcall.php", line 14, characters 7-7:
 Expected `T#2`
 File "wildcard_funcall.php", line 14, characters 7-7:
-Considering that this type argument is invariant with respect to A
+Considering that this type argument is invariant with respect to `A`
 File "wildcard_funcall.php", line 14, characters 17-22:
 But got `A<int>`
 File "wildcard_funcall.php", line 15, characters 14-28:
@@ -27,7 +27,7 @@ Invalid argument (Typing[4110])
 File "wildcard_funcall.php", line 15, characters 9-9:
 Expected `T#3`
 File "wildcard_funcall.php", line 15, characters 9-9:
-Considering that this type argument is invariant with respect to A
+Considering that this type argument is invariant with respect to `A`
 File "wildcard_funcall.php", line 15, characters 22-24:
 But got `int`
 File "wildcard_funcall.php", line 16, characters 19-33:
@@ -35,7 +35,7 @@ Invalid argument (Typing[4110])
 File "wildcard_funcall.php", line 16, characters 9-14:
 Expected `string`
 File "wildcard_funcall.php", line 16, characters 9-14:
-Considering that this type argument is invariant with respect to A
+Considering that this type argument is invariant with respect to `A`
 File "wildcard_funcall.php", line 16, characters 27-29:
 But got `int`
 File "wildcard_funcall.php", line 10, characters 7-7:

@@ -5,7 +5,7 @@ This is the method with `where` type constraints
 File "where_bad.php", line 10, characters 35-40:
 Expected `string`
 File "where_bad.php", line 7, characters 37-37:
-  via this generic T
+  via this generic `T`
 File "where_bad.php", line 7, characters 41-43:
 But got `int`
 File "where_bad.php", line 12, characters 17-21:
@@ -17,4 +17,4 @@ Expected `int`
 File "where_bad.php", line 10, characters 35-40:
 But got `string`
 File "where_bad.php", line 7, characters 37-37:
-  via this generic T
+  via this generic `T`

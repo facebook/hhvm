@@ -1,5 +1,5 @@
 File "generic_attr_constraint.php", line 8, characters 15-17:
-Invalid xhp value for attribute :foo in :my-xhp (Typing[4323])
+Invalid xhp value for attribute `:foo` in `:my-xhp` (Typing[4323])
 File "generic_attr_constraint.php", line 3, characters 20-22:
 Some type constraint(s) are violated here
 File "generic_attr_constraint.php", line 3, characters 15-15:

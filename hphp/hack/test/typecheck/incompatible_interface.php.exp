@@ -5,4 +5,4 @@ Expected `int`
 File "incompatible_interface.php", line 16, characters 9-9:
 But got `T`
 File "incompatible_interface.php", line 18, characters 26-26:
-  via this generic T
+  via this generic `T`

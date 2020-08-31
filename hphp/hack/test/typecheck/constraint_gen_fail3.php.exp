@@ -5,4 +5,4 @@ Expected `?A`
 File "constraint_gen_fail3.php", line 23, characters 9-9:
 But got `T`
 File "constraint_gen_fail3.php", line 24, characters 27-27:
-  via this generic T
+  via this generic `T`

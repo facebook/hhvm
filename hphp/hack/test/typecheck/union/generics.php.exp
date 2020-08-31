@@ -73,7 +73,7 @@ Invalid argument (Typing[4110])
 File "generics.php--file2.php", line 100, characters 20-22:
 Expected `int`
 File "generics.php--file2.php", line 16, characters 36-36:
-  via this generic T
+  via this generic `T`
 File "generics.php--file2.php", line 102, characters 32-33:
 But got `string`
 File "generics.php--file2.php", line 20, characters 47-50:

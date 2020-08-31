@@ -11,4 +11,4 @@ Expected `IHasFoo`
 File "contravariance_constraint_bad.php", line 29, characters 60-66:
 But got `IHasBar`
 File "contravariance_constraint_bad.php", line 29, characters 60-66:
-Considering that this type argument is contravariant with respect to ICanCallFoo
+Considering that this type argument is contravariant with respect to `ICanCallFoo`

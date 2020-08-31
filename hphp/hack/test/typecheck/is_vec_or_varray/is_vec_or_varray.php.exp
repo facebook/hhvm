@@ -9,7 +9,7 @@ But got `string`
 File "is_vec_or_varray.php", line 11, characters 5-17:
 Invalid index type for this vec (Typing[4324])
 File "is_vec_or_varray.php", line 11, characters 8-12:
-Expected `int` because only int can be used to index into a Vector or vec.
+Expected `int` because only `int` can be used to index into a `Vector` or `vec`.
 File "is_vec_or_varray.php", line 11, characters 8-12:
 But got `string`
 File "is_vec_or_varray.php", line 12, characters 16-17:

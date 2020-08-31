@@ -3,10 +3,10 @@ Invalid argument (Typing[4110])
 File "gen_trait4.php", line 18, characters 30-30:
 Expected `A`
 File "gen_trait4.php", line 18, characters 30-30:
-Considering that this type argument is invariant with respect to Vector
+Considering that this type argument is invariant with respect to `Vector`
 File "gen_trait4.php", line 21, characters 15-15:
 But got `B`
 File "gen_trait4.php", line 13, characters 20-20:
-  via this generic T
+  via this generic `T`
 File "gen_trait4.php", line 13, characters 20-20:
-Considering that this type argument is invariant with respect to Vector
+Considering that this type argument is invariant with respect to `Vector`

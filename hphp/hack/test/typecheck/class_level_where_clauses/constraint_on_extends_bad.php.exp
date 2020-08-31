@@ -7,4 +7,4 @@ Expected `num`
 File "constraint_on_extends_bad.php", line 14, characters 33-34:
 But got `Tu`
 File "constraint_on_extends_bad.php", line 13, characters 22-22:
-  via this generic T
+  via this generic `T`

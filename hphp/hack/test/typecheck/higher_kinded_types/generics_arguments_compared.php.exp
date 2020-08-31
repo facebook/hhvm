@@ -3,6 +3,6 @@ Invalid return type (Typing[4110])
 File "generics_arguments_compared.php", line 4, characters 37-42:
 Expected `string`
 File "generics_arguments_compared.php", line 4, characters 37-42:
-Considering that this type argument is invariant with respect to T
+Considering that this type argument is invariant with respect to `T`
 File "generics_arguments_compared.php", line 4, characters 24-26:
 But got `int`

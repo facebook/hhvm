@@ -7,12 +7,12 @@ Local variable already used in `using` statement (Typing[4178])
 File "using_bad.php", line 29, characters 15-31:
 Using cannot be used on non-disposable expression (Typing[4110])
 File "using_bad.php", line 29, characters 15-31:
-Expected `IDisposable` because it was assigned in a 'using' clause
+Expected `IDisposable` because it was assigned in a `using` clause
 File "using_bad.php", line 29, characters 19-29:
 But got `AsyncHandle`
 File "using_bad.php", line 33, characters 20-31:
 Using cannot be used on non-disposable expression (Typing[4110])
 File "using_bad.php", line 33, characters 20-31:
-Expected `IAsyncDisposable` because it was assigned in a 'using' clause
+Expected `IAsyncDisposable` because it was assigned in a `using` clause
 File "using_bad.php", line 33, characters 24-29:
 But got `Handle`

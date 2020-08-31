@@ -5,4 +5,4 @@ Expected `B`
 File "invariant_err_msg.php", line 6, characters 36-36:
 But got `A`
 File "invariant_err_msg.php", line 6, characters 36-36:
-Considering that this type argument is invariant with respect to Vector
+Considering that this type argument is invariant with respect to `Vector`

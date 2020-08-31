@@ -5,4 +5,4 @@ Expected `dynamic`
 File "match_param.php", line 13, characters 33-37:
 But got `mixed`
 File "match_param.php", line 4, characters 22-24:
-  via this generic Tin
+  via this generic `Tin`

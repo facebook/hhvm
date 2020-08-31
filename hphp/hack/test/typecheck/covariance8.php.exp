@@ -3,8 +3,8 @@ Invalid argument (Typing[4110])
 File "covariance8.php--file2.php", line 7, characters 19-19:
 Expected `B`
 File "covariance8.php--file1.php", line 4, characters 22-22:
-  via this generic T
+  via this generic `T`
 File "covariance8.php--file2.php", line 6, characters 22-22:
 But got `A`
 File "covariance8.php--file2.php", line 6, characters 22-22:
-Considering that this type argument is invariant with respect to ID
+Considering that this type argument is invariant with respect to `ID`

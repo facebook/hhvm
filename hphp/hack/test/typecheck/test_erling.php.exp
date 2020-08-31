@@ -3,6 +3,6 @@ Invalid argument (Typing[4110])
 File "test_erling.php", line 12, characters 21-21:
 Expected `A`
 File "test_erling.php", line 12, characters 21-21:
-Considering that this type argument is invariant with respect to Vector
+Considering that this type argument is invariant with respect to `Vector`
 File "test_erling.php", line 14, characters 21-22:
 But got `?A`

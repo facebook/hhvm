@@ -3,7 +3,7 @@ No method `missing_method` in `MyClass` (did you mean `hello`?) (Typing[4053])
 File "lambda_bad_as_cond_result.php", line 26, characters 46-52:
 This is why I think it is an object of type MyClass
 File "lambda_bad_as_cond_result.php", line 26, characters 46-52:
-Considering that this type argument is contravariant with respect to MyClosureRunner
+Considering that this type argument is contravariant with respect to `MyClosureRunner`
 File "lambda_bad_as_cond_result.php", line 4, characters 7-13:
 Declaration of `MyClass` is here
 File "lambda_bad_as_cond_result.php", line 36, characters 17-39:
@@ -11,6 +11,6 @@ No method `another_missing_methodO` in `MyClass` (did you mean `hello`?) (Typing
 File "lambda_bad_as_cond_result.php", line 26, characters 46-52:
 This is why I think it is an object of type MyClass
 File "lambda_bad_as_cond_result.php", line 26, characters 46-52:
-Considering that this type argument is contravariant with respect to MyClosureRunner
+Considering that this type argument is contravariant with respect to `MyClosureRunner`
 File "lambda_bad_as_cond_result.php", line 4, characters 7-13:
 Declaration of `MyClass` is here

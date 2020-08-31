@@ -5,14 +5,14 @@ Expected `num` because this is used in an arithmetic operation
 File "foreach_vector.php", line 18, characters 19-21:
 But got `Foo`
 File "collections/Vector.hhi", line 45, characters 50-51:
-  via this generic Tv
+  via this generic `Tv`
 File "collections/interfaces.hhi", line 585, characters 49-50:
-  via this generic Tv
+  via this generic `Tv`
 File "collections/interfaces.hhi", line 310, characters 61-62:
-  via this generic Tv
+  via this generic `Tv`
 File "rx/interfaces.hhi", line 382, characters 36-37:
-  via this generic Tv
+  via this generic `Tv`
 File "rx/interfaces.hhi", line 35, characters 33-34:
-  via this generic Tv
+  via this generic `Tv`
 File "rx/interfaces.hhi", line 26, characters 52-53:
-  via this generic Tv
+  via this generic `Tv`

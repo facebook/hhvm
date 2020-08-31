@@ -5,4 +5,4 @@ Expected `NAC\AAA`
 File "contravariance_constraint_bad_2.php", line 37, characters 33-33:
 But got `T`
 File "contravariance_constraint_bad_2.php", line 37, characters 33-33:
-Considering that this type argument is contravariant with respect to NAC\CONTRA
+Considering that this type argument is contravariant with respect to `NAC\CONTRA`

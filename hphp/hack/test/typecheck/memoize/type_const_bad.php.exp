@@ -3,4 +3,4 @@ Parameters to memoized function must be null, bool, int, float, string, an objec
 File "type_const_bad.php", line 8, characters 20-22:
 This is an object of type Bar
 File "type_const_bad.php", line 10, characters 30-38:
-  resulting from expanding the type constant this::TID
+  resulting from expanding the type constant `this::TID`

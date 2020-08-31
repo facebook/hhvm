@@ -5,6 +5,6 @@ File "use_trait_bad_constraint_2.php", line 4, characters 14-15:
 File "use_trait_bad_constraint_2.php", line 10, characters 10-11:
 Expected `Ta`
 File "use_trait_bad_constraint_2.php", line 4, characters 20-21:
-  via this generic Ta
+  via this generic `Ta`
 File "use_trait_bad_constraint_2.php", line 10, characters 14-15:
 But got `Tb`

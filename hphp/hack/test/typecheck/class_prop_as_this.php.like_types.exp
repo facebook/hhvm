@@ -9,4 +9,4 @@ Expected `~<expr#1>` because it is an unenforceable type
 File "class_prop_as_this.php", line 9, characters 31-31:
 But got `<expr#2>`
 File "class_prop_as_this.php", line 17, characters 14-16:
-  where '<expr#2>' is a reference to this expression
+  where `<expr#2>` is a reference to this expression

@@ -125,6 +125,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::pushframe:
     case Vinstr::popframe:
     case Vinstr::recordstack:
+    case Vinstr::recordbasenativesp:
     case Vinstr::spill:
     case Vinstr::spillbi:
     case Vinstr::spillli:

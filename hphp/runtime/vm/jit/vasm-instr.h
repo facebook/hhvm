@@ -92,6 +92,7 @@ struct Vunit;
   O(pushframe, Inone, Un, Dn)\
   O(popframe, Inone, Un, Dn)\
   O(recordstack, Inone, Un, Dn)\
+  O(recordbasenativesp, Inone, Un, Dn)\
   O(spill, Inone, U(s), D(d))\
   O(spillbi, I(s), Un, D(d))\
   O(spillli, I(s), Un, D(d))\
@@ -568,6 +569,16 @@ struct phijmp { Vlabel target; Vtuple uses; };
  */
 struct conjure { Vreg c; };
 struct conjureuse { Vreg c; };
+
+/*
+ * This pseudo instruction marks the end of raw manipulation of the native
+ * stack in a unit.  Prior to this sp adjustments may not be made, as
+ * instructions are manipulating the stack as it was prior to entering the
+ * unit.  This is likely only used so that the first instruction in a unit
+ * can move the return address pushed by a call from the native stack to the
+ * ActRec on the vm stack.
+ */
+struct recordbasenativesp {};
 
 /*
  * Pseudo-instructions used to represent where Vregs are moved to/from

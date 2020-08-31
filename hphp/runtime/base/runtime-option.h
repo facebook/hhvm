@@ -1228,7 +1228,7 @@ struct RuntimeOption {
   F(int32_t, ServerOOMAdj, 0)                                           \
   F(std::string, PreludePath, "")                                       \
   F(uint32_t, NonSharedInstanceMemoCaches, 10)                          \
-  F(bool, UseGraphColor, true)                                          \
+  F(bool, UseGraphColor, false)                                         \
   F(std::vector<std::string>, IniGetHide, std::vector<std::string>())   \
   F(std::string, UseRemoteUnixServer, "no")                             \
   F(std::string, UnixServerPath, "")                                    \

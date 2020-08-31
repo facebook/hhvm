@@ -870,6 +870,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
       // may be a deficit of non-variadic arguments, and the need to push an
       // empty array for the variadic argument ... that work is left to
       // prepareFuncEntry.
+      assertx(numArgs + numUnpackArgs <= numParams);
       return numArgs + numUnpackArgs;
     }
   }
@@ -919,11 +920,12 @@ static void prepareFuncEntry(ActRec *ar, Array&& generics) {
     // All extra arguments are expected to be packed in a varray.
     assertx(nargs == nparams + 1);
     assertx(tvIsHAMSafeVArray(stack.topC()));
-    auto const unpackArgs = stack.topC()->m_data.parr;
-    assertx(!unpackArgs->empty());
     if (!func->hasVariadicCaptureParam()) {
       // Record the number of args for the warning before dropping extra args.
-      raiseTooManyArgumentsWarnings = nparams + unpackArgs->size();
+      auto const unpackArgs = stack.topC()->m_data.parr;
+      if (!unpackArgs->empty()) {
+        raiseTooManyArgumentsWarnings = nparams + unpackArgs->size();
+      }
       stack.popC();
       ar->setNumArgs(nparams);
     }
@@ -3664,15 +3666,16 @@ OPTBLD_INLINE void iopUnsetG() {
   vmStack().popC();
 }
 
-bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgs,
-             bool hasUnpack, void* ctx, TCA retAddr) {
+bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
+             void* ctx, TCA retAddr) {
   TRACE(3, "FCall: pc %p func %p base %d\n", vmpc(),
         vmfp()->unit()->entry(),
         int(vmfp()->func()->base()));
 
+  assertx(numArgsInclUnpack <= func->numNonVariadicParams() + 1);
   assertx(kNumActRecCells == 3);
   ActRec* ar = vmStack().indA(
-    numArgs + (hasUnpack ? 1 : 0) + (callFlags.hasGenerics() ? 1 : 0));
+    numArgsInclUnpack + (callFlags.hasGenerics() ? 1 : 0));
   ar->m_sfp = vmfp();
   ar->setJitReturn(retAddr);
   ar->setFunc(func);
@@ -3680,30 +3683,11 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgs,
     callFlags.callOffset(),
     callFlags.asyncEagerReturn() ? (1 << ActRec::AsyncEagerRet) : 0
   );
-  ar->setNumArgs(numArgs + (hasUnpack ? 1 : 0));
+  ar->setNumArgs(numArgsInclUnpack);
   ar->setThisOrClassAllowNull(ctx);
 
   try {
-    assertx(!callFlags.hasGenerics() || tvIsHAMSafeVArray(vmStack().topC()));
-    auto generics = callFlags.hasGenerics()
-      ? Array::attach(vmStack().topC()->m_data.parr) : Array();
-    if (callFlags.hasGenerics()) vmStack().discard();
-
-    auto const func = ar->func();
-    if (hasUnpack) {
-      checkStack(vmStack(), func, 0);
-      auto const newNumArgs = prepareUnpackArgs(func, numArgs, true);
-      ar->setNumArgs(newNumArgs);
-    } else if (UNLIKELY(numArgs > func->numNonVariadicParams())) {
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        iopNewVec(numArgs - func->numNonVariadicParams());
-      } else {
-        iopNewVArray(numArgs - func->numNonVariadicParams());
-      }
-      ar->setNumArgs(func->numNonVariadicParams() + 1);
-    }
-
-    prepareFuncEntry(ar, std::move(generics));
+    prepareFuncEntry(ar, GenericsSaver::pop(callFlags.hasGenerics()));
 
     checkForReifiedGenericsErrors(ar, callFlags.hasGenerics());
     calleeDynamicCallChecks(ar->func(), callFlags.isDynamicCall());
@@ -3715,7 +3699,7 @@ bool doFCall(CallFlags callFlags, const Func* func, uint32_t numArgs,
     assertx(vmfp() == ar || vmfp() == ar->m_sfp);
 
     auto const func = ar->func();
-    auto const numInOutParams = func->numInOutParamsForArgs(numArgs);
+    auto const numInOutParams = func->numInOutParamsForArgs(numArgsInclUnpack);
 
     if (ar->m_sfp == vmfp()) {
       // Unwind pre-live frame.
@@ -3758,6 +3742,27 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   callerRxChecks(vmfp(), func);
   checkStack(vmStack(), func, 0);
 
+  auto const numArgsInclUnpack = [&] {
+    if (UNLIKELY(fca.hasUnpack())) {
+      checkStack(vmStack(), func, 0);
+
+      GenericsSaver gs{fca.hasGenerics()};
+      return prepareUnpackArgs(func, fca.numArgs, true);
+    }
+
+    if (UNLIKELY(fca.numArgs > func->numNonVariadicParams())) {
+      GenericsSaver gs{fca.hasGenerics()};
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        iopNewVec(fca.numArgs - func->numNonVariadicParams());
+      } else {
+        iopNewVArray(fca.numArgs - func->numNonVariadicParams());
+      }
+      return func->numNonVariadicParams() + 1;
+    }
+
+    return fca.numArgs;
+  }();
+
   auto const callFlags = CallFlags(
     fca.hasGenerics(),
     dynamic,
@@ -3766,8 +3771,8 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
     0  // generics bitmap not used by interpreter
   );
 
-  doFCall(callFlags, func, fca.numArgs, fca.hasUnpack(),
-          takeCtx(std::forward<Ctx>(ctx)), jit::tc::ustubs().retHelper);
+  doFCall(callFlags, func, numArgsInclUnpack, takeCtx(std::forward<Ctx>(ctx)),
+          jit::tc::ustubs().retHelper);
   pc = vmpc();
 }
 

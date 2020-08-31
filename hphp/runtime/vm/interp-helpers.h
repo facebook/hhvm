@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_INTERP_HELPERS_H_
-#define incl_HPHP_VM_INTERP_HELPERS_H_
+#pragma once
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -34,6 +33,33 @@
 #include <folly/Random.h>
 
 namespace HPHP {
+
+/*
+ * RAII wrapper for popping/pushing generics from/to the VM stack.
+ */
+struct GenericsSaver {
+  GenericsSaver(bool hasGenerics) : m_generics(pop(hasGenerics)) {}
+  ~GenericsSaver() { push(std::move(m_generics)); }
+
+  static Array pop(bool hasGenerics) {
+    if (LIKELY(!hasGenerics)) return Array();
+    assertx(tvIsHAMSafeVArray(vmStack().topC()));
+    auto const generics = vmStack().topC()->m_data.parr;
+    vmStack().discard();
+    return Array::attach(generics);
+  }
+  static void push(Array&& generics) {
+    if (LIKELY(generics.isNull())) return;
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      vmStack().pushVecNoRc(generics.detach());
+    } else {
+      vmStack().pushArrayNoRc(generics.detach());
+    }
+  }
+
+private:
+  Array m_generics;
+};
 
 inline void callerInOutChecks(const Func* func, const FCallArgs& fca) {
   for (auto i = 0; i < fca.numArgs; ++i) {
@@ -172,4 +198,3 @@ void checkStack(Stack& stk, const Func* f, int32_t extraCells) {
 }
 
 }
-#endif

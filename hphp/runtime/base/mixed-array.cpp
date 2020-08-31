@@ -456,10 +456,8 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   memcpy(ad, &other, sizeof(MixedArray) + sizeof(Elm) * other.m_used);
 #endif
   auto const count = mode == AllocMode::Request ? OneReference : StaticValue;
-  auto const aux =
-    other.keyTypes().packForAux() |
-    (other.isLegacyArray() ? ArrayData::kLegacyArray : 0) |
-    (shouldCreateStrKeyTable ? kHasStrKeyTable : 0);
+  auto const aux = other.auxBits() | other.keyTypes().packForAux() |
+                   (shouldCreateStrKeyTable ? kHasStrKeyTable : 0);
   ad->initHeader_16(dest_hk, count, aux);
 
   // We want SlowCopy to be a tail call in the opt build, but we still want to

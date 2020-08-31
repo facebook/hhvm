@@ -63,8 +63,7 @@ LoggingArray* makeWithProfile(ArrayData* ad, LoggingProfile* prof) {
   assertx(ad->getPosition() == ad->iter_begin());
 
   auto lad = static_cast<LoggingArray*>(tl_heap->objMallocIndex(kSizeIndex));
-  lad->initHeader_16(getBespokeKind(ad->kind()), OneReference,
-                     ad->isLegacyArray() ? ArrayData::kLegacyArray : 0);
+  lad->initHeader_16(getBespokeKind(ad->kind()), OneReference, ad->auxBits());
   lad->setLayout(s_layout);
   lad->wrapped = ad;
   lad->profile = prof;
@@ -141,8 +140,7 @@ LoggingArray* LoggingArray::MakeStatic(ArrayData* ad, LoggingProfile* prof) {
   auto const size = sizeof(LoggingArray);
   auto lad = static_cast<LoggingArray*>(
       RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
-  lad->initHeader_16(getBespokeKind(ad->kind()), StaticValue,
-                     ad->isLegacyArray() ? ArrayData::kLegacyArray : 0);
+  lad->initHeader_16(getBespokeKind(ad->kind()), StaticValue, ad->auxBits());
   lad->setLayout(s_layout);
   lad->wrapped = ad;
   lad->profile = prof;

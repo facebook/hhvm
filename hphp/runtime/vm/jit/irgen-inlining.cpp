@@ -339,11 +339,11 @@ void beginInlining(IRGS& env,
     0
   ).value());
 
-  emitPrologueLocals(env, numArgs, callFlags, closure);
+  emitPrologueLocals(env, target, numArgs, callFlags, closure);
 
-  emitGenericsMismatchCheck(env, callFlags);
-  emitCalleeDynamicCallCheck(env, callFlags);
-  emitImplicitContextCheck(env);
+  emitGenericsMismatchCheck(env, target, callFlags);
+  emitCalleeDynamicCallCheck(env, target, callFlags);
+  emitImplicitContextCheck(env, target);
 
   assertx(startSk.hasThis() == startSk.func()->hasThisInBody());
   assertx(

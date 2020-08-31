@@ -88,7 +88,7 @@ genFuncPrologue(TransID transID, TransKind kind,
   IRUnit unit{context, std::make_unique<AnnotationData>()};
   irgen::IRGS env{unit, nullptr, 0, nullptr, true};
 
-  irgen::emitFuncPrologue(env, argc, transID);
+  irgen::emitFuncPrologue(env, func, argc, transID);
   irgen::sealUnit(env);
 
   printUnit(2, unit, "After initial prologue generation");

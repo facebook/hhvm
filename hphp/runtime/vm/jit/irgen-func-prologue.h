@@ -32,18 +32,19 @@ struct IRGS;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitPrologueLocals(IRGS& env, uint32_t argc, SSATmp* callFlags,
-                        SSATmp* closureOpt);
+void emitPrologueLocals(IRGS& env, const Func* callee, uint32_t argc,
+                        SSATmp* callFlags, SSATmp* closureOpt);
 
-void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID);
+void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
+                      TransID transID);
 
-void emitGenericsMismatchCheck(IRGS& env, SSATmp* callFlags);
+void emitGenericsMismatchCheck(IRGS& env, const Func* callee,
+                               SSATmp* callFlags);
 
-void emitCalleeDynamicCallCheck(IRGS& env, SSATmp* callFlags);
+void emitCalleeDynamicCallCheck(IRGS& env, const Func* callee,
+                                SSATmp* callFlags);
 
-void emitImplicitContextCheck(IRGS& env);
-
-void emitCallInOutCheck(IRGS& env, SSATmp* callFlags);
+void emitImplicitContextCheck(IRGS& env, const Func* callee);
 
 ///////////////////////////////////////////////////////////////////////////////
 

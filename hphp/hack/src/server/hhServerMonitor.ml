@@ -160,6 +160,8 @@ let start () =
   (* TODO: Catch all exceptions that make it this high, log them, and exit with
    * the proper code *)
   try
+    (* prevents threshold monitor from moving Hack processes into www.slice/hack.service *)
+    PidLog.disable ();
     (* This avoids dying if SIGUSR{1,2} is received by accident *)
     Sys_utils.set_signal Sys.sigusr1 Sys.Signal_ignore;
     Sys_utils.set_signal Sys.sigusr2 Sys.Signal_ignore;

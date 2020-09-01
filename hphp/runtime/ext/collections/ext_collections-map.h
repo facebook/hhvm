@@ -419,7 +419,7 @@ struct MapIterator {
 
   Variant current() const {
     auto const mp = m_obj.get();
-    if (!mp->iter_valid(m_pos)) {
+    if (!mp->iter_valid_and_not_tombstone(m_pos)) {
       throw_iterator_not_valid();
     }
     return tvAsCVarRef(mp->iter_value(m_pos));
@@ -427,14 +427,14 @@ struct MapIterator {
 
   Variant key() const {
     auto const mp = m_obj.get();
-    if (!mp->iter_valid(m_pos)) {
+    if (!mp->iter_valid_and_not_tombstone(m_pos)) {
       throw_iterator_not_valid();
     }
     return mp->iter_key(m_pos);
   }
 
   bool valid() const {
-    return m_obj->iter_valid(m_pos);
+    return m_obj->iter_valid_and_not_tombstone(m_pos);
   }
 
   void next() {

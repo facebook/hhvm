@@ -367,7 +367,7 @@ struct SetIterator {
 
   Variant current() const {
     auto st = m_obj.get();
-    if (!st->iter_valid(m_pos)) {
+    if (!st->iter_valid_and_not_tombstone(m_pos)) {
       throw_iterator_not_valid();
     }
     return tvAsCVarRef(st->iter_value(m_pos));
@@ -376,7 +376,7 @@ struct SetIterator {
   Variant key() const { return current(); }
 
   bool valid() const {
-    return m_obj->iter_valid(m_pos);
+    return m_obj->iter_valid_and_not_tombstone(m_pos);
   }
 
   void next() {

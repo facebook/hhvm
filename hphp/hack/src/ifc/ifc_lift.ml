@@ -10,6 +10,8 @@
 open Hh_prelude
 open Ifc_types
 module Decl = Ifc_decl
+module Env = Ifc_env
+module Lattice = Ifc_security_lattice
 module T = Typing_defs
 module TClass = Decl_provider.Class
 module TEnv = Typing_env
@@ -23,51 +25,19 @@ exception LiftError of string
 
 let fail fmt = Format.kasprintf (fun s -> raise (LiftError s)) fmt
 
+(* Empty type environment useful for localising decl types and pretty printing types *)
 let empty_tenv meta = TEnv.empty meta.m_ctx meta.m_path None
 
-let find_ancestor_tparams proto_renv class_name (targs : T.locl_ty list) =
-  let class_decl = Decl.find_core_class_decl proto_renv.pre_meta class_name in
-  let tparam_names =
-    let tp_name tparam = snd tparam.T.tp_name in
-    List.map ~f:tp_name @@ TClass.tparams class_decl
+let expand_var proto_renv id =
+  (* Drops the environment. Var expansion only compresses paths, so this is
+   * safe (but less efficient than threading the environment). *)
+  let (_, ty) =
+    Typing_inference_env.expand_var
+      proto_renv.pre_tenv.Tast.inference_env
+      Typing_reason.Rnone
+      id
   in
-  let substitution =
-    match List.zip tparam_names targs with
-    | Some zipped -> SMap.of_list zipped
-    | None ->
-      fail "%s has uneven number of type parameters and arguments" class_name
-  in
-  let extract_tparams (ancestor_name, ancestor) =
-    let tenv = empty_tenv proto_renv.pre_meta in
-    (* Type localisation configuration. We use it for instantiating type parameters. *)
-    let ety_env =
-      let this_ty = T.mk (TReason.none, TUtils.this_of @@ TEnv.get_self tenv) in
-      {
-        T.type_expansions = [];
-        substs = substitution;
-        quiet = false;
-        on_error =
-          (fun ?code:_ _ ->
-            fail "something went wrong during generic substitution");
-        this_ty;
-        from_class = None;
-      }
-    in
-    let (_, ty) = TPhase.localize ~ety_env tenv ancestor in
-    match T.get_node ty with
-    | T.Tclass (_, _, targs) ->
-      if List.is_empty targs then
-        None
-      else
-        Some (ancestor_name, targs)
-    | _ ->
-      fail
-        "Tried to extract type parameters of %s, but it is not a class"
-        ancestor_name
-  in
-  TClass.all_ancestors class_decl
-  |> List.filter_map ~f:extract_tparams
-  |> SMap.of_list
+  ty
 
 (* If there is a lump policy variable in effect, return that otherwise
    generate a new policy variable. *)
@@ -76,45 +46,29 @@ let get_policy ?prefix lump_pol_opt proto_renv =
   | Some lump_pol -> lump_pol
   | None ->
     let prefix = Option.value prefix ~default:"v" in
-    Ifc_env.new_policy_var proto_renv prefix
+    Env.new_policy_var proto_renv prefix
 
-let rec class_ty lump_pol_opt proto_renv targs name =
+let rec class_ty lump_pol_opt proto_renv name =
   let { cd_policied_properties } =
     match SMap.find_opt name proto_renv.pre_decl.de_class with
     | Some class_sig -> class_sig
     | None -> fail "could not found a class policy signature for %s" name
   in
-  let prop_ty { pp_name; pp_type; pp_purpose; pp_pos; _ } =
-    (* Purpose of the property takes precedence over any lump policy. *)
-    let lump_pol_opt =
-      let pos = PosSet.singleton pp_pos in
-      Option.merge
-        (Option.map ~f:(Ifc_security_lattice.parse_policy pos) pp_purpose)
-        lump_pol_opt
-        ~f:(fun a _ -> a)
-    in
-    (pp_name, lazy (ty ~prefix:("." ^ pp_name) lump_pol_opt proto_renv pp_type))
-  in
-  let lump_pol = get_policy lump_pol_opt proto_renv ~prefix:"lump" in
-  let c_tparams =
-    let prefix = "tp" in
-    let tparam_ty = ty ~prefix lump_pol_opt proto_renv in
-    let tparams = find_ancestor_tparams proto_renv name targs in
-    let tparams =
-      if List.is_empty targs then
-        tparams
-      else
-        SMap.add name targs tparams
-    in
-    SMap.map (List.map ~f:tparam_ty) tparams
+  let prop_pol { pp_name; pp_purpose; pp_pos; _ } =
+    (* Purpose of the property takes precedence over any lump policy.
+     * TODO(T74471162): Lump might itself be a purpose. There should be a check
+     * or constraint generation of some sort.
+     *)
+    let parse_policy = Lattice.parse_policy (PosSet.singleton pp_pos) in
+    let pp_policy = parse_policy pp_purpose in
+    (pp_name, pp_policy)
   in
   Tclass
     {
       c_name = name;
       c_self = get_policy lump_pol_opt proto_renv ~prefix:name;
-      c_lump = lump_pol;
-      c_property_map = SMap.of_list (List.map ~f:prop_ty cd_policied_properties);
-      c_tparams;
+      c_lump = get_policy lump_pol_opt proto_renv ~prefix:"lump";
+      c_properties = SMap.of_list (List.map ~f:prop_pol cd_policied_properties);
     }
 
 (* Turns a locl_ty into a type with policy annotations;
@@ -129,20 +83,8 @@ and ty ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
   | T.Ttuple tyl -> Ttuple (List.map ~f:ty tyl)
   | T.Tunion tyl -> Tunion (List.map ~f:ty tyl)
   | T.Tintersection tyl -> Tinter (List.map ~f:ty tyl)
-  | T.Tclass ((_, name), _, tparams) ->
-    class_ty lump_pol_opt proto_renv tparams name
-  | T.Tvar id ->
-    (* Drops the environment `expand_var` returns. This is logically
-     * correct, but threading the envrionment would lead to faster future
-     * `Tvar` lookups.
-     *)
-    let (_, t) =
-      Typing_inference_env.expand_var
-        proto_renv.pre_tenv.Tast.inference_env
-        Typing_reason.Rnone
-        id
-    in
-    ty t
+  | T.Tclass ((_, name), _, _) -> class_ty lump_pol_opt proto_renv name
+  | T.Tvar id -> ty (expand_var proto_renv id)
   | T.Tfun fun_ty ->
     Tfun
       {
@@ -151,7 +93,7 @@ and ty ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
         f_args =
           List.map ~f:(fun p -> ty p.T.fp_type.T.et_type) fun_ty.T.ft_params;
         f_ret = ty fun_ty.T.ft_ret.T.et_type;
-        f_exn = class_ty None proto_renv [] Ifc_decl.exception_id;
+        f_exn = class_ty None proto_renv Decl.exception_id;
       }
   | T.Tdependent (T.DTthis, tbound) ->
     (* TODO(T72024862): This treatment ignores late static binding. *)

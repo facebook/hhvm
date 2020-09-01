@@ -1,6 +1,6 @@
 Analyzing __construct:
 * pc: pc
-* This: \C<\C, lump'1, cx=<.cx>>
+* This: \C<\C, lump'1, cx=PUBLIC>
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:
@@ -10,12 +10,12 @@ Analyzing __construct:
   Locals:
     lvars: { $cd -> \D<\D, lump'2>; $cx -> <$cx>; $cy -> <$cy> }
 Constraints:
-  [\C < .cx, $cx < .cx, pc < .cx, \C < lump'1, $cy < lump'1, pc < lump'1,
-   \C < lump'1, lump'2 = lump'1, \D < lump'1, pc < lump'1]
+  [\C = PUBLIC, $cx = PUBLIC, pc = PUBLIC, \C < lump'1, $cy < lump'1,
+   pc < lump'1, \C < lump'1, lump'2 = lump'1, \D < lump'1, pc < lump'1]
 
 Analyzing testGetUnpolicied:
 * pc: pc
-* This: \C<\C, lump'1, cx=?thunk>
+* This: \C<\C, lump'1, cx=PUBLIC>
 * Return: \D<\D, lump'2>
 * Exception: \Exception<\Exception, lump>
 * Params:
@@ -29,7 +29,7 @@ Constraints:
 
 Analyzing testSetMultipleUnpolicied:
 * pc: pc
-* This: \C<\C, lump'1, cx=?thunk>
+* This: \C<\C, lump'1, cx=PUBLIC>
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:
@@ -44,7 +44,7 @@ Constraints:
 
 Analyzing testSetDeep:
 * pc: pc
-* This: \C<\C, lump'1, cx=?thunk>
+* This: \C<\C, lump'1, cx=PUBLIC>
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:

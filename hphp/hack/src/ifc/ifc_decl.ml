@@ -26,6 +26,8 @@ let infer_flows_id = "\\InferFlows"
 
 let exception_id = "\\Exception"
 
+let vec_id = "\\HH\\vec"
+
 let cipp_id = "\\Cipp"
 
 let construct_id = "__construct"
@@ -90,14 +92,8 @@ let resolve_duplicate_policied_properties policied_properties =
   let go pprop =
     match Caml.Hashtbl.find_opt prop_table pprop.pp_name with
     | Some pprop' ->
-      begin
-        match (pprop.pp_purpose, pprop'.pp_purpose) with
-        | (Some purpose, Some purpose')
-          when not @@ String.equal purpose purpose' ->
-          fail @@ err_msg pprop.pp_name purpose purpose'
-        | (Some _, None) -> Caml.Hashtbl.replace prop_table pprop.pp_name pprop
-        | _ -> ()
-      end
+      if not @@ String.equal pprop.pp_purpose pprop'.pp_purpose then
+        fail @@ err_msg pprop.pp_name pprop.pp_purpose pprop'.pp_purpose
     | None -> Caml.Hashtbl.add prop_table pprop.pp_name pprop
   in
   List.iter ~f:go policied_properties;
@@ -117,7 +113,6 @@ let mk_policied_prop
     {
       A.cv_span = pp_pos;
       cv_id = (_, pp_name);
-      cv_type = (pp_type, _);
       cv_visibility = pp_visibility;
       cv_user_attributes = attrs;
       _;
@@ -127,14 +122,12 @@ let mk_policied_prop
     | None -> `No_policy
     | Some attr ->
       (match attr.A.ua_params with
-      | [] -> `Policy None
-      | [(_, A.String purpose)] -> `Policy (Some purpose)
-      | _ -> fail "expected a string literal as a purpose argument.")
+      | [(_, A.String purpose)] -> `Policy purpose
+      | _ -> fail "expected a string literal as a purpose argument")
   in
   match find_policy attrs with
   | `No_policy -> None
-  | `Policy pp_purpose ->
-    Some { pp_name; pp_type; pp_visibility; pp_purpose; pp_pos }
+  | `Policy pp_purpose -> Some { pp_name; pp_visibility; pp_purpose; pp_pos }
 
 let class_ class_decl_env class_ =
   let { A.c_name = (_, name); c_vars = properties; _ } = class_ in
@@ -163,7 +156,7 @@ let class_ class_decl_env class_ =
 let magic_class_decls =
   SMap.of_list
     [
-      ("\\HH\\vec", { cd_policied_properties = [] });
+      (vec_id, { cd_policied_properties = [] });
       (exception_id, { cd_policied_properties = [] });
     ]
 

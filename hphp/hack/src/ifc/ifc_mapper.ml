@@ -19,17 +19,12 @@ let rec ptype fty fpol = function
   | Tunion tl -> Tunion (List.map ~f:fty tl)
   | Tinter tl -> Tinter (List.map ~f:fty tl)
   | Tclass cls ->
-    let lazy_fty lpty = lazy (fty (Lazy.force lpty)) in
-    let prop_map = SMap.map lazy_fty cls.c_property_map in
-    let ptype = ptype fty fpol in
-    let c_tparams = SMap.map (List.map ~f:ptype) cls.c_tparams in
     Tclass
       {
         c_name = cls.c_name;
         c_self = fpol cls.c_self;
         c_lump = fpol cls.c_lump;
-        c_property_map = prop_map;
-        c_tparams;
+        c_properties = SMap.map fpol cls.c_properties;
       }
   | Tfun f -> Tfun (fun_ fty fpol f)
 

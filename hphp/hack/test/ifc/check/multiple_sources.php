@@ -10,9 +10,7 @@ class C {
     public int $b2,
     <<Policied("PUBLIC")>>
     public int $public,
-    <<Policied>>
     public int $v1,
-    <<Policied>>
     public int $v2,
   ) {}
 

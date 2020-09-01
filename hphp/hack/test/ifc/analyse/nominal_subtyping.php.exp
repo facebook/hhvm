@@ -1,34 +1,6 @@
-Analyzing \testTParams1:
-* pc: pc
-* This: None
-* Return: \A<\A=[<tp>]><\A, lump'1>
-* Exception: \Exception<\Exception, lump>
-* Params:
-  lvars: { $b -> \B<\A=[<tp'1>], \B=[<tp'2>]><\B, lump'2> }
-* Final environment:
-  Deps: {}
-  Locals:
-    lvars: { $b -> \B<\A=[<tp'1>], \B=[<tp'2>]><\B, lump'2> }
-Constraints:
-  [tp < tp'1, tp'1 < tp, lump'2 = lump'1, \B < \A]
-
-Analyzing \testTParams2:
-* pc: pc
-* This: None
-* Return: \A<\A=[<tp>]><\A, lump'1>
-* Exception: \Exception<\Exception, lump>
-* Params:
-  lvars: { $c -> \C<\A=[<tp'1>], \C=[nothing]><\C, lump'2> }
-* Final environment:
-  Deps: {}
-  Locals:
-    lvars: { $c -> \C<\A=[<tp'1>], \C=[nothing]><\C, lump'2> }
-Constraints:
-  [tp < tp'1, tp'1 < tp, lump'2 = lump'1, \C < \A]
-
 Analyzing __construct:
 * pc: pc
-* This: \D<\D, lump'1, pd=<.pd>>
+* This: \D<\D, lump'1, pd=PD>
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:
@@ -38,11 +10,11 @@ Analyzing __construct:
   Locals:
     lvars: { $pd -> <$pd> }
 Constraints:
-  [\D < .pd, $pd < .pd, pc < .pd]
+  [\D < PD, $pd < PD, pc < PD]
 
 Analyzing __construct:
 * pc: pc
-* This: \E<\E, lump'1, pd=<.pd>, pe=<.pe>>
+* This: \E<\E, lump'1, pd=PD, pe=PE>
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:
@@ -53,9 +25,9 @@ Analyzing __construct:
     lvars: { $pd -> <$pd>; $pe -> <$pe> }
     pc: exn
 Constraints:
-  [\E < .pd, $pd < .pd, pc < .pd, \E < .pe, $pe < .pe, pc < .pe,
+  [\E < PD, $pd < PD, pc < PD, \E < PE, $pe < PE, pc < PE,
    \D#__construct < pcjoin, pc < pcjoin,
-   {(this: \E<\E, lump'1, pd=<.pd>, pe=<.pe>>)->\D#__construct<pcjoin, \D#__construct>(<$pd>): <\D#__construct_ret> [\Exception<exn,
+   {(this: \E<\E, lump'1, pd=PD, pe=PE>)->\D#__construct<pcjoin, \D#__construct>(<$pd>): <\D#__construct_ret> [\Exception<exn,
                                                                     exn>]},
    \D#__construct < \D#__construct_ret, exn = lump, exn < \Exception,
    exn < \Exception]
@@ -63,20 +35,20 @@ Constraints:
 Analyzing \testPoliciedPropertiesED:
 * pc: pc
 * This: None
-* Return: \D<\D, lump'1, pd=<.pd>>
+* Return: \D<\D, lump'1, pd=PD>
 * Exception: \Exception<\Exception, lump>
 * Params:
-  lvars: { $e -> \E<\E, lump'2, pd=<.pd'1>, pe=?thunk> }
+  lvars: { $e -> \E<\E, lump'2, pd=PD, pe=PE> }
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $e -> \E<\E, lump'2, pd=<.pd'1>, pe=?thunk> }
+    lvars: { $e -> \E<\E, lump'2, pd=PD, pe=PE> }
 Constraints:
-  [.pd < .pd'1, .pd'1 < .pd, lump'2 = lump'1, \E < \D]
+  [lump'2 = lump'1, \E < \D]
 
 Analyzing __construct:
 * pc: pc
-* This: \F<\F, lump'1, pd=<.pd>, pe=<.pe>, pf=<.pf>>
+* This: \F<\F, lump'1, pd=PD, pe=PE, pf=PF>
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:
@@ -87,9 +59,9 @@ Analyzing __construct:
     lvars: { $pd -> <$pd>; $pe -> <$pe>; $pf -> <$pf> }
     pc: exn
 Constraints:
-  [\F < .pd, $pd < .pd, pc < .pd, \F < .pe, $pe < .pe, pc < .pe, \F < .pf,
-   $pf < .pf, pc < .pf, \E#__construct < pcjoin, pc < pcjoin,
-   {(this: \F<\F, lump'1, pd=<.pd>, pe=<.pe>, pf=<.pf>>)->\E#__construct<pcjoin, \E#__construct>(<$pd>,
+  [\F < PD, $pd < PD, pc < PD, \F < PE, $pe < PE, pc < PE, \F < PF, $pf < PF,
+   pc < PF, \E#__construct < pcjoin, pc < pcjoin,
+   {(this: \F<\F, lump'1, pd=PD, pe=PE, pf=PF>)->\E#__construct<pcjoin, \E#__construct>(<$pd>,
                                                                     <$pe>): <\E#__construct_ret> [\Exception<exn,
                                                                     exn>]},
    \E#__construct < \E#__construct_ret, exn = lump, exn < \Exception,
@@ -98,29 +70,28 @@ Constraints:
 Analyzing \testPoliciedPropertiesFE:
 * pc: pc
 * This: None
-* Return: \E<\E, lump'1, pd=<.pd>, pe=<.pe>>
+* Return: \E<\E, lump'1, pd=PD, pe=PE>
 * Exception: \Exception<\Exception, lump>
 * Params:
-  lvars: { $f -> \F<\F, lump'2, pd=<.pd'1>, pe=<.pe'1>, pf=?thunk> }
+  lvars: { $f -> \F<\F, lump'2, pd=PD, pe=PE, pf=PF> }
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $f -> \F<\F, lump'2, pd=<.pd'1>, pe=<.pe'1>, pf=?thunk> }
+    lvars: { $f -> \F<\F, lump'2, pd=PD, pe=PE, pf=PF> }
 Constraints:
-  [.pd < .pd'1, .pd'1 < .pd, .pe < .pe'1, .pe'1 < .pe, lump'2 = lump'1,
-   \F < \E]
+  [lump'2 = lump'1, \F < \E]
 
 Analyzing \testPoliciedPropertiesFD:
 * pc: pc
 * This: None
-* Return: \D<\D, lump'1, pd=<.pd>>
+* Return: \D<\D, lump'1, pd=PD>
 * Exception: \Exception<\Exception, lump>
 * Params:
-  lvars: { $f -> \F<\F, lump'2, pd=<.pd'1>, pe=?thunk, pf=?thunk> }
+  lvars: { $f -> \F<\F, lump'2, pd=PD, pe=PE, pf=PF> }
 * Final environment:
   Deps: {}
   Locals:
-    lvars: { $f -> \F<\F, lump'2, pd=<.pd'1>, pe=?thunk, pf=?thunk> }
+    lvars: { $f -> \F<\F, lump'2, pd=PD, pe=PE, pf=PF> }
 Constraints:
-  [.pd < .pd'1, .pd'1 < .pd, lump'2 = lump'1, \F < \D]
+  [lump'2 = lump'1, \F < \D]
 

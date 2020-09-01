@@ -72,8 +72,7 @@ and class_ = {
   c_name: string;
   c_self: policy;
   c_lump: policy;
-  c_property_map: ptype Lazy.t SMap.t;
-  c_tparams: ptype list SMap.t;
+  c_properties: policy SMap.t;
 }
 
 and fun_ = {
@@ -163,8 +162,7 @@ type env = {
 type policied_property = {
   pp_pos: Pos.t;
   pp_name: string;
-  pp_type: Type.locl_ty;
-  pp_purpose: purpose option;
+  pp_purpose: purpose;
   (* Visibility is not needed beyond the decl phase, but OCaml makes
    * it difficult to map between collections, so it is carried to the analysis. *)
   pp_visibility: Aast.visibility;

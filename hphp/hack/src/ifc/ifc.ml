@@ -32,16 +32,10 @@ let should_print ~user_mode ~phase =
 
 let fail fmt = Format.kasprintf (fun s -> raise (FlowInference s)) fmt
 
-let find_variances meta class_name =
-  let class_decl = Decl.find_core_class_decl meta class_name in
-  let tparams = TClass.tparams class_decl in
-  List.map ~f:(fun tparam -> tparam.T.tp_variance) tparams
-
 (* A constraint accumulator that registers a subtyping
    requirement t1 <: t2 *)
 let rec subtype ~pos meta t1 t2 acc =
   let subtype = subtype ~pos meta in
-  let equivalent = equivalent ~pos meta in
   match (t1, t2) with
   | (Tprim p1, Tprim p2)
   | (Tgeneric p1, Tgeneric p2) ->
@@ -52,54 +46,15 @@ let rec subtype ~pos meta t1 t2 acc =
       List.fold zip ~init:acc ~f:(fun acc (t1, t2) -> subtype t1 t2 acc)
     | None -> fail "incompatible tuple types")
   | (Tclass cl1, Tclass cl2) ->
-    (* Nominal subtyping records flows in properties and the type parameters
+    (* Nominal subtyping records flows in properties (through the lump policy)
      * common to both classes. The typechecker ensures that the subtyping
-     * relation holds so we only need to record the flows in inherited entities.
+     * relation holds, so we do not need safety checks.
+     *
+     * We do not need constraints for policied properties as their policies are
+     * known statically. Hence, the only flow constraint we have can have due
+     * to subtyping of these is the trivial one of the form A < A.
      *)
-    let policied_property_subtype acc _ pty1_opt pty2_opt =
-      match (pty1_opt, pty2_opt) with
-      | (Some pty1, Some pty2) ->
-        (equivalent (Lazy.force pty1) (Lazy.force pty2) acc, None)
-      | _ -> (acc, None)
-    in
-    let tparams_subtype acc =
-      let tparam_subtype acc pty1 pty2 variance =
-        match variance with
-        | Ast_defs.Invariant -> equivalent pty1 pty2 acc
-        | Ast_defs.Covariant -> subtype pty1 pty2 acc
-        | Ast_defs.Contravariant -> subtype pty2 pty1 acc
-      in
-      let tparams_subtype acc class_name tparams_opt1 tparams_opt2 =
-        let variances = find_variances meta class_name in
-        match (tparams_opt1, tparams_opt2) with
-        | (Some tparams1, Some tparams2) ->
-          let init = acc in
-          let f = tparam_subtype in
-          begin
-            match Utils.fold3 ~init ~f tparams1 tparams2 variances with
-            | List.Or_unequal_lengths.Ok acc -> (acc, Some ())
-            | _ -> fail "unequal number of type parameters during subtyping"
-          end
-        | _ -> (acc, None)
-      in
-      let combine = tparams_subtype in
-      fst @@ SMap.merge_env acc ~combine cl1.c_tparams cl2.c_tparams
-    in
-    (* Invariant in property policies *)
-    (* When forcing an unevaluated ptype thunk, only policied properties
-     * will be populated. This invariant, and the ban on recursive class cycles
-     * through policied properties (enforcement still to be done, see T68078692)
-     * ensures termination here.
-     *)
-    SMap.merge_env
-      acc
-      cl1.c_property_map
-      cl2.c_property_map
-      ~combine:policied_property_subtype
-    |> fst
-    (* Use the declared variance for subtyping constraints of
-     * type parameters *)
-    |> tparams_subtype
+    acc
     (* Invariant in lump policy *)
     |> L.(cl1.c_lump = cl2.c_lump) ~pos
     (* Covariant in class policy *)
@@ -128,71 +83,59 @@ and equivalent ~pos meta t1 t2 acc =
   let subtype = subtype ~pos meta in
   subtype t1 t2 (subtype t2 t1 acc)
 
-(* Generates a fresh supertype of the argument type *)
-let adjust ?(prefix = "weak") ~pos ~adjustment renv env ty =
+(* Generates a fresh sub/super policy of the argument polic *)
+let adjust_policy ?(prefix = "weak") ~pos ~adjustment renv env policy =
+  match (adjustment, policy) with
+  | (Astrengthen, Pbot _)
+  | (Aweaken, Ptop _) ->
+    (env, policy)
+  | (Astrengthen, _) ->
+    let new_policy = Env.new_policy_var renv.re_proto prefix in
+    let prop = L.(new_policy < policy) ~pos in
+    (Env.acc env prop, new_policy)
+  | (Aweaken, _) ->
+    let new_policy = Env.new_policy_var renv.re_proto prefix in
+    let prop = L.(policy < new_policy) ~pos in
+    (Env.acc env prop, new_policy)
+
+(* Generates a fresh sub/super ptype of the argument ptype *)
+let adjust_ptype ?prefix ~pos ~adjustment renv env ty =
+  let adjust_policy = adjust_policy ?prefix ~pos renv in
   let flip = function
     | Astrengthen -> Aweaken
     | Aweaken -> Astrengthen
   in
-  let freshen_policy adjustment acc policy =
-    match (adjustment, policy) with
-    | (Astrengthen, Pbot _)
-    | (Aweaken, Ptop _) ->
-      (acc, policy)
-    | (Astrengthen, _) ->
-      let new_policy = Env.new_policy_var renv.re_proto prefix in
-      let prop = L.(new_policy < policy) ~pos in
-      (prop acc, new_policy)
-    | (Aweaken, _) ->
-      let new_policy = Env.new_policy_var renv.re_proto prefix in
-      let prop = L.(policy < new_policy) ~pos in
-      (prop acc, new_policy)
-  in
-  let rec freshen adjustment acc ty =
+  let rec freshen adjustment env ty =
     let freshen_cov = freshen adjustment in
     let freshen_con = freshen @@ flip adjustment in
-    let freshen_pol_cov = freshen_policy adjustment in
-    let freshen_pol_con = freshen_policy @@ flip adjustment in
-    let simple_freshen f acc policy =
-      let (acc, p) = freshen_pol_cov acc policy in
-      (acc, f p)
+    let freshen_pol_cov = adjust_policy ~adjustment in
+    let freshen_pol_con = adjust_policy ~adjustment:(flip adjustment) in
+    let simple_freshen f policy =
+      let (env, p) = freshen_pol_cov env policy in
+      (env, f p)
     in
     let on_list mk tl =
-      let (acc, tl') = List.map_env acc tl ~f:freshen_cov in
-      (acc, mk tl')
+      let (env, tl') = List.map_env env tl ~f:freshen_cov in
+      (env, mk tl')
     in
     match ty with
-    | Tprim policy -> simple_freshen (fun p -> Tprim p) acc policy
-    | Tgeneric policy -> simple_freshen (fun p -> Tgeneric p) acc policy
+    | Tprim policy -> simple_freshen (fun p -> Tprim p) policy
+    | Tgeneric policy -> simple_freshen (fun p -> Tgeneric p) policy
     | Ttuple tl -> on_list (fun l -> Ttuple l) tl
     | Tunion tl -> on_list (fun l -> Tunion l) tl
     | Tinter tl -> on_list (fun l -> Tinter l) tl
     | Tclass class_ ->
-      let adjust_tparam acc variance pty =
-        match variance with
-        | Ast_defs.Covariant -> freshen_cov acc pty
-        | Ast_defs.Invariant -> (acc, pty)
-        | Ast_defs.Contravariant -> freshen_con acc pty
-      in
-      let (acc, super_pol) = freshen_pol_cov acc class_.c_self in
-      let (acc, tparams) =
-        let adjust_tparams acc class_name =
-          let variances = find_variances renv.re_proto.pre_meta class_name in
-          List.map2_env ~f:adjust_tparam acc variances
-        in
-        SMap.map_env adjust_tparams acc class_.c_tparams
-      in
-      (acc, Tclass { class_ with c_self = super_pol; c_tparams = tparams })
+      let (env, super_pol) = freshen_pol_cov env class_.c_self in
+      (env, Tclass { class_ with c_self = super_pol })
     | Tfun fun_ ->
-      let (acc, f_pc) = freshen_pol_con acc fun_.f_pc in
-      let (acc, f_self) = freshen_pol_cov acc fun_.f_self in
-      let (acc, f_args) = List.map_env acc ~f:freshen_con fun_.f_args in
-      let (acc, f_ret) = freshen_cov acc fun_.f_ret in
-      let (acc, f_exn) = freshen_cov acc fun_.f_exn in
-      (acc, Tfun { f_pc; f_self; f_args; f_ret; f_exn })
+      let (env, f_pc) = freshen_pol_con env fun_.f_pc in
+      let (env, f_self) = freshen_pol_cov env fun_.f_self in
+      let (env, f_args) = List.map_env env ~f:freshen_con fun_.f_args in
+      let (env, f_ret) = freshen_cov env fun_.f_ret in
+      let (env, f_exn) = freshen_cov env fun_.f_exn in
+      (env, Tfun { f_pc; f_self; f_args; f_ret; f_exn })
   in
-  let (acc, ty') = freshen adjustment env.e_acc ty in
-  (Env.acc env (fun _ -> acc), ty')
+  freshen adjustment env ty
 
 let rec add_dependencies ~pos pl t acc =
   match t with
@@ -288,12 +231,16 @@ let receiver_of_obj_get obj_ptype property =
   | Tclass class_ -> class_
   | _ -> fail "couldn't find a class for the property '%s'" property
 
+(* We generate a ptype out of the property type and fill it with either the
+ * purpose of property or the lump policy of some object root. *)
 let property_ptype proto_renv obj_ptype property property_ty =
   let class_ = receiver_of_obj_get obj_ptype property in
-  match SMap.find_opt property class_.c_property_map with
-  | Some ptype -> Lazy.force ptype
-  | None ->
-    Lift.ty ~prefix:("." ^ property) (Some class_.c_lump) proto_renv property_ty
+  let prop_pol =
+    match SMap.find_opt property class_.c_properties with
+    | Some policy -> policy
+    | None -> class_.c_lump
+  in
+  Lift.ty ~prefix:property (Some prop_pol) proto_renv property_ty
 
 let throw ~pos renv env exn_ty =
   let union env t1 t2 = (env, mk_union t1 t2) in
@@ -335,7 +282,7 @@ let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
   in
   let callee_exn_policy = Env.new_policy_var renv.re_proto "exn" in
   let callee_exn =
-    Lift.class_ty (Some callee_exn_policy) renv.re_proto [] Decl.exception_id
+    Lift.class_ty (Some callee_exn_policy) renv.re_proto Decl.exception_id
   in
   (* The PC of the function being called depends on the join of the current
    * PC dependencies, as well as the function's own self policy *)
@@ -391,15 +338,24 @@ let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
   let env = throw ~pos renv env callee_exn in
   (env, ret_pty)
 
-let vec_element_pty vec_pty =
-  let class_ =
+let vec_element_pty renv vec_ty vec_pty =
+  let lump =
     match vec_pty with
-    | Tclass cls when String.equal cls.c_name "\\HH\\vec" -> cls
+    | Tclass cls when String.equal cls.c_name Decl.vec_id -> cls.c_lump
     | _ -> fail "expected a vector"
   in
-  match SMap.find_opt "\\HH\\vec" class_.c_tparams with
-  | Some [element_pty] -> element_pty
-  | _ -> fail "expected one type parameter from a vector object"
+  let rec element_pty vec_ty =
+    match T.get_node vec_ty with
+    | T.Tclass ((_, c_name), _, [element_ty])
+      when String.equal c_name Decl.vec_id ->
+      Lift.ty (Some lump) renv.re_proto element_ty
+    | T.Tvar id -> element_pty @@ Lift.expand_var renv.re_proto id
+    | _ ->
+      fail
+        "expected one type parameter from a vector object, but got %s"
+        (Pp_type.show_ty () vec_ty)
+  in
+  element_pty vec_ty
 
 (* Finds what we flow into in an assignment.
  * The type LHS has in the input is the type after the assignment takes place. *)
@@ -417,7 +373,7 @@ let rec flux_target ~pos renv env ((_, lhs_ty), lhs_exp) =
     let prop_pty = property_ptype renv.re_proto obj_pty property lhs_ty in
     let env = Env.acc env (add_dependencies ~pos [obj_pol] prop_pty) in
     (env, prop_pty, Env.get_gpc_policy renv env K.Next)
-  | A.Array_get (vec, ix_opt) ->
+  | A.Array_get ((((_, vec_ty), _) as vec), ix_opt) ->
     (* Copy-on-Write handling of Array_get LHS in an assignment. When there is
      * an assignmnet lhs[ix] = rhs or lhs[] = rhs, we
      * 1. evaluate ix in case it has side-effects
@@ -438,7 +394,7 @@ let rec flux_target ~pos renv env ((_, lhs_ty), lhs_exp) =
     let (env, vec_pty, pc) = flux_target ~pos renv env vec in
     let meta = renv.re_proto.pre_meta in
     let env = Env.acc env @@ subtype ~pos meta old_vec_pty vec_pty in
-    let element_pty = vec_element_pty vec_pty in
+    let element_pty = vec_element_pty renv vec_ty vec_pty in
     (* Even though the runtime updates the entire vector, we treat
      * the mutation as if it were happening on a single element.
      * That is sound because, after the mutation, changes can only
@@ -483,16 +439,14 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
   | A.Lvar (_pos, lid) -> refresh_lvar_type ~pos renv env lid ety
   | A.Obj_get (obj, (_, A.Id (_, property)), _) ->
     let (env, obj_ptype) = expr env obj in
-    let prop_ptype = property_ptype renv.re_proto obj_ptype property ety in
+    let prop_pty = property_ptype renv.re_proto obj_ptype property ety in
     let prefix = "." ^ property in
-    let (env, super_ptype) =
-      adjust ~pos ~prefix ~adjustment:Aweaken renv env prop_ptype
+    let (env, super_pty) =
+      adjust_ptype ~pos ~prefix ~adjustment:Aweaken renv env prop_pty
     in
-    let obj_class = receiver_of_obj_get obj_ptype property in
-    let env =
-      Env.acc env (add_dependencies ~pos [obj_class.c_self] super_ptype)
-    in
-    (env, super_ptype)
+    let obj_pol = (receiver_of_obj_get obj_ptype property).c_self in
+    let env = Env.acc env (add_dependencies ~pos [obj_pol] super_pty) in
+    (env, super_pty)
   | A.This ->
     (match renv.re_this with
     | Some ptype -> (env, ptype)
@@ -562,14 +516,14 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
     (* We require each collection element to be a subtype of the vector
      * element parameter. *)
     let vec_pty = Lift.ty ~prefix:"vec" None renv.re_proto ety in
-    let element_pty = vec_element_pty vec_pty in
+    let element_pty = vec_element_pty renv ety vec_pty in
     let mk_element_subtype env exp =
       let (env, pty) = expr env exp in
       Env.acc env (subtype ~pos renv.re_proto.pre_meta pty element_pty)
     in
     let env = List.fold ~f:mk_element_subtype ~init:env exprs in
     (env, vec_pty)
-  | A.Array_get (exp, ix_opt) ->
+  | A.Array_get ((((_, vec_ty), _) as vec), ix_opt) ->
     (* Return the type parameter corresponding to the vector element type. *)
     let env =
       (* Evaluate the index in case it has side-effects. *)
@@ -577,8 +531,8 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
       | Some ix -> fst @@ expr env ix
       | None -> fail "cannot have an empty index when reading"
     in
-    let (env, vec_pty) = expr env exp in
-    let element_pty = vec_element_pty vec_pty in
+    let (env, vec_pty) = expr env vec in
+    let element_pty = vec_element_pty renv vec_ty vec_pty in
     (env, element_pty)
   (* TODO(T70139741): support variadic functions and constructors
    * TODO(T70139893): support classes with type parameters
@@ -617,14 +571,14 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
     let env = Env.filter_conts env (K.equal K.Next) in
     let env = Env.set_pc env K.Next PCSet.empty in
     let env =
-      let freshen = adjust ~pos ~adjustment:Aweaken in
+      let freshen = adjust_ptype ~pos ~adjustment:Aweaken in
       Env.freshen_cenv ~freshen renv env captured_ids
     in
 
     let pc = Env.new_policy_var renv.re_proto "pc" in
     let self = Env.new_policy_var renv.re_proto "lambda" in
     let (env, ptys) = add_params renv env fun_.A.f_params in
-    let exn = Lift.class_ty None renv.re_proto [] Decl.exception_id in
+    let exn = Lift.class_ty None renv.re_proto Decl.exception_id in
     let ret = Lift.ty ~prefix:"ret" None renv.re_proto (fst fun_.A.f_ret) in
     let renv = { renv with re_ret = ret; re_exn = exn; re_gpc = pc } in
 
@@ -744,7 +698,7 @@ and stmt renv env ((pos, s) : Tast.stmt) =
      * exceptions are catchable inside the block
      *)
     let try_renv =
-      let fresh_exn = Lift.class_ty None renv.re_proto [] Decl.exception_id in
+      let fresh_exn = Lift.class_ty None renv.re_proto Decl.exception_id in
       { renv with re_exn = fresh_exn }
     in
     let env = block try_renv env try_blk in
@@ -837,7 +791,7 @@ let analyse_callable
     let proto_renv = Env.new_proto_renv meta saved_env scope decl_env in
 
     let global_pc = Env.new_policy_var proto_renv "pc" in
-    let exn = Lift.class_ty None proto_renv [] Decl.exception_id in
+    let exn = Lift.class_ty None proto_renv Decl.exception_id in
 
     (* Here, we ignore the type parameters of this because at the moment we
      * lack Tgeneric policy type. This will be fixed (T68414656) in the future.
@@ -845,7 +799,7 @@ let analyse_callable
     let this_ty =
       match class_name with
       | Some cname when not is_static ->
-        Some (Lift.class_ty None proto_renv [] cname)
+        Some (Lift.class_ty None proto_renv cname)
       | _ -> None
     in
     let ret_ty = Lift.ty ~prefix:"ret" None proto_renv return in
@@ -1114,7 +1068,7 @@ class Policied
     HH\ClassAttribute,
     HH\ParameterAttribute,
     HH\FunctionAttribute {
-  public function __construct(public string $purpose = "") { }
+  public function __construct(public string $purpose) { }
 }
 class Cipp
  implements

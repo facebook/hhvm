@@ -1,18 +1,8 @@
 <?hh
 
-class A<T> { }
-
-class B<T> extends A<T> {}
-
-function testTParams1(B<int> $b): A<int> { return $b; }
-
-class C<T> extends A<int> {}
-
-function testTParams2(C<nothing> $c): A<int> { return $c; }
-
 class D {
   public function __construct(
-    <<Policied>>
+    <<Policied("pd")>>
     public int $pd
   ) {}
 }
@@ -20,7 +10,7 @@ class D {
 class E extends D {
   public function __construct(
     public int $pd,
-    <<Policied>>
+    <<Policied("pe")>>
     public int $pe,
   ) {
     parent::__construct($pd);
@@ -33,7 +23,7 @@ class F extends E {
   public function __construct(
     public int $pd,
     public int $pe,
-    <<Policied>>
+    <<Policied("pf")>>
     public int $pf,
   ) {
     parent::__construct($pd, $pe);

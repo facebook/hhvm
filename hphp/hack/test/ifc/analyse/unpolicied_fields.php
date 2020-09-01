@@ -2,7 +2,7 @@
 
 class C {
   public function __construct(
-    <<Policied>>
+    <<Policied("PUBLIC")>>
     public int $cx,
     public int $cy,
     public D $cd,

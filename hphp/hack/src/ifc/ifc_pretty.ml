@@ -45,8 +45,6 @@ let rec ptype fmt ty =
     let pp_sep fmt () = fprintf fmt "%s@ " sep in
     fprintf fmt "(@[<hov2>%a@])" (list pp_sep ptype) l
   in
-  let tparam fmt pty = ptype fmt pty in
-  let tparams fmt = fprintf fmt "[@[<hov2>%a@]]" (list comma_sep tparam) in
   match ty with
   | Tprim p
   | Tgeneric p ->
@@ -55,21 +53,13 @@ let rec ptype fmt ty =
   | Tunion [] -> fprintf fmt "nothing"
   | Tunion tl -> list' " |" tl
   | Tinter tl -> list' " &" tl
-  | Tclass { c_name; c_self; c_lump; c_property_map; c_tparams } ->
+  | Tclass { c_name; c_self; c_lump; c_properties } ->
     fprintf fmt "%s" c_name;
-    if not @@ SMap.is_empty c_tparams then
-      fprintf fmt "<@[<hov2>%a@]>" (smap comma_sep tparams) c_tparams;
     fprintf fmt "<@[<hov2>%a,@ %a" policy c_self policy c_lump;
-    if not (SMap.is_empty c_property_map) then
-      fprintf fmt ",@ %a" (smap comma_sep lazy_ptype) c_property_map;
+    if not (SMap.is_empty c_properties) then
+      fprintf fmt ",@ %a" (smap comma_sep policy) c_properties;
     fprintf fmt "@]>"
   | Tfun fn -> fun_ fmt fn
-
-and lazy_ptype fmt ty =
-  if Lazy.is_val ty then
-    ptype fmt (Lazy.force ty)
-  else
-    fprintf fmt "?thunk"
 
 (* Format: <pc, self>(arg1, arg2, ...): ret [exn] *)
 and fun_ fmt fn =
@@ -175,9 +165,7 @@ let env fmt env =
 
 let class_decl fmt { cd_policied_properties = props; _ } =
   let policied_property fmt { pp_name; pp_purpose; _ } =
-    match pp_purpose with
-    | Some purpose -> fprintf fmt "%s:%s" pp_name purpose
-    | None -> fprintf fmt "%s" pp_name
+    fprintf fmt "%s:%s" pp_name pp_purpose
   in
   let properties fmt = list comma_sep policied_property fmt in
   fprintf fmt "{ policied_props = [@[<hov>%a@]] }" properties props

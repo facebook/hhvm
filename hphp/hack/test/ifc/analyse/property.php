@@ -1,16 +1,16 @@
 <?hh // strict
 
 class Other {
-  <<Policied>>
+  <<Policied("oBool")>>
   public bool $oBool = false;
   public string $oString = 'Hi there!';
 }
 
 class My {
   public function __construct(
-    <<Policied>>
+    <<Policied("mInt")>>
     public int $mInt,
-    <<Policied>>
+    <<Policied("other")>>
     public Other $other,
     public bool $mBool,
   ) { }

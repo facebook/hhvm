@@ -1,2 +1,2 @@
 
-Fatal error: `async` cannot be used on an abstract method. Use an `Awaitable<...>` return type instead. in %s/async_bad_class.php on line 3
+Fatal error: `async` cannot be used on an `abstract` method. Use an `Awaitable<...>` return type instead. in %s/async_bad_class.php on line 3

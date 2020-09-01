@@ -1,1 +1,1 @@
-Fatal error: Cannot declare constructors and magic methods such as `__construct` async in %s/async-constructor.php on line 4
+Fatal error: Cannot declare constructors and magic methods like `__construct` as `async` in %s/async-constructor.php on line 4

@@ -1960,7 +1960,7 @@ where
                 self.produce_error(
                     |_, x| Self::is_abstract_and_async_method(x),
                     node,
-                    || errors::error2046("an abstract method"),
+                    || errors::error2046("an `abstract` method"),
                     async_annotation,
                 );
 
@@ -3223,13 +3223,13 @@ where
                 ClosureTypeSpecifier(_) if self_.env.is_hhvm_compat() => {
                     self_.errors.push(Self::make_error_from_node(
                         hint,
-                        errors::invalid_is_as_expression_hint(n, "Callable"),
+                        errors::invalid_is_as_expression_hint(n, "__Callable"),
                     ));
                 }
                 SoftTypeSpecifier(_) => {
                     self_.errors.push(Self::make_error_from_node(
                         hint,
-                        errors::invalid_is_as_expression_hint(n, "Soft"),
+                        errors::invalid_is_as_expression_hint(n, "__Soft"),
                     ));
                 }
                 AttributizedSpecifier(x)
@@ -3240,7 +3240,7 @@ where
                 {
                     self_.errors.push(Self::make_error_from_node(
                         hint,
-                        errors::invalid_is_as_expression_hint(n, "Soft"),
+                        errors::invalid_is_as_expression_hint(n, "__Soft"),
                     ));
                 }
                 _ => (),
@@ -5049,11 +5049,11 @@ where
             ListExpression(x) => Self::syntax_to_list_no_separators(&x.list_members)
                 .for_each(|n| self.check_lvalue(false, n)),
             SafeMemberSelectionExpression(_) => {
-                err(self, errors::not_allowed_in_write("?-> operator"))
+                err(self, errors::not_allowed_in_write("`?->` operator"))
             }
             MemberSelectionExpression(x) => {
                 if Self::token_kind(&x.member_name) == Some(TokenKind::XHPClassName) {
-                    err(self, errors::not_allowed_in_write("->: operator"))
+                    err(self, errors::not_allowed_in_write("`->:` operator"))
                 }
             }
             VariableExpression(x) => {
@@ -5062,21 +5062,21 @@ where
                     if text == sn::special_idents::THIS {
                         err(self, errors::reassign_this)
                     } else if text == sn::superglobals::GLOBALS {
-                        err(self, errors::not_allowed_in_write("$GLOBALS"))
+                        err(self, errors::not_allowed_in_write("`$GLOBALS`"))
                     }
                 }
             }
             DecoratedExpression(x) => match Self::token_kind(&x.decorated_expression_decorator) {
-                Some(TokenKind::Clone) => err(self, errors::not_allowed_in_write("Clone")),
-                Some(TokenKind::Await) => err(self, errors::not_allowed_in_write("Await")),
-                Some(TokenKind::Suspend) => err(self, errors::not_allowed_in_write("Suspend")),
+                Some(TokenKind::Clone) => err(self, errors::not_allowed_in_write("`clone`")),
+                Some(TokenKind::Await) => err(self, errors::not_allowed_in_write("`await`")),
+                Some(TokenKind::Suspend) => err(self, errors::not_allowed_in_write("`suspend`")),
                 Some(TokenKind::QuestionQuestion) => {
-                    err(self, errors::not_allowed_in_write("?? operator"))
+                    err(self, errors::not_allowed_in_write("`??` operator"))
                 }
                 Some(TokenKind::BarGreaterThan) => {
-                    err(self, errors::not_allowed_in_write("|> operator"))
+                    err(self, errors::not_allowed_in_write("`|>` operator"))
                 }
-                Some(TokenKind::Inout) => err(self, errors::not_allowed_in_write("Inout")),
+                Some(TokenKind::Inout) => err(self, errors::not_allowed_in_write("`inout`")),
                 _ => {}
             },
             ParenthesizedExpression(x) => {

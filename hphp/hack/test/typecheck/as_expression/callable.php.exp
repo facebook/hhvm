@@ -1,5 +1,5 @@
 File "callable.php", line 6, characters 9-29:
-Callable typehints cannot be used with as-expressions (Parsing[1002])
+`__Callable` typehints cannot be used with `as` expressions (Parsing[1002])
 File "callable.php", line 7, characters 5-6:
 Invalid argument (Typing[4110])
 File "callable.php", line 3, characters 12-14:

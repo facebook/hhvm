@@ -265,7 +265,7 @@ pub const error2030: Error = Cow::Borrowed("Only traits may use `require impleme
 pub const error2032: Error = Cow::Borrowed("The array type is not allowed in `strict` mode.");
 pub const error2033: Error = Cow::Borrowed(concat!(
     "The splat operator `...` for unpacking variadic arguments ",
-    "may only appear at the end of an argument list."
+    "may only appear at the **end** of an argument list."
 ));
 pub const error2034: Error = Cow::Borrowed(concat!(
     "A type alias declaration cannot both use `type` and have a ",
@@ -276,7 +276,7 @@ pub const error2036: Error = Cow::Borrowed(concat!(
     "Only interfaces and classes may extend other interfaces and ",
     "classes."
 ));
-pub const error2037: Error = Cow::Borrowed("A class may extend at most one other class.");
+pub const error2037: Error = Cow::Borrowed("A class may extend at most **one** other class.");
 pub fn error2038(constructor_name: &str) -> Error {
     Cow::Owned(format!(
         concat!(
@@ -293,7 +293,7 @@ pub const error2040: Error = Cow::Borrowed(concat!(
 ));
 pub const error2041: Error = Cow::Borrowed(concat!(
     "Unexpected method body: interfaces may contain only",
-    " method signatures, and not method implementations."
+    " method signatures, and **not** method implementations."
 ));
 pub const error2042: Error = Cow::Borrowed("Interfaces may not be declared `abstract`.");
 pub const error2043: Error = Cow::Borrowed("Traits may not be declared `abstract`.");
@@ -304,8 +304,9 @@ pub fn error2046(method_type: &str) -> Error {
     ))
 }
 
-pub const error2048: Error = Cow::Borrowed("Expected group use prefix to end with `\\`");
-pub const error2049: Error = Cow::Borrowed("A namespace use clause may not specify the kind here.");
+pub const error2048: Error = Cow::Borrowed("Expected group `use` prefix to end with `\\`");
+pub const error2049: Error =
+    Cow::Borrowed("A namespace `use` clause may not specify the kind here.");
 pub const error2050: Error =
     Cow::Borrowed("A concrete constant declaration must have an initializer.");
 pub const error2051: Error =
@@ -473,7 +474,7 @@ pub const static_property_in_reified_class: Error =
 pub const cls_reified_generic_in_static_method: Error =
     Cow::Borrowed("You may not use reified generics of the class in a static method");
 pub const static_method_reified_obj_creation: Error = Cow::Borrowed(
-    "You may not use object creation for potentially reified self or parent from a static method",
+    "You may not use object creation for potentially reified `self` or `parent` from a static method",
 );
 pub const non_invariant_reified_generic: Error =
     Cow::Borrowed("Reified generics cannot be covariant or contravariant");
@@ -788,7 +789,7 @@ pub const this_in_static: Error =
     Cow::Borrowed("Don't use `$this` in a static method, use `static::` instead");
 pub fn async_magic_method(name: &str) -> Error {
     Cow::Owned(format!(
-        "Cannot declare constructors and magic methods such as `{}` async",
+        "Cannot declare constructors and magic methods like `{}` as `async`",
         name.to_string(),
     ))
 }
@@ -860,7 +861,7 @@ pub fn self_or_parent_colon_colon_class_outside_of_class(name: &str) -> Error {
 }
 pub fn invalid_is_as_expression_hint(n: &str, hint: &str) -> Error {
     Cow::Owned(format!(
-        "{} typehints cannot be used with {}-expressions",
+        "`{}` typehints cannot be used with `{}` expressions",
         hint.to_string(),
         n.to_string(),
     ))
@@ -883,14 +884,14 @@ pub fn clone_cannot_be_static(class_name: &str, method_name: &str) -> Error {
 pub const namespace_not_a_classname: Error =
     Cow::Borrowed("Namespace cannot be used as a classname");
 pub const for_with_as_expression: Error =
-    Cow::Borrowed("For loops can not use as-expressions. Did you mean `foreach`?");
+    Cow::Borrowed("For loops can not use `as` expressions. Did you mean `foreach`?");
 pub const sealed_final: Error = Cow::Borrowed("Classes cannot be both `final` and `sealed`.");
 pub const interface_implements: Error =
     Cow::Borrowed("Interfaces may not implement other interfaces or classes");
 pub const memoize_on_lambda: Error =
     Cow::Borrowed("`<<__Memoize>>` attribute is not allowed on lambdas or anonymous functions.");
 pub fn declared_final(elt: &str) -> Error {
-    Cow::Owned(format!("{} cannot be declared final.", elt.to_string(),))
+    Cow::Owned(format!("{} cannot be declared `final`.", elt.to_string(),))
 }
 pub fn invalid_xhp_classish(elt: &str) -> Error {
     Cow::Owned(format!("{} are not valid xhp classes.", elt.to_string(),))

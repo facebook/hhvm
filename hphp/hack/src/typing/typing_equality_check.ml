@@ -20,8 +20,8 @@ module Phase = Typing_phase
 
 let trivial_result_str bop =
   match bop with
-  | Ast_defs.Eqeqeq -> "false"
-  | Ast_defs.Diff2 -> "true"
+  | Ast_defs.Eqeqeq -> Markdown_lite.md_codify "false"
+  | Ast_defs.Diff2 -> Markdown_lite.md_codify "true"
   | _ -> assert false
 
 let trivial_comparison_error env p bop ty1 ty2 trail1 trail2 =
@@ -97,7 +97,7 @@ let rec assert_nontrivial p bop env ty1 ty2 =
     | ((r, Tprim N.Tvoid), _)
     | (_, (r, Tprim N.Tvoid)) ->
       (* Ideally we shouldn't hit this case, but well... *)
-      Errors.void_usage p (Reason.to_string "This is void" r)
+      Errors.void_usage p (Reason.to_string "This is `void`" r)
     | ((_, Tprim a), (_, Tnewtype (e, _, bound)))
       when Env.is_enum env e && bad_compare_prim_to_enum a bound ->
       trivial_comparison_error env p bop ty1 bound trail1 trail2

@@ -141,7 +141,9 @@ let handle_value_in_return
         to __MutableReturn functions *)
       ( if function_returns_mutable && not (is_fun_call_returning_mutable env e)
       then
-        let kind = "not valid return value for __MutableReturn functions." in
+        let kind =
+          "not a valid return value for `__MutableReturn` functions."
+        in
         Errors.invalid_mutable_return_result (Tast.get_position e) fun_pos kind
       );
       env
@@ -171,7 +173,7 @@ let freeze_or_move_local
         env
     end
   | [((id_pos, _), T.This)] ->
-    invalid_target p id_pos "the this type, which is mutably borrowed";
+    invalid_target p id_pos "the `this` type, which is mutably borrowed";
     env
   | _ ->
     (* Error, freeze/move takes a single local as an argument *)

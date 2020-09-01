@@ -202,7 +202,9 @@ let rec array_get
         else (
           Errors.null_container
             expr_pos
-            (Reason.to_string "This is what makes me believe it can be null" r);
+            (Reason.to_string
+               "This is what makes me believe it can be `null`."
+               r);
           (env, err_witness env expr_pos)
         )
       in

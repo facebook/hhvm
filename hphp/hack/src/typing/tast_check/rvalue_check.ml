@@ -23,12 +23,12 @@ let check_valid_rvalue p env ty =
       | (r, Tprim Tnoreturn) ->
         Errors.noreturn_usage
           p
-          (Reason.to_string "A noreturn function always throws or exits" r);
+          (Reason.to_string "A `noreturn` function always throws or exits." r);
         env
       | (r, Tprim Tvoid) ->
         Errors.void_usage
           p
-          (Reason.to_string "A void function doesn't return a value" r);
+          (Reason.to_string "A `void` function doesn't return a value." r);
         env
       | (_, Tunion tyl2) -> iter_over_types env (tyl2 @ tyl)
       | (_, _) -> iter_over_types env tyl)

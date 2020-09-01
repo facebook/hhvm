@@ -29,8 +29,8 @@ let validator =
 
     method! on_tprim acc r prim =
       match prim with
-      | Aast.Tvoid -> this#invalid acc r "the void type"
-      | Aast.Tnoreturn -> this#invalid acc r "the noreturn type"
+      | Aast.Tvoid -> this#invalid acc r "the `void` type"
+      | Aast.Tnoreturn -> this#invalid acc r "the `noreturn` type"
       | _ -> acc
 
     method! on_tfun acc r _fun_type = this#invalid acc r "a function type"
@@ -47,7 +47,7 @@ let validator =
         this#invalid acc r
         @@ "the abstract type constant "
         ^ tconst
-        ^ " because it is not marked <<__Enforceable>>"
+        ^ " because it is not marked `<<__Enforceable>>`"
 
     method! on_tgeneric acc r name _tyargs =
       (* If we allow higher-kinded generics to be enforceable at some point,
@@ -61,7 +61,7 @@ let validator =
       if acc.like_context then
         acc
       else
-        this#invalid acc r "a newtype"
+        this#invalid acc r "a `newtype`"
 
     method! on_tlike acc r ty =
       if TypecheckerOptions.like_casts (Tast_env.get_tcopt acc.env) then
@@ -185,7 +185,7 @@ let validator =
         this#invalid
           acc
           r
-          "a reified type parameter that is not marked <<__Enforceable>>"
+          "a reified type parameter that is not marked `<<__Enforceable>>`"
       | (Nast.Reified, true) -> acc
   end
 

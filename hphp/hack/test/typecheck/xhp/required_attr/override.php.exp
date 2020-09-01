@@ -1,11 +1,11 @@
 File "override.php", line 6, characters 39-39:
 Redeclared attribute must not be less strict (Typing[4315])
 File "override.php", line 4, characters 39-39:
-The attribute is required, which is stricter than lateinit
+The attribute is `@required`, which is stricter than `@lateinit`
 File "override.php", line 7, characters 39-39:
 Redeclared attribute must not be less strict (Typing[4315])
 File "override.php", line 4, characters 39-39:
-The attribute is required, which is stricter than not required or lateinit
+The attribute is `@required`, which is stricter than not `@required` or `@lateinit`
 File "override.php", line 7, characters 39-39:
 The property `:a` has the wrong type (Typing[4341])
 File "override.php", line 7, characters 39-39:
@@ -17,7 +17,7 @@ But got `?int`
 File "override.php", line 12, characters 39-39:
 Redeclared attribute must not be less strict (Typing[4315])
 File "override.php", line 9, characters 39-39:
-The attribute is lateinit, which is stricter than not required or lateinit
+The attribute is `@lateinit`, which is stricter than not `@required` or `@lateinit`
 File "override.php", line 12, characters 39-39:
 The property `:a` has the wrong type (Typing[4341])
 File "override.php", line 12, characters 39-39:

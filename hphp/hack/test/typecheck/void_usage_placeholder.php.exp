@@ -1,4 +1,4 @@
 File "void_usage_placeholder.php", line 6, characters 15-16:
 You are using the return value of a `void` function (Typing[4119])
 File "void_usage_placeholder.php", line 6, characters 15-16:
-A void function doesn't return a value (`$_` is a placeholder variable not meant to be used)
+A `void` function doesn't return a value. (`$_` is a placeholder variable not meant to be used)

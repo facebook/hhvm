@@ -679,7 +679,7 @@ and add_list code pos_msg_l =
     if fixme_present pos code then
       let explanation =
         Printf.sprintf
-          "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d, and this cannot be enabled by configuration"
+          "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d, and this cannot be enabled by configuration"
           code
       in
       add_error_with_fixme_error code explanation pos_msg_l
@@ -699,13 +699,13 @@ and add_list code pos_msg_l =
     add_applied_fixme code pos
   else if !report_pos_from_reason && Pos.get_from_reason pos then
     let explanation =
-      "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress an error whose position was derived from reason information"
+      "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress an error whose position was derived from reason information"
     in
     add_error_with_fixme_error code explanation pos_msg_l
   else if !is_hh_fixme_disallowed pos code then
     let explanation =
       Printf.sprintf
-        "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d in declarations"
+        "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d in declarations"
         code
     in
     add_error_with_fixme_error code explanation pos_msg_l
@@ -724,7 +724,7 @@ and add_list code pos_msg_l =
     else
       let explanation =
         Printf.sprintf
-          "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d"
+          "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress error %d"
           code
       in
       add_error_with_fixme_error code explanation pos_msg_l
@@ -908,7 +908,7 @@ let fixme_format pos =
   add
     (Parsing.err_code Parsing.FixmeFormat)
     pos
-    "HH_FIXME wrong format, expected '/* HH_FIXME[ERROR_NUMBER] */'"
+    "`HH_FIXME` wrong format, expected `/* HH_FIXME[ERROR_NUMBER] */`"
 
 let parsing_error (p, msg) = add (Parsing.err_code Parsing.ParsingError) p msg
 
@@ -1950,7 +1950,7 @@ let toplevel_break p =
   add
     (NastCheck.err_code NastCheck.ToplevelBreak)
     p
-    "`break` can only be used inside loops or switch statements"
+    "`break` can only be used inside loops or `switch` statements"
 
 let toplevel_continue p =
   add
@@ -2081,7 +2081,7 @@ let inout_params_in_coroutine pos =
   add
     (NastCheck.err_code NastCheck.InoutParamsInCoroutine)
     pos
-    "Inout parameters cannot be defined on coroutines."
+    "`inout` parameters cannot be defined on coroutines."
 
 let mutable_attribute_on_function pos =
   add
@@ -2158,11 +2158,11 @@ let inout_params_special pos =
   add
     (NastCheck.err_code NastCheck.InoutParamsSpecial)
     pos
-    "Methods with special semantics cannot have inout parameters."
+    "Methods with special semantics cannot have `inout` parameters."
 
 let inout_params_memoize fpos pos =
-  let msg1 = (fpos, "Functions with inout parameters cannot be memoized") in
-  let msg2 = (pos, "This is an inout parameter") in
+  let msg1 = (fpos, "Functions with `inout` parameters cannot be memoized") in
+  let msg2 = (pos, "This is an `inout` parameter") in
   add_list (NastCheck.err_code NastCheck.InoutParamsMemoize) [msg1; msg2]
 
 let reading_from_append pos =
@@ -2175,7 +2175,7 @@ let inout_argument_bad_expr pos =
   add
     (NastCheck.err_code NastCheck.InoutArgumentBadExpr)
     pos
-    ( "Arguments for inout parameters must be local variables or simple "
+    ( "Arguments for `inout` parameters must be local variables or simple "
     ^ "subscript expressions on vecs, dicts, keysets, or arrays" )
 
 let illegal_destructor pos =
@@ -2247,7 +2247,7 @@ let switch_multiple_default pos =
   add
     (NastCheck.err_code NastCheck.SwitchMultipleDefault)
     pos
-    "There can be only one default case in `switch`"
+    "There can be only one `default` case in `switch`"
 
 (*****************************************************************************)
 (* Nast terminality *)
@@ -2492,7 +2492,7 @@ let invalid_shape_remove_key p =
   add
     (Typing.err_code Typing.InvalidShapeRemoveKey)
     p
-    "You can only unset fields of local variables"
+    "You can only unset fields of **local** variables"
 
 let unification_cycle pos ty =
   add_list
@@ -2625,7 +2625,7 @@ let tuple_syntax p =
   add
     (Typing.err_code Typing.TupleSyntax)
     p
-    "Did you want a tuple? Try `(X,Y)`, not `tuple<X,Y>`"
+    "Did you want a *tuple*? Try `(X,Y)`, not `tuple<X,Y>`"
 
 let redeclaring_missing_method p trait_method =
   add
@@ -3310,19 +3310,18 @@ let fun_variadicity_hh_vs_php56 pos1 pos2 (on_error : typing_error_callback) =
   on_error
     ~code:(Typing.err_code Typing.FunVariadicityHhVsPhp56)
     [
-      (pos1, "Variadic arguments: ...-style is not a subtype of ...$args");
+      (pos1, "Variadic arguments: `...`-style is not a subtype of `...$args`");
       (pos2, "Because of this definition");
     ]
 
 let ellipsis_strict_mode ~require pos =
   let msg =
     match require with
-    | `Type ->
-      "Cannot use `...` without a type hint in strict mode. Please add a type hint."
+    | `Type -> "Cannot use `...` without a **type hint** in strict mode."
     | `Param_name ->
-      "Cannot use `...` without a parameter name in strict mode. Please add a parameter name."
+      "Cannot use `...` without a **parameter name** in strict mode."
     | `Type_and_param_name ->
-      "Cannot use `...` without a type hint and parameter name in strict mode. Please add a type hint and parameter name."
+      "Cannot use `...` without a **type hint** and **parameter name** in strict mode."
   in
   add (Typing.err_code Typing.EllipsisStrictMode) pos msg
 
@@ -4037,7 +4036,7 @@ let null_container p null_witness =
     ( [
         ( p,
           "You are trying to access an element of this container"
-          ^ " but the container could be null. " );
+          ^ " but the container could be `null`. " );
       ]
     @ null_witness )
 

@@ -1,4 +1,4 @@
-Typing[4151] This expression is always true
+Typing[4151] This expression is always `true`
    --> always_true.php
   3 | function foo(array<int> $arg): void {
     |              ^^^^^^^^^^ This is a varray and cannot be null

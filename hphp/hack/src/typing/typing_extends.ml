@@ -156,8 +156,8 @@ let check_dynamically_callable member_name parent_class_elt class_elt on_error =
     let (lazy pos) = class_elt.ce_pos in
     let errorl =
       [
-        (parent_pos, "This method is __DynamicallyCallable");
-        (pos, "This method is not");
+        (parent_pos, "This method is `__DynamicallyCallable`.");
+        (pos, "This method is **not**.");
       ]
     in
     Errors.bad_method_override pos member_name errorl on_error
@@ -208,10 +208,12 @@ let check_xhp_attr_required env parent_class_elt class_elt on_error =
       when is_less_strict (tag, parent_tag) ->
       let (lazy parent_pos) = parent_class_elt.ce_pos in
       let (lazy child_pos) = class_elt.ce_pos in
+      let lateinit = Markdown_lite.md_codify "@lateinit" in
+      let required = Markdown_lite.md_codify "@required" in
       let show = function
-        | None -> "not required or lateinit"
-        | Some Required -> "required"
-        | Some Lateinit -> "lateinit"
+        | None -> Printf.sprintf "not %s or %s" required lateinit
+        | Some Required -> required
+        | Some Lateinit -> lateinit
       in
       Errors.bad_xhp_attr_required_override
         (show parent_tag)

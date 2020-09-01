@@ -10805,34 +10805,38 @@ SPOffsets calculate_sp_offsets(const State& state) {
 
   SPOffsets spOffsets(unit.blocks.size());
 
-  // The offset is relative to the start of unit position.
-  spOffsets[unit.entry].in = 0;
-
   // We don't need dataflow for this because we require that the stack pointer
   // offset is always statically known. This implies that it cannot have
   // different offsets at join points (we'll assert otherwise), so one pass is
   // sufficient.
   for (auto const b : state.rpo) {
-    assertx(spOffsets[b].in);
-    auto spOffset = *spOffsets[b].in;
+    auto spOffset = spOffsets[b].in;
 
     // Calculate the block's instruction effects on the offset.
     auto const& block = unit.blocks[b];
-    for (auto const& inst : block.code) {
-      spOffset += sp_change(state, inst);
-      // Don't support moving the stack pointer before where it started
-      // originally.
-      assertx(spOffset <= 0);
+    for (size_t i = 0; i < block.code.size(); i++) {
+      auto const& inst = block.code[i];
+      if (inst.op == Vinstr::recordbasenativesp) {
+        assert_flog(!spOffset, "Block B{} Instr {} initiailizes native SP, "
+                    "but already initialized.", b, i);
+        spOffset = 0;
+      } else if (spOffset) {
+        *spOffset += sp_change(state, inst);
+        // Don't support moving the stack pointer before where it started
+        // originally.
+        assertx(*spOffset <= 0);
+      }
     }
 
     // Propagate state to successors.
     auto const successorList = succs(block);
     // If there's no successors, we're exiting the unit, so make sure the stack
     // pointer has been returned to its entry position.
-    assertx(IMPLIES(successorList.empty(), spOffset == 0));
+    assertx(IMPLIES(successorList.empty(), !spOffset || *spOffset == 0));
     for (auto const succ : successorList) {
       // Join point shouldn't have differing offsets.
-      assertx(!spOffsets[succ].in || *spOffsets[succ].in == spOffset);
+      assertx(!spOffsets[succ].in || (spOffset &&
+                                      *spOffsets[succ].in == *spOffset));
       spOffsets[succ].in = spOffset;
     }
 
@@ -10874,19 +10878,26 @@ bool materialize_spill(const State& state,
                        Vlabel b,
                        Vinstr& inst,
                        size_t& instIdx,
-                       int skip) {
+                       folly::Optional<int> skip) {
+  auto const getSkip = [&skip] {
+    // We have already asserted there is no spilling prior to
+    // recordbasenativesp
+    assertx(skip);
+    return *skip;
+  };
+
   auto const to_offset = [&] (SpillSlot slot) {
-    return slot.slot*8 + skip;
+    return slot.slot*8 + getSkip();
   };
   auto const to_offset_wide = [&] (SpillSlotWide slot) {
-    return state.numSpillSlots*8 + slot.slot*16 + skip;
+    return state.numSpillSlots*8 + slot.slot*16 + getSkip();
   };
 
   // Materialize a spill of an immediate.
   auto const spillImmed = [&] (Vreg d,
                                Immed i,
                                auto const& immedToReg) {
-    assertx(skip >= 0);
+    assertx(getSkip() >= 0);
     auto const& info = reg_info(state, d);
     assertx(is_spill(info.regClass));
 
@@ -10926,7 +10937,7 @@ bool materialize_spill(const State& state,
 
   switch (inst.op) {
     case Vinstr::spill: {
-      assertx(skip >= 0);
+      assertx(getSkip() >= 0);
       assertx(inst.spill_.s.isPhys());
       auto const& info = reg_info(state, inst.spill_.d);
       assertx(is_spill(info.regClass));
@@ -10953,7 +10964,7 @@ bool materialize_spill(const State& state,
       return true;
     }
     case Vinstr::reload: {
-      assertx(skip >= 0);
+      assertx(getSkip() >= 0);
       assertx(inst.reload_.d.isPhys());
       auto const& info = reg_info(state, inst.reload_.s);
       assertx(is_spill(info.regClass));
@@ -10998,7 +11009,7 @@ bool materialize_spill(const State& state,
         [&] (Immed i, Vreg r) { return ldimmq{i.q(), r}; }
       );
     case Vinstr::spillundefq:
-      assertx(skip >= 0);
+      assertx(getSkip() >= 0);
       assertx(is_spill(reg_info(state, inst.spillundefq_.d).regClass));
       inst.nop_ = nop{};
       inst.op = Vinstr::nop;
@@ -11020,18 +11031,24 @@ void materialize_spills(const State& state, size_t spillSpace) {
   assertx(spOffsets.size() == state.unit.blocks.size());
 
   for (auto const b : state.rpo) {
-    assertx(spOffsets[b].in);
-    auto spOffset = *spOffsets[b].in;
-    assertx(IMPLIES(b == state.unit.entry, spOffset == 0));
-    assertx(spOffset <= 0);
+    auto spOffset = spOffsets[b].in;
+    assertx(IMPLIES(b == state.unit.entry, !spOffset));
+    assertx(!spOffset || *spOffset <= 0);
 
     for (size_t i = 0; i < state.unit.blocks[b].code.size(); ++i) {
       auto& inst = state.unit.blocks[b].code[i];
-      if (materialize_spill(state, b, inst, i, -spOffset - spillSpace)) {
+      folly::Optional<int> skip;
+      if (spOffset) skip = -*spOffset - spillSpace;
+      if (materialize_spill(state, b, inst, i, skip)) {
         assertx(sp_change(state, inst) == 0);
       } else {
-        spOffset += sp_change(state, inst);
-        assertx(spOffset <= 0);
+        if (inst.op == Vinstr::recordbasenativesp) {
+          assertx(!spOffset);
+          spOffset = 0;
+        } else if (spOffset) {
+          *spOffset += sp_change(state, inst);
+          assertx(*spOffset <= 0);
+        }
       }
     }
 
@@ -11039,7 +11056,8 @@ void materialize_spills(const State& state, size_t spillSpace) {
     // was calculated by calculate_sp_offsets().
     if (debug) {
       auto const successorList = succs(state.unit.blocks[b]);
-      always_assert(IMPLIES(successorList.empty(), spOffset == 0));
+      always_assert(IMPLIES(successorList.empty(),
+                            !spOffset || *spOffset == 0));
       for (auto const succ : successorList) {
         always_assert(spOffsets[succ].in == spOffset);
       }
@@ -11065,6 +11083,7 @@ struct SPAdjustLiveness {
 // different set representations for the slots.
 template <typename T, typename Resize, typename Subtract>
 jit::vector<SPAdjustLiveness> find_spill_liveness_impl(const State& state,
+                                                       const SPOffsets& spOff,
                                                        Resize resize,
                                                        Subtract subtract) {
   auto const& unit = state.unit;
@@ -11138,6 +11157,7 @@ jit::vector<SPAdjustLiveness> find_spill_liveness_impl(const State& state,
 
   for (auto const b : state.rpo) {
     auto& live = liveness[b];
+    bool spRecorded = spOff[b].in.has_value();
 
     // The spill slots are alive if any of the individual ones were calculated
     // to be alive (and vice-versa).
@@ -11151,10 +11171,21 @@ jit::vector<SPAdjustLiveness> find_spill_liveness_impl(const State& state,
       for (size_t i = 0; i < block.code.size(); ++i) {
         auto const& inst = block.code[i];
         assertx(inst.op != Vinstr::reload);
+        if (inst.op == Vinstr::recordbasenativesp) spRecorded = true;
         if (!is_spill_inst(inst)) continue;
         live.begin = i;
+        always_assert_flog(spRecorded, "Trying to spill before allowed. "
+                           "Spill space is being allocated due to a spill at "
+                           "B{} Instr {}, but the base native sp is not yet "
+                           "recorded.", b, i);
         break;
       }
+    } else {
+      always_assert_flog(spRecorded, "Trying to spill before it is allowed. "
+                         "Spill slots are live at the start of B{}, but the "
+                         "base native sp is not yet recorded. There is a "
+                         "spill somewhere in a loop that is not dominated by "
+                         "the recording of the base native sp.", b);
     }
 
     // If there are no spill slots alive going out of the block and there's any
@@ -11177,7 +11208,8 @@ jit::vector<SPAdjustLiveness> find_spill_liveness_impl(const State& state,
 }
 
 // Calculate liveness information for the spill slots.
-jit::vector<SPAdjustLiveness> find_spill_liveness(const State& state) {
+jit::vector<SPAdjustLiveness> find_spill_liveness(const State& state,
+                                                  const SPOffsets& spOffsets) {
   auto const numSlots = state.numSpillSlots + state.numWideSpillSlots;
 
   static constexpr size_t kSmallLimit = 128;
@@ -11188,6 +11220,7 @@ jit::vector<SPAdjustLiveness> find_spill_liveness(const State& state) {
     using Bitset = std::bitset<kSmallLimit>;
     return find_spill_liveness_impl<Bitset>(
       state,
+      spOffsets,
       [] (const Bitset&) {},
       [] (const Bitset& a, const Bitset& b) { return a & ~b; }
     );
@@ -11197,6 +11230,7 @@ jit::vector<SPAdjustLiveness> find_spill_liveness(const State& state) {
     using Bitset = boost::dynamic_bitset<>;
     return find_spill_liveness_impl<Bitset>(
       state,
+      spOffsets,
       [&] (Bitset& s) { s.resize(numSlots); },
       [] (const Bitset& a, const Bitset& b) { return a - b; }
     );
@@ -11205,31 +11239,26 @@ jit::vector<SPAdjustLiveness> find_spill_liveness(const State& state) {
 
 // Calculate liveness information for the stack pointer offset
 jit::vector<SPAdjustLiveness> find_sp_liveness(const State& state,
+                                               const SPOffsets& spOffsets,
                                                bool& found) {
-  // The stack pointer is alive only if its offset is non-zero, so we'll use the
-  // offset information.
-  auto const spOffsets = calculate_sp_offsets(state);
-  assertx(spOffsets.size() == state.unit.blocks.size());
-
   auto const& unit = state.unit;
   jit::vector<SPAdjustLiveness> liveness(unit.blocks.size());
 
   for (auto const b : state.rpo) {
-    assertx(spOffsets[b].in);
-    assertx(spOffsets[b].out);
-    auto const in = *spOffsets[b].in;
-    auto const out = *spOffsets[b].out;
+    auto in = spOffsets[b].in;
+    auto out = spOffsets[b].out;
 
     auto& live = liveness[b];
 
-    if (in == 0) {
+    if (!in || *in == 0) {
       // The in-offset of the block is 0, so the stack pointer offset is dead
       // coming into the block. Look for any instruction which changes it to
       // make the stack pointer offset alive.
       auto& block = unit.blocks[b];
       for (size_t i = 0; i < block.code.size(); ++i) {
         auto const& inst = block.code[i];
-        if (sp_change(state, inst) == 0) continue;
+        if (!in && inst.op == Vinstr::recordbasenativesp) in = 0;
+        if (!in || sp_change(state, inst) == 0) continue;
         live.begin = i;
         found = true;
         break;
@@ -11240,13 +11269,15 @@ jit::vector<SPAdjustLiveness> find_sp_liveness(const State& state,
       found = true;
     }
 
-    if (out == 0) {
+    if (!out) continue;
+    if (*out == 0) {
       // The out-offset of the block is 0, so the stack pointer offset is dead
       // going out of the block. Look backwards for any instruction which
       // changes it to make the stack pointer offset alive.
       auto& block = unit.blocks[b];
       for (size_t i = block.code.size(); i > 0; --i) {
         auto const& inst = block.code[i-1];
+        if (inst.op == Vinstr::recordbasenativesp) break;
         if (sp_change(state, inst) == 0) continue;
         live.end = i - 1;
         found = true;
@@ -11338,13 +11369,18 @@ void expand_spill_liveness(const State& state,
 
 // Insert stack pointer adjustments at the appropriate places
 void insert_sp_adjustments(State& state, size_t spillSpace) {
+  // We make use of the stack pointer offset info to determine liveness of the
+  // stack pointer, and establish if the base sp has been recorded.
+  auto const spOffsets = calculate_sp_offsets(state);
+  assertx(spOffsets.size() == state.unit.blocks.size());
+
   // Calculate where spill slots are alive, then where the stack pointer is
   // alive (non zero offset), and expand the spill slot liveness to match the
   // stack pointer liveness.
-  auto spillLiveness = find_spill_liveness(state);
+  auto spillLiveness = find_spill_liveness(state, spOffsets);
 
   auto found = false;
-  auto const spLiveness = find_sp_liveness(state, found);
+  auto const spLiveness = find_sp_liveness(state, spOffsets, found);
   if (found) expand_spill_liveness(state, spillLiveness, spLiveness);
 
   auto& unit = state.unit;

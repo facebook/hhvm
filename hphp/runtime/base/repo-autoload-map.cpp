@@ -78,10 +78,16 @@ static std::optional<String> getPathFromSymbol(
     return {StrNR(acc->second).asString()};
   }
 
-  String path;
-  auto res = Repo::get().findPath(unitSn, RuntimeOption::SourceRoot, path);
-  always_assert(res == RepoStatus::success);
-  auto spath = makeStaticString(path.get());
+  std::optional<String> path;
+  try {
+    path = Repo::get().findPath(unitSn, RuntimeOption::SourceRoot);
+  } catch (RepoExc& re) {
+    FTRACE(1, "Failed loading because of repo error {} {}\n", name.data(), re.msg());
+    return {};
+  }
+
+  always_assert(path.has_value());
+  auto spath = makeStaticString(path->get());
   unitToPathMap.insert(std::make_pair(unitSn, spath));
 
   FTRACE(1, "Success autoload {} {}\n", name.data(), spath->data());

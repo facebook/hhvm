@@ -490,41 +490,46 @@ void Repo::RemoveFileHashStmt::remove(RepoTxn& txn, const std::string& path) {
   query.exec();
 }
 
-RepoStatus Repo::GetUnitPathStmt::get(int64_t unitSn, String& path) {
-  try {
-    auto txn = RepoTxn{m_repo.begin()};
-    if (!prepared()) {
-      auto selectQuery = folly::sformat(
-        "SELECT f.path "
-        "FROM {} AS u, {} AS f "
-        "WHERE u.unitSn == @unitSn AND f.sha1 == u.sha1",
-        m_repo.table(m_repoId, "Unit"),
-        m_repo.table(m_repoId, "FileSha1"));
-      txn.prepare(*this, selectQuery);
-    }
-    RepoTxnQuery query(txn, *this);
-    query.bindInt64("@unitSn", unitSn);
-    query.step();
-    if (!query.row()) {
-      return RepoStatus::error;
-    }
-    StringData* spath; query.getStaticString(0, spath);
-    path = String(spath);
-    txn.commit();
-    return RepoStatus::success;
-  } catch (RepoExc& re) {
-    return RepoStatus::error;
+std::optional<String> Repo::GetUnitPathStmt::get(int64_t unitSn) {
+  auto txn = RepoTxn{m_repo.begin()};
+  if (!prepared()) {
+    auto selectQuery = folly::sformat(
+      "SELECT f.path "
+      "FROM {} AS u, {} AS f "
+      "WHERE u.unitSn == @unitSn AND f.sha1 == u.sha1",
+      m_repo.table(m_repoId, "Unit"),
+      m_repo.table(m_repoId, "FileSha1"));
+    txn.prepare(*this, selectQuery);
   }
+  RepoTxnQuery query(txn, *this);
+  query.bindInt64("@unitSn", unitSn);
+  query.step();
+  if (!query.row()) {
+    return {};
+  }
+
+  StringData* spath; query.getStaticString(0, spath);
+  auto path = String(spath);
+  txn.commit();
+  return path;
 }
 
-RepoStatus Repo::findPath(int64_t unitSn, const std::string& root, String& path) {
+std::optional<String> Repo::findPath(int64_t unitSn, const std::string& root) {
   if (m_dbc == nullptr) {
-    return RepoStatus::error;
+    return {};
   }
+
   int repoId;
   for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
-    String relPath;
-    if (m_getUnitPath[repoId].get(unitSn, relPath) == RepoStatus::success) {
+    if (repoName(repoId).empty()) {
+      // The repo wasn't loadable
+      continue;
+    }
+
+    auto maybeRelPath = m_getUnitPath[repoId].get(unitSn);
+    if (maybeRelPath.has_value()) {
+      auto relPath = maybeRelPath.value();
+      String path;
       if (relPath[0] == '/') {
         path = relPath;
       } else {
@@ -532,11 +537,11 @@ RepoStatus Repo::findPath(int64_t unitSn, const std::string& root, String& path)
       }
       TRACE(3, "Repo loaded file path for '%ld' from '%s'\n",
                 unitSn, repoName(repoId).c_str());
-      return RepoStatus::success;
+      return path;
     }
   }
   TRACE(3, "Repo file path: error loading '%ld'\n", unitSn);
-  return RepoStatus::error;
+  return {};
 }
 
 RepoStatus Repo::GetUnitStmt::get(const char* path, int64_t& unitSn) {

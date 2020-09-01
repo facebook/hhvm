@@ -110,7 +110,7 @@ struct Repo : RepoProxy {
                                  const Native::FuncTable&);
   void forgetUnit(const std::string& path);
   RepoStatus findFile(const char* path, const std::string& root, SHA1& sha1);
-  RepoStatus findPath(int64_t unitSn, const std::string& root, String& path);
+  std::optional<String> findPath(int64_t unitSn, const std::string& root);
   RepoStatus findUnit(const char* path, const std::string& root, int64_t& unitSn);
   RepoStatus insertSha1(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn);
   void commitSha1(UnitOrigin unitOrigin, UnitEmitter* ue);
@@ -184,7 +184,7 @@ struct Repo : RepoProxy {
 
   struct GetUnitPathStmt : public RepoProxy::Stmt {
     GetUnitPathStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    RepoStatus get(int64_t unitSn, String& path);
+    std::optional<String> get(int64_t unitSn);
   };
 
   struct GetUnitStmt : public RepoProxy::Stmt {

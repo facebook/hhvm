@@ -118,16 +118,22 @@ void cgLdCls(IRLS& env, const IRInstruction* inst) {
 
   auto const sf1 = v.makeReg();
   auto const sf2 = v.makeReg();
-  auto const low = v.makeReg();
   auto const cls1 = v.makeReg();
   auto const cls2 = v.makeReg();
 
   v << testbim{1, src[StringData::isSymbolOffset()], sf1};
   fwdJcc(v, env, CC_E, sf1, then);
-  v << loadl{src[StringData::cachedClassOffset()], low};
-  v << testl{low, low, sf2};
-  fwdJcc(v, env, CC_E, sf2, then);
-  v << movzlq{low, cls1};
+  if (use_lowptr) {
+    auto const low = v.makeReg();
+    v << loadl{src[StringData::cachedClassOffset()], low};
+    v << testl{low, low, sf2};
+    fwdJcc(v, env, CC_E, sf2, then);
+    v << movzlq{low, cls1};
+  } else {
+    v << load{src[StringData::cachedClassOffset()], cls1};
+    v << testq{cls1, cls1, sf2};
+    fwdJcc(v, env, CC_E, sf2, then);
+  }
   v << phijmp{done, v.makeTuple({cls1})};
 
   vc = then;

@@ -132,10 +132,6 @@ inline bool emit(Venv& env, const popframe&) {
   return true;
 }
 
-inline bool emit(Venv& env, const recordbasenativesp& i) {
-  return true;
-}
-
 inline bool emit(Venv& env, const recordstack& i) {
   env.record_inline_stack(i.fakeAddress);
   return true;

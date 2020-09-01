@@ -293,9 +293,6 @@ public:
   unsigned def_pos{kMaxPos};
   Vlabel def_block;
 
-  // List of recordbasenativesps this vreg is live across.
-  jit::vector<unsigned> recordbasenativesps{};
-
   // Copy of the Vreg's def instruction.
   Vinstr def_inst;
 };
@@ -344,9 +341,8 @@ public:
   jit::vector<Vlabel> blocks;
   // [start,end) position of each block.
   jit::vector<LiveRange> block_ranges;
-  // Per-block sp[offset] to spill-slots.  folly::none in cases where we
-  // have still not reached the recordbasenativesp instruction.
-  jit::vector<folly::Optional<int>> spill_offsets;
+  // Per-block sp[offset] to spill-slots.
+  jit::vector<int> spill_offsets;
   // Per-block live-in sets.
   jit::vector<LiveSet> livein;
 };
@@ -678,34 +674,23 @@ int spEffect(const Vunit& unit, const Vinstr& inst, PhysReg sp,
 /*
  * Compute the offset from `sp' to the spill area at each block start.
  */
-jit::vector<folly::Optional<int>> analyzeSP(const Vunit& unit,
-                                            const jit::vector<Vlabel>& blocks,
-                                            PhysReg sp) {
+jit::vector<int> analyzeSP(const Vunit& unit,
+                           const jit::vector<Vlabel>& blocks,
+                           PhysReg sp) {
   auto visited = boost::dynamic_bitset<>(unit.blocks.size());
-  auto spill_offsets = jit::vector<folly::Optional<int>>(unit.blocks.size());
+  auto spill_offsets = jit::vector<int>(unit.blocks.size());
 
   for (auto const b : blocks) {
-    auto offset = visited.test(b) ? spill_offsets[b] : folly::none;
+    auto offset = visited.test(b) ? spill_offsets[b] : 0;
 
-    for (unsigned j = 0; j < unit.blocks[b].code.size(); j++) {
-      auto const& inst = unit.blocks[b].code[j];
-      if (inst.op == Vinstr::recordbasenativesp) {
-        assert_flog(!offset, "Block B{} Instr {} initiailizes native SP, but "
-                    "already initialized.", size_t(b), j);
-        offset = 0;
-      } else if (offset) {
-        *offset -= spEffect(unit, inst, sp);
-      }
+    for (auto const& inst : unit.blocks[b].code) {
+      offset -= spEffect(unit, inst, sp);
     }
     for (auto const s : succs(unit.blocks[b])) {
       if (visited.test(s)) {
         assert_flog(offset == spill_offsets[s],
                     "sp mismatch on edge B{}->B{}, expected {} got {}",
-                    size_t(b), size_t(s),
-                    spill_offsets[s] ? std::to_string(*spill_offsets[s])
-                                     : "none",
-                    offset           ? std::to_string(*offset)
-                                     : "none");
+                    size_t(b), size_t(s), spill_offsets[s], offset);
       } else {
         spill_offsets[s] = offset;
         visited.set(s);
@@ -944,17 +929,6 @@ jit::vector<Variable*> buildIntervals(const Vunit& unit,
       visitOperands(inst, uv);
       uv.use(implicit_uses);
       uv.across(implicit_across);
-      if (inst.op == Vinstr::recordbasenativesp) {
-        forEach(live, [&](Vreg r) {
-          if (!unit.regToConst.count(r)) {
-            // We mark the recordbasenativesp as a use so no spills get
-            // inserted prior to the recordbasenativesp unless they have to be.
-            uv.use(r);
-            if (!variables[r]) variables[r] = Variable::create(r);
-            variables[r]->recordbasenativesps.push_back(pos);
-          }
-        });
-      }
     }
 
     // sanity check liveness computation
@@ -2010,18 +1984,9 @@ void insertSpill(const VxlsContext& ctx,
     assertx(pos - 1 >= range.start && pos + 1 < range.end);
     return true;
   };
-  auto const spill = [&] (unsigned pos) {
-    assertx(checkPos(pos));
-    resolution.spills[pos][ivl->reg] = ivl; // store ivl->reg => ivl->slot
-  };
-  if (ivl->var->recordbasenativesps.empty()) {
-    spill(ivl->var->def_pos + 1);
-  } else {
-    for (auto const pos : ivl->var->recordbasenativesps) {
-      always_assert_flog(ivl->covers(pos), "Spilling required before native sp set");
-      spill(pos + 1);
-    }
-  }
+  auto pos = ivl->var->def_pos + 1;
+  assertx(checkPos(pos));
+  resolution.spills[pos][ivl->reg] = ivl; // store ivl->reg => ivl->slot
 }
 
 /*
@@ -2293,7 +2258,7 @@ void renameOperands(Vunit& unit, const VxlsContext& ctx,
  * Updates `j' to refer to the same instruction after the code insertions.
  */
 void insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
-                    const CopyPlan& spills, folly::Optional<MemoryRef> slots,
+                    const CopyPlan& spills, MemoryRef slots,
                     unsigned pos) {
   jit::vector<Vinstr> stores;
 
@@ -2301,11 +2266,9 @@ void insertSpillsAt(jit::vector<Vinstr>& code, unsigned& j,
     auto ivl = spills[src];
     if (!ivl) continue;
 
-    always_assert_flog(slots, "Spilling before native sp is set (pos {})",
-                       pos);
     auto slot = ivl->var->slot;
     assertx(slot >= 0 && src == ivl->reg);
-    MemoryRef ptr{slots->r + slotOffset(slot)};
+    MemoryRef ptr{slots.r + slotOffset(slot)};
 
     if (!ivl->var->wide) {
       always_assert_flog(!src.isSF(), "Tried to spill %flags");
@@ -2353,8 +2316,7 @@ void insertCopiesAt(const VxlsContext& ctx,
  * Updates `j' to refer to the same instruction after the code insertions.
  */
 void insertLoadsAt(jit::vector<Vinstr>& code, unsigned& j,
-                   const CopyPlan& plan, folly::Optional<MemoryRef> slots,
-                   unsigned pos) {
+                   const CopyPlan& plan, MemoryRef slots, unsigned pos) {
   jit::vector<Vinstr> loads;
 
   for_each_load(plan, [&] (PhysReg dst, const Interval* ivl) {
@@ -2373,9 +2335,7 @@ void insertLoadsAt(jit::vector<Vinstr>& code, unsigned& j,
         not_reached();
       }());
     } else if (ivl->spilled()) {
-      always_assert_flog(slots, "Reloading before native sp is set (pos {})",
-                         pos);
-      MemoryRef ptr{slots->r + slotOffset(ivl->var->slot)};
+      MemoryRef ptr{slots.r + slotOffset(ivl->var->slot)};
       if (!ivl->var->wide) {
         loads.emplace_back(load{ptr, dst});
       } else {
@@ -2404,8 +2364,7 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
     auto offset = ctx.spill_offsets[b];
 
     for (unsigned j = 0; j < code.size(); j++, pos += 2) {
-      folly::Optional<MemoryRef> slots = folly::none;
-      if (offset) slots = ctx.sp[*offset];
+      MemoryRef slots = ctx.sp[offset];
 
       // Spills, reg-reg moves, and loads of constant values or spill space all
       // occur between instruction.  Insert them in order.
@@ -2426,13 +2385,8 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
         insertLoadsAt(code, j, c->second, slots, pos);
       }
       assertx(resolution.spills.count(pos) == 0);
-      if (code[j].op == Vinstr::recordbasenativesp) {
-        assert_flog(!offset, "Block B{} Instr {} initiailizes native SP, but "
-                    "already initialized.", size_t(b), j);
-        offset = 0;
-      } else if (offset) {
-        *offset -= spEffect(unit, code[j], ctx.sp);
-      }
+
+      offset -= spEffect(unit, code[j], ctx.sp);
     }
   }
 
@@ -2448,9 +2402,7 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
         auto& code = block.code;
         unsigned j = code.size() - 1;
         auto const pos = ctx.block_ranges[b].end - 1;
-        auto const offset = ctx.spill_offsets[succlist[0]];
-        assertx(offset);
-        auto const slots = ctx.sp[*offset];
+        auto const slots = ctx.sp[ctx.spill_offsets[succlist[0]]];
 
         // We interleave copies and loads in `edge_copies', so here and below
         // we process them separately (and pass `true' to avoid asserting).
@@ -2466,9 +2418,7 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
           auto& code = unit.blocks[s].code;
           unsigned j = 0;
           auto const pos = ctx.block_ranges[s].start;
-          auto const offset = ctx.spill_offsets[s];
-          assertx(offset);
-          auto const slots = ctx.sp[*offset];
+          auto const slots = ctx.sp[ctx.spill_offsets[s]];
 
           insertCopiesAt(ctx, code, j, c->second, pos);
           insertLoadsAt(code, j, c->second, slots, pos);
@@ -2531,10 +2481,6 @@ enum SpillState : uint8_t {
   // State is uninitialized. All block in-states start here.
   Uninit,
 
-  // Spill space is not currently possible; we must allocate spill space after
-  // this point.
-  NoSpillPossible,
-
   // Spill space is not currently needed; it's safe to allocate spill space
   // after this point.
   NoSpill,
@@ -2577,10 +2523,6 @@ SpillState instrInState(const Vunit& unit, const Vinstr& inst,
                         SpillState prevState, PhysReg sp) {
   switch (prevState) {
     case Uninit: break;
-
-    case NoSpillPossible:
-      if (inst.op == Vinstr::recordbasenativesp) return NoSpill;
-      return NoSpillPossible;
 
     case NoSpill:
       if (instrNeedsSpill(unit, inst, sp)) return NeedSpill;
@@ -2772,7 +2714,7 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
   for (uint32_t i = 0; i < ctx.blocks.size(); ++i) rpoIds[ctx.blocks[i]] = i;
 
   jit::vector<SpillStates> states(unit.blocks.size(), {Uninit, Uninit});
-  states[unit.entry].in = NoSpillPossible;
+  states[unit.entry].in = NoSpill;
   dataflow_worklist<uint32_t> worklist(unit.blocks.size());
   worklist.push(0);
 
@@ -2804,14 +2746,14 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
     auto state = states[label];
     auto& block = unit.blocks[label];
 
-    // Any block with a non NeedSpill in-state and == NeedSpill out-state might
-    // have an instruction in it that needs spill space, which we allocate
-    // right before the instruction in question.
-    if (state.in != NeedSpill && state.out == NeedSpill) {
-      auto blockState = state.in;
+    // Any block with a NoSpill in-state and == NeedSpill out-state might have
+    // an instruction in it that needs spill space, which we allocate right
+    // before the instruction in question.
+    if (state.in == NoSpill && state.out == NeedSpill) {
+      auto state = NoSpill;
       for (auto it = block.code.begin(); it != block.code.end(); ++it) {
-        blockState = instrInState(unit, *it, blockState, ctx.sp);
-        if (blockState == NeedSpill) {
+        state = instrInState(unit, *it, state, ctx.sp);
+        if (state == NeedSpill) {
           FTRACE(3, "alloc spill before {}: {}\n", label, show(unit, *it));
           alloc.set_irctx(it->irctx());
           block.code.insert(it, alloc);
@@ -2823,10 +2765,9 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
     // Allocate spill space on edges from a NoSpill out-state to a NeedSpill
     // in-state.
     auto const successors = succs(block);
-    if (state.out == NoSpill || state.out == NoSpillPossible) {
+    if (state.out == NoSpill) {
       for (auto s : successors) {
         if (states[s].in == NeedSpill) {
-          assertx(state.out != NoSpillPossible);
           FTRACE(3, "alloc spill on edge from {} -> {}\n", label, s);
           auto it = std::prev(block.code.end());
           alloc.set_irctx(it->irctx());
@@ -2846,9 +2787,9 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
       block.code.insert(it, free);
     }
 
-    // Any block that ends with NeedSpill needs to be walked to look for places
-    // to free spill space.
-    if (state.out == NeedSpill) {
+    // Any block that ends with anything other than NoSpill needs to be walked
+    // to look for places to free spill space.
+    if (state.out != NoSpill) {
       processSpillExits(unit, label, state.in, free, ctx.sp);
     }
   }

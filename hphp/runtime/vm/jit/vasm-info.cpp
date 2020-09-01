@@ -410,7 +410,6 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::pushm:
     case Vinstr::pushp:
     case Vinstr::pushpm:
-    case Vinstr::recordbasenativesp:
     case Vinstr::recordstack:
     case Vinstr::resumetc:
     case Vinstr::ret:

@@ -1416,7 +1416,8 @@ struct VarNR : private TypedValue {
   explicit VarNR(TypedValue tv) { m_type = tv.m_type; m_data = tv.m_data; }
   explicit VarNR(const Variant& v) : VarNR{*v.asTypedValue()} {}
 
-  VarNR(const VarNR &v) : TypedValue(v) {}
+  VarNR(const VarNR&) = delete;
+  VarNR& operator=(const VarNR&) = delete;
 
   explicit VarNR() { asVariant()->asTypedValue()->m_type = KindOfUninit; }
 

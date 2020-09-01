@@ -8,7 +8,6 @@
  *)
 
 open Hh_prelude
-open Markdown_lite
 
 let strip_ns id = id |> Utils.strip_ns |> Hh_autoimport.reverse_type
 
@@ -281,14 +280,19 @@ let rec to_string prefix r =
     @ [
         ( p2,
           "All the local information about "
-          ^ md_codify s
+          ^ Markdown_lite.md_codify s
           ^ " has been invalidated "
           ^ cause
           ^ ".\nThis is a limitation of the type-checker; use a local if that's the problem."
         );
       ]
   | Rformat (_, s, t) ->
-    let s = prefix ^ " because of the " ^ md_codify s ^ " format specifier" in
+    let s =
+      prefix
+      ^ " because of the "
+      ^ Markdown_lite.md_codify s
+      ^ " format specifier"
+    in
     (match to_string "" t with
     | [(_, "")] -> [(p, s)]
     | el -> [(p, s)] @ el)
@@ -297,12 +301,14 @@ let rec to_string prefix r =
       ( p,
         prefix
         ^ "; implicitly defined constant `::class` is a string that contains the fully qualified name of "
-        ^ (strip_ns s |> md_codify) );
+        ^ (strip_ns s |> Markdown_lite.md_codify) );
     ]
   | Runknown_class _ -> [(p, prefix ^ "; this class name is unknown to Hack")]
   | Rinstantiate (r_orig, generic_name, r_inst) ->
     to_string prefix r_orig
-    @ to_string ("  via this generic " ^ md_codify generic_name) r_inst
+    @ to_string
+        ("  via this generic " ^ Markdown_lite.md_codify generic_name)
+        r_inst
   | Rtype_variable p ->
     [(p, prefix ^ " because a type could not be determined here")]
   | Rtype_variable_generics (p, tp_name, s) ->
@@ -310,11 +316,11 @@ let rec to_string prefix r =
       ( p,
         prefix
         ^ " because type parameter "
-        ^ md_codify tp_name
+        ^ Markdown_lite.md_codify tp_name
         ^ " of "
-        ^ md_codify s
+        ^ Markdown_lite.md_codify s
         ^ " could not be determined. Please add explicit type parameters to the invocation of "
-        ^ md_codify s );
+        ^ Markdown_lite.md_codify s );
     ]
   | Rsolve_fail p ->
     [(p, prefix ^ " because a type could not be determined here")]
@@ -335,8 +341,10 @@ let rec to_string prefix r =
     in
     [
       ( pos,
-        sprintf "%sby accessing the type constant %s" prefix (md_codify tconst)
-      );
+        sprintf
+          "%sby accessing the type constant %s"
+          prefix
+          (Markdown_lite.md_codify tconst) );
     ]
     @ to_string ("on " ^ ty_str) r_root
   | Rtypeconst (r_orig, (pos, tconst), ty_str, r_root) ->
@@ -355,10 +363,13 @@ let rec to_string prefix r =
   | Rtype_access (r, (r_hd, tconst) :: tail) ->
     to_string prefix r
     @ to_string
-        ("  resulting from expanding the type constant " ^ md_codify tconst)
+        ( "  resulting from expanding the type constant "
+        ^ Markdown_lite.md_codify tconst )
         r_hd
     @ List.concat_map tail ~f:(fun (r, s) ->
-          to_string ("  then expanding the type constant " ^ md_codify s) r)
+          to_string
+            ("  then expanding the type constant " ^ Markdown_lite.md_codify s)
+            r)
   | Rexpr_dep_type (r, p, e) ->
     to_string prefix r @ [(p, "  " ^ expr_dep_type_reason_string e)]
   | Rtconst_no_cstr (_, n) ->
@@ -390,7 +401,7 @@ let rec to_string prefix r =
       ( p,
         prefix
         ^ " because the field "
-        ^ md_codify name
+        ^ Markdown_lite.md_codify name
         ^ " is not defined in this shape type, "
         ^ "and this shape type does not allow unknown fields" );
     ]
@@ -399,24 +410,30 @@ let rec to_string prefix r =
       ( p,
         prefix
         ^ " because the field "
-        ^ md_codify name
+        ^ Markdown_lite.md_codify name
         ^ " may be set to any type in this shape" );
     ]
   | Runset_field (p, name) ->
-    [(p, prefix ^ " because the field " ^ md_codify name ^ " was unset here")]
+    [
+      ( p,
+        prefix
+        ^ " because the field "
+        ^ Markdown_lite.md_codify name
+        ^ " was unset here" );
+    ]
   | Rcontravariant_generic (r_orig, class_name) ->
     to_string prefix r_orig
     @ [
         ( p,
           "Considering that this type argument is contravariant with respect to "
-          ^ (strip_ns class_name |> md_codify) );
+          ^ (strip_ns class_name |> Markdown_lite.md_codify) );
       ]
   | Rinvariant_generic (r_orig, class_name) ->
     to_string prefix r_orig
     @ [
         ( p,
           "Considering that this type argument is invariant with respect to "
-          ^ (strip_ns class_name |> md_codify) );
+          ^ (strip_ns class_name |> Markdown_lite.md_codify) );
       ]
   | Rregex _ -> [(p, prefix ^ " resulting from this regex pattern")]
   | Rimplicit_upper_bound (_, cstr) ->
@@ -424,7 +441,7 @@ let rec to_string prefix r =
       ( p,
         prefix
         ^ " arising from an implicit "
-        ^ md_codify ("as " ^ cstr)
+        ^ Markdown_lite.md_codify ("as " ^ cstr)
         ^ " constraint on this type" );
     ]
   | Rcstr_on_generics _ -> [(p, prefix)]
@@ -442,7 +459,13 @@ let rec to_string prefix r =
     ]
   | Rlambda_param (_, r_orig) -> to_string prefix r_orig
   | Rshape (p, fun_name) ->
-    [(p, prefix ^ " because " ^ md_codify fun_name ^ " expects a shape")]
+    [
+      ( p,
+        prefix
+        ^ " because "
+        ^ Markdown_lite.md_codify fun_name
+        ^ " expects a shape" );
+    ]
   | Renforceable p -> [(p, prefix ^ " because it is an unenforceable type")]
   | Rdestructure p ->
     [(p, prefix ^ " resulting from a list destructuring assignment or a splat")]
@@ -555,22 +578,26 @@ and expr_dep_type_reason_string = function
   | ERexpr id ->
     let did = get_expr_display_id id in
     "where "
-    ^ md_codify ("<expr#" ^ string_of_int did ^ ">")
+    ^ Markdown_lite.md_codify ("<expr#" ^ string_of_int did ^ ">")
     ^ " is a reference to this expression"
   | ERstatic ->
     "where `<static>` refers to the late bound type of the enclosing class"
   | ERclass c ->
-    "where the class " ^ (strip_ns c |> md_codify) ^ " was referenced here"
+    "where the class "
+    ^ (strip_ns c |> Markdown_lite.md_codify)
+    ^ " was referenced here"
   | ERparent p ->
     "where the class "
-    ^ (strip_ns p |> md_codify)
+    ^ (strip_ns p |> Markdown_lite.md_codify)
     ^ " (the parent of the enclosing) class was referenced here"
   | ERself c ->
     "where the class "
-    ^ (strip_ns c |> md_codify)
+    ^ (strip_ns c |> Markdown_lite.md_codify)
     ^ " was referenced here via the keyword `self`"
   | ERpu s ->
-    "where " ^ md_codify s ^ " is a type projected from this expression"
+    "where "
+    ^ Markdown_lite.md_codify s
+    ^ " is a type projected from this expression"
 
 let to_constructor_string r =
   match r with
@@ -713,9 +740,9 @@ let string_of_ureason = function
   | URyield -> "Invalid `yield`"
   | URxhp (cls, attr) ->
     "Invalid xhp value for attribute "
-    ^ md_codify attr
+    ^ Markdown_lite.md_codify attr
     ^ " in "
-    ^ (strip_ns cls |> md_codify)
+    ^ (strip_ns cls |> Markdown_lite.md_codify)
   | URxhp_spread -> "The attribute spread operator cannot be called on non-XHP"
   | URindex s -> "Invalid index type for this " ^ strip_ns s
   | URparam -> "Invalid argument"

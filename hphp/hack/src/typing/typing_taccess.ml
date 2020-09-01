@@ -29,6 +29,7 @@ module MakeType = Typing_make_type
 type context = {
   (* The T in the type access C::T *)
   id: Nast.sid;
+  root_pos: Pos.t;
   (* The expand environment as passed in by Typing_phase.localize *)
   ety_env: expand_env;
   (* A set of visited types used to avoid infinite loops during expansion. *)
@@ -96,17 +97,9 @@ let make_abstract env id name namel bnd =
    both a constraint type and assigned type. Which one we choose depends if
    the current root is the base (origin) of the expansion, or if it is an
    upper bound of the base. *)
-let create_root_from_type_constant
-    ctx env root (class_pos, class_name) opt_class_def =
+let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
+    =
   let { id = (id_pos, id_name) as id; _ } = ctx in
-  let class_ =
-    match opt_class_def with
-    | None ->
-      raise_error (fun () ->
-          if not ctx.ety_env.quiet then
-            Errors.unbound_name_typing class_pos class_name)
-    | Some c -> c
-  in
   let typeconst =
     match Env.get_typeconst env class_ id_name with
     | Some tc -> tc
@@ -226,20 +219,28 @@ let rec expand ctx env root =
     let name = Printf.sprintf "<cls#%s>" name in
     (env, update_class_name env ctx.id name res)
   | Tclass (cls, _, _) ->
-    let opt_class_def = Env.get_class env (snd cls) in
-    let allow_abstract =
-      match opt_class_def with
-      | Some ci
-        when Ast_defs.(equal_class_kind (Decl_provider.Class.kind ci) Ctrait) ->
+    begin
+      match Env.get_class env (snd cls) with
+      | None ->
+        raise_error (fun () ->
+            if not ctx.ety_env.quiet then
+              Errors.unbound_name_type_constant_access
+                ~access_pos:ctx.root_pos
+                ~name_pos:(fst cls)
+                (snd cls))
+      | Some ci ->
         (* Hack: `self` in a trait is mistakenly replaced by the trait instead
            of the class using the trait, so if a trait is the root, it is
            likely because originally there was `self::T` written.
            TODO(T54081153): fix `self` in traits and clean this up *)
-        true
-      | _ -> ctx.allow_abstract
-    in
-    let ctx = { ctx with allow_abstract } in
-    create_root_from_type_constant ctx env root cls opt_class_def
+        let allow_abstract =
+          Ast_defs.(equal_class_kind (Decl_provider.Class.kind ci) Ctrait)
+          || ctx.allow_abstract
+        in
+
+        let ctx = { ctx with allow_abstract } in
+        create_root_from_type_constant ctx env root cls ci
+    end
   | Tgeneric (s, tyargs) ->
     let ctx =
       let generics_seen = TySet.add root ctx.generics_seen in
@@ -345,6 +346,7 @@ let expand_with_env
     ?(as_tyvar_with_cnstr = false)
     root
     id
+    ~root_pos
     ~on_error
     ~allow_abstract_tconst =
   let (env, ty) =
@@ -358,6 +360,7 @@ let expand_with_env
           allow_abstract = allow_abstract_tconst;
           abstract_as_tyvar = as_tyvar_with_cnstr;
           on_error;
+          root_pos;
         }
       in
       let (env, res) = expand ctx env root in
@@ -418,6 +421,7 @@ let referenced_typeconsts env ety_env (root, ids) ~on_error =
             ~as_tyvar_with_cnstr:false
             root
             (pos, tconst)
+            ~root_pos:(get_pos root)
             ~on_error
             ~allow_abstract_tconst:true,
           acc )

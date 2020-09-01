@@ -2725,6 +2725,21 @@ let unbound_name_typing pos name =
     pos
     ("Unbound name (typing): " ^ md_codify (strip_ns name))
 
+let unbound_name_type_constant_access ~access_pos ~name_pos name =
+  add_list
+    (Typing.err_code Typing.UnboundNameTypeConstantAccess)
+    ( [
+        ( access_pos,
+          "Unbound name "
+          ^ md_codify (strip_ns name)
+          ^ " in type constant access" );
+      ]
+    @
+    if Pos.equal name_pos access_pos then
+      []
+    else
+      [(name_pos, "Unbound name is here")] )
+
 let previous_default p =
   add
     (Typing.err_code Typing.PreviousDefault)

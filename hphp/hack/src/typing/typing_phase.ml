@@ -284,15 +284,21 @@ let rec localize ~ety_env env (dty : decl_ty) =
       | _ -> false
     in
     let (env, root_ty) = localize ~ety_env env root_ty in
-    let (env, ety) =
-      List.fold ids ~init:(env, root_ty) ~f:(fun (env, root_ty) id ->
-          TUtils.expand_typeconst
-            ety_env
-            env
-            root_ty
-            id
-            ~on_error:ety_env.on_error
-            ~allow_abstract_tconst)
+    let root_pos = get_pos root_ty in
+    let ((env, ety), _) =
+      List.fold
+        ids
+        ~init:((env, root_ty), root_pos)
+        ~f:(fun ((env, root_ty), root_pos) id ->
+          ( TUtils.expand_typeconst
+              ety_env
+              env
+              root_ty
+              id
+              ~root_pos
+              ~on_error:ety_env.on_error
+              ~allow_abstract_tconst,
+            fst id ))
     in
     let (expansion_reason, ty) = deref ety in
     (* Elaborate reason with information about expression dependent types and

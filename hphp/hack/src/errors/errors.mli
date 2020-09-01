@@ -346,6 +346,9 @@ val field_kinds : Pos.t -> Pos.t -> unit
 
 val unbound_name_typing : Pos.t -> string -> unit
 
+val unbound_name_type_constant_access :
+  access_pos:Pos.t -> name_pos:Pos.t -> string -> unit
+
 val did_you_mean_naming : Pos.t -> string -> Pos.t -> string -> unit
 
 val previous_default : Pos.t -> unit

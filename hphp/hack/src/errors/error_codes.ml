@@ -651,7 +651,8 @@ module Typing = struct
     | ContextImplicitPolicyLeakage
     | ReifiedFunctionReference
     | ClassMethAbstractCall
-    | KindMismatch (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | KindMismatch
+    | UnboundNameTypeConstantAccess (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

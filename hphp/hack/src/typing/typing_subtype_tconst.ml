@@ -20,6 +20,7 @@ let make_type_const_equal
           ~as_tyvar_with_cnstr
           ty
           tconstid
+          ~root_pos:(get_pos ty)
           ~on_error
           ~allow_abstract_tconst:true
           ~ignore_errors:as_tyvar_with_cnstr

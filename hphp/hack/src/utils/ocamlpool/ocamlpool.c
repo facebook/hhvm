@@ -123,7 +123,7 @@ static void assert_out_of_section(void)
 
 static void init_cursor(void)
 {
-  ocamlpool_limit = (value*)ocamlpool_root + 1;
+  ocamlpool_limit = (value*)ocamlpool_root;
   ocamlpool_bound = (value*)ocamlpool_root + Wosize_val(ocamlpool_root);
   ocamlpool_cursor = ocamlpool_bound;
 }
@@ -246,6 +246,7 @@ static void ocamlpool_chunk_alloc(void)
 
   size_t words = (chunk_size / WORD_SIZE);
 
+  // Adjust root to account for ocaml header
   ocamlpool_root = (value)((value*)block + 1);
   OCAMLPOOL_SET_HEADER(ocamlpool_root, words - 1, String_tag, ocamlpool_color);
   init_cursor();
@@ -261,6 +262,7 @@ static void ocamlpool_chunk_alloc(void)
  */
 value ocamlpool_reserve_block(int tag, size_t words)
 {
+  // Add 1 word for rust header
   size_t size = words + 1;
   value *pointer = ocamlpool_cursor - size;
 
@@ -268,7 +270,8 @@ value ocamlpool_reserve_block(int tag, size_t words)
   {
     size_t old_ocamlpool_next_chunk_size = ocamlpool_next_chunk_size;
     if (size >= ocamlpool_next_chunk_size) {
-        ocamlpool_next_chunk_size = size;
+        // Add 1 word for ocaml's header
+        ocamlpool_next_chunk_size = size + 1;
     }
     ocamlpool_chunk_truncate();
     ocamlpool_chunk_alloc();

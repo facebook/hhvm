@@ -36,7 +36,6 @@ let element_to_class_elt
       elt_origin = ce_origin;
       elt_visibility = ce_visibility;
       elt_reactivity = _;
-      elt_fixme_codes = _;
       elt_deprecated = ce_deprecated;
     } =
   { ce_visibility; ce_origin; ce_type; ce_deprecated; ce_pos; ce_flags }

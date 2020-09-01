@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5c84e03ffae8d17eb8b0dfe02b4be01d>>
+// @generated SignedSource<<fb3feccf72f8fad5c11fbbe381dc0ba1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -121,7 +121,6 @@ pub struct ShallowProp<'a> {
     pub type_: Option<Ty<'a>>,
     pub abstract_: bool,
     pub visibility: oxidized::aast::Visibility,
-    pub fixme_codes: i_set::ISet<'a>,
 }
 impl<'a> TrivialDrop for ShallowProp<'a> {}
 
@@ -147,7 +146,6 @@ pub struct ShallowMethod<'a> {
     pub reactivity: Option<decl_defs::MethodReactivity<'a>>,
     pub type_: Ty<'a>,
     pub visibility: oxidized::aast::Visibility,
-    pub fixme_codes: i_set::ISet<'a>,
     pub deprecated: Option<&'a str>,
 }
 impl<'a> TrivialDrop for ShallowMethod<'a> {}

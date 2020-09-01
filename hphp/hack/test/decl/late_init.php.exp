@@ -16,7 +16,7 @@ Parsed decls:
          sp_type =
          (Some (Rhint (root|late_init.php line 4, characters 54-59),
                 (Tprim Tstring)));
-         sp_abstract = false; sp_visibility = Private; sp_fixme_codes = {} }
+         sp_abstract = false; sp_visibility = Private }
         ];
       sc_sprops = [];
       sc_constructor =
@@ -53,8 +53,7 @@ Parsed decls:
                     (make_ft_flags sync none ~return_disposable:false
                       ~returns_mutable:false ~returns_void_to_rx:false);
                     ft_reactive = Nonreactive }));
-              sm_visibility = Public; sm_fixme_codes = {};
-              sm_deprecated = None });
+              sm_visibility = Public; sm_deprecated = None });
       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
       sc_enum_type = None; sc_decl_errors = <opaque> } };
   funs = {}; typedefs = {}; consts = {} }

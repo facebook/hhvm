@@ -153,7 +153,6 @@ let prop env cv =
     sp_type = ty;
     sp_abstract = cv.cv_abstract;
     sp_visibility = cv.cv_visibility;
-    sp_fixme_codes = Fixme_provider.get_fixme_codes_for_pos cv_pos;
   }
 
 and static_prop env cv =
@@ -179,7 +178,6 @@ and static_prop env cv =
     sp_type = ty;
     sp_abstract = cv.cv_abstract;
     sp_visibility = cv.cv_visibility;
-    sp_fixme_codes = Fixme_provider.get_fixme_codes_for_pos cv_pos;
   }
 
 let method_type env m =
@@ -287,7 +285,6 @@ let method_ env c m =
     sm_reactivity = reactivity;
     sm_type = mk (Reason.Rwitness pos, Tfun ft);
     sm_visibility = m.m_visibility;
-    sm_fixme_codes = Fixme_provider.get_fixme_codes_for_pos pos;
     sm_deprecated;
   }
 

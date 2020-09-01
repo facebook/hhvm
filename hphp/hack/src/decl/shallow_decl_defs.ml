@@ -53,7 +53,6 @@ type shallow_prop = {
   sp_type: decl_ty option;
   sp_abstract: bool;
   sp_visibility: Aast.visibility;
-  sp_fixme_codes: ISet.t;
 }
 [@@deriving eq, show]
 
@@ -67,7 +66,6 @@ type shallow_method = {
   sm_reactivity: Decl_defs.method_reactivity option;
   sm_type: decl_ty;
   sm_visibility: Aast.visibility;
-  sm_fixme_codes: ISet.t;
   sm_deprecated: string option;
 }
 [@@deriving eq, show]

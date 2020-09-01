@@ -26,22 +26,21 @@ Parsed decls:
          sp_type =
          (Some (Rhint (root|classes.php line 5, characters 10-15),
                 (Tprim Tstring)));
-         sp_abstract = false; sp_visibility = Public; sp_fixme_codes = {} };
+         sp_abstract = false; sp_visibility = Public };
         { Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
           sp_lateinit = false; sp_lsb = false;
           sp_name = ([6:17-35], "protectedProperty"); sp_needs_init = true;
           sp_type =
           (Some (Rhint (root|classes.php line 6, characters 13-15),
                  (Tprim Tint)));
-          sp_abstract = false; sp_visibility = Protected; sp_fixme_codes = {}
-          };
+          sp_abstract = false; sp_visibility = Protected };
         { Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
           sp_lateinit = true; sp_lsb = false; sp_name = ([7:34-36], "p");
           sp_needs_init = true;
           sp_type =
           (Some (Rhint (root|classes.php line 7, characters 25-32),
                  (Tprim Tarraykey)));
-          sp_abstract = false; sp_visibility = Public; sp_fixme_codes = {} }
+          sp_abstract = false; sp_visibility = Public }
         ];
       sc_sprops =
       [{ Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
@@ -50,7 +49,7 @@ Parsed decls:
          sp_type =
          (Some (Rhint (root|classes.php line 4, characters 18-23),
                 (Tprim Tstring)));
-         sp_abstract = false; sp_visibility = Private; sp_fixme_codes = {} }
+         sp_abstract = false; sp_visibility = Private }
         ];
       sc_constructor =
       (Some { Shallow_decl_defs.sm_abstract = false; sm_final = false;
@@ -72,8 +71,7 @@ Parsed decls:
                     (make_ft_flags sync none ~return_disposable:false
                       ~returns_mutable:false ~returns_void_to_rx:false);
                     ft_reactive = Nonreactive }));
-              sm_visibility = Public; sm_fixme_codes = {};
-              sm_deprecated = None });
+              sm_visibility = Public; sm_deprecated = None });
       sc_static_methods = [];
       sc_methods =
       [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
@@ -95,7 +93,7 @@ Parsed decls:
                (make_ft_flags sync none ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive = Nonreactive }));
-         sm_visibility = Private; sm_fixme_codes = {}; sm_deprecated = None };
+         sm_visibility = Private; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([12:19-31], "publicMethod");
           sm_override = false; sm_dynamicallycallable = false;
@@ -115,7 +113,7 @@ Parsed decls:
                 (make_ft_flags sync none ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive }));
-          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
+          sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([13:22-37], "protectedMethod");
           sm_override = false; sm_dynamicallycallable = false;
@@ -135,8 +133,7 @@ Parsed decls:
                 (make_ft_flags sync none ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive }));
-          sm_visibility = Protected; sm_fixme_codes = {};
-          sm_deprecated = None };
+          sm_visibility = Protected; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([14:25-40], "async_generator");
           sm_override = false; sm_dynamicallycallable = false;
@@ -188,7 +185,7 @@ Parsed decls:
                 (make_ft_flags async generator none ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive }));
-          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
+          sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([23:19-36], "reactive_function");
           sm_override = false; sm_dynamicallycallable = false;
@@ -208,7 +205,7 @@ Parsed decls:
                 (make_ft_flags sync none ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Reactive {} }));
-          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
+          sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false;
           sm_name = ([26:19-44], "shallow_reactive_function");
@@ -229,7 +226,7 @@ Parsed decls:
                 (make_ft_flags sync none ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Shallow {} }));
-          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
+          sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false;
           sm_name = ([29:19-42], "local_reactive_function");
@@ -250,7 +247,7 @@ Parsed decls:
                 (make_ft_flags sync none ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Local {} }));
-          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
+          sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false;
           sm_name = ([32:19-49], "reactive_function_mutable_args");
@@ -309,7 +306,7 @@ Parsed decls:
                 (make_ft_flags sync none ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Reactive {} }));
-          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
+          sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([40:19-33], "mutable_return");
           sm_override = false; sm_dynamicallycallable = false;
@@ -329,7 +326,7 @@ Parsed decls:
                 (make_ft_flags sync none ~return_disposable:false
                   ~returns_mutable:true ~returns_void_to_rx:false);
                 ft_reactive = Reactive {} }));
-          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
+          sm_visibility = Public; sm_deprecated = None }
         ];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
       };
@@ -348,29 +345,28 @@ Parsed decls:
          sp_type =
          (Some (Rhint (root|classes.php line 51, characters 13-18),
                 (Tprim Tstring)));
-         sp_abstract = false; sp_visibility = Private; sp_fixme_codes = {} };
+         sp_abstract = false; sp_visibility = Private };
         { Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
           sp_lateinit = false; sp_lsb = false;
           sp_name = ([52:22-32], "protected"); sp_needs_init = true;
           sp_type =
           (Some (Rhint (root|classes.php line 52, characters 15-20),
                  (Tprim Tstring)));
-          sp_abstract = false; sp_visibility = Protected; sp_fixme_codes = {}
-          };
+          sp_abstract = false; sp_visibility = Protected };
         { Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
           sp_lateinit = false; sp_lsb = false;
           sp_name = ([53:19-26], "public"); sp_needs_init = true;
           sp_type =
           (Some (Rhint (root|classes.php line 53, characters 12-17),
                  (Tprim Tstring)));
-          sp_abstract = false; sp_visibility = Public; sp_fixme_codes = {} };
+          sp_abstract = false; sp_visibility = Public };
         { Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
           sp_lateinit = false; sp_lsb = false;
           sp_name = ([54:19-30], "hasDefault"); sp_needs_init = true;
           sp_type =
           (Some (Rhint (root|classes.php line 54, characters 12-17),
                  (Tprim Tstring)));
-          sp_abstract = false; sp_visibility = Public; sp_fixme_codes = {} }
+          sp_abstract = false; sp_visibility = Public }
         ];
       sc_sprops = [];
       sc_constructor =
@@ -443,8 +439,7 @@ Parsed decls:
                     (make_ft_flags sync none ~return_disposable:false
                       ~returns_mutable:false ~returns_void_to_rx:false);
                     ft_reactive = Nonreactive }));
-              sm_visibility = Public; sm_fixme_codes = {};
-              sm_deprecated = None });
+              sm_visibility = Public; sm_deprecated = None });
       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
       sc_enum_type = None; sc_decl_errors = <opaque> };
     "\\MyFinalClass" ->

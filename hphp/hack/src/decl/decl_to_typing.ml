@@ -46,7 +46,6 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
     sm_reactivity = _;
     sm_type = ty;
     sm_visibility;
-    sm_fixme_codes = _;
     sm_deprecated;
   } =
     meth
@@ -99,7 +98,6 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
     sp_type;
     sp_abstract;
     sp_visibility;
-    sp_fixme_codes = _;
   } =
     prop
   in

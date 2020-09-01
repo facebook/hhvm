@@ -53,7 +53,7 @@ Parsed decls:
                (make_ft_flags sync none ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive = Reactive {} }));
-         sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
+         sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([7:19-21], "f2");
           sm_override = false; sm_dynamicallycallable = false;
@@ -99,7 +99,7 @@ Parsed decls:
                 (make_ft_flags sync none ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Reactive {} }));
-          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
+          sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([9:19-21], "f3");
           sm_override = false; sm_dynamicallycallable = false;
@@ -145,7 +145,7 @@ Parsed decls:
                 (make_ft_flags sync none ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Reactive {} }));
-          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
+          sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([11:19-21], "f4");
           sm_override = false; sm_dynamicallycallable = false;
@@ -191,7 +191,7 @@ Parsed decls:
                 (make_ft_flags sync none ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Reactive {} }));
-          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
+          sm_visibility = Public; sm_deprecated = None }
         ];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
       } };

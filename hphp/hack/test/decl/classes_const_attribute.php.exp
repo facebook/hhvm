@@ -16,7 +16,7 @@ Parsed decls:
          sp_type =
          (Some (Rhint (root|classes_const_attribute.php line 5, characters 31-38),
                 (Tprim Tarraykey)));
-         sp_abstract = true; sp_visibility = Public; sp_fixme_codes = {} }
+         sp_abstract = true; sp_visibility = Public }
         ];
       sc_sprops = []; sc_constructor = None; sc_static_methods = [];
       sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
@@ -38,7 +38,7 @@ Parsed decls:
          sp_type =
          (Some (Rhint (root|classes_const_attribute.php line 9, characters 22-24),
                 (Tprim Tint)));
-         sp_abstract = false; sp_visibility = Public; sp_fixme_codes = {} }
+         sp_abstract = false; sp_visibility = Public }
         ];
       sc_sprops = []; sc_constructor = None; sc_static_methods = [];
       sc_methods = []; sc_user_attributes = []; sc_enum_type = None;

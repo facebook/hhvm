@@ -17,7 +17,7 @@ Parsed decls:
          sp_type =
          (Some (Rhint (root|generic_classes.php line 4, characters 11-11),
                 (Tgeneric ("T", []))));
-        sp_abstract = false; sp_visibility = Private; sp_fixme_codes = {} }
+        sp_abstract = false; sp_visibility = Private }
       ];
     sc_sprops = [];
     sc_constructor =
@@ -53,7 +53,7 @@ Parsed decls:
                 (make_ft_flags sync none ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive }));
-    sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None });
+    sm_visibility = Public; sm_deprecated = None });
     sc_static_methods = [];
     sc_methods =
     [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
@@ -75,7 +75,7 @@ Parsed decls:
            (make_ft_flags sync none ~return_disposable:false
              ~returns_mutable:false ~returns_void_to_rx:false);
            ft_reactive = Nonreactive }));
-      sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
+      sm_visibility = Public; sm_deprecated = None }
     ];
   sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque> };
 "\\ContravariantBag" ->
@@ -93,7 +93,7 @@ Parsed decls:
      sp_type =
      (Some (Rhint (root|generic_classes.php line 16, characters 11-11),
             (Tgeneric ("T", []))));
-    sp_abstract = false; sp_visibility = Private; sp_fixme_codes = {} }
+    sp_abstract = false; sp_visibility = Private }
   ];
 sc_sprops = [];
 sc_constructor =
@@ -129,9 +129,9 @@ sc_constructor =
             (make_ft_flags sync none ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None });
-sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-sc_enum_type = None; sc_decl_errors = <opaque> };
+sm_visibility = Public; sm_deprecated = None }); sc_static_methods = [];
+sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
+sc_decl_errors = <opaque> };
 "\\CovariantBag" ->
 { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false; sc_is_xhp = false;
   sc_has_xhp_keyword = false; sc_kind = Cnormal;
@@ -147,7 +147,7 @@ sc_enum_type = None; sc_decl_errors = <opaque> };
      sp_type =
      (Some (Rhint (root|generic_classes.php line 24, characters 11-11),
             (Tgeneric ("T", []))));
-    sp_abstract = false; sp_visibility = Private; sp_fixme_codes = {} }
+    sp_abstract = false; sp_visibility = Private }
   ];
 sc_sprops = [];
 sc_constructor =
@@ -183,8 +183,7 @@ sc_constructor =
             (make_ft_flags sync none ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
-sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None });
-sc_static_methods = [];
+sm_visibility = Public; sm_deprecated = None }); sc_static_methods = [];
 sc_methods =
 [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
    sm_memoizelsb = false; sm_name = ([30:19-22], "get"); sm_override = false;
@@ -204,7 +203,7 @@ sc_methods =
        (make_ft_flags sync none ~return_disposable:false
          ~returns_mutable:false ~returns_void_to_rx:false);
        ft_reactive = Nonreactive }));
-  sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
+  sm_visibility = Public; sm_deprecated = None }
 ]; sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
 } }; funs = {}; typedefs = {}; consts = {}
 }

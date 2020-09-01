@@ -825,7 +825,6 @@ and build_constructor
       elt_visibility = vis;
       elt_origin = class_name;
       elt_reactivity = None;
-      elt_fixme_codes = method_.sm_fixme_codes;
       elt_deprecated = method_.sm_deprecated;
     }
   in
@@ -903,7 +902,6 @@ and prop_decl
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_reactivity = None;
-      elt_fixme_codes = sp.sp_fixme_codes;
       elt_deprecated = None;
     }
   in
@@ -940,7 +938,6 @@ and static_prop_decl
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_reactivity = None;
-      elt_fixme_codes = sp.sp_fixme_codes;
       elt_deprecated = None;
     }
   in
@@ -1078,7 +1075,6 @@ and method_decl_acc
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_reactivity = m.sm_reactivity;
-      elt_fixme_codes = m.sm_fixme_codes;
       elt_deprecated = m.sm_deprecated;
     }
   in

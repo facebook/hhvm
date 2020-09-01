@@ -30,7 +30,7 @@ Parsed decls:
                 (Toption
                    (Rhint (root|xhp_attr.php line 6, characters 11-16),
                     (Tprim Tstring)))));
-         sp_abstract = false; sp_visibility = Public; sp_fixme_codes = {} };
+         sp_abstract = false; sp_visibility = Public };
         { Shallow_decl_defs.sp_const = false; sp_xhp_attr = None;
           sp_lateinit = false; sp_lsb = false;
           sp_name = ([14:18-24], "after"); sp_needs_init = true;
@@ -39,7 +39,7 @@ Parsed decls:
                  (Toption
                     (Rhint (root|xhp_attr.php line 14, characters 11-16),
                      (Tprim Tstring)))));
-          sp_abstract = false; sp_visibility = Public; sp_fixme_codes = {} };
+          sp_abstract = false; sp_visibility = Public };
         { Shallow_decl_defs.sp_const = false;
           sp_xhp_attr =
           (Some { Typing_defs_core.xa_tag = None; xa_has_default = true });
@@ -48,7 +48,7 @@ Parsed decls:
           sp_type =
           (Some (Rhint (root|xhp_attr.php line 7, characters 13-15),
                  (Tprim Tint)));
-          sp_abstract = false; sp_visibility = Public; sp_fixme_codes = {} };
+          sp_abstract = false; sp_visibility = Public };
         { Shallow_decl_defs.sp_const = false;
           sp_xhp_attr =
           (Some { Typing_defs_core.xa_tag = None; xa_has_default = false });
@@ -59,7 +59,7 @@ Parsed decls:
                  (Toption
                     (Rhint (root|xhp_attr.php line 8, characters 13-15),
                      (Tprim Tint)))));
-          sp_abstract = false; sp_visibility = Public; sp_fixme_codes = {} };
+          sp_abstract = false; sp_visibility = Public };
         { Shallow_decl_defs.sp_const = false;
           sp_xhp_attr =
           (Some { Typing_defs_core.xa_tag = (Some Typing_defs_core.Required);
@@ -69,7 +69,7 @@ Parsed decls:
           sp_type =
           (Some (Rhint (root|xhp_attr.php line 9, characters 13-15),
                  (Tprim Tint)));
-          sp_abstract = false; sp_visibility = Public; sp_fixme_codes = {} };
+          sp_abstract = false; sp_visibility = Public };
         { Shallow_decl_defs.sp_const = false;
           sp_xhp_attr =
           (Some { Typing_defs_core.xa_tag = None; xa_has_default = true });
@@ -80,7 +80,7 @@ Parsed decls:
                  (Toption
                     (Rhint (root|xhp_attr.php line 10, characters 14-16),
                      (Tprim Tint)))));
-          sp_abstract = false; sp_visibility = Public; sp_fixme_codes = {} };
+          sp_abstract = false; sp_visibility = Public };
         { Shallow_decl_defs.sp_const = false;
           sp_xhp_attr =
           (Some { Typing_defs_core.xa_tag = None; xa_has_default = false });
@@ -91,7 +91,7 @@ Parsed decls:
                  (Toption
                     (Rwitness (root|xhp_attr.php line 11, characters 19-21),
                      (Tprim Tstring)))));
-          sp_abstract = false; sp_visibility = Public; sp_fixme_codes = {} };
+          sp_abstract = false; sp_visibility = Public };
         { Shallow_decl_defs.sp_const = false;
           sp_xhp_attr =
           (Some { Typing_defs_core.xa_tag = (Some Typing_defs_core.Lateinit);
@@ -101,7 +101,7 @@ Parsed decls:
           sp_type =
           (Some (Rhint (root|xhp_attr.php line 12, characters 13-15),
                  (Tprim Tint)));
-          sp_abstract = false; sp_visibility = Public; sp_fixme_codes = {} }
+          sp_abstract = false; sp_visibility = Public }
         ];
       sc_sprops = []; sc_constructor = None; sc_static_methods = [];
       sc_methods = []; sc_user_attributes = []; sc_enum_type = None;

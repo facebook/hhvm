@@ -38,7 +38,7 @@ Parsed decls:
                (make_ft_flags sync none ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive = Nonreactive }));
-         sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
+         sm_visibility = Public; sm_deprecated = None }
         ];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
       };
@@ -71,7 +71,7 @@ Parsed decls:
                (make_ft_flags sync none ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive = Nonreactive }));
-         sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
+         sm_visibility = Public; sm_deprecated = None }
         ];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
       };
@@ -104,7 +104,7 @@ Parsed decls:
                (make_ft_flags sync none ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive = Nonreactive }));
-         sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
+         sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([5:19-29], "closeDoors");
           sm_override = false; sm_dynamicallycallable = false;
@@ -124,7 +124,7 @@ Parsed decls:
                 (make_ft_flags sync none ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive }));
-          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
+          sm_visibility = Public; sm_deprecated = None }
         ];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
       };
@@ -163,7 +163,7 @@ Parsed decls:
                (make_ft_flags sync none ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive = Nonreactive }));
-         sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
+         sm_visibility = Public; sm_deprecated = None }
         ];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
       } };

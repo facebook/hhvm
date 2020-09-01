@@ -24,7 +24,6 @@ use oxidized_by_ref::{
     decl_defs::MethodReactivity,
     errors::Errors,
     file_info::Mode,
-    i_set::ISet,
     nast,
     pos::Pos,
     relative_path::RelativePath,
@@ -1353,7 +1352,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                     type_: self.node_to_ty(hint),
                                     abstract_: false,
                                     visibility,
-                                    fixme_codes: ISet::empty(),
                                 });
                             }
 
@@ -3011,7 +3009,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         type_: ty,
                         abstract_: modifiers.is_abstract,
                         visibility: modifiers.visibility,
-                        fixme_codes: ISet::empty(),
                     })
                 }
                 n => panic!("Expected a ListItem, but was {:?}", n),
@@ -3052,7 +3049,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     Some(ShallowProp {
                         abstract_: false,
                         const_: false,
-                        fixme_codes: ISet::empty(),
                         lateinit: false,
                         lsb: false,
                         name: Id(pos, name),
@@ -3193,7 +3189,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             dynamicallycallable: attributes.dynamically_callable,
             type_: ty,
             visibility: modifiers.visibility,
-            fixme_codes: ISet::empty(),
             deprecated,
         });
         if is_constructor {

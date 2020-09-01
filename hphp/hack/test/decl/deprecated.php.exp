@@ -30,7 +30,7 @@ Parsed decls:
                (make_ft_flags sync none ~return_disposable:false
                  ~returns_mutable:false ~returns_void_to_rx:false);
                ft_reactive = Nonreactive }));
-         sm_visibility = Public; sm_fixme_codes = {};
+         sm_visibility = Public;
          sm_deprecated =
          (Some "The method foo is deprecated: use bar() instead") };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
@@ -52,7 +52,7 @@ Parsed decls:
                 (make_ft_flags sync none ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive }));
-          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
+          sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([11:19-22], "baz");
           sm_override = false; sm_dynamicallycallable = false;
@@ -72,7 +72,7 @@ Parsed decls:
                 (make_ft_flags sync none ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive }));
-          sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None };
+          sm_visibility = Public; sm_deprecated = None };
         { Shallow_decl_defs.sm_abstract = false; sm_final = false;
           sm_memoizelsb = false; sm_name = ([14:19-23], "foo2");
           sm_override = false; sm_dynamicallycallable = false;
@@ -92,7 +92,7 @@ Parsed decls:
                 (make_ft_flags sync none ~return_disposable:false
                   ~returns_mutable:false ~returns_void_to_rx:false);
                 ft_reactive = Nonreactive }));
-          sm_visibility = Public; sm_fixme_codes = {};
+          sm_visibility = Public;
           sm_deprecated =
           (Some "The method foo2 is deprecated: use bar2() instead") }
         ];

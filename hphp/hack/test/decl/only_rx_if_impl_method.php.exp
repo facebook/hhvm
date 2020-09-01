@@ -32,7 +32,7 @@ Parsed decls:
                Reactive {(Rhint (root|only_rx_if_impl_method.php line 6, characters 26-28),
                           (Tapply (([6:26-29], "\\IRx"), [])))}
                }));
-         sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
+         sm_visibility = Public; sm_deprecated = None }
         ];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
       };

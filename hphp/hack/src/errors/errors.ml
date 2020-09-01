@@ -2225,9 +2225,11 @@ let case_fallthrough pos1 pos2 =
     (NastCheck.err_code NastCheck.CaseFallthrough)
     [
       ( pos1,
-        "This `switch` has a case that implicitly falls through and is "
+        "This `switch` has a `case` that implicitly falls through and is "
         ^ "not annotated with `// FALLTHROUGH`" );
-      (pos2, "This case implicitly falls through");
+      ( pos2,
+        "This `case` implicitly falls through. Did you forget to add `break` or `return`?"
+      );
     ]
 
 let default_fallthrough pos =

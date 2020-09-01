@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/timestamp.h"
+#include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -765,6 +766,37 @@ void write_prof_data(ProfDataSerializer& ser, ProfData* pd) {
   write_raw<uint64_t>(ser, pd->baseProfCount());
 }
 
+void maybe_output_prof_trans_rec_trace(
+  TransID transId, const ProfTransRec* profTransRec, uint64_t translationWeight) {
+  if (profTransRec->kind() != TransKind::Profile) {
+    return;
+  }
+  if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::print_profiles)) {
+    auto const sk = profTransRec->srcKey();
+    auto const unit = sk.unit();
+    const char *filePath = "";
+    if (unit->filepath()->data() && unit->filepath()->size()) {
+      filePath = unit->filepath()->data();
+    }
+    folly::dynamic blocks = folly::dynamic::array;
+    for (const auto& block : profTransRec->region()->blocks()) {
+      const auto typePreconditionsStr = show(block->typePreConditions());
+      if (!typePreconditionsStr.empty()) {
+        blocks.push_back(folly::dynamic::object("type_preconditions_raw", typePreconditionsStr));
+      }
+    }
+    folly::dynamic profTransRecProfile = folly::dynamic::object;
+    profTransRecProfile["end_line_nunber"] = unit->getLineNumber(profTransRec->lastBcOff());
+    profTransRecProfile["file_path"] = filePath;
+    profTransRecProfile["function_name"] = sk.func()->fullName()->data();
+    profTransRecProfile["profile"] = folly::dynamic::object("profileType", "ProfTransRec");
+    profTransRecProfile["start_line_number"] = unit->getLineNumber(profTransRec->region()->start().offset());
+    profTransRecProfile["translation_weight"] = translationWeight;
+    profTransRecProfile["region"] = folly::dynamic::object("blocks", blocks);
+    HPHP::Trace::traceRelease("json:%s\n", folly::toJson(profTransRecProfile).c_str());
+  }
+}
+
 void read_prof_data(ProfDataDeserializer& ser, ProfData* pd) {
   BootStats::Block timer("DES_read_prof_data",
                          RuntimeOption::ServerExecutionMode());
@@ -776,6 +808,8 @@ void read_prof_data(ProfDataDeserializer& ser, ProfData* pd) {
     if (transID == kInvalidTransID) break;
     pd->addProfTrans(transID, read_prof_trans_rec(ser));
     *pd->transCounterAddr(transID) = read_raw<int64_t>(ser);
+    auto const profTransRec = pd->transRec(transID);
+    maybe_output_prof_trans_rec_trace(transID, profTransRec, pd->transCounter(transID));
   }
   pd->setBaseProfCount(read_raw<uint64_t>(ser));
 }
@@ -877,6 +911,35 @@ void read_maybe_serializable(ProfDataDeserializer& ser, T& out) {
   read_impl(ser, out, false);
 }
 
+template<typename T>
+void maybe_output_target_profile_trace(
+  const StringData* name, const TargetProfile<T>& prof, const rds::Profile &pt) {
+  if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::print_profiles, 1)) {
+    auto const pd = profData();
+    assertx(pd != nullptr);
+    if (isValidTransID(pt.transId)) {
+      auto const ptr = pd->transRec(pt.transId);
+      if (ptr) {
+        auto const srcKey = ptr->srcKey();
+        auto const func = srcKey.func();
+        auto const unit = srcKey.unit();
+        const char *filePath = "";
+        if (unit->filepath()->data() && unit->filepath()->size()) {
+          filePath = unit->filepath()->data();
+        }
+        folly::dynamic targetProfileInfo = folly::dynamic::object;
+        targetProfileInfo["trans_id"] = pt.transId;
+        targetProfileInfo["profile_raw_name"] = name->toCppString();
+        targetProfileInfo["profile"] = prof.value().toDynamic();
+        targetProfileInfo["file_path"] = filePath;
+        targetProfileInfo["line_number"] = unit->getLineNumber(srcKey.offset());
+        targetProfileInfo["function_name"] = func->fullName()->data();
+        HPHP::Trace::traceRelease("json:%s\n", folly::toJson(targetProfileInfo).c_str());
+      }
+    }
+  }
+}
+
 struct SymbolFixup : boost::static_visitor<void> {
   SymbolFixup(ProfDataDeserializer& ser, StringData* name, uint32_t size) :
       ser{ser}, name{name}, size{size} {}
@@ -896,30 +959,7 @@ struct SymbolFixup : boost::static_visitor<void> {
     } else {
       read_raw(ser, &prof.value(), size);
     }
-    if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::print_profiles, 1)) {
-      auto const pd = profData();
-      assertx(pd != nullptr);
-      if (isValidTransID(pt.transId)) {
-        auto const ptr = pd->transRec(pt.transId);
-        if (ptr) {
-          auto const srcKey = ptr->srcKey();
-          auto const func = srcKey.func();
-          auto const unit = srcKey.unit();
-          const char *filePath = "";
-          if (unit->filepath()->data() && unit->filepath()->size()) {
-            filePath = unit->filepath()->data();
-          }
-          folly::dynamic targetProfileInfo = folly::dynamic::object;
-          targetProfileInfo["trans_id"] = pt.transId;
-          targetProfileInfo["profile_raw_name"] = name->toCppString();
-          targetProfileInfo["profile"] = prof.value().toDynamic();
-          targetProfileInfo["file_path"] = filePath;
-          targetProfileInfo["line_number"] = unit->getLineNumber(srcKey.offset());
-          targetProfileInfo["function_name"] = func->fullName()->data();
-          HPHP::Trace::traceRelease("json:%s\n", folly::toJson(targetProfileInfo).c_str());
-        }
-      }
-    }
+    maybe_output_target_profile_trace(name, prof, pt);
   }
 
   void operator()(rds::Profile& pt) {

@@ -134,6 +134,7 @@
                 "line_number":3
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -533,5 +534,5 @@
     }
   },
   "program_text":"<?hh\n\nasync function f() {\n  concurrent {\n    await genx(inout_fun(inout $x));\n    await genx($x);\n  }\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-17-0000"
 }

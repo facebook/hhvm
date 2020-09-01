@@ -116,6 +116,7 @@
                 "line_number":2
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -1837,5 +1838,5 @@
     }
   },
   "program_text":"<?hh\nfunction foo() {\n  for($x;$y;$z) {\n    return $a;\n  }\n  for($x;$y;$z) {}\n  for(;$y;$z) {}\n  for($x;;$z) {}\n  for($x;$y;) {}\n  for($x;;) {}\n  for(;$y;) {}\n  for(;;$z) {}\n  for($x, $y;;) {}\n  for(;$x, $y, $z;) {}\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-17-0000"
 }

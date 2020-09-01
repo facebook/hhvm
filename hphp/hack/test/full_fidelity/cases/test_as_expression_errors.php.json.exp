@@ -171,6 +171,7 @@
                 "line_number":12
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -351,5 +352,5 @@
     }
   },
   "program_text":"<?hh\n/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */\n\nfunction test(mixed $e): void {\n  $e as @int; // error\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-17-0000"
 }

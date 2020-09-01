@@ -196,6 +196,7 @@
                         "line_number":4
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -345,6 +346,7 @@
                         "line_number":5
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -565,6 +567,7 @@
                         "line_number":9
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -732,6 +735,7 @@
                         "line_number":10
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -970,6 +974,7 @@
                         "line_number":14
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1137,6 +1142,7 @@
                         "line_number":15
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1348,6 +1354,7 @@
                         "line_number":19
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1515,6 +1522,7 @@
                         "line_number":20
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1607,5 +1615,5 @@
     }
   },
   "program_text":"<?hh // strict\n\ninterface I1 {\n  public function i1(): void; // legal\n  public abstract function i2(): void; // error2045\n}\n\nclass C1 { // technically is half of errror2044, but we report error2044 later\n  public function c2(): void { } // legal\n  public abstract function c3(): void; // error2044 reported here\n}\n\nabstract class C2 { // legal\n  public function c1(): void { } // legal\n  public abstract function c2(): void; // legal\n}\n\ntrait T {\n  public function t1(): void { } // legal\n  public abstract function t2(): void; // legal\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-17-0000"
 }

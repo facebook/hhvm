@@ -358,6 +358,7 @@
                 "line_number":4
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -1573,5 +1574,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nasync function foo(mixed $a, mixed $b, mixed $c, mixed $x) : Awaitable<void> {\n  await $a++;  // still await ($a++) to force people to make their\n               //  callsites (await $a)++ to clarify readability.\n  await ++$a;  // and this doesn't care because they're unary prefix.\n  await $a + $x;\n  await await $a;\n  await $a->bar($x);\n  await $a->bar($x) is vec;\n  await $a * $x;\n  await $a |> $b($$) |> $c($$);\n  await $a ? $b : $c;\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-17-0000"
 }

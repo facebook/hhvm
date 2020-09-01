@@ -129,6 +129,7 @@
                 "line_number":4
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -311,6 +312,7 @@
                 "line_number":8
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -987,6 +989,7 @@
                         "line_number":13
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1563,5 +1566,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nfunction get_int(): int {\n  return 0;\n}\n\nfunction test(): void {\n  $_ = ((int, int) $mt = tuple(get_int(), get_int())): void ==> {};\n}\n\nclass A {\n  public function test(): void {\n    $_ = ((int, int) $mt = tuple(get_int(), get_int())): void ==> {};\n  }\n}\n",
-  "version":"2020-08-05-0000"
+  "version":"2020-08-17-0000"
 }

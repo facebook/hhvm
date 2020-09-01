@@ -116,6 +116,7 @@
                 "line_number":3
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -332,5 +333,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction test(): void {\n  $foo::$bar<Qux>;\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-17-0000"
 }

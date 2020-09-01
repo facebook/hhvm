@@ -206,6 +206,7 @@
                         "line_number":4
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{"kind":"missing"},
                     "function_type":{"kind":"missing"},
                     "function_where_clause":{"kind":"missing"}
@@ -378,6 +379,7 @@
                 "line_number":9
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -813,5 +815,5 @@
     }
   },
   "program_text":"<?hh\n\nclass C {\n  public static function f() {\n    return \"lol\";\n  }\n}\n\nfunction test(): void {\n  $_ = ($x = varray[C::f()]): void ==> {};\n}\n",
-  "version":"2020-08-05-0000"
+  "version":"2020-08-17-0000"
 }

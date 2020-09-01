@@ -2554,6 +2554,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         param_list: Self::R,
         _right_parens: Self::R,
         _colon: Self::R,
+        _capability_provisional: Self::R, // TODO(vmladenov) provisional capabilities most likely unnecessary for direct decl
         ret_hint: Self::R,
         _where: Self::R,
     ) -> Self::R {

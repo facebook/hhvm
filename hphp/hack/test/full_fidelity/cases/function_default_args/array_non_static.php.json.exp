@@ -120,6 +120,7 @@
                 "line_number":3
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -545,6 +546,7 @@
                 "line_number":7
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -632,5 +634,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction get(): int {\n  return 1;\n}\n\nfunction f(array<int> $vec = varray[get(), 2]): void{}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-17-0000"
 }

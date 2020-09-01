@@ -47,6 +47,7 @@ type t =
   | NamespaceUseClause
   | FunctionDeclaration
   | FunctionDeclarationHeader
+  | CapabilityProvisional
   | WhereClause
   | WhereConstraint
   | MethodishDeclaration
@@ -229,6 +230,7 @@ let to_string kind =
   | NamespaceUseClause                -> "namespace_use_clause"
   | FunctionDeclaration               -> "function_declaration"
   | FunctionDeclarationHeader         -> "function_declaration_header"
+  | CapabilityProvisional             -> "capability_provisional"
   | WhereClause                       -> "where_clause"
   | WhereConstraint                   -> "where_constraint"
   | MethodishDeclaration              -> "methodish_declaration"

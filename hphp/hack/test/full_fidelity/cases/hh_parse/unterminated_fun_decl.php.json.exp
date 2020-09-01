@@ -121,6 +121,7 @@
                 "line_number":3
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}

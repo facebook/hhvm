@@ -802,6 +802,7 @@
                         "line_number":13
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1321,6 +1322,7 @@
                         "line_number":17
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1654,6 +1656,7 @@
                         "line_number":22
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -2610,6 +2613,7 @@
                         "line_number":38
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{

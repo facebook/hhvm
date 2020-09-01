@@ -58,7 +58,8 @@
     --expect-extension .errors.exp
     --program %{exe:../../../src/hh_parse.exe}
     --flags
-    --full-fidelity-errors)))
+    --full-fidelity-errors
+    --allow-unstable-features)))
 
 (alias
     (name full_fidelity_json_test)
@@ -121,7 +122,8 @@
     --program %{exe:../../../src/hh_parse.exe}
     --flags
     --full-fidelity-json
-    --pretty-print-json)))
+    --pretty-print-json
+    --allow-unstable-features)))
 
 (alias
     (name runtest)

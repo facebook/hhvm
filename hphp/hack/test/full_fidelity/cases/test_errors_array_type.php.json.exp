@@ -166,6 +166,7 @@
                 "line_number":3
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -403,6 +404,7 @@
                 "line_number":4
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -583,6 +585,7 @@
                 "line_number":5
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -808,6 +811,7 @@
                 "line_number":6
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -975,5 +979,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction f (int $a) : Vector<array> {} // error\nfunction f (array $a) : int {} // error\nfunction f (int $a) : array {} // error\nfunction f (array<int> $a) : array<int, string> {} //no error\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-17-0000"
 }

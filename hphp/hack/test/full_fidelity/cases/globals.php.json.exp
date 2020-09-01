@@ -153,6 +153,7 @@
                 "line_number":4
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -254,6 +255,7 @@
                 "line_number":5
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -550,5 +552,5 @@
     }
   },
   "program_text":"<?hh // partial\n\n\nfunction f($_) {}\nfunction g() {\n  f($GLOBALS['derp']); // ok\n  f($GLOBALS); // not ok\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-17-0000"
 }

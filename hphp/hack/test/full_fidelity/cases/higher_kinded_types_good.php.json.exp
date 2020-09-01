@@ -242,6 +242,7 @@
                 "line_number":3
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -1022,6 +1023,7 @@
                 "line_number":9
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -1464,6 +1466,7 @@
                 "line_number":11
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -1768,6 +1771,7 @@
                 "line_number":13
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -2059,6 +2063,7 @@
                 "line_number":15
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -2146,5 +2151,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction test1<T1<_>>() : void {}\n\nclass Test1<T1<X>> {}\n\ntype foo<T1<X> as SomeClass> = bool;\n\nfunction test2<T1<TX as Foo<X>>>() : void {}\n\nfunction test3<T1<TX as Foo<TX>> as Foo<TX>>() : void {}\n\nfunction test4<T1<+TX>, T2>() : void {}\n\nfunction test5<C<_>, T2>() : void {}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-17-0000"
 }

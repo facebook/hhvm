@@ -174,9 +174,18 @@ module type Syntax_S = sig
     ; function_left_paren                                : t
     ; function_parameter_list                            : t
     ; function_right_paren                               : t
+    ; function_capability_provisional                    : t
     ; function_colon                                     : t
     ; function_type                                      : t
     ; function_where_clause                              : t
+    }
+  | CapabilityProvisional             of
+    { capability_provisional_at                          : t
+    ; capability_provisional_left_brace                  : t
+    ; capability_provisional_type                        : t
+    ; capability_provisional_unsafe_plus                 : t
+    ; capability_provisional_unsafe_type                 : t
+    ; capability_provisional_right_brace                 : t
     }
   | WhereClause                       of
     { where_clause_keyword                               : t
@@ -1099,7 +1108,8 @@ module type Syntax_S = sig
   val make_namespace_group_use_declaration : t -> t -> t -> t -> t -> t -> t -> t
   val make_namespace_use_clause : t -> t -> t -> t -> t
   val make_function_declaration : t -> t -> t -> t
-  val make_function_declaration_header : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_function_declaration_header : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_capability_provisional : t -> t -> t -> t -> t -> t -> t
   val make_where_clause : t -> t -> t
   val make_where_constraint : t -> t -> t -> t
   val make_methodish_declaration : t -> t -> t -> t -> t
@@ -1280,6 +1290,7 @@ module type Syntax_S = sig
   val is_namespace_use_clause : t -> bool
   val is_function_declaration : t -> bool
   val is_function_declaration_header : t -> bool
+  val is_capability_provisional : t -> bool
   val is_where_clause : t -> bool
   val is_where_constraint : t -> bool
   val is_methodish_declaration : t -> bool

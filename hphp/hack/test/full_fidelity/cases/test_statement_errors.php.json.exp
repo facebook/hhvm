@@ -116,6 +116,7 @@
                 "line_number":2
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -1960,5 +1961,5 @@
     }
   },
   "program_text":"<?hh\nfunction bar() : void {\n  case 123: ; // error, outside switch\n  default: ; // error, outside switch\n  switch ($x) { case 123: ; default: break;} // no error\n  break; // error\n  while($a) {\n    if ($b) break; // no error\n    if ($c) continue; // no error\n    $x = function($b) { break; }; // error\n  }\n  try {} catch (Exception $ex) {} // no error\n  try {} finally {} // no error\n  try {} // error\n  switch ($x) { } // error\n  switch ($x) { foo(); } // error\n  switch ($x) { foo(); foo(); } // error\n}\n",
-  "version":"2020-08-05-0000"
+  "version":"2020-08-17-0000"
 }

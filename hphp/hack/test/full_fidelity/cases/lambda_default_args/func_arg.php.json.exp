@@ -222,6 +222,7 @@
                         "line_number":6
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -423,6 +424,7 @@
                         "line_number":7
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -838,5 +840,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nclass A {\n\n  public static function get_int():int {return 5;}\n  public function test(): void {\n    $_ = (int $a = A::get_int()): void ==> {};\n  }\n\n}\n",
-  "version":"2020-08-05-0000"
+  "version":"2020-08-17-0000"
 }

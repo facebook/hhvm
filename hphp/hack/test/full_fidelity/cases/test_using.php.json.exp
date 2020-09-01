@@ -134,6 +134,7 @@
                 "line_number":2
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -433,5 +434,5 @@
     }
   },
   "program_text":"<?hh\nasync function f() {\n  await async {\n    using new C();\n    print 1;\n  };\n}\n",
-  "version":"2020-08-05-0000"
+  "version":"2020-08-17-0000"
 }

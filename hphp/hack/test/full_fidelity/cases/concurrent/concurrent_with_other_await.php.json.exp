@@ -134,6 +134,7 @@
                 "line_number":2
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -693,5 +694,5 @@
     }
   },
   "program_text":"<?hh\nasync function foo1(): Awaitable<void> {\n  await g();\n  concurrent {\n    $x = await genx();\n    await geny();\n  }\n  await h();\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-17-0000"
 }

@@ -285,7 +285,7 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_function_declaration_header(_: &C, function_modifiers: Self, function_keyword: Self, function_name: Self, function_type_parameter_list: Self, function_left_paren: Self, function_parameter_list: Self, function_right_paren: Self, function_colon: Self, function_type: Self, function_where_clause: Self) -> Self {
+    fn make_function_declaration_header(_: &C, function_modifiers: Self, function_keyword: Self, function_name: Self, function_type_parameter_list: Self, function_left_paren: Self, function_parameter_list: Self, function_right_paren: Self, function_capability_provisional: Self, function_colon: Self, function_type: Self, function_where_clause: Self) -> Self {
         let syntax = SyntaxVariant::FunctionDeclarationHeader(Box::new(FunctionDeclarationHeaderChildren {
             function_modifiers,
             function_keyword,
@@ -294,9 +294,23 @@ where
             function_left_paren,
             function_parameter_list,
             function_right_paren,
+            function_capability_provisional,
             function_colon,
             function_type,
             function_where_clause,
+        }));
+        let value = V::from_syntax(&syntax);
+        Self::make(syntax, value)
+    }
+
+    fn make_capability_provisional(_: &C, capability_provisional_at: Self, capability_provisional_left_brace: Self, capability_provisional_type: Self, capability_provisional_unsafe_plus: Self, capability_provisional_unsafe_type: Self, capability_provisional_right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::CapabilityProvisional(Box::new(CapabilityProvisionalChildren {
+            capability_provisional_at,
+            capability_provisional_left_brace,
+            capability_provisional_type,
+            capability_provisional_unsafe_plus,
+            capability_provisional_unsafe_type,
+            capability_provisional_right_brace,
         }));
         let value = V::from_syntax(&syntax);
         Self::make(syntax, value)
@@ -2105,7 +2119,7 @@ where
                 acc
             },
             SyntaxVariant::FunctionDeclarationHeader(x) => {
-                let FunctionDeclarationHeaderChildren { function_modifiers, function_keyword, function_name, function_type_parameter_list, function_left_paren, function_parameter_list, function_right_paren, function_colon, function_type, function_where_clause } = *x;
+                let FunctionDeclarationHeaderChildren { function_modifiers, function_keyword, function_name, function_type_parameter_list, function_left_paren, function_parameter_list, function_right_paren, function_capability_provisional, function_colon, function_type, function_where_clause } = *x;
                 let acc = f(function_modifiers, acc);
                 let acc = f(function_keyword, acc);
                 let acc = f(function_name, acc);
@@ -2113,9 +2127,20 @@ where
                 let acc = f(function_left_paren, acc);
                 let acc = f(function_parameter_list, acc);
                 let acc = f(function_right_paren, acc);
+                let acc = f(function_capability_provisional, acc);
                 let acc = f(function_colon, acc);
                 let acc = f(function_type, acc);
                 let acc = f(function_where_clause, acc);
+                acc
+            },
+            SyntaxVariant::CapabilityProvisional(x) => {
+                let CapabilityProvisionalChildren { capability_provisional_at, capability_provisional_left_brace, capability_provisional_type, capability_provisional_unsafe_plus, capability_provisional_unsafe_type, capability_provisional_right_brace } = *x;
+                let acc = f(capability_provisional_at, acc);
+                let acc = f(capability_provisional_left_brace, acc);
+                let acc = f(capability_provisional_type, acc);
+                let acc = f(capability_provisional_unsafe_plus, acc);
+                let acc = f(capability_provisional_unsafe_type, acc);
+                let acc = f(capability_provisional_right_brace, acc);
                 acc
             },
             SyntaxVariant::WhereClause(x) => {
@@ -3305,6 +3330,7 @@ where
             SyntaxVariant::NamespaceUseClause {..} => SyntaxKind::NamespaceUseClause,
             SyntaxVariant::FunctionDeclaration {..} => SyntaxKind::FunctionDeclaration,
             SyntaxVariant::FunctionDeclarationHeader {..} => SyntaxKind::FunctionDeclarationHeader,
+            SyntaxVariant::CapabilityProvisional {..} => SyntaxKind::CapabilityProvisional,
             SyntaxVariant::WhereClause {..} => SyntaxKind::WhereClause,
             SyntaxVariant::WhereConstraint {..} => SyntaxKind::WhereConstraint,
             SyntaxVariant::MethodishDeclaration {..} => SyntaxKind::MethodishDeclaration,
@@ -3620,10 +3646,11 @@ where
                  function_attribute_spec: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::FunctionDeclarationHeader, 10) => SyntaxVariant::FunctionDeclarationHeader(Box::new(FunctionDeclarationHeaderChildren {
+             (SyntaxKind::FunctionDeclarationHeader, 11) => SyntaxVariant::FunctionDeclarationHeader(Box::new(FunctionDeclarationHeaderChildren {
                  function_where_clause: ts.pop().unwrap(),
                  function_type: ts.pop().unwrap(),
                  function_colon: ts.pop().unwrap(),
+                 function_capability_provisional: ts.pop().unwrap(),
                  function_right_paren: ts.pop().unwrap(),
                  function_parameter_list: ts.pop().unwrap(),
                  function_left_paren: ts.pop().unwrap(),
@@ -3631,6 +3658,15 @@ where
                  function_name: ts.pop().unwrap(),
                  function_keyword: ts.pop().unwrap(),
                  function_modifiers: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::CapabilityProvisional, 6) => SyntaxVariant::CapabilityProvisional(Box::new(CapabilityProvisionalChildren {
+                 capability_provisional_right_brace: ts.pop().unwrap(),
+                 capability_provisional_unsafe_type: ts.pop().unwrap(),
+                 capability_provisional_unsafe_plus: ts.pop().unwrap(),
+                 capability_provisional_type: ts.pop().unwrap(),
+                 capability_provisional_left_brace: ts.pop().unwrap(),
+                 capability_provisional_at: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::WhereClause, 2) => SyntaxVariant::WhereClause(Box::new(WhereClauseChildren {
@@ -4836,9 +4872,20 @@ pub struct FunctionDeclarationHeaderChildren<T, V> {
     pub function_left_paren: Syntax<T, V>,
     pub function_parameter_list: Syntax<T, V>,
     pub function_right_paren: Syntax<T, V>,
+    pub function_capability_provisional: Syntax<T, V>,
     pub function_colon: Syntax<T, V>,
     pub function_type: Syntax<T, V>,
     pub function_where_clause: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct CapabilityProvisionalChildren<T, V> {
+    pub capability_provisional_at: Syntax<T, V>,
+    pub capability_provisional_left_brace: Syntax<T, V>,
+    pub capability_provisional_type: Syntax<T, V>,
+    pub capability_provisional_unsafe_plus: Syntax<T, V>,
+    pub capability_provisional_unsafe_type: Syntax<T, V>,
+    pub capability_provisional_right_brace: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -6025,6 +6072,7 @@ pub enum SyntaxVariant<T, V> {
     NamespaceUseClause(Box<NamespaceUseClauseChildren<T, V>>),
     FunctionDeclaration(Box<FunctionDeclarationChildren<T, V>>),
     FunctionDeclarationHeader(Box<FunctionDeclarationHeaderChildren<T, V>>),
+    CapabilityProvisional(Box<CapabilityProvisionalChildren<T, V>>),
     WhereClause(Box<WhereClauseChildren<T, V>>),
     WhereConstraint(Box<WhereConstraintChildren<T, V>>),
     MethodishDeclaration(Box<MethodishDeclarationChildren<T, V>>),
@@ -6431,7 +6479,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             FunctionDeclarationHeader(x) => {
-                get_index(10).and_then(|index| { match index {
+                get_index(11).and_then(|index| { match index {
                         0 => Some(&x.function_modifiers),
                     1 => Some(&x.function_keyword),
                     2 => Some(&x.function_name),
@@ -6439,9 +6487,22 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     4 => Some(&x.function_left_paren),
                     5 => Some(&x.function_parameter_list),
                     6 => Some(&x.function_right_paren),
-                    7 => Some(&x.function_colon),
-                    8 => Some(&x.function_type),
-                    9 => Some(&x.function_where_clause),
+                    7 => Some(&x.function_capability_provisional),
+                    8 => Some(&x.function_colon),
+                    9 => Some(&x.function_type),
+                    10 => Some(&x.function_where_clause),
+                        _ => None,
+                    }
+                })
+            },
+            CapabilityProvisional(x) => {
+                get_index(6).and_then(|index| { match index {
+                        0 => Some(&x.capability_provisional_at),
+                    1 => Some(&x.capability_provisional_left_brace),
+                    2 => Some(&x.capability_provisional_type),
+                    3 => Some(&x.capability_provisional_unsafe_plus),
+                    4 => Some(&x.capability_provisional_unsafe_type),
+                    5 => Some(&x.capability_provisional_right_brace),
                         _ => None,
                     }
                 })

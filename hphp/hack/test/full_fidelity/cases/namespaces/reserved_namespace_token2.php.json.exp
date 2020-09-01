@@ -188,6 +188,7 @@
                 "line_number":7
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -439,6 +440,7 @@
                 "line_number":11
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -526,5 +528,5 @@
     }
   },
   "program_text":"<?hh\n\n// Using `namespace` as a name is not allowed\n\nclass namespace {}\n\nfunction test(): void {\n  $x = new namespace();\n}\n\nfunction namespace(): void {}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-17-0000"
 }

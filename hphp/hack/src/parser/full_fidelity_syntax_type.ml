@@ -90,6 +90,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_left_paren                                : t
     ; function_parameter_list                            : t
     ; function_right_paren                               : t
+    ; function_capability_provisional                    : t
     ; function_colon                                     : t
     ; function_type                                      : t
     ; function_where_clause                              : t
@@ -284,9 +285,18 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_left_paren                                : t
     ; function_parameter_list                            : t
     ; function_right_paren                               : t
+    ; function_capability_provisional                    : t
     ; function_colon                                     : t
     ; function_type                                      : t
     ; function_where_clause                              : t
+    }
+  | CapabilityProvisional             of
+    { capability_provisional_at                          : t
+    ; capability_provisional_left_brace                  : t
+    ; capability_provisional_type                        : t
+    ; capability_provisional_unsafe_plus                 : t
+    ; capability_provisional_unsafe_type                 : t
+    ; capability_provisional_right_brace                 : t
     }
   | WhereClause                       of
     { where_clause_keyword                               : t
@@ -1571,9 +1581,18 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_left_paren: Token.t value
     ; function_parameter_list: (parameter option) listesque value
     ; function_right_paren: Token.t value
+    ; function_capability_provisional: capability_provisional option value
     ; function_colon: Token.t option value
     ; function_type: attributized_specifier option value
     ; function_where_clause: where_clause option value
+    }
+  and capability_provisional =
+    { capability_provisional_at: Token.t value
+    ; capability_provisional_left_brace: Token.t value
+    ; capability_provisional_type: specifier value
+    ; capability_provisional_unsafe_plus: Token.t option value
+    ; capability_provisional_unsafe_type: specifier option value
+    ; capability_provisional_right_brace: Token.t value
     }
   and where_clause =
     { where_clause_keyword: Token.t value

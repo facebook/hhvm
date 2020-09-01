@@ -162,8 +162,12 @@ impl<'src> SmartConstructors<'src, NoState> for MinimalSmartConstructors {
         <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::make_function_declaration(self, arg0, arg1, arg2)
     }
 
-    fn make_function_declaration_header(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R, arg8: Self::R, arg9: Self::R) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::make_function_declaration_header(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+    fn make_function_declaration_header(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R, arg8: Self::R, arg9: Self::R, arg10: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::make_function_declaration_header(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
+    }
+
+    fn make_capability_provisional(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::make_capability_provisional(self, arg0, arg1, arg2, arg3, arg4, arg5)
     }
 
     fn make_where_clause(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {

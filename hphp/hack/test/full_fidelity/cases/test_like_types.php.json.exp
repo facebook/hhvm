@@ -1100,6 +1100,7 @@
                 "line_number":12
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -1187,5 +1188,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction f(\n  ~int $a,\n  vec<~dict<int, string>> $b,\n  ~SomeClass::TFoo $c,\n  (function(~int): void) $d,\n  ?~int $e,\n  ~?int $f,\n  ~~int $g,\n  (int, ~string) $h,\n): void {}\n",
-  "version":"2020-08-05-0000"
+  "version":"2020-08-17-0000"
 }

@@ -146,6 +146,7 @@
                 "line_number":3
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{"kind":"missing"},
             "function_type":{"kind":"missing"},
             "function_where_clause":{"kind":"missing"}
@@ -333,5 +334,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction f($x) {\n  somename {1, 2};\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-17-0000"
 }

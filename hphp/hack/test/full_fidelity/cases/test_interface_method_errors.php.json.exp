@@ -178,6 +178,7 @@
                         "line_number":4
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -295,6 +296,7 @@
                         "line_number":5
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -506,6 +508,7 @@
                         "line_number":9
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -623,6 +626,7 @@
                         "line_number":10
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -834,6 +838,7 @@
                         "line_number":14
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -951,6 +956,7 @@
                         "line_number":15
                       }
                     },
+                    "function_capability_provisional":{"kind":"missing"},
                     "function_colon":{
                       "kind":"token",
                       "token":{
@@ -1061,5 +1067,5 @@
     }
   },
   "program_text":"<?hh // strict\n\ninterface I {\n  function i1(): int; // legal\n  function i2(): int { } // error2041\n}\n\nclass C {\n  function c1(): void; // error2015\n  function c2(): void { } // legal\n}\n\ntrait T {\n  function t1() : void; // error2015\n  function t2() : void { } // legal\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-17-0000"
 }

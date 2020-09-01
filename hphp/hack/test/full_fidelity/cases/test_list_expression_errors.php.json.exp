@@ -1799,6 +1799,7 @@
                 "line_number":24
               }
             },
+            "function_capability_provisional":{"kind":"missing"},
             "function_colon":{
               "kind":"token",
               "token":{
@@ -2109,5 +2110,5 @@
     }
   },
   "program_text":"<?hh // strict\n\n// legal because 'list' can be the value clause of a foreach\nforeach($array as list($odd, $even)){\n}\n\n// legal because 'list' can be the operand to a list destructuring\nlist($a, list($b, $c)) = $vector;\n\n// legal because nested destructuring, and use as value clause, are both legal\nforeach($array as list($odd, list($even))){\n}\n\n// legal because used as left side of simple assignment\nlist($a) = $vector;\nlist(,,$a,,) = $vector;\n// legal because simple assignment is right-associative\n$x = list($whatever) = $whatever;\n\nfoo(list($a, $b)); // error 2040\nlist(2) + 3; // error 2040\nlist(2) % 3; // error 2040\n\nfunction foo(): (int, int) {\n  return list(1, 2); // error, list can only be used as an lvar\n}\n",
-  "version":"2020-06-23-0001"
+  "version":"2020-08-17-0000"
 }

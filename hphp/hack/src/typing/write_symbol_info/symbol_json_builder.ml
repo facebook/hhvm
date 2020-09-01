@@ -44,7 +44,7 @@ let process_decl_loc
   in
   (decl_id, prog)
 
-let process_container_decl ctx source_map con progress =
+let process_container_decl ctx source_map con (all_decls, progress) =
   let (con_pos, con_name) = con.c_name in
   let (con_type, decl_pred) =
     container_decl_predicate (get_container_kind con)
@@ -53,7 +53,7 @@ let process_container_decl ctx source_map con progress =
     add_container_decl_fact decl_pred con_name progress
   in
   let (prop_decls, prog) =
-    List.fold con.c_vars ~init:([], prog) ~f:(fun (decls, prog) prop ->
+    List.fold_right con.c_vars ~init:([], prog) ~f:(fun prop (decls, prog) ->
         let (pos, id) = prop.cv_id in
         let (decl_id, prog) =
           process_decl_loc
@@ -70,7 +70,7 @@ let process_container_decl ctx source_map con progress =
         (build_property_decl_json_ref decl_id :: decls, prog))
   in
   let (class_const_decls, prog) =
-    List.fold con.c_consts ~init:([], prog) ~f:(fun (decls, prog) const ->
+    List.fold_right con.c_consts ~init:([], prog) ~f:(fun const (decls, prog) ->
         let (pos, id) = const.cc_id in
         let (decl_id, prog) =
           process_decl_loc
@@ -87,7 +87,10 @@ let process_container_decl ctx source_map con progress =
         (build_class_const_decl_json_ref decl_id :: decls, prog))
   in
   let (type_const_decls, prog) =
-    List.fold con.c_typeconsts ~init:([], prog) ~f:(fun (decls, prog) tc ->
+    List.fold_right
+      con.c_typeconsts
+      ~init:([], prog)
+      ~f:(fun tc (decls, prog) ->
         let (pos, id) = tc.c_tconst_name in
         let (decl_id, prog) =
           process_decl_loc
@@ -104,7 +107,7 @@ let process_container_decl ctx source_map con progress =
         (build_type_const_decl_json_ref decl_id :: decls, prog))
   in
   let (method_decls, prog) =
-    List.fold con.c_methods ~init:([], prog) ~f:(fun (decls, prog) meth ->
+    List.fold_right con.c_methods ~init:([], prog) ~f:(fun meth (decls, prog) ->
         let (pos, id) = meth.m_name in
         let (decl_id, prog) =
           process_decl_loc
@@ -121,7 +124,7 @@ let process_container_decl ctx source_map con progress =
         (build_method_decl_json_ref decl_id :: decls, prog))
   in
   let members =
-    prop_decls @ class_const_decls @ type_const_decls @ method_decls
+    type_const_decls @ class_const_decls @ prop_decls @ method_decls
   in
   let (_, prog) =
     add_container_defn_fact ctx source_map con con_decl_id members prog
@@ -129,7 +132,9 @@ let process_container_decl ctx source_map con progress =
   let ref_json = build_container_decl_json_ref con_type con_decl_id in
   let (_, prog) = add_decl_loc_fact con_pos ref_json prog in
   let (_, prog) = add_decl_span_fact con.c_span ref_json prog in
-  process_doc_comment con.c_doc_comment con_pos ref_json prog
+  let all_decls = all_decls @ [ref_json] @ members in
+  let prog = process_doc_comment con.c_doc_comment con_pos ref_json prog in
+  (all_decls, prog)
 
 let process_xref
     decl_fun
@@ -152,14 +157,17 @@ let process_container_xref
     symbol_pos
     (xrefs, progress)
 
-let process_enum_decl ctx source_map enm progress =
+let process_enum_decl ctx source_map enm (all_decls, progress) =
   let (pos, id) = enm.c_name in
   let (enum_id, prog) = add_enum_decl_fact id progress in
   let enum_decl_ref = build_enum_decl_json_ref enum_id in
   let (_, prog) = add_decl_loc_fact pos enum_decl_ref prog in
   let (_, prog) = add_decl_span_fact enm.c_span enum_decl_ref prog in
-  let (enumerators, prog) =
-    List.fold enm.c_consts ~init:([], prog) ~f:(fun (decls, prog) enumerator ->
+  let (enumerators, decl_refs, prog) =
+    List.fold_right
+      enm.c_consts
+      ~init:([], [], prog)
+      ~f:(fun enumerator (decls, refs, prog) ->
         let (pos, id) = enumerator.cc_id in
         let (decl_id, prog) = add_enumerator_fact enum_id id prog in
         let ref_json = build_enumerator_decl_json_ref decl_id in
@@ -167,12 +175,13 @@ let process_enum_decl ctx source_map enm progress =
         let prog =
           process_doc_comment enumerator.cc_doc_comment pos ref_json prog
         in
-        (build_id_json decl_id :: decls, prog))
+        (build_id_json decl_id :: decls, ref_json :: refs, prog))
   in
   let (_, prog) =
     add_enum_defn_fact ctx source_map enm enum_id enumerators prog
   in
-  process_doc_comment enm.c_doc_comment pos enum_decl_ref prog
+  let prog = process_doc_comment enm.c_doc_comment pos enum_decl_ref prog in
+  (all_decls @ (enum_decl_ref :: decl_refs), prog)
 
 let process_enum_xref symbol_def pos (xrefs, progress) =
   process_xref
@@ -182,9 +191,9 @@ let process_enum_xref symbol_def pos (xrefs, progress) =
     pos
     (xrefs, progress)
 
-let process_func_decl ctx source_map elem progress =
+let process_func_decl ctx source_map elem (all_decls, progress) =
   let (pos, id) = elem.f_name in
-  let (_, prog) =
+  let (decl_id, prog) =
     process_decl_loc
       add_func_decl_fact
       (add_func_defn_fact ctx source_map)
@@ -196,7 +205,7 @@ let process_func_decl ctx source_map elem progress =
       elem.f_doc_comment
       progress
   in
-  prog
+  (all_decls @ [build_func_decl_json_ref decl_id], prog)
 
 let process_function_xref symbol_def pos (xrefs, progress) =
   process_xref
@@ -206,9 +215,9 @@ let process_function_xref symbol_def pos (xrefs, progress) =
     pos
     (xrefs, progress)
 
-let process_gconst_decl ctx source_map elem progress =
+let process_gconst_decl ctx source_map elem (all_decls, progress) =
   let (pos, id) = elem.cst_name in
-  let (_, prog) =
+  let (decl_id, prog) =
     process_decl_loc
       add_gconst_decl_fact
       (add_gconst_defn_fact ctx source_map)
@@ -220,7 +229,7 @@ let process_gconst_decl ctx source_map elem progress =
       None
       progress
   in
-  prog
+  (all_decls @ [build_gconst_decl_json_ref decl_id], prog)
 
 let process_gconst_xref symbol_def pos (xrefs, progress) =
   process_xref
@@ -268,20 +277,20 @@ let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
           pos
           (xrefs, prog))
 
-let process_typedef_decl ctx source_map elem progress =
+let process_typedef_decl ctx source_map elem (all_decls, progress) =
   let (pos, id) = elem.t_name in
   let (decl_id, prog) = add_typedef_decl_fact ctx source_map id elem progress in
   let ref_json = build_typedef_decl_json_ref decl_id in
   let (_, prog) = add_decl_loc_fact pos ref_json prog in
   let (_, prog) = add_decl_span_fact elem.t_span ref_json prog in
-  prog
+  (all_decls @ [ref_json], prog)
 
-let process_decls ctx files_info (tasts : Tast.program list) =
+let process_decls ctx (files_info : file_info list) =
   let (source_map, progress) =
     List.fold
       files_info
       ~init:(SMap.empty, init_progress)
-      ~f:(fun (fm, prog) (fp, source_text) ->
+      ~f:(fun (fm, prog) (fp, _, source_text) ->
         let filepath = Relative_path.to_absolute fp in
         match source_text with
         | None ->
@@ -292,16 +301,21 @@ let process_decls ctx files_info (tasts : Tast.program list) =
           let (_, prog) = add_file_lines_fact filepath st prog in
           (fm, prog))
   in
-  List.fold tasts ~init:progress ~f:(fun prog tast ->
-      List.fold tast ~init:prog ~f:(fun acc def ->
-          match def with
-          | Class en when phys_equal en.c_kind Cenum ->
-            process_enum_decl ctx source_map en acc
-          | Class cd -> process_container_decl ctx source_map cd acc
-          | Constant gd -> process_gconst_decl ctx source_map gd acc
-          | Fun fd -> process_func_decl ctx source_map fd acc
-          | Typedef td -> process_typedef_decl ctx source_map td acc
-          | _ -> acc))
+  List.fold files_info ~init:progress ~f:(fun prog (fp, tast, _) ->
+      let (file_decls, prog) =
+        List.fold tast ~init:([], prog) ~f:(fun acc def ->
+            match def with
+            | Class en when phys_equal en.c_kind Cenum ->
+              process_enum_decl ctx source_map en acc
+            | Class cd -> process_container_decl ctx source_map cd acc
+            | Constant gd -> process_gconst_decl ctx source_map gd acc
+            | Fun fd -> process_func_decl ctx source_map fd acc
+            | Typedef td -> process_typedef_decl ctx source_map td acc
+            | _ -> acc)
+      in
+      let filepath = Relative_path.to_absolute fp in
+      let (_, prog) = add_file_decls_fact filepath file_decls prog in
+      prog)
 
 let process_xrefs ctx (tasts : Tast.program list) progress =
   List.fold tasts ~init:progress ~f:(fun prog tast ->
@@ -362,6 +376,8 @@ let progress_to_json progress =
     by id only *)
     [
       ("src.FileLines.1", progress.resultJson.fileLines);
+      ( sprintf "hack.FileDeclarations.%d" ver,
+        progress.resultJson.fileDeclarations );
       (sprintf "hack.FileXRefs.%d" ver, progress.resultJson.fileXRefs);
       ( sprintf "hack.MethodDefinition.%d" ver,
         progress.resultJson.methodDefinition );
@@ -423,8 +439,8 @@ let progress_to_json progress =
 
 (* This function processes declarations, starting with an
 empty fact cache. *)
-let build_decls_json ctx tasts files_info =
-  let progress = process_decls ctx files_info tasts in
+let build_decls_json ctx files_info =
+  let progress = process_decls ctx files_info in
   progress_to_json progress
 
 (* This function processes cross-references, starting with an
@@ -435,7 +451,12 @@ let build_xrefs_json ctx tasts =
 
 (* This function processes both declarations and cross-references,
 sharing the declaration fact cache between them. *)
-let build_json ctx files_info tasts =
-  let progress = process_decls ctx files_info tasts in
-  let progress = process_xrefs ctx tasts progress in
+let build_json ctx files_info =
+  let progress = process_decls ctx files_info in
+  let progress =
+    process_xrefs
+      ctx
+      (List.map files_info ~f:(fun (_, tast, _) -> tast))
+      progress
+  in
   progress_to_json progress

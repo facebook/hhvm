@@ -33,22 +33,22 @@ let write_file file_dir num_tasts json_chunks =
 let write_json
     (ctx : Provider_context.t)
     (file_dir : string)
-    (tasts : Tast.program list)
     (files_info : Symbol_builder_types.file_info list)
     (start_time : float) : unit =
   try
     let (small, large) =
-      List.partition_tf tasts (fun tast -> List.length tast <= 2000)
+      List.partition_tf files_info (fun (_, tast, _) ->
+          List.length tast <= 2000)
     in
     if List.is_empty large then
-      let json_chunks = Symbol_json_builder.build_json ctx files_info tasts in
-      write_file file_dir (List.length tasts) json_chunks
+      let json_chunks = Symbol_json_builder.build_json ctx files_info in
+      write_file file_dir (List.length files_info) json_chunks
     else
-      let json_chunks = Symbol_json_builder.build_json ctx files_info small in
+      let json_chunks = Symbol_json_builder.build_json ctx small in
       write_file file_dir (List.length small) json_chunks;
-      List.iter large (fun tast ->
+      List.iter large (fun (fp, tast, st) ->
           let decl_json_chunks =
-            Symbol_json_builder.build_decls_json ctx [tast] files_info
+            Symbol_json_builder.build_decls_json ctx [(fp, tast, st)]
           in
           write_file file_dir 1 decl_json_chunks;
           let xref_json_chunks =
@@ -69,18 +69,17 @@ let recheck_job
     ()
     (progress : Relative_path.t list) : unit =
   let start_time = Unix.gettimeofday () in
-  let info_lsts =
+  let files_info =
     List.map progress ~f:(fun path ->
         let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
         let { Tast_provider.Compute_tast.tast; _ } =
           Tast_provider.compute_tast_unquarantined ~ctx ~entry
         in
-        (tast, (path, entry.source_text)))
+        (path, tast, entry.source_text))
   in
-  let (tasts, files_info) = List.unzip info_lsts in
   Relative_path.set_path_prefix Relative_path.Root (Path.make root_path);
   Relative_path.set_path_prefix Relative_path.Hhi (Path.make hhi_path);
-  write_json ctx out_dir tasts files_info start_time
+  write_json ctx out_dir files_info start_time
 
 let go
     (workers : MultiWorker.worker list option)

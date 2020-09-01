@@ -20,6 +20,7 @@ type predicate =
   | EnumDeclaration
   | EnumDefinition
   | Enumerator
+  | FileDeclarations
   | FileLines
   | FileXRefs
   | FunctionDeclaration
@@ -49,6 +50,7 @@ type glean_json = {
   enumDeclaration: json list;
   enumDefinition: json list;
   enumerator: json list;
+  fileDeclarations: json list;
   fileLines: json list;
   fileXRefs: json list;
   functionDeclaration: json list;
@@ -74,7 +76,8 @@ type result_progress = {
   factIds: (predicate * int) list JMap.t;
 }
 
-type file_info = Relative_path.t * Full_fidelity_source_text.t option
+type file_info =
+  Relative_path.t * Tast.program * Full_fidelity_source_text.t option
 
 (* Containers that can be in inheritance relationships *)
 type container_type =

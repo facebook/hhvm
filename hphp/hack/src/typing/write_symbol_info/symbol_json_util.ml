@@ -122,6 +122,7 @@ let init_progress =
       enumDeclaration = [];
       enumDefinition = [];
       enumerator = [];
+      fileDeclarations = [];
       fileLines = [];
       fileXRefs = [];
       functionDeclaration = [];
@@ -213,6 +214,11 @@ let update_json_data predicate json progress =
       {
         progress.resultJson with
         enumerator = json :: progress.resultJson.enumerator;
+      }
+    | FileDeclarations ->
+      {
+        progress.resultJson with
+        fileDeclarations = json :: progress.resultJson.fileDeclarations;
       }
     | FileLines ->
       {

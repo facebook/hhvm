@@ -410,3 +410,13 @@ let add_file_xrefs_fact filepath xref_map progress =
       ]
   in
   add_fact FileXRefs json_fact progress
+
+let add_file_decls_fact filepath decls progress =
+  let json_fact =
+    JSON_Object
+      [
+        ("file", build_file_json_nested filepath);
+        ("declarations", JSON_Array decls);
+      ]
+  in
+  add_fact FileDeclarations json_fact progress

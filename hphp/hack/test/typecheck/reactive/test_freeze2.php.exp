@@ -1,2 +1,4 @@
 File "test_freeze2.php", line 24, characters 3-4:
-Variable `$y` is undefined, not always defined, or unset afterwards (did you mean `$b` instead?) (Naming[2050])
+Variable `$y` is undefined, not always defined, or unset afterwards. (Naming[2050])
+File "test_freeze2.php", line 9, characters 21-22:
+Did you mean `$b` instead?

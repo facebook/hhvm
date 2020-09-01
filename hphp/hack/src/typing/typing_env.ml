@@ -1018,7 +1018,7 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
         let all_locals = LID.Map.elements ctx.LEnvC.local_types in
         let var_name (k, _) = LID.to_string k in
         match most_similar lid all_locals var_name with
-        | Some (k, _) -> Some (LID.to_string k)
+        | Some (k, (_, pos, _)) -> Some (LID.to_string k, pos)
         | None -> None
       in
       Errors.undefined ~in_rx_scope p lid (suggest_most_similar lid)

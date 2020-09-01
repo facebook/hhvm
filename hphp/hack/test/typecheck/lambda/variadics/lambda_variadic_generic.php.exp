@@ -9,7 +9,9 @@ This type has 0 arguments
 File "lambda_variadic_generic.php", line 16, characters 35-35:
 This one has 1
 File "lambda_variadic_generic.php", line 40, characters 47-49:
-No method `bar` in `C` (did you mean `foo`?) (Typing[4053])
+No method `bar` in `C` (Typing[4053])
+File "lambda_variadic_generic.php", line 4, characters 19-21:
+Did you mean `foo` instead?
 File "lambda_variadic_generic.php", line 16, characters 37-37:
 This is why I think it is an object of type C
 File "lambda_variadic_generic.php", line 11, characters 29-29:

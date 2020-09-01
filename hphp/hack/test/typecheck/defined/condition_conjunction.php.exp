@@ -21,9 +21,13 @@ Expected `int`
 File "condition_conjunction.php", line 3, characters 19-22:
 But got `?int`
 File "condition_conjunction.php", line 11, characters 20-21:
-Variable `$z` is undefined, or not always defined (did you mean `$s` instead?) (Naming[2050])
+Variable `$z` is undefined, or not always defined. (Naming[2050])
+File "condition_conjunction.php", line 8, characters 19-20:
+Did you mean `$s` instead?
 File "condition_conjunction.php", line 12, characters 20-21:
-Variable `$u` is undefined, or not always defined (did you mean `$s` instead?) (Naming[2050])
+Variable `$u` is undefined, or not always defined. (Naming[2050])
+File "condition_conjunction.php", line 8, characters 19-20:
+Did you mean `$s` instead?
 File "condition_conjunction.php", line 16, characters 14-15:
 Invalid argument (Typing[4110])
 File "condition_conjunction.php", line 39, characters 21-23:
@@ -31,18 +35,34 @@ Expected `int`
 File "condition_conjunction.php", line 3, characters 19-22:
 But got `?int`
 File "condition_conjunction.php", line 17, characters 18-19:
-Variable `$z` is undefined, or not always defined (did you mean `$s` instead?) (Naming[2050])
+Variable `$z` is undefined, or not always defined. (Naming[2050])
+File "condition_conjunction.php", line 4, characters 39-40:
+Did you mean `$s` instead?
 File "condition_conjunction.php", line 18, characters 18-19:
-Variable `$u` is undefined, or not always defined (did you mean `$s` instead?) (Naming[2050])
+Variable `$u` is undefined, or not always defined. (Naming[2050])
+File "condition_conjunction.php", line 4, characters 39-40:
+Did you mean `$s` instead?
 File "condition_conjunction.php", line 19, characters 18-19:
-Variable `$t` is undefined, or not always defined (did you mean `$s` instead?) (Naming[2050])
+Variable `$t` is undefined, or not always defined. (Naming[2050])
+File "condition_conjunction.php", line 4, characters 39-40:
+Did you mean `$s` instead?
 File "condition_conjunction.php", line 29, characters 20-21:
-Variable `$z` is undefined, or not always defined (did you mean `$s` instead?) (Naming[2050])
+Variable `$z` is undefined, or not always defined. (Naming[2050])
+File "condition_conjunction.php", line 27, characters 19-20:
+Did you mean `$s` instead?
 File "condition_conjunction.php", line 30, characters 20-21:
-Variable `$u` is undefined, or not always defined (did you mean `$s` instead?) (Naming[2050])
+Variable `$u` is undefined, or not always defined. (Naming[2050])
+File "condition_conjunction.php", line 27, characters 19-20:
+Did you mean `$s` instead?
 File "condition_conjunction.php", line 34, characters 18-19:
-Variable `$z` is undefined, or not always defined (did you mean `$s` instead?) (Naming[2050])
+Variable `$z` is undefined, or not always defined. (Naming[2050])
+File "condition_conjunction.php", line 23, characters 41-42:
+Did you mean `$s` instead?
 File "condition_conjunction.php", line 35, characters 18-19:
-Variable `$u` is undefined, or not always defined (did you mean `$s` instead?) (Naming[2050])
+Variable `$u` is undefined, or not always defined. (Naming[2050])
+File "condition_conjunction.php", line 23, characters 41-42:
+Did you mean `$s` instead?
 File "condition_conjunction.php", line 36, characters 18-19:
-Variable `$t` is undefined, or not always defined (did you mean `$s` instead?) (Naming[2050])
+Variable `$t` is undefined, or not always defined. (Naming[2050])
+File "condition_conjunction.php", line 23, characters 41-42:
+Did you mean `$s` instead?

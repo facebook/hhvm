@@ -404,9 +404,9 @@ class BarebonesTests(TestCase[CommonTestDriver]):
         self.test_driver.check_cmd(
             [
                 "{root}foo_4.php:3:19,21: Name already bound: `FOO` (Naming[2012])",
-                "  {root}foo_3.php:7:15,17: Previous definition `Foo` differs only in capitalization ",
+                "  {root}foo_3.php:7:15,17: Previous definition F~~oo~~ differs only by case ",
                 "{root}foo_4.php:4:22,22: Name already bound: `H` (Naming[2012])",
-                "  {root}foo_3.php:3:18,18: Previous definition `h` differs only in capitalization ",
+                "  {root}foo_3.php:3:18,18: Previous definition ~~h~~ differs only by case ",
             ]
         )
 
@@ -978,7 +978,8 @@ class CommonTests(BarebonesTests):
             [
                 "{root}foo_4.php:3:19,21: Name already bound: `Foo` (Naming[2012])",
                 "  {root}foo_3.php:7:15,17: Previous definition is here",
-                "{root}foo_5.php:6:28,29: No class variable `$y` in `Bar` (did you mean `$x`?) (Typing[4090])",
+                "{root}foo_5.php:6:28,29: No class variable `$y` in `Bar` (Typing[4090])",
+                "  {root}foo_4.php:4:31,32: Did you mean `$x` instead?",
                 "  {root}foo_5.php:3:19,21: Declaration of `Bar` is here",
             ]
         )

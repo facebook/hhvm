@@ -1,2 +1,4 @@
 File "mutability_flavors2_1.php", line 14, characters 5-6:
-Variable `$a` is undefined, not always defined, or unset afterwards (did you mean `$b` instead?) (Naming[2050])
+Variable `$a` is undefined, not always defined, or unset afterwards. (Naming[2050])
+File "mutability_flavors2_1.php", line 12, characters 3-22:
+Did you mean `$b` instead?

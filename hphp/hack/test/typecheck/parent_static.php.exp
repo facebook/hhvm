@@ -1,4 +1,6 @@
 File "parent_static.php", line 18, characters 13-14:
-No static method `f1` in `A` (did you mean instance method `f1`?) (Typing[4090])
+No static method `f1` in `A` (Typing[4090])
+File "parent_static.php", line 13, characters 19-20:
+Did you mean instance method `f1` instead?
 File "parent_static.php", line 12, characters 7-7:
 Declaration of `A` is here

@@ -1,5 +1,7 @@
 File "method_dispatch_08.php", line 26, characters 9-10:
-No method `f2` in `A` (did you mean static method `f2`?) (Typing[4053])
+No method `f2` in `A` (Typing[4053])
+File "method_dispatch_08.php", line 18, characters 26-27:
+Did you mean static method `f2` instead?
 File "method_dispatch_08.php", line 25, characters 32-32:
 This is why I think it is an object of type A
 File "method_dispatch_08.php", line 16, characters 7-7:

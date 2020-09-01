@@ -59,7 +59,9 @@ let final_global_diagnostics =
   "
 /b.php:
 File \"/b.php\", line 4, characters 12-14:
-No method `foo` in `B` (did you mean `bar`?) (Typing[4053])
+No method `foo` in `B` (Typing[4053])
+File \"/a.php\", line 3, characters 19-21:
+Did you mean `bar` instead?
 File \"/b.php\", line 4, characters 5-9:
 This is why I think it is an object of type B
 File \"/b.php\", line 2, characters 7-7:

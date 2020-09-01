@@ -15,7 +15,9 @@ Expected `C`
 File "partial_classes_bad_01.php", line 16, characters 13-14:
 But got `C2`
 File "partial_classes_bad_01.php", line 28, characters 40-41:
-No method `me` in `PartialC` (did you mean `foo`?) (Typing[4053])
+No method `me` in `PartialC` (Typing[4053])
+File "partial_classes_bad_01.php", line 28, characters 19-21:
+Did you mean `foo` instead?
 File "partial_classes_bad_01.php", line 28, characters 33-37:
 This is why I think it is an object of type PartialC
 File "partial_classes_bad_01.php", line 24, characters 7-14:

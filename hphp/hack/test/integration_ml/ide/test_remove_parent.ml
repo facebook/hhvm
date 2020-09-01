@@ -39,7 +39,9 @@ File \"/foo.php\", line 3, characters 19-27:
 Unbound name: `FooParent` (an object type) (Naming[2049])
 
 File \"/foo.php\", line 5, characters 12-14:
-No method `lol` in `Foo` (did you mean `test`?) (Typing[4053])
+No method `lol` in `Foo` (Typing[4053])
+File \"/foo.php\", line 4, characters 19-22:
+Did you mean `test` instead?
 File \"/foo.php\", line 5, characters 5-9:
 This is why I think it is an object of type Foo
 File \"/foo.php\", line 3, characters 7-9:

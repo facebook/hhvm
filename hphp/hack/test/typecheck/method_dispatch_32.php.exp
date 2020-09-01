@@ -1,4 +1,6 @@
 File "method_dispatch_32.php", line 25, characters 13-14:
-No static method `f1` in `B` (did you mean instance method `f1`?) (Typing[4090])
+No static method `f1` in `B` (Typing[4090])
+File "method_dispatch_32.php", line 22, characters 19-20:
+Did you mean instance method `f1` instead?
 File "method_dispatch_32.php", line 21, characters 7-7:
 Declaration of `B` is here

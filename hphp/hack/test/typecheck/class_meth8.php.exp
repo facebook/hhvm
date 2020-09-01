@@ -1,4 +1,6 @@
 File "class_meth8.php", line 19, characters 24-27:
-No static method `f1` in `A` (did you mean instance method `f1`?) (Typing[4090])
+No static method `f1` in `A` (Typing[4090])
+File "class_meth8.php", line 13, characters 19-20:
+Did you mean instance method `f1` instead?
 File "class_meth8.php", line 12, characters 7-7:
 Declaration of `A` is here

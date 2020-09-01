@@ -1,5 +1,7 @@
 File "test_method.php", line 19, characters 7-9:
-No method `foo` in `Foo` (did you mean `bar`?) (Typing[4053])
+No method `foo` in `Foo` (Typing[4053])
+File "test_method.php", line 11, characters 19-21:
+Did you mean `bar` instead?
 File "test_method.php", line 17, characters 12-14:
 This is why I think it is an object of type Foo
 File "test_method.php", line 4, characters 7-9:

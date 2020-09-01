@@ -1,5 +1,7 @@
 File "lambda_bad_as_pair_argument.php", line 32, characters 17-30:
-No method `missing_method` in `MyClass` (did you mean `hello`?) (Typing[4053])
+No method `missing_method` in `MyClass` (Typing[4053])
+File "lambda_bad_as_pair_argument.php", line 5, characters 19-23:
+Did you mean `hello` instead?
 File "lambda_bad_as_pair_argument.php", line 22, characters 24-30:
 This is why I think it is an object of type MyClass
 File "lambda_bad_as_pair_argument.php", line 22, characters 24-30:

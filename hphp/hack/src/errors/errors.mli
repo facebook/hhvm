@@ -189,7 +189,8 @@ val unbound_name : Pos.t -> string -> name_context -> unit
 
 val invalid_fun_pointer : Pos.t -> string -> unit
 
-val undefined : in_rx_scope:bool -> Pos.t -> string -> string option -> unit
+val undefined :
+  in_rx_scope:bool -> Pos.t -> string -> (string * Pos.t) option -> unit
 
 val this_reserved : Pos.t -> unit
 

@@ -987,6 +987,23 @@ let method_name_already_bound pos name =
     pos
     ("Method name already bound: " ^ md_codify name)
 
+(* Given two equal-length strings, highlights the characters in
+   the second that differ from the first *)
+let highlight_differences base to_highlight =
+  match List.zip (String.to_list base) (String.to_list to_highlight) with
+  | Some l ->
+    List.group l ~break:(fun (o1, s1) (o2, s2) ->
+        not (Bool.equal (Char.equal o1 s1) (Char.equal o2 s2)))
+    |> List.map ~f:(fun cs ->
+           let s = List.map cs ~f:snd |> String.of_char_list in
+           let (c1, c2) = List.hd_exn cs in
+           if Char.equal c1 c2 then
+             s
+           else
+             md_highlight s)
+    |> String.concat
+  | None -> to_highlight
+
 let error_name_already_bound name name_prev p p_prev =
   let name = strip_ns name in
   let name_prev = strip_ns name_prev in
@@ -994,12 +1011,12 @@ let error_name_already_bound name name_prev p p_prev =
     [
       (p, "Name already bound: " ^ md_codify name);
       ( p_prev,
-        if String.compare name name_prev = 0 then
+        if String.equal name name_prev then
           "Previous definition is here"
         else
           "Previous definition "
-          ^ md_codify name_prev
-          ^ " differs only in capitalization " );
+          ^ highlight_differences name name_prev
+          ^ " differs only by case " );
     ]
   in
   let hhi_msg =
@@ -1061,24 +1078,38 @@ let rx_move_invalid_location pos =
     pos
     "`Rx\\move` is only allowed in argument position or as right hand side of the assignment."
 
+let hint_message ?(modifier = "") orig hint hint_pos =
+  let s =
+    if
+      (not (String.equal orig hint))
+      && String.equal (String.lowercase orig) (String.lowercase hint)
+    then
+      Printf.sprintf
+        "Did you mean %s%s instead (which only differs by case)?"
+        modifier
+        (highlight_differences orig hint)
+    else
+      Printf.sprintf "Did you mean %s%s instead?" modifier (md_codify hint)
+  in
+  (hint_pos, s)
+
 let undefined ~in_rx_scope pos var_name did_you_mean =
   let msg =
     if in_rx_scope then
       Printf.sprintf
-        "Variable %s is undefined, not always defined, or unset afterwards"
+        "Variable %s is undefined, not always defined, or unset afterwards."
         (md_codify var_name)
     else
       Printf.sprintf
-        "Variable %s is undefined, or not always defined"
+        "Variable %s is undefined, or not always defined."
         (md_codify var_name)
   in
   let suggestion =
     match did_you_mean with
-    | Some var_name ->
-      Printf.sprintf " (did you mean %s instead?)" (md_codify var_name)
-    | None -> ""
+    | Some (did_you_mean, pos) -> [hint_message var_name did_you_mean pos]
+    | None -> []
   in
-  add_list (Naming.err_code Naming.Undefined) [(pos, msg ^ suggestion)]
+  add_list (Naming.err_code Naming.Undefined) ((pos, msg) :: suggestion)
 
 let this_reserved pos =
   add
@@ -1498,11 +1529,13 @@ let invalid_req_extends pos =
     "Only traits and interfaces may use `require extends`"
 
 let did_you_mean_naming pos name suggest_pos suggest_name =
+  let name = strip_ns name in
+  let suggest_name = strip_ns suggest_name in
   add_list
     (Naming.err_code Naming.DidYouMeanNaming)
     [
-      (pos, "Could not find " ^ (strip_ns name |> md_codify));
-      (suggest_pos, "Did you mean " ^ (strip_ns suggest_name |> md_codify) ^ "?");
+      (pos, "Could not find " ^ md_codify name ^ ".");
+      hint_message name suggest_name suggest_pos;
     ]
 
 let using_internal_class pos name =
@@ -3022,19 +3055,19 @@ let unknown_type description pos r =
   let msg = "Was expecting " ^ description ^ " but type is unknown" in
   add_list (Typing.err_code Typing.UnknownType) ([(pos, msg)] @ r)
 
-let not_found_hint = function
-  | `no_hint -> ""
-  | `closest (_pos, v) ->
-    Printf.sprintf " (did you mean static method %s?)" (md_codify v)
-  | `did_you_mean (_pos, v) ->
-    Printf.sprintf " (did you mean %s?)" (md_codify v)
+let not_found_hint orig hint =
+  match hint with
+  | `no_hint -> None
+  | `closest (pos, v) ->
+    Some (hint_message ~modifier:"static method " orig v pos)
+  | `did_you_mean (pos, v) -> Some (hint_message orig v pos)
 
-let snot_found_hint = function
-  | `no_hint -> ""
-  | `closest (_pos, v) ->
-    Printf.sprintf " (did you mean instance method %s?)" (md_codify v)
-  | `did_you_mean (_pos, v) ->
-    Printf.sprintf " (did you mean %s?)" (md_codify v)
+let snot_found_hint orig hint =
+  match hint with
+  | `no_hint -> None
+  | `closest (pos, v) ->
+    Some (hint_message ~modifier:"instance method " orig v pos)
+  | `did_you_mean (pos, v) -> Some (hint_message orig v pos)
 
 let string_of_class_member_kind = function
   | `class_constant -> "class constant"
@@ -3060,10 +3093,14 @@ let smember_not_found
   in
   on_error
     ~code:(Typing.err_code Typing.SmemberNotFound)
-    [
-      (pos, msg ^ snot_found_hint hint);
-      (cpos, "Declaration of " ^ md_codify class_name ^ " is here");
-    ]
+    (let claim = (pos, msg) in
+     let hint =
+       match snot_found_hint member_name hint with
+       | None -> []
+       | Some hint -> [hint]
+     in
+     (claim :: hint)
+     @ [(cpos, "Declaration of " ^ md_codify class_name ^ " is here")])
 
 let member_not_found
     kind
@@ -3084,8 +3121,15 @@ let member_not_found
   in
   on_error
     ~code:(Typing.err_code Typing.MemberNotFound)
-    ( (pos, msg ^ not_found_hint hint)
-    :: (reason @ [(cpos, "Declaration of " ^ type_name ^ " is here")]) )
+    (let claim = (pos, msg) in
+     let hint =
+       match not_found_hint member_name hint with
+       | None -> []
+       | Some hint -> [hint]
+     in
+     (claim :: hint)
+     @ reason
+     @ [(cpos, "Declaration of " ^ type_name ^ " is here")])
 
 let parent_in_trait pos =
   add

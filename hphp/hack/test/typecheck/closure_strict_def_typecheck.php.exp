@@ -1,4 +1,6 @@
 File "closure_strict_def_typecheck.php", line 17, characters 28-29:
-No static method `f1` in `Foo` (did you mean instance method `bar`?) (Typing[4090])
+No static method `f1` in `Foo` (Typing[4090])
+File "closure_strict_def_typecheck.php", line 14, characters 19-21:
+Did you mean instance method `bar` instead?
 File "closure_strict_def_typecheck.php", line 13, characters 7-9:
 Declaration of `Foo` is here

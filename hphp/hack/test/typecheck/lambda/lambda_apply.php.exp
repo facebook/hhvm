@@ -1,11 +1,15 @@
 File "lambda_apply.php", line 16, characters 20-21:
-No method `fo` in `C` (did you mean `foo`?) (Typing[4053])
+No method `fo` in `C` (Typing[4053])
+File "lambda_apply.php", line 13, characters 19-21:
+Did you mean `foo` instead?
 File "lambda_apply.php", line 16, characters 30-30:
 This is why I think it is an object of type C
 File "lambda_apply.php", line 12, characters 7-7:
 Declaration of `C` is here
 File "lambda_apply.php", line 17, characters 32-33:
-No method `fo` in `C` (did you mean `foo`?) (Typing[4053])
+No method `fo` in `C` (Typing[4053])
+File "lambda_apply.php", line 13, characters 19-21:
+Did you mean `foo` instead?
 File "lambda_apply.php", line 17, characters 16-16:
 This is why I think it is an object of type C
 File "lambda_apply.php", line 12, characters 7-7:

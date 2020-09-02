@@ -2297,10 +2297,6 @@ SSATmp* simplifyConvTVToInt(State& env, const IRInstruction* inst) {
 
   if (srcType <= TInt)  return src;
   if (srcType <= TNull) return cns(env, 0);
-  if (srcType <= TArr)  {
-    auto const length = gen(env, Count, src);
-    return gen(env, Select, length, cns(env, 1), cns(env, 0));
-  }
   if (srcType.subtypeOfAny(TVec, TVArr)) {
     auto const length = gen(env, CountVec, src);
     return gen(env, Select, length, cns(env, 1), cns(env, 0));
@@ -2334,7 +2330,6 @@ SSATmp* simplifyConvTVToDbl(State& env, const IRInstruction* inst) {
 
   if (srcType <= TDbl)  return src;
   if (srcType <= TNull) return cns(env, 0.0);
-  if (srcType <= TArr)  return gen(env, ConvArrToDbl, src);
   if (srcType.subtypeOfAny(TVec, TVArr)) {
     auto const length = gen(env, CountVec, src);
     return gen(env, ConvBoolToDbl, gen(env, ConvIntToBool, length));

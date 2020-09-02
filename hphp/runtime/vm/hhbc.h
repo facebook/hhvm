@@ -1057,19 +1057,6 @@ constexpr bool isBinaryOp(Op opcode) {
     opcode == Op::Xor;
 }
 
-constexpr bool isCast(Op opcode) {
-  return
-    opcode == Op::CastBool ||
-    opcode == Op::CastInt ||
-    opcode == Op::CastDouble ||
-    opcode == Op::CastString ||
-    opcode == Op::CastDict ||
-    opcode == Op::CastKeyset ||
-    opcode == Op::CastVec ||
-    opcode == Op::CastVArray ||
-    opcode == Op::CastDArray;
-}
-
 constexpr bool isFCallClsMethod(Op opcode) {
   return
     opcode == OpFCallClsMethod ||

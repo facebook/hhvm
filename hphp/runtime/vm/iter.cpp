@@ -467,13 +467,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
 
   auto const size = ad->getSize();
   if (UNLIKELY(size == 0)) {
-    if (!Local) {
-      if (UNLIKELY(ad->decWillRelease())) {
-        if (ad->hasVanillaPackedLayout()) return iter_next_free_packed(dest, ad);
-        if (ad->hasVanillaMixedLayout()) return iter_next_free_mixed(dest, ad);
-      }
-      ad->decRefCount();
-    }
+    if (!Local) decRefArr(ad);
     dest->kill();
     return 0;
   }
@@ -542,13 +536,7 @@ int64_t new_iter_array_key(Iter*       dest,
 
   auto const size = ad->getSize();
   if (UNLIKELY(size == 0)) {
-    if (!Local) {
-      if (UNLIKELY(ad->decWillRelease())) {
-        if (ad->hasVanillaPackedLayout()) return iter_next_free_packed(dest, ad);
-        if (ad->hasVanillaMixedLayout()) return iter_next_free_mixed(dest, ad);
-      }
-      ad->decRefCount();
-    }
+    if (!Local) decRefArr(ad);
     dest->kill();
     return 0;
   }

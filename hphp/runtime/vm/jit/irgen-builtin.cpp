@@ -1236,8 +1236,6 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
 // (if any) we need a vanilla input for to generate optimized HHIR.
 
 const hphp_fast_string_imap<int> s_vanilla_params{
-  {"count", 0},
-  {"sizeof", 0},
   {"HH\\Shapes::idx", 0},
   {"HH\\Lib\\_Private\\Native\\first", 0},
   {"HH\\Lib\\_Private\\Native\\last", 0},

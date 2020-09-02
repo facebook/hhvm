@@ -48,8 +48,7 @@ void waitOnExportProfiles();
  * a variety of possible memory layouts. Eventually, our goal is to generate
  * these layouts at runtime, based on profiling information.
  *
- * Bespoke arrays have an m_size that is the ones-complement of their bespoke
- * layout id. This means we will always call Vsize() for these arrays.
+ * Bespoke arrays store their bespoke layout in the ArrayData's m_extra field.
  */
 struct BespokeArray : ArrayData {
   static BespokeArray* asBespoke(ArrayData*);

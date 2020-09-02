@@ -31,6 +31,17 @@ namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
 
+folly::Optional<Type> getTypeForArrLikeCast(Op op) {
+  switch (op) {
+    case Op::CastVec:    return TVec;
+    case Op::CastDict:   return TDict;
+    case Op::CastKeyset: return TKeyset;
+    case Op::CastVArray: return TVArr;
+    case Op::CastDArray: return TDArr;
+    default:             return folly::none;
+  }
+}
+
 using Locations = TinyVector<Location, 2>;
 
 Locations getVanillaLocationsForBuiltin(const IRGS& env, SrcKey sk) {
@@ -74,7 +85,7 @@ Locations getVanillaLocations(const IRGS& env, SrcKey sk) {
     return getVanillaLocationsForCall(env, sk);
   } else if (isBinaryOp(op)) {
     return {Location::Stack{soff}, Location::Stack{soff - 1}};
-  } else if (isCast(op)) {
+  } else if (getTypeForArrLikeCast(op)) {
     return {Location::Stack{soff}};
   } else if (isMemberDimOp(op) || isMemberFinalOp(op)) {
     return {Location::MBase{}};
@@ -110,31 +121,14 @@ Locations getVanillaLocations(const IRGS& env, SrcKey sk) {
     }
 
     // Miscellaneous ops that constrain one stack value.
-    case Op::BitNot:
     case Op::ClassGetTS:
     case Op::IterInit:
-    case Op::JmpNZ:
-    case Op::JmpZ:
-    case Op::Not:
       return {Location::Stack{soff}};
 
     default:
       return {};
   }
   always_assert(false);
-}
-
-// Returns a type `t` such that if the input is a subtype of `t`, the cast
-// is trivial. For non-casts, or casts we don't care about, returns TBottom.
-Type getTypeForCast(Op op) {
-  switch (op) {
-    case Op::CastVec:    return TVec;
-    case Op::CastDict:   return TDict;
-    case Op::CastKeyset: return TKeyset;
-    case Op::CastVArray: return TVArr;
-    case Op::CastDArray: return TDArr;
-    default:             return TBottom;
-  }
 }
 
 void guardToVanilla(IRGS& env, SrcKey sk, Location loc) {
@@ -163,9 +157,9 @@ bool skipVanillaGuards(IRGS& env, SrcKey sk, const Locations& locs) {
   if (op == Op::Same || op == Op::NSame) {
     assertx(locs.size() == 2);
     return !is_arrlike(locs[0]) || !is_arrlike(locs[1]);
-  } else if (isCast(op)) {
+  } else if (auto const type = getTypeForArrLikeCast(op)) {
     assertx(locs.size() == 1);
-    return env.irb->fs().typeOf(locs[0]) <= getTypeForCast(op);
+    return env.irb->fs().typeOf(locs[0]) <= *type;
   }
   return false;
 }

@@ -35,10 +35,10 @@ const BespokeArray* BespokeArray::asBespoke(const ArrayData* ad) {
 }
 
 const bespoke::Layout* BespokeArray::layout() const {
-  return bespoke::layoutForIndex(~m_size);
+  return bespoke::layoutForIndex(m_extra);
 }
 void BespokeArray::setLayout(const bespoke::Layout* layout) {
-  m_size = uint32_t(~layout->index());
+  m_extra = layout->index();
 }
 
 size_t BespokeArray::heapSize() const {

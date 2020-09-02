@@ -1953,11 +1953,11 @@ To string conversions:
   computed by returning the value of their count method. Objects that do not
   implement Countable have a count of 1.
 
-| CountVec,        D(Int), S(VArr,Vec),    NF
+| CountVec,        D(Int), S(VArr,Vec),    LA
 
-| CountDict,       D(Int), S(DArr,Dict),   NF
+| CountDict,       D(Int), S(DArr,Dict),   LA
 
-| CountKeyset,     D(Int), S(Keyset), NF
+| CountKeyset,     D(Int), S(Keyset), LA
 
 | CountCollection, D(Int), S(Obj),    NF
 
@@ -3270,7 +3270,7 @@ fields of that struct for holding intermediate values.
 
 | UnsetLegacyDict, D(Dict), S(Dict), CRc|PRc
 
-  Enable/disable the legacy bit on the vec/dict in S0, copying it if necessary 
+  Enable/disable the legacy bit on the vec/dict in S0, copying it if necessary
   and returning the tagged array.
 
 

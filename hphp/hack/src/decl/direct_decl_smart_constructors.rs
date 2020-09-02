@@ -526,6 +526,7 @@ pub struct TypeParameterDecl<'a> {
     variance: Variance,
     constraints: &'a [(ConstraintKind, Node<'a>)],
     tparam_params: &'a [Tparam<'a>],
+    user_attributes: &'a [&'a UserAttributeNode<'a>],
 }
 
 #[derive(Clone, Debug)]
@@ -1677,6 +1678,16 @@ impl<'a, 'b> Iterator for NodeIterHelper<'a, 'b> {
     }
 }
 
+impl<'a, 'b> DoubleEndedIterator for NodeIterHelper<'a, 'b> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        match self {
+            NodeIterHelper::Empty => None,
+            NodeIterHelper::Single(_) => self.next(),
+            NodeIterHelper::Vec(ref mut iter) => iter.next_back(),
+        }
+    }
+}
+
 impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
     type S = Node<'a>;
 
@@ -2366,13 +2377,23 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_type_parameter(
         &mut self,
-        _arg0: Self::R,
+        user_attributes: Self::R,
         reify: Self::R,
         variance: Self::R,
         name: Self::R,
         tparam_params: Self::R,
         constraints: Self::R,
     ) -> Self::R {
+        let user_attributes = match user_attributes {
+            Node::BracketedList((_, attributes, _)) => {
+                self.slice_from_iter(attributes.into_iter().filter_map(|x| match x {
+                    Node::Attribute(a) => Some(*a),
+                    _ => None,
+                }))
+            }
+            _ => &[][..],
+        };
+
         let constraints = self.filter_map_to_slice(constraints, |node| match node {
             Node::TypeConstraint(&constraint) => Some(constraint),
             n if n.is_ignored() => None,
@@ -2406,6 +2427,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             },
             constraints,
             tparam_params,
+            user_attributes,
         }))
     }
 
@@ -2432,6 +2454,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 reified,
                 constraints,
                 tparam_params,
+                user_attributes,
             } = decl;
             let constraints = unwrap_or_return!(self.maybe_slice_from_iter(
                 constraints.iter().map(|constraint| {
@@ -2441,12 +2464,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     Some((kind, ty))
                 })
             ));
+
+            let user_attributes = self.slice_from_iter(
+                user_attributes
+                    .iter()
+                    .rev()
+                    .map(|x| self.user_attribute_to_decl(x)),
+            );
             tparams.push(Tparam {
                 variance,
                 name,
                 constraints,
                 reified,
-                user_attributes: &[],
+                user_attributes,
                 tparams: tparam_params,
             });
         }

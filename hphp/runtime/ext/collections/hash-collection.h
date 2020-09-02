@@ -65,7 +65,6 @@ struct HashCollection : ObjectData {
 
     if (UNLIKELY(ad->size() < m_size)) warnOnStrIntDup();
     assertx(m_size);
-    assertx(ad->m_pos == 0);
     return Array::attach(ad);
   }
 

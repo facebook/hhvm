@@ -38,7 +38,7 @@ const bespoke::Layout* BespokeArray::layout() const {
   return bespoke::layoutForIndex(~m_size);
 }
 void BespokeArray::setLayout(const bespoke::Layout* layout) {
-  m_sizeAndPos = uint32_t(~layout->index());
+  m_size = uint32_t(~layout->index());
 }
 
 size_t BespokeArray::heapSize() const {

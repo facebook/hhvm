@@ -23,21 +23,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * NOTE: MixedArray no longer calls this constructor.  If you change it, change
- * the MixedArray::Make functions as appropriate.
- */
-inline ArrayData::ArrayData(ArrayKind kind, RefCount initial_count)
-  : m_sizeAndPos(uint32_t(-1))
-{
-  initHeader(static_cast<HeaderKind>(kind), initial_count);
-  assertx(m_size == -1);
-  assertx(m_pos == 0);
-  assertx(m_kind == static_cast<HeaderKind>(kind));
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 ALWAYS_INLINE ArrayData* staticEmptyVArray() {
   void* vp1 = &s_theEmptyVArray;
   void* vp2 = &s_theEmptyVec;
@@ -317,31 +302,6 @@ DataType ArrayData::toPersistentDataType() const {
     case kNumKinds:   not_reached();
   }
   not_reached();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Iteration.
-
-inline int32_t ArrayData::getPosition() const {
-  return isVanilla() ? m_pos : iter_begin();
-}
-
-inline void ArrayData::setPosition(int32_t p) {
-  auto const cur_pos = getPosition();
-  assertx(cur_pos == p || (!isStatic() && isVanilla()));
-  if (cur_pos != p) m_pos = p;
-}
-
-inline bool ArrayData::isHead() const {
-  return getPosition() == iter_begin();
-}
-
-inline bool ArrayData::isTail() const {
-  return getPosition() == iter_last();
-}
-
-inline bool ArrayData::isInvalid() const {
-  return getPosition() == iter_end();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

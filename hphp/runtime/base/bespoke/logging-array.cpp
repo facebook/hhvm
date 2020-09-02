@@ -60,7 +60,6 @@ HeaderKind getBespokeKind(ArrayData::ArrayKind kind) {
 
 LoggingArray* makeWithProfile(ArrayData* ad, LoggingProfile* prof) {
   assertx(ad->isVanilla());
-  assertx(ad->getPosition() == ad->iter_begin());
 
   auto lad = static_cast<LoggingArray*>(tl_heap->objMallocIndex(kSizeIndex));
   lad->initHeader_16(getBespokeKind(ad->kind()), OneReference, ad->auxBits());

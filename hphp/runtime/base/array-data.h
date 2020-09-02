@@ -129,8 +129,6 @@ struct ArrayData : MaybeCountable {
   // Creation and destruction.
 
 protected:
-  explicit ArrayData(ArrayKind kind, RefCount initial_count = OneReference);
-
   /*
    * We can't `= delete` this because we subclass ArrayData.
    */
@@ -457,16 +455,6 @@ public:
   // Iteration.
 
   /*
-   * Get the position of the array's internal cursor.
-   */
-  int32_t getPosition() const;
-
-  /*
-   * Set the array's internal cursor to raw position `p'.
-   */
-  void setPosition(int32_t p);
-
-  /*
    * @see: array-data.cpp, for documentation for IterEnd, IterBegin, etc.
    */
   ssize_t iter_begin() const;
@@ -480,17 +468,6 @@ public:
    * position (i.e., iter_end()), return false.
    */
   Variant value(int32_t pos) const;
-
-  /*
-   * Is the array's internal cursor pointing to...
-   *
-   *  - Head: the first element?
-   *  - Tail: the last element?
-   *  - Invalid: the canonical invalid position?
-   */
-  bool isHead() const;
-  bool isTail() const;
-  bool isInvalid() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // PHP array functions.
@@ -702,20 +679,10 @@ protected:
   friend struct c_Map;
   friend struct c_ImmMap;
 
-  // The following fields are blocked into unions with qwords so we
-  // can combine the stores when initializing arrays.  (gcc won't do
-  // this on its own.)
-
-  // note that m_size does not store the array size for bespoke array-likes -
-  // instead, it is ~BespokeID. Call size() instead for bespokearray-likes,
-  // (or in general, to future-proof code).
-  union {
-    struct {
-      uint32_t m_size;
-      int32_t m_pos;
-    };
-    uint64_t m_sizeAndPos; // careful, m_pos is signed
-  };
+  // m_extra is free for use by different ArrayKind implementations.
+  // Right now, it's only used by bespoke arrays for the bespoke layout ID.
+  uint32_t m_size;
+  uint32_t m_extra;
 };
 
 static_assert(ArrayData::kPackedKind == uint8_t(HeaderKind::Packed), "");

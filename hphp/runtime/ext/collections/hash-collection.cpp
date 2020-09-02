@@ -96,16 +96,13 @@ void HashCollection::warnOnStrIntDup() const {
 
 Array HashCollection::toVArray() {
   if (!m_size) return empty_varray();
-  auto arr = Array{arrayData()}.toVArray();
-  assertx(arr->m_pos == 0);
-  return arr;
+  return Array{arrayData()}.toVArray();
 }
 
 Array HashCollection::toDArray() {
   if (!m_size) return empty_darray();
   auto arr = Array{arrayData()}.toDArray();
   if (UNLIKELY(arr->size() < m_size)) warnOnStrIntDup();
-  assertx(arr->m_pos == 0);
   return arr;
 }
 
@@ -339,8 +336,6 @@ HashCollection::Elm& HashCollection::allocElmFront(MixedArray::Inserter ei) {
   }
   // Set the hash entry we found to point to element slot 0.
   (*ei) = 0;
-  // Adjust m_pos so that is points at this new first element.
-  arrayData()->m_pos = 0;
   // Adjust size to reflect that we're adding a new element.
   incSize();
   // Store the value into element slot 0.

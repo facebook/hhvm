@@ -46,7 +46,7 @@ struct SetArray::Initializer {
   Initializer() {
     auto const ad = reinterpret_cast<SetArray*>(&s_theEmptySetArray);
     ad->initHash(SetArray::SmallScale);
-    ad->m_sizeAndPos = 0;
+    ad->m_size = 0;
     ad->m_scale_used = SetArray::SmallScale;
     ad->initHeader(HeaderKind::Keyset, StaticValue);
     assertx(ad->checkInvariants());
@@ -87,13 +87,12 @@ ArrayData* SetArray::MakeReserveSet(uint32_t size) {
 
   ad->initHash(scale);
   ad->initHeader(HeaderKind::Keyset, OneReference);
-  ad->m_sizeAndPos   = 0;                   // size = 0, pos = 0
+  ad->m_size         = 0;
   ad->m_scale_used   = scale;               // scale = scale, used = 0
 
   assertx(ad->kind() == kKeysetKind);
   assertx(!ad->isZombie());
   assertx(ad->m_size == 0);
-  assertx(ad->m_pos == 0);
   assertx(ad->hasExactlyOneRef());
   assertx(ad->m_scale == scale);
   assertx(ad->m_used == 0);
@@ -223,9 +222,8 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
 
   assertx(ad->m_kind == HeaderKind::Keyset);
   assertx(ad->m_size == other.m_size);
-  assertx(ad->m_pos == other.m_pos);
   assertx(mode == AllocMode::Request ?
-         ad->hasExactlyOneRef() : ad->isStatic());
+          ad->hasExactlyOneRef() : ad->isStatic());
   assertx(ad->m_scale == scale);
   assertx(ad->m_used == used);
   assertx(ad->checkInvariants());
@@ -348,10 +346,6 @@ void SetArray::erase(RemovePos pos) {
   hashTab()[pos.probeIdx] = Tombstone;
 
   auto const elms = data();
-  if (m_pos == pos.elmIdx) {
-    m_pos = nextElm(elms, pos.elmIdx);
-  }
-
   auto& elm = elms[pos.elmIdx];
   assertx(!elm.isInvalid());
   tvDecRefGen(&elm.tv);
@@ -384,7 +378,7 @@ SetArray* SetArray::grow(bool copy) {
   assertx(newScale >= SmallScale && (newScale & (newScale - 1)) == 0);
 
   auto ad            = reqAlloc(newScale);
-  ad->m_sizeAndPos   = m_sizeAndPos;
+  ad->m_size         = m_size;
   ad->m_scale_used   = newScale | (uint64_t{oldUsed} << 32);
   ad->initHeader(HeaderKind::Keyset, OneReference);
 
@@ -419,7 +413,6 @@ SetArray* SetArray::grow(bool copy) {
   assertx(ad->hasExactlyOneRef());
   assertx(ad->kind() == kind());
   assertx(ad->m_size == m_size);
-  assertx(ad->m_pos == m_pos);
   assertx(ad->m_scale == newScale);
   assertx(ad->m_used == oldUsed);
   assertx(ad->checkInvariants());
@@ -436,11 +429,6 @@ SetArray* SetArray::prepareForInsert(bool copy) {
 
 void SetArray::compact() {
   auto const elms = data();
-  Elm posElm;
-  if (m_pos < m_used) {
-    posElm = elms[m_pos];
-  }
-
   auto const table = initHash(m_scale);
   auto const mask = this->mask();
   uint32_t j = 0;
@@ -455,14 +443,7 @@ void SetArray::compact() {
   }
   assertx(ClearElms(elms + j, m_used - j));
 
-  if (m_pos == m_used) {
-    m_pos = j;
-  } else {
-    assertx(m_pos < m_used);
-    m_pos = findElm(posElm);
-  }
   m_used = j;
-
   assertx(m_size == m_used);
   assertx(checkInvariants());
 }
@@ -490,11 +471,6 @@ void SetArray::compact() {
  *
  *   m_size <= m_used
  *   m_used <= capacity()
- *   m_pos and all external iterators can't be on a tombstone
- *     or an empty element
- *
- * kKeysetKind:
- *   0 <= m_pos <= m_used
  */
 bool SetArray::checkInvariants() const {
   static_assert(sizeof(SetArray) % 16 == 0, "Some memcpy16 can fail.");
@@ -511,8 +487,6 @@ bool SetArray::checkInvariants() const {
   // Non-zombie:
   assertx(m_size <= m_used);
   assertx(m_used <= capacity());
-  assertx(0 <= m_pos && m_pos <= m_used);
-  assertx(m_pos == m_used || !data()[m_pos].isInvalid());
 
 #if 0
   /*
@@ -692,11 +666,6 @@ ArrayData* SetArray::Pop(ArrayData* ad, Variant& value) {
   } else {
     value = uninit_null();
   }
-  /*
-   * To conform to PHP5 behavior, the pop operation resets the array's
-   * internal iterator.
-   */
-  a->m_pos = a->getIterBegin();
   return a;
 }
 
@@ -715,11 +684,6 @@ ArrayData* SetArray::Dequeue(ArrayData* ad, Variant& value) {
   } else {
     value = uninit_null();
   }
-  /*
-   * To conform to PHP5 behavior, the shift operation resets the array's
-   * internal iterator.
-   */
-  a->m_pos = a->getIterBegin();
   return a;
 }
 
@@ -750,7 +714,6 @@ ArrayData* SetArray::Prepend(ArrayData* ad, TypedValue v) {
   ++a->m_size;
   elms[0] = e;
   assertx(!elms[0].isInvalid());
-  a->m_pos = 0; // Like all other array-likes
   a->compact(); // Rebuild the hash table.
   return a;
 }

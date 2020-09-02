@@ -67,7 +67,7 @@ struct MixedArray::DictInitializer {
   DictInitializer() {
     auto const ad = reinterpret_cast<MixedArray*>(&s_theEmptyDictArray);
     ad->initHash(1);
-    ad->m_sizeAndPos = 0;
+    ad->m_size  = 0;
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
     ad->initHeader(HeaderKind::Dict, StaticValue);
@@ -80,7 +80,7 @@ struct MixedArray::DArrayInitializer {
   DArrayInitializer() {
     auto const ad = reinterpret_cast<MixedArray*>(&s_theEmptyDArray);
     ad->initHash(1);
-    ad->m_sizeAndPos = 0;
+    ad->m_size = 0;
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
     ad->initHeader(HeaderKind::Mixed, StaticValue);
@@ -93,7 +93,7 @@ struct MixedArray::MarkedDictArrayInitializer {
   MarkedDictArrayInitializer() {
     auto const ad = reinterpret_cast<MixedArray*>(&s_theEmptyMarkedDictArray);
     ad->initHash(1);
-    ad->m_sizeAndPos = 0;
+    ad->m_size = 0;
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
     ad->initHeader_16(HeaderKind::Dict, StaticValue, ArrayData::kLegacyArray);
@@ -106,7 +106,7 @@ struct MixedArray::MarkedDArrayInitializer {
   MarkedDArrayInitializer() {
     auto const ad = reinterpret_cast<MixedArray*>(&s_theEmptyMarkedDArray);
     ad->initHash(1);
-    ad->m_sizeAndPos = 0;
+    ad->m_size = 0;
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
     ad->initHeader_16(HeaderKind::Mixed, StaticValue, ArrayData::kLegacyArray);
@@ -129,14 +129,13 @@ ArrayData* MixedArray::MakeReserveImpl(uint32_t size, HeaderKind hk) {
   // but the hash table may not be.  So let's issue the cache request ASAP.
   ad->initHash(scale);
 
-  ad->m_sizeAndPos   = 0; // size=0, pos=0
   ad->initHeader(hk, OneReference);
+  ad->m_size         = 0;
   ad->m_scale_used   = scale; // used=0
   ad->m_nextKI       = 0;
 
   assertx(ad->m_kind == hk);
   assertx(ad->m_size == 0);
-  assertx(ad->m_pos == 0);
   assertx(ad->hasExactlyOneRef());
   assertx(ad->m_used == 0);
   assertx(ad->m_nextKI == 0);
@@ -181,8 +180,8 @@ MixedArray* MixedArray::MakeStructImpl(uint32_t size,
   auto const ad    = reqAlloc(scale);
   auto const aux = MixedArrayKeys::packStaticStrsForAux();
 
-  ad->m_sizeAndPos       = size; // pos=0
   ad->initHeader_16(hk, OneReference, aux);
+  ad->m_size             = size;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -206,7 +205,6 @@ MixedArray* MixedArray::MakeStructImpl(uint32_t size,
   }
 
   assertx(ad->m_size == size);
-  assertx(ad->m_pos == 0);
   assertx(ad->m_kind == hk);
   assertx(ad->m_scale == scale);
   assertx(ad->hasExactlyOneRef());
@@ -242,8 +240,8 @@ MixedArray* MixedArray::AllocStructImpl(uint32_t size,
   auto const ad    = reqAlloc(scale);
   auto const aux = MixedArrayKeys::packStaticStrsForAux();
 
-  ad->m_sizeAndPos       = size; // pos=0
   ad->initHeader_16(hk, OneReference, aux);
+  ad->m_size             = size;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -257,7 +255,6 @@ MixedArray* MixedArray::AllocStructImpl(uint32_t size,
   if (debug) memset(ad->data(), kMixedElmFill, sizeof(MixedArrayElm) * size);
 
   assertx(ad->m_size == size);
-  assertx(ad->m_pos == 0);
   assertx(ad->m_kind == hk);
   assertx(ad->m_scale == scale);
   assertx(ad->hasExactlyOneRef());
@@ -286,8 +283,8 @@ MixedArray* MixedArray::MakeMixedImpl(uint32_t size, const TypedValue* kvs) {
 
   ad->initHash(scale);
 
-  ad->m_sizeAndPos       = size; // pos=0
   ad->initHeader(hdr, OneReference);
+  ad->m_size             = size;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -329,7 +326,6 @@ MixedArray* MixedArray::MakeMixedImpl(uint32_t size, const TypedValue* kvs) {
   }
 
   assertx(ad->m_size == size);
-  assertx(ad->m_pos == 0);
   assertx(ad->m_scale == scale);
   assertx(ad->hasExactlyOneRef());
   assertx(ad->m_used == size);
@@ -367,7 +363,6 @@ MixedArray* MixedArray::MakeDArrayNatural(uint32_t size,
 
   ad->initHash(scale);
 
-  ad->m_sizeAndPos       = size; // pos=0
   if (RuntimeOption::EvalHackArrDVArrs) {
     ad->initHeader_16(
         HeaderKind::Dict,
@@ -376,6 +371,7 @@ MixedArray* MixedArray::MakeDArrayNatural(uint32_t size,
   } else {
     ad->initHeader_16(HeaderKind::Mixed, OneReference, aux);
   }
+  ad->m_size             = size;
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = size;
 
@@ -394,7 +390,6 @@ MixedArray* MixedArray::MakeDArrayNatural(uint32_t size,
   }
 
   assertx(ad->m_size == size);
-  assertx(ad->m_pos == 0);
   assertx(ad->m_scale == scale);
   assertx(ad->hasExactlyOneRef());
   assertx(ad->m_used == size);
@@ -468,7 +463,6 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
     assertx(res->isLegacyArray() == other.isLegacyArray());
     assertx(res->keyTypes() == other.keyTypes());
     assertx(res->m_size == other.m_size);
-    assertx(res->m_pos == other.m_pos);
     assertx(res->m_used == other.m_used);
     assertx(res->m_scale == scale);
     return res;
@@ -729,7 +723,6 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
  *
  *   m_size <= m_used; m_used <= capacity()
  *   last element cannot be a tombstone
- *   m_pos and all external iterators can't be on a tombstone
  *   m_nextKI >= highest actual int key
  *   Elm.data.m_type maybe kInvalidDataType (tombstone)
  *   hash[] maybe Tombstone
@@ -764,10 +757,6 @@ bool MixedArray::checkInvariants() const {
   assertx(m_size <= m_used);
   assertx(m_used <= capacity());
   assertx(IMPLIES(isStatic(), m_used == m_size));
-  if (m_pos != m_used) {
-    assertx(size_t(m_pos) < m_used);
-    assertx(!isTombstone(data()[m_pos].data.m_type));
-  }
   return true;
 }
 
@@ -915,9 +904,9 @@ MixedArray* MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
 
   auto ad            = reqAlloc(newScale);
   auto const oldUsed = old->m_used;
-  ad->m_sizeAndPos   = old->m_sizeAndPos;
   ad->initHeader_16(old->m_kind, OneReference, old->m_aux16);
-  ad->m_scale_used   = newScale | uint64_t{oldUsed} << 32;
+  ad->m_size = old->m_size;
+  ad->m_scale_used = newScale | uint64_t{oldUsed} << 32;
   ad->m_aux16 &= ~(ArrayData::kHasProvenanceData |
                    ArrayData::kHasStrKeyTable);
 
@@ -933,7 +922,6 @@ MixedArray* MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
     assertx(res->isLegacyArray() == old->isLegacyArray());
     assertx(res->keyTypes() == old->keyTypes());
     assertx(res->m_size == old->m_size);
-    assertx(res->m_pos == old->m_pos);
     assertx(res->m_used == oldUsed);
     assertx(res->m_scale == newScale);
     assertx(!res->hasStrKeyTable());
@@ -982,31 +970,8 @@ MixedArray* MixedArray::prepareForInsert(bool copy) {
 }
 
 void MixedArray::compact(bool renumber /* = false */) {
-  bool updatePosAfterCompact = false;
-  ElmKey mPos;
-
-  // Prep work before beginning the compaction process
-  if (LIKELY(!renumber)) {
-    if (m_pos == m_used) {
-      // If m_pos is the canonical invalid position, we need to update it to
-      // what the new canonical invalid position will be after compaction
-      m_pos = m_size;
-    } else if (m_pos != 0) {
-      // Cache key for element associated with m_pos in order to
-      // update m_pos after the compaction has been performed.
-      // We only need to do this if m_pos is nonzero and is not
-      // the canonical invalid position.
-      updatePosAfterCompact = true;
-      assertx(size_t(m_pos) < m_used);
-      auto& e = data()[m_pos];
-      mPos.hash = e.hash();
-      mPos.skey = e.skey;
-    }
-  } else {
-    m_pos = 0;
-    // Set m_nextKI to 0 for now to prepare for renumbering integer keys
-    m_nextKI = 0;
-  }
+  // Set m_nextKI to 0 for now to prepare for renumbering integer keys
+  if (UNLIKELY(renumber)) m_nextKI = 0;
 
   // Perform compaction
   auto elms = data();
@@ -1026,13 +991,6 @@ void MixedArray::compact(bool renumber /* = false */) {
       m_nextKI++;
     }
     *findForNewInsert(table, mask, toE.probe()) = toPos;
-  }
-
-  if (updatePosAfterCompact) {
-    // Update m_pos, now that compaction is complete
-    m_pos = mPos.hash >= 0 ? ssize_t(find(mPos.skey, mPos.hash))
-                           : ssize_t(find(mPos.ikey, mPos.hash));
-    assertx(m_pos >= 0 && m_pos < m_size);
   }
 
   m_used = m_size;
@@ -1186,12 +1144,7 @@ void MixedArray::eraseNoCompact(RemovePos pos) {
   assertx(pos.valid());
   hashTab()[pos.probeIdx] = Tombstone;
 
-  // If the internal pointer points to this element, advance it.
   Elm* elms = data();
-  if (m_pos == pos.elmIdx) {
-    m_pos = nextElm(elms, pos.elmIdx);
-  }
-
   auto& e = elms[pos.elmIdx];
   auto const oldTV = e.data;
   if (e.hasStrKey()) {
@@ -1272,8 +1225,8 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
                    ~(ArrayData::kHasProvenanceData |
                      ArrayData::kHasStrKeyTable);
 
-  ad->m_sizeAndPos      = src->m_sizeAndPos;
   ad->initHeader_16(src->m_kind, OneReference, aux);
+  ad->m_size            = src->m_size;
   ad->m_scale           = scale; // don't set m_used yet
   ad->m_nextKI          = src->m_nextKI;
 
@@ -1283,19 +1236,6 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   auto srcElm = src->data();
   auto const srcStop = src->data() + oldUsed;
   uint32_t i = 0;
-
-  // We're not copying the tombstones over to the new array, so the
-  // positions of the elements in the new array may be shifted. Cache
-  // the key for element associated with src->m_pos so that we can
-  // properly initialize ad->m_pos below.
-  ElmKey mPos;
-  bool updatePosAfterCopy = src->m_pos != 0 && src->m_pos < src->m_used;
-  if (updatePosAfterCopy) {
-    assertx(size_t(src->m_pos) < src->m_used);
-    auto& e = srcElm[src->m_pos];
-    mPos.hash = e.probe();
-    mPos.skey = e.skey;
-  }
 
   // Copy the elements
   auto mask = MixedArray::Mask(scale);
@@ -1311,18 +1251,6 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
     *ad->findForNewInsert(table, mask, hash) = i;
     ++dstElm;
     ++i;
-  }
-
-  // Now that we have finished copying the elements, update ad->m_pos
-  if (updatePosAfterCopy) {
-    ad->m_pos = mPos.hash >= 0 ? ssize_t(ad->find(mPos.skey, mPos.hash))
-      : ssize_t(ad->find(mPos.ikey, mPos.hash));
-    assertx(ad->m_pos >=0 && ad->m_pos < ad->m_size);
-  } else {
-    // If src->m_pos is equal to src's canonical invalid position, then
-    // set ad->m_pos to ad's canonical invalid position.
-    if (src->m_pos != 0)
-      ad->m_pos = ad->m_size;
   }
 
   // Set new used value (we've removed any tombstones).
@@ -1429,9 +1357,6 @@ ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {
   } else {
     value = uninit_null();
   }
-  // To conform to PHP5 behavior, the pop operation resets the array's
-  // internal iterator.
-  a->m_pos = a->nextElm(elms, -1);
   return a;
 }
 

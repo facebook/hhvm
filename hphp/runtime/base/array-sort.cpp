@@ -229,7 +229,6 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   do {                                                          \
     if (!a->m_size) return;                                     \
     SortFlavor flav = a->preSort<acc_type>(acc_type(), true);   \
-    a->m_pos = ssize_t(0);                                      \
     try {                                                       \
       CALL_SORT(acc_type);                                      \
     } catch (...) {                                             \
@@ -279,7 +278,6 @@ void PackedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
   assertx(!ad->hasMultipleRefs());
   auto a = ad;
   SortFlavor flav = preSort(ad);
-  a->m_pos = 0;
   auto data_begin = packedData(ad);
   auto data_end = data_begin + a->m_size;
   CALL_SORT(TVAccessor);
@@ -298,7 +296,6 @@ void PackedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
       return false;                                             \
     }                                                           \
     a->preSort<acc_type>(acc_type(), false);                    \
-    a->m_pos = ssize_t(0);                                      \
     SCOPE_EXIT {                                                \
       /* Make sure we leave the array in a consistent state */  \
       a->postSort(resetKeys);                                   \

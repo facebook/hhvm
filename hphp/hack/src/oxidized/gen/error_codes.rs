@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6a9214d4b922d82e1ef9f63259d8000a>>
+// @generated SignedSource<<552b2c7f31067502e57d2fb67abbcfaa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -281,6 +281,7 @@ pub enum NastCheck {
     EntryPointArguments,
     VariadicMemoize,
     AbstractMethodMemoize,
+    InstancePropertyInAbstractFinalClass,
 }
 impl TrivialDrop for NastCheck {}
 
@@ -683,6 +684,7 @@ pub enum Typing {
     ReifiedFunctionReference,
     ClassMethAbstractCall,
     KindMismatch,
+    UnboundNameTypeConstantAccess,
 }
 impl TrivialDrop for Typing {}
 

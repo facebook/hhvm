@@ -106,10 +106,7 @@ Variant autoload_symbol_to_path(const String& symbol, AutoloadMap::KindOf kind) 
     SystemLib::throwInvalidOperationExceptionObject(
       "Only available when autoloader is active");
   }
-  auto path = AutoloadHandler::s_instance->getFile(
-    symbol,
-    kind,
-    kind != AutoloadMap::KindOf::Constant);
+  auto path = AutoloadHandler::s_instance->getFile(symbol, kind);
   if (!path) {
     return null_string;
   }

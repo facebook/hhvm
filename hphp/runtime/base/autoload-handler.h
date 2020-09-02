@@ -105,8 +105,7 @@ struct AutoloadHandler final : RequestEventHandler {
   }
 
   std::optional<String> getFile(const String& name,
-                                  AutoloadMap::KindOf kind,
-                                  bool toLower);
+                                  AutoloadMap::KindOf kind);
 
   Array getSymbols(const String& path, AutoloadMap::KindOf kind);
 
@@ -117,7 +116,6 @@ private:
   template <class T>
   AutoloadMap::Result loadFromMapImpl(const String& name,
                                       AutoloadMap::KindOf kind,
-                                      bool toLower,
                                       const T &checkExists,
                                       Variant& err);
 
@@ -134,7 +132,7 @@ private:
    */
   template <class T>
   AutoloadMap::Result loadFromMap(const String& name, AutoloadMap::KindOf kind,
-                                  bool toLower, const T &checkExists);
+                                  const T &checkExists);
 
   /**
    * loadFromMapPartial() will call the failure callback if there is an error
@@ -147,7 +145,7 @@ private:
    */
   template <class T>
   AutoloadMap::Result loadFromMapPartial(const String& className,
-                                         AutoloadMap::KindOf kind, bool toLower,
+                                         AutoloadMap::KindOf kind,
                                          const T &checkExists, Variant& err);
 
   static String getSignature(const Variant& handler);

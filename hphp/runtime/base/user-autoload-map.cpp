@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/user-autoload-map.h"
 
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/assertions.h"
 
 namespace HPHP {
@@ -117,12 +118,12 @@ Array UserAutoloadMap::getAllFiles() const {
 
 std::optional<String> UserAutoloadMap::getTypeFile(
   const String& typeName) {
-  return getFileFromMap(m_typeFile, typeName);
+  return getFileFromMap(m_typeFile, HHVM_FN(strtolower)(typeName));
 }
 
 std::optional<String> UserAutoloadMap::getFunctionFile(
   const String& funcName) {
-  return getFileFromMap(m_functionFile, funcName);
+  return getFileFromMap(m_functionFile, HHVM_FN(strtolower)(funcName));
 }
 
 std::optional<String> UserAutoloadMap::getConstantFile(
@@ -132,7 +133,7 @@ std::optional<String> UserAutoloadMap::getConstantFile(
 
 std::optional<String> UserAutoloadMap::getTypeAliasFile(
   const String& typeAliasName) {
-  return getFileFromMap(m_typeAliasFile, typeAliasName);
+  return getFileFromMap(m_typeAliasFile, HHVM_FN(strtolower)(typeAliasName));
 }
 
 Array UserAutoloadMap::getFileTypes(const String& path) {

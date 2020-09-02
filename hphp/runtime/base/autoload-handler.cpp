@@ -21,7 +21,6 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/container-functions.h"
@@ -214,13 +213,10 @@ const StaticString
   s_line("line");
 
 std::optional<String> AutoloadHandler::getFile(const String& clsName,
-                                               AutoloadMap::KindOf kind,
-                                               bool toLower) {
+                                               AutoloadMap::KindOf kind) {
   assertx(m_map);
   // Always normalize name before autoloading
-  const String& name = normalizeNS(clsName);
-  String canonicalName = toLower ? HHVM_FN(strtolower)(name) : name;
-  return m_map->getFile(kind, canonicalName);
+  return m_map->getFile(kind, normalizeNS(clsName));
 }
 
 Array AutoloadHandler::getSymbols(const String& path,
@@ -233,10 +229,9 @@ template <class T>
 AutoloadMap::Result
 AutoloadHandler::loadFromMapImpl(const String& clsName,
                                  AutoloadMap::KindOf kind,
-                                 bool toLower,
                                  const T &checkExists,
                                  Variant& err) {
-  auto file = getFile(clsName, kind, toLower);
+  auto file = getFile(clsName, kind);
   if (!file) {
     return AutoloadMap::Result::Failure;
   }
@@ -280,13 +275,11 @@ template <class T>
 AutoloadMap::Result
 AutoloadHandler::loadFromMap(const String& clsName,
                              AutoloadMap::KindOf kind,
-                             bool toLower,
                              const T &checkExists) {
   assertx(m_map);
   while (true) {
     Variant err{Variant::NullInit()};
-    AutoloadMap::Result res = loadFromMapImpl(clsName, kind, toLower,
-                                              checkExists, err);
+    AutoloadMap::Result res = loadFromMapImpl(clsName, kind, checkExists, err);
     if (res == AutoloadMap::Result::Success) {
       return AutoloadMap::Result::Success;
     }
@@ -306,7 +299,6 @@ bool AutoloadHandler::autoloadFunc(StringData* name) {
   return m_map &&
     loadFromMap(String{name},
                 AutoloadMap::KindOf::Function,
-                true,
                 FuncExistsChecker(name)) != AutoloadMap::Result::Failure;
 }
 
@@ -314,13 +306,12 @@ bool AutoloadHandler::autoloadConstant(StringData* name) {
   return m_map &&
     loadFromMap(String{name},
                 AutoloadMap::KindOf::Constant,
-                false,
                 ConstExistsChecker(name)) != AutoloadMap::Result::Failure;
 }
 
 bool AutoloadHandler::autoloadType(const String& name) {
   return m_map &&
-    loadFromMap(name, AutoloadMap::KindOf::TypeAlias, true,
+    loadFromMap(name, AutoloadMap::KindOf::TypeAlias,
                 TypeExistsChecker(name)) != AutoloadMap::Result::Failure;
 }
 
@@ -354,8 +345,8 @@ bool AutoloadHandler::autoloadClass(const String& clsName) {
     return false;
   }
   ClassExistsChecker ce(className);
-  AutoloadMap::Result res = loadFromMap(className,
-                                        AutoloadMap::KindOf::Type, true, ce);
+  AutoloadMap::Result res = loadFromMap(className, AutoloadMap::KindOf::Type,
+                                        ce);
   if (res == AutoloadMap::Result::Success || ce()) return true;
   return false;
 }
@@ -364,7 +355,7 @@ bool AutoloadHandler::autoloadRecordDesc(const String& recName) {
   if (recName.empty()) return false;
   return m_map &&
          loadFromMap(recName, AutoloadMap::KindOf::Type,
-                     true, RecordExistsChecker(recName)) !=
+                     RecordExistsChecker(recName)) !=
          AutoloadMap::Result::Failure;
 }
 
@@ -381,11 +372,9 @@ template <class T>
 AutoloadMap::Result
 AutoloadHandler::loadFromMapPartial(const String& className,
                                     AutoloadMap::KindOf kind,
-                                    bool toLower,
                                     const T &checkExists,
                                     Variant& err) {
-  AutoloadMap::Result res = loadFromMapImpl(className, kind, toLower,
-                                            checkExists, err);
+  AutoloadMap::Result res = loadFromMapImpl(className, kind, checkExists, err);
   if (res == AutoloadMap::Result::Success) {
     return AutoloadMap::Result::Success;
   }
@@ -419,8 +408,8 @@ bool AutoloadHandler::autoloadNamedType(const String& clsName) {
       // Try consulting the 'type' map first, but don't call the failure
       // callback unless there was an uncaught exception or a fatal error
       // during the include operation.
-      typeRes = loadFromMapPartial(className, AutoloadMap::KindOf::Type,
-                                    true, cte, typeErr);
+      typeRes = loadFromMapPartial(className, AutoloadMap::KindOf::Type, cte,
+                                   typeErr);
       if (typeRes == AutoloadMap::Result::Success) return true;
     }
     Variant typeAliasErr{Variant::NullInit()};
@@ -429,8 +418,8 @@ bool AutoloadHandler::autoloadNamedType(const String& clsName) {
       // failure callback unless there was an uncaught exception
       // or fatal error.
       typeAliasRes = loadFromMapPartial(className,
-                                        AutoloadMap::KindOf::TypeAlias,
-                                        true, cte, typeAliasErr);
+                                        AutoloadMap::KindOf::TypeAlias, cte,
+                                        typeAliasErr);
       if (typeAliasRes == AutoloadMap::Result::Success) return true;
     }
     // If we reach this point, then for each map either nothing was found

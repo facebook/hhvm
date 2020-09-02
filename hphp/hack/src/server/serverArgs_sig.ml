@@ -88,6 +88,8 @@ module type S = sig
 
   val with_saved_state : options -> saved_state_target option
 
+  val with_dep_graph_v2 : options -> string option
+
   val allow_non_opt_build : options -> bool
 
   val write_symbol_info : options -> string option

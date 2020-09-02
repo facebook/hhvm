@@ -144,11 +144,6 @@ bool merge_into(FrameState& dst, const FrameState& src) {
   // We must always have the same stublogue mode.
   always_assert(dst.stublogue == src.stublogue);
 
-  if (dst.needRatchet != src.needRatchet) {
-    dst.needRatchet = true;
-    changed = true;
-  }
-
   if (dst.mbr.ptr != src.mbr.ptr) {
     dst.mbr.ptr = nullptr;
     changed = true;

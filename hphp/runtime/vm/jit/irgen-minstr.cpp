@@ -1629,10 +1629,6 @@ void emitBaseH(IRGS& env) {
 }
 
 void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
-  // Eagerly mark us as not needing ratchets.  If the intermediate operation
-  // ends up calling misLea(), this will be set to true.
-  env.irb->fs().setNeedRatchet(false);
-
   auto const key = memberKey(env, mk);
   auto const base = [&] {
     if (mcodeIsProp(mk.mcode)) return propImpl(env, mode, key, mk.mcode == MQT);

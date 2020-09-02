@@ -156,12 +156,6 @@ struct FrameState {
   bool stublogue{false};
 
   /*
-   * Tracks whether we will need to ratchet tvRef and tvRef2 after emitting an
-   * intermediate member instruction.
-   */
-  bool needRatchet{false};
-
-  /*
    * ctx tracks the current ActRec's this/ctx field
    */
   SSATmp* ctx{nullptr};
@@ -313,7 +307,6 @@ struct FrameStateMgr final {
   FPInvOffset irSPOff()           const { return cur().irSPOff; }
   FPInvOffset bcSPOff()           const { return cur().bcSPOff; }
   bool        stublogue()         const { return cur().stublogue; }
-  bool        needRatchet()       const { return cur().needRatchet; }
   bool        stackModified()     const { return cur().stackModified; }
 
   /*
@@ -337,7 +330,6 @@ struct FrameStateMgr final {
    * In the presence of inlining, these modify state for the most-inlined
    * frame.
    */
-  void setNeedRatchet(bool b)           { cur().needRatchet = b; }
   void resetStackModified()             { cur().stackModified = false; }
   void setBCSPOff(FPInvOffset o)        { cur().bcSPOff = o; }
   void incBCSPDepth(int32_t n = 1)      { cur().bcSPOff += n; }

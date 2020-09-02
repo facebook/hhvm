@@ -38,6 +38,32 @@ and fun_ fty fpol f =
     f_exn = ptype f.f_exn;
   }
 
+let iter_ptype2 fty fpol pt1 pt2 =
+  let flist l1 l2 =
+    match List.iter2 ~f:fty l1 l2 with
+    | List.Or_unequal_lengths.Ok () -> ()
+    | _ -> invalid_arg "iter_ptype2"
+  in
+  match (pt1, pt2) with
+  | (Tprim p1, Tprim p2)
+  | (Tgeneric p1, Tgeneric p2) ->
+    fpol p1 p2
+  | (Ttuple tl1, Ttuple tl2)
+  | (Tunion tl1, Tunion tl2)
+  | (Tinter tl1, Tinter tl2) ->
+    flist tl1 tl2
+  | (Tclass cls1, Tclass cls2) ->
+    (* ignore property map, it is going away soon *)
+    fpol cls1.c_self cls2.c_self;
+    fpol cls1.c_lump cls2.c_lump
+  | (Tfun f1, Tfun f2) ->
+    fpol f1.f_pc f2.f_pc;
+    fpol f1.f_self f2.f_self;
+    flist f1.f_args f2.f_args;
+    fty f1.f_ret f2.f_ret;
+    fty f1.f_exn f2.f_exn
+  | _ -> invalid_arg "iter_ptype2"
+
 (* "fprop: int -> prop -> prop" takes as first argument the
    number of binders under which the prop argument is; it is
    initialized by the "depth" argument *)

@@ -252,23 +252,6 @@ let throw ~pos renv env exn_ty =
       subtype ~pos renv.re_proto.pre_meta exn_ty renv.re_exn
       && add_dependencies ~pos (PCSet.elements lpc) renv.re_exn)
 
-let rec set_policy p = function
-  | Tprim _ -> Tprim p
-  | Tgeneric _ -> Tgeneric p
-  | Ttuple l -> Ttuple (List.map ~f:(set_policy p) l)
-  | Tunion l -> Tunion (List.map ~f:(set_policy p) l)
-  | Tinter l -> Tinter (List.map ~f:(set_policy p) l)
-  | Tclass c -> Tclass { c with c_self = p }
-  | Tfun f ->
-    Tfun
-      {
-        f_pc = p;
-        f_self = p;
-        f_args = List.map ~f:(set_policy p) f.f_args;
-        f_ret = set_policy p f.f_ret;
-        f_exn = set_policy p f.f_exn;
-      }
-
 let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
   let (callee, ret_pty) =
     let name =
@@ -307,28 +290,33 @@ let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
       Env.acc env
       @@ subtype ~pos renv.re_proto.pre_meta (Tfun fty) (Tfun hole_ty)
     | Cglobal callable_name ->
-      begin
+      let fp =
+        { fp_name = callable_name; fp_this = that_pty_opt; fp_type = hole_ty }
+      in
+      let (env, call_constraint) =
         match SMap.find_opt callable_name renv.re_proto.pre_decl.de_fun with
         | Some { fd_kind = FDCIPP } ->
-          let cipp_policy = Env.new_policy_var renv.re_proto "implicit" in
-          let cipp_ty = set_policy cipp_policy (Tfun hole_ty) in
-          Env.acc env
-          @@ subtype ~pos renv.re_proto.pre_meta cipp_ty (Tfun hole_ty)
+          let cipp_scheme = Decl.make_cipp_scheme renv.re_proto fp in
+          let prop =
+            (* because cipp_scheme is created after fp they cannot
+               mismatch and call_constraint will not fail *)
+            Option.value_exn
+              (Solver.call_constraint
+                 ~subtype:(subtype renv.re_proto.pre_meta)
+                 ~pos
+                 fp
+                 cipp_scheme)
+          in
+          (env, prop)
         (* TODO(T68007489): Temporarily infer everything for every function call.
          * switch back to using InferFlows annotation when scaling is an issue.
          *)
         | Some _ ->
-          let fp =
-            {
-              fp_name = callable_name;
-              fp_this = that_pty_opt;
-              fp_type = hole_ty;
-            }
-          in
           let env = Env.add_dep env callable_name in
-          Env.acc env (fun acc -> Chole (pos, fp) :: acc)
+          (env, Chole (pos, fp))
         | None -> fail "unknown function '%s'" callable_name
-      end
+      in
+      Env.acc env (fun acc -> call_constraint :: acc)
   in
   let env = Env.acc env @@ add_dependencies ~pos [callee] ret_pty in
   (* Any function call may throw, so we need to update the current PC and
@@ -357,8 +345,8 @@ let vec_element_pty renv vec_ty vec_pty =
   in
   element_pty vec_ty
 
-(* Finds what we flow into in an assignment.
- * The type LHS has in the input is the type after the assignment takes place. *)
+(* Finds what we flow into in an assignment. Uses the TAST invariant that
+ * the lhs' type is the type after the assignment occurred. *)
 let rec flux_target ~pos renv env ((_, lhs_ty), lhs_exp) =
   let expr = expr ~pos renv in
   match lhs_exp with
@@ -405,12 +393,11 @@ let rec flux_target ~pos renv env ((_, lhs_ty), lhs_exp) =
 
 and assign ~pos renv env op lhs_exp rhs_exp =
   let expr = expr ~pos renv in
-  (* Handle the incorporation of LHS in RHS if assignment uses and operation,
-   * e.g., $a += $b. *)
   let (env, rhs_pty) =
     if Option.is_none op then
       expr env rhs_exp
     else
+      (* increment-like operations (e.g., $a += $b) *)
       let (env, lhs_pty) = expr env lhs_exp in
       let (env, rhs_pty) = expr env rhs_exp in
       binop ~pos renv env lhs_pty rhs_pty
@@ -722,57 +709,68 @@ and block renv env (blk : Tast.block) =
   in
   List.fold_left ~f:seq ~init:env blk
 
-let rec domain =
-  let get_var = function
-    | Pfree_var (v, s) -> VarSet.singleton (v, s)
-    | _ -> VarSet.empty
+(* Returns the list of free policy variables in a policied type *)
+let free_pvars =
+  let on_policy acc p =
+    match p with
+    | Pfree_var (v, s) ->
+      acc := VarSet.add (v, s) !acc;
+      p
+    | _ -> p
   in
-  let get_list =
-    List.fold ~f:(fun s t -> VarSet.union s @@ domain t) ~init:VarSet.empty
-  in
-  function
-  | Tprim p
-  | Tgeneric p ->
-    get_var p
-  | Ttuple pl
-  | Tunion pl
-  | Tinter pl ->
-    get_list pl
-  | Tclass cls -> get_var cls.c_self
-  | Tfun f ->
-    f.f_ret :: f.f_exn :: f.f_args |> get_list |> VarSet.union (get_var f.f_pc)
+  let rec iter acc p = Ifc_mapper.ptype (iter acc) (on_policy acc) p in
+  fun pty ->
+    let acc = ref VarSet.empty in
+    let _ = iter acc pty in
+    !acc
 
-(* Check if some function prototype is governed by a policy, meaning that the
- * policy flows into the argument and pc and that the return type flows into
- * the policy
- *)
-let governs ~pos meta p fp acc =
-  let proto_vars = domain @@ Tfun fp.fp_type in
-  (* Quantify only the free variables that do not show up in the function
-   * prototype. We eliminate them via simplification because they only show up
-   * on one side of the entailment *)
-  let quantify =
-    let pred v = not @@ VarSet.mem v proto_vars in
-    Logic.quantify ~pred ~quant:Qexists
+(* Checks that two type schemes are in a subtyping relationship. The
+ * skeletons of the two input type schemes are expected to be same.
+ * A list of invalid flows is returned, if the list is empty the
+ * type schemes are in a subtyping relationship. *)
+let check_subtype_scheme ~pos _meta sub_scheme sup_scheme : pos_flow list =
+  let (Fscheme (sub_scope, sub_proto, sub_prop)) = sub_scheme in
+  let (Fscheme (sup_scope, sup_proto, sup_prop)) = sup_scheme in
+  assert (not (Scope.equal sub_scope sup_scope));
+  (* To compare them, we need the two constraints to use the same set
+     of free variables. For example, if sub_scheme and sup_scheme are
+       - ((function():int{p1}), Csub) and,
+       - ((function():int{p2}), Csup)
+     we rename p2 into p1 by conjoining p2 = p1 to Csup and
+     quantifying p2 away. *)
+  let sup_props =
+    let accum = ref [sup_prop] in
+    let rec equate pt1 pt2 =
+      let eqpol p1 p2 = accum := L.(p1 = p2) ~pos !accum in
+      Ifc_mapper.iter_ptype2 equate eqpol pt1 pt2
+    in
+    equate (Tfun sub_proto.fp_type) (Tfun sup_proto.fp_type);
+    begin
+      match (sub_proto.fp_this, sup_proto.fp_this) with
+      | (Some sub_this_ty, Some sup_this_ty) -> equate sub_this_ty sup_this_ty
+      | (None, None) -> ()
+      | _ -> invalid_arg "method/function mismatch"
+    end;
+    !accum
   in
-  let assumed_ty = set_policy p @@ Tfun fp.fp_type in
-  let lattice =
-    (* We assume that the prototype is equivalent to the assumed type. This
-     * means that:
-     *  proto <: assumed_ty : Policy P flows into input and out of outputs
-     *  assumed_ty <: proto : Inputs flow into P and P flows into outputs
-     * In the future, we can adjust these flows by using different assumed
-     * types for the upper and lower bounds.
-     *)
-    equivalent ~pos meta (Tfun fp.fp_type) assumed_ty []
-    |> Logic.conjoin
-    |> quantify
+  let sub_vars =
+    let fp_vars = free_pvars (Tfun sub_proto.fp_type) in
+    match sub_proto.fp_this with
+    | Some sub_this_ty -> VarSet.union fp_vars (free_pvars sub_this_ty)
+    | None -> fp_vars
+  in
+  let pred v = not @@ VarSet.mem v sub_vars in
+  let sup_lattice =
+    Logic.conjoin sup_props
+    |> Logic.quantify ~pred ~quant:Qexists
     |> Logic.simplify
     |> Logic.flatten_prop
     |> Ifc_security_lattice.transitive_closure
   in
-  let prop = quantify acc |> Logic.simplify in
-  Logic.entailment_violations lattice prop
+  let sub_prop =
+    sub_prop |> Logic.quantify ~pred ~quant:Qexists |> Logic.simplify
+  in
+  Logic.entailment_violations sup_lattice sub_prop
 
 let analyse_callable
     ?class_name
@@ -844,8 +842,10 @@ let analyse_callable
     let entailment =
       match SMap.find_opt callable_name decl_env.de_fun with
       | Some { fd_kind = FDCIPP } ->
-        let implicit = Env.new_policy_var proto_renv "implicit" in
-        governs ~pos meta implicit proto
+        let cipp_scheme = Decl.make_cipp_scheme proto_renv proto in
+        fun prop ->
+          let fun_scheme = Fscheme (scope, proto, prop) in
+          check_subtype_scheme ~pos meta fun_scheme cipp_scheme
       | _ -> const []
     in
 
@@ -930,7 +930,8 @@ let opts_of_raw_opts raw_opts =
     try Lattice.mk_exn raw_opts.ropt_security_lattice
     with Lattice.Invalid_security_lattice ->
       fail
-        "option error: lattice specification should be basic flux constraints, e.g., `A < B` separated by `;`"
+        ( "option error: lattice specification should be basic flux "
+        ^^ "constraints, e.g., `A < B` separated by `;`" )
   in
   { opt_mode; opt_security_lattice }
 
@@ -950,12 +951,8 @@ let check meta tast () =
       fail "solver error: cyclic call graph"
     | Solver.Error (Solver.MissingResults callable) ->
       fail "solver error: missing results for callable '%s'" callable
-    | Solver.Error (Solver.InvalidCall (reason, caller, callee)) ->
-      fail
-        "solver error: invalid call to '%s' in '%s' (%s)"
-        callee
-        caller
-        reason
+    | Solver.Error (Solver.InvalidCall (caller, callee)) ->
+      fail "solver error: invalid call to '%s' in '%s'" callee caller
   in
 
   let simplify result =
@@ -1009,7 +1006,8 @@ let check meta tast () =
     in
 
     let context_implicit_policy_leakage (pos, source, sink) =
-      (* The latest program point contributing to the violation is the primary error *)
+      (* The latest program point contributing to the violation is the
+         primary error *)
       let (primary, secondaries) =
         let poss =
           PosSet.elements pos |> List.sort ~compare:Pos.compare |> List.rev
@@ -1024,7 +1022,6 @@ let check meta tast () =
 
     if should_print ~user_mode:meta.m_opts.opt_mode ~phase:Mcheck then begin
       List.iter ~f:illegal_information_flow simple_illegal_flows;
-
       List.iter ~f:context_implicit_policy_leakage implicit
     end
   in

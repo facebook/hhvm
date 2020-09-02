@@ -9,6 +9,10 @@
 open Hh_prelude
 open Hh_core
 open Ifc_types
+module Env = Ifc_env
+module Logic = Ifc_logic
+module Mapper = Ifc_mapper
+module L = Logic.Infix
 module A = Aast
 module T = Typing_defs
 
@@ -220,3 +224,20 @@ let find_core_class_decl meta class_name =
   match Decl_provider.get_class meta.m_ctx class_name with
   | Some class_decl -> class_decl
   | None -> fail ("couldn't find the decl for " ^ class_name)
+
+(* Builds the type scheme for a cipp callable *)
+let make_cipp_scheme re_proto (fp : fun_proto) =
+  let scope = Scope.alloc () in
+  let re_proto = { re_proto with pre_scope = scope } in
+  let cipp = Env.new_policy_var re_proto "cipp" in
+  let rec set_cipp pty = Mapper.ptype set_cipp (const cipp) pty in
+  let pbot = Pbot PosSet.empty in
+  let fp' =
+    {
+      fp_name = fp.fp_name;
+      fp_this = Option.map ~f:set_cipp fp.fp_this;
+      fp_type =
+        { (Mapper.fun_ set_cipp (const cipp) fp.fp_type) with f_self = pbot };
+    }
+  in
+  Fscheme (scope, fp', Ctrue)

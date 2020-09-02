@@ -18,10 +18,30 @@ module L = Logic.Infix
 type solving_error =
   | RecursiveCycle
   | MissingResults of string
-  (* InvalidCall (reason, caller, callee) *)
-  | InvalidCall of string * string * string
+  (* InvalidCall (caller, callee) *)
+  | InvalidCall of string * string
 
 exception Error of solving_error
+
+let call_constraint ~subtype ~pos ?(depth = 0) proto scheme =
+  let (Fscheme (callee_scope, callee_proto, callee_constraint)) = scheme in
+  let pred (_, s) = Scope.equal s callee_scope in
+  let make_constraint this_types =
+    Some
+      ( [callee_constraint]
+      |> subtype ~pos (Tfun callee_proto.fp_type) (Tfun proto.fp_type)
+      |> (match this_types with
+         | Some (t1, t2) -> subtype ~pos t1 t2
+         | None -> Utils.identity)
+      |> Logic.conjoin
+      (* the assertion on scopes in close_one below ensures that
+         we quantify only the callee policy variables *)
+      |> Logic.quantify ~pred ~quant:Qexists ~depth )
+  in
+  match (proto.fp_this, callee_proto.fp_this) with
+  | (Some this1, Some this2) -> make_constraint (Some (this1, this2))
+  | (None, None) -> make_constraint None
+  | _ -> None
 
 (* Combine the results of each individual function into a global
    constraint. If the resulting constraint is satisfiable all the
@@ -48,26 +68,17 @@ let global_exn ~subtype callable_results =
   let close_one closed_results_map res_name =
     let result = SMap.find res_name results_map in
     let rec subst depth = function
-      | Chole (pos, ({ fp_name = callee_name; _ } as proto)) ->
-        let invalid_call reason =
-          raise (Error (InvalidCall (reason, res_name, callee_name)))
-        in
-        let callee = SMap.find callee_name closed_results_map in
+      | Chole (pos, proto) ->
+        let callee = SMap.find proto.fp_name closed_results_map in
         assert (not (Scope.equal callee.res_scope result.res_scope));
-        let pred (_, s) = Scope.equal s callee.res_scope in
-        [callee.res_constraint]
-        |> subtype ~pos (Tfun callee.res_proto.fp_type) (Tfun proto.fp_type)
-        |> (match (proto.fp_this, callee.res_proto.fp_this) with
-           | (Some t1, Some t2) -> subtype ~pos t1 t2
-           | (None, Some _) ->
-             invalid_call ("expected '" ^ callee_name ^ "' to be a function")
-           | (Some _, None) ->
-             invalid_call ("expected '" ^ callee_name ^ "' to be a method")
-           | (None, None) -> Utils.identity)
-        |> Logic.conjoin
-        (* the assertion on scopes above ensures that we quantify
-           only the callee policy variables *)
-        |> Logic.quantify ~pred ~quant:Qexists ~depth
+        let scheme =
+          Fscheme (callee.res_scope, callee.res_proto, callee.res_constraint)
+        in
+        begin
+          match call_constraint ~subtype ~depth ~pos proto scheme with
+          | Some prop -> prop
+          | None -> raise (Error (InvalidCall (res_name, proto.fp_name)))
+        end
       | c -> Mapper.prop Utils.identity subst depth c
     in
     let closed_constr = subst 0 result.res_constraint in

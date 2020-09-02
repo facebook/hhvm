@@ -8,6 +8,17 @@ class C {
   public function __construct() {}
 }
 
+<<InferFlows>>
+function plus(int $x, int $y): int {
+  return $x + $y;
+}
+
+<<InferFlows>>
+function store(int $x): void {
+  $c = new C();
+  $c->value = $x;
+}
+
 <<Cipp>>
 function call_cipp(): int {
   return call_inferred(123);
@@ -19,6 +30,8 @@ function call_inferred(int $x): int {
   return plus($x, 2);
 }
 
+// Functions below should trigger errors
+
 <<Cipp>>
 function leak_value(int $x): void {
   // This leaks $x (and pc) by storing into PUBLIC
@@ -29,15 +42,4 @@ function leak_value(int $x): void {
 function leak_pc(): void {
   // This leaks the PC by storing into PUBLIC
   store(123);
-}
-
-<<InferFlows>>
-function plus(int $x, int $y): int {
-  return $x + $y;
-}
-
-<<InferFlows>>
-function store(int $x): void {
-  $c = new C();
-  $c->value = $x;
 }

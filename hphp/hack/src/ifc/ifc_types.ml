@@ -91,6 +91,9 @@ type fun_proto = {
   fp_type: fun_;
 }
 
+(* A flow between two policies with positions justifying it *)
+type pos_flow = PosSet.t * policy * policy
+
 (* Flow constraints with quantifiers and implication *)
 type prop =
   | Ctrue
@@ -98,10 +101,12 @@ type prop =
   (* if policy <= purpose then prop0 else prop1 *)
   | Ccond of (Pos.t * policy * purpose) * prop * prop
   | Cconj of prop * prop
-  | Cflow of (PosSet.t * policy * policy)
+  | Cflow of pos_flow
   (* holes are introduced by calls to functions for which
      we do not have a flow type at hand *)
   | Chole of (Pos.t * fun_proto)
+
+type fun_scheme = Fscheme of Scope.t * fun_proto * prop
 
 module Flow = struct
   type t = policy * policy

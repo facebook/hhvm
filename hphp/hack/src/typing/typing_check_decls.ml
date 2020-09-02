@@ -266,6 +266,7 @@ and method_ env m =
   List.iter m.m_params (fun_param env);
   variadic_param env m.m_variadic;
   List.iter m.m_tparams (tparam env);
+  List.iter m.m_where_constraints (where_constr env);
   maybe hint env (hint_of_type_hint m.m_ret)
 
 and fun_param env param =

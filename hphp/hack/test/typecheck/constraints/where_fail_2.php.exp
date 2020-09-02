@@ -1,0 +1,16 @@
+File "where_fail_2.php", line 8, characters 33-36:
+Some type constraint(s) here are violated (Typing[4323])
+File "where_fail_2.php", line 5, characters 9-9:
+`T` is a constrained type parameter
+File "where_fail_2.php", line 5, characters 14-14:
+Expected `I`
+File "where_fail_2.php", line 8, characters 35-35:
+But got `T`
+File "where_fail_2.php", line 17, characters 51-54:
+Some type constraint(s) here are violated (Typing[4323])
+File "where_fail_2.php", line 5, characters 9-9:
+`T` is a constrained type parameter
+File "where_fail_2.php", line 5, characters 14-14:
+Expected `I`
+File "where_fail_2.php", line 17, characters 53-53:
+But got `T`

@@ -295,8 +295,8 @@ let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
       in
       let (env, call_constraint) =
         match SMap.find_opt callable_name renv.re_proto.pre_decl.de_fun with
-        | Some { fd_kind = FDCIPP } ->
-          let cipp_scheme = Decl.make_cipp_scheme renv.re_proto fp in
+        | Some { fd_kind = FDGovernedBy policy } ->
+          let scheme = Decl.make_callable_scheme renv.re_proto policy fp in
           let prop =
             (* because cipp_scheme is created after fp they cannot
                mismatch and call_constraint will not fail *)
@@ -305,13 +305,10 @@ let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
                  ~subtype:(subtype renv.re_proto.pre_meta)
                  ~pos
                  fp
-                 cipp_scheme)
+                 scheme)
           in
           (env, prop)
-        (* TODO(T68007489): Temporarily infer everything for every function call.
-         * switch back to using InferFlows annotation when scaling is an issue.
-         *)
-        | Some _ ->
+        | Some { fd_kind = FDInferFlows } ->
           let env = Env.add_dep env callable_name in
           (env, Chole (pos, fp))
         | None -> fail "unknown function '%s'" callable_name
@@ -770,6 +767,9 @@ let check_subtype_scheme ~pos _meta sub_scheme sup_scheme : pos_flow list =
   let sub_prop =
     sub_prop |> Logic.quantify ~pred ~quant:Qexists |> Logic.simplify
   in
+  (* Format.printf "%s@." sub_proto.fp_name;
+   * Format.printf "LATTICE: %a@." Pp.security_lattice sup_lattice;
+   * Format.printf "PROP: %a@." Pp.prop sub_prop; *)
   Logic.entailment_violations sup_lattice sub_prop
 
 let analyse_callable
@@ -841,11 +841,11 @@ let analyse_callable
 
     let entailment =
       match SMap.find_opt callable_name decl_env.de_fun with
-      | Some { fd_kind = FDCIPP } ->
-        let cipp_scheme = Decl.make_cipp_scheme proto_renv proto in
+      | Some { fd_kind = FDGovernedBy policy } ->
+        let scheme = Decl.make_callable_scheme proto_renv policy proto in
         fun prop ->
           let fun_scheme = Fscheme (scope, proto, prop) in
-          check_subtype_scheme ~pos meta fun_scheme cipp_scheme
+          check_subtype_scheme ~pos meta fun_scheme scheme
       | _ -> const []
     in
 
@@ -1067,10 +1067,12 @@ class Policied
     HH\FunctionAttribute {
   public function __construct(public string $purpose) { }
 }
-class Cipp
+class Governed
  implements
- HH\FunctionAttribute,
- HH\MethodAttribute {}
+   HH\FunctionAttribute,
+   HH\MethodAttribute {
+  public function __construct(public string $purpose = "") { }
+}
 |}
     );
   |]

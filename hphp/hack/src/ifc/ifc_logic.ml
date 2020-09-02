@@ -253,7 +253,15 @@ let rec entailment_violations lattice = function
     []
   | Cflow (_, p1, p2) when equal_policy p1 p2 -> []
   | Cflow ((_, pol1, pol2) as flow) ->
-    if FlowSet.mem (pol1, pol2) lattice then
+    if
+      FlowSet.mem (pol1, pol2) lattice
+      (* If some policy flows into PUBLIC then it flows into anything. If PRIVATE
+         flows into a policy, then anything flows into it. We include these rules
+         in case we encounter constraints relating free variables to unknown
+         purposes *)
+      || FlowSet.mem (pol1, Pbot PosSet.empty) lattice
+      || FlowSet.mem (Ptop PosSet.empty, pol2) lattice
+    then
       []
     else
       [flow]

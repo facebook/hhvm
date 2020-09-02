@@ -12,6 +12,7 @@ open Ifc_types
 module Env = Ifc_env
 module Logic = Ifc_logic
 module Mapper = Ifc_mapper
+module Lattice = Ifc_security_lattice
 module L = Logic.Infix
 module A = Aast
 module T = Typing_defs
@@ -32,7 +33,7 @@ let exception_id = "\\Exception"
 
 let vec_id = "\\HH\\vec"
 
-let cipp_id = "\\Cipp"
+let governed_id = "\\Governed"
 
 let construct_id = "__construct"
 
@@ -50,12 +51,22 @@ let get_attr attr attrs =
 
 let callable_decl attrs =
   let fd_kind =
-    if Option.is_some (get_attr infer_flows_id attrs) then
-      FDInferFlows
-    else if Option.is_some (get_attr cipp_id attrs) then
-      FDCIPP
-    else
-      FDPublic
+    match get_attr governed_id attrs with
+    | Some attr ->
+      let policy =
+        match attr.A.ua_params with
+        | [] -> None
+        | [((pos, _), A.String purpose)] ->
+          Some (Lattice.parse_policy (PosSet.singleton pos) purpose)
+        | _ -> fail "expected a string literal as governed by argument."
+      in
+      FDGovernedBy policy
+    | None ->
+      if Option.is_some (get_attr infer_flows_id attrs) then
+        FDInferFlows
+      else
+        (* Eventually, make this (FDGovernedBy Pbot) *)
+        FDInferFlows
   in
   { fd_kind }
 
@@ -225,19 +236,26 @@ let find_core_class_decl meta class_name =
   | Some class_decl -> class_decl
   | None -> fail ("couldn't find the decl for " ^ class_name)
 
-(* Builds the type scheme for a cipp callable *)
-let make_cipp_scheme re_proto (fp : fun_proto) =
+(* Builds the type scheme for a callable *)
+let make_callable_scheme re_proto pol (fp : fun_proto) =
   let scope = Scope.alloc () in
   let re_proto = { re_proto with pre_scope = scope } in
-  let cipp = Env.new_policy_var re_proto "cipp" in
-  let rec set_cipp pty = Mapper.ptype set_cipp (const cipp) pty in
+  let policy =
+    match pol with
+    | Some policy -> policy
+    | None -> Env.new_policy_var re_proto "implicit"
+  in
+  let rec set_policy pty = Mapper.ptype set_policy (const policy) pty in
   let pbot = Pbot PosSet.empty in
   let fp' =
     {
       fp_name = fp.fp_name;
-      fp_this = Option.map ~f:set_cipp fp.fp_this;
+      fp_this = Option.map ~f:set_policy fp.fp_this;
       fp_type =
-        { (Mapper.fun_ set_cipp (const cipp) fp.fp_type) with f_self = pbot };
+        {
+          (Mapper.fun_ set_policy (const policy) fp.fp_type) with
+          f_self = pbot;
+        };
     }
   in
   Fscheme (scope, fp', Ctrue)

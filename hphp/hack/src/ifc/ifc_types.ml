@@ -185,8 +185,7 @@ type magic_decl = {
 }
 
 type fun_decl_kind =
-  | FDPublic
-  | FDCIPP
+  | FDGovernedBy of policy option
   | FDInferFlows
 
 type fun_decl = { fd_kind: fun_decl_kind }

@@ -17,7 +17,7 @@ class C {
   public function __construct() { $this->a = new A(); }
 }
 
-function apply((function(int): int) $f, C $c): void {
+function apply_ok((function(int): int) $f, C $c): void {
   // This is fine since we're inferring flows
   $c->value = $f(0);
 }
@@ -25,13 +25,13 @@ function apply((function(int): int) $f, C $c): void {
 // Function arguments of cipp function take in cipp
 // data and return cipp data
 
-<<Cipp>>
-function cipp_apply((function(int): int) $f, int $arg): int {
+<<Governed>>
+function apply((function(int): int) $f, int $arg): int {
   return $f($arg);
 }
 
-<<Cipp>>
-function cipp_apply0((function(int): int) $f, C $c): void {
+<<Governed>>
+function apply0((function(int): int) $f, C $c): void {
   // PUBLIC flows into CIPP, the call works because ints
   // are immutable
   $f($c->value);
@@ -39,20 +39,20 @@ function cipp_apply0((function(int): int) $f, C $c): void {
 
 // Functions below trigger errors
 
-<<Cipp>>
-function cipp_apply1((function(int): int) $f, C $c): void {
+<<Governed>>
+function apply1((function(int): int) $f, C $c): void {
   $c->value = $f(0);
 }
 
-<<Cipp>>
-function cipp_apply2((function(): void) $f, C $c): void {
+<<Governed>>
+function apply2((function(): void) $f, C $c): void {
   if ($c->foo) {
     $f();
   }
 }
 
-<<Cipp>>
-function cipp_apply3((function(A): void) $f, C $c): void {
+<<Governed>>
+function apply3((function(A): void) $f, C $c): void {
   // Error, $c->a is mutable
   $f($c->a);
 }

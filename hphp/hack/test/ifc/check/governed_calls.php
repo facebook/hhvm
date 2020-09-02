@@ -19,12 +19,12 @@ function store(int $x): void {
   $c->value = $x;
 }
 
-<<Cipp>>
-function call_cipp(): int {
+<<Governed>>
+function call_governed(): int {
   return call_inferred(123);
 }
 
-<<Cipp>>
+<<Governed>>
 function call_inferred(int $x): int {
   // This is allowed
   return plus($x, 2);
@@ -32,14 +32,21 @@ function call_inferred(int $x): int {
 
 // Functions below should trigger errors
 
-<<Cipp>>
+<<Governed>>
 function leak_value(int $x): void {
   // This leaks $x (and pc) by storing into PUBLIC
   store($x);
 }
 
-<<Cipp>>
+<<Governed>>
 function leak_pc(): void {
   // This leaks the PC by storing into PUBLIC
+  store(123);
+}
+
+
+<<Governed("PUBLIC")>>
+function public_pc(): void {
+  // This does not leak the PC, because the context is public
   store(123);
 }

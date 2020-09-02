@@ -542,6 +542,9 @@ LoggingProfile* getLoggingProfile(SrcKey sk, ArrayData* ad) {
 }
 
 SrcKey getSrcKey() {
+  // If there are no VM frames, don't drop an anchor
+  if (!rds::header()) return SrcKey();
+
   VMRegAnchor _(VMRegAnchor::Soft);
   if (tl_regState != VMRegState::CLEAN || vmfp() == nullptr) {
     return SrcKey();

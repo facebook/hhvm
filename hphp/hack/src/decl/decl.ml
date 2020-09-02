@@ -785,19 +785,9 @@ and constructor_decl
       Inconsistent
   in
   let cstr =
-    match (class_.sc_constructor, pcstr) with
-    | (None, _) -> pcstr
-    | (Some method_, Some elt) when get_elt_final elt ->
-      let fe = Decl_heap.Constructors.find_unsafe elt.elt_origin in
-      Errors.override_final
-        ~parent:fe.fe_pos
-        ~child:(fst method_.sm_name)
-        ~on_error:None;
-      let cstr = build_constructor ~write_shmem:true class_ method_ in
-      cstr
-    | (Some method_, _) ->
-      let cstr = build_constructor ~write_shmem:true class_ method_ in
-      cstr
+    match class_.sc_constructor with
+    | None -> pcstr
+    | Some method_ -> build_constructor ~write_shmem:true class_ method_
   in
   (cstr, Decl_utils.coalesce_consistent pconsist cconsist)
 

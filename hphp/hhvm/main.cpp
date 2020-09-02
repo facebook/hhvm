@@ -51,6 +51,8 @@ std::vector<std::string> dummy_vec { "hello", "foo" };
 std::set<std::string> dummy_set { "hello" };
 
 int main(int argc, char** argv) {
+  HPHP::StaticString::CreateAll();
+
   // Also for t15096405
   std::string (*ptr1)(std::string&&, const char*) = std::operator+;
   std::string (*ptr2)(const char*, std::string&&) = std::operator+;

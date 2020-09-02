@@ -43,6 +43,7 @@ inline void register_process_init() {
  * real execution context or anything like that.)
  */
 inline void init_for_unit_test() {
+  HPHP::StaticString::CreateAll();
   register_process_init();
   initialize_repo();
   IniSetting::Map ini = IniSetting::Map::object;

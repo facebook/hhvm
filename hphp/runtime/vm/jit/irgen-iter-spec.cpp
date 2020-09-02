@@ -206,7 +206,7 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 // Basic logging.
 
-auto const s_ArrayIterProfile = makeStaticString("ArrayIterProfile");
+const StaticString s_ArrayIterProfile{"ArrayIterProfile"};
 
 void logArrayIterProfile(IRGS& env, const IterArgs& data,
                          folly::Optional<IterSpecialization> iter_type) {
@@ -218,7 +218,7 @@ void logArrayIterProfile(IRGS& env, const IterArgs& data,
   auto const profile = TargetProfile<ArrayIterProfile>(
     env.context,
     makeMarker(env, bcOff(env)),
-    s_ArrayIterProfile
+    s_ArrayIterProfile.get()
   );
   if (!profile.optimizing()) return;
   if (env.inlineState.conjure) return;
@@ -279,7 +279,7 @@ ArrayIterProfile::Result getProfileResult(IRGS& env, const SSATmp* base) {
   auto const profile = TargetProfile<ArrayIterProfile>(
     env.context,
     makeMarker(env, bcOff(env)),
-    s_ArrayIterProfile
+    s_ArrayIterProfile.get()
   );
   if (!profile.optimizing()) return generic;
   auto const result = profile.data().result();

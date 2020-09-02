@@ -56,14 +56,14 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static auto const s_ArrayIterProfile = makeStaticString("ArrayIterProfile");
+const StaticString s_ArrayIterProfile{"ArrayIterProfile"};
 
 void profileIterInit(IRLS& env, const IRInstruction* inst, bool isInitK) {
   if (!inst->src(0)->isA(TArrLike)) return;
   auto const profile = TargetProfile<ArrayIterProfile>(
     env.unit.context(),
     inst->marker(),
-    s_ArrayIterProfile
+    s_ArrayIterProfile.get()
   );
   if (!profile.profiling()) return;
 

@@ -25,6 +25,7 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char **argv) {
+  HPHP::StaticString::CreateAll();
   HPHP::register_process_init();
 
 #ifdef HHVM_FBMAKE

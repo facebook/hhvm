@@ -521,7 +521,7 @@ const auto globalKeys = {
   StaticString{"_FILES"},
   StaticString{"_ENV"},
   StaticString{"_REQUEST"},
-  s_GLOBALS,
+  StaticString{"GLOBALS"}
 };
 
 // Don't read the GLOBALS array directly through php_global; doing so warns.

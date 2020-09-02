@@ -1084,6 +1084,7 @@ void printTopBytecodes(const OfflineTransData* tdata,
 }
 
 int main(int argc, char *argv[]) {
+  StaticString::CreateAll();
   folly::SingletonVault::singleton()->registrationComplete();
 
   pcre_init();

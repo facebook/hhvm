@@ -367,8 +367,37 @@ void String::dump() const {
 ///////////////////////////////////////////////////////////////////////////////
 // StaticString
 
+bool StaticString::s_globalInit{false};
+std::vector<std::tuple<const char*, size_t, StaticString*>>*
+  StaticString::s_registered;
+
 void StaticString::construct(const char* s, size_t len) {
-  m_str = makeStaticStringSafe(s, len);
+  if (s_globalInit) {
+    init(s, len);
+  } else {
+    if (!s_registered) {
+      s_registered =
+        new std::vector<std::tuple<const char*, size_t, StaticString*>>;
+    }
+    s_registered->emplace_back(s, len, this);
+  }
+}
+
+void StaticString::init(const char* s, size_t len) {
+  reset(makeStaticString(s, len));
+}
+
+uint32_t StaticString::CreateAll() {
+  if (s_globalInit) return 0;
+  s_globalInit = true;
+  create_string_data_map();
+  for (auto& p : *s_registered) {
+    std::get<2>(p)->init(std::get<0>(p), std::get<1>(p));
+  }
+  auto const ret = s_registered->size();
+  s_registered->clear();
+  delete s_registered;
+  return ret;
 }
 
 const StaticString

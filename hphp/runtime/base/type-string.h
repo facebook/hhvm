@@ -72,7 +72,6 @@ struct String {
 protected:
   req::ptr<StringData> m_str;
 
-protected:
   using NoIncRef = req::ptr<StringData>::NoIncRef;
   String(StringData* sd, NoIncRef) : m_str(sd, NoIncRef{}) {}
 
@@ -494,10 +493,38 @@ struct StaticString : String {
     // prevent ~req::ptr from destroying contents.
     detach();
   }
+  StaticString(const StaticString& other) {
+    m_str = other.get();
+  }
   StaticString& operator=(const StaticString& other) = delete;
 
+  StringData* get() const {
+    assertx(valid());
+    return m_str.get();
+  }
+
+  bool valid() const {
+    if (s_globalInit) {
+      assertx(m_str);
+      return true;
+    }
+    return false;
+  }
+
+  // Return number of lazily created StaticStrings, must run before creating
+  // VM threads.
+  static uint32_t CreateAll();
+
+  // StaticStrings created before s_globalInit is set will be created lazily,
+  // upon create(). Those are expected to happen during process initialization
+  // before VM threads are created, so no need to worry about thread safety.
+  static bool s_globalInit;
  private:
   void construct(const char* s, size_t len);
+  void init(const char* s, size_t len);
+
+  static std::vector<std::tuple<const char*, size_t, StaticString*>>*
+    s_registered;
 };
 
 StaticString getDataTypeString(DataType t, bool isLegacy = false);

@@ -71,14 +71,6 @@ StringData* makeStaticString(const char* str, size_t len);
 StringData* makeStaticString(const char* str);
 
 /*
- * As their counterparts above, but check that the static string
- * table has been initialized. These should be used for anything
- * that might run before main().
- */
-StringData* makeStaticStringSafe(const char* str, size_t len);
-StringData* makeStaticStringSafe(const char* str);
-
-/*
  * Lookup static strings for single character strings.  (We pre-create
  * static strings for all 256 characters at process startup.)
  */
@@ -135,6 +127,11 @@ Array lookupDefinedConstants(bool categorize = false);
  */
 size_t countStaticStringConstants();
 
+/*
+ * Initialize the static string table. This needs to happen before any static
+ * strings are materialized.
+ */
+void create_string_data_map();
 /*
  * The static string table is generally initially created before main
  * by global constructors (StaticString objects).  After we've parsed

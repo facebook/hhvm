@@ -175,6 +175,7 @@ StringData* StringData::MakeShared(folly::StringPiece sl) {
 }
 
 StringData* StringData::MakeStatic(folly::StringPiece sl) {
+  assertx(StaticString::s_globalInit);
   return MakeShared<true>(sl);
 }
 

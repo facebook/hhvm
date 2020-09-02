@@ -144,7 +144,8 @@ TEST(SlabManagerTest, tag_overflow) {
   for (int i = 1; i <= 0x10001; ++i) {
     auto tagged = mgr.tryAlloc();
     ASSERT_EQ(tagged.ptr(), slab);
-    ASSERT_EQ(tagged.tag(), i & TaggedSlabPtr::TagMask);
+    auto constexpr mask = TaggedSlabPtr::TagMask >> TaggedSlabPtr::TagShift;
+    ASSERT_EQ(tagged.tag(), i & mask);
     mgr.push_front(tagged.ptr(), tagged.tag());
   }
 }

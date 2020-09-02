@@ -30,26 +30,30 @@ constexpr size_t kSlabSize = 1ull << kLgSlabSize;
 constexpr size_t kSlabAlign = kSlabSize;
 
 // To mitigate the ABA problem (i.e., a slab is allocated and returned to the
-// list without another thread noticing), we tag the pointers on the lower 16
+// list without another thread noticing), we tag the pointers on the higher 16
 // bits. This should be sufficient for our purpose of slab management, so we
 // don't consider also using other bits for now.
 struct TaggedSlabPtr {
-  static constexpr uintptr_t TagMask = (1ul << 16) - 1;
-  static_assert(kSlabAlign > TagMask, "");
+  static constexpr size_t TagShift = 48;
+  static constexpr uintptr_t TagMask = ((1ull << 16) - 1) << TagShift;
   TaggedSlabPtr() noexcept : rep(0) {}
   /* implicit */ TaggedSlabPtr(std::nullptr_t) noexcept : rep(0) {}
   TaggedSlabPtr(void* p, uint16_t tag = 0) noexcept
-    : rep(reinterpret_cast<uintptr_t>(p) | tag) {
+    : rep(reinterpret_cast<uintptr_t>(p) |
+          (static_cast<uintptr_t>(tag) << TagShift)) {
     assertx(ptr() == p);
   }
   void* ptr() const {
     return reinterpret_cast<void*>(rep & ~TagMask);
   }
   uint16_t tag() const {
-    return static_cast<uint16_t>(rep);
+    return static_cast<uint16_t>(rep >> TagShift);
   }
   explicit operator bool() const {
     return !!rep;
+  }
+  bool operator==(const TaggedSlabPtr o) const {
+    return rep == o.rep;
   }
  private:
   uintptr_t rep;
@@ -78,7 +82,7 @@ struct TaggedSlabList {
     return m_bytes.load(std::memory_order_relaxed);
   }
   /*
-   * Add a slab to the list.  If `local`, assume the list is only accessed in a
+   * Add a slab to the list. If `local`, assume the list is only accessed in a
    * single thread.
    */
   template<bool local = false> void push_front(void* p, uint16_t tag) {
@@ -102,6 +106,49 @@ struct TaggedSlabList {
     }
   }
 
+  /*
+   * Get the head. Note that you cannot assume that the head hasn't changed
+   * unless access happens only in a single thread.
+   */
+  template<bool local = false> TaggedSlabPtr unsafe_peek() {
+    return m_head.load(local ? std::memory_order_relaxed
+                             : std::memory_order_acquire);
+  }
+
+  /*
+   * Try to return a slab from the list, assuming the list is only accessed in a
+   * single thread. Return a nullptr when list is empty.
+   */
+  TaggedSlabPtr try_local_pop() {
+    if (auto const currHead = m_head.load(std::memory_order_relaxed)) {
+      auto const ptr = reinterpret_cast<AtomicTaggedSlabPtr*>(currHead.ptr());
+      auto next = ptr->load(std::memory_order_relaxed);
+      assertx(m_head.load(std::memory_order_acquire) == currHead);
+      m_head.store(next, std::memory_order_relaxed);
+      m_bytes.fetch_sub(kSlabSize, std::memory_order_relaxed);
+      return currHead;
+    }
+    return nullptr;
+  }
+
+  /*
+   * Try to return a slab from the list, which can happen concurrently from
+   *  multiple threads. Return a nullptr when list is empty.
+   */
+  TaggedSlabPtr try_shared_pop() {
+    auto currHead = m_head.load(std::memory_order_acquire);
+    while (currHead) {
+      auto const ptr = reinterpret_cast<AtomicTaggedSlabPtr*>(currHead.ptr());
+      auto next = ptr->load(std::memory_order_acquire);
+      if (m_head.compare_exchange_weak(currHead, next,
+                                       std::memory_order_release)) {
+        m_bytes.fetch_sub(kSlabSize, std::memory_order_relaxed);
+        return currHead;
+      } // otherwise currHead is updated with latest value of m_head.
+    }
+    return nullptr;
+  }
+
   // Divide a preallocated piece of memory into slabs and add to the list.
   template<bool local = false>
   void addRange(void* ptr, std::size_t size) {
@@ -120,17 +167,7 @@ struct TaggedSlabList {
 
 struct SlabManager : TaggedSlabList {
   TaggedSlabPtr tryAlloc() {
-    auto currHead = m_head.load(std::memory_order_acquire);
-    while (currHead) {
-      auto const ptr =reinterpret_cast<AtomicTaggedSlabPtr*>(currHead.ptr());
-      auto next = ptr->load(std::memory_order_acquire);
-      if (m_head.compare_exchange_weak(currHead, next,
-                                       std::memory_order_release)) {
-        m_bytes.fetch_sub(kSlabSize, std::memory_order_relaxed);
-        return currHead;
-      } // otherwise currHead is updated with latest value of m_head.
-    }
-    return nullptr;
+    return try_shared_pop();
   }
 
   // Push everything in a local TaggedSlabList `other` that ends with with

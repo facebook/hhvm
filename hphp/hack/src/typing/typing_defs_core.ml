@@ -473,6 +473,8 @@ let get_reason (r, _) = r
 
 let get_node (_, n) = n
 
+let with_reason (_, ty) reason = (reason, ty)
+
 let get_pos t = Reason.to_pos (get_reason t)
 
 let mk_constraint_type p = p

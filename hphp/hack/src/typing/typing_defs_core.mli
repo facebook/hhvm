@@ -471,6 +471,8 @@ val get_reason : 'phase ty -> Reason.t
 
 val get_node : 'phase ty -> 'phase ty_
 
+val with_reason : 'phase ty -> Reason.t -> 'phase ty
+
 val get_pos : 'phase ty -> Pos.t
 
 val mk_constraint_type : Reason.t * constraint_type_ -> constraint_type

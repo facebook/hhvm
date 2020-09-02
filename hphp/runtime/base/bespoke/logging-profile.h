@@ -41,7 +41,6 @@ struct LoggingArray;
   X(ConvertToUncounted, true)  \
   X(ReleaseUncounted,   true)  \
   X(Release,            true)  \
-  X(Size,               true)  \
   X(IsVectorData,       true)  \
   X(GetInt,             true)  \
   X(GetStr,             true)  \

@@ -73,7 +73,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetStr(ArrayData*, StringData* k, TypedValue v);
   static constexpr auto SetStrMove = &SetStr;
-  static size_t Vsize(const ArrayData*);
   static bool IsVectorData(const ArrayData*) { return true; }
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData*);

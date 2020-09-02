@@ -106,9 +106,6 @@ void BespokeArray::ReleaseUncounted(ArrayData* ad) {
 void BespokeArray::Release(ArrayData* ad) {
   asBespoke(ad)->layout()->release(ad);
 }
-size_t BespokeArray::Vsize(const ArrayData* ad) {
-  return asBespoke(ad)->layout()->size(ad);
-}
 bool BespokeArray::IsVectorData(const ArrayData* ad) {
   return asBespoke(ad)->layout()->isVectorData(ad);
 }

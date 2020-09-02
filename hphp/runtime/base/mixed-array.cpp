@@ -763,8 +763,6 @@ bool MixedArray::checkInvariants() const {
 //=============================================================================
 // Iteration.
 
-size_t MixedArray::Vsize(const ArrayData*) { not_reached(); }
-
 TypedValue MixedArray::GetPosVal(const ArrayData* ad, ssize_t pos) {
   auto a = asMixed(ad);
   assertx(a->checkInvariants());
@@ -1441,7 +1439,7 @@ ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
   }
   auto a = asMixed(in);
 
-  auto const size = a->getSize();
+  auto const size = a->size();
   if (!size) return ArrayData::CreateDArray();
   if (copy) return ToDArrayImpl(a);
 

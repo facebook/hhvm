@@ -113,7 +113,7 @@ void ArrayIterProfile::update(const ArrayData* arr, bool is_kviter) {
     } else {
       m_key_types_counts[specialization.key_types]++;
     }
-    m_num_iterations += arr->getSize();
+    m_num_iterations += arr->size();
     m_base_type_counts[specialization.base_type]++;
     size_t num_profiled_values = 0;
     IterateKVNoInc(arr, [&](TypedValue k, TypedValue v) {

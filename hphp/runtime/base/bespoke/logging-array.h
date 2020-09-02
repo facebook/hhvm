@@ -55,9 +55,7 @@ struct LoggingLayout : public Layout {
   void releaseUncounted(ArrayData*) const final;
   void release(ArrayData*) const final;
 
-  size_t size(const ArrayData*) const final;
   bool isVectorData(const ArrayData*) const final;
-
   TypedValue getInt(const ArrayData*, int64_t) const final;
   TypedValue getStr(const ArrayData*, const StringData*) const final;
   TypedValue getKey(const ArrayData*, ssize_t pos) const final;

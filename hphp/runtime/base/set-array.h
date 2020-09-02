@@ -388,7 +388,6 @@ private:
 // ArrayData API
 
 public:
-  static size_t Vsize(const ArrayData*);
   static TypedValue GetPosVal(const ArrayData*, ssize_t);
   static bool IsVectorData(const ArrayData*);
   static bool ExistsInt(const ArrayData*, int64_t);

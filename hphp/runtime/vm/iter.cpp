@@ -123,7 +123,7 @@ bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
     assertx(arr->hasVanillaMixedLayout());
   } else if (m_nextHelperIdx == IterNextIndex::ArrayMixedPointer) {
     assertx(arr->hasVanillaMixedLayout());
-    assertx(arr->getSize() == MixedArray::asMixed(arr)->iterLimit());
+    assertx(arr->size() == MixedArray::asMixed(arr)->iterLimit());
   } else {
     // We'd like to assert the converse, too: a packed or mixed array should
     // a next helper that makes use of its layout. However, this condition
@@ -140,10 +140,10 @@ bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
   // Check the consistency of the pos and end fields.
   if (m_nextHelperIdx == IterNextIndex::ArrayPackedPointer) {
     assertx(m_packed_elm < m_packed_end);
-    assertx(m_packed_end == packedData(arr) + arr->getSize());
+    assertx(m_packed_end == packedData(arr) + arr->size());
   } else if (m_nextHelperIdx == IterNextIndex::ArrayMixedPointer) {
     assertx(m_mixed_elm < m_mixed_end);
-    assertx(m_mixed_end == MixedArray::asMixed(arr)->data() + arr->getSize());
+    assertx(m_mixed_end == MixedArray::asMixed(arr)->data() + arr->size());
   } else {
     assertx(m_pos < m_end);
     assertx(m_end == arr->iter_end());
@@ -465,7 +465,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   auto constexpr BaseConst = Type != IterTypeOp::LocalBaseMutable;
   auto constexpr Local     = Type != IterTypeOp::NonLocal;
 
-  auto const size = ad->getSize();
+  auto const size = ad->size();
   if (UNLIKELY(size == 0)) {
     if (!Local) decRefArr(ad);
     dest->kill();
@@ -534,7 +534,7 @@ int64_t new_iter_array_key(Iter*       dest,
   auto constexpr BaseConst = Type != IterTypeOp::LocalBaseMutable;
   auto constexpr Local     = Type != IterTypeOp::NonLocal;
 
-  auto const size = ad->getSize();
+  auto const size = ad->size();
   if (UNLIKELY(size == 0)) {
     if (!Local) decRefArr(ad);
     dest->kill();

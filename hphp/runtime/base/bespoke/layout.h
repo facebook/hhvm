@@ -40,11 +40,9 @@ struct Layout {
   virtual void convertToUncounted(
     ArrayData*, DataWalker::PointerMap* seen) const = 0;
   virtual void releaseUncounted(ArrayData*) const = 0;
-
   virtual void release(ArrayData*) const = 0;
-  virtual size_t size(const ArrayData*) const = 0;
-  virtual bool isVectorData(const ArrayData*) const = 0;
 
+  virtual bool isVectorData(const ArrayData*) const = 0;
   virtual TypedValue getInt(const ArrayData*, int64_t) const = 0;
   virtual TypedValue getStr(const ArrayData*, const StringData*) const = 0;
   virtual TypedValue getKey(const ArrayData*, ssize_t pos) const = 0;

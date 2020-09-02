@@ -128,7 +128,7 @@ uint8_t PackedArray::sizeClass(const ArrayData* ad) {
 inline void PackedArray::scan(const ArrayData* a, type_scan::Scanner& scanner) {
   assertx(checkInvariants(a));
   auto data = packedData(a);
-  scanner.scan(*data, a->getSize() * sizeof(*data));
+  scanner.scan(*data, a->size() * sizeof(*data));
 }
 
 template <class F, bool inc>

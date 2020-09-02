@@ -98,9 +98,7 @@ namespace {
 
 inline ArrayData* alloc_packed_static(const ArrayData* ad) {
   auto const extra = arrprov::tagSize(ad);
-  auto const size = sizeof(ArrayData)
-                  + ad->getSize() * sizeof(TypedValue)
-                  + extra;
+  auto const size = sizeof(ArrayData) + ad->size() * sizeof(TypedValue) + extra;
   auto const ret = RuntimeOption::EvalLowStaticArrays
     ? low_malloc(size)
     : uncounted_malloc(size);
@@ -591,11 +589,6 @@ TypedValue PackedArray::GetPosVal(const ArrayData* ad, ssize_t pos) {
   return *LvalUncheckedInt(const_cast<ArrayData*>(ad), pos);
 }
 
-size_t PackedArray::Vsize(const ArrayData*) {
-  // PackedArray always has a valid m_size so it's an error to get here.
-  always_assert(false);
-}
-
 bool PackedArray::ExistsInt(const ArrayData* ad, int64_t k) {
   assertx(checkInvariants(ad));
   return size_t(k) < ad->m_size;
@@ -613,7 +606,7 @@ namespace {
 template<typename FoundFn>
 auto MutableOpInt(ArrayData* adIn, int64_t k, bool copy, FoundFn found) {
   assertx(PackedArray::checkInvariants(adIn));
-  if (UNLIKELY(size_t(k) >= adIn->getSize())) {
+  if (UNLIKELY(size_t(k) >= adIn->size())) {
     throwOOBArrayKeyException(k, adIn);
   }
   auto const ad = copy ? PackedArray::Copy(adIn) : adIn;
@@ -839,7 +832,7 @@ ArrayData* PackedArray::ToVArray(ArrayData* adIn, bool copy) {
     return adIn;
   }
 
-  if (adIn->getSize() == 0) return ArrayData::CreateVArray();
+  if (adIn->size() == 0) return ArrayData::CreateVArray();
   auto const ad = copy ? Copy(adIn) : adIn;
   ad->m_kind = HeaderKind::Packed;
   ad->setLegacyArray(false);
@@ -850,7 +843,7 @@ ArrayData* PackedArray::ToVArray(ArrayData* adIn, bool copy) {
 
 ArrayData* PackedArray::ToDArray(ArrayData* adIn, bool /*copy*/) {
   assertx(checkInvariants(adIn));
-  auto const size = adIn->getSize();
+  auto const size = adIn->size();
   if (size == 0) return ArrayData::CreateDArray();
   DArrayInit init{size};
   for (int64_t i = 0; i < size; ++i) init.add(i, GetPosVal(adIn, i));

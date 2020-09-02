@@ -121,10 +121,6 @@ ALWAYS_INLINE void ArrayData::decRefAndRelease() {
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayFunction dispatch.
 
-inline size_t ArrayData::vsize() const {
-  return g_array_funcs.vsize[kind()](this);
-}
-
 inline void ArrayData::release() noexcept {
   assertx(!hasMultipleRefs());
   g_array_funcs.release[kind()](this);
@@ -135,11 +131,6 @@ inline void ArrayData::release() noexcept {
 // Introspection.
 
 inline size_t ArrayData::size() const {
-  if (UNLIKELY((int)m_size < 0)) return vsize();
-  return m_size;
-}
-
-inline size_t ArrayData::getSize() const {
   return m_size;
 }
 

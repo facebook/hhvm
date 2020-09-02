@@ -160,7 +160,7 @@ bool LoggingArray::checkInvariants() const {
   assertx(kindIsValid());
   assertx(wrapped->isVanilla());
   assertx(wrapped->kindIsValid());
-  assertx(wrapped->getSize() == getSize());
+  assertx(wrapped->size() == size());
   assertx(wrapped->toDataType() == toDataType());
   assertx(asBespoke(this)->layout() == s_layout);
   assertx(m_kind == getBespokeKind(wrapped->kind()));
@@ -225,15 +225,10 @@ void LoggingLayout::release(ArrayData* ad) const {
 //////////////////////////////////////////////////////////////////////////////
 // Accessors
 
-size_t LoggingLayout::size(const ArrayData* ad) const {
-  logEvent(ad, ArrayOp::Size);
-  return LoggingArray::asLogging(ad)->wrapped->size();
-}
 bool LoggingLayout::isVectorData(const ArrayData* ad) const {
   logEvent(ad, ArrayOp::IsVectorData);
   return LoggingArray::asLogging(ad)->wrapped->isVectorData();
 }
-
 TypedValue LoggingLayout::getInt(const ArrayData* ad, int64_t k) const {
   logEvent(ad, ArrayOp::GetInt, k);
   return LoggingArray::asLogging(ad)->wrapped->get(k);

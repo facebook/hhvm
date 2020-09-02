@@ -534,8 +534,6 @@ const TypedValue* SetArray::tvOfPos(uint32_t pos) const {
   return !elm.isTombstone() ? &elm.tv : nullptr;
 }
 
-size_t SetArray::Vsize(const ArrayData*) { not_reached(); }
-
 TypedValue SetArray::GetPosVal(const ArrayData* ad, ssize_t pos) {
   auto a = asSet(ad);
   assertx(0 <= pos && pos < a->m_used);

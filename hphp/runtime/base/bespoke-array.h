@@ -79,7 +79,6 @@ private:
 public:
   // ArrayData interface
   static void Release(ArrayData*);
-  static size_t Vsize(const ArrayData* ad);
   static bool IsVectorData(const ArrayData* ad);
 
   // RO access

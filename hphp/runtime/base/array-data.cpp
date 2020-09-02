@@ -375,14 +375,6 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(SetStrMove)
 
   /*
-   * size_t Vsize(const ArrayData*)
-   *
-   *   This entry point is only for bespoke array-likes; for vanilla array
-   *   layouts, this function is not_reached().
-   */
-  DISPATCH(Vsize)
-
-  /*
    * bool IsVectorData(const ArrayData*)
    *
    *   Return true if this array is empty, or if it has only contiguous integer

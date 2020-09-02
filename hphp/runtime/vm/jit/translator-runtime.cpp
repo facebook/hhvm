@@ -537,7 +537,7 @@ TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
 template <bool isFirst>
 TypedValue vecFirstLast(ArrayData* a) {
   assertx(a->isVecKind() || a->isPackedKind());
-  auto const size = a->getSize();
+  auto const size = a->size();
   if (UNLIKELY(size == 0)) return make_tv<KindOfNull>();
   return PackedArray::NvGetInt(a, isFirst ? 0 : size - 1);
 }

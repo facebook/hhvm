@@ -306,7 +306,6 @@ private:
   using ArrayData::release;
 
 public:
-  static size_t Vsize(const ArrayData*);
   static TypedValue GetPosVal(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData*);
   static bool IsStrictVector(const ArrayData* ad) {

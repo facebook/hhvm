@@ -126,7 +126,7 @@ am::Query amquery_from_queryf(const StringData* pattern,
   // Not directly calling argsv.toFollyDynamic() as that creates a folly
   // dynamic object, not list
   std::vector<am::QueryArgument> query_args;
-  query_args.reserve(args->getSize());
+  query_args.reserve(args->size());
 
   for (ArrayIter iter(args); iter; ++iter) {
     const Variant& arg = iter.second();

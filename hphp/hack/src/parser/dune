@@ -126,15 +126,12 @@
     full_fidelity_ast
     scoured_comments
     rust_aast_parser_types
-    hack_grammar_descriptor_helper
     ide_parser_cache
     limited_width_pretty_printing_library
     namespaces
     parser_return
     pretty_printing_library
-    pretty_printing_library_sig
-    random_ast_generator_config
-    random_ast_generator)
+    pretty_printing_library_sig)
   (preprocess (pps visitors.ppx ppx_deriving.std)) ; See T41851208
   (libraries
     ast

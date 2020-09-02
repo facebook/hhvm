@@ -160,7 +160,10 @@ StringData** precompute_chars() {
   return raw;
 }
 
-StringData* insertStaticString(StringData* sd) {
+}
+
+StringData* insertStaticString(StringData* sd,
+                               void (*deleter)(StringData*)) {
   assertx(sd->isStatic());
   auto pair = s_stringDataMap->insert(
     safe_cast<StrInternKey>(reinterpret_cast<uintptr_t>(sd)),
@@ -168,7 +171,11 @@ StringData* insertStaticString(StringData* sd) {
   );
 
   if (!pair.second) {
-    sd->destructStatic();
+    if (deleter) {
+      deleter(sd);
+    } else {
+      sd->destructStatic();
+    }
   } else {
     MemoryStats::LogAlloc(AllocKind::StaticString,
                           sd->size() + sizeof(StringData));
@@ -181,12 +188,6 @@ StringData* insertStaticString(StringData* sd) {
   assertx(to_sdata(pair.first->first) != nullptr);
 
   return const_cast<StringData*>(to_sdata(pair.first->first));
-}
-
-inline StringData* insertStaticStringSlice(folly::StringPiece slice) {
-  return insertStaticString(StringData::MakeStatic(slice));
-}
-
 }
 
 void create_string_data_map() {
@@ -220,7 +221,7 @@ StringData* makeStaticString(const StringData* str) {
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(to_sdata(it->first));
   }
-  return insertStaticStringSlice(str->slice());
+  return insertStaticString(StringData::MakeStatic(str->slice()));
 }
 
 StringData* makeStaticString(folly::StringPiece slice) {
@@ -228,7 +229,7 @@ StringData* makeStaticString(folly::StringPiece slice) {
   if (it != s_stringDataMap->end()) {
     return const_cast<StringData*>(to_sdata(it->first));
   }
-  return insertStaticStringSlice(slice);
+  return insertStaticString(StringData::MakeStatic(slice));
 }
 
 StringData* lookupStaticString(const StringData *str) {

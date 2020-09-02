@@ -144,6 +144,13 @@ struct StringData final : MaybeCountable,
   static StringData* MakeProxy(const APCString* apcstr);
 
   /*
+   * Initialize a static string on a pre-allocated range of memory. This is
+   * useful when we need to create static strings at designated addresses when
+   * optimizing locality.
+   */
+  static StringData* MakeStaticAt(folly::StringPiece, MemBlock);
+
+  /*
    * Allocate a string with malloc, using the low-memory allocator if
    * jemalloc is available, and setting it as a static string.
    *
@@ -528,7 +535,9 @@ private:
 
 private:
   template<bool trueStatic>
-  static StringData* MakeShared(folly::StringPiece sl);
+  static MemBlock AllocateShared(folly::StringPiece sl);
+  template<bool trueStatic>
+  static StringData* MakeSharedAt(folly::StringPiece sl, MemBlock range);
 
   StringData(const StringData&) = delete;
   StringData& operator=(const StringData&) = delete;

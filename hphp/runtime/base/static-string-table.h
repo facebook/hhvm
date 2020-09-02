@@ -71,6 +71,15 @@ StringData* makeStaticString(const char* str, size_t len);
 StringData* makeStaticString(const char* str);
 
 /*
+ * Insert an already initialized static StringData into the static string table.
+ * If the same string is already present, invoke the deleter to take appropriate
+ * action. By default, the deleter tries to free the memory; thus we need to
+ * pass a custom deleter if we manipulate pre-allocated memory.
+ */
+StringData* insertStaticString(StringData*,
+                               void (*deleter)(StringData*) = nullptr);
+
+/*
  * Lookup static strings for single character strings.  (We pre-create
  * static strings for all 256 characters at process startup.)
  */

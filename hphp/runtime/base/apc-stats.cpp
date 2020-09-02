@@ -184,13 +184,12 @@ size_t getMemSize(const ArrayData* arr, bool recurse) {
   switch (arr->kind()) {
   case ArrayData::ArrayKind::kPackedKind:
   case ArrayData::ArrayKind::kVecKind: {
-    // we want to measure just the overhead of the array
+    // This array space overhead computation assumes a TypedValue* layout.
+    static_assert(PackedArray::stores_typed_values);
     auto size = PackedArray::heapSize(arr) - (sizeof(TypedValue) * arr->m_size);
-    auto const values = packedData(arr);
-    auto const last = values + arr->m_size;
-    for (auto ptr = values; ptr != last; ++ptr) {
-      size += getMemSize(ptr, recurse);
-    }
+    PackedArray::IterateVNoInc(arr, [&](TypedValue tv) {
+      size += getMemSize(&tv, recurse);
+    });
     return size;
   }
   case ArrayData::ArrayKind::kDictKind:

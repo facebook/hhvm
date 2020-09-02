@@ -1323,12 +1323,9 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
     return ArrayMergeGeneric(ret, elems);
   }
 
-  assertx(PackedArray::checkInvariants(elems));
-  auto src           = packedData(elems);
-  auto const srcStop = src + elems->m_size;
-  for (; src != srcStop; ++src) {
-    ret->nextInsert(*src);
-  }
+  PackedArray::IterateVNoInc(elems, [&](TypedValue tv) {
+    ret->nextInsert(tv);
+  });
 
   return tagArrProv(ret);
 

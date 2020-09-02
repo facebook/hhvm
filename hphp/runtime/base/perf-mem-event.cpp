@@ -152,6 +152,9 @@ void fill_record(const ArrayData* arr, const void* addr,
                  StructuredLogEntry& record) {
   if (try_member(arr, addr, record)) return;
 
+  // We can't implement this function without making an assumption on the
+  // layout of the array. We'll need to make more than local changes here.
+  static_assert(PackedArray::stores_typed_values);
   auto const tv = reinterpret_cast<const TypedValue*>(addr);
   auto const idx = tv - packedData(arr);
   if (idx < 0) return;

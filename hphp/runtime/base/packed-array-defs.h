@@ -40,6 +40,9 @@ TypedValue* packedData(const ArrayData* arr) {
 
 ALWAYS_INLINE
 ptrdiff_t PackedArray::entriesOffset() {
+  // The JIT calls entriesOffset in code that depends on the TypeValue* layout.
+  // There may be other places where the JIT depends on this layout, too.
+  static_assert(PackedArray::stores_typed_values);
   return reinterpret_cast<ptrdiff_t>(
     packedData(reinterpret_cast<ArrayData*>(0x0)));
 }
@@ -148,6 +151,11 @@ void PackedArray::IterateKV(const ArrayData* arr, F fn) {
   for (auto k = make_tv<KindOfInt64>(0); val(k).num < size; ++val(k).num) {
     if (ArrayData::call_helper(fn, k, GetPosVal(arr, val(k).num))) break;
   }
+}
+
+template <class F>
+ALWAYS_INLINE void PackedArray::IterateVNoInc(const ArrayData* arr, F fn) {
+  PackedArray::IterateV<F, false>(arr, std::move(fn));
 }
 
 //////////////////////////////////////////////////////////////////////

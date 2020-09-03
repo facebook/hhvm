@@ -40,10 +40,6 @@ class type cursor =
     Returns `None` if inapplicable for this type of cursor. *)
     method get_calculate_fanout_result : Calculate_fanout.result option
 
-    (** Get the cumulative dependency graph delta that has occurred since the
-    saved-state for the point in time represented by this cursor. *)
-    method get_dep_graph_delta : dep_graph_delta
-
     (** Get the client ID that owns this cursor. *)
     method get_client_id : client_id
 

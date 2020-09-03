@@ -236,18 +236,11 @@ let advance_cursor
     |> Relative_path.Set.union env.changed_files
     |> Relative_path.Set.union input_files
   in
-  let cursor =
-    cursor#advance
-      ~detail_level:env.detail_level
-      setup_result.ctx
-      setup_result.workers
-      cursor_changed_files
-  in
-  let dep_graph_delta = cursor#get_dep_graph_delta in
-  HashSet.iter dep_graph_delta ~f:(fun (dependent, dependency) ->
-      Typing_deps.add_idep_directly_to_graph dependent dependency);
-
-  cursor
+  cursor#advance
+    ~detail_level:env.detail_level
+    setup_result.ctx
+    setup_result.workers
+    cursor_changed_files
 
 let mode_calculate
     ~(env : env) ~(input_files : Path.Set.t) ~(cursor_id : string option) :

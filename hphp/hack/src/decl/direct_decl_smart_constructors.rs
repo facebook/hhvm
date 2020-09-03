@@ -1958,6 +1958,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_list(&mut self, items: std::vec::Vec<Self::R>, _: usize) -> Self::R {
         if items
             .iter()
+            .flat_map(|node| node.iter())
             .any(|node| matches!(node, Node::Token(TokenKind::Yield)))
         {
             Node::Token(TokenKind::Yield)
@@ -2011,6 +2012,46 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         } else {
             expr
         }
+    }
+
+    fn make_anonymous_function(
+        &mut self,
+        _arg0: Self::R,
+        _arg1: Self::R,
+        _arg2: Self::R,
+        _arg3: Self::R,
+        _arg4: Self::R,
+        _arg5: Self::R,
+        _arg6: Self::R,
+        _arg7: Self::R,
+        _arg8: Self::R,
+        _arg9: Self::R,
+        _arg10: Self::R,
+    ) -> Self::R {
+        // do not allow Yield to bubble up
+        Node::Ignored
+    }
+
+    fn make_lambda_expression(
+        &mut self,
+        _arg0: Self::R,
+        _arg1: Self::R,
+        _arg2: Self::R,
+        _arg3: Self::R,
+        _arg4: Self::R,
+    ) -> Self::R {
+        // do not allow Yield to bubble up
+        Node::Ignored
+    }
+
+    fn make_awaitable_creation_expression(
+        &mut self,
+        _arg0: Self::R,
+        _arg1: Self::R,
+        _arg2: Self::R,
+    ) -> Self::R {
+        // do not allow Yield to bubble up
+        Node::Ignored
     }
 
     fn make_darray_intrinsic_expression(
@@ -2183,24 +2224,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         )))
     }
 
-    fn make_binary_expression(&mut self, lhs: Self::R, op: Self::R, rhs: Self::R) -> Self::R {
-        let pos = unwrap_or_return!(Pos::merge(
-            self.state.arena,
-            unwrap_or_return!(Pos::merge(
-                self.state.arena,
-                unwrap_or_return!(lhs.get_pos(self.state.arena)),
-                unwrap_or_return!(op.get_pos(self.state.arena))
-            )
-            .ok()),
-            unwrap_or_return!(rhs.get_pos(self.state.arena)),
-        )
-        .ok());
-        let op = match &op {
+    fn make_binary_expression(&mut self, lhs: Self::R, op_node: Self::R, rhs: Self::R) -> Self::R {
+        let op = match &op_node {
             Node::Operator(&(_, op)) => match op {
                 TokenKind::Plus => Bop::Plus,
                 TokenKind::Minus => Bop::Minus,
                 TokenKind::Star => Bop::Star,
                 TokenKind::Slash => Bop::Slash,
+                TokenKind::Equal => Bop::Eq(None),
                 TokenKind::EqualEqual => Bop::Eqeq,
                 TokenKind::EqualEqualEqual => Bop::Eqeqeq,
                 TokenKind::StarStar => Bop::Starstar,
@@ -2221,6 +2252,23 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             },
             _ => return Node::Ignored,
         };
+
+        match (&op, rhs) {
+            (Bop::Eq(_), Node::Token(TokenKind::Yield)) => return rhs,
+            _ => (),
+        }
+
+        let pos = unwrap_or_return!(Pos::merge(
+            self.state.arena,
+            unwrap_or_return!(Pos::merge(
+                self.state.arena,
+                unwrap_or_return!(lhs.get_pos(self.state.arena)),
+                unwrap_or_return!(op_node.get_pos(self.state.arena))
+            )
+            .ok()),
+            unwrap_or_return!(rhs.get_pos(self.state.arena)),
+        )
+        .ok());
 
         Node::Expr(self.alloc(aast::Expr(
             pos,

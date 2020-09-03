@@ -46,7 +46,7 @@ let can_run_systemd () =
        * `--quiet` only suppresses stdout. *)
       let ic =
         Unix.open_process_in
-          "timeout 1 systemd-run --quiet --user -- true 2> /dev/null"
+          "timeout 1 systemd-run --scope --quiet --user -- true 2> /dev/null"
       in
       (* If all goes right, `systemd-run` will return immediately with exit code 0
        * and run `true` asynchronously as a service. If it goes wrong, it will exit
@@ -179,12 +179,6 @@ let start_server (env : env) =
           [| "--debug-client"; string_of_int @@ Handle.get_handle fd |]);
       ]
   in
-  if not silent then
-    Printf.eprintf
-      "Server launched with the following command:\n\t%s\n%!"
-      ( String.concat ~sep:" "
-      @@ Array.to_list (Array.map ~f:Filename.quote hh_server_args) );
-
   let (stdin, stdout, stderr) =
     if silent then
       let nfd = Unix.openfile Sys_utils.null_path [Unix.O_RDWR] 0 in
@@ -193,7 +187,7 @@ let start_server (env : env) =
       Unix.(stdin, stdout, stderr)
   in
   try
-    let server_pid =
+    let (exe, args) =
       if can_run_systemd () then
         (* launch command
          * systemd-run    (creates a transient cgroup)
@@ -209,15 +203,17 @@ let start_server (env : env) =
             systemd_exe; "--scope"; "--user"; "--quiet"; "--slice=hack.slice";
           |]
         in
-        Unix.create_process
-          systemd_exe
-          (Array.concat [systemd_args; hh_server_args])
-          stdin
-          stdout
-          stderr
+        (systemd_exe, Array.concat [systemd_args; hh_server_args])
       else
-        Unix.create_process hh_server hh_server_args stdin stdout stderr
+        (hh_server, hh_server_args)
     in
+    if not silent then
+      Printf.eprintf
+        "Server launched with the following command:\n\t%s\n%!"
+        (String.concat
+           ~sep:" "
+           (Array.to_list (Array.map ~f:Filename.quote args)));
+    let server_pid = Unix.create_process exe args stdin stdout stderr in
     Unix.close out_fd;
 
     match Sys_utils.waitpid_non_intr [] server_pid with

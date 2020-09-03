@@ -1458,7 +1458,16 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             Node::Expr(aast::Expr(
                 _,
                 aast::Expr_::ClassConst(&(aast::ClassId(pos, aast::ClassId_::CIself), const_name)),
-            )) => ShapeFieldName::SFclassConst(Id(pos, "self"), const_name),
+            )) => ShapeFieldName::SFclassConst(
+                Id(
+                    pos,
+                    self.state
+                        .classish_name_builder
+                        .get_current_classish_name()?
+                        .0,
+                ),
+                const_name,
+            ),
             _ => return None,
         })
     }

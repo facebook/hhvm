@@ -721,7 +721,12 @@ where
             if let Token(t) = &c.literal_expression.syntax {
                 if is_valid_shape_literal(t) {
                     let ast::Id(p, n) = Self::pos_name(node, env)?;
-                    let str_ = Self::mk_str(node, env, Self::unesc_dbl, &n);
+                    let unescp = if t.kind() == TK::SingleQuotedStringLiteral {
+                        unescape_single
+                    } else {
+                        Self::unesc_dbl
+                    };
+                    let str_ = Self::mk_str(node, env, unescp, &n);
                     if let Some(_) = ocaml_helper::int_of_string_opt(&str_.as_bytes()) {
                         Self::raise_parsing_error(
                             node,

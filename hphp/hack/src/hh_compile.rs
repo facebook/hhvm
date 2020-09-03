@@ -4,14 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ::anyhow::{self, anyhow, Context};
-
+use rayon::prelude::*;
 use structopt::StructOpt;
 
 use compile_rust as compile;
 
 use compile::{Env, EnvFlags, Profile};
-use hhbc_hhas_rust::IoWrite;
-use itertools::Either::*;
 use multifile_rust as multifile;
 use options::Options;
 use oxidized::relative_path::{self, RelativePath};
@@ -19,10 +17,10 @@ use stack_limit::{StackLimit, KI, MI};
 
 use std::{
     fs::File,
-    io::{self, BufRead, Read, Write},
-    iter::{once, Iterator, Map},
+    io::{self, stdout, BufRead, Read, Write},
+    iter::{Iterator, Map},
     path::{Path, PathBuf},
-    sync::Arc,
+    sync::{Arc, Mutex},
     vec::IntoIter,
 };
 
@@ -79,9 +77,8 @@ fn process_single_file_impl(
     opts: &Opts,
     filepath: &Path,
     content: &[u8],
-    output_kind: &OutputKind,
     stack_limit: &StackLimit,
-) -> anyhow::Result<Option<Profile>> {
+) -> anyhow::Result<(String, Option<Profile>)> {
     if opts.verbosity > 1 {
         eprintln!("processing file: {}", filepath.display());
     }
@@ -98,31 +95,23 @@ fn process_single_file_impl(
         config_list: vec![],
         flags,
     };
-    let mut writer = output_kind.make_writer()?;
-    let profile = compile::from_text(&env, stack_limit, &mut writer, content)?;
-    writer.flush()?;
-    Ok(profile)
+    let mut output = String::new();
+    let profile = compile::from_text(&env, stack_limit, &mut output, content)?;
+    Ok((output, profile))
 }
 
 fn process_single_file_with_retry(
     opts: &Opts,
     filepath: PathBuf,
     content: Vec<u8>,
-    output_kind: &OutputKind,
-) -> anyhow::Result<Option<Profile>> {
-    let ctx = &Arc::new((opts.clone(), filepath, content, output_kind.clone()));
+) -> anyhow::Result<(String, Option<Profile>)> {
+    let ctx = &Arc::new((opts.clone(), filepath, content));
     let job_builder = move || {
         let new_ctx = Arc::clone(ctx);
         Box::new(
             move |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
-                let (opts, filepath, content, output_kind) = new_ctx.as_ref();
-                process_single_file_impl(
-                    opts,
-                    filepath,
-                    content.as_slice(),
-                    output_kind,
-                    stack_limit,
-                )
+                let (opts, filepath, content) = new_ctx.as_ref();
+                process_single_file_impl(opts, filepath, content.as_slice(), stack_limit)
             },
         )
     };
@@ -154,11 +143,8 @@ fn process_single_file(
     opts: &Opts,
     filepath: PathBuf,
     content: Vec<u8>,
-    output_kind: &OutputKind,
-) -> anyhow::Result<Option<Profile>> {
-    match std::panic::catch_unwind(|| {
-        process_single_file_with_retry(opts, filepath, content, output_kind)
-    }) {
+) -> anyhow::Result<(String, Option<Profile>)> {
+    match std::panic::catch_unwind(|| process_single_file_with_retry(opts, filepath, content)) {
         Ok(r) => r,
         Err(panic) => match panic.downcast::<String>() {
             Ok(msg) => Err(anyhow!("panic: {}", msg)),
@@ -240,22 +226,9 @@ impl Config {
     }
 }
 
-#[derive(Debug, Clone)]
-enum OutputKind {
-    Stdout,
-    File(PathBuf),
-}
-
-impl OutputKind {
-    fn make_writer(&self) -> Result<IoWrite, io::Error> {
-        Ok(match self {
-            Self::Stdout => IoWrite::new(std::io::stdout()),
-            Self::File(f) => IoWrite::new(File::create(f)?),
-        })
-    }
-}
-
 fn main() -> anyhow::Result<()> {
+    type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
+
     let opts = Opts::from_args();
     if opts.verbosity > 1 {
         eprintln!("hh_compile options/flags: {:#?}", opts);
@@ -266,35 +239,39 @@ fn main() -> anyhow::Result<()> {
         unimplemented!("TODO(hrust) handlers for daemon (HHVM) mode");
     } else {
         config.dump_if_needed(&opts);
-        let (files, output_kind) = match &opts.input_file_list {
-            Some(filename) => {
-                let files = read_file_list(&filename)?;
-                (Left(files), OutputKind::Stdout)
-            }
-            None => {
-                let output_kind = match &opts.output_file {
-                    None => OutputKind::Stdout,
-                    Some(output_file) => OutputKind::File(output_file.clone()),
-                };
-                let filename = opts
-                    .filename
-                    .as_ref()
-                    .cloned()
-                    .ok_or_else(|| anyhow! {"TODO(hrust) support stdin"})?;
-                (Right(once(filename)), output_kind)
-            }
+
+        let writer: SyncWrite = match &opts.output_file {
+            None => Mutex::new(Box::new(stdout())),
+            Some(output_file) => Mutex::new(Box::new(File::create(output_file)?)),
         };
-        for ref f in files {
+
+        let files: Vec<_> = match &opts.input_file_list {
+            Some(filename) => read_file_list(&filename)?.collect(),
+            None => vec![opts
+                .filename
+                .as_ref()
+                .cloned()
+                .ok_or_else(|| anyhow! {"TODO(hrust) support stdin"})?],
+        };
+
+        files.par_iter().try_for_each(|f| {
             let content = read_file(f)?;
             let files = multifile::to_files(f, content)?;
             for (f, content) in files {
                 let f = f.as_ref();
-                let r = process_single_file(&opts, f.into(), content, &output_kind);
-                if let Err(e) = r {
-                    eprintln!("Error in file {}: {}", f.display(), e);
+                match process_single_file(&opts, f.into(), content) {
+                    Err(e) => write!(
+                        writer.lock().unwrap(),
+                        "Error in file {}: {}",
+                        f.display(),
+                        e
+                    )?,
+                    Ok((output, _profile)) => {
+                        writer.lock().unwrap().write_all(output.as_bytes())?
+                    }
                 }
             }
-        }
-        Ok(())
+            Ok(())
+        })
     }
 }

@@ -23,6 +23,7 @@ let init root : Provider_context.t =
     {
       TypecheckerOptions.default with
       GlobalOptions.tco_shallow_class_decl = true;
+      tco_higher_kinded_types = true;
     }
   in
   let ctx =

@@ -140,8 +140,6 @@ module VarSet = Set.Make (Var)
 
 type var_set = VarSet.t
 
-type entailment = prop -> (PosSet.t * policy * policy) list
-
 type local_env = {
   le_vars: ptype LMap.t;
   (* Policy tracking local effects, these effects
@@ -214,13 +212,6 @@ type mode =
   | Mdebug
 [@@deriving eq]
 
-(* Raw fields for options. All the fields have a counter part in `options`
- * without the leading `r` in the field name. *)
-type raw_options = {
-  ropt_mode: string;
-  ropt_security_lattice: string;
-}
-
 (* Structured/parsed/sanitised options. *)
 type options = {
   (* Mode of operation that determines how much of the analysis is executed
@@ -230,43 +221,30 @@ type options = {
   opt_security_lattice: security_lattice;
 }
 
-type meta = {
-  m_opts: options;
-  (* Relative path to the file being checked *)
-  m_path: Relative_path.t;
-  (* Typechecker context *)
-  m_ctx: Provider_context.t;
-}
-
-(* Read-only environment containing just enough information to compute flow
-   types from Hack types *)
-type proto_renv = {
-  (* during flow inference, types are always given relative to a scope. *)
-  pre_scope: Scope.t;
-  (* hash table keeping track of counters to generate variable names *)
-  pre_pvar_counters: (string, int ref) Hashtbl.t;
-  (* extended decls for IFC *)
-  pre_decl: decl_env;
-  (* Hack type environment *)
-  pre_tenv: Tast.saved_env;
-  (* Metadata *)
-  pre_meta: meta;
-}
-
 (* Read-only environment information managed following a stack discipline
    when walking the Hack syntax *)
-type renv = {
-  (* Section of renv needed to initialize full renv *)
-  re_proto: proto_renv;
-  (* Policy type of $this. *)
-  re_this: ptype option;
-  (* Return type of the function being checked. *)
-  re_ret: ptype;
-  (* The initial program counter for the function *)
+type 'ptype renv_ = {
+  (* during flow inference, types are always given relative to a scope. *)
+  re_scope: Scope.t;
+  (* hash table keeping track of counters to generate variable names *)
+  re_pvar_counters: (string, int ref) Hashtbl.t;
+  (* extended decls for IFC *)
+  re_decl: decl_env;
+  (* Hack type environment *)
+  re_tenv: Tast.saved_env;
+  (* policy type of $this *)
+  re_this: 'ptype option;
+  (* return type of the function being checked *)
+  re_ret: 'ptype;
+  (* the program counter policy of the current function *)
   re_gpc: policy;
   (* Exception thrown from the callable *)
-  re_exn: ptype;
+  re_exn: 'ptype;
 }
+
+type proto_renv = unit renv_
+
+type renv = ptype renv_
 
 (* The analysis result for a callable *)
 type callable_result = {
@@ -284,7 +262,7 @@ type callable_result = {
      res_constraint *)
   res_deps: SSet.t;
   (* Entailment based on the function's assumed prototype *)
-  res_entailment: entailment;
+  res_entailment: prop -> pos_flow list;
 }
 
 type adjustment =

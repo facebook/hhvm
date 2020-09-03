@@ -8,6 +8,7 @@
 
 open Hh_prelude
 open Ifc_types
+module Lattice = Ifc_security_lattice
 
 exception Invalid_ifc_mode of string
 
@@ -21,8 +22,15 @@ let parse_mode_exn mode_str =
   | "DEBUG" -> Mdebug
   | _ -> raise @@ Invalid_ifc_mode mode_str
 
-let new_raw_options mode lattice =
-  { ropt_mode = mode; ropt_security_lattice = lattice }
-
-let new_options mode lattice =
-  { opt_mode = mode; opt_security_lattice = lattice }
+let parse ~mode ~lattice =
+  try
+    let opt_mode = parse_mode_exn mode in
+    let opt_security_lattice = Lattice.mk_exn lattice in
+    Ok { opt_mode; opt_security_lattice }
+  with
+  | Lattice.Invalid_security_lattice ->
+    Error
+      ( "option error: lattice specification should be basic flux "
+      ^ "constraints, e.g., `A < B` separated by `;`" )
+  | Invalid_ifc_mode mode ->
+    Error (Printf.sprintf "option error: %s is not a recognised mode" mode)

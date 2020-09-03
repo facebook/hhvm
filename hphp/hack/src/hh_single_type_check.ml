@@ -1300,7 +1300,7 @@ let handle_mode
   in
   let iter_over_files f : unit = List.iter filenames f in
   match mode with
-  | Ifc (ropt_mode, ropt_security_lattice) ->
+  | Ifc (mode, lattice) ->
     let print_errors errors = List.iter ~f:(print_error error_format) errors in
     if not (List.is_empty parse_errors) then
       print_errors parse_errors
@@ -1311,8 +1311,12 @@ let handle_mode
       if not (List.is_empty errors) then
         print_errors errors
       else
-        let raw_opts = { Ifc_types.ropt_mode; ropt_security_lattice } in
-        let ifc_errors = Ifc.do_ raw_opts files_info ctx in
+        let opts =
+          match Ifc_options.parse ~mode ~lattice with
+          | Ok opts -> opts
+          | Error e -> die ("Could not parse IFC options: " ^ e)
+        in
+        let ifc_errors = Ifc.do_ opts files_info ctx in
         if not @@ List.is_empty ifc_errors then begin
           print_errors ifc_errors;
           exit 2

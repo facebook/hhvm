@@ -18,34 +18,45 @@ module LSet = Local_id.Set
    use higher-order functions to parameterize
    complex behavior! *)
 
-let new_policy_var { pre_scope; pre_pvar_counters; _ } prefix =
+let new_policy_var { re_scope; re_pvar_counters; _ } prefix =
   let suffix =
-    match Caml.Hashtbl.find_opt pre_pvar_counters prefix with
+    match Caml.Hashtbl.find_opt re_pvar_counters prefix with
     | Some counter ->
       incr counter;
       "'" ^ string_of_int !counter
     | None ->
-      Caml.Hashtbl.add pre_pvar_counters prefix (ref 0);
+      Caml.Hashtbl.add re_pvar_counters prefix (ref 0);
       ""
   in
-  Pfree_var (prefix ^ suffix, pre_scope)
+  Pfree_var (prefix ^ suffix, re_scope)
 
-let new_proto_renv meta saved_tenv scope decl_env =
+(* Creates a read-only environment sufficient to call functions
+   from ifc_lift.ml *)
+let new_renv scope decl_env saved_tenv : proto_renv =
+  let dummy_pol = Pbot PosSet.empty in
   {
-    pre_scope = scope;
-    pre_decl = decl_env;
-    pre_pvar_counters = Caml.Hashtbl.create 10;
-    pre_tenv = saved_tenv;
-    pre_meta = meta;
+    re_scope = scope;
+    re_decl = decl_env;
+    re_pvar_counters = Caml.Hashtbl.create 10;
+    re_tenv = saved_tenv;
+    (* the fields below are initialized with dummy values *)
+    re_this = None;
+    re_ret = ();
+    re_gpc = dummy_pol;
+    re_exn = ();
   }
 
-let new_renv proto_renv this_ty ret_ty global_pc exn =
+(* Prepares a read-only environment to type-check a function *)
+let prep_renv renv this_ty_opt ret_ty gpc_pol exn_ty : renv =
   {
-    re_proto = proto_renv;
-    re_this = this_ty;
+    re_scope = renv.re_scope;
+    re_decl = renv.re_decl;
+    re_pvar_counters = renv.re_pvar_counters;
+    re_tenv = renv.re_tenv;
+    re_this = this_ty_opt;
     re_ret = ret_ty;
-    re_gpc = global_pc;
-    re_exn = exn;
+    re_gpc = gpc_pol;
+    re_exn = exn_ty;
   }
 
 let empty_lenv = { le_vars = LMap.empty; le_pc = PCSet.empty }

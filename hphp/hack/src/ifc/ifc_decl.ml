@@ -244,13 +244,12 @@ let property_policy { de_class; _ } cname pname =
          p.pp_purpose))
 
 (* Builds the type scheme for a callable *)
-let make_callable_scheme re_proto pol (fp : fun_proto) =
-  let scope = Scope.alloc () in
-  let re_proto = { re_proto with pre_scope = scope } in
+let make_callable_scheme renv pol (fp : fun_proto) =
+  let renv = { renv with re_scope = Scope.alloc () } in
   let policy =
     match pol with
     | Some policy -> policy
-    | None -> Env.new_policy_var re_proto "implicit"
+    | None -> Env.new_policy_var renv "implicit"
   in
   let rec set_policy pty = Mapper.ptype set_policy (const policy) pty in
   let pbot = Pbot PosSet.empty in
@@ -265,4 +264,4 @@ let make_callable_scheme re_proto pol (fp : fun_proto) =
         };
     }
   in
-  Fscheme (scope, fp', Ctrue)
+  Fscheme (renv.re_scope, fp', Ctrue)

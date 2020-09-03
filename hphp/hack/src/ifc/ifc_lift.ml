@@ -25,60 +25,57 @@ exception LiftError of string
 
 let fail fmt = Format.kasprintf (fun s -> raise (LiftError s)) fmt
 
-(* Empty type environment useful for localising decl types and pretty printing types *)
-let empty_tenv meta = TEnv.empty meta.m_ctx meta.m_path None
-
-let expand_var proto_renv id =
+let expand_var renv id =
   (* Drops the environment. Var expansion only compresses paths, so this is
    * safe (but less efficient than threading the environment). *)
   let (_, ty) =
     Typing_inference_env.expand_var
-      proto_renv.pre_tenv.Tast.inference_env
+      renv.re_tenv.Tast.inference_env
       Typing_reason.Rnone
       id
   in
   ty
 
-(* If there is a lump policy variable in effect, return that otherwise
-   generate a new policy variable. *)
-let get_policy ?prefix lump_pol_opt proto_renv =
-  match lump_pol_opt with
-  | Some lump_pol -> lump_pol
+(* Returns the lump policy if there is one in effect, otherwise
+   generates a fresh policy variable *)
+let get_policy ?prefix lump renv =
+  match lump with
+  | Some policy -> policy
   | None ->
     let prefix = Option.value prefix ~default:"v" in
-    Env.new_policy_var proto_renv prefix
+    Env.new_policy_var renv prefix
 
-let rec class_ty lump_pol_opt proto_renv name =
+let class_ty ?lump renv name =
   Tclass
     {
       c_name = name;
-      c_self = get_policy lump_pol_opt proto_renv ~prefix:name;
-      c_lump = get_policy lump_pol_opt proto_renv ~prefix:"lump";
+      c_self = get_policy lump renv ~prefix:name;
+      c_lump = get_policy lump renv ~prefix:"lump";
     }
 
 (* Turns a locl_ty into a type with policy annotations;
    the policy annotations are fresh policy variables *)
-and ty ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
-  let ty = ty ?prefix lump_pol_opt proto_renv in
+let rec ty ?prefix ?lump renv (t : T.locl_ty) =
+  let ty = ty ?prefix ?lump renv in
   match T.get_node t with
-  | T.Tprim _ -> Tprim (get_policy lump_pol_opt proto_renv ?prefix)
+  | T.Tprim _ -> Tprim (get_policy ?prefix lump renv)
   | T.Tgeneric (_name, _targs) ->
     (* TODO(T69551141) Handle type arguments *)
-    Tgeneric (get_policy lump_pol_opt proto_renv ?prefix)
+    Tgeneric (get_policy ?prefix lump renv)
   | T.Ttuple tyl -> Ttuple (List.map ~f:ty tyl)
   | T.Tunion tyl -> Tunion (List.map ~f:ty tyl)
   | T.Tintersection tyl -> Tinter (List.map ~f:ty tyl)
-  | T.Tclass ((_, name), _, _) -> class_ty lump_pol_opt proto_renv name
-  | T.Tvar id -> ty (expand_var proto_renv id)
+  | T.Tclass ((_, name), _, _) -> class_ty ?lump renv name
+  | T.Tvar id -> ty (expand_var renv id)
   | T.Tfun fun_ty ->
     Tfun
       {
-        f_pc = get_policy lump_pol_opt proto_renv ~prefix:"pc";
-        f_self = get_policy lump_pol_opt proto_renv ?prefix;
+        f_pc = get_policy ~prefix:"pc" lump renv;
+        f_self = get_policy ?prefix lump renv;
         f_args =
           List.map ~f:(fun p -> ty p.T.fp_type.T.et_type) fun_ty.T.ft_params;
         f_ret = ty fun_ty.T.ft_ret.T.et_type;
-        f_exn = class_ty None proto_renv Decl.exception_id;
+        f_exn = class_ty ?lump renv Decl.exception_id;
       }
   | T.Tdependent (T.DTthis, tbound) ->
     (* TODO(T72024862): This treatment ignores late static binding. *)

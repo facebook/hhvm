@@ -337,6 +337,19 @@ impl<'a> NamespaceBuilder<'a> {
         }
     }
 
+    // push_namespace(Y) + pop_namespace() + push_namespace(X) should be equivalent to
+    // push_namespace(Y) + push_namespace(X) + pop_previous_namespace()
+    fn pop_previous_namespace(&mut self) {
+        if self.stack.len() > 2 {
+            let last = self.stack.pop().unwrap().name;
+            let previous = self.stack.pop().unwrap().name;
+            // should always be the case, but just to be safe
+            if last.starts_with(previous) && last.ends_with("\\") {
+                self.push_namespace(Some(&last[previous.len()..last.len() - 1]))
+            }
+        }
+    }
+
     fn current_namespace(&self) -> &'a str {
         self.stack.last().map(|ni| ni.name).unwrap_or("\\")
     }
@@ -2744,18 +2757,29 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         }
     }
 
+    fn make_namespace_declaration(&mut self, _name: Self::R, body: Self::R) -> Self::R {
+        if let Node::IgnoredSyntaxKind(SyntaxKind::NamespaceBody) = body {
+            Rc::make_mut(&mut self.state.namespace_builder).pop_namespace();
+        }
+        Node::Ignored
+    }
+
     fn make_namespace_declaration_header(&mut self, _keyword: Self::R, name: Self::R) -> Self::R {
         let name = self.get_name("", name).map(|Id(_, name)| name);
+        // if this is header of semicolon-style (one with NamespaceEmptyBody) namespace, we should pop
+        // the previous namespace first, but we don't have the body yet. We'll fix it retroactively in
+        // make_namespace_empty_body
         Rc::make_mut(&mut self.state.namespace_builder).push_namespace(name);
         Node::Ignored
     }
 
-    fn make_namespace_body(&mut self, _arg0: Self::R, body: Self::R, _arg2: Self::R) -> Self::R {
-        let is_empty = matches!(body, Node::Token(TokenKind::Semicolon));
-        if !is_empty {
-            Rc::make_mut(&mut self.state.namespace_builder).pop_namespace();
-        }
-        Node::Ignored
+    fn make_namespace_body(&mut self, _arg0: Self::R, _body: Self::R, _arg2: Self::R) -> Self::R {
+        Node::IgnoredSyntaxKind(SyntaxKind::NamespaceBody)
+    }
+
+    fn make_namespace_empty_body(&mut self, _arg0: Self::R) -> Self::R {
+        Rc::make_mut(&mut self.state.namespace_builder).pop_previous_namespace();
+        Node::IgnoredSyntaxKind(SyntaxKind::NamespaceEmptyBody)
     }
 
     fn make_namespace_use_declaration(

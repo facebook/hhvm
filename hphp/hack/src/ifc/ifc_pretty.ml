@@ -53,12 +53,8 @@ let rec ptype fmt ty =
   | Tunion [] -> fprintf fmt "nothing"
   | Tunion tl -> list' " |" tl
   | Tinter tl -> list' " &" tl
-  | Tclass { c_name; c_self; c_lump; c_properties } ->
-    fprintf fmt "%s" c_name;
-    fprintf fmt "<@[<hov2>%a,@ %a" policy c_self policy c_lump;
-    if not (SMap.is_empty c_properties) then
-      fprintf fmt ",@ %a" (smap comma_sep policy) c_properties;
-    fprintf fmt "@]>"
+  | Tclass { c_name; c_self; c_lump } ->
+    fprintf fmt "%s<@[<hov2>%a,@ %a@]>" c_name policy c_self policy c_lump
   | Tfun fn -> fun_ fmt fn
 
 (* Format: <pc, self>(arg1, arg2, ...): ret [exn] *)

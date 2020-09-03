@@ -236,7 +236,7 @@ let receiver_of_obj_get obj_ptype property =
 let property_ptype proto_renv obj_ptype property property_ty =
   let class_ = receiver_of_obj_get obj_ptype property in
   let prop_pol =
-    match SMap.find_opt property class_.c_properties with
+    match Decl.property_policy proto_renv.pre_decl class_.c_name property with
     | Some policy -> policy
     | None -> class_.c_lump
   in

@@ -58,6 +58,12 @@ type quant =
   | Qforall
   | Qexists
 
+type class_ = {
+  c_name: string;
+  c_self: policy;
+  c_lump: policy;
+}
+
 (* Types with policies *)
 type ptype =
   | Tprim of policy
@@ -67,13 +73,6 @@ type ptype =
   | Tinter of ptype list
   | Tclass of class_
   | Tfun of fun_
-
-and class_ = {
-  c_name: string;
-  c_self: policy;
-  c_lump: policy;
-  c_properties: policy SMap.t;
-}
 
 and fun_ = {
   (* The PC guards a function's effects *)

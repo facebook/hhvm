@@ -24,7 +24,6 @@ let rec ptype fty fpol = function
         c_name = cls.c_name;
         c_self = fpol cls.c_self;
         c_lump = fpol cls.c_lump;
-        c_properties = SMap.map fpol cls.c_properties;
       }
   | Tfun f -> Tfun (fun_ fty fpol f)
 

@@ -1,6 +1,6 @@
 Analyzing __construct:
 * pc: pc
-* This: \C<\C, lump'1, cx=PUBLIC>
+* This: \C<\C, lump'1>
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:
@@ -15,7 +15,7 @@ Constraints:
 
 Analyzing testGetUnpolicied:
 * pc: pc
-* This: \C<\C, lump'1, cx=PUBLIC>
+* This: \C<\C, lump'1>
 * Return: \D<\D, lump'2>
 * Exception: \Exception<\Exception, lump>
 * Params:
@@ -29,7 +29,7 @@ Constraints:
 
 Analyzing testSetMultipleUnpolicied:
 * pc: pc
-* This: \C<\C, lump'1, cx=PUBLIC>
+* This: \C<\C, lump'1>
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:
@@ -44,7 +44,7 @@ Constraints:
 
 Analyzing testSetDeep:
 * pc: pc
-* This: \C<\C, lump'1, cx=PUBLIC>
+* This: \C<\C, lump'1>
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:

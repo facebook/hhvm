@@ -14,7 +14,7 @@ Constraints:
 
 Analyzing __construct:
 * pc: pc
-* This: \C<\C, lump'1, ci=SECRET, d=SECRET>
+* This: \C<\C, lump'1>
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:
@@ -29,7 +29,7 @@ Constraints:
 
 Analyzing getShallow1:
 * pc: pc
-* This: \C<\C, lump'1, ci=SECRET, d=SECRET>
+* This: \C<\C, lump'1>
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:
@@ -43,7 +43,7 @@ Constraints:
 
 Analyzing getShallow2:
 * pc: pc
-* This: \C<\C, lump'1, ci=SECRET, d=SECRET>
+* This: \C<\C, lump'1>
 * Return: \D<\D, lump'2>
 * Exception: \Exception<\Exception, lump>
 * Params:
@@ -57,7 +57,7 @@ Constraints:
 
 Analyzing getDeep:
 * pc: pc
-* This: \C<\C, lump'1, ci=SECRET, d=SECRET>
+* This: \C<\C, lump'1>
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:
@@ -71,7 +71,7 @@ Constraints:
 
 Analyzing writeDeep:
 * pc: pc
-* This: \C<\C, lump'1, ci=SECRET, d=SECRET>
+* This: \C<\C, lump'1>
 * Return: <ret>
 * Exception: \Exception<\Exception, lump>
 * Params:

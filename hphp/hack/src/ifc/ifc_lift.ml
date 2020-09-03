@@ -49,26 +49,11 @@ let get_policy ?prefix lump_pol_opt proto_renv =
     Env.new_policy_var proto_renv prefix
 
 let rec class_ty lump_pol_opt proto_renv name =
-  let { cd_policied_properties } =
-    match SMap.find_opt name proto_renv.pre_decl.de_class with
-    | Some class_sig -> class_sig
-    | None -> fail "could not found a class policy signature for %s" name
-  in
-  let prop_pol { pp_name; pp_purpose; pp_pos; _ } =
-    (* Purpose of the property takes precedence over any lump policy.
-     * TODO(T74471162): Lump might itself be a purpose. There should be a check
-     * or constraint generation of some sort.
-     *)
-    let parse_policy = Lattice.parse_policy (PosSet.singleton pp_pos) in
-    let pp_policy = parse_policy pp_purpose in
-    (pp_name, pp_policy)
-  in
   Tclass
     {
       c_name = name;
       c_self = get_policy lump_pol_opt proto_renv ~prefix:name;
       c_lump = get_policy lump_pol_opt proto_renv ~prefix:"lump";
-      c_properties = SMap.of_list (List.map ~f:prop_pol cd_policied_properties);
     }
 
 (* Turns a locl_ty into a type with policy annotations;

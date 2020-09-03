@@ -231,10 +231,17 @@ let collect_sigs defs =
   in
   List.fold ~f:add_class_decl ~init classes
 
-let find_core_class_decl meta class_name =
-  match Decl_provider.get_class meta.m_ctx class_name with
-  | Some class_decl -> class_decl
-  | None -> fail ("couldn't find the decl for " ^ class_name)
+let property_policy { de_class; _ } cname pname =
+  Option.(
+    SMap.find_opt cname de_class >>= fun cls ->
+    List.find
+      ~f:(fun p -> String.equal p.pp_name pname)
+      cls.cd_policied_properties
+    >>= fun p ->
+    return
+      (Ifc_security_lattice.parse_policy
+         (PosSet.singleton p.pp_pos)
+         p.pp_purpose))
 
 (* Builds the type scheme for a callable *)
 let make_callable_scheme re_proto pol (fp : fun_proto) =

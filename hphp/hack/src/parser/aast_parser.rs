@@ -5,6 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::aast_check;
+use crate::expression_tree_check;
 use lowerer::{lower, ScourComment};
 use mode_parser::{parse_mode, Language};
 use namespaces_rust as namespaces;
@@ -127,7 +128,11 @@ impl<'a> AastParser {
                 env.codegen,
             ));
             errors.sort_by(SyntaxError::compare_offset);
-            errors.extend(aast.map_or(vec![], aast_check::check_program));
+
+            let empty_program = vec![];
+            let aast = aast.unwrap_or(&empty_program);
+            errors.extend(aast_check::check_program(&aast));
+            errors.extend(expression_tree_check::check_program(&aast));
             errors
         };
         if env.codegen {

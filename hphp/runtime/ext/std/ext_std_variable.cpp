@@ -422,17 +422,7 @@ Variant HHVM_FUNCTION(HH_last_key, const Variant& v) {
 
 namespace {
 
-const StaticString
-  s_Null("N;"),
-  s_True("b:1;"),
-  s_False("b:0;"),
-  s_Res("i:0;"),
-  s_EmptyArray("a:0:{}"),
-  s_EmptyVArray("y:0:{}"),
-  s_EmptyDArray("Y:0:{}"),
-  s_EmptyVec("v:0:{}"),
-  s_EmptyDictArray("D:0:{}"),
-  s_EmptyKeysetArray("k:0:{}");
+const StaticString s_Res("i:0;");
 
 struct SerializeOptions {
   bool keepDVArrays = false;
@@ -445,29 +435,7 @@ struct SerializeOptions {
 
 ALWAYS_INLINE String serialize_impl(const Variant& value,
                                     const SerializeOptions& opts) {
-  auto const empty_hack = [&](const ArrayData* arr, const StaticString& empty) {
-    if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices &&
-                 opts.warnOnHackArrays)) {
-      raise_hack_arr_compat_serialize_notice(arr);
-    }
-    return opts.forcePHPArrays ? s_EmptyArray : empty;
-  };
-
   switch (value.getType()) {
-    case KindOfUninit:
-    case KindOfNull:
-      return s_Null;
-    case KindOfBoolean:
-      return value.getBoolean() ? s_True : s_False;
-    case KindOfInt64: {
-      StringBuffer sb;
-      sb.append("i:");
-      sb.append(value.getInt64());
-      sb.append(';');
-      return sb.detach();
-    }
-    case KindOfFunc:
-      invalidFuncConversion("string");
     case KindOfClass:
     case KindOfLazyClass:
     case KindOfPersistentString:
@@ -491,66 +459,21 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfResource:
       return s_Res;
 
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfFunc:
     case KindOfPersistentVec:
-    case KindOfVec: {
-      ArrayData* arr = value.getArrayData();
-      assertx(arr->isVecType());
-      if (arr->empty() && LIKELY(!opts.serializeProvenanceAndLegacy)) {
-        if (UNLIKELY(RuntimeOption::EvalHackArrDVArrs &&
-                     arr->isLegacyArray())) {
-          return opts.keepDVArrays && !opts.forcePHPArrays
-            ? s_EmptyVArray
-            : s_EmptyArray;
-        }
-        return empty_hack(arr, s_EmptyVec);
-      }
-      break;
-    }
-
+    case KindOfVec:
     case KindOfPersistentDict:
-    case KindOfDict: {
-      ArrayData* arr = value.getArrayData();
-      assertx(arr->isDictType());
-      if (arr->empty() && LIKELY(!opts.serializeProvenanceAndLegacy)) {
-        if (UNLIKELY(RuntimeOption::EvalHackArrDVArrs &&
-                     arr->isLegacyArray())) {
-          return opts.keepDVArrays && !opts.forcePHPArrays
-            ? s_EmptyDArray
-            : s_EmptyArray;
-        }
-        return empty_hack(arr, s_EmptyDictArray);
-      }
-      break;
-    }
-
+    case KindOfDict:
     case KindOfPersistentKeyset:
-    case KindOfKeyset: {
-      ArrayData* arr = value.getArrayData();
-      assertx(arr->isKeysetType());
-      if (arr->empty()) return empty_hack(arr, s_EmptyKeysetArray);
-      break;
-    }
-
+    case KindOfKeyset:
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
-    case KindOfVArray: {
-      ArrayData *arr = value.getArrayData();
-      assertx(arr->isPHPArrayType());
-      assertx(!RO::EvalHackArrDVArrs);
-      if (arr->empty() && LIKELY(!opts.serializeProvenanceAndLegacy)) {
-        if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices &&
-                     opts.warnOnPHPArrays)) {
-          raise_hack_arr_compat_serialize_notice(arr);
-        }
-        if (opts.keepDVArrays && !opts.forcePHPArrays) {
-          assertx(arr->isDVArray());
-          return arr->isVArray() ? s_EmptyVArray : s_EmptyDArray;
-        }
-        return s_EmptyArray;
-      }
-      break;
-    }
+    case KindOfVArray:
     case KindOfDouble:
     case KindOfObject:
     case KindOfClsMeth:

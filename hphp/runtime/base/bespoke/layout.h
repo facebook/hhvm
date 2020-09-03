@@ -27,7 +27,11 @@ struct Layout {
   Layout();
   virtual ~Layout() {}
 
-  uint32_t index() const { return m_index; }
+  /* bespoke indexes are 16 bits wide, the last 3 values are reserved
+   * (see jit::ArraySpec for why) */
+  static uint16_t constexpr kMaxIndex = (1 << 16) - 4;
+
+  uint16_t index() const { return m_index; }
 
   virtual size_t heapSize(const ArrayData* ad) const = 0;
   virtual void scan(const ArrayData* ad, type_scan::Scanner& scan) const = 0;
@@ -80,10 +84,10 @@ struct Layout {
   virtual void setLegacyArrayInPlace(ArrayData*, bool legacy) const = 0;
 
 private:
-  uint32_t m_index;
+  uint16_t m_index;
 };
 
-const Layout* layoutForIndex(uint32_t index);
+const Layout* layoutForIndex(uint16_t index);
 
 }}
 

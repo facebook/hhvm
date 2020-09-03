@@ -22,19 +22,17 @@
 namespace HPHP { namespace bespoke {
 
 namespace {
-auto constexpr kMaxNumLayouts = 1 << 16;
-
-std::array<Layout*, kMaxNumLayouts> s_layoutTable;
+std::array<Layout*, Layout::kMaxIndex + 1> s_layoutTable;
 }
 
 Layout::Layout() {
   static std::atomic<uint64_t> s_layoutTableIndex;
-  m_index = s_layoutTableIndex ++;
-  always_assert(m_index < kMaxNumLayouts);
+  m_index = s_layoutTableIndex++;
+  always_assert(m_index < kMaxIndex);
   s_layoutTable[m_index] = this;
 }
 
-const Layout* layoutForIndex(uint32_t index) {
+const Layout* layoutForIndex(uint16_t index) {
   auto const layout = s_layoutTable[index];
   assertx(layout->index() == index);
   return layout;

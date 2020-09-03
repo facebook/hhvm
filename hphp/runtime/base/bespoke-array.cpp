@@ -35,7 +35,7 @@ const BespokeArray* BespokeArray::asBespoke(const ArrayData* ad) {
 }
 
 const bespoke::Layout* BespokeArray::layout() const {
-  return bespoke::layoutForIndex(m_extra);
+  return bespoke::layoutForIndex(static_cast<uint16_t>(m_extra));
 }
 void BespokeArray::setLayout(const bespoke::Layout* layout) {
   m_extra = layout->index();

@@ -3360,6 +3360,52 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         self.hint_ty(pos, Ty_::Ttuple(tys))
     }
 
+    fn make_intersection_type_specifier(
+        &mut self,
+        left_paren: Self::R,
+        tys: Self::R,
+        right_paren: Self::R,
+    ) -> Self::R {
+        let pos = unwrap_or_return!(Pos::merge(
+            self.state.arena,
+            unwrap_or_return!(left_paren.get_pos(self.state.arena)),
+            unwrap_or_return!(right_paren.get_pos(self.state.arena)),
+        )
+        .ok());
+        let tys = unwrap_or_return!(self.maybe_slice_from_iter(
+            tys.iter()
+                .map(|x| match x {
+                    Node::ListItem((ty, _ampersand)) => ty,
+                    _ => x,
+                })
+                .map(|&node| self.node_to_ty(node))
+        ));
+        self.hint_ty(pos, Ty_::Tintersection(tys))
+    }
+
+    fn make_union_type_specifier(
+        &mut self,
+        left_paren: Self::R,
+        tys: Self::R,
+        right_paren: Self::R,
+    ) -> Self::R {
+        let pos = unwrap_or_return!(Pos::merge(
+            self.state.arena,
+            unwrap_or_return!(left_paren.get_pos(self.state.arena)),
+            unwrap_or_return!(right_paren.get_pos(self.state.arena)),
+        )
+        .ok());
+        let tys = unwrap_or_return!(self.maybe_slice_from_iter(
+            tys.iter()
+                .map(|x| match x {
+                    Node::ListItem((ty, _bar)) => ty,
+                    _ => x,
+                })
+                .map(|&node| self.node_to_ty(node))
+        ));
+        self.hint_ty(pos, Ty_::Tunion(tys))
+    }
+
     fn make_shape_type_specifier(
         &mut self,
         shape: Self::R,

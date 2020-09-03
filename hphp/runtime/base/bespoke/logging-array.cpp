@@ -185,6 +185,10 @@ void LoggingArray::updateKindAndSize() {
   assertx(checkInvariants());
 }
 
+std::string LoggingLayout::describe() const {
+  return "Logging";
+}
+
 size_t LoggingLayout::heapSize(const ArrayData*) const {
   return sizeof(LoggingArray);
 }

@@ -42,6 +42,9 @@ struct BespokeLayout {
   /* retrieve a layout by index */
   static BespokeLayout LayoutFromIndex(uint16_t idx);
 
+  /* get a human-readable string describing the layout */
+  std::string describe() const ;
+
 private:
   const bespoke::Layout* m_layout{nullptr};
 };

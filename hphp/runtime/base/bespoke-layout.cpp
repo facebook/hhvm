@@ -26,6 +26,10 @@ BespokeLayout BespokeLayout::LayoutFromIndex(uint16_t idx) {
   return BespokeLayout{layout};
 }
 
+std::string BespokeLayout::describe() const {
+  return m_layout->describe();
+}
+
 uint16_t BespokeLayout::index() const {
   return m_layout->index();
 }

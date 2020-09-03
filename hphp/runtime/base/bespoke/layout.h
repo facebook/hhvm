@@ -34,6 +34,8 @@ struct Layout {
 
   uint16_t index() const { return m_index; }
 
+  virtual std::string describe() const = 0;
+
   virtual size_t heapSize(const ArrayData* ad) const = 0;
   virtual void scan(const ArrayData* ad, type_scan::Scanner& scan) const = 0;
   virtual ArrayData* escalateToVanilla(

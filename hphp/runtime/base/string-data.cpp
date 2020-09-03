@@ -149,10 +149,12 @@ MemBlock StringData::AllocateShared(folly::StringPiece sl) {
 template <bool trueStatic> ALWAYS_INLINE
 StringData* StringData::MakeSharedAt(folly::StringPiece sl, MemBlock range) {
   assertx(range.size >= sl.size() + kStringOverhead);
-  bool symbol = s_symbols_loaded.load(std::memory_order_acquire) &&
+  auto const symbol = trueStatic &&
+    !s_symbols_loaded.load(std::memory_order_acquire) &&
     (range.size >= sl.size() + kStringOverhead + sizeof(SymbolPrefix));
+  auto const extra = symbol ? sizeof(SymbolPrefix) : 0;
   StringData* sd = reinterpret_cast<StringData*>(
-    reinterpret_cast<uintptr_t>(range.ptr) + symbol * sizeof(SymbolPrefix)
+    reinterpret_cast<uintptr_t>(range.ptr) + extra
   );
   auto const data = reinterpret_cast<char*>(sd + 1);
 

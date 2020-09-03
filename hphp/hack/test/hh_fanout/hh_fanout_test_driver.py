@@ -66,6 +66,9 @@ def exec(args: List[str], *, raise_on_error: bool = True) -> str:
             + f"Stdout: {stdout}\n"
             + f"Stderr: {stderr}\n"
         )
+    elif DEBUGGING:
+        stderr = result.stderr.decode()
+        log(f"Stderr: {stderr}")
     return stdout
 
 
@@ -181,6 +184,19 @@ def run_hh_fanout_calculate_errors_pretty_print(
     args.append("--pretty-print")
 
     result = exec([env.hh_fanout_path, "calculate-errors", *args])
+    result = result.replace(env.root_dir, "")
+    result = result.strip()
+    return result
+
+
+def run_hh_fanout_status(env: Env, cursor: Cursor) -> str:
+    args = []
+    args.extend(("--from", "integration-test"))
+    args.extend(("--root", env.root_dir))
+    args.extend(("--state-path", os.path.join(env.root_dir, "hh_fanout_state")))
+    args.extend(("--cursor", cursor))
+
+    result = exec([env.hh_fanout_path, "status", *args])
     result = result.replace(env.root_dir, "")
     result = result.strip()
     return result

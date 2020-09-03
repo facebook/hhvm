@@ -131,11 +131,13 @@ class cursor ~client_id ~cursor_state =
     val cursor_state : cursor_state = cursor_state
 
     method get_file_deltas : Naming_sqlite.file_deltas =
-      match cursor_state with
-      | Saved_state _
-      | Typecheck_result _ ->
-        Relative_path.Map.empty
-      | Saved_state_delta { changed_files; _ } -> changed_files
+      let rec helper cursor_state =
+        match cursor_state with
+        | Saved_state _ -> Relative_path.Map.empty
+        | Typecheck_result { previous; _ } -> helper previous
+        | Saved_state_delta { changed_files; _ } -> changed_files
+      in
+      helper cursor_state
 
     method get_calculate_fanout_result : Calculate_fanout.result option =
       match cursor_state with
@@ -143,6 +145,18 @@ class cursor ~client_id ~cursor_state =
       | Typecheck_result _ ->
         None
       | Saved_state_delta { fanout_result; _ } -> Some fanout_result
+
+    method get_calculate_fanout_results_since_last_typecheck
+        : Calculate_fanout.result list =
+      let rec helper cursor_state =
+        match cursor_state with
+        | Saved_state _
+        | Typecheck_result _ ->
+          []
+        | Saved_state_delta { fanout_result; previous; _ } ->
+          fanout_result :: helper previous
+      in
+      helper cursor_state
 
     method private load_naming_table (ctx : Provider_context.t) : Naming_table.t
         =
@@ -318,6 +332,10 @@ class cursor ~client_id ~cursor_state =
                  (Relative_path.Set.elements files_to_typecheck)
                  ~num_workers:(List.length workers))
         in
+        Hh_logger.log
+          "Got %d new dependency edges as a result of typechecking %d files"
+          (HashSet.length fanout_files_deps)
+          (Relative_path.Set.cardinal files_to_typecheck);
         let typecheck_result = { fanout_files_deps; errors } in
         let cursor =
           new cursor

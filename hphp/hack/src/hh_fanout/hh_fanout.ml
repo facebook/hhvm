@@ -661,6 +661,33 @@ let debug_subcommand =
      let path = Path.make path in
      (fun () -> Lwt_main.run (mode_debug ~env ~path ~cursor_id)))
 
+let mode_status ~(env : env) ~(cursor_id : string) : unit Lwt.t =
+  let incremental_state = make_incremental_state ~env in
+  let cursor =
+    incremental_state#look_up_cursor ~client_id:None ~cursor_id
+    |> Result.ok_or_failwith
+  in
+  let fanout_calculations =
+    cursor#get_calculate_fanout_results_since_last_typecheck
+  in
+  let%lwt () = Status.go fanout_calculations in
+  Lwt.return_unit
+
+let status_subcommand =
+  let open Command.Param in
+  let open Command.Let_syntax in
+  Command.basic
+    ~summary:
+      "EXPERIMENTAL: Shows details about the files that need to be re-typechecked on the next `calculate-errors` call"
+    (let%map env = parse_env ()
+     and cursor_id =
+       flag
+         "--cursor"
+         (required string)
+         ~doc:"CURSOR The cursor that the previous request returned"
+     in
+     (fun () -> Lwt_main.run (mode_status ~env ~cursor_id)))
+
 let mode_query
     ~(env : env) ~(dep_hash : Typing_deps.Dep.t) ~(include_extends : bool) :
     unit Lwt.t =
@@ -732,6 +759,7 @@ let () =
          ("calculate", calculate_subcommand);
          ("calculate-errors", calculate_errors_subcommand);
          ("debug", debug_subcommand);
+         ("status", status_subcommand);
          ("query", query_subcommand);
          ("query-path", query_path_subcommand);
        ]

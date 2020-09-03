@@ -12,6 +12,7 @@ from hh_fanout_test_driver import (
     generate_saved_state,
     run_hh_fanout,
     run_hh_fanout_calculate_errors,
+    run_hh_fanout_status,
 )
 from libfb.py.testutil import BaseFacebookTestCase
 
@@ -224,3 +225,92 @@ function foo(): void {
             )
             cursor3 = result["cursor"]
             self.assertEqual(cursor3, cursor2)
+
+    def test_status(self) -> None:
+        work_dir: str
+        with tempfile.TemporaryDirectory() as work_dir:
+
+            def file(path: Path) -> Path:
+                return os.path.join(work_dir, path)
+
+            # Initial status should have no changed files.
+            (env, saved_state_info) = self.set_up_work_dir(work_dir)
+            result = run_hh_fanout(
+                env=env,
+                saved_state_info=saved_state_info,
+                changed_files=[],
+                args=[],
+                cursor=None,
+            )
+            cursor = cast(str, result["cursor"])
+            status = run_hh_fanout_status(env=env, cursor=cursor)
+            self.assertEqual(status, "Total files to typecheck: 0")
+
+            # Creating files should add each file as an individual element to
+            # the status, with no fanout other than itself.
+            self.write(
+                file("foo.php"),
+                """<?hh
+function foo(): int {
+    return 1;
+}
+""",
+            )
+            self.write(
+                file("depends_on_foo.php"),
+                """<?hh
+function depends_on_foo(): int {
+    return foo();
+}
+""",
+            )
+            result = run_hh_fanout(
+                env=env,
+                saved_state_info=saved_state_info,
+                changed_files=[file("foo.php"), file("depends_on_foo.php")],
+                args=[],
+                cursor=cursor,
+            )
+            cursor = cast(str, result["cursor"])
+            status = run_hh_fanout_status(env=env, cursor=cursor)
+            self.assertEqual(
+                status,
+                """\
+depends_on_foo.php
+  A \\depends_on_foo (1 file)
+foo.php
+  A \\foo (1 file)
+Total files to typecheck: 2\
+""",
+            )
+
+            # Performing a typecheck should clear out the status, since we no
+            # longer need to re-typecheck any files.
+            result = run_hh_fanout_calculate_errors(
+                env=env, saved_state_info=saved_state_info, cursor=cursor
+            )
+            cursor = cast(str, result["cursor"])
+            status = run_hh_fanout_status(env=env, cursor=cursor)
+            self.assertEqual(status, "Total files to typecheck: 0")
+
+            # Changing an upstream file should also include its downstream
+            # dependent in its fanout size, according to status. Note that the
+            # downstream file itself isn't included in the status printout,
+            # since it hasn't changed.
+            result = run_hh_fanout(
+                env=env,
+                saved_state_info=saved_state_info,
+                changed_files=[file("foo.php")],
+                args=[],
+                cursor=cursor,
+            )
+            cursor = cast(str, result["cursor"])
+            status = run_hh_fanout_status(env=env, cursor=cursor)
+            self.assertEqual(
+                status,
+                """\
+foo.php
+  M \\foo (2 files)
+Total files to typecheck: 2\
+""",
+            )

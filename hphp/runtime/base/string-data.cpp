@@ -70,13 +70,7 @@ std::aligned_storage<
 //////////////////////////////////////////////////////////////////////
 
 namespace {
-struct SymbolPrefix {
-  AtomicLowPtr<NamedEntity> ne;
-  AtomicLowPtr<Class> cls;
-};
 std::atomic<bool> s_symbols_loaded;
-
-static_assert(sizeof(SymbolPrefix) % alignof(StringData) == 0, "");
 
 SymbolPrefix* getSymbolPrefix(StringData* sd) {
   assertx(sd->isSymbol());

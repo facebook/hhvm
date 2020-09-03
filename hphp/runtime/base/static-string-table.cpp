@@ -177,8 +177,10 @@ StringData* insertStaticString(StringData* sd,
       sd->destructStatic();
     }
   } else {
-    MemoryStats::LogAlloc(AllocKind::StaticString,
-                          sd->size() + sizeof(StringData));
+    auto const symbol = sd->isSymbol();
+    auto const allocSize = sd->size() + kStringOverhead
+                         + (symbol ? sizeof(SymbolPrefix) : 0);
+    MemoryStats::LogAlloc(AllocKind::StaticString, allocSize);
     if (RuntimeOption::EvalEnableReverseDataMap) {
       data_map::register_start(sd);
     }

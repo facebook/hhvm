@@ -580,6 +580,16 @@ private:
   };
 };
 
+/*
+ * Some static StringData has a SymbolPrefix allocated right in front.
+ */
+struct SymbolPrefix {
+  AtomicLowPtr<NamedEntity> ne;
+  AtomicLowPtr<Class> cls;
+};
+
+static_assert(sizeof(SymbolPrefix) % alignof(StringData) == 0, "");
+
 //////////////////////////////////////////////////////////////////////
 
 /*

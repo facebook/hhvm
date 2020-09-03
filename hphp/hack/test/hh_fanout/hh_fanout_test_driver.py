@@ -168,7 +168,7 @@ def run_hh_fanout_calculate_errors(
 
 
 def run_hh_fanout_calculate_errors_pretty_print(
-    env: Env, saved_state_info: SavedStateInfo, work_dir: Path, cursor: Cursor
+    env: Env, saved_state_info: SavedStateInfo, cursor: Cursor
 ) -> str:
     args = []
     args.extend(("--from", "integration-test"))
@@ -181,18 +181,18 @@ def run_hh_fanout_calculate_errors_pretty_print(
     args.append("--pretty-print")
 
     result = exec([env.hh_fanout_path, "calculate-errors", *args])
-    result = result.replace(work_dir, "")
+    result = result.replace(env.root_dir, "")
     result = result.strip()
     return result
 
 
-def run_hh_server_check(env: Env, work_dir: Path) -> str:
+def run_hh_server_check(env: Env) -> str:
     result = exec(
-        [env.hh_server_path, "--check", work_dir, "--no-load"],
+        [env.hh_server_path, "--check", env.root_dir, "--no-load"],
         # Returns 1 when there's typechecking errors.
         raise_on_error=False,
     )
-    result = result.replace(work_dir, "")
+    result = result.replace(env.root_dir, "")
     result = result.strip()
     return result
 
@@ -237,9 +237,9 @@ def run_typecheck_test(
     env: Env, saved_state_info: SavedStateInfo, work_dir: Path, cursor: Cursor
 ) -> None:
     hh_fanout_result = run_hh_fanout_calculate_errors_pretty_print(
-        env=env, saved_state_info=saved_state_info, work_dir=work_dir, cursor=cursor
+        env=env, saved_state_info=saved_state_info, cursor=cursor
     )
-    hh_server_result = run_hh_server_check(env=env, work_dir=work_dir)
+    hh_server_result = run_hh_server_check(env=env)
     print(hh_fanout_result)
 
     if hh_fanout_result == hh_server_result:

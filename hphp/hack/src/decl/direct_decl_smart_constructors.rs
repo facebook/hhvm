@@ -1084,7 +1084,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         String(_) => Some(Ty_::Tprim(arena.alloc(aast::Tprim::Tstring))),
                         String2(_) => Some(Ty_::Tprim(arena.alloc(aast::Tprim::Tstring))),
                         PrefixedString(_) => Some(Ty_::Tprim(arena.alloc(aast::Tprim::Tstring))),
-                        Unop(&(Uop::Unot, _)) | Unop(&(Uop::Utild, _)) => Some(TANY_), //match OCaml behavior
                         Unop(&(_op, expr)) => expr_to_ty(arena, expr),
                         ParenthesizedExpr(&expr) => expr_to_ty(arena, expr),
                         Any => Some(TANY_),
@@ -1153,6 +1152,22 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 };
                 Some(Ty(reason, self.alloc(ty_)))
             }
+        }
+    }
+
+    // Limited version of node_to_ty that matches behavior of Decl_utils.infer_const
+    fn infer_const(&self, name: Node<'a>, node: Node<'a>) -> Option<Ty<'a>> {
+        match node {
+            Node::StringLiteral(_)
+            | Node::BooleanLiteral(_)
+            | Node::IntLiteral(_)
+            | Node::FloatingLiteral(_)
+            | Node::Null(_)
+            | Node::Expr(aast::Expr(_, aast::Expr_::Unop(&(Uop::Uminus, _))))
+            | Node::Expr(aast::Expr(_, aast::Expr_::Unop(&(Uop::Uplus, _)))) => {
+                self.node_to_ty(node)
+            }
+            _ => Some(self.tany_with_pos(name.get_pos(self.state.arena)?)),
         }
     }
 
@@ -2690,7 +2705,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 ));
                 let ty = self
                     .node_to_ty(hint)
-                    .or_else(|| self.node_to_ty(*initializer))
+                    .or_else(|| self.infer_const(*name, *initializer))
                     .unwrap_or_else(|| tany());
                 let modifiers = read_member_modifiers(modifiers.iter());
                 if self
@@ -3323,7 +3338,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 Node::ListItem(&(name, value)) => Some(shallow_decl_defs::ShallowClassConst {
                     abstract_: false,
                     name: self.get_name("", name)?,
-                    type_: self.node_to_ty(value).unwrap_or_else(|| tany()),
+                    type_: self.infer_const(name, value).unwrap_or_else(|| tany()),
                 }),
                 n => panic!("Expected an enum case, got {:?}", n),
             }

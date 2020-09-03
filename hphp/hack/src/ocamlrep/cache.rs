@@ -47,6 +47,9 @@ impl MemoizationCache {
 
     #[inline(always)]
     pub fn memoized(&self, input: usize, size_in_bytes: usize, f: impl FnOnce() -> usize) -> usize {
+        if size_in_bytes == 0 {
+            return f();
+        }
         let memoized_output = match self.cache.borrow().as_ref().map(|cache| {
             cache
                 .get(&input)

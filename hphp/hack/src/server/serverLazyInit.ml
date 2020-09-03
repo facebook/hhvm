@@ -33,29 +33,47 @@ module DepSet = Typing_deps.DepSet
 module Dep = Typing_deps.Dep
 module SLC = ServerLocalConfig
 
-let lock_and_load_deptable
-    (fn : string) ~(ignore_hh_version : bool) ~(fail_if_missing : bool) : unit =
-  if String.length fn = 0 && not fail_if_missing then
-    Hh_logger.log "The dependency file was not specified - ignoring"
-  else
-    (* The SQLite deptable must be loaded in the master process *)
+type deptable =
+  | SQLiteDeptable of string
+  | CustomDeptable of string
 
-    (* Take a lock on the info file for the SQLite *)
-    try
-      LoadScriptUtils.lock_saved_state fn;
-      let start_t = Unix.gettimeofday () in
-      SharedMem.load_dep_table_sqlite fn ignore_hh_version;
-      let (_t : float) =
-        Hh_logger.log_duration "Did read the dependency file (sec)" start_t
-      in
-      HackEventLogger.load_deptable_end start_t
-    with
-    | (SharedMem.Sql_assertion_failure 11 | SharedMem.Sql_assertion_failure 14)
-      as e ->
-      (* SQL_corrupt *)
-      let stack = Caml.Printexc.get_raw_backtrace () in
-      LoadScriptUtils.delete_corrupted_saved_state fn;
-      Caml.Printexc.raise_with_backtrace e stack
+let deptable_with_sqlite_file (genv : genv) (sqlite_fn : string) : deptable =
+  match ServerArgs.with_dep_graph_v2 genv.options with
+  | None -> SQLiteDeptable sqlite_fn
+  | Some fn -> CustomDeptable fn
+
+let lock_and_load_deptable
+    (deptable : deptable) ~(ignore_hh_version : bool) ~(fail_if_missing : bool)
+    : unit =
+  match deptable with
+  | SQLiteDeptable fn ->
+    if String.length fn = 0 && not fail_if_missing then
+      Hh_logger.log "The dependency file was not specified - ignoring"
+    else begin
+      (* The SQLite deptable must be loaded in the master process *)
+
+      (* Take a lock on the info file for the SQLite *)
+      try
+        LoadScriptUtils.lock_saved_state fn;
+        let start_t = Unix.gettimeofday () in
+        SharedMem.load_dep_table_sqlite fn ignore_hh_version;
+        let (_t : float) =
+          Hh_logger.log_duration "Did read the dependency file (sec)" start_t
+        in
+        HackEventLogger.load_deptable_end start_t
+      with
+      | (SharedMem.Sql_assertion_failure 11 | SharedMem.Sql_assertion_failure 14)
+        as e ->
+        (* SQL_corrupt *)
+        let stack = Caml.Printexc.get_raw_backtrace () in
+        LoadScriptUtils.delete_corrupted_saved_state fn;
+        Caml.Printexc.raise_with_backtrace e stack
+    end
+  | CustomDeptable fn ->
+    Hh_logger.log "Loading custom dependency graph from %s" fn;
+    (match Typing_deps.load_custom_dep_graph fn with
+    | Ok () -> ()
+    | Error msg -> failwith msg)
 
 let merge_saved_state_futures
     (genv : genv)
@@ -111,10 +129,10 @@ let merge_saved_state_futures
         ServerArgs.ignore_hh_version genv.ServerEnv.options
       in
       let fail_if_missing = not genv.local_config.SLC.can_skip_deptable in
-      lock_and_load_deptable
-        result.State_loader.deptable_fn
-        ~ignore_hh_version
-        ~fail_if_missing;
+      let deptable =
+        deptable_with_sqlite_file genv result.State_loader.deptable_fn
+      in
+      lock_and_load_deptable deptable ~ignore_hh_version ~fail_if_missing;
       let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
       let naming_table_fallback_path =
         get_naming_table_fallback_path genv downloaded_naming_table_path
@@ -251,7 +269,8 @@ let use_precomputed_state_exn
   in
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
   let fail_if_missing = not genv.local_config.SLC.can_skip_deptable in
-  lock_and_load_deptable deptable_fn ~ignore_hh_version ~fail_if_missing;
+  let deptable = deptable_with_sqlite_file genv deptable_fn in
+  lock_and_load_deptable deptable ~ignore_hh_version ~fail_if_missing;
   let changes = Relative_path.set_of_list changes in
   let naming_changes = Relative_path.set_of_list naming_changes in
   let prechecked_changes = Relative_path.set_of_list prechecked_changes in

@@ -122,6 +122,8 @@ module NamingHash : sig
   val to_int64 : t -> int64
 end
 
+val load_custom_dep_graph : string -> (unit, string) result
+
 val trace : bool ref
 
 val add_dependency_callback :

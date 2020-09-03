@@ -1,0 +1,20 @@
+
+(library
+  (name depgraph)
+  (modules)
+  (wrapped false)
+  (preprocess (pps ppx_deriving.std))
+  (self_build_stubs_archive (depgraph))
+)
+
+(rule
+  (targets libdepgraph_stubs.a)
+  (deps (source_tree %{workspace_root}/src))
+  (locks /cargo)
+  (action
+    (run %{workspace_root}/scripts/build_rust_to_ocaml.sh
+      depgraph
+      depgraph
+    )
+  )
+)

@@ -16,6 +16,7 @@
     typing_deps)
   (libraries
     collections
+    depgraph
     file_info
     heap_shared_mem_hash
     relative_path

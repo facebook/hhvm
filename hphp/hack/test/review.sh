@@ -39,7 +39,7 @@ for f in "$@"; do
   echo "$ARROW $f $(tput sgr0)"
   # `-b a` means to number all lines; this is the same as
   # --body-numbering=a, but works with both BSD and GNU `nl`
-  nl -b a "$f"
+  nl -b a "$(reconstitute_full_path "$f" "$SOURCE_ROOT")"
   echo
 
   OUT_BASE=$(reconstitute_full_path "$f" "$OUTPUT_ROOT")

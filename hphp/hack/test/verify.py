@@ -412,17 +412,21 @@ def report_failures(
         (exp_dir, out_dir) = get_exp_out_dirs(first_test_file)
         output_dir_var = "SOURCE_ROOT=%s OUTPUT_ROOT=%s " % (exp_dir, out_dir)
 
+        fbcode = find_in_ancestors("fbcode", first_test_file)
+        review_script = os.path.join(fbcode, "hphp", "hack", "test", "review.sh")
+
         def fname_map_var(f: str) -> str:
             return "hphp/hack/" + os.path.relpath(f, out_dir)
 
         print(
-            "OUT_EXT=%s EXP_EXT=%s %s%sNO_COPY=%s ./hphp/hack/test/review.sh %s"
+            "OUT_EXT=%s EXP_EXT=%s %s%sNO_COPY=%s %s %s"
             % (
                 out_extension,
                 expect_extension,
                 fallback_expect_ext_var,
                 output_dir_var,
                 "true" if no_copy else "false",
+                review_script,
                 " ".join(map(fname_map_var, fnames)),
             )
         )

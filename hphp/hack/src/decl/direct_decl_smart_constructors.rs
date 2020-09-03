@@ -1628,6 +1628,12 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 self.convert_tapply_to_tgeneric(tk),
                 self.convert_tapply_to_tgeneric(tv),
             ))),
+            Ty_::Ttuple(tys) => Ty_::Ttuple(
+                self.slice_from_iter(
+                    tys.iter()
+                        .map(|&targ| self.convert_tapply_to_tgeneric(targ)),
+                ),
+            ),
             _ => return ty,
         };
         Ty(ty.0, self.alloc(ty_))

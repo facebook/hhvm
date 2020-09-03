@@ -1,4 +1,6 @@
-<?hh
+<?hh // strict
+
+class E<Ta, Tb> {}
 
 interface I<
   Ta as arraykey,
@@ -14,4 +16,5 @@ interface I<
   Tdarr as darray<Ta, Tb>,
   Tvarr as varray<Ta>,
   Tvdarr as varray_or_darray<Ta, Tb>,
->{}
+  Ttuple as (Ta, Tb),
+> {}

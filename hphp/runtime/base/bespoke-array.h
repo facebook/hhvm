@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/bespoke-layout.h"
 
 namespace HPHP {
 
@@ -33,7 +34,7 @@ inline bool shouldTestBespokeArrayLikes() {
 }
 
 namespace bespoke {
-// Hide "BespokeLayout" and its implementations to the rest of the codebase.
+// Hide Layout and its implementations to the rest of the codebase.
 struct Layout;
 // Maybe wrap this array in a LoggingArray, based on runtime options.
 ArrayData* maybeMakeLoggingArray(ArrayData*);
@@ -54,9 +55,13 @@ struct BespokeArray : ArrayData {
   static BespokeArray* asBespoke(ArrayData*);
   static const BespokeArray* asBespoke(const ArrayData*);
 
-  const bespoke::Layout* layout() const;
-  void setLayout(const bespoke::Layout*);
+  BespokeLayout layout() const;
 
+protected:
+  const bespoke::Layout* layoutRaw() const;
+  void setLayoutRaw(const bespoke::Layout*);
+
+public:
   size_t heapSize() const;
   void scan(type_scan::Scanner& scan) const;
   void setLegacyArrayBit(bool legacy);

@@ -49,7 +49,7 @@ static_assert(kSizeIndex == 0 ||
               kSizeIndex2Size[kSizeIndex - 1] < sizeof(LoggingArray),
               "kSizeIndex must be the smallest size for LoggingArray");
 
-LoggingLayout* s_layout = new LoggingLayout();
+Layout* s_layout = new LoggingLayout();
 std::atomic<bool> g_emitLoggingArrays;
 
 // The bespoke kind for a vanilla kind.
@@ -127,7 +127,7 @@ LoggingArray* LoggingArray::Make(ArrayData* ad, LoggingProfile* profile) {
   auto lad = static_cast<LoggingArray*>(tl_heap->objMallocIndex(kSizeIndex));
   lad->initHeader_16(getBespokeKind(ad->kind()), OneReference, ad->auxBits());
   lad->m_size = ad->size();
-  lad->setLayout(s_layout);
+  lad->setLayoutRaw(s_layout);
   lad->wrapped = ad;
   lad->profile = profile;
   assertx(lad->checkInvariants());
@@ -143,7 +143,7 @@ LoggingArray* LoggingArray::MakeStatic(ArrayData* ad, LoggingProfile* profile) {
       RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
   lad->initHeader_16(getBespokeKind(ad->kind()), StaticValue, ad->auxBits());
   lad->m_size = ad->size();
-  lad->setLayout(s_layout);
+  lad->setLayoutRaw(s_layout);
   lad->wrapped = ad;
   lad->profile = profile;
   assertx(lad->checkInvariants());
@@ -162,7 +162,7 @@ bool LoggingArray::checkInvariants() const {
   assertx(wrapped->kindIsValid());
   assertx(wrapped->size() == size());
   assertx(wrapped->toDataType() == toDataType());
-  assertx(asBespoke(this)->layout() == s_layout);
+  assertx(layoutRaw() == s_layout);
   assertx(m_kind == getBespokeKind(wrapped->kind()));
   assertx(isLegacyArray() == wrapped->isLegacyArray());
   return true;

@@ -14,8 +14,9 @@
   +----------------------------------------------------------------------+
 */
 
-#ifndef HPHP_BESPOKE_LAYOUT_H_
-#define HPHP_BESPOKE_LAYOUT_H_
+// don't mix this file up with runtime/base/bespoke-layout.h !
+#ifndef HPHP_BESPOKEDIR_LAYOUT_H_
+#define HPHP_BESPOKEDIR_LAYOUT_H_
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/bespoke-array.h"
@@ -91,4 +92,4 @@ const Layout* layoutForIndex(uint16_t index);
 
 }}
 
-#endif // HPHP_BESPOKE_LAYOUT_H_
+#endif // HPHP_BESPOKEDIR_LAYOUT_H_

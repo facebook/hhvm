@@ -565,8 +565,8 @@ fn emit_id(emitter: &mut Emitter, env: &Env, id: &tast::Sid) -> Result {
         G__NAMESPACE__ => instr::string(env.namespace.name.as_ref().map_or("", |s| &s[..])),
         EXIT | DIE => return emit_exit(emitter, env, None),
         _ => {
-            //panic!("TODO: uncomment after D19350786 lands")
-            //let cid: ConstId = r#const::Type::from_ast_name(&s);
+            // panic!("TODO: uncomment after D19350786 lands")
+            // let cid: ConstId = r#const::Type::from_ast_name(&s);
             let cid: ConstId = string_utils::strip_global_ns(&s).to_string().into();
             emit_symbol_refs::State::add_constant(emitter, cid.clone());
             return Ok(emit_pos_then(p, instr::lit_const(CnsE(cid))));

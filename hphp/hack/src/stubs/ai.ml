@@ -100,7 +100,3 @@ module TraceService = struct
 
   let go _ _ _ _ = ""
 end
-
-module QueryService = struct
-  let go _ _ = ""
-end

@@ -14,7 +14,17 @@ type 'a shape_map = 'a ShapeMap.t [@@deriving eq, show]
 
 type 'a local_id_map = 'a Local_id.Map.t [@@deriving eq]
 
-let pp_local_id_map _ fmt _ = Format.pp_print_string fmt "<local_id_map>"
+let pp_local_id_map _ fmt map =
+  Format.fprintf fmt "@[<hov 2>{";
+  ignore
+    (Local_id.Map.fold
+       (fun key _ sep ->
+         if sep then Format.fprintf fmt "@ ";
+         Local_id.pp fmt key;
+         true)
+       map
+       false);
+  Format.fprintf fmt "}@]"
 
 type pos = Ast_defs.pos [@@deriving eq, show, ord]
 

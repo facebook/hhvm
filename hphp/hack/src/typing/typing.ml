@@ -190,6 +190,37 @@ let is_return_disposable_fun_type env ty =
          (Typing_disposable.is_disposable_type env ft.ft_ret.et_type)
   | _ -> false
 
+(* Turn an environment into a local_id_map suitable to be embedded
+ * into an AssertEnv statement
+ *)
+let annot_map env =
+  match Env.next_cont_opt env with
+  | Some { Typing_per_cont_env.local_types; _ } ->
+    Some (Local_id.Map.map (fun (ty, pos, _expr_id) -> (pos, ty)) local_types)
+  | None -> None
+
+(* Similar to annot_map above, but filters the map to only contain
+ * information about locals in lset
+ *)
+let refinement_annot_map env lset =
+  match annot_map env with
+  | Some map ->
+    let map =
+      Local_id.Map.filter (fun lid _ -> Local_id.Set.mem lid lset) map
+    in
+    if Local_id.Map.is_empty map then
+      None
+    else
+      Some map
+  | None -> None
+
+let add_block_annots ~pos ?join_map ?refinement_map blk =
+  let mk_join_annot map = (pos, Aast.AssertEnv (Aast.Join, map)) in
+  let mk_refinement_annot map = (pos, Aast.AssertEnv (Aast.Refinement, map)) in
+  Option.to_list (Option.map ~f:mk_join_annot join_map)
+  @ Option.to_list (Option.map ~f:mk_refinement_annot refinement_map)
+  @ blk
+
 (* Given a localized parameter type and parameter information, infer
  * a type for the parameter default expression (if present) and check that
  * it is a subtype of the parameter type (if present). If no parameter type
@@ -566,10 +597,10 @@ and stmt_ env pos st =
       branch
         env
         (fun env ->
-          let env = condition env true te in
+          let (env, _lset) = condition env true te in
           block env b1)
         (fun env ->
-          let env = condition env false te in
+          let (env, _lset) = condition env false te in
           block env b2)
     in
     (* TODO TAST: annotate with joined types *)
@@ -677,14 +708,14 @@ and stmt_ env pos st =
                 (* The following is necessary in case there is an assignment in the
                  * expression *)
                 let (env, te, _) = expr env e in
-                let env = condition env true te in
+                let (env, _lset) = condition env true te in
                 let env = LEnv.update_next_from_conts env [C.Do; C.Next] in
                 let (env, tb) = block env b in
                 (env, tb))
           in
           let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
           let (env, te, _) = expr env e in
-          let env = condition env false te in
+          let (env, _lset) = condition env false te in
           let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
           (env, (tb, te)))
     in
@@ -698,17 +729,20 @@ and stmt_ env pos st =
                 let env =
                   LEnv.update_next_from_conts env [C.Continue; C.Next]
                 in
+                let join_map = annot_map env in
                 (* The following is necessary in case there is an assignment in the
                  * expression *)
                 let (env, te, _) = expr env e in
-                let env = condition env true te in
+                let (env, lset) = condition env true te in
+                let refinement_map = refinement_annot_map env lset in
                 (* TODO TAST: avoid repeated generation of block *)
                 let (env, tb) = block env b in
+                let tb = add_block_annots ~pos ?join_map ?refinement_map tb in
                 (env, tb))
           in
           let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
           let (env, te, _) = expr env e in
-          let env = condition env false te in
+          let (env, _lset) = condition env false te in
           let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
           (env, (te, tb)))
     in
@@ -750,7 +784,7 @@ and stmt_ env pos st =
                 (* The following is necessary in case there is an assignment in the
                  * expression *)
                 let (env, te2, _) = expr env e2 in
-                let env = condition env true te2 in
+                let (env, _lset) = condition env true te2 in
                 let (env, tb) = block env b in
                 let env =
                   LEnv.update_next_from_conts env [C.Continue; C.Next]
@@ -760,7 +794,7 @@ and stmt_ env pos st =
           in
           let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
           let (env, te2, _) = expr env e2 in
-          let env = condition env false te2 in
+          let (env, _lset) = condition env false te2 in
           let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
           (env, (te1, te2, te3, tb)))
     in
@@ -1183,7 +1217,7 @@ and eif env ~(expected : ExpectedTy.t option) p c e1 e2 =
   let condition = condition ~lhs_of_null_coalesce:false in
   let (env, tc, tyc) = raw_expr ~lhs_of_null_coalesce:false env c in
   let parent_lenv = env.lenv in
-  let env = condition env true tc in
+  let (env, _lset) = condition env true tc in
   let (env, te1, ty1) =
     match e1 with
     | None ->
@@ -1195,7 +1229,7 @@ and eif env ~(expected : ExpectedTy.t option) p c e1 e2 =
   in
   let lenv1 = env.lenv in
   let env = { env with lenv = parent_lenv } in
-  let env = condition env false tc in
+  let (env, _lset) = condition env false tc in
   let (env, te2, ty2) = expr ?expected env e2 in
   let lenv2 = env.lenv in
   let env = LEnv.union_lenvs env parent_lenv lenv1 lenv2 in
@@ -1528,7 +1562,7 @@ and expr_
   | Assert (AE_assert e) ->
     let (env, te, _) = expr env e in
     let env = LEnv.save_and_merge_next_in_cont env C.Exit in
-    let env = condition env true te in
+    let (env, _lset) = condition env true te in
     make_result
       env
       p
@@ -2087,7 +2121,7 @@ and expr_
     let c = Ast_defs.(equal_bop bop Ampamp) in
     let (env, te1, _) = expr env e1 in
     let lenv = env.lenv in
-    let env = condition env c te1 in
+    let (env, _lset) = condition env c te1 in
     let (env, te2, _) = expr env e2 in
     let env = { env with lenv } in
     make_result
@@ -6309,6 +6343,11 @@ and make_a_local_of env e =
  * argument refine is a function that takes the type of the variable
  * and returns a refined type (making necessary changes to the
  * environment, which is threaded through).
+ *
+ * All refinement functions return, in addition to the updated
+ * environment, a (conservative) set of all the locals that got
+ * refined. This set is used to construct AssertEnv statmements in
+ * the typed AST.
  *)
 and refine_lvalue_type env (((_p, ty), _) as te) ~refine =
   let (env, ty) = refine env ty in
@@ -6316,15 +6355,16 @@ and refine_lvalue_type env (((_p, ty), _) as te) ~refine =
   let (env, localopt) = make_a_local_of env e in
   (* TODO TAST: generate an assignment to the fake local in the TAST *)
   match localopt with
-  | Some local -> set_local env local ty
-  | None -> env
+  | Some lid -> (set_local env lid ty, Local_id.Set.singleton (snd lid))
+  | None -> (env, Local_id.Set.empty)
 
 and condition_nullity ~nonnull (env : env) te =
   match te with
   (* assignment: both the rhs and lhs of the '=' must be made null/non-null *)
   | (_, Aast.Binop (Ast_defs.Eq None, var, te)) ->
-    let env = condition_nullity ~nonnull env te in
-    condition_nullity ~nonnull env var
+    let (env, lset1) = condition_nullity ~nonnull env te in
+    let (env, lset2) = condition_nullity ~nonnull env var in
+    (env, Local_id.Set.union lset1 lset2)
   (* case where `Shapes::idx(...)` must be made null/non-null *)
   | ( _,
       Aast.Call
@@ -6369,9 +6409,9 @@ and condition
   | Aast.True
   | Aast.Expr_list []
     when not tparamet ->
-    LEnv.drop_cont env C.Next
-  | Aast.False when tparamet -> LEnv.drop_cont env C.Next
-  | Aast.Expr_list [] -> env
+    (LEnv.drop_cont env C.Next, Local_id.Set.empty)
+  | Aast.False when tparamet -> (LEnv.drop_cont env C.Next, Local_id.Set.empty)
+  | Aast.Expr_list [] -> (env, Local_id.Set.empty)
   | Aast.Expr_list [x] -> condition env tparamet x
   | Aast.Expr_list (_ :: xs) -> condition env tparamet (pty, Aast.Expr_list xs)
   | Aast.Call (Cnormal, (_, Aast.Id (_, func)), _, [param], None)
@@ -6391,7 +6431,7 @@ and condition
   | Aast.Binop (Ast_defs.Eq None, _, _) ->
     let (env, ety) = Env.expand_type env ty in
     (match deref ety with
-    | (_, Tprim Tbool) -> env
+    | (_, Tprim Tbool) -> (env, Local_id.Set.empty)
     | _ -> condition_nullity ~nonnull:tparamet env te)
   | Aast.Binop (((Ast_defs.Diff | Ast_defs.Diff2) as op), e1, e2) ->
     let op =
@@ -6403,47 +6443,48 @@ and condition
     condition env (not tparamet) (pty, Aast.Binop (op, e1, e2))
   | Aast.Id (_, s) when SN.Rx.is_enabled s ->
     (* when Rx\IS_ENABLED is false - switch env to non-reactive *)
-    if not tparamet then
-      Env.set_env_reactive env Nonreactive
-    else
-      env
+    let env =
+      if not tparamet then
+        Env.set_env_reactive env Nonreactive
+      else
+        env
+    in
+    (env, Local_id.Set.empty)
   (* Conjunction of conditions. Matches the two following forms:
       if (cond1 && cond2)
       if (!(cond1 || cond2))
   *)
   | Aast.Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2)
     when Bool.equal tparamet Ast_defs.(equal_bop bop Ampamp) ->
-    let env = condition env tparamet e1 in
+    let (env, lset1) = condition env tparamet e1 in
     (* This is necessary in case there is an assignment in e2
      * We essentially redo what has been undone in the
      * `Binop (Ampamp|Barbar)` case of `expr` *)
     let (env, _, _) = expr env (Tast.to_nast_expr e2) in
-    let env = condition env tparamet e2 in
-    env
+    let (env, lset2) = condition env tparamet e2 in
+    (env, Local_id.Set.union lset1 lset2)
   (* Disjunction of conditions. Matches the two following forms:
       if (cond1 || cond2)
       if (!(cond1 && cond2))
   *)
   | Aast.Binop (((Ast_defs.Ampamp | Ast_defs.Barbar) as bop), e1, e2)
     when Bool.equal tparamet Ast_defs.(equal_bop bop Barbar) ->
-    let (env, (), ()) =
+    let (env, lset1, lset2) =
       branch
         env
         (fun env ->
           (* Either cond1 is true and we don't know anything about cond2... *)
-          let env = condition env tparamet e1 in
-          (env, ()))
+          condition env tparamet e1)
         (fun env ->
           (* ... Or cond1 is false and therefore cond2 must be true *)
-          let env = condition env (not tparamet) e1 in
+          let (env, _lset) = condition env (not tparamet) e1 in
           (* Similarly to the conjunction case, there might be an assignment in
           cond2 which we must account for. Again we redo what has been undone in
           the `Binop (Ampamp|Barbar)` case of `expr` *)
           let (env, _, _) = expr env (Tast.to_nast_expr e2) in
-          let env = condition env tparamet e2 in
-          (env, ()))
+          condition env tparamet e2)
     in
-    env
+    (env, Local_id.Set.union lset1 lset2)
   | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_dict_or_darray ->
     safely_refine_is_array env `HackDictOrDArray p f lv
@@ -6480,7 +6521,7 @@ and condition
         class_for_refinement env p reason ivar_pos ivar_ty hint_ty
       in
       let (env, refined_ty) = Inter.intersect env reason ivar_ty hint_ty in
-      set_local env ivar refined_ty
+      (set_local env ivar refined_ty, Local_id.Set.singleton (snd ivar))
     in
     let (env, hint_ty) =
       if not tparamet then
@@ -6489,7 +6530,7 @@ and condition
         (env, hint_ty)
     in
     refine_type env hint_ty
-  | _ -> env
+  | _ -> (env, Local_id.Set.empty)
 
 (** Transform a hint like `A<_>` to a localized type like `A<T#1>` for refinment of
 an instance variable. ivar_ty is the previous type of that instance variable. *)

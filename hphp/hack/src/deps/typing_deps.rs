@@ -5,64 +5,11 @@
 
 #![cfg_attr(use_unstable_features, feature(test))]
 
-use depgraph::reader::{DepGraph, DepGraphOpener};
 use fnv::FnvHasher;
 use ocamlrep::Value;
-use ocamlrep_ocamlpool::ocaml_ffi;
 use std::convert::TryInto;
-use std::ffi::OsString;
 use std::hash::Hasher;
 use std::panic;
-
-extern "C" {
-    fn assert_master();
-}
-
-static mut UNSAFE_DEPGRAPH: Option<Box<UnsafeDepGraph>> = None;
-
-/// We wrap the dependency graph in an unsafe structure.
-///
-/// We need to do this, because we want to store both the
-/// mmap and the dependency graph that references it in a
-/// global variable.
-pub struct UnsafeDepGraph {
-    /// The opener contains the open mmap.
-    _do_not_reference_opener: DepGraphOpener,
-    /// The actual dependency graph references the opener above,
-    /// as such we must make sure that the dependency graph
-    /// does NOT outlive the opener.
-    ///
-    /// The lifetime on this is a LIE.
-    _do_not_reference_depgraph: DepGraph<'static>,
-}
-
-impl UnsafeDepGraph {
-    pub fn new(opener: DepGraphOpener) -> Result<Self, String> {
-        let depgraph: DepGraph<'_> = opener.open()?;
-
-        // Safety:
-        //
-        // We cast a bounded lifetime to a static lifetime. This is
-        // of course a lie. However, using the API of UnsafeDepGraph,
-        // we make sure that any reference to `depgraph` will not
-        // outlive the opener.
-        let depgraph: DepGraph<'static> = unsafe { std::mem::transmute(depgraph) };
-        Ok(Self {
-            _do_not_reference_opener: opener,
-            _do_not_reference_depgraph: depgraph,
-        })
-    }
-
-    /// Return a reference to the depgraph.
-    ///
-    /// The returned depgraph cannot outlive `self`.
-    ///
-    /// Explicit lifetimes for clarity.
-    #[allow(clippy::needless_lifetimes)]
-    pub fn depgraph<'a>(&'a self) -> &'a DepGraph<'a> {
-        &self._do_not_reference_depgraph
-    }
-}
 
 /// Variant types used in the naming table.
 ///
@@ -246,25 +193,6 @@ pub fn combine_hashes(dep_hash: i32, naming_hash: i64) -> i64 {
     let upper_31_bits = (dep_hash as i64) << 31;
     let lower_31_bits = naming_hash & 0b01111111_11111111_11111111_11111111;
     upper_31_bits | lower_31_bits
-}
-
-ocaml_ffi! {
-    fn hh_load_custom_dep_graph(depgraph_fn: OsString) -> Result<(), String> {
-        unsafe {
-            assert_master();
-        }
-
-        let opener = DepGraphOpener::from_path(&depgraph_fn).map_err(
-            |err| format!("could not open dep graph file: {:?}", err)
-        )?;
-        let unsafe_depgraph = UnsafeDepGraph::new(opener)?;
-
-        unsafe {
-            UNSAFE_DEPGRAPH = Some(Box::new(unsafe_depgraph));
-        }
-
-        Ok(())
-    }
 }
 
 #[cfg(all(test, use_unstable_features))]

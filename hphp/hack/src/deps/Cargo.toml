@@ -10,7 +10,5 @@ path = "typing_deps.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-depgraph = { path = "../depgraph" }
 ocamlrep = { path = "../ocamlrep" }
-ocamlrep_ocamlpool = { path = "../ocamlrep_ocamlpool" }
 fnv = "1.0"

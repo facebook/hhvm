@@ -264,9 +264,6 @@ end
 (* Module keeping track of what object depends on what. *)
 (*****************************************************************************)
 
-external load_custom_dep_graph : string -> (unit, string) result
-  = "hh_load_custom_dep_graph"
-
 let allow_dependency_table_reads = Graph.hh_allow_dependency_table_reads
 
 let get_ideps_from_hash x =

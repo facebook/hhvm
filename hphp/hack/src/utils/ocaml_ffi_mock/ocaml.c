@@ -6,7 +6,6 @@
  *
  */
 
-void assert_master() {}
 void ocamlpool_enter(void) {}
 void ocamlpool_leave(void) {}
 void ocamlpool_cursor(void) {}

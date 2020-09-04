@@ -76,6 +76,8 @@ module type Syntax_S = sig
     ; enum_colon                                         : t
     ; enum_base                                          : t
     ; enum_type                                          : t
+    ; enum_includes_keyword                              : t
+    ; enum_includes_list                                 : t
     ; enum_left_brace                                    : t
     ; enum_enumerators                                   : t
     ; enum_right_brace                                   : t
@@ -1093,7 +1095,7 @@ module type Syntax_S = sig
   val make_variable_expression : t -> t
   val make_pipe_variable_expression : t -> t
   val make_file_attribute_specification : t -> t -> t -> t -> t -> t
-  val make_enum_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
+  val make_enum_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_enumerator : t -> t -> t -> t -> t
   val make_record_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_record_field : t -> t -> t -> t -> t

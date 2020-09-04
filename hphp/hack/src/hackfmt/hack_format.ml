@@ -208,10 +208,18 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           enum_colon = colon_kw;
           enum_base = base;
           enum_type;
+          enum_includes_keyword = enum_includes_kw;
+          enum_includes_list;
           enum_left_brace = left_b;
           enum_enumerators = enumerators;
           enum_right_brace = right_b;
         } ->
+      let after_each_ancestor is_last =
+        if is_last then
+          Nothing
+        else
+          space_split ()
+      in
       Concat
         [
           t env attr;
@@ -223,6 +231,33 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Space;
           SplitWith Cost.Base;
           Nest [Space; t env base; Space; t env enum_type; Space];
+          when_present enum_includes_kw (fun () ->
+              Nest
+                [
+                  Space;
+                  Split;
+                  t env enum_includes_kw;
+                  WithRule
+                    ( Rule.Parental,
+                      Nest
+                        [
+                          Span
+                            [
+                              Space;
+                              ( if list_length enum_includes_list = 1 then
+                                SplitWith Cost.Base
+                              else
+                                Split );
+                              Nest
+                                [
+                                  handle_possible_list
+                                    env
+                                    ~after_each:after_each_ancestor
+                                    enum_includes_list;
+                                ];
+                            ];
+                        ] );
+                ]);
           braced_block_nest
             env
             left_b

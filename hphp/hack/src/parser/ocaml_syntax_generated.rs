@@ -204,7 +204,7 @@ where
       Self { syntax, value }
     }
 
-    fn make_enum_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self) -> Self {
+    fn make_enum_declaration(ctx: &C, arg0: Self, arg1: Self, arg2: Self, arg3: Self, arg4: Self, arg5: Self, arg6: Self, arg7: Self, arg8: Self, arg9: Self, arg10: Self) -> Self {
       let children = [
           &arg0.value, 
           &arg1.value, 
@@ -214,7 +214,9 @@ where
           &arg5.value, 
           &arg6.value, 
           &arg7.value, 
-          &arg8.value
+          &arg8.value, 
+          &arg9.value, 
+          &arg10.value
       ];
       let value = V::from_values(&children);
       let syntax = Self::make(
@@ -230,7 +232,9 @@ where
               arg5.syntax, 
               arg6.syntax, 
               arg7.syntax, 
-              arg8.syntax
+              arg8.syntax, 
+              arg9.syntax, 
+              arg10.syntax
           ],
       );
       Self { syntax, value }

@@ -1145,6 +1145,7 @@ and enum_ env e =
   {
     N.e_base = hint env e.Aast.e_base;
     N.e_constraint = Option.map e.Aast.e_constraint (hint env);
+    N.e_includes = List.map ~f:(hint env) e.Aast.e_includes;
   }
 
 and type_paraml ?(forbid_this = false) env tparams =

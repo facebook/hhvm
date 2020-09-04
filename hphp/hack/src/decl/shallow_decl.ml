@@ -288,9 +288,6 @@ let method_ env c m =
     sm_deprecated;
   }
 
-let enum_type hint e =
-  { te_base = hint e.e_base; te_constraint = Option.map e.e_constraint hint }
-
 let class_ env c =
   let hint = Decl_hint.hint env in
   let (req_extends, req_implements) = split_reqs c in
@@ -316,6 +313,17 @@ let class_ env c =
   in
   let where_constraints =
     List.map c.c_where_constraints (where_constraint env)
+  in
+  let enum_type hint e =
+    let et =
+      {
+        te_base = hint e.e_base;
+        te_constraint = Option.map e.e_constraint hint;
+        te_includes = List.map ~f:hint e.e_includes;
+      }
+    in
+    List.iter ~f:add_cstr_dep et.te_includes;
+    et
   in
   List.iter ~f:add_cstr_dep sc_extends;
   List.iter ~f:add_cstr_dep sc_uses;

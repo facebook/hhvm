@@ -131,6 +131,7 @@ let given_text_tokens =
     make_token_node "If" "if" ();
     make_token_node "Implements" "implements" ();
     make_token_node "Include" "include" ();
+    make_token_node "Includes" "includes" ();
     make_token_node "Include_once" "include_once" ();
     make_token_node "Inout" "inout" ();
     make_token_node "Instanceof" "instanceof" ();

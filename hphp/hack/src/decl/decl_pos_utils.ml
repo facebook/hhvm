@@ -309,7 +309,11 @@ struct
   and requirement (p, t) = (pos p, ty t)
 
   and enum_type te =
-    { te_base = ty te.te_base; te_constraint = ty_opt te.te_constraint }
+    {
+      te_base = ty te.te_base;
+      te_constraint = ty_opt te.te_constraint;
+      te_includes = List.map ~f:ty te.te_includes;
+    }
 
   and typedef tdef =
     {

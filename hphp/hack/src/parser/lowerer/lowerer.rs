@@ -4816,6 +4816,7 @@ where
                     enum_: Some(ast::Enum_ {
                         base: Self::p_hint(&c.enum_base, env)?,
                         constraint: Self::mp_optional(Self::p_tconstraint_ty, &c.enum_type, env)?,
+                        includes: Self::could_map(Self::p_hint, &c.enum_includes_list, env)?,
                     }),
 
                     doc_comment: doc_comment_opt,

@@ -3347,8 +3347,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         extends: Self::R,
         constraint: Self::R,
         _arg6: Self::R,
-        cases: Self::R,
+        includes: Self::R,
         _arg8: Self::R,
+        cases: Self::R,
+        _arg10: Self::R,
     ) -> Self::R {
         let id = unwrap_or_return!(
             self.get_name(self.state.namespace_builder.current_namespace(), name)
@@ -3392,6 +3394,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             _ => None,
         };
 
+        let includes = self.filter_map_to_slice(includes, |node| self.node_to_ty(node));
+
         let cls = shallow_decl_defs::ShallowClass {
             mode: match self.state.file_mode_builder {
                 FileModeBuilder::None | FileModeBuilder::Pending => Mode::Mstrict,
@@ -3422,6 +3426,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             enum_type: Some(EnumType {
                 base: hint,
                 constraint,
+                includes,
             }),
             // NB: We have no intention of populating this field. Any errors
             // historically emitted during shallow decl should be migrated to a

@@ -76,6 +76,7 @@ type t =
   | If
   | Implements
   | Include
+  | Includes
   | Include_once
   | Inout
   | Instanceof
@@ -291,6 +292,7 @@ let from_string keyword ~only_reserved =
   | "if"                                  -> Some If
   | "implements"                          -> Some Implements
   | "include"                             -> Some Include
+  | "includes"                            -> Some Includes
   | "include_once"                        -> Some Include_once
   | "inout"                               -> Some Inout
   | "instanceof"                          -> Some Instanceof
@@ -480,6 +482,7 @@ let to_string kind =
   | If                            -> "if"
   | Implements                    -> "implements"
   | Include                       -> "include"
+  | Includes                      -> "includes"
   | Include_once                  -> "include_once"
   | Inout                         -> "inout"
   | Instanceof                    -> "instanceof"

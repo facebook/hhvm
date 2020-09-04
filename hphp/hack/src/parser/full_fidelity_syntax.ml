@@ -579,6 +579,8 @@ module WithToken(Token: TokenType) = struct
         enum_colon;
         enum_base;
         enum_type;
+        enum_includes_keyword;
+        enum_includes_list;
         enum_left_brace;
         enum_enumerators;
         enum_right_brace;
@@ -589,6 +591,8 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc enum_colon in
          let acc = f acc enum_base in
          let acc = f acc enum_type in
+         let acc = f acc enum_includes_keyword in
+         let acc = f acc enum_includes_list in
          let acc = f acc enum_left_brace in
          let acc = f acc enum_enumerators in
          let acc = f acc enum_right_brace in
@@ -2437,6 +2441,8 @@ module WithToken(Token: TokenType) = struct
         enum_colon;
         enum_base;
         enum_type;
+        enum_includes_keyword;
+        enum_includes_list;
         enum_left_brace;
         enum_enumerators;
         enum_right_brace;
@@ -2447,6 +2453,8 @@ module WithToken(Token: TokenType) = struct
         enum_colon;
         enum_base;
         enum_type;
+        enum_includes_keyword;
+        enum_includes_list;
         enum_left_brace;
         enum_enumerators;
         enum_right_brace;
@@ -4296,6 +4304,8 @@ module WithToken(Token: TokenType) = struct
         enum_colon;
         enum_base;
         enum_type;
+        enum_includes_keyword;
+        enum_includes_list;
         enum_left_brace;
         enum_enumerators;
         enum_right_brace;
@@ -4306,6 +4316,8 @@ module WithToken(Token: TokenType) = struct
         "enum_colon";
         "enum_base";
         "enum_type";
+        "enum_includes_keyword";
+        "enum_includes_list";
         "enum_left_brace";
         "enum_enumerators";
         "enum_right_brace";
@@ -6220,6 +6232,8 @@ module WithToken(Token: TokenType) = struct
           enum_colon;
           enum_base;
           enum_type;
+          enum_includes_keyword;
+          enum_includes_list;
           enum_left_brace;
           enum_enumerators;
           enum_right_brace;
@@ -6231,6 +6245,8 @@ module WithToken(Token: TokenType) = struct
           enum_colon;
           enum_base;
           enum_type;
+          enum_includes_keyword;
+          enum_includes_list;
           enum_left_brace;
           enum_enumerators;
           enum_right_brace;
@@ -8323,6 +8339,8 @@ module WithToken(Token: TokenType) = struct
         enum_colon
         enum_base
         enum_type
+        enum_includes_keyword
+        enum_includes_list
         enum_left_brace
         enum_enumerators
         enum_right_brace
@@ -8334,6 +8352,8 @@ module WithToken(Token: TokenType) = struct
           enum_colon;
           enum_base;
           enum_type;
+          enum_includes_keyword;
+          enum_includes_list;
           enum_left_brace;
           enum_enumerators;
           enum_right_brace;

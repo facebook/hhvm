@@ -105,6 +105,7 @@ pub struct ClassDeclChildren {
 pub struct EnumDeclChildren {
     pub name: Node,
     pub attributes: Node,
+    pub includes: Node,
 }
 
 #[derive(Debug)]
@@ -286,13 +287,19 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         _colon: Self::R,
         _base: Self::R,
         _type: Self::R,
+        _includes: Self::R,
+        includes_list: Self::R,
         _left_brace: Self::R,
         _enumerators: Self::R,
         _right_brace: Self::R,
     ) -> Self::R {
         match name {
             Node::Ignored => Node::Ignored,
-            _ => Node::EnumDecl(Box::new(EnumDeclChildren { name, attributes })),
+            _ => Node::EnumDecl(Box::new(EnumDeclChildren {
+                name,
+                attributes,
+                includes: includes_list,
+            })),
         }
     }
 

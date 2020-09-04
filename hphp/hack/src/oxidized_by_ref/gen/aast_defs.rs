@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ccab1d04cf025b84b76a7cbd6076b345>>
+// @generated SignedSource<<704a489757b9e414f1e644a87279ddf1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -266,6 +266,7 @@ pub use oxidized::aast_defs::TypedefVisibility;
 pub struct Enum_<'a> {
     pub base: Hint<'a>,
     pub constraint: Option<Hint<'a>>,
+    pub includes: &'a [Hint<'a>],
 }
 impl<'a> TrivialDrop for Enum_<'a> {}
 

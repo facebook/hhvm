@@ -5432,6 +5432,8 @@
             }
           },
           "enum_type":{"kind":"missing"},
+          "enum_includes_keyword":{"kind":"missing"},
+          "enum_includes_list":{"kind":"missing"},
           "enum_left_brace":{"kind":"missing"},
           "enum_enumerators":{
             "kind":"list",

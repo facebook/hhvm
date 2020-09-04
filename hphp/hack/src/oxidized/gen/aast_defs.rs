@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<10df4570472fe5a172c56f96ca92ac20>>
+// @generated SignedSource<<2115be0b1b8fd48e0eb0152173df14eb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -477,6 +477,7 @@ impl TrivialDrop for TypedefVisibility {}
 pub struct Enum_ {
     pub base: Hint,
     pub constraint: Option<Hint>,
+    pub includes: Vec<Hint>,
 }
 
 #[derive(

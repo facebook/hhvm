@@ -241,6 +241,7 @@ and pu_member_type = {
 and enum_type = {
   te_base: decl_ty;
   te_constraint: decl_ty option;
+  te_includes: decl_ty list;
 }
 
 and record_field_req =

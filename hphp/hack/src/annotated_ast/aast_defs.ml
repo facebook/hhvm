@@ -196,6 +196,7 @@ and typedef_visibility =
 and enum_ = {
   e_base: hint;
   e_constraint: hint option;
+  e_includes: hint list;
 }
 
 and where_constraint = hint * Ast_defs.constraint_kind * hint

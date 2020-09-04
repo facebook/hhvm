@@ -164,6 +164,8 @@ let schema : schema_node list =
           ("colon", Token);
           ("base", Aggregate Specifier);
           ("type", ZeroOrOne (Just "TypeConstraint"));
+          ("includes_keyword", ZeroOrOne Token);
+          ("includes_list", ZeroOrMore (Aggregate Specifier));
           ("left_brace", Token);
           ("enumerators", ZeroOrMore (Just "Enumerator"));
           ("right_brace", Token);

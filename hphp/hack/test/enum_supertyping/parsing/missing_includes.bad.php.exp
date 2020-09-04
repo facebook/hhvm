@@ -1,0 +1,9 @@
+(12,14)-(12,14) A left brace `{` is expected here.
+(12,16)-(12,16) An equals sign `=` is expected here.
+(12,16)-(12,17) Invalid expression in constant initializer
+(12,18)-(12,18) An expression is expected here.
+(12,18)-(12,18) A semicolon `;` is expected here.
+(12,21)-(12,21) An equals sign `=` is expected here.
+(12,21)-(12,22) Invalid expression in constant initializer
+(12,22)-(12,22) An expression is expected here.
+(12,22)-(12,22) A semicolon `;` is expected here.

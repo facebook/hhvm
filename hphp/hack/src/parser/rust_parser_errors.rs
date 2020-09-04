@@ -75,6 +75,7 @@ enum UnstableFeatures {
     ExpressionTrees,
     PocketUniverses,
     CoeffectsProvisional,
+    EnumSupertyping,
 }
 
 use BinopAllowsAwaitInPositions::*;
@@ -5696,6 +5697,11 @@ where
                 ),
                 _ => (),
             },
+            EnumDeclaration(x) => match &x.enum_includes_keyword.syntax {
+                Token(_) => self.check_can_use_feature(node, &UnstableFeatures::EnumSupertyping),
+                _ => (),
+            },
+
             _ => (),
         }
 

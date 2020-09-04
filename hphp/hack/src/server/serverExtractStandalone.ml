@@ -1252,9 +1252,12 @@ and add_signature_dependencies ctx env obj =
       | Class _ ->
         List.iter (Class.all_ancestors cls) (fun (_, ty) -> add_dep ty);
         List.iter (Class.all_ancestor_reqs cls) (fun (_, ty) -> add_dep ty);
-        Option.iter (Class.enum_type cls) ~f:(fun { te_base; te_constraint } ->
+        Option.iter
+          (Class.enum_type cls)
+          ~f:(fun { te_base; te_constraint; te_includes } ->
             add_dep te_base;
-            Option.iter te_constraint ~f:add_dep)
+            Option.iter te_constraint ~f:add_dep;
+            List.iter te_includes ~f:add_dep)
       | AllMembers _ ->
         (* AllMembers is used for dependencies on enums, so we should depend on all constants *)
         List.iter (Class.consts cls) (fun (name, c) ->

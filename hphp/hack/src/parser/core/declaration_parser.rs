@@ -213,9 +213,13 @@ where
     }
 
     fn parse_enum_declaration(&mut self, attrs: S::R) -> S::R {
-        //
+        // enum-name-list-nonempty:
+        //   :  enum-name enum-name-list
+        // includes-declaration-opt:
+        //   :
+        //   :  includes enum-name-list-nonempty
         // enum-declaration:
-        //   attribute-specification-opt enum  name  enum-base  type-constraint-opt /
+        //   attribute-specification-opt enum  name  enum-base  type-constraint-opt  includes-declaration-opt /
         //     {  enumerator-list-opt  }
         // enum-base:
         //   :  int
@@ -232,6 +236,7 @@ where
         let base =
             self.parse_type_specifier(false /* allow_var */, true /* allow_attr */);
         let enum_type = self.parse_type_constraint_opt();
+        let (classish_includes, classish_includes_list) = self.parse_classish_includes_opt();
         let (left_brace, enumerators, right_brace) =
             self.parse_braced_list(|x: &mut Self| x.parse_enumerator_list_opt());
         S!(
@@ -243,6 +248,8 @@ where
             colon,
             base,
             enum_type,
+            classish_includes,
+            classish_includes_list,
             left_brace,
             enumerators,
             right_brace,
@@ -609,6 +616,19 @@ where
         }
     }
 
+    fn parse_classish_includes_opt(&mut self) -> (S::R, S::R) {
+        if self.peek_token_kind() != TokenKind::Includes {
+            let missing1 = S!(make_missing, self, self.pos());
+            let missing2 = S!(make_missing, self, self.pos());
+            (missing1, missing2)
+        } else {
+            let includes_token = self.next_token();
+            let includes_token = S!(make_token, self, includes_token);
+            let includes_list = self.parse_special_type_list();
+            (includes_token, includes_list)
+        }
+    }
+
     fn parse_xhp_keyword(&mut self) -> (S::R, bool) {
         let xhp = self.optional_token(TokenKind::XHP);
         let is_missing = xhp.is_missing();
@@ -707,8 +727,8 @@ where
     }
 
     fn parse_special_type_list(&mut self) -> S::R {
-        // An extends / implements list is a comma-separated list of types, but
-        // very special types; we want the types to consist of a name and an
+        // An extends / implements / includes list is a comma-separated list of types,
+        // but very special types; we want the types to consist of a name and an
         // optional generic type argument list.
         //
         // TODO: Can the type name be of the form "foo::bar"? Those do not

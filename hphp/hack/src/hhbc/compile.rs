@@ -130,7 +130,7 @@ where
     let opts =
         Options::from_configs(&env.config_jsons, &env.config_list).map_err(anyhow::Error::msg)?;
 
-    let (parsing_t, mut parse_result) = profile(|| {
+    let (mut parse_result, parsing_t) = time(|| {
         parse_file(
             &opts,
             stack_limit,
@@ -146,7 +146,7 @@ where
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
     );
 
-    let (codegen_t, program) = match &mut parse_result {
+    let (program, codegen_t) = match &mut parse_result {
         Either::Right(ast) => {
             let namespace = RcOc::new(NamespaceEnv::empty(
                 emitter.options().hhvm.aliased_namespaces_cloned().collect(),
@@ -162,15 +162,15 @@ where
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace), ast);
             emit_pu_rust::translate(ast);
             let e = &mut emitter;
-            profile(move || emit(e, &env, namespace, ast))
+            time(move || emit(e, &env, namespace, ast))
         }
         Either::Left((pos, msg, is_runtime_error)) => {
-            profile(|| emit_fatal(*is_runtime_error, pos, msg))
+            time(|| emit_fatal(*is_runtime_error, pos, msg))
         }
     };
     let program = program.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))?;
 
-    let (printing_t, print_result) = profile(|| {
+    let (print_result, printing_t) = time(|| {
         print_program(
             &mut Context::new(
                 &mut emitter,
@@ -344,11 +344,7 @@ fn parse_file(
     }
 }
 
-fn profile<T, F>(f: F) -> (f64, T)
-where
-    F: FnOnce() -> T,
-{
-    let t0 = std::time::Instant::now();
-    let ret = f();
-    (t0.elapsed().as_secs_f64(), ret)
+fn time<T>(f: impl FnOnce() -> T) -> (T, f64) {
+    let (r, t) = profile_rust::time(f);
+    (r, t.as_secs_f64())
 }

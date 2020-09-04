@@ -1,6 +1,7 @@
 extern crate libc;
 
 use std::mem;
+use std::time::{Duration, Instant};
 
 /// Gets CPU times for this and all child processes.
 /// Returns
@@ -65,6 +66,13 @@ where
         (now - start) / (if iteration == 0 { 1. } else { iteration as f64 }),
         iteration,
     );
+}
+
+pub fn time<T>(f: impl FnOnce() -> T) -> (T, Duration) {
+    let start = Instant::now();
+    let result = f();
+    let time_taken = start.elapsed();
+    (result, time_taken)
 }
 
 #[cfg(test)]

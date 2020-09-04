@@ -297,6 +297,7 @@ dependencies = [
  "options 0.0.0",
  "oxidized 0.0.0",
  "parser_core_types 0.0.0",
+ "profile_rust 0.0.0",
  "stack_limit 0.0.0",
 ]
 
@@ -2021,6 +2022,13 @@ version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "unicode-xid 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "profile_rust"
+version = "0.0.0"
+dependencies = [
+ "libc 0.2.66 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

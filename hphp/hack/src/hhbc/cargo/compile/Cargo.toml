@@ -23,6 +23,7 @@ ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
+profile_rust = { path = "../../../utils/perf/cargo/profile" }
 stack_limit = { path = "../../../utils/stack_limit" }
 anyhow = "1.0"
 bitflags = "1.2"

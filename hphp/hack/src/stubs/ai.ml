@@ -11,7 +11,7 @@ let magic_builtins = [||]
 
 let do_ _ _ _ = ()
 
-let go _ _ _ _ _ = Errors.empty
+let go _ _ _ _ = Errors.empty
 
 let go_incremental _ _ _ _ _ = Errors.empty
 

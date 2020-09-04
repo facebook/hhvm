@@ -36,14 +36,12 @@ let ai_check
     if not all_passed then
       (env, t)
     else
-      let check_mode = ServerArgs.check_mode genv.options in
       let errorl =
         Ai.go
           genv.workers
           files_info
           (Provider_utils.ctx_from_server_env env)
           ai_opt
-          check_mode
       in
       let env = { env with errorl (* Just Zonk errors. *) } in
       (env, Hh_logger.log_duration "Ai" t)

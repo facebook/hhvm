@@ -25,36 +25,6 @@ let get_hhserver () =
   else
     exe_name
 
-(* Sometimes systemd-run is available but we can't use it. For example, the
- * systemd might not have a proper working user session, so we might not be
- * able to run commands via systemd-run as a user process *)
-let can_run_systemd () =
-  if not Sys.unix then
-    false
-  else
-    (* if we're on Unix, verify systemd-run is in the path *)
-    let systemd_binary =
-      try
-        Unix.open_process_in "which systemd-run 2> /dev/null"
-        |> In_channel.input_line
-      with _ -> None
-    in
-    if is_none systemd_binary then
-      false
-    else
-      (* Use `timeout` in case it hangs mysteriously.
-       * `--quiet` only suppresses stdout. *)
-      let ic =
-        Unix.open_process_in
-          "timeout 1 systemd-run --scope --quiet --user -- true 2> /dev/null"
-      in
-      (* If all goes right, `systemd-run` will return immediately with exit code 0
-       * and run `true` asynchronously as a service. If it goes wrong, it will exit
-       * with a non-zero exit code *)
-      match Unix.close_process_in ic with
-      | Unix.WEXITED 0 -> true
-      | _ -> false
-
 type env = {
   root: Path.t;
   from: string;
@@ -187,33 +157,9 @@ let start_server (env : env) =
       Unix.(stdin, stdout, stderr)
   in
   try
-    let (exe, args) =
-      if can_run_systemd () then
-        (* launch command
-         * systemd-run    (creates a transient cgroup)
-         *    --scope     (allows synchronous execution of hh_server)
-         *    --user      (specifies this to be a user instance)
-         *    --quiet     (suppresses output to stdout)
-         *    --slice=hack.slice   (puts created units under hack.slice)
-         *    hh_server <hh_server args>
-         *)
-        let systemd_exe = "systemd-run" in
-        let systemd_args =
-          [|
-            systemd_exe; "--scope"; "--user"; "--quiet"; "--slice=hack.slice";
-          |]
-        in
-        (systemd_exe, Array.concat [systemd_args; hh_server_args])
-      else
-        (hh_server, hh_server_args)
+    let server_pid =
+      Unix.create_process hh_server hh_server_args stdin stdout stderr
     in
-    if not silent then
-      Printf.eprintf
-        "Server launched with the following command:\n\t%s\n%!"
-        (String.concat
-           ~sep:" "
-           (Array.to_list (Array.map ~f:Filename.quote args)));
-    let server_pid = Unix.create_process exe args stdin stdout stderr in
     Unix.close out_fd;
 
     match Sys_utils.waitpid_non_intr [] server_pid with

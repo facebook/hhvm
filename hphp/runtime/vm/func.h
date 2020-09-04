@@ -598,6 +598,9 @@ struct Func final {
 
   void setHasForeignThis(bool);
 
+  void registerInDataMap();
+  void deregisterInDataMap();
+
   /////////////////////////////////////////////////////////////////////////////
   // Definition context.                                                [const]
 
@@ -1430,6 +1433,7 @@ private:
   bool m_shouldSampleJit : 1;
   bool m_serialized : 1;
   bool m_hasForeignThis : 1;
+  bool m_registeredInDataMap : 1;
   int m_maxStackCells{0};
   uint64_t m_inoutBitVal{0};
   Unit* const m_unit;

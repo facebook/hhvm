@@ -101,6 +101,7 @@ Func::Func(Unit& unit, const StringData* name, Attr attrs)
   , m_shouldSampleJit(StructuredLog::coinflip(RuntimeOption::EvalJitSampleRate))
   , m_serialized(false)
   , m_hasForeignThis(false)
+  , m_registeredInDataMap(false)
   , m_unit(&unit)
   , m_shared(nullptr)
   , m_attrs(attrs)
@@ -118,6 +119,7 @@ Func::Func(
   , m_shouldSampleJit(StructuredLog::coinflip(RuntimeOption::EvalJitSampleRate))
   , m_serialized(false)
   , m_hasForeignThis(false)
+  , m_registeredInDataMap(false)
   , m_unit(&unit)
   , m_shared(nullptr)
   , m_attrs(attrs)
@@ -130,6 +132,8 @@ Func::~Func() {
   if (m_fullName != nullptr && m_maybeIntercepted != -1) {
     unregister_intercept_flag(fullNameStr(), &m_maybeIntercepted);
   }
+  // Should've deregistered in Func::destroy() or Func::freeClone()
+  assertx(!m_registeredInDataMap);
 #ifndef NDEBUG
   validate();
   m_magic = ~m_magic;
@@ -156,13 +160,11 @@ void Func::destroy(Func* func) {
 
     assertx(s_funcVec.get(func->m_funcId) == func);
     s_funcVec.set(func->m_funcId, nullptr);
-    func->m_funcId = InvalidFuncId;
 
-    if (RuntimeOption::EvalEnableReverseDataMap) {
-      // We register Funcs to data_map in Func::init() and Func::clone(), both
-      // of which are accompanied by calls to Func::setNewFuncId().
-      data_map::deregister(func);
+    if (func->m_registeredInDataMap) {
+      func->deregisterInDataMap();
     }
+    func->m_funcId = InvalidFuncId;
 
     if (s_treadmill.load(std::memory_order_acquire)) {
       Treadmill::enqueue([func](){ destroy(func); });
@@ -185,6 +187,9 @@ void Func::freeClone() {
   if (m_funcId != InvalidFuncId) {
     assertx(s_funcVec.get(m_funcId) == this);
     s_funcVec.set(m_funcId, nullptr);
+    if (m_registeredInDataMap) {
+      deregisterInDataMap();
+    }
     m_funcId = InvalidFuncId;
   }
 
@@ -212,14 +217,11 @@ Func* Func::clone(Class* cls, const StringData* name) const {
   f->m_u.setCls(cls);
   f->setFullName(numParams);
 
-  if (RuntimeOption::EvalEnableReverseDataMap) {
-    data_map::register_start(f);
-  }
-
   if (f != this) {
     f->m_cachedFunc = rds::Link<LowPtr<Func>, rds::Mode::NonLocal>{};
     f->m_maybeIntercepted = -1;
     f->m_isPreFunc = false;
+    f->m_registeredInDataMap = false;
   }
 
   return f;
@@ -242,10 +244,6 @@ void Func::init(int numParams) {
   if (!preClass()) {
     setNewFuncId();
     setFullName(numParams);
-
-    if (RuntimeOption::EvalEnableReverseDataMap) {
-      data_map::register_start(this);
-    }
   } else {
     m_fullName = nullptr;
   }
@@ -342,6 +340,23 @@ void Func::finishedEmittingParams(std::vector<ParamInfo>& fParams) {
     m_paramCounts |= 1;
   }
   assertx(numParams() == fParams.size());
+}
+
+void Func::registerInDataMap() {
+  assertx(m_funcId != InvalidFuncId &&
+          (!m_isPreFunc || m_cloned.flag.test_and_set()));
+  assertx(!m_registeredInDataMap);
+  assertx(mallocEnd());
+  data_map::register_start(this);
+  m_registeredInDataMap = true;
+}
+
+void Func::deregisterInDataMap() {
+  assertx(m_registeredInDataMap);
+  assertx(m_funcId != InvalidFuncId &&
+          (!m_isPreFunc || m_cloned.flag.test_and_set()));
+  data_map::deregister(this);
+  m_registeredInDataMap = false;
 }
 
 bool Func::isMemoizeImplName(const StringData* name) {

@@ -310,6 +310,10 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   }
 
   f->finishedEmittingParams(fParams);
+
+  if (RuntimeOption::EvalEnableReverseDataMap && !preClass) {
+    f->registerInDataMap();
+  }
   return f;
 }
 

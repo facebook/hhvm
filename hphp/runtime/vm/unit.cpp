@@ -564,6 +564,13 @@ void setupClass(Class* newClass, NamedEntity* nameList) {
   if (RuntimeOption::EvalEnableReverseDataMap) {
     // The corresponding deregister is in NamedEntity::removeClass().
     data_map::register_start(newClass);
+    for (unsigned i = 0, n = newClass->numMethods(); i < n; i++) {
+      if (auto meth = newClass->getMethod(i)) {
+        if (meth->cls() == newClass) {
+          meth->registerInDataMap();
+        }
+      }
+    }
   }
 }
 }

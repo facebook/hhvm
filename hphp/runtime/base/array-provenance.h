@@ -126,38 +126,18 @@ public:
     return tag;
   }
 
-  static Tag RuntimeLocation(
-    const StringData* filename,
-    int line
-  ) {
+  static Tag RuntimeLocation(const StringData* filename, int line) {
     Tag tag;
     tag.m_filename = ptrAndKind(Kind::RuntimeLocation, filename);
     tag.m_line = line;
     return tag;
   }
 
-  static Tag RuntimeLocation(
-    const char* file,
-    int line
-  ) {
-    return RuntimeLocation(makeStaticString(file), line);
-  }
-
-  static Tag RuntimeLocationPoison(
-    const StringData* filename,
-    int line
-  ) {
+  static Tag RuntimeLocationPoison(const StringData* filename, int line) {
     Tag tag;
     tag.m_filename = ptrAndKind(Kind::RuntimeLocationPoison, filename);
     tag.m_line = line;
     return tag;
-  }
-
-  static Tag RuntimeLocationPoison(
-    const char* file,
-    int line
-  ) {
-    return RuntimeLocationPoison(makeStaticString(file), line);
   }
 
   Kind kind() const { return extractKind(m_filename.get()); }
@@ -274,15 +254,21 @@ private:
   Tag m_saved_tag;
 };
 
-#define ARRPROV_HERE() (                        \
-    ::HPHP::arrprov::Tag::RuntimeLocation(      \
-      __FILE__,                                 \
-      __LINE__                                  \
-    )                                           \
-  )
+#define ARRPROV_HERE() ([&]{                                      \
+    static auto const file = makeStaticString(__FILE__);          \
+    return ::HPHP::arrprov::Tag::RuntimeLocation(file, __LINE__); \
+  }())
+
+#define ARRPROV_HERE_POISON() ([&]{                                     \
+    static auto const file = makeStaticString(__FILE__);                \
+    return ::HPHP::arrprov::Tag::RuntimeLocationPoison(file, __LINE__); \
+  }())
 
 #define ARRPROV_USE_RUNTIME_LOCATION() \
   ::HPHP::arrprov::TagOverride ap_override(ARRPROV_HERE())
+
+#define ARRPROV_USE_POISONED_LOCATION() \
+  ::HPHP::arrprov::TagOverride ap_override(ARRPROV_HERE_POISON())
 
 // Set tag even if provenanance is currently disabled.
 // This is useful for runtime initialization and config parsing code, where
@@ -292,14 +278,6 @@ private:
       ARRPROV_HERE(),                             \
       ::HPHP::arrprov::TagOverride::ForceTag{}    \
   )
-
-#define ARRPROV_USE_POISONED_LOCATION()           \
-  ::HPHP::arrprov::TagOverride ap_override(       \
-    ::HPHP::arrprov::Tag::RuntimeLocationPoison(  \
-      __FILE__,                                   \
-      __LINE__                                    \
-    )                                             \
-)
 
 #define ARRPROV_USE_VMPC() \
   ::HPHP::arrprov::TagOverride ap_override({})

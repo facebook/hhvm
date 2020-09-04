@@ -1303,6 +1303,8 @@ struct RuntimeOption {
   F(bool, WidenIsArray, false)                                          \
   F(bool, WidenIsArrayLogs, true)                                       \
   F(bool, EnablePerFileCoverage, false)                                 \
+  /* Should we use the autoload map from the repo */                    \
+  F(bool, UseRepoAutoloadMap, true)                                     \
   F(bool, LogOnIsArrayFunction, false)                                  \
   /* Unit prefetching options */                                        \
   F(uint32_t, UnitPrefetcherMaxThreads, 0)                              \

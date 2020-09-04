@@ -236,16 +236,18 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
           decoder.assertDone();
         }
 
-        {
-          RepoTxnQuery query(txn, stmt);
-          auto key = std::string("autoloadmap");
-          query.bindStdString("@key", key);
-          query.step();
-          if (!query.row()) {
-            throw RepoExc("Can't find key = 'autoloadmap' in %s", tbl.c_str());
+        if (RuntimeOption::EvalUseRepoAutoloadMap) {
+          {
+            RepoTxnQuery query(txn, stmt);
+            auto key = std::string("autoloadmap");
+            query.bindStdString("@key", key);
+            query.step();
+            if (!query.row()) {
+              throw RepoExc("Can't find key = 'autoloadmap' in %s", tbl.c_str());
+            }
+            BlobDecoder decoder = query.getBlob(0, true);
+            s_globalData.AutoloadMap = RepoAutoloadMapBuilder::serde(decoder);
           }
-          BlobDecoder decoder = query.getBlob(0, true);
-          s_globalData.AutoloadMap = RepoAutoloadMapBuilder::serde(decoder);
         }
       }
 

@@ -1,1 +1,1 @@
--vEval.UnitPrefetcherMaxThreads=1
+-vEval.UseRepoAutoloadMap=0 -vEval.UnitPrefetcherMaxThreads=1

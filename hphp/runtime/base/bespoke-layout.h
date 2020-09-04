@@ -36,6 +36,13 @@ struct BespokeLayout {
     assertx(layout);
   }
 
+  bool operator==(const BespokeLayout& o) const {
+    return o.m_layout == m_layout;
+  }
+  bool operator!=(const BespokeLayout& o) const {
+    return !(*this == o);
+  }
+
   /* get the index of this layout */
   uint16_t index() const;
 

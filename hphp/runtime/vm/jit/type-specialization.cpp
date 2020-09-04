@@ -46,16 +46,29 @@ bool ArraySpec::operator<=(const ArraySpec& rhs) const {
   assertx(rhs.checkInvariants());
   auto const& lhs = *this;
 
-  if (lhs == Bottom() || rhs == Top()) return true;
-  if (lhs == Top() || rhs == Bottom()) return false;
+  if (rhs == Top()) return true;
+  if (lhs == Bottom()) return true;
+  if (rhs == Bottom()) return false; // since lhs is not Bottom
+  if (lhs == Top()) return false; // since rhs is not Top
+
+  if (rhs.vanilla()) {
+    if (!lhs.vanilla()) {
+      return false;
+    }
+  } else if (auto const index = rhs.bespokeIndex()) {
+    if (lhs.bespokeIndex() != index) {
+      return false;
+    }
+  }
 
   // It's possible to subtype RAT::Array types, but it's potentially O(n), so
   // we just don't do it. It's okay for <= to return false negative results.
-  if ((rhs.m_sort & HasType) &&
-      !((lhs.m_sort & HasType) && lhs.m_ptr == rhs.m_ptr)) {
+
+  // if LHS drops RHS's type, it's bigger
+  if (rhs.type() && lhs.type() != rhs.type()) {
     return false;
   }
-  if (rhs.vanilla() && !lhs.vanilla()) return false;
+
   return true;
 }
 
@@ -67,14 +80,31 @@ ArraySpec ArraySpec::operator|(const ArraySpec& rhs) const {
   if (lhs <= rhs) return rhs;
   if (rhs <= lhs) return lhs;
 
-  // Note that each bit in m_sort represents some fact we know about the type.
-  // To union the types, we must intersect (and thus lose) some of these facts.
   auto result = lhs;
-  result.m_sort &= rhs.m_sort;
-  if (lhs.m_ptr != rhs.m_ptr) {
-    result.m_sort &= ~HasType;
+
+  // lhs and rhs are both neither top nor bottom
+  // but we can still have m_sort of Top and a RAT specialization
+  assertx(lhs.m_sort != Sort::Bottom);
+  assertx(rhs.m_sort != Sort::Bottom);
+
+  if (lhs.m_sort == Sort::Top ||
+      rhs.m_sort == Sort::Top) {
+    result.m_sort = Sort::Top;
+  } else if (lhs.bespokeIndex() && rhs.bespokeIndex()) {
+    if (lhs.bespokeIndex() != rhs.bespokeIndex()) {
+      result.m_sort = Sort::Top;
+    }
+  } else if (lhs.vanilla() != rhs.vanilla()) {
+    result.m_sort = Sort::Top;
+  }
+
+  // now address the RAT types
+  if (rhs.type() == lhs.type()) {
+    result.m_ptr = rhs.m_ptr;
+  } else {
     result.m_ptr = 0;
   }
+
   assertx(result.checkInvariants());
   return result;
 }
@@ -87,47 +117,64 @@ ArraySpec ArraySpec::operator&(const ArraySpec& rhs) const {
   if (lhs <= rhs) return lhs;
   if (rhs <= lhs) return rhs;
 
-  // Note that each bit in m_sort represents some fact we know about the type.
-  // To intersect the types, we may union (and thus gain) some of these facts.
   auto result = lhs;
-  result.m_sort |= rhs.m_sort;
+  // lhs and rhs are both neither top nor bottom
+  // but we can still have m_sort of Top and a RAT specialization
+  assertx(lhs.m_sort != Sort::Bottom);
+  assertx(rhs.m_sort != Sort::Bottom);
 
-  // If both types have an RAT and they differ, keep the "better" one.
-  if (rhs.m_sort & HasType) {
-    if ((lhs.m_sort & HasType) && lhs.m_ptr != rhs.m_ptr) {
-      auto const rat = chooseRATArray(lhs.getRawType(), rhs.getRawType());
-      result.m_ptr = reinterpret_cast<uintptr_t>(rat);
-    } else {
-      result.m_ptr = rhs.m_ptr;
-    }
+  if (lhs.m_sort == Sort::Top) {
+    result.m_sort = rhs.m_sort;
+  } else if (rhs.m_sort == Sort::Top) {
+    result.m_sort = lhs.m_sort;
+  } else if (lhs.vanilla() != rhs.vanilla()) {
+    return Bottom();
+  } else if (lhs.bespokeIndex() != rhs.bespokeIndex()) {
+    return Bottom();
+  }
+
+  if (!rhs.type()) {
+    result.m_ptr = lhs.m_ptr;
+  } else if (!lhs.type()) {
+    result.m_ptr = rhs.m_ptr;
+  } else if (lhs.type() != rhs.type()) {
+    // If both types have an RAT and they differ, keep the "better" one.
+    // (see above)
+    auto const rat = chooseRATArray(lhs.type(), rhs.type());
+    result.m_ptr = reinterpret_cast<uintptr_t>(rat);
   }
 
   result.checkInvariants();
   return result;
 }
 
+std::optional<BespokeLayout> ArraySpec::bespokeLayout() const {
+  if (auto const idx = bespokeIndex()) {
+    return BespokeLayout::LayoutFromIndex(*idx);
+  } else {
+    return {};
+  }
+}
+
 std::string ArraySpec::toString() const {
   std::string result;
-  if ((m_sort & IsVanilla) && result.empty()) {
+
+  if (vanilla()) {
     result += "=Vanilla";
+  } else if (auto const layout = bespokeLayout()) {
+    folly::format(&result, "=Bespoke({})", layout->describe());
   }
-  if (m_sort & HasType) {
-    auto const type = reinterpret_cast<const RepoAuthType::Array*>(m_ptr);
+
+  if (auto const ty = type()) {
     auto const sign = result.empty() ? '=' : ':';
-    result += folly::to<std::string>(sign, show(*type));
+    result += folly::to<std::string>(sign, show(*ty));
   }
   return result;
 }
 
 bool ArraySpec::checkInvariants() const {
-  if ((*this == Top()) || (*this == Bottom())) return true;
-  assertx(m_sort != IsTop);
-  assertx(!(m_sort & IsBottom));
-  if (m_sort & HasType) {
-    assertx(m_ptr != 0);
-  } else {
-    assertx(m_ptr == 0);
-  }
+  // if m_sort is bottom, we should _not_ have a RAT type set
+  assertx(IMPLIES(m_sort == Sort::Bottom, !type()));
   return true;
 }
 

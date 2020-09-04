@@ -18,6 +18,7 @@
 #define incl_HPHP_JIT_TYPE_H_
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/bespoke-layout.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/repo-auth-type.h"
@@ -768,6 +769,13 @@ public:
    *   TPackedArr.narrowToVanilla()  == TPackedArr
    */
   Type narrowToVanilla() const;
+
+  /*
+   * Return a copy of this type with an ArraySpec for the given bespoke index
+   *   TVanillaArr.narrowToBespokeLayout(<some layout>) == TArr
+   *   (TVec|TInt).narrowToBespokeLayout(<some layout>) == TVec=Bespoke(<some layout>)|TIn
+   */
+  Type narrowToBespokeLayout(BespokeLayout) const;
 
   /*
    * Return a copy of this type without a vanilla ArraySpec. Examples:

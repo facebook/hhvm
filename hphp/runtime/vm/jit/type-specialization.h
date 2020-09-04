@@ -18,6 +18,7 @@
 #define incl_HPHP_JIT_TYPE_SPECIALIZATION_H_
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/bespoke-layout.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 
@@ -57,6 +58,7 @@ struct ArraySpec {
    */
   constexpr explicit ArraySpec(LayoutTag = LayoutTag::Unknown);
   explicit ArraySpec(const RepoAuthType::Array* arrTy);
+  explicit ArraySpec(BespokeLayout layout);
 
   /*
    * Set or unset the vanilla bits on an ArraySpec.
@@ -65,11 +67,17 @@ struct ArraySpec {
   ArraySpec widenToBespoke() const;
 
   /*
-   * Post-deserialization fixup. We expose getRawType() so that we can adjust
-   * the underlying type for non-vanilla ArraySpecs where type() hides it.
+   * Assign the bespoke layout of the ArraySpec, if it is possible
+   * to do so without a contradiction--otherwise return Top
    */
-  const RepoAuthType::Array* getRawType() const;
-  void setRawType(const RepoAuthType::Array* adjusted);
+  ArraySpec narrowToBespokeLayout(BespokeLayout layout) const;
+
+  /*
+   * Only for post-deserialization fixup.
+   *
+   * As a precondition, the ArraySpec must already have a RAT type
+   */
+  void setType(const RepoAuthType::Array* adjusted);
 
   /*
    * Human-readable debug string.
@@ -85,6 +93,11 @@ struct ArraySpec {
   uintptr_t bits() const;
   const RepoAuthType::Array* type() const;
   bool vanilla() const;
+
+  /*
+   * Retrieve and lookup the bespoke layout for this ArraySpec, if presentj
+   */
+  std::optional<BespokeLayout> bespokeLayout() const;
 
   /*
    * Casts.
@@ -130,31 +143,39 @@ private:
   bool checkInvariants() const;
 
   /*
-   * Mask of specializations that a given ArraySpec represents.
+   * Allowed values of m_sort. Anything above Sort::Vanilla denotes a bespoke
+   * layout with index m_sort - Sort::Vanilla
    */
-  enum SortOf : uint16_t {
-    IsTop     = 0,
-    IsBottom  = 1 << 0,
-    HasType   = 1 << 1,
-    IsVanilla = 1 << 2,
+  enum class Sort : uint16_t {
+    /* possibly vanilla or bespoke */
+    Top = 0,
+    Bottom,
+    /* definitely vanilla */
+    Vanilla
+    /* larger values mean definitely a particular bespoke layout */
   };
-  friend SortOf operator|(SortOf, SortOf);
-  friend SortOf operator&(SortOf, SortOf);
+
+  /* convert an index to a Sort */
+  static Sort sortForBespokeIndex(uint16_t);
+  /* convert a sort to an index, or return 0 if the sort does not represent an
+   * index */
+  static std::optional<uint16_t> bespokeIndexForSort(Sort);
+  std::optional<uint16_t> bespokeIndex() const;
 
   /*
    * Data members.
    */
   union {
     struct {
-      uintptr_t m_sort : 16;
+      Sort m_sort : 16;
+      /*
+       * holds the repo-auth type, or nullptr if there isn't one
+       */
       uintptr_t m_ptr : 48;
     };
     uintptr_t m_bits;
   };
 };
-
-ArraySpec::SortOf operator|(ArraySpec::SortOf l, ArraySpec::SortOf r);
-ArraySpec::SortOf operator&(ArraySpec::SortOf l, ArraySpec::SortOf r);
 
 ///////////////////////////////////////////////////////////////////////////////
 

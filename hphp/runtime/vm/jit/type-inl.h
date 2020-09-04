@@ -18,6 +18,7 @@
 #error "type-inl.h should only be included by type.h"
 #endif
 
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
@@ -567,8 +568,8 @@ inline ArraySpec Type::arrSpec() const {
   // to represent "bespoke" ArraySpecs. (We're punning array-like vals here.)
   if (m_hasConstVal) {
     if (m_ptr != Ptr::NotPtr) return ArraySpec::Top();
-    if (!m_arrVal->isVanilla()) return ArraySpec::Top();
-    return ArraySpec{ArraySpec::LayoutTag::Vanilla};
+    if (m_arrVal->isVanilla()) return ArraySpec{ArraySpec::LayoutTag::Vanilla};
+    return ArraySpec{BespokeArray::asBespoke(m_arrVal)->layout()};
   }
 
   assertx(m_arrSpec != ArraySpec::Bottom());

@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/bespoke-layout.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
@@ -40,7 +41,6 @@
 #include <folly/gen/Base.h>
 
 #include <vector>
-
 
 namespace HPHP { namespace jit {
 
@@ -74,15 +74,23 @@ constexpr Type::bits_t Type::kClsSpecBits;
 Type Type::narrowToVanilla() const {
   if (!supports(SpecKind::Array)) return *this;
   if (supports(SpecKind::Class) || supports(SpecKind::Record)) return *this;
-  auto const oldSpec = arrSpec();
-  return oldSpec.vanilla() ? *this : Type(*this, oldSpec.narrowToVanilla());
+  auto const newSpec = arrSpec().narrowToVanilla();
+  if (newSpec == ArraySpec::Bottom()) return TBottom;
+  return Type(*this, newSpec);
+}
+
+Type Type::narrowToBespokeLayout(BespokeLayout layout) const {
+  if (!supports(SpecKind::Array)) return *this;
+  if (supports(SpecKind::Class) || supports(SpecKind::Record)) return *this;
+  auto const newSpec = arrSpec().narrowToBespokeLayout(layout);
+  if (newSpec == ArraySpec::Bottom()) return TBottom;
+  return Type(*this, newSpec);
 }
 
 Type Type::widenToBespoke() const {
   if (!supports(SpecKind::Array)) return *this;
   if (supports(SpecKind::Class) || supports(SpecKind::Record)) return *this;
-  auto const oldSpec = arrSpec();
-  return oldSpec.vanilla() ? Type(*this, oldSpec.widenToBespoke()) : *this;
+  return Type(*this, arrSpec().widenToBespoke());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -475,8 +483,8 @@ Type Type::deserialize(ProfDataDeserializer& ser) {
     } else {
       assertx(key == TypeKey::ArrSpec);
       read_raw(ser, t.m_extra);
-      if (auto const arr = t.m_arrSpec.getRawType()) {
-        t.m_arrSpec.setRawType(ser.remap(arr));
+      if (auto const arr = t.m_arrSpec.type()) {
+        t.m_arrSpec.setType(ser.remap(arr));
       }
     }
     return t;
@@ -636,7 +644,16 @@ Type Type::modified() const {
  */
 static bool arrayFitsSpec(const ArrayData* arr, ArraySpec spec) {
   if (spec == ArraySpec::Top()) return true;
-  if (arr->isVanilla()) spec = spec.narrowToVanilla();
+  if (spec == ArraySpec::Bottom()) return false;
+
+  if (spec.vanilla() && !arr->isVanilla()) {
+    return false;
+  } else if (auto const layout = spec.bespokeLayout()) {
+    if (arr->isVanilla()) return false;
+    auto const bad = BespokeArray::asBespoke(arr);
+    if (bad->layout() != *layout) return false;
+  }
+
   if (!spec.type()) return true;
 
   using A = RepoAuthType::Array;
@@ -908,8 +925,17 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
   }
 
   auto const result = Type(dt_modulo_persistence(type(tv)));
-  auto const vanilla = isArrayLikeType(type(tv)) && val(tv).parr->isVanilla();
-  return vanilla ? result.narrowToVanilla() : result;
+
+  if (isArrayLikeType(type(tv))) {
+    if (val(tv).parr->isVanilla()) {
+      return result.narrowToVanilla();
+    } else {
+      auto const bad = BespokeArray::asBespoke(val(tv).parr);
+      return result.narrowToBespokeLayout(bad->layout());
+    }
+  }
+
+  return result;
 }
 
 namespace {

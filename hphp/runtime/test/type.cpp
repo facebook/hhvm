@@ -21,13 +21,16 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/test/bespoke-layout-mock.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 // for specialized object tests to get some real VM::Class
 #include "hphp/system/systemlib.h"
+
 
 namespace HPHP { namespace jit {
 
@@ -895,6 +898,47 @@ TEST(Type, VanillaVec) {
   EXPECT_TRUE(TVanillaVec <= TVec);
   EXPECT_FALSE(TVec < TVanillaVec);
   EXPECT_TRUE(TVanillaVec < TVec);
+}
+
+TEST(Type, BespokeVec) {
+  auto const foo_layout = BespokeLayout{bespoke::testing::makeDummyLayout("foo")};
+  auto const bar_layout = BespokeLayout{bespoke::testing::makeDummyLayout("bar")};
+
+  auto const vecFoo = TVec.narrowToBespokeLayout(foo_layout);
+  EXPECT_EQ("Vec=Bespoke(foo)", vecFoo.toString());
+  EXPECT_FALSE(TVec <= vecFoo);
+  EXPECT_FALSE(TVanillaVec <= vecFoo);
+  EXPECT_FALSE(vecFoo <= TVanillaVec);
+  EXPECT_EQ(vecFoo | TVanillaVec, TVec);
+  EXPECT_EQ(TVanillaVec & vecFoo, TBottom);
+  EXPECT_EQ(vecFoo | TVec, TVec);
+  EXPECT_EQ(vecFoo & TVec, vecFoo);
+
+  auto const vecBar = TVec.narrowToBespokeLayout(bar_layout);
+  EXPECT_EQ("Vec=Bespoke(bar)", vecBar.toString());
+  EXPECT_FALSE(vecFoo <= vecBar);
+  EXPECT_FALSE(vecBar <= vecFoo);
+  EXPECT_EQ(TBottom, vecFoo & vecBar);
+  EXPECT_EQ(TVec, vecFoo | vecBar);
+}
+
+TEST(Type, BespokeVecRAT) {
+  auto const foo_layout = BespokeLayout{bespoke::testing::makeDummyLayout("foo")};
+  auto const bar_layout = BespokeLayout{bespoke::testing::makeDummyLayout("bar")};
+
+  ArrayTypeTable::Builder ratBuilder;
+  auto const rat = ratBuilder.packedn(RepoAuthType::Array::Empty::No,
+                                      RepoAuthType(RepoAuthType::Tag::Str));
+  auto const vecRat = Type::Vec(rat);
+  EXPECT_EQ("Vec=N([Str])", vecRat.toString());
+  auto const vecRatBespoke = vecRat.narrowToBespokeLayout(foo_layout);
+  EXPECT_EQ("Vec=Bespoke(foo):N([Str])", vecRatBespoke.toString());
+  auto const vecRatVanilla = vecRat.narrowToVanilla();
+  EXPECT_EQ("Vec=Vanilla:N([Str])", vecRatVanilla.toString());
+
+  EXPECT_EQ(TBottom, vecRatBespoke.narrowToVanilla());
+  EXPECT_EQ(TBottom, vecRatVanilla.narrowToBespokeLayout(foo_layout));
+  EXPECT_EQ(TBottom, vecRatBespoke.narrowToBespokeLayout(bar_layout));
 }
 
 TEST(Type, VanillaVecRAT) {

@@ -160,70 +160,93 @@ inline TypeSpec TypeSpec::operator-(const TypeSpec& rhs) const {
 ///////////////////////////////////////////////////////////////////////////////
 // ArraySpec.
 
+inline ArraySpec::Sort ArraySpec::sortForBespokeIndex(uint16_t index) {
+  return safe_cast<ArraySpec::Sort>(
+    static_cast<uint16_t>(ArraySpec::Sort::Vanilla) + index + 1
+  );
+}
+
+inline std::optional<uint16_t> ArraySpec::bespokeIndexForSort(ArraySpec::Sort s) {
+  auto const sort = static_cast<uint16_t>(s);
+  auto constexpr vanilla = static_cast<uint16_t>(Sort::Vanilla);
+  if (sort > vanilla) {
+    return sort - (vanilla + 1);
+  } else {
+    return {};
+  }
+}
+
 constexpr inline ArraySpec::ArraySpec(LayoutTag tag)
-  : m_sort(tag == LayoutTag::Vanilla ? IsVanilla : IsTop)
+  : m_sort(tag == LayoutTag::Vanilla ? Sort::Vanilla : Sort::Top)
   , m_ptr(0)
 {}
 
 constexpr inline ArraySpec::ArraySpec(ArraySpec::BottomTag)
-  : m_sort(IsBottom)
+  : m_sort(Sort::Bottom)
   , m_ptr(0)
 {}
 
 inline ArraySpec::ArraySpec(const RepoAuthType::Array* arrTy)
-  : m_sort(HasType)
+  : m_sort(Sort::Top)
   , m_ptr(reinterpret_cast<uintptr_t>(arrTy))
 {
   assertx(checkInvariants());
 }
 
+inline ArraySpec::ArraySpec(BespokeLayout layout)
+  : m_sort(sortForBespokeIndex(layout.index()))
+  , m_ptr(0)
+{}
+
+
 inline ArraySpec ArraySpec::narrowToVanilla() const {
   auto result = *this;
-  result.m_sort |= (*this == Bottom() ? IsTop : IsVanilla);
-  assertx(result.checkInvariants());
+  if (m_sort == Sort::Top) {
+    result.m_sort = Sort::Vanilla;
+  } else if (m_sort != Sort::Vanilla) {
+    return Bottom();
+  }
+
+  return result;
+}
+
+inline ArraySpec ArraySpec::narrowToBespokeLayout(BespokeLayout layout) const {
+  auto result = *this;
+
+  auto const target = sortForBespokeIndex(layout.index());
+  if (m_sort == Sort::Top) {
+    result.m_sort = target;
+  } else if (m_sort != target) {
+    return Bottom();
+  }
+
   return result;
 }
 
 inline ArraySpec ArraySpec::widenToBespoke() const {
   auto result = *this;
-  result.m_sort &= ~IsVanilla;
-  assertx(result.checkInvariants());
+  result.m_sort = Sort::Top;
   return result;
 }
 
-inline const RepoAuthType::Array* ArraySpec::getRawType() const {
-  if (!(m_sort & HasType)) return nullptr;
-  return reinterpret_cast<const RepoAuthType::Array*>(m_ptr);
-}
-
-inline void ArraySpec::setRawType(const RepoAuthType::Array* adjusted) {
-  assertx(getRawType() && adjusted);
+inline void ArraySpec::setType(const RepoAuthType::Array* adjusted) {
+  assertx(type() && adjusted);
   m_ptr = reinterpret_cast<uintptr_t>(adjusted);
 }
 
 inline const RepoAuthType::Array* ArraySpec::type() const {
-  return m_sort & HasType
-    ? reinterpret_cast<const RepoAuthType::Array*>(m_ptr)
-    : nullptr;
+  return reinterpret_cast<const RepoAuthType::Array*>(m_ptr);
 }
 
 inline bool ArraySpec::vanilla() const {
-  return m_sort & IsVanilla;
+  return m_sort == Sort::Vanilla;
+}
+
+inline std::optional<uint16_t> ArraySpec::bespokeIndex() const {
+  return bespokeIndexForSort(m_sort);
 }
 
 IMPLEMENT_SPEC_OPERS(ArraySpec, false)
-
-///////////////////////////////////////////////////////////////////////////////
-
-inline ArraySpec::SortOf operator|(ArraySpec::SortOf l, ArraySpec::SortOf r) {
-  return static_cast<ArraySpec::SortOf>(
-      static_cast<uint8_t>(l) | static_cast<uint8_t>(r));
-}
-
-inline ArraySpec::SortOf operator&(ArraySpec::SortOf l, ArraySpec::SortOf r) {
-  return static_cast<ArraySpec::SortOf>(
-      static_cast<uint8_t>(l) & static_cast<uint8_t>(r));
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // ClsRecSpec.

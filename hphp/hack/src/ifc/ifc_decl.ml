@@ -37,6 +37,8 @@ let governed_id = "\\Governed"
 
 let construct_id = "__construct"
 
+let external_id = "\\External"
+
 let make_callable_name cls_name_opt name =
   match cls_name_opt with
   | None -> name
@@ -49,7 +51,7 @@ let get_attr attr attrs =
   | [a] -> Some a
   | _ -> fail ("multiple '" ^ attr ^ "' attributes found")
 
-let callable_decl attrs =
+let callable_decl attrs args =
   let fd_kind =
     match get_attr governed_id attrs with
     | Some attr ->
@@ -68,13 +70,24 @@ let callable_decl attrs =
         (* Eventually, make this (FDGovernedBy Pbot) *)
         FDInferFlows
   in
-  { fd_kind }
+  let fd_args =
+    let f param =
+      match get_attr external_id param.A.param_user_attributes with
+      | Some { A.ua_name = (pos, _); _ } -> AKExternal pos
+      | None -> AKDefault
+    in
+    List.map ~f args
+  in
+  { fd_kind; fd_args }
 
-let fun_ { A.f_name = (_, name); f_user_attributes = attrs; _ } =
-  (make_callable_name None name, callable_decl attrs)
+let fun_ { A.f_name = (_, name); f_user_attributes = attrs; f_params = args; _ }
+    =
+  (make_callable_name None name, callable_decl attrs args)
 
-let meth class_name { A.m_name = (_, name); m_user_attributes = attrs; _ } =
-  (make_callable_name (Some class_name) name, callable_decl attrs)
+let meth
+    class_name
+    { A.m_name = (_, name); m_user_attributes = attrs; m_params = args; _ } =
+  (make_callable_name (Some class_name) name, callable_decl attrs args)
 
 let immediate_supers { A.c_uses; A.c_extends; _ } =
   let id_of_hint = function
@@ -244,24 +257,36 @@ let property_policy { de_class; _ } cname pname =
          p.pp_purpose))
 
 (* Builds the type scheme for a callable *)
-let make_callable_scheme renv pol (fp : fun_proto) =
+let make_callable_scheme renv pol fp args =
   let renv = { renv with re_scope = Scope.alloc () } in
   let policy =
     match pol with
     | Some policy -> policy
     | None -> Env.new_policy_var renv "implicit"
   in
-  let rec set_policy pty = Mapper.ptype set_policy (const policy) pty in
+  let rec set_policy p pty = Mapper.ptype (set_policy p) (const p) pty in
   let pbot = Pbot PosSet.empty in
+  let (acc, args) =
+    let f acc ty = function
+      | AKDefault -> (acc, set_policy policy ty)
+      | AKExternal pos ->
+        let ext = Env.new_policy_var renv "external" in
+        (L.(ext < policy) ~pos acc, set_policy ext ty)
+    in
+    List.map2_env [] ~f fp.fp_type.f_args args
+  in
   let fp' =
     {
       fp_name = fp.fp_name;
-      fp_this = Option.map ~f:set_policy fp.fp_this;
+      fp_this = Option.map ~f:(set_policy policy) fp.fp_this;
       fp_type =
         {
-          (Mapper.fun_ set_policy (const policy) fp.fp_type) with
+          f_pc = policy;
+          f_args = args;
+          f_ret = set_policy policy fp.fp_type.f_ret;
+          f_exn = set_policy policy fp.fp_type.f_exn;
           f_self = pbot;
         };
     }
   in
-  Fscheme (renv.re_scope, fp', Ctrue)
+  Fscheme (renv.re_scope, fp', Logic.conjoin acc)

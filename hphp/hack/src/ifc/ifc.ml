@@ -291,15 +291,15 @@ let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
       in
       let (env, call_constraint) =
         match SMap.find_opt callable_name renv.re_decl.de_fun with
-        | Some { fd_kind = FDGovernedBy policy } ->
-          let scheme = Decl.make_callable_scheme renv policy fp in
+        | Some { fd_kind = FDGovernedBy policy; fd_args } ->
+          let scheme = Decl.make_callable_scheme renv policy fp fd_args in
           let prop =
             (* because cipp_scheme is created after fp they cannot
                mismatch and call_constraint will not fail *)
             Option.value_exn (Solver.call_constraint ~subtype ~pos fp scheme)
           in
           (env, prop)
-        | Some { fd_kind = FDInferFlows } ->
+        | Some { fd_kind = FDInferFlows; _ } ->
           let env = Env.add_dep env callable_name in
           (env, Chole (pos, fp))
         | None -> fail "unknown function '%s'" callable_name
@@ -829,8 +829,8 @@ let analyse_callable
 
     let entailment =
       match SMap.find_opt callable_name decl_env.de_fun with
-      | Some { fd_kind = FDGovernedBy policy } ->
-        let scheme = Decl.make_callable_scheme renv policy proto in
+      | Some { fd_kind = FDGovernedBy policy; fd_args } ->
+        let scheme = Decl.make_callable_scheme renv policy proto fd_args in
         fun prop ->
           let fun_scheme = Fscheme (scope, proto, prop) in
           check_subtype_scheme ~pos fun_scheme scheme
@@ -1042,6 +1042,9 @@ class Governed
    HH\MethodAttribute {
   public function __construct(public string $purpose = "") { }
 }
+class External
+  implements
+    HH\ParameterAttribute {}
 |}
     );
   |]

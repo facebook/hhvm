@@ -1,0 +1,16 @@
+File "external_args.php", line 50, characters 3-24:
+Context-implicit policy leaks into `lump'1` via `pc`. (Typing[4380])
+File "external_args.php", line 50, characters 3-24:
+Context-implicit policy leaks into `lump'1` via `lump'2`. (Typing[4380])
+File "external_args.php", line 50, characters 3-24:
+Context-implicit policy leaks into `lump'1` via `\A'1`. (Typing[4380])
+File "external_args.php", line 30, characters 3-12:
+Context-implicit policy leaks into `lump'2` via `lump'1`. (Typing[4380])
+File "external_args.php", line 36, characters 3-13:
+Context-implicit policy leaks into `lump'1` via `lump'2`. (Typing[4380])
+File "external_args.php", line 24, characters 3-24:
+Context-implicit policy leaks into `lump'1` via `pc`. (Typing[4380])
+File "external_args.php", line 24, characters 3-24:
+Context-implicit policy leaks into `lump'1` via `lump'2`. (Typing[4380])
+File "external_args.php", line 24, characters 3-24:
+Context-implicit policy leaks into `lump'1` via `\A'1`. (Typing[4380])

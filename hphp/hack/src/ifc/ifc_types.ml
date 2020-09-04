@@ -185,7 +185,14 @@ type fun_decl_kind =
   | FDGovernedBy of policy option
   | FDInferFlows
 
-type fun_decl = { fd_kind: fun_decl_kind }
+type arg_kind =
+  | AKDefault
+  | AKExternal of Pos.t
+
+type fun_decl = {
+  fd_kind: fun_decl_kind;
+  fd_args: arg_kind list;
+}
 
 type decl_env = {
   (* policy decls for classes indexed by class name *)

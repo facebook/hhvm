@@ -10,6 +10,7 @@
     ast
     server_load_flag
     utils_exit
+    utils_multifile
     (select coroutine_errors.ml from
     (facebook -> facebook/coroutine_errors.ml)
     (-> ../stubs/coroutine_errors.ml))

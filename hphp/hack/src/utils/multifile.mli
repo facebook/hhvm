@@ -9,3 +9,5 @@
 val file_to_file_list : Relative_path.t -> (Relative_path.t * string) list
 
 val file_to_files : Relative_path.t -> string Relative_path.Map.t
+
+val read_file_from_multifile : string -> string list

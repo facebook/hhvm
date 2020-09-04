@@ -263,7 +263,7 @@ let load_context_lines_for_highlighted ~before ~after ~(pos : Pos.absolute) :
   let path = Pos.filename pos in
   let (start_line, _start_col) = Pos.line_column pos in
   let (end_line, end_col) = Pos.end_line_column pos in
-  let lines = (try Errors.read_lines path with Sys_error _ -> []) in
+  let lines = Errors.read_lines path in
   match lines with
   | [] ->
     List.range ~start:`inclusive ~stop:`inclusive start_line end_line

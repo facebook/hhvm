@@ -407,7 +407,10 @@ let make_absolute_error code (x : (Pos.absolute * string) list) :
 
 let get_messages (error : 'a error_) = snd error
 
-let read_lines path = In_channel.read_lines path
+let read_lines path =
+  try In_channel.read_lines path
+  with Sys_error _ ->
+    (try Multifile.read_file_from_multifile path with Sys_error _ -> [])
 
 let num_digits x = int_of_float (Float.log10 (float_of_int x)) + 1
 

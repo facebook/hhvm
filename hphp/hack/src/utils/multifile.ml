@@ -73,3 +73,22 @@ let file_to_file_list file =
     [(file, content)]
 
 let file_to_files file = file_to_file_list file |> Relative_path.Map.of_list
+
+(* Given a path of the form `sample/file/name.php--another/file/name.php`,
+   it will read in the portion of `sample/file/name.php` corresponding
+   to `another/file/name.php`. *)
+let read_file_from_multifile path =
+  let splitter = ".php--" in
+  let ix = String_utils.substring_index splitter path in
+  if ix >= 0 then
+    let abs_fn =
+      String_utils.string_before path (ix + String.length ".php")
+      |> Relative_path.create Relative_path.Dummy
+    in
+    let rel_path = Relative_path.create Relative_path.Dummy path in
+    let files = file_to_files abs_fn in
+    match Relative_path.Map.find_opt files rel_path with
+    | None -> []
+    | Some content -> Str.split (Str.regexp "\n") content
+  else
+    []

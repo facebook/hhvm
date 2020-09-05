@@ -715,8 +715,9 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
         flags = FileLoadFlags::kHitMem;
         if (ent) ent->setStr("type", "cache_hit_readlock");
         return tmp;
+      } else if (tmp->cu.unit) {
+        ++s_prefetchVersion;
       }
-      ++s_prefetchVersion;
     }
 
     if (!cachedUnit.try_lock_for_update()) {
@@ -731,8 +732,9 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
           flags = FileLoadFlags::kWaited;
           if (ent) ent->setStr("type", "cache_hit_writelock");
           return tmp;
+        } else if (tmp->cu.unit) {
+          ++s_prefetchVersion;
         }
-        ++s_prefetchVersion;
         if (ent) ent->setStr("type", "cache_stale");
       } else {
         if (ent) ent->setStr("type", "cache_miss");
@@ -809,7 +811,7 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
             flags = FileLoadFlags::kHitMem;
             return cu;
           }
-        } else {
+        } else if (cachedUnit && cachedUnit->cu.unit) {
           ++s_prefetchVersion;
         }
       }
@@ -1250,11 +1252,17 @@ void prefetchUnit(StringData* requestedPath,
     // exists, we'll atomically insert it. In that case, the path has
     // never been prefetched.
     decltype(s_prefetchVersionMap)::accessor acc;
-    if (s_prefetchVersionMap.insert(acc, requestedPath)) return false;
+    if (s_prefetchVersionMap.insert(acc, {requestedPath, version})) {
+      return false;
+    }
     // The path has been prefetched before. We need to check the
     // version if its greater than or equal to the global
     // version.
-    return acc->second >= version;
+    if (acc->second < version) {
+      acc->second = version;
+      return false;
+    }
+    return true;
   }();
   if (prefetchedAlready) return;
 

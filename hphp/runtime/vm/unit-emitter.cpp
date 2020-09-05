@@ -919,8 +919,66 @@ void UnitEmitter::serde(SerDe& sd) {
     }
   );
 
-  // Mergeables
-  sd(m_mergeableStmts);
+  // Mergeables (we cannot just serde the vector because some of the
+  // entries are populated when creating PreClassEmitters).
+  if constexpr (SerDe::deserializing) {
+    size_t size;
+    sd(size);
+
+    for (size_t i = 0; i < size; ++i) {
+      size_t idx;
+      decltype(m_mergeableStmts)::value_type v;
+      sd(idx);
+      sd(v);
+      switch (v.first) {
+        case MergeKind::Define:
+        case MergeKind::TypeAlias:
+          insertMergeableId(v.first, idx, v.second);
+          break;
+        case MergeKind::Record:
+          insertMergeableRecord(idx, v.second);
+          break;
+        case MergeKind::Class:
+        case MergeKind::Done:
+        case MergeKind::UniqueDefinedClass:
+          always_assert(false);
+      }
+    }
+  } else {
+    size_t size = 0;
+    for (auto const& [k, _] : m_mergeableStmts) {
+      switch (k) {
+        case MergeKind::TypeAlias:
+        case MergeKind::Record:
+        case MergeKind::Define:
+          ++size;
+          break;
+        case MergeKind::Class:
+          break;
+        case MergeKind::Done:
+        case MergeKind::UniqueDefinedClass:
+          always_assert(false);
+      }
+    }
+
+    sd(size);
+    for (size_t i = 0; i < m_mergeableStmts.size(); ++i) {
+      auto const& p = m_mergeableStmts[i];
+      switch (p.first) {
+        case MergeKind::TypeAlias:
+        case MergeKind::Record:
+        case MergeKind::Define:
+          sd(i);
+          sd(p);
+          break;
+        case MergeKind::Class:
+          break;
+        case MergeKind::Done:
+        case MergeKind::UniqueDefinedClass:
+          always_assert(false);
+      }
+    }
+  }
 
   // Func emitters (we cannot use seq for these because they come from
   // both the pre-class emitters and m_fes.

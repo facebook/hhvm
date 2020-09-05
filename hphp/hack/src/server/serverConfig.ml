@@ -87,7 +87,7 @@ let make_sharedmem_config config options local_config =
     match ServerArgs.ai_mode options with
     | None -> (global_size, heap_size, dep_table_pow, hash_table_pow)
     | Some ai_options ->
-      Ai.modify_shared_mem_sizes
+      Ai_options.modify_shared_mem_sizes
         global_size
         heap_size
         dep_table_pow

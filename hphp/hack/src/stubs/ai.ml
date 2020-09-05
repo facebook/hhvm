@@ -15,10 +15,6 @@ let go _ _ _ _ = Errors.empty
 
 let go_incremental _ _ _ _ _ = Errors.empty
 
-let modify_shared_mem_sizes global_size heap_size dep_table_pow hash_table_pow _
-    =
-  (global_size, heap_size, dep_table_pow, hash_table_pow)
-
 let modify_worker_count worker_count = worker_count
 
 module InfoService = struct

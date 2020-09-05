@@ -69,7 +69,6 @@ bool canDCE(IRInstruction* inst) {
   case ConvDblToBool:
   case ConvIntToBool:
   case ConvStrToBool:
-  case ConvArrToDbl:
   case ConvBoolToDbl:
   case ConvIntToDbl:
   case ConvStrToDbl:

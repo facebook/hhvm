@@ -458,8 +458,6 @@ To bool conversions:
 
 To double conversions:
 
-| ConvArrToDbl,                 D(Dbl), S(Arr),                           NF
-
 | ConvBoolToDbl,                D(Dbl), S(Bool),                          NF
 
 | ConvIntToDbl,                 D(Dbl), S(Int),                           NF

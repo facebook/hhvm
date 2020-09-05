@@ -267,7 +267,6 @@ void cgConvIntToDbl(IRLS& env, const IRInstruction* inst) {
 }
 
 IMPL_OPCODE_CALL(ConvStrToDbl);
-IMPL_OPCODE_CALL(ConvArrToDbl);
 IMPL_OPCODE_CALL(ConvObjToDbl);
 IMPL_OPCODE_CALL(ConvResToDbl);
 IMPL_OPCODE_CALL(ConvTVToDbl);

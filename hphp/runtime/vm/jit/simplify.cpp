@@ -2114,16 +2114,6 @@ SSATmp* simplifyConvStrToBool(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyConvArrToDbl(State& env, const IRInstruction* inst) {
-  auto const src = inst->src(0);
-  if (src->hasConstVal()) {
-    if (src->arrVal()->empty()) {
-      return cns(env, 0.0);
-    }
-  }
-  return nullptr;
-}
-
 SSATmp* simplifyConvBoolToDbl(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
@@ -3484,7 +3474,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConcatStr4)
   X(ConcatIntStr)
   X(ConcatStrInt)
-  X(ConvArrToDbl)
   X(ConvBoolToDbl)
   X(ConvBoolToInt)
   X(ConvTVToBool)

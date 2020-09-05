@@ -238,10 +238,6 @@ double convObjToDblHelper(const ObjectData* o) {
   return o->toDouble();
 }
 
-double convArrToDblHelper(ArrayData* a) {
-  return a->empty() ? 0 : 1;
-}
-
 double convStrToDblHelper(const StringData* s) {
   return s->toDouble();
 }

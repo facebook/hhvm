@@ -171,8 +171,6 @@ static CallMap s_callMap {
     {ConvTVToBool,     tvToBool, DSSA, SSync,
                            {{TV, 0}}},
 
-    {ConvArrToDbl,       convArrToDblHelper, DSSA, SNone,
-                           {{SSA, 0}}},
     {ConvObjToDbl,       convObjToDblHelper, DSSA, SSync,
                            {{SSA, 0}}},
     {ConvStrToDbl,       convStrToDblHelper, DSSA, SSync,

@@ -83,7 +83,7 @@ Locations getVanillaLocations(const IRGS& env, SrcKey sk) {
     return getVanillaLocationsForBuiltin(env, sk);
   } else if (isFCall(op)) {
     return getVanillaLocationsForCall(env, sk);
-  } else if (isBinaryOp(op)) {
+  } else if (isComparisonOp(op)) {
     return {Location::Stack{soff}, Location::Stack{soff - 1}};
   } else if (getTypeForArrLikeCast(op)) {
     return {Location::Stack{soff}};
@@ -100,30 +100,17 @@ Locations getVanillaLocations(const IRGS& env, SrcKey sk) {
     case Op::AddNewElemC:
       return {Location::Stack{soff - 1}};
     case Op::AKExists:
+    case Op::ClassGetTS:
     case Op::ColFromArray:
+    case Op::IterInit:
       return {Location::Stack{soff}};
 
-    // Miscellaneous ops that constrain one local.
-    case Op::IncDecL: {
-      auto const local = getImm(sk.pc(), localImmIdx(op)).u_NLA;
-      return {Location::Local{safe_cast<uint32_t>(local.id)}};
-    }
+    // Local iterators constrain the local base.
     case Op::LIterInit:
     case Op::LIterNext: {
       auto const local = getImm(sk.pc(), localImmIdx(op)).u_LA;
       return {Location::Local{safe_cast<uint32_t>(local)}};
     }
-
-    case Op::SetOpL: {
-      auto const local = getImm(sk.pc(), localImmIdx(op)).u_LA;
-      return {Location{Location::Local{safe_cast<uint32_t>(local)}},
-              Location{Location::Stack{soff}}};
-    }
-
-    // Miscellaneous ops that constrain one stack value.
-    case Op::ClassGetTS:
-    case Op::IterInit:
-      return {Location::Stack{soff}};
 
     default:
       return {};

@@ -1040,11 +1040,8 @@ constexpr bool isArrLikeConstructorOp(Op opcode) {
     opcode == Op::NewDArray;
 }
 
-constexpr bool isBinaryOp(Op opcode) {
+constexpr bool isComparisonOp(Op opcode) {
   return
-#define SETOP_OP(setOpOp, bcOp) opcode == bcOp ||
-  SETOP_OPS
-#undef SETOP_OP
     opcode == Op::Cmp ||
     opcode == Op::Eq ||
     opcode == Op::Neq ||
@@ -1053,8 +1050,7 @@ constexpr bool isBinaryOp(Op opcode) {
     opcode == Op::Lt ||
     opcode == Op::Lte ||
     opcode == Op::Same ||
-    opcode == Op::NSame ||
-    opcode == Op::Xor;
+    opcode == Op::NSame;
 }
 
 constexpr bool isFCallClsMethod(Op opcode) {

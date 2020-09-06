@@ -238,6 +238,10 @@ module UserAttributes = struct
 
   let uaPure = "__Pure"
 
+  let uaCipp = "__Cipp"
+
+  let uaCippLocal = "__CippLocal"
+
   let uaReactive = "__Rx"
 
   let uaLocalReactive = "__RxLocal"
@@ -324,6 +328,8 @@ module UserAttributes = struct
           (uaAcceptDisposable, [parameter]);
           (uaReturnDisposable, [fn; mthd]);
           (uaPure, [fn; mthd]);
+          (uaCipp, [fn; mthd]);
+          (uaCippLocal, [fn; mthd]);
           (uaReactive, [fn; mthd]);
           (uaLocalReactive, [fn; mthd]);
           (uaMutable, [fn; mthd; parameter; instProperty; staticProperty]);

@@ -393,6 +393,8 @@ and reactivity =
   | Pure of decl_ty option
   | MaybeReactive of reactivity
   | RxVar of reactivity option
+  | Cipp of string option
+  | CippLocal of string option
 
 (** The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)

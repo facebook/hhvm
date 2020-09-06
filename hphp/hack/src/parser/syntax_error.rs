@@ -489,9 +489,10 @@ pub const type_alias_to_type_constant: Error =
     Cow::Borrowed("Type aliases to type constants are not supported");
 pub const interface_with_memoize: Error =
     Cow::Borrowed("`__Memoize` is not allowed on interface methods");
-pub const multiple_reactivity_annotations: Error = Cow::Borrowed(
-    "Only one of following annotations is allowed: `__Pure`, `__Rx`, `__RxShallow`, `__RxLocal`, `__NonRx`.",
-);
+pub const multiple_reactivity_annotations: Error = Cow::Borrowed(concat!(
+    "Only one of following annotations is allowed: `__Pure`, `__Rx`, ",
+    "`__RxShallow`, `__RxLocal`, `__NonRx`, `__Cipp`, `__CippLocal`.",
+));
 pub const functions_cannot_implement_reactive: Error =
     Cow::Borrowed("`__OnlyRxIfImpl` annotations are only valid on class methods.");
 pub const missing_reactivity_for_condition: Error = Cow::Borrowed(concat!(

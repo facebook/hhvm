@@ -1504,6 +1504,8 @@ where
             || name == sn::user_attributes::LOCAL_REACTIVE
             || name == sn::user_attributes::NON_RX
             || name == sn::user_attributes::PURE
+            || name == sn::user_attributes::CIPP
+            || name == sn::user_attributes::CIPP_LOCAL
     }
 
     fn is_some_reactivity_attribute(&self, node: &'a Syntax<Token, Value>) -> bool {

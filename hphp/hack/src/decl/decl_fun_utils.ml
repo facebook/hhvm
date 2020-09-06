@@ -30,21 +30,36 @@ let condition_type_from_attributes env user_attributes =
   |> Option.map ~f:(conditionally_reactive_attribute_to_hint env)
 
 let fun_reactivity_opt env user_attributes =
-  let has attr = Naming_attributes.mem attr user_attributes in
   let module UA = SN.UserAttributes in
   let rx_condition = condition_type_from_attributes env user_attributes in
-  if has UA.uaPure then
-    Some (Pure rx_condition)
-  else if has UA.uaReactive then
-    Some (Reactive rx_condition)
-  else if has UA.uaShallowReactive then
-    Some (Shallow rx_condition)
-  else if has UA.uaLocalReactive then
-    Some (Local rx_condition)
-  else if has UA.uaNonRx then
-    Some Nonreactive
-  else
-    None
+  let get_cipp_param = function
+    | [(_, String s)] -> Some s
+    | [(_, Class_const ((_, CI (_, s)), (_, name)))]
+      when String.equal name SN.Members.mClass ->
+      Some s
+    | _ -> None
+  in
+  let rec go = function
+    | [] -> None
+    | { Aast.ua_name = (_, n); ua_params } :: tl ->
+      if String.equal n UA.uaPure then
+        Some (Pure rx_condition)
+      else if String.equal n UA.uaReactive then
+        Some (Reactive rx_condition)
+      else if String.equal n UA.uaShallowReactive then
+        Some (Shallow rx_condition)
+      else if String.equal n UA.uaLocalReactive then
+        Some (Local rx_condition)
+      else if String.equal n UA.uaNonRx then
+        Some Nonreactive
+      else if String.equal n UA.uaCipp then
+        Some (Cipp (get_cipp_param ua_params))
+      else if String.equal n UA.uaCippLocal then
+        Some (CippLocal (get_cipp_param ua_params))
+      else
+        go tl
+  in
+  go user_attributes
 
 let fun_reactivity env user_attributes =
   fun_reactivity_opt env user_attributes |> Option.value ~default:Nonreactive

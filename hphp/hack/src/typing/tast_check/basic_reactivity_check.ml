@@ -509,10 +509,17 @@ let disallow_this ctx =
 
 let get_reactivity_from_user_attributes user_attributes =
   let module UA = SN.UserAttributes in
+  let get_params = function
+    | [(_, String s)] -> Some s
+    | [(_, Class_const ((_, CI (_, s)), (_, name)))]
+      when String.equal name SN.Members.mClass ->
+      Some s
+    | _ -> None
+  in
   let rec go attrs =
     match attrs with
     | [] -> None
-    | { Aast.ua_name = (_, n); _ } :: tl ->
+    | { Aast.ua_name = (_, n); ua_params } :: tl ->
       if String.equal n UA.uaPure then
         Some (Pure None)
       else if String.equal n UA.uaReactive then
@@ -523,6 +530,10 @@ let get_reactivity_from_user_attributes user_attributes =
         Some (Local None)
       else if String.equal n UA.uaNonRx then
         Some Nonreactive
+      else if String.equal n UA.uaCipp then
+        Some (Cipp (get_params ua_params))
+      else if String.equal n UA.uaCippLocal then
+        Some (CippLocal (get_params ua_params))
       else
         go tl
   in
@@ -547,15 +558,20 @@ let check =
     inherit [ctx] Tast_visitor.iter_with_state as super
 
     method handle_body env ctx b =
-      if equal_reactivity ctx.reactivity Nonreactive then
+      match ctx.reactivity with
+      | Nonreactive
+      | Cipp _
+      | CippLocal _ ->
         List.iter b.fb_ast (check_non_rx#on_stmt env)
-      else
-        match b.fb_ast with
-        | [(_, If ((_, Id (_, c)), then_stmt, else_stmt))]
-          when SN.Rx.is_enabled c ->
-          List.iter then_stmt (self#on_stmt (env, ctx));
-          List.iter else_stmt ~f:(check_non_rx#on_stmt env)
-        | _ -> List.iter b.fb_ast (self#on_stmt (env, ctx))
+      | _ ->
+        begin
+          match b.fb_ast with
+          | [(_, If ((_, Id (_, c)), then_stmt, else_stmt))]
+            when SN.Rx.is_enabled c ->
+            List.iter then_stmt (self#on_stmt (env, ctx));
+            List.iter else_stmt ~f:(check_non_rx#on_stmt env)
+          | _ -> List.iter b.fb_ast (self#on_stmt (env, ctx))
+        end
 
     method! on_Expr (env, ctx) e = self#on_expr (env, set_expr_statement ctx) e
 

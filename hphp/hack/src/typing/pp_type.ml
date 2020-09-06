@@ -317,6 +317,16 @@ and pp_reactivity : Format.formatter -> reactivity -> unit =
     Format.pp_print_string fmt "Pure {";
     pp_ty fmt ty;
     Format.pp_print_string fmt "}"
+  | Cipp None -> Format.pp_print_string fmt "Cipp {}"
+  | Cipp (Some s) ->
+    Format.pp_print_string fmt "Cipp {";
+    Format.pp_print_string fmt s;
+    Format.pp_print_string fmt "}"
+  | CippLocal None -> Format.pp_print_string fmt "CippLocal {}"
+  | CippLocal (Some s) ->
+    Format.pp_print_string fmt "CippLocal {";
+    Format.pp_print_string fmt s;
+    Format.pp_print_string fmt "}"
 
 and show_reactivity : reactivity -> string =
  (fun x -> Format.asprintf "%a" pp_reactivity x)

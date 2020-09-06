@@ -466,6 +466,18 @@ let rec reactivity_to_string env r =
     (match opt_r with
     | None -> ""
     | Some r -> " " ^ reactivity_to_string env r)
+  | Cipp s ->
+    "cipp"
+    ^
+    (match s with
+    | None -> ""
+    | Some s -> "(" ^ s ^ ")")
+  | CippLocal s ->
+    "cipp_local"
+    ^
+    (match s with
+    | None -> ""
+    | Some s -> "(" ^ s ^ ")")
 
 let lenv_as_value env lenv =
   let { per_cont_env; local_using_vars; local_reactive; local_mutability } =

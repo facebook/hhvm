@@ -1,2 +1,2 @@
 File "parse_multiple1.php", line 4, characters 3-23:
-Only one of following annotations is allowed: `__Pure`, `__Rx`, `__RxShallow`, `__RxLocal`, `__NonRx`. (Parsing[1002])
+Only one of following annotations is allowed: `__Pure`, `__Rx`, `__RxShallow`, `__RxLocal`, `__NonRx`, `__Cipp`, `__CippLocal`. (Parsing[1002])

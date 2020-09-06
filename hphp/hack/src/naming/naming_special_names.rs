@@ -230,6 +230,10 @@ pub mod user_attributes {
 
     pub const PURE: &str = "__Pure";
 
+    pub const CIPP: &str = "__Cipp";
+
+    pub const CIPP_LOCAL: &str = "__CippLocal";
+
     pub const REACTIVE: &str = "__Rx";
 
     pub const LOCAL_REACTIVE: &str = "__RxLocal";
@@ -300,6 +304,8 @@ pub mod user_attributes {
             ACCEPT_DISPOSABLE,
             RETURN_DISPOSABLE,
             PURE,
+            CIPP,
+            CIPP_LOCAL,
             REACTIVE,
             LOCAL_REACTIVE,
             MUTABLE,
@@ -768,6 +774,10 @@ pub mod rx {
 
     pub const PURE: &str = "Pure";
 
+    pub const CIPP: &str = "Cipp";
+
+    pub const CIPP_LOCAL: &str = "CippLocal";
+
     pub const RX: &str = "Rx";
 
     pub const RX_LOCAL: &str = "RxLocal";
@@ -787,6 +797,8 @@ pub mod rx {
         lazy_static! {
             static ref REACTIVE_TYPEHINTS: HashSet<&'static str> = vec![
                 PURE,
+                CIPP,
+                CIPP_LOCAL,
                 RX,
                 RX_LOCAL,
                 RX_SHALLOW,

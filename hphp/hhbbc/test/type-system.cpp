@@ -165,35 +165,32 @@ TypedValue tv(SString s) { return make_tv<KindOfPersistentString>(s); }
 TypedValue tv(const StaticString& s) { return tv(s.get()); }
 TypedValue tv(int64_t i) { return make_tv<KindOfInt64>(i); }
 
-auto const test_empty_array = folly::lazy([] {
-  return staticEmptyDArray();
+auto const test_empty_dict = folly::lazy([] {
+  return staticEmptyDictArray();
 });
 
-auto const test_array_map_value = folly::lazy([] {
-  auto ar = make_map_array(
-    s_A.get(), s_B.get(),
-    s_test.get(), 12
-  );
+auto const test_dict_map_value = folly::lazy([] {
+  auto ar = make_dict_array(s_A.get(), s_B.get(), s_test.get(), 12);
   return ArrayData::GetScalarArray(std::move(ar));
 });
 
 // The following helpers produce "vector-like" arrays, in the sense that they
 // have the keys 0...size-1, inserted in that order. They're actually backed
-// by MixedArrays in the runtime, but HHBBC only reasons about Hack-visible
-// types, never about backing layouts.
+// by dicts in the runtime, but we can still test our array specialization
+// logic with these types.
 
-auto const test_array_vector_value = folly::lazy([] {
-  auto ar = make_map_array(0, 42, 1, 23, 2, 12);
+auto const test_dict_vector_value = folly::lazy([] {
+  auto ar = make_dict_array(0, 42, 1, 23, 2, 12);
   return ArrayData::GetScalarArray(std::move(ar));
 });
 
-auto const test_array_vector_value2 = folly::lazy([] {
-  auto ar = make_map_array(0, 42, 1, 23.0, 2, 12);
+auto const test_dict_vector_value2 = folly::lazy([] {
+  auto ar = make_dict_array(0, 42, 1, 23.0, 2, 12);
   return ArrayData::GetScalarArray(std::move(ar));
 });
 
-auto const test_array_vector_value3 = folly::lazy([] {
-  auto ar = make_map_array(0, 1, 1, 2, 2, 3, 3, 4, 4, 5);
+auto const test_dict_vector_value3 = folly::lazy([] {
+  auto ar = make_dict_array(0, 1, 1, 2, 2, 3, 3, 4, 4, 5);
   return ArrayData::GetScalarArray(std::move(ar));
 });
 
@@ -203,8 +200,8 @@ auto const with_data = folly::lazy([] {
     dval(2.0),
     sval(s_test.get()),
     sval_nonstatic(s_test.get()),
-    aval(test_array_map_value()),
-    aval(test_array_vector_value())
+    dict_val(test_dict_map_value()),
+    dict_val(test_dict_vector_value())
   };
 });
 
@@ -213,72 +210,72 @@ auto const specialized_array_examples = folly::lazy([] {
 
   auto test_map_a          = MapElems{};
   test_map_a[tv(s_test)]   = ival(2);
-  ret.emplace_back(sarr_map(test_map_a));
+  ret.emplace_back(sdict_map(test_map_a));
 
   auto test_map_b          = MapElems{};
   test_map_b[tv(s_test)]   = TInt;
-  ret.emplace_back(sarr_map(test_map_b));
+  ret.emplace_back(sdict_map(test_map_b));
 
   auto test_map_c          = MapElems{};
   test_map_c[tv(s_A)]      = TInt;
-  ret.emplace_back(sarr_map(test_map_c));
+  ret.emplace_back(sdict_map(test_map_c));
 
   auto test_map_d          = MapElems{};
   test_map_d[tv(s_A)]      = TInt;
   test_map_d[tv(s_test)]   = TDbl;
-  ret.emplace_back(sarr_map(test_map_d));
+  ret.emplace_back(sdict_map(test_map_d));
 
   auto test_map_e          = MapElems{};
   test_map_e[tv(s_A)]      = TInt;
   test_map_e[tv(s_test)]   = TObj;
-  ret.emplace_back(arr_map(test_map_e));
+  ret.emplace_back(dict_map(test_map_e));
 
   auto test_map_f          = MapElems{};
   test_map_f[tv(s_A)]      = TInt;
   test_map_f[tv(s_test)]   = TDbl;
-  ret.emplace_back(arr_map(test_map_f, TInt, TSStr));
+  ret.emplace_back(dict_map(test_map_f, TInt, TSStr));
 
   auto test_map_g          = MapElems{};
   test_map_g[tv(s_A)]      = TInt;
-  ret.emplace_back(arr_map(test_map_g, sval(s_test.get()), TSStr));
+  ret.emplace_back(dict_map(test_map_g, sval(s_test.get()), TSStr));
 
   auto test_map_h          = MapElems{};
   test_map_h[tv(s_A)]      = TInt;
-  ret.emplace_back(arr_map(test_map_h, TSStr, TDbl));
+  ret.emplace_back(dict_map(test_map_h, TSStr, TDbl));
 
   auto test_map_i          = MapElems{};
   test_map_i[tv(s_A)]      = TInt;
   test_map_i[tv(s_test)]   = TDbl;
-  ret.emplace_back(arr_map(test_map_i, TArrKey, TBool));
+  ret.emplace_back(dict_map(test_map_i, TArrKey, TBool));
 
   auto test_map_j          = MapElems{};
   test_map_j[tv(s_A)]      = TInt;
-  ret.emplace_back(arr_map(test_map_j));
+  ret.emplace_back(dict_map(test_map_j));
 
-  ret.emplace_back(arr_packedn(TInt));
-  ret.emplace_back(arr_mapn(TSStr, arr_mapn(TInt, TSStr)));
-  ret.emplace_back(arr_mapn(TSStr, TArr));
-  ret.emplace_back(arr_mapn(TSStr, arr_packedn(TSStr)));
-  ret.emplace_back(arr_mapn(TSStr, arr_mapn(TSStr, TSStr)));
-  ret.emplace_back(arr_packed({TInt, TStr, TBool}));
-  ret.emplace_back(arr_packedn(TObj));
-  ret.emplace_back(arr_packed({TInt, TObj}));
-  ret.emplace_back(arr_mapn(TSStr, TObj));
-  ret.emplace_back(union_of(arr_packedn(TObj), some_aempty()));
-  ret.emplace_back(union_of(arr_packed({TInt, TObj}), some_aempty()));
-  ret.emplace_back(union_of(arr_mapn(TInt, TObj), some_aempty()));
-  ret.emplace_back(union_of(arr_map(test_map_e), some_aempty()));
-  ret.emplace_back(union_of(arr_map(test_map_i, TStr, TObj), some_aempty()));
-  ret.emplace_back(opt(arr_packedn(TObj)));
-  ret.emplace_back(opt(arr_packed({TInt, TObj})));
-  ret.emplace_back(opt(arr_mapn(TInt, TObj)));
-  ret.emplace_back(opt(arr_map(test_map_e)));
-  ret.emplace_back(opt(arr_map(test_map_i, TStr, TObj)));
-  ret.emplace_back(opt(union_of(arr_packedn(TObj), some_aempty())));
-  ret.emplace_back(opt(union_of(arr_packed({TInt, TObj}), some_aempty())));
-  ret.emplace_back(opt(union_of(arr_mapn(TInt, TObj), some_aempty())));
-  ret.emplace_back(opt(union_of(arr_map(test_map_e), some_aempty())));
-  ret.emplace_back(opt(union_of(arr_map(test_map_i, TSStr, TObj), some_aempty())));
+  ret.emplace_back(dict_packedn(TInt));
+  ret.emplace_back(dict_n(TSStr, dict_n(TInt, TSStr)));
+  ret.emplace_back(dict_n(TSStr, TArr));
+  ret.emplace_back(dict_n(TSStr, dict_packedn(TSStr)));
+  ret.emplace_back(dict_n(TSStr, dict_n(TSStr, TSStr)));
+  ret.emplace_back(dict_packed({TInt, TStr, TBool}));
+  ret.emplace_back(dict_packedn(TObj));
+  ret.emplace_back(dict_packed({TInt, TObj}));
+  ret.emplace_back(dict_n(TSStr, TObj));
+  ret.emplace_back(union_of(dict_packedn(TObj), TDictE));
+  ret.emplace_back(union_of(dict_packed({TInt, TObj}), TDictE));
+  ret.emplace_back(union_of(dict_n(TInt, TObj), TDictE));
+  ret.emplace_back(union_of(dict_map(test_map_e), TDictE));
+  ret.emplace_back(union_of(dict_map(test_map_i, TStr, TObj), TDictE));
+  ret.emplace_back(opt(dict_packedn(TObj)));
+  ret.emplace_back(opt(dict_packed({TInt, TObj})));
+  ret.emplace_back(opt(dict_n(TInt, TObj)));
+  ret.emplace_back(opt(dict_map(test_map_e)));
+  ret.emplace_back(opt(dict_map(test_map_i, TStr, TObj)));
+  ret.emplace_back(opt(union_of(dict_packedn(TObj), TDictE)));
+  ret.emplace_back(opt(union_of(dict_packed({TInt, TObj}), TDictE)));
+  ret.emplace_back(opt(union_of(dict_n(TInt, TObj), TDictE)));
+  ret.emplace_back(opt(union_of(dict_map(test_map_e), TDictE)));
+  ret.emplace_back(opt(union_of(dict_map(test_map_i, TSStr, TObj), TDictE)));
 
   return ret;
 });
@@ -736,10 +733,10 @@ TEST(Type, Prim) {
 TEST(Type, CouldBeValues) {
   EXPECT_FALSE(ival(2).couldBe(ival(3)));
   EXPECT_TRUE(ival(2).couldBe(ival(2)));
-  EXPECT_FALSE(aval(test_array_vector_value()).couldBe(
-    aval(test_array_map_value())));
-  EXPECT_TRUE(aval(test_array_vector_value()).couldBe(
-    aval(test_array_vector_value())));
+  EXPECT_FALSE(dict_val(test_dict_vector_value()).couldBe(
+               dict_val(test_dict_map_value())));
+  EXPECT_TRUE(dict_val(test_dict_vector_value()).couldBe(
+              dict_val(test_dict_vector_value())));
   EXPECT_TRUE(dval(2.0).couldBe(dval(2.0)));
   EXPECT_FALSE(dval(2.0).couldBe(dval(3.0)));
 
@@ -911,7 +908,7 @@ TEST(Type, Option) {
   for (auto& t : optionals()) EXPECT_EQ(t, opt(unopt(t)));
   for (auto& t : optionals()) EXPECT_TRUE(is_opt(t));
   for (auto& t : all()) {
-    if (!is_specialized_array(t)) {
+    if (!is_specialized_dict(t)) {
       auto const found =
         std::find(begin(optionals()), end(optionals()), t) != end(optionals());
       EXPECT_EQ(found, is_opt(t));
@@ -1159,14 +1156,14 @@ TEST(Type, SpecificExamples) {
   test_map_b[tv(s_B)] = TRes;
 
   auto const disjointArrSpecs = std::vector<Type>{
-    arr_packedn(TInt),
-    arr_packedn(TStr),
-    arr_packed({TDbl}),
-    arr_packed({TBool}),
-    arr_mapn(TStr, TStr),
-    arr_mapn(TStr, TInt),
-    arr_map(test_map_a),
-    arr_map(test_map_b)
+    dict_packedn(TInt),
+    dict_packedn(TStr),
+    dict_packed({TDbl}),
+    dict_packed({TBool}),
+    dict_n(TStr, TStr),
+    dict_n(TStr, TInt),
+    dict_map(test_map_a),
+    dict_map(test_map_b)
   };
   for (auto const& t1 : disjointArrSpecs) {
     for (auto const& t2 : disjointArrSpecs) {
@@ -1174,14 +1171,14 @@ TEST(Type, SpecificExamples) {
       EXPECT_FALSE(t1.couldBe(t2));
       EXPECT_FALSE(t2.couldBe(t1));
 
-      auto const t3 = union_of(t1, some_aempty());
-      auto const t4 = union_of(t2, some_aempty());
+      auto const t3 = union_of(t1, TDictE);
+      auto const t4 = union_of(t2, TDictE);
       EXPECT_TRUE(t3.couldBe(t4));
       EXPECT_TRUE(t4.couldBe(t3));
       EXPECT_FALSE(t3.subtypeOf(t4));
       EXPECT_FALSE(t4.subtypeOf(t3));
-      EXPECT_EQ(intersection_of(t3, t4), some_aempty());
-      EXPECT_EQ(intersection_of(t4, t3), some_aempty());
+      EXPECT_EQ(intersection_of(t3, t4), TDictE);
+      EXPECT_EQ(intersection_of(t4, t3), TDictE);
 
       auto const t5 = opt(t1);
       auto const t6 = opt(t2);
@@ -1198,8 +1195,8 @@ TEST(Type, SpecificExamples) {
       EXPECT_TRUE(t8.couldBe(t7));
       EXPECT_FALSE(t7.subtypeOf(t8));
       EXPECT_FALSE(t8.subtypeOf(t7));
-      EXPECT_EQ(intersection_of(t7, t8), opt(some_aempty()));
-      EXPECT_EQ(intersection_of(t8, t7), opt(some_aempty()));
+      EXPECT_EQ(intersection_of(t7, t8), opt(TDictE));
+      EXPECT_EQ(intersection_of(t8, t7), opt(TDictE));
     }
   }
 }
@@ -1873,25 +1870,25 @@ TEST(Type, FromHNIConstraint) {
   EXPECT_EQ(from_hni_constraint(makeStaticString("")), TCell);
 }
 
-TEST(Type, ArrPacked1) {
-  auto const a1 = arr_packed({ival(2), TSStr, TInt});
-  auto const a2 = arr_packed({TInt,    TStr,  TInitCell});
-  auto const s1 = sarr_packed({ival(2), TSStr, TInt});
-  auto const s2 = sarr_packed({TInt,    TStr,  TInitCell});
+TEST(Type, DictPacked1) {
+  auto const a1 = dict_packed({ival(2), TSStr, TInt});
+  auto const a2 = dict_packed({TInt,    TStr,  TInitCell});
+  auto const s1 = sdict_packed({ival(2), TSStr, TInt});
+  auto const s2 = sdict_packed({TInt,    TStr,  TInitCell});
 
   for (auto& a : { a1, s1, a2, s2 }) {
-    EXPECT_TRUE(a.subtypeOf(BArr));
+    EXPECT_TRUE(a.subtypeOf(BDict));
     EXPECT_TRUE(a.subtypeOf(a));
     EXPECT_EQ(a, a);
   }
 
   // Subtype stuff.
 
-  EXPECT_TRUE(a1.subtypeOf(BArr));
-  EXPECT_FALSE(a1.subtypeOf(BSArr));
+  EXPECT_TRUE(a1.subtypeOf(BDict));
+  EXPECT_FALSE(a1.subtypeOf(BSDict));
 
-  EXPECT_TRUE(s1.subtypeOf(BArr));
-  EXPECT_TRUE(s1.subtypeOf(BSArr));
+  EXPECT_TRUE(s1.subtypeOf(BDict));
+  EXPECT_TRUE(s1.subtypeOf(BSDict));
 
   EXPECT_TRUE(a1.subtypeOf(a2));
   EXPECT_TRUE(s1.subtypeOf(s2));
@@ -1911,25 +1908,25 @@ TEST(Type, ArrPacked1) {
   EXPECT_TRUE(s2.couldBe(s1));
 }
 
-TEST(Type, OptArrPacked1) {
-  auto const a1 = opt(arr_packed({ival(2), TSStr, TInt}));
-  auto const a2 = opt(arr_packed({TInt,    TStr,  TInitCell}));
-  auto const s1 = opt(sarr_packed({ival(2), TSStr, TInt}));
-  auto const s2 = opt(sarr_packed({TInt,    TStr,  TInitCell}));
+TEST(Type, OptDictPacked1) {
+  auto const a1 = opt(dict_packed({ival(2), TSStr, TInt}));
+  auto const a2 = opt(dict_packed({TInt,    TStr,  TInitCell}));
+  auto const s1 = opt(sdict_packed({ival(2), TSStr, TInt}));
+  auto const s2 = opt(sdict_packed({TInt,    TStr,  TInitCell}));
 
   for (auto& a : { a1, s1, a2, s2 }) {
-    EXPECT_TRUE(a.subtypeOrNull(BArr));
+    EXPECT_TRUE(a.subtypeOrNull(BDict));
     EXPECT_TRUE(a.subtypeOf(a));
     EXPECT_EQ(a, a);
   }
 
   // Subtype stuff.
 
-  EXPECT_TRUE(a1.subtypeOrNull(BArr));
-  EXPECT_FALSE(a1.subtypeOrNull(BSArr));
+  EXPECT_TRUE(a1.subtypeOrNull(BDict));
+  EXPECT_FALSE(a1.subtypeOrNull(BSDict));
 
-  EXPECT_TRUE(s1.subtypeOrNull(BArr));
-  EXPECT_TRUE(s1.subtypeOrNull(BSArr));
+  EXPECT_TRUE(s1.subtypeOrNull(BDict));
+  EXPECT_TRUE(s1.subtypeOrNull(BSDict));
 
   EXPECT_TRUE(a1.subtypeOf(a2));
   EXPECT_TRUE(s1.subtypeOf(s2));
@@ -1949,25 +1946,25 @@ TEST(Type, OptArrPacked1) {
   EXPECT_TRUE(s2.couldBe(s1));
 }
 
-TEST(Type, ArrPacked2) {
+TEST(Type, DictPacked2) {
   {
-    auto const a1 = arr_packed({TInt, TInt, TDbl});
-    auto const a2 = arr_packed({TInt, TInt});
+    auto const a1 = dict_packed({TInt, TInt, TDbl});
+    auto const a2 = dict_packed({TInt, TInt});
     EXPECT_FALSE(a1.subtypeOf(a2));
     EXPECT_FALSE(a1.couldBe(a2));
   }
 
   {
-    auto const a1 = arr_packed({TInitCell, TInt});
-    auto const a2 = arr_packed({TInt, TInt});
+    auto const a1 = dict_packed({TInitCell, TInt});
+    auto const a2 = dict_packed({TInt, TInt});
     EXPECT_TRUE(a1.couldBe(a2));
     EXPECT_TRUE(a2.subtypeOf(a1));
   }
 
   {
-    auto const a1 = arr_packed_darray({TInt, TInt, TInt});
-    auto const s1 = sarr_packed_darray({TInt, TInt, TInt});
-    auto const s2 = aval(test_array_vector_value());
+    auto const a1 = dict_packed({TInt, TInt, TInt});
+    auto const s1 = sdict_packed({TInt, TInt, TInt});
+    auto const s2 = dict_val(test_dict_vector_value());
     EXPECT_TRUE(s2.subtypeOf(a1));
     EXPECT_TRUE(s2.subtypeOf(s1));
     EXPECT_TRUE(s2.couldBe(a1));
@@ -1975,11 +1972,11 @@ TEST(Type, ArrPacked2) {
   }
 
   {
-    auto const s1 = sarr_packed_darray({ival(42), ival(23), ival(12)});
-    auto const s2 = aval(test_array_vector_value());
-    auto const s3 = sarr_packed_darray({TInt});
-    auto const a4 = sarr_packed_darray({TInt});
-    auto const a5 = arr_packed_darray({ival(42), ival(23), ival(12)});
+    auto const s1 = sdict_packed({ival(42), ival(23), ival(12)});
+    auto const s2 = dict_val(test_dict_vector_value());
+    auto const s3 = sdict_packed({TInt});
+    auto const a4 = sdict_packed({TInt});
+    auto const a5 = dict_packed({ival(42), ival(23), ival(12)});
     EXPECT_TRUE(s1.subtypeOf(s2));
     EXPECT_EQ(s1, s2);
     EXPECT_FALSE(s2.subtypeOf(s3));
@@ -1993,36 +1990,36 @@ TEST(Type, ArrPacked2) {
   }
 }
 
-TEST(Type, ArrPackedUnion) {
+TEST(Type, DictPackedUnion) {
   {
-    auto const a1 = arr_packed({TInt, TDbl});
-    auto const a2 = arr_packed({TDbl, TInt});
-    EXPECT_EQ(union_of(a1, a2), arr_packed({TNum, TNum}));
+    auto const a1 = dict_packed({TInt, TDbl});
+    auto const a2 = dict_packed({TDbl, TInt});
+    EXPECT_EQ(union_of(a1, a2), dict_packed({TNum, TNum}));
   }
 
   {
-    auto const s1 = sarr_packed({TInt, TDbl});
-    auto const s2 = sarr_packed({TDbl, TInt});
+    auto const s1 = sdict_packed({TInt, TDbl});
+    auto const s2 = sdict_packed({TDbl, TInt});
     EXPECT_EQ(union_of(s1, s1), s1);
-    EXPECT_EQ(union_of(s1, s2), sarr_packed({TNum, TNum}));
+    EXPECT_EQ(union_of(s1, s2), sdict_packed({TNum, TNum}));
   }
 
   {
-    auto const s1 = sarr_packed({TInt});
-    auto const s2 = sarr_packed({TDbl, TDbl});
-    EXPECT_EQ(union_of(s1, s2), sarr_packedn(TNum));
+    auto const s1 = sdict_packed({TInt});
+    auto const s2 = sdict_packed({TDbl, TDbl});
+    EXPECT_EQ(union_of(s1, s2), sdict_packedn(TNum));
   }
 
   {
-    auto const s1 = aval(test_array_vector_value());
-    auto const s2 = sarr_packed_darray({TInt, TInt, TInt});
-    auto const s3 = sarr_packed_darray({TInt, TNum, TInt});
+    auto const s1 = dict_val(test_dict_vector_value());
+    auto const s2 = sdict_packed({TInt, TInt, TInt});
+    auto const s3 = sdict_packed({TInt, TNum, TInt});
     EXPECT_EQ(union_of(s1, s2), s2);
     EXPECT_EQ(union_of(s1, s3), s3);
   }
 
   {
-    auto const s1  = sarr_packed({TInt});
+    auto const s1  = sdict_packed({TInt});
     auto const os1 = opt(s1);
     EXPECT_EQ(union_of(s1, TInitNull), os1);
     EXPECT_EQ(union_of(os1, s1), os1);
@@ -2031,43 +2028,43 @@ TEST(Type, ArrPackedUnion) {
   }
 
   {
-    auto const s1 = sarr_packed({TInt});
+    auto const s1 = sdict_packed({TInt});
     EXPECT_EQ(union_of(s1, TObj), TInitCell);
-    EXPECT_EQ(union_of(s1, TSArr), TSArr);
+    EXPECT_EQ(union_of(s1, TSDict), TSDict);
   }
 
   {
-    auto const s1 = aval(test_array_vector_value());
-    auto const s2 = aval(test_array_vector_value2());
-    EXPECT_EQ(union_of(s1, s2), sarr_packed_darray({ival(42), TNum, ival(12)}));
+    auto const s1 = dict_val(test_dict_vector_value());
+    auto const s2 = dict_val(test_dict_vector_value2());
+    EXPECT_EQ(union_of(s1, s2), sdict_packed({ival(42), TNum, ival(12)}));
   }
 }
 
-TEST(Type, ArrPackedN) {
-  auto const a1 = aval(test_array_vector_value());
-  auto const a2 = sarr_packed_darray({TInt, TInt});
-  EXPECT_EQ(union_of(a1, a2), sarr_packedn_darray(TInt));
+TEST(Type, DictPackedN) {
+  auto const a1 = dict_val(test_dict_vector_value());
+  auto const a2 = sdict_packed({TInt, TInt});
+  EXPECT_EQ(union_of(a1, a2), sdict_packedn(TInt));
 
-  auto const s2 = sarr_packed({TInt, TInt});
-  EXPECT_TRUE(s2.subtypeOf(sarr_packedn(TInt)));
-  EXPECT_FALSE(s2.subtypeOf(sarr_packedn(TDbl)));
-  EXPECT_TRUE(s2.subtypeOf(sarr_packedn(TNum)));
-  EXPECT_TRUE(s2.subtypeOf(arr_packedn(TInt)));
-  EXPECT_TRUE(s2.subtypeOf(opt(arr_packedn(TInt))));
+  auto const s2 = sdict_packed({TInt, TInt});
+  EXPECT_TRUE(s2.subtypeOf(sdict_packedn(TInt)));
+  EXPECT_FALSE(s2.subtypeOf(sdict_packedn(TDbl)));
+  EXPECT_TRUE(s2.subtypeOf(sdict_packedn(TNum)));
+  EXPECT_TRUE(s2.subtypeOf(dict_packedn(TInt)));
+  EXPECT_TRUE(s2.subtypeOf(opt(dict_packedn(TInt))));
 
-  EXPECT_TRUE(s2.couldBe(arr_packedn(TInt)));
-  EXPECT_TRUE(s2.couldBe(arr_packedn(TInitCell)));
+  EXPECT_TRUE(s2.couldBe(dict_packedn(TInt)));
+  EXPECT_TRUE(s2.couldBe(dict_packedn(TInitCell)));
 
-  auto const sn1 = sarr_packedn(TInt);
-  auto const sn2 = sarr_packedn(TInitNull);
+  auto const sn1 = sdict_packedn(TInt);
+  auto const sn2 = sdict_packedn(TInitNull);
 
-  EXPECT_EQ(union_of(sn1, sn2), sarr_packedn(TOptInt));
+  EXPECT_EQ(union_of(sn1, sn2), sdict_packedn(TOptInt));
   EXPECT_EQ(union_of(sn1, TInitNull), opt(sn1));
   EXPECT_EQ(union_of(TInitNull, sn1), opt(sn1));
   EXPECT_FALSE(sn2.couldBe(sn1));
   EXPECT_FALSE(sn1.couldBe(sn2));
 
-  auto const sn3 = sarr_packedn(TInitCell);
+  auto const sn3 = sdict_packedn(TInitCell);
   EXPECT_TRUE(sn1.couldBe(sn3));
   EXPECT_TRUE(sn2.couldBe(sn3));
   EXPECT_TRUE(sn3.couldBe(sn1));
@@ -2078,7 +2075,7 @@ TEST(Type, ArrPackedN) {
   EXPECT_FALSE(s2.couldBe(sn2));
 }
 
-TEST(Type, ArrStruct) {
+TEST(Type, DictStruct) {
   auto test_map_a          = MapElems{};
   test_map_a[tv(s_test)]   = ival(2);
 
@@ -2090,9 +2087,9 @@ TEST(Type, ArrStruct) {
   test_map_c[tv(s_A)]      = TInt;
   test_map_c[tv(s_B)]      = TDbl;
 
-  auto const ta = arr_map(test_map_a);
-  auto const tb = arr_map(test_map_b);
-  auto const tc = arr_map(test_map_c);
+  auto const ta = dict_map(test_map_a);
+  auto const tb = dict_map(test_map_b);
+  auto const tc = dict_map(test_map_c);
 
   EXPECT_FALSE(ta.subtypeOf(tc));
   EXPECT_FALSE(tc.subtypeOf(ta));
@@ -2103,13 +2100,13 @@ TEST(Type, ArrStruct) {
   EXPECT_FALSE(tc.couldBe(ta));
   EXPECT_FALSE(tc.couldBe(tb));
 
-  EXPECT_TRUE(ta.subtypeOf(BArr));
-  EXPECT_TRUE(tb.subtypeOf(BArr));
-  EXPECT_TRUE(tc.subtypeOf(BArr));
+  EXPECT_TRUE(ta.subtypeOf(BDict));
+  EXPECT_TRUE(tb.subtypeOf(BDict));
+  EXPECT_TRUE(tc.subtypeOf(BDict));
 
-  auto const sa = sarr_map(test_map_a);
-  auto const sb = sarr_map(test_map_b);
-  auto const sc = sarr_map(test_map_c);
+  auto const sa = sdict_map(test_map_a);
+  auto const sb = sdict_map(test_map_b);
+  auto const sc = sdict_map(test_map_c);
 
   EXPECT_FALSE(sa.subtypeOf(sc));
   EXPECT_FALSE(sc.subtypeOf(sa));
@@ -2120,170 +2117,170 @@ TEST(Type, ArrStruct) {
   EXPECT_FALSE(sc.couldBe(sa));
   EXPECT_FALSE(sc.couldBe(sb));
 
-  EXPECT_TRUE(sa.subtypeOf(BSArr));
-  EXPECT_TRUE(sb.subtypeOf(BSArr));
-  EXPECT_TRUE(sc.subtypeOf(BSArr));
+  EXPECT_TRUE(sa.subtypeOf(BSDict));
+  EXPECT_TRUE(sb.subtypeOf(BSDict));
+  EXPECT_TRUE(sc.subtypeOf(BSDict));
 
   auto test_map_d          = MapElems{};
   test_map_d[tv(s_A)]      = sval(s_B.get());
   test_map_d[tv(s_test)]   = ival(12);
-  auto const sd = sarr_map_darray(test_map_d);
-  EXPECT_EQ(sd, aval(test_array_map_value()));
+  auto const sd = sdict_map(test_map_d);
+  EXPECT_EQ(sd, dict_val(test_dict_map_value()));
 
   auto test_map_e          = MapElems{};
   test_map_e[tv(s_A)]      = TSStr;
   test_map_e[tv(s_test)]   = TNum;
-  auto const se = sarr_map_darray(test_map_e);
-  EXPECT_TRUE(aval(test_array_map_value()).subtypeOf(se));
-  EXPECT_TRUE(se.couldBe(aval(test_array_map_value())));
+  auto const se = sdict_map(test_map_e);
+  EXPECT_TRUE(dict_val(test_dict_map_value()).subtypeOf(se));
+  EXPECT_TRUE(se.couldBe(dict_val(test_dict_map_value())));
 }
 
-TEST(Type, ArrMapN) {
-  auto const test_map = aval(test_array_map_value());
-  EXPECT_TRUE(test_map != arr_mapn(TSStr, TInitUnc));
-  EXPECT_TRUE(test_map.subtypeOf(arr_mapn_darray(TSStr, TInitUnc)));
-  EXPECT_TRUE(test_map.subtypeOf(sarr_mapn_darray(TSStr, TInitUnc)));
-  EXPECT_TRUE(sarr_packedn({TInt}).subtypeOf(arr_mapn(TInt, TInt)));
-  EXPECT_TRUE(sarr_packed({TInt}).subtypeOf(arr_mapn(TInt, TInt)));
+TEST(Type, DictMapN) {
+  auto const test_map = dict_val(test_dict_map_value());
+  EXPECT_TRUE(test_map != dict_n(TSStr, TInitUnc));
+  EXPECT_TRUE(test_map.subtypeOf(dict_n(TSStr, TInitUnc)));
+  EXPECT_TRUE(test_map.subtypeOf(sdict_n(TSStr, TInitUnc)));
+  EXPECT_TRUE(sdict_packedn({TInt}).subtypeOf(dict_n(TInt, TInt)));
+  EXPECT_TRUE(sdict_packed({TInt}).subtypeOf(dict_n(TInt, TInt)));
 
   auto test_map_a          = MapElems{};
   test_map_a[tv(s_test)]   = ival(2);
-  auto const tstruct       = sarr_map(test_map_a);
+  auto const tstruct       = sdict_map(test_map_a);
 
-  EXPECT_TRUE(tstruct.subtypeOf(arr_mapn(TSStr, ival(2))));
-  EXPECT_TRUE(tstruct.subtypeOf(arr_mapn(TSStr, TInt)));
-  EXPECT_TRUE(tstruct.subtypeOf(sarr_mapn(TSStr, TInt)));
-  EXPECT_TRUE(tstruct.subtypeOf(arr_mapn(TStr, TInt)));
+  EXPECT_TRUE(tstruct.subtypeOf(dict_n(TSStr, ival(2))));
+  EXPECT_TRUE(tstruct.subtypeOf(dict_n(TSStr, TInt)));
+  EXPECT_TRUE(tstruct.subtypeOf(sdict_n(TSStr, TInt)));
+  EXPECT_TRUE(tstruct.subtypeOf(dict_n(TStr, TInt)));
 
-  EXPECT_TRUE(test_map.couldBe(arr_mapn_darray(TSStr, TInitCell)));
-  EXPECT_FALSE(test_map.couldBe(arr_mapn_darray(TSStr, TStr)));
-  EXPECT_FALSE(test_map.couldBe(arr_mapn_darray(TSStr, TObj)));
+  EXPECT_TRUE(test_map.couldBe(dict_n(TSStr, TInitCell)));
+  EXPECT_FALSE(test_map.couldBe(dict_n(TSStr, TStr)));
+  EXPECT_FALSE(test_map.couldBe(dict_n(TSStr, TObj)));
 
-  EXPECT_FALSE(test_map.couldBe(aval(test_empty_array())));
-  EXPECT_FALSE(arr_mapn_darray(TSStr, TInt).couldBe(aval(test_empty_array())));
+  EXPECT_FALSE(test_map.couldBe(dict_val(test_empty_dict())));
+  EXPECT_FALSE(dict_n(TSStr, TInt).couldBe(dict_val(test_empty_dict())));
 
-  EXPECT_TRUE(sarr_packedn(TInt).couldBe(sarr_mapn(TInt, TInt)));
-  EXPECT_FALSE(sarr_packedn(TInt).couldBe(sarr_mapn(TInt, TObj)));
+  EXPECT_TRUE(sdict_packedn(TInt).couldBe(sdict_n(TInt, TInt)));
+  EXPECT_FALSE(sdict_packedn(TInt).couldBe(sdict_n(TInt, TObj)));
 
-  EXPECT_TRUE(tstruct.couldBe(sarr_mapn(TSStr, TInt)));
-  EXPECT_FALSE(tstruct.couldBe(sarr_mapn(TSStr, TObj)));
+  EXPECT_TRUE(tstruct.couldBe(sdict_n(TSStr, TInt)));
+  EXPECT_FALSE(tstruct.couldBe(sdict_n(TSStr, TObj)));
 }
 
-TEST(Type, ArrEquivalentRepresentations) {
+TEST(Type, DictEquivalentRepresentations) {
   {
-    auto const simple = aval(test_array_vector_value());
-    auto const bulky  = sarr_packed_darray({ival(42), ival(23), ival(12)});
+    auto const simple = dict_val(test_dict_vector_value());
+    auto const bulky  = sdict_packed({ival(42), ival(23), ival(12)});
     EXPECT_EQ(simple, bulky);
   }
 
   {
-    auto const simple = aval(test_array_map_value());
+    auto const simple = dict_val(test_dict_map_value());
 
     auto map          = MapElems{};
     map[tv(s_A)]      = sval(s_B.get());
     map[tv(s_test)]   = ival(12);
-    auto const bulky  = sarr_map_darray(map);
+    auto const bulky  = sdict_map(map);
 
     EXPECT_EQ(simple, bulky);
   }
 }
 
-TEST(Type, ArrUnions) {
+TEST(Type, DictUnions) {
   auto test_map_a          = MapElems{};
   test_map_a[tv(s_test)]   = ival(2);
-  auto const tstruct       = sarr_map(test_map_a);
+  auto const tstruct       = sdict_map(test_map_a);
 
   auto test_map_b          = MapElems{};
   test_map_b[tv(s_test)]   = TInt;
-  auto const tstruct2      = sarr_map(test_map_b);
+  auto const tstruct2      = sdict_map(test_map_b);
 
   auto test_map_c          = MapElems{};
   test_map_c[tv(s_A)]      = TInt;
-  auto const tstruct3      = sarr_map(test_map_c);
+  auto const tstruct3      = sdict_map(test_map_c);
 
   auto test_map_d          = MapElems{};
   test_map_d[tv(s_A)]      = TInt;
   test_map_d[tv(s_test)]   = TDbl;
-  auto const tstruct4      = sarr_map(test_map_d);
+  auto const tstruct4      = sdict_map(test_map_d);
 
-  auto const packed_int = arr_packedn(TInt);
+  auto const packed_int = dict_packedn(TInt);
 
   EXPECT_EQ(union_of(tstruct, packed_int),
-            arr_mapn(union_of(TSStr, TInt), TInt));
+            dict_n(union_of(TSStr, TInt), TInt));
   EXPECT_EQ(union_of(tstruct, tstruct2), tstruct2);
-  EXPECT_EQ(union_of(tstruct, tstruct3), sarr_mapn(TSStr, TInt));
-  EXPECT_EQ(union_of(tstruct, tstruct4), sarr_mapn(TSStr, TNum));
+  EXPECT_EQ(union_of(tstruct, tstruct3), sdict_n(TSStr, TInt));
+  EXPECT_EQ(union_of(tstruct, tstruct4), sdict_n(TSStr, TNum));
 
-  EXPECT_EQ(union_of(sarr_packed({TInt, TDbl, TDbl}), sarr_packedn(TDbl)),
-            sarr_packedn(TNum));
-  EXPECT_EQ(union_of(sarr_packed({TInt, TDbl}), tstruct),
-            sarr_mapn(union_of(TSStr, TInt), TNum));
+  EXPECT_EQ(union_of(sdict_packed({TInt, TDbl, TDbl}), sdict_packedn(TDbl)),
+            sdict_packedn(TNum));
+  EXPECT_EQ(union_of(sdict_packed({TInt, TDbl}), tstruct),
+            sdict_n(union_of(TSStr, TInt), TNum));
 
-  EXPECT_EQ(union_of(arr_mapn(TInt, TTrue), arr_mapn(TStr, TFalse)),
-            arr_mapn(TArrKey, TBool));
+  EXPECT_EQ(union_of(dict_n(TInt, TTrue), dict_n(TStr, TFalse)),
+            dict_n(TArrKey, TBool));
 
-  auto const aval1 = aval(test_array_vector_value());
-  auto const aval2 = aval(test_array_vector_value3());
-  EXPECT_EQ(union_of(aval1, aval2), sarr_packedn_darray(TInt));
+  auto const dict_val1 = dict_val(test_dict_vector_value());
+  auto const dict_val2 = dict_val(test_dict_vector_value3());
+  EXPECT_EQ(union_of(dict_val1, dict_val2), sdict_packedn(TInt));
 }
 
-TEST(Type, ArrIntersections) {
+TEST(Type, DictIntersections) {
   auto test_map_a          = MapElems{};
   test_map_a[tv(s_test)]   = ival(2);
-  auto const tstruct       = sarr_map(test_map_a);
+  auto const tstruct       = sdict_map(test_map_a);
 
   auto test_map_b          = MapElems{};
   test_map_b[tv(s_test)]   = TInt;
-  auto const tstruct2      = sarr_map(test_map_b);
+  auto const tstruct2      = sdict_map(test_map_b);
 
   auto test_map_c          = MapElems{};
   test_map_c[tv(s_A)]      = TInt;
-  auto const tstruct3      = sarr_map(test_map_c);
+  auto const tstruct3      = sdict_map(test_map_c);
 
   auto test_map_d          = MapElems{};
   test_map_d[tv(s_A)]      = TInt;
   test_map_d[tv(s_test)]   = TDbl;
-  auto const tstruct4      = sarr_map(test_map_d);
+  auto const tstruct4      = sdict_map(test_map_d);
 
   auto test_map_e          = MapElems{};
   test_map_e[tv(s_A)]      = TInt;
   test_map_e[tv(s_B)]      = TDbl;
-  auto const tstruct5      = sarr_map(test_map_e);
+  auto const tstruct5      = sdict_map(test_map_e);
 
   auto test_map_f          = MapElems{};
   test_map_f[tv(s_A)]      = TArrKey;
   test_map_f[tv(s_B)]      = TInt;
-  auto const tstruct6      = sarr_map(test_map_f);
+  auto const tstruct6      = sdict_map(test_map_f);
 
   auto test_map_g          = MapElems{};
   test_map_g[tv(s_A)]      = TStr;
   test_map_g[tv(s_B)]      = TArrKey;
-  auto const tstruct7      = sarr_map(test_map_g);
+  auto const tstruct7      = sdict_map(test_map_g);
 
   auto test_map_h          = MapElems{};
   test_map_h[tv(s_A)]      = TStr;
   test_map_h[tv(s_B)]      = TInt;
-  auto const tstruct8      = sarr_map(test_map_h);
+  auto const tstruct8      = sdict_map(test_map_h);
 
   auto test_map_i          = MapElems{};
   test_map_i[tv(s_A)]      = TStr;
   test_map_i[tv(s_B)]      = TInt;
   test_map_i[tv(s_BB)]     = TVec;
-  auto const tstruct9      = arr_map(test_map_i);
+  auto const tstruct9      = dict_map(test_map_i);
 
   auto test_map_j          = MapElems{};
   test_map_j[tv(s_A)]      = TSStr;
   test_map_j[tv(s_B)]      = TInt;
   test_map_j[tv(s_BB)]     = TSVec;
-  auto const tstruct10     = sarr_map(test_map_j);
+  auto const tstruct10     = sdict_map(test_map_j);
 
   auto test_map_k          = MapElems{};
   test_map_k[tv(s_A)]      = TSStr;
   test_map_k[tv(s_B)]      = TInt;
   test_map_k[tv(s_BB)]     = TObj;
-  auto const tstruct11     = arr_map(test_map_k);
+  auto const tstruct11     = dict_map(test_map_k);
 
-  auto const mapn_str_int = arr_mapn(TStr, TInt);
+  auto const mapn_str_int = dict_n(TStr, TInt);
 
   EXPECT_EQ(intersection_of(tstruct,  mapn_str_int), tstruct);
   EXPECT_EQ(intersection_of(tstruct2, mapn_str_int), tstruct2);
@@ -2295,58 +2292,55 @@ TEST(Type, ArrIntersections) {
   EXPECT_EQ(intersection_of(tstruct6, tstruct7),     tstruct8);
   EXPECT_EQ(intersection_of(tstruct8, tstruct),      TBottom);
 
-  EXPECT_EQ(intersection_of(sarr_packed({TNum, TDbl, TNum}),
-                            sarr_packedn(TDbl)),
-            sarr_packed({TDbl, TDbl, TDbl}));
-  EXPECT_EQ(intersection_of(sarr_packed({TNum, TDbl, TNum}),
-                            sarr_packed({TDbl, TNum, TInt})),
-            sarr_packed({TDbl, TDbl, TInt}));
+  EXPECT_EQ(intersection_of(sdict_packed({TNum, TDbl, TNum}),
+                            sdict_packedn(TDbl)),
+            sdict_packed({TDbl, TDbl, TDbl}));
+  EXPECT_EQ(intersection_of(sdict_packed({TNum, TDbl, TNum}),
+                            sdict_packed({TDbl, TNum, TInt})),
+            sdict_packed({TDbl, TDbl, TInt}));
   EXPECT_EQ(intersection_of(TSDictN, dict_n(TArrKey, TInitCell)),
             sdict_n(TUncArrKey, TInitUnc));
   EXPECT_EQ(intersection_of(TSDictN, dict_n(TArrKey, TInitCell)),
             sdict_n(TUncArrKey, TInitUnc));
-  EXPECT_EQ(intersection_of(tstruct9, TSArrN), tstruct10);
-  EXPECT_EQ(intersection_of(TSArrN, arr_packed({TStr, TVec, TInt, TInitCell})),
-                            sarr_packed({TSStr, TSVec, TInt, TInitUnc}));
-  EXPECT_EQ(intersection_of(arr_packedn(TStr), TSArrN), sarr_packedn(TSStr));
-  EXPECT_EQ(intersection_of(TSArrN, arr_packedn(TObj)), TBottom);
-  EXPECT_EQ(intersection_of(arr_packed({TStr, TInt, TObj}), TSArrN), TBottom);
-  EXPECT_EQ(intersection_of(TSArrN, tstruct11), TBottom);
+  EXPECT_EQ(intersection_of(tstruct9, TSDictN), tstruct10);
+  EXPECT_EQ(intersection_of(TSDictN, dict_packed({TStr, TVec, TInt, TInitCell})),
+                            sdict_packed({TSStr, TSVec, TInt, TInitUnc}));
+  EXPECT_EQ(intersection_of(dict_packedn(TStr), TSDictN), sdict_packedn(TSStr));
+  EXPECT_EQ(intersection_of(TSDictN, dict_packedn(TObj)), TBottom);
+  EXPECT_EQ(intersection_of(dict_packed({TStr, TInt, TObj}), TSDictN), TBottom);
+  EXPECT_EQ(intersection_of(TSDictN, tstruct11), TBottom);
   EXPECT_EQ(
     intersection_of(dict_n(TArrKey, TObj), TSDictN),
     TBottom
   );
   EXPECT_EQ(
-    intersection_of(union_of(arr_mapn(TInt, TObj), some_aempty()),
-                    union_of(arr_packed({TInt, TObj}), some_aempty())),
-    some_aempty()
+    intersection_of(union_of(dict_n(TInt, TObj), TDictE),
+                    union_of(dict_packed({TInt, TObj}), TDictE)),
+    TDictE
   );
   EXPECT_EQ(
-    intersection_of(opt(arr_mapn(TInt, TObj)), TUnc),
+    intersection_of(opt(dict_n(TInt, TObj)), TUnc),
     TInitNull
   );
   EXPECT_EQ(
-    intersection_of(opt(arr_packedn(TObj)), TInitUnc),
+    intersection_of(opt(dict_packedn(TObj)), TInitUnc),
     TInitNull
   );
   EXPECT_EQ(
-    intersection_of(union_of(arr_packed({TInt, TObj}), some_aempty()), TUnc),
-    aempty()
+    intersection_of(union_of(dict_packed({TInt, TObj}), TDictE), TUnc),
+    TSDictE
   );
   EXPECT_EQ(
-    intersection_of(
-      opt(union_of(arr_packed({TInt, TObj}), some_aempty())),
-      TUnc
-    ),
-    opt(aempty())
+    intersection_of(opt(union_of(dict_packed({TInt, TObj}), TDictE)), TUnc),
+    opt(TSDictE)
   );
 }
 
-TEST(Type, ArrOfArr) {
-  auto const t1 = arr_mapn(TSStr, arr_mapn(TInt, TSStr));
-  auto const t2 = arr_mapn(TSStr, TArr);
-  auto const t3 = arr_mapn(TSStr, arr_packedn(TSStr));
-  auto const t4 = arr_mapn(TSStr, arr_mapn(TSStr, TSStr));
+TEST(Type, DictOfDict) {
+  auto const t1 = dict_n(TSStr, dict_n(TInt, TSStr));
+  auto const t2 = dict_n(TSStr, TDict);
+  auto const t3 = dict_n(TSStr, dict_packedn(TSStr));
+  auto const t4 = dict_n(TSStr, dict_n(TSStr, TSStr));
   EXPECT_TRUE(t1.subtypeOf(t2));
   EXPECT_TRUE(t1.couldBe(t3));
   EXPECT_FALSE(t1.subtypeOf(t3));
@@ -2368,35 +2362,35 @@ TEST(Type, WideningAlreadyStable) {
   }
 }
 
-TEST(Type, EmptyArray) {
+TEST(Type, EmptyDict) {
   {
-    auto const possible_e = union_of(arr_packedn(TInt), aempty());
-    EXPECT_TRUE(possible_e.couldBe(aempty()));
-    EXPECT_TRUE(possible_e.couldBe(arr_packedn(TInt)));
-    EXPECT_EQ(array_elem(possible_e, ival(0)).first, opt(TInt));
+    auto const possible_e = union_of(dict_packedn(TInt), dict_empty());
+    EXPECT_TRUE(possible_e.couldBe(dict_empty()));
+    EXPECT_TRUE(possible_e.couldBe(dict_packedn(TInt)));
+    EXPECT_EQ(dict_elem(possible_e, ival(0)).first, TInt);
   }
 
   {
-    auto const possible_e = union_of(arr_packed({TInt, TInt}), aempty());
-    EXPECT_TRUE(possible_e.couldBe(aempty()));
-    EXPECT_TRUE(possible_e.couldBe(arr_packed({TInt, TInt})));
-    EXPECT_FALSE(possible_e.couldBe(arr_packed({TInt, TInt, TInt})));
-    EXPECT_FALSE(possible_e.subtypeOf(arr_packedn(TInt)));
-    EXPECT_EQ(array_elem(possible_e, ival(0)).first, opt(TInt));
-    EXPECT_EQ(array_elem(possible_e, ival(1)).first, opt(TInt));
+    auto const possible_e = union_of(dict_packed({TInt, TInt}), dict_empty());
+    EXPECT_TRUE(possible_e.couldBe(dict_empty()));
+    EXPECT_TRUE(possible_e.couldBe(dict_packed({TInt, TInt})));
+    EXPECT_FALSE(possible_e.couldBe(dict_packed({TInt, TInt, TInt})));
+    EXPECT_FALSE(possible_e.subtypeOf(dict_packedn(TInt)));
+    EXPECT_EQ(dict_elem(possible_e, ival(0)).first, TInt);
+    EXPECT_EQ(dict_elem(possible_e, ival(1)).first, TInt);
   }
 
   {
-    auto const estat = union_of(sarr_packedn(TInt), aempty());
-    EXPECT_TRUE(estat.couldBe(aempty()));
-    EXPECT_TRUE(estat.couldBe(sarr_packedn(TInt)));
-    EXPECT_FALSE(estat.subtypeOf(sarr_packedn(TInt)));
-    EXPECT_FALSE(estat.subtypeOf(BSArrE));
-    EXPECT_TRUE(estat.couldBe(BSArrE));
+    auto const estat = union_of(sdict_packedn(TInt), dict_empty());
+    EXPECT_TRUE(estat.couldBe(dict_empty()));
+    EXPECT_TRUE(estat.couldBe(sdict_packedn(TInt)));
+    EXPECT_FALSE(estat.subtypeOf(sdict_packedn(TInt)));
+    EXPECT_FALSE(estat.subtypeOf(BSDictE));
+    EXPECT_TRUE(estat.couldBe(BSDictE));
   }
 
-  EXPECT_EQ(array_newelem(aempty(), ival(142), ProvTag::Top).first,
-            arr_packed({ival(142)}));
+  EXPECT_EQ(dict_newelem(dict_empty(), ival(142)).first,
+            dict_packed({ival(142)}));
 }
 
 TEST(Type, BasicArrays) {
@@ -2459,18 +2453,18 @@ TEST(Type, BasicArrays) {
  * add predefined bits for things like TSArrE|TArrN these will fail
  * and need to be revisted.
  */
-TEST(Type, ArrBitCombos) {
-  auto const u1 = union_of(sarr_packedn(TInt), TArrE);
-  EXPECT_TRUE(u1.couldBe(BArrE));
-  EXPECT_TRUE(u1.couldBe(BSArrE));
-  EXPECT_TRUE(u1.couldBe(sarr_packedn(TInt)));
-  EXPECT_EQ(array_elem(u1, ival(0)).first, TOptInt);
+TEST(Type, DictBitCombos) {
+  auto const u1 = union_of(sdict_packedn(TInt), TDictE);
+  EXPECT_TRUE(u1.couldBe(BDictE));
+  EXPECT_TRUE(u1.couldBe(BSDictE));
+  EXPECT_TRUE(u1.couldBe(sdict_packedn(TInt)));
+  EXPECT_EQ(dict_elem(u1, ival(0)).first, TInt);
 
-  auto const u2 = union_of(TSArrE, arr_packedn(TInt));
-  EXPECT_TRUE(u2.couldBe(BArrE));
-  EXPECT_TRUE(u2.couldBe(BSArrE));
-  EXPECT_TRUE(u2.couldBe(arr_packedn(TInt)));
-  EXPECT_EQ(array_elem(u2, ival(0)).first, TOptInt);
+  auto const u2 = union_of(TSDictE, dict_packedn(TInt));
+  EXPECT_TRUE(u2.couldBe(BDictE));
+  EXPECT_TRUE(u2.couldBe(BSDictE));
+  EXPECT_TRUE(u2.couldBe(dict_packedn(TInt)));
+  EXPECT_EQ(dict_elem(u2, ival(0)).first, TInt);
 }
 
 TEST(Type, ArrKey) {
@@ -2554,10 +2548,10 @@ TEST(Type, LoosenStaticness) {
     EXPECT_EQ(loosen_staticness(wait_handle(index, t)),
               wait_handle(index, loosen_staticness(t)));
     if (t.subtypeOf(TInitCell)) {
-      EXPECT_EQ(loosen_staticness(arr_packedn(t)),
-                arr_packedn(loosen_staticness(t)));
-      EXPECT_EQ(loosen_staticness(sarr_packedn(t)),
-                arr_packedn(loosen_staticness(t)));
+      EXPECT_EQ(loosen_staticness(dict_packedn(t)),
+                dict_packedn(loosen_staticness(t)));
+      EXPECT_EQ(loosen_staticness(sdict_packedn(t)),
+                dict_packedn(loosen_staticness(t)));
     }
   }
 
@@ -2591,11 +2585,11 @@ TEST(Type, LoosenStaticness) {
     { TUnc, TCell },
     { TInitUnc, TInitCell },
     { sval(s_test.get()), sval_nonstatic(s_test.get()) },
-    { sarr_packedn(TInt), arr_packedn(TInt) },
-    { sarr_packed({TInt, TBool}), arr_packed({TInt, TBool}) },
-    { sarr_mapn(TSStr, TInt), arr_mapn(TStr, TInt) },
-    { sarr_mapn(TInt, TSDictN), arr_mapn(TInt, TDictN) },
-    { sarr_map(test_map), arr_map(test_map) },
+    { sdict_packedn(TInt), dict_packedn(TInt) },
+    { sdict_packed({TInt, TBool}), dict_packed({TInt, TBool}) },
+    { sdict_n(TSStr, TInt), dict_n(TStr, TInt) },
+    { sdict_n(TInt, TSDictN), dict_n(TInt, TDictN) },
+    { sdict_map(test_map), dict_map(test_map) },
     { TClsMeth, TClsMeth },
     { TFuncLike, TFuncLike },
     { TStrLike, TStrLike },
@@ -2613,10 +2607,10 @@ TEST(Type, LoosenStaticness) {
     EXPECT_EQ(loosen_staticness(opt(p.first)), opt(p.second));
     EXPECT_EQ(loosen_staticness(wait_handle(index, p.first)),
               wait_handle(index, p.second));
-    EXPECT_EQ(loosen_staticness(arr_packedn(p.first)),
-              arr_packedn(p.second));
-    EXPECT_EQ(loosen_staticness(sarr_packedn(p.first)),
-              arr_packedn(p.second));
+    EXPECT_EQ(loosen_staticness(dict_packedn(p.first)),
+              dict_packedn(p.second));
+    EXPECT_EQ(loosen_staticness(sdict_packedn(p.first)),
+              dict_packedn(p.second));
   }
 }
 
@@ -2660,10 +2654,10 @@ TEST(Type, LoosenEmptiness) {
     { TSKeysetN, TSKeyset },
     { TKeysetE, TKeyset },
     { TKeysetN, TKeyset },
-    { arr_packedn(TInt), union_of(TPArrE, arr_packedn(TInt)) },
-    { arr_packed({TInt, TBool}), union_of(TPArrE, arr_packed({TInt, TBool})) },
-    { arr_mapn(TStr, TInt), union_of(TPArrE, arr_mapn(TStr, TInt)) },
-    { arr_map(test_map), union_of(TPArrE, arr_map(test_map)) },
+    { dict_packedn(TInt), union_of(TDictE, dict_packedn(TInt)) },
+    { dict_packed({TInt, TBool}), union_of(TDictE, dict_packed({TInt, TBool})) },
+    { dict_n(TStr, TInt), union_of(TDictE, dict_n(TStr, TInt)) },
+    { dict_map(test_map), union_of(TDictE, dict_map(test_map)) },
     { TArrLikeE, TArrLike },
     { TArrLikeE, TArrLike },
   };
@@ -2705,12 +2699,11 @@ TEST(Type, LoosenValues) {
     { dval(3.14), TDbl },
     { sval(s_test.get()), TSStr },
     { sval_nonstatic(s_test.get()), TStr },
-    { aval(test_array_vector_value()), TSDArrN },
-    { arr_packedn(TInt), TPArrN },
-    { arr_packed({TInt, TBool}), TPArrN },
-    { arr_packed_varray({TInt, TBool}), TVArrN },
-    { arr_mapn(TStr, TInt), TPArrN },
-    { arr_map(test_map), TPArrN }
+    { dict_val(test_dict_vector_value()), TSDictN },
+    { dict_packedn(TInt), TDictN },
+    { dict_packed({TInt, TBool}), TDictN },
+    { dict_n(TStr, TInt), TDictN },
+    { dict_map(test_map), TDictN }
   };
   for (auto const& p : tests) {
     EXPECT_EQ(loosen_values(p.first), p.second);
@@ -2908,19 +2901,19 @@ TEST(Type, RemoveCounted) {
 
   auto test_map_g = MapElems{};
   test_map_g[tv(s_A)] = TSStr;
-  test_map_g[tv(s_B)] = sarr_map(test_map_f);
+  test_map_g[tv(s_B)] = sdict_map(test_map_f);
 
   auto test_map_h = MapElems{};
   test_map_h[tv(s_A)] = TStr;
-  test_map_h[tv(s_B)] = arr_map(test_map_e);
+  test_map_h[tv(s_B)] = dict_map(test_map_e);
 
   auto test_map_i = MapElems{};
   test_map_i[tv(s_A)] = TSStr;
-  test_map_i[tv(s_B)] = sarr_map(test_map_f);
+  test_map_i[tv(s_B)] = sdict_map(test_map_f);
 
   auto test_map_j = MapElems{};
   test_map_j[tv(s_A)] = TSStr;
-  test_map_j[tv(s_B)] = arr_map(test_map_d);
+  test_map_j[tv(s_B)] = dict_map(test_map_d);
 
   auto const cases = std::vector<std::pair<Type, Type>>{
     { TInt, TInt },
@@ -2959,100 +2952,100 @@ TEST(Type, RemoveCounted) {
     { TStrLike, TUncStrLike },
     { TInitCell, TInitUnc },
     { TCell, TUnc },
-    { some_aempty(), aempty() },
+    { some_dict_empty(), dict_empty() },
     { ival(1), ival(1) },
     { dval(2.0), dval(2.0) },
     { sval(s_test.get()), sval(s_test.get()) },
     { sval_nonstatic(s_test.get()), sval(s_test.get()) },
-    { aval(test_array_map_value()), aval(test_array_map_value()) },
-    { aval(test_array_vector_value()), aval(test_array_vector_value()) },
-    { sarr_packedn(TInt), sarr_packedn(TInt) },
-    { arr_packedn(TInitCell), sarr_packedn(TInitUnc) },
-    { arr_packedn(TObj), TBottom },
-    { arr_packedn(ival(123)), sarr_packedn(ival(123)) },
+    { dict_val(test_dict_map_value()), dict_val(test_dict_map_value()) },
+    { dict_val(test_dict_vector_value()), dict_val(test_dict_vector_value()) },
+    { sdict_packedn(TInt), sdict_packedn(TInt) },
+    { dict_packedn(TInitCell), sdict_packedn(TInitUnc) },
+    { dict_packedn(TObj), TBottom },
+    { dict_packedn(ival(123)), sdict_packedn(ival(123)) },
     {
-      arr_packedn(sval_nonstatic(s_test.get())),
-      sarr_packedn(sval(s_test.get()))
+      dict_packedn(sval_nonstatic(s_test.get())),
+      sdict_packedn(sval(s_test.get()))
     },
-    { sarr_packed({TInt, TSStr}), sarr_packed({TInt, TSStr}) },
-    { arr_packed({TInitCell, TStr}), sarr_packed({TInitUnc, TSStr}) },
-    { arr_packed({TInt, TObj, TInt}), TBottom },
-    { sarr_mapn(TInt, TSStr), sarr_mapn(TInt, TSStr) },
-    { sarr_mapn(TSStr, TInt), sarr_mapn(TSStr, TInt) },
-    { arr_mapn(TArrKey, TArrKey), sarr_mapn(TUncArrKey, TUncArrKey) },
-    { arr_mapn(TStr, TStr), sarr_mapn(TSStr, TSStr) },
-    { arr_mapn(TInt, TObj), TBottom },
-    { arr_mapn(TStr, dval(3.14)), sarr_mapn(TSStr, dval(3.14)) },
-    { sarr_map(test_map_a), sarr_map(test_map_a) },
-    { arr_map(test_map_a), sarr_map(test_map_a) },
-    { arr_map(test_map_b), sarr_map(test_map_c) },
-    { arr_map(test_map_d), TBottom },
-    { arr_map(test_map_e), sarr_map(test_map_f) },
-    { sarr_map(test_map_f), sarr_map(test_map_f) },
-    { sarr_packedn(sarr_packedn(TInt)), sarr_packedn(sarr_packedn(TInt)) },
-    { arr_packedn(arr_packedn(TStr)), sarr_packedn(sarr_packedn(TSStr)) },
-    { arr_packedn(arr_packedn(TObj)), TBottom },
+    { sdict_packed({TInt, TSStr}), sdict_packed({TInt, TSStr}) },
+    { dict_packed({TInitCell, TStr}), sdict_packed({TInitUnc, TSStr}) },
+    { dict_packed({TInt, TObj, TInt}), TBottom },
+    { sdict_n(TInt, TSStr), sdict_n(TInt, TSStr) },
+    { sdict_n(TSStr, TInt), sdict_n(TSStr, TInt) },
+    { dict_n(TArrKey, TArrKey), sdict_n(TUncArrKey, TUncArrKey) },
+    { dict_n(TStr, TStr), sdict_n(TSStr, TSStr) },
+    { dict_n(TInt, TObj), TBottom },
+    { dict_n(TStr, dval(3.14)), sdict_n(TSStr, dval(3.14)) },
+    { sdict_map(test_map_a), sdict_map(test_map_a) },
+    { dict_map(test_map_a), sdict_map(test_map_a) },
+    { dict_map(test_map_b), sdict_map(test_map_c) },
+    { dict_map(test_map_d), TBottom },
+    { dict_map(test_map_e), sdict_map(test_map_f) },
+    { sdict_map(test_map_f), sdict_map(test_map_f) },
+    { sdict_packedn(sdict_packedn(TInt)), sdict_packedn(sdict_packedn(TInt)) },
+    { dict_packedn(dict_packedn(TStr)), sdict_packedn(sdict_packedn(TSStr)) },
+    { dict_packedn(dict_packedn(TObj)), TBottom },
     {
-      sarr_packed({sarr_packed({TInt, TDbl}), TInt}),
-      sarr_packed({sarr_packed({TInt, TDbl}), TInt})
-    },
-    {
-      arr_packed({arr_packed({TArrKey, TStr}), TInitCell}),
-      sarr_packed({sarr_packed({TUncArrKey, TSStr}), TInitUnc})
-    },
-    { arr_packed({arr_packed({TObj, TObj}), TInt}), TBottom },
-    {
-      sarr_mapn(TSStr, sarr_mapn(TSStr, TInitUnc)),
-      sarr_mapn(TSStr, sarr_mapn(TSStr, TInitUnc))
+      sdict_packed({sdict_packed({TInt, TDbl}), TInt}),
+      sdict_packed({sdict_packed({TInt, TDbl}), TInt})
     },
     {
-      arr_mapn(TStr, arr_mapn(TStr, TArrKey)),
-      sarr_mapn(TSStr, sarr_mapn(TSStr, TUncArrKey))
+      dict_packed({dict_packed({TArrKey, TStr}), TInitCell}),
+      sdict_packed({sdict_packed({TUncArrKey, TSStr}), TInitUnc})
     },
-    { arr_mapn(TInt, arr_mapn(TInt, TObj)), TBottom },
-    { sarr_map(test_map_g), sarr_map(test_map_g) },
-    { arr_map(test_map_h), sarr_map(test_map_i) },
-    { arr_map(test_map_j), TBottom },
-    { opt(sarr_mapn(TInt, TInt)), opt(sarr_mapn(TInt, TInt)) },
+    { dict_packed({dict_packed({TObj, TObj}), TInt}), TBottom },
     {
-      union_of(sarr_mapn(TInt, TInt), aempty()),
-      union_of(sarr_mapn(TInt, TInt), aempty())
-    },
-    { opt(arr_mapn(TStr, TObj)), TInitNull },
-    { opt(arr_packedn(TObj)), TInitNull },
-    { opt(arr_packed({TObj, TInt})), TInitNull },
-    { opt(arr_map(test_map_j)), TInitNull },
-    {
-      opt(arr_packedn(opt(arr_mapn(TStr, TObj)))),
-      opt(sarr_packedn(TInitNull))
-    },
-    { union_of(arr_mapn(TStr, TObj), some_aempty()), aempty() },
-    { union_of(arr_packedn(TObj), some_aempty()), aempty() },
-    { union_of(arr_packed({TObj, TInt}), some_aempty()), aempty() },
-    { union_of(arr_map(test_map_j), some_aempty()), aempty() },
-    {
-      arr_packedn(union_of(arr_mapn(TStr, TObj), some_aempty())),
-      sarr_packedn(aempty())
-    },
-    { opt(union_of(arr_mapn(TStr, TObj), some_aempty())), opt(aempty()) },
-    { opt(union_of(arr_packedn(TObj), some_aempty())), opt(aempty()) },
-    { opt(union_of(arr_packed({TObj, TInt}), some_aempty())), opt(aempty()) },
-    { opt(union_of(arr_map(test_map_j), some_aempty())), opt(aempty()) },
-    { arr_map(test_map_d, TInt, TInt), TBottom },
-    { arr_map(test_map_d, TStr, TObj), TBottom },
-    { arr_map(test_map_a, TInt, TStr), sarr_map(test_map_a, TInt, TSStr) },
-    {
-      arr_map(test_map_a, TStr, TInitCell),
-      sarr_map(test_map_a, TSStr, TInitUnc)
-    },
-    { arr_map(test_map_a, TInt, TObj), sarr_map(test_map_a) },
-    {
-      arr_map(test_map_a, TStr, opt(TObj)),
-      sarr_map(test_map_a, TSStr, TInitNull)
+      sdict_n(TSStr, sdict_n(TSStr, TInitUnc)),
+      sdict_n(TSStr, sdict_n(TSStr, TInitUnc))
     },
     {
-      arr_map(test_map_a, TStr, union_of(arr_packedn(TObj), some_aempty())),
-      sarr_map(test_map_a, TSStr, aempty())
+      dict_n(TStr, dict_n(TStr, TArrKey)),
+      sdict_n(TSStr, sdict_n(TSStr, TUncArrKey))
+    },
+    { dict_n(TInt, dict_n(TInt, TObj)), TBottom },
+    { sdict_map(test_map_g), sdict_map(test_map_g) },
+    { dict_map(test_map_h), sdict_map(test_map_i) },
+    { dict_map(test_map_j), TBottom },
+    { opt(sdict_n(TInt, TInt)), opt(sdict_n(TInt, TInt)) },
+    {
+      union_of(sdict_n(TInt, TInt), dict_empty()),
+      union_of(sdict_n(TInt, TInt), dict_empty())
+    },
+    { opt(dict_n(TStr, TObj)), TInitNull },
+    { opt(dict_packedn(TObj)), TInitNull },
+    { opt(dict_packed({TObj, TInt})), TInitNull },
+    { opt(dict_map(test_map_j)), TInitNull },
+    {
+      opt(dict_packedn(opt(dict_n(TStr, TObj)))),
+      opt(sdict_packedn(TInitNull))
+    },
+    { union_of(dict_n(TStr, TObj), some_dict_empty()), TSDictE },
+    { union_of(dict_packedn(TObj), some_dict_empty()), TSDictE },
+    { union_of(dict_packed({TObj, TInt}), some_dict_empty()), TSDictE },
+    { union_of(dict_map(test_map_j), some_dict_empty()), TSDictE },
+    {
+      dict_packedn(union_of(dict_n(TStr, TObj), some_dict_empty())),
+      sdict_packedn(TSDictE)
+    },
+    { opt(union_of(dict_n(TStr, TObj), some_dict_empty())), opt(TSDictE) },
+    { opt(union_of(dict_packedn(TObj), some_dict_empty())), opt(TSDictE) },
+    { opt(union_of(dict_packed({TObj, TInt}), some_dict_empty())), opt(TSDictE) },
+    { opt(union_of(dict_map(test_map_j), some_dict_empty())), opt(TSDictE) },
+    { dict_map(test_map_d, TInt, TInt), TBottom },
+    { dict_map(test_map_d, TStr, TObj), TBottom },
+    { dict_map(test_map_a, TInt, TStr), sdict_map(test_map_a, TInt, TSStr) },
+    {
+      dict_map(test_map_a, TStr, TInitCell),
+      sdict_map(test_map_a, TSStr, TInitUnc)
+    },
+    { dict_map(test_map_a, TInt, TObj), sdict_map(test_map_a) },
+    {
+      dict_map(test_map_a, TStr, opt(TObj)),
+      sdict_map(test_map_a, TSStr, TInitNull)
+    },
+    {
+      dict_map(test_map_a, TStr, union_of(dict_packedn(TObj), some_dict_empty())),
+      sdict_map(test_map_a, TSStr, TSDictE)
     },
     { TClsMeth, use_lowptr ? TClsMeth : TBottom },
     { TVArrCompat, use_lowptr ? TVArrCompatSA : TSVArr },
@@ -3083,7 +3076,7 @@ TEST(Type, MustBeCounted) {
     if (!t1.couldBe(TNull)) {
       EXPECT_FALSE(must_be_counted(opt(t1)));
     }
-    EXPECT_FALSE(must_be_counted(union_of(t1, some_aempty())));
+    EXPECT_FALSE(must_be_counted(union_of(t1, some_dict_empty())));
   }
 
   auto test_map_a = MapElems{};
@@ -3123,21 +3116,21 @@ TEST(Type, MustBeCounted) {
     { ival(1), false },
     { dval(2.0), false },
     { sval(s_test.get()), false },
-    { aval(test_array_map_value()), false },
-    { aval(test_array_vector_value()), false },
-    { arr_packedn(TInt), false },
-    { arr_packedn(TObj), true },
-    { arr_packed({TInt, TStr}), false },
-    { arr_packed({TInt, TObj}), true },
-    { arr_mapn(TInt, TInt), false },
-    { arr_mapn(TInt, TObj), true },
-    { arr_packed({TInt, arr_packedn(TObj)}), true },
-    { arr_map(test_map_a), false },
-    { arr_map(test_map_b), true },
-    { arr_map(test_map_b, TStr, TObj), true },
-    { arr_map(test_map_a, TStr, TObj), false },
-    { arr_map(test_map_b, TSStr, TInt), true },
-    { arr_map(test_map_a, TSStr, TInt), false },
+    { dict_val(test_dict_map_value()), false },
+    { dict_val(test_dict_vector_value()), false },
+    { dict_packedn(TInt), false },
+    { dict_packedn(TObj), true },
+    { dict_packed({TInt, TStr}), false },
+    { dict_packed({TInt, TObj}), true },
+    { dict_n(TInt, TInt), false },
+    { dict_n(TInt, TObj), true },
+    { dict_packed({TInt, dict_packedn(TObj)}), true },
+    { dict_map(test_map_a), false },
+    { dict_map(test_map_b), true },
+    { dict_map(test_map_b, TStr, TObj), true },
+    { dict_map(test_map_a, TStr, TObj), false },
+    { dict_map(test_map_b, TSStr, TInt), true },
+    { dict_map(test_map_a, TSStr, TInt), false },
     { TClsMeth, !use_lowptr },
     { TVArrCompat, false },
     { TVArrCompatSA, false },
@@ -3156,11 +3149,11 @@ TEST(Type, MustBeCounted) {
     if (!p.first.couldBe(TNull)) {
       EXPECT_FALSE(must_be_counted(opt(p.first)));
     }
-    EXPECT_FALSE(must_be_counted(union_of(p.first, some_aempty())));
+    EXPECT_FALSE(must_be_counted(union_of(p.first, some_dict_empty())));
   }
 }
 
-TEST(Type, ArrMapOptValues) {
+TEST(Type, DictMapOptValues) {
   auto test_map_a = MapElems{};
   test_map_a[tv(s_A)] = TInt;
   test_map_a[tv(s_B)] = TDbl;
@@ -3201,247 +3194,236 @@ TEST(Type, ArrMapOptValues) {
   test_map_j[tv(s_B)] = TDbl;
   test_map_j[tv(s_test)] = TArrKey;
 
-  EXPECT_EQ(arr_map(test_map_a, TInt, TSStr), arr_map(test_map_a, TInt, TSStr));
-  EXPECT_NE(arr_map(test_map_a, TInt, TSStr), arr_map(test_map_a, TInt, TStr));
+  EXPECT_EQ(dict_map(test_map_a, TInt, TSStr), dict_map(test_map_a, TInt, TSStr));
+  EXPECT_NE(dict_map(test_map_a, TInt, TSStr), dict_map(test_map_a, TInt, TStr));
 
   EXPECT_FALSE(
-    arr_map(test_map_c, TSStr, TInt).subtypeOf(arr_map(test_map_d, TSStr, TInt))
+    dict_map(test_map_c, TSStr, TInt).subtypeOf(dict_map(test_map_d, TSStr, TInt))
   );
   EXPECT_FALSE(
-    arr_map(test_map_a, TSStr, TInt).subtypeOf(arr_map(test_map_e, TSStr, TInt))
+    dict_map(test_map_a, TSStr, TInt).subtypeOf(dict_map(test_map_e, TSStr, TInt))
   );
   EXPECT_FALSE(
-    arr_map(test_map_b, TSStr, TInt).subtypeOf(arr_map(test_map_a, TSStr, TInt))
+    dict_map(test_map_b, TSStr, TInt).subtypeOf(dict_map(test_map_a, TSStr, TInt))
   );
   EXPECT_FALSE(
-    arr_map(test_map_a, TSStr, TInt).subtypeOf(arr_map(test_map_b, TSStr, TInt))
+    dict_map(test_map_a, TSStr, TInt).subtypeOf(dict_map(test_map_b, TSStr, TInt))
   );
   EXPECT_TRUE(
-    arr_map(test_map_a, TSStr, TInt).subtypeOf(arr_map(test_map_b, TSStr, TNum))
+    dict_map(test_map_a, TSStr, TInt).subtypeOf(dict_map(test_map_b, TSStr, TNum))
   );
   EXPECT_FALSE(
-    arr_map(test_map_a, TSStr, TInt).subtypeOf(arr_map(test_map_b, TInt, TNum))
+    dict_map(test_map_a, TSStr, TInt).subtypeOf(dict_map(test_map_b, TInt, TNum))
   );
   EXPECT_TRUE(
-    arr_map(test_map_a, TSStr, TInt).subtypeOf(arr_map(test_map_a, TStr, TInt))
+    dict_map(test_map_a, TSStr, TInt).subtypeOf(dict_map(test_map_a, TStr, TInt))
   );
   EXPECT_FALSE(
-    arr_map(test_map_a, TStr, TInt).subtypeOf(arr_map(test_map_a, TSStr, TInt))
+    dict_map(test_map_a, TStr, TInt).subtypeOf(dict_map(test_map_a, TSStr, TInt))
   );
   EXPECT_FALSE(
-    arr_map(test_map_a, TSStr, TNum).subtypeOf(arr_map(test_map_a, TSStr, TInt))
+    dict_map(test_map_a, TSStr, TNum).subtypeOf(dict_map(test_map_a, TSStr, TInt))
   );
   EXPECT_TRUE(
-    arr_map(test_map_a, TSStr, TInt).subtypeOf(arr_mapn(TStr, TNum))
+    dict_map(test_map_a, TSStr, TInt).subtypeOf(dict_n(TStr, TNum))
   );
   EXPECT_FALSE(
-    arr_map(test_map_a, TSStr, TInt).subtypeOf(arr_mapn(TStr, TInt))
+    dict_map(test_map_a, TSStr, TInt).subtypeOf(dict_n(TStr, TInt))
   );
   EXPECT_FALSE(
-    arr_map(test_map_f, TSStr, TInt).subtypeOf(arr_mapn(TInt, TNum))
+    dict_map(test_map_f, TSStr, TInt).subtypeOf(dict_n(TInt, TNum))
   );
-  EXPECT_FALSE(arr_map(test_map_a).subtypeOf(arr_mapn(TInt, TNum)));
+  EXPECT_FALSE(dict_map(test_map_a).subtypeOf(dict_n(TInt, TNum)));
   EXPECT_FALSE(
-    arr_mapn(TSStr, TInt).subtypeOf(arr_map(test_map_a, TSStr, TInt))
+    dict_n(TSStr, TInt).subtypeOf(dict_map(test_map_a, TSStr, TInt))
   );
 
   EXPECT_TRUE(
-    arr_map(test_map_a, TSStr, TInt).couldBe(arr_map(test_map_a, TSStr, TInt))
+    dict_map(test_map_a, TSStr, TInt).couldBe(dict_map(test_map_a, TSStr, TInt))
   );
   EXPECT_TRUE(
-    arr_map(test_map_a, TSStr, TInt).couldBe(arr_map(test_map_a, TSStr, TNum))
+    dict_map(test_map_a, TSStr, TInt).couldBe(dict_map(test_map_a, TSStr, TNum))
   );
   EXPECT_TRUE(
-    arr_map(test_map_a, TSStr, TNum).couldBe(arr_map(test_map_a, TSStr, TInt))
+    dict_map(test_map_a, TSStr, TNum).couldBe(dict_map(test_map_a, TSStr, TInt))
   );
   EXPECT_TRUE(
-    arr_map(test_map_a, TArrKey, TInt).couldBe(arr_map(test_map_a, TSStr, TInt))
+    dict_map(test_map_a, TArrKey, TInt).couldBe(dict_map(test_map_a, TSStr, TInt))
   );
   EXPECT_TRUE(
-    arr_map(test_map_a, TSStr, TInt).couldBe(arr_map(test_map_a, TArrKey, TInt))
+    dict_map(test_map_a, TSStr, TInt).couldBe(dict_map(test_map_a, TArrKey, TInt))
   );
   EXPECT_TRUE(
-    arr_map(test_map_a, TSStr, TInt).couldBe(arr_map(test_map_a, TInt, TInt))
+    dict_map(test_map_a, TSStr, TInt).couldBe(dict_map(test_map_a, TInt, TInt))
   );
   EXPECT_TRUE(
-    arr_map(test_map_a, TInt, TInt).couldBe(arr_map(test_map_a, TSStr, TInt))
+    dict_map(test_map_a, TInt, TInt).couldBe(dict_map(test_map_a, TSStr, TInt))
   );
   EXPECT_TRUE(
-    arr_map(test_map_a, TSStr, TDbl).couldBe(arr_map(test_map_a, TSStr, TObj))
+    dict_map(test_map_a, TSStr, TDbl).couldBe(dict_map(test_map_a, TSStr, TObj))
   );
   EXPECT_FALSE(
-    arr_map(test_map_a, TSStr, TInt).couldBe(arr_map(test_map_c, TSStr, TInt))
+    dict_map(test_map_a, TSStr, TInt).couldBe(dict_map(test_map_c, TSStr, TInt))
   );
   EXPECT_FALSE(
-    arr_map(test_map_c, TSStr, TInt).couldBe(arr_map(test_map_a, TSStr, TInt))
+    dict_map(test_map_c, TSStr, TInt).couldBe(dict_map(test_map_a, TSStr, TInt))
   );
   EXPECT_FALSE(
-    arr_map(test_map_a, TSStr, TInt).couldBe(arr_map(test_map_e, TSStr, TInt))
+    dict_map(test_map_a, TSStr, TInt).couldBe(dict_map(test_map_e, TSStr, TInt))
   );
   EXPECT_FALSE(
-    arr_map(test_map_e, TSStr, TInt).couldBe(arr_map(test_map_a, TSStr, TInt))
+    dict_map(test_map_e, TSStr, TInt).couldBe(dict_map(test_map_a, TSStr, TInt))
   );
   EXPECT_TRUE(
-    arr_map(test_map_a).couldBe(arr_map(test_map_b, TSStr, TDbl))
+    dict_map(test_map_a).couldBe(dict_map(test_map_b, TSStr, TDbl))
   );
   EXPECT_TRUE(
-    arr_map(test_map_b, TSStr, TDbl).couldBe(arr_map(test_map_a))
+    dict_map(test_map_b, TSStr, TDbl).couldBe(dict_map(test_map_a))
   );
   EXPECT_FALSE(
-    arr_map(test_map_a).couldBe(arr_map(test_map_b, TSStr, TObj))
+    dict_map(test_map_a).couldBe(dict_map(test_map_b, TSStr, TObj))
   );
   EXPECT_FALSE(
-    arr_map(test_map_b, TSStr, TObj).couldBe(arr_map(test_map_a))
+    dict_map(test_map_b, TSStr, TObj).couldBe(dict_map(test_map_a))
   );
 
   EXPECT_EQ(
-    union_of(arr_map(test_map_a), arr_map(test_map_b)),
-    arr_map(test_map_b, sval(s_B.get()), TDbl)
+    union_of(dict_map(test_map_a), dict_map(test_map_b)),
+    dict_map(test_map_b, sval(s_B.get()), TDbl)
   );
   EXPECT_EQ(
-    union_of(arr_map(test_map_a), arr_map(test_map_c)),
-    arr_map(test_map_b, TSStr, TNum)
+    union_of(dict_map(test_map_a), dict_map(test_map_c)),
+    dict_map(test_map_b, TSStr, TNum)
   );
   EXPECT_EQ(
-    union_of(arr_map(test_map_a, TInt, TStr), arr_map(test_map_a, TStr, TInt)),
-    arr_map(test_map_a, TArrKey, TArrKey)
+    union_of(dict_map(test_map_a, TInt, TStr), dict_map(test_map_a, TStr, TInt)),
+    dict_map(test_map_a, TArrKey, TArrKey)
   );
   EXPECT_EQ(
-    union_of(arr_map(test_map_c), arr_map(test_map_d)),
-    arr_mapn(TSStr, TInt)
+    union_of(dict_map(test_map_c), dict_map(test_map_d)),
+    dict_n(TSStr, TInt)
   );
   EXPECT_EQ(
-    union_of(arr_map(test_map_c, TInt, TInt), arr_map(test_map_d, TInt, TInt)),
-    arr_mapn(TUncArrKey, TInt)
+    union_of(dict_map(test_map_c, TInt, TInt), dict_map(test_map_d, TInt, TInt)),
+    dict_n(TUncArrKey, TInt)
   );
   EXPECT_EQ(
     union_of(
-      arr_map(test_map_c, TSStr, TDbl),
-      arr_map(test_map_d, TSStr, TDbl)
+      dict_map(test_map_c, TSStr, TDbl),
+      dict_map(test_map_d, TSStr, TDbl)
     ),
-    arr_mapn(TSStr, TNum)
+    dict_n(TSStr, TNum)
   );
   EXPECT_EQ(
-    union_of(arr_map(test_map_c, TSStr, TDbl), arr_packed({TInt})),
-    arr_mapn(TUncArrKey, TNum)
+    union_of(dict_map(test_map_c, TSStr, TDbl), dict_packed({TInt})),
+    dict_n(TUncArrKey, TNum)
   );
   EXPECT_EQ(
-    union_of(arr_map(test_map_c, TSStr, TDbl), arr_packedn(TInt)),
-    arr_mapn(TUncArrKey, TNum)
+    union_of(dict_map(test_map_c, TSStr, TDbl), dict_packedn(TInt)),
+    dict_n(TUncArrKey, TNum)
   );
   EXPECT_EQ(
-    union_of(arr_map(test_map_c, TInt, TDbl), arr_mapn(TSStr, TInt)),
-    arr_mapn(TUncArrKey, TNum)
+    union_of(dict_map(test_map_c, TInt, TDbl), dict_n(TSStr, TInt)),
+    dict_n(TUncArrKey, TNum)
   );
 
   EXPECT_EQ(
     intersection_of(
-      arr_map(test_map_a, TSStr, TInt),
-      arr_map(test_map_a, TSStr, TInt)
+      dict_map(test_map_a, TSStr, TInt),
+      dict_map(test_map_a, TSStr, TInt)
     ),
-    arr_map(test_map_a, TSStr, TInt)
+    dict_map(test_map_a, TSStr, TInt)
   );
   EXPECT_EQ(
     intersection_of(
-      arr_map(test_map_a, TSStr, TArrKey),
-      arr_map(test_map_a, TSStr, TInt)
+      dict_map(test_map_a, TSStr, TArrKey),
+      dict_map(test_map_a, TSStr, TInt)
     ),
-    arr_map(test_map_a, TSStr, TInt)
+    dict_map(test_map_a, TSStr, TInt)
   );
   EXPECT_EQ(
     intersection_of(
-      arr_map(test_map_a, TSStr, TInt),
-      arr_map(test_map_a, TArrKey, TInt)
+      dict_map(test_map_a, TSStr, TInt),
+      dict_map(test_map_a, TArrKey, TInt)
     ),
-    arr_map(test_map_a, TSStr, TInt)
+    dict_map(test_map_a, TSStr, TInt)
   );
   EXPECT_EQ(
     intersection_of(
-      arr_map(test_map_a, TSStr, TInt),
-      arr_map(test_map_a, TInt, TInt)
+      dict_map(test_map_a, TSStr, TInt),
+      dict_map(test_map_a, TInt, TInt)
     ),
-    arr_map(test_map_a)
+    dict_map(test_map_a)
   );
   EXPECT_EQ(
     intersection_of(
-      arr_map(test_map_a, TInt, TStr),
-      arr_map(test_map_a, TInt, TInt)
+      dict_map(test_map_a, TInt, TStr),
+      dict_map(test_map_a, TInt, TInt)
     ),
-    arr_map(test_map_a)
+    dict_map(test_map_a)
   );
   EXPECT_EQ(
     intersection_of(
-      arr_map(test_map_a, TInt, TInt),
-      arr_map(test_map_e, TInt, TInt)
+      dict_map(test_map_a, TInt, TInt),
+      dict_map(test_map_e, TInt, TInt)
     ),
     TBottom
   );
   EXPECT_EQ(
-    intersection_of(arr_map(test_map_a), arr_map(test_map_b, TSStr, TNum)),
-    arr_map(test_map_a)
+    intersection_of(dict_map(test_map_a), dict_map(test_map_b, TSStr, TNum)),
+    dict_map(test_map_a)
   );
   EXPECT_EQ(
-    intersection_of(arr_map(test_map_b, TSStr, TNum), arr_map(test_map_a)),
-    arr_map(test_map_a)
+    intersection_of(dict_map(test_map_b, TSStr, TNum), dict_map(test_map_a)),
+    dict_map(test_map_a)
   );
   EXPECT_EQ(
-    intersection_of(arr_map(test_map_a), arr_map(test_map_b, TSStr, TObj)),
+    intersection_of(dict_map(test_map_a), dict_map(test_map_b, TSStr, TObj)),
     TBottom
   );
   EXPECT_EQ(
-    intersection_of(arr_map(test_map_b, TSStr, TObj), arr_map(test_map_a)),
+    intersection_of(dict_map(test_map_b, TSStr, TObj), dict_map(test_map_a)),
     TBottom
   );
   EXPECT_EQ(
-    intersection_of(arr_map(test_map_a, TSStr, TObj), arr_mapn(TSStr, TObj)),
+    intersection_of(dict_map(test_map_a, TSStr, TObj), dict_n(TSStr, TObj)),
     TBottom
   );
   EXPECT_EQ(
-    intersection_of(arr_map(test_map_a, TSStr, TObj), arr_mapn(TSStr, TNum)),
-    arr_map(test_map_a)
+    intersection_of(dict_map(test_map_a, TSStr, TObj), dict_n(TSStr, TNum)),
+    dict_map(test_map_a)
   );
   EXPECT_EQ(
     intersection_of(
-      arr_map(test_map_a, TSStr, TInitCell),
-      arr_mapn(TSStr, TNum)
+      dict_map(test_map_a, TSStr, TInitCell),
+      dict_n(TSStr, TNum)
     ),
-    arr_map(test_map_a, TSStr, TNum)
+    dict_map(test_map_a, TSStr, TNum)
   );
 
   EXPECT_EQ(
-    array_set(arr_map(test_map_b), TSStr, TStr, ProvTag::NoTag).first,
-    arr_map(test_map_g, TSStr, TStr)
+    dict_set(dict_map(test_map_b), TSStr, TStr).first,
+    dict_map(test_map_g, TSStr, TStr)
   );
   EXPECT_EQ(
-    array_set(arr_map(test_map_a), sval(s_B.get()), TStr, ProvTag::NoTag).first,
-    arr_map(test_map_h)
+    dict_set(dict_map(test_map_a), sval(s_B.get()), TStr).first,
+    dict_map(test_map_h)
   );
   EXPECT_EQ(
-    array_set(
-      arr_map(test_map_a),
+    dict_set(dict_map(test_map_a), sval(s_test.get()), TStr).first,
+    dict_map(test_map_i)
+  );
+  EXPECT_EQ(
+    dict_set(dict_map(test_map_a, TSStr, TInt), sval(s_test.get()), TStr).first,
+    dict_map(test_map_a, TSStr, TArrKey)
+  );
+  EXPECT_EQ(
+    dict_set(
+      dict_map(test_map_a, sval(s_test.get()), TInt),
       sval(s_test.get()),
-      TStr,
-      ProvTag::NoTag
+      TStr
     ).first,
-    arr_map(test_map_i)
-  );
-  EXPECT_EQ(
-    array_set(
-      arr_map(test_map_a, TSStr, TInt),
-      sval(s_test.get()),
-      TStr,
-      ProvTag::NoTag
-    ).first,
-    arr_map(test_map_a, TSStr, TArrKey)
-  );
-  EXPECT_EQ(
-    array_set(
-      arr_map(test_map_a, sval(s_test.get()), TInt),
-      sval(s_test.get()),
-      TStr,
-      ProvTag::NoTag
-    ).first,
-    arr_map(test_map_j)
+    dict_map(test_map_j)
   );
 }
 

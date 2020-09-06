@@ -3037,12 +3037,38 @@ Type dict_map(MapElems m, Type optKey, Type optVal) {
   );
 }
 
+Type sdict_map(MapElems m, Type optKey, Type optVal) {
+  return map_impl(
+    BSDictN,
+    std::move(m),
+    std::move(optKey),
+    std::move(optVal),
+    ProvTag::Top
+  );
+}
+
 Type dict_n(Type k, Type v) {
   return mapn_impl(BDictN, std::move(k), std::move(v), ProvTag::Top);
 }
 
 Type sdict_n(Type k, Type v) {
   return mapn_impl(BSDictN, std::move(k), std::move(v), ProvTag::Top);
+}
+
+Type dict_packed(std::vector<Type> v) {
+  return packed_impl(BDictN, std::move(v), ProvTag::Top);
+}
+
+Type sdict_packed(std::vector<Type> v) {
+  return packed_impl(BSDictN, std::move(v), ProvTag::Top);
+}
+
+Type dict_packedn(Type t) {
+  return packedn_impl(BDictN, std::move(t));
+}
+
+Type sdict_packedn(Type t) {
+  return packedn_impl(BSDictN, std::move(t));
 }
 
 Type keyset_val(SArray val) {
@@ -3223,18 +3249,8 @@ Type arr_packed_varray(std::vector<Type> elems, ProvTag tag) {
   return packed_impl(BVArrN, std::move(elems), tag);
 }
 
-Type arr_packed_darray(std::vector<Type> elems) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  return packed_impl(BDArrN, std::move(elems), ProvTag::Top);
-}
-
 Type sarr_packed(std::vector<Type> elems) {
   return packed_impl(BSPArrN, std::move(elems), ProvTag::Top);
-}
-
-Type sarr_packed_darray(std::vector<Type> elems) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  return packed_impl(BSDArrN, std::move(elems), ProvTag::Top);
 }
 
 Type arr_packedn(Type t) {
@@ -3243,11 +3259,6 @@ Type arr_packedn(Type t) {
 
 Type sarr_packedn(Type t) {
   return packedn_impl(BSPArrN, std::move(t));
-}
-
-Type sarr_packedn_darray(Type t) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  return packedn_impl(BSDArrN, std::move(t));
 }
 
 Type map_impl(trep bits, MapElems m, Type optKey, Type optVal, ProvTag prov) {
@@ -3327,12 +3338,6 @@ Type sarr_map(MapElems m, Type k, Type v) {
   return map_impl(BSPArrN, std::move(m), std::move(k), std::move(v), tag);
 }
 
-Type sarr_map_darray(MapElems m, Type k, Type v) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  auto const tag = ProvTag::Top;
-  return map_impl(BSDArrN, std::move(m), std::move(k), std::move(v), tag);
-}
-
 Type mapn_impl(trep bits, Type k, Type v, ProvTag tag) {
   assert(k.subtypeOf(BArrKeyCompat));
 
@@ -3374,18 +3379,8 @@ Type arr_mapn(Type k, Type v) {
   return mapn_impl(BPArrN, std::move(k), std::move(v), ProvTag::Top);
 }
 
-Type arr_mapn_darray(Type k, Type v) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  return mapn_impl(BDArrN, std::move(k), std::move(v), ProvTag::Top);
-}
-
 Type sarr_mapn(Type k, Type v) {
   return mapn_impl(BSPArrN, std::move(k), std::move(v), ProvTag::Top);
-}
-
-Type sarr_mapn_darray(Type k, Type v) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
-  return mapn_impl(BSDArrN, std::move(k), std::move(v), ProvTag::Top);
 }
 
 Type opt(Type t) {

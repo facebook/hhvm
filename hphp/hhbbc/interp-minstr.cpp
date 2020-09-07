@@ -558,15 +558,8 @@ void promoteBaseElemD(ISS& env) {
   // of these functions.
   if (mustBeArrLike(ty)) return;
 
-  // Intermediate ElemD operations on strings fatal, unless the string is empty,
-  // which promotes to array. So for any string here we can assume it promoted
-  // to an empty array.
-  if (ty.subtypeOf(BStr)) {
-    ty = some_aempty();
-    return;
-  }
-
-  if (mustBeEmptyish(ty)) return unreachable(env);
+  // ElemD operations on strings and emptyish values always fail.
+  if (ty.subtypeOf(BStr) || mustBeEmptyish(ty)) return unreachable(env);
 
   /*
    * If the base still could be some kind of array (but isn't an array sub-type
@@ -1114,24 +1107,15 @@ void miFinalSetElem(ISS& env,
     push(env, std::move(ty));
   };
 
-  // Note: we must handle the string-related cases before doing the
-  // general handleBaseElemD, since operates on strings as if this
-  // was an intermediate ElemD.
-  if (env.collect.mInstrState.base.type.subtypeOf(sempty())) {
-    env.collect.mInstrState.base.type = some_aempty();
-  } else {
-    auto& ty = env.collect.mInstrState.base.type;
-    if (ty.couldBe(BStr)) {
-      // Note here that a string type stays a string (with a changed character,
-      // and loss of staticness), unless it was the empty string, where it
-      // becomes an array.  Do it conservatively for now:
-      ty = union_of(
-        loosen_staticness(loosen_values(std::move(ty))),
-        some_aempty()
-      );
-    }
-    if (!ty.subtypeOf(BStr)) promoteBaseElemD(env);
+  auto& ty = env.collect.mInstrState.base.type;
+  if (ty.couldBe(BStr)) {
+    if (ty.subtypeOf(sempty())) return unreachable(env);
+    // Static strings may become counted when we update their data here.
+    // We still need to call loosen_arrays to handle unions like Dict|Str.
+    ty = loosen_arrays(loosen_staticness(loosen_values(std::move(ty))));
   }
+  // Strings always raise on ElemD, but still support SetElem operations.
+  if (!ty.subtypeOf(BStr)) promoteBaseElemD(env);
 
   /*
    * In some unusual cases with illegal keys, SetM pushes null
@@ -1216,8 +1200,7 @@ void miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type&) {
   // We don't handle inner-array types with unset yet.
   always_assert(env.collect.mInstrState.arrayChain.empty());
   auto const& ty = env.collect.mInstrState.base.type;
-  always_assert(!ty.strictSubtypeOfAny(TVec, TDict, TKeyset));
-  always_assert(!ty.strictSubtypeOfAny(TPArr, TDArr, TVArr));
+  always_assert(!ty.strictSubtypeOfAny(TVArr, TDArr, TVec, TDict, TKeyset));
   endBase(env);
   discard(env, nDiscard);
 }

@@ -91,8 +91,6 @@ Type native_function_return_type(const php::Func* f) {
     } else if (f->retTypeConstraint.isDArray()) {
       assertx(!RuntimeOption::EvalHackArrDVArrs);
       t = TDArr;
-    } else if (f->retTypeConstraint.isArray()) {
-      t = TPArr;
     }
   }
 

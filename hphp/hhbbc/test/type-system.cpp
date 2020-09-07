@@ -290,8 +290,6 @@ auto const primitives = folly::lazy([] {
     TInt,
     TDbl,
     TSStr,
-    TSPArrE,
-    TSPArrN,
     TSVArrE,
     TSVArrN,
     TSDArrE,
@@ -328,10 +326,6 @@ auto const optionals = folly::lazy([] {
     TOptArrKeyCompat,
     TOptSStr,
     TOptStr,
-    TOptSPArrE,
-    TOptSPArrN,
-    TOptSPArr,
-    TOptPArr,
     TOptSVArrE,
     TOptSVArrN,
     TOptSVArr,
@@ -377,10 +371,6 @@ auto const non_opt_unions = folly::lazy([] {
     TBool,
     TNum,
     TStr,
-    TPArrE,
-    TPArrN,
-    TSPArr,
-    TPArr,
     TVArrE,
     TVArrN,
     TSVArr,
@@ -989,9 +979,6 @@ TEST(Type, OptUnionOf) {
 
   EXPECT_EQ(TOptVArrCompat, union_of(TOptClsMeth, TVArr));
   EXPECT_EQ(TOptVArrCompatSA, union_of(TOptClsMeth, TSVArr));
-
-  EXPECT_EQ(TOptArrCompat, union_of(TOptClsMeth, TPArr));
-  EXPECT_EQ(TOptArrCompatSA, union_of(TOptClsMeth, TSPArr));
 
   EXPECT_EQ(TOptVecCompat, union_of(TOptClsMeth, TVec));
   EXPECT_EQ(TOptVecCompatSA, union_of(TOptClsMeth, TSVec));
@@ -2432,20 +2419,6 @@ TEST(Type, BasicArrays) {
   EXPECT_EQ(union_of(TVArrE, TDArrE), TArrE);
   EXPECT_EQ(union_of(TSVArr, TSDArrN), TSArr);
   EXPECT_EQ(union_of(TVArr, TDArr), TArr);
-
-  EXPECT_EQ(union_of(TSVArrE, TSPArrE), TSArrE);
-  EXPECT_EQ(union_of(TSVArrN, TSPArrN), TSArrN);
-  EXPECT_EQ(union_of(TVArrN, TPArrN), TArrN);
-  EXPECT_EQ(union_of(TVArrE, TPArrE), TArrE);
-  EXPECT_EQ(union_of(TSVArr, TSPArrN), TSArr);
-  EXPECT_EQ(union_of(TVArr, TPArr), TArr);
-
-  EXPECT_EQ(union_of(TSDArrE, TSPArrE), TSArrE);
-  EXPECT_EQ(union_of(TSDArrN, TSPArrN), TSArrN);
-  EXPECT_EQ(union_of(TDArrN, TPArrN), TArrN);
-  EXPECT_EQ(union_of(TDArrE, TPArrE), TArrE);
-  EXPECT_EQ(union_of(TSDArr, TSPArrN), TSArr);
-  EXPECT_EQ(union_of(TDArr, TPArr), TArr);
 }
 
 /*
@@ -2562,9 +2535,6 @@ TEST(Type, LoosenStaticness) {
     { TSArrE, TArrE },
     { TSArrN, TArrN },
     { TSArr, TArr },
-    { TSPArrE, TPArrE },
-    { TSPArrN, TPArrN },
-    { TSPArr, TPArr },
     { TSVArrE, TVArrE },
     { TSVArrN, TVArrN },
     { TSVArr, TVArr },
@@ -2630,10 +2600,6 @@ TEST(Type, LoosenEmptiness) {
     { TSArrN, TSArr },
     { TArrE, TArr },
     { TArrN, TArr },
-    { TSPArrE, TSPArr },
-    { TSPArrN, TSPArr },
-    { TPArrE, TPArr },
-    { TPArrN, TPArr },
     { TSVArrE, TSVArr },
     { TSVArrN, TSVArr },
     { TVArrE, TVArr },
@@ -2738,8 +2704,6 @@ TEST(Type, AddNonEmptiness) {
   std::vector<std::pair<Type, Type>> tests = {
     { TArrE, TArr },
     { TSArrE, TSArr },
-    { TPArrE, TPArr },
-    { TSPArrE, TSPArr },
     { TVArrE, TVArr },
     { TSVArrE, TSVArr },
     { TDArrE, TDArr },
@@ -2764,21 +2728,13 @@ TEST(Type, LoosenDVArrayness) {
   Index index{ program.get() };
 
   for (auto const& t : all_with_waithandles(index)) {
-    if (t.subtypeOfAny(TOptPArr, TOptVArr, TOptDArr, TOptVArrCompat) &&
-        t != TInitNull) {
+    if (t.subtypeOfAny(TOptVArr, TOptDArr, TOptVArrCompat) && t != TInitNull) {
       continue;
     }
     EXPECT_EQ(loosen_dvarrayness(t), t);
   }
 
   std::vector<std::pair<Type, Type>> tests = {
-    { TSPArrE, TSArrE },
-    { TSPArrN, TSArrN },
-    { TSPArr,  TSArr },
-    { TPArrE,  TArrE },
-    { TPArrN,  TArrN },
-    { TPArr,   TArr },
-
     { TSVArrE, TSArrE },
     { TSVArrN, TSArrN },
     { TSVArr,  TSArr },

@@ -994,13 +994,6 @@ void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
   prepareAndCallProfiled(env, func, fca, nullptr, true, false);
 }
 
-void fcallFuncArr(IRGS& env, const FCallArgs& fca) {
-  UNUSED auto const arr = topC(env);
-  assertx(arr->isA(TArr) || arr->isA(TVec) || arr->isA(TDict));
-
-  return interpOne(env);
-}
-
 } // namespace
 
 void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
@@ -1033,9 +1026,6 @@ void emitFCallFunc(IRGS& env, FCallArgs fca) {
   if (callee->isA(TFunc)) return fcallFuncFunc(env, fca);
   if (callee->isA(TClsMeth)) return fcallFuncClsMeth(env, fca);
   if (callee->isA(TStr)) return fcallFuncStr(env, fca);
-  if (callee->isA(TArr)) return fcallFuncArr(env, fca);
-  if (callee->isA(TVec)) return fcallFuncArr(env, fca);
-  if (callee->isA(TDict)) return fcallFuncArr(env, fca);
   if (callee->isA(TRFunc)) return fcallFuncRFunc(env, fca);
   if (callee->isA(TRClsMeth)) return fcallFuncRClsMeth(env, fca);
   return interpOne(env);
@@ -1077,7 +1067,7 @@ void emitResolveMethCaller(IRGS& env, const StringData* name) {
 }
 
 void emitResolveRFunc(IRGS& env, const StringData* name) {
-  if (!topC(env)->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TArr)) {
+  if (!topC(env)->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)) {
     return interpOne(env);
   }
   auto const tsList = popC(env);
@@ -1615,7 +1605,7 @@ void emitResolveClsMethodS(IRGS& env, SpecialClsRef ref,
 
 void emitResolveRClsMethod(IRGS& env, const StringData* methodName) {
   auto const generics = topC(env);
-  if (!generics->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TArr)) {
+  if (!generics->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)) {
     return interpOne(env);
   }
   auto const cls = topC(env, BCSPRelOffset { 1 });
@@ -1626,7 +1616,7 @@ void emitResolveRClsMethod(IRGS& env, const StringData* methodName) {
 void emitResolveRClsMethodD(IRGS& env, const StringData* className,
                             const StringData* methodName) {
   auto const generics = topC(env);
-  if (!generics->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TArr)) {
+  if (!generics->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)) {
     return interpOne(env);
   }
 
@@ -1652,7 +1642,7 @@ void emitResolveRClsMethodD(IRGS& env, const StringData* className,
 void emitResolveRClsMethodS(IRGS& env, SpecialClsRef ref,
                             const StringData* methodName) {
   auto const generics = topC(env);
-  if (!generics->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TArr)) {
+  if (!generics->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)) {
     return interpOne(env);
   }
   auto const cls = specialClsRefToCls(env, ref);

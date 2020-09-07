@@ -710,13 +710,10 @@ bool opcodeMayRaise(Opcode opc) {
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
   case InstanceOfRecDesc:
-  case InterfaceSupportsArr:
+  case InterfaceSupportsArrLike:
   case InterfaceSupportsDbl:
-  case InterfaceSupportsDict:
   case InterfaceSupportsInt:
-  case InterfaceSupportsKeyset:
   case InterfaceSupportsStr:
-  case InterfaceSupportsVec:
   case InterpOneCF:
   case IsCol:
   case IsFunReifiedGenericsMatched:

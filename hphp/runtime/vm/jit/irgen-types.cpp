@@ -438,22 +438,17 @@ SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
   return mc.elseDo([&]{ return cns(env, false); });
 }
 
-// Checks if the `arr` has provenance, implementing the same logic as in the
-// runtume helper arrprov::arrayWantsTag. If so, logs a serialization notice.
+// Logs a serialization notice for a dvarray if these notices are enabled.
 void maybeLogSerialization(IRGS& env, SSATmp* arr, SerializationSite site) {
-  assertx(arr->isA(TArr));
+  assertx(arr->isA(TVArr|TDArr));
   if (!RO::EvalArrayProvenance) return;
-
-  ifThen(env, [&](Block* taken) {
-    arr = gen(env, CheckType, TVArr|TDArr, taken, arr);
-    gen(env, RaiseArraySerializeNotice, cns(env, site), arr);
-  }, [&]{});
+  gen(env, RaiseArraySerializeNotice, cns(env, site), arr);
 }
 
 SSATmp* isArrayImpl(IRGS& env, SSATmp* src, bool log_on_hack_arrays) {
   MultiCond mc{env};
 
-  mc.ifTypeThen(src, TArr, [&](SSATmp* src) {
+  mc.ifTypeThen(src, TVArr|TDArr, [&](SSATmp* src) {
     maybeLogSerialization(env, src, SerializationSite::IsArray);
     return cns(env, true);
   });
@@ -706,13 +701,10 @@ void emitInstanceOf(IRGS& env) {
   }
 
   auto const res = [&]() -> SSATmp* {
-    if (t2->isA(TArr))    return gen(env, InterfaceSupportsArr, t1);
-    if (t2->isA(TVec))    return gen(env, InterfaceSupportsVec, t1);
-    if (t2->isA(TDict))   return gen(env, InterfaceSupportsDict, t1);
-    if (t2->isA(TKeyset)) return gen(env, InterfaceSupportsKeyset, t1);
-    if (t2->isA(TInt))    return gen(env, InterfaceSupportsInt, t1);
-    if (t2->isA(TStr))    return gen(env, InterfaceSupportsStr, t1);
-    if (t2->isA(TDbl))    return gen(env, InterfaceSupportsDbl, t1);
+    if (t2->isA(TArrLike)) return gen(env, InterfaceSupportsArrLike, t1);
+    if (t2->isA(TInt))     return gen(env, InterfaceSupportsInt, t1);
+    if (t2->isA(TStr))     return gen(env, InterfaceSupportsStr, t1);
+    if (t2->isA(TDbl))     return gen(env, InterfaceSupportsDbl, t1);
     if (t2->isA(TCls)) {
       if (!RO::EvalRaiseClassConversionWarning) {
         return gen(env, InterfaceSupportsStr, t1);

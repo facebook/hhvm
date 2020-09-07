@@ -1219,10 +1219,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   }
   case VecLast: {
     auto const base = inst.src(0);
-    if (base->hasConstVal(TArr)) {
-      return may_load_store(
-          AElemI { base, static_cast<int64_t>(base->arrVal()->size() - 1) },
-          AEmpty);
+    if (base->hasConstVal(TArrLike)) {
+      auto const index = static_cast<int64_t>(base->arrLikeVal()->size() - 1);
+      return may_load_store(AElemI { base, index }, AEmpty);
     }
     return may_load_store(AElemIAny, AEmpty);
   }
@@ -1677,10 +1676,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NInstanceOfBitmask:
   case InstanceOfIface:
   case InstanceOfRecDesc:
-  case InterfaceSupportsArr:
-  case InterfaceSupportsVec:
-  case InterfaceSupportsDict:
-  case InterfaceSupportsKeyset:
+  case InterfaceSupportsArrLike:
   case InterfaceSupportsDbl:
   case InterfaceSupportsInt:
   case InterfaceSupportsStr:

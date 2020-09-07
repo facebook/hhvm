@@ -261,10 +261,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case ExtendsClass:
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
-  case InterfaceSupportsArr:
-  case InterfaceSupportsVec:
-  case InterfaceSupportsDict:
-  case InterfaceSupportsKeyset:
+  case InterfaceSupportsArrLike:
   case InterfaceSupportsStr:
   case InterfaceSupportsInt:
   case InterfaceSupportsDbl:

@@ -145,10 +145,7 @@ bool canDCE(IRInstruction* inst) {
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
   case InstanceOfRecDesc:
-  case InterfaceSupportsArr:
-  case InterfaceSupportsVec:
-  case InterfaceSupportsDict:
-  case InterfaceSupportsKeyset:
+  case InterfaceSupportsArrLike:
   case InterfaceSupportsStr:
   case InterfaceSupportsInt:
   case InterfaceSupportsDbl:

@@ -791,13 +791,7 @@ To string conversions:
 
   Sets D to true if S0 is a descendant of the record in S1, false otherwise.
 
-| InterfaceSupportsArr,        D(Bool), S(Str), NF
-
-| InterfaceSupportsVec,        D(Bool), S(Str), NF
-
-| InterfaceSupportsDict,       D(Bool), S(Str), NF
-
-| InterfaceSupportsKeyset,     D(Bool), S(Str), NF
+| InterfaceSupportsArrLike,    D(Bool), S(Str), NF
 
 | InterfaceSupportsStr,        D(Bool), S(Str), NF
 

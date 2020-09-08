@@ -107,6 +107,8 @@ pub struct FunHdr {
     constrs: Vec<ast::WhereConstraint>,
     type_parameters: Vec<ast::Tparam>,
     parameters: Vec<ast::FunParam>,
+    capability: Option<ast::Hint>,
+    unsafe_capability: Option<ast::Hint>,
     return_type: Option<ast::Hint>,
 }
 
@@ -118,6 +120,8 @@ impl FunHdr {
             constrs: vec![],
             type_parameters: vec![],
             parameters: vec![],
+            capability: None,
+            unsafe_capability: None,
             return_type: None,
         }
     }
@@ -3522,6 +3526,19 @@ where
         }
     }
 
+    fn p_cap(node: &Syntax<T, V>, env: &mut Env) -> Result<(Option<ast::Hint>, Option<ast::Hint>)> {
+        match &node.syntax {
+            Missing => Ok((None, None)),
+            CapabilityProvisional(c) => {
+                let cap = Self::p_hint(&c.capability_provisional_type, env)?;
+                let unsafe_cap =
+                    Self::mp_optional(Self::p_hint, &c.capability_provisional_unsafe_type, env)?;
+                Ok((Some(cap), unsafe_cap))
+            }
+            _ => Self::missing_syntax("type parameter", node, env),
+        }
+    }
+
     fn p_fun_hdr(node: &Syntax<T, V>, env: &mut Env) -> Result<FunHdr> {
         match &node.syntax {
             FunctionDeclarationHeader(c) => {
@@ -3537,6 +3554,8 @@ where
                 let kinds = Self::p_kinds(function_modifiers, env)?;
                 let has_async = kinds.has(modifier::ASYNC);
                 let parameters = Self::could_map(Self::p_fun_param, function_parameter_list, env)?;
+                let (capability, unsafe_capability) =
+                    Self::p_cap(&c.function_capability_provisional, env)?;
                 let return_type = Self::mp_optional(Self::p_hint, function_type, env)?;
                 let suspension_kind = Self::mk_suspension_kind_(has_async);
                 let name = Self::pos_name(function_name, env)?;
@@ -3548,6 +3567,8 @@ where
                     constrs,
                     type_parameters,
                     parameters,
+                    capability,
+                    unsafe_capability,
                     return_type,
                 })
             }
@@ -4620,6 +4641,8 @@ where
                 };
                 let user_attributes = Self::p_user_attributes(function_attribute_spec, env)?;
                 let variadic = Self::determine_variadicity(&hdr.parameters);
+                let cap = ast::TypeHint((), hdr.capability);
+                let unsafe_cap = ast::TypeHint((), hdr.unsafe_capability);
                 let ret = ast::TypeHint((), hdr.return_type);
                 Ok(vec![ast::Def::mk_fun(ast::Fun_ {
                     span: Self::p_fun_pos(node, env),
@@ -4630,8 +4653,8 @@ where
                     tparams: hdr.type_parameters,
                     where_constraints: hdr.constrs,
                     params: hdr.parameters,
-                    cap: ast::TypeHint((), None), // TODO(T70095684)
-                    unsafe_cap: ast::TypeHint((), None), // TODO(T70095684)
+                    cap,
+                    unsafe_cap,
                     body: ast::FuncBody {
                         ast: block,
                         annotation: (),

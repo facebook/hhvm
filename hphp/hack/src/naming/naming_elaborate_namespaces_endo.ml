@@ -145,13 +145,10 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let namespace =
         { empty_with_default with ns_name = Some "HH\\Capabilities" }
       in
-      let cap_env = { env with namespace } in
-      let f_cap = super#on_type_hint cap_env f.f_cap in
-      let namespace =
-        { empty_with_default with ns_name = Some "HH\\Capabilities\\Unsafe" }
+      let f_cap = super#on_type_hint { env with namespace } f.f_cap in
+      let f_unsafe_cap =
+        super#on_type_hint { env with namespace } f.f_unsafe_cap
       in
-      let unsafe_cap_env = { env with namespace } in
-      let f_unsafe_cap = super#on_type_hint unsafe_cap_env f.f_unsafe_cap in
       let f = super#on_fun_ env f in
       { f with f_cap; f_unsafe_cap }
 

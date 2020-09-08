@@ -24,7 +24,7 @@ impl<P> Error_<P> {
     }
 }
 
-trait FileOrd {
+pub trait FileOrd {
     fn cmp_file(&self, other: &Self) -> Ordering;
 }
 

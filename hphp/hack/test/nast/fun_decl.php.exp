@@ -10,9 +10,9 @@
          param_name = "$v"; param_expr = None; param_callconv = None;
          param_user_attributes = []; param_visibility = None }
         ];
-      f_cap = ((), None); f_body = { fb_ast = []; fb_annotation = Named };
-      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
-      f_external = true;
+      f_cap = ((), None); f_unsafe_cap = ((), None);
+      f_body = { fb_ast = []; fb_annotation = Named }; f_fun_kind = FSync;
+      f_user_attributes = []; f_file_attributes = []; f_external = true;
       f_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;

@@ -430,6 +430,21 @@ let rec fun_def ctx f :
           SN.UserAttributes.uaDisableTypecheckerInternal
           f.f_user_attributes
       in
+      let cap_hint_opt = hint_of_type_hint f.f_cap in
+      let (env, cap_ty) =
+        Option.value_map
+          cap_hint_opt
+          ~default:(env, MakeType.nothing (Reason.Rwitness (fst f.f_name)))
+          ~f:(Phase.localize_hint_with_self env)
+      in
+      let unsafe_cap_hint_opt = hint_of_type_hint f.f_unsafe_cap in
+      let (env, unsafe_cap_ty) =
+        Option.value_map
+          unsafe_cap_hint_opt
+          (* note the top type here, default is no unsafe capabilities *)
+          ~default:(env, MakeType.mixed (Reason.Rwitness (fst f.f_name)))
+          ~f:(Phase.localize_hint_with_self env)
+      in
       let (env, tb) =
         Typing.fun_ ~disable env return pos f.f_body f.f_fun_kind
       in
@@ -464,7 +479,8 @@ let rec fun_def ctx f :
           Aast.f_variadic = t_variadic;
           Aast.f_params = typed_params;
           (* TODO(T70095684) fix f_cap *)
-          Aast.f_cap = (MakeType.mixed Reason.none, hint_of_type_hint f.f_cap);
+          Aast.f_cap = (cap_ty, cap_hint_opt);
+          Aast.f_unsafe_cap = (unsafe_cap_ty, unsafe_cap_hint_opt);
           Aast.f_fun_kind = f.f_fun_kind;
           Aast.f_file_attributes = file_attrs;
           Aast.f_user_attributes = user_attributes;
@@ -659,6 +675,8 @@ and method_def env cls m =
           Aast.m_params = typed_params;
           (* TODO(T70095684) fix m_cap *)
           Aast.m_cap = (MakeType.mixed Reason.none, hint_of_type_hint m.m_cap);
+          Aast.m_unsafe_cap =
+            (MakeType.mixed Reason.none, hint_of_type_hint m.m_unsafe_cap);
           Aast.m_fun_kind = m.m_fun_kind;
           Aast.m_user_attributes = user_attributes;
           Aast.m_ret = (locl_ty, hint_of_type_hint m.m_ret);

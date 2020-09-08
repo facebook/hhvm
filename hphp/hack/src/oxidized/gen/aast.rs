@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0c6f8e71ba4486536f17dfbbf2e1b85d>>
+// @generated SignedSource<<4961246a1ef861ea23c47de5276e1cea>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -580,6 +580,7 @@ pub struct Fun_<Ex, Fb, En, Hi> {
     pub variadic: FunVariadicity<Ex, Fb, En, Hi>,
     pub params: Vec<FunParam<Ex, Fb, En, Hi>>,
     pub cap: TypeHint<Hi>,
+    pub unsafe_cap: TypeHint<Hi>,
     pub body: FuncBody<Ex, Fb, En, Hi>,
     pub fun_kind: ast_defs::FunKind,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
@@ -1064,6 +1065,7 @@ pub struct Method_<Ex, Fb, En, Hi> {
     pub variadic: FunVariadicity<Ex, Fb, En, Hi>,
     pub params: Vec<FunParam<Ex, Fb, En, Hi>>,
     pub cap: TypeHint<Hi>,
+    pub unsafe_cap: TypeHint<Hi>,
     pub body: FuncBody<Ex, Fb, En, Hi>,
     pub fun_kind: ast_defs::FunKind,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,

@@ -11,7 +11,7 @@
          m_abstract = false; m_static = true; m_visibility = Public;
          m_name = ([6:26-30], "buzz"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
-         m_cap = ((), None);
+         m_cap = ((), None); m_unsafe_cap = ((), None);
          m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = Named };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = ((), (Some ([6:34-38], (Hprim Tvoid)))); m_external = false;
@@ -31,7 +31,7 @@
        f_ret = ((), (Some ([9:17-21], (Hprim Tvoid))));
        f_name = ([9:10-13], "\\Foo\\Bar\\baz"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap = ((), None);
+       f_cap = ((), None); f_unsafe_cap = ((), None);
        f_body =
        { fb_ast =
          [([11:3-21],

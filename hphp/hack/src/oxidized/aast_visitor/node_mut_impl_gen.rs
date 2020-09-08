@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5b2e3e48c76ab81d23f24697b064bcea>>
+// @generated SignedSource<<e0b3f934bfa6b823093c4e7453896672>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1106,6 +1106,7 @@ impl<P: Params> NodeMut<P> for Fun_<P::Ex, P::Fb, P::En, P::Hi> {
         self.variadic.accept(c, v)?;
         self.params.accept(c, v)?;
         self.cap.accept(c, v)?;
+        self.unsafe_cap.accept(c, v)?;
         self.body.accept(c, v)?;
         self.fun_kind.accept(c, v)?;
         self.user_attributes.accept(c, v)?;
@@ -1468,6 +1469,7 @@ impl<P: Params> NodeMut<P> for Method_<P::Ex, P::Fb, P::En, P::Hi> {
         self.variadic.accept(c, v)?;
         self.params.accept(c, v)?;
         self.cap.accept(c, v)?;
+        self.unsafe_cap.accept(c, v)?;
         self.body.accept(c, v)?;
         self.fun_kind.accept(c, v)?;
         self.user_attributes.accept(c, v)?;

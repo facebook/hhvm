@@ -430,7 +430,8 @@ fn from_xhp_attribute_declaration_method<'a>(
         where_constraints: vec![],
         variadic: FunVariadicity::FVnonVariadic,
         params: vec![],
-        cap: TypeHint((), None), // TODO(T70095684)
+        cap: TypeHint((), None),        // TODO(T70095684)
+        unsafe_cap: TypeHint((), None), // TODO(T70095684)
         body: FuncBody {
             ast,
             annotation: (),

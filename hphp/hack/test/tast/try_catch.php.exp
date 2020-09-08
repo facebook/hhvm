@@ -3,7 +3,7 @@
       f_ret = ((void), (Some ([11:25-29], (Hprim Tvoid))));
       f_name = ([11:10-21], "\\might_throw"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-      f_cap = ((mixed), None);
+      f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
       f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
@@ -20,7 +20,8 @@
        f_ret = ((int), (Some ([13:44-47], (Hprim Tint))));
        f_name = ([13:10-40], "\\terminal_catch_can_do_whatever");
        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
-       f_params = []; f_cap = ((mixed), None);
+       f_params = []; f_cap = ((nothing), None);
+       f_unsafe_cap = ((mixed), None);
        f_body =
        { fb_ast =
          [([14:3-11],

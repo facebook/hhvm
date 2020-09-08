@@ -19,7 +19,7 @@
          param_expr = None; param_callconv = None;
          param_user_attributes = []; param_visibility = None }
         ];
-      f_cap = ((mixed), None);
+      f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
       f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
@@ -34,7 +34,7 @@
        f_ret = ((void), (Some ([5:18-22], (Hprim Tvoid))));
        f_name = ([5:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-       f_cap = ((mixed), None);
+       f_cap = ((nothing), None); f_unsafe_cap = ((mixed), None);
        f_body =
        { fb_ast =
          [([6:3-24],
@@ -60,7 +60,8 @@
                             param_user_attributes = [];
                             param_visibility = None }
                            ];
-                         f_cap = ((mixed), None);
+                         f_cap = ((nothing), None);
+                         f_unsafe_cap = ((mixed), None);
                          f_body =
                          { fb_ast =
                            [([6:20-22],

@@ -3337,7 +3337,9 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
               Aast.f_body = { Aast.fb_ast = tb; fb_annotation = () };
               (* TODO(T70095684) definitely fix f_cap *)
               Aast.f_cap =
-                (MakeType.mixed Reason.none, hint_of_type_hint f.f_cap);
+                (MakeType.nothing Reason.none, hint_of_type_hint f.f_cap);
+              Aast.f_unsafe_cap =
+                (MakeType.mixed Reason.none, hint_of_type_hint f.f_unsafe_cap);
               Aast.f_params = t_params;
               Aast.f_variadic = t_variadic;
               (* TODO TAST: Variadic efuns *)

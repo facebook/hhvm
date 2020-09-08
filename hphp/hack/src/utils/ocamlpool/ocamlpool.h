@@ -49,7 +49,10 @@ void ocamlpool_leave(void);
 int ocamlpool_allocated_chunks(void);
 
 /* Controlling the size of allocated chunks.
- * >= 512, preferably >= 2^20 */
+ * >= 512, preferably >= 2^20
+ *
+ * NOTE: When changing this value, change the magic number in ocamlpool_test.rs
+ */
 #define OCAMLPOOL_DEFAULT_SIZE (1024 * 1024)
 size_t ocamlpool_get_next_chunk_size(void);
 void ocamlpool_set_next_chunk_size(size_t sz);

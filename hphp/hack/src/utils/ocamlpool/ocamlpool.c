@@ -169,7 +169,7 @@ void ocamlpool_enter(void)
   ocamlpool_sane_young_ptr = caml_young_ptr;
 
   assert_in_section();
-}
+ }
 
 
 void ocamlpool_leave(void)

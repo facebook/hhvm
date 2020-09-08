@@ -278,11 +278,11 @@ fn unescape_literal(
                 b'b' if literal_kind == LiteralKind::LiteralLongString => output.push(b'\x08'),
                 b'\'' => output.extend_from_slice(b"\\\'"),
                 b'n' => match literal_kind {
-                    LiteralKind::LiteralLongString => (),
+                    LiteralKind::LiteralLongString => {}
                     _ => output.push(b'\n'),
                 },
                 b'r' => match literal_kind {
-                    LiteralKind::LiteralLongString => (),
+                    LiteralKind::LiteralLongString => {}
                     _ => output.push(b'\r'),
                 },
                 b't' => output.push(b'\t'),

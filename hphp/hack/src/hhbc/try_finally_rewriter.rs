@@ -61,12 +61,12 @@ impl JumpInstructions<'_> {
                         RetC | RetCSuspended | RetM(_) => {
                             acc.insert(jt_gen.get_id_for_return(), i);
                         }
-                        _ => (),
+                        _ => {}
                     },
                     &ISpecialFlow(Goto(ref l)) => {
                         acc.insert(jt_gen.get_id_for_label(Label::Named(l.clone())), i);
                     }
-                    _ => (),
+                    _ => {}
                 };
                 acc
             },
@@ -112,7 +112,7 @@ fn get_pos_for_error<'a>(env: &'a Env<'a>) -> Cow<'a, Pos> {
             ScopeItem::Function(fd) => return Pos::first_char_of_line(fd.get_span()),
             // For methods, it points to class not the method.. weird
             ScopeItem::Class(cd) => return Pos::first_char_of_line(cd.get_span()),
-            ScopeItem::Method(_) | ScopeItem::Lambda(_) | ScopeItem::LongLambda(_) => (),
+            ScopeItem::Method(_) | ScopeItem::Lambda(_) | ScopeItem::LongLambda(_) => {}
         }
     }
     Cow::Owned(Pos::make_none())
@@ -213,7 +213,7 @@ pub fn fail_if_goto_from_try_to_finally(
         let mut state = State(vec![]);
         visit(&mut state, &mut (), block).unwrap();
         state.0
-    };
+    }
 
     struct GotoVisitor<'a>(std::marker::PhantomData<&'a ()>);
     impl<'ast, 'a> Visitor<'ast> for GotoVisitor<'a> {
@@ -438,7 +438,7 @@ pub(super) fn emit_finally_epilogue(
             }
             _ => fail(),
         }
-    };
+    }
     Ok(if jump_instrs.0.is_empty() {
         instr::empty()
     } else if jump_instrs.0.len() == 1 {

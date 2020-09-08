@@ -50,10 +50,13 @@ pub fn from_ast<'a>(
     let is_late_init = attributes.iter().any(|a| a.name == ua::LATE_INIT);
 
     if !args.is_static && class.final_ && class.kind.is_cabstract() {
-        return Err(emit_fatal::raise_fatal_parse(&pos, format!(
-            "Class {} contains non-static property declaration and therefore cannot be declared 'abstract final'",
-            string_utils::strip_global_ns(&class.name.1),
-        )));
+        return Err(emit_fatal::raise_fatal_parse(
+            &pos,
+            format!(
+                "Class {} contains non-static property declaration and therefore cannot be declared 'abstract final'",
+                string_utils::strip_global_ns(&class.name.1),
+            ),
+        ));
     };
 
     let type_info = match args.typehint.as_ref() {

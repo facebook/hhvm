@@ -7,8 +7,8 @@
 pub mod ocaml_context_state;
 mod ocaml_syntax_generated;
 
-use ocaml::core::mlvalues::Value as OcamlValue;
 use ocaml::core::mlvalues::Value;
+use ocaml::core::mlvalues::Value as OcamlValue;
 use ocamlpool_rust::utils::*;
 use parser_core_types::{
     lexable_token::LexableToken,

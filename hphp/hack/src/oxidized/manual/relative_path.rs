@@ -192,7 +192,7 @@ impl<'de> Deserialize<'de> for RelativePath {
                                 value
                             )),
                             &self,
-                        ))
+                        ));
                     }
                 };
                 let path = match path_str {
@@ -204,7 +204,7 @@ impl<'de> Deserialize<'de> for RelativePath {
                                  when deserializing RelativePath",
                             ),
                             &self,
-                        ))
+                        ));
                     }
                 };
                 Ok(RelativePath { prefix, path })

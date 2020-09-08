@@ -93,7 +93,7 @@ impl Env {
                                 args[0] =
                                     Expr(p.clone(), Expr_::String(fn_name.into_owned().into()));
                             }
-                            _ => (),
+                            _ => {}
                         }
                     }
                     Expr(_, Expr_::Id(id))
@@ -108,13 +108,13 @@ impl Env {
                                 args[0] =
                                     Expr(p.clone(), Expr_::String(cl_name.into_owned().into()));
                             }
-                            _ => (),
+                            _ => {}
                         }
                     }
-                    _ => (),
+                    _ => {}
                 }
             }
-            _ => (),
+            _ => {}
         }
     }
 }
@@ -207,10 +207,10 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                         );
                         *sid = new_name;
                     }
-                    _ => (),
+                    _ => {}
                 }
             }
-            _ => (),
+            _ => {}
         }
         rd.recurse(env, self.object())
     }
@@ -235,7 +235,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             Expr_::Efun(_) | Expr_::Lfun(_) => {
                 env.in_ppl = false;
             }
-            _ => (),
+            _ => {}
         }
 
         match e {
@@ -382,9 +382,9 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             x == "Xhp" || x == ":Xhp" || x == "XHP"
         }
         match hint {
-            Hint_::Happly(sid, _) if is_xhp_screwup(&sid.1) => (),
+            Hint_::Happly(sid, _) if is_xhp_screwup(&sid.1) => {}
             Hint_::Happly(sid, hints) if is_rx(&sid.1) && hints.len() == 1 => match *hints[0].1 {
-                Hint_::Hfun(_) => (),
+                Hint_::Hfun(_) => {}
                 _ => {
                     env.elaborate_type_name(sid);
                 }
@@ -392,11 +392,11 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             Hint_::Happly(sid, _) if is_rx(&sid.1) => {
                 env.elaborate_type_name(sid);
             }
-            Hint_::Happly(sid, _) if is_reserved_type_hint(&sid.1) && !env.in_codegen() => (),
+            Hint_::Happly(sid, _) if is_reserved_type_hint(&sid.1) && !env.in_codegen() => {}
             Hint_::Happly(sid, _) => {
                 env.elaborate_type_name(sid);
             }
-            _ => (),
+            _ => {}
         }
         hint.recurse(env, self.object())
     }
@@ -410,7 +410,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             ShapeFieldName::SFclassConst(id, _) => {
                 env.elaborate_type_name(id);
             }
-            _ => (),
+            _ => {}
         }
         sfn.recurse(env, self.object())
     }
@@ -441,7 +441,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             Some(sid) => {
                 env.elaborate_type_name(sid);
             }
-            _ => (),
+            _ => {}
         })
     }
 
@@ -454,7 +454,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             {
                 env.elaborate_type_name(sid);
             }
-            _ => (),
+            _ => {}
         }
         child.recurse(env, self.object())
     }

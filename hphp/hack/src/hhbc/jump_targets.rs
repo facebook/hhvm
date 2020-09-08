@@ -75,7 +75,7 @@ impl JumpTargets {
                 Region::Loop(LoopLabels { iterator, .. }, _) => {
                     add_iterator(iterator.clone(), &mut iters);
                 }
-                _ => (),
+                _ => {}
             }
         }
         None
@@ -402,7 +402,7 @@ impl Gen {
                 let (_, cases) = &**x;
                 Self::collect_valid_target_labels_for_switch_cases_aux(acc, cases)
             }
-            _ => (),
+            _ => {}
         }
     }
 
@@ -436,7 +436,7 @@ impl Gen {
                 let (_, defs) = &**x;
                 Self::collect_valid_target_labels_for_defs_aux(acc, defs)
             }
-            _ => (),
+            _ => {}
         }
     }
 

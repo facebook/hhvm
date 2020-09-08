@@ -278,7 +278,7 @@ fn shape_to_typed_value(
                             return Err(Error::unrecoverable(format!(
                                 "{} is not a valid integer index",
                                 s
-                            )))
+                            )));
                         }
                     }
                 }

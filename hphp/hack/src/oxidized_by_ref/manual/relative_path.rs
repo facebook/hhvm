@@ -169,7 +169,7 @@ impl<'de> Deserialize<'de> for RelativePath<'de> {
                                 value
                             )),
                             &self,
-                        ))
+                        ));
                     }
                 };
                 let path = match path_str {
@@ -181,7 +181,7 @@ impl<'de> Deserialize<'de> for RelativePath<'de> {
                                  when deserializing RelativePath",
                             ),
                             &self,
-                        ))
+                        ));
                     }
                 };
                 Ok(RelativePath::make(prefix, path))

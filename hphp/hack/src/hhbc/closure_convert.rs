@@ -441,7 +441,7 @@ fn make_scope_name(ns: &RcOc<namespace_env::Env>, scope: &ast_scope::Scope) -> S
                     parts.push("::".into())
                 };
             }
-            _ => (),
+            _ => {}
         }
     }
     parts.reverse();

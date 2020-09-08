@@ -126,7 +126,7 @@ where
     ) -> Result<(), P::Error> {
         Ok(match self {
             Some(t) => t.accept(c, v)?,
-            _ => (),
+            _ => {}
         })
     }
 }
@@ -142,7 +142,7 @@ where
     ) -> Result<(), P::Error> {
         Ok(match self {
             Some(t) => t.accept(c, v)?,
-            _ => (),
+            _ => {}
         })
     }
 }

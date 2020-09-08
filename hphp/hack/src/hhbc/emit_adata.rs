@@ -72,7 +72,7 @@ fn rewrite_typed_value(e: &mut Emitter, instr: &mut Instruct) -> Result<()> {
                         return Err(Error::Unrecoverable(format!(
                             "Unknown HhasAdata data: {}",
                             d
-                        )))
+                        )));
                     }
                 }
             }

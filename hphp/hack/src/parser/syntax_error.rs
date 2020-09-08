@@ -391,7 +391,7 @@ pub const expression_as_attribute_arguments: Error =
 pub const instanceof_invalid_scope_resolution: Error = Cow::Borrowed(concat!(
     "A scope resolution `::` on the right side of an ",
     "`instanceof` operator must start with a class name, `self`, `parent`, or `static`, and end with ",
-     "a variable",
+    "a variable",
 ));
 pub const instanceof_memberselection_inside_scoperesolution: Error = Cow::Borrowed(concat!(
     "A scope resolution `::` on the right ",
@@ -559,8 +559,8 @@ pub fn mutable_parameter_in_memoize_function(is_this: bool) -> Error {
 pub const mutable_return_in_memoize_function: Error =
     Cow::Borrowed("Memoized functions cannot return mutable objects.");
 pub const vararg_and_mutable: Error = Cow::Borrowed(
-      "`__Mutable`, `__OwnedMutable` and `__MaybeMutable` annotations cannot be used with variadic parameters."
-  );
+    "`__Mutable`, `__OwnedMutable` and `__MaybeMutable` annotations cannot be used with variadic parameters.",
+);
 pub const tparams_in_tconst: Error =
     Cow::Borrowed("Type parameters are not allowed on class type constants");
 pub const targs_not_allowed: Error =
@@ -940,11 +940,10 @@ pub fn invalid_typehint_alias(alias: &str, hint: &str) -> Error {
     ))
 }
 
-pub const function_pointer_bad_recv: Error =
-    Cow::Borrowed(concat!(
-        "Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. ",
-        "Use lambdas `(...) ==> {...}` for other cases."
-    ));
+pub const function_pointer_bad_recv: Error = Cow::Borrowed(concat!(
+    "Function pointers `<>` can only be created with toplevel functions and explicitly named static methods. ",
+    "Use lambdas `(...) ==> {...}` for other cases."
+));
 
 pub const local_variable_with_type: Error =
     Cow::Borrowed("Local variables cannot have type annotations in Hack.");

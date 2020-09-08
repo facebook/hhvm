@@ -143,7 +143,7 @@ fn typenames_from_list(list: Node, namespace: &str, names: &mut StringSet, names
                 names.insert(name);
             }
         }),
-        _ => (),
+        _ => {}
     };
 }
 
@@ -416,7 +416,7 @@ fn collect(mut acc: CollectAcc, node: Node) -> CollectAcc {
         FileAttributeSpecification(attributes) => {
             acc.1.file_attributes = attributes_into_facts(&acc.0, *attributes);
         }
-        _ => (),
+        _ => {}
     };
     acc
 }

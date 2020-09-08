@@ -21,7 +21,6 @@ pub use visitor::{visit, Visitor};
 pub use visitor_mut::{visit as visit_mut, VisitorMut};
 
 mod type_params_defaults {
-
     pub struct P<Context, Error, Ex, Fb, En, Hi>(
         std::marker::PhantomData<(Context, Error, Ex, Fb, En, Hi)>,
     );

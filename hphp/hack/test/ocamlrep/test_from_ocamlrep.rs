@@ -23,7 +23,7 @@ fn expected_int_but_got_block() {
     let value = unsafe { Arena::make_transparent(value) };
     let err = isize::from_ocamlrep(value).err().unwrap();
     match err {
-        ExpectedImmediate(..) => (),
+        ExpectedImmediate(..) => {}
         _ => panic!("unexpected error: {}", err.to_string()),
     }
 }
@@ -135,7 +135,7 @@ fn expected_unit_struct_but_got_block() {
     let value = unsafe { Arena::make_transparent(value) };
     let err = UnitStruct::from_ocamlrep(value).err().unwrap();
     match err {
-        ExpectedImmediate(..) => (),
+        ExpectedImmediate(..) => {}
         _ => panic!("unexpected error: {}", err.to_string()),
     }
 }

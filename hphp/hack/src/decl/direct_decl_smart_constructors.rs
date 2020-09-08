@@ -84,7 +84,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             let mut qualified_name =
                 String::with_capacity_in(namespace.len() + parts.len() * 10, this.state.arena);
             match parts.first() {
-                Some(Node::Backslash(_)) => (), // Already fully-qualified
+                Some(Node::Backslash(_)) => {} // Already fully-qualified
                 _ => qualified_name.push_str(namespace),
             }
             for part in parts {
@@ -279,7 +279,7 @@ fn read_member_modifiers<'a: 'b, 'b>(modifiers: impl Iterator<Item = &'b Node<'a
             Node::Token(TokenKind::Static) => ret.is_static = true,
             Node::Token(TokenKind::Abstract) => ret.is_abstract = true,
             Node::Token(TokenKind::Final) => ret.is_final = true,
-            _ => (),
+            _ => {}
         }
     }
     ret
@@ -427,7 +427,7 @@ impl<'a> ClassishNameBuilder<'a> {
                 class_name.push_str(name);
                 *self = InClassish(arena.alloc((class_name.into_bump_str(), pos, token_kind)))
             }
-            InClassish(_) => (),
+            InClassish(_) => {}
         }
     }
 
@@ -864,7 +864,7 @@ impl<'a> Node<'a> {
                         arena.alloc(Ty_::Tapply(arena.alloc((class_name, &[][..])))),
                     ));
                 }
-                _ => (),
+                _ => {}
             }
         }
 
@@ -936,7 +936,7 @@ impl<'a> Node<'a> {
                     "__ReturnDisposable" => {
                         attributes.returns_disposable = true;
                     }
-                    _ => (),
+                    _ => {}
                 }
             } else {
                 panic!("Expected an attribute, but was {:?}", self);
@@ -1799,7 +1799,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
         // We only want to check the mode if <? is the very first token we see.
         match (&self.state.file_mode_builder, &kind) {
-            (FileModeBuilder::None, TokenKind::Markup) => (),
+            (FileModeBuilder::None, TokenKind::Markup) => {}
             (FileModeBuilder::None, TokenKind::LessThanQuestion) => {
                 self.state.file_mode_builder = FileModeBuilder::Pending
             }
@@ -1814,7 +1814,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         Mode::Mstrict
                     });
             }
-            (_, _) => (),
+            (_, _) => {}
         }
 
         let result = match kind {
@@ -2289,7 +2289,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
         match (&op, rhs) {
             (Bop::Eq(_), Node::Token(TokenKind::Yield)) => return rhs,
-            _ => (),
+            _ => {}
         }
 
         let pos = unwrap_or_return!(Pos::merge(
@@ -2893,7 +2893,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             match modifier {
                 Node::Token(TokenKind::Abstract) => class_kind = ClassKind::Cabstract,
                 Node::Token(TokenKind::Final) => final_ = true,
-                _ => (),
+                _ => {}
             }
         }
 
@@ -2923,7 +2923,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         for attribute in attributes.iter() {
             match attribute {
                 &Node::Attribute(..) => user_attributes_len += 1,
-                _ => (),
+                _ => {}
             }
         }
 
@@ -2961,7 +2961,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         methods_len += 1
                     }
                 }
-                _ => (),
+                _ => {}
             }
         }
 
@@ -2982,7 +2982,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         for attribute in attributes.iter() {
             match attribute {
                 Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(&attr)),
-                _ => (),
+                _ => {}
             }
         }
         // Match ordering of attributes produced by the OCaml decl parser (even
@@ -3041,7 +3041,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         methods.push(method.clone());
                     }
                 }
-                _ => (), // It's not our job to report errors here.
+                _ => {} // It's not our job to report errors here.
             }
         }
 
@@ -3381,7 +3381,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         for attribute in attributes.iter() {
             match attribute {
                 Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
-                _ => (),
+                _ => {}
             }
         }
         // Match ordering of attributes produced by the OCaml decl parser (even
@@ -3800,7 +3800,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         fold_string_concat(&e1, acc);
                         fold_string_concat(&e2, acc);
                     }
-                    _ => (),
+                    _ => {}
                 }
             }
 

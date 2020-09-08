@@ -2072,20 +2072,19 @@ where
             let right_precedence = right_operator.precedence(&self.env);
             let associativity = right_operator.associativity(&self.env);
             let is_parsable_as_assignment =
-              // check if this is the case ... $a = ...
-              // where
-              //   'left_precedence' - precedence of the operation on the left of $a
-              //   'rigft_term' - $a
-              //   'kind' - operator that follows right_term
-              //
-              // in case if right_term is valid left hand side for the assignment
-              // and token is assignment operator and left_precedence is less than
-              // bumped priority fort the assignment we reset precedence before parsing
-              // right hand side of the assignment to make sure it is consumed.
-              !self.check_if_should_override_normal_precedence(
-                &right_term,
-                kind,
-                left_precedence).is_none();
+            // check if this is the case ... $a = ...
+            // where
+            //   'left_precedence' - precedence of the operation on the left of $a
+            //   'rigft_term' - $a
+            //   'kind' - operator that follows right_term
+            //
+            // in case if right_term is valid left hand side for the assignment
+            // and token is assignment operator and left_precedence is less than
+            // bumped priority fort the assignment we reset precedence before parsing
+            // right hand side of the assignment to make sure it is consumed.
+            !self
+                .check_if_should_override_normal_precedence(&right_term, kind, left_precedence)
+                .is_none();
             if right_precedence > left_precedence
                 || (associativity == Assoc::RightAssociative && right_precedence == left_precedence)
                 || is_parsable_as_assignment

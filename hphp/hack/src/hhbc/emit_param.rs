@@ -67,7 +67,7 @@ fn rename_params(mut params: Vec<HhasParam>) -> Vec<HhasParam> {
                 }
             }
         }
-    };
+    }
     let mut param_counts = BTreeMap::new();
     let names = params
         .iter()

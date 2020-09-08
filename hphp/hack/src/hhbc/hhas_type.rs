@@ -20,7 +20,6 @@ pub struct Constant {
 
 #[allow(dead_code)]
 pub mod constraint {
-
     use bitflags::bitflags;
 
     #[derive(Clone, Default, Debug)]
@@ -91,7 +90,6 @@ impl Constant {
 
 #[cfg(test)]
 mod test {
-
     #[test]
     fn test_constraint_flags_to_string_called_by_hhbc_hhas() {
         use crate::constraint::Flags;

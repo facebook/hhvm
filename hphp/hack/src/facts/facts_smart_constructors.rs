@@ -337,7 +337,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
                     }
                 }
             }
-            _ => (),
+            _ => {}
         };
         Node::Ignored
     }

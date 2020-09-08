@@ -242,7 +242,7 @@ mod inout_locals {
                         let (uop, e) = &**expr;
                         match uop {
                             ast_defs::Uop::Uincr | ast_defs::Uop::Udecr => collect_lvars_hs(c, e),
-                            _ => (),
+                            _ => {}
                         }
                     }
                     // $v
@@ -250,7 +250,7 @@ mod inout_locals {
                         let Lid(_, (_, id)) = &**expr;
                         add_use(id.to_string(), &mut c.state);
                     }
-                    _ => (),
+                    _ => {}
                 })
             }
         }
@@ -268,7 +268,7 @@ mod inout_locals {
                 }
             }
             tast::Expr_::List(exprs) => exprs.iter().for_each(|expr| collect_lvars_hs(ctx, expr)),
-            _ => (),
+            _ => {}
         }
     }
 }
@@ -684,7 +684,7 @@ fn parse_include(e: &tast::Expr) -> IncludePath {
             tast::Expr_::String(lit) => (String::new(), lit.to_string()),
             _ => (text_of_expr(e), String::new()),
         }
-    };
+    }
     let (mut var, mut lit) = split_var_lit(e);
     if var == pseudo_consts::G__DIR__ {
         var = String::new();
@@ -857,7 +857,7 @@ pub fn emit_await(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr
                 && args.len() == 1
                 && string_utils::strip_global_ns(&(*id.1)) == "gena") =>
         {
-            return inline_gena_call(emitter, env, &args[0])
+            return inline_gena_call(emitter, env, &args[0]);
         }
         _ => {
             let after_await = emitter.label_gen_mut().next_regular();
@@ -1123,7 +1123,7 @@ fn emit_named_collection_str(
             return Err(unrecoverable(format!(
                 "collection: {} does not exist",
                 name
-            )))
+            )));
         }
     };
     emit_named_collection(e, env, pos, expr, fields, ctype)
@@ -1274,7 +1274,7 @@ fn non_numeric(s: &str) -> bool {
             i64::from_str(&s)
         })
         .map_err(|_| ())
-    };
+    }
     fn float_from_str_radix(s: &str, radix: u32) -> std::result::Result<f64, ()> {
         let i = i64::from_str_radix(&s.replace(".", ""), radix).map_err(|_| ())?;
         Ok(match s.matches(".").count() {
@@ -1285,7 +1285,7 @@ fn non_numeric(s: &str) -> bool {
             }
             _ => return Err(()),
         })
-    };
+    }
     fn out_of_bounds(s: &str) -> bool {
         // compare strings instead of floats to avoid rounding imprecision
         if FLOAT.is_match(s) {
@@ -1314,7 +1314,7 @@ fn non_numeric(s: &str) -> bool {
             };
             f64::from_str(s).map_err(|_| ()).and_then(validate_float)
         }
-    };
+    }
     int_from_str(&s).is_err() && float_from_str(&s).is_err()
 }
 
@@ -2809,7 +2809,7 @@ fn emit_class_meth_native(
         ClassExpr::Expr(_) => {
             return Err(unrecoverable(
                 "emit_class_meth_native: ClassExpr::Expr should be impossible",
-            ))
+            ));
         }
     })
 }
@@ -3092,10 +3092,13 @@ fn emit_reified_type_opt(env: &Env, pos: &Pos, name: &str) -> Result<Option<Inst
     };
     let check = |is_soft| -> Result<()> {
         if is_soft {
-            Err(emit_fatal::raise_fatal_parse(pos, format!(
-                "{} is annotated to be a soft reified generic, it cannot be used until the __Soft annotation is removed",
-                name
-            )))
+            Err(emit_fatal::raise_fatal_parse(
+                pos,
+                format!(
+                    "{} is annotated to be a soft reified generic, it cannot be used until the __Soft annotation is removed",
+                    name
+                ),
+            ))
         } else {
             Ok(())
         }
@@ -3217,7 +3220,7 @@ fn emit_new(
                 H::MaybeGenerics => {
                     return Err(unrecoverable(
                         "Internal error: This case should have been transformed",
-                    ))
+                    ));
                 }
             }
         }
@@ -3402,7 +3405,7 @@ fn emit_prop_expr(
             return Err(emit_fatal::raise_fatal_parse(
                 &prop.0,
                 "?-> can only be used with scalar property names",
-            ))
+            ));
         }
         MemberKey::PC(_) => (mk, emit_expr(e, env, prop)?, 1),
         MemberKey::PL(local) if null_coalesce_assignment => {
@@ -4061,7 +4064,7 @@ fn from_unop(opts: &Options, op: &ast_defs::Uop) -> Result {
         _ => {
             return Err(Unrecoverable(
                 "this unary operation cannot be translated".into(),
-            ))
+            ));
         }
     })
 }
@@ -4150,12 +4153,12 @@ fn from_binop(opts: &Options, op: &ast_defs::Bop) -> Result {
         B::QuestionQuestion => {
             return Err(Unrecoverable(
                 "null coalescence is emitted differently".into(),
-            ))
+            ));
         }
         B::Barbar | B::Ampamp => {
             return Err(Unrecoverable(
                 "short-circuiting operator cannot be generated as a simple binop".into(),
-            ))
+            ));
         }
     })
 }
@@ -4467,7 +4470,7 @@ fn emit_cast(
                     return Err(emit_fatal::raise_fatal_parse(
                         pos,
                         format!("Invalid cast type: {}", id),
-                    ))
+                    ));
                 }
             }
         }
@@ -4816,7 +4819,7 @@ fn emit_base_(
                 return Err(emit_fatal::raise_fatal_runtime(
                     pos,
                     "Can't use [] for reading",
-                ))
+                ));
             }
             // base is in turn array_get - do a specific handling for inout params
             // if necessary
@@ -5169,7 +5172,7 @@ fn can_use_as_rhs_in_list_assignment(expr: &tast::Expr_) -> Result<bool> {
         E_::PUIdentifier(_) => {
             return Err(Unrecoverable(
                 "TODO(T35357243): Pocket Universes syntax must be erased by now".into(),
-            ))
+            ));
         }
         _ => false,
     })
@@ -5458,7 +5461,7 @@ pub fn emit_lval_op_nonlist_steps(
                     return Err(emit_fatal::raise_fatal_runtime(
                         pos,
                         "Can't use [] for reading",
-                    ))
+                    ));
                 }
                 (_, opt_elem_expr) => {
                     let mode = match op {
@@ -5610,7 +5613,7 @@ pub fn emit_lval_op_nonlist_steps(
                 return Err(emit_fatal::raise_fatal_parse(
                     pos,
                     "Can't use return value in write context",
-                ))
+                ));
             }
         })
     };
@@ -5674,7 +5677,7 @@ pub fn fixup_type_arg<'a>(
     struct Checker<'s> {
         erased_tparams: &'s [&'s str],
         isas: bool,
-    };
+    }
     impl<'ast, 's> Visitor<'ast> for Checker<'s> {
         type P = AstParams<(), Option<Error>>;
 
@@ -5700,10 +5703,10 @@ pub fn fixup_type_arg<'a>(
                     return Err(Some(emit_fatal::raise_fatal_parse(
                         &h.0,
                         "Erased generics are not allowed in is/as expressions",
-                    )))
+                    )));
                 }
                 H_::Haccess(_, _) => return Ok(()),
-                _ => (),
+                _ => {}
             }
             h.recurse(c, self.object())
         }

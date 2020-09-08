@@ -368,7 +368,7 @@ where
         )
     }
 
-    fn parse_foreach_statement(&mut self) -> S::R where {
+    fn parse_foreach_statement(&mut self) -> S::R {
         let foreach_keyword_token = self.assert_token(TokenKind::Foreach);
         let foreach_left_paren = self.require_left_paren();
         self.expect_in_new_scope(ExpectedTokens::RightParen);
@@ -463,7 +463,7 @@ where
     //   await-opt   using   (   expression-list   )   compound-statement
     //
     // TODO: Update the specification of the grammar
-    fn parse_using_statement(&mut self, await_kw: S::R) -> S::R where {
+    fn parse_using_statement(&mut self, await_kw: S::R) -> S::R {
         let using_kw = self.assert_token(TokenKind::Using);
         // Decision point - Are we at a function scope or a body scope
         let token_kind = self.peek_token_kind();

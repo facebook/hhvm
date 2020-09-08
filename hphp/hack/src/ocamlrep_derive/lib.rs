@@ -379,7 +379,7 @@ fn get_boxed_tuple_len(variant: &VariantInfo) -> Option<usize> {
     use syn::{Fields, GenericArgument, PathArguments, Type, TypePath, TypeReference};
 
     match &variant.ast().fields {
-        Fields::Unnamed(_) => (),
+        Fields::Unnamed(_) => {}
         _ => return None,
     }
     let bi = match variant.bindings() {

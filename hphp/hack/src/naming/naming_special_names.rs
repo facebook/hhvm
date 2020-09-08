@@ -10,7 +10,6 @@
 /** Module consisting of the special names known to the typechecker */
 
 pub mod classes {
-
     pub const PARENT: &str = "parent";
 
     pub const STATIC: &str = "static";
@@ -106,7 +105,6 @@ pub mod collections {
 }
 
 pub mod members {
-
     use lazy_static::lazy_static;
     use std::collections::HashMap;
     use std::collections::HashSet;
@@ -202,7 +200,6 @@ pub mod members {
 }
 
 pub mod user_attributes {
-
     use lazy_static::lazy_static;
     use std::collections::HashSet;
 

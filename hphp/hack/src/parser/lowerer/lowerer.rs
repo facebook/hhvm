@@ -3725,7 +3725,7 @@ where
                 Self::is_valid_attribute_arg(&c.parenthesized_expression_expression, env)
             }
             // Normal literals (string, int, etc)
-            LiteralExpression(_) => (),
+            LiteralExpression(_) => {}
             // ::class strings
             ScopeResolutionExpression(c) => {
                 if let Some(TK::Class) = Self::token_kind(&c.scope_resolution_name) {
@@ -3742,8 +3742,8 @@ where
                 Self::is_valid_attribute_arg(&c.prefix_unary_operand, env);
                 let token = Self::token_kind(&c.prefix_unary_operator);
                 match token {
-                    Some(TK::Minus) => (),
-                    Some(TK::Plus) => (),
+                    Some(TK::Minus) => {}
+                    Some(TK::Plus) => {}
                     _ => Self::raise_parsing_error(
                         node,
                         env,

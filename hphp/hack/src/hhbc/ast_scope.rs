@@ -60,7 +60,7 @@ impl<'a> Scope<'a> {
                 ScopeItem::Method(md) => {
                     return md.get_span().clone();
                 }
-                _ => (),
+                _ => {}
             }
         }
         Pos::make_none()
@@ -84,7 +84,7 @@ impl<'a> Scope<'a> {
                 ScopeItem::Method(md) => {
                     extend_shallowly(md.get_tparams());
                 }
-                _ => (),
+                _ => {}
             }
         }
         tparams
@@ -102,7 +102,7 @@ impl<'a> Scope<'a> {
                 ScopeItem::Method(md) => {
                     return md.get_tparams();
                 }
-                _ => (),
+                _ => {}
             }
         }
         &[]
@@ -130,7 +130,7 @@ impl<'a> Scope<'a> {
                 ScopeItem::Method(_) => {
                     return true;
                 }
-                _ => (),
+                _ => {}
             }
         }
         false
@@ -150,7 +150,7 @@ impl<'a> Scope<'a> {
                     let fun_kind = f.get_fun_kind();
                     return fun_kind == FunKind::FAsync || fun_kind == FunKind::FAsyncGenerator;
                 }
-                _ => (),
+                _ => {}
             }
         }
         false
@@ -171,7 +171,7 @@ impl<'a> Scope<'a> {
                         return false;
                     }
                 }
-                ScopeItem::Lambda(_) => (),
+                ScopeItem::Lambda(_) => {}
                 _ => return false,
             }
         }
@@ -203,7 +203,7 @@ impl<'a> Scope<'a> {
                 }) => {
                     return *rl;
                 }
-                _ => (),
+                _ => {}
             }
         }
         rx::Level::NonRx
@@ -219,7 +219,7 @@ impl<'a> Scope<'a> {
                 ScopeItem::Function(f) => {
                     return has(f.get_user_attributes());
                 }
-                _ => (),
+                _ => {}
             }
         }
         false

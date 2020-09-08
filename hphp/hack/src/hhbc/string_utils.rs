@@ -263,7 +263,6 @@ pub mod integer {
 }
 
 pub mod float {
-
     fn sprintf(f: f64) -> Option<String> {
         const BUF_SIZE: usize = 256;
 
@@ -596,7 +595,6 @@ mod string_utils_tests {
 
     mod types {
         mod fix_casing {
-
             macro_rules! test_case {
                 ($name: ident, $input: expr, $expected: expr) => {
                     #[test]

@@ -138,7 +138,7 @@ where
             relabel(l1);
             relabel(l2);
         }
-        _ => (),
+        _ => {}
     }
 }
 
@@ -200,7 +200,7 @@ pub fn clone_with_fresh_regular_labels(emitter: &mut Emitter, block: &mut InstrS
             Instruct::ILabel(Label::Named(name)) => {
                 named.insert(name.to_string(), emitter.label_gen_mut().next_regular());
             }
-            _ => (),
+            _ => {}
         }
         (regular, named)
     };

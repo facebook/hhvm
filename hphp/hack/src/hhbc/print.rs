@@ -261,14 +261,14 @@ fn print_include_region<W: Write>(
 ) -> Result<(), W::Error> {
     fn print_path<W: Write>(w: &mut W, p: &Path) -> Result<(), W::Error> {
         option(w, p.to_str(), |w, p: &str| write!(w, "\n  {}", p))
-    };
+    }
     fn print_if_exists<W: Write>(w: &mut W, p: &Path) -> Result<(), W::Error> {
         if p.exists() {
             print_path(w, p)
         } else {
             Ok(())
         }
-    };
+    }
     fn print_include<W: Write>(
         ctx: &mut Context,
         w: &mut W,
@@ -316,7 +316,7 @@ fn print_include_region<W: Write>(
                 print_if_exists(w, &resolved)
             }
         }
-    };
+    }
     if !includes.is_empty() {
         w.write("\n.includes {")?;
         for inc in includes.into_iter() {
@@ -572,7 +572,7 @@ fn print_constant<W: Write>(
             w.write(" = ")?;
             triple_quotes(w, |w| print_adata(ctx, w, value))?;
         }
-        None => (),
+        None => {}
     }
     w.write(";")
 }
@@ -2348,7 +2348,7 @@ fn print_uop<W: Write>(w: &mut W, op: ast::Uop) -> Result<(), W::Error> {
         U::Upincr | U::Updecr => {
             return Err(Error::fail(
                 "string_of_uop - should have been captures earlier",
-            ))
+            ));
         }
     })
 }
@@ -2523,7 +2523,7 @@ fn print_expr<W: Write>(
             } else {
                 id.into()
             }
-        };
+        }
 
         if env.is_some() {
             let class_id = class::Type::from_ast_name(id);
@@ -2609,8 +2609,10 @@ fn print_expr<W: Write>(
                 .to_uppercase();
 
                 lazy_static! {
-                    static ref UNSIGNED_EXP : Regex = Regex::new(r"(?P<first>E)(?P<second>\d+)").unwrap();
-                    static ref SIGNED_SINGLE_DIGIT_EXP: Regex = Regex::new(r"(?P<first>E[+-])(?P<second>\d$)").unwrap();
+                    static ref UNSIGNED_EXP: Regex =
+                        Regex::new(r"(?P<first>E)(?P<second>\d+)").unwrap();
+                    static ref SIGNED_SINGLE_DIGIT_EXP: Regex =
+                        Regex::new(r"(?P<first>E[+-])(?P<second>\d$)").unwrap();
                 }
                 // turn mEn into mE+n
                 let s = UNSIGNED_EXP.replace(&s, "${first}+${second}");
@@ -2865,10 +2867,10 @@ fn print_expr<W: Write>(
         )),
         E_::Suspend(_) | E_::Callconv(_) | E_::ExprList(_) => {
             Err(Error::fail("illegal default value"))
-        },
+        }
         _ => Err(Error::fail(
-            "TODO Unimplemented: We are missing a lot of cases in the case match. Delete this catchall"
-        ))
+            "TODO Unimplemented: We are missing a lot of cases in the case match. Delete this catchall",
+        )),
     }
 }
 

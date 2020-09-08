@@ -315,7 +315,7 @@ fn hint_to_type_constant_list(
             _ => {
                 return Err(unrecoverable(
                     "Structure not translated according to ast_to_nast",
-                ))
+                ));
             }
         },
         Hfun(hf) => {

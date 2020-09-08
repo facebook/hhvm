@@ -354,7 +354,11 @@ where
     {
         let token = self.next_token_with_tokenizer(tokenizer);
         if token.kind() != kind {
-            panic!("Expected {:?}, but got {:?}. This indicates a bug in the parser, regardless of how broken the input code is.", kind, token.kind())
+            panic!(
+                "Expected {:?}, but got {:?}. This indicates a bug in the parser, regardless of how broken the input code is.",
+                kind,
+                token.kind()
+            )
         }
         S!(make_token, self, token)
     }

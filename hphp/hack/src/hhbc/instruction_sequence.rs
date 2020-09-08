@@ -1424,7 +1424,7 @@ impl InstrSeq {
         F: FnMut(&mut Instruct) -> bool,
     {
         match self {
-            InstrSeq::Empty => (),
+            InstrSeq::Empty => {}
             InstrSeq::One(x) => {
                 if !f(x) {
                     *self = InstrSeq::Empty
@@ -1450,7 +1450,7 @@ impl InstrSeq {
         F: FnMut(&'i mut Instruct),
     {
         match self {
-            InstrSeq::Empty => (),
+            InstrSeq::Empty => {}
             InstrSeq::One(x) => f(x),
             InstrSeq::List(instr_lst) => instr_lst.iter_mut().for_each(f),
             InstrSeq::Concat(instrseq_lst) => instrseq_lst.iter_mut().for_each(|x| x.map_mut(f)),

@@ -132,7 +132,7 @@ pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: &Hint) -> Result<St
         Herr | Hany => {
             return Err(Unrecoverable(
                 "This should be an error caught in naming".into(),
-            ))
+            ));
         }
         h => fmt_name_or_prim(tparams, &hint_to_string(&h)).into(),
     })
@@ -205,7 +205,7 @@ fn hint_to_type_constraint(
         Herr | Hany => {
             return Err(Unrecoverable(
                 "This should be an error caught in naming".into(),
-            ))
+            ));
         }
         Hoption(t) => {
             if let Happly(Id(_, s), hs) = &*(t.1) {
@@ -213,7 +213,7 @@ fn hint_to_type_constraint(
                     match &hs[..] {
                         [] => return Ok(Type::default()),
                         [h] => return hint_to_type_constraint(kind, tparams, false, h),
-                        _ => (),
+                        _ => {}
                     }
                 }
             } else if let Hsoft(Hint(_, h)) = &*(t.1) {
@@ -257,7 +257,7 @@ fn hint_to_type_constraint(
                         _ => hint_to_type_constraint(kind, tparams, false, &hs[0]),
                     };
                 }
-                _ => (),
+                _ => {}
             };
             type_application_helper(tparams, kind, pos, s)?
         }
@@ -385,7 +385,7 @@ fn param_hint_to_type_info(
         Herr | Hany => {
             return Err(Unrecoverable(
                 "Expected error on Tany in naming: param_hint_to_type_info".into(),
-            ))
+            ));
         }
         _ => true,
     };

@@ -53,9 +53,9 @@ fn emit_native_opcode_impl(
             if let [p] = ua.params.as_slice() {
                 match p.1.as_string() {
                     Some(s) if s == "HH\\AsyncGenerator" || s == "Generator" => {
-                        return emit_generator_method(name, params)
+                        return emit_generator_method(name, params);
                     }
-                    _ => (),
+                    _ => {}
                 }
             };
         }
@@ -97,7 +97,7 @@ fn emit_generator_method(name: &str, params: &[tast::FunParam]) -> Result {
             return Err(emit_fatal::raise_fatal_runtime(
                 &Pos::make_none(),
                 String::from("incorrect native generator function"),
-            ))
+            ));
         }
     };
     Ok(InstrSeq::gather(vec![instrs, instr::retc()]))

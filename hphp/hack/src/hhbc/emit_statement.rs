@@ -579,7 +579,7 @@ fn emit_switch(
             None => {
                 return Err(Unrecoverable(
                     "impossible - switch statements must have at least one case".into(),
-                ))
+                ));
             }
             Some((last, rest)) => {
                 // Emit all the cases except the last one
@@ -609,7 +609,7 @@ fn emit_switch(
                         tast::Case::Default(_, _) => {
                             return Err(Unrecoverable(
                                 "impossible - there shouldn't be a default".into(),
-                            ))
+                            ));
                         }
                     };
                     // ...and emit warning/exception for missing default
@@ -639,7 +639,7 @@ fn emit_switch(
                         return Err(emit_fatal::raise_fatal_runtime(
                             pos,
                             "Switch statements may only contain one 'default' clause.",
-                        ))
+                        ));
                     }
                 };
                 let case_expr_instrs = case_exprs
@@ -1065,7 +1065,7 @@ fn emit_iterator_key_value_storage(
             }
         };
         Ok(None)
-    };
+    }
     match iterator {
         A::AsKv(k, v) => Ok(
             match (
@@ -1379,7 +1379,7 @@ fn emit_for(
                 emit_expr::emit_jmpnz(emitter, env, cond, label)
             }?
             .instrs)
-        };
+        }
         fn expr_list(
             emitter: &mut Emitter,
             env: &mut Env,
@@ -1408,7 +1408,7 @@ fn emit_for(
                     Ok(res)
                 }
             }
-        };
+        }
         match cond.1.as_expr_list() {
             Some(es) => Ok(match es.split_first() {
                 None => {
@@ -1424,7 +1424,7 @@ fn emit_for(
             }),
             None => final_(emitter, env, jmpz, label, cond),
         }
-    };
+    }
     // TODO: this is bizarre codegen for a "for" loop.
     //  This should be codegen'd as
     //  emit_ignored_expr initializer;

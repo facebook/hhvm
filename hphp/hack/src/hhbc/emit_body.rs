@@ -350,7 +350,7 @@ fn make_decl_vars(
     } else {
         match &scope.items[..] {
             [] | [.., ScopeItem::Class(_), _] => move_this(&mut decl_vars),
-            _ => (),
+            _ => {}
         };
         decl_vars
     };
@@ -491,7 +491,7 @@ fn emit_defs(env: &mut Env, emitter: &mut Emitter, prog: &[tast::Def]) -> Result
             Def::Namespace(ns) => emit_defs(env, emitter, &ns.1),
             _ => Ok(instr::empty()),
         }
-    };
+    }
     fn aux(env: &mut Env, emitter: &mut Emitter, defs: &[tast::Def]) -> Result {
         match defs {
             [Def::SetNamespaceEnv(ns), ..] => {
@@ -515,7 +515,7 @@ fn emit_defs(env: &mut Env, emitter: &mut Emitter, prog: &[tast::Def]) -> Result
                 aux(env, emitter, &defs[1..])?,
             ])),
         }
-    };
+    }
     match prog {
         [Def::Stmt(s), ..] if s.1.is_markup() => Ok(InstrSeq::gather(vec![
             emit_statement::emit_markup(emitter, env, s.1.as_markup().unwrap(), true)?,

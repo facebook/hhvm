@@ -308,11 +308,11 @@ fn emit_reified_extends_params<'a>(
                         &l.iter().collect::<Vec<_>>(),
                     )?,
                     instr::record_reified_generic(),
-                ]))
+                ]));
             }
-            _ => (),
+            _ => {}
         },
-        _ => (),
+        _ => {}
     }
     let hack_arr_dv_arr_mark = e
         .options()

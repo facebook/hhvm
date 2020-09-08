@@ -101,7 +101,7 @@ fn elaborate_raw_id(nsenv: &namespace_env::Env, kind: ElaborateKind, id: &str) -
         ElaborateKind::Class if sn::typehints::is_reserved_hh_name(&id) => {
             return fqid;
         }
-        _ => (),
+        _ => {}
     }
 
     let (prefix, has_bslash) = match id.find("\\") {
@@ -296,7 +296,7 @@ pub mod toplevel_elaborator {
         p.iter_mut().for_each(|x| match x {
             Def::<A>::Class(c) => c.file_attributes = file_attrs.clone(),
             Def::<A>::Fun(f) => f.file_attributes = file_attrs.clone(),
-            _ => (),
+            _ => {}
         });
     }
 

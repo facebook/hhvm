@@ -165,10 +165,12 @@ class SoapClient {
     mixed $input_headers = null,
   ): mixed;
 
+  <<__ProvenanceSkipFrame>>
   public function call__(mixed $name, mixed $args): mixed {
     return $this->__soapcall($name, $args);
   }
 
+  <<__ProvenanceSkipFrame>>
   public function __soapcall(
     string $name,
     varray<mixed> $args,

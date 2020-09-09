@@ -30,7 +30,11 @@ let mk_lowercase_constant pos cst =
       code = Codes.to_enum Codes.LowercaseConstant;
       severity = Lint_warning;
       pos;
-      message = spf "Please use '%s' instead of '%s'" lower cst;
+      message =
+        spf
+          "Please use %s instead of %s"
+          (Markdown_lite.md_codify lower)
+          (Markdown_lite.md_codify cst);
       bypass_changed_lines = false;
       autofix = ("", "");
     }
@@ -43,7 +47,10 @@ let use_collection_literal pos coll =
     (Codes.to_enum Codes.UseCollectionLiteral)
     Lint_warning
     pos
-    (spf "Use `%s {...}` instead of `new %s(...)`" coll coll)
+    ( "Use "
+    ^ Markdown_lite.md_codify (coll ^ " {...}")
+    ^ " instead of "
+    ^ Markdown_lite.md_codify ("new " ^ coll ^ "(...)") )
 
 let static_string ?(no_consts = false) pos =
   add
@@ -63,8 +70,7 @@ let shape_idx_access_required_field field_pos name =
     (Codes.to_enum Codes.ShapeIdxRequiredField)
     Lint_warning
     field_pos
-    ( "The field '"
-    ^ name
-    ^ "' is required to exist in the shape. Consider using a subscript-expression instead, such as $myshape['"
-    ^ name
-    ^ "']" )
+    ( "The field "
+    ^ Markdown_lite.md_codify name
+    ^ " is required to exist in the shape. Consider using a subscript-expression instead, such as "
+    ^ Markdown_lite.md_codify ("$myshape['" ^ name ^ "']") )

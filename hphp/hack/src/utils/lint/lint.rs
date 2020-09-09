@@ -41,7 +41,7 @@ impl LintError {
     pub fn lowercase_constant(p: Pos, cst: &str) -> Self {
         let lower = cst.to_ascii_lowercase();
         let message = format!(
-            "Please use '{}' instead of '{}'",
+            "Please use `{}` instead of `{}`",
             lower.to_string(),
             cst.to_string()
         );

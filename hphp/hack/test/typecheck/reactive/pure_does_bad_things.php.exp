@@ -1,0 +1,14 @@
+File "pure_does_bad_things.php", line 5, characters 3-16:
+Static property cannot be used in a reactive context. (Typing[4228])
+File "pure_does_bad_things.php", line 6, characters 3-6:
+`echo` or `print` are not allowed in reactive functions. (Typing[4226])
+File "pure_does_bad_things.php", line 8, characters 3-9:
+This object's property is being mutated (used as an lvalue)
+You cannot set non-mutable object properties in reactive functions (Typing[4202])
+File "pure_does_bad_things.php", line 15, characters 3-16:
+Static property cannot be used in a reactive context. (Typing[4228])
+File "pure_does_bad_things.php", line 16, characters 3-6:
+`echo` or `print` are not allowed in reactive functions. (Typing[4226])
+File "pure_does_bad_things.php", line 18, characters 3-9:
+This object's property is being mutated (used as an lvalue)
+You cannot set non-mutable object properties in reactive functions (Typing[4202])

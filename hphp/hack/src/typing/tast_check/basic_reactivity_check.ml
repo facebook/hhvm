@@ -566,10 +566,15 @@ let check =
       | _ ->
         begin
           match b.fb_ast with
-          | [(_, If ((_, Id (_, c)), then_stmt, else_stmt))]
+          | [(_, If (((p, _), Id (_, c)), then_stmt, else_stmt))]
             when SN.Rx.is_enabled c ->
-            List.iter then_stmt (self#on_stmt (env, ctx));
-            List.iter else_stmt ~f:(check_non_rx#on_stmt env)
+            (match ctx.reactivity with
+            | Pure _ ->
+              Errors.rx_enabled_in_non_rx_context p;
+              List.iter b.fb_ast (self#on_stmt (env, ctx))
+            | _ ->
+              List.iter then_stmt (self#on_stmt (env, ctx));
+              List.iter else_stmt ~f:(check_non_rx#on_stmt env))
           | _ -> List.iter b.fb_ast (self#on_stmt (env, ctx))
         end
 
@@ -704,6 +709,11 @@ let check =
                   (env, set_reactivity ctx (Env.env_reactivity env))
               in
               self#handle_body env ctx f.f_body
+            | ( _,
+                Unop
+                  ( ( Ast_defs.Uincr | Ast_defs.Udecr | Ast_defs.Upincr
+                    | Ast_defs.Updecr ),
+                    te1 ) )
             | (_, Binop (Ast_defs.Eq _, te1, _)) ->
               check_assignment_or_unset_target
                 ~is_assignment:true

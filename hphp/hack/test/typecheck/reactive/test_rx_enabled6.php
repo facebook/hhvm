@@ -10,10 +10,10 @@ function f(): int {
 }
 
 <<__Pure>>
-function rx() {
+function rx(): int {
   return 1;
 }
 
-function nonrx() {
+function nonrx(): int{
   return 1;
 }

@@ -253,6 +253,9 @@ let check_call env method_info pos reason ft arg_types =
        stripped condition types (they were checked on step 1) *)
       let caller_reactivity =
         let rec go = function
+          | Pure (Some _)
+          | MaybeReactive (Pure (Some _)) ->
+            MaybeReactive (Pure None)
           | Reactive (Some _)
           | MaybeReactive (Reactive (Some _)) ->
             MaybeReactive (Reactive None)

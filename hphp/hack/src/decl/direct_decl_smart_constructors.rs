@@ -3315,9 +3315,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 Reactivity::Pure(condition_type) => Some(MethodReactivity::MethodPure(
                     get_condition_type_name(condition_type),
                 )),
-                Reactivity::Nonreactive | Reactivity::MaybeReactive(_) | Reactivity::RxVar(_) => {
-                    None
-                }
+                Reactivity::Nonreactive
+                | Reactivity::MaybeReactive(_)
+                | Reactivity::RxVar(_)
+                | Reactivity::Cipp(_)
+                | Reactivity::CippLocal(_) => None,
             },
             dynamicallycallable: attributes.dynamically_callable,
             type_: ty,

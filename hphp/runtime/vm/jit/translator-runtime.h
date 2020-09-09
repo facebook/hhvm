@@ -58,20 +58,16 @@ ArrayData* dictAddElemStringKeyHelper(ArrayData* ad, StringData* key,
 /* Helper functions for conversion instructions that are too
  * complicated to inline
  */
-ArrayData* convArrToVecHelper(ArrayData* a);
-ArrayData* convDictToVecHelper(ArrayData* a);
-ArrayData* convKeysetToVecHelper(ArrayData* a);
+ArrayData* convArrLikeToVecHelper(ArrayData* a);
 ArrayData* convObjToVecHelper(ObjectData* o);
-ArrayData* convArrToDictHelper(ArrayData* a);
-ArrayData* convVecToDictHelper(ArrayData* a);
-ArrayData* convKeysetToDictHelper(ArrayData* a);
+ArrayData* convArrLikeToDictHelper(ArrayData* a);
 ArrayData* convObjToDictHelper(ObjectData* o);
-ArrayData* convArrToKeysetHelper(ArrayData* a);
-ArrayData* convVecToKeysetHelper(ArrayData* a);
-ArrayData* convDictToKeysetHelper(ArrayData* a);
+ArrayData* convArrLikeToKeysetHelper(ArrayData* a);
 ArrayData* convObjToKeysetHelper(ObjectData* o);
+ArrayData* convArrLikeToVArrHelper(ArrayData* a);
 ArrayData* convClsMethToVArrHelper(ClsMethDataRef clsmeth);
 ArrayData* convClsMethToVecHelper(ClsMethDataRef clsmeth);
+ArrayData* convArrLikeToDArrHelper(ArrayData* a);
 ArrayData* convClsMethToDArrHelper(ClsMethDataRef clsmeth);
 ArrayData* convClsMethToDictHelper(ClsMethDataRef clsmeth);
 ArrayData* convClsMethToKeysetHelper(ClsMethDataRef clsmeth);

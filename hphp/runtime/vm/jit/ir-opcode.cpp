@@ -83,6 +83,9 @@ TRACE_SET_MOD(hhir);
 #define DLvalOfPtr     HasDest
 #define DPtrIter       HasDest
 #define DPtrIterVal    HasDest
+#define DKeepVanilla(t)    HasDest
+#define DDArrKeepVanilla   HasDest
+#define DVArrKeepVanilla   HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -157,6 +160,9 @@ OpInfo g_opInfo[] = {
 #undef DUnion
 #undef DMemoKey
 #undef DLvalOfPtr
+#undef DKeepVanilla
+#undef DDArrKeepVanilla
+#undef DVArrKeepVanilla
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -322,9 +328,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ConcatStrStr:
   case ConstructInstance:
   case ContEnter:
-  case ConvArrToDict:
-  case ConvArrToKeyset:
-  case ConvArrToVec:
+  case ConvArrLikeToKeyset:
   case ConvTVToBool:
   case ConvTVToDbl:
   case ConvTVToInt:
@@ -334,9 +338,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvClsMethToKeyset:
   case ConvClsMethToVArr:
   case ConvClsMethToVec:
-  case ConvDictToDArr:
-  case ConvDictToKeyset:
-  case ConvKeysetToDArr:
   case ConvObjToBool:
   case ConvObjToDArr:
   case ConvObjToDbl:
@@ -347,7 +348,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvObjToVArr:
   case ConvObjToVec:
   case ConvResToStr:
-  case ConvVecToKeyset:
   case Count:
   case CreateAAWH:
   case DictGet:
@@ -578,29 +578,23 @@ bool opcodeMayRaise(Opcode opc) {
   case ContStarted:
   case ContStartedCheck:
   case ContValid:
-  case ConvArrToDArr:
-  case ConvArrToVArr:
+  case ConvArrLikeToDict:
+  case ConvArrLikeToVec:
+  case ConvArrLikeToDArr:
+  case ConvArrLikeToVArr:
   case ConvBoolToDbl:
   case ConvBoolToInt:
   case ConvDblToBool:
   case ConvDblToInt:
   case ConvDblToStr:
-  case ConvDictToVArr:
-  case ConvDictToVec:
   case ConvIntToBool:
   case ConvIntToDbl:
   case ConvIntToStr:
-  case ConvKeysetToDict:
-  case ConvKeysetToVArr:
-  case ConvKeysetToVec:
   case ConvResToDbl:
   case ConvResToInt:
   case ConvStrToBool:
   case ConvStrToDbl:
   case ConvStrToInt:
-  case ConvVecToDArr:
-  case ConvVecToDict:
-  case ConvVecToVArr:
   case ConvPtrToLval:
   case CountCollection:
   case CountDict:

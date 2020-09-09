@@ -545,6 +545,11 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
     if (!allowBespokeArrayLikes()) return t;
     return inst->isLayoutAgnostic() ? t.widenToBespoke() : t.narrowToVanilla();
   };
+  auto const keepVanilla = [&](const IRInstruction* inst, Type t) {
+    assertx(inst->src(0)->type() <= TArrLike);
+    return inst->src(0)->type() <= TVanillaArrLike ? t.narrowToVanilla()
+                                                   : t.widenToBespoke();
+  };
   using namespace TypeNames;
   using TypeNames::TCA;
 #define ND              assertx(0 && "outputType requires HasDest or NaryDest");
@@ -596,6 +601,12 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DPtrIter        return ptrIterReturn(inst);
 #define DPtrIterVal     return ptrIterValReturn(inst);
 
+#define DKeepVanilla(t) return keepVanilla(inst, t);
+#define DVArrKeepVanilla \
+  return keepVanilla(inst, RO::EvalHackArrDVArrs ? TVec : TVArr);
+#define DDArrKeepVanilla \
+  return keepVanilla(inst, RO::EvalHackArrDVArrs ? TDict : TDArr);
+
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
   switch (inst->op()) {
@@ -644,6 +655,9 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DLvalOfPtr
 #undef DPtrIter
 #undef DPtrIterVal
+#undef DKeepVanilla
+#undef DVArrKeepVanilla
+#undef DDArrKeepVanilla
 }
 
 }}

@@ -1885,8 +1885,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConcatStr3:
   case ConcatStr4:
   case ConvTVToDbl:
-  case ConvArrToVec:
-  case ConvArrToDict:
   case ConvObjToVec:
   case ConvObjToDict:
   case ConvObjToKeyset:
@@ -1920,28 +1918,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RecordReifiedGenericsAndGetTSList:
     return may_load_store(AElemAny, AEmpty);
 
-  case ConvArrToKeyset: // Decrefs input values
-  case ConvVecToKeyset:
-  case ConvDictToKeyset:
-  case ConvDictToDArr: // These 4 may raise Hack array compat notices
-  case ConvKeysetToDArr:
+  case ConvArrLikeToVec:
+  case ConvArrLikeToVArr:
+  case ConvArrLikeToDArr: // May raise Hack array compat notices
+  case ConvArrLikeToDict:
+  case ConvArrLikeToKeyset: // Decrefs input values
   case ConvClsMethToDArr:
   case ConvClsMethToDict:
   case ConvClsMethToKeyset:
   case ConvClsMethToVArr:
   case ConvClsMethToVec:
-    return may_load_store(AElemAny, AEmpty);
-
-  case ConvDictToVec:
-  case ConvKeysetToVec:
-  case ConvVecToDict:
-  case ConvKeysetToDict:
-  case ConvArrToVArr:
-  case ConvVecToVArr:
-  case ConvDictToVArr:
-  case ConvKeysetToVArr:
-  case ConvArrToDArr:
-  case ConvVecToDArr:
     return may_load_store(AElemAny, AEmpty);
 
   // debug_backtrace() traverses stack and WaitHandles on the heap.

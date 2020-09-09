@@ -376,11 +376,7 @@ Instruction set
 
 To vec conversions:
 
-| ConvArrToVec,                 D(Vec), S(Arr),                      PRc|CRc
-
-| ConvDictToVec,                D(Vec), S(Dict),                     PRc|CRc
-
-| ConvKeysetToVec,              D(Vec), S(Keyset),                   PRc|CRc
+| ConvArrLikeToVec,             DKeepVanilla(Vec), S(ArrLike),       PRc|CRc|LA
 
 | ConvClsMethToVec,             D(Vec), S(ClsMeth),                  PRc|CRc
 
@@ -389,11 +385,7 @@ To vec conversions:
 
 To dict conversions:
 
-| ConvArrToDict,                D(Dict), S(Arr),                     PRc|CRc
-
-| ConvVecToDict,                D(Dict), S(Vec),                     PRc|CRc
-
-| ConvKeysetToDict,             D(Dict), S(Keyset),                  PRc|CRc
+| ConvArrLikeToDict,            DKeepVanilla(Dict), S(ArrLike),      PRc|CRc|LA
 
 | ConvClsMethToDict,            D(Dict), S(ClsMeth),                 PRc|CRc
 
@@ -402,11 +394,7 @@ To dict conversions:
 
 To keyset conversions:
 
-| ConvArrToKeyset,              D(Keyset), S(Arr),                   PRc|CRc
-
-| ConvVecToKeyset,              D(Keyset), S(Vec),                   PRc|CRc
-
-| ConvDictToKeyset,             D(Keyset), S(Dict),                  PRc|CRc
+| ConvArrLikeToKeyset,          DKeepVanilla(Keyset), S(ArrLike),    PRc|CRc|LA
 
 | ConvClsMethToKeyset,          D(Keyset), S(ClsMeth),               PRc|CRc
 
@@ -415,28 +403,16 @@ To keyset conversions:
 
 To varray conversions:
 
-| ConvArrToVArr,                DVArr, S(Arr),                        PRc|CRc
+| ConvArrLikeToVArr,            DVArrKeepVanilla, S(ArrLike),        PRc|CRc|LA
 
-| ConvVecToVArr,                DVArr, S(Vec),                        PRc|CRc
+| ConvClsMethToVArr,            DVArr, S(ClsMeth),                   PRc|CRc
 
-| ConvDictToVArr,               DVArr, S(Dict),                       PRc|CRc
-
-| ConvKeysetToVArr,             DVArr, S(Keyset),                     PRc|CRc
-
-| ConvClsMethToVArr,            DVArr, S(ClsMeth),                    PRc|CRc
-
-| ConvObjToVArr,                DVArr, S(Obj),                        PRc|CRc
+| ConvObjToVArr,                DVArr, S(Obj),                       PRc|CRc
 
 
 To darray conversion:
 
-| ConvArrToDArr,                DDArr, S(Arr),                       PRc|CRc
-
-| ConvVecToDArr,                DDArr, S(Vec),                       PRc|CRc
-
-| ConvDictToDArr,               DDArr, S(Dict),                      PRc|CRc
-
-| ConvKeysetToDArr,             DDArr, S(Keyset),                    PRc|CRc
+| ConvArrLikeToDArr,            DDArrKeepVanilla, S(ArrLike),        PRc|CRc|LA
 
 | ConvClsMethToDArr,            DDArr, S(ClsMeth),                   PRc|CRc
 

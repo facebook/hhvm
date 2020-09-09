@@ -546,6 +546,10 @@ using TypeNames::TCA;
 #define DPtrIter
 #define DPtrIterVal
 
+#define DKeepVanilla(t)
+#define DDArrKeepVanilla
+#define DVArrKeepVanilla
+
 #define O(opcode, dstinfo, srcinfo, flags) \
   case opcode: dstinfo srcinfo countCheck(); return true;
 
@@ -604,6 +608,9 @@ using TypeNames::TCA;
 #undef DUnion
 #undef DMemoKey
 #undef DLvalOfPtr
+#undef DKeepVanilla
+#undef DDArrKeepVanilla
+#undef DVArrKeepVanilla
   return true;
 }
 

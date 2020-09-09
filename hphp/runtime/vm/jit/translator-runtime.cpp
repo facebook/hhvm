@@ -108,26 +108,10 @@ ArrayData* addNewElemKeyset(ArrayData* keyset, TypedValue v) {
 
 //////////////////////////////////////////////////////////////////////
 
-ArrayData* convArrToVecHelper(ArrayData* adIn) {
-  assertx(adIn->isPHPArrayType());
+ArrayData* convArrLikeToVecHelper(ArrayData* adIn) {
   auto a = adIn->toVec(adIn->cowCheck());
+  assertx(a->isVecType());
   if (a != adIn) decRefArr(adIn);
-  return a;
-}
-
-ArrayData* convDictToVecHelper(ArrayData* adIn) {
-  assertx(adIn->isDictKind());
-  auto a = MixedArray::ToVec(adIn, adIn->cowCheck());
-  assertx(a != adIn);
-  decRefArr(adIn);
-  return a;
-}
-
-ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
-  assertx(adIn->isKeysetKind());
-  auto a = SetArray::ToVec(adIn, adIn->cowCheck());
-  assertx(a != adIn);
-  decRefArr(adIn);
   return a;
 }
 
@@ -138,24 +122,9 @@ ArrayData* convObjToVecHelper(ObjectData* obj) {
   return a;
 }
 
-ArrayData* convArrToDictHelper(ArrayData* adIn) {
-  assertx(adIn->isPHPArrayType());
+ArrayData* convArrLikeToDictHelper(ArrayData* adIn) {
   auto a = adIn->toDict(adIn->cowCheck());
-  if (a != adIn) decRefArr(adIn);
-  return a;
-}
-
-ArrayData* convVecToDictHelper(ArrayData* adIn) {
-  assertx(adIn->isVecKind());
-  auto a = PackedArray::ToDict(adIn, adIn->cowCheck());
-  assertx(a != adIn);
-  decRefArr(adIn);
-  return a;
-}
-
-ArrayData* convKeysetToDictHelper(ArrayData* adIn) {
-  assertx(adIn->isKeysetKind());
-  auto a = SetArray::ToDict(adIn, adIn->cowCheck());
+  assertx(a->isDictType());
   if (a != adIn) decRefArr(adIn);
   return a;
 }
@@ -167,24 +136,9 @@ ArrayData* convObjToDictHelper(ObjectData* obj) {
   return a;
 }
 
-ArrayData* convArrToKeysetHelper(ArrayData* adIn) {
-  assertx(adIn->isPHPArrayType());
+ArrayData* convArrLikeToKeysetHelper(ArrayData* adIn) {
   auto a = adIn->toKeyset(adIn->cowCheck());
-  if (a != adIn) decRefArr(adIn);
-  return a;
-}
-
-ArrayData* convVecToKeysetHelper(ArrayData* adIn) {
-  assertx(adIn->isVecKind());
-  auto a = PackedArray::ToKeyset(adIn, adIn->cowCheck());
-  assertx(a != adIn);
-  decRefArr(adIn);
-  return a;
-}
-
-ArrayData* convDictToKeysetHelper(ArrayData* adIn) {
-  assertx(adIn->isDictKind());
-  auto a = MixedArray::ToKeyset(adIn, adIn->cowCheck());
+  assertx(a->isKeysetType());
   if (a != adIn) decRefArr(adIn);
   return a;
 }
@@ -193,6 +147,20 @@ ArrayData* convObjToKeysetHelper(ObjectData* obj) {
   auto a = castObjToKeyset(obj);
   assertx(a->isKeysetType());
   decRefObj(obj);
+  return a;
+}
+
+ArrayData* convArrLikeToVArrHelper(ArrayData* adIn) {
+  auto a = adIn->toVArray(adIn->cowCheck());
+  assertx(a->isVArray());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convArrLikeToDArrHelper(ArrayData* adIn) {
+  auto a = adIn->toDArray(adIn->cowCheck());
+  assertx(a->isDArray());
+  if (a != adIn) decRefArr(adIn);
   return a;
 }
 

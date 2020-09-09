@@ -383,16 +383,10 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
       };
       if (RuntimeOption::EvalHackArrDVArrs) {
         if (unpack->isA(TVec)) return doCall(fca, true /* skipRepack */);
-        if (unpack->isA(TArr)) return doConvertAndCall(ConvArrToVec);
-        if (unpack->isA(TDict)) return doConvertAndCall(ConvDictToVec);
-        if (unpack->isA(TKeyset)) return doConvertAndCall(ConvKeysetToVec);
+        if (unpack->isA(TArrLike)) return doConvertAndCall(ConvArrLikeToVec);
       } else {
         if (unpack->isA(TVArr)) return doCall(fca, true /* skipRepack */);
-        if (unpack->isA(TDArr)) return doConvertAndCall(ConvArrToVArr);
-        if (unpack->isA(TArr)) return doConvertAndCall(ConvArrToVArr);
-        if (unpack->isA(TVec)) return doConvertAndCall(ConvVecToVArr);
-        if (unpack->isA(TDict)) return doConvertAndCall(ConvDictToVArr);
-        if (unpack->isA(TKeyset)) return doConvertAndCall(ConvKeysetToVArr);
+        if (unpack->isA(TArrLike)) return doConvertAndCall(ConvArrLikeToVArr);
       }
     }
 

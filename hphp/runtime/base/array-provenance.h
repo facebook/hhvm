@@ -70,91 +70,50 @@ struct Tag {
     RuntimeLocationPoison,
   };
 
-private:
-  static auto constexpr kKindMask = 0x7;
-
-  template <typename T>
-  static const char* ptrAndKind(Kind k, const T* filename) {
-    auto const ptr = reinterpret_cast<uintptr_t>(filename);
-    assertx(!(ptr & kKindMask));
-    return reinterpret_cast<const char*>(
-      ptr + static_cast<uintptr_t>(k)
-    );
-  }
-
-  static const char* ptrAndKind(Kind k, std::nullptr_t) {
-    return reinterpret_cast<const char*>(
-      static_cast<uintptr_t>(k)
-    );
-  }
-
-  template <typename T>
-  static const T* removeKind(const char* filename) {
-    return reinterpret_cast<T*>(
-      reinterpret_cast<uintptr_t>(filename) & ~kKindMask
-    );
-  }
-
-  static Kind extractKind(const char* filename) {
-    return static_cast<Kind>(
-      reinterpret_cast<uintptr_t>(filename) & kKindMask
-    );
-  }
-
-public:
   constexpr Tag() = default;
-  Tag(const StringData* filename, int32_t line);
-
+  Tag(const StringData* filename, int32_t line) {
+    *this = Tag(Kind::Known, filename, line);
+  }
   static Tag RepoUnion() {
-    Tag tag;
-    tag.m_filename = ptrAndKind(Kind::UnknownRepo, nullptr);
-    tag.m_line = -1;
-    return tag;
+    return Tag(Kind::UnknownRepo, nullptr);
   }
-
   static Tag TraitMerge(const StringData* filename) {
-    Tag tag;
-    tag.m_filename = ptrAndKind(Kind::KnownTraitMerge, filename);
-    tag.m_line = -1;
-    return tag;
+    return Tag(Kind::KnownTraitMerge, filename);
   }
-
   static Tag LargeEnum(const StringData* classname) {
-    Tag tag;
-    tag.m_filename = ptrAndKind(Kind::KnownLargeEnum, classname);
-    tag.m_line = -1;
-    return tag;
+    return Tag(Kind::KnownLargeEnum, classname);
   }
-
-  static Tag RuntimeLocation(const StringData* filename, int line) {
-    Tag tag;
-    tag.m_filename = ptrAndKind(Kind::RuntimeLocation, filename);
-    tag.m_line = line;
-    return tag;
+  static Tag RuntimeLocation(const StringData* filename) {
+    return Tag(Kind::RuntimeLocation, filename);
   }
-
-  static Tag RuntimeLocationPoison(const StringData* filename, int line) {
-    Tag tag;
-    tag.m_filename = ptrAndKind(Kind::RuntimeLocationPoison, filename);
-    tag.m_line = line;
-    return tag;
+  static Tag RuntimeLocationPoison(const StringData* filename) {
+    return Tag(Kind::RuntimeLocationPoison, filename);
   }
-
-  Kind kind() const { return extractKind(m_filename.get()); }
-  const StringData* filename() const {
-    return removeKind<StringData>(m_filename.get());
-  }
-  int32_t line() const { return m_line; }
-
-  /* return true if this tag is not default-constructed */
-  bool valid() const { return kind() != Kind::Invalid; }
 
   /*
-   * return true if this tag represents a concretely-known location
-   * and should be propagated
+   * `name` means different things for different kinds:
+   *  - Kind::Known, Kind::TraitMerge: a Hack filename
+   *  - Kind::LargeEnum: a Hack enum class
+   *  - Kind::RuntimeLocation, Kind::RuntimeLocationPoison: a C++ file/line
+   *
+   * `line` will be -1 except for Kind::Known, in which case it may be valid.
+   */
+  Kind kind() const;
+  const StringData* name() const;
+  int32_t line() const;
+
+  /* Unique key usable for hashing. */
+  uint64_t hash() const;
+
+  /* Return true if this tag is not default-constructed. */
+  bool valid() const { return *this != Tag{}; }
+
+  /*
+   * Return true if this tag represents a concretely-known location
+   * and should be propagated.
    *
    * i.e. if this function returns false, we treat an array with this tag
-   * as needing a new one if we get the opportunity to retag it
+   * as needing a new tag if we get the opportunity to retag it.
    */
   bool concrete() const {
     switch (kind()) {
@@ -169,35 +128,17 @@ public:
     always_assert(false);
   }
 
-  operator bool() const {
-    return concrete();
-  }
+  operator bool() const { return concrete(); }
 
-  bool operator==(const Tag& other) const {
-    if (kind() != other.kind()) return false;
-    switch (kind()) {
-    case Kind::Invalid:
-    case Kind::UnknownRepo:
-      return true;
-    case Kind::KnownTraitMerge:
-    case Kind::KnownLargeEnum:
-      return m_filename == other.m_filename;
-    case Kind::Known:
-    case Kind::RuntimeLocation:
-    case Kind::RuntimeLocationPoison:
-      return m_filename == other.m_filename &&
-        m_line == other.m_line;
-    }
-    always_assert(false);
-  }
-  bool operator!=(const Tag& other) const { return !(*this == other); }
+  bool operator==(const Tag& other) const;
+  bool operator!=(const Tag& other) const;
 
   std::string toString() const;
 
 private:
-  /* dumb pointee type because we don't want to break aliasing
-   * rules and don't guarantee the actual type of this pointer */
-  LowPtr<const char> m_filename{nullptr};
+  Tag(Kind kind, const StringData* name, int32_t line = -1);
+
+  LowPtr<const char> m_name{nullptr};
   int32_t m_line{0};
 };
 
@@ -254,14 +195,19 @@ private:
   Tag m_saved_tag;
 };
 
-#define ARRPROV_HERE() ([&]{                                      \
-    static auto const file = makeStaticString(__FILE__);          \
-    return ::HPHP::arrprov::Tag::RuntimeLocation(file, __LINE__); \
+#define ARRPROV_STR_IMPL(X) #X
+#define ARRPROV_STR(X) ARRPROV_STR_IMPL(X)
+
+#define ARRPROV_HERE() ([&]{                            \
+    static auto const file = makeStaticString(          \
+        __FILE__ ":" ARRPROV_STR(__LINE__));            \
+    return ::HPHP::arrprov::Tag::RuntimeLocation(file); \
   }())
 
-#define ARRPROV_HERE_POISON() ([&]{                                     \
-    static auto const file = makeStaticString(__FILE__);                \
-    return ::HPHP::arrprov::Tag::RuntimeLocationPoison(file, __LINE__); \
+#define ARRPROV_HERE_POISON() ([&]{                           \
+    static auto const file = makeStaticString(                \
+        __FILE__ ":" ARRPROV_STR(__LINE__));                  \
+    return ::HPHP::arrprov::Tag::RuntimeLocationPoison(file); \
   }())
 
 #define ARRPROV_USE_RUNTIME_LOCATION() \

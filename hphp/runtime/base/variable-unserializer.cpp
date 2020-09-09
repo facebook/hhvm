@@ -1248,12 +1248,17 @@ Array VariableUnserializer::unserializeArray() {
 }
 
 arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
+  if (type() != VariableUnserializer::Type::Internal &&
+      type() != VariableUnserializer::Type::Serialize) {
+    return {};
+  }
+
   auto const finish = [&] (auto tag) -> arrprov::Tag {
     if (!RO::EvalArrayProvenance) return {};
     return tag;
   };
 
-  auto const read_filename = [&]() -> const StringData* {
+  auto const read_name = [&]() -> const StringData* {
     if (peek() == 't') {
       assertx(m_unitFilename);
       expectChar('t');
@@ -1265,21 +1270,14 @@ arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
     }
   };
 
-  auto const read_file_line = [&]() -> std::pair<const StringData*, int> {
+  // Used for arrprov::Tag kinds that are defined by their name alone.
+  auto const expect_name = [&]() -> const StringData* {
+    readChar();
     expectChar(':');
-    expectChar('i');
-    expectChar(':');
-    auto const line = static_cast<int>(readInt());
+    auto const name = read_name();
     expectChar(';');
-    auto const filename = read_filename();
-    expectChar(';');
-    return std::make_pair(filename, line);
+    return name;
   };
-
-  if (type() != VariableUnserializer::Type::Internal &&
-      type() != VariableUnserializer::Type::Serialize) {
-    return {};
-  }
 
   if (peek() != 'p') {
     return {};
@@ -1287,44 +1285,26 @@ arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
   expectChar('p');
 
   if (peek() == ':') {
-    auto const [filename, line] = read_file_line();
-    return finish(
-      arrprov::Tag { filename, line }
-    );
+    expectChar(':');
+    expectChar('i');
+    expectChar(':');
+    auto const line = static_cast<int>(readInt());
+    expectChar(';');
+    auto const name = read_name();
+    expectChar(';');
+    return finish(arrprov::Tag(name, line));
   } else if (peek() == 'u') {
     expectChar('u');
     expectChar(';');
-    return finish(
-      arrprov::Tag::RepoUnion()
-    );
+    return finish(arrprov::Tag::RepoUnion());
   } else if (peek() == 'r') {
-    expectChar('r');
-    expectChar(':');
-    auto const filename = read_filename();
-    expectChar(';');
-    return finish(
-      arrprov::Tag::TraitMerge(filename)
-    );
+    return finish(arrprov::Tag::TraitMerge(expect_name()));
   } else if (peek() == 'e') {
-    expectChar('e');
-    expectChar(':');
-    auto const filename = read_filename();
-    expectChar(';');
-    return finish(
-      arrprov::Tag::LargeEnum(filename)
-    );
+    return finish(arrprov::Tag::LargeEnum(expect_name()));
   } if (peek() == 'c') {
-    expectChar('c');
-    auto const [filename, line] = read_file_line();
-    return finish(
-        arrprov::Tag::RuntimeLocation(filename, line)
-    );
+    return finish(arrprov::Tag::RuntimeLocation(expect_name()));
   } if (peek() == 'z') {
-    expectChar('z');
-    auto const [filename, line] = read_file_line();
-    return finish(
-        arrprov::Tag::RuntimeLocationPoison(filename, line)
-    );
+    return finish(arrprov::Tag::RuntimeLocationPoison(expect_name()));
   } else {
     return {};
   }

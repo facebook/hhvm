@@ -36,6 +36,7 @@
 #include <folly/container/F14Map.h>
 #include <folly/Format.h>
 #include <folly/SharedMutex.h>
+#include <tbb/concurrent_hash_map.h>
 
 #include <type_traits>
 
@@ -45,32 +46,69 @@ TRACE_SET_MOD(runtime);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Tag::Tag(const StringData* filename, int32_t line)
-    : m_filename(ptrAndKind(Kind::Known, filename))
-    , m_line(line)
-  {
-    // TODO(kshaunak): This assertion fails for getEvaledArg; fix that case.
-    //assertx(IMPLIES(line >= 0, filename && !filename->empty()));
-  }
+namespace {
+
+static auto constexpr kKindMask = 0x7;
+
+Tag::Kind extractKind(const char* ptr) {
+  return static_cast<Tag::Kind>(uintptr_t(ptr) & kKindMask);
+}
+
+const StringData* extractName(const char* ptr) {
+  return reinterpret_cast<const StringData*>(uintptr_t(ptr) & ~kKindMask);
+}
+
+const char* packKindAndName(Tag::Kind kind, const StringData* name) {
+  auto const ptr = reinterpret_cast<uintptr_t>(name);
+  assertx(!(ptr & kKindMask));
+  return reinterpret_cast<const char*>(ptr + static_cast<uintptr_t>(kind));
+}
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Tag::Tag(Tag::Kind kind, const StringData* name, int32_t line)
+  : m_name(packKindAndName(kind, name))
+  , m_line(line) {}
+
+Tag::Kind Tag::kind() const {
+  return extractKind(m_name.get());
+}
+const StringData* Tag::name() const {
+  return extractName(m_name.get());
+}
+int32_t Tag::line() const {
+  return kind() == Kind::Known ? m_line : -1;
+}
+uint64_t Tag::hash() const {
+  return folly::hash::hash_combine(uintptr_t(m_name.get()), m_line);
+}
+
+bool Tag::operator==(const Tag& other) const {
+  return m_name == other.m_name && m_line == other.m_line;
+}
+bool Tag::operator!=(const Tag& other) const {
+  return m_name != other.m_name || m_line != other.m_line;
+}
 
 std::string Tag::toString() const {
   switch (kind()) {
   case Kind::Invalid:
     return "unknown location (no tag)";
   case Kind::Known:
-    return folly::sformat("{}:{}", filename()->slice(), line());
+    return folly::sformat("{}:{}", name()->slice(), line());
   case Kind::UnknownRepo:
     return "unknown location (repo union)";
   case Kind::KnownTraitMerge:
-    return folly::sformat("{}:{} (trait xinit merge)", filename()->slice(), -1);
+    return folly::sformat("{}:{} (trait xinit merge)", name()->slice(), -1);
   case Kind::KnownLargeEnum:
-    return folly::sformat("{}:{} (large enum)", filename()->slice(), -1);
+    return folly::sformat("{}:{} (large enum)", name()->slice(), -1);
   case Kind::RuntimeLocation:
-    return folly::sformat("{}:{} (c++ runtime location)",
-                          filename()->slice(), line());
+    return folly::sformat("{} (c++ runtime location)", name()->slice());
   case Kind::RuntimeLocationPoison:
-    return folly::sformat("unknown location (poisoned c++ runtime location was {}:{})",
-                          filename()->slice(), line());
+    return folly::sformat("unknown location (poisoned c++ runtime location was {})",
+                          name()->slice());
   }
   always_assert(false);
 }

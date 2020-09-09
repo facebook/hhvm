@@ -75,11 +75,7 @@ struct ScalarHash {
 
     if (RuntimeOption::EvalArrayProvenance) {
       if (!tag.valid()) tag = arrprov::getTag(arr);
-      if (tag.valid()) {
-        ret = folly::hash::hash_combine(ret, static_cast<int>(tag.kind()));
-        ret = folly::hash::hash_combine(ret, tag.line());
-        ret = folly::hash::hash_combine(ret, tag.filename());
-      }
+      if (tag.valid()) ret = folly::hash::hash_combine(ret, tag.hash());
     }
     IterateKV(
       arr,

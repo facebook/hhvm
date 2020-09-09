@@ -1755,23 +1755,12 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr,
     kind
   );
 
-  auto const write_filename = [&](const StringData* name) {
+  auto const write_name = [&](const StringData* name) {
     if (m_unitFilename == name) {
       m_buf->append("t;");
     } else {
       write(name->data(), name->size());
     }
-  };
-
-  auto const write_file_line_tag = [&](
-      const char* format_tag,
-      const arrprov::Tag& tag
-  ) {
-    auto const line = tag.line();
-    auto const filename = tag.filename();
-    m_buf->append(format_tag);
-    write(line);
-    write_filename(filename);
   };
 
   if ((m_type == Type::Internal || m_serializeProvenanceAndLegacy) &&
@@ -1780,28 +1769,33 @@ void VariableSerializer::serializeArrayImpl(const ArrayData* arr,
     if (tag.valid()) {
       switch (tag.kind()) {
       case arrprov::Tag::Kind::Invalid: always_assert(false);
-      case arrprov::Tag::Kind::Known:
-        write_file_line_tag("p:", tag);
+      case arrprov::Tag::Kind::Known: {
+        m_buf->append("p:");
+        write(tag.line());
+        write_name(tag.name());
         break;
+      }
       case arrprov::Tag::Kind::UnknownRepo: {
         m_buf->append("pu;");
         break;
       }
       case arrprov::Tag::Kind::KnownTraitMerge: {
         m_buf->append("pr:");
-        write_filename(tag.filename());
+        write_name(tag.name());
         break;
       }
       case arrprov::Tag::Kind::KnownLargeEnum: {
         m_buf->append("pe:");
-        write_filename(tag.filename());
+        write_name(tag.name());
         break;
       }
       case arrprov::Tag::Kind::RuntimeLocation:
-        write_file_line_tag("pc:", tag);
+        m_buf->append("pc:");
+        write_name(tag.name());
         break;
       case arrprov::Tag::Kind::RuntimeLocationPoison:
-        write_file_line_tag("pz:", tag);
+        m_buf->append("pz:");
+        write_name(tag.name());
         break;
       }
     }

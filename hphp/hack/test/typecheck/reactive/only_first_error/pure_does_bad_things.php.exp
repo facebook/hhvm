@@ -1,0 +1,2 @@
+File "pure_does_bad_things.php", line 5, characters 3-16:
+Static property cannot be used in a reactive context. (Typing[4228])

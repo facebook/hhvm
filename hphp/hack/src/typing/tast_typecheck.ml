@@ -49,15 +49,11 @@ let refine ((_p, cond_ty), cond_expr) _cond_is_true gamma =
     | _ -> false
   in
   match cond_expr with
-  | Call (Aast.Cnormal, (_, Id (_, id)), [], _, None) when is_refinement_fun id
-    ->
+  | Call ((_, Id (_, id)), [], _, None) when is_refinement_fun id ->
     raise Not_implemented
   | Call
-      ( _,
-        (_, Class_const ((_, CI (_, "\\HH\\Shapes")), (_, "keyExists"))),
-        _,
-        _,
-        _ ) ->
+      ((_, Class_const ((_, CI (_, "\\HH\\Shapes")), (_, "keyExists"))), _, _, _)
+    ->
     raise Not_implemented
   | Is _
   | As _

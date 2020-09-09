@@ -490,7 +490,7 @@ module Visitor_DEPRECATED = struct
 
       method on_class_const : 'a -> class_id -> pstring -> 'a
 
-      method on_call : 'a -> call_type -> expr -> expr list -> expr option -> 'a
+      method on_call : 'a -> expr -> expr list -> expr option -> 'a
 
       method on_function_pointer :
         'a ->
@@ -804,8 +804,8 @@ module Visitor_DEPRECATED = struct
         | Array_get (e1, e2) -> this#on_array_get acc e1 e2
         | Class_get (cid, e) -> this#on_class_get acc cid e
         | Class_const (cid, id) -> this#on_class_const acc cid id
-        | Call (ct, e, _, el, unpacked_element) ->
-          this#on_call acc ct e el unpacked_element
+        | Call (e, _, el, unpacked_element) ->
+          this#on_call acc e el unpacked_element
         | FunctionPointer (fpid, targs) ->
           this#on_function_pointer acc fpid targs
         | String2 el -> this#on_string2 acc el
@@ -936,7 +936,7 @@ module Visitor_DEPRECATED = struct
 
       method on_class_const acc cid _ = this#on_class_id acc cid
 
-      method on_call acc _ e el unpacked_element =
+      method on_call acc e el unpacked_element =
         let acc = this#on_expr acc e in
         let acc = List.fold_left el ~f:this#on_expr ~init:acc in
         let acc =

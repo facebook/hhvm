@@ -57,19 +57,19 @@
            (Awaitall (
               [((Some ([15:16-27], __tmp$2)),
                 (([15:16-27], Awaitable<string>),
-                 (Call (Cnormal,
+                 (Call (
                     (([15:16-25], (function(): Awaitable<string>)),
                      (Id ([15:16-25], "\\genString"))),
                     [], [], None))));
                 (None,
                  (([14:11-22], Awaitable<string>),
-                  (Call (Cnormal,
+                  (Call (
                      (([14:11-20], (function(): Awaitable<string>)),
                       (Id ([14:11-20], "\\genString"))),
                      [], [], None))));
                 ((Some ([13:16-24], __tmp$1)),
                  (([13:16-24], Awaitable<int>),
-                  (Call (Cnormal,
+                  (Call (
                      (([13:16-22], (function(): Awaitable<int>)),
                       (Id ([13:16-22], "\\genInt"))),
                      [], [], None))))

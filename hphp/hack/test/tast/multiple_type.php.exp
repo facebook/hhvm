@@ -100,7 +100,7 @@
            ([18:3-20],
             (Return
                (Some (([18:10-19], (int | string)),
-                      (Call (Cnormal,
+                      (Call (
                          (([18:10-17], (function(): (int | string))),
                           (Obj_get (
                              (([18:10-12], (C1 | C2)),

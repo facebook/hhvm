@@ -61,7 +61,7 @@ Errors:
                        (([13:10-33], shape()),
                         (Await
                            (([13:16-33], Awaitable<shape()>),
-                            (Call (Cnormal,
+                            (Call (
                                (([13:16-31], (function(): Awaitable<shape()>)),
                                 (Id ([13:16-31], "\\gen_empty_shape"))),
                                [], [], None)))))
@@ -69,7 +69,7 @@ Errors:
                 ([14:5-28],
                  (Expr
                     (([14:5-27], null),
-                     (Call (Cnormal,
+                     (Call (
                         (([14:5-16], (function(?shape(...) $shape, arraykey $index, $default=_): null)),
                          (Class_const (
                             (([14:5-11], Shapes),

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<704a489757b9e414f1e644a87279ddf1>>
+// @generated SignedSource<<aa79b8d91339d155956143bf9a4ad042>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -43,8 +43,6 @@ impl<'a> TrivialDrop for Lid<'a> {}
 pub type Sid<'a> = ast_defs::Id<'a>;
 
 pub use oxidized::aast_defs::IsReified;
-
-pub use oxidized::aast_defs::CallType;
 
 pub use oxidized::aast_defs::FuncReactive;
 

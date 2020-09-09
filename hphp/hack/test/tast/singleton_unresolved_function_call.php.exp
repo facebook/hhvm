@@ -33,7 +33,7 @@
           ([5:3-16],
            (Return
               (Some (([5:10-15], int),
-                     (Call (Cnormal,
+                     (Call (
                         (([5:10-12], (function(int): int)),
                          (Lvar ([5:10-12], $f))),
                         [], [(([5:13-14], int), (Int "1"))], None))))))

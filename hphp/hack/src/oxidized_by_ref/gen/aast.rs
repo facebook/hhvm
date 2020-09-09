@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<930f63cccf422f1815bcf70b51a7ccf8>>
+// @generated SignedSource<<1caaca3ab6fc64c96f5424cfe63ce3b2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -333,7 +333,6 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
     ClassConst(&'a (ClassId<'a, Ex, Fb, En, Hi>, Pstring<'a>)),
     Call(
         &'a (
-            oxidized::aast::CallType,
             Expr<'a, Ex, Fb, En, Hi>,
             &'a [Targ<'a, Hi>],
             &'a [Expr<'a, Ex, Fb, En, Hi>],

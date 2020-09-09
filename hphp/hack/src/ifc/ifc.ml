@@ -430,7 +430,7 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
   | A.BracedExpr e ->
     expr env e
   (* TODO(T68414656): Support calls with type arguments *)
-  | A.Call (_call_type, e, _type_args, args, _extra_args) ->
+  | A.Call (e, _type_args, args, _extra_args) ->
     let (env, args_pty) = List.map_env ~f:expr env args in
     let call env call_type this_pty =
       call ~pos renv env call_type this_pty args_pty ety

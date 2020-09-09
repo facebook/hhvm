@@ -63,7 +63,7 @@
            [([5:5-21],
              (Return
                 (Some (([5:12-20], string),
-                       (Call (Cnormal,
+                       (Call (
                           (([5:12-16], (function(string $x): string)),
                            (Class_const (
                               (([5:12-13], A), (CI ([5:12-13], "\\A"))),
@@ -112,14 +112,14 @@
            [([5:5-27],
              (Return
                 (Some (([5:12-26], string),
-                       (Call (Cnormal,
+                       (Call (
                           (([5:12-16], (function(string $x): string)),
                            (Class_const (
                               (([5:12-13], B), (CI ([5:12-13], "\\B"))),
                               ([5:15-16], "f")))),
                           [],
                           [(([5:17-25], string),
-                            (Call (Cnormal,
+                            (Call (
                                (([5:17-21], (function(string $x): string)),
                                 (Class_const (
                                    (([5:17-18], A), (CI ([5:17-18], "\\A"))),
@@ -154,21 +154,21 @@
         [([4:3-31],
           (Return
              (Some (([4:10-30], string),
-                    (Call (Cnormal,
+                    (Call (
                        (([4:10-14], (function(string $x): string)),
                         (Class_const (
                            (([4:10-11], C), (CI ([4:10-11], "\\C"))),
                            ([4:13-14], "f")))),
                        [],
                        [(([4:15-29], string),
-                         (Call (Cnormal,
+                         (Call (
                             (([4:15-19], (function(string $x): string)),
                              (Class_const (
                                 (([4:15-16], B), (CI ([4:15-16], "\\B"))),
                                 ([4:18-19], "f")))),
                             [],
                             [(([4:20-28], string),
-                              (Call (Cnormal,
+                              (Call (
                                  (([4:20-24], (function(string $x): string)),
                                   (Class_const (
                                      (([4:20-21], A), (CI ([4:20-21], "\\A"))),

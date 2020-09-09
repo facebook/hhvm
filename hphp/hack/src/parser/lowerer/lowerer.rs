@@ -1527,13 +1527,7 @@ where
                     _ => recv,
                 };
                 let (args, varargs) = split_args_vararg(args, e)?;
-                Ok(E_::mk_call(
-                    ast::CallType::Cnormal,
-                    recv,
-                    vec![],
-                    args,
-                    varargs,
-                ))
+                Ok(E_::mk_call(recv, vec![], args, varargs))
             };
         let p_obj_get = |recv: &Syntax<T, V>,
                          op: &Syntax<T, V>,
@@ -1734,7 +1728,6 @@ where
                         let s = extract_unquoted_string(Self::text_str(expr, env), 0, expr.width())
                             .map_err(|e| Error::Failwith(e.msg))?;
                         Ok(E_::mk_call(
-                            ast::CallType::Cnormal,
                             Self::p_expr(recv, env)?,
                             vec![],
                             vec![E::new(literal_expression_pos, E_::String(s.into()))],
@@ -1781,13 +1774,7 @@ where
                                 }
                             }
                         }
-                        Ok(E_::mk_call(
-                            ast::CallType::Cnormal,
-                            recv,
-                            targs,
-                            args,
-                            varargs,
-                        ))
+                        Ok(E_::mk_call(recv, targs, args, varargs))
                     }
                 }
             }
@@ -1920,7 +1907,6 @@ where
                         Some(TK::Suspend) => Ok(E_::mk_suspend(expr)),
                         Some(TK::Clone) => Ok(E_::mk_clone(expr)),
                         Some(TK::Print) => Ok(E_::mk_call(
-                            ast::CallType::Cnormal,
                             E::new(
                                 pos.clone(),
                                 E_::mk_id(ast::Id(pos, special_functions::ECHO.into())),
@@ -2041,7 +2027,6 @@ where
             DefineExpression(c) => {
                 let name = Self::pos_name(&c.define_keyword, env)?;
                 Ok(E_::mk_call(
-                    ast::CallType::Cnormal,
                     mk_id_expr(name),
                     vec![],
                     c.define_argument_list
@@ -2313,7 +2298,6 @@ where
                     static_: false,
                 };
                 Ok(E_::mk_call(
-                    ast::CallType::Cnormal,
                     E::new(pos, E_::mk_lfun(body, vec![])),
                     vec![],
                     vec![],
@@ -2409,7 +2393,7 @@ where
                     raise("Array-like class consts are not valid lvalues");
                 }
             }
-            Call(c) => match &(c.1).1 {
+            Call(c) => match &(c.0).1 {
                 Id(sid) if sid.1 == "tuple" => {
                     raise("Tuple cannot be used as an lvalue. Maybe you meant list?")
                 }
@@ -3079,10 +3063,7 @@ where
                     let args = Self::could_map(Self::p_expr, &c.echo_expressions, e)?;
                     Ok(S::new(
                         pos.clone(),
-                        S_::mk_expr(ast::Expr::new(
-                            pos,
-                            E_::mk_call(ast::CallType::Cnormal, echo, vec![], args, None),
-                        )),
+                        S_::mk_expr(ast::Expr::new(pos, E_::mk_call(echo, vec![], args, None))),
                     ))
                 };
                 Self::lift_awaits_in_statement(f, node, env)
@@ -3103,10 +3084,7 @@ where
                     };
                     Ok(S::new(
                         pos.clone(),
-                        S_::mk_expr(ast::Expr::new(
-                            pos,
-                            E_::mk_call(ast::CallType::Cnormal, unset, vec![], args, None),
-                        )),
+                        S_::mk_expr(ast::Expr::new(pos, E_::mk_call(unset, vec![], args, None))),
                     ))
                 };
                 Self::lift_awaits_in_statement(f, node, env)

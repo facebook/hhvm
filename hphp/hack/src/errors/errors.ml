@@ -4814,10 +4814,13 @@ let attribute_param_type pos x =
     pos
     ("This attribute parameter should be " ^ x)
 
-let deprecated_use pos pos_def msg =
-  add_list
-    (Typing.err_code Typing.DeprecatedUse)
-    [(pos, msg); (pos_def, "Definition is here")]
+let deprecated_use pos ?(pos_def = None) msg =
+  let def_message =
+    match pos_def with
+    | Some pos_def -> [(pos_def, "Definition is here")]
+    | None -> []
+  in
+  add_list (Typing.err_code Typing.DeprecatedUse) ((pos, msg) :: def_message)
 
 let cannot_declare_constant kind pos (class_pos, class_name) =
   let kind_str =

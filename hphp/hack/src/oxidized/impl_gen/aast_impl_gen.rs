@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5e858519a5d96eef7f58b3686fd5d1aa>>
+// @generated SignedSource<<516a3e73ec973586a4e977d0d5026201>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1026,13 +1026,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         Expr_::ClassConst(Box::new((p0, p1)))
     }
     pub fn mk_call(
-        p0: CallType,
-        p1: Expr<Ex, Fb, En, Hi>,
-        p2: Vec<Targ<Hi>>,
-        p3: Vec<Expr<Ex, Fb, En, Hi>>,
-        p4: Option<Expr<Ex, Fb, En, Hi>>,
+        p0: Expr<Ex, Fb, En, Hi>,
+        p1: Vec<Targ<Hi>>,
+        p2: Vec<Expr<Ex, Fb, En, Hi>>,
+        p3: Option<Expr<Ex, Fb, En, Hi>>,
     ) -> Self {
-        Expr_::Call(Box::new((p0, p1, p2, p3, p4)))
+        Expr_::Call(Box::new((p0, p1, p2, p3)))
     }
     pub fn mk_function_pointer(p0: FunctionPtrId<Ex, Fb, En, Hi>, p1: Vec<Targ<Hi>>) -> Self {
         Expr_::FunctionPointer(Box::new((p0, p1)))
@@ -1637,14 +1636,13 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_call(
         &self,
     ) -> Option<(
-        &CallType,
         &Expr<Ex, Fb, En, Hi>,
         &Vec<Targ<Hi>>,
         &Vec<Expr<Ex, Fb, En, Hi>>,
         &Option<Expr<Ex, Fb, En, Hi>>,
     )> {
         match self {
-            Expr_::Call(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3, &p0.4)),
+            Expr_::Call(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3)),
             _ => None,
         }
     }
@@ -2031,14 +2029,13 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_call_mut(
         &mut self,
     ) -> Option<(
-        &mut CallType,
         &mut Expr<Ex, Fb, En, Hi>,
         &mut Vec<Targ<Hi>>,
         &mut Vec<Expr<Ex, Fb, En, Hi>>,
         &mut Option<Expr<Ex, Fb, En, Hi>>,
     )> {
         match self {
-            Expr_::Call(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2, &mut p0.3, &mut p0.4)),
+            Expr_::Call(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2, &mut p0.3)),
             _ => None,
         }
     }
@@ -2429,14 +2426,13 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_call_into(
         self,
     ) -> Option<(
-        CallType,
         Expr<Ex, Fb, En, Hi>,
         Vec<Targ<Hi>>,
         Vec<Expr<Ex, Fb, En, Hi>>,
         Option<Expr<Ex, Fb, En, Hi>>,
     )> {
         match self {
-            Expr_::Call(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3, (*p0).4)),
+            Expr_::Call(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3)),
             _ => None,
         }
     }

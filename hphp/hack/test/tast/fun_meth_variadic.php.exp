@@ -43,7 +43,7 @@
               [([7:5-24],
                 (Expr
                    (([7:5-23], void),
-                    (Call (Cnormal,
+                    (Call (
                        (([7:5-17], (function(string $s): void)),
                         (Id ([7:5-17], "\\takes_string"))),
                        [], [(([7:18-22], string), (Lvar ([7:18-22], $arg)))],

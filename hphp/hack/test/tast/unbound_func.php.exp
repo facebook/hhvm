@@ -12,8 +12,7 @@ Errors:
         [([4:3-18],
           (Expr
              (([4:3-17], _),
-              (Call (Cnormal,
-                 (([4:3-15], _), (Id ([4:3-15], "\\unbound_func"))), 
+              (Call ((([4:3-15], _), (Id ([4:3-15], "\\unbound_func"))), 
                  [], [], None)))))
           ];
         fb_annotation = () };

@@ -77,9 +77,9 @@ let expression_exits env (_, e) =
   | Assert (AE_assert (_, False))
   | Yield_break ->
     true
-  | Call (Cnormal, (_, Id (_, fun_name)), _, _, _) ->
+  | Call ((_, Id (_, fun_name)), _, _, _) ->
     funopt_is_noreturn @@ get_fun (Typing_env.get_ctx env) fun_name
-  | Call (Cnormal, (_, Class_const ((_, ci), meth_id)), _, _, _) ->
+  | Call ((_, Class_const ((_, ci), meth_id)), _, _, _) ->
     static_meth_is_noreturn env ci meth_id
   | _ -> false
 

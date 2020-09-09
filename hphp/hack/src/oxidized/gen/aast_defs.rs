@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2115be0b1b8fd48e0eb0152173df14eb>>
+// @generated SignedSource<<41b497853351828ec0f7323b99360f66>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -45,29 +45,6 @@ pub struct Lid(pub Pos, pub LocalId);
 pub type Sid = ast_defs::Id;
 
 pub type IsReified = bool;
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum CallType {
-    /// when the call looks like f()
-    Cnormal,
-    /// when the call looks like call_user_func(...)
-    CuserFunc,
-}
-impl TrivialDrop for CallType {}
 
 #[derive(
     Clone,

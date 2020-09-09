@@ -221,7 +221,7 @@ mod inout_locals {
         ) -> std::result::Result<(), ()> {
             // f(inout $v) or f(&$v)
             if let tast::Expr_::Call(expr) = p {
-                let (_, _, _, args, uarg) = &**expr;
+                let (_, _, args, uarg) = &**expr;
                 args.iter()
                     .for_each(|arg| handle_arg(&c.env, false, c.i, arg, &mut c.state));
                 uarg.as_ref()
@@ -852,7 +852,7 @@ pub fn emit_await(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr
         .flags
         .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION);
     match e.as_call() {
-        Some((_, tast::Expr(_, tast::Expr_::Id(id)), _, args, None))
+        Some((tast::Expr(_, tast::Expr_::Id(id)), _, args, None))
             if (cant_inline_gen_functions
                 && args.len() == 1
                 && string_utils::strip_global_ns(&(*id.1)) == "gena") =>
@@ -2403,13 +2403,7 @@ fn emit_special_function(
             );
             let call = tast::Expr(
                 pos.clone(),
-                tast::Expr_::mk_call(
-                    tast::CallType::Cnormal,
-                    expr_id,
-                    vec![],
-                    args[1..].to_owned(),
-                    uarg.cloned(),
-                ),
+                tast::Expr_::mk_call(expr_id, vec![], args[1..].to_owned(), uarg.cloned()),
             );
             let ignored_expr = emit_ignored_expr(e, env, &Pos::make_none(), &call)?;
             Ok(Some(InstrSeq::gather(vec![
@@ -2985,8 +2979,7 @@ fn emit_call_expr(
     env: &Env,
     pos: &Pos,
     async_eager_label: Option<Label>,
-    (_, expr, targs, args, uarg): &(
-        tast::CallType,
+    (expr, targs, args, uarg): &(
         tast::Expr,
         Vec<tast::Targ>,
         Vec<tast::Expr>,
@@ -5133,7 +5126,7 @@ fn can_use_as_rhs_in_list_assignment(expr: &tast::Expr_) -> Result<bool> {
     use aast::Expr_ as E_;
     Ok(match expr {
         E_::Call(c)
-            if ((c.1).1)
+            if ((c.0).1)
                 .as_id()
                 .map_or(false, |id| id.1 == special_functions::ECHO) =>
         {

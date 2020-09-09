@@ -224,14 +224,13 @@ let visitor =
         self#on_expr env expr
       | _ -> typed_class_id env ty p
 
-    method! on_Call env ct e tal el unpacked_element =
+    method! on_Call env e tal el unpacked_element =
       (* For Id, Obj_get (with an Id member), and Class_const, we don't want to
        * use the result of `self#on_expr env e`, since it would record a
        * property, class const, or global const access instead of a method call.
        * So instead of invoking super#on_Call, we reimplement it here, omitting
        * `self#on_expr env e` when necessary. *)
       let ( + ) = self#plus in
-      let cta = self#on_call_type env ct in
       let ea =
         match snd e with
         | Aast.Id id -> process_fun_id id
@@ -249,7 +248,7 @@ let visitor =
           ~f:(self#on_expr env)
           unpacked_element
       in
-      cta + ea + tala + ela + uea
+      ea + tala + ela + uea
 
     method! on_Haccess env root ids =
       let acc =

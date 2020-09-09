@@ -393,8 +393,7 @@ and stmt env acc st =
   let catch = catch env in
   let case = case env in
   match snd st with
-  | Expr
-      (_, Call (Cnormal, (_, Class_const ((_, CIparent), (_, m))), _, el, _uel))
+  | Expr (_, Call ((_, Class_const ((_, CIparent), (_, m))), _, el, _uel))
     when String.equal m SN.Members.__construct ->
     let acc = List.fold_left ~f:expr ~init:acc el in
     assign env acc DeferredMembers.parent_init_prop
@@ -530,7 +529,7 @@ and expr_ env acc p e =
   | Class_const _
   | Class_get _ ->
     acc
-  | Call (Cnormal, (p, Obj_get ((_, This), (_, Id (_, f)), _)), _, _, _) ->
+  | Call ((p, Obj_get ((_, This), (_, Id (_, f)), _)), _, _, _) ->
     let method_ = Env.get_method env f in
     (match method_ with
     | None ->
@@ -543,7 +542,7 @@ and expr_ env acc p e =
         method_ := Done;
         let fb = Nast.assert_named_body b in
         toplevel env acc fb.fb_ast))
-  | Call (_, e, _, el, unpacked_element) ->
+  | Call (e, _, el, unpacked_element) ->
     let el =
       match e with
       | (_, Id (_, fun_name)) when is_whitelisted fun_name ->

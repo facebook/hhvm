@@ -86,22 +86,18 @@ let extend_tparams env tparaml =
  *)
 let handle_special_calls env call =
   match call with
-  | Call (ct, ((_, Id (_, cn)) as id), targs, [(p, String fn)], uargs)
+  | Call (((_, Id (_, cn)) as id), targs, [(p, String fn)], uargs)
     when String.equal cn SN.AutoimportedFunctions.fun_ ->
     (* Functions referenced by fun() are always fully-qualified *)
     let fn = Utils.add_ns fn in
-    Call (ct, id, targs, [(p, String fn)], uargs)
+    Call (id, targs, [(p, String fn)], uargs)
   | Call
-      ( ct,
-        ((_, Id (_, cn)) as id),
-        targs,
-        [(p1, String cl); meth],
-        unpacked_element )
+      (((_, Id (_, cn)) as id), targs, [(p1, String cl); meth], unpacked_element)
     when ( String.equal cn SN.AutoimportedFunctions.meth_caller
          || String.equal cn SN.AutoimportedFunctions.class_meth )
          && (not @@ in_codegen env) ->
     let cl = Utils.add_ns cl in
-    Call (ct, id, targs, [(p1, String cl); meth], unpacked_element)
+    Call (id, targs, [(p1, String cl); meth], unpacked_element)
   | _ -> call
 
 class ['a, 'b, 'c, 'd] generic_elaborator =
@@ -243,21 +239,19 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
     (* The function that actually rewrites names *)
     method! on_expr_ env expr =
       match expr with
-      | Call (ct, (p, Id (p2, cn)), targs, el, uarg)
+      | Call ((p, Id (p2, cn)), targs, el, uarg)
         when SN.SpecialFunctions.is_special_function cn
              || (SN.PPLFunctions.is_reserved cn && env.in_ppl) ->
         Call
-          ( self#on_call_type env ct,
-            (p, Id (p2, cn)),
+          ( (p, Id (p2, cn)),
             List.map targs ~f:(self#on_targ env),
             List.map el ~f:(self#on_expr env),
             Option.map uarg ~f:(self#on_expr env) )
-      | Call (ct, (p, Aast.Id id), tal, el, unpacked_element) ->
+      | Call ((p, Aast.Id id), tal, el, unpacked_element) ->
         let new_id = NS.elaborate_id env.namespace NS.ElaborateFun id in
         let renamed_call =
           Call
-            ( ct,
-              (p, Id new_id),
+            ( (p, Id new_id),
               List.map tal ~f:(self#on_targ env),
               List.map el ~f:(self#on_expr env),
               Option.map unpacked_element ~f:(self#on_expr env) )

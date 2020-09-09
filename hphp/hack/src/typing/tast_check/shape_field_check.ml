@@ -82,8 +82,7 @@ let handler =
       function
       | ( (p, _),
           Call
-            ( Aast.Cnormal,
-              (_, Class_const ((_, CI (_, class_name)), (_, method_name))),
+            ( (_, Class_const ((_, CI (_, class_name)), (_, method_name))),
               _,
               [shape; ((pos, _), String field_name)],
               None ) )
@@ -92,15 +91,13 @@ let handler =
         trivial_shapes_key_exists_check p env shape (pos, field_name)
       | ( (p, _),
           Call
-            ( Aast.Cnormal,
-              (_, Class_const ((_, CI (_, class_name)), (_, method_name))),
+            ( (_, Class_const ((_, CI (_, class_name)), (_, method_name))),
               _,
               [shape; ((pos, _), String field_name); _],
               None ) )
       | ( (p, _),
           Call
-            ( Aast.Cnormal,
-              (_, Class_const ((_, CI (_, class_name)), (_, method_name))),
+            ( (_, Class_const ((_, CI (_, class_name)), (_, method_name))),
               _,
               [shape; ((pos, _), String field_name)],
               None ) )

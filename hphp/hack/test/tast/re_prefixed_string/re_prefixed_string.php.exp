@@ -33,7 +33,7 @@ Errors:
                (Binop ((Eq None),
                   (([7:3-5], shape(0 => string)), (Lvar ([7:3-5], $y))),
                   (([7:8-19], shape(0 => string)),
-                   (Call (Cnormal,
+                   (Call (
                       (([7:8-15], (function<T as shape(...)>(HH\Lib\Regex\Pattern<shape(0 => string)> $pattern): shape(0 => string))),
                        (Id ([7:8-15], "\\goodbye"))),
                       [((shape(0 => string)),

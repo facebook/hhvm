@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4961246a1ef861ea23c47de5276e1cea>>
+// @generated SignedSource<<5f32b3f467a9342c590fc071dad9bd2a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -308,7 +308,6 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     ClassConst(Box<(ClassId<Ex, Fb, En, Hi>, Pstring)>),
     Call(
         Box<(
-            CallType,
             Expr<Ex, Fb, En, Hi>,
             Vec<Targ<Hi>>,
             Vec<Expr<Ex, Fb, En, Hi>>,

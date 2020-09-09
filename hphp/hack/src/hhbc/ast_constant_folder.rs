@@ -364,12 +364,12 @@ pub fn expr_to_typed_value_(
 
         Call(id)
             if id
-                .1
+                .0
                 .as_id()
                 .map(|x| x.1 == special_functions::HHAS_ADATA)
                 .unwrap_or(false) =>
         {
-            match &id.3[..] {
+            match &id.2[..] {
                 &[tast::Expr(_, tast::Expr_::String(ref data))] => {
                     // FIXME: This is not safe--string literals are binary strings.
                     // There's no guarantee that they're valid UTF-8.

@@ -63,7 +63,7 @@
            [([5:5-21],
              (Return
                 (Some (([5:12-20], string),
-                       (Call (Cnormal,
+                       (Call (
                           (([5:12-16], (function(string $x): string)),
                            (Class_const (
                               (([5:12-13], A), (CI ([5:12-13], "\\A"))),
@@ -95,14 +95,14 @@
         [([4:3-25],
           (Return
              (Some (([4:10-24], string),
-                    (Call (Cnormal,
+                    (Call (
                        (([4:10-14], (function(string $x): string)),
                         (Class_const (
                            (([4:10-11], B), (CI ([4:10-11], "\\B"))),
                            ([4:13-14], "f")))),
                        [],
                        [(([4:15-23], string),
-                         (Call (Cnormal,
+                         (Call (
                             (([4:15-19], (function(string $x): string)),
                              (Class_const (
                                 (([4:15-16], A), (CI ([4:15-16], "\\A"))),

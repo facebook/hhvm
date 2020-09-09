@@ -43,7 +43,7 @@
          [([7:3-12:5],
            (Expr
               (([7:3-12:4], void),
-               (Call (Cnormal,
+               (Call (
                   (([7:3-15], (function(mixed $_): void)),
                    (Id ([7:3-15], "\\expect_mixed"))),
                   [],

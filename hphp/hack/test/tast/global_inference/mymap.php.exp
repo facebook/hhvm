@@ -17,7 +17,7 @@
         [([5:3-22],
           (Expr
              (([5:3-21], void),
-              (Call (Cnormal,
+              (Call (
                  (([5:3-10], (function(string $x, int $y): void)),
                   (Obj_get (
                      (([5:3-5], MyMap<string, int>), (Lvar ([5:3-5], $m))),
@@ -31,7 +31,7 @@
           ([6:3-24],
            (Return
               (Some (([6:10-23], ?int),
-                     (Call (Cnormal,
+                     (Call (
                         (([6:10-17], (function(string $x): ?int)),
                          (Obj_get (
                             (([6:10-12], MyMap<string, int>),

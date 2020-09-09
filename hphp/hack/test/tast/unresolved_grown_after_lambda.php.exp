@@ -91,7 +91,7 @@ Errors:
           ([14:3-15],
            (Return
               (Some (([14:10-14], int),
-                     (Call (Cnormal,
+                     (Call (
                         (([14:10-12], (function(): int)),
                          (Lvar ([14:10-12], $f))),
                         [], [], None))))))

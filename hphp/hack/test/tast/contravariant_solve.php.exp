@@ -155,19 +155,19 @@
                (Binop ((Eq None),
                   (([17:3-5], void), (Lplaceholder [17:3-5])),
                   (([17:8-21], I<int>),
-                   (Call (Cnormal,
+                   (Call (
                       (([17:8-9], (function<T>(I<int> $_, I<int> $_): I<int>)),
                        (Id ([17:8-9], "\\f"))),
                       [((int), ([17:8-9], (Happly (([Pos.none], "_"), []))))],
                       [(([17:10-14], E<int>),
-                        (Call (Cnormal,
+                        (Call (
                            (([17:10-11], (function<T>(int $_): E<int>)),
                             (Id ([17:10-11], "\\g"))),
                            [((int),
                              ([17:10-11], (Happly (([Pos.none], "_"), []))))],
                            [(([17:12-13], int), (Int "1"))], None)));
                         (([17:16-20], E<int>),
-                         (Call (Cnormal,
+                         (Call (
                             (([17:16-17], (function<T>(int $_): E<int>)),
                              (Id ([17:16-17], "\\g"))),
                             [((int),

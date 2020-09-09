@@ -34,17 +34,17 @@
         [([4:3-21],
           (Return
              (Some (([4:10-20], int),
-                    (Call (Cnormal,
+                    (Call (
                        (([4:10-11], (function(int $x): int)),
                         (Id ([4:10-11], "\\g"))),
                        [],
                        [(([4:12-19], int),
-                         (Call (Cnormal,
+                         (Call (
                             (([4:12-13], (function(int $x): int)),
                              (Id ([4:12-13], "\\g"))),
                             [],
                             [(([4:14-18], int),
-                              (Call (Cnormal,
+                              (Call (
                                  (([4:14-15], (function(int $x): int)),
                                   (Id ([4:14-15], "\\g"))),
                                  [], [(([4:16-17], int), (Int "0"))], None)))

@@ -213,7 +213,7 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                 Ok(())
             }
             Call(x) => {
-                let (func_e, pos_args, unpacked_arg) = (&x.1, &x.3, &x.4);
+                let (func_e, pos_args, unpacked_arg) = (&x.0, &x.2, &x.3);
                 if let Id(x) = &func_e.1 {
                     let call_name = &x.1;
                     if call_name == emitter_special_functions::SET_FRAME_METADATA {

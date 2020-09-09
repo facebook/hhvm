@@ -203,7 +203,7 @@
            ([34:3-20],
             (Expr
                (([34:3-19], void),
-                (Call (Cnormal,
+                (Call (
                    (([34:3-10], (function(X $x): void)),
                     (Obj_get (
                        (([34:3-5], MyPhonyVector<X>), (Lvar ([34:3-5], $x))),
@@ -219,7 +219,7 @@
            ([35:3-20],
             (Expr
                (([35:3-19], void),
-                (Call (Cnormal,
+                (Call (
                    (([35:3-10], (function(X $x): void)),
                     (Obj_get (
                        (([35:3-5], MyPhonyVector<X>), (Lvar ([35:3-5], $x))),
@@ -235,7 +235,7 @@
            ([36:3-12],
             (Expr
                (([36:3-11], void),
-                (Call (Cnormal,
+                (Call (
                    (([36:3-7], (function(MyPhonyVector<X> $v): void)),
                     (Id ([36:3-7], "\\test"))),
                    [],

@@ -41,7 +41,7 @@ Errors:
            (Awaitall (
               [((Some ([9:17-26], __tmp$1)),
                 (([9:17-26], Awaitable<int>),
-                 (Call (Cnormal,
+                 (Call (
                     (([9:17-24], (function(): Awaitable<int>)),
                      (Id ([9:17-24], "\\gen_int"))),
                     [], [], None))))
@@ -52,7 +52,7 @@ Errors:
                     (Binop ((Eq None),
                        (([10:5-8], Awaitable<int>), (Lvar ([10:5-8], $v2))),
                        (([10:11-20], Awaitable<int>),
-                        (Call (Cnormal,
+                        (Call (
                            (([10:11-18], (function(): Awaitable<int>)),
                             (Id ([10:11-18], "\\gen_int"))),
                            [], [], None)))

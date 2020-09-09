@@ -1335,7 +1335,7 @@ and check_constant_expr env (pos, e) =
   | Aast.Shape fdl ->
     (* Only check the values because shape field names are always legal *)
     List.for_all fdl ~f:(fun (_, e) -> check_constant_expr env e)
-  | Aast.Call (_, (_, Aast.Id (_, cn)), _, el, unpacked_element)
+  | Aast.Call ((_, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.fun_
          || String.equal cn SN.AutoimportedFunctions.class_meth
          || String.equal cn SN.StdlibFunctions.array_mark_legacy
@@ -1625,8 +1625,7 @@ and stmt env (pos, st) =
     | Aast.Switch (e, cl) -> switch_stmt env e cl
     | Aast.Foreach (e, ae, b) -> foreach_stmt env e ae b
     | Aast.Try (b, cl, fb) -> try_stmt env b cl fb
-    | Aast.Expr
-        (cp, Aast.Call (_, (p, Aast.Id (fp, fn)), hl, el, unpacked_element))
+    | Aast.Expr (cp, Aast.Call ((p, Aast.Id (fp, fn)), hl, el, unpacked_element))
       when String.equal fn SN.AutoimportedFunctions.invariant ->
       (* invariant is subject to a source-code transform in the HHVM
        * runtime: the arguments to invariant are lazily evaluated only in
@@ -1650,8 +1649,7 @@ and stmt env (pos, st) =
           let violation =
             ( cp,
               Aast.Call
-                ( Aast.Cnormal,
-                  (p, Aast.Id (fp, SN.AutoimportedFunctions.invariant_violation)),
+                ( (p, Aast.Id (fp, SN.AutoimportedFunctions.invariant_violation)),
                   hl,
                   el,
                   unpacked_element ) )
@@ -1975,27 +1973,25 @@ and expr_ env p (e : Nast.expr_) =
         N.PU_identifier (make_class_id env x1, s1, s2)
       | _ -> failwith "TODO(T35357243): Error during parsing of PU_identifier"
     end
-  | Aast.Call (_, (_, Aast.Id (p, pseudo_func)), tal, el, unpacked_element)
+  | Aast.Call ((_, Aast.Id (p, pseudo_func)), tal, el, unpacked_element)
     when String.equal pseudo_func SN.SpecialFunctions.echo ->
     arg_unpack_unexpected unpacked_element;
-    N.Call
-      ( N.Cnormal,
-        (p, N.Id (p, pseudo_func)),
-        targl env p tal,
-        exprl env el,
-        None )
-  | Aast.Call (_, (p, Aast.Id (_, cn)), tal, el, unpacked_element)
+    N.Call ((p, N.Id (p, pseudo_func)), targl env p tal, exprl env el, None)
+  | Aast.Call ((p, Aast.Id (_, cn)), tal, el, _)
     when String.equal cn SN.StdlibFunctions.call_user_func ->
-    arg_unpack_unexpected unpacked_element;
+    Errors.deprecated_use
+      p
+      ( "The builtin "
+      ^ Markdown_lite.md_codify (Utils.strip_ns cn)
+      ^ " is deprecated." );
     begin
       match el with
       | [] ->
         Errors.naming_too_few_arguments p;
         N.Any
-      | f :: el ->
-        N.Call (N.Cuser_func, expr env f, targl env p tal, exprl env el, None)
+      | f :: el -> N.Call (expr env f, targl env p tal, exprl env el, None)
     end
-  | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
+  | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.fun_ ->
     arg_unpack_unexpected unpacked_element;
     let (genv, _) = env in
@@ -2016,7 +2012,7 @@ and expr_ env p (e : Nast.expr_) =
         Errors.naming_too_many_arguments p;
         N.Any
     end
-  | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
+  | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.inst_meth ->
     arg_unpack_unexpected unpacked_element;
     begin
@@ -2034,7 +2030,7 @@ and expr_ env p (e : Nast.expr_) =
         Errors.naming_too_many_arguments p;
         N.Any
     end
-  | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
+  | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.meth_caller ->
     arg_unpack_unexpected unpacked_element;
     begin
@@ -2061,7 +2057,7 @@ and expr_ env p (e : Nast.expr_) =
         Errors.naming_too_many_arguments p;
         N.Any
     end
-  | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
+  | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.class_meth ->
     arg_unpack_unexpected unpacked_element;
     begin
@@ -2127,14 +2123,14 @@ and expr_ env p (e : Nast.expr_) =
         Errors.naming_too_many_arguments p;
         N.Any
     end
-  | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
+  | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.SpecialFunctions.assert_ ->
     arg_unpack_unexpected unpacked_element;
     if List.length el <> 1 then Errors.assert_arity p;
     N.Assert
       (N.AE_assert
          (Option.value_map (List.hd el) ~default:(p, N.Any) ~f:(expr env)))
-  | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
+  | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.SpecialFunctions.tuple ->
     arg_unpack_unexpected unpacked_element;
     (match el with
@@ -2143,47 +2139,31 @@ and expr_ env p (e : Nast.expr_) =
       N.Any
     | el -> N.List (exprl env el))
   (* sample, factor, observe, condition *)
-  | Aast.Call (_, (p1, Aast.Id (p2, cn)), tal, el, unpacked_element)
+  | Aast.Call ((p1, Aast.Id (p2, cn)), tal, el, unpacked_element)
     when Env.in_ppl env && SN.PPLFunctions.is_reserved cn ->
     let n_expr = N.Id (p2, cn) in
     N.Call
-      ( N.Cnormal,
-        (p1, n_expr),
-        targl env p tal,
-        exprl env el,
-        oexpr env unpacked_element )
-  | Aast.Call (_, (p, Aast.Id f), tal, el, unpacked_element) ->
+      ((p1, n_expr), targl env p tal, exprl env el, oexpr env unpacked_element)
+  | Aast.Call ((p, Aast.Id f), tal, el, unpacked_element) ->
     N.Call
-      ( N.Cnormal,
-        (p, N.Id f),
-        targl env p tal,
-        exprl env el,
-        oexpr env unpacked_element )
+      ((p, N.Id f), targl env p tal, exprl env el, oexpr env unpacked_element)
   (* match *)
   (* Handle nullsafe instance method calls here. Because Obj_get is used
      for both instance property access and instance method calls, we need
      to match the entire "Call(Obj_get(..), ..)" pattern here so that we
      only match instance method calls *)
   | Aast.Call
-      ( _,
-        (p, Aast.Obj_get (e1, e2, Aast.OG_nullsafe)),
-        tal,
-        el,
-        unpacked_element ) ->
+      ((p, Aast.Obj_get (e1, e2, Aast.OG_nullsafe)), tal, el, unpacked_element)
+    ->
     N.Call
-      ( N.Cnormal,
-        (p, N.Obj_get (expr env e1, expr_obj_get_name env e2, N.OG_nullsafe)),
+      ( (p, N.Obj_get (expr env e1, expr_obj_get_name env e2, N.OG_nullsafe)),
         targl env p tal,
         exprl env el,
         oexpr env unpacked_element )
   (* Handle all kinds of calls that weren't handled by any of the cases above *)
-  | Aast.Call (_, e, tal, el, unpacked_element) ->
+  | Aast.Call (e, tal, el, unpacked_element) ->
     N.Call
-      ( N.Cnormal,
-        expr env e,
-        targl env p tal,
-        exprl env el,
-        oexpr env unpacked_element )
+      (expr env e, targl env p tal, exprl env el, oexpr env unpacked_element)
   | Aast.FunctionPointer (Aast.FP_id fid, targs) ->
     N.FunctionPointer (N.FP_id fid, targl env p targs)
   | Aast.FunctionPointer

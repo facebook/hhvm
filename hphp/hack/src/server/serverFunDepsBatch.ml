@@ -58,7 +58,7 @@ let collect_in_decl =
 
     method plus a b = Results.union a b
 
-    method! on_Call env ct e h el unpacked_element =
+    method! on_Call env e h el unpacked_element =
       let ( + ) = self#plus in
       let acc =
         match snd e with
@@ -69,7 +69,7 @@ let collect_in_decl =
         | T.Lvar (pos, id) -> process_local (pos, Local_id.get_name id)
         | _ -> self#zero
       in
-      acc + super#on_Call env ct e h el unpacked_element
+      acc + super#on_Call env e h el unpacked_element
 
     method! on_New env (((p, ty), _) as c) targs el unpacked_element ctor_annot
         =

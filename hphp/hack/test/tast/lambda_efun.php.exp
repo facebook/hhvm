@@ -65,7 +65,7 @@ Errors:
               (([16:3-13], int),
                (Binop ((Eq None), (([16:3-5], int), (Lvar ([16:3-5], $l))),
                   (([16:8-13], int),
-                   (Call (Cnormal,
+                   (Call (
                       (([16:8-10], (function(num $z): int)),
                        (Lvar ([16:8-10], $x))),
                       [], [(([16:11-12], int), (Int "2"))], None)))
@@ -122,7 +122,7 @@ Errors:
               (([21:3-13], int),
                (Binop ((Eq None), (([21:3-5], int), (Lvar ([21:3-5], $l))),
                   (([21:8-13], int),
-                   (Call (Cnormal,
+                   (Call (
                       (([21:8-10], (function(num $z): int)),
                        (Lvar ([21:8-10], $x))),
                       [], [(([21:11-12], int), (Int "2"))], None)))
@@ -187,7 +187,7 @@ Errors:
               (([24:3-17], int),
                (Binop ((Eq None), (([24:3-5], int), (Lvar ([24:3-5], $l))),
                   (([24:8-17], int),
-                   (Call (Cnormal,
+                   (Call (
                       (([24:8-10], (function(int $a, int $b): int)),
                        (Lvar ([24:8-10], $x))),
                       [],

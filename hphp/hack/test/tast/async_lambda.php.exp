@@ -60,7 +60,7 @@
                                    (([7:12-34], string),
                                     (Await
                                        (([7:18-34], Awaitable<string>),
-                                        (Call (Cnormal,
+                                        (Call (
                                            (([7:18-27], (function(string $s): Awaitable<string>)),
                                             (Id ([7:18-27], "\\genString"))),
                                            [],
@@ -118,7 +118,7 @@
                                     (([10:12-31], string),
                                      (Await
                                         (([10:18-31], Awaitable<string>),
-                                         (Call (Cnormal,
+                                         (Call (
                                             (([10:18-27], (function(string $s): Awaitable<string>)),
                                              (Id ([10:18-27], "\\genString"))),
                                             [],

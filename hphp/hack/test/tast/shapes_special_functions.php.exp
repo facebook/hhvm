@@ -39,7 +39,7 @@
          [([6:3-24],
            (Expr
               (([6:3-23], ?int),
-               (Call (Cnormal,
+               (Call (
                   (([6:3-14], (function(?shape(...) $shape, arraykey $index, $default=_): ?int)),
                    (Class_const (
                       (([6:3-9], Shapes), (CI ([6:3-9], "\\HH\\Shapes"))),
@@ -52,7 +52,7 @@
            ([7:3-27],
             (Expr
                (([7:3-26], int),
-                (Call (Cnormal,
+                (Call (
                    (([7:3-14], (function(?shape(...) $shape, arraykey $index, $default=_): int)),
                     (Class_const (
                        (([7:3-9], Shapes), (CI ([7:3-9], "\\HH\\Shapes"))),
@@ -66,7 +66,7 @@
            ([8:3-30],
             (Expr
                (([8:3-29], bool),
-                (Call (Cnormal,
+                (Call (
                    (([8:3-20], (function(shape(...) $shape, arraykey $index): bool)),
                     (Class_const (
                        (([8:3-9], Shapes), (CI ([8:3-9], "\\HH\\Shapes"))),
@@ -79,7 +79,7 @@
            ([9:3-36],
             (Expr
                (([9:3-35], void),
-                (Call (Cnormal,
+                (Call (
                    (([9:3-20], (function<T as shape(...)>(inout shape('x' => int, ?'y' => int) $shape, arraykey $index): void)),
                     (Class_const (
                        (([9:3-9], Shapes), (CI ([9:3-9], "\\HH\\Shapes"))),
@@ -96,7 +96,7 @@
            ([10:3-23],
             (Expr
                (([10:3-22], darray<string, int>),
-                (Call (Cnormal,
+                (Call (
                    (([10:3-18], (function(shape(...) $shape): darray<string, int>)),
                     (Class_const (
                        (([10:3-9], Shapes), (CI ([10:3-9], "\\HH\\Shapes"))),

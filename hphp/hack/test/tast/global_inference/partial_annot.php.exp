@@ -16,7 +16,7 @@
         [([5:3-20],
           (Return
              (Some (([5:10-19], ?string),
-                    (Call (Cnormal,
+                    (Call (
                        (([5:10-17], (function(): ?string)),
                         (Obj_get (
                            (([5:10-12], A<string>), (Lvar ([5:10-12], $x))),

@@ -59,7 +59,7 @@
             [([8:5-29],
               (Expr
                  (([8:5-28], void),
-                  (Call (Cnormal,
+                  (Call (
                      (([8:5-24], (function(num $x): void)),
                       (Class_const ((([8:5-11], B), CIparent),
                          ([8:13-24], "__construct")))),

@@ -201,5 +201,5 @@ let check_class_access ~use_pos ~def_pos env (vis, lsb) cid class_ =
 
 let check_deprecated ~use_pos ~def_pos deprecated =
   match deprecated with
-  | Some s -> Errors.deprecated_use use_pos def_pos s
+  | Some s -> Errors.deprecated_use use_pos ~pos_def:(Some def_pos) s
   | None -> ()

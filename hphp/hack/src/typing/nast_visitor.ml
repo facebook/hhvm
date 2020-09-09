@@ -74,19 +74,17 @@ class virtual iter =
 
     method! on_expr env e =
       match e with
-      | (_, Call (ct, ((_, Id (_, cn)) as e1), ta, el, unpacked_element))
+      | (_, Call (((_, Id (_, cn)) as e1), ta, el, unpacked_element))
         when String.equal cn SN.Rx.move ->
         self#on_Call
           { env with rx_move_allowed = false }
-          ct
           e1
           ta
           el
           unpacked_element
-      | (_, Call (ct, e1, ta, el, unpacked_element)) ->
+      | (_, Call (e1, ta, el, unpacked_element)) ->
         self#on_Call
           { env with rx_move_allowed = true }
-          ct
           e1
           ta
           el

@@ -82,7 +82,7 @@ impl Env {
     fn handle_special_calls(&self, call: &mut Expr_) {
         match call {
             Expr_::Call(c) => {
-                let (func, args) = (&c.1, &mut c.3);
+                let (func, args) = (&c.0, &mut c.2);
                 match func {
                     Expr(_, Expr_::Id(id))
                         if id.1 == sn::autoimported_functions::FUN_ && args.len() == 1 =>
@@ -240,11 +240,9 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
 
         match e {
             Expr_::Call(c) => {
-                let (call_type, func, targs, args, uargs) =
-                    (&mut c.0, &mut c.1, &mut c.2, &mut c.3, &mut c.4);
+                let (func, targs, args, uargs) = (&mut c.0, &mut c.1, &mut c.2, &mut c.3);
 
                 // Recurse first due to borrow order
-                call_type.accept(env, self.object())?;
                 targs.accept(env, self.object())?;
                 args.accept(env, self.object())?;
                 uargs.accept(env, self.object())?;

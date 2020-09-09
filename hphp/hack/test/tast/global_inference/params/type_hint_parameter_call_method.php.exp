@@ -24,7 +24,7 @@
            [([5:5-13],
              (Expr
                 (([5:5-12], void),
-                 (Call (Cnormal,
+                 (Call (
                     (([5:5-8], (function(int $_): void)),
                      (Id ([5:5-8], "\\bar"))),
                     [], [(([5:9-11], int), (Lvar ([5:9-11], $x)))], None)))))

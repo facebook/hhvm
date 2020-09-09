@@ -80,7 +80,7 @@ let rec check_expr env (_, e) =
         end
       | _ -> ()
     end
-  | Call (_, (_, Id (_, f)), _, el, None)
+  | Call ((_, Id (_, f)), _, el, None)
     when String.equal f SN.PseudoFunctions.unset ->
     let rec check_unset_exp e =
       match e with

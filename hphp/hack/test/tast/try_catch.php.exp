@@ -40,7 +40,7 @@
                  ([17:5-19],
                   (Expr
                      (([17:5-18], void),
-                      (Call (Cnormal,
+                      (Call (
                          (([17:5-16], (function(): void)),
                           (Id ([17:5-16], "\\might_throw"))),
                          [], [], None)))))

@@ -856,7 +856,7 @@ val attribute_too_few_arguments : Pos.t -> string -> int -> unit
 
 val attribute_param_type : Pos.t -> string -> unit
 
-val deprecated_use : Pos.t -> Pos.t -> string -> unit
+val deprecated_use : Pos.t -> ?pos_def:Pos.t option -> string -> unit
 
 val cannot_declare_constant :
   [< `enum | `trait | `record ] -> Pos.t -> Pos.t * string -> unit

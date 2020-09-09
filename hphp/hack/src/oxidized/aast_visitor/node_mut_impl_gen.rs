@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e0b3f934bfa6b823093c4e7453896672>>
+// @generated SignedSource<<15bbe2192981183caca072d93609729c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -185,25 +185,6 @@ impl<P: Params> NodeMut<P> for CaType {
                 a0.accept(c, v)?;
                 Ok(())
             }
-        }
-    }
-}
-impl<P: Params> NodeMut<P> for CallType {
-    fn accept<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_call_type(c, self)
-    }
-    fn recurse<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        match self {
-            CallType::Cnormal => Ok(()),
-            CallType::CuserFunc => Ok(()),
         }
     }
 }
@@ -776,7 +757,6 @@ impl<P: Params> NodeMut<P> for Expr_<P::Ex, P::Fb, P::En, P::Hi> {
                 a.1.accept(c, v)?;
                 a.2.accept(c, v)?;
                 a.3.accept(c, v)?;
-                a.4.accept(c, v)?;
                 Ok(())
             }
             Expr_::FunctionPointer(a) => {

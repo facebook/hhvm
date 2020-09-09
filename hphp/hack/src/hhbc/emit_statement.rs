@@ -101,7 +101,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                 instr::popc(),
             ])),
             a::Expr_::Call(c) => {
-                if let (_, a::Expr(_, a::Expr_::Id(sid)), _, exprs, None) = c.as_ref() {
+                if let (a::Expr(_, a::Expr_::Id(sid)), _, exprs, None) = c.as_ref() {
                     let ft = hhbc_id::function::Type::from_ast_name(&sid.1);
                     let fname = ft.to_raw_string();
                     if fname.eq_ignore_ascii_case("unset") {
@@ -1507,7 +1507,6 @@ pub fn emit_markup(
         let call_expr = tast::Expr(
             Pos::make_none(),
             tast::Expr_::mk_call(
-                tast::CallType::Cnormal,
                 tast::Expr(
                     Pos::make_none(),
                     tast::Expr_::mk_id(ast_defs::Id(Pos::make_none(), fname)),

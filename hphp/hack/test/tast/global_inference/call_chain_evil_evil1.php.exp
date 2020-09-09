@@ -63,7 +63,7 @@
            [([5:5-26],
              (Return
                 (Some (([5:12-25], string),
-                       (Call (Cnormal,
+                       (Call (
                           (([5:12-21], (function(string $x): string)),
                            (Class_const ((([5:12-18], this), CIparent),
                               ([5:20-21], "f")))),
@@ -108,7 +108,7 @@
         [([4:3-27],
           (Return
              (Some (([4:10-26], string),
-                    (Call (Cnormal,
+                    (Call (
                        (([4:10-15], (function(string $x): string)),
                         (Obj_get ((([4:10-12], B), (Lvar ([4:10-12], $b))),
                            (([4:14-15], (function(string $x): string)),
@@ -116,7 +116,7 @@
                            OG_nullthrows))),
                        [],
                        [(([4:16-25], string),
-                         (Call (Cnormal,
+                         (Call (
                             (([4:16-21], (function(string $x): string)),
                              (Obj_get (
                                 (([4:16-18], A), (Lvar ([4:16-18], $a))),

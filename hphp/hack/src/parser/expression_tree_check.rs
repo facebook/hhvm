@@ -6,7 +6,6 @@
 
 use oxidized::{
     aast,
-    aast_defs::CallType,
     aast_visitor::{visit, AstParams, Node, Visitor},
     ast_defs::*,
     pos::Pos,
@@ -98,13 +97,11 @@ impl<'ast> Visitor<'ast> for Checker {
                 },
                 // Allow simple function calls.
                 Call(call) => match &**call {
-                    // Ban call_user_func(...)
-                    (CallType::CuserFunc, _, _, _, _) => false,
                     // Ban variadic calls foo(...$x);
-                    (CallType::Cnormal, _, _, _, Some(_)) => false,
+                    (_, _, _, Some(_)) => false,
                     // Ban generic type arguments foo<X, Y>();
-                    (CallType::Cnormal, _, targs, _, _) if !targs.is_empty() => false,
-                    (CallType::Cnormal, recv, _targs, args, _variadic) => {
+                    (_, targs, _, _) if !targs.is_empty() => false,
+                    (recv, _targs, args, _variadic) => {
                         // Only allow direct function calls, so allow
                         // foo(), but don't allow (foo())().
                         match recv.1 {

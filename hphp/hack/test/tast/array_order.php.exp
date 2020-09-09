@@ -17,7 +17,7 @@
                        (([13:22-23], int), (Int "0")));
                        ((([13:25-29], string), (String "k2")),
                         (([13:33-50], _),
-                         (Call (Cnormal,
+                         (Call (
                             (([13:33-48], (function(): _)),
                              (Id ([13:33-48], "\\my_php_function"))),
                             [], [], None))))
@@ -33,7 +33,7 @@
                    (Varray (None,
                       [(([14:15-16], int), (Int "0"));
                         (([14:18-35], _),
-                         (Call (Cnormal,
+                         (Call (
                             (([14:18-33], (function(): _)),
                              (Id ([14:18-33], "\\my_php_function"))),
                             [], [], None)))

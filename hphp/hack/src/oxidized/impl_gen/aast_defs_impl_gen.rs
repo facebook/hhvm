@@ -3,32 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ba1851a7927063dae77c059ddc7fd13d>>
+// @generated SignedSource<<7c05235740e15397bd62765891d1a1e4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
 use crate::aast_defs::*;
-impl CallType {
-    pub fn mk_cnormal() -> Self {
-        CallType::Cnormal
-    }
-    pub fn mk_cuser_func() -> Self {
-        CallType::CuserFunc
-    }
-    pub fn is_cnormal(&self) -> bool {
-        match self {
-            CallType::Cnormal => true,
-            _ => false,
-        }
-    }
-    pub fn is_cuser_func(&self) -> bool {
-        match self {
-            CallType::CuserFunc => true,
-            _ => false,
-        }
-    }
-}
 impl FuncReactive {
     pub fn mk_fpure() -> Self {
         FuncReactive::FPure

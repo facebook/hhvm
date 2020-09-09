@@ -38,12 +38,6 @@ and sid = Ast_defs.id
 
 and is_reified = bool
 
-and call_type =
-  | Cnormal [@visitors.name "call_type_Cnormal"]
-      (** when the call looks like f() *)
-  | Cuser_func [@visitors.name "call_type_Cuser_func"]
-      (** when the call looks like call_user_func(...) *)
-
 and func_reactive =
   | FPure
   | FReactive

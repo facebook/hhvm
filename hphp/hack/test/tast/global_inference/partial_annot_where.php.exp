@@ -17,7 +17,7 @@
         [([5:3-20],
           (Return
              (Some (([5:10-19], ?arraykey),
-                    (Call (Cnormal,
+                    (Call (
                        (([5:10-17], (function(): ?arraykey)),
                         (Obj_get (
                            (([5:10-12], A<arraykey>), (Lvar ([5:10-12], $x))),

@@ -121,7 +121,7 @@ class visitor =
       let ( + ) = self#plus in
       special_fun_acc + acc + super#on_expr env expr
 
-    method! on_Call env ct e hl el unpacked_element =
+    method! on_Call env e hl el unpacked_element =
       let acc =
         match snd e with
         | Tast.Id (pos, name) -> self#fun_call env Function name pos
@@ -138,7 +138,7 @@ class visitor =
           |> List.fold ~init:self#zero ~f:self#plus
         | _ -> self#zero
       in
-      self#plus acc (super#on_Call env ct e hl el unpacked_element)
+      self#plus acc (super#on_Call env e hl el unpacked_element)
   end
 
 let find_fun_calls ctx tasts =

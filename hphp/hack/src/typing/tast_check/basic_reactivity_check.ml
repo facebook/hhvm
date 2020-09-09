@@ -11,7 +11,7 @@ include TM.Shared (Env)
 
 let expr_is_valid_owned_arg (e : expr) : bool =
   match snd e with
-  | Call (_, (_, Id (_, id)), _, _, _) ->
+  | Call ((_, Id (_, id)), _, _, _) ->
     String.equal id SN.Rx.mutable_ || String.equal id SN.Rx.move
   | _ -> false
 
@@ -365,8 +365,8 @@ let check_rx_mutable_arguments (p : Pos.t) (env : Env.env) (tel : expr list) =
 
 let enforce_mutable_call (env : Env.env) (te : expr) =
   match snd te with
-  | Call (_, (_, Id ((_, s) as id)), _, el, _)
-  | Call (_, (_, Fun_id ((_, s) as id)), _, el, _)
+  | Call ((_, Id ((_, s) as id)), _, el, _)
+  | Call ((_, Fun_id ((_, s) as id)), _, el, _)
     when String.( <> ) s SN.Rx.move && String.( <> ) s SN.Rx.freeze ->
     begin
       match Env.get_fun env (snd id) with
@@ -375,12 +375,12 @@ let enforce_mutable_call (env : Env.env) (te : expr) =
       | _ -> ()
     end
   (* static methods/lambdas *)
-  | Call (_, ((_, fun_ty), Class_const _), _, el, _)
-  | Call (_, ((_, fun_ty), Lvar _), _, el, _) ->
+  | Call (((_, fun_ty), Class_const _), _, el, _)
+  | Call (((_, fun_ty), Lvar _), _, el, _) ->
     let (env, efun_ty) = Env.expand_type env fun_ty in
     check_mutability_fun_params env Borrowable_args.empty efun_ty el
   (* $x->method() where method is mutable *)
-  | Call (_, ((pos, fun_ty), Obj_get (expr, _, _)), _, el, _) ->
+  | Call (((pos, fun_ty), Obj_get (expr, _, _)), _, el, _) ->
     let (env, efun_ty) = Env.expand_type env fun_ty in
     begin
       match get_node efun_ty with
@@ -723,7 +723,7 @@ let check =
 
               (* dive into subnodes *)
               super#on_expr (env, ctx) expr
-            | (_, Call (_, (_, Id (_, f)), _, el, None))
+            | (_, Call ((_, Id (_, f)), _, el, None))
               when String.equal f SN.PseudoFunctions.unset ->
               List.iter
                 el
@@ -731,15 +731,15 @@ let check =
 
               (* dive into subnodes *)
               super#on_expr (env, ctx) expr
-            | (_, Call (_, (_, Id (_, f)), _, el, None))
+            | (_, Call ((_, Id (_, f)), _, el, None))
               when String.equal f SN.Rx.mutable_ ->
               check_rx_mutable_arguments (get_position expr) env el;
               super#on_expr (env, ctx) expr
-            | (_, Call (_, (_, Id (p, f)), _, _, None))
+            | (_, Call ((_, Id (p, f)), _, _, None))
               when String.equal f SN.SpecialFunctions.echo ->
               Errors.echo_in_reactive_context p;
               super#on_expr (env, ctx) expr
-            | (_, Call (_, f, _, _, _)) ->
+            | (_, Call (f, _, _, _)) ->
               enforce_mutable_call env expr;
               ( if not is_expr_statement then
                 let (_env, fun_ty) = Env.expand_type env (get_type f) in

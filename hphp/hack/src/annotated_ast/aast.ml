@@ -156,8 +156,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       ('ex, 'fb, 'en, 'hi) class_id * ('ex, 'fb, 'en, 'hi) class_get_expr
   | Class_const of ('ex, 'fb, 'en, 'hi) class_id * pstring
   | Call of
-      call_type
-      * ('ex, 'fb, 'en, 'hi) expr
+      ('ex, 'fb, 'en, 'hi) expr
       (* function *)
       * 'hi targ list
       (* explicit type annotations *)

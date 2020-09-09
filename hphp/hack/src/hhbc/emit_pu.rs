@@ -109,7 +109,7 @@ fn class_const(pos: Pos, cls: impl Into<String>, name: impl Into<String>) -> Tas
 }
 
 fn call(pos: Pos, caller: Tast::Expr, args: Vec<Tast::Expr>) -> Tast::Expr {
-    let expr = Tast::Expr_::mk_call(aast_defs::CallType::Cnormal, caller, vec![], args, None);
+    let expr = Tast::Expr_::mk_call(caller, vec![], args, None);
     Tast::Expr(pos, expr)
 }
 

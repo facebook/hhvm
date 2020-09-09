@@ -71,7 +71,7 @@
               (([5:3-13], string),
                (Binop ((Eq None), (([5:3-5], string), (Lvar ([5:3-5], $x))),
                   (([5:8-13], string),
-                   (Call (Cnormal,
+                   (Call (
                       (([5:8-10], (function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)),
                        (Lvar ([5:8-10], $f))),
                       [], [(([5:11-12], int), (Int "4"))], None)))
@@ -81,7 +81,7 @@
               (([6:3-17], string),
                (Binop ((Eq None), (([6:3-5], string), (Lvar ([6:3-5], $y))),
                   (([6:8-17], string),
-                   (Call (Cnormal,
+                   (Call (
                       (([6:8-10], (function((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)) $n): string)),
                        (Lvar ([6:8-10], $f))),
                       [], [(([6:11-16], string), (String "bar"))], None)))

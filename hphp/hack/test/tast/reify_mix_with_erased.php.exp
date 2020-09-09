@@ -48,7 +48,7 @@ Errors:
          [([8:3-22],
            (Expr
               (([8:3-21], string),
-               (Call (Cnormal,
+               (Call (
                   (([8:3-4], (function<reify T, Tu>(string $f): string)),
                    (Id ([8:3-4], "\\f"))),
                   [((int), ([8:5-8], (Hprim Tint)));

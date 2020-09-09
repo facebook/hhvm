@@ -850,7 +850,6 @@ fn convert_meth_caller_to_func_ptr<'a>(
     };
     let mangle_name = string_utils::mangle_meth_caller(cls, fname);
     let fun_handle: Expr_ = Expr_::mk_call(
-        CallType::Cnormal,
         expr_id("\\__systemlib\\meth_caller".into()),
         vec![],
         vec![Expr(pos(), Expr_::mk_string(mangle_name.clone().into()))],
@@ -865,14 +864,12 @@ fn convert_meth_caller_to_func_ptr<'a>(
     let assert_invariant = Expr(
         pos(),
         Expr_::mk_call(
-            CallType::Cnormal,
             expr_id("\\HH\\invariant".into()),
             vec![],
             vec![
                 Expr(
                     pos(),
                     Expr_::mk_call(
-                        CallType::Cnormal,
                         expr_id("\\is_a".into()),
                         vec![],
                         vec![
@@ -896,7 +893,6 @@ fn convert_meth_caller_to_func_ptr<'a>(
     let meth_caller_handle = Expr(
         pos(),
         Expr_::mk_call(
-            CallType::Cnormal,
             Expr(
                 pos(),
                 Expr_::ObjGet(Box::new((
@@ -1154,7 +1150,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
             }
             Expr_::Call(mut x)
                 if {
-                    if let Expr_::Id(ref id) = (x.1).1 {
+                    if let Expr_::Id(ref id) = (x.0).1 {
                         let name = strip_id(id);
                         ["hh\\meth_caller", "meth_caller"]
                             .iter()
@@ -1169,7 +1165,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                     }
                 } =>
             {
-                if let [Expr(pc, cls), Expr(pf, func)] = &mut *x.3 {
+                if let [Expr(pc, cls), Expr(pf, func)] = &mut *x.2 {
                     match (&cls, func.as_string()) {
                         (Expr_::ClassConst(cc), Some(fname))
                             if string_utils::is_class(&(cc.1).1) =>
@@ -1245,13 +1241,13 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                 }
             }
             Expr_::Call(x)
-                if (x.1)
+                if (x.0)
                     .as_class_get()
                     .and_then(|(id, _)| id.as_ciexpr())
                     .and_then(|x| x.as_id())
                     .map(string_utils::is_parent)
                     .unwrap_or(false)
-                    || (x.1)
+                    || (x.0)
                         .as_class_const()
                         .and_then(|(id, _)| id.as_ciexpr())
                         .and_then(|x| x.as_id())
@@ -1264,13 +1260,13 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                 res
             }
             Expr_::Call(mut x)
-                if x.1
+                if x.0
                     .as_id()
                     .map(|id| id.1.eq_ignore_ascii_case("tuple"))
                     .unwrap_or_default() =>
             {
                 // replace tuple with varray
-                let call_args = mem::replace(&mut x.3, vec![]);
+                let call_args = mem::replace(&mut x.2, vec![]);
                 let mut res = Expr_::mk_varray(None, call_args);
                 res.recurse(env, self.object())?;
                 res
@@ -1376,13 +1372,7 @@ fn extract_debugger_main(
                 p(),
                 Stmt_::mk_expr(Expr(
                     p(),
-                    Expr_::mk_call(
-                        CallType::Cnormal,
-                        id("unset"),
-                        vec![],
-                        vec![lv(&name)],
-                        None,
-                    ),
+                    Expr_::mk_call(id("unset"), vec![], vec![lv(&name)], None),
                 )),
             );
             Stmt(
@@ -1408,10 +1398,7 @@ fn extract_debugger_main(
         .iter()
         .map(|name| {
             let checkfunc = id("\\__systemlib\\__debugger_is_uninit");
-            let isuninit = Expr(
-                p(),
-                Expr_::mk_call(CallType::Cnormal, checkfunc, vec![], vec![lv(name)], None),
-            );
+            let isuninit = Expr(p(), Expr_::mk_call(checkfunc, vec![], vec![lv(name)], None));
             let obj = Expr(
                 p(),
                 Expr_::mk_new(

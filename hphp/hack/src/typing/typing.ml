@@ -1383,7 +1383,6 @@ and expr_
       ~(expected : ExpectedTy.t option)
       env
       p
-      call_type
       e
       explicit_targs
       el
@@ -1395,7 +1394,6 @@ and expr_
         ~expected
         p
         env
-        call_type
         e
         explicit_targs
         el
@@ -1994,8 +1992,8 @@ and expr_
         ty2
     in
     make_result env p (Aast.Array_get (te1, Some te2)) ty
-  | Call (Cnormal, (pos_id, Id ((_, s) as id)), [], el, None)
-    when is_pseudo_function s ->
+  | Call ((pos_id, Id ((_, s) as id)), [], el, None) when is_pseudo_function s
+    ->
     let (env, tel, tys) = exprs ~accept_using_var:true env el in
     let env =
       if String.equal s SN.PseudoFunctions.hh_show then (
@@ -2022,13 +2020,12 @@ and expr_
       env
       p
       (Aast.Call
-         ( Cnormal,
-           Tast.make_typed_expr pos_id (TUtils.mk_tany env pos_id) (Aast.Id id),
+         ( Tast.make_typed_expr pos_id (TUtils.mk_tany env pos_id) (Aast.Id id),
            [],
            tel,
            None ))
       ty
-  | Call (call_type, e, explicit_targs, el, unpacked_element) ->
+  | Call (e, explicit_targs, el, unpacked_element) ->
     let env = might_throw env in
     let (env, te, ty) =
       check_call
@@ -2036,7 +2033,6 @@ and expr_
         ~expected
         env
         p
-        call_type
         e
         explicit_targs
         el
@@ -2395,7 +2391,7 @@ and expr_
   | Suspend e ->
     let (env, te, ty) =
       match e with
-      | (_, Call (call_type, e, explicit_targs, el, unpacked_element)) ->
+      | (_, Call (e, explicit_targs, el, unpacked_element)) ->
         let env = Env.open_tyvars env p in
         (fun (env, te, ty) ->
           (Typing_solver.close_tyvars_and_solve env Errors.unify_error, te, ty))
@@ -2404,7 +2400,6 @@ and expr_
              ~expected
              env
              p
-             call_type
              e
              explicit_targs
              el
@@ -4077,18 +4072,13 @@ and dispatch_call
     ~is_using_clause
     p
     env
-    call_type
     ((fpos, fun_expr) as e)
     explicit_targs
     el
     unpacked_element
     ~in_suspend =
   let make_call env te tal tel typed_unpack_element ty =
-    make_result
-      env
-      p
-      (Aast.Call (call_type, te, tal, tel, typed_unpack_element))
-      ty
+    make_result env p (Aast.Call (te, tal, tel, typed_unpack_element)) ty
   in
   (* TODO: Avoid Tany annotations in TAST by eliminating `make_call_special` *)
   let make_call_special env id tel ty =
@@ -4766,7 +4756,6 @@ and dispatch_call
       ty
   (* Call instance method *)
   | Obj_get (e1, (pos_id, Id m), nullflavor) ->
-    let is_method = Aast_defs.equal_call_type call_type Cnormal in
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let nullsafe =
       match nullflavor with
@@ -4776,7 +4765,7 @@ and dispatch_call
     let (env, (tfty, tal)) =
       TOG.obj_get
         ~obj_pos:(fst e1)
-        ~is_method
+        ~is_method:true
         ~nullsafe
         ~coerce_from_ty:None
         ~explicit_targs
@@ -6370,8 +6359,7 @@ and condition_nullity ~nonnull (env : env) te =
   (* case where `Shapes::idx(...)` must be made null/non-null *)
   | ( _,
       Aast.Call
-        ( _,
-          (_, Aast.Class_const ((_, Aast.CI (_, shapes)), (_, idx))),
+        ( (_, Aast.Class_const ((_, Aast.CI (_, shapes)), (_, idx))),
           _,
           [shape; field],
           _ ) )
@@ -6416,12 +6404,12 @@ and condition
   | Aast.Expr_list [] -> (env, Local_id.Set.empty)
   | Aast.Expr_list [x] -> condition env tparamet x
   | Aast.Expr_list (_ :: xs) -> condition env tparamet (pty, Aast.Expr_list xs)
-  | Aast.Call (Cnormal, (_, Aast.Id (_, func)), _, [param], None)
+  | Aast.Call ((_, Aast.Id (_, func)), _, [param], None)
     when String.equal SN.PseudoFunctions.isset func
          && tparamet
          && not (Env.is_strict env) ->
     condition_isset env param
-  | Aast.Call (Cnormal, (_, Aast.Id (_, func)), _, [te], None)
+  | Aast.Call ((_, Aast.Id (_, func)), _, [te], None)
     when String.equal SN.StdlibFunctions.is_null func ->
     condition_nullity ~nonnull:(not tparamet) env te
   | Aast.Binop ((Ast_defs.Eqeq | Ast_defs.Eqeqeq), (_, Aast.Null), e)
@@ -6487,21 +6475,20 @@ and condition
           condition env tparamet e2)
     in
     (env, Local_id.Set.union lset1 lset2)
-  | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], None)
+  | Aast.Call (((p, _), Aast.Id (_, f)), _, [lv], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_dict_or_darray ->
     safely_refine_is_array env `HackDictOrDArray p f lv
-  | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], None)
+  | Aast.Call (((p, _), Aast.Id (_, f)), _, [lv], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_vec_or_varray ->
     safely_refine_is_array env `HackVecOrVArray p f lv
-  | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], None)
+  | Aast.Call (((p, _), Aast.Id (_, f)), _, [lv], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_any_array ->
     safely_refine_is_array env `AnyArray p f lv
-  | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], None)
+  | Aast.Call (((p, _), Aast.Id (_, f)), _, [lv], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_php_array ->
     safely_refine_is_array env `PHPArray p f lv
   | Aast.Call
-      ( Cnormal,
-        (_, Aast.Class_const ((_, Aast.CI (_, class_name)), (_, method_name))),
+      ( (_, Aast.Class_const ((_, Aast.CI (_, class_name)), (_, method_name))),
         _,
         [shape; field],
         None )

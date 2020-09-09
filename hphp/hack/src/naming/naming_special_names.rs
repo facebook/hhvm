@@ -405,7 +405,7 @@ pub mod attribute_kinds {
 
     lazy_static! {
         pub static ref PLAIN_ENGLISH_MAP: HashMap<&'static str, &'static str> =
-            PLAIN_ENGLISH.iter().cloned().collect();
+            PLAIN_ENGLISH.iter().copied().collect();
     }
 }
 
@@ -497,23 +497,24 @@ pub mod pseudo_functions {
 
     pub const DIE: &str = "\\die";
 
+    pub static ALL_PSEUDO_FUNCTIONS: &[&str] = &[
+        ISSET,
+        UNSET,
+        HH_SHOW,
+        HH_SHOW_ENV,
+        HH_LOG_LEVEL,
+        HH_FORCE_SOLVE,
+        HH_LOOP_FOREVER,
+        ASSERT,
+        ECHO,
+        EMPTY,
+        EXIT,
+        DIE,
+    ];
+
     lazy_static! {
-        pub static ref ALL_PSEUDO_FUNCTIONS: Vec<&'static str> = vec![
-            ISSET,
-            UNSET,
-            HH_SHOW,
-            HH_SHOW_ENV,
-            HH_LOG_LEVEL,
-            HH_FORCE_SOLVE,
-            HH_LOOP_FOREVER,
-            ASSERT,
-            ECHO,
-            EMPTY,
-            EXIT,
-            DIE,
-        ];
         static ref PSEUDO_SET: HashSet<&'static str> =
-            ALL_PSEUDO_FUNCTIONS.iter().cloned().collect();
+            ALL_PSEUDO_FUNCTIONS.iter().copied().collect();
     }
 
     pub fn is_pseudo_function(x: &str) -> bool {
@@ -713,22 +714,23 @@ pub mod pseudo_consts {
 
     pub const EXIT: &str = "\\exit";
 
+    pub static ALL_PSEUDO_CONSTS: &[&str] = &[
+        G__LINE__,
+        G__CLASS__,
+        G__TRAIT__,
+        G__FILE__,
+        G__DIR__,
+        G__FUNCTION__,
+        G__METHOD__,
+        G__NAMESPACE__,
+        G__COMPILER_FRONTEND__,
+        G__FUNCTION_CREDENTIAL__,
+        DIE,
+        EXIT,
+    ];
+
     lazy_static! {
-        static ref ALL_PSEUDO_CONSTS: Vec<&'static str> = vec![
-            G__LINE__,
-            G__CLASS__,
-            G__TRAIT__,
-            G__FILE__,
-            G__DIR__,
-            G__FUNCTION__,
-            G__METHOD__,
-            G__NAMESPACE__,
-            G__COMPILER_FRONTEND__,
-            G__FUNCTION_CREDENTIAL__,
-            DIE,
-            EXIT,
-        ];
-        static ref PSEUDO_SET: HashSet<&'static str> = ALL_PSEUDO_CONSTS.iter().cloned().collect();
+        static ref PSEUDO_SET: HashSet<&'static str> = ALL_PSEUDO_CONSTS.iter().copied().collect();
     }
 
     pub fn is_pseudo_const(x: &str) -> bool {
@@ -832,17 +834,18 @@ pub mod superglobals {
     use std::collections::HashSet;
     pub const GLOBALS: &str = "$GLOBALS";
 
+    pub static SUPERGLOBALS: &[&str] = &[
+        "$_SERVER",
+        "$_GET",
+        "$_POST",
+        "$_FILES",
+        "$_COOKIE",
+        "$_REQUEST",
+        "$_ENV",
+    ];
+
     lazy_static! {
-        static ref SUPERGLOBALS: Vec<&'static str> = vec![
-            "$_SERVER",
-            "$_GET",
-            "$_POST",
-            "$_FILES",
-            "$_COOKIE",
-            "$_REQUEST",
-            "$_ENV"
-        ];
-        static ref SUPERGLOBALS_SET: HashSet<&'static str> = SUPERGLOBALS.iter().cloned().collect();
+        static ref SUPERGLOBALS_SET: HashSet<&'static str> = SUPERGLOBALS.iter().copied().collect();
     }
     pub fn is_superglobal(x: &str) -> bool {
         SUPERGLOBALS_SET.contains(x)
@@ -855,19 +858,21 @@ pub mod superglobals {
 pub mod ppl_functions {
     use lazy_static::lazy_static;
     use std::collections::HashSet;
+
+    pub static ALL_RESERVED: &[&str] = &[
+        "sample",
+        "\\sample",
+        "factor",
+        "\\factor",
+        "observe",
+        "\\observe",
+        "condition",
+        "\\condition",
+        "sample_model",
+        "\\sample_model",
+    ];
+
     lazy_static! {
-        static ref ALL_RESERVED: Vec<&'static str> = vec!(
-            "sample",
-            "\\sample",
-            "factor",
-            "\\factor",
-            "observe",
-            "\\observe",
-            "condition",
-            "\\condition",
-            "sample_model",
-            "\\sample_model"
-        );
         static ref ALL_RESERVED_SET: HashSet<&'static str> = ALL_RESERVED.iter().cloned().collect();
     }
     pub fn is_reserved(x: &str) -> bool {

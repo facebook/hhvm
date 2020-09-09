@@ -5,5 +5,5 @@ function main() {
   require "nested2/inner.inc";
 
   var_dump(fun('main'));
-  inner2();
+  (new C2)->inner();
 }

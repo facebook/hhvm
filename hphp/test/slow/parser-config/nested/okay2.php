@@ -6,6 +6,6 @@ function main() {
   require "nested3/inner.inc";
 
   var_dump(fun('main'));
-  inner();
-  inner3();
+  (new C)->inner();
+  (new C3)->inner();
 }

@@ -38,7 +38,7 @@ def out2expectf_main():
             test_file = args.test_directory / pl.Path(str(test) + '.out')
             data = open(test_file).read()
         except IOError:
-            print("%s.out doesn't exist, skipping" % test_file)
+            print("%s doesn't exist, skipping" % test_file)
             continue
 
         try:

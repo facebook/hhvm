@@ -61,9 +61,6 @@ let assert_opts_equal caml rust =
     Hhbc_options.(phpism_disable_static_closures caml)
     Hhbc_options.(phpism_disable_static_closures rust);
   assert_equal
-    Hhbc_options.(emit_func_pointers caml)
-    Hhbc_options.(emit_func_pointers rust);
-  assert_equal
     Hhbc_options.(emit_cls_meth_pointers caml)
     Hhbc_options.(emit_cls_meth_pointers rust);
   assert_equal
@@ -293,9 +290,6 @@ let test_all_overrides_json_only _ =
   \"hhvm.emit_cls_meth_pointers\": {
     \"global_value\": false
   },
-  \"hhvm.emit_func_pointers\": {
-    \"global_value\": false
-  },
  \"hhvm.emit_inst_meth_pointers\": {
     \"global_value\": false
   },
@@ -425,8 +419,6 @@ module CliArgOverrides = struct
 
   let hhvm'emit_cls_meth_pointers = "-vhhvm.emit_cls_meth_pointers=0"
 
-  let hhvm'emit_func_pointers = "-vhhvm.emit_func_pointers=0"
-
   let hhvm'emit_inst_meth_pointers = "-vhhvm.emit_inst_meth_pointers=0"
 
   let hhvm'emit_meth_caller_func_pointers =
@@ -526,7 +518,6 @@ let test_all_overrides_cli_only _ =
       hhvm'array_provenance;
       (* hhvm'dynamic_invoke_functions; *)
       hhvm'emit_cls_meth_pointers;
-      hhvm'emit_func_pointers;
       hhvm'emit_inst_meth_pointers;
       hhvm'emit_meth_caller_func_pointers;
       hhvm'emit_class_pointers;

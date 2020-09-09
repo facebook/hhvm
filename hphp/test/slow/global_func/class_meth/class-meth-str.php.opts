@@ -1,3 +1,2 @@
--vEval.EmitFuncPointers=1
 -vEval.EmitClsMethPointers=1
 -vEval.IsCompatibleClsMethType=1

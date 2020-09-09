@@ -5,5 +5,5 @@ function main() {
   require __DIR__."/../nested2/inner.inc";
 
   var_dump(fun('main'));
-  inner2();
+  (new C2)->inner();
 }

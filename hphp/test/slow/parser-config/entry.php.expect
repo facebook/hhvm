@@ -1,4 +1,16 @@
 function(main)
-string(5) "inner"
-function(inner2)
-string(6) "inner3"
+varray(2) {
+  object(C) (0) {
+  }
+  string(5) "inner"
+}
+varray(2) {
+  object(C2) (0) {
+  }
+  function(C2::inner)
+}
+varray(2) {
+  object(C3) (0) {
+  }
+  string(5) "inner"
+}

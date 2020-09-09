@@ -2873,31 +2873,23 @@ fn emit_hh_fun(
     fname: &str,
 ) -> Result<InstrSeq> {
     let fname = string_utils::strip_global_ns(fname);
-    if e.options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::EMIT_FUNC_POINTERS)
-    {
-        if has_non_tparam_generics_targs(env, targs) {
-            let generics = emit_reified_targs(
-                e,
-                env,
-                pos,
-                targs
-                    .iter()
-                    .map(|targ| &targ.1)
-                    .collect::<Vec<_>>()
-                    .as_slice(),
-            )?;
-            Ok(InstrSeq::gather(vec![
-                generics,
-                instr::resolve_rfunc(fname.to_owned().into()),
-            ]))
-        } else {
-            Ok(instr::resolve_func(fname.to_owned().into()))
-        }
+    if has_non_tparam_generics_targs(env, targs) {
+        let generics = emit_reified_targs(
+            e,
+            env,
+            pos,
+            targs
+                .iter()
+                .map(|targ| &targ.1)
+                .collect::<Vec<_>>()
+                .as_slice(),
+        )?;
+        Ok(InstrSeq::gather(vec![
+            generics,
+            instr::resolve_rfunc(fname.to_owned().into()),
+        ]))
     } else {
-        Ok(instr::string(fname))
+        Ok(instr::resolve_func(fname.to_owned().into()))
     }
 }
 

@@ -1,2 +1,6 @@
 function(main)
-function(inner2)
+varray(2) {
+  object(C2) (0) {
+  }
+  function(C2::inner)
+}

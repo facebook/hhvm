@@ -1,5 +1,7 @@
 <?hh
 
-function inner2() {
-  var_dump(fun("inner2"));
+class C2 {
+  function inner() {
+    var_dump(inst_meth($this, __FUNCTION__));
+  }
 }

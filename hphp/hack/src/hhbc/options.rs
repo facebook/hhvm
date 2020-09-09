@@ -14,8 +14,8 @@
 //! The options are grouped their common prefix in their canonical names,
 //! which is specified via macros `prefix_all` or `prefixed_flags`, respectively.
 //! E.g., `prefix_all("hhvm.")`` or `prefixed_flags(..., "hhvm.", ...)` ensure that
-//! an argument "emit_func_pointers" or flag LOG_EXTERN_COMPILER_PERF gets the
-//! canonical name "hhvm.emit_func_pointers" or "hhvm.log_extern_compiler_perf", respectively.
+//! an argument "emit_cls_meth_pointers" or flag LOG_EXTERN_COMPILER_PERF gets the
+//! canonical name "hhvm.emit_cls_meth_pointers" or "hhvm.log_extern_compiler_perf", respectively.
 //!
 //! Non-canonical names (used when parsing from CLI) are specified by:
 //! - `options_cli::CANON_BY_ALIAS.get("some_alias")`; and
@@ -29,7 +29,7 @@
 //! ```
 //! let opts: Options = Options::default(); // JSON key
 //! opts.doc_root.get();                    // doc_root
-//! opts.hhvm.emit_func_pointers.set(42);   // hhvm.emit_func_pointers
+//! opts.hhvm.emit_cls_meth_pointers.set(42); // hhvm.emit_cls_meth_pointers
 //! opts.hhvm_flags.contains(
 //!     HhvmFlags::RX_IS_ENABLED);          // hhvm.rx_is_enabled
 //! opts.hhvm.hack_lang_flags.set(
@@ -162,7 +162,6 @@ prefixed_flags!(
     "hhvm.",
     ARRAY_PROVENANCE,
     EMIT_CLS_METH_POINTERS,
-    EMIT_FUNC_POINTERS,
     EMIT_INST_METH_POINTERS,
     EMIT_METH_CALLER_FUNC_POINTERS,
     ENABLE_INTRINSICS_EXTENSION,
@@ -176,7 +175,6 @@ prefixed_flags!(
 impl Default for HhvmFlags {
     fn default() -> HhvmFlags {
         HhvmFlags::EMIT_CLS_METH_POINTERS
-            | HhvmFlags::EMIT_FUNC_POINTERS
             | HhvmFlags::EMIT_INST_METH_POINTERS
             | HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS
     }
@@ -680,9 +678,6 @@ mod tests {
     "global_value": "0"
   },
   "hhvm.emit_cls_meth_pointers": {
-    "global_value": false
-  },
-  "hhvm.emit_func_pointers": {
     "global_value": true
   },
   "hhvm.emit_inst_meth_pointers": {
@@ -790,7 +785,7 @@ mod tests {
                 m.insert("bar".to_owned(), "baz".to_owned());
                 m.into()
             }),
-            flags: HhvmFlags::EMIT_FUNC_POINTERS,
+            flags: HhvmFlags::EMIT_CLS_METH_POINTERS,
             ..Default::default()
         });
         assert_eq!(HHVM_1, serde_json::to_string_pretty(&hhvm).unwrap(),);
@@ -801,7 +796,7 @@ mod tests {
         let j = serde_json::from_str(
             r#"{
             "hhvm.aliased_namespaces": { "global_value": {"foo": "bar"} },
-            "hhvm.emit_func_pointers": { "global_value": "true" },
+            "hhvm.emit_cls_meth_pointers": { "global_value": "true" },
             "hhvm.jit_enable_rename_function": { "global_value": 1 },
             "hhvm.log_extern_compiler_perf": { "global_value": false },
             "hhvm.array_provenance": { "global_value": "1" }
@@ -810,7 +805,7 @@ mod tests {
         .unwrap();
         let hhvm: Hhvm = serde_json::from_value(j).unwrap();
         assert!(hhvm.flags.contains(
-            HhvmFlags::EMIT_FUNC_POINTERS
+            HhvmFlags::EMIT_CLS_METH_POINTERS
                 | HhvmFlags::JIT_ENABLE_RENAME_FUNCTION
                 | HhvmFlags::ARRAY_PROVENANCE
         ));
@@ -821,25 +816,25 @@ mod tests {
     fn test_hhvm_json_de_defaults_overrideable() {
         let hhvm: Hhvm = serde_json::value::from_value(json!({})).unwrap();
         assert_eq!(hhvm.flags, HhvmFlags::default());
-        assert!(hhvm.flags.contains(HhvmFlags::EMIT_FUNC_POINTERS));
+        assert!(hhvm.flags.contains(HhvmFlags::EMIT_CLS_METH_POINTERS));
 
         // now override a true-by-default option with a false value
         let hhvm: Hhvm = serde_json::value::from_value(json!({
-            "hhvm.emit_func_pointers": { "global_value": "false" },
+            "hhvm.emit_cls_meth_pointers": { "global_value": "false" },
         }))
         .unwrap();
-        assert!(!hhvm.flags.contains(HhvmFlags::EMIT_FUNC_POINTERS));
+        assert!(!hhvm.flags.contains(HhvmFlags::EMIT_CLS_METH_POINTERS));
     }
 
     #[test]
     fn test_hhvm_flags_alias_json_de() {
         // sanity check for defaults (otherwise this test doesn't do much!)
         assert!(!HhvmFlags::default().contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION));
-        assert!(HhvmFlags::default().contains(HhvmFlags::EMIT_FUNC_POINTERS));
+        assert!(HhvmFlags::default().contains(HhvmFlags::EMIT_CLS_METH_POINTERS));
 
         let hhvm: Hhvm = serde_json::from_str(
             r#"{ "eval.jitenablerenamefunction": { "global_value": "true" },
-                 "eval.emitfuncpointers": { "global_value": "false" } }"#,
+                 "eval.emitclsmethpointers": { "global_value": "false" } }"#,
         )
         .unwrap();
         assert!(
@@ -851,7 +846,7 @@ mod tests {
         assert!(
             !hhvm // verify a true-by-default flag was parsed as false
                 .flags
-                .contains(HhvmFlags::EMIT_FUNC_POINTERS)
+                .contains(HhvmFlags::EMIT_CLS_METH_POINTERS)
         );
     }
 
@@ -859,9 +854,9 @@ mod tests {
     fn test_empty_flag_treated_as_false_json_de() {
         // verify a true-by-default flag was parsed as false if ""
         let hhvm: Hhvm =
-            serde_json::from_str(r#"{ "hhvm.emit_func_pointers": { "global_value": "" } }"#)
+            serde_json::from_str(r#"{ "hhvm.emit_cls_meth_pointers": { "global_value": "" } }"#)
                 .unwrap();
-        assert!(!hhvm.flags.contains(HhvmFlags::EMIT_FUNC_POINTERS));
+        assert!(!hhvm.flags.contains(HhvmFlags::EMIT_CLS_METH_POINTERS));
     }
 
     #[test]
@@ -1162,8 +1157,7 @@ bitflags! {
         // No longer using bits 16-21.
         const DISABLE_NONTOPLEVEL_DECLARATIONS = 1 << 22;
         const DISABLE_STATIC_CLOSURES = 1 << 23;
-        // No longer using bit 24.
-        const EMIT_FUNC_POINTERS = 1 << 25;
+        // No longer using bits 24-25.
         const EMIT_CLS_METH_POINTERS = 1 << 26;
         const EMIT_INST_METH_POINTERS = 1 << 27;
         const EMIT_METH_CALLER_FUNC_POINTERS = 1 << 28;

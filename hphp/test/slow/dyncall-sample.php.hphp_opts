@@ -2,5 +2,4 @@
 -vRuntime.Eval.ForbidDynamicCallsToClsMeth=2
 -vRuntime.Eval.ForbidDynamicCallsToInstMeth=2
 -vRuntime.Eval.ForbidDynamicConstructs=2
--vRuntime.Eval.EmitFuncPointers=1
 -vRuntime.Eval.EmitClsMethPointers=1

@@ -7,7 +7,7 @@ function main() {
   require "nested/nested3/inner.inc";
 
   var_dump(fun('main'));
-  inner();
-  inner2();
-  inner3();
+  (new C)->inner();
+  (new C2)->inner();
+  (new C3)->inner();
 }

@@ -22,8 +22,7 @@ namespace HPHP {
 
 #define HAC_CHECK_OPTS                         \
   HC(Compare, compare)                         \
-  HC(ArrayKeyCast, array_key_cast)             \
-  HC(ArrayPlus, array_plus)
+  HC(ArrayKeyCast, array_key_cast)
 
 ///////////////////////////////////////////////////////////////////////////////
 }

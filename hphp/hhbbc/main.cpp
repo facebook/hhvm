@@ -282,7 +282,6 @@ std::vector<SString> load_input(F&& fun) {
   RO::EvalJitEnableRenameFunction = gd.EnableRenameFunction;
   RO::EvalHackArrCompatNotices =
     RO::EvalHackArrCompatCheckCompare =
-    RO::EvalHackArrCompatCheckArrayPlus =
       gd.HackArrCompatNotices;
   RO::EvalForbidDynamicCallsToFunc = gd.ForbidDynamicCallsToFunc;
   RO::EvalForbidDynamicCallsToClsMeth =

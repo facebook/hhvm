@@ -74,26 +74,27 @@ struct RepoOptions {
 // (Type, HDFName, DV)
 // (N=no-prefix, P=PHP7, E=Eval, H=Hack.Lang)
 #define PARSERFLAGS() \
-  N(StringMap,      AliasedNamespaces,              StringMap{})      \
-  P(bool,           UVS,                            s_PHP7_master)    \
-  P(bool,           LTRAssign,                      s_PHP7_master)    \
-  H(bool,           EnableCoroutines,               true)             \
-  H(bool,           Hacksperimental,                false)            \
-  H(bool,           DisableLvalAsAnExpression,      false)            \
-  H(bool,           AllowNewAttributeSyntax,        false)            \
-  H(bool,           ConstDefaultFuncArgs,           false)            \
-  H(bool,           ConstStaticProps,               false)            \
-  H(bool,           AbstractStaticProps,            false)            \
-  H(bool,           DisableUnsetClassConst,         false)            \
-  H(bool,           DisallowFuncPtrsInConstants,    false)            \
-  E(bool,           EmitFuncPointers,               true)             \
-  E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
-  H(bool,           AllowUnstableFeatures,          false)            \
-  H(bool,           EnableXHPClassModifier,         true)             \
-  H(bool,           DisableXHPElementMangling,      true)             \
-  H(bool,           DisableArray,                   true)             \
-  H(bool,           DisableArrayCast,               true)             \
-  H(bool,           DisableArrayTypehint,           true)             \
+  N(StringMap,      AliasedNamespaces,                StringMap{})    \
+  P(bool,           UVS,                              s_PHP7_master)  \
+  P(bool,           LTRAssign,                        s_PHP7_master)  \
+  H(bool,           EnableCoroutines,                 true)           \
+  H(bool,           Hacksperimental,                  false)          \
+  H(bool,           DisableLvalAsAnExpression,        false)          \
+  H(bool,           AllowNewAttributeSyntax,          false)          \
+  H(bool,           ConstDefaultFuncArgs,             false)          \
+  H(bool,           ConstStaticProps,                 false)          \
+  H(bool,           AbstractStaticProps,              false)          \
+  H(bool,           DisableUnsetClassConst,           false)          \
+  H(bool,           DisallowFuncPtrsInConstants,      false)          \
+  E(bool,           EmitFuncPointers,                 true)           \
+  E(bool,           EmitInstMethPointers,             false)          \
+  H(bool,           AllowUnstableFeatures,            false)          \
+  H(bool,           EnableXHPClassModifier,           true)           \
+  H(bool,           DisableXHPElementMangling,        true)           \
+  H(bool,           DisableArray,                     true)           \
+  H(bool,           DisableArrayCast,                 true)           \
+  H(bool,           DisableArrayTypehint,             true)           \
+  H(bool,           EnableFirstClassFunctionPointers, false)          \
   /**/
 
   /**/

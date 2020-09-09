@@ -324,7 +324,7 @@ let col_width_for_highlighted (position_groups : position_group list) =
     let line_nums =
       List.map position_groups ~f:(fun pg -> pg.messages |> message_positions)
       |> List.concat_no_order
-      |> List.map ~f:Pos.line
+      |> List.map ~f:Pos.end_line
     in
     List.max_elt line_nums Int.compare
     |> Option.value ~default:0

@@ -772,18 +772,11 @@ public:
 
   /*
    * Return a copy of this type with an ArraySpec for the given bespoke index
-   *   TVanillaArr.narrowToBespokeLayout(<some layout>) == TArr
-   *   (TVec|TInt).narrowToBespokeLayout(<some layout>) == TVec=Bespoke(<some layout>)|TIn
+   *   TVanillaArr.narrowToBespokeLayout(<some layout>) == TBottom
+   *   TVec.narrowToBespokeLayout(<some layout>) == TVec=Bespoke(<some layout>)
+   *   (TVec|TInt).narrowToBespokeLayout(<some layout>) == TVec=Bespoke(<some layout>)|TInt
    */
   Type narrowToBespokeLayout(BespokeLayout) const;
-
-  /*
-   * Return a copy of this type without a vanilla ArraySpec. Examples:
-   *   TVanillaArr.widenToBespoke()        == TArr
-   *   (TVanillaVec|TInt).widenToBespoke() == TVec|TInt
-   *   TPackedArr.widenToBespoke()         == TArr={PackedKind|Bespoke}
-   */
-  Type widenToBespoke() const;
 
   /*
    * Return a copy of this Type with the specialization dropped.

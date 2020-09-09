@@ -545,10 +545,9 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
     if (!allowBespokeArrayLikes()) return t;
     if (inst->isLayoutPreserving()) {
       assertx(inst->src(0)->type() <= TArrLike);
-      return inst->src(0)->type().arrSpec().vanilla() ? t.narrowToVanilla()
-                                                      : t.widenToBespoke();
+      return inst->src(0)->type().arrSpec().vanilla() ? t.narrowToVanilla() : t;
     } else if (inst->isLayoutAgnostic()) {
-      return t.widenToBespoke();
+      return t;
     } else {
       return t.narrowToVanilla();
     }

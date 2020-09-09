@@ -61,10 +61,9 @@ struct ArraySpec {
   explicit ArraySpec(BespokeLayout layout);
 
   /*
-   * Set or unset the vanilla bits on an ArraySpec.
+   * Set the vanilla bits on an ArraySpec.
    */
   ArraySpec narrowToVanilla() const;
-  ArraySpec widenToBespoke() const;
 
   /*
    * Assign the bespoke layout of the ArraySpec, if it is possible

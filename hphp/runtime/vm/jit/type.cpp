@@ -87,12 +87,6 @@ Type Type::narrowToBespokeLayout(BespokeLayout layout) const {
   return Type(*this, newSpec);
 }
 
-Type Type::widenToBespoke() const {
-  if (!supports(SpecKind::Array)) return *this;
-  if (supports(SpecKind::Class) || supports(SpecKind::Record)) return *this;
-  return Type(*this, arrSpec().widenToBespoke());
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 const ArrayData* Type::arrLikeVal() const {
@@ -963,7 +957,11 @@ bool ratArrIsCounted(const RepoAuthType::Array* arr, const Class* ctx) {
   return false;
 }
 
-Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
   using T = RepoAuthType::Tag;
   switch (ty.tag()) {
     case T::OptBool:        return TBool       | TInitNull;
@@ -1145,15 +1143,6 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
   }
   not_reached();
 }
-
-}
-
-Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
-  auto const result = typeFromRATImpl(ty, ctx);
-  return allowBespokeArrayLikes() ? result.widenToBespoke() : result;
-}
-
-//////////////////////////////////////////////////////////////////////
 
 Type typeFromPropTC(const HPHP::TypeConstraint& tc,
                     const Class* propCls,

@@ -223,12 +223,6 @@ inline ArraySpec ArraySpec::narrowToBespokeLayout(BespokeLayout layout) const {
   return result;
 }
 
-inline ArraySpec ArraySpec::widenToBespoke() const {
-  auto result = *this;
-  result.m_sort = Sort::Top;
-  return result;
-}
-
 inline void ArraySpec::setType(const RepoAuthType::Array* adjusted) {
   assertx(type() && adjusted);
   m_ptr = reinterpret_cast<uintptr_t>(adjusted);

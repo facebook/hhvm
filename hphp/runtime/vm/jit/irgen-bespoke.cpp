@@ -54,24 +54,12 @@ Locations getVanillaLocationsForBuiltin(const IRGS& env, SrcKey sk) {
   }
 }
 
-Locations getVanillaLocationsForCall(const IRGS& env, SrcKey sk) {
-  auto const soff = env.irb->fs().bcSPOff();
-  auto const fca = getImm(sk.pc(), 0).u_FCA;
-  if (!fca.hasUnpack()) return {};
-  auto const input = getInstrInfo(sk.op()).in;
-  auto const extra = ((input & InstrFlags::Stack1) ? 1 : 0) +
-                     ((input & InstrFlags::Stack2) ? 1 : 0);
-  return {Location::Stack{soff - (fca.hasGenerics() ? 1 : 0) - extra}};
-}
-
 Locations getVanillaLocations(const IRGS& env, SrcKey sk) {
   auto const op = sk.op();
   auto const soff = env.irb->fs().bcSPOff();
 
   if (op == Op::FCallBuiltin || op == Op::NativeImpl) {
     return getVanillaLocationsForBuiltin(env, sk);
-  } else if (isFCall(op)) {
-    return getVanillaLocationsForCall(env, sk);
   } else if (isComparisonOp(op)) {
     return {Location::Stack{soff}, Location::Stack{soff - 1}};
   } else if (isMemberDimOp(op) || isMemberFinalOp(op)) {

@@ -13,7 +13,7 @@ use emit_type_constant_rust as emit_type_constant;
 use env::{emitter::Emitter, local, Env, Flags as EnvFlags};
 use hhas_symbol_refs_rust::IncludePath;
 use hhbc_ast_rust::*;
-use hhbc_id_rust::{class, function, method, prop, r#const, Id};
+use hhbc_id_rust::{class, r#const, function, method, prop, Id};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{
     instr, unrecoverable,
@@ -4690,12 +4690,14 @@ fn emit_base_(
         mode
     };
     let local_temp_kind = get_local_temp_kind(env, true, inout_param_info, Some(expr));
-    let emit_default = |e: &mut Emitter,
-                        base_instrs,
-                        cls_instrs,
-                        setup_instrs,
-                        base_stack_size,
-                        cls_stack_size| {
+    let emit_default = |
+        e: &mut Emitter,
+        base_instrs,
+        cls_instrs,
+        setup_instrs,
+        base_stack_size,
+        cls_stack_size,
+    | {
         match local_temp_kind {
             Some(local_temp) => {
                 let local = e.local_gen_mut().get_unnamed();

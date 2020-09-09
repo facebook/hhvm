@@ -247,8 +247,8 @@ fn make_memoize_method_with_params_code(
     let deprecation_body =
         emit_body::emit_deprecation_info(args.scope, args.deprecation_info, emitter.systemlib())?;
     let (begin_label, default_value_setters) =
-        // Default value setters belong in the wrapper method not in the original method
-        emit_param::emit_param_default_value_setter(emitter, env, false, pos, hhas_params)?;
+    // Default value setters belong in the wrapper method not in the original method
+     emit_param::emit_param_default_value_setter(emitter, env, false, pos, hhas_params)?;
     let fcall_args = {
         let mut fcall_flags = FcallFlags::default();
         if args.flags.contains(Flags::IS_REFIED) {

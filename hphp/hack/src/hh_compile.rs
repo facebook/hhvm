@@ -247,11 +247,12 @@ fn main() -> anyhow::Result<()> {
 
         let files: Vec<_> = match &opts.input_file_list {
             Some(filename) => read_file_list(&filename)?.collect(),
-            None => vec![opts
-                .filename
-                .as_ref()
-                .cloned()
-                .ok_or_else(|| anyhow! {"TODO(hrust) support stdin"})?],
+            None => vec![
+                opts.filename
+                    .as_ref()
+                    .cloned()
+                    .ok_or_else(|| anyhow! {"TODO(hrust) support stdin"})?,
+            ],
         };
 
         files.par_iter().try_for_each(|f| {

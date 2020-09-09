@@ -87,11 +87,7 @@ fn emit_program_<'p>(
     if !emitter.for_debugger_eval {
         let contains_toplevel_code = prog.iter().find_map(|d| {
             if let Some(Tast::Stmt(pos, s_)) = d.as_stmt() {
-                if s_.is_markup() {
-                    None
-                } else {
-                    Some(pos)
-                }
+                if s_.is_markup() { None } else { Some(pos) }
             } else {
                 None
             }

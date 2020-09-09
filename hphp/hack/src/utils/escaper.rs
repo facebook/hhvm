@@ -145,11 +145,7 @@ fn escape_byte_by<F: Fn(u8) -> Option<Cow<'static, [u8]>>>(cow: Cow<[u8]>, f: F)
             _ => {}
         }
     }
-    if copied {
-        c.into()
-    } else {
-        cow
-    }
+    if copied { c.into() } else { cow }
 }
 
 fn codepoint_to_utf8(n: u32, output: &mut impl GrowableBytes) -> Result<(), InvalidString> {

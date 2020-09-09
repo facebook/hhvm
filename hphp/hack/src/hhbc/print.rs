@@ -263,11 +263,7 @@ fn print_include_region<W: Write>(
         option(w, p.to_str(), |w, p: &str| write!(w, "\n  {}", p))
     }
     fn print_if_exists<W: Write>(w: &mut W, p: &Path) -> Result<(), W::Error> {
-        if p.exists() {
-            print_path(w, p)
-        } else {
-            Ok(())
-        }
+        if p.exists() { print_path(w, p) } else { Ok(()) }
     }
     fn print_include<W: Write>(
         ctx: &mut Context,
@@ -1168,11 +1164,7 @@ fn print_instructions<W: Write>(
 }
 
 fn if_then<F: FnOnce() -> R, R>(cond: bool, f: F) -> Option<R> {
-    if cond {
-        Some(f())
-    } else {
-        None
-    }
+    if cond { Some(f()) } else { None }
 }
 
 fn print_fcall_args<W: Write>(

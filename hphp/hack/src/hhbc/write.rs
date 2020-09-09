@@ -45,11 +45,7 @@ pub trait Write {
     fn write_fmt(&mut self, fmt: Arguments) -> Result<(), Self::Error>;
 
     fn write_if(&mut self, cond: bool, s: impl AsRef<str>) -> Result<(), Self::Error> {
-        if cond {
-            self.write(s)
-        } else {
-            Ok(())
-        }
+        if cond { self.write(s) } else { Ok(()) }
     }
 }
 

@@ -64,11 +64,7 @@ pub fn is_xhp(name: &str) -> bool {
 }
 
 pub fn clean(s: &str) -> &str {
-    if is_xhp(s) {
-        strip_colon(s)
-    } else {
-        s
-    }
+    if is_xhp(s) { strip_colon(s) } else { s }
 }
 
 fn strip_colon(s: &str) -> &str {
@@ -150,11 +146,7 @@ pub fn prefix_namespace(n: &str, s: &str) -> String {
 }
 
 pub fn strip_global_ns(s: &str) -> &str {
-    if s.starts_with("\\") {
-        &s[1..]
-    } else {
-        s
-    }
+    if s.starts_with("\\") { &s[1..] } else { s }
 }
 
 // Strip zero or more chars followed by a backslash
@@ -177,11 +169,7 @@ pub fn strip_type_list(s: &str) -> Cow<str> {
 
 pub fn cmp(s1: &str, s2: &str, case_sensitive: bool, ignore_ns: bool) -> bool {
     fn canon(s: &str, ignore_ns: bool) -> &str {
-        if ignore_ns {
-            strip_ns(s)
-        } else {
-            s
-        }
+        if ignore_ns { strip_ns(s) } else { s }
     }
 
     let s1 = canon(s1, ignore_ns);

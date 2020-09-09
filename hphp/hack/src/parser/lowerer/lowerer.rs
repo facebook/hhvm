@@ -1480,9 +1480,10 @@ where
     ) -> Result<ast::Expr_> {
         env.check_stack_limit();
         use ast::Expr as E;
-        let split_args_vararg = |arg_list_node: &Syntax<T, V>,
-                                 e: &mut Env|
-         -> Result<(Vec<ast::Expr>, Option<ast::Expr>)> {
+        let split_args_vararg = |
+            arg_list_node: &Syntax<T, V>,
+            e: &mut Env,
+        | -> Result<(Vec<ast::Expr>, Option<ast::Expr>)> {
             let mut arg_list: Vec<_> = arg_list_node.syntax_node_to_list_skip_separator().collect();
             if let Some(last_arg) = arg_list.last() {
                 if let DecoratedExpression(c) = &last_arg.syntax {
@@ -1529,11 +1530,12 @@ where
                 let (args, varargs) = split_args_vararg(args, e)?;
                 Ok(E_::mk_call(recv, vec![], args, varargs))
             };
-        let p_obj_get = |recv: &Syntax<T, V>,
-                         op: &Syntax<T, V>,
-                         name: &Syntax<T, V>,
-                         e: &mut Env|
-         -> Result<ast::Expr_> {
+        let p_obj_get = |
+            recv: &Syntax<T, V>,
+            op: &Syntax<T, V>,
+            name: &Syntax<T, V>,
+            e: &mut Env,
+        | -> Result<ast::Expr_> {
             if recv.is_object_creation_expression() && !e.codegen() {
                 Self::raise_parsing_error(recv, e, &syntax_error::invalid_constructor_method_call);
             }
@@ -2476,11 +2478,13 @@ where
     ) -> Result<Vec<Either<Syntax<T, V>, &'b Syntax<T, V>>>> {
         let nodes = nodes.syntax_node_to_list_skip_separator();
         let mut state = (None, None, vec![]); // (start, end, result)
-        let combine = |state: &mut (
-            Option<&'b Syntax<T, V>>,
-            Option<&'b Syntax<T, V>>,
-            Vec<Either<Syntax<T, V>, &'b Syntax<T, V>>>,
-        )| {
+        let combine = |
+            state: &mut (
+                Option<&'b Syntax<T, V>>,
+                Option<&'b Syntax<T, V>>,
+                Vec<Either<Syntax<T, V>, &'b Syntax<T, V>>>,
+            ),
+        | {
             match (state.0, state.1) {
                 (Some(s), None) => state.2.push(Right(s)),
                 (Some(s), Some(e)) => {
@@ -3962,10 +3966,11 @@ where
             }
             false
         };
-        let p_method_vis = |node: &Syntax<T, V>,
-                            name_pos: &Pos,
-                            env: &mut Env|
-         -> Result<ast::Visibility> {
+        let p_method_vis = |
+            node: &Syntax<T, V>,
+            name_pos: &Pos,
+            env: &mut Env,
+        | -> Result<ast::Visibility> {
             match Self::p_visibility_last_win(node, env)? {
                 None => {
                     Self::raise_hh_error(env, Naming::method_needs_visibility(name_pos.clone()));

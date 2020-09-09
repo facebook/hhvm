@@ -31,17 +31,22 @@ pub fn from_ast(
     namespace: &Namespace,
     attr: &a::UserAttribute,
 ) -> Result<HhasAttribute> {
-    let arguments =
-        ast_constant_folder::literals_from_exprs(namespace, &mut attr.params.clone(), e).map_err(
-            |err| {
-                assert_eq!(err, ast_constant_folder::Error::UserDefinedConstant,
-            "literals_from_expr should have panicked for an error other than UserDefinedConstant");
-                emit_fatal::raise_fatal_parse(
-                    &attr.name.0,
-                    format!("Attribute arguments must be literals"),
-                )
-            },
-        )?;
+    let arguments = ast_constant_folder::literals_from_exprs(
+        namespace,
+        &mut attr.params.clone(),
+        e,
+    )
+    .map_err(|err| {
+        assert_eq!(
+            err,
+            ast_constant_folder::Error::UserDefinedConstant,
+            "literals_from_expr should have panicked for an error other than UserDefinedConstant"
+        );
+        emit_fatal::raise_fatal_parse(
+            &attr.name.0,
+            format!("Attribute arguments must be literals"),
+        )
+    })?;
     let fully_qualified_id = if attr.name.1.starts_with("__") {
         // don't do anything to builtin attributes
         attr.name.1.to_owned()

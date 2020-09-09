@@ -190,9 +190,10 @@ mod tests {
             stack_sizes.push(stack_size);
         };
 
-        assert!(job
-            .with_elastic_stack(&make_expo_grower, &mut on_retry, get_slack_space,)
-            .is_err());
+        assert!(
+            job.with_elastic_stack(&make_expo_grower, &mut on_retry, get_slack_space,)
+                .is_err()
+        );
 
         assert_eq!(
             stack_sizes,

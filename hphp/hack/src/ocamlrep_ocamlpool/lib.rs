@@ -48,7 +48,9 @@ impl Pool {
 impl Drop for Pool {
     #[inline(always)]
     fn drop(&mut self) {
-        unsafe { ocamlpool_leave() };
+        unsafe {
+            ocamlpool_leave()
+        };
     }
 }
 
@@ -67,7 +69,9 @@ impl Allocator for Pool {
     #[inline(always)]
     fn set_field<'a>(&self, block: &mut BlockBuilder<'a>, index: usize, value: OpaqueValue<'a>) {
         assert!(index < block.size());
-        unsafe { caml_set_field(self.block_ptr_mut(block) as usize, index, value.to_bits()) };
+        unsafe {
+            caml_set_field(self.block_ptr_mut(block) as usize, index, value.to_bits())
+        };
     }
 
     unsafe fn block_ptr_mut<'a>(&self, block: &mut BlockBuilder<'a>) -> *mut OpaqueValue<'a> {

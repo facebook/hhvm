@@ -191,8 +191,10 @@ pub fn relabel_function(params: &mut Vec<HhasParam>, body: &mut InstrSeq) {
 }
 
 pub fn clone_with_fresh_regular_labels(emitter: &mut Emitter, block: &mut InstrSeq) {
-    let mut folder = |(mut regular, mut named): (HashMap<Id, Label>, HashMap<String, Label>),
-                      instr: &Instruct| {
+    let mut folder = |
+        (mut regular, mut named): (HashMap<Id, Label>, HashMap<String, Label>),
+        instr: &Instruct,
+    | {
         match instr {
             Instruct::ILabel(Label::Regular(id)) => {
                 regular.insert(*id, emitter.label_gen_mut().next_regular());

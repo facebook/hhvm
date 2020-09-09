@@ -1506,9 +1506,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         type_arguments: Node<'a>,
         pos_to_merge: Option<&'a Pos<'a>>,
     ) -> Node<'a> {
-        let type_arguments =
-            unwrap_or_return!(self
-                .maybe_slice_from_iter(type_arguments.iter().map(|&node| self.node_to_ty(node))));
+        let type_arguments = unwrap_or_return!(
+            self.maybe_slice_from_iter(type_arguments.iter().map(|&node| self.node_to_ty(node)))
+        );
 
         let ty_ = match (base_ty, type_arguments) {
             (Id(_, name), &[Ty(_, Ty_::Tfun(f))]) if name == "\\Pure" => {
@@ -1851,11 +1851,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             }
             TokenKind::SingleQuotedStringLiteral => Node::StringLiteral(
                 self.alloc((
-                    unwrap_or_return!(escaper::unescape_single_in(
-                        self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
-                        self.state.arena,
+                    unwrap_or_return!(
+                        escaper::unescape_single_in(
+                            self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
+                            self.state.arena,
+                        )
+                        .ok()
                     )
-                    .ok())
                     .into(),
                     token_pos(self),
                 )),
@@ -1878,11 +1880,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             ))),
             TokenKind::NowdocStringLiteral => Node::StringLiteral(
                 self.alloc((
-                    unwrap_or_return!(escaper::unescape_nowdoc_in(
-                        self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
-                        self.state.arena,
+                    unwrap_or_return!(
+                        escaper::unescape_nowdoc_in(
+                            self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
+                            self.state.arena,
+                        )
+                        .ok()
                     )
-                    .ok())
                     .into(),
                     token_pos(self),
                 )),
@@ -2041,11 +2045,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         // can tell that *some* initializer was here. Useful for class
         // properties, where we need to enforce that properties without default
         // values are initialized in the constructor.
-        if expr.is_ignored() {
-            equals
-        } else {
-            expr
-        }
+        if expr.is_ignored() { equals } else { expr }
     }
 
     fn make_anonymous_function(
@@ -2212,12 +2212,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_prefix_unary_expression(&mut self, op: Self::R, value: Self::R) -> Self::R {
-        let pos = unwrap_or_return!(Pos::merge(
-            self.state.arena,
-            unwrap_or_return!(op.get_pos(self.state.arena)),
-            unwrap_or_return!(value.get_pos(self.state.arena))
-        )
-        .ok());
+        let pos = unwrap_or_return!(
+            Pos::merge(
+                self.state.arena,
+                unwrap_or_return!(op.get_pos(self.state.arena)),
+                unwrap_or_return!(value.get_pos(self.state.arena))
+            )
+            .ok()
+        );
         let op = match &op {
             Node::Operator(&(_, op)) => match op {
                 TokenKind::Tilde => Uop::Utild,
@@ -2238,12 +2240,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_postfix_unary_expression(&mut self, value: Self::R, op: Self::R) -> Self::R {
-        let pos = unwrap_or_return!(Pos::merge(
-            self.state.arena,
-            unwrap_or_return!(value.get_pos(self.state.arena)),
-            unwrap_or_return!(op.get_pos(self.state.arena))
-        )
-        .ok());
+        let pos = unwrap_or_return!(
+            Pos::merge(
+                self.state.arena,
+                unwrap_or_return!(value.get_pos(self.state.arena)),
+                unwrap_or_return!(op.get_pos(self.state.arena))
+            )
+            .ok()
+        );
         let op = match &op {
             Node::Operator(&(_, op)) => match op {
                 TokenKind::PlusPlus => Uop::Upincr,
@@ -2292,17 +2296,21 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             _ => {}
         }
 
-        let pos = unwrap_or_return!(Pos::merge(
-            self.state.arena,
-            unwrap_or_return!(Pos::merge(
+        let pos = unwrap_or_return!(
+            Pos::merge(
                 self.state.arena,
-                unwrap_or_return!(lhs.get_pos(self.state.arena)),
-                unwrap_or_return!(op_node.get_pos(self.state.arena))
+                unwrap_or_return!(
+                    Pos::merge(
+                        self.state.arena,
+                        unwrap_or_return!(lhs.get_pos(self.state.arena)),
+                        unwrap_or_return!(op_node.get_pos(self.state.arena))
+                    )
+                    .ok()
+                ),
+                unwrap_or_return!(rhs.get_pos(self.state.arena)),
             )
-            .ok()),
-            unwrap_or_return!(rhs.get_pos(self.state.arena)),
-        )
-        .ok());
+            .ok()
+        );
 
         Node::Expr(self.alloc(aast::Expr(
             pos,
@@ -2321,12 +2329,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         rparen: Self::R,
     ) -> Self::R {
         let pos = unwrap_or_return!(lparen.get_pos(self.state.arena));
-        let pos = unwrap_or_return!(Pos::merge(
-            self.state.arena,
-            pos,
-            unwrap_or_return!(rparen.get_pos(self.state.arena))
-        )
-        .ok());
+        let pos = unwrap_or_return!(
+            Pos::merge(
+                self.state.arena,
+                pos,
+                unwrap_or_return!(rparen.get_pos(self.state.arena))
+            )
+            .ok()
+        );
         Node::Expr(self.alloc(aast::Expr(
             pos,
             unwrap_or_return!(self.node_to_expr(expr)).1,
@@ -2362,12 +2372,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let unqualified_id = unwrap_or_return!(self.get_name("", class_type));
         if unqualified_id.1.trim_start_matches("\\") == "varray_or_darray" {
-            let pos = unwrap_or_return!(Pos::merge(
-                self.state.arena,
-                unqualified_id.0,
-                unwrap_or_return!(type_arguments.get_pos(self.state.arena)),
-            )
-            .ok());
+            let pos = unwrap_or_return!(
+                Pos::merge(
+                    self.state.arena,
+                    unqualified_id.0,
+                    unwrap_or_return!(type_arguments.get_pos(self.state.arena)),
+                )
+                .ok()
+            );
             let type_arguments = type_arguments.as_slice(self.state.arena);
             let ty_ = match type_arguments {
                 [tk, tv] => Ty_::TvarrayOrDarray(self.alloc((
@@ -2709,19 +2721,21 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         // appear in classes or directly in namespaces.
         match decls {
             Node::List([Node::List([name, initializer])]) => {
-                let id = unwrap_or_return!(self.get_name(
-                    if self
-                        .state
-                        .classish_name_builder
-                        .get_current_classish_name()
-                        .is_some()
-                    {
-                        ""
-                    } else {
-                        self.state.namespace_builder.current_namespace()
-                    },
-                    *name,
-                ));
+                let id = unwrap_or_return!(
+                    self.get_name(
+                        if self
+                            .state
+                            .classish_name_builder
+                            .get_current_classish_name()
+                            .is_some()
+                        {
+                            ""
+                        } else {
+                            self.state.namespace_builder.current_namespace()
+                        },
+                        *name,
+                    )
+                );
                 let ty = self
                     .node_to_ty(hint)
                     .or_else(|| self.infer_const(*name, *initializer))
@@ -3159,42 +3173,44 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         attributes: Self::R,
         _arg2: Self::R,
     ) -> Self::R {
-        let xhp_attr_decls = unwrap_or_return!(self.maybe_slice_from_iter(
-            attributes
-                .iter()
-                .filter_map(|x| match x {
-                    Node::XhpClassAttribute(x) => Some(x),
-                    _ => None,
-                })
-                .map(|node| {
-                    let Id(pos, name) = node.name;
-                    let name = prefix_colon(self.state.arena, name);
-
-                    let type_ = self.node_to_ty(node.hint);
-                    let type_ = if node.nullable && node.tag.is_none() {
-                        type_.and_then(|x| match x {
-                            Ty(_, Ty_::Toption(_)) => type_, // already nullable
-                            _ => self.node_to_ty(self.hint_ty(x.get_pos()?, Ty_::Toption(x))), // make nullable
-                        })
-                    } else {
-                        type_
-                    };
-                    Some(ShallowProp {
-                        abstract_: false,
-                        const_: false,
-                        lateinit: false,
-                        lsb: false,
-                        name: Id(pos, name),
-                        needs_init: node.needs_init,
-                        visibility: aast::Visibility::Public,
-                        type_,
-                        xhp_attr: Some(shallow_decl_defs::XhpAttr {
-                            tag: node.tag,
-                            has_default: !node.needs_init,
-                        }),
+        let xhp_attr_decls = unwrap_or_return!(
+            self.maybe_slice_from_iter(
+                attributes
+                    .iter()
+                    .filter_map(|x| match x {
+                        Node::XhpClassAttribute(x) => Some(x),
+                        _ => None,
                     })
-                })
-        ));
+                    .map(|node| {
+                        let Id(pos, name) = node.name;
+                        let name = prefix_colon(self.state.arena, name);
+
+                        let type_ = self.node_to_ty(node.hint);
+                        let type_ = if node.nullable && node.tag.is_none() {
+                            type_.and_then(|x| match x {
+                                Ty(_, Ty_::Toption(_)) => type_, // already nullable
+                                _ => self.node_to_ty(self.hint_ty(x.get_pos()?, Ty_::Toption(x))), // make nullable
+                            })
+                        } else {
+                            type_
+                        };
+                        Some(ShallowProp {
+                            abstract_: false,
+                            const_: false,
+                            lateinit: false,
+                            lsb: false,
+                            name: Id(pos, name),
+                            needs_init: node.needs_init,
+                            visibility: aast::Visibility::Public,
+                            type_,
+                            xhp_attr: Some(shallow_decl_defs::XhpAttr {
+                                tag: node.tag,
+                                has_default: !node.needs_init,
+                            }),
+                        })
+                    })
+            )
+        );
 
         let xhp_attr_uses_decls = self.slice_from_iter(
             attributes
@@ -3457,12 +3473,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         // We don't need to include the tys list in this position merging
         // because by definition it's already contained by the two brackets.
-        let pos = unwrap_or_return!(Pos::merge(
-            self.state.arena,
-            unwrap_or_return!(left_paren.get_pos(self.state.arena)),
-            unwrap_or_return!(right_paren.get_pos(self.state.arena)),
-        )
-        .ok());
+        let pos = unwrap_or_return!(
+            Pos::merge(
+                self.state.arena,
+                unwrap_or_return!(left_paren.get_pos(self.state.arena)),
+                unwrap_or_return!(right_paren.get_pos(self.state.arena)),
+            )
+            .ok()
+        );
         let tys = unwrap_or_return!(
             self.maybe_slice_from_iter(tys.iter().map(|&node| self.node_to_ty(node)))
         );
@@ -3475,20 +3493,24 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         tys: Self::R,
         right_paren: Self::R,
     ) -> Self::R {
-        let pos = unwrap_or_return!(Pos::merge(
-            self.state.arena,
-            unwrap_or_return!(left_paren.get_pos(self.state.arena)),
-            unwrap_or_return!(right_paren.get_pos(self.state.arena)),
-        )
-        .ok());
-        let tys = unwrap_or_return!(self.maybe_slice_from_iter(
-            tys.iter()
-                .map(|x| match x {
-                    Node::ListItem((ty, _ampersand)) => ty,
-                    _ => x,
-                })
-                .map(|&node| self.node_to_ty(node))
-        ));
+        let pos = unwrap_or_return!(
+            Pos::merge(
+                self.state.arena,
+                unwrap_or_return!(left_paren.get_pos(self.state.arena)),
+                unwrap_or_return!(right_paren.get_pos(self.state.arena)),
+            )
+            .ok()
+        );
+        let tys = unwrap_or_return!(
+            self.maybe_slice_from_iter(
+                tys.iter()
+                    .map(|x| match x {
+                        Node::ListItem((ty, _ampersand)) => ty,
+                        _ => x,
+                    })
+                    .map(|&node| self.node_to_ty(node))
+            )
+        );
         self.hint_ty(pos, Ty_::Tintersection(tys))
     }
 
@@ -3498,20 +3520,24 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         tys: Self::R,
         right_paren: Self::R,
     ) -> Self::R {
-        let pos = unwrap_or_return!(Pos::merge(
-            self.state.arena,
-            unwrap_or_return!(left_paren.get_pos(self.state.arena)),
-            unwrap_or_return!(right_paren.get_pos(self.state.arena)),
-        )
-        .ok());
-        let tys = unwrap_or_return!(self.maybe_slice_from_iter(
-            tys.iter()
-                .map(|x| match x {
-                    Node::ListItem((ty, _bar)) => ty,
-                    _ => x,
-                })
-                .map(|&node| self.node_to_ty(node))
-        ));
+        let pos = unwrap_or_return!(
+            Pos::merge(
+                self.state.arena,
+                unwrap_or_return!(left_paren.get_pos(self.state.arena)),
+                unwrap_or_return!(right_paren.get_pos(self.state.arena)),
+            )
+            .ok()
+        );
+        let tys = unwrap_or_return!(
+            self.maybe_slice_from_iter(
+                tys.iter()
+                    .map(|x| match x {
+                        Node::ListItem((ty, _bar)) => ty,
+                        _ => x,
+                    })
+                    .map(|&node| self.node_to_ty(node))
+            )
+        );
         self.hint_ty(pos, Ty_::Tunion(tys))
     }
 
@@ -3538,12 +3564,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Node::Token(TokenKind::DotDotDot) => ShapeKind::OpenShape,
             _ => ShapeKind::ClosedShape,
         };
-        let pos = unwrap_or_return!(Pos::merge(
-            self.state.arena,
-            unwrap_or_return!(shape.get_pos(self.state.arena)),
-            unwrap_or_return!(rparen.get_pos(self.state.arena)),
-        )
-        .ok());
+        let pos = unwrap_or_return!(
+            Pos::merge(
+                self.state.arena,
+                unwrap_or_return!(shape.get_pos(self.state.arena)),
+                unwrap_or_return!(rparen.get_pos(self.state.arena)),
+            )
+            .ok()
+        );
         self.hint_ty(pos, Ty_::Tshape(self.alloc((kind, fields.into()))))
     }
 
@@ -3612,12 +3640,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             self.make_apply(
                 Id(id.0, self.state.namespace_builder.rename_import(id.1)),
                 targ,
-                Some(unwrap_or_return!(Pos::merge(
-                    self.state.arena,
-                    unwrap_or_return!(classname.get_pos(self.state.arena)),
-                    unwrap_or_return!(gt.get_pos(self.state.arena)),
-                )
-                .ok())),
+                Some(unwrap_or_return!(
+                    Pos::merge(
+                        self.state.arena,
+                        unwrap_or_return!(classname.get_pos(self.state.arena)),
+                        unwrap_or_return!(gt.get_pos(self.state.arena)),
+                    )
+                    .ok()
+                )),
             )
         }
     }
@@ -3628,12 +3658,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg1: Self::R,
         value: Self::R,
     ) -> Self::R {
-        let pos = unwrap_or_return!(Pos::merge(
-            self.state.arena,
-            unwrap_or_return!(class_name.get_pos(self.state.arena)),
-            unwrap_or_return!(value.get_pos(self.state.arena)),
-        )
-        .ok());
+        let pos = unwrap_or_return!(
+            Pos::merge(
+                self.state.arena,
+                unwrap_or_return!(class_name.get_pos(self.state.arena)),
+                unwrap_or_return!(value.get_pos(self.state.arena)),
+            )
+            .ok()
+        );
         let Id(class_name_pos, class_name_str) = unwrap_or_return!(
             self.get_name(self.state.namespace_builder.current_namespace(), class_name)
         );
@@ -3740,12 +3772,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         value_type: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        let pos = unwrap_or_return!(Pos::merge(
-            self.state.arena,
-            unwrap_or_return!(array.get_pos(self.state.arena)),
-            unwrap_or_return!(greater_than.get_pos(self.state.arena)),
-        )
-        .ok());
+        let pos = unwrap_or_return!(
+            Pos::merge(
+                self.state.arena,
+                unwrap_or_return!(array.get_pos(self.state.arena)),
+                unwrap_or_return!(greater_than.get_pos(self.state.arena)),
+            )
+            .ok()
+        );
         let key_type = self.node_to_ty(key_type);
         let value_type = self.node_to_ty(value_type);
         self.hint_ty(pos, Ty_::Tarray(self.alloc((key_type, value_type))))
@@ -3843,23 +3877,27 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_nullable_type_specifier(&mut self, question_mark: Self::R, hint: Self::R) -> Self::R {
         let hint_pos = unwrap_or_return!(hint.get_pos(self.state.arena));
         self.hint_ty(
-            unwrap_or_return!(Pos::merge(
-                self.state.arena,
-                unwrap_or_return!(question_mark.get_pos(self.state.arena)),
-                hint_pos,
-            )
-            .ok()),
+            unwrap_or_return!(
+                Pos::merge(
+                    self.state.arena,
+                    unwrap_or_return!(question_mark.get_pos(self.state.arena)),
+                    hint_pos,
+                )
+                .ok()
+            ),
             Ty_::Toption(unwrap_or_return!(self.node_to_ty(hint))),
         )
     }
 
     fn make_like_type_specifier(&mut self, tilde: Self::R, type_: Self::R) -> Self::R {
-        let pos = unwrap_or_return!(Pos::merge(
-            self.state.arena,
-            unwrap_or_return!(tilde.get_pos(self.state.arena)),
-            unwrap_or_return!(type_.get_pos(self.state.arena)),
-        )
-        .ok());
+        let pos = unwrap_or_return!(
+            Pos::merge(
+                self.state.arena,
+                unwrap_or_return!(tilde.get_pos(self.state.arena)),
+                unwrap_or_return!(type_.get_pos(self.state.arena)),
+            )
+            .ok()
+        );
         self.hint_ty(pos, Ty_::Tlike(unwrap_or_return!(self.node_to_ty(type_))))
     }
 
@@ -3916,12 +3954,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
         let (hint, mutability) = Self::unwrap_mutability(ret_hint);
         let ret = unwrap_or_return!(self.node_to_ty(hint));
-        let pos = unwrap_or_return!(Pos::merge(
-            self.state.arena,
-            unwrap_or_return!(left_paren.get_pos(self.state.arena)),
-            unwrap_or_return!(right_paren.get_pos(self.state.arena)),
-        )
-        .ok());
+        let pos = unwrap_or_return!(
+            Pos::merge(
+                self.state.arena,
+                unwrap_or_return!(left_paren.get_pos(self.state.arena)),
+                unwrap_or_return!(right_paren.get_pos(self.state.arena)),
+            )
+            .ok()
+        );
         let mut flags = FunTypeFlags::empty();
         if mutability.is_some() {
             flags |= FunTypeFlags::RETURNS_MUTABLE;
@@ -4031,12 +4071,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         constant_name: Self::R,
     ) -> Self::R {
         let id = unwrap_or_return!(self.get_name("", constant_name));
-        let pos = unwrap_or_return!(Pos::merge(
-            self.state.arena,
-            unwrap_or_return!(ty.get_pos(self.state.arena)),
-            unwrap_or_return!(constant_name.get_pos(self.state.arena)),
-        )
-        .ok());
+        let pos = unwrap_or_return!(
+            Pos::merge(
+                self.state.arena,
+                unwrap_or_return!(ty.get_pos(self.state.arena)),
+                unwrap_or_return!(constant_name.get_pos(self.state.arena)),
+            )
+            .ok()
+        );
         match ty {
             Node::TypeconstAccess(innards) => {
                 innards.0.set(pos);
@@ -4085,12 +4127,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         // we had a soft type specifier here--the typechecker does not use it).
         // Replace its Reason with one including the position of the `@` token.
         self.hint_ty(
-            unwrap_or_return!(Pos::merge(
-                self.state.arena,
-                unwrap_or_return!(at_token.get_pos(self.state.arena)),
-                hint_pos,
-            )
-            .ok()),
+            unwrap_or_return!(
+                Pos::merge(
+                    self.state.arena,
+                    unwrap_or_return!(at_token.get_pos(self.state.arena)),
+                    hint_pos,
+                )
+                .ok()
+            ),
             *hint.1,
         )
     }

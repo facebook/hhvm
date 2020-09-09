@@ -352,9 +352,11 @@ where
             Missing => Left(Left(empty())),
             SyntaxList(s) => Left(Right(
                 s.iter()
-                    .map(move |x| match &x.syntax {
-                        ListItem(x) => Left(on_list_item(x)),
-                        _ => Right(once(x)),
+                    .map(move |x| {
+                        match &x.syntax {
+                            ListItem(x) => Left(on_list_item(x)),
+                            _ => Right(once(x)),
+                        }
                     })
                     .flatten(),
             )),
@@ -2716,9 +2718,11 @@ where
     }
 
     fn function_call_on_xhp_name_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        let check = |self_: &mut Self,
-                     member_object: &'a Syntax<Token, Value>,
-                     name: &'a Syntax<Token, Value>| {
+        let check = |
+            self_: &mut Self,
+            member_object: &'a Syntax<Token, Value>,
+            name: &'a Syntax<Token, Value>,
+        | {
             if let XHPExpression(_) = &member_object.syntax {
                 if self_.env.is_typechecker() {
                     self_.errors.push(Self::make_error_from_node(
@@ -4296,45 +4300,45 @@ where
                     self.text(&x.namespace_use_alias),
                 );
 
-                let do_check =
-                    |self_: &mut Self,
-                     error_on_global_redefinition,
-                     get_names: &dyn Fn(&mut UsedNames) -> &mut Strmap<FirstUseOrDef>,
-                     report_error| {
-                        let is_global_namespace = self_.is_global_namespace();
-                        let names = get_names(&mut self_.names);
-                        match names.get(&short_name) {
-                            Some(FirstUseOrDef {
-                                location,
-                                kind,
-                                global,
-                                ..
-                            }) => {
-                                if *kind != NameDef
-                                    || error_on_global_redefinition
-                                        && (is_global_namespace || *global)
-                                {
-                                    self_.errors.push(Self::make_name_already_used_error(
-                                        name,
-                                        name_text,
-                                        &short_name,
-                                        location,
-                                        report_error,
-                                    ))
-                                }
-                            }
-                            None => {
-                                let new_use = make_first_use_or_def(
-                                    false,
-                                    NameUse,
-                                    Self::make_location_of_node(name),
-                                    GLOBAL_NAMESPACE_NAME,
-                                    &qualified_name,
-                                );
-                                names.add(&short_name, new_use)
+                let do_check = |
+                    self_: &mut Self,
+                    error_on_global_redefinition,
+                    get_names: &dyn Fn(&mut UsedNames) -> &mut Strmap<FirstUseOrDef>,
+                    report_error,
+                | {
+                    let is_global_namespace = self_.is_global_namespace();
+                    let names = get_names(&mut self_.names);
+                    match names.get(&short_name) {
+                        Some(FirstUseOrDef {
+                            location,
+                            kind,
+                            global,
+                            ..
+                        }) => {
+                            if *kind != NameDef
+                                || error_on_global_redefinition && (is_global_namespace || *global)
+                            {
+                                self_.errors.push(Self::make_name_already_used_error(
+                                    name,
+                                    name_text,
+                                    &short_name,
+                                    location,
+                                    report_error,
+                                ))
                             }
                         }
-                    };
+                        None => {
+                            let new_use = make_first_use_or_def(
+                                false,
+                                NameUse,
+                                Self::make_location_of_node(name),
+                                GLOBAL_NAMESPACE_NAME,
+                                &qualified_name,
+                            );
+                            names.add(&short_name, new_use)
+                        }
+                    }
+                };
 
                 match &kind.syntax {
                     Token(token) => match token.kind() {
@@ -4859,10 +4863,12 @@ where
     }
 
     fn class_property_declarator_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        let check_decls = |self_: &mut Self,
-                           f: &dyn Fn(&'a Syntax<Token, Value>) -> bool,
-                           error: errors::Error,
-                           property_declarators| {
+        let check_decls = |
+            self_: &mut Self,
+            f: &dyn Fn(&'a Syntax<Token, Value>) -> bool,
+            error: errors::Error,
+            property_declarators,
+        | {
             Self::syntax_to_list_no_separators(property_declarators).for_each(|decl| {
                 if let PropertyDeclarator(x) = &decl.syntax {
                     if f(&x.property_initializer) {

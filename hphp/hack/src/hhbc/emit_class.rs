@@ -621,11 +621,13 @@ pub fn emit_class<'a>(emitter: &mut Emitter, ast_class: &'a tast::Class_) -> Res
     let initialized_constants: Vec<_> = constants
         .iter()
         .filter_map(
-            |HhasConstant {
-                 ref name,
-                 ref initializer_instrs,
-                 ..
-             }| {
+            |
+                HhasConstant {
+                    ref name,
+                    ref initializer_instrs,
+                    ..
+                },
+            | {
                 initializer_instrs
                     .as_ref()
                     .map(|instrs| (name, emitter.label_gen_mut().next_regular(), instrs))

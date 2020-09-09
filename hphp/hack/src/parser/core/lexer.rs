@@ -202,11 +202,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
 
     fn remaining(&self) -> usize {
         let r = (self.source.length() as isize) - (self.offset as isize);
-        if r < 0 {
-            0
-        } else {
-            r as usize
-        }
+        if r < 0 { 0 } else { r as usize }
     }
 
     fn peek(&self, i: usize) -> char {

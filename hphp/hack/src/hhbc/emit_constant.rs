@@ -10,7 +10,7 @@ use env::{emitter::Emitter, Env};
 use hhas_constant_rust::{self as hhas_constant, HhasConstant};
 use hhas_function_rust::{self as hhas_function, HhasFunction};
 use hhas_pos_rust::Span;
-use hhbc_id_rust::{function, r#const, Id};
+use hhbc_id_rust::{r#const, function, Id};
 use hhbc_string_utils_rust::strip_global_ns;
 use instruction_sequence_rust::{instr, InstrSeq, Result};
 use oxidized::ast as tast;

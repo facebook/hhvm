@@ -5,7 +5,7 @@
 
 use env::emitter::Emitter;
 use hhas_symbol_refs_rust::*;
-use hhbc_id_rust::{class, function, r#const, Id};
+use hhbc_id_rust::{class, r#const, function, Id};
 use std::collections::BTreeSet;
 
 #[derive(Default)]

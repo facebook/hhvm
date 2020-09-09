@@ -842,13 +842,17 @@ mod tests {
                  "eval.emitfuncpointers": { "global_value": "false" } }"#,
         )
         .unwrap();
-        assert!(hhvm // verify a false-by-default flag was parsed as true
-            .flags
-            .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION));
+        assert!(
+            hhvm // verify a false-by-default flag was parsed as true
+                .flags
+                .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION)
+        );
 
-        assert!(!hhvm // verify a true-by-default flag was parsed as false
-            .flags
-            .contains(HhvmFlags::EMIT_FUNC_POINTERS));
+        assert!(
+            !hhvm // verify a true-by-default flag was parsed as false
+                .flags
+                .contains(HhvmFlags::EMIT_FUNC_POINTERS)
+        );
     }
 
     #[test]
@@ -868,10 +872,11 @@ mod tests {
             },
         }))
         .expect("failed to deserialize");
-        assert!(act
-            .hhvm
-            .flags
-            .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION));
+        assert!(
+            act.hhvm
+                .flags
+                .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION)
+        );
     }
 
     #[test]
@@ -966,16 +971,18 @@ mod tests {
             .to_string(),
         ];
         let act = Options::from_configs_(&jsons, &EMPTY_STRS).unwrap();
-        assert!(act
-            .hhvm
-            .hack_lang
-            .flags
-            .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING));
-        assert!(!act
-            .hhvm
-            .hack_lang
-            .flags
-            .contains(LangFlags::ENABLE_COROUTINES));
+        assert!(
+            act.hhvm
+                .hack_lang
+                .flags
+                .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING)
+        );
+        assert!(
+            !act.hhvm
+                .hack_lang
+                .flags
+                .contains(LangFlags::ENABLE_COROUTINES)
+        );
         assert!(act.hhvm.flags.contains(HhvmFlags::RX_IS_ENABLED));
     }
 

@@ -176,6 +176,7 @@ enum OpcodeFlag : uint64_t {
   HasExtra         = 1ULL << 8,
   Passthrough      = 1ULL << 9,
   LayoutAgnostic   = 1ULL << 10,
+  LayoutPreserving = 1ULL << 11,
 };
 
 bool hasEdges(Opcode opc);

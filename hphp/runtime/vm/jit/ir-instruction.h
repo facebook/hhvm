@@ -130,6 +130,7 @@ struct IRInstruction {
   bool hasEdges() const;
   bool isPassthrough() const;
   bool isLayoutAgnostic() const;
+  bool isLayoutPreserving() const;
 
   /*
    * Returns false if this instruction cannot raise an error under any

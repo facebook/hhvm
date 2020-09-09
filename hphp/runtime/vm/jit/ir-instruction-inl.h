@@ -83,6 +83,10 @@ inline bool IRInstruction::isLayoutAgnostic() const {
   return opcodeHasFlags(op(), LayoutAgnostic);
 }
 
+inline bool IRInstruction::isLayoutPreserving() const {
+  return opcodeHasFlags(op(), LayoutPreserving);
+}
+
 inline bool IRInstruction::producesReference() const {
   return opcodeHasFlags(op(), ProducesRC);
 }

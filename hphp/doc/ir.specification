@@ -158,9 +158,15 @@ MElem (MInstrElem)
 
 LA (Layout-Agnostic)
 
-The instruction is generic over array-like inputs and outputs. Most ops that
-deal with array-like types can only handle their default ("Vanilla") layouts.
-We whitelist those ops that are generic over layout.
+  The instruction is generic over array-like inputs and outputs. Most ops that
+  deal with array-like types can only handle their default ("Vanilla") layouts.
+  We whitelist those ops that are generic over layout.
+
+LP (Layout-preserving)
+
+  The instruction is closed under vanilla array layouts: if the first argument
+  is vanilla, so too is the destination. The first argument must be an
+  array-like type. Layout-preserving implies layout-agnostic.
 
 
 Instruction set
@@ -376,7 +382,7 @@ Instruction set
 
 To vec conversions:
 
-| ConvArrLikeToVec,             DKeepVanilla(Vec), S(ArrLike),       PRc|CRc|LA
+| ConvArrLikeToVec,             D(Vec), S(ArrLike),                  PRc|CRc|LP
 
 | ConvClsMethToVec,             D(Vec), S(ClsMeth),                  PRc|CRc
 
@@ -385,7 +391,7 @@ To vec conversions:
 
 To dict conversions:
 
-| ConvArrLikeToDict,            DKeepVanilla(Dict), S(ArrLike),      PRc|CRc|LA
+| ConvArrLikeToDict,            D(Dict), S(ArrLike),                 PRc|CRc|LP
 
 | ConvClsMethToDict,            D(Dict), S(ClsMeth),                 PRc|CRc
 
@@ -394,7 +400,7 @@ To dict conversions:
 
 To keyset conversions:
 
-| ConvArrLikeToKeyset,          DKeepVanilla(Keyset), S(ArrLike),    PRc|CRc|LA
+| ConvArrLikeToKeyset,          D(Keyset), S(ArrLike),               PRc|CRc|LP
 
 | ConvClsMethToKeyset,          D(Keyset), S(ClsMeth),               PRc|CRc
 
@@ -403,7 +409,7 @@ To keyset conversions:
 
 To varray conversions:
 
-| ConvArrLikeToVArr,            DVArrKeepVanilla, S(ArrLike),        PRc|CRc|LA
+| ConvArrLikeToVArr,            DVArr, S(ArrLike),                   PRc|CRc|LP
 
 | ConvClsMethToVArr,            DVArr, S(ClsMeth),                   PRc|CRc
 
@@ -412,7 +418,7 @@ To varray conversions:
 
 To darray conversion:
 
-| ConvArrLikeToDArr,            DDArrKeepVanilla, S(ArrLike),        PRc|CRc|LA
+| ConvArrLikeToDArr,            DDArr, S(ArrLike),                   PRc|CRc|LP
 
 | ConvClsMethToDArr,            DDArr, S(ClsMeth),                   PRc|CRc
 

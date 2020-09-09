@@ -42,6 +42,7 @@ TRACE_SET_MOD(hhir);
 #define MProp  MInstrProp
 #define MElem  MInstrElem
 #define LA     LayoutAgnostic
+#define LP     (LayoutPreserving|LayoutAgnostic)
 
 #define ND             0
 #define D(n)           HasDest
@@ -83,9 +84,6 @@ TRACE_SET_MOD(hhir);
 #define DLvalOfPtr     HasDest
 #define DPtrIter       HasDest
 #define DPtrIterVal    HasDest
-#define DKeepVanilla(t)    HasDest
-#define DDArrKeepVanilla   HasDest
-#define DVArrKeepVanilla   HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -160,9 +158,6 @@ OpInfo g_opInfo[] = {
 #undef DUnion
 #undef DMemoKey
 #undef DLvalOfPtr
-#undef DKeepVanilla
-#undef DDArrKeepVanilla
-#undef DVArrKeepVanilla
 
 ///////////////////////////////////////////////////////////////////////////////
 

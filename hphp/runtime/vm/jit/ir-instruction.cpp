@@ -543,12 +543,15 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
   // because we never use these types. Otherwise, apply layout-dependence.
   auto const checkLayoutFlags = [&](Type t) {
     if (!allowBespokeArrayLikes()) return t;
-    return inst->isLayoutAgnostic() ? t.widenToBespoke() : t.narrowToVanilla();
-  };
-  auto const keepVanilla = [&](const IRInstruction* inst, Type t) {
-    assertx(inst->src(0)->type() <= TArrLike);
-    return inst->src(0)->type() <= TVanillaArrLike ? t.narrowToVanilla()
-                                                   : t.widenToBespoke();
+    if (inst->isLayoutPreserving()) {
+      assertx(inst->src(0)->type() <= TArrLike);
+      return inst->src(0)->type().arrSpec().vanilla() ? t.narrowToVanilla()
+                                                      : t.widenToBespoke();
+    } else if (inst->isLayoutAgnostic()) {
+      return t.widenToBespoke();
+    } else {
+      return t.narrowToVanilla();
+    }
   };
   using namespace TypeNames;
   using TypeNames::TCA;
@@ -601,12 +604,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DPtrIter        return ptrIterReturn(inst);
 #define DPtrIterVal     return ptrIterValReturn(inst);
 
-#define DKeepVanilla(t) return keepVanilla(inst, t);
-#define DVArrKeepVanilla \
-  return keepVanilla(inst, RO::EvalHackArrDVArrs ? TVec : TVArr);
-#define DDArrKeepVanilla \
-  return keepVanilla(inst, RO::EvalHackArrDVArrs ? TDict : TDArr);
-
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
   switch (inst->op()) {
@@ -655,9 +652,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DLvalOfPtr
 #undef DPtrIter
 #undef DPtrIterVal
-#undef DKeepVanilla
-#undef DVArrKeepVanilla
-#undef DDArrKeepVanilla
 }
 
 }}

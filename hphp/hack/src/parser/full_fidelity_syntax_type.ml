@@ -1554,7 +1554,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and namespace_use_declaration =
     { namespace_use_keyword: Token.t value
     ; namespace_use_kind: Token.t option value
-    ; namespace_use_clauses: (namespace_use_clause option) listesque value
+    ; namespace_use_clauses: namespace_use_clause listesque value
     ; namespace_use_semicolon: Token.t option value
     }
   and namespace_group_use_declaration =
@@ -1583,7 +1583,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_name: Token.t value
     ; function_type_parameter_list: type_parameters option value
     ; function_left_paren: Token.t value
-    ; function_parameter_list: (parameter option) listesque value
+    ; function_parameter_list: parameter listesque value
     ; function_right_paren: Token.t value
     ; function_capability_provisional: capability_provisional option value
     ; function_colon: Token.t option value
@@ -2066,7 +2066,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and list_expression =
     { list_keyword: Token.t value
     ; list_left_paren: Token.t value
-    ; list_members: (expression option) listesque value
+    ; list_members: expression listesque value
     ; list_right_paren: Token.t value
     }
   and collection_literal_expression =
@@ -2384,17 +2384,17 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and tuple_type_specifier =
     { tuple_left_paren: Token.t value
-    ; tuple_types: (specifier option) listesque value
+    ; tuple_types: specifier listesque value
     ; tuple_right_paren: Token.t value
     }
   and union_type_specifier =
     { union_left_paren: Token.t value
-    ; union_types: (specifier option) listesque value
+    ; union_types: specifier listesque value
     ; union_right_paren: Token.t value
     }
   and intersection_type_specifier =
     { intersection_left_paren: Token.t value
-    ; intersection_types: (specifier option) listesque value
+    ; intersection_types: specifier listesque value
     ; intersection_right_paren: Token.t value
     }
   and pocket_atom_expression =

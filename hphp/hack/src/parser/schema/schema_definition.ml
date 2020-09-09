@@ -322,7 +322,7 @@ let schema : schema_node list =
         [
           ("keyword", Token);
           ("kind", ZeroOrOne Token);
-          ("clauses", ZeroOrMore (ZeroOrOne (Just "NamespaceUseClause")));
+          ("clauses", ZeroOrMore (Just "NamespaceUseClause"));
           ("semicolon", ZeroOrOne Token);
         ];
     };
@@ -387,7 +387,7 @@ let schema : schema_node list =
           ("name", Token);
           ("type_parameter_list", ZeroOrOne (Just "TypeParameters"));
           ("left_paren", Token);
-          ("parameter_list", ZeroOrMore (ZeroOrOne (Aggregate Parameter)));
+          ("parameter_list", ZeroOrMore (Aggregate Parameter));
           ("right_paren", Token);
           ("capability_provisional", ZeroOrOne (Just "CapabilityProvisional"));
           ("colon", ZeroOrOne Token);
@@ -1506,7 +1506,7 @@ let schema : schema_node list =
         [
           ("keyword", Token);
           ("left_paren", Token);
-          ("members", ZeroOrMore (ZeroOrOne (Aggregate Expression)));
+          ("members", ZeroOrMore (Aggregate Expression));
           ("right_paren", Token);
         ];
     };
@@ -2284,7 +2284,7 @@ let schema : schema_node list =
       fields =
         [
           ("left_paren", Token);
-          ("types", ZeroOrMore (ZeroOrOne (Aggregate Specifier)));
+          ("types", ZeroOrMore (Aggregate Specifier));
           ("right_paren", Token);
         ];
     };
@@ -2298,7 +2298,7 @@ let schema : schema_node list =
       fields =
         [
           ("left_paren", Token);
-          ("types", ZeroOrMore (ZeroOrOne (Aggregate Specifier)));
+          ("types", ZeroOrMore (Aggregate Specifier));
           ("right_paren", Token);
         ];
     };
@@ -2312,7 +2312,7 @@ let schema : schema_node list =
       fields =
         [
           ("left_paren", Token);
-          ("types", ZeroOrMore (ZeroOrOne (Aggregate Specifier)));
+          ("types", ZeroOrMore (Aggregate Specifier));
           ("right_paren", Token);
         ];
     };

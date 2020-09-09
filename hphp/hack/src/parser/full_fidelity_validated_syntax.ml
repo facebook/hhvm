@@ -1050,7 +1050,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_namespace_use_declaration : namespace_use_declaration validator = function
   | { Syntax.syntax = Syntax.NamespaceUseDeclaration x; value = v } -> v,
     { namespace_use_semicolon = validate_option_with (validate_token) x.namespace_use_semicolon
-    ; namespace_use_clauses = validate_list_with (validate_option_with (validate_namespace_use_clause)) x.namespace_use_clauses
+    ; namespace_use_clauses = validate_list_with (validate_namespace_use_clause) x.namespace_use_clauses
     ; namespace_use_kind = validate_option_with (validate_token) x.namespace_use_kind
     ; namespace_use_keyword = validate_token x.namespace_use_keyword
     }
@@ -1060,7 +1060,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.NamespaceUseDeclaration
       { namespace_use_keyword = invalidate_token x.namespace_use_keyword
       ; namespace_use_kind = invalidate_option_with (invalidate_token) x.namespace_use_kind
-      ; namespace_use_clauses = invalidate_list_with (invalidate_option_with (invalidate_namespace_use_clause)) x.namespace_use_clauses
+      ; namespace_use_clauses = invalidate_list_with (invalidate_namespace_use_clause) x.namespace_use_clauses
       ; namespace_use_semicolon = invalidate_option_with (invalidate_token) x.namespace_use_semicolon
       }
     ; Syntax.value = v
@@ -1130,7 +1130,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; function_colon = validate_option_with (validate_token) x.function_colon
     ; function_capability_provisional = validate_option_with (validate_capability_provisional) x.function_capability_provisional
     ; function_right_paren = validate_token x.function_right_paren
-    ; function_parameter_list = validate_list_with (validate_option_with (validate_parameter)) x.function_parameter_list
+    ; function_parameter_list = validate_list_with (validate_parameter) x.function_parameter_list
     ; function_left_paren = validate_token x.function_left_paren
     ; function_type_parameter_list = validate_option_with (validate_type_parameters) x.function_type_parameter_list
     ; function_name = validate_token x.function_name
@@ -1146,7 +1146,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; function_name = invalidate_token x.function_name
       ; function_type_parameter_list = invalidate_option_with (invalidate_type_parameters) x.function_type_parameter_list
       ; function_left_paren = invalidate_token x.function_left_paren
-      ; function_parameter_list = invalidate_list_with (invalidate_option_with (invalidate_parameter)) x.function_parameter_list
+      ; function_parameter_list = invalidate_list_with (invalidate_parameter) x.function_parameter_list
       ; function_right_paren = invalidate_token x.function_right_paren
       ; function_capability_provisional = invalidate_option_with (invalidate_capability_provisional) x.function_capability_provisional
       ; function_colon = invalidate_option_with (invalidate_token) x.function_colon
@@ -2584,7 +2584,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_list_expression : list_expression validator = function
   | { Syntax.syntax = Syntax.ListExpression x; value = v } -> v,
     { list_right_paren = validate_token x.list_right_paren
-    ; list_members = validate_list_with (validate_option_with (validate_expression)) x.list_members
+    ; list_members = validate_list_with (validate_expression) x.list_members
     ; list_left_paren = validate_token x.list_left_paren
     ; list_keyword = validate_token x.list_keyword
     }
@@ -2594,7 +2594,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.ListExpression
       { list_keyword = invalidate_token x.list_keyword
       ; list_left_paren = invalidate_token x.list_left_paren
-      ; list_members = invalidate_list_with (invalidate_option_with (invalidate_expression)) x.list_members
+      ; list_members = invalidate_list_with (invalidate_expression) x.list_members
       ; list_right_paren = invalidate_token x.list_right_paren
       }
     ; Syntax.value = v
@@ -3558,7 +3558,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_tuple_type_specifier : tuple_type_specifier validator = function
   | { Syntax.syntax = Syntax.TupleTypeSpecifier x; value = v } -> v,
     { tuple_right_paren = validate_token x.tuple_right_paren
-    ; tuple_types = validate_list_with (validate_option_with (validate_specifier)) x.tuple_types
+    ; tuple_types = validate_list_with (validate_specifier) x.tuple_types
     ; tuple_left_paren = validate_token x.tuple_left_paren
     }
   | s -> validation_fail (Some SyntaxKind.TupleTypeSpecifier) s
@@ -3566,7 +3566,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.TupleTypeSpecifier
       { tuple_left_paren = invalidate_token x.tuple_left_paren
-      ; tuple_types = invalidate_list_with (invalidate_option_with (invalidate_specifier)) x.tuple_types
+      ; tuple_types = invalidate_list_with (invalidate_specifier) x.tuple_types
       ; tuple_right_paren = invalidate_token x.tuple_right_paren
       }
     ; Syntax.value = v
@@ -3574,7 +3574,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_union_type_specifier : union_type_specifier validator = function
   | { Syntax.syntax = Syntax.UnionTypeSpecifier x; value = v } -> v,
     { union_right_paren = validate_token x.union_right_paren
-    ; union_types = validate_list_with (validate_option_with (validate_specifier)) x.union_types
+    ; union_types = validate_list_with (validate_specifier) x.union_types
     ; union_left_paren = validate_token x.union_left_paren
     }
   | s -> validation_fail (Some SyntaxKind.UnionTypeSpecifier) s
@@ -3582,7 +3582,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.UnionTypeSpecifier
       { union_left_paren = invalidate_token x.union_left_paren
-      ; union_types = invalidate_list_with (invalidate_option_with (invalidate_specifier)) x.union_types
+      ; union_types = invalidate_list_with (invalidate_specifier) x.union_types
       ; union_right_paren = invalidate_token x.union_right_paren
       }
     ; Syntax.value = v
@@ -3590,7 +3590,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_intersection_type_specifier : intersection_type_specifier validator = function
   | { Syntax.syntax = Syntax.IntersectionTypeSpecifier x; value = v } -> v,
     { intersection_right_paren = validate_token x.intersection_right_paren
-    ; intersection_types = validate_list_with (validate_option_with (validate_specifier)) x.intersection_types
+    ; intersection_types = validate_list_with (validate_specifier) x.intersection_types
     ; intersection_left_paren = validate_token x.intersection_left_paren
     }
   | s -> validation_fail (Some SyntaxKind.IntersectionTypeSpecifier) s
@@ -3598,7 +3598,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.IntersectionTypeSpecifier
       { intersection_left_paren = invalidate_token x.intersection_left_paren
-      ; intersection_types = invalidate_list_with (invalidate_option_with (invalidate_specifier)) x.intersection_types
+      ; intersection_types = invalidate_list_with (invalidate_specifier) x.intersection_types
       ; intersection_right_paren = invalidate_token x.intersection_right_paren
       }
     ; Syntax.value = v

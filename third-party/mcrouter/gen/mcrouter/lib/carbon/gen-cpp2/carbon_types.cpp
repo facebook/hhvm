@@ -11,13 +11,3 @@
 
 #include "mcrouter/lib/carbon/gen-cpp2/carbon_data.h"
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-

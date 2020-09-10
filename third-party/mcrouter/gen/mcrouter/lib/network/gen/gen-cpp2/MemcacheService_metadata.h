@@ -21,34 +21,31 @@ namespace apache {
 namespace thrift {
 namespace detail {
 namespace md {
-using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
-using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
-using ThriftService = ::apache::thrift::metadata::ThriftService;
 
 template <>
 class ServiceMetadata<::facebook::memcache::thrift::MemcacheSvIf> {
  public:
   static void gen(ThriftMetadata& metadata, ThriftServiceContext& context);
  private:
-  static void gen_mcGet(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_mcSet(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_mcDelete(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_mcLeaseGet(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_mcLeaseSet(ThriftMetadata& metadata, ThriftService& context);
   static void gen_mcAdd(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_mcReplace(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_mcGets(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_mcCas(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_mcIncr(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_mcDecr(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_mcMetaget(ThriftMetadata& metadata, ThriftService& context);
   static void gen_mcAppend(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_mcPrepend(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_mcTouch(ThriftMetadata& metadata, ThriftService& context);
-  static void gen_mcFlushRe(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_mcCas(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_mcDecr(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_mcDelete(ThriftMetadata& metadata, ThriftService& context);
   static void gen_mcFlushAll(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_mcFlushRe(ThriftMetadata& metadata, ThriftService& context);
   static void gen_mcGat(ThriftMetadata& metadata, ThriftService& context);
   static void gen_mcGats(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_mcGet(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_mcGets(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_mcIncr(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_mcLeaseGet(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_mcLeaseSet(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_mcMetaget(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_mcPrepend(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_mcReplace(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_mcSet(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_mcTouch(ThriftMetadata& metadata, ThriftService& context);
   static void gen_mcVersion(ThriftMetadata& metadata, ThriftService& context);
 };
 } // namespace md

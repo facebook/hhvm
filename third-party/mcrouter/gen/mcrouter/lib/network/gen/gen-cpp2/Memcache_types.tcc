@@ -20,266 +20,266 @@ struct TccStructTraits<::facebook::memcache::thrift::McGetRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McGetReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McSetRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McSetReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McDeleteRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McDeleteReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McLeaseGetRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McLeaseGetReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McLeaseSetRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McLeaseSetReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McAddRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McAddReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McReplaceRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McReplaceReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McGetsRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McGetsReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McCasRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McCasReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McIncrRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McIncrReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McDecrRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McDecrReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McMetagetRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McMetagetReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McAppendRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McAppendReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McPrependRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McPrependReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McTouchRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McTouchReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McFlushReRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McFlushReReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McFlushAllRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McFlushAllReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McGatRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McGatReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McGatsRequest> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::facebook::memcache::thrift::McGatsReply> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 
 } // namespace detail
@@ -307,7 +307,7 @@ void McGetRequest::readNoXfer(Protocol_* iprot) {
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -383,7 +383,7 @@ uint32_t McGetRequest::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McGetRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedSizeStop();
@@ -395,7 +395,7 @@ uint32_t McGetRequest::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McGetRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedSizeStop();
@@ -407,7 +407,7 @@ uint32_t McGetRequest::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McGetRequest");
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("flags", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
@@ -463,7 +463,7 @@ _readField_result:
 _readField_value:
   {
     
-    iprot->readBinary(this->value);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::read(*iprot, this->value);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.value = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -494,7 +494,7 @@ _readField_flags:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -597,12 +597,12 @@ uint32_t McGetReply::serializedSize(Protocol_ const* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   if (this->value_ref().has_value()) {
     xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 2);
-    xfer += prot_->serializedSizeBinary(this->value);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<false>(*prot_, this->value);
   }
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -617,12 +617,12 @@ uint32_t McGetReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   if (this->value_ref().has_value()) {
     xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 2);
-    xfer += prot_->serializedSizeZCBinary(this->value);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<true>(*prot_, this->value);
   }
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -638,14 +638,14 @@ uint32_t McGetReply::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldEnd();
   if (this->value_ref().has_value()) {
     xfer += prot_->writeFieldBegin("value", apache::thrift::protocol::T_STRING, 2);
-    xfer += prot_->writeBinary(this->value);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::write(*prot_, this->value);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldBegin("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -686,7 +686,7 @@ void McSetRequest::readNoXfer(Protocol_* iprot) {
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -732,7 +732,7 @@ _readField_flags:
 _readField_value:
   {
     
-    iprot->readBinary(this->value);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::read(*iprot, this->value);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.value = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -809,13 +809,13 @@ uint32_t McSetRequest::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McSetRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<false>(*prot_, this->value);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -825,13 +825,13 @@ uint32_t McSetRequest::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McSetRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeZCBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<true>(*prot_, this->value);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -841,7 +841,7 @@ uint32_t McSetRequest::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McSetRequest");
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::write(*prot_, this->exptime);
@@ -850,7 +850,7 @@ uint32_t McSetRequest::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->writeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::write(*prot_, this->value);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -918,7 +918,7 @@ _readField_flags:
 _readField_value:
   {
     
-    iprot->readBinary(this->value);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::read(*iprot, this->value);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.value = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -934,7 +934,7 @@ _readField_value:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1038,9 +1038,9 @@ uint32_t McSetReply::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 3);
-  xfer += prot_->serializedSizeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<false>(*prot_, this->value);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -1056,9 +1056,9 @@ uint32_t McSetReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 3);
-  xfer += prot_->serializedSizeZCBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<true>(*prot_, this->value);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -1076,10 +1076,10 @@ uint32_t McSetReply::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("value", apache::thrift::protocol::T_STRING, 3);
-  xfer += prot_->writeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::write(*prot_, this->value);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -1120,7 +1120,7 @@ void McDeleteRequest::readNoXfer(Protocol_* iprot) {
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1166,7 +1166,7 @@ _readField_exptime:
 _readField_value:
   {
     
-    iprot->readBinary(this->value);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::read(*iprot, this->value);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.value = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1270,13 +1270,13 @@ uint32_t McDeleteRequest::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McDeleteRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<false>(*prot_, this->value);
   xfer += prot_->serializedFieldSize("attributes", apache::thrift::protocol::T_MAP, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, std::unordered_map<std::string, uint64_t>>::serializedSize<false>(*prot_, this->attributes);
   xfer += prot_->serializedSizeStop();
@@ -1288,13 +1288,13 @@ uint32_t McDeleteRequest::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McDeleteRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeZCBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<true>(*prot_, this->value);
   xfer += prot_->serializedFieldSize("attributes", apache::thrift::protocol::T_MAP, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, std::unordered_map<std::string, uint64_t>>::serializedSize<false>(*prot_, this->attributes);
   xfer += prot_->serializedSizeStop();
@@ -1306,7 +1306,7 @@ uint32_t McDeleteRequest::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McDeleteRequest");
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("flags", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
@@ -1315,7 +1315,7 @@ uint32_t McDeleteRequest::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::write(*prot_, this->exptime);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->writeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::write(*prot_, this->value);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("attributes", apache::thrift::protocol::T_MAP, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, std::unordered_map<std::string, uint64_t>>::write(*prot_, this->attributes);
@@ -1386,7 +1386,7 @@ _readField_flags:
 _readField_value:
   {
     
-    iprot->readBinary(this->value);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::read(*iprot, this->value);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.value = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1402,7 +1402,7 @@ _readField_value:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1506,9 +1506,9 @@ uint32_t McDeleteReply::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 3);
-  xfer += prot_->serializedSizeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<false>(*prot_, this->value);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -1524,9 +1524,9 @@ uint32_t McDeleteReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 3);
-  xfer += prot_->serializedSizeZCBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<true>(*prot_, this->value);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -1544,10 +1544,10 @@ uint32_t McDeleteReply::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("value", apache::thrift::protocol::T_STRING, 3);
-  xfer += prot_->writeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::write(*prot_, this->value);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -1588,7 +1588,7 @@ void McLeaseGetRequest::readNoXfer(Protocol_* iprot) {
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1664,7 +1664,7 @@ uint32_t McLeaseGetRequest::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McLeaseGetRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedSizeStop();
@@ -1676,7 +1676,7 @@ uint32_t McLeaseGetRequest::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McLeaseGetRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedSizeStop();
@@ -1688,7 +1688,7 @@ uint32_t McLeaseGetRequest::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McLeaseGetRequest");
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("flags", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
@@ -1759,7 +1759,7 @@ _readField_leaseToken:
 _readField_value:
   {
     
-    iprot->readBinary(this->value);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::read(*iprot, this->value);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.value = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1790,7 +1790,7 @@ _readField_flags:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1903,12 +1903,12 @@ uint32_t McLeaseGetReply::serializedSize(Protocol_ const* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->leaseToken);
   if (this->value_ref().has_value()) {
     xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 3);
-    xfer += prot_->serializedSizeBinary(this->value);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<false>(*prot_, this->value);
   }
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 4);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 5);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 6);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -1925,12 +1925,12 @@ uint32_t McLeaseGetReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->leaseToken);
   if (this->value_ref().has_value()) {
     xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 3);
-    xfer += prot_->serializedSizeZCBinary(this->value);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<true>(*prot_, this->value);
   }
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 4);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 5);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 6);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -1949,14 +1949,14 @@ uint32_t McLeaseGetReply::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldEnd();
   if (this->value_ref().has_value()) {
     xfer += prot_->writeFieldBegin("value", apache::thrift::protocol::T_STRING, 3);
-    xfer += prot_->writeBinary(this->value);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::write(*prot_, this->value);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldBegin("flags", apache::thrift::protocol::T_I64, 4);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 5);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 6);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -1997,7 +1997,7 @@ void McLeaseSetRequest::readNoXfer(Protocol_* iprot) {
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -2043,7 +2043,7 @@ _readField_flags:
 _readField_value:
   {
     
-    iprot->readBinary(this->value);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::read(*iprot, this->value);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.value = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -2143,13 +2143,13 @@ uint32_t McLeaseSetRequest::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McLeaseSetRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<false>(*prot_, this->value);
   xfer += prot_->serializedFieldSize("leaseToken", apache::thrift::protocol::T_I64, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->leaseToken);
   xfer += prot_->serializedSizeStop();
@@ -2161,13 +2161,13 @@ uint32_t McLeaseSetRequest::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McLeaseSetRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeZCBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<true>(*prot_, this->value);
   xfer += prot_->serializedFieldSize("leaseToken", apache::thrift::protocol::T_I64, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->leaseToken);
   xfer += prot_->serializedSizeStop();
@@ -2179,7 +2179,7 @@ uint32_t McLeaseSetRequest::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McLeaseSetRequest");
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::write(*prot_, this->exptime);
@@ -2188,7 +2188,7 @@ uint32_t McLeaseSetRequest::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->writeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::write(*prot_, this->value);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("leaseToken", apache::thrift::protocol::T_I64, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::write(*prot_, this->leaseToken);
@@ -2244,7 +2244,7 @@ _readField_result:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -2330,7 +2330,7 @@ uint32_t McLeaseSetReply::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -2344,7 +2344,7 @@ uint32_t McLeaseSetReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -2359,7 +2359,7 @@ uint32_t McLeaseSetReply::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::write(*prot_, this->result);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -2400,7 +2400,7 @@ void McAddRequest::readNoXfer(Protocol_* iprot) {
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -2446,7 +2446,7 @@ _readField_flags:
 _readField_value:
   {
     
-    iprot->readBinary(this->value);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::read(*iprot, this->value);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.value = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -2523,13 +2523,13 @@ uint32_t McAddRequest::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McAddRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<false>(*prot_, this->value);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -2539,13 +2539,13 @@ uint32_t McAddRequest::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McAddRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeZCBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<true>(*prot_, this->value);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -2555,7 +2555,7 @@ uint32_t McAddRequest::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McAddRequest");
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::write(*prot_, this->exptime);
@@ -2564,7 +2564,7 @@ uint32_t McAddRequest::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->writeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::write(*prot_, this->value);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -2617,7 +2617,7 @@ _readField_result:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -2703,7 +2703,7 @@ uint32_t McAddReply::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -2717,7 +2717,7 @@ uint32_t McAddReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -2732,7 +2732,7 @@ uint32_t McAddReply::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::write(*prot_, this->result);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -2773,7 +2773,7 @@ void McReplaceRequest::readNoXfer(Protocol_* iprot) {
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -2819,7 +2819,7 @@ _readField_flags:
 _readField_value:
   {
     
-    iprot->readBinary(this->value);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::read(*iprot, this->value);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.value = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -2896,13 +2896,13 @@ uint32_t McReplaceRequest::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McReplaceRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<false>(*prot_, this->value);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -2912,13 +2912,13 @@ uint32_t McReplaceRequest::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McReplaceRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeZCBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<true>(*prot_, this->value);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -2928,7 +2928,7 @@ uint32_t McReplaceRequest::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McReplaceRequest");
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::write(*prot_, this->exptime);
@@ -2937,7 +2937,7 @@ uint32_t McReplaceRequest::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->writeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::write(*prot_, this->value);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -2990,7 +2990,7 @@ _readField_result:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -3076,7 +3076,7 @@ uint32_t McReplaceReply::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -3090,7 +3090,7 @@ uint32_t McReplaceReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -3105,7 +3105,7 @@ uint32_t McReplaceReply::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::write(*prot_, this->result);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -3146,7 +3146,7 @@ void McGetsRequest::readNoXfer(Protocol_* iprot) {
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -3222,7 +3222,7 @@ uint32_t McGetsRequest::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McGetsRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedSizeStop();
@@ -3234,7 +3234,7 @@ uint32_t McGetsRequest::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McGetsRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedSizeStop();
@@ -3246,7 +3246,7 @@ uint32_t McGetsRequest::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McGetsRequest");
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("flags", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
@@ -3317,7 +3317,7 @@ _readField_casToken:
 _readField_value:
   {
     
-    iprot->readBinary(this->value);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::read(*iprot, this->value);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.value = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -3348,7 +3348,7 @@ _readField_flags:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -3461,12 +3461,12 @@ uint32_t McGetsReply::serializedSize(Protocol_ const* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->casToken);
   if (this->value_ref().has_value()) {
     xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 3);
-    xfer += prot_->serializedSizeBinary(this->value);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<false>(*prot_, this->value);
   }
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 4);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 5);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 6);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -3483,12 +3483,12 @@ uint32_t McGetsReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->casToken);
   if (this->value_ref().has_value()) {
     xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 3);
-    xfer += prot_->serializedSizeZCBinary(this->value);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<true>(*prot_, this->value);
   }
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 4);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 5);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 6);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -3507,14 +3507,14 @@ uint32_t McGetsReply::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldEnd();
   if (this->value_ref().has_value()) {
     xfer += prot_->writeFieldBegin("value", apache::thrift::protocol::T_STRING, 3);
-    xfer += prot_->writeBinary(this->value);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::write(*prot_, this->value);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldBegin("flags", apache::thrift::protocol::T_I64, 4);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 5);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 6);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -3555,7 +3555,7 @@ void McCasRequest::readNoXfer(Protocol_* iprot) {
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -3601,7 +3601,7 @@ _readField_flags:
 _readField_value:
   {
     
-    iprot->readBinary(this->value);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::read(*iprot, this->value);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.value = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -3701,13 +3701,13 @@ uint32_t McCasRequest::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McCasRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<false>(*prot_, this->value);
   xfer += prot_->serializedFieldSize("casToken", apache::thrift::protocol::T_I64, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->casToken);
   xfer += prot_->serializedSizeStop();
@@ -3719,13 +3719,13 @@ uint32_t McCasRequest::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McCasRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeZCBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<true>(*prot_, this->value);
   xfer += prot_->serializedFieldSize("casToken", apache::thrift::protocol::T_I64, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->casToken);
   xfer += prot_->serializedSizeStop();
@@ -3737,7 +3737,7 @@ uint32_t McCasRequest::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McCasRequest");
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::write(*prot_, this->exptime);
@@ -3746,7 +3746,7 @@ uint32_t McCasRequest::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->writeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::write(*prot_, this->value);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("casToken", apache::thrift::protocol::T_I64, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->casToken);
@@ -3802,7 +3802,7 @@ _readField_result:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -3888,7 +3888,7 @@ uint32_t McCasReply::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -3902,7 +3902,7 @@ uint32_t McCasReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -3917,7 +3917,7 @@ uint32_t McCasReply::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::write(*prot_, this->result);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -3958,7 +3958,7 @@ void McIncrRequest::readNoXfer(Protocol_* iprot) {
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -4034,7 +4034,7 @@ uint32_t McIncrRequest::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McIncrRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("delta", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->delta);
   xfer += prot_->serializedSizeStop();
@@ -4046,7 +4046,7 @@ uint32_t McIncrRequest::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McIncrRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("delta", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->delta);
   xfer += prot_->serializedSizeStop();
@@ -4058,7 +4058,7 @@ uint32_t McIncrRequest::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McIncrRequest");
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("delta", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::write(*prot_, this->delta);
@@ -4129,7 +4129,7 @@ _readField_delta:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -4225,7 +4225,7 @@ uint32_t McIncrReply::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("delta", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->delta);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 3);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 4);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -4241,7 +4241,7 @@ uint32_t McIncrReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("delta", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->delta);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 3);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 4);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -4259,7 +4259,7 @@ uint32_t McIncrReply::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::write(*prot_, this->delta);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 3);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 4);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -4300,7 +4300,7 @@ void McDecrRequest::readNoXfer(Protocol_* iprot) {
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -4376,7 +4376,7 @@ uint32_t McDecrRequest::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McDecrRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("delta", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->delta);
   xfer += prot_->serializedSizeStop();
@@ -4388,7 +4388,7 @@ uint32_t McDecrRequest::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McDecrRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("delta", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->delta);
   xfer += prot_->serializedSizeStop();
@@ -4400,7 +4400,7 @@ uint32_t McDecrRequest::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McDecrRequest");
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("delta", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::write(*prot_, this->delta);
@@ -4471,7 +4471,7 @@ _readField_delta:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -4567,7 +4567,7 @@ uint32_t McDecrReply::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("delta", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->delta);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 3);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 4);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -4583,7 +4583,7 @@ uint32_t McDecrReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("delta", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->delta);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 3);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 4);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -4601,7 +4601,7 @@ uint32_t McDecrReply::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::write(*prot_, this->delta);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 3);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 4);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -4642,7 +4642,7 @@ void McMetagetRequest::readNoXfer(Protocol_* iprot) {
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -4695,7 +4695,7 @@ uint32_t McMetagetRequest::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McMetagetRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -4705,7 +4705,7 @@ uint32_t McMetagetRequest::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McMetagetRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -4715,7 +4715,7 @@ uint32_t McMetagetRequest::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McMetagetRequest");
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -4813,7 +4813,7 @@ _readField_ipv:
 _readField_ipAddress:
   {
     
-    iprot->readString(this->ipAddress);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->ipAddress);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.ipAddress = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -4829,7 +4829,7 @@ _readField_ipAddress:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -4953,9 +4953,9 @@ uint32_t McMetagetReply::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("ipv", apache::thrift::protocol::T_I16, 4);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->ipv);
   xfer += prot_->serializedFieldSize("ipAddress", apache::thrift::protocol::T_STRING, 5);
-  xfer += prot_->serializedSizeString(this->ipAddress);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->ipAddress);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 6);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 7);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -4975,9 +4975,9 @@ uint32_t McMetagetReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("ipv", apache::thrift::protocol::T_I16, 4);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->ipv);
   xfer += prot_->serializedFieldSize("ipAddress", apache::thrift::protocol::T_STRING, 5);
-  xfer += prot_->serializedSizeString(this->ipAddress);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->ipAddress);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 6);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 7);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -5001,10 +5001,10 @@ uint32_t McMetagetReply::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->ipv);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("ipAddress", apache::thrift::protocol::T_STRING, 5);
-  xfer += prot_->writeString(this->ipAddress);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->ipAddress);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 6);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 7);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -5045,7 +5045,7 @@ void McAppendRequest::readNoXfer(Protocol_* iprot) {
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -5091,7 +5091,7 @@ _readField_flags:
 _readField_value:
   {
     
-    iprot->readBinary(this->value);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::read(*iprot, this->value);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.value = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -5168,13 +5168,13 @@ uint32_t McAppendRequest::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McAppendRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<false>(*prot_, this->value);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -5184,13 +5184,13 @@ uint32_t McAppendRequest::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McAppendRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeZCBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<true>(*prot_, this->value);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -5200,7 +5200,7 @@ uint32_t McAppendRequest::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McAppendRequest");
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::write(*prot_, this->exptime);
@@ -5209,7 +5209,7 @@ uint32_t McAppendRequest::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->writeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::write(*prot_, this->value);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -5262,7 +5262,7 @@ _readField_result:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -5348,7 +5348,7 @@ uint32_t McAppendReply::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -5362,7 +5362,7 @@ uint32_t McAppendReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -5377,7 +5377,7 @@ uint32_t McAppendReply::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::write(*prot_, this->result);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -5418,7 +5418,7 @@ void McPrependRequest::readNoXfer(Protocol_* iprot) {
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -5464,7 +5464,7 @@ _readField_flags:
 _readField_value:
   {
     
-    iprot->readBinary(this->value);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::read(*iprot, this->value);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.value = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -5541,13 +5541,13 @@ uint32_t McPrependRequest::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McPrependRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<false>(*prot_, this->value);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -5557,13 +5557,13 @@ uint32_t McPrependRequest::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McPrependRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeZCBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<true>(*prot_, this->value);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -5573,7 +5573,7 @@ uint32_t McPrependRequest::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McPrependRequest");
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::write(*prot_, this->exptime);
@@ -5582,7 +5582,7 @@ uint32_t McPrependRequest::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("value", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->writeBinary(this->value);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::write(*prot_, this->value);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -5635,7 +5635,7 @@ _readField_result:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -5721,7 +5721,7 @@ uint32_t McPrependReply::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -5735,7 +5735,7 @@ uint32_t McPrependReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -5750,7 +5750,7 @@ uint32_t McPrependReply::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::write(*prot_, this->result);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -5791,7 +5791,7 @@ void McTouchRequest::readNoXfer(Protocol_* iprot) {
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -5867,7 +5867,7 @@ uint32_t McTouchRequest::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McTouchRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedSizeStop();
@@ -5879,7 +5879,7 @@ uint32_t McTouchRequest::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McTouchRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedSizeStop();
@@ -5891,7 +5891,7 @@ uint32_t McTouchRequest::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McTouchRequest");
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("exptime", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::write(*prot_, this->exptime);
@@ -5947,7 +5947,7 @@ _readField_result:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -6033,7 +6033,7 @@ uint32_t McTouchReply::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -6047,7 +6047,7 @@ uint32_t McTouchReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -6062,7 +6062,7 @@ uint32_t McTouchReply::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::write(*prot_, this->result);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -6103,7 +6103,7 @@ void McFlushReRequest::readNoXfer(Protocol_* iprot) {
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -6156,7 +6156,7 @@ uint32_t McFlushReRequest::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McFlushReRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -6166,7 +6166,7 @@ uint32_t McFlushReRequest::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McFlushReRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -6176,7 +6176,7 @@ uint32_t McFlushReRequest::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McFlushReRequest");
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -6229,7 +6229,7 @@ _readField_result:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -6315,7 +6315,7 @@ uint32_t McFlushReReply::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -6329,7 +6329,7 @@ uint32_t McFlushReReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -6344,7 +6344,7 @@ uint32_t McFlushReReply::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::write(*prot_, this->result);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -6385,7 +6385,7 @@ void McFlushAllRequest::readNoXfer(Protocol_* iprot) {
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -6461,7 +6461,7 @@ uint32_t McFlushAllRequest::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McFlushAllRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("delay", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->delay);
   xfer += prot_->serializedSizeStop();
@@ -6473,7 +6473,7 @@ uint32_t McFlushAllRequest::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("McFlushAllRequest");
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedFieldSize("delay", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->delay);
   xfer += prot_->serializedSizeStop();
@@ -6485,7 +6485,7 @@ uint32_t McFlushAllRequest::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("McFlushAllRequest");
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("delay", apache::thrift::protocol::T_I32, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::write(*prot_, this->delay);
@@ -6541,7 +6541,7 @@ _readField_result:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -6627,7 +6627,7 @@ uint32_t McFlushAllReply::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -6641,7 +6641,7 @@ uint32_t McFlushAllReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("result", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -6656,7 +6656,7 @@ uint32_t McFlushAllReply::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::write(*prot_, this->result);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -6712,7 +6712,7 @@ _readField_exptime:
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -6775,7 +6775,7 @@ uint32_t McGatRequest::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -6787,7 +6787,7 @@ uint32_t McGatRequest::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -6800,7 +6800,7 @@ uint32_t McGatRequest::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::write(*prot_, this->exptime);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -6853,7 +6853,7 @@ _readField_result:
 _readField_value:
   {
     
-    iprot->readBinary(this->value);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::read(*iprot, this->value);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.value = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -6884,7 +6884,7 @@ _readField_flags:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -6987,12 +6987,12 @@ uint32_t McGatReply::serializedSize(Protocol_ const* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   if (this->value_ref().has_value()) {
     xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 2);
-    xfer += prot_->serializedSizeBinary(this->value);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<false>(*prot_, this->value);
   }
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -7007,12 +7007,12 @@ uint32_t McGatReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::carbon::Result>::serializedSize<false>(*prot_, this->result);
   if (this->value_ref().has_value()) {
     xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 2);
-    xfer += prot_->serializedSizeZCBinary(this->value);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<true>(*prot_, this->value);
   }
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -7028,14 +7028,14 @@ uint32_t McGatReply::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldEnd();
   if (this->value_ref().has_value()) {
     xfer += prot_->writeFieldBegin("value", apache::thrift::protocol::T_STRING, 2);
-    xfer += prot_->writeBinary(this->value);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::write(*prot_, this->value);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldBegin("flags", apache::thrift::protocol::T_I64, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 5);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);
@@ -7091,7 +7091,7 @@ _readField_exptime:
 _readField_key:
   {
     
-    iprot->readBinary(this->key.rawUnsafe());
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::read(*iprot, this->key);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.key = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -7154,7 +7154,7 @@ uint32_t McGatsRequest::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<false>(*prot_, this->key);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -7166,7 +7166,7 @@ uint32_t McGatsRequest::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("exptime", apache::thrift::protocol::T_I32, 1);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::serializedSize<false>(*prot_, this->exptime);
   xfer += prot_->serializedFieldSize("key", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->serializedSizeZCBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::serializedSize<true>(*prot_, this->key);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -7179,7 +7179,7 @@ uint32_t McGatsRequest::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int32_t>::write(*prot_, this->exptime);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("key", apache::thrift::protocol::T_STRING, 2);
-  xfer += prot_->writeBinary(this->key.rawUnsafe());
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::detail::indirection_tag<::apache::thrift::type_class::binary,  ::carbon::thrift::apache_thrift_indirection_module_IOBufKey>,  ::carbon::thrift::IOBufKey>::write(*prot_, this->key);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();
@@ -7247,7 +7247,7 @@ _readField_casToken:
 _readField_value:
   {
     
-    iprot->readBinary(this->value);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::read(*iprot, this->value);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.value = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -7278,7 +7278,7 @@ _readField_flags:
 _readField_message:
   {
     
-    iprot->readString(this->message);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->message);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.message = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -7391,12 +7391,12 @@ uint32_t McGatsReply::serializedSize(Protocol_ const* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->casToken);
   if (this->value_ref().has_value()) {
     xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 3);
-    xfer += prot_->serializedSizeBinary(this->value);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<false>(*prot_, this->value);
   }
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 4);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 5);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 6);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -7413,12 +7413,12 @@ uint32_t McGatsReply::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->casToken);
   if (this->value_ref().has_value()) {
     xfer += prot_->serializedFieldSize("value", apache::thrift::protocol::T_STRING, 3);
-    xfer += prot_->serializedSizeZCBinary(this->value);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<true>(*prot_, this->value);
   }
   xfer += prot_->serializedFieldSize("flags", apache::thrift::protocol::T_I64, 4);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::serializedSize<false>(*prot_, this->flags);
   xfer += prot_->serializedFieldSize("message", apache::thrift::protocol::T_STRING, 5);
-  xfer += prot_->serializedSizeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->message);
   xfer += prot_->serializedFieldSize("appSpecificErrorCode", apache::thrift::protocol::T_I16, 6);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::serializedSize<false>(*prot_, this->appSpecificErrorCode);
   xfer += prot_->serializedSizeStop();
@@ -7437,14 +7437,14 @@ uint32_t McGatsReply::write(Protocol_* prot_) const {
   xfer += prot_->writeFieldEnd();
   if (this->value_ref().has_value()) {
     xfer += prot_->writeFieldBegin("value", apache::thrift::protocol::T_STRING, 3);
-    xfer += prot_->writeBinary(this->value);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::binary, folly::IOBuf>::write(*prot_, this->value);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldBegin("flags", apache::thrift::protocol::T_I64, 4);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, uint64_t>::write(*prot_, this->flags);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("message", apache::thrift::protocol::T_STRING, 5);
-  xfer += prot_->writeString(this->message);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->message);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("appSpecificErrorCode", apache::thrift::protocol::T_I16, 6);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int16_t>::write(*prot_, this->appSpecificErrorCode);

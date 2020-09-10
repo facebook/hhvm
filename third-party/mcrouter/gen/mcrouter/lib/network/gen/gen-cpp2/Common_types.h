@@ -11,6 +11,7 @@
 
 #include "mcrouter/lib/carbon/gen-cpp2/carbon_types.h"
 #include "mcrouter/lib/carbon/gen-cpp2/carbon_result_types.h"
+#include <mcrouter/lib/carbon/CarbonProtocolReader.h>
 
 namespace apache {
 namespace thrift {
@@ -174,9 +175,21 @@ class GoAwayRequest;
 // BEGIN hash_and_equal_to
 // END hash_and_equal_to
 namespace facebook { namespace memcache { namespace thrift {
-class McVersionRequest final  {
+class McVersionRequest  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = McVersionRequest;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McVersionRequest() {}
@@ -188,11 +201,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   McVersionRequest(const McVersionRequest&) = default;
 
+
   McVersionRequest& operator=(McVersionRequest&&) = default;
 
   McVersionRequest& operator=(const McVersionRequest&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
+
+  virtual ~McVersionRequest() {}
+
  public:
    ::carbon::thrift::IOBufKey key;
 
@@ -267,15 +284,27 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   uint32_t serializedSizeZC(Protocol_ const* prot_) const;
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
+  // user defined code (cpp2.methods = ...)
+  
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+
 
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< McVersionRequest >;
+  friend void swap(McVersionRequest& a, McVersionRequest& b);
 };
-
-void swap(McVersionRequest& a, McVersionRequest& b);
 
 template <class Protocol_>
 uint32_t McVersionRequest::read(Protocol_* iprot) {
@@ -286,9 +315,21 @@ uint32_t McVersionRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McVersionReply final  {
+class McVersionReply  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = McVersionReply;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McVersionReply() :
@@ -302,11 +343,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   McVersionReply(const McVersionReply&) = default;
 
+
   McVersionReply& operator=(McVersionReply&&) = default;
 
   McVersionReply& operator=(const McVersionReply&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
+
+  virtual ~McVersionReply() {}
+
  public:
    ::carbon::Result result;
  public:
@@ -497,15 +542,27 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   uint32_t serializedSizeZC(Protocol_ const* prot_) const;
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
+  // user defined code (cpp2.methods = ...)
+  
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+
 
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< McVersionReply >;
+  friend void swap(McVersionReply& a, McVersionReply& b);
 };
-
-void swap(McVersionReply& a, McVersionReply& b);
 
 template <class Protocol_>
 uint32_t McVersionReply::read(Protocol_* iprot) {
@@ -516,9 +573,21 @@ uint32_t McVersionReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McStatsRequest final  {
+class McStatsRequest  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = McStatsRequest;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McStatsRequest() {}
@@ -530,11 +599,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   McStatsRequest(const McStatsRequest&) = default;
 
+
   McStatsRequest& operator=(McStatsRequest&&) = default;
 
   McStatsRequest& operator=(const McStatsRequest&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
+
+  virtual ~McStatsRequest() {}
+
  public:
    ::carbon::thrift::IOBufKey key;
 
@@ -609,15 +682,27 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   uint32_t serializedSizeZC(Protocol_ const* prot_) const;
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
+  // user defined code (cpp2.methods = ...)
+  
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+
 
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< McStatsRequest >;
+  friend void swap(McStatsRequest& a, McStatsRequest& b);
 };
-
-void swap(McStatsRequest& a, McStatsRequest& b);
 
 template <class Protocol_>
 uint32_t McStatsRequest::read(Protocol_* iprot) {
@@ -628,9 +713,21 @@ uint32_t McStatsRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McStatsReply final  {
+class McStatsReply  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = McStatsReply;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McStatsReply() :
@@ -644,11 +741,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   McStatsReply(const McStatsReply&) = default;
 
+
   McStatsReply& operator=(McStatsReply&&) = default;
 
   McStatsReply& operator=(const McStatsReply&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
+
+  virtual ~McStatsReply() {}
+
  public:
    ::carbon::Result result;
  public:
@@ -833,15 +934,27 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   uint32_t serializedSizeZC(Protocol_ const* prot_) const;
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
+  // user defined code (cpp2.methods = ...)
+  
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+
 
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< McStatsReply >;
+  friend void swap(McStatsReply& a, McStatsReply& b);
 };
-
-void swap(McStatsReply& a, McStatsReply& b);
 
 template <class Protocol_>
 uint32_t McStatsReply::read(Protocol_* iprot) {
@@ -852,9 +965,21 @@ uint32_t McStatsReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McShutdownRequest final  {
+class McShutdownRequest  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = McShutdownRequest;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McShutdownRequest() {}
@@ -866,11 +991,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   McShutdownRequest(const McShutdownRequest&) = default;
 
+
   McShutdownRequest& operator=(McShutdownRequest&&) = default;
 
   McShutdownRequest& operator=(const McShutdownRequest&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
+
+  virtual ~McShutdownRequest() {}
+
  public:
    ::carbon::thrift::IOBufKey key;
 
@@ -945,15 +1074,27 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   uint32_t serializedSizeZC(Protocol_ const* prot_) const;
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
+  // user defined code (cpp2.methods = ...)
+  
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+
 
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< McShutdownRequest >;
+  friend void swap(McShutdownRequest& a, McShutdownRequest& b);
 };
-
-void swap(McShutdownRequest& a, McShutdownRequest& b);
 
 template <class Protocol_>
 uint32_t McShutdownRequest::read(Protocol_* iprot) {
@@ -964,9 +1105,21 @@ uint32_t McShutdownRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McShutdownReply final  {
+class McShutdownReply  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = McShutdownReply;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McShutdownReply() :
@@ -980,11 +1133,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   McShutdownReply(const McShutdownReply&) = default;
 
+
   McShutdownReply& operator=(McShutdownReply&&) = default;
 
   McShutdownReply& operator=(const McShutdownReply&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
+
+  virtual ~McShutdownReply() {}
+
  public:
    ::carbon::Result result;
  public:
@@ -1133,15 +1290,27 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   uint32_t serializedSizeZC(Protocol_ const* prot_) const;
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
+  // user defined code (cpp2.methods = ...)
+  
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+
 
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< McShutdownReply >;
+  friend void swap(McShutdownReply& a, McShutdownReply& b);
 };
-
-void swap(McShutdownReply& a, McShutdownReply& b);
 
 template <class Protocol_>
 uint32_t McShutdownReply::read(Protocol_* iprot) {
@@ -1152,9 +1321,21 @@ uint32_t McShutdownReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McQuitRequest final  {
+class McQuitRequest  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = McQuitRequest;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McQuitRequest() {}
@@ -1166,11 +1347,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   McQuitRequest(const McQuitRequest&) = default;
 
+
   McQuitRequest& operator=(McQuitRequest&&) = default;
 
   McQuitRequest& operator=(const McQuitRequest&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
+
+  virtual ~McQuitRequest() {}
+
  public:
    ::carbon::thrift::IOBufKey key;
 
@@ -1245,15 +1430,27 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   uint32_t serializedSizeZC(Protocol_ const* prot_) const;
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
+  // user defined code (cpp2.methods = ...)
+  
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+
 
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< McQuitRequest >;
+  friend void swap(McQuitRequest& a, McQuitRequest& b);
 };
-
-void swap(McQuitRequest& a, McQuitRequest& b);
 
 template <class Protocol_>
 uint32_t McQuitRequest::read(Protocol_* iprot) {
@@ -1264,9 +1461,21 @@ uint32_t McQuitRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McQuitReply final  {
+class McQuitReply  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = McQuitReply;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McQuitReply() :
@@ -1280,11 +1489,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   McQuitReply(const McQuitReply&) = default;
 
+
   McQuitReply& operator=(McQuitReply&&) = default;
 
   McQuitReply& operator=(const McQuitReply&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
+
+  virtual ~McQuitReply() {}
+
  public:
    ::carbon::Result result;
  public:
@@ -1433,15 +1646,27 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   uint32_t serializedSizeZC(Protocol_ const* prot_) const;
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
+  // user defined code (cpp2.methods = ...)
+  
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+
 
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< McQuitReply >;
+  friend void swap(McQuitReply& a, McQuitReply& b);
 };
-
-void swap(McQuitReply& a, McQuitReply& b);
 
 template <class Protocol_>
 uint32_t McQuitReply::read(Protocol_* iprot) {
@@ -1452,9 +1677,21 @@ uint32_t McQuitReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McExecRequest final  {
+class McExecRequest  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = McExecRequest;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McExecRequest() {}
@@ -1466,11 +1703,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   McExecRequest(const McExecRequest&) = default;
 
+
   McExecRequest& operator=(McExecRequest&&) = default;
 
   McExecRequest& operator=(const McExecRequest&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
+
+  virtual ~McExecRequest() {}
+
  public:
    ::carbon::thrift::IOBufKey key;
 
@@ -1545,15 +1786,27 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   uint32_t serializedSizeZC(Protocol_ const* prot_) const;
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
+  // user defined code (cpp2.methods = ...)
+  
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+
 
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< McExecRequest >;
+  friend void swap(McExecRequest& a, McExecRequest& b);
 };
-
-void swap(McExecRequest& a, McExecRequest& b);
 
 template <class Protocol_>
 uint32_t McExecRequest::read(Protocol_* iprot) {
@@ -1564,9 +1817,21 @@ uint32_t McExecRequest::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class McExecReply final  {
+class McExecReply  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = McExecReply;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   McExecReply() :
@@ -1580,11 +1845,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   McExecReply(const McExecReply&) = default;
 
+
   McExecReply& operator=(McExecReply&&) = default;
 
   McExecReply& operator=(const McExecReply&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
+
+  virtual ~McExecReply() {}
+
  public:
    ::carbon::Result result;
  public:
@@ -1775,15 +2044,27 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   uint32_t serializedSizeZC(Protocol_ const* prot_) const;
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
+  // user defined code (cpp2.methods = ...)
+  
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+
 
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< McExecReply >;
+  friend void swap(McExecReply& a, McExecReply& b);
 };
-
-void swap(McExecReply& a, McExecReply& b);
 
 template <class Protocol_>
 uint32_t McExecReply::read(Protocol_* iprot) {
@@ -1794,9 +2075,21 @@ uint32_t McExecReply::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class GoAwayAcknowledgement final  {
+class GoAwayAcknowledgement  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = GoAwayAcknowledgement;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   GoAwayAcknowledgement() {}
@@ -1808,11 +2101,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   GoAwayAcknowledgement(const GoAwayAcknowledgement&) = default;
 
+
   GoAwayAcknowledgement& operator=(GoAwayAcknowledgement&&) = default;
 
   GoAwayAcknowledgement& operator=(const GoAwayAcknowledgement&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
+
+  virtual ~GoAwayAcknowledgement() {}
+
   bool operator==(const GoAwayAcknowledgement& rhs) const;
 #ifndef SWIG
   friend bool operator!=(const GoAwayAcknowledgement& __x, const GoAwayAcknowledgement& __y) {
@@ -1840,15 +2137,27 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   uint32_t serializedSizeZC(Protocol_ const* prot_) const;
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
+  // user defined code (cpp2.methods = ...)
+  
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+
 
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< GoAwayAcknowledgement >;
+  friend void swap(GoAwayAcknowledgement& a, GoAwayAcknowledgement& b);
 };
-
-void swap(GoAwayAcknowledgement& a, GoAwayAcknowledgement& b);
 
 template <class Protocol_>
 uint32_t GoAwayAcknowledgement::read(Protocol_* iprot) {
@@ -1859,9 +2168,21 @@ uint32_t GoAwayAcknowledgement::read(Protocol_* iprot) {
 
 }}} // facebook::memcache::thrift
 namespace facebook { namespace memcache { namespace thrift {
-class GoAwayRequest final  {
+class GoAwayRequest  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = GoAwayRequest;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   GoAwayRequest() :
@@ -1874,11 +2195,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   GoAwayRequest(const GoAwayRequest&) = default;
 
+
   GoAwayRequest& operator=(GoAwayRequest&&) = default;
 
   GoAwayRequest& operator=(const GoAwayRequest&) = default;
 THRIFT_IGNORE_ISSET_USE_WARNING_END
   void __clear();
+
+  virtual ~GoAwayRequest() {}
+
  public:
    ::carbon::Result result;
  public:
@@ -1990,15 +2315,27 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   uint32_t serializedSizeZC(Protocol_ const* prot_) const;
   template <class Protocol_>
   uint32_t write(Protocol_* prot_) const;
+  // user defined code (cpp2.methods = ...)
+  
+  template <class V>
+  void visitFields(V&& v);
+  template <class V>
+  void visitFields(V&& v) const;
+
+  template <class Writer>
+  void serialize(Writer&& writer) const;
+
+  void deserialize(carbon::CarbonProtocolReader& reader);
+
+
 
  private:
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< GoAwayRequest >;
+  friend void swap(GoAwayRequest& a, GoAwayRequest& b);
 };
-
-void swap(GoAwayRequest& a, GoAwayRequest& b);
 
 template <class Protocol_>
 uint32_t GoAwayRequest::read(Protocol_* iprot) {

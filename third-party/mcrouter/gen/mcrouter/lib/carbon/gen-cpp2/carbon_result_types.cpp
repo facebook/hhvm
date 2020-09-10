@@ -44,13 +44,3 @@ const _Result_EnumMapFactory::NamesToValuesMapType _Result_NAMES_TO_VALUES = _Re
 FOLLY_POP_WARNING
 
 } // carbon
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-

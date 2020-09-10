@@ -15,7 +15,7 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::carbon::Result> {
   using type = ::carbon::Result;
   static constexpr const std::size_t size = 34;
-  static constexpr const std::array<type, 34> values = {{
+  static constexpr const std::array<type, size> values = {{
     type::UNKNOWN,
     type::DELETED,
     type::TOUCHED,
@@ -51,7 +51,7 @@ template <> struct TEnumDataStorage<::carbon::Result> {
     type::DEADLINE_EXCEEDED,
     type::NUM_RESULTS,
   }};
-  static constexpr const std::array<folly::StringPiece, 34> names = {{
+  static constexpr const std::array<folly::StringPiece, size> names = {{
     "UNKNOWN",
     "DELETED",
     "TOUCHED",

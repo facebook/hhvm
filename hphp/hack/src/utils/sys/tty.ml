@@ -92,10 +92,14 @@ let supports_color =
       value
 
 let should_color color_mode =
+  let force_color =
+    Sys_utils.get_env "FORCE_ERROR_COLOR"
+    |> Option.value_map ~default:false ~f:(fun s -> s = "true")
+  in
   match color_mode with
   | Color_Always -> true
   | Color_Never -> false
-  | Color_Auto -> supports_color ()
+  | Color_Auto -> supports_color () || force_color
 
 let emoji_spinner =
   List.map

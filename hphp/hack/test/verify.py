@@ -153,6 +153,7 @@ def run_batch_tests(
     default_expect_regex: Optional[str],
     ignore_error_text: bool,
     no_stderr: bool,
+    force_color: bool,
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
     out_extension: str,
@@ -186,12 +187,15 @@ def run_batch_tests(
         cmd += flags + test_flags
         cmd += [os.path.basename(case.file_path) for case in test_cases]
         debug_cmd(test_dir, cmd)
+        env = os.environ.copy()
+        env["FORCE_ERROR_COLOR"] = "true" if force_color else "false"
         try:
             return_code = subprocess.call(
                 cmd,
                 stderr=None if no_stderr else subprocess.STDOUT,
                 cwd=test_dir,
                 universal_newlines=True,
+                env=env,
             )
         except subprocess.CalledProcessError:
             # we don't care about nonzero exit codes... for instance, type
@@ -243,6 +247,7 @@ def run_test_program(
     default_expect_regex: Optional[str],
     ignore_error_text: bool,
     no_stderr: bool,
+    force_color: bool,
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
     timeout: Optional[float] = None,
@@ -262,6 +267,8 @@ def run_test_program(
             cmd.append(test_name)
         cmd += flags + test_flags
         debug_cmd(test_dir, cmd)
+        env = os.environ.copy()
+        env["FORCE_ERROR_COLOR"] = "true" if force_color else "false"
         try:
             output = subprocess.check_output(
                 cmd,
@@ -272,6 +279,7 @@ def run_test_program(
                 input=test_case.input,
                 timeout=timeout,
                 errors="replace",
+                env=env,
             )
         except subprocess.TimeoutExpired as e:
             output = "Timed out. " + str(e.output)
@@ -525,6 +533,7 @@ def run_tests(
     batch_mode: str,
     ignore_error_text: bool,
     no_stderr: bool,
+    force_color: bool,
     mode_flag: List[str],
     get_flags: Callable[[str], List[str]],
     timeout: Optional[float] = None,
@@ -547,6 +556,7 @@ def run_tests(
             default_expect_regex,
             ignore_error_text,
             no_stderr,
+            force_color,
             mode_flag,
             get_flags,
             out_extension,
@@ -559,6 +569,7 @@ def run_tests(
             default_expect_regex,
             ignore_error_text,
             no_stderr,
+            force_color,
             mode_flag,
             get_flags,
             timeout=timeout,
@@ -610,6 +621,7 @@ def run_idempotence_tests(
         idempotence_test_cases,
         program,
         default_expect_regex,
+        False,
         False,
         False,
         mode_flag,
@@ -709,6 +721,12 @@ if __name__ == "__main__":
         type=int,
         help="Timeout in seconds for each test, in non-batch mode.",
     )
+    parser.add_argument(
+        "--force-color",
+        action="store_true",
+        help="Set the FORCE_ERROR_COLOR environment variable, "
+        "which causes the test output to retain terminal escape codes.",
+    )
     parser.epilog = (
         "%s looks for a file named HH_FLAGS in the same directory"
         " as the test files it is executing. If found, the "
@@ -749,6 +767,7 @@ if __name__ == "__main__":
         args.batch,
         args.ignore_error_text,
         args.no_stderr,
+        args.force_color,
         mode_flag,
         get_flags,
         timeout=args.timeout,

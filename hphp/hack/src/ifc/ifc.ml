@@ -426,7 +426,7 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
     | Some ptype -> (env, ptype)
     | None -> fail "encountered $this outside of a class context")
   | A.ET_Splice e
-  | A.ExpressionTree (_, e)
+  | A.ExpressionTree (_, e, _)
   | A.BracedExpr e ->
     expr env e
   (* TODO(T68414656): Support calls with type arguments *)

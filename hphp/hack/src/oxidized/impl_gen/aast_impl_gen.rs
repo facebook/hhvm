@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<516a3e73ec973586a4e977d0d5026201>>
+// @generated SignedSource<<40cdbf8caf658a9c41094042e8057b00>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1138,8 +1138,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_parenthesized_expr(p0: Expr<Ex, Fb, En, Hi>) -> Self {
         Expr_::ParenthesizedExpr(Box::new(p0))
     }
-    pub fn mk_expression_tree(p0: Hint, p1: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::ExpressionTree(Box::new((p0, p1)))
+    pub fn mk_expression_tree(
+        p0: Hint,
+        p1: Expr<Ex, Fb, En, Hi>,
+        p2: Option<Expr<Ex, Fb, En, Hi>>,
+    ) -> Self {
+        Expr_::ExpressionTree(Box::new((p0, p1, p2)))
     }
     pub fn mk_lplaceholder(p0: Pos) -> Self {
         Expr_::Lplaceholder(Box::new(p0))
@@ -1842,9 +1846,11 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_expression_tree(&self) -> Option<(&Hint, &Expr<Ex, Fb, En, Hi>)> {
+    pub fn as_expression_tree(
+        &self,
+    ) -> Option<(&Hint, &Expr<Ex, Fb, En, Hi>, &Option<Expr<Ex, Fb, En, Hi>>)> {
         match self {
-            Expr_::ExpressionTree(p0) => Some((&p0.0, &p0.1)),
+            Expr_::ExpressionTree(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
@@ -2254,9 +2260,15 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_expression_tree_mut(&mut self) -> Option<(&mut Hint, &mut Expr<Ex, Fb, En, Hi>)> {
+    pub fn as_expression_tree_mut(
+        &mut self,
+    ) -> Option<(
+        &mut Hint,
+        &mut Expr<Ex, Fb, En, Hi>,
+        &mut Option<Expr<Ex, Fb, En, Hi>>,
+    )> {
         match self {
-            Expr_::ExpressionTree(p0) => Some((&mut p0.0, &mut p0.1)),
+            Expr_::ExpressionTree(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
         }
     }
@@ -2632,9 +2644,11 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_expression_tree_into(self) -> Option<(Hint, Expr<Ex, Fb, En, Hi>)> {
+    pub fn as_expression_tree_into(
+        self,
+    ) -> Option<(Hint, Expr<Ex, Fb, En, Hi>, Option<Expr<Ex, Fb, En, Hi>>)> {
         match self {
-            Expr_::ExpressionTree(p0) => Some(((*p0).0, (*p0).1)),
+            Expr_::ExpressionTree(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }

@@ -207,7 +207,8 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       (** TODO: T38184446 Consolidate collections in AAST *)
   | BracedExpr of ('ex, 'fb, 'en, 'hi) expr
   | ParenthesizedExpr of ('ex, 'fb, 'en, 'hi) expr
-  | ExpressionTree of hint * ('ex, 'fb, 'en, 'hi) expr
+  | ExpressionTree of
+      hint * ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr option
   (* None of these constructors exist in the AST *)
   | Lplaceholder of pos
   | Fun_id of sid

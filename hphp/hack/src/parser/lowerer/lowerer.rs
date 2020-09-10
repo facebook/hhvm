@@ -2091,6 +2091,7 @@ where
             PrefixedCodeExpression(c) => Ok(E_::mk_expression_tree(
                 Self::p_hint(&c.prefixed_code_prefix, env)?,
                 Self::p_expr(&c.prefixed_code_expression, env)?,
+                None,
             )),
             ConditionalExpression(c) => {
                 let alter = Self::p_expr(&c.conditional_alternative, env)?;

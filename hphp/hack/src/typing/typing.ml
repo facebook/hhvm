@@ -2509,9 +2509,13 @@ and expr_
     in
     let (env, ty) = Phase.localize_hint_with_self env hint in
     make_result env p (Aast.Cast (hint, te)) ty
-  | ExpressionTree (hint, e) ->
+  | ExpressionTree (hint, e, e2) ->
     let (env, te, ty) = expr env e in
-    make_result env p (Aast.ExpressionTree (hint, te)) ty
+    (match e2 with
+    | Some e2 ->
+      let (env, te2, _ty2) = expr env e2 in
+      make_result env p (Aast.ExpressionTree (hint, te, Some te2)) ty
+    | None -> make_result env p (Aast.ExpressionTree (hint, te, None)) ty)
   | Is (e, hint) ->
     Typing_kinding.Simple.check_well_kinded_hint env hint;
     let (env, te, _) = expr env e in

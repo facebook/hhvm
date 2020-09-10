@@ -142,6 +142,14 @@ struct FactsStore : public AutoloadMap {
   virtual ~FactsStore() = default;
 
   /**
+   * Return the correctly-capitalized name of `type`.
+   *
+   * Return `null` if `type` is not defined, or if it is defined in more than
+   * one file.
+   */
+  virtual Variant getTypeName(const String& type) = 0;
+
+  /**
    * Return whether the given type is a class, enum, interface, or trait.
    *
    * Return `null` if given none of the above.

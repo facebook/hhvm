@@ -623,6 +623,7 @@ let hh_show p env ty =
 type log_structure =
   | Log_head of string * log_structure list
   | Log_type of string * Typing_defs.locl_ty
+  | Log_decl_type of string * Typing_defs.decl_ty
   | Log_type_i of string * Typing_defs.internal_type
 
 let log_with_level env key ~level log_f =
@@ -640,6 +641,11 @@ let log_types p env items =
               indentEnv ~color:(Normal Yellow) message (fun () -> go items)
             | Log_type (message, ty) ->
               let s = Typing_print.debug env ty in
+              lprintf (Bold Green) "%s: " message;
+              lprintf (Normal Green) "%s" s;
+              lnewline ()
+            | Log_decl_type (message, ty) ->
+              let s = Typing_print.debug_decl env ty in
               lprintf (Bold Green) "%s: " message;
               lprintf (Normal Green) "%s" s;
               lnewline ()
@@ -711,6 +717,34 @@ let log_intersection ~level env r ty1 ty2 ~inter_ty =
                 Log_type ("intersection", inter_ty);
               ] );
         ])
+
+let log_type_access ~level root (p, type_const_name) (env, result_ty) =
+  ( log_with_level env "tyconst" ~level @@ fun () ->
+    log_types
+      p
+      env
+      [
+        Log_head
+          ( "Accessing type constant " ^ type_const_name ^ " of",
+            [Log_type ("type", root); Log_type ("result", result_ty)] );
+      ] );
+  (env, result_ty)
+
+let log_localize ~level (decl_ty : decl_ty) (env, result_ty) =
+  ( log_with_level env "localize" ~level @@ fun () ->
+    let pos = Reason.to_pos @@ get_reason result_ty in
+    log_types
+      pos
+      env
+      [
+        Log_head
+          ( "Localizing",
+            [
+              Log_decl_type ("decl type", decl_ty);
+              Log_type ("result", result_ty);
+            ] );
+      ] );
+  (env, result_ty)
 
 let increment_feature_count env s =
   if GlobalOptions.tco_language_feature_logging (Env.get_tcopt env) then

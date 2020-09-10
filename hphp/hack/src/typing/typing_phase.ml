@@ -118,6 +118,8 @@ let env_with_self ?pos ?(quiet = false) ?report_cycle env =
 (*****************************************************************************)
 
 let rec localize ~ety_env env (dty : decl_ty) =
+  Typing_log.log_localize ~level:1 dty
+  @@
   let tvar_or_localize ~ety_env env r ty ~i =
     if
       GlobalOptions.tco_global_inference env.genv.tcopt

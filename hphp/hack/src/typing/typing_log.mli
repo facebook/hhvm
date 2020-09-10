@@ -28,6 +28,7 @@ val hh_show : Pos.t -> Typing_env_types.env -> Typing_defs.locl_ty -> unit
 type log_structure =
   | Log_head of string * log_structure list
   | Log_type of string * Typing_defs.locl_ty
+  | Log_decl_type of string * Typing_defs.decl_ty
   | Log_type_i of string * Typing_defs.internal_type
 
 val log_with_level :
@@ -79,6 +80,19 @@ val log_intersection :
   Typing_defs.locl_ty ->
   inter_ty:Typing_defs.locl_ty ->
   unit
+
+val log_type_access :
+  level:int ->
+  Typing_defs.locl_ty ->
+  Ast_defs.id ->
+  Typing_env_types.env * Typing_defs.locl_ty ->
+  Typing_env_types.env * Typing_defs.locl_ty
+
+val log_localize :
+  level:int ->
+  Typing_defs.decl_ty ->
+  Typing_env_types.env * Typing_defs.locl_ty ->
+  Typing_env_types.env * Typing_defs.locl_ty
 
 val increment_feature_count : Typing_env_types.env -> string -> unit
 

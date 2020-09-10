@@ -902,16 +902,16 @@ and simplify_subtype_i
                  Option.is_some non_ty_opt ->
             default_subtype env
           (* Ideally, we'd want this case to come after the case with an intersection
-     on the left, to deal properly with (#1 & A) <: Thas_member(#2) by potentially
-     adding an upper bound to #1, but that would result in a disjunction
-     which we don't handle very well at the moment.
-     TODO: when we have a better treatment of disjunctions, move that case after
-     the case with an intersection on the left.
-     For now, if there is an intersection on the left here,
-     we rely on how obj_get itself treats intersections. If that
-     intersection contains a type variable, this type variable will be eagerly
-     solved. Once this case is moved, we can clean up obj_get from the Tvar and
-     Tintersection cases *)
+            on the left, to deal properly with (#1 & A) <: Thas_member(#2) by potentially
+            adding an upper bound to #1, but that would result in a disjunction
+            which we don't handle very well at the moment.
+            TODO: when we have a better treatment of disjunctions, move that case after
+            the case with an intersection on the left.
+            For now, if there is an intersection on the left here,
+            we rely on how obj_get itself treats intersections. If that
+            intersection contains a type variable, this type variable will be eagerly
+            solved. Once this case is moved, we can clean up obj_get from the Tvar and
+            Tintersection cases *)
           | _ ->
             let (obj_get_ty, error_prop) =
               Errors.try_with_result

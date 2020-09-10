@@ -350,6 +350,8 @@ let expand_with_env
     ~on_error
     ~allow_abstract_tconst =
   let (env, ty) =
+    Log.log_type_access ~level:1 root id
+    @@
     try
       let ctx =
         {

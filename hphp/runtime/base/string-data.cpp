@@ -1049,9 +1049,7 @@ bool StringData::checkSane() const {
   assertx(uint32_t(size()) <= MaxSize);
   assertx(size() >= 0);
   assertx(IMPLIES(isSymbol(), isStatic()));
-  if (isImmutable()) {
-    assertx(capacity() == 0);
-  } else {
+  if (!isImmutable()) {
     assertx(size() <= capacity());
     assertx(capacity() <= MaxSize);
   }

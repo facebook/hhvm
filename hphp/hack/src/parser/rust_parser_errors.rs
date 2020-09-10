@@ -2078,7 +2078,6 @@ where
     fn parameter_rx_errors(&mut self, node: &'a Syntax<Token, Value>) {
         if let ParameterDeclaration(x) = &node.syntax {
             let spec = &x.parameter_attribute;
-            let name = &x.parameter_name;
             let has_owned_mutable =
                 self.attribute_specification_contains(spec, sn::user_attributes::OWNED_MUTABLE);
 
@@ -2102,12 +2101,6 @@ where
                     errors::conflicting_owned_mutable_and_maybe_mutable_attributes,
                 )),
                 _ => {}
-            }
-            if (has_mutable || has_owned_mutable || has_maybemutable)
-                && Self::is_variadic_expression(name)
-            {
-                self.errors
-                    .push(Self::make_error_from_node(name, errors::vararg_and_mutable))
             }
             let is_inout = Self::is_parameter_with_callconv(node);
             if is_inout && (has_mutable || has_maybemutable || has_owned_mutable) {

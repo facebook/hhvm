@@ -558,9 +558,6 @@ pub fn mutable_parameter_in_memoize_function(is_this: bool) -> Error {
 }
 pub const mutable_return_in_memoize_function: Error =
     Cow::Borrowed("Memoized functions cannot return mutable objects.");
-pub const vararg_and_mutable: Error = Cow::Borrowed(
-    "`__Mutable`, `__OwnedMutable` and `__MaybeMutable` annotations cannot be used with variadic parameters.",
-);
 pub const tparams_in_tconst: Error =
     Cow::Borrowed("Type parameters are not allowed on class type constants");
 pub const targs_not_allowed: Error =

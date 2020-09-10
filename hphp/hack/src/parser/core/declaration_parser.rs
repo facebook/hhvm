@@ -2138,19 +2138,14 @@ where
     fn parse_enum_or_classish_or_function_declaration(&mut self) -> S::R {
         // An enum, type alias, function, interface, trait or class may all
         // begin with an attribute.
-        let mut parser1 = self.clone();
-        let attribute_specification = parser1.parse_attribute_specification_opt();
+        let attribute_specification = match self.peek_token_kind() {
+            TokenKind::At | TokenKind::LessThanLessThan => self.parse_attribute_specification_opt(),
+            _ => S!(make_missing, self, self.pos()),
+        };
 
-        let mut parser2 = parser1.clone();
-        let token = parser2.next_token();
-        match token.kind() {
-            TokenKind::Enum => {
-                self.continue_from(parser1);
-                self.parse_enum_declaration(attribute_specification)
-            }
+        match self.peek_token_kind() {
+            TokenKind::Enum => self.parse_enum_declaration(attribute_specification),
             TokenKind::Type | TokenKind::Newtype => {
-                self.continue_from(parser1);
-
                 self.parse_alias_declaration(attribute_specification)
             }
             TokenKind::Async | TokenKind::Function => {
@@ -2163,7 +2158,6 @@ where
                         p.parse_possible_php_function(/* toplevel=*/ true)
                     })
                 } else {
-                    self.continue_from(parser1);
                     self.parse_function_declaration(attribute_specification)
                 }
             }
@@ -2172,15 +2166,12 @@ where
             | TokenKind::Interface
             | TokenKind::Trait
             | TokenKind::XHP
-            | TokenKind::Class => {
-                self.continue_from(parser1);
-                self.parse_classish_declaration(attribute_specification)
-            }
+            | TokenKind::Class => self.parse_classish_declaration(attribute_specification),
             _ => {
                 // ERROR RECOVERY: we encountered an unexpected token, raise an error and continue
                 // TODO: This is wrong; we have lost the attribute specification
                 // from the tree.
-                self.continue_from(parser2);
+                let token = self.next_token();
                 self.with_error(Errors::error1057(self.token_text(&token)));
                 let token = S!(make_token, self, token);
                 S!(make_error, self, token)

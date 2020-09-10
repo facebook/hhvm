@@ -20,13 +20,20 @@ endif()
 if (NOT LIBZIP_FOUND)
   cmake_minimum_required(VERSION 2.8.0)
   include(ExternalProject)
+  include(HPHPFunctions)
 
   set(LIBZIP_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/libzip-install")
+  SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
+    LIBZIP_DOWNLOAD_ARGS
+    SOURCE_URL
+    "https://libzip.org/download/libzip-1.6.1.tar.gz"
+    SOURCE_HASH
+    "SHA256=06eb8e9141fd19e2788cabaea9c9c2fd4d488d9e1484eb474bbfcac78e7b1d88"
+  )
 
   ExternalProject_Add(
     libzipBuild
-    URL "https://libzip.org/download/libzip-1.6.1.tar.gz"
-    URL_HASH SHA256=06eb8e9141fd19e2788cabaea9c9c2fd4d488d9e1484eb474bbfcac78e7b1d88
+    ${LIBZIP_DOWNLOAD_ARGS}
     CMAKE_ARGS
     -DENABLE_COMMONCRYPTO=FALSE
     -DENABLE_GNUTLS=FALSE

@@ -1214,12 +1214,14 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable& nativeFuncs) {
 //////////////////////////////////////////////////////////////////////
 
 void clearUnitCacheForExit() {
-  if (!RO::RepoAuthoritative && unitPrefetchingEnabled()) {
-    getPrefetchExecutor().join();
-  }
   s_nonRepoUnitCache.clear();
   s_repoUnitCache.clear();
   s_perUserUnitCaches.clear();
+}
+
+void shutdownUnitPrefetcher() {
+  if (RO::RepoAuthoritative || !unitPrefetchingEnabled()) return;
+  getPrefetchExecutor().join();
 }
 
 //////////////////////////////////////////////////////////////////////

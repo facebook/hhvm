@@ -1,0 +1,6 @@
+File "rx_move7.php", line 10, characters 10-19:
+`Rx\move` is only allowed in argument position or as right hand side of the assignment. (Naming[2096])
+File "rx_move7.php", line 10, characters 28-37:
+`Rx\move` is only allowed in argument position or as right hand side of the assignment. (Naming[2096])
+File "rx_move7.php", line 10, characters 5-6:
+Cannot assign immutable value to mutably-owned local variable. Mutability flavor of local variable cannot be altered. (Typing[4294])

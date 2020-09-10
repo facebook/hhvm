@@ -2,6 +2,6 @@
 
 <<__Rx>>
 function foo(
-  &$x, // bad
+  int &$x, // bad
 ): void {
 }

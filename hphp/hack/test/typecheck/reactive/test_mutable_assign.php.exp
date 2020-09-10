@@ -1,0 +1,6 @@
+File "test_mutable_assign.php", line 11, characters 3-4:
+Cannot assign immutable value to mutably-owned local variable. Mutability flavor of local variable cannot be altered. (Typing[4294])
+File "test_mutable_assign.php", line 12, characters 8-9:
+This variable is mutable. You cannot create a new reference to it. (Typing[4210])
+File "test_mutable_assign.php", line 17, characters 8-9:
+This variable is mutable. You cannot create a new reference to it. (Typing[4210])

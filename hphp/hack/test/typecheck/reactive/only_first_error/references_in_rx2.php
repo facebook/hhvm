@@ -1,6 +1,6 @@
 <?hh // partial
 
-function by_ref(&$ref) {}
+function by_ref(int &$ref) {}
 
 <<__Rx>>
 function foo(): void {

@@ -7,4 +7,4 @@ function foo(): void {
 }
 
 <<__Rx>>
-function call($_) {}
+function call(string $_) {}

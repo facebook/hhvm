@@ -1,2 +1,0 @@
-File "test_mutable_assign.php", line 11, characters 3-4:
-Cannot assign immutable value to mutably-owned local variable. Mutability flavor of local variable cannot be altered. (Typing[4294])

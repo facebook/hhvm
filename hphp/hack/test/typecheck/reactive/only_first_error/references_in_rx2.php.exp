@@ -1,2 +1,2 @@
-File "references_in_rx2.php", line 3, characters 17-17:
-A type specifier is expected here. (Parsing[1002])
+File "references_in_rx2.php", line 3, characters 21-21:
+Encountered unexpected token `&`. (Parsing[1002])

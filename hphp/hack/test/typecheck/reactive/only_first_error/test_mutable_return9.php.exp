@@ -1,2 +1,0 @@
-File "test_mutable_return9.php", line 8, characters 5-6:
-Cannot assign mutable value to mutably-borrowed local variable. Mutability flavor of local variable cannot be altered. (Typing[4294])

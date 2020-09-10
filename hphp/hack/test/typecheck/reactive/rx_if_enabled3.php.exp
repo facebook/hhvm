@@ -1,0 +1,4 @@
+File "rx_if_enabled3.php", line 6, characters 7-22:
+`HH\Rx\IS_ENABLED` must be the only condition in an if-statement, and that if-statement must be the only statement in the function body. (NastCheck[3062])
+File "rx_if_enabled3.php", line 9, characters 5-18:
+`echo` or `print` are not allowed in reactive functions. (Typing[4226])

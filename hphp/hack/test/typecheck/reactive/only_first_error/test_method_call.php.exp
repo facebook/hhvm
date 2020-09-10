@@ -1,6 +1,0 @@
-File "test_method_call.php", line 24, characters 3-14:
-  <expr#1> as Something
-File "test_method_call.php", line 26, characters 3-13:
-Cannot call mutable function on immutable expression (Typing[4214])
-File "test_method_call.php", line 6, characters 19-24:
-This function is marked `<<__Mutable>>`, so it has a mutable `$this`.

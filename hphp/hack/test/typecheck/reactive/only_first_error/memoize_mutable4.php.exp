@@ -1,2 +1,0 @@
-File "memoize_mutable4.php", line 4, characters 3-89:
-`__Mutable` and `__MaybeMutable` annotations are not allowed on static methods. (Parsing[1002])

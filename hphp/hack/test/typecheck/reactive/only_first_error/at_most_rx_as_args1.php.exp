@@ -1,2 +1,0 @@
-File "at_most_rx_as_args1.php", line 4, characters 1-20:
-`__OnlyRxIfImpl` and `__AtMostRxAsArgs` annotations cannot be used without `__Rx`, `__RxShallow`, or `__RxLocal`. (Parsing[1002])

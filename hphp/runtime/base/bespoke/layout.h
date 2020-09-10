@@ -37,6 +37,7 @@ struct Layout {
   virtual std::string describe() const = 0;
 
   virtual size_t heapSize(const ArrayData* ad) const = 0;
+  virtual size_t align(const ArrayData* ad) const = 0;
   virtual void scan(const ArrayData* ad, type_scan::Scanner& scan) const = 0;
   virtual ArrayData* escalateToVanilla(
     const ArrayData*, const char* reason) const = 0;

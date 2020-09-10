@@ -247,6 +247,23 @@ void LoggingProfile::logEventImpl(const EventKey& key) {
          EventKey(key).toString(), it->second);
 }
 
+void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {
+  // Hold the read mutex for the duration of the mutation so that export cannot
+  // begin until the mutation is complete.
+  folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
+  if (s_exportStarted.load(std::memory_order_relaxed)) return;
+
+  EntryTypesMap::accessor it;
+  if (monotypeEvents.insert(it, {before.asInt16(), after.asInt16()})) {
+    it->second = 1;
+  } else {
+    it->second++;
+  }
+
+  FTRACE(6, "EntryTypes escalation {} -> {} [count={}]\n", before.toString(),
+         after.toString(), it->second);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -300,14 +317,50 @@ struct SinkOutputData {
   uint64_t totalCount;
 };
 
+struct EntryTypesUseOutputData {
+  EntryTypesUseOutputData(EntryTypes state, uint64_t count)
+    : state(state)
+    , count(count)
+  {}
+
+  bool operator<(const EntryTypesUseOutputData& other) const {
+    return count > other.count;
+  }
+
+  EntryTypes state;
+  uint64_t count;
+};
+
+struct EntryTypesEscalationOutputData {
+  EntryTypesEscalationOutputData(EntryTypes before, EntryTypes after,
+                               uint64_t count)
+    : before(before)
+    , after(after)
+    , count(count)
+  {}
+
+  bool operator<(const EntryTypesEscalationOutputData& other) const {
+    return count > other.count;
+  }
+
+  EntryTypes before;
+  EntryTypes after;
+  uint64_t count;
+};
+
 struct SourceOutputData {
   SourceOutputData(const LoggingProfile* profile,
                    std::vector<OperationOutputData>&& operations,
-                   std::vector<SinkOutputData>&& sinkData)
+                   std::vector<SinkOutputData>&& sinkData,
+                   std::vector<EntryTypesEscalationOutputData>&& monoEscalations,
+                   std::vector<EntryTypesUseOutputData>&& monoUses)
     : profile(profile)
+    , monotypeEscalations(std::move(monoEscalations))
+    , monotypeUses(std::move(monoUses))
     , sinks(std::move(sinkData))
   {
     std::sort(sinks.begin(), sinks.end());
+    std::sort(monotypeEscalations.begin(), monotypeEscalations.end());
     std::sort(operations.begin(), operations.end());
 
     readCount = 0;
@@ -332,6 +385,8 @@ struct SourceOutputData {
   const LoggingProfile* profile;
   std::vector<OperationOutputData> readOperations;
   std::vector<OperationOutputData> writeOperations;
+  std::vector<EntryTypesEscalationOutputData> monotypeEscalations;
+  std::vector<EntryTypesUseOutputData> monotypeUses;
   std::vector<SinkOutputData> sinks;
   uint64_t readCount;
   uint64_t writeCount;
@@ -406,6 +461,18 @@ bool exportSortedProfiles(FILE* file, const ProfileOutputData& profileData) {
                                           : "<unknown>");
     }
 
+    LOG_OR_RETURN(file, "  Entry Type Escalations:\n");
+    for (auto const& escData : sourceData.monotypeEscalations) {
+      LOG_OR_RETURN(file, "  {: >6}x {} -> {}\n", escData.count,
+                    escData.before.toString(), escData.after.toString());
+    }
+
+    LOG_OR_RETURN(file, "  Entry Type Operations:\n");
+    for (auto const& useData : sourceData.monotypeUses) {
+      LOG_OR_RETURN(file, "  {: >6}x {}\n", useData.count,
+                    useData.state.toString());
+    }
+
     LOG_OR_RETURN(file, "\n");
   }
 
@@ -458,7 +525,34 @@ SourceOutputData sortSourceData(const LoggingProfile* profile) {
     }
   );
 
-  return SourceOutputData(profile, std::move(operations), std::move(sinks));
+  // Determine monotype operations
+  std::vector<EntryTypesEscalationOutputData> escalations;
+  std::map<uint16_t, uint64_t> usesMap;
+  for (auto const& statesAndCount : profile->monotypeEvents) {
+    auto const before = statesAndCount.first.first;
+    auto const after = statesAndCount.first.second;
+    auto const count = statesAndCount.second;
+
+    if (before != after) {
+      escalations.emplace_back(EntryTypes(before), EntryTypes(after),
+                               count);
+    }
+
+    usesMap[after] += count;
+  }
+
+  std::vector<EntryTypesUseOutputData> uses;
+  uses.reserve(usesMap.size());
+  std::transform(
+    usesMap.begin(), usesMap.end(), std::back_inserter(uses),
+    [](const std::pair<uint16_t, uint64_t>& useData) {
+      auto const state = EntryTypes(useData.first);
+      return EntryTypesUseOutputData(state, useData.second);
+    }
+  );
+
+  return SourceOutputData(profile, std::move(operations), std::move(sinks),
+                          std::move(escalations), std::move(uses));
 }
 
 ProfileOutputData sortProfileData() {

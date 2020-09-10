@@ -77,13 +77,13 @@ ArrayData* BespokeArray::MakeUncounted(ArrayData* ad, bool hasApcTv,
   auto const layout = BespokeArray::asBespoke(ad)->layoutRaw();
   auto const extra = uncountedAllocExtra(ad, hasApcTv);
   auto const bytes = layout->heapSize(ad);
-  assertx(bytes % 16 == 0);
+  assertx(extra % layout->align(ad) == 0);
 
   // "Help" out by copying the array's raw bytes to an uncounted allocation.
   auto const mem = static_cast<char*>(uncounted_malloc(bytes + extra));
   auto const result = reinterpret_cast<ArrayData*>(mem + extra);
-  memcpy16_inline(reinterpret_cast<char*>(result),
-                  reinterpret_cast<char*>(ad), bytes);
+  memcpy8(reinterpret_cast<char*>(result),
+          reinterpret_cast<char*>(ad), bytes);
   auto const aux = ad->auxBits() | (hasApcTv ? ArrayData::kHasApcTv : 0);
   result->initHeader_16(HeaderKind(ad->kind()), UncountedValue, aux);
   assertx(BespokeArray::asBespoke(result)->layoutRaw() == layout);

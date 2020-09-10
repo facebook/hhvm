@@ -31,6 +31,7 @@
 namespace HPHP { namespace bespoke {
 
 struct LoggingArray;
+struct EntryTypes;
 
 // The second entry in these tuples is an "is read operation" flag.
 // This flag is set for ops that are guaranteed to preserve the array's layout,
@@ -89,8 +90,17 @@ struct LoggingProfile {
     SrcKey, uint64_t, SrcKey::TbbHashCompare, integralHashCompare<uint64_t>>;
 
   // Values in the event map are sampled event counts.
-  using EventMap = tbb::concurrent_hash_map<
-    EventMapKey, size_t, EventMapHasher>;
+  using EventMap = tbb::concurrent_hash_map<EventMapKey, size_t,
+                                            EventMapHasher>;
+
+  // The key maps the EntryType before the operation to the EntryType after the
+  // operation
+  using EntryTypesMapKey = std::pair<uint16_t, uint16_t>;
+  using EntryTypesMapHasher = pairHashCompare<uint16_t, uint16_t,
+                                              integralHashCompare<uint16_t>,
+                                              integralHashCompare<uint16_t>>;
+  using EntryTypesMap = tbb::concurrent_hash_map<EntryTypesMapKey, size_t,
+                                                 EntryTypesMapHasher>;
 
   explicit LoggingProfile(SrcKey source) : source(source) {}
 
@@ -107,6 +117,8 @@ struct LoggingProfile {
   void logEvent(ArrayOp op, int64_t k, TypedValue v);
   void logEvent(ArrayOp op, const StringData* k, TypedValue v);
 
+  void logEntryTypes(EntryTypes before, EntryTypes after);
+
 private:
   void logEventImpl(const EventKey& key);
 
@@ -116,6 +128,7 @@ public:
   std::atomic<uint64_t> loggingArraysEmitted = 0;
   LoggingArray* staticArray = nullptr;
   EventMap events;
+  EntryTypesMap monotypeEvents;
 };
 
 // Return a profile for the given (valid) SrcKey. If no profile for the SrcKey

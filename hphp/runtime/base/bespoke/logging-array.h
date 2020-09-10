@@ -19,8 +19,8 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/bespoke/entry-types.h"
 #include "hphp/runtime/base/bespoke/layout.h"
-#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/srckey.h"
 
@@ -31,7 +31,8 @@ struct LoggingProfile;
 struct LoggingArray : BespokeArray {
   static LoggingArray* asLogging(ArrayData* ad);
   static const LoggingArray* asLogging(const ArrayData* ad);
-  static LoggingArray* Make(ArrayData* ad, LoggingProfile* profile);
+  static LoggingArray* Make(ArrayData* ad, LoggingProfile* profile,
+                            EntryTypes ms);
   static LoggingArray* MakeStatic(ArrayData* ad, LoggingProfile* profile);
   static void FreeStatic(LoggingArray* lad);
 
@@ -42,12 +43,14 @@ struct LoggingArray : BespokeArray {
 
   ArrayData* wrapped;
   LoggingProfile* profile;
+  EntryTypes entryTypes;
 };
 
 struct LoggingLayout : public Layout {
   std::string describe() const final;
 
   size_t heapSize(const ArrayData* ad) const final;
+  size_t align(const ArrayData* ad) const final;
   void scan(const ArrayData* ad, type_scan::Scanner& scan) const final;
   ArrayData* escalateToVanilla(
     const ArrayData*, const char* reason) const final;

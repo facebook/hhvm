@@ -29,6 +29,7 @@ struct MockLayout : Layout {
   MOCK_CONST_METHOD0(describe, std::string());
 
   MOCK_CONST_METHOD1(heapSize, size_t(const ArrayData* ad));
+  MOCK_CONST_METHOD1(align, size_t(const ArrayData* ad));
   MOCK_CONST_METHOD2(scan, void(const ArrayData* ad, type_scan::Scanner& scan));
   MOCK_CONST_METHOD2(escalateToVanilla, ArrayData*(const ArrayData*, const char* reason));
 

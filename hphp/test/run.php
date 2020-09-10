@@ -434,6 +434,7 @@ function get_options($argv) {
     '*hhas-round-trip' => '',
     'color' => 'c',
     'no-fun' => '',
+    'no-skipif' => '',
     'cores' => '',
     'dump-tc' => '',
     'no-clean' => '',
@@ -2583,7 +2584,7 @@ function run_and_lock_test($options, $test) {
 }
 
 function run_test($options, $test) {
-  $skip_reason = skip_test($options, $test);
+  $skip_reason = skip_test($options, $test, !($options['no-skipif'] ?? false));
   if ($skip_reason !== null) return $skip_reason;
 
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);

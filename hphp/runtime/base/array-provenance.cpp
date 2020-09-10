@@ -433,7 +433,6 @@ struct MutationState {
   Mutation& mutation;
   const char* function_name;
   bool recursive = true;
-  bool raised_object_notice = false;
   bool raised_stack_notice = false;
 };
 
@@ -477,12 +476,7 @@ ArrayData* apply_mutation(TypedValue tv, State& state,
     return nullptr;
   }
 
-  if (isObjectType(type(tv)) && !state.raised_object_notice) {
-    auto const cls = val(tv).pobj->getClassName().data();
-    raise_notice("%s called on object: %s", state.function_name, cls);
-    state.raised_object_notice = true;
-    return nullptr;
-  } else if (!isArrayLikeType(type(tv))) {
+  if (!isArrayLikeType(type(tv))) {
     return nullptr;
   }
 
@@ -581,7 +575,6 @@ TypedValue markTvImpl(TypedValue in, bool legacy, bool recursive) {
     } else {
       auto state = MutationState<decltype(unmark_tv)>{
         unmark_tv, "array_unmark_legacy", recursive};
-      state.raised_object_notice = true;
       return apply_mutation(in, state);
     }
   }();
@@ -603,8 +596,6 @@ TypedValue tagTvImpl(TypedValue in, int64_t flags) {
   };
 
   auto state = MutationState<decltype(tag_tv)>{tag_tv, "tag_provenance_here"};
-  // don't raise notice on objects in tag_provenance_here
-  state.raised_object_notice = true;
   auto const ad = apply_mutation(in, state);
   return ad ? make_array_like_tv(ad) : tvReturn(tvAsCVarRef(&in));
 }

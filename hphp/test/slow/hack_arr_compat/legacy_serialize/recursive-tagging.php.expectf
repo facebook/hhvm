@@ -49,8 +49,6 @@ $x[2][2][0]: <not an array>
 
 Warning: array_mark_legacy() called on vec in %s/recursive-tagging.php on line 38
 
-Notice: array_mark_legacy called on object: C in %s/recursive-tagging.php on line 38
-
 Printing marking for $y:
 varray(3) {
   vec(1) {
@@ -100,8 +98,6 @@ $y[2][2][0]: <not an array>
 ==============================================
 test_cow_optimizations($recursive=true):
 
-Notice: array_mark_legacy called on object: C in %s/recursive-tagging.php on line 46
-
 Printing marking for $x:
 varray(1) {
   varray(1) {
@@ -115,8 +111,6 @@ $x[0][0]: <not an array>
 
 ==============================================
 test_unable_to_cow($recursive=true):
-
-Notice: array_mark_legacy called on object: C in %s/recursive-tagging.php on line 55
 
 Printing marking for $x:
 darray(1) {

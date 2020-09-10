@@ -333,3 +333,9 @@ let list_files env =
       (Errors.get_error_list env.errorl)
   in
   SSet.elements acc
+
+let add_changed_files env changed_files =
+  {
+    env with
+    changed_files = Relative_path.Set.union env.changed_files changed_files;
+  }

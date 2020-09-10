@@ -121,7 +121,14 @@ void cgLdCls(IRLS& env, const IRInstruction* inst) {
   auto const cls1 = v.makeReg();
   auto const cls2 = v.makeReg();
 
-  v << testbim{1, src[StringData::isSymbolOffset()], sf1};
+  // Most significant bit indicates whether it is symbol or not
+  static_assert(StringData::kSymbolOffsetInAux > 7,
+                "must use the higher order bits");
+  v << testbim{
+    (int32_t)StringData::kSymbolOffsetInAux - 8,
+    src[StringData::isSymbolOffset()],
+    sf1
+  };
   fwdJcc(v, env, CC_E, sf1, then);
   if (use_lowptr) {
     auto const low = v.makeReg();

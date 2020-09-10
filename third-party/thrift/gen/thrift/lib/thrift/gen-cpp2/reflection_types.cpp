@@ -52,68 +52,33 @@ namespace detail {
 void TccStructTraits<::apache::thrift::reflection::StructField>::translateFieldName(
     FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
     FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "isRequired") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_BOOL;
-  }
-  else if (_fname == "type") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_I64;
-  }
-  else if (_fname == "name") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "annotations") {
-    fid = 4;
-    _ftype = apache::thrift::protocol::T_MAP;
-  }
-  else if (_fname == "order") {
-    fid = 5;
-    _ftype = apache::thrift::protocol::T_I16;
-  }
-}
-void TccStructTraits<::apache::thrift::reflection::DataType>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "name") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "fields") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_MAP;
-  }
-  else if (_fname == "mapKeyType") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_I64;
-  }
-  else if (_fname == "valueType") {
-    fid = 4;
-    _ftype = apache::thrift::protocol::T_I64;
-  }
-  else if (_fname == "enumValues") {
-    fid = 5;
-    _ftype = apache::thrift::protocol::T_MAP;
-  }
-}
-void TccStructTraits<::apache::thrift::reflection::Schema>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "dataTypes") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_MAP;
-  }
-  else if (_fname == "names") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_MAP;
-  }
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 5;
+  static constexpr folly::StringPiece _names[] = {
+    "isRequired",
+    "type",
+    "name",
+    "annotations",
+    "order",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+    4,
+    5,
+  };
+  static constexpr TType _types[] = {
+    TType::T_BOOL,
+    TType::T_I64,
+    TType::T_STRING,
+    TType::T_MAP,
+    TType::T_I16,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
 }
 
 } // namespace detail
@@ -171,13 +136,8 @@ bool StructField::operator==(const StructField& rhs) const {
   if (!(lhs.name == rhs.name)) {
     return false;
   }
-  if (lhs.annotations_ref().has_value() != rhs.annotations_ref().has_value()) {
+  if (lhs.annotations_ref() != rhs.annotations_ref()) {
     return false;
-  }
-  if (lhs.annotations_ref().has_value()) {
-    if (!(lhs.annotations == rhs.annotations)) {
-      return false;
-    }
   }
   if (!(lhs.order == rhs.order)) {
     return false;
@@ -196,11 +156,11 @@ std::unordered_map<::std::string, ::std::string>* StructField::get_annotations()
 
 void swap(StructField& a, StructField& b) {
   using ::std::swap;
-  swap(a.isRequired, b.isRequired);
-  swap(a.type, b.type);
-  swap(a.name, b.name);
+  swap(a.isRequired_ref().value(), b.isRequired_ref().value());
+  swap(a.type_ref().value(), b.type_ref().value());
+  swap(a.name_ref().value(), b.name_ref().value());
   swap(a.annotations_ref().value_unchecked(), b.annotations_ref().value_unchecked());
-  swap(a.order, b.order);
+  swap(a.order_ref().value(), b.order_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -215,7 +175,49 @@ template uint32_t StructField::write<>(apache::thrift::CompactProtocolWriter*) c
 template uint32_t StructField::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t StructField::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }}} // apache::thrift::reflection
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::reflection::DataType>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 5;
+  static constexpr folly::StringPiece _names[] = {
+    "name",
+    "fields",
+    "mapKeyType",
+    "valueType",
+    "enumValues",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+    4,
+    5,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+    TType::T_MAP,
+    TType::T_I64,
+    TType::T_I64,
+    TType::T_MAP,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace reflection {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -260,37 +262,17 @@ bool DataType::operator==(const DataType& rhs) const {
   if (!(lhs.name == rhs.name)) {
     return false;
   }
-  if (lhs.fields_ref().has_value() != rhs.fields_ref().has_value()) {
+  if (lhs.fields_ref() != rhs.fields_ref()) {
     return false;
   }
-  if (lhs.fields_ref().has_value()) {
-    if (!(lhs.fields == rhs.fields)) {
-      return false;
-    }
-  }
-  if (lhs.mapKeyType_ref().has_value() != rhs.mapKeyType_ref().has_value()) {
+  if (lhs.mapKeyType_ref() != rhs.mapKeyType_ref()) {
     return false;
   }
-  if (lhs.mapKeyType_ref().has_value()) {
-    if (!(lhs.mapKeyType == rhs.mapKeyType)) {
-      return false;
-    }
-  }
-  if (lhs.valueType_ref().has_value() != rhs.valueType_ref().has_value()) {
+  if (lhs.valueType_ref() != rhs.valueType_ref()) {
     return false;
   }
-  if (lhs.valueType_ref().has_value()) {
-    if (!(lhs.valueType == rhs.valueType)) {
-      return false;
-    }
-  }
-  if (lhs.enumValues_ref().has_value() != rhs.enumValues_ref().has_value()) {
+  if (lhs.enumValues_ref() != rhs.enumValues_ref()) {
     return false;
-  }
-  if (lhs.enumValues_ref().has_value()) {
-    if (!(lhs.enumValues == rhs.enumValues)) {
-      return false;
-    }
   }
   return true;
 }
@@ -314,7 +296,7 @@ std::unordered_map<::std::string, int32_t>* DataType::get_enumValues() & {
 
 void swap(DataType& a, DataType& b) {
   using ::std::swap;
-  swap(a.name, b.name);
+  swap(a.name_ref().value(), b.name_ref().value());
   swap(a.fields_ref().value_unchecked(), b.fields_ref().value_unchecked());
   swap(a.mapKeyType_ref().value_unchecked(), b.mapKeyType_ref().value_unchecked());
   swap(a.valueType_ref().value_unchecked(), b.valueType_ref().value_unchecked());
@@ -333,7 +315,52 @@ template uint32_t DataType::write<>(apache::thrift::CompactProtocolWriter*) cons
 template uint32_t DataType::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t DataType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        DataType,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>,
+        std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        DataType,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>,
+        std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>>,
+    "inconsistent use of nimble option");
+
 }}} // apache::thrift::reflection
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::reflection::Schema>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 2;
+  static constexpr folly::StringPiece _names[] = {
+    "dataTypes",
+    "names",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+  };
+  static constexpr TType _types[] = {
+    TType::T_MAP,
+    TType::T_MAP,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace reflection {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -385,8 +412,8 @@ std::unordered_map<::std::string, int64_t> Schema::get_names() && {
 
 void swap(Schema& a, Schema& b) {
   using ::std::swap;
-  swap(a.dataTypes, b.dataTypes);
-  swap(a.names, b.names);
+  swap(a.dataTypes_ref().value(), b.dataTypes_ref().value());
+  swap(a.names_ref().value(), b.names_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -400,5 +427,19 @@ template void Schema::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t Schema::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t Schema::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t Schema::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Schema,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>,
+        std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        Schema,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>,
+        std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>>,
+    "inconsistent use of nimble option");
 
 }}} // apache::thrift::reflection

@@ -15,7 +15,7 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::apache::thrift::reflection::Type> {
   using type = ::apache::thrift::reflection::Type;
   static constexpr const std::size_t size = 16;
-  static constexpr const std::array<type, 16> values = {{
+  static constexpr const std::array<type, size> values = {{
     type::TYPE_VOID,
     type::TYPE_STRING,
     type::TYPE_BOOL,
@@ -33,7 +33,7 @@ template <> struct TEnumDataStorage<::apache::thrift::reflection::Type> {
     type::TYPE_PROGRAM,
     type::TYPE_FLOAT,
   }};
-  static constexpr const std::array<folly::StringPiece, 16> names = {{
+  static constexpr const std::array<folly::StringPiece, size> names = {{
     "TYPE_VOID",
     "TYPE_STRING",
     "TYPE_BOOL",

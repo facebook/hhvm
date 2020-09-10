@@ -165,8 +165,20 @@ class Schema;
 // END hash_and_equal_to
 namespace apache { namespace thrift { namespace reflection {
 class StructField final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = StructField;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
   StructField();
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -178,6 +190,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   StructField(StructField&&) = default;
 
   StructField(const StructField&) = default;
+
 
   StructField& operator=(StructField&&) = default;
 
@@ -293,20 +306,24 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const std::unordered_map<::std::string, ::std::string>&> annotations_ref() const& {
-    return {annotations, __isset.annotations};
+  template <typename..., typename T = std::unordered_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> annotations_ref() const& {
+    return {this->annotations, __isset.annotations};
   }
 
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const std::unordered_map<::std::string, ::std::string>&&> annotations_ref() const&& {
-    return {std::move(annotations), __isset.annotations};
+  template <typename..., typename T = std::unordered_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> annotations_ref() const&& {
+    return {std::move(this->annotations), __isset.annotations};
   }
 
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<std::unordered_map<::std::string, ::std::string>&> annotations_ref() & {
-    return {annotations, __isset.annotations};
+  template <typename..., typename T = std::unordered_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> annotations_ref() & {
+    return {this->annotations, __isset.annotations};
   }
 
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<std::unordered_map<::std::string, ::std::string>&&> annotations_ref() && {
-    return {std::move(annotations), __isset.annotations};
+  template <typename..., typename T = std::unordered_map<::std::string, ::std::string>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> annotations_ref() && {
+    return {std::move(this->annotations), __isset.annotations};
   }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
@@ -411,9 +428,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< StructField >;
+  friend void swap(StructField& a, StructField& b);
 };
-
-void swap(StructField& a, StructField& b);
 
 template <class Protocol_>
 uint32_t StructField::read(Protocol_* iprot) {
@@ -425,8 +441,20 @@ uint32_t StructField::read(Protocol_* iprot) {
 }}} // apache::thrift::reflection
 namespace apache { namespace thrift { namespace reflection {
 class DataType final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = DataType;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
   DataType();
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -438,6 +466,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   DataType(DataType&&) = default;
 
   DataType(const DataType&) = default;
+
 
   DataType& operator=(DataType&&) = default;
 
@@ -509,74 +538,90 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>&> fields_ref() const& {
-    return {fields, __isset.fields};
+  template <typename..., typename T = std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> fields_ref() const& {
+    return {this->fields, __isset.fields};
   }
 
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>&&> fields_ref() const&& {
-    return {std::move(fields), __isset.fields};
+  template <typename..., typename T = std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> fields_ref() const&& {
+    return {std::move(this->fields), __isset.fields};
   }
 
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>&> fields_ref() & {
-    return {fields, __isset.fields};
+  template <typename..., typename T = std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> fields_ref() & {
+    return {this->fields, __isset.fields};
   }
 
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>&&> fields_ref() && {
-    return {std::move(fields), __isset.fields};
-  }
-THRIFT_IGNORE_ISSET_USE_WARNING_END
-
-THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const int64_t&> mapKeyType_ref() const& {
-    return {mapKeyType, __isset.mapKeyType};
-  }
-
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const int64_t&&> mapKeyType_ref() const&& {
-    return {std::move(mapKeyType), __isset.mapKeyType};
-  }
-
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<int64_t&> mapKeyType_ref() & {
-    return {mapKeyType, __isset.mapKeyType};
-  }
-
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<int64_t&&> mapKeyType_ref() && {
-    return {std::move(mapKeyType), __isset.mapKeyType};
+  template <typename..., typename T = std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> fields_ref() && {
+    return {std::move(this->fields), __isset.fields};
   }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const int64_t&> valueType_ref() const& {
-    return {valueType, __isset.valueType};
+  template <typename..., typename T = int64_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> mapKeyType_ref() const& {
+    return {this->mapKeyType, __isset.mapKeyType};
   }
 
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const int64_t&&> valueType_ref() const&& {
-    return {std::move(valueType), __isset.valueType};
+  template <typename..., typename T = int64_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> mapKeyType_ref() const&& {
+    return {std::move(this->mapKeyType), __isset.mapKeyType};
   }
 
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<int64_t&> valueType_ref() & {
-    return {valueType, __isset.valueType};
+  template <typename..., typename T = int64_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> mapKeyType_ref() & {
+    return {this->mapKeyType, __isset.mapKeyType};
   }
 
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<int64_t&&> valueType_ref() && {
-    return {std::move(valueType), __isset.valueType};
+  template <typename..., typename T = int64_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> mapKeyType_ref() && {
+    return {std::move(this->mapKeyType), __isset.mapKeyType};
   }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const std::unordered_map<::std::string, int32_t>&> enumValues_ref() const& {
-    return {enumValues, __isset.enumValues};
+  template <typename..., typename T = int64_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> valueType_ref() const& {
+    return {this->valueType, __isset.valueType};
   }
 
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const std::unordered_map<::std::string, int32_t>&&> enumValues_ref() const&& {
-    return {std::move(enumValues), __isset.enumValues};
+  template <typename..., typename T = int64_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> valueType_ref() const&& {
+    return {std::move(this->valueType), __isset.valueType};
   }
 
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<std::unordered_map<::std::string, int32_t>&> enumValues_ref() & {
-    return {enumValues, __isset.enumValues};
+  template <typename..., typename T = int64_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> valueType_ref() & {
+    return {this->valueType, __isset.valueType};
   }
 
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<std::unordered_map<::std::string, int32_t>&&> enumValues_ref() && {
-    return {std::move(enumValues), __isset.enumValues};
+  template <typename..., typename T = int64_t>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> valueType_ref() && {
+    return {std::move(this->valueType), __isset.valueType};
+  }
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  template <typename..., typename T = std::unordered_map<::std::string, int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> enumValues_ref() const& {
+    return {this->enumValues, __isset.enumValues};
+  }
+
+  template <typename..., typename T = std::unordered_map<::std::string, int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> enumValues_ref() const&& {
+    return {std::move(this->enumValues), __isset.enumValues};
+  }
+
+  template <typename..., typename T = std::unordered_map<::std::string, int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> enumValues_ref() & {
+    return {this->enumValues, __isset.enumValues};
+  }
+
+  template <typename..., typename T = std::unordered_map<::std::string, int32_t>>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> enumValues_ref() && {
+    return {std::move(this->enumValues), __isset.enumValues};
   }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
@@ -669,9 +714,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< DataType >;
+  friend void swap(DataType& a, DataType& b);
 };
-
-void swap(DataType& a, DataType& b);
 
 template <class Protocol_>
 uint32_t DataType::read(Protocol_* iprot) {
@@ -683,8 +727,20 @@ uint32_t DataType::read(Protocol_* iprot) {
 }}} // apache::thrift::reflection
 namespace apache { namespace thrift { namespace reflection {
 class Schema final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = Schema;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   Schema() {}
@@ -695,6 +751,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   Schema(Schema&&) = default;
 
   Schema(const Schema&) = default;
+
 
   Schema& operator=(Schema&&) = default;
 
@@ -811,9 +868,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< Schema >;
+  friend void swap(Schema& a, Schema& b);
 };
-
-void swap(Schema& a, Schema& b);
 
 template <class Protocol_>
 uint32_t Schema::read(Protocol_* iprot) {

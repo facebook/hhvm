@@ -43,11 +43,25 @@ class ThriftMetadataServiceAsyncClient : public apache::thrift::GeneratedAsyncCl
 #if FOLLY_HAS_COROUTINES
   template <int = 0>
   folly::coro::Task< ::apache::thrift::metadata::ThriftServiceMetadataResponse> co_getThriftServiceMetadata() {
-    co_return co_await semifuture_getThriftServiceMetadata();
+    auto _task = semifuture_getThriftServiceMetadata();
+    const folly::CancellationToken& cancelToken =
+        co_await folly::coro::co_current_cancellation_token;
+    if (cancelToken.canBeCancelled()) {
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+    } else {
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+    }
   }
   template <int = 0>
   folly::coro::Task< ::apache::thrift::metadata::ThriftServiceMetadataResponse> co_getThriftServiceMetadata(apache::thrift::RpcOptions& rpcOptions) {
-    co_return co_await semifuture_getThriftServiceMetadata(rpcOptions);
+    auto _task = semifuture_getThriftServiceMetadata(rpcOptions);
+    const folly::CancellationToken& cancelToken =
+        co_await folly::coro::co_current_cancellation_token;
+    if (cancelToken.canBeCancelled()) {
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(folly::coro::detachOnCancel(std::move(_task))));
+    } else {
+      co_yield folly::coro::co_result(co_await folly::coro::co_awaitTry(std::move(_task)));
+    }
   }
 #endif // FOLLY_HAS_COROUTINES
   virtual void getThriftServiceMetadata(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback);

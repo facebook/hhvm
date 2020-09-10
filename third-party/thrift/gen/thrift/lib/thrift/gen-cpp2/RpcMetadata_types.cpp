@@ -283,350 +283,7 @@ namespace detail {
 void TccStructTraits<::apache::thrift::ZlibCompressionCodecConfig>::translateFieldName(
     FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
     FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-}
-void TccStructTraits<::apache::thrift::ZstdCompressionCodecConfig>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-}
-void TccStructTraits<::apache::thrift::CodecConfig>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "zlibConfig") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "zstdConfig") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-}
-void TccStructTraits<::apache::thrift::CompressionConfig>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "codecConfig") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "compressionSizeLimit") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_I64;
-  }
-}
-void TccStructTraits<::apache::thrift::NegotiationParameters>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "compressionAlgos") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_I64;
-  }
-}
-void TccStructTraits<::apache::thrift::InteractionCreate>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "interactionId") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_I64;
-  }
-  else if (_fname == "interactionName") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-}
-void TccStructTraits<::apache::thrift::RequestRpcMetadata>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "protocol") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "name") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "kind") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "seqId") {
-    fid = 4;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "clientTimeoutMs") {
-    fid = 5;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "queueTimeoutMs") {
-    fid = 6;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "priority") {
-    fid = 7;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "otherMetadata") {
-    fid = 8;
-    _ftype = apache::thrift::protocol::T_MAP;
-  }
-  else if (_fname == "host") {
-    fid = 9;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "url") {
-    fid = 10;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "crc32c") {
-    fid = 11;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "flags") {
-    fid = 12;
-    _ftype = apache::thrift::protocol::T_I64;
-  }
-  else if (_fname == "loadMetric") {
-    fid = 13;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "compression") {
-    fid = 14;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "compressionConfig") {
-    fid = 15;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "interactionId") {
-    fid = 16;
-    _ftype = apache::thrift::protocol::T_I64;
-  }
-  else if (_fname == "interactionCreate") {
-    fid = 17;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-}
-void TccStructTraits<::apache::thrift::PayloadResponseMetadata>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-}
-void TccStructTraits<::apache::thrift::PayloadDeclaredExceptionMetadata>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-}
-void TccStructTraits<::apache::thrift::PayloadProxyExceptionMetadata>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-}
-void TccStructTraits<::apache::thrift::PayloadProxiedExceptionMetadata>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-}
-void TccStructTraits<::apache::thrift::PayloadAppClientExceptionMetadata>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-}
-void TccStructTraits<::apache::thrift::PayloadAppServerExceptionMetadata>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-}
-void TccStructTraits<::apache::thrift::PayloadExceptionMetadata>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "declaredException") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "proxyException") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "proxiedException") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "appClientException") {
-    fid = 4;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "appServerException") {
-    fid = 5;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-}
-void TccStructTraits<::apache::thrift::PayloadExceptionMetadataBase>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "name_utf8") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "what_utf8") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "metadata") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-}
-void TccStructTraits<::apache::thrift::PayloadMetadata>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "responseMetadata") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "exceptionMetadata") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-}
-void TccStructTraits<::apache::thrift::ResponseRpcMetadata>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "protocol") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "seqId") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "otherMetadata") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_MAP;
-  }
-  else if (_fname == "load") {
-    fid = 4;
-    _ftype = apache::thrift::protocol::T_I64;
-  }
-  else if (_fname == "crc32c") {
-    fid = 5;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "compression") {
-    fid = 6;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "payloadMetadata") {
-    fid = 7;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-}
-void TccStructTraits<::apache::thrift::ResponseRpcError>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "name_utf8") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "what_utf8") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "category") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "code") {
-    fid = 4;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "load") {
-    fid = 5;
-    _ftype = apache::thrift::protocol::T_I64;
-  }
-}
-void TccStructTraits<::apache::thrift::StreamPayloadMetadata>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "compression") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "otherMetadata") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_MAP;
-  }
-}
-void TccStructTraits<::apache::thrift::RequestSetupMetadata>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "opaque") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_MAP;
-  }
-  else if (_fname == "interfaceKind") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "minVersion") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "maxVersion") {
-    fid = 4;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-}
-void TccStructTraits<::apache::thrift::HeadersPayloadContent>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "otherMetadata") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_MAP;
-  }
-}
-void TccStructTraits<::apache::thrift::HeadersPayloadMetadata>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "compression") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
 }
 
 } // namespace detail
@@ -672,7 +329,23 @@ template uint32_t ZlibCompressionCodecConfig::write<>(apache::thrift::CompactPro
 template uint32_t ZlibCompressionCodecConfig::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ZlibCompressionCodecConfig::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::ZstdCompressionCodecConfig>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -712,6 +385,61 @@ template uint32_t ZstdCompressionCodecConfig::write<>(apache::thrift::CompactPro
 template uint32_t ZstdCompressionCodecConfig::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ZstdCompressionCodecConfig::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
+}} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::CodecConfig>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 2;
+  static constexpr folly::StringPiece _names[] = {
+    "zlibConfig",
+    "zstdConfig",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift {
+
+constexpr std::size_t const TEnumTraits<::apache::thrift::CodecConfig::Type>::size;
+folly::Range<::apache::thrift::CodecConfig::Type const*> const TEnumTraits<::apache::thrift::CodecConfig::Type>::values = folly::range(TEnumDataStorage<::apache::thrift::CodecConfig::Type>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::CodecConfig::Type>::names = folly::range(TEnumDataStorage<::apache::thrift::CodecConfig::Type>::names);
+
+char const* TEnumTraits<::apache::thrift::CodecConfig::Type>::findName(type value) {
+  using factory = detail::TEnumMapFactory<::apache::thrift::CodecConfig::Type>;
+  static folly::Indestructible<factory::ValuesToNamesMapType> const map{
+      factory::makeValuesToNamesMap()};
+  auto found = map->find(value);
+  return found == map->end() ? nullptr : found->second;
+}
+
+bool TEnumTraits<::apache::thrift::CodecConfig::Type>::findValue(char const* name, type* out) {
+  using factory = detail::TEnumMapFactory<::apache::thrift::CodecConfig::Type>;
+  static folly::Indestructible<factory::NamesToValuesMapType> const map{
+      factory::makeNamesToValuesMap()};
+  auto found = map->find(name);
+  return found == map->end() ? false : (*out = found->second, true);
+}
 }} // apache::thrift
 namespace apache { namespace thrift {
 
@@ -788,7 +516,64 @@ template uint32_t CodecConfig::write<>(apache::thrift::CompactProtocolWriter*) c
 template uint32_t CodecConfig::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t CodecConfig::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        CodecConfig,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::ZlibCompressionCodecConfig>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        CodecConfig,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::ZstdCompressionCodecConfig>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        CodecConfig,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::ZlibCompressionCodecConfig>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        CodecConfig,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::ZstdCompressionCodecConfig>,
+    "inconsistent use of nimble option");
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::CompressionConfig>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 2;
+  static constexpr folly::StringPiece _names[] = {
+    "codecConfig",
+    "compressionSizeLimit",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRUCT,
+    TType::T_I64,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -812,21 +597,11 @@ bool CompressionConfig::operator==(const CompressionConfig& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.codecConfig_ref().has_value() != rhs.codecConfig_ref().has_value()) {
+  if (lhs.codecConfig_ref() != rhs.codecConfig_ref()) {
     return false;
   }
-  if (lhs.codecConfig_ref().has_value()) {
-    if (!(lhs.codecConfig == rhs.codecConfig)) {
-      return false;
-    }
-  }
-  if (lhs.compressionSizeLimit_ref().has_value() != rhs.compressionSizeLimit_ref().has_value()) {
+  if (lhs.compressionSizeLimit_ref() != rhs.compressionSizeLimit_ref()) {
     return false;
-  }
-  if (lhs.compressionSizeLimit_ref().has_value()) {
-    if (!(lhs.compressionSizeLimit == rhs.compressionSizeLimit)) {
-      return false;
-    }
   }
   return true;
 }
@@ -835,21 +610,11 @@ bool CompressionConfig::operator<(const CompressionConfig& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.codecConfig_ref().has_value() != rhs.codecConfig_ref().has_value()) {
-    return lhs.codecConfig_ref().has_value() < rhs.codecConfig_ref().has_value();
+  if (lhs.codecConfig_ref() != rhs.codecConfig_ref()) {
+    return lhs.codecConfig_ref() < rhs.codecConfig_ref();
   }
-  if (lhs.codecConfig_ref().has_value()) {
-    if (!(lhs.codecConfig == rhs.codecConfig)) {
-      return lhs.codecConfig < rhs.codecConfig;
-    }
-  }
-  if (lhs.compressionSizeLimit_ref().has_value() != rhs.compressionSizeLimit_ref().has_value()) {
-    return lhs.compressionSizeLimit_ref().has_value() < rhs.compressionSizeLimit_ref().has_value();
-  }
-  if (lhs.compressionSizeLimit_ref().has_value()) {
-    if (!(lhs.compressionSizeLimit == rhs.compressionSizeLimit)) {
-      return lhs.compressionSizeLimit < rhs.compressionSizeLimit;
-    }
+  if (lhs.compressionSizeLimit_ref() != rhs.compressionSizeLimit_ref()) {
+    return lhs.compressionSizeLimit_ref() < rhs.compressionSizeLimit_ref();
   }
   return false;
 }
@@ -881,7 +646,49 @@ template uint32_t CompressionConfig::write<>(apache::thrift::CompactProtocolWrit
 template uint32_t CompressionConfig::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t CompressionConfig::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        CompressionConfig,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::CodecConfig>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        CompressionConfig,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::CodecConfig>,
+    "inconsistent use of nimble option");
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::NegotiationParameters>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 1;
+  static constexpr folly::StringPiece _names[] = {
+    "compressionAlgos",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+  };
+  static constexpr TType _types[] = {
+    TType::T_I64,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -902,13 +709,8 @@ bool NegotiationParameters::operator==(const NegotiationParameters& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.compressionAlgos_ref().has_value() != rhs.compressionAlgos_ref().has_value()) {
+  if (lhs.compressionAlgos_ref() != rhs.compressionAlgos_ref()) {
     return false;
-  }
-  if (lhs.compressionAlgos_ref().has_value()) {
-    if (!(lhs.compressionAlgos == rhs.compressionAlgos)) {
-      return false;
-    }
   }
   return true;
 }
@@ -917,13 +719,8 @@ bool NegotiationParameters::operator<(const NegotiationParameters& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.compressionAlgos_ref().has_value() != rhs.compressionAlgos_ref().has_value()) {
-    return lhs.compressionAlgos_ref().has_value() < rhs.compressionAlgos_ref().has_value();
-  }
-  if (lhs.compressionAlgos_ref().has_value()) {
-    if (!(lhs.compressionAlgos == rhs.compressionAlgos)) {
-      return lhs.compressionAlgos < rhs.compressionAlgos;
-    }
+  if (lhs.compressionAlgos_ref() != rhs.compressionAlgos_ref()) {
+    return lhs.compressionAlgos_ref() < rhs.compressionAlgos_ref();
   }
   return false;
 }
@@ -946,7 +743,40 @@ template uint32_t NegotiationParameters::write<>(apache::thrift::CompactProtocol
 template uint32_t NegotiationParameters::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t NegotiationParameters::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::InteractionCreate>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 2;
+  static constexpr folly::StringPiece _names[] = {
+    "interactionId",
+    "interactionName",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+  };
+  static constexpr TType _types[] = {
+    TType::T_I64,
+    TType::T_STRING,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -995,8 +825,8 @@ bool InteractionCreate::operator<(const InteractionCreate& rhs) const {
 
 void swap(InteractionCreate& a, InteractionCreate& b) {
   using ::std::swap;
-  swap(a.interactionId, b.interactionId);
-  swap(a.interactionName, b.interactionName);
+  swap(a.interactionId_ref().value(), b.interactionId_ref().value());
+  swap(a.interactionName_ref().value(), b.interactionName_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1011,7 +841,170 @@ template uint32_t InteractionCreate::write<>(apache::thrift::CompactProtocolWrit
 template uint32_t InteractionCreate::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t InteractionCreate::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::InteractionTerminate>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 1;
+  static constexpr folly::StringPiece _names[] = {
+    "interactionId",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+  };
+  static constexpr TType _types[] = {
+    TType::T_I64,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+InteractionTerminate::InteractionTerminate(apache::thrift::FragileConstructor, int64_t interactionId__arg) :
+    interactionId(std::move(interactionId__arg)) {
+  __isset.interactionId = true;
+}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void InteractionTerminate::__clear() {
+  // clear all fields
+  interactionId = 0;
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  __isset = {};
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+bool InteractionTerminate::operator==(const InteractionTerminate& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.interactionId == rhs.interactionId)) {
+    return false;
+  }
+  return true;
+}
+
+bool InteractionTerminate::operator<(const InteractionTerminate& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.interactionId == rhs.interactionId)) {
+    return lhs.interactionId < rhs.interactionId;
+  }
+  return false;
+}
+
+
+void swap(InteractionTerminate& a, InteractionTerminate& b) {
+  using ::std::swap;
+  swap(a.interactionId_ref().value(), b.interactionId_ref().value());
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+  swap(a.__isset, b.__isset);
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+}
+
+template void InteractionTerminate::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t InteractionTerminate::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t InteractionTerminate::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t InteractionTerminate::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void InteractionTerminate::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t InteractionTerminate::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t InteractionTerminate::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t InteractionTerminate::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+
+}} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::RequestRpcMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 17;
+  static constexpr folly::StringPiece _names[] = {
+    "protocol",
+    "name",
+    "kind",
+    "seqId",
+    "clientTimeoutMs",
+    "queueTimeoutMs",
+    "priority",
+    "otherMetadata",
+    "host",
+    "url",
+    "crc32c",
+    "flags",
+    "loadMetric",
+    "compression",
+    "compressionConfig",
+    "interactionId",
+    "interactionCreate",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+  };
+  static constexpr TType _types[] = {
+    TType::T_I32,
+    TType::T_STRING,
+    TType::T_I32,
+    TType::T_I32,
+    TType::T_I32,
+    TType::T_I32,
+    TType::T_I32,
+    TType::T_MAP,
+    TType::T_STRING,
+    TType::T_STRING,
+    TType::T_I32,
+    TType::T_I64,
+    TType::T_STRING,
+    TType::T_I32,
+    TType::T_STRUCT,
+    TType::T_I64,
+    TType::T_STRUCT,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1097,141 +1090,56 @@ bool RequestRpcMetadata::operator==(const RequestRpcMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.protocol_ref().has_value() != rhs.protocol_ref().has_value()) {
+  if (lhs.protocol_ref() != rhs.protocol_ref()) {
     return false;
   }
-  if (lhs.protocol_ref().has_value()) {
-    if (!(lhs.protocol == rhs.protocol)) {
-      return false;
-    }
-  }
-  if (lhs.name_ref().has_value() != rhs.name_ref().has_value()) {
+  if (lhs.name_ref() != rhs.name_ref()) {
     return false;
   }
-  if (lhs.name_ref().has_value()) {
-    if (!(lhs.name == rhs.name)) {
-      return false;
-    }
-  }
-  if (lhs.kind_ref().has_value() != rhs.kind_ref().has_value()) {
+  if (lhs.kind_ref() != rhs.kind_ref()) {
     return false;
   }
-  if (lhs.kind_ref().has_value()) {
-    if (!(lhs.kind == rhs.kind)) {
-      return false;
-    }
-  }
-  if (lhs.seqId_ref().has_value() != rhs.seqId_ref().has_value()) {
+  if (lhs.seqId_ref() != rhs.seqId_ref()) {
     return false;
   }
-  if (lhs.seqId_ref().has_value()) {
-    if (!(lhs.seqId == rhs.seqId)) {
-      return false;
-    }
-  }
-  if (lhs.clientTimeoutMs_ref().has_value() != rhs.clientTimeoutMs_ref().has_value()) {
+  if (lhs.clientTimeoutMs_ref() != rhs.clientTimeoutMs_ref()) {
     return false;
   }
-  if (lhs.clientTimeoutMs_ref().has_value()) {
-    if (!(lhs.clientTimeoutMs == rhs.clientTimeoutMs)) {
-      return false;
-    }
-  }
-  if (lhs.queueTimeoutMs_ref().has_value() != rhs.queueTimeoutMs_ref().has_value()) {
+  if (lhs.queueTimeoutMs_ref() != rhs.queueTimeoutMs_ref()) {
     return false;
   }
-  if (lhs.queueTimeoutMs_ref().has_value()) {
-    if (!(lhs.queueTimeoutMs == rhs.queueTimeoutMs)) {
-      return false;
-    }
-  }
-  if (lhs.priority_ref().has_value() != rhs.priority_ref().has_value()) {
+  if (lhs.priority_ref() != rhs.priority_ref()) {
     return false;
   }
-  if (lhs.priority_ref().has_value()) {
-    if (!(lhs.priority == rhs.priority)) {
-      return false;
-    }
-  }
-  if (lhs.otherMetadata_ref().has_value() != rhs.otherMetadata_ref().has_value()) {
+  if (lhs.otherMetadata_ref() != rhs.otherMetadata_ref()) {
     return false;
   }
-  if (lhs.otherMetadata_ref().has_value()) {
-    if (!(lhs.otherMetadata == rhs.otherMetadata)) {
-      return false;
-    }
-  }
-  if (lhs.host_ref().has_value() != rhs.host_ref().has_value()) {
+  if (lhs.host_ref() != rhs.host_ref()) {
     return false;
   }
-  if (lhs.host_ref().has_value()) {
-    if (!(lhs.host == rhs.host)) {
-      return false;
-    }
-  }
-  if (lhs.url_ref().has_value() != rhs.url_ref().has_value()) {
+  if (lhs.url_ref() != rhs.url_ref()) {
     return false;
   }
-  if (lhs.url_ref().has_value()) {
-    if (!(lhs.url == rhs.url)) {
-      return false;
-    }
-  }
-  if (lhs.crc32c_ref().has_value() != rhs.crc32c_ref().has_value()) {
+  if (lhs.crc32c_ref() != rhs.crc32c_ref()) {
     return false;
   }
-  if (lhs.crc32c_ref().has_value()) {
-    if (!(lhs.crc32c == rhs.crc32c)) {
-      return false;
-    }
-  }
-  if (lhs.flags_ref().has_value() != rhs.flags_ref().has_value()) {
+  if (lhs.flags_ref() != rhs.flags_ref()) {
     return false;
   }
-  if (lhs.flags_ref().has_value()) {
-    if (!(lhs.flags == rhs.flags)) {
-      return false;
-    }
-  }
-  if (lhs.loadMetric_ref().has_value() != rhs.loadMetric_ref().has_value()) {
+  if (lhs.loadMetric_ref() != rhs.loadMetric_ref()) {
     return false;
   }
-  if (lhs.loadMetric_ref().has_value()) {
-    if (!(lhs.loadMetric == rhs.loadMetric)) {
-      return false;
-    }
-  }
-  if (lhs.compression_ref().has_value() != rhs.compression_ref().has_value()) {
+  if (lhs.compression_ref() != rhs.compression_ref()) {
     return false;
   }
-  if (lhs.compression_ref().has_value()) {
-    if (!(lhs.compression == rhs.compression)) {
-      return false;
-    }
-  }
-  if (lhs.compressionConfig_ref().has_value() != rhs.compressionConfig_ref().has_value()) {
+  if (lhs.compressionConfig_ref() != rhs.compressionConfig_ref()) {
     return false;
   }
-  if (lhs.compressionConfig_ref().has_value()) {
-    if (!(lhs.compressionConfig == rhs.compressionConfig)) {
-      return false;
-    }
-  }
-  if (lhs.interactionId_ref().has_value() != rhs.interactionId_ref().has_value()) {
+  if (lhs.interactionId_ref() != rhs.interactionId_ref()) {
     return false;
   }
-  if (lhs.interactionId_ref().has_value()) {
-    if (!(lhs.interactionId == rhs.interactionId)) {
-      return false;
-    }
-  }
-  if (lhs.interactionCreate_ref().has_value() != rhs.interactionCreate_ref().has_value()) {
+  if (lhs.interactionCreate_ref() != rhs.interactionCreate_ref()) {
     return false;
-  }
-  if (lhs.interactionCreate_ref().has_value()) {
-    if (!(lhs.interactionCreate == rhs.interactionCreate)) {
-      return false;
-    }
   }
   return true;
 }
@@ -1240,141 +1148,56 @@ bool RequestRpcMetadata::operator<(const RequestRpcMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.protocol_ref().has_value() != rhs.protocol_ref().has_value()) {
-    return lhs.protocol_ref().has_value() < rhs.protocol_ref().has_value();
+  if (lhs.protocol_ref() != rhs.protocol_ref()) {
+    return lhs.protocol_ref() < rhs.protocol_ref();
   }
-  if (lhs.protocol_ref().has_value()) {
-    if (!(lhs.protocol == rhs.protocol)) {
-      return lhs.protocol < rhs.protocol;
-    }
+  if (lhs.name_ref() != rhs.name_ref()) {
+    return lhs.name_ref() < rhs.name_ref();
   }
-  if (lhs.name_ref().has_value() != rhs.name_ref().has_value()) {
-    return lhs.name_ref().has_value() < rhs.name_ref().has_value();
+  if (lhs.kind_ref() != rhs.kind_ref()) {
+    return lhs.kind_ref() < rhs.kind_ref();
   }
-  if (lhs.name_ref().has_value()) {
-    if (!(lhs.name == rhs.name)) {
-      return lhs.name < rhs.name;
-    }
+  if (lhs.seqId_ref() != rhs.seqId_ref()) {
+    return lhs.seqId_ref() < rhs.seqId_ref();
   }
-  if (lhs.kind_ref().has_value() != rhs.kind_ref().has_value()) {
-    return lhs.kind_ref().has_value() < rhs.kind_ref().has_value();
+  if (lhs.clientTimeoutMs_ref() != rhs.clientTimeoutMs_ref()) {
+    return lhs.clientTimeoutMs_ref() < rhs.clientTimeoutMs_ref();
   }
-  if (lhs.kind_ref().has_value()) {
-    if (!(lhs.kind == rhs.kind)) {
-      return lhs.kind < rhs.kind;
-    }
+  if (lhs.queueTimeoutMs_ref() != rhs.queueTimeoutMs_ref()) {
+    return lhs.queueTimeoutMs_ref() < rhs.queueTimeoutMs_ref();
   }
-  if (lhs.seqId_ref().has_value() != rhs.seqId_ref().has_value()) {
-    return lhs.seqId_ref().has_value() < rhs.seqId_ref().has_value();
+  if (lhs.priority_ref() != rhs.priority_ref()) {
+    return lhs.priority_ref() < rhs.priority_ref();
   }
-  if (lhs.seqId_ref().has_value()) {
-    if (!(lhs.seqId == rhs.seqId)) {
-      return lhs.seqId < rhs.seqId;
-    }
+  if (lhs.otherMetadata_ref() != rhs.otherMetadata_ref()) {
+    return lhs.otherMetadata_ref() < rhs.otherMetadata_ref();
   }
-  if (lhs.clientTimeoutMs_ref().has_value() != rhs.clientTimeoutMs_ref().has_value()) {
-    return lhs.clientTimeoutMs_ref().has_value() < rhs.clientTimeoutMs_ref().has_value();
+  if (lhs.host_ref() != rhs.host_ref()) {
+    return lhs.host_ref() < rhs.host_ref();
   }
-  if (lhs.clientTimeoutMs_ref().has_value()) {
-    if (!(lhs.clientTimeoutMs == rhs.clientTimeoutMs)) {
-      return lhs.clientTimeoutMs < rhs.clientTimeoutMs;
-    }
+  if (lhs.url_ref() != rhs.url_ref()) {
+    return lhs.url_ref() < rhs.url_ref();
   }
-  if (lhs.queueTimeoutMs_ref().has_value() != rhs.queueTimeoutMs_ref().has_value()) {
-    return lhs.queueTimeoutMs_ref().has_value() < rhs.queueTimeoutMs_ref().has_value();
+  if (lhs.crc32c_ref() != rhs.crc32c_ref()) {
+    return lhs.crc32c_ref() < rhs.crc32c_ref();
   }
-  if (lhs.queueTimeoutMs_ref().has_value()) {
-    if (!(lhs.queueTimeoutMs == rhs.queueTimeoutMs)) {
-      return lhs.queueTimeoutMs < rhs.queueTimeoutMs;
-    }
+  if (lhs.flags_ref() != rhs.flags_ref()) {
+    return lhs.flags_ref() < rhs.flags_ref();
   }
-  if (lhs.priority_ref().has_value() != rhs.priority_ref().has_value()) {
-    return lhs.priority_ref().has_value() < rhs.priority_ref().has_value();
+  if (lhs.loadMetric_ref() != rhs.loadMetric_ref()) {
+    return lhs.loadMetric_ref() < rhs.loadMetric_ref();
   }
-  if (lhs.priority_ref().has_value()) {
-    if (!(lhs.priority == rhs.priority)) {
-      return lhs.priority < rhs.priority;
-    }
+  if (lhs.compression_ref() != rhs.compression_ref()) {
+    return lhs.compression_ref() < rhs.compression_ref();
   }
-  if (lhs.otherMetadata_ref().has_value() != rhs.otherMetadata_ref().has_value()) {
-    return lhs.otherMetadata_ref().has_value() < rhs.otherMetadata_ref().has_value();
+  if (lhs.compressionConfig_ref() != rhs.compressionConfig_ref()) {
+    return lhs.compressionConfig_ref() < rhs.compressionConfig_ref();
   }
-  if (lhs.otherMetadata_ref().has_value()) {
-    if (!(lhs.otherMetadata == rhs.otherMetadata)) {
-      return lhs.otherMetadata < rhs.otherMetadata;
-    }
+  if (lhs.interactionId_ref() != rhs.interactionId_ref()) {
+    return lhs.interactionId_ref() < rhs.interactionId_ref();
   }
-  if (lhs.host_ref().has_value() != rhs.host_ref().has_value()) {
-    return lhs.host_ref().has_value() < rhs.host_ref().has_value();
-  }
-  if (lhs.host_ref().has_value()) {
-    if (!(lhs.host == rhs.host)) {
-      return lhs.host < rhs.host;
-    }
-  }
-  if (lhs.url_ref().has_value() != rhs.url_ref().has_value()) {
-    return lhs.url_ref().has_value() < rhs.url_ref().has_value();
-  }
-  if (lhs.url_ref().has_value()) {
-    if (!(lhs.url == rhs.url)) {
-      return lhs.url < rhs.url;
-    }
-  }
-  if (lhs.crc32c_ref().has_value() != rhs.crc32c_ref().has_value()) {
-    return lhs.crc32c_ref().has_value() < rhs.crc32c_ref().has_value();
-  }
-  if (lhs.crc32c_ref().has_value()) {
-    if (!(lhs.crc32c == rhs.crc32c)) {
-      return lhs.crc32c < rhs.crc32c;
-    }
-  }
-  if (lhs.flags_ref().has_value() != rhs.flags_ref().has_value()) {
-    return lhs.flags_ref().has_value() < rhs.flags_ref().has_value();
-  }
-  if (lhs.flags_ref().has_value()) {
-    if (!(lhs.flags == rhs.flags)) {
-      return lhs.flags < rhs.flags;
-    }
-  }
-  if (lhs.loadMetric_ref().has_value() != rhs.loadMetric_ref().has_value()) {
-    return lhs.loadMetric_ref().has_value() < rhs.loadMetric_ref().has_value();
-  }
-  if (lhs.loadMetric_ref().has_value()) {
-    if (!(lhs.loadMetric == rhs.loadMetric)) {
-      return lhs.loadMetric < rhs.loadMetric;
-    }
-  }
-  if (lhs.compression_ref().has_value() != rhs.compression_ref().has_value()) {
-    return lhs.compression_ref().has_value() < rhs.compression_ref().has_value();
-  }
-  if (lhs.compression_ref().has_value()) {
-    if (!(lhs.compression == rhs.compression)) {
-      return lhs.compression < rhs.compression;
-    }
-  }
-  if (lhs.compressionConfig_ref().has_value() != rhs.compressionConfig_ref().has_value()) {
-    return lhs.compressionConfig_ref().has_value() < rhs.compressionConfig_ref().has_value();
-  }
-  if (lhs.compressionConfig_ref().has_value()) {
-    if (!(lhs.compressionConfig == rhs.compressionConfig)) {
-      return lhs.compressionConfig < rhs.compressionConfig;
-    }
-  }
-  if (lhs.interactionId_ref().has_value() != rhs.interactionId_ref().has_value()) {
-    return lhs.interactionId_ref().has_value() < rhs.interactionId_ref().has_value();
-  }
-  if (lhs.interactionId_ref().has_value()) {
-    if (!(lhs.interactionId == rhs.interactionId)) {
-      return lhs.interactionId < rhs.interactionId;
-    }
-  }
-  if (lhs.interactionCreate_ref().has_value() != rhs.interactionCreate_ref().has_value()) {
-    return lhs.interactionCreate_ref().has_value() < rhs.interactionCreate_ref().has_value();
-  }
-  if (lhs.interactionCreate_ref().has_value()) {
-    if (!(lhs.interactionCreate == rhs.interactionCreate)) {
-      return lhs.interactionCreate < rhs.interactionCreate;
-    }
+  if (lhs.interactionCreate_ref() != rhs.interactionCreate_ref()) {
+    return lhs.interactionCreate_ref() < rhs.interactionCreate_ref();
   }
   return false;
 }
@@ -1437,7 +1260,47 @@ template uint32_t RequestRpcMetadata::write<>(apache::thrift::CompactProtocolWri
 template uint32_t RequestRpcMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t RequestRpcMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        RequestRpcMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::CompressionConfig>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        RequestRpcMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::InteractionCreate>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        RequestRpcMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::CompressionConfig>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        RequestRpcMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::InteractionCreate>,
+    "inconsistent use of nimble option");
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::PayloadResponseMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1477,7 +1340,23 @@ template uint32_t PayloadResponseMetadata::write<>(apache::thrift::CompactProtoc
 template uint32_t PayloadResponseMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadResponseMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::PayloadDeclaredExceptionMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1517,7 +1396,23 @@ template uint32_t PayloadDeclaredExceptionMetadata::write<>(apache::thrift::Comp
 template uint32_t PayloadDeclaredExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadDeclaredExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::PayloadProxyExceptionMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1557,7 +1452,23 @@ template uint32_t PayloadProxyExceptionMetadata::write<>(apache::thrift::Compact
 template uint32_t PayloadProxyExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadProxyExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::PayloadProxiedExceptionMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1597,7 +1508,23 @@ template uint32_t PayloadProxiedExceptionMetadata::write<>(apache::thrift::Compa
 template uint32_t PayloadProxiedExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadProxiedExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::PayloadAppClientExceptionMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1637,7 +1564,23 @@ template uint32_t PayloadAppClientExceptionMetadata::write<>(apache::thrift::Com
 template uint32_t PayloadAppClientExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadAppClientExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::PayloadAppServerExceptionMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1677,6 +1620,70 @@ template uint32_t PayloadAppServerExceptionMetadata::write<>(apache::thrift::Com
 template uint32_t PayloadAppServerExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadAppServerExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
+}} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::PayloadExceptionMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 5;
+  static constexpr folly::StringPiece _names[] = {
+    "declaredException",
+    "proxyException",
+    "proxiedException",
+    "appClientException",
+    "appServerException",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+    4,
+    5,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift {
+
+constexpr std::size_t const TEnumTraits<::apache::thrift::PayloadExceptionMetadata::Type>::size;
+folly::Range<::apache::thrift::PayloadExceptionMetadata::Type const*> const TEnumTraits<::apache::thrift::PayloadExceptionMetadata::Type>::values = folly::range(TEnumDataStorage<::apache::thrift::PayloadExceptionMetadata::Type>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::PayloadExceptionMetadata::Type>::names = folly::range(TEnumDataStorage<::apache::thrift::PayloadExceptionMetadata::Type>::names);
+
+char const* TEnumTraits<::apache::thrift::PayloadExceptionMetadata::Type>::findName(type value) {
+  using factory = detail::TEnumMapFactory<::apache::thrift::PayloadExceptionMetadata::Type>;
+  static folly::Indestructible<factory::ValuesToNamesMapType> const map{
+      factory::makeValuesToNamesMap()};
+  auto found = map->find(value);
+  return found == map->end() ? nullptr : found->second;
+}
+
+bool TEnumTraits<::apache::thrift::PayloadExceptionMetadata::Type>::findValue(char const* name, type* out) {
+  using factory = detail::TEnumMapFactory<::apache::thrift::PayloadExceptionMetadata::Type>;
+  static folly::Indestructible<factory::NamesToValuesMapType> const map{
+      factory::makeNamesToValuesMap()};
+  auto found = map->find(name);
+  return found == map->end() ? false : (*out = found->second, true);
+}
 }} // apache::thrift
 namespace apache { namespace thrift {
 
@@ -1786,7 +1793,103 @@ template uint32_t PayloadExceptionMetadata::write<>(apache::thrift::CompactProto
 template uint32_t PayloadExceptionMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadExceptionMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        PayloadExceptionMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::PayloadDeclaredExceptionMetadata>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        PayloadExceptionMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::PayloadProxyExceptionMetadata>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        PayloadExceptionMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::PayloadProxiedExceptionMetadata>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        PayloadExceptionMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::PayloadAppClientExceptionMetadata>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        PayloadExceptionMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::PayloadAppServerExceptionMetadata>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        PayloadExceptionMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::PayloadDeclaredExceptionMetadata>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        PayloadExceptionMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::PayloadProxyExceptionMetadata>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        PayloadExceptionMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::PayloadProxiedExceptionMetadata>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        PayloadExceptionMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::PayloadAppClientExceptionMetadata>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        PayloadExceptionMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::PayloadAppServerExceptionMetadata>,
+    "inconsistent use of nimble option");
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::PayloadExceptionMetadataBase>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 3;
+  static constexpr folly::StringPiece _names[] = {
+    "name_utf8",
+    "what_utf8",
+    "metadata",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+    TType::T_STRING,
+    TType::T_STRUCT,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1813,29 +1916,14 @@ bool PayloadExceptionMetadataBase::operator==(const PayloadExceptionMetadataBase
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.name_utf8_ref().has_value() != rhs.name_utf8_ref().has_value()) {
+  if (lhs.name_utf8_ref() != rhs.name_utf8_ref()) {
     return false;
   }
-  if (lhs.name_utf8_ref().has_value()) {
-    if (!(lhs.name_utf8 == rhs.name_utf8)) {
-      return false;
-    }
-  }
-  if (lhs.what_utf8_ref().has_value() != rhs.what_utf8_ref().has_value()) {
+  if (lhs.what_utf8_ref() != rhs.what_utf8_ref()) {
     return false;
   }
-  if (lhs.what_utf8_ref().has_value()) {
-    if (!(lhs.what_utf8 == rhs.what_utf8)) {
-      return false;
-    }
-  }
-  if (lhs.metadata_ref().has_value() != rhs.metadata_ref().has_value()) {
+  if (lhs.metadata_ref() != rhs.metadata_ref()) {
     return false;
-  }
-  if (lhs.metadata_ref().has_value()) {
-    if (!(lhs.metadata == rhs.metadata)) {
-      return false;
-    }
   }
   return true;
 }
@@ -1844,29 +1932,14 @@ bool PayloadExceptionMetadataBase::operator<(const PayloadExceptionMetadataBase&
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.name_utf8_ref().has_value() != rhs.name_utf8_ref().has_value()) {
-    return lhs.name_utf8_ref().has_value() < rhs.name_utf8_ref().has_value();
+  if (lhs.name_utf8_ref() != rhs.name_utf8_ref()) {
+    return lhs.name_utf8_ref() < rhs.name_utf8_ref();
   }
-  if (lhs.name_utf8_ref().has_value()) {
-    if (!(lhs.name_utf8 == rhs.name_utf8)) {
-      return lhs.name_utf8 < rhs.name_utf8;
-    }
+  if (lhs.what_utf8_ref() != rhs.what_utf8_ref()) {
+    return lhs.what_utf8_ref() < rhs.what_utf8_ref();
   }
-  if (lhs.what_utf8_ref().has_value() != rhs.what_utf8_ref().has_value()) {
-    return lhs.what_utf8_ref().has_value() < rhs.what_utf8_ref().has_value();
-  }
-  if (lhs.what_utf8_ref().has_value()) {
-    if (!(lhs.what_utf8 == rhs.what_utf8)) {
-      return lhs.what_utf8 < rhs.what_utf8;
-    }
-  }
-  if (lhs.metadata_ref().has_value() != rhs.metadata_ref().has_value()) {
-    return lhs.metadata_ref().has_value() < rhs.metadata_ref().has_value();
-  }
-  if (lhs.metadata_ref().has_value()) {
-    if (!(lhs.metadata == rhs.metadata)) {
-      return lhs.metadata < rhs.metadata;
-    }
+  if (lhs.metadata_ref() != rhs.metadata_ref()) {
+    return lhs.metadata_ref() < rhs.metadata_ref();
   }
   return false;
 }
@@ -1899,6 +1972,73 @@ template uint32_t PayloadExceptionMetadataBase::write<>(apache::thrift::CompactP
 template uint32_t PayloadExceptionMetadataBase::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadExceptionMetadataBase::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        PayloadExceptionMetadataBase,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::PayloadExceptionMetadata>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        PayloadExceptionMetadataBase,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::PayloadExceptionMetadata>,
+    "inconsistent use of nimble option");
+
+}} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::PayloadMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 2;
+  static constexpr folly::StringPiece _names[] = {
+    "responseMetadata",
+    "exceptionMetadata",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift {
+
+constexpr std::size_t const TEnumTraits<::apache::thrift::PayloadMetadata::Type>::size;
+folly::Range<::apache::thrift::PayloadMetadata::Type const*> const TEnumTraits<::apache::thrift::PayloadMetadata::Type>::values = folly::range(TEnumDataStorage<::apache::thrift::PayloadMetadata::Type>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::PayloadMetadata::Type>::names = folly::range(TEnumDataStorage<::apache::thrift::PayloadMetadata::Type>::names);
+
+char const* TEnumTraits<::apache::thrift::PayloadMetadata::Type>::findName(type value) {
+  using factory = detail::TEnumMapFactory<::apache::thrift::PayloadMetadata::Type>;
+  static folly::Indestructible<factory::ValuesToNamesMapType> const map{
+      factory::makeValuesToNamesMap()};
+  auto found = map->find(value);
+  return found == map->end() ? nullptr : found->second;
+}
+
+bool TEnumTraits<::apache::thrift::PayloadMetadata::Type>::findValue(char const* name, type* out) {
+  using factory = detail::TEnumMapFactory<::apache::thrift::PayloadMetadata::Type>;
+  static folly::Indestructible<factory::NamesToValuesMapType> const map{
+      factory::makeNamesToValuesMap()};
+  auto found = map->find(name);
+  return found == map->end() ? false : (*out = found->second, true);
+}
 }} // apache::thrift
 namespace apache { namespace thrift {
 
@@ -1975,7 +2115,138 @@ template uint32_t PayloadMetadata::write<>(apache::thrift::CompactProtocolWriter
 template uint32_t PayloadMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t PayloadMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        PayloadMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::PayloadResponseMetadata>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        PayloadMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::PayloadExceptionMetadataBase>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        PayloadMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::PayloadResponseMetadata>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        PayloadMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::PayloadExceptionMetadataBase>,
+    "inconsistent use of nimble option");
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::ProxiedPayloadMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift {
+
+THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
+ProxiedPayloadMetadata::ProxiedPayloadMetadata(apache::thrift::FragileConstructor) {}
+THRIFT_IGNORE_ISSET_USE_WARNING_END
+void ProxiedPayloadMetadata::__clear() {
+  // clear all fields
+}
+
+bool ProxiedPayloadMetadata::operator==(const ProxiedPayloadMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return true;
+}
+
+bool ProxiedPayloadMetadata::operator<(const ProxiedPayloadMetadata& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  return false;
+}
+
+
+void swap(ProxiedPayloadMetadata& a, ProxiedPayloadMetadata& b) {
+  using ::std::swap;
+  (void)a;
+  (void)b;
+}
+
+template void ProxiedPayloadMetadata::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ProxiedPayloadMetadata::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ProxiedPayloadMetadata::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ProxiedPayloadMetadata::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ProxiedPayloadMetadata::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ProxiedPayloadMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ProxiedPayloadMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ProxiedPayloadMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+
+}} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::ResponseRpcMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 8;
+  static constexpr folly::StringPiece _names[] = {
+    "protocol",
+    "seqId",
+    "otherMetadata",
+    "load",
+    "crc32c",
+    "compression",
+    "payloadMetadata",
+    "proxiedPayloadMetadata",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+  };
+  static constexpr TType _types[] = {
+    TType::T_I32,
+    TType::T_I32,
+    TType::T_MAP,
+    TType::T_I64,
+    TType::T_I32,
+    TType::T_I32,
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1991,14 +2262,15 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
 ResponseRpcMetadata::~ResponseRpcMetadata() {}
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-ResponseRpcMetadata::ResponseRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, int32_t seqId__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, int64_t load__arg, std::uint32_t crc32c__arg,  ::apache::thrift::CompressionAlgorithm compression__arg,  ::apache::thrift::PayloadMetadata payloadMetadata__arg) :
+ResponseRpcMetadata::ResponseRpcMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::ProtocolId protocol__arg, int32_t seqId__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg, int64_t load__arg, std::uint32_t crc32c__arg,  ::apache::thrift::CompressionAlgorithm compression__arg,  ::apache::thrift::PayloadMetadata payloadMetadata__arg,  ::apache::thrift::ProxiedPayloadMetadata proxiedPayloadMetadata__arg) :
     protocol(std::move(protocol__arg)),
     seqId(std::move(seqId__arg)),
     otherMetadata(std::move(otherMetadata__arg)),
     load(std::move(load__arg)),
     crc32c(std::move(crc32c__arg)),
     compression(std::move(compression__arg)),
-    payloadMetadata(std::move(payloadMetadata__arg)) {
+    payloadMetadata(std::move(payloadMetadata__arg)),
+    proxiedPayloadMetadata(std::move(proxiedPayloadMetadata__arg)) {
   __isset.protocol = true;
   __isset.seqId = true;
   __isset.otherMetadata = true;
@@ -2006,6 +2278,7 @@ ResponseRpcMetadata::ResponseRpcMetadata(apache::thrift::FragileConstructor,  ::
   __isset.crc32c = true;
   __isset.compression = true;
   __isset.payloadMetadata = true;
+  __isset.proxiedPayloadMetadata = true;
 }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 void ResponseRpcMetadata::__clear() {
@@ -2026,61 +2299,29 @@ bool ResponseRpcMetadata::operator==(const ResponseRpcMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.protocol_ref().has_value() != rhs.protocol_ref().has_value()) {
+  if (lhs.protocol_ref() != rhs.protocol_ref()) {
     return false;
   }
-  if (lhs.protocol_ref().has_value()) {
-    if (!(lhs.protocol == rhs.protocol)) {
-      return false;
-    }
-  }
-  if (lhs.seqId_ref().has_value() != rhs.seqId_ref().has_value()) {
+  if (lhs.seqId_ref() != rhs.seqId_ref()) {
     return false;
   }
-  if (lhs.seqId_ref().has_value()) {
-    if (!(lhs.seqId == rhs.seqId)) {
-      return false;
-    }
-  }
-  if (lhs.otherMetadata_ref().has_value() != rhs.otherMetadata_ref().has_value()) {
+  if (lhs.otherMetadata_ref() != rhs.otherMetadata_ref()) {
     return false;
   }
-  if (lhs.otherMetadata_ref().has_value()) {
-    if (!(lhs.otherMetadata == rhs.otherMetadata)) {
-      return false;
-    }
-  }
-  if (lhs.load_ref().has_value() != rhs.load_ref().has_value()) {
+  if (lhs.load_ref() != rhs.load_ref()) {
     return false;
   }
-  if (lhs.load_ref().has_value()) {
-    if (!(lhs.load == rhs.load)) {
-      return false;
-    }
-  }
-  if (lhs.crc32c_ref().has_value() != rhs.crc32c_ref().has_value()) {
+  if (lhs.crc32c_ref() != rhs.crc32c_ref()) {
     return false;
   }
-  if (lhs.crc32c_ref().has_value()) {
-    if (!(lhs.crc32c == rhs.crc32c)) {
-      return false;
-    }
-  }
-  if (lhs.compression_ref().has_value() != rhs.compression_ref().has_value()) {
+  if (lhs.compression_ref() != rhs.compression_ref()) {
     return false;
   }
-  if (lhs.compression_ref().has_value()) {
-    if (!(lhs.compression == rhs.compression)) {
-      return false;
-    }
-  }
-  if (lhs.payloadMetadata_ref().has_value() != rhs.payloadMetadata_ref().has_value()) {
+  if (lhs.payloadMetadata_ref() != rhs.payloadMetadata_ref()) {
     return false;
   }
-  if (lhs.payloadMetadata_ref().has_value()) {
-    if (!(lhs.payloadMetadata == rhs.payloadMetadata)) {
-      return false;
-    }
+  if (lhs.proxiedPayloadMetadata_ref() != rhs.proxiedPayloadMetadata_ref()) {
+    return false;
   }
   return true;
 }
@@ -2089,61 +2330,29 @@ bool ResponseRpcMetadata::operator<(const ResponseRpcMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.protocol_ref().has_value() != rhs.protocol_ref().has_value()) {
-    return lhs.protocol_ref().has_value() < rhs.protocol_ref().has_value();
+  if (lhs.protocol_ref() != rhs.protocol_ref()) {
+    return lhs.protocol_ref() < rhs.protocol_ref();
   }
-  if (lhs.protocol_ref().has_value()) {
-    if (!(lhs.protocol == rhs.protocol)) {
-      return lhs.protocol < rhs.protocol;
-    }
+  if (lhs.seqId_ref() != rhs.seqId_ref()) {
+    return lhs.seqId_ref() < rhs.seqId_ref();
   }
-  if (lhs.seqId_ref().has_value() != rhs.seqId_ref().has_value()) {
-    return lhs.seqId_ref().has_value() < rhs.seqId_ref().has_value();
+  if (lhs.otherMetadata_ref() != rhs.otherMetadata_ref()) {
+    return lhs.otherMetadata_ref() < rhs.otherMetadata_ref();
   }
-  if (lhs.seqId_ref().has_value()) {
-    if (!(lhs.seqId == rhs.seqId)) {
-      return lhs.seqId < rhs.seqId;
-    }
+  if (lhs.load_ref() != rhs.load_ref()) {
+    return lhs.load_ref() < rhs.load_ref();
   }
-  if (lhs.otherMetadata_ref().has_value() != rhs.otherMetadata_ref().has_value()) {
-    return lhs.otherMetadata_ref().has_value() < rhs.otherMetadata_ref().has_value();
+  if (lhs.crc32c_ref() != rhs.crc32c_ref()) {
+    return lhs.crc32c_ref() < rhs.crc32c_ref();
   }
-  if (lhs.otherMetadata_ref().has_value()) {
-    if (!(lhs.otherMetadata == rhs.otherMetadata)) {
-      return lhs.otherMetadata < rhs.otherMetadata;
-    }
+  if (lhs.compression_ref() != rhs.compression_ref()) {
+    return lhs.compression_ref() < rhs.compression_ref();
   }
-  if (lhs.load_ref().has_value() != rhs.load_ref().has_value()) {
-    return lhs.load_ref().has_value() < rhs.load_ref().has_value();
+  if (lhs.payloadMetadata_ref() != rhs.payloadMetadata_ref()) {
+    return lhs.payloadMetadata_ref() < rhs.payloadMetadata_ref();
   }
-  if (lhs.load_ref().has_value()) {
-    if (!(lhs.load == rhs.load)) {
-      return lhs.load < rhs.load;
-    }
-  }
-  if (lhs.crc32c_ref().has_value() != rhs.crc32c_ref().has_value()) {
-    return lhs.crc32c_ref().has_value() < rhs.crc32c_ref().has_value();
-  }
-  if (lhs.crc32c_ref().has_value()) {
-    if (!(lhs.crc32c == rhs.crc32c)) {
-      return lhs.crc32c < rhs.crc32c;
-    }
-  }
-  if (lhs.compression_ref().has_value() != rhs.compression_ref().has_value()) {
-    return lhs.compression_ref().has_value() < rhs.compression_ref().has_value();
-  }
-  if (lhs.compression_ref().has_value()) {
-    if (!(lhs.compression == rhs.compression)) {
-      return lhs.compression < rhs.compression;
-    }
-  }
-  if (lhs.payloadMetadata_ref().has_value() != rhs.payloadMetadata_ref().has_value()) {
-    return lhs.payloadMetadata_ref().has_value() < rhs.payloadMetadata_ref().has_value();
-  }
-  if (lhs.payloadMetadata_ref().has_value()) {
-    if (!(lhs.payloadMetadata == rhs.payloadMetadata)) {
-      return lhs.payloadMetadata < rhs.payloadMetadata;
-    }
+  if (lhs.proxiedPayloadMetadata_ref() != rhs.proxiedPayloadMetadata_ref()) {
+    return lhs.proxiedPayloadMetadata_ref() < rhs.proxiedPayloadMetadata_ref();
   }
   return false;
 }
@@ -2164,6 +2373,14 @@ const  ::apache::thrift::PayloadMetadata* ResponseRpcMetadata::get_payloadMetada
   return payloadMetadata_ref().has_value() ? std::addressof(payloadMetadata) : nullptr;
 }
 
+const  ::apache::thrift::ProxiedPayloadMetadata* ResponseRpcMetadata::get_proxiedPayloadMetadata() const& {
+  return proxiedPayloadMetadata_ref().has_value() ? std::addressof(proxiedPayloadMetadata) : nullptr;
+}
+
+ ::apache::thrift::ProxiedPayloadMetadata* ResponseRpcMetadata::get_proxiedPayloadMetadata() & {
+  return proxiedPayloadMetadata_ref().has_value() ? std::addressof(proxiedPayloadMetadata) : nullptr;
+}
+
 
 void swap(ResponseRpcMetadata& a, ResponseRpcMetadata& b) {
   using ::std::swap;
@@ -2174,6 +2391,7 @@ void swap(ResponseRpcMetadata& a, ResponseRpcMetadata& b) {
   swap(a.crc32c_ref().value_unchecked(), b.crc32c_ref().value_unchecked());
   swap(a.compression_ref().value_unchecked(), b.compression_ref().value_unchecked());
   swap(a.payloadMetadata_ref().value_unchecked(), b.payloadMetadata_ref().value_unchecked());
+  swap(a.proxiedPayloadMetadata_ref().value_unchecked(), b.proxiedPayloadMetadata_ref().value_unchecked());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -2188,7 +2406,73 @@ template uint32_t ResponseRpcMetadata::write<>(apache::thrift::CompactProtocolWr
 template uint32_t ResponseRpcMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ResponseRpcMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ResponseRpcMetadata,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::PayloadMetadata>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ResponseRpcMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::ProxiedPayloadMetadata>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ResponseRpcMetadata,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::PayloadMetadata>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ResponseRpcMetadata,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::ProxiedPayloadMetadata>,
+    "inconsistent use of nimble option");
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::ResponseRpcError>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 5;
+  static constexpr folly::StringPiece _names[] = {
+    "name_utf8",
+    "what_utf8",
+    "category",
+    "code",
+    "load",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+    4,
+    5,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+    TType::T_STRING,
+    TType::T_I32,
+    TType::T_I32,
+    TType::T_I64,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -2231,45 +2515,20 @@ bool ResponseRpcError::operator==(const ResponseRpcError& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.name_utf8_ref().has_value() != rhs.name_utf8_ref().has_value()) {
+  if (lhs.name_utf8_ref() != rhs.name_utf8_ref()) {
     return false;
   }
-  if (lhs.name_utf8_ref().has_value()) {
-    if (!(lhs.name_utf8 == rhs.name_utf8)) {
-      return false;
-    }
-  }
-  if (lhs.what_utf8_ref().has_value() != rhs.what_utf8_ref().has_value()) {
+  if (lhs.what_utf8_ref() != rhs.what_utf8_ref()) {
     return false;
   }
-  if (lhs.what_utf8_ref().has_value()) {
-    if (!(lhs.what_utf8 == rhs.what_utf8)) {
-      return false;
-    }
-  }
-  if (lhs.category_ref().has_value() != rhs.category_ref().has_value()) {
+  if (lhs.category_ref() != rhs.category_ref()) {
     return false;
   }
-  if (lhs.category_ref().has_value()) {
-    if (!(lhs.category == rhs.category)) {
-      return false;
-    }
-  }
-  if (lhs.code_ref().has_value() != rhs.code_ref().has_value()) {
+  if (lhs.code_ref() != rhs.code_ref()) {
     return false;
   }
-  if (lhs.code_ref().has_value()) {
-    if (!(lhs.code == rhs.code)) {
-      return false;
-    }
-  }
-  if (lhs.load_ref().has_value() != rhs.load_ref().has_value()) {
+  if (lhs.load_ref() != rhs.load_ref()) {
     return false;
-  }
-  if (lhs.load_ref().has_value()) {
-    if (!(lhs.load == rhs.load)) {
-      return false;
-    }
   }
   return true;
 }
@@ -2278,45 +2537,20 @@ bool ResponseRpcError::operator<(const ResponseRpcError& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.name_utf8_ref().has_value() != rhs.name_utf8_ref().has_value()) {
-    return lhs.name_utf8_ref().has_value() < rhs.name_utf8_ref().has_value();
+  if (lhs.name_utf8_ref() != rhs.name_utf8_ref()) {
+    return lhs.name_utf8_ref() < rhs.name_utf8_ref();
   }
-  if (lhs.name_utf8_ref().has_value()) {
-    if (!(lhs.name_utf8 == rhs.name_utf8)) {
-      return lhs.name_utf8 < rhs.name_utf8;
-    }
+  if (lhs.what_utf8_ref() != rhs.what_utf8_ref()) {
+    return lhs.what_utf8_ref() < rhs.what_utf8_ref();
   }
-  if (lhs.what_utf8_ref().has_value() != rhs.what_utf8_ref().has_value()) {
-    return lhs.what_utf8_ref().has_value() < rhs.what_utf8_ref().has_value();
+  if (lhs.category_ref() != rhs.category_ref()) {
+    return lhs.category_ref() < rhs.category_ref();
   }
-  if (lhs.what_utf8_ref().has_value()) {
-    if (!(lhs.what_utf8 == rhs.what_utf8)) {
-      return lhs.what_utf8 < rhs.what_utf8;
-    }
+  if (lhs.code_ref() != rhs.code_ref()) {
+    return lhs.code_ref() < rhs.code_ref();
   }
-  if (lhs.category_ref().has_value() != rhs.category_ref().has_value()) {
-    return lhs.category_ref().has_value() < rhs.category_ref().has_value();
-  }
-  if (lhs.category_ref().has_value()) {
-    if (!(lhs.category == rhs.category)) {
-      return lhs.category < rhs.category;
-    }
-  }
-  if (lhs.code_ref().has_value() != rhs.code_ref().has_value()) {
-    return lhs.code_ref().has_value() < rhs.code_ref().has_value();
-  }
-  if (lhs.code_ref().has_value()) {
-    if (!(lhs.code == rhs.code)) {
-      return lhs.code < rhs.code;
-    }
-  }
-  if (lhs.load_ref().has_value() != rhs.load_ref().has_value()) {
-    return lhs.load_ref().has_value() < rhs.load_ref().has_value();
-  }
-  if (lhs.load_ref().has_value()) {
-    if (!(lhs.load == rhs.load)) {
-      return lhs.load < rhs.load;
-    }
+  if (lhs.load_ref() != rhs.load_ref()) {
+    return lhs.load_ref() < rhs.load_ref();
   }
   return false;
 }
@@ -2343,7 +2577,40 @@ template uint32_t ResponseRpcError::write<>(apache::thrift::CompactProtocolWrite
 template uint32_t ResponseRpcError::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ResponseRpcError::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::StreamPayloadMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 2;
+  static constexpr folly::StringPiece _names[] = {
+    "compression",
+    "otherMetadata",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+  };
+  static constexpr TType _types[] = {
+    TType::T_I32,
+    TType::T_MAP,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -2367,21 +2634,11 @@ bool StreamPayloadMetadata::operator==(const StreamPayloadMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.compression_ref().has_value() != rhs.compression_ref().has_value()) {
+  if (lhs.compression_ref() != rhs.compression_ref()) {
     return false;
   }
-  if (lhs.compression_ref().has_value()) {
-    if (!(lhs.compression == rhs.compression)) {
-      return false;
-    }
-  }
-  if (lhs.otherMetadata_ref().has_value() != rhs.otherMetadata_ref().has_value()) {
+  if (lhs.otherMetadata_ref() != rhs.otherMetadata_ref()) {
     return false;
-  }
-  if (lhs.otherMetadata_ref().has_value()) {
-    if (!(lhs.otherMetadata == rhs.otherMetadata)) {
-      return false;
-    }
   }
   return true;
 }
@@ -2390,21 +2647,11 @@ bool StreamPayloadMetadata::operator<(const StreamPayloadMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.compression_ref().has_value() != rhs.compression_ref().has_value()) {
-    return lhs.compression_ref().has_value() < rhs.compression_ref().has_value();
+  if (lhs.compression_ref() != rhs.compression_ref()) {
+    return lhs.compression_ref() < rhs.compression_ref();
   }
-  if (lhs.compression_ref().has_value()) {
-    if (!(lhs.compression == rhs.compression)) {
-      return lhs.compression < rhs.compression;
-    }
-  }
-  if (lhs.otherMetadata_ref().has_value() != rhs.otherMetadata_ref().has_value()) {
-    return lhs.otherMetadata_ref().has_value() < rhs.otherMetadata_ref().has_value();
-  }
-  if (lhs.otherMetadata_ref().has_value()) {
-    if (!(lhs.otherMetadata == rhs.otherMetadata)) {
-      return lhs.otherMetadata < rhs.otherMetadata;
-    }
+  if (lhs.otherMetadata_ref() != rhs.otherMetadata_ref()) {
+    return lhs.otherMetadata_ref() < rhs.otherMetadata_ref();
   }
   return false;
 }
@@ -2436,7 +2683,46 @@ template uint32_t StreamPayloadMetadata::write<>(apache::thrift::CompactProtocol
 template uint32_t StreamPayloadMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t StreamPayloadMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::RequestSetupMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 4;
+  static constexpr folly::StringPiece _names[] = {
+    "opaque",
+    "interfaceKind",
+    "minVersion",
+    "maxVersion",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+    4,
+  };
+  static constexpr TType _types[] = {
+    TType::T_MAP,
+    TType::T_I32,
+    TType::T_I32,
+    TType::T_I32,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -2466,37 +2752,17 @@ bool RequestSetupMetadata::operator==(const RequestSetupMetadata& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.opaque_ref().has_value() != rhs.opaque_ref().has_value()) {
+  if (lhs.opaque_ref() != rhs.opaque_ref()) {
     return false;
   }
-  if (lhs.opaque_ref().has_value()) {
-    if (!(lhs.opaque == rhs.opaque)) {
-      return false;
-    }
-  }
-  if (lhs.interfaceKind_ref().has_value() != rhs.interfaceKind_ref().has_value()) {
+  if (lhs.interfaceKind_ref() != rhs.interfaceKind_ref()) {
     return false;
   }
-  if (lhs.interfaceKind_ref().has_value()) {
-    if (!(lhs.interfaceKind == rhs.interfaceKind)) {
-      return false;
-    }
-  }
-  if (lhs.minVersion_ref().has_value() != rhs.minVersion_ref().has_value()) {
+  if (lhs.minVersion_ref() != rhs.minVersion_ref()) {
     return false;
   }
-  if (lhs.minVersion_ref().has_value()) {
-    if (!(lhs.minVersion == rhs.minVersion)) {
-      return false;
-    }
-  }
-  if (lhs.maxVersion_ref().has_value() != rhs.maxVersion_ref().has_value()) {
+  if (lhs.maxVersion_ref() != rhs.maxVersion_ref()) {
     return false;
-  }
-  if (lhs.maxVersion_ref().has_value()) {
-    if (!(lhs.maxVersion == rhs.maxVersion)) {
-      return false;
-    }
   }
   return true;
 }
@@ -2530,7 +2796,37 @@ template uint32_t RequestSetupMetadata::write<>(apache::thrift::CompactProtocolW
 template uint32_t RequestSetupMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t RequestSetupMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::HeadersPayloadContent>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 1;
+  static constexpr folly::StringPiece _names[] = {
+    "otherMetadata",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+  };
+  static constexpr TType _types[] = {
+    TType::T_MAP,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -2551,13 +2847,8 @@ bool HeadersPayloadContent::operator==(const HeadersPayloadContent& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.otherMetadata_ref().has_value() != rhs.otherMetadata_ref().has_value()) {
+  if (lhs.otherMetadata_ref() != rhs.otherMetadata_ref()) {
     return false;
-  }
-  if (lhs.otherMetadata_ref().has_value()) {
-    if (!(lhs.otherMetadata == rhs.otherMetadata)) {
-      return false;
-    }
   }
   return true;
 }
@@ -2566,13 +2857,8 @@ bool HeadersPayloadContent::operator<(const HeadersPayloadContent& rhs) const {
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.otherMetadata_ref().has_value() != rhs.otherMetadata_ref().has_value()) {
-    return lhs.otherMetadata_ref().has_value() < rhs.otherMetadata_ref().has_value();
-  }
-  if (lhs.otherMetadata_ref().has_value()) {
-    if (!(lhs.otherMetadata == rhs.otherMetadata)) {
-      return lhs.otherMetadata < rhs.otherMetadata;
-    }
+  if (lhs.otherMetadata_ref() != rhs.otherMetadata_ref()) {
+    return lhs.otherMetadata_ref() < rhs.otherMetadata_ref();
   }
   return false;
 }
@@ -2603,7 +2889,37 @@ template uint32_t HeadersPayloadContent::write<>(apache::thrift::CompactProtocol
 template uint32_t HeadersPayloadContent::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t HeadersPayloadContent::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }} // apache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::HeadersPayloadMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 1;
+  static constexpr folly::StringPiece _names[] = {
+    "compression",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+  };
+  static constexpr TType _types[] = {
+    TType::T_I32,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -2624,13 +2940,8 @@ bool HeadersPayloadMetadata::operator==(const HeadersPayloadMetadata& rhs) const
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.compression_ref().has_value() != rhs.compression_ref().has_value()) {
+  if (lhs.compression_ref() != rhs.compression_ref()) {
     return false;
-  }
-  if (lhs.compression_ref().has_value()) {
-    if (!(lhs.compression == rhs.compression)) {
-      return false;
-    }
   }
   return true;
 }
@@ -2639,13 +2950,8 @@ bool HeadersPayloadMetadata::operator<(const HeadersPayloadMetadata& rhs) const 
   (void)rhs;
   auto& lhs = *this;
   (void)lhs;
-  if (lhs.compression_ref().has_value() != rhs.compression_ref().has_value()) {
-    return lhs.compression_ref().has_value() < rhs.compression_ref().has_value();
-  }
-  if (lhs.compression_ref().has_value()) {
-    if (!(lhs.compression == rhs.compression)) {
-      return lhs.compression < rhs.compression;
-    }
+  if (lhs.compression_ref() != rhs.compression_ref()) {
+    return lhs.compression_ref() < rhs.compression_ref();
   }
   return false;
 }
@@ -2667,5 +2973,7 @@ template void HeadersPayloadMetadata::readNoXfer<>(apache::thrift::CompactProtoc
 template uint32_t HeadersPayloadMetadata::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t HeadersPayloadMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t HeadersPayloadMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
 
 }} // apache::thrift

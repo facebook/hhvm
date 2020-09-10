@@ -10,3 +10,204 @@
 #include "thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h"
 
 
+namespace apache {
+namespace thrift {
+namespace detail {
+namespace md {
+
+template <>
+class EnumMetadata<::apache::thrift::ProtocolId>
+    : private EmptyMetadata {
+ public:
+  using EmptyMetadata::gen;
+};
+template <>
+class EnumMetadata<::apache::thrift::RpcKind>
+    : private EmptyMetadata {
+ public:
+  using EmptyMetadata::gen;
+};
+template <>
+class EnumMetadata<::apache::thrift::RpcPriority>
+    : private EmptyMetadata {
+ public:
+  using EmptyMetadata::gen;
+};
+template <>
+class EnumMetadata<::apache::thrift::CompressionAlgorithm>
+    : private EmptyMetadata {
+ public:
+  using EmptyMetadata::gen;
+};
+template <>
+class EnumMetadata<::apache::thrift::RequestRpcMetadataFlags>
+    : private EmptyMetadata {
+ public:
+  using EmptyMetadata::gen;
+};
+template <>
+class EnumMetadata<::apache::thrift::ResponseRpcErrorCategory>
+    : private EmptyMetadata {
+ public:
+  using EmptyMetadata::gen;
+};
+template <>
+class EnumMetadata<::apache::thrift::ResponseRpcErrorCode>
+    : private EmptyMetadata {
+ public:
+  using EmptyMetadata::gen;
+};
+template <>
+class EnumMetadata<::apache::thrift::InterfaceKind>
+    : private EmptyMetadata {
+ public:
+  using EmptyMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::ZlibCompressionCodecConfig>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::ZstdCompressionCodecConfig>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::CodecConfig>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::CompressionConfig>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::NegotiationParameters>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::InteractionCreate>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::InteractionTerminate>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::RequestRpcMetadata>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::PayloadResponseMetadata>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::PayloadDeclaredExceptionMetadata>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::PayloadProxyExceptionMetadata>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::PayloadProxiedExceptionMetadata>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::PayloadAppClientExceptionMetadata>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::PayloadAppServerExceptionMetadata>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::PayloadExceptionMetadata>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::PayloadExceptionMetadataBase>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::PayloadMetadata>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::ProxiedPayloadMetadata>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::ResponseRpcMetadata>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::ResponseRpcError>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::StreamPayloadMetadata>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::RequestSetupMetadata>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::HeadersPayloadContent>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::HeadersPayloadMetadata>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+} // namespace md
+} // namespace detail
+} // namespace thrift
+} // namespace apache

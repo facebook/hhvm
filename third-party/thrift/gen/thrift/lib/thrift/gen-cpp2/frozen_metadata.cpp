@@ -19,14 +19,15 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 
-void StructMetadata<::apache::thrift::frozen::schema::Field>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs.emplace("frozen.Field", ::apache::thrift::metadata::ThriftStruct{});
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::frozen::schema::Field>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs_ref()->emplace("frozen.Field", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
-    return;
+    return res.first->second;
   }
   ::apache::thrift::metadata::ThriftStruct& frozen_Field = res.first->second;
-  frozen_Field.name = "frozen.Field";
-  frozen_Field.is_union = false;
+  frozen_Field.name_ref() = "frozen.Field";
+  frozen_Field.is_union_ref() = false;
   static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
   frozen_Field_fields[] = {
     std::make_tuple(1, "layoutId", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE)),
@@ -34,21 +35,23 @@ void StructMetadata<::apache::thrift::frozen::schema::Field>::gen(ThriftMetadata
   };
   for (const auto& f : frozen_Field_fields) {
     ::apache::thrift::metadata::ThriftField field;
-    field.id = std::get<0>(f);
-    field.name = std::get<1>(f);
-    field.is_optional = std::get<2>(f);
-    std::get<3>(f)->writeAndGenType(field.type, metadata);
-    frozen_Field.fields.push_back(std::move(field));
+    field.id_ref() = std::get<0>(f);
+    field.name_ref() = std::get<1>(f);
+    field.is_optional_ref() = std::get<2>(f);
+    std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    frozen_Field.fields_ref()->push_back(std::move(field));
   }
+  return res.first->second;
 }
-void StructMetadata<::apache::thrift::frozen::schema::Layout>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs.emplace("frozen.Layout", ::apache::thrift::metadata::ThriftStruct{});
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::frozen::schema::Layout>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs_ref()->emplace("frozen.Layout", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
-    return;
+    return res.first->second;
   }
   ::apache::thrift::metadata::ThriftStruct& frozen_Layout = res.first->second;
-  frozen_Layout.name = "frozen.Layout";
-  frozen_Layout.is_union = false;
+  frozen_Layout.name_ref() = "frozen.Layout";
+  frozen_Layout.is_union_ref() = false;
   static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
   frozen_Layout_fields[] = {
     std::make_tuple(1, "size", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)),
@@ -58,21 +61,23 @@ void StructMetadata<::apache::thrift::frozen::schema::Layout>::gen(ThriftMetadat
   };
   for (const auto& f : frozen_Layout_fields) {
     ::apache::thrift::metadata::ThriftField field;
-    field.id = std::get<0>(f);
-    field.name = std::get<1>(f);
-    field.is_optional = std::get<2>(f);
-    std::get<3>(f)->writeAndGenType(field.type, metadata);
-    frozen_Layout.fields.push_back(std::move(field));
+    field.id_ref() = std::get<0>(f);
+    field.name_ref() = std::get<1>(f);
+    field.is_optional_ref() = std::get<2>(f);
+    std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    frozen_Layout.fields_ref()->push_back(std::move(field));
   }
+  return res.first->second;
 }
-void StructMetadata<::apache::thrift::frozen::schema::Schema>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.structs.emplace("frozen.Schema", ::apache::thrift::metadata::ThriftStruct{});
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::frozen::schema::Schema>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs_ref()->emplace("frozen.Schema", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
-    return;
+    return res.first->second;
   }
   ::apache::thrift::metadata::ThriftStruct& frozen_Schema = res.first->second;
-  frozen_Schema.name = "frozen.Schema";
-  frozen_Schema.is_union = false;
+  frozen_Schema.name_ref() = "frozen.Schema";
+  frozen_Schema.is_union_ref() = false;
   static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
   frozen_Schema_fields[] = {
     std::make_tuple(4, "fileVersion", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)),
@@ -82,12 +87,13 @@ void StructMetadata<::apache::thrift::frozen::schema::Schema>::gen(ThriftMetadat
   };
   for (const auto& f : frozen_Schema_fields) {
     ::apache::thrift::metadata::ThriftField field;
-    field.id = std::get<0>(f);
-    field.name = std::get<1>(f);
-    field.is_optional = std::get<2>(f);
-    std::get<3>(f)->writeAndGenType(field.type, metadata);
-    frozen_Schema.fields.push_back(std::move(field));
+    field.id_ref() = std::get<0>(f);
+    field.name_ref() = std::get<1>(f);
+    field.is_optional_ref() = std::get<2>(f);
+    std::get<3>(f)->writeAndGenType(*field.type_ref(), metadata);
+    frozen_Schema.fields_ref()->push_back(std::move(field));
   }
+  return res.first->second;
 }
 
 } // namespace md

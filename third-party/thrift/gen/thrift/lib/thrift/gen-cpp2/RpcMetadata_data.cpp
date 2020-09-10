@@ -53,5 +53,20 @@ constexpr const std::array<::apache::thrift::InterfaceKind, 2> TEnumDataStorage<
 constexpr const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::InterfaceKind>::names;
 
 
+constexpr const std::size_t TEnumDataStorage<::apache::thrift::CodecConfig::Type>::size;
+constexpr const std::array<::apache::thrift::CodecConfig::Type, 2> TEnumDataStorage<::apache::thrift::CodecConfig::Type>::values;
+constexpr const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::CodecConfig::Type>::names;
+
+
+constexpr const std::size_t TEnumDataStorage<::apache::thrift::PayloadExceptionMetadata::Type>::size;
+constexpr const std::array<::apache::thrift::PayloadExceptionMetadata::Type, 5> TEnumDataStorage<::apache::thrift::PayloadExceptionMetadata::Type>::values;
+constexpr const std::array<folly::StringPiece, 5> TEnumDataStorage<::apache::thrift::PayloadExceptionMetadata::Type>::names;
+
+
+constexpr const std::size_t TEnumDataStorage<::apache::thrift::PayloadMetadata::Type>::size;
+constexpr const std::array<::apache::thrift::PayloadMetadata::Type, 2> TEnumDataStorage<::apache::thrift::PayloadMetadata::Type>::values;
+constexpr const std::array<folly::StringPiece, 2> TEnumDataStorage<::apache::thrift::PayloadMetadata::Type>::names;
+
+
 } // namespace thrift
 } // namespace apache

@@ -52,330 +52,21 @@ namespace detail {
 void TccStructTraits<::apache::thrift::metadata::ThriftListType>::translateFieldName(
     FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
     FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "valueType") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftSetType>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "valueType") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftMapType>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "keyType") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "valueType") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftEnumType>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "name") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftStructType>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "name") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftUnionType>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "name") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftTypedefType>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "name") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "underlyingType") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftStreamType>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "elemType") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "initialResponseType") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftSinkType>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "elemType") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "finalResponseType") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "initialResponseType") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftType>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "t_primitive") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "t_list") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "t_set") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "t_map") {
-    fid = 4;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "t_enum") {
-    fid = 5;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "t_struct") {
-    fid = 6;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "t_union") {
-    fid = 7;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "t_typedef") {
-    fid = 8;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "t_stream") {
-    fid = 9;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "t_sink") {
-    fid = 10;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftEnum>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "name") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "elements") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_MAP;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftField>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "id") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "type") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "name") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "is_optional") {
-    fid = 4;
-    _ftype = apache::thrift::protocol::T_BOOL;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftStruct>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "name") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "fields") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_LIST;
-  }
-  else if (_fname == "is_union") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_BOOL;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftException>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "name") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "fields") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_LIST;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftFunction>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "name") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "return_type") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "arguments") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_LIST;
-  }
-  else if (_fname == "exceptions") {
-    fid = 4;
-    _ftype = apache::thrift::protocol::T_LIST;
-  }
-  else if (_fname == "is_oneway") {
-    fid = 5;
-    _ftype = apache::thrift::protocol::T_BOOL;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftService>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "name") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "functions") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_LIST;
-  }
-  else if (_fname == "parent") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftModuleContext>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "name") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftServiceContext>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "service_info") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "module") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftMetadata>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "enums") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_MAP;
-  }
-  else if (_fname == "structs") {
-    fid = 4;
-    _ftype = apache::thrift::protocol::T_MAP;
-  }
-  else if (_fname == "exceptions") {
-    fid = 5;
-    _ftype = apache::thrift::protocol::T_MAP;
-  }
-  else if (_fname == "services") {
-    fid = 6;
-    _ftype = apache::thrift::protocol::T_MAP;
-  }
-}
-void TccStructTraits<::apache::thrift::metadata::ThriftServiceMetadataResponse>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "context") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
-  else if (_fname == "metadata") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRUCT;
-  }
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 1;
+  static constexpr folly::StringPiece _names[] = {
+    "valueType",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRUCT,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
 }
 
 } // namespace detail
@@ -448,7 +139,49 @@ template uint32_t ThriftListType::write<>(apache::thrift::CompactProtocolWriter*
 template uint32_t ThriftListType::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftListType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftListType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftListType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of nimble option");
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftSetType>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 1;
+  static constexpr folly::StringPiece _names[] = {
+    "valueType",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRUCT,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 ThriftSetType::ThriftSetType(const ThriftSetType& srcObj) {
@@ -515,7 +248,52 @@ template uint32_t ThriftSetType::write<>(apache::thrift::CompactProtocolWriter*)
 template uint32_t ThriftSetType::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftSetType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftSetType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftSetType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of nimble option");
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftMapType>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 2;
+  static constexpr folly::StringPiece _names[] = {
+    "keyType",
+    "valueType",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 ThriftMapType::ThriftMapType(const ThriftMapType& srcObj) {
@@ -602,7 +380,61 @@ template uint32_t ThriftMapType::write<>(apache::thrift::CompactProtocolWriter*)
 template uint32_t ThriftMapType::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftMapType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftMapType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftMapType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftMapType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftMapType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of nimble option");
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftEnumType>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 1;
+  static constexpr folly::StringPiece _names[] = {
+    "name",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -642,7 +474,7 @@ bool ThriftEnumType::operator<(const ThriftEnumType& rhs) const {
 
 void swap(ThriftEnumType& a, ThriftEnumType& b) {
   using ::std::swap;
-  swap(a.name, b.name);
+  swap(a.name_ref().value(), b.name_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -657,7 +489,37 @@ template uint32_t ThriftEnumType::write<>(apache::thrift::CompactProtocolWriter*
 template uint32_t ThriftEnumType::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftEnumType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftStructType>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 1;
+  static constexpr folly::StringPiece _names[] = {
+    "name",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -697,7 +559,7 @@ bool ThriftStructType::operator<(const ThriftStructType& rhs) const {
 
 void swap(ThriftStructType& a, ThriftStructType& b) {
   using ::std::swap;
-  swap(a.name, b.name);
+  swap(a.name_ref().value(), b.name_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -712,7 +574,37 @@ template uint32_t ThriftStructType::write<>(apache::thrift::CompactProtocolWrite
 template uint32_t ThriftStructType::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftStructType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftUnionType>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 1;
+  static constexpr folly::StringPiece _names[] = {
+    "name",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -752,7 +644,7 @@ bool ThriftUnionType::operator<(const ThriftUnionType& rhs) const {
 
 void swap(ThriftUnionType& a, ThriftUnionType& b) {
   using ::std::swap;
-  swap(a.name, b.name);
+  swap(a.name_ref().value(), b.name_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -767,7 +659,40 @@ template uint32_t ThriftUnionType::write<>(apache::thrift::CompactProtocolWriter
 template uint32_t ThriftUnionType::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftUnionType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftTypedefType>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 2;
+  static constexpr folly::StringPiece _names[] = {
+    "name",
+    "underlyingType",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+    TType::T_STRUCT,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 ThriftTypedefType::ThriftTypedefType(const ThriftTypedefType& srcObj) {
@@ -839,7 +764,7 @@ bool ThriftTypedefType::operator<(const ThriftTypedefType& rhs) const {
 
 void swap(ThriftTypedefType& a, ThriftTypedefType& b) {
   using ::std::swap;
-  swap(a.name, b.name);
+  swap(a.name_ref().value(), b.name_ref().value());
   swap(a.underlyingType, b.underlyingType);
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
@@ -855,7 +780,52 @@ template uint32_t ThriftTypedefType::write<>(apache::thrift::CompactProtocolWrit
 template uint32_t ThriftTypedefType::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftTypedefType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftTypedefType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftTypedefType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of nimble option");
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftStreamType>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 2;
+  static constexpr folly::StringPiece _names[] = {
+    "elemType",
+    "initialResponseType",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 ThriftStreamType::ThriftStreamType(const ThriftStreamType& srcObj) {
@@ -942,7 +912,67 @@ template uint32_t ThriftStreamType::write<>(apache::thrift::CompactProtocolWrite
 template uint32_t ThriftStreamType::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftStreamType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftStreamType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftStreamType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftStreamType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftStreamType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of nimble option");
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftSinkType>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 3;
+  static constexpr folly::StringPiece _names[] = {
+    "elemType",
+    "finalResponseType",
+    "initialResponseType",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 ThriftSinkType::ThriftSinkType(const ThriftSinkType& srcObj) {
@@ -1049,7 +1079,122 @@ template uint32_t ThriftSinkType::write<>(apache::thrift::CompactProtocolWriter*
 template uint32_t ThriftSinkType::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftSinkType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftSinkType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftSinkType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftSinkType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftSinkType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftSinkType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftSinkType,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of nimble option");
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftType>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 10;
+  static constexpr folly::StringPiece _names[] = {
+    "t_primitive",
+    "t_list",
+    "t_set",
+    "t_map",
+    "t_enum",
+    "t_struct",
+    "t_union",
+    "t_typedef",
+    "t_stream",
+    "t_sink",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+  };
+  static constexpr TType _types[] = {
+    TType::T_I32,
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift {
+
+constexpr std::size_t const TEnumTraits<::apache::thrift::metadata::ThriftType::Type>::size;
+folly::Range<::apache::thrift::metadata::ThriftType::Type const*> const TEnumTraits<::apache::thrift::metadata::ThriftType::Type>::values = folly::range(TEnumDataStorage<::apache::thrift::metadata::ThriftType::Type>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::apache::thrift::metadata::ThriftType::Type>::names = folly::range(TEnumDataStorage<::apache::thrift::metadata::ThriftType::Type>::names);
+
+char const* TEnumTraits<::apache::thrift::metadata::ThriftType::Type>::findName(type value) {
+  using factory = detail::TEnumMapFactory<::apache::thrift::metadata::ThriftType::Type>;
+  static folly::Indestructible<factory::ValuesToNamesMapType> const map{
+      factory::makeValuesToNamesMap()};
+  auto found = map->find(value);
+  return found == map->end() ? nullptr : found->second;
+}
+
+bool TEnumTraits<::apache::thrift::metadata::ThriftType::Type>::findValue(char const* name, type* out) {
+  using factory = detail::TEnumMapFactory<::apache::thrift::metadata::ThriftType::Type>;
+  static folly::Indestructible<factory::NamesToValuesMapType> const map{
+      factory::makeNamesToValuesMap()};
+  auto found = map->find(name);
+  return found == map->end() ? false : (*out = found->second, true);
+}
+}} // apache::thrift
 namespace apache { namespace thrift { namespace metadata {
 
 void ThriftType::__clear() {
@@ -1213,7 +1358,148 @@ template uint32_t ThriftType::write<>(apache::thrift::CompactProtocolWriter*) co
 template uint32_t ThriftType::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftListType>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftSetType>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftMapType>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftEnumType>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftStructType>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftUnionType>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftTypedefType>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftStreamType>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftSinkType>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftListType>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftSetType>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftMapType>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftEnumType>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftStructType>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftUnionType>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftTypedefType>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftStreamType>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftType,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftSinkType>,
+    "inconsistent use of nimble option");
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftEnum>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 2;
+  static constexpr folly::StringPiece _names[] = {
+    "name",
+    "elements",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+    TType::T_MAP,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1270,8 +1556,8 @@ const ::std::map<int32_t, ::std::string>& ThriftEnum::get_elements() const& {
 
 void swap(ThriftEnum& a, ThriftEnum& b) {
   using ::std::swap;
-  swap(a.name, b.name);
-  swap(a.elements, b.elements);
+  swap(a.name_ref().value(), b.name_ref().value());
+  swap(a.elements_ref().value(), b.elements_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1286,7 +1572,46 @@ template uint32_t ThriftEnum::write<>(apache::thrift::CompactProtocolWriter*) co
 template uint32_t ThriftEnum::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftEnum::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftField>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 4;
+  static constexpr folly::StringPiece _names[] = {
+    "id",
+    "type",
+    "name",
+    "is_optional",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+    4,
+  };
+  static constexpr TType _types[] = {
+    TType::T_I32,
+    TType::T_STRUCT,
+    TType::T_STRING,
+    TType::T_BOOL,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1361,10 +1686,10 @@ const  ::apache::thrift::metadata::ThriftType& ThriftField::get_type() const& {
 
 void swap(ThriftField& a, ThriftField& b) {
   using ::std::swap;
-  swap(a.id, b.id);
-  swap(a.type, b.type);
-  swap(a.name, b.name);
-  swap(a.is_optional, b.is_optional);
+  swap(a.id_ref().value(), b.id_ref().value());
+  swap(a.type_ref().value(), b.type_ref().value());
+  swap(a.name_ref().value(), b.name_ref().value());
+  swap(a.is_optional_ref().value(), b.is_optional_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1379,7 +1704,55 @@ template uint32_t ThriftField::write<>(apache::thrift::CompactProtocolWriter*) c
 template uint32_t ThriftField::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftField::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftField,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftField,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of nimble option");
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftStruct>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 3;
+  static constexpr folly::StringPiece _names[] = {
+    "name",
+    "fields",
+    "is_union",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+    TType::T_LIST,
+    TType::T_BOOL,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1445,9 +1818,9 @@ const ::std::vector< ::apache::thrift::metadata::ThriftField>& ThriftStruct::get
 
 void swap(ThriftStruct& a, ThriftStruct& b) {
   using ::std::swap;
-  swap(a.name, b.name);
-  swap(a.fields, b.fields);
-  swap(a.is_union, b.is_union);
+  swap(a.name_ref().value(), b.name_ref().value());
+  swap(a.fields_ref().value(), b.fields_ref().value());
+  swap(a.is_union_ref().value(), b.is_union_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1462,7 +1835,52 @@ template uint32_t ThriftStruct::write<>(apache::thrift::CompactProtocolWriter*) 
 template uint32_t ThriftStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftStruct,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftField>>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftStruct,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftField>>,
+    "inconsistent use of nimble option");
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftException>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 2;
+  static constexpr folly::StringPiece _names[] = {
+    "name",
+    "fields",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+    TType::T_LIST,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1519,8 +1937,8 @@ const ::std::vector< ::apache::thrift::metadata::ThriftField>& ThriftException::
 
 void swap(ThriftException& a, ThriftException& b) {
   using ::std::swap;
-  swap(a.name, b.name);
-  swap(a.fields, b.fields);
+  swap(a.name_ref().value(), b.name_ref().value());
+  swap(a.fields_ref().value(), b.fields_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1535,7 +1953,61 @@ template uint32_t ThriftException::write<>(apache::thrift::CompactProtocolWriter
 template uint32_t ThriftException::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftException::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftException,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftField>>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftException,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftField>>,
+    "inconsistent use of nimble option");
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftFunction>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 5;
+  static constexpr folly::StringPiece _names[] = {
+    "name",
+    "return_type",
+    "arguments",
+    "exceptions",
+    "is_oneway",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+    4,
+    5,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+    TType::T_STRUCT,
+    TType::T_LIST,
+    TType::T_LIST,
+    TType::T_BOOL,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1643,11 +2115,11 @@ const ::std::vector< ::apache::thrift::metadata::ThriftField>& ThriftFunction::g
 
 void swap(ThriftFunction& a, ThriftFunction& b) {
   using ::std::swap;
-  swap(a.name, b.name);
-  swap(a.return_type, b.return_type);
-  swap(a.arguments, b.arguments);
-  swap(a.exceptions, b.exceptions);
-  swap(a.is_oneway, b.is_oneway);
+  swap(a.name_ref().value(), b.name_ref().value());
+  swap(a.return_type_ref().value(), b.return_type_ref().value());
+  swap(a.arguments_ref().value(), b.arguments_ref().value());
+  swap(a.exceptions_ref().value(), b.exceptions_ref().value());
+  swap(a.is_oneway_ref().value(), b.is_oneway_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1662,7 +2134,79 @@ template uint32_t ThriftFunction::write<>(apache::thrift::CompactProtocolWriter*
 template uint32_t ThriftFunction::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftFunction::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftFunction,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftFunction,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftField>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftFunction,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftField>>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftFunction,
+        ::apache::thrift::type_class::variant,
+         ::apache::thrift::metadata::ThriftType>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftFunction,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftField>>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftFunction,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftField>>,
+    "inconsistent use of nimble option");
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftService>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 3;
+  static constexpr folly::StringPiece _names[] = {
+    "name",
+    "functions",
+    "parent",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+    TType::T_LIST,
+    TType::T_STRING,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1695,13 +2239,8 @@ bool ThriftService::operator==(const ThriftService& rhs) const {
   if (!(lhs.functions == rhs.functions)) {
     return false;
   }
-  if (lhs.parent_ref().has_value() != rhs.parent_ref().has_value()) {
+  if (lhs.parent_ref() != rhs.parent_ref()) {
     return false;
-  }
-  if (lhs.parent_ref().has_value()) {
-    if (!(lhs.parent == rhs.parent)) {
-      return false;
-    }
   }
   return true;
 }
@@ -1716,13 +2255,8 @@ bool ThriftService::operator<(const ThriftService& rhs) const {
   if (!(lhs.functions == rhs.functions)) {
     return lhs.functions < rhs.functions;
   }
-  if (lhs.parent_ref().has_value() != rhs.parent_ref().has_value()) {
-    return lhs.parent_ref().has_value() < rhs.parent_ref().has_value();
-  }
-  if (lhs.parent_ref().has_value()) {
-    if (!(lhs.parent == rhs.parent)) {
-      return lhs.parent < rhs.parent;
-    }
+  if (lhs.parent_ref() != rhs.parent_ref()) {
+    return lhs.parent_ref() < rhs.parent_ref();
   }
   return false;
 }
@@ -1738,8 +2272,8 @@ const ::std::vector< ::apache::thrift::metadata::ThriftFunction>& ThriftService:
 
 void swap(ThriftService& a, ThriftService& b) {
   using ::std::swap;
-  swap(a.name, b.name);
-  swap(a.functions, b.functions);
+  swap(a.name_ref().value(), b.name_ref().value());
+  swap(a.functions_ref().value(), b.functions_ref().value());
   swap(a.parent_ref().value_unchecked(), b.parent_ref().value_unchecked());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
@@ -1755,7 +2289,49 @@ template uint32_t ThriftService::write<>(apache::thrift::CompactProtocolWriter*)
 template uint32_t ThriftService::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftService::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftService,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftFunction>>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftService,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector< ::apache::thrift::metadata::ThriftFunction>>,
+    "inconsistent use of nimble option");
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftModuleContext>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 1;
+  static constexpr folly::StringPiece _names[] = {
+    "name",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1795,7 +2371,7 @@ bool ThriftModuleContext::operator<(const ThriftModuleContext& rhs) const {
 
 void swap(ThriftModuleContext& a, ThriftModuleContext& b) {
   using ::std::swap;
-  swap(a.name, b.name);
+  swap(a.name_ref().value(), b.name_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1810,7 +2386,40 @@ template uint32_t ThriftModuleContext::write<>(apache::thrift::CompactProtocolWr
 template uint32_t ThriftModuleContext::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftModuleContext::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftServiceContext>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 2;
+  static constexpr folly::StringPiece _names[] = {
+    "service_info",
+    "module",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1875,8 +2484,8 @@ const  ::apache::thrift::metadata::ThriftModuleContext& ThriftServiceContext::ge
 
 void swap(ThriftServiceContext& a, ThriftServiceContext& b) {
   using ::std::swap;
-  swap(a.service_info, b.service_info);
-  swap(a.module, b.module);
+  swap(a.service_info_ref().value(), b.service_info_ref().value());
+  swap(a.module_ref().value(), b.module_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -1891,7 +2500,70 @@ template uint32_t ThriftServiceContext::write<>(apache::thrift::CompactProtocolW
 template uint32_t ThriftServiceContext::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftServiceContext::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftServiceContext,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftService>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftServiceContext,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftModuleContext>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftServiceContext,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftService>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftServiceContext,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftModuleContext>,
+    "inconsistent use of nimble option");
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftMetadata>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 4;
+  static constexpr folly::StringPiece _names[] = {
+    "enums",
+    "structs",
+    "exceptions",
+    "services",
+  };
+  static constexpr int16_t _ids[] = {
+    2,
+    4,
+    5,
+    6,
+  };
+  static constexpr TType _types[] = {
+    TType::T_MAP,
+    TType::T_MAP,
+    TType::T_MAP,
+    TType::T_MAP,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -1990,10 +2662,10 @@ const ::std::map<::std::string,  ::apache::thrift::metadata::ThriftService>& Thr
 
 void swap(ThriftMetadata& a, ThriftMetadata& b) {
   using ::std::swap;
-  swap(a.enums, b.enums);
-  swap(a.structs, b.structs);
-  swap(a.exceptions, b.exceptions);
-  swap(a.services, b.services);
+  swap(a.enums_ref().value(), b.enums_ref().value());
+  swap(a.structs_ref().value(), b.structs_ref().value());
+  swap(a.exceptions_ref().value(), b.exceptions_ref().value());
+  swap(a.services_ref().value(), b.services_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -2008,7 +2680,88 @@ template uint32_t ThriftMetadata::write<>(apache::thrift::CompactProtocolWriter*
 template uint32_t ThriftMetadata::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftMetadata::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftMetadata,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>,
+        ::std::map<::std::string,  ::apache::thrift::metadata::ThriftEnum>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftMetadata,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>,
+        ::std::map<::std::string,  ::apache::thrift::metadata::ThriftStruct>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftMetadata,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>,
+        ::std::map<::std::string,  ::apache::thrift::metadata::ThriftException>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftMetadata,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>,
+        ::std::map<::std::string,  ::apache::thrift::metadata::ThriftService>>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftMetadata,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>,
+        ::std::map<::std::string,  ::apache::thrift::metadata::ThriftEnum>>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftMetadata,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>,
+        ::std::map<::std::string,  ::apache::thrift::metadata::ThriftStruct>>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftMetadata,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>,
+        ::std::map<::std::string,  ::apache::thrift::metadata::ThriftException>>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftMetadata,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::structure>,
+        ::std::map<::std::string,  ::apache::thrift::metadata::ThriftService>>,
+    "inconsistent use of nimble option");
+
 }}} // apache::thrift::metadata
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::apache::thrift::metadata::ThriftServiceMetadataResponse>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 2;
+  static constexpr folly::StringPiece _names[] = {
+    "context",
+    "metadata",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRUCT,
+    TType::T_STRUCT,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace apache { namespace thrift { namespace metadata {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -2073,8 +2826,8 @@ const  ::apache::thrift::metadata::ThriftMetadata& ThriftServiceMetadataResponse
 
 void swap(ThriftServiceMetadataResponse& a, ThriftServiceMetadataResponse& b) {
   using ::std::swap;
-  swap(a.context, b.context);
-  swap(a.metadata, b.metadata);
+  swap(a.context_ref().value(), b.context_ref().value());
+  swap(a.metadata_ref().value(), b.metadata_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -2088,5 +2841,31 @@ template void ThriftServiceMetadataResponse::readNoXfer<>(apache::thrift::Compac
 template uint32_t ThriftServiceMetadataResponse::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t ThriftServiceMetadataResponse::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t ThriftServiceMetadataResponse::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftServiceMetadataResponse,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftServiceContext>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ThriftServiceMetadataResponse,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftMetadata>,
+    "inconsistent use of json option");
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftServiceMetadataResponse,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftServiceContext>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ThriftServiceMetadataResponse,
+        ::apache::thrift::type_class::structure,
+         ::apache::thrift::metadata::ThriftMetadata>,
+    "inconsistent use of nimble option");
 
 }}} // apache::thrift::metadata

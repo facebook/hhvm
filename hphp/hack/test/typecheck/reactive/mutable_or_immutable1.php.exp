@@ -1,2 +1,2 @@
-File "mutable_or_immutable1.php", line 5, characters 10-10:
-`<<__MaybeMutable>>` only makes sense on methods, or parameters on functions or methods. (NastCheck[3069])
+File "mutable_or_immutable1.php", line 4, characters 3-16:
+The `__MaybeMutable` attribute cannot be used on a function. (Typing[4231])

@@ -1057,8 +1057,6 @@ val invalid_mutable_return_result : Pos.t -> Pos.t -> string -> unit
 val mutable_return_result_mismatch :
   bool -> Pos.t -> Pos.t -> typing_error_callback -> unit
 
-val mutable_attribute_on_function : Pos.t -> unit
-
 val mutable_methods_must_be_reactive : Pos.t -> string -> unit
 
 val mutable_return_annotated_decls_must_be_reactive :
@@ -1263,8 +1261,6 @@ val callsite_reactivity_mismatch :
 
 val rx_parameter_condition_mismatch :
   string -> Pos.t -> Pos.t -> typing_error_callback -> unit
-
-val maybe_mutable_attribute_on_function : Pos.t -> unit
 
 val conflicting_mutable_and_maybe_mutable_attributes : Pos.t -> unit
 

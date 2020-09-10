@@ -1,0 +1,2 @@
+File "rx_class2.php", line 3, characters 3-13:
+The `__RxShallow` attribute cannot be used on a class. (Typing[4231])

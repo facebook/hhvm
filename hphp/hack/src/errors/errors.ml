@@ -2123,23 +2123,11 @@ let inout_params_in_coroutine pos =
     pos
     "`inout` parameters cannot be defined on coroutines."
 
-let mutable_attribute_on_function pos =
-  add
-    (NastCheck.err_code NastCheck.MutableAttributeOnFunction)
-    pos
-    "`<<__Mutable>>` only makes sense on methods, or parameters on functions or methods."
-
-let maybe_mutable_attribute_on_function pos =
-  add
-    (NastCheck.err_code NastCheck.MaybeMutableAttributeOnFunction)
-    pos
-    "`<<__MaybeMutable>>` only makes sense on methods, or parameters on functions or methods."
-
 let conflicting_mutable_and_maybe_mutable_attributes pos =
   add
     (NastCheck.err_code NastCheck.ConflictingMutableAndMaybeMutableAttributes)
     pos
-    "Declaration cannot have both `<<__Mutable>>` and `<<__MaybeMutable>>` attributtes."
+    "Declaration cannot have both `<<__Mutable>>` and `<<__MaybeMutable>>` attributes."
 
 let mutable_methods_must_be_reactive pos name =
   add

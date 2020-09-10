@@ -5,3 +5,5 @@ function f(): void {
   $z = function(<<__OwnedMutable>> A $c): void {
   };
 }
+
+interface A {}

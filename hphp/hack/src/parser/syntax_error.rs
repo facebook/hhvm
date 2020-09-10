@@ -499,8 +499,6 @@ pub const missing_reactivity_for_condition: Error = Cow::Borrowed(concat!(
     "`__OnlyRxIfImpl` and `__AtMostRxAsArgs` annotations cannot ",
     "be used without `__Rx`, `__RxShallow`, or `__RxLocal`.",
 ));
-pub const misplaced_owned_mutable: Error =
-    Cow::Borrowed("`__OwnedMutable` annotation can only be placed on parameters.");
 pub const conflicting_mutable_and_owned_mutable_attributes: Error =
     Cow::Borrowed("Parameter cannot have both `__Mutable` and `__OwnedMutable` annotations.");
 pub const conflicting_mutable_and_maybe_mutable_attributes: Error =
@@ -539,8 +537,6 @@ pub const invalid_await_position_dependent: Error = Cow::Borrowed(concat!(
     "`await` cannot be used as an expression inside another await expression. ",
     "Pull the inner `await` out into its own statement.",
 ));
-pub const misplaced_reactivity_annotation: Error =
-    Cow::Borrowed("Reactive annotations `__Rx` are not allowed on classes, interfaces or traits.");
 pub const mutability_annotation_on_constructor: Error = Cow::Borrowed(
     "`__Mutable`, `__MaybeMutable`, and `__MutableReturn` annotations are not allowed on constructors.",
 );

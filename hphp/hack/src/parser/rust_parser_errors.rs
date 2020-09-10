@@ -1587,10 +1587,6 @@ where
         }
     }
 
-    fn methodish_contains_owned_mutable_attribute(&self, node: &'a Syntax<Token, Value>) -> bool {
-        self.methodish_contains_attribute(node, sn::user_attributes::OWNED_MUTABLE)
-    }
-
     fn check_nonrx_annotation(&mut self, node: &'a Syntax<Token, Value>) {
         let err_decl = |self_: &mut Self| {
             self_.errors.push(Self::make_error_from_node(
@@ -1671,20 +1667,6 @@ where
             }
             _ => false,
         }
-    }
-
-    fn function_declaration_contains_only_rx_if_impl_attribute(
-        &self,
-        node: &'a Syntax<Token, Value>,
-    ) -> bool {
-        self.function_declaration_contains_attribute(node, sn::user_attributes::ONLY_RX_IF_IMPL)
-    }
-
-    fn function_declaration_contains_owned_mutable_attribute(
-        &self,
-        node: &'a Syntax<Token, Value>,
-    ) -> bool {
-        self.function_declaration_contains_attribute(node, sn::user_attributes::OWNED_MUTABLE)
     }
 
     fn attribute_multiple_reactivity_annotations(
@@ -1809,29 +1791,12 @@ where
                 );
                 self.error_if_memoize_function_returns_mutable(function_attrs);
 
-                self.produce_error(
-                    |self_, x| {
-                        Self::function_declaration_contains_only_rx_if_impl_attribute(self_, x)
-                    },
-                    node,
-                    || errors::functions_cannot_implement_reactive,
-                    function_attrs,
-                );
                 self.check_nonrx_annotation(node);
 
                 self.produce_error(
                     |self_, x| Self::function_missing_reactivity_for_condition(self_, x),
                     node,
                     || errors::missing_reactivity_for_condition,
-                    function_attrs,
-                );
-
-                self.produce_error(
-                    |self_, x| {
-                        Self::function_declaration_contains_owned_mutable_attribute(self_, x)
-                    },
-                    node,
-                    || errors::misplaced_owned_mutable,
                     function_attrs,
                 );
 
@@ -1989,12 +1954,6 @@ where
                     |self_, x| self_.methodish_missing_reactivity_for_condition(x),
                     node,
                     || errors::missing_reactivity_for_condition,
-                    method_attrs,
-                );
-                self.produce_error(
-                    |self_, x| self_.methodish_contains_owned_mutable_attribute(x),
-                    node,
-                    || errors::misplaced_owned_mutable,
                     method_attrs,
                 );
             }
@@ -4026,13 +3985,6 @@ where
                 || errors::error2037,
                 &cd.classish_extends_list,
             );
-
-            if let Some(n) = self.attribute_first_reactivity_annotation(&cd.classish_attribute) {
-                self.errors.push(Self::make_error_from_node(
-                    n,
-                    errors::misplaced_reactivity_annotation,
-                ))
-            };
 
             self.invalid_modifier_errors("Classes, interfaces, and traits", node, |kind| {
                 kind == TokenKind::Abstract || kind == TokenKind::Final || kind == TokenKind::XHP

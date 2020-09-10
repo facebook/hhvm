@@ -39,14 +39,12 @@ let check_implements
         if
           check_locations
           && (not @@ List.mem intfs attr_interface ~equal:String.equal)
-        then (
+        then
           Errors.wrong_expression_kind_builtin_attribute
             expr_kind
             attr_pos
             attr_name;
-          false
-        ) else
-          true
+        true
       | None -> false
     in
     let () =

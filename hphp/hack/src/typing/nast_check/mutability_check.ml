@@ -37,9 +37,6 @@ let handler =
     method! at_fun_ env f =
       let (pos, fname) = f.f_name in
       let ua = f.f_user_attributes in
-      (* Functions can't be mutable, only methods can *)
-      if is_mutable ua then Errors.mutable_attribute_on_function pos;
-      if is_maybe_mutable ua then Errors.maybe_mutable_attribute_on_function pos;
       if is_mutable_return ua && not env.is_reactive then
         Errors.mutable_return_annotated_decls_must_be_reactive
           "function"

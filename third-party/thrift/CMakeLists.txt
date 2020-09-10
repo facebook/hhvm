@@ -5,6 +5,7 @@ set(CXX_SOURCES)
 auto_sources(files "*.cpp" "RECURSE" "${THRIFT_DIR}")
 
 HHVM_REMOVE_MATCHES_FROM_LISTS(files MATCHES
+  "/conformance/"
   "/demo/"
   "/perf/"
   "/test/"
@@ -16,6 +17,7 @@ HHVM_REMOVE_MATCHES_FROM_LISTS(files MATCHES
   "/lib/cpp2/transport/core/testutil/"
   "/lib/cpp2/transport/.*RoutingHandler.*"
   "/lib/py/"
+  "/lib/py3/"
   "/lib/php/"
   "/testutil/"
   "/tutorial/"

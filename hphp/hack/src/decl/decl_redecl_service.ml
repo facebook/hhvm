@@ -26,6 +26,8 @@ type redo_type_decl_result = {
   to_recheck: DepSet.t;
 }
 
+let lvl = Hh_logger.Level.Debug
+
 let shallow_decl_enabled (ctx : Provider_context.t) =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
@@ -286,7 +288,7 @@ let parallel_on_the_fly_decl
     let files_initial_count = List.length fnl in
     let files_declared_count = ref 0 in
     let t = Unix.gettimeofday () in
-    Hh_logger.log "Declaring on-the-fly %d files" files_initial_count;
+    Hh_logger.log ~lvl "Declaring on-the-fly %d files" files_initial_count;
     ServerProgress.send_percentage_progress_to_monitor
       ~operation:"declaring"
       ~done_count:!files_declared_count
@@ -301,8 +303,8 @@ let parallel_on_the_fly_decl
         ~merge:(merge_on_the_fly files_initial_count files_declared_count)
         ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
     in
-    let t = Hh_logger.log_duration "Finished declaring on-the-fly" t in
-    Hh_logger.log "Computing dependencies of %d files" files_initial_count;
+    let t = Hh_logger.log_duration ~lvl "Finished declaring on-the-fly" t in
+    Hh_logger.log ~lvl "Computing dependencies of %d files" files_initial_count;
     let files_computed_count = ref 0 in
     ServerProgress.send_percentage_progress_to_monitor
       ~operation:"computing dependencies of"
@@ -319,7 +321,7 @@ let parallel_on_the_fly_decl
         ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
     in
     let (_t : float) =
-      Hh_logger.log_duration "Finished computing dependencies" t
+      Hh_logger.log_duration ~lvl "Finished computing dependencies" t
     in
     OnTheFlyStore.clear ();
     (errors, changed, to_redecl, to_recheck)
@@ -460,7 +462,7 @@ let filter_dependent_classes_parallel
     let classes_initial_count = List.length maybe_dependent_classes in
     let classes_filtered_count = ref 0 in
     let t = Unix.gettimeofday () in
-    Hh_logger.log "Filtering %d dependent classes" classes_initial_count;
+    Hh_logger.log ~lvl "Filtering %d dependent classes" classes_initial_count;
     ServerProgress.send_percentage_progress_to_monitor
       ~operation:"filtering"
       ~done_count:!classes_filtered_count
@@ -481,7 +483,7 @@ let filter_dependent_classes_parallel
              maybe_dependent_classes)
     in
     let (_t : float) =
-      Hh_logger.log_duration "Finished filtering dependent classes" t
+      Hh_logger.log_duration ~lvl "Finished filtering dependent classes" t
     in
     ClassSetStore.clear ();
     res
@@ -531,7 +533,7 @@ let get_elems
      *)
     let classes_initial_count = List.length classes in
     let t = Unix.gettimeofday () in
-    Hh_logger.log "Getting elements of %d classes" classes_initial_count;
+    Hh_logger.log ~lvl "Getting elements of %d classes" classes_initial_count;
     let elements =
       if classes_initial_count < 10 then
         Decl_class_elements.get_for_classes ~old classes
@@ -552,7 +554,9 @@ let get_elems
           ~next:(MultiWorker.next ~max_size:bucket_size workers classes)
     in
 
-    let (_t : float) = Hh_logger.log_duration "Finished getting elements" t in
+    let (_t : float) =
+      Hh_logger.log_duration ~lvl "Finished getting elements" t
+    in
     elements
 
 (*****************************************************************************)

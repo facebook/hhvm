@@ -420,8 +420,13 @@ def report_failures(
         (exp_dir, out_dir) = get_exp_out_dirs(first_test_file)
         output_dir_var = "SOURCE_ROOT=%s OUTPUT_ROOT=%s " % (exp_dir, out_dir)
 
-        fbcode = find_in_ancestors("fbcode", first_test_file)
-        review_script = os.path.join(fbcode, "hphp", "hack", "test", "review.sh")
+        # Get a full path to 'review.sh' so this command be run
+        # regardless of your current directory.
+        review_script = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "review.sh"
+        )
+        if not os.path.isfile(review_script):
+            review_script = "./hphp/hack/test/review.sh"
 
         def fname_map_var(f: str) -> str:
             return "hphp/hack/" + os.path.relpath(f, out_dir)

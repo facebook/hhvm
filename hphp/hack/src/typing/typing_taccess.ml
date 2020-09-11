@@ -62,7 +62,7 @@ exception NoTypeConst of (unit -> unit)
 
 let raise_error error = raise_notrace @@ NoTypeConst error
 
-let make_reason env r id root =
+let make_reason env id root r =
   Reason.Rtypeconst (r, id, Typing_print.error env root, get_reason root)
 
 (* FIXME: It is bogus to use strings here and put them in Tgeneric; one
@@ -125,9 +125,9 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
     let drop_exact ty =
       (* Legacy behavior is to preserve exactness only on `this` and not
        through `this::T` *)
-      match deref ty with
-      | (r, Tclass (cid, _, tyl)) -> mk (r, Tclass (cid, Nonexact, tyl))
-      | _ -> ty
+      map_ty ty ~f:(function
+          | Tclass (cid, _, tyl) -> Tclass (cid, Nonexact, tyl)
+          | ty -> ty)
     in
     let ety_env =
       let from_class = None in
@@ -148,14 +148,13 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
     (* Concrete type constants *)
     | { ttc_type = Some ty; ttc_constraint = None; _ } ->
       let (env, ty) = Phase.localize ~ety_env env ty in
-      let (r, ty) = deref ty in
-      (env, Exact (mk (make_reason env r id root, ty)))
+      let ty = map_reason ty ~f:(make_reason env id root) in
+      (env, Exact ty)
     (* A type constant with default can be seen as abstract or exact, depending
      on the root and base of the access. *)
     | { ttc_type = Some ty; ttc_constraint = Some _; _ } ->
       let (env, ty) = Phase.localize ~ety_env env ty in
-      let (r, ty) = deref ty in
-      let ty = mk (make_reason env r id root, ty) in
+      let ty = map_reason ty ~f:(make_reason env id root) in
       if Cls.final class_ || Option.is_none ctx.base then
         (env, Exact ty)
       else
@@ -176,7 +175,7 @@ let rec type_of_result ctx env root res =
       (env, tvar)
     ) else
       let generic_name = tp_name name id in
-      let reason = make_reason env Reason.Rnone id root in
+      let reason = make_reason env id root Reason.Rnone in
       let ty = MakeType.generic reason generic_name in
       let env =
         Option.fold bnd ~init:env ~f:(fun env bnd ->
@@ -201,7 +200,7 @@ let update_class_name env id new_name = function
 
 let rec expand ctx env root : _ * result =
   let (env, root) = Env.expand_type env root in
-  let make_reason env = make_reason env Reason.Rnone ctx.id root in
+  let make_reason env = make_reason env ctx.id root Reason.Rnone in
   match get_node root with
   | Tany _
   | Terr ->
@@ -368,7 +367,7 @@ let expand_with_env
       type_of_result ctx env root res
     with NoTypeConst error ->
       if not ignore_errors then error ();
-      let reason = make_reason env Reason.Rnone id root in
+      let reason = make_reason env id root Reason.Rnone in
       (env, Typing_utils.terr env reason)
   in
   (* If type constant has type this::ID and method has associated condition

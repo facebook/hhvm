@@ -184,12 +184,12 @@ let bind env var (ty : locl_ty) =
   (* If there has been a use of this type variable that led to an "unknown type"
    * error (e.g. method invocation), then record this in the reason info. We
    * can make use of this for linters and code mods that suggest annotations *)
-  let (r, ty_) = deref ty in
   let ty =
-    if Env.get_tyvar_eager_solve_fail env var then
-      mk (Reason.Rsolve_fail (Reason.to_pos r), ty_)
-    else
-      ty
+    map_reason ty ~f:(fun r ->
+        if Env.get_tyvar_eager_solve_fail env var then
+          Reason.Rsolve_fail (Reason.to_pos r)
+        else
+          r)
   in
   (* Update the variance *)
   let env = Env.update_variance_after_bind env var ty in
@@ -546,17 +546,31 @@ let solve_all_unsolved_tyvars_gi env make_on_error =
 let unsolved_invariant_tyvars_under_union_and_intersection env ty =
   let rec find_tyvars (env, tyvars) ty =
     let (env, ty) = Env.expand_type env ty in
-    match deref ty with
-    | (r, Tvar v) -> (env, (r, v) :: tyvars)
-    | (_, Toption ty) -> find_tyvars (env, tyvars) ty
-    | (_, Tunion tyl)
-    | (_, Tintersection tyl) ->
+    match get_node ty with
+    | Tvar v -> (env, (get_reason ty, v) :: tyvars)
+    | Toption ty -> find_tyvars (env, tyvars) ty
+    | Tunion tyl
+    | Tintersection tyl ->
       List.fold tyl ~init:(env, tyvars) ~f:find_tyvars
-    | ( _,
-        ( Terr | Tany _ | Tdynamic | Tnonnull | Tprim _ | Tclass _ | Tobject
-        | Tgeneric _ | Tnewtype _ | Tdependent _ | Tvarray _ | Tdarray _
-        | Tvarray_or_darray _ | Ttuple _ | Tshape _ | Tfun _ | Tpu _
-        | Tpu_type_access _ | Tunapplied_alias _ ) ) ->
+    | Terr
+    | Tany _
+    | Tdynamic
+    | Tnonnull
+    | Tprim _
+    | Tclass _
+    | Tobject
+    | Tgeneric _
+    | Tnewtype _
+    | Tdependent _
+    | Tvarray _
+    | Tdarray _
+    | Tvarray_or_darray _
+    | Ttuple _
+    | Tshape _
+    | Tfun _
+    | Tpu _
+    | Tpu_type_access _
+    | Tunapplied_alias _ ->
       (env, tyvars)
   in
   find_tyvars (env, []) ty

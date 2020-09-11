@@ -111,15 +111,11 @@ let parse_printf_string env s pos (class_ : locl_ty) : env * locl_fun_params =
     let snippet = String.sub s i0 (min (i + 1) (String.length s) - i0) in
     let add_reason =
       List.map ~f:(fun p ->
-          let (why, ty) = deref p.fp_type.et_type in
-          {
-            p with
-            fp_type =
-              {
-                p.fp_type with
-                et_type = mk (Reason.Rformat (pos, snippet, why), ty);
-              };
-          })
+          let et_type =
+            p.fp_type.et_type
+            |> map_reason ~f:(fun r -> Reason.Rformat (pos, snippet, r))
+          in
+          { p with fp_type = { p.fp_type with et_type } })
     in
     match lookup_magic_type env class_ fname with
     | (env, Some (good_args, None)) ->

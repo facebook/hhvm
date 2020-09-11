@@ -102,15 +102,15 @@ let err r = mk (r, Terr)
 
 let nullable_decl r ty =
   (* Cheap avoidance of double nullable *)
-  match deref ty with
-  | (_, (Toption _ as ty_)) -> mk (r, ty_)
+  match get_node ty with
+  | Toption _ as ty_ -> mk (r, ty_)
   | _ -> mk (r, Toption ty)
 
 let nullable_locl r ty =
   (* Cheap avoidance of double nullable *)
-  match deref ty with
-  | (_, (Toption _ as ty_)) -> mk (r, ty_)
-  | (_, Tunion []) -> null r
+  match get_node ty with
+  | Toption _ as ty_ -> mk (r, ty_)
+  | Tunion [] -> null r
   | _ -> mk (r, Toption ty)
 
 let nothing r = mk (r, Tunion [])

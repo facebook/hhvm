@@ -73,8 +73,8 @@ let expand_atom env reason (base : locl_ty) enum member tyname =
   (* We are trying to expand `member:@ty` to a known type, when `member` is
    * solved to a known atom of `base:@enum`
    *)
-  match deref member with
-  | (_, Tprim (Aast_defs.Tatom atom)) ->
+  match get_node member with
+  | Tprim (Aast_defs.Tatom atom) ->
     reduce_pu_type_access env base enum atom tyname
   | _ -> (env, Typing_utils.terr env reason)
 

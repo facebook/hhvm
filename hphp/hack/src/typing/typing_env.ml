@@ -1144,7 +1144,7 @@ let update_lost_info name blame env ty =
         List.fold_map tyl ~init:(env, seen_tyvars) ~f:update_ty
       in
       ((env, seen_tyvars), mk (info r, Tunion tyl))
-    | (r, ty) -> ((env, seen_tyvars), mk (info r, ty))
+    | _ -> ((env, seen_tyvars), map_reason ty ~f:info)
   and update_ty_i (env, seen_tyvars) ty =
     match ty with
     | LoclType ty ->

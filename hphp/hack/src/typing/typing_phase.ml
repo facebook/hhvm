@@ -137,13 +137,15 @@ let rec localize ~ety_env env (dty : decl_ty) =
   | (r, Tmixed) -> (env, MakeType.mixed r)
   | (r, Tthis) ->
     let ty =
-      match deref ety_env.this_ty with
-      | (Reason.Rnone, ty) -> mk (r, ty)
-      | (Reason.Rexpr_dep_type (_, pos, s), ty) ->
-        mk (Reason.Rexpr_dep_type (r, pos, s), ty)
-      | (reason, ty) when Option.is_some ety_env.from_class -> mk (reason, ty)
-      | (reason, ty) ->
-        mk (Reason.Rinstantiate (reason, SN.Typehints.this, r), ty)
+      map_reason ety_env.this_ty ~f:(function
+          | Reason.Rnone -> r
+          | Reason.Rexpr_dep_type (_, pos, s) ->
+            Reason.Rexpr_dep_type (r, pos, s)
+          | reason ->
+            if Option.is_some ety_env.from_class then
+              reason
+            else
+              Reason.Rinstantiate (reason, SN.Typehints.this, r))
     in
     let (env, ty) =
       match ety_env.from_class with
@@ -302,7 +304,6 @@ let rec localize ~ety_env env (dty : decl_ty) =
               ~allow_abstract_tconst,
             fst id ))
     in
-    let expansion_reason = get_reason ty in
     (* Elaborate reason with information about expression dependent types and
      * the original location of the Taccess type
      *)
@@ -324,7 +325,8 @@ let rec localize ~ety_env env (dty : decl_ty) =
       in
       Reason.Rtype_access (expand_reason, [(reason, taccess_string)])
     in
-    (env, with_reason ty @@ elaborate_reason expansion_reason)
+    let ty = map_reason ty ~f:elaborate_reason in
+    (env, ty)
   | (r, Tshape (shape_kind, tym)) ->
     let (env, tym) = ShapeFieldMap.map_env (localize ~ety_env) env tym in
     (env, mk (r, Tshape (shape_kind, tym)))
@@ -582,9 +584,11 @@ and localize_possibly_enforced_ty ~ety_env env ety =
   (env, { ety with et_type })
 
 and localize_cstr_ty ~ety_env env ty tp_name =
-  let (env, ety) = localize ~ety_env env ty in
-  let (r, ty_) = deref ety in
-  let ty = mk (Reason.Rcstr_on_generics (Reason.to_pos r, tp_name), ty_) in
+  let (env, ty) = localize ~ety_env env ty in
+  let ty =
+    map_reason ty ~f:(fun r ->
+        Reason.Rcstr_on_generics (Reason.to_pos r, tp_name))
+  in
   (env, ty)
 
 (* Localize an explicit type argument to a constructor or function. We

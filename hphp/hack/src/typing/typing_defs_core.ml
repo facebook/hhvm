@@ -473,7 +473,11 @@ let get_reason (r, _) = r
 
 let get_node (_, n) = n
 
-let with_reason (_, ty) reason = (reason, ty)
+let map_reason (r, ty) ~(f : Reason.t -> Reason.t) = (f r, ty)
+
+let map_ty (r, ty) ~(f : _ ty_ -> _ ty_) = (r, f ty)
+
+let with_reason ty r = map_reason ty ~f:(fun _r -> r)
 
 let get_pos t = Reason.to_pos (get_reason t)
 

@@ -390,7 +390,7 @@ let has_expanded { type_expansions; _ } x =
       | _ -> None)
 
 let reason = function
-  | LoclType t -> fst (deref t)
+  | LoclType t -> get_reason t
   | ConstraintType t -> fst (deref_constraint_type t)
 
 let is_constraint_type = function

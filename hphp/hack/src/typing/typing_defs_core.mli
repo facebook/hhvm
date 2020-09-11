@@ -475,6 +475,10 @@ val with_reason : 'phase ty -> Reason.t -> 'phase ty
 
 val get_pos : 'phase ty -> Pos.t
 
+val map_reason : 'phase ty -> f:(Reason.t -> Reason.t) -> 'phase ty
+
+val map_ty : 'ph1 ty -> f:('ph1 ty_ -> 'ph2 ty_) -> 'ph2 ty
+
 val mk_constraint_type : Reason.t * constraint_type_ -> constraint_type
 
 val deref_constraint_type : constraint_type -> Reason.t * constraint_type_

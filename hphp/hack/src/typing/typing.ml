@@ -4263,8 +4263,7 @@ and dispatch_call
     let x = List.hd_exn el in
     let (env, _tx, ty) = expr env x in
     let explain_array_filter ty =
-      let (r, t) = deref ty in
-      mk (Reason.Rarray_filter (p, r), t)
+      map_reason ty ~f:(fun r -> Reason.Rarray_filter (p, r))
     in
     let get_value_type env tv =
       let (env, tv) =
@@ -4319,9 +4318,9 @@ and dispatch_call
     in
     let (env, rty) = get_array_filter_return_type env ty in
     let fty =
-      match deref fty with
-      | (r, Tfun ft) -> mk (r, Tfun { ft with ft_ret = MakeType.unenforced rty })
-      | _ -> fty
+      map_ty fty ~f:(function
+          | Tfun ft -> Tfun { ft with ft_ret = MakeType.unenforced rty }
+          | ty -> ty)
     in
     make_call
       env
@@ -6424,8 +6423,8 @@ and condition
   | Aast.Class_get _
   | Aast.Binop (Ast_defs.Eq None, _, _) ->
     let (env, ety) = Env.expand_type env ty in
-    (match deref ety with
-    | (_, Tprim Tbool) -> (env, Local_id.Set.empty)
+    (match get_node ety with
+    | Tprim Tbool -> (env, Local_id.Set.empty)
     | _ -> condition_nullity ~nonnull:tparamet env te)
   | Aast.Binop (((Ast_defs.Diff | Ast_defs.Diff2) as op), e1, e2) ->
     let op =
@@ -6960,9 +6959,9 @@ and overload_function
   let (env, ty) = f env fty res el in
   let (env, fty) = Env.expand_type env fty in
   let fty =
-    match deref fty with
-    | (r, Tfun ft) -> mk (r, Tfun { ft with ft_ret = MakeType.unenforced ty })
-    | _ -> fty
+    map_ty fty ~f:(function
+        | Tfun ft -> Tfun { ft with ft_ret = MakeType.unenforced ty }
+        | ty -> ty)
   in
   let te = Tast.make_typed_expr fpos fty (Aast.Class_const (tcid, method_id)) in
   make_call env te tal tel typed_unpack_element ty

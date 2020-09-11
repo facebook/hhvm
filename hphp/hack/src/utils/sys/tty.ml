@@ -77,6 +77,14 @@ let style_num = function
   | NormalWithBG (text, bg) -> text_num text ^ ";" ^ background_num bg
   | BoldWithBG (text, bg) -> text_num text ^ ";" ^ background_num bg ^ ";1"
 
+let style_num_from_list color styles =
+  List.fold_left styles ~init:(color_num color) ~f:(fun accum style ->
+      match style with
+      | `Bold -> accum ^ ";1"
+      | `Dim -> accum ^ ";2"
+      | `Italics -> accum ^ ";3"
+      | `Underline -> accum ^ ";4")
+
 let supports_color =
   let memo = ref None in
   fun () ->
@@ -124,6 +132,12 @@ let supports_emoji () = Sys.os_type <> "Win32" && supports_color ()
 let apply_color ?(color_mode = Color_Auto) c s : string =
   if should_color color_mode then
     Printf.sprintf "\x1b[%sm%s\x1b[0m" (style_num c) s
+  else
+    Printf.sprintf "%s" s
+
+let apply_color_from_style ?(color_mode = Color_Auto) style s : string =
+  if should_color color_mode then
+    Printf.sprintf "\x1b[%sm%s\x1b[0m" style s
   else
     Printf.sprintf "%s" s
 

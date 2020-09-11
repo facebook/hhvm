@@ -38,6 +38,12 @@ type color_mode =
 
 val apply_color : ?color_mode:color_mode -> style -> string -> string
 
+val style_num_from_list :
+  raw_color -> [< `Bold | `Dim | `Italics | `Underline ] list -> string
+
+val apply_color_from_style :
+  ?color_mode:color_mode -> string -> string -> string
+
 (*
  * Print a sequence of colorized strings to stdout/stderr, using ANSI color
  * escapes codes.

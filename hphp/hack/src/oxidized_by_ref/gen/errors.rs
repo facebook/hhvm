@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ca032b2c4270fe38a353c9e010825bcc>>
+// @generated SignedSource<<8153b3da948789927a026f1eeb31600a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -51,7 +51,11 @@ pub type FilesT<'a, A> = relative_path::map::Map<'a, FileT<'a, A>>;
     Serialize,
     ToOcamlRep
 )]
-pub struct Error_<'a, A>(pub oxidized::errors::ErrorCode, pub &'a [Message<'a, A>]);
+pub struct Error_<'a, A> {
+    pub code: oxidized::errors::ErrorCode,
+    pub claim: Message<'a, A>,
+    pub reasons: &'a [Message<'a, A>],
+}
 impl<'a, A: TrivialDrop> TrivialDrop for Error_<'a, A> {}
 
 pub type Error<'a> = Error_<'a, &'a pos::Pos<'a>>;

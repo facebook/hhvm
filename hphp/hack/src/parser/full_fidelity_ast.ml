@@ -105,7 +105,7 @@ let process_lowpri_errors (env : env) (lowpri_errors : (Pos.t * string) list) =
     List.iter ~f:Errors.parsing_error lowpri_errors
 
 let process_non_syntax_errors (_ : env) (errors : Errors.error list) =
-  List.iter ~f:Errors.add_error_with_check errors
+  List.iter ~f:Errors.add_error errors
 
 let process_lint_errors (_ : env) (errors : Relative_path.t Lint.t list) =
   List.iter ~f:Lint.add_lint errors

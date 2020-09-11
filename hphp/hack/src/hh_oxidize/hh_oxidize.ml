@@ -98,7 +98,7 @@ let convert_single_file env filename =
   let (_, oxidized_module) = oxidize filename in
   let src = Stringify.stringify oxidized_module in
   write_format_and_sign env out_filename src;
-  printf "%s" (read out_filename)
+  printf "%s\n%s" header (read out_filename)
 
 let parse_types_file filename =
   let lines = ref [] in

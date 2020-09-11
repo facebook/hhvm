@@ -24,7 +24,17 @@ impl<'a> Error_<'a, Pos<'a>> {
     }
 }
 
-impl<P: Ord> Ord for Error_<'_, P> {
+pub trait FileOrd {
+    fn cmp_file(&self, other: &Self) -> Ordering;
+}
+
+impl FileOrd for &Pos<'_> {
+    fn cmp_file(&self, other: &Self) -> Ordering {
+        self.filename().cmp(other.filename())
+    }
+}
+
+impl<P: Ord + FileOrd> Ord for Error_<'_, P> {
     // Intended to match the implementation of `compare` in `Errors.sort` in OCaml.
     fn cmp(&self, other: &Self) -> Ordering {
         let Self(self_code, self_messages) = self;
@@ -39,9 +49,11 @@ impl<P: Ord> Ord for Error_<'_, P> {
         let (other_pos, other_msg) = other_first;
         // The primary sort order is the position of the first message.
         self_pos
-            .cmp(other_pos)
-            // If the positions are the same, sort by error code.
-            .then((*self_code as isize).cmp(&(*other_code as isize)))
+            .cmp_file(other_pos)
+            // If the files are the same, sort by phase.
+            .then(((*self_code / 1000) as isize).cmp(&((*other_code / 1000) as isize)))
+            // If the phases are the same, sort by position.
+            .then(self_pos.cmp(other_pos))
             // If the error codes are the same, sort by message text.
             .then(self_msg.cmp(other_msg))
             // If the first message text is the same, compare the rest of the
@@ -56,7 +68,7 @@ impl<P: Ord> Ord for Error_<'_, P> {
     }
 }
 
-impl<P: Ord> PartialOrd for Error_<'_, P> {
+impl<P: Ord + FileOrd> PartialOrd for Error_<'_, P> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }

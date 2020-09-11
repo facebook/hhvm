@@ -74,8 +74,8 @@ let expand_typedef_ ?(force_expand = false) ety_env env r x argl =
     else
       (env, (ety_env, mk (r, get_node expanded_ty)))
 
-let expand_typedef ety_env env r x argl =
-  let (env, (_, ty)) = expand_typedef_ ety_env env r x argl in
+let expand_typedef ety_env env r type_name argl =
+  let (env, (_, ty)) = expand_typedef_ ety_env env r type_name argl in
   (env, ty)
 
 (* Expand a typedef, smashing abstraction and collecting a trail

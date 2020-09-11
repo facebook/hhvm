@@ -1386,14 +1386,14 @@ and simplify_subtype_i
         | (_, (Tunion _ | Tintersection _ | Tvar _)) -> default_subtype env
         | _ when subtype_env.no_top_bottom -> default env
         (* If ty_sub contains other types, e.g. C<T>, make this a subtype assertion on
-    those inner types and `any`. For example transform the assertion
-      C<D> <: Tany
-    into
-      C<D> <: C<Tany>
-    which might become
-      D <: Tany
-    if say C is covariant.
-    *)
+            those inner types and `any`. For example transform the assertion
+              C<D> <: Tany
+            into
+              C<D> <: C<Tany>
+            which might become
+              D <: Tany
+            if say C is covariant.
+            *)
         | _ ->
           let ty_super = anyfy env r_super ty_sub in
           simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env))

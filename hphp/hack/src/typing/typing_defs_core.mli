@@ -463,8 +463,6 @@ and locl_fun_params = locl_ty fun_params
 (* Abstraction *)
 val compare_decl_ty : decl_ty -> decl_ty -> int
 
-val equal_locl_ty : locl_ty -> locl_ty -> bool
-
 val mk : Reason.t * 'phase ty_ -> 'phase ty
 
 val deref : 'phase ty -> Reason.t * 'phase ty_

@@ -27,31 +27,29 @@ module MakeType = Typing_make_type
    below where this behavior is encoded. *)
 
 type context = {
-  (* The T in the type access C::T *)
-  id: Nast.sid;
+  id: Nast.sid;  (** The T in the type access C::T *)
   root_pos: Pos.t;
-  (* The expand environment as passed in by Typing_phase.localize *)
   ety_env: expand_env;
-  (* A set of visited types used to avoid infinite loops during expansion. *)
+      (** The expand environment as passed in by Typing_phase.localize *)
   generics_seen: TySet.t;
-  (* Whether or not an abstract type constant is allowed as the result. In the
-     future, this boolean should disappear and abstract type constants should
-     appear only in the class where they are defined. *)
+      (** A set of visited types used to avoid infinite loops during expansion. *)
   allow_abstract: bool;
-  (* If set, abstract type constants will be expanded as type variables. This
-     is a hack which should naturally go away when the semantics of abstract
-     type constants is cleaned up. *)
+      (** Whether or not an abstract type constant is allowed as the result. In the
+          future, this boolean should disappear and abstract type constants should
+          appear only in the class where they are defined. *)
   abstract_as_tyvar: bool;
-  (* The origin of the extension. For example if TC is a generic parameter
-     subject to the constraint TC as C and we would like to expand TC::T we
-     will expand C::T with base set to `Some (Tgeneric "TC")` (and root set
-     to C). If it is None the base is exactly the current root. *)
+      (** If set, abstract type constants will be expanded as type variables. This
+          is a hack which should naturally go away when the semantics of abstract
+          type constants is cleaned up. *)
   base: locl_ty option;
-  (* A callback for errors *)
-  on_error: Errors.typing_error_callback;
+      (** The origin of the extension. For example if TC is a generic parameter
+          subject to the constraint TC as C and we would like to expand TC::T we
+          will expand C::T with base set to `Some (Tgeneric "TC")` (and root set
+          to C). If it is None the base is exactly the current root. *)
+  on_error: Errors.typing_error_callback;  (** A callback for errors *)
 }
 
-(* The result of an expansion
+(** The result of an expansion
    - Exact ty means that the expansion results precisely in 'ty'
    - Abstract (n0, [n1, n2, n3], bound) means that the result is a
      generic with name n0::T such that:
@@ -72,8 +70,8 @@ let make_reason env r id root =
    with a class name *)
 let tp_name class_name id = class_name ^ "::" ^ snd id
 
-(* A smart constructor for Abstract that also checks if the type we are
-   creating is known to be equal to some other type *)
+(** A smart constructor for Abstract that also checks if the type we are
+    creating is known to be equal to some other type *)
 let make_abstract env id name namel bnd =
   let tp_name = tp_name name id in
   if not (Typing_set.is_empty (Env.get_equal_bounds env tp_name [])) then
@@ -93,10 +91,10 @@ let make_abstract env id name namel bnd =
   else
     Abstract (name, namel, bnd)
 
-(* Lookup a type constant in a class and return a result. A type constant has
-   both a constraint type and assigned type. Which one we choose depends if
-   the current root is the base (origin) of the expansion, or if it is an
-   upper bound of the base. *)
+(** Lookup a type constant in a class and return a result. A type constant has
+    both a constraint type and assigned type. Which one we choose depends if
+    the current root is the base (origin) of the expansion, or if it is an
+    upper bound of the base. *)
 let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
     =
   let { id = (id_pos, id_name) as id; _ } = ctx in
@@ -201,7 +199,7 @@ let update_class_name env id new_name = function
   | Abstract (name, namel, bnd) ->
     make_abstract env id new_name (name :: namel) bnd
 
-let rec expand ctx env root =
+let rec expand ctx env root : _ * result =
   let (env, root) = Env.expand_type env root in
   let make_reason env = make_reason env Reason.Rnone ctx.id root in
   match get_node root with
@@ -339,8 +337,9 @@ let rec expand ctx env root =
           (get_pos root)
           ctx.on_error)
 
+(** Expands a type constant access like A::T to its definition. *)
 let expand_with_env
-    ety_env
+    (ety_env : expand_env)
     env
     ?(ignore_errors = false)
     ?(as_tyvar_with_cnstr = false)

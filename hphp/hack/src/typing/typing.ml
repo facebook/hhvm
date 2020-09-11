@@ -5909,7 +5909,7 @@ Returns in this order the typed expressions for the arguments, for the variadic 
 and call
     ~(expected : ExpectedTy.t option)
     ?(method_call_info : TR.method_call_info option)
-    ?(nullsafe : Pos.t option option)
+    ?(nullsafe : Pos.t option = None)
     pos
     env
     fty
@@ -5985,11 +5985,11 @@ and call
           in
           (env, (tel, None, ty))
         | (_, Tunion [ty]) ->
-          call ~expected ?nullsafe pos env ty el unpacked_element
+          call ~expected ~nullsafe pos env ty el unpacked_element
         | (r, Tunion tyl) ->
           let (env, resl) =
             List.map_env env tyl (fun env ty ->
-                call ~expected ?nullsafe pos env ty el unpacked_element)
+                call ~expected ~nullsafe pos env ty el unpacked_element)
           in
           let retl = List.map resl ~f:(fun (_, _, x) -> x) in
           let (env, ty) = Union.union_list env r retl in
@@ -6004,7 +6004,7 @@ and call
         | (r, Tintersection tyl) ->
           let (env, resl) =
             TUtils.run_on_intersection env tyl ~f:(fun env ty ->
-                call ~expected ?nullsafe pos env ty el unpacked_element)
+                call ~expected ~nullsafe pos env ty el unpacked_element)
           in
           let retl = List.map resl ~f:(fun (_, _, x) -> x) in
           let (env, ty) = Inter.intersect_list env r retl in

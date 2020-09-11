@@ -2313,7 +2313,10 @@ and simplify_subtype_reactivity
     when is_call_site && (Option.is_none x || Option.equal String.equal x y) ->
     valid env
   (* CippLocal can also call nonreactive *)
-  | ((Pure _ | Nonreactive), CippLocal _) when is_call_site -> valid env
+  | ( (Nonreactive | Reactive _ | Local _ | Shallow _ | MaybeReactive _),
+      CippLocal _ )
+    when is_call_site ->
+    valid env
   | _ -> check_condition_type_has_matching_reactive_method env
 
 and should_check_fun_params_reactivity (ft_super : locl_fun_type) =

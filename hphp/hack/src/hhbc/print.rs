@@ -1611,7 +1611,6 @@ fn print_istype_op<W: Write>(w: &mut W, op: &IstypeOp) -> Result<(), W::Error> {
         Op::OpInt => w.write("Int"),
         Op::OpDbl => w.write("Dbl"),
         Op::OpStr => w.write("Str"),
-        Op::OpArr => w.write("Arr"),
         Op::OpObj => w.write("Obj"),
         Op::OpRes => w.write("Res"),
         Op::OpScalar => w.write("Scalar"),

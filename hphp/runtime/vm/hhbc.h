@@ -310,7 +310,6 @@ inline bool isIncDecO(IncDecOp op) {
   ISTYPE_OP(Int)                               \
   ISTYPE_OP(Dbl)                               \
   ISTYPE_OP(Str)                               \
-  ISTYPE_OP(Arr)                               \
   ISTYPE_OP(Vec)                               \
   ISTYPE_OP(Dict)                              \
   ISTYPE_OP(Keyset)                            \

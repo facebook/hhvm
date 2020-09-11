@@ -22,7 +22,7 @@ function test() {
     f(), f(), f(), f(), f(), f(), f(), f(), f(), f(),
     f(), f(), f(), f(), f(), f(), f(), f(), f(), f(),
   ];
-  var_dump(is_array($x1));
+  var_dump(HH\is_php_array($x1));
   var_dump(is_vec($x1));
   var_dump(is_dict($x1));
   var_dump(is_varray($x1));
@@ -50,7 +50,7 @@ function test() {
     90 => f(), 91 => f(), 92 => f(), 93 => f(), 94 => f(),
     95 => f(), 96 => f(), 97 => f(), 98 => f(), 99 => f()
   ];
-  var_dump(is_array($x2));
+  var_dump(HH\is_php_array($x2));
   var_dump(is_vec($x2));
   var_dump(is_dict($x2));
   var_dump(is_varray($x2));
@@ -78,7 +78,7 @@ function test() {
     'k90' => f(), 'k91' => f(), 'k92' => f(), 'k93' => f(), 'k94' => f(),
     'k95' => f(), 'k96' => f(), 'k97' => f(), 'k98' => f(), 'k99' => f()
   ];
-  var_dump(is_array($x3));
+  var_dump(HH\is_php_array($x3));
   var_dump(is_vec($x3));
   var_dump(is_dict($x3));
   var_dump(is_varray($x3));

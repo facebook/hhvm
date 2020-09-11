@@ -13,7 +13,7 @@ function main() {
     tuple("server", $_SERVER),
   ];
   $dfuncs = vec[
-    fun('is_array'),
+    fun('HH\\is_php_array'),
     fun('HH\\is_darray'),
     fun('HH\\is_dict'),
   ];

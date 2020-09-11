@@ -64,7 +64,7 @@ function is_as_dynamic() {
 function is_as_shuffle_static() {
   $m = class_meth(Foo::class, 'bar');
 
-  if (is_array($m)) {
+  if (HH\is_php_array($m)) {
     $x = varray($m);
     echo '$m === varray($m): '.P($m === $x);
 
@@ -82,7 +82,7 @@ function is_as_shuffle_static() {
 function is_as_shuffle_dynamic() {
   $m = LV(class_meth(Foo::class, 'bar'));
 
-  if (is_array($m)) {
+  if (HH\is_php_array($m)) {
     $x = varray($m);
     echo '$m === varray($m): '.P($m === $x);
 

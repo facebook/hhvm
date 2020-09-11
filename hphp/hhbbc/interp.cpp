@@ -2988,7 +2988,6 @@ bool isValidTypeOpForIsAs(const IsTypeOp& op) {
     case IsTypeOp::Obj:
       return true;
     case IsTypeOp::Res:
-    case IsTypeOp::Arr:
     case IsTypeOp::Vec:
     case IsTypeOp::Dict:
     case IsTypeOp::Keyset:

@@ -1093,8 +1093,6 @@ struct RuntimeOption {
   F(bool, HackArrCompatFBSerializeHackArraysNotices, false)             \
   /* Raise notices on intish-cast (which may use an is_array check) */  \
   F(bool, HackArrCompatIntishCastNotices, false)                        \
-  /* Raise notices when is_array is called with any hack array */       \
-  F(bool, HackArrCompatIsArrayNotices, false)                           \
   /* Raise notices when is_vec or is_dict  is called with a v/darray */ \
   F(bool, HackArrCompatIsVecDictNotices, false)                         \
   F(bool, HackArrCompatSerializeNotices, false)                         \
@@ -1295,11 +1293,7 @@ struct RuntimeOption {
   /* When set:
    * - `is_array` becomes equivalent to `is_any_array` or
    *  `isTvArrayLike` instead of being a strict PHP array check.
-   * - For safety, we still log when these calls receive Hack arrays.
-   *   See `SuppressWidenIsArrayLogs`.
    */                                                                   \
-  F(bool, WidenIsArray, false)                                          \
-  F(bool, WidenIsArrayLogs, true)                                       \
   F(bool, EnablePerFileCoverage, false)                                 \
   /* Should we use the autoload map from the repo */                    \
   F(bool, UseRepoAutoloadMap, true)                                     \

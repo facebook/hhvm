@@ -38,7 +38,7 @@ function direct_test_others($v) {
   echo "is_float => " . boolstr(is_float($v2)) . "\n";
   echo "is_resource => " . boolstr(is_resource($v2)) . "\n";
   echo "is_object => " . boolstr(is_object($v2)) . "\n";
-  echo "is_array => " . boolstr(is_array($v2)) . "\n";
+  echo "HH\is_php_array => " . boolstr(HH\is_php_array($v2)) . "\n";
   echo "is_vec => " . boolstr(is_vec($v2)) . "\n";
   echo "is_dict => " . boolstr(is_dict($v2)) . "\n";
   echo "is_keyset => " . boolstr(is_keyset($v2)) . "\n";
@@ -146,7 +146,7 @@ function test2() {
     'is_float',
     'is_resource',
     'is_object',
-    'is_array',
+    'HH\is_php_array',
     'HH\\is_vec',
     'HH\\is_dict',
     'HH\\is_keyset',
@@ -169,28 +169,28 @@ function test3() {
   var_dump(is_darray(dict[0 => 'a', 1 => 'b']));
 
   var_dump(gettype(varray[]));
-  var_dump(is_array(varray[]));
+  var_dump(HH\is_php_array(varray[]));
   var_dump(is_vec(varray[]));
   var_dump(is_dict(varray[]));
   var_dump(is_varray(varray[]));
   var_dump(is_darray(varray[]));
 
   var_dump(gettype(darray[]));
-  var_dump(is_array(darray[]));
+  var_dump(HH\is_php_array(darray[]));
   var_dump(is_vec(darray[]));
   var_dump(is_dict(darray[]));
   var_dump(is_varray(darray[]));
   var_dump(is_darray(darray[]));
 
   var_dump(gettype(varray['a', 'b', 'c']));
-  var_dump(is_array(varray['a', 'b', 'c']));
+  var_dump(HH\is_php_array(varray['a', 'b', 'c']));
   var_dump(is_vec(varray['a', 'b', 'c']));
   var_dump(is_dict(varray['a', 'b', 'c']));
   var_dump(is_varray(varray['a', 'b', 'c']));
   var_dump(is_darray(varray['a', 'b', 'c']));
 
   var_dump(gettype(darray[0 => 'a', 1 => 'b', 2 => 'c']));
-  var_dump(is_array(darray[0 => 'a', 1 => 'b', 2 => 'c']));
+  var_dump(HH\is_php_array(darray[0 => 'a', 1 => 'b', 2 => 'c']));
   var_dump(is_vec(darray[0 => 'a', 1 => 'b', 2 => 'c']));
   var_dump(is_dict(darray[0 => 'a', 1 => 'b', 2 => 'c']));
   var_dump(is_varray(darray[0 => 'a', 1 => 'b', 2 => 'c']));

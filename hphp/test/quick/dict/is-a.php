@@ -32,8 +32,8 @@ function test_is_a($a, $interfaces) {
   echo "\tis_scalar: ";
   var_dump(is_scalar($a));
 
-  echo "\tis_array: ";
-  var_dump(is_array($a));
+  echo "\tis_php_array: ";
+  var_dump(HH\is_php_array($a));
 
   echo "\tis_vec: ";
   var_dump(is_vec($a));

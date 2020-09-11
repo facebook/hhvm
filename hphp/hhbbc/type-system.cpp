@@ -3838,9 +3838,6 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::Class: return TCls;
   case IsTypeOp::Func:
     return TFunc;
-  case IsTypeOp::Arr:
-    if (!RO::EvalWidenIsArray) return php_arr;
-    /* fallthrough */
   case IsTypeOp::ArrLike:
     return RO::EvalIsCompatibleClsMethType ? TArrLikeCompat : TArrLike;
   case IsTypeOp::Scalar: always_assert(0);
@@ -6158,7 +6155,6 @@ bool could_copy_on_write(const Type& t) {
 
 bool is_type_might_raise(const Type& testTy, const Type& valTy) {
   auto const hackarr = RO::EvalHackArrDVArrs;
-  auto const BHackArr = BVec | BDict | BKeyset;
 
   // Explanation for the array-like type test behaviors:
   //
@@ -6179,8 +6175,7 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
     return valTy.couldBe(BCls);
   } else if (testTy == TArr || testTy == TArrCompat) {
     return mayLogProv ||
-           (RO::EvalIsVecNotices && !hackarr && valTy.couldBe(BClsMeth)) ||
-           (RO::EvalHackArrCompatIsArrayNotices && valTy.couldBe(BHackArr));
+           (RO::EvalIsVecNotices && !hackarr && valTy.couldBe(BClsMeth));
   } else if (testTy == TVArr || testTy == TVArrCompat) {
     return mayLogProv ||
            (RO::EvalIsVecNotices && valTy.couldBe(BClsMeth)) ||
@@ -6205,8 +6200,6 @@ bool is_type_might_raise(IsTypeOp testOp, const Type& valTy) {
   switch (testOp) {
     case IsTypeOp::Scalar:
       return false;
-    case IsTypeOp::Arr:
-      if (RO::EvalWidenIsArray && valTy.couldBe(BVec | BDict | BKeyset)) return true;
       /* fallthrough */
     default:
       return is_type_might_raise(type_of_istype(testOp), valTy);

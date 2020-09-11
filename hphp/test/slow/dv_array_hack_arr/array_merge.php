@@ -7,7 +7,7 @@ function test($a, $b) {
   var_dump($b);
   $x = array_merge($a, $b);
   var_dump($x);
-  var_dump(is_array($x));
+  var_dump(HH\is_php_array($x));
   var_dump(is_varray($x));
   var_dump(is_darray($x));
 }

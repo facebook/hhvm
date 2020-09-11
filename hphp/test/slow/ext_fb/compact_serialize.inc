@@ -41,7 +41,7 @@ function fb_cs_test_impl($v) {
   $array_tests = vec[];
   if ($v is KeyedContainer<_,_>) {
     $array_tests = vec[
-      'is_array',
+      'HH\\is_php_array',
       'HH\\is_darray',
       'HH\\is_varray',
     ];

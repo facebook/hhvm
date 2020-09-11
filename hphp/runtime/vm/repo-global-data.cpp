@@ -35,8 +35,6 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(PHP7_Substr);
   SHOW(EnableRenameFunction);
   SHOW(HackArrCompatNotices);
-  SHOW(HackArrCompatIsArrayNotices);
-  SHOW(HackArrCompatIsVecDictNotices);
   SHOW(HackArrCompatSerializeNotices);
   SHOW(HackArrDVArrs);
   SHOW(EnableIntrinsicsExtension);
@@ -56,8 +54,6 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(IsCompatibleClsMethType);
   SHOW(ArrayProvenance);
   SHOW(StrictArrayFillKeys);
-  SHOW(WidenIsArray);
-  SHOW(WidenIsArrayLogs);
 #undef SHOW
   return out;
 }

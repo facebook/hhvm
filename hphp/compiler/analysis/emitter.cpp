@@ -162,8 +162,6 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable,
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =
     RuntimeOption::EvalInitialStaticStringTableSize;
-  gd.HackArrCompatIsArrayNotices =
-    RuntimeOption::EvalHackArrCompatIsArrayNotices;
   gd.HackArrCompatIsVecDictNotices =
     RuntimeOption::EvalHackArrCompatIsVecDictNotices;
   gd.HackArrCompatSerializeNotices =
@@ -175,8 +173,6 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable,
   gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
   gd.IsCompatibleClsMethType = RuntimeOption::EvalIsCompatibleClsMethType;
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;
-  gd.WidenIsArray = RO::EvalWidenIsArray;
-  gd.WidenIsArrayLogs = RO::EvalWidenIsArrayLogs;
 
   for (auto a : Option::APCProfile) {
     gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));

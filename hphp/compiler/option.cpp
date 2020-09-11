@@ -205,7 +205,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   BIND_HAC_OPTION_SELF(Notices)
   BIND_HAC_OPTION(CheckCompare, Notices)
-  BIND_HAC_OPTION_SELF(IsArrayNotices)
   BIND_HAC_OPTION_SELF(SerializeNotices)
   BIND_HAC_OPTION_SELF(CompactSerializeNotices)
 
@@ -273,15 +272,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(WholeProgram, ini, config, "WholeProgram", true);
   Config::Bind(RuntimeOption::EvalUseHHBBC, ini, config, "UseHHBBC",
                RuntimeOption::EvalUseHHBBC);
-
-  Config::Bind(RuntimeOption::EvalWidenIsArray, ini, config,
-               "WidenIsArray",
-               RuntimeOption::EvalWidenIsArray);
-
-  Config::Bind(RuntimeOption::EvalWidenIsArrayLogs, ini, config,
-               "WidenIsArrayLogs",
-               RuntimeOption::EvalWidenIsArrayLogs);
-
 
   // Temporary, during file-cache migration.
   Config::Bind(FileCache::UseNewCache, ini, config, "UseNewCache", false);

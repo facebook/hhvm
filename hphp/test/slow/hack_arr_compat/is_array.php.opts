@@ -1,6 +1,0 @@
--vEval.HackArrCompatNotices=1
--vEval.HackArrCompatIsArrayNotices=1
--vEval.HackArrCompatIsVecDictNotices=1
--vEval.ArrayProvenance=1
--vEval.LogArrayProvenance=1
--vEval.LogArrayProvenanceSampleRatio=1

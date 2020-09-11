@@ -15,7 +15,7 @@ function C(bool $b) {
 function is_functions_static() {
   $m = class_meth(Foo::class, 'bar');
 
-  echo 'is_array($m):'        ;C(is_array($m));
+  echo 'HH\is_php_array($m):'        ;C(HH\is_php_array($m));
   echo 'HH\is_any_array($m):' ;C(HH\is_any_array($m));
   echo 'HH\is_varray($m):'       ;C(HH\is_varray($m));
   echo 'HH\is_darray($m):'       ;C(HH\is_darray($m));
@@ -46,7 +46,7 @@ function is_functions_static() {
 function is_functions_dynamic() {
   $m = LV(class_meth(Foo::class, 'bar'));
 
-  echo 'is_array($m):'        ;C(is_array($m));
+  echo 'HH\is_php_array($m):'        ;C(HH\is_php_array($m));
   echo 'HH\is_any_array($m):' ;C(hh\is_any_array($m));
   echo 'HH\is_varray($m):'       ;C(HH\is_varray($m));
   echo 'HH\is_darray($m):'       ;C(HH\is_darray($m));
@@ -77,7 +77,7 @@ function is_functions_dynamic() {
 function is_functions_builtins() {
   $m = LV(class_meth(Foo::class, 'bar'));
 
-  echo 'is_array($m):'       ;C(LV('is_array')($m));
+  echo 'HH\is_php_array($m):'       ;C(LV('HH\is_php_array')($m));
   echo 'HH\is_any_array($m):';C(LV('HH\is_any_array')($m));
   echo 'HH\is_varray($m):'   ;C(LV('HH\is_varray')($m));
   echo 'HH\is_vec_or_varray($m):'   ;C(LV('HH\is_vec_or_varray')($m));

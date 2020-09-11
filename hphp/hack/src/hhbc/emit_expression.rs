@@ -2920,7 +2920,6 @@ fn istype_op(opts: &Options, id: impl AsRef<str>) -> Option<IstypeOp> {
         "is_bool" => Some(OpBool),
         "is_float" | "is_real" | "is_double" => Some(OpDbl),
         "is_string" => Some(OpStr),
-        "is_array" => Some(OpArr),
         "is_object" => Some(OpObj),
         "is_null" => Some(OpNull),
         "is_scalar" => Some(OpScalar),

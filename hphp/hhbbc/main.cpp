@@ -295,8 +295,6 @@ std::vector<SString> load_input(F&& fun) {
     gd.LogKnownMethodsAsDynamicCalls;
   RO::EvalNoticeOnBuiltinDynamicCalls =
     gd.NoticeOnBuiltinDynamicCalls;
-  RO::EvalHackArrCompatIsArrayNotices =
-    gd.HackArrCompatIsArrayNotices;
   RO::EvalHackArrCompatIsVecDictNotices =
     gd.HackArrCompatIsVecDictNotices;
   RO::EvalHackArrCompatSerializeNotices =
@@ -315,9 +313,6 @@ std::vector<SString> load_input(F&& fun) {
   } else {
     RO::EvalEnforceGenericsUB = 1;
   }
-
-  RO::EvalWidenIsArray = gd.WidenIsArray;
-  RO::EvalWidenIsArrayLogs = gd.WidenIsArrayLogs;
 
   auto const units = Repo::get().enumerateUnits(RepoIdCentral, true);
   auto const size = units.size();
@@ -400,8 +395,6 @@ void write_global_data(
   gd.EnableArgsInBacktraces      = RuntimeOption::EnableArgsInBacktraces;
   gd.NoticeOnBuiltinDynamicCalls =
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
-  gd.HackArrCompatIsArrayNotices =
-    RuntimeOption::EvalHackArrCompatIsArrayNotices;
   gd.HackArrCompatIsVecDictNotices =
     RuntimeOption::EvalHackArrCompatIsVecDictNotices;
   gd.HackArrCompatSerializeNotices =
@@ -417,8 +410,6 @@ void write_global_data(
   gd.IsCompatibleClsMethType = RuntimeOption::EvalIsCompatibleClsMethType;
   gd.ArrayProvenance = RuntimeOption::EvalArrayProvenance;
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;
-  gd.WidenIsArray = RO::EvalWidenIsArray;
-  gd.WidenIsArrayLogs = RO::EvalWidenIsArrayLogs;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     gd.ConstantFunctions.push_back(elm);

@@ -1,4 +1,4 @@
-is_array($m): (error: is_array() called on clsmeth) True
+HH\is_php_array($m): (error: is_array() called on clsmeth) True
 HH\is_any_array($m): (error: is_any_array() called on clsmeth) True
 HH\is_varray($m): (error: is_varray() called on clsmeth) True
 HH\is_darray($m): False
@@ -21,7 +21,7 @@ is_a($m, HH\Rx\Traversable): False
 is_a($m, HH\Rx\KeyedTraversable): False
 is_a($m, Container): False
 is_a($m, KeyedContainer): False
-is_array($m): (error: is_array() called on clsmeth) True
+HH\is_php_array($m): (error: is_array() called on clsmeth) True
 HH\is_any_array($m): (error: is_any_array() called on clsmeth) True
 HH\is_varray($m): (error: is_varray() called on clsmeth) True
 HH\is_darray($m): False
@@ -44,7 +44,7 @@ is_a($m, HH\Rx\Traversable): False
 is_a($m, HH\Rx\KeyedTraversable): False
 is_a($m, Container): False
 is_a($m, KeyedContainer): False
-is_array($m): (error: is_array() called on clsmeth) True
+HH\is_php_array($m): (error: is_array() called on clsmeth) True
 HH\is_any_array($m): (error: is_any_array() called on clsmeth) True
 HH\is_varray($m): (error: is_varray() called on clsmeth) True
 HH\is_vec_or_varray($m): (error: is_vec_or_varray() called on clsmeth) True

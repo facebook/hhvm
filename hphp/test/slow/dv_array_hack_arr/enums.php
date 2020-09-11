@@ -30,7 +30,7 @@ enum Enum3 : mixed {
 function main_entry(): void {
   $x = Day::getNames();
   var_dump($x);
-  var_dump(is_array($x));
+  var_dump(HH\is_php_array($x));
   var_dump(is_varray($x));
   var_dump(is_darray($x));
 
@@ -38,7 +38,7 @@ function main_entry(): void {
 
   $x = Day::getValues();
   var_dump($x);
-  var_dump(is_array($x));
+  var_dump(HH\is_php_array($x));
   var_dump(is_varray($x));
   var_dump(is_darray($x));
 

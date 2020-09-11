@@ -1,6 +1,0 @@
--vRuntime.Eval.HackArrCompatNotices=true -d hhvm.php7.all=0
--vRuntime.Eval.HackArrCompatIsArrayNotices=true
--vRuntime.Eval.HackArrCompatIsVecDictNotices=true
--vRuntime.Eval.ArrayProvenance=1
--vRuntime.Eval.LogArrayProvenance=1
--vEval.LogArrayProvenanceSampleRatio=1

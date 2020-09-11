@@ -1530,7 +1530,6 @@ IsTypeC  <op>                     [C]  ->  [C:Bool]
       Int      | Int
       Dbl      | Dbl
       Str      | Str
-      Arr      | Arr
       Vec      | Vec
       Dict     | Dict
       Keyset   | Keyset
@@ -1540,7 +1539,6 @@ IsTypeC  <op>                     [C]  ->  [C:Bool]
       Res      | Res
       PHPArr   | Arr
 
-  If operand is Arr we'll emit a notice if C is Vec, Dict, or Keyset.
   If t is Obj, this instruction checks if the operand in an object.
     Instances of a special class __PHP_Incomplete_Class are not considered
     objects.
@@ -1559,7 +1557,6 @@ IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
       Int      | Int
       Dbl      | Dbl
       Str      | Str
-      Arr      | Arr
       Vec      | Vec
       Dict     | Dict
       Keyset   | Keyset
@@ -1576,8 +1573,6 @@ IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
   If the local variable given by %1 is not defined, this instruction raises a
   warning and pushes false onto the stack, unless if the operand is Null, in
   which case it pushes true.
-  If operand is Arr this instruction emits a notice if %1 is Vec, Dict, or
-  Keyset. PHPArr is the same as Arr except that it doesn't emit notices.
 
 
 7. Mutator instructions
@@ -3334,11 +3329,11 @@ ThrowNonExhaustiveSwitch [] -> []
 ResolveClass <litstr id>   []  ->  [C:Class] (where %1 is a class name)
                            []  ->  [C:Str]
 
-  If %1 is a valid class name, resolve it to a class pointer value, then push 
+  If %1 is a valid class name, resolve it to a class pointer value, then push
   the pointer onto the top of stack. When resolution fails, push the class name.
 
 RaiseClassStringConversionWarning [] -> []
-  
+
   Raises a warning indicating an implicit class to string conversion.
   This warning can be downgraded to a noop through a runtime option.
 

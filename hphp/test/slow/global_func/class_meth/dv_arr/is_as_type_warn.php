@@ -6,7 +6,7 @@ class A {
 }
 
 function test_is_type($x) {
-  var_dump(is_array($x));
+  var_dump(HH\is_php_array($x));
   var_dump(HH\is_varray($x));
   var_dump(HH\is_vec($x));
   var_dump($x is vec);

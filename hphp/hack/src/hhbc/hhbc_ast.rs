@@ -364,7 +364,6 @@ pub enum IstypeOp {
     OpInt,
     OpDbl,
     OpStr,
-    OpArr,
     OpObj,
     OpRes,
     OpScalar,

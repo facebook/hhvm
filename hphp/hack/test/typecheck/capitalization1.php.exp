@@ -1,4 +1,4 @@
 File "capitalization1.php", line 11, characters 17-25:
 Could not find `camelcase`. (Naming[2006])
 File "capitalization1.php", line 3, characters 7-15:
-Did you mean ~~C~~amel~~C~~ase instead (which only differs by case)?
+Did you mean `~~C~~amel~~C~~ase` instead (which only differs by case)?

@@ -49,7 +49,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
     "unsaved: compute_tast(class Foo) should have this many calls to disk_cat";
   Asserter.String_asserter.assert_list_equals
     [
-      "[2006] Could not find `foo`.; Did you mean ~~F~~oo instead (which only differs by case)?";
+      "[2006] Could not find `foo`.; Did you mean `~~F~~oo` instead (which only differs by case)?";
       "[4110] Invalid return type; Expected `int`; But got `string`";
     ]
     (errors_to_string errors)
@@ -105,7 +105,7 @@ let test_unsaved_symbol_change ~(sqlite : bool) () =
     "unsaved: compute_tast(class Foo again) should have this many calls to disk_cat";
   Asserter.String_asserter.assert_list_equals
     [
-      "[2006] Could not find `foo`.; Did you mean ~~F~~oo instead (which only differs by case)?";
+      "[2006] Could not find `foo`.; Did you mean `~~F~~oo` instead (which only differs by case)?";
       "[4110] Invalid return type; Expected `int`; But got `string`";
     ]
     (errors_to_string errors)

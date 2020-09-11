@@ -1022,7 +1022,7 @@ let error_name_already_bound name name_prev p p_prev =
           "Previous definition is here"
         else
           "Previous definition "
-          ^ highlight_differences name name_prev
+          ^ (highlight_differences name name_prev |> Markdown_lite.md_codify)
           ^ " differs only by case " );
     ]
   in
@@ -1094,7 +1094,7 @@ let hint_message ?(modifier = "") orig hint hint_pos =
       Printf.sprintf
         "Did you mean %s%s instead (which only differs by case)?"
         modifier
-        (highlight_differences orig hint)
+        (highlight_differences orig hint |> Markdown_lite.md_codify)
     else
       Printf.sprintf
         "Did you mean %s%s instead?"

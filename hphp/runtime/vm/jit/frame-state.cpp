@@ -615,7 +615,6 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
         case LTag::Local: return LocalState::default_type();
         case LTag::Stack: return StackState::default_type();
         case LTag::MBase: return MBaseState::default_type();
-          always_assert(false); // Can't be a base
       }
       not_reached();
     }();

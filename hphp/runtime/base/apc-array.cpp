@@ -104,11 +104,19 @@ APCArray::MakeSharedArray(ArrayData* arr, APCHandleLevel level,
 
       if (arr->isVArray()) {
         assertx(!RuntimeOption::EvalHackArrDVArrs);
-        return add_prov(MakePacked(arr, APCKind::SharedVArray, unserializeObj));
+        return add_prov(MakePacked(arr,
+                                   arr->isLegacyArray() ?
+                                     APCKind::SharedMarkedVArray :
+                                     APCKind::SharedVArray,
+                                   unserializeObj));
       }
       if (arr->isDArray()) {
         assertx(!RuntimeOption::EvalHackArrDVArrs);
-        return add_prov(MakeHash(arr, APCKind::SharedDArray, unserializeObj));
+        return add_prov(MakeHash(arr,
+                                 arr->isLegacyArray() ?
+                                   APCKind::SharedMarkedDArray :
+                                   APCKind::SharedDArray,
+                                 unserializeObj));
       }
       return arr->isVectorData()
         ? MakePacked(arr, APCKind::SharedPackedArray, unserializeObj)

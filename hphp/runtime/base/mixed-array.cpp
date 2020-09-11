@@ -603,7 +603,7 @@ ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc, bool isLegacy) {
   return ad;
 }
 
-ArrayData* MixedArray::MakeDArrayFromAPC(const APCArray* apc) {
+ArrayData* MixedArray::MakeDArrayFromAPC(const APCArray* apc, bool isMarked) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   assertx(apc->isDArray());
   auto const apcSize = apc->size();
@@ -612,6 +612,7 @@ ArrayData* MixedArray::MakeDArrayFromAPC(const APCArray* apc) {
     init.setValidKey(apc->getKey(i), apc->getValue(i)->toLocal());
   }
   auto const ad = init.create();
+  ad->setLegacyArray(isMarked);
   return tagArrProv(ad, apc);
 }
 

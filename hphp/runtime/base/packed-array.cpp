@@ -503,7 +503,7 @@ ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc, bool isLegacy) {
   return ad;
 }
 
-ArrayData* PackedArray::MakeVArrayFromAPC(const APCArray* apc) {
+ArrayData* PackedArray::MakeVArrayFromAPC(const APCArray* apc, bool isMarked) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   assertx(apc->isVArray());
   auto const apcSize = apc->size();
@@ -512,6 +512,7 @@ ArrayData* PackedArray::MakeVArrayFromAPC(const APCArray* apc) {
     init.append(apc->getValue(i)->toLocal());
   }
   auto const ad = init.create();
+  ad->setLegacyArray(isMarked);
   return tagArrProv(ad, apc);
 }
 

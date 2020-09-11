@@ -237,10 +237,20 @@ Variant APCHandle::toLocalHelper() const {
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalVArray()
       );
+    case APCKind::SharedMarkedVArray:
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
+      return Variant::attach(
+        APCArray::fromHandle(this)->toLocalMarkedVArray()
+      );
     case APCKind::SharedDArray:
       assertx(!RuntimeOption::EvalHackArrDVArrs);
       return Variant::attach(
         APCArray::fromHandle(this)->toLocalDArray()
+      );
+    case APCKind::SharedMarkedDArray:
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
+      return Variant::attach(
+        APCArray::fromHandle(this)->toLocalMarkedDArray()
       );
     case APCKind::SharedVec:
       return Variant::attach(
@@ -310,7 +320,9 @@ void APCHandle::deleteShared() {
       return;
 
     case APCKind::SharedVArray:
+    case APCKind::SharedMarkedVArray:
     case APCKind::SharedDArray:
+    case APCKind::SharedMarkedDArray:
       assertx(!RuntimeOption::EvalHackArrDVArrs);
     case APCKind::SharedPackedArray:
     case APCKind::SharedArray:
@@ -391,7 +403,9 @@ bool APCHandle::checkInvariants() const {
       assertx(m_type == KindOfPersistentKeyset);
       return true;
     case APCKind::SharedVArray:
+    case APCKind::SharedMarkedVArray:
     case APCKind::SharedDArray:
+    case APCKind::SharedMarkedDArray:
       assertx(!RuntimeOption::EvalHackArrDVArrs);
     case APCKind::FuncEntity:
     case APCKind::RFunc:

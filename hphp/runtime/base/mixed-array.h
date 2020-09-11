@@ -269,7 +269,8 @@ public:
   ) = delete;
 
   static ArrayData* MakeDictFromAPC(const APCArray* apc, bool isLegacy = false);
-  static ArrayData* MakeDArrayFromAPC(const APCArray* apc);
+  static ArrayData* MakeDArrayFromAPC(const APCArray* apc,
+                                      bool isMarked = false);
 
   static bool DictEqual(const ArrayData*, const ArrayData*);
   static bool DictNotEqual(const ArrayData*, const ArrayData*);

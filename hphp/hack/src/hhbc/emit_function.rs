@@ -92,7 +92,9 @@ pub fn emit_function<'a>(e: &mut Emitter, f: &'a tast::Fun_) -> Result<Vec<HhasF
 
     let rx_level = rx::Level::from_ast(&f.user_attributes).unwrap_or(rx::Level::NonRx);
     let (ast_body, rx_body) = {
-        if rx_level != rx::Level::NonRx {
+        if let rx::Level::NonRx | rx::Level::Pure(_) = rx_level {
+            (&f.body.ast, false)
+        } else {
             match rx::halves_of_is_enabled_body(&f.body) {
                 Some((enabled_body, disabled_body)) => {
                     if e.options().hhvm.flags.contains(HhvmFlags::RX_IS_ENABLED) {
@@ -104,8 +106,6 @@ pub fn emit_function<'a>(e: &mut Emitter, f: &'a tast::Fun_) -> Result<Vec<HhasF
                 }
                 None => (&f.body.ast, true),
             }
-        } else {
-            (&f.body.ast, false)
         }
     };
 

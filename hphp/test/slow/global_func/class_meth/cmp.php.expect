@@ -183,15 +183,15 @@ bool(false)
 bool(false)
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
 
 bool(false)
 bool(false)
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
 
 Test 13
 bool(false)
@@ -409,15 +409,15 @@ bool(false)
 bool(false)
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
 
 bool(false)
 bool(false)
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
+Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
 
 Test 13
 bool(false)
@@ -448,4 +448,3 @@ Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keyset
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-

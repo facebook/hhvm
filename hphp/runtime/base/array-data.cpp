@@ -816,21 +816,11 @@ bool ArrayData::Lte(const ArrayData* ad1, const ArrayData* ad2) {
 }
 
 bool ArrayData::Gt(const ArrayData* ad1, const ArrayData* ad2) {
-  // Vecs and varrays have different comparison behavior for now
-  if (ad1->isVecType() || ad2->isVecType()) {
-    return CompareHelper(ad1, ad2) > 0;
-  } else {
-    return 0 > CompareHelper(ad2, ad1);
-  }
+  return CompareHelper(ad1, ad2) > 0;
 }
 
 bool ArrayData::Gte(const ArrayData* ad1, const ArrayData* ad2) {
-  // Vecs and varrays have different comparison behavior for now
-  if (ad1->isVecType() || ad2->isVecType()) {
-    return CompareHelper(ad1, ad2) >= 0;
-  } else {
-    return 0 >= CompareHelper(ad2, ad1);
-  }
+  return CompareHelper(ad1, ad2) >= 0;
 }
 
 int64_t ArrayData::Compare(const ArrayData* ad1, const ArrayData* ad2) {

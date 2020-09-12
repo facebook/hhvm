@@ -39,9 +39,9 @@ Comparisons:
     === false
     !== true
     <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
+    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
     <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
+    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
     <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
   Comparing varray and vec:
     === false
@@ -63,9 +63,9 @@ Comparisons:
     === false
     !== true
     <   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+    >   Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
     <=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
-    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare a varray with a non-varray
+    >=  Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
     <=> Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare darrays
   Comparing darray and darray:
     === true

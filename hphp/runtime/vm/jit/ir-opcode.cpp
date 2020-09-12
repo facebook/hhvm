@@ -249,25 +249,10 @@ folly::Optional<Opcode> negateCmpOp(Opcode opc) {
 
     // Arrays/vec/dicts can contain an element with NaN, so only equality
     // comparisons can be negated.
-    case EqArr:               return NeqArr;
-    case NeqArr:              return EqArr;
-    case SameArr:             return NSameArr;
-    case NSameArr:            return SameArr;
-
-    case EqVec:               return NeqVec;
-    case NeqVec:              return EqVec;
-    case SameVec:             return NSameVec;
-    case NSameVec:            return SameVec;
-
-    case EqDict:              return NeqDict;
-    case NeqDict:             return EqDict;
-    case SameDict:            return NSameDict;
-    case NSameDict:           return SameDict;
-
-    case EqKeyset:            return NeqKeyset;
-    case NeqKeyset:           return EqKeyset;
-    case SameKeyset:          return NSameKeyset;
-    case NSameKeyset:         return SameKeyset;
+    case EqArrLike:           return NeqArrLike;
+    case NeqArrLike:          return EqArrLike;
+    case SameArrLike:         return NSameArrLike;
+    case NSameArrLike:        return SameArrLike;
 
     case GtRes:               return LteRes;
     case GteRes:              return LtRes;
@@ -282,12 +267,8 @@ folly::Optional<Opcode> negateCmpOp(Opcode opc) {
 
 bool opcodeMayRaise(Opcode opc) {
   switch (opc) {
-  case NSameArr:
-  case SameArr:
-  case NSameDict:
-  case NSameVec:
-  case SameDict:
-  case SameVec:
+  case NSameArrLike:
+  case SameArrLike:
     return RuntimeOption::EvalHackArrCompatCheckCompare;
 
   case IsTypeStruct:
@@ -312,9 +293,8 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckSurpriseAndStack:
   case CheckSurpriseFlagsEnter:
   case Clone:
-  case CmpArr:
+  case CmpArrLike:
   case CmpObj:
-  case CmpVec:
   case ConcatIntStr:
   case ConcatStr3:
   case ConcatStr4:
@@ -354,17 +334,13 @@ bool opcodeMayRaise(Opcode opc) {
   case ElemVecD:
   case ElemVecU:
   case ElemX:
-  case EqArr:
-  case EqDict:
+  case EqArrLike:
   case EqObj:
-  case EqVec:
   case GetMemoKey:
-  case GtArr:
-  case GteArr:
+  case GtArrLike:
+  case GteArrLike:
   case GteObj:
-  case GteVec:
   case GtObj:
-  case GtVec:
   case HandleRequestSurprise:
   case IncDecElem:
   case IncDecProp:
@@ -400,19 +376,15 @@ bool opcodeMayRaise(Opcode opc) {
   case LookupClsMethodFCache:
   case LookupCnsE:
   case LookupFuncCached:
-  case LtArr:
-  case LteArr:
+  case LtArrLike:
+  case LteArrLike:
   case LteObj:
-  case LteVec:
   case LtObj:
-  case LtVec:
   case MapGet:
   case MapSet:
   case NativeImpl:
-  case NeqArr:
-  case NeqDict:
+  case NeqArrLike:
   case NeqObj:
-  case NeqVec:
   case NewKeysetArray:
   case NewRecord:
   case OODeclExists:
@@ -649,7 +621,6 @@ bool opcodeMayRaise(Opcode opc) {
   case EqDbl:
   case EqFunc:
   case EqInt:
-  case EqKeyset:
   case EqPtrIter:
   case EqRes:
   case EqStr:
@@ -848,7 +819,6 @@ bool opcodeMayRaise(Opcode opc) {
   case NeqBool:
   case NeqDbl:
   case NeqInt:
-  case NeqKeyset:
   case NeqRes:
   case NeqStr:
   case NeqStrInt:
@@ -866,7 +836,6 @@ bool opcodeMayRaise(Opcode opc) {
   case NewStructDict:
   case NInstanceOfBitmask:
   case Nop:
-  case NSameKeyset:
   case NSameObj:
   case NSameStr:
   case OrdStr:
@@ -891,7 +860,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ReserveVecNewElem:
   case RestoreErrorLevel:
   case RetCtrl:
-  case SameKeyset:
   case SameObj:
   case SameStr:
   case Select:

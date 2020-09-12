@@ -60,8 +60,6 @@ Locations getVanillaLocations(const IRGS& env, SrcKey sk) {
 
   if (op == Op::FCallBuiltin || op == Op::NativeImpl) {
     return getVanillaLocationsForBuiltin(env, sk);
-  } else if (isComparisonOp(op)) {
-    return {Location::Stack{soff}, Location::Stack{soff - 1}};
   } else if (isMemberDimOp(op) || isMemberFinalOp(op)) {
     return {Location::MBase{}};
   }
@@ -106,23 +104,6 @@ void guardToVanilla(IRGS& env, SrcKey sk, Location loc) {
   auto const target_type = type.unspecialize().narrowToVanilla();
   checkType(env, loc, target_type, -1);
 }
-
-bool skipVanillaGuards(IRGS& env, SrcKey sk, const Locations& locs) {
-  auto const is_arrlike = [&](Location loc) {
-    auto const& type = env.irb->fs().typeOf(loc);
-    if (!type.isKnownDataType()) return false;
-    auto const dt = type.toDataType();
-    return isArrayLikeType(dt) || isClsMethType(dt);
-  };
-
-  auto const op = sk.op();
-  if (op == Op::Same || op == Op::NSame) {
-    assertx(locs.size() == 2);
-    return !is_arrlike(locs[0]) || !is_arrlike(locs[1]);
-  }
-  return false;
-}
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -130,7 +111,6 @@ bool skipVanillaGuards(IRGS& env, SrcKey sk, const Locations& locs) {
 bool checkBespokeInputs(IRGS& env, SrcKey sk) {
   if (!allowBespokeArrayLikes()) return true;
   auto const locs = getVanillaLocations(env, sk);
-  if (skipVanillaGuards(env, sk, locs)) return true;
 
   for (auto const loc : locs) {
     auto const& type = env.irb->fs().typeOf(loc);
@@ -145,7 +125,6 @@ bool checkBespokeInputs(IRGS& env, SrcKey sk) {
 void handleBespokeInputs(IRGS& env, SrcKey sk) {
   if (!allowBespokeArrayLikes()) return;
   auto const locs = getVanillaLocations(env, sk);
-  if (skipVanillaGuards(env, sk, locs)) return;
 
   assertx(!env.irb->guardFailBlock());
   for (auto const loc : locs) guardToVanilla(env, sk, loc);

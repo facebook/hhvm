@@ -1287,9 +1287,7 @@ struct Lt : CompareBase<bool, std::less<>> {
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
     assertx(ad1->isVecType());
     assertx(ad2->isVecType());
-    return ArrayData::bothVanilla(ad1, ad2)
-      ? PackedArray::VecLt(ad1, ad2)
-      : ArrayData::Lt(ad1, ad2);
+    return ArrayData::Lt(ad1, ad2);
   }
 };
 
@@ -1313,9 +1311,7 @@ struct Lte : CompareBase<bool, std::less_equal<>> {
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
     assertx(ad1->isVecType());
     assertx(ad2->isVecType());
-    return ArrayData::bothVanilla(ad1, ad2)
-      ? PackedArray::VecLte(ad1, ad2)
-      : ArrayData::Lte(ad1, ad2);
+    return ArrayData::Lte(ad1, ad2);
   }
 };
 
@@ -1339,10 +1335,7 @@ struct Gt : CompareBase<bool, std::greater<>> {
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
     assertx(ad1->isVecType());
     assertx(ad2->isVecType());
-    return ArrayData::bothVanilla(ad1, ad2)
-      ? PackedArray::VecGt(ad1, ad2)
-      // WARNING: ArrayData::Gt(ad1, ad2) is incorrect; param order matters.
-      : !ArrayData::Lte(ad1, ad2);
+    return ArrayData::Gt(ad1, ad2);
   }
 };
 
@@ -1366,10 +1359,7 @@ struct Gte : CompareBase<bool, std::greater_equal<>> {
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
     assertx(ad1->isVecType());
     assertx(ad2->isVecType());
-    return ArrayData::bothVanilla(ad1, ad2)
-      ? PackedArray::VecGte(ad1, ad2)
-      // WARNING: ArrayData::Gte(ad1, ad2) is incorrect; param order matters.
-      : !ArrayData::Lt(ad1, ad2);
+    return ArrayData::Gte(ad1, ad2);
   }
 };
 
@@ -1400,9 +1390,7 @@ struct Cmp : CompareBase<int64_t, struct PHPPrimitiveCmp> {
   int64_t vec(const ArrayData* ad1, const ArrayData* ad2) const {
     assertx(ad1->isVecType());
     assertx(ad2->isVecType());
-    return ArrayData::bothVanilla(ad1, ad2)
-      ? PackedArray::VecCmp(ad1, ad2)
-      : ArrayData::Compare(ad1, ad2);
+    return ArrayData::Compare(ad1, ad2);
   }
 };
 

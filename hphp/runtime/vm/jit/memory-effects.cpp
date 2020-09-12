@@ -1245,10 +1245,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckArrayCOW:
     return may_load_store(AHeapAny, AEmpty);
 
-  case SameArr:
-  case NSameArr:
-    return may_load_store(AEmpty, AEmpty);
-
   case DictGetQuiet:
   case DictIsset:
   case DictIdx:
@@ -1259,15 +1255,18 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AKExistsKeyset:
     return may_load_store(AElemAny, AEmpty);
 
-  case SameVec:
-  case NSameVec:
-  case SameDict:
-  case NSameDict:
-  case EqKeyset:
-  case NeqKeyset:
-  case SameKeyset:
-  case NSameKeyset:
+  case SameArrLike:
+  case NSameArrLike:
     return may_load_store(AElemAny, AEmpty);
+
+  case EqArrLike:
+  case NeqArrLike: {
+    if (inst.src(0)->type() <= TKeyset && inst.src(1)->type() <= TKeyset) {
+      return may_load_store(AElemAny, AEmpty);
+    } else {
+      return may_load_store(AHeapAny, AHeapAny);
+    }
+  }
 
   case AKExistsObj:
     return may_load_store(AHeapAny, AHeapAny);
@@ -1834,22 +1833,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqObj:
   case NeqObj:
   case CmpObj:
-  case GtArr:
-  case GteArr:
-  case LtArr:
-  case LteArr:
-  case EqArr:
-  case NeqArr:
-  case CmpArr:
-  case GtVec:
-  case GteVec:
-  case LtVec:
-  case LteVec:
-  case EqVec:
-  case NeqVec:
-  case CmpVec:
-  case EqDict:
-  case NeqDict:
+  case GtArrLike:
+  case GteArrLike:
+  case LtArrLike:
+  case LteArrLike:
+  case CmpArrLike:
   case ConvObjToVArr:  // can invoke PHP
   case ConvObjToDArr:  // can invoke PHP
   case OODeclExists:

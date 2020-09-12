@@ -251,52 +251,27 @@ Opcode toObjCmpOpcode(Op op) {
   }
 }
 
-Opcode toArrCmpOpcode(Op op) {
+Opcode toArrLikeCmpOpcode(Op op) {
   switch (op) {
-    case Op::Gt:    return GtArr;
-    case Op::Gte:   return GteArr;
-    case Op::Lt:    return LtArr;
-    case Op::Lte:   return LteArr;
-    case Op::Eq:    return EqArr;
-    case Op::Same:  return SameArr;
-    case Op::Neq:   return NeqArr;
-    case Op::NSame: return NSameArr;
-    case Op::Cmp:   return CmpArr;
+    case Op::Gt:    return GtArrLike;
+    case Op::Gte:   return GteArrLike;
+    case Op::Lt:    return LtArrLike;
+    case Op::Lte:   return LteArrLike;
+    case Op::Eq:    return EqArrLike;
+    case Op::Same:  return SameArrLike;
+    case Op::Neq:   return NeqArrLike;
+    case Op::NSame: return NSameArrLike;
+    case Op::Cmp:   return CmpArrLike;
     default: always_assert(false);
   }
 }
 
-Opcode toVecCmpOpcode(Op op) {
+Opcode toArrLikeCmpOpcodeNoRelational(Op op) {
   switch (op) {
-    case Op::Gt:    return GtVec;
-    case Op::Gte:   return GteVec;
-    case Op::Lt:    return LtVec;
-    case Op::Lte:   return LteVec;
-    case Op::Eq:    return EqVec;
-    case Op::Same:  return SameVec;
-    case Op::Neq:   return NeqVec;
-    case Op::NSame: return NSameVec;
-    case Op::Cmp:   return CmpVec;
-    default: always_assert(false);
-  }
-}
-
-Opcode toDictCmpOpcode(Op op) {
-  switch (op) {
-    case Op::Eq:    return EqDict;
-    case Op::Same:  return SameDict;
-    case Op::Neq:   return NeqDict;
-    case Op::NSame: return NSameDict;
-    default: always_assert(false);
-  }
-}
-
-Opcode toKeysetCmpOpcode(Op op) {
-  switch (op) {
-    case Op::Eq:    return EqKeyset;
-    case Op::Same:  return SameKeyset;
-    case Op::Neq:   return NeqKeyset;
-    case Op::NSame: return NSameKeyset;
+    case Op::Eq:    return EqArrLike;
+    case Op::Same:  return SameArrLike;
+    case Op::Neq:   return NeqArrLike;
+    case Op::NSame: return NSameArrLike;
     default: always_assert(false);
   }
 }
@@ -858,7 +833,7 @@ void implArrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 
   if (rightTy <= TArr) {
     // No conversion needed.
-    push(env, gen(env, toArrCmpOpcode(op), left, right));
+    push(env, gen(env, toArrLikeCmpOpcode(op), left, right));
   } else if (rightTy.subtypeOfAny(TNull, TBool)) {
     // If compared against null or bool, convert both sides to bools.
     push(env,
@@ -889,7 +864,7 @@ void implArrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     } else {
       raiseClsMethToVecWarningHelper(env);
       auto const arr = convertClsMethToVec(env, right);
-      push(env, gen(env, toArrCmpOpcode(op), left, arr));
+      push(env, gen(env, toArrLikeCmpOpcode(op), left, arr));
       decRef(env, arr);
     }
   } else {
@@ -906,12 +881,12 @@ void implVecCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   if (rightTy.subtypeOfAny(TNull, TBool)) {
     push(env, emitHackArrBoolCmp(env, op, left, gen(env, ConvTVToBool, right)));
   } else if (rightTy <= TVec) {
-    push(env, gen(env, toVecCmpOpcode(op), left, right));
+    push(env, gen(env, toArrLikeCmpOpcode(op), left, right));
   } else if (rightTy <= TClsMeth) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       raiseClsMethToVecWarningHelper(env);
       auto const arr = convertClsMethToVec(env, right);
-      push(env, gen(env, toVecCmpOpcode(op), left, arr));
+      push(env, gen(env, toArrLikeCmpOpcode(op), left, arr));
       decRef(env, arr);
     } else {
       raiseHACCompareWarningHelper(env);
@@ -942,7 +917,7 @@ void implDictCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     // Dicts can't use relational comparisons.
     if (op == Op::Eq || op == Op::Neq ||
         op == Op::Same || op == Op::NSame) {
-      push(env, gen(env, toDictCmpOpcode(op), left, right));
+      push(env, gen(env, toArrLikeCmpOpcodeNoRelational(op), left, right));
     } else {
       gen(
         env,
@@ -969,7 +944,7 @@ void implKeysetCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     // Keysets can't use relational comparisons.
     if (op == Op::Eq || op == Op::Neq ||
         op == Op::Same || op == Op::NSame) {
-      push(env, gen(env, toKeysetCmpOpcode(op), left, right));
+      push(env, gen(env, toArrLikeCmpOpcodeNoRelational(op), left, right));
     } else {
       gen(
         env,

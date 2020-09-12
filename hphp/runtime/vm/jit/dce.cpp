@@ -121,10 +121,6 @@ bool canDCE(IRInstruction* inst) {
   case CmpBool:
   case SameObj:
   case NSameObj:
-  case EqKeyset:
-  case NeqKeyset:
-  case SameKeyset:
-  case NSameKeyset:
   case GtRes:
   case GteRes:
   case LtRes:
@@ -373,22 +369,11 @@ bool canDCE(IRInstruction* inst) {
   case EqObj:
   case NeqObj:
   case CmpObj:
-  case GtArr:
-  case GteArr:
-  case LtArr:
-  case LteArr:
-  case EqArr:
-  case NeqArr:
-  case CmpArr:
-  case GtVec:
-  case GteVec:
-  case LtVec:
-  case LteVec:
-  case EqVec:
-  case NeqVec:
-  case CmpVec:
-  case EqDict:
-  case NeqDict:
+  case GtArrLike:
+  case GteArrLike:
+  case LtArrLike:
+  case LteArrLike:
+  case CmpArrLike:
   case JmpZero:
   case JmpNZero:
   case JmpSSwitchDest:
@@ -705,14 +690,14 @@ bool canDCE(IRInstruction* inst) {
   case StFrameMeta:
     return false;
 
-  case SameArr:
-  case NSameArr:
-  case SameVec:
-  case NSameVec:
-  case SameDict:
-  case NSameDict:
   case IsTypeStruct:
     return !opcodeMayRaise(inst->op());
+
+  case EqArrLike:
+  case NeqArrLike:
+  case SameArrLike:
+  case NSameArrLike:
+    return !inst->mayRaiseErrorWithSources();
   }
   not_reached();
 }

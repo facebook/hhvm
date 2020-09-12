@@ -707,13 +707,6 @@ ArrayData* ArrayData::Create(TypedValue name, TypedValue value) {
 ALWAYS_INLINE
 bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
                             bool strict) {
-  // There are only two cases where we should call this slow, generic method:
-  //  1. We have two PHP arrays.
-  //  2. We have two Hack arrays (of same type), and at least one is bespoke.
-  assertx((ad1->isPHPArrayType() && ad2->isPHPArrayType()) ||
-          (ad1->toDataType() == ad2->toDataType()));
-  assertx(IMPLIES(ad1->isHackArrayType(), !bothVanilla(ad1, ad2)));
-
   if (ad1 == ad2) return true;
   if (!ArrayData::dvArrayEqual(ad1, ad2)) {
     if (checkHACCompare() &&
@@ -756,13 +749,6 @@ bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
 
 ALWAYS_INLINE
 int64_t ArrayData::CompareHelper(const ArrayData* ad1, const ArrayData* ad2) {
-  // There are only two cases where we should call this slow, generic method:
-  //  1. We have two PHP arrays.
-  //  2. We have two vecs, and at least one is bespoke.
-  assertx((ad1->isPHPArrayType() && ad2->isPHPArrayType()) ||
-          (ad1->isVecType() && ad2->isVecType()));
-  assertx(IMPLIES(ad1->isVecType(), !bothVanilla(ad1, ad2)));
-
   if (!ArrayData::dvArrayEqual(ad1, ad2)) {
     if (ad1->isVArray()) throw_varray_compare_exception();
     if (ad1->isDArray()) throw_darray_compare_exception();
@@ -830,11 +816,21 @@ bool ArrayData::Lte(const ArrayData* ad1, const ArrayData* ad2) {
 }
 
 bool ArrayData::Gt(const ArrayData* ad1, const ArrayData* ad2) {
-  return 0 > CompareHelper(ad2, ad1); // Not symmetric; Order matters here.
+  // Vecs and varrays have different comparison behavior for now
+  if (ad1->isVecType() || ad2->isVecType()) {
+    return CompareHelper(ad1, ad2) > 0;
+  } else {
+    return 0 > CompareHelper(ad2, ad1);
+  }
 }
 
 bool ArrayData::Gte(const ArrayData* ad1, const ArrayData* ad2) {
-  return 0 >= CompareHelper(ad2, ad1); // Not symmetric; Order matters here.
+  // Vecs and varrays have different comparison behavior for now
+  if (ad1->isVecType() || ad2->isVecType()) {
+    return CompareHelper(ad1, ad2) >= 0;
+  } else {
+    return 0 >= CompareHelper(ad2, ad1);
+  }
 }
 
 int64_t ArrayData::Compare(const ArrayData* ad1, const ArrayData* ad2) {

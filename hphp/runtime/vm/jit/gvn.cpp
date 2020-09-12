@@ -235,16 +235,8 @@ bool supportsGVN(const IRInstruction* inst) {
   case CmpBool:
   case SameObj:
   case NSameObj:
-  case SameArr:
-  case NSameArr:
-  case SameVec:
-  case NSameVec:
-  case SameDict:
-  case NSameDict:
-  case EqKeyset:
-  case NeqKeyset:
-  case SameKeyset:
-  case NSameKeyset:
+  case SameArrLike:
+  case NSameArrLike:
   case GtRes:
   case GteRes:
   case LtRes:
@@ -306,6 +298,12 @@ bool supportsGVN(const IRInstruction* inst) {
   case ConvPtrToLval:
   case RaiseErrorOnInvalidIsAsExpressionType:
     return true;
+
+  case EqArrLike:
+  case NeqArrLike:
+    // Keyset equality comparisons never re-enter or throw
+    return inst->src(0)->type() <= TKeyset && inst->src(1)->type() <= TKeyset;
+
 
   case IsTypeStruct:
     // Resources can change type without generating a new SSATmp,

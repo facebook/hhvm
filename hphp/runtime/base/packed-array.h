@@ -181,11 +181,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static bool VecNotEqual(const ArrayData* ad1, const ArrayData* ad2);
   static bool VecSame(const ArrayData* ad1, const ArrayData* ad2);
   static bool VecNotSame(const ArrayData* ad1, const ArrayData* ad2);
-  static bool VecLt(const ArrayData* ad1, const ArrayData* ad2);
-  static bool VecLte(const ArrayData* ad1, const ArrayData* ad2);
-  static bool VecGt(const ArrayData* ad1, const ArrayData* ad2);
-  static bool VecGte(const ArrayData* ad1, const ArrayData* ad2);
-  static int64_t VecCmp(const ArrayData* ad1, const ArrayData* ad2);
 
   // Fast iteration
   template <class F, bool inc = true>

@@ -990,30 +990,6 @@ bool PackedArray::VecEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
   return true;
 }
 
-ALWAYS_INLINE
-int64_t PackedArray::VecCmpHelper(const ArrayData* ad1, const ArrayData* ad2) {
-  assertx(checkInvariants(ad1));
-  assertx(checkInvariants(ad2));
-  assertx(ad1->isVecKind());
-  assertx(ad2->isVecKind());
-
-  auto const size1 = ad1->m_size;
-  auto const size2 = ad2->m_size;
-
-  if (size1 < size2) return -1;
-  if (size1 > size2) return 1;
-
-  // Prevent circular referenced objects/arrays or deep ones.
-  check_recursion_error();
-
-  for (uint32_t i = 0; i < size1; ++i) {
-    auto const cmp = tvCompare(GetPosVal(ad1, i), GetPosVal(ad2, i));
-    if (cmp != 0) return cmp;
-  }
-
-  return 0;
-}
-
 bool PackedArray::VecEqual(const ArrayData* ad1, const ArrayData* ad2) {
   return VecEqualHelper(ad1, ad2, false);
 }
@@ -1028,26 +1004,6 @@ bool PackedArray::VecSame(const ArrayData* ad1, const ArrayData* ad2) {
 
 bool PackedArray::VecNotSame(const ArrayData* ad1, const ArrayData* ad2) {
   return !VecEqualHelper(ad1, ad2, true);
-}
-
-bool PackedArray::VecLt(const ArrayData* ad1, const ArrayData* ad2) {
-  return VecCmpHelper(ad1, ad2) < 0;
-}
-
-bool PackedArray::VecLte(const ArrayData* ad1, const ArrayData* ad2) {
-  return VecCmpHelper(ad1, ad2) <= 0;
-}
-
-bool PackedArray::VecGt(const ArrayData* ad1, const ArrayData* ad2) {
-  return VecCmpHelper(ad1, ad2) > 0;
-}
-
-bool PackedArray::VecGte(const ArrayData* ad1, const ArrayData* ad2) {
-  return VecCmpHelper(ad1, ad2) >= 0;
-}
-
-int64_t PackedArray::VecCmp(const ArrayData* ad1, const ArrayData* ad2) {
-  return VecCmpHelper(ad1, ad2);
 }
 
 //////////////////////////////////////////////////////////////////////

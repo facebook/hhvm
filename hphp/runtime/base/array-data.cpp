@@ -868,13 +868,8 @@ void ArrayData::getNotFound(int64_t k) const {
 }
 
 void ArrayData::getNotFound(const StringData* k) const {
-  // For vecs (and not varrays), we throw an InvalidArgumentException
-  if (isVecType()) throwInvalidArrayKeyException(k, this);
-  if (RO::EvalHackArrCompatNotices) {
-    raise_hackarr_compat_notice(
-      "Raising OutOfBoundsException for accessing string index of varray"
-    );
-  }
+  // For varrays and vecs, we throw an InvalidArgumentException
+  if (isVArray() || isVecType()) throwInvalidArrayKeyException(k, this);
   throwOOBArrayKeyException(k, this);
 }
 

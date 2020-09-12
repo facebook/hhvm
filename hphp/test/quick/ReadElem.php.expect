@@ -2,8 +2,8 @@
 20
 30
 Out of bounds varray access: invalid index 3
-Out of bounds varray access: invalid index "0"
-Out of bounds varray access: invalid index "x"
+Invalid varray key: expected a key of type int, string given
+Invalid varray key: expected a key of type int, string given
 a
 b
 c

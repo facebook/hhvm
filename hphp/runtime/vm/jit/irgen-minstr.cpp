@@ -1354,7 +1354,7 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
 
   if ((isVec && !key->isA(TInt)) ||
       (isDict && !key->isA(TInt | TStr))) {
-    gen(env, ThrowInvalidArrayKeyForSet, base, key);
+    gen(env, ThrowInvalidArrayKey, base, key);
     return cns(env, TBottom);
   }
 

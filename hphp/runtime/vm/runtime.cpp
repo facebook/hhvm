@@ -186,11 +186,7 @@ void throwArrayIndexException(const ArrayData* ad, const int64_t index) {
 }
 
 void throwArrayKeyException(const ArrayData* ad, const StringData* key) {
-  if (ad->isVArray() && RO::EvalHackArrCompatNotices) {
-    raise_hackarr_compat_notice(
-      "Raising OutOfBoundsException for accessing string index of varray"
-    );
-  }
+  assertx(ad->isDArray() || ad->isDictType());
   throwOOBArrayKeyException(key, ad);
 }
 

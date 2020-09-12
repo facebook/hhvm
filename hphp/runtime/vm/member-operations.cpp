@@ -55,21 +55,10 @@ void throw_cannot_use_newelem_for_lval_read_col() {
     "Cannot use [] with collections for reading in an lvalue context");
 }
 
-void throw_cannot_use_newelem_for_lval_read_vec() {
+void throw_cannot_use_newelem_for_lval_read(const ArrayData* ad) {
   SystemLib::throwInvalidOperationExceptionObject(
-    "Cannot use [] with vecs for reading in an lvalue context"
-  );
-}
-
-void throw_cannot_use_newelem_for_lval_read_dict() {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Cannot use [] with dicts for reading in an lvalue context"
-  );
-}
-
-void throw_cannot_use_newelem_for_lval_read_keyset() {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Cannot use [] with keysets for reading in an lvalue context"
+    folly::sformat("Cannot use [] with {}s for reading in an lvalue context",
+                   getDataTypeString(ad->toDataType(), ad->isLegacyArray()))
   );
 }
 

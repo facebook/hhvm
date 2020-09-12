@@ -463,8 +463,6 @@ static CallMap s_callMap {
     {ThrowOutOfBounds, throwOOBException, DNone, SSync, {{TV, 0}, {TV, 1}}},
     {ThrowInvalidArrayKey, invalidArrayKeyHelper, DNone, SSync,
                  {{SSA, 0}, {TV, 1}}},
-    {ThrowInvalidArrayKeyForSet, invalidArrayKeyForSetHelper, DNone, SSync,
-                 {{SSA, 0}, {TV, 1}}},
 
     /* instanceof checks */
     {ProfileInstanceCheck, &InstanceBits::profile, DNone, SNone, {{SSA, 0}}},

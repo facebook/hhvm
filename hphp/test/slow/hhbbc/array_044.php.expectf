@@ -1,1 +1,1 @@
-Out of bounds varray access: invalid index "nothere"
+Invalid varray key: expected a key of type int, string given

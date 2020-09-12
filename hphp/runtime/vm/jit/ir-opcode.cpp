@@ -466,7 +466,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:
   case ThrowInvalidArrayKey:
-  case ThrowInvalidArrayKeyForSet:
   case ThrowInvalidOperation:
   case ThrowLateInitPropError:
   case ThrowMissingArg:

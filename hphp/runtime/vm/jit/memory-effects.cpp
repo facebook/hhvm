@@ -1890,7 +1890,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvObjToKeyset:
   case ThrowOutOfBounds:
   case ThrowInvalidArrayKey:
-  case ThrowInvalidArrayKeyForSet:
   case ThrowInvalidOperation:
   case ThrowCallReifiedFunctionWithoutGenerics:
   case ThrowDivisionByZeroException:

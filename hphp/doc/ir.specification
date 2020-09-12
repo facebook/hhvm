@@ -3105,11 +3105,11 @@ fields of that struct for holding intermediate values.
 
 | ThrowArrayIndexException, ND, S(ArrLike) S(Int), T
 
-  Throws an out of bounds exception if S0 is an undefined index for an array.
+  Throws an OutOfBoundsException if S0 is an undefined index for an array.
 
-| ThrowArrayKeyException, ND, S(ArrLike) S(Str), T
+| ThrowArrayKeyException, ND, S(DArr,Dict) S(Str), T
 
-  Throws an out of bounds exception if S0 is an undefined key for an array.
+  Throws an OutOfBoundsException if S0 is an undefined key for a darray or dict.
 
 | ThrowOutOfBounds, ND, S(ArrLike|Obj) S(Cell), T|LA
 
@@ -3117,12 +3117,6 @@ fields of that struct for holding intermediate values.
   S1.
 
 | ThrowInvalidArrayKey, ND, S(ArrLike) S(Cell), T|LA
-
-  Throws an InvalidArgumentException corresponding to an access of S0 with the
-  key S1, which has a type invalid for that array. For varrays, an
-  OutOfBoundsException will be thrown instead for compatibility.
-
-| ThrowInvalidArrayKeyForSet, ND, S(ArrLike) S(Cell), T|LA
 
   Throws an InvalidArgumentException corresponding to an access of S0 with the
   key S1, which has a type invalid for that array.

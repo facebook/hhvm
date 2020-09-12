@@ -142,9 +142,7 @@ inline ObjectData* instanceFromTv(tv_rval tv) {
 }
 
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read_col();
-[[noreturn]] void throw_cannot_use_newelem_for_lval_read_vec();
-[[noreturn]] void throw_cannot_use_newelem_for_lval_read_dict();
-[[noreturn]] void throw_cannot_use_newelem_for_lval_read_keyset();
+[[noreturn]] void throw_cannot_use_newelem_for_lval_read(const ArrayData*);
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read_clsmeth();
 [[noreturn]] void throw_cannot_use_newelem_for_lval_read_record();
 [[noreturn]] void throw_cannot_unset_for_clsmeth();
@@ -187,20 +185,6 @@ inline TypedValue ElemEmptyish() {
   return make_tv<KindOfNull>();
 }
 
-[[noreturn]]
-inline void raiseVecVArrayStringKey(ArrayData* base, StringData *key) {
-  if (base->isVecType()) {
-    throwInvalidArrayKeyException(key, base);
-  } else {
-    if (RO::EvalHackArrCompatNotices) {
-      raise_hackarr_compat_notice(
-        "Raising OutOfBoundsException for accessing string index of varray"
-      );
-    }
-    throwOOBArrayKeyException(key, base);
-  }
-}
-
 /**
  * Elem when base is a Vec
  */
@@ -212,7 +196,7 @@ inline TypedValue ElemVecPre(ArrayData* base, int64_t key) {
 template<MOpMode mode>
 inline TypedValue ElemVecPre(ArrayData* base, StringData* key) {
   if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
-    raiseVecVArrayStringKey(base, key);
+    throwInvalidArrayKeyException(key, base);
   }
   return make_tv<KindOfUninit>();
 }
@@ -310,7 +294,7 @@ template<MOpMode mode>
 inline TypedValue ElemBespokePre(ArrayData* base, StringData* key) {
   if ((mode == MOpMode::Warn || mode == MOpMode::InOut) &&
       (base->isVecType() || base->isVArray())) {
-    raiseVecVArrayStringKey(base, key);
+    throwInvalidArrayKeyException(key, base);
   }
   return BespokeArray::NvGetStr(base, key);
 }
@@ -593,8 +577,7 @@ inline tv_lval ElemDVecPre(tv_lval base, int64_t key) {
 }
 
 inline tv_lval ElemDVecPre(tv_lval base, StringData* key) {
-  auto const arr = base.val().parr;
-  raiseVecVArrayStringKey(arr, key);
+  throwInvalidArrayKeyException(key, base.val().parr);
 }
 
 inline tv_lval ElemDVecPre(tv_lval base, TypedValue key) {
@@ -1117,21 +1100,6 @@ inline tv_lval NewElemString(tv_lval base) {
 }
 
 /**
- * NewElem when base is an Array
- */
-inline tv_lval NewElemArray(tv_lval base) {
-  assertx(tvIsArray(base));
-  assertx(tvIsPlausible(*base));
-  if (RO::EvalHackArrCompatNotices) {
-    raise_hackarr_compat_notice(
-      "Raising OutOfBoundsException for new-elem read"
-    );
-  }
-  throwMissingElementException("Lval");
-  return nullptr;
-}
-
-/**
  * NewElem when base is an Object
  */
 inline tv_lval NewElemObject(tv_lval base) {
@@ -1166,18 +1134,15 @@ inline tv_lval NewElem(tv_lval base) {
       return NewElemString(base);
     case KindOfPersistentVec:
     case KindOfVec:
-      throw_cannot_use_newelem_for_lval_read_vec();
     case KindOfPersistentDict:
     case KindOfDict:
-      throw_cannot_use_newelem_for_lval_read_dict();
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-      throw_cannot_use_newelem_for_lval_read_keyset();
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      return NewElemArray(base);
+      throw_cannot_use_newelem_for_lval_read(val(base).parr);
     case KindOfObject:
       return NewElemObject(base);
     case KindOfClsMeth:
@@ -1872,19 +1837,15 @@ inline TypedValue SetOpNewElem(SetOpOp op, tv_lval base, TypedValue* rhs) {
 
     case KindOfPersistentVec:
     case KindOfVec:
-      throw_cannot_use_newelem_for_lval_read_vec();
     case KindOfPersistentDict:
     case KindOfDict:
-      throw_cannot_use_newelem_for_lval_read_dict();
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-      throw_cannot_use_newelem_for_lval_read_keyset();
-
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      throwMissingElementException("Set-op");
+      throw_cannot_use_newelem_for_lval_read(val(base).parr);
 
     case KindOfObject: {
       failOnNonCollectionObjArrayAccess(val(base).pobj);
@@ -2066,19 +2027,15 @@ inline TypedValue IncDecNewElem(IncDecOp op, tv_lval base) {
 
     case KindOfPersistentVec:
     case KindOfVec:
-      throw_cannot_use_newelem_for_lval_read_vec();
     case KindOfPersistentDict:
     case KindOfDict:
-      throw_cannot_use_newelem_for_lval_read_dict();
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-      throw_cannot_use_newelem_for_lval_read_keyset();
-
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
-      throwMissingElementException("Inc/dec");
+      throw_cannot_use_newelem_for_lval_read(val(base).parr);
 
     case KindOfObject: {
       failOnNonCollectionObjArrayAccess(val(base).pobj);

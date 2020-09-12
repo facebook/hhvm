@@ -821,22 +821,8 @@ void throwOOBException(TypedValue base, TypedValue key) {
 }
 
 void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key) {
-  if (ad->isVArray() && tvIsString(key)) {
-    if (RO::EvalHackArrCompatNotices) {
-      raise_hackarr_compat_notice(
-        "Raising OutOfBoundsException for accessing string index of varray"
-      );
-    }
-    throwOOBArrayKeyException(key, ad);
-  } else {
-    throwInvalidArrayKeyException(&key, ad);
-  }
-}
-
-void invalidArrayKeyForSetHelper(const ArrayData* ad, TypedValue key) {
   throwInvalidArrayKeyException(&key, ad);
 }
-
 
 namespace MInstrHelpers {
 

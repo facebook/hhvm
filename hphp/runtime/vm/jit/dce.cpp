@@ -660,7 +660,6 @@ bool canDCE(IRInstruction* inst) {
   case JmpPlaceholder:
   case ThrowOutOfBounds:
   case ThrowInvalidArrayKey:
-  case ThrowInvalidArrayKeyForSet:
   case ThrowInvalidOperation:
   case ThrowCallReifiedFunctionWithoutGenerics:
   case ThrowDivisionByZeroException:

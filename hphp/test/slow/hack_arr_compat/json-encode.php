@@ -105,6 +105,7 @@ literals();
 
 test("normal", 0);
 test("force PHP", JSON_FB_FORCE_PHP_ARRAYS);
+test("force Hack", JSON_FB_FORCE_HACK_ARRAYS);
 test("dict warn", JSON_FB_WARN_DICTS);
 test("keyset warn", JSON_FB_WARN_KEYSETS);
 test("PHP warn", JSON_FB_WARN_PHP_ARRAYS);
@@ -137,4 +138,23 @@ var_dump(json_encode(vec[
   JSON_FB_WARN_DICTS |
   JSON_FB_WARN_KEYSETS
 ));
+echo "=============== force Hack arrays ignores structure ===============\n";
+$examples = vec[
+  varray[],
+  darray[],
+  vec[],
+  dict[],
+  keyset[],
+  varray[17, 34],
+  darray[0 => 17, 1 => 34],
+  vec[17, 34],
+  dict[0 => 17, 1 => 34],
+  keyset[17, 34],
+  darray['a' => 17, 'b' => 34],
+  dict['a' => 17, 'b' => 34],
+  keyset['a', 'b'],
+];
+foreach ($examples as $example) {
+  var_dump(json_encode($example, JSON_FB_FORCE_HACK_ARRAYS));
+}
 }

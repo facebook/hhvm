@@ -67,6 +67,7 @@ const int64_t k_JSON_FB_WARN_DICT_LIKE_DARRAYS = 1ll << 32;
 const int64_t k_JSON_FB_IGNORE_LATEINIT = 1ll << 33;
 const int64_t k_JSON_FB_THRIFT_SIMPLE_JSON = 1ll << 34;
 const int64_t k_JSON_FB_WARN_KEYSETS       = 1ll << 36;
+const int64_t k_JSON_FB_FORCE_HACK_ARRAYS  = 1ll << 37;
 
 const int64_t k_JSON_ERROR_NONE
   = json_error_codes::JSON_ERROR_NONE;
@@ -130,6 +131,7 @@ TypedValue HHVM_FUNCTION(json_encode, const Variant& value,
   VariableSerializer vs(VariableSerializer::Type::JSON, options);
   vs.setDepthLimit(depth);
   if (options & k_JSON_FB_FORCE_PHP_ARRAYS) vs.setForcePHPArrays();
+  if (options & k_JSON_FB_FORCE_HACK_ARRAYS) vs.setForceHackArrays();
   if (options & k_JSON_FB_WARN_DICTS) vs.setDictWarn();
   if (options & k_JSON_FB_WARN_KEYSETS) vs.setKeysetWarn();
   if (options & k_JSON_FB_WARN_PHP_ARRAYS) vs.setPHPWarn();
@@ -331,6 +333,7 @@ struct JsonExtension final : Extension {
     HHVM_RC_INT(JSON_FB_IGNORE_LATEINIT, k_JSON_FB_IGNORE_LATEINIT);
     HHVM_RC_INT(JSON_FB_THRIFT_SIMPLE_JSON, k_JSON_FB_THRIFT_SIMPLE_JSON);
     HHVM_RC_INT(JSON_FB_WARN_KEYSETS, k_JSON_FB_WARN_KEYSETS);
+    HHVM_RC_INT(JSON_FB_FORCE_HACK_ARRAYS, k_JSON_FB_FORCE_HACK_ARRAYS);
 
     HHVM_RC_INT(JSON_ERROR_NONE, k_JSON_ERROR_NONE);
     HHVM_RC_INT(JSON_ERROR_DEPTH, k_JSON_ERROR_DEPTH);

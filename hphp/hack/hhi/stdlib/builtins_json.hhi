@@ -50,6 +50,7 @@ const int JSON_FB_WARN_DICT_LIKE_DARRAYS = 0;
 const int JSON_FB_IGNORE_LATEINIT = 0;
 const int JSON_FB_THRIFT_SIMPLE_JSON = 0;
 const int JSON_FB_WARN_KEYSETS = 0;
+const int JSON_FB_FORCE_HACK_ARRAYS = 0;
 
 <<__PHPStdLib, __Rx>>
 function json_encode(mixed $value, int $options = 0, int $depth = 512);

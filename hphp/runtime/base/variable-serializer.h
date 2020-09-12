@@ -103,6 +103,12 @@ struct VariableSerializer {
   // Force Hack arrays to serialize as PHP arrays.
   void setForcePHPArrays() { m_forcePHPArrays = true; }
 
+  // Force PHP arrays to serialize as Hack arrays. This mode is preferred.
+  // In this mode, all decisions are driven by types. E.g., for JSON:
+  //   - varrays and vecs are encoded as lists: [...]
+  //   - darrays and dicts are encoded as maps: {...}
+  void setForceHackArrays() { m_forceHackArrays = true; }
+
   // Emit a HAC notice on serialization of the specified kind of array.
   void setHackWarn()  { m_hackWarn = true; }
   void setDictWarn()  { m_dictWarn = true; }
@@ -274,6 +280,7 @@ private:
   int m_valueCount{0};           // current ref index
   bool m_keepDVArrays;           // serialize d/varrays as themselves or arrays
   bool m_forcePHPArrays{false};  // serialize PHP and Hack arrays as PHP arrays
+  bool m_forceHackArrays{false}; // serialize PHP and Hack arrays as Hack arrays
   bool m_serializeProvenanceAndLegacy{false}; // serialize provenance tags and
                                               // legacy bit
   bool m_hackWarn{false};        // warn when attempting on Hack arrays

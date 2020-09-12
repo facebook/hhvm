@@ -94,6 +94,14 @@ VariableSerializer::getKind(const ArrayData* arr) const {
   assertx(!RuntimeOption::EvalHackArrDVArrs || arr->isNotDVArray());
   if (UNLIKELY(m_forcePHPArrays)) {
     return VariableSerializer::ArrayKind::PHP;
+  } else if (UNLIKELY(m_forceHackArrays)) {
+    if (arr->isDArray() || arr->isDictType()) {
+      return VariableSerializer::ArrayKind::Dict;
+    } else if (arr->isVArray() || arr->isVecType()) {
+      return VariableSerializer::ArrayKind::Vec;
+    }
+    assertx(arr->isKeysetType());
+    return VariableSerializer::ArrayKind::Keyset;
   }
 
   auto const respectsLegacyBit = [&] {
@@ -1834,8 +1842,8 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
 
   const bool isVectorData = arr->isVectorData();
 
-  if (UNLIKELY(!m_forcePHPArrays && !m_serializeProvenanceAndLegacy &&
-               arrprov::arrayWantsTag(arr))) {
+  if (arrprov::arrayWantsTag(arr) && !m_serializeProvenanceAndLegacy &&
+      !m_forcePHPArrays && !m_forceHackArrays) {
     auto const source = [&]() -> folly::Optional<SerializationSite> {
       switch (getType()) {
       case VariableSerializer::Type::JSON:

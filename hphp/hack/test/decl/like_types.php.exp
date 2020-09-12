@@ -46,6 +46,11 @@ Parsed decls:
                     ~has_default:false ~mode:FPnormal);
                    }
                  ];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|like_types.php line 13, characters 19-19),
+                  (Tunion []))
+                 };
                ft_ret =
                { et_enforced = false;
                  et_type =
@@ -81,6 +86,11 @@ Parsed decls:
                  ~has_default:false ~mode:FPnormal);
                 }
               ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|like_types.php line 4, characters 10-19),
+               (Tunion []))
+              };
             ft_ret =
             { et_enforced = false;
               et_type =
@@ -121,6 +131,11 @@ Parsed decls:
                 ~has_default:false ~mode:FPnormal);
                }
             ];
+          ft_implicit_params =
+          { capability =
+            (Rhint (root|like_types.php line 6, characters 10-10),
+             (Tunion []))
+            };
           ft_ret =
           { et_enforced = false;
             et_type =

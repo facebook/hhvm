@@ -22,6 +22,11 @@ Parsed decls:
                  ~has_default:false ~mode:FPnormal);
                 }
               ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|soft_type_hint.php line 3, characters 10-10),
+               (Tunion []))
+              };
             ft_ret =
             { et_enforced = false;
               et_type =

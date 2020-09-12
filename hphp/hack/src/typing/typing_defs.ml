@@ -918,6 +918,9 @@ and equal_decl_fun_arity ft1 ft2 =
 and equal_decl_fun_type fty1 fty2 =
   equal_decl_possibly_enforced_ty fty1.ft_ret fty2.ft_ret
   && equal_decl_ft_params fty1.ft_params fty2.ft_params
+  && equal_decl_ft_implicit_params
+       fty1.ft_implicit_params
+       fty2.ft_implicit_params
   && equal_decl_fun_arity fty1 fty2
   && equal_reactivity fty1.ft_reactive fty2.ft_reactive
   && Int.equal fty1.ft_flags fty2.ft_flags
@@ -956,6 +959,9 @@ and equal_decl_fun_param param1 param2 =
 
 and equal_decl_ft_params params1 params2 =
   List.equal ~equal:equal_decl_fun_param params1 params2
+
+and equal_decl_ft_implicit_params { capability = cap1 } { capability = cap2 } =
+  equal_decl_ty cap1 cap2
 
 let equal_typeconst_abstract_kind ak1 ak2 =
   match (ak1, ak2) with

@@ -22,6 +22,11 @@ Parsed decls:
           (Tfun
              { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|accept_disposable.php line 5, characters 19-27),
+                  (Tunion []))
+                 };
                ft_ret =
                { et_enforced = false;
                  et_type =
@@ -42,6 +47,11 @@ Parsed decls:
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|accept_disposable.php line 6, characters 19-21),
+                   (Tunion []))
+                  };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
@@ -77,6 +87,11 @@ Parsed decls:
                  ~has_default:false ~mode:FPnormal);
                 }
               ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|accept_disposable.php line 9, characters 10-10),
+               (Tunion []))
+              };
             ft_ret =
             { et_enforced = false;
               et_type =

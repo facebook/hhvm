@@ -34,6 +34,11 @@ Parsed decls:
           (Tfun
              { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|classes_typeconst.php line 7, characters 19-19),
+                  (Tunion []))
+                 };
                ft_ret =
                { et_enforced = false;
                  et_type =
@@ -57,6 +62,11 @@ Parsed decls:
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|classes_typeconst.php line 11, characters 19-19),
+                   (Tunion []))
+                  };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
@@ -117,6 +127,11 @@ Parsed decls:
                     ~has_default:false ~mode:FPnormal);
                    }
                  ];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|classes_typeconst.php line 20, characters 28-38),
+                  (Tunion []))
+                 };
                ft_ret =
                { et_enforced = false;
                  et_type =

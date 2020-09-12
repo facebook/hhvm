@@ -1389,6 +1389,11 @@ module Json = struct
             (Tfun
                {
                  ft_params;
+                 ft_implicit_params =
+                   {
+                     capability =
+                       Typing_make_type.default_capability Reason.Rnone;
+                   };
                  ft_ret = { et_type = ft_ret; et_enforced = false };
                  (* Dummy values: these aren't currently serialized. *)
                  ft_arity = Fstandard;

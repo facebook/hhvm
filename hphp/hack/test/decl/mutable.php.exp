@@ -42,6 +42,11 @@ Parsed decls:
                             ~mode:FPnormal);
                            }
                          ];
+                       ft_implicit_params =
+                       { capability =
+                         (Rhint (root|mutable.php line 6, characters 15-42),
+                          (Tunion []))
+                         };
                        ft_ret =
                        { et_enforced = false;
                          et_type =
@@ -58,6 +63,10 @@ Parsed decls:
                  ~has_default:false ~mode:FPnormal);
                 }
               ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|mutable.php line 6, characters 10-10), (Tunion []))
+              };
             ft_ret =
             { et_enforced = false;
               et_type =
@@ -99,6 +108,11 @@ Parsed decls:
                             ~mode:FPnormal);
                            }
                          ];
+                       ft_implicit_params =
+                       { capability =
+                         (Rhint (root|mutable.php line 9, characters 15-47),
+                          (Tunion []))
+                         };
                        ft_ret =
                        { et_enforced = false;
                          et_type =
@@ -115,6 +129,10 @@ Parsed decls:
                  ~has_default:false ~mode:FPnormal);
                 }
               ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|mutable.php line 9, characters 10-10), (Tunion []))
+              };
             ft_ret =
             { et_enforced = false;
               et_type =
@@ -156,6 +174,11 @@ Parsed decls:
                             ~mode:FPnormal);
                            }
                          ];
+                       ft_implicit_params =
+                       { capability =
+                         (Rhint (root|mutable.php line 12, characters 15-47),
+                          (Tunion []))
+                         };
                        ft_ret =
                        { et_enforced = false;
                          et_type =
@@ -172,6 +195,11 @@ Parsed decls:
                  ~has_default:false ~mode:FPnormal);
                 }
               ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|mutable.php line 12, characters 10-10),
+               (Tunion []))
+              };
             ft_ret =
             { et_enforced = false;
               et_type =
@@ -199,6 +227,11 @@ Parsed decls:
                   (Tfun
                      { ft_arity = (Fstandard ()); ft_tparams = [];
                        ft_where_constraints = []; ft_params = [];
+                       ft_implicit_params =
+                       { capability =
+                         (Rhint (root|mutable.php line 15, characters 15-43),
+                          (Tunion []))
+                         };
                        ft_ret =
                        { et_enforced = false;
                          et_type =
@@ -215,6 +248,11 @@ Parsed decls:
                  ~has_default:false ~mode:FPnormal);
                 }
               ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|mutable.php line 15, characters 10-10),
+               (Tunion []))
+              };
             ft_ret =
             { et_enforced = false;
               et_type =

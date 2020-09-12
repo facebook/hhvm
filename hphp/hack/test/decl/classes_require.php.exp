@@ -28,6 +28,11 @@ Parsed decls:
           (Tfun
              { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|classes_require.php line 26, characters 19-21),
+                  (Tunion []))
+                 };
                ft_ret =
                { et_enforced = false;
                  et_type =
@@ -61,6 +66,11 @@ Parsed decls:
           (Tfun
              { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|classes_require.php line 9, characters 19-21),
+                  (Tunion []))
+                 };
                ft_ret =
                { et_enforced = false;
                  et_type =
@@ -94,6 +104,11 @@ Parsed decls:
           (Tfun
              { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|classes_require.php line 4, characters 19-27),
+                  (Tunion []))
+                 };
                ft_ret =
                { et_enforced = false;
                  et_type =
@@ -114,6 +129,11 @@ Parsed decls:
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|classes_require.php line 5, characters 19-28),
+                   (Tunion []))
+                  };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
@@ -153,6 +173,11 @@ Parsed decls:
           (Tfun
              { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|classes_require.php line 16, characters 19-25),
+                  (Tunion []))
+                 };
                ft_ret =
                { et_enforced = false;
                  et_type =

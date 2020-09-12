@@ -1735,6 +1735,7 @@ and expr_
             ft_tparams = fty.ft_tparams;
             ft_where_constraints = fty.ft_where_constraints;
             ft_params = fty.ft_params;
+            ft_implicit_params = fty.ft_implicit_params;
             ft_ret = fty.ft_ret;
             (* propagate 'is_coroutine' from the method being called*)
             ft_flags = fty.ft_flags;
@@ -4923,6 +4924,11 @@ and dispatch_call
                           ~has_default:false;
                       fp_rx_annotation = None;
                     });
+              ft_implicit_params =
+                {
+                  capability =
+                    MakeType.default_capability (Reason.Rwitness fpos);
+                };
               ft_ret = { et_enforced = false; et_type = ft_ret };
               ft_reactive = Nonreactive;
               ft_flags = 0;

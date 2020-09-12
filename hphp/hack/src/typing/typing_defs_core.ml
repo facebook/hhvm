@@ -396,6 +396,10 @@ and reactivity =
   | Cipp of string option
   | CippLocal of string option
 
+(** Companion to fun_params type, intended to consolidate checking of
+ * implicit params for functions. *)
+and 'ty fun_implicit_params = { capability: 'ty }
+
 (** The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)
 and 'ty fun_type = {
@@ -403,6 +407,7 @@ and 'ty fun_type = {
   ft_tparams: 'ty tparam list;
   ft_where_constraints: 'ty where_constraint list;
   ft_params: 'ty fun_params;
+  ft_implicit_params: 'ty fun_implicit_params;
   ft_ret: 'ty possibly_enforced_ty;
       (** Carries through the sync/async information from the aast *)
   ft_reactive: reactivity;

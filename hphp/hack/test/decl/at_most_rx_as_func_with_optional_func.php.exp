@@ -35,6 +35,11 @@ Parsed decls:
                                ~mode:FPnormal);
                               }
                            ];
+                         ft_implicit_params =
+                         { capability =
+                           (Rhint (root|at_most_rx_as_func_with_optional_func.php line 6, characters 4-22),
+                            (Tunion []))
+                           };
                          ft_ret =
                          { et_enforced = false;
                            et_type =
@@ -51,6 +56,11 @@ Parsed decls:
                 ~has_default:true ~mode:FPnormal);
                }
             ];
+          ft_implicit_params =
+          { capability =
+            (Rhint (root|at_most_rx_as_func_with_optional_func.php line 4, characters 10-10),
+             (Tunion []))
+            };
           ft_ret =
           { et_enforced = false;
             et_type =

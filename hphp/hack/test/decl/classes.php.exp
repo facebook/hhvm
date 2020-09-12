@@ -61,6 +61,11 @@ Parsed decls:
                (Tfun
                   { ft_arity = (Fstandard ()); ft_tparams = [];
                     ft_where_constraints = []; ft_params = [];
+                    ft_implicit_params =
+                    { capability =
+                      (Rhint (root|classes.php line 9, characters 19-29),
+                       (Tunion []))
+                      };
                     ft_ret =
                     { et_enforced = false;
                       et_type =
@@ -83,6 +88,11 @@ Parsed decls:
           (Tfun
              { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|classes.php line 11, characters 20-32),
+                  (Tunion []))
+                 };
                ft_ret =
                { et_enforced = false;
                  et_type =
@@ -103,6 +113,11 @@ Parsed decls:
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|classes.php line 12, characters 19-30),
+                   (Tunion []))
+                  };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
@@ -123,6 +138,11 @@ Parsed decls:
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|classes.php line 13, characters 22-36),
+                   (Tunion []))
+                  };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
@@ -167,6 +187,11 @@ Parsed decls:
                       ~has_default:false ~mode:FPnormal);
                      }
                   ];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|classes.php line 14, characters 25-39),
+                   (Tunion []))
+                  };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
@@ -195,6 +220,11 @@ Parsed decls:
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|classes.php line 23, characters 19-35),
+                   (Tunion []))
+                  };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
@@ -216,6 +246,11 @@ Parsed decls:
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|classes.php line 26, characters 19-43),
+                   (Tunion []))
+                  };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
@@ -237,6 +272,11 @@ Parsed decls:
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|classes.php line 29, characters 19-41),
+                   (Tunion []))
+                  };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
@@ -296,6 +336,11 @@ Parsed decls:
                       ~mode:FPnormal);
                      }
                   ];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|classes.php line 32, characters 19-48),
+                   (Tunion []))
+                  };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
@@ -316,6 +361,11 @@ Parsed decls:
            (Tfun
               { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
+                ft_implicit_params =
+                { capability =
+                  (Rhint (root|classes.php line 40, characters 19-32),
+                   (Tunion []))
+                  };
                 ft_ret =
                 { et_enforced = false;
                   et_type =
@@ -429,6 +479,11 @@ Parsed decls:
                           ~mode:FPnormal);
                          }
                       ];
+                    ft_implicit_params =
+                    { capability =
+                      (Rhint (root|classes.php line 50, characters 19-29),
+                       (Tunion []))
+                      };
                     ft_ret =
                     { et_enforced = false;
                       et_type =

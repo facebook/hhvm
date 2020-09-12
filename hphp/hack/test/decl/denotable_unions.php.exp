@@ -47,6 +47,11 @@ Parsed decls:
                  ~has_default:false ~mode:FPnormal);
                 }
               ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|denotable_unions.php line 9, characters 10-10),
+               (Tunion []))
+              };
             ft_ret =
             { et_enforced = false;
               et_type =
@@ -83,6 +88,11 @@ Parsed decls:
                  ~has_default:false ~mode:FPnormal);
                 }
               ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|denotable_unions.php line 10, characters 10-10),
+               (Tunion []))
+              };
             ft_ret =
             { et_enforced = false;
               et_type =

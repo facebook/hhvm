@@ -188,6 +188,12 @@ let method_type env m =
   let returns_void_to_rx = fun_returns_void_to_rx m.m_user_attributes in
   let return_disposable = has_return_disposable_attribute m.m_user_attributes in
   let params = make_params env ~is_lambda:false m.m_params in
+  let implicit_params =
+    {
+      capability =
+        Typing_make_type.default_capability (Reason.Rhint (fst m.m_name));
+    }
+  in
   let ret =
     ret_from_fun_kind
       ~is_lambda:false
@@ -214,6 +220,7 @@ let method_type env m =
     ft_tparams = tparams;
     ft_where_constraints = where_constraints;
     ft_params = params;
+    ft_implicit_params = implicit_params;
     ft_ret = { et_type = ret; et_enforced = false };
     ft_reactive = reactivity;
     ft_flags =

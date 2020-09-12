@@ -62,6 +62,9 @@ Parsed decls:
                  ~has_default:false ~mode:FPnormal);
                 }
               ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|xhp.php line 7, characters 10-32), (Tunion [])) };
             ft_ret =
             { et_enforced = false;
               et_type =

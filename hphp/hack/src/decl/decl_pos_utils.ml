@@ -143,12 +143,15 @@ struct
 
   and possibly_enforced_ty et = { et with et_type = ty et.et_type }
 
+  and fun_implicit_params implicit = { capability = ty implicit.capability }
+
   and fun_type ft =
     {
       ft with
       ft_tparams = List.map ~f:type_param ft.ft_tparams;
       ft_where_constraints = List.map ft.ft_where_constraints where_constraint;
       ft_params = List.map ft.ft_params fun_param;
+      ft_implicit_params = fun_implicit_params ft.ft_implicit_params;
       ft_ret = possibly_enforced_ty ft.ft_ret;
       ft_arity = fun_arity ft.ft_arity;
       ft_reactive = fun_reactive ft.ft_reactive;

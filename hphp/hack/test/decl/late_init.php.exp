@@ -43,6 +43,11 @@ Parsed decls:
                          ~mode:FPnormal);
                         }
                       ];
+                    ft_implicit_params =
+                    { capability =
+                      (Rhint (root|late_init.php line 4, characters 19-29),
+                       (Tunion []))
+                      };
                     ft_ret =
                     { et_enforced = false;
                       et_type =

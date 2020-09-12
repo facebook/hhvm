@@ -19,6 +19,11 @@ Parsed decls:
           (Tfun
              { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|only_rx_if_impl_method.php line 7, characters 19-19),
+                  (Tunion []))
+                 };
                ft_ret =
                { et_enforced = false;
                  et_type =

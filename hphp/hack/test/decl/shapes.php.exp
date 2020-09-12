@@ -27,6 +27,9 @@ Parsed decls:
             (make_fp_flags ~mutability:none ~accept_disposable:false
               ~has_default:false ~mode:FPnormal);
              }];
+       ft_implicit_params =
+       { capability =
+         (Rhint (root|shapes.php line 15, characters 10-22), (Tunion [])) };
        ft_ret =
        { et_enforced = false;
          et_type =
@@ -63,6 +66,9 @@ Parsed decls:
              ~has_default:false ~mode:FPnormal);
             }
           ];
+        ft_implicit_params =
+        { capability =
+          (Rhint (root|shapes.php line 9, characters 10-22), (Tunion [])) };
         ft_ret =
         { et_enforced = false;
           et_type =
@@ -120,6 +126,9 @@ Parsed decls:
              ~has_default:false ~mode:FPnormal);
             }
           ];
+        ft_implicit_params =
+        { capability =
+          (Rhint (root|shapes.php line 5, characters 10-20), (Tunion [])) };
         ft_ret =
         { et_enforced = false;
           et_type =

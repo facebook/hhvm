@@ -32,6 +32,11 @@ Parsed decls:
                             ~mode:FPinout);
                            }
                          ];
+                       ft_implicit_params =
+                       { capability =
+                         (Rhint (root|inout.php line 3, characters 12-38),
+                          (Tunion []))
+                         };
                        ft_ret =
                        { et_enforced = false;
                          et_type =
@@ -48,6 +53,10 @@ Parsed decls:
                  ~has_default:false ~mode:FPnormal);
                 }
               ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|inout.php line 3, characters 10-10), (Tunion []))
+              };
             ft_ret =
             { et_enforced = false;
               et_type =

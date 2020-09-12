@@ -9,6 +9,11 @@ Parsed decls:
        (Tfun
           { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|yield_deeper.php line 3, characters 10-10),
+               (Tunion []))
+              };
             ft_ret =
             { et_enforced = false;
               et_type =
@@ -35,6 +40,11 @@ Parsed decls:
        (Tfun
           { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|yield_deeper.php line 7, characters 10-10),
+               (Tunion []))
+              };
             ft_ret =
             { et_enforced = false;
               et_type =
@@ -53,6 +63,11 @@ Parsed decls:
        (Tfun
           { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|yield_deeper.php line 13, characters 10-10),
+               (Tunion []))
+              };
             ft_ret =
             { et_enforced = false;
               et_type =
@@ -71,6 +86,11 @@ Parsed decls:
        (Tfun
           { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|yield_deeper.php line 19, characters 16-16),
+               (Tunion []))
+              };
             ft_ret =
             { et_enforced = false;
               et_type =
@@ -92,6 +112,11 @@ Parsed decls:
        (Tfun
           { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|yield_deeper.php line 26, characters 16-16),
+               (Tunion []))
+              };
             ft_ret =
             { et_enforced = false;
               et_type =

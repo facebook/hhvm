@@ -72,6 +72,7 @@ let expand_ty ?var_hook ?pos env ty =
         ft_ret;
         ft_flags;
         ft_params;
+        ft_implicit_params;
         ft_reactive;
       } =
     {
@@ -83,6 +84,7 @@ let expand_ty ?var_hook ?pos env ty =
         List.map ~f:exp_where_constraint ft_where_constraints;
       ft_ret = exp_possibly_enforced_ty ft_ret;
       ft_params = List.map ~f:exp_fun_param ft_params;
+      ft_implicit_params = exp_fun_implicit_params ft_implicit_params;
     }
   and exp_fun_param { fp_pos; fp_name; fp_type; fp_rx_annotation; fp_flags } =
     {
@@ -92,6 +94,8 @@ let expand_ty ?var_hook ?pos env ty =
       fp_rx_annotation;
       fp_flags;
     }
+  and exp_fun_implicit_params { capability } =
+    { capability = exp_ty capability }
   and exp_possibly_enforced_ty { et_type; et_enforced } =
     { et_type = exp_ty et_type; et_enforced }
   and exp_sft { sft_optional; sft_ty } =

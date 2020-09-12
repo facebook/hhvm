@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<11e05c398cab69145167d3510af73040>>
+// @generated SignedSource<<5761768068f74f1cb328f28430329cb9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -673,6 +673,25 @@ pub enum Reactivity<'a> {
 }
 impl<'a> TrivialDrop for Reactivity<'a> {}
 
+/// Companion to fun_params type, intended to consolidate checking of
+/// implicit params for functions.
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct FunImplicitParams<'a> {
+    pub capability: Ty<'a>,
+}
+impl<'a> TrivialDrop for FunImplicitParams<'a> {}
+
 /// The type of a function AND a method.
 /// A function has a min and max arity because of optional arguments
 #[derive(
@@ -692,6 +711,7 @@ pub struct FunType<'a> {
     pub tparams: &'a [Tparam<'a>],
     pub where_constraints: &'a [WhereConstraint<'a>],
     pub params: FunParams<'a>,
+    pub implicit_params: FunImplicitParams<'a>,
     /// Carries through the sync/async information from the aast
     pub ret: PossiblyEnforcedTy<'a>,
     pub reactive: Reactivity<'a>,

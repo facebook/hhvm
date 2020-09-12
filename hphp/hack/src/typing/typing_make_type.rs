@@ -366,7 +366,12 @@ impl<'a> TypeBuilder<'a> {
             rx_annotation: None,
         })
     }
-    pub fn funtype(&'a self, params: &'a [&'a FunParam<'a>], ret: Ty<'a>) -> &'a FunType<'a> {
+    pub fn funtype(
+        &'a self,
+        params: &'a [&'a FunParam<'a>],
+        implicit_params: FunImplicitParams<'a>,
+        ret: Ty<'a>,
+    ) -> &'a FunType<'a> {
         self.alloc(FunType {
             ret: PossiblyEnforcedTy {
                 type_: ret,
@@ -374,6 +379,7 @@ impl<'a> TypeBuilder<'a> {
                 enforced: false,
             },
             params,
+            implicit_params,
             // TODO: set the following fields correctly
             arity: FunArity::Fstandard,
             tparams: &[],

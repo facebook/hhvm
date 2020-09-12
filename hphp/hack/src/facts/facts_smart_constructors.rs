@@ -364,7 +364,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         _left_parens: Self::R,
         _param_list: Self::R,
         _right_parens: Self::R,
-        _capability_provisional: Self::R, // TODO(vmladenov)
+        _capability_provisional: Self::R,
         _colon: Self::R,
         _type: Self::R,
         _where: Self::R,

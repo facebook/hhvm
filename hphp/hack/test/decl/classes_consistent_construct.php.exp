@@ -60,6 +60,11 @@ Parsed decls:
                          ~mode:FPnormal);
                         }
                       ];
+                    ft_implicit_params =
+                    { capability =
+                      (Rhint (root|classes_consistent_construct.php line 8, characters 19-29),
+                       (Tunion []))
+                      };
                     ft_ret =
                     { et_enforced = false;
                       et_type =

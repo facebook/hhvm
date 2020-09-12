@@ -1449,6 +1449,10 @@ and method_ genv m =
         failwith "ast_to_nast error unnamedbody in method_"
   in
   let attrs = user_attributes env m.Aast.m_user_attributes in
+  let m_cap = Aast.type_hint_option_map ~f:(hint env) m.Aast.m_cap in
+  let m_unsafe_cap =
+    Aast.type_hint_option_map ~f:(hint env) m.Aast.m_unsafe_cap
+  in
   {
     N.m_annotation = ();
     N.m_span = m.Aast.m_span;
@@ -1460,8 +1464,8 @@ and method_ genv m =
     N.m_tparams = tparam_l;
     N.m_where_constraints = where_constraints;
     N.m_params = paraml;
-    N.m_cap = m.Aast.m_cap;
-    N.m_unsafe_cap = m.Aast.m_unsafe_cap;
+    N.m_cap;
+    N.m_unsafe_cap;
     N.m_body = body;
     N.m_fun_kind = m.Aast.m_fun_kind;
     N.m_ret = ret;

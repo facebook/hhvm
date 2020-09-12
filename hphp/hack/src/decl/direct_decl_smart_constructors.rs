@@ -31,9 +31,9 @@ use oxidized_by_ref::{
     shape_map::ShapeField,
     typing_defs,
     typing_defs::{
-        EnumType, FunArity, FunElt, FunParam, FunParams, FunType, ParamMode, ParamMutability,
-        PossiblyEnforcedTy, Reactivity, ShapeFieldType, ShapeKind, Tparam, Ty, Ty_,
-        TypeconstAbstractKind, TypedefType, WhereConstraint, XhpAttrTag,
+        EnumType, FunArity, FunElt, FunImplicitParams, FunParam, FunParams, FunType, ParamMode,
+        ParamMutability, PossiblyEnforcedTy, Reactivity, ShapeFieldType, ShapeKind, Tparam, Ty,
+        Ty_, TypeconstAbstractKind, TypedefType, WhereConstraint, XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
@@ -254,6 +254,10 @@ fn tarraykey<'a>(arena: &'a Bump) -> Ty<'a> {
         Reason::none(),
         arena.alloc(Ty_::Tprim(arena.alloc(aast::Tprim::Tarraykey))),
     )
+}
+
+fn default_capability<'a>(arena: &'a Bump, r: Reason<'a>) -> Ty<'a> {
+    Ty(arena.alloc(r), arena.alloc(Ty_::Tunion(&[])))
 }
 
 #[derive(Debug)]
@@ -523,6 +527,7 @@ pub struct FunctionHeader<'a> {
     modifiers: Node<'a>,
     type_params: Node<'a>,
     param_list: Node<'a>,
+    capability_provisional: Node<'a>,
     ret_hint: Node<'a>,
 }
 
@@ -1251,6 +1256,20 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
     }
 
+    fn as_fun_implicit_params(
+        &mut self,
+        capability_provisional: Node<'a>,
+        default_pos: &'a Pos<'a>,
+    ) -> FunImplicitParams<'a> {
+        let capability = self
+            .node_to_ty(capability_provisional)
+            .unwrap_or(default_capability(
+                self.state.arena,
+                Reason::hint(default_pos),
+            ));
+        FunImplicitParams { capability }
+    }
+
     fn function_into_ty(
         &mut self,
         namespace: &'a str,
@@ -1260,14 +1279,17 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     ) -> Option<(Id<'a>, Ty<'a>, &'a [ShallowProp<'a>])> {
         let id = self.get_name(namespace, header.name)?;
         let (params, properties, arity) = self.as_fun_params(header.param_list)?;
+        let f_pos = header.name.get_pos(self.state.arena).unwrap_or(Pos::none());
+        let implicit_params = self.as_fun_implicit_params(header.capability_provisional, f_pos);
+
         let type_ = match header.name {
             Node::Construct(pos) => Ty(
                 self.alloc(Reason::witness(pos)),
                 self.alloc(Ty_::Tprim(self.alloc(aast::Tprim::Tvoid))),
             ),
-            _ => self.node_to_ty(header.ret_hint).unwrap_or_else(|| {
-                self.tany_with_pos(header.name.get_pos(self.state.arena).unwrap_or(Pos::none()))
-            }),
+            _ => self
+                .node_to_ty(header.ret_hint)
+                .unwrap_or_else(|| self.tany_with_pos(f_pos)),
         };
         let async_ = header
             .modifiers
@@ -1321,6 +1343,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             tparams,
             where_constraints: &[],
             params,
+            implicit_params,
             ret: PossiblyEnforcedTy {
                 enforced: false,
                 type_,
@@ -1606,6 +1629,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 };
                 let params =
                     self.slice_from_iter(fun_type.params.iter().cloned().map(convert_param));
+                let implicit_params = fun_type.implicit_params.clone();
                 let ret = PossiblyEnforcedTy {
                     enforced: fun_type.ret.enforced,
                     type_: self.convert_tapply_to_tgeneric(fun_type.ret.type_),
@@ -1613,6 +1637,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 Ty_::Tfun(self.alloc(FunType {
                     arity,
                     params,
+                    implicit_params,
                     ret,
                     reactive: fun_type.reactive.clone(),
                     ..*fun_type
@@ -2677,6 +2702,18 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         }
     }
 
+    fn make_capability_provisional(
+        &mut self,
+        _at: Self::R,
+        _lb: Self::R,
+        ty: Self::R,
+        _plus: Self::R,
+        _unsafe_ty: Self::R,
+        _rb: Self::R,
+    ) -> Self::R {
+        ty
+    }
+
     fn make_function_declaration_header(
         &mut self,
         modifiers: Self::R,
@@ -2686,8 +2723,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _left_parens: Self::R,
         param_list: Self::R,
         _right_parens: Self::R,
+        capability_provisional: Self::R,
         _colon: Self::R,
-        _capability_provisional: Self::R, // TODO(vmladenov) provisional capabilities most likely unnecessary for direct decl
         ret_hint: Self::R,
         _where: Self::R,
     ) -> Self::R {
@@ -2699,6 +2736,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             modifiers,
             type_params,
             param_list,
+            capability_provisional,
             ret_hint,
         }))
     }
@@ -3962,6 +4000,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             )
             .ok()
         );
+        let implicit_params = self.as_fun_implicit_params(Node::Ignored, pos);
+
         let mut flags = FunTypeFlags::empty();
         if mutability.is_some() {
             flags |= FunTypeFlags::RETURNS_MUTABLE;
@@ -3974,6 +4014,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 tparams: &[],
                 where_constraints: &[],
                 params,
+                implicit_params,
                 ret: PossiblyEnforcedTy {
                     enforced: false,
                     type_: ret,

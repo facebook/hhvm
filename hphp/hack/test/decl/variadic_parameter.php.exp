@@ -33,6 +33,11 @@ Parsed decls:
                           ));
                        ft_tparams = []; ft_where_constraints = [];
                        ft_params = [];
+                       ft_implicit_params =
+                       { capability =
+                         (Rhint (root|variadic_parameter.php line 3, characters 15-40),
+                          (Tunion []))
+                         };
                        ft_ret =
                        { et_enforced = false;
                          et_type =
@@ -49,6 +54,11 @@ Parsed decls:
                  ~has_default:false ~mode:FPnormal);
                 }
               ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|variadic_parameter.php line 3, characters 10-13),
+               (Tunion []))
+              };
             ft_ret =
             { et_enforced = false;
               et_type =

@@ -825,6 +825,12 @@ and localize_ft
         in
         (env, { param with fp_type = ty }))
   in
+  let (env, implicit_params) =
+    let (env, capability) =
+      localize ~ety_env env ft.ft_implicit_params.capability
+    in
+    (env, { capability })
+  in
   let (env, ret) = localize_possibly_enforced_ty ~ety_env env ft.ft_ret in
   let ft =
     set_ft_ftk
@@ -839,6 +845,7 @@ and localize_ft
       ft with
       ft_arity = arity;
       ft_params = params;
+      ft_implicit_params = implicit_params;
       ft_ret = ret;
       ft_tparams = tparams;
       ft_where_constraints = where_constraints;

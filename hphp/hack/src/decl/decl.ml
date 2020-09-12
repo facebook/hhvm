@@ -290,6 +290,15 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
   let returns_void_to_rx = fun_returns_void_to_rx f.f_user_attributes in
   let return_disposable = has_return_disposable_attribute f.f_user_attributes in
   let params = make_params env ~is_lambda f.f_params in
+  let capability =
+    hint_to_type
+      ~is_lambda:false
+      ~default:
+        (Typing_make_type.default_capability (Reason.Rhint (fst f.f_name)))
+      env
+      (Reason.Rwitness (fst f.f_name))
+      (hint_of_type_hint f.f_cap)
+  in
   let ret_ty =
     ret_from_fun_kind
       ~is_lambda
@@ -325,6 +334,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
             ft_tparams = tparams;
             ft_where_constraints = where_constraints;
             ft_params = params;
+            ft_implicit_params = { capability };
             ft_ret = { et_type = ret_ty; et_enforced = false };
             ft_reactive = reactivity;
             ft_flags =

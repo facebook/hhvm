@@ -42,7 +42,7 @@ let rec strip_ty ty =
     | Tunion tyl -> Tunion (strip_tyl tyl)
     | Tintersection tyl -> Tintersection (strip_tyl tyl)
     | Tclass (sid, exact, tyl) -> Tclass (sid, exact, strip_tyl tyl)
-    | Tfun { ft_params; ft_ret; _ } ->
+    | Tfun { ft_params; ft_implicit_params = { capability }; ft_ret; _ } ->
       let strip_param ({ fp_type; _ } as fp) =
         let fp_type = strip_possibly_enforced_ty fp_type in
         {
@@ -60,10 +60,12 @@ let rec strip_ty ty =
         }
       in
       let ft_params = List.map ft_params ~f:strip_param in
+      let ft_implicit_params = { capability = strip_ty capability } in
       let ft_ret = strip_possibly_enforced_ty ft_ret in
       Tfun
         {
           ft_params;
+          ft_implicit_params;
           ft_ret;
           (* Dummy values: these aren't currently serialized. *)
           ft_arity = Fstandard;

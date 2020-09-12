@@ -109,6 +109,9 @@ and hint_ p env = function
       }
     in
     let paraml = List.map3_exn hl kl muts ~f:make_param in
+    let implicit_params =
+      { capability = Typing_make_type.default_capability (Reason.Rhint p) }
+    in
     let ret = possibly_enforced_hint env h in
     let arity =
       match vh with
@@ -129,6 +132,7 @@ and hint_ p env = function
         ft_tparams = [];
         ft_where_constraints = [];
         ft_params = paraml;
+        ft_implicit_params = implicit_params;
         ft_ret = ret;
         ft_flags =
           make_ft_flags

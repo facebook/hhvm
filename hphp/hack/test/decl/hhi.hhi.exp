@@ -32,6 +32,10 @@ Parsed decls:
                     ~has_default:false ~mode:FPnormal);
                    }
                  ];
+               ft_implicit_params =
+               { capability =
+                 (Rhint (root|hhi.hhi line 10, characters 19-19), (Tunion []))
+                 };
                ft_ret =
                { et_enforced = false;
                  et_type =
@@ -67,6 +71,9 @@ Parsed decls:
                  ~has_default:false ~mode:FPnormal);
                 }
               ];
+            ft_implicit_params =
+            { capability =
+              (Rhint (root|hhi.hhi line 7, characters 10-10), (Tunion [])) };
             ft_ret =
             { et_enforced = false;
               et_type =

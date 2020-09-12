@@ -160,3 +160,7 @@ let simple_variadic_splat r ty =
              d_variadic = Some ty;
              d_kind = SplatUnpack;
            } ))
+
+let default_capability r =
+  (* TODO(coeffects) Replace with type alias from HHI *)
+  nothing r

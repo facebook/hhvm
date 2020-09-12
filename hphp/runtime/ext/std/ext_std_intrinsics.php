@@ -132,6 +132,9 @@ function id_string(string $value): string {
 function serialize_with_format(mixed $thing, int $format): string;
 
 <<__Native>>
+function deserialize_with_format(string $str, int $format): mixed;
+
+<<__Native>>
 function rqtrace_create_event(
   string $name,
   int $start_us,

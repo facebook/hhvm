@@ -126,6 +126,16 @@ String HHVM_FUNCTION(serialize_with_format, const Variant& thing,
   return vs.serialize(thing, true);
 }
 
+Variant HHVM_FUNCTION(deserialize_with_format, const String& str,
+                      int64_t format) {
+  if (format > static_cast<int64_t>(VariableUnserializer::Type::Last)) {
+    raise_invalid_argument_warning("invalid serializer format");
+  }
+  auto const type = static_cast<VariableUnserializer::Type>(format);
+  VariableUnserializer vu(str.data(), str.size(), type);
+  return vu.unserialize();
+}
+
 namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -391,6 +401,8 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_dict_await, dummy_dict_await);
 
   HHVM_FALIAS(__hhvm_intrinsics\\serialize_with_format, serialize_with_format);
+  HHVM_FALIAS(__hhvm_intrinsics\\deserialize_with_format,
+              deserialize_with_format);
 
   HHVM_FALIAS(__hhvm_intrinsics\\rqtrace_create_event, rqtrace_create_event);
   HHVM_FALIAS(__hhvm_intrinsics\\rqtrace_create_scope, rqtrace_create_scope);

@@ -44,7 +44,8 @@ struct VariableUnserializer {
     Serialize,
     Internal,
     APCSerialize,
-    DebuggerSerialize
+    DebuggerSerialize,
+    Last
   };
 
   /*

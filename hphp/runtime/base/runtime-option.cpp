@@ -2791,7 +2791,8 @@ void RuntimeOption::Load(
 
   // We don't support provenance for bespoke array-likes, so don't construct
   // any at runtime if we're logging provenance instrumentation results.
-  if (RO::EvalBespokeArrayLikeMode > 0 && RO::EvalLogArrayProvenance) {
+  if (RO::EvalBespokeArrayLikeMode > 0 &&
+      (RO::EvalArrayProvenance || RO::EvalLogArrayProvenance)) {
     RO::EvalBespokeArrayLikeMode = 0;
   }
 

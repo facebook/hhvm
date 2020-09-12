@@ -87,7 +87,7 @@ string(82) "D:2:{s:1:"a";D:2:{s:1:"c";i:1;s:1:"d";i:2;}s:1:"b";D:2:{s:1:"e";i:3;
 Notice: Hack Array Compat: Serializing vec in %s/serialize2.php on line 79
 string(129) "a:5:{i:0;i:1;i:1;v:3:{i:2;i:3;i:4;}i:2;a:3:{i:0;i:5;i:1;i:6;i:2;i:7;}i:3;k:3:{i:8;i:9;i:10;}i:4;D:2:{s:1:"a";i:11;s:1:"b";i:12;}}"
 
-Notice: Hack Array Compat: Serializing vec in %s/serialize2.php on line 86
+Notice: Hack Array Compat: Serializing dict in %s/serialize2.php on line 86
 string(159) "O:8:"stdClass":4:{s:1:"a";a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}s:1:"b";v:3:{i:1;i:2;i:3;}s:1:"c";D:2:{s:1:"a";i:1;s:1:"b";i:2;}s:1:"d";k:3:{s:1:"a";s:1:"b";s:1:"c";}}"
 string(77) "Accessing <<__LateInit>> property 'LateInitClass::prop' before initialization"
 ==================== PHP warn =========================
@@ -155,9 +155,9 @@ Notice: Hack Array Compat: Serializing array in %s/serialize2.php on line 79
 Notice: Hack Array Compat: Serializing vec in %s/serialize2.php on line 79
 string(129) "a:5:{i:0;i:1;i:1;v:3:{i:2;i:3;i:4;}i:2;a:3:{i:0;i:5;i:1;i:6;i:2;i:7;}i:3;k:3:{i:8;i:9;i:10;}i:4;D:2:{s:1:"a";i:11;s:1:"b";i:12;}}"
 
-Notice: Hack Array Compat: Serializing array in %s/serialize2.php on line 86
+Notice: Hack Array Compat: Serializing dict in %s/serialize2.php on line 86
 
-Notice: Hack Array Compat: Serializing vec in %s/serialize2.php on line 86
+Notice: Hack Array Compat: Serializing array in %s/serialize2.php on line 86
 string(159) "O:8:"stdClass":4:{s:1:"a";a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}s:1:"b";v:3:{i:1;i:2;i:3;}s:1:"c";D:2:{s:1:"a";i:1;s:1:"b";i:2;}s:1:"d";k:3:{s:1:"a";s:1:"b";s:1:"c";}}"
 string(77) "Accessing <<__LateInit>> property 'LateInitClass::prop' before initialization"
 ==================== force + hack warn =========================
@@ -192,7 +192,7 @@ string(82) "a:2:{s:1:"a";a:2:{s:1:"c";i:1;s:1:"d";i:2;}s:1:"b";a:2:{s:1:"e";i:3;
 Notice: Hack Array Compat: Serializing vec in %s/serialize2.php on line 79
 string(154) "a:5:{i:0;i:1;i:1;a:3:{i:0;i:2;i:1;i:3;i:2;i:4;}i:2;a:3:{i:0;i:5;i:1;i:6;i:2;i:7;}i:3;a:3:{i:8;i:8;i:9;i:9;i:10;i:10;}i:4;a:2:{s:1:"a";i:11;s:1:"b";i:12;}}"
 
-Notice: Hack Array Compat: Serializing vec in %s/serialize2.php on line 86
+Notice: Hack Array Compat: Serializing dict in %s/serialize2.php on line 86
 string(195) "O:8:"stdClass":4:{s:1:"a";a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}s:1:"b";a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}s:1:"c";a:2:{s:1:"a";i:1;s:1:"b";i:2;}s:1:"d";a:3:{s:1:"a";s:1:"a";s:1:"b";s:1:"b";s:1:"c";s:1:"c";}}"
 string(77) "Accessing <<__LateInit>> property 'LateInitClass::prop' before initialization"
 ==================== force + PHP warn =========================
@@ -260,9 +260,9 @@ Notice: Hack Array Compat: Serializing array in %s/serialize2.php on line 79
 Notice: Hack Array Compat: Serializing vec in %s/serialize2.php on line 79
 string(154) "a:5:{i:0;i:1;i:1;a:3:{i:0;i:2;i:1;i:3;i:2;i:4;}i:2;a:3:{i:0;i:5;i:1;i:6;i:2;i:7;}i:3;a:3:{i:8;i:8;i:9;i:9;i:10;i:10;}i:4;a:2:{s:1:"a";i:11;s:1:"b";i:12;}}"
 
-Notice: Hack Array Compat: Serializing array in %s/serialize2.php on line 86
+Notice: Hack Array Compat: Serializing dict in %s/serialize2.php on line 86
 
-Notice: Hack Array Compat: Serializing vec in %s/serialize2.php on line 86
+Notice: Hack Array Compat: Serializing array in %s/serialize2.php on line 86
 string(195) "O:8:"stdClass":4:{s:1:"a";a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}s:1:"b";a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}s:1:"c";a:2:{s:1:"a";i:1;s:1:"b";i:2;}s:1:"d";a:3:{s:1:"a";s:1:"a";s:1:"b";s:1:"b";s:1:"c";s:1:"c";}}"
 string(77) "Accessing <<__LateInit>> property 'LateInitClass::prop' before initialization"
 ==================== ignore lateinit =========================

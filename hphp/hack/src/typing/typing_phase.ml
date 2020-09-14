@@ -621,9 +621,21 @@ and localize_targ ~check_well_kinded env hint =
 
 (* See signature in .mli file for details *)
 and localize_targs_with_kinds
-    ~check_well_kinded ~is_method ~def_pos ~use_pos ~use_name env nkinds targl =
-  let tparam_count = List.length nkinds in
+    ~check_well_kinded
+    ~is_method
+    ~def_pos
+    ~use_pos
+    ~use_name
+    ?(tparaml = [])
+    env
+    named_kinds
+    targl =
   let targ_count = List.length targl in
+  let tparam_count =
+    match List.length tparaml with
+    | 0 -> List.length named_kinds
+    | n -> n
+  in
   (* If there are explicit type arguments but too few or too many then
    * report an error *)
   if Int.( <> ) targ_count 0 && Int.( <> ) tparam_count targ_count then
@@ -647,36 +659,58 @@ and localize_targs_with_kinds
     List.map2_env
       env
       targl
-      (List.take nkinds targ_count)
+      (List.take named_kinds targ_count)
       (localize_targ_with_kind ~check_well_kinded)
   in
   (* Generate fresh type variables for the remainder *)
   let (env, implicit_targs) =
-    List.map_env env (List.drop nkinds targ_count) (fun env nkind ->
-        let (name, kind) = nkind in
-        let is_higher_kinded = KindDefs.Simple.get_arity kind > 0 in
-        let wildcard_hint =
-          (use_pos, Aast.Happly ((Pos.none, SN.Typehints.wildcard), []))
+    let mk_implicit_targ env (kind_name, kind) =
+      let wildcard_hint =
+        (use_pos, Aast.Happly ((Pos.none, SN.Typehints.wildcard), []))
+      in
+      if
+        check_well_kinded
+        && KindDefs.Simple.get_arity kind > 0
+        && Int.( = ) targ_count 0
+      then (
+        (* We only throw an error if the user didn't provide any type arguments at all.
+           Otherwise, if they provided some, but not all of them, n arity mismatch
+           triggers earlier in this function, independently from higher-kindedness *)
+        Errors.implicit_type_argument_for_higher_kinded_type
+          ~use_pos
+          ~def_pos:(fst kind_name)
+          (snd kind_name);
+        (env, (mk (Reason.none, Terr), wildcard_hint))
+      ) else
+        let (env, tvar) =
+          Env.fresh_type_reason
+            env
+            (Reason.Rtype_variable_generics (use_pos, snd kind_name, use_name))
         in
-        if check_well_kinded && is_higher_kinded && Int.( = ) targ_count 0 then (
-          (* We only throw an error if the user didn't provide any type arguments at all.
-             Otherwise, if they provided some, but not all of them, n arity mismatch
-             triggers earlier in this function, independently from higher-kindedness *)
-          let def_pos = fst name in
-          Errors.implicit_type_argument_for_higher_kinded_type
-            ~use_pos
-            ~def_pos
-            (snd name);
-          (env, (mk (Reason.none, Terr), wildcard_hint))
-        ) else
-          let (env, tvar) =
-            Env.fresh_type_reason
-              env
-              (Reason.Rtype_variable_generics (use_pos, snd name, use_name))
-          in
-          Typing_log.log_tparam_instantiation env use_pos (snd name) tvar;
-          (env, (tvar, wildcard_hint)))
+        Typing_log.log_tparam_instantiation env use_pos (snd kind_name) tvar;
+        (env, (tvar, wildcard_hint))
+    in
+    List.map_env env (List.drop named_kinds targ_count) mk_implicit_targ
   in
+  let check_for_explicit_user_attribute tparam (_, hint) =
+    let is_wildcard =
+      match hint with
+      | (_, Aast.Happly ((_, class_id), _))
+        when String.equal class_id SN.Typehints.wildcard ->
+        true
+      | _ -> false
+    in
+    if
+      Attributes.mem SN.UserAttributes.uaExplicit tparam.tp_user_attributes
+      && is_wildcard
+    then
+      Errors.require_generic_explicit tparam.tp_name (fst hint)
+  in
+  List.iter2
+    tparaml
+    (explicit_targs @ implicit_targs)
+    ~f:check_for_explicit_user_attribute
+  |> ignore;
   (env, explicit_targs @ implicit_targs)
 
 and localize_targs
@@ -689,6 +723,7 @@ and localize_targs
     ~def_pos
     ~use_pos
     ~use_name
+    ~tparaml
     env
     nkinds
     targl

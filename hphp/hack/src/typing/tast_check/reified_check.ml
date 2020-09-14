@@ -126,11 +126,7 @@ let is_wildcard (_, hint) =
  *
  * where Tf does not exist at runtime.
  *)
-let verify_targ_valid env reification tparam ((_, hint) as targ) =
-  if Attributes.mem UA.uaExplicit tparam.tp_user_attributes && is_wildcard targ
-  then
-    Errors.require_generic_explicit tparam.tp_name (fst hint);
-
+let verify_targ_valid env reification tparam targ =
   (* There is some subtlety here. If a type *parameter* is declared reified,
    * even if it is soft, we require that the argument be concrete or reified, not soft
    * reified or erased *)

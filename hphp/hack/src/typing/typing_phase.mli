@@ -78,6 +78,7 @@ val localize_targs_with_kinds :
   def_pos:Pos.t ->
   use_pos:Pos.t ->
   use_name:string ->
+  ?tparaml:decl_tparam list ->
   env ->
   Typing_kinding_defs.Simple.named_kind list ->
   Aast.hint list ->

@@ -144,25 +144,25 @@ pub fn from_ast<'a>(
         }
     });
     let (ast_body_block, is_rx_body, rx_disabled) =
-    if let rx::Level::NonRx | rx::Level::Pure(_) = rx_level {
-        (&method.body.ast, false, false)
-    } else {
-        match rx::halves_of_is_enabled_body(&method.body) {
-            None => (&method.body.ast, true, false),
-            Some((enabled_body, disabled_body)) => {
-                if emitter
-                    .options()
-                    .hhvm
-                    .flags
-                    .contains(options::HhvmFlags::RX_IS_ENABLED)
-                {
-                    (enabled_body, true, false)
-                } else {
-                    (disabled_body, false, true)
+        if let rx::Level::NonRx | rx::Level::Pure(_) = rx_level {
+            (&method.body.ast, false, false)
+        } else {
+            match rx::halves_of_is_enabled_body(&method.body) {
+                None => (&method.body.ast, true, false),
+                Some((enabled_body, disabled_body)) => {
+                    if emitter
+                        .options()
+                        .hhvm
+                        .flags
+                        .contains(options::HhvmFlags::RX_IS_ENABLED)
+                    {
+                        (enabled_body, true, false)
+                    } else {
+                        (disabled_body, false, true)
+                    }
                 }
             }
-        }
-    };
+        };
     let (body, is_generator, is_pair_generator) = if is_native_opcode_impl {
         (
             emit_native_opcode::emit_body(

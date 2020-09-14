@@ -839,7 +839,6 @@ void ExternCompiler::writeConfigs() {
       // necessary to initialize zend-strtod, which is used to serialize
       // boundConfig to JSON (!)
       zend_get_bigint_data();
-      ARRPROV_USE_RUNTIME_LOCATION();
       return IniSetting::GetAllAsJSON();
     }
     return "";

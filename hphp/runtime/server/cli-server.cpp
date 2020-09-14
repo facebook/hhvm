@@ -657,6 +657,7 @@ const StaticString
   s_access("access");
 
 Array init_ini_settings(const std::string& settings) {
+  ARRPROV_USE_RUNTIME_LOCATION();
   String s(settings.c_str(), CopyString);
   auto var = Variant::attach(HHVM_FN(json_decode)(s, true));
 

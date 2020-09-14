@@ -368,10 +368,9 @@ void ReleaseUncountedTv(tv_lval lval) {
  * Extra space that gets prepended to uncounted arrays.
  */
 ALWAYS_INLINE size_t uncountedAllocExtra(const ArrayData* ad, bool apc_tv) {
-  auto const amt = (apc_tv ? sizeof(APCTypedValue) : 0)
-                   + arrprov::tagSize(ad)
-                   + (ad->hasStrKeyTable() ? sizeof(StrKeyTable) : 0);
-  return (amt + 15) & ~15ull;
+  auto const extra = (apc_tv ? sizeof(APCTypedValue) : 0) +
+                     (ad->hasStrKeyTable() ? sizeof(StrKeyTable) : 0);
+  return (extra + 15) & ~15ull;
 }
 
 //////////////////////////////////////////////////////////////////////

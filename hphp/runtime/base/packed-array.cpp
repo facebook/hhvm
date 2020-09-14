@@ -97,12 +97,11 @@ PackedArray::MarkedVArrayInitializer PackedArray::s_marked_varr_initializer;
 namespace {
 
 inline ArrayData* alloc_packed_static(const ArrayData* ad) {
-  auto const extra = arrprov::tagSize(ad);
-  auto const size = sizeof(ArrayData) + ad->size() * sizeof(TypedValue) + extra;
+  auto const size = sizeof(ArrayData) + ad->size() * sizeof(TypedValue);
   auto const ret = RuntimeOption::EvalLowStaticArrays
     ? low_malloc(size)
     : uncounted_malloc(size);
-  return reinterpret_cast<ArrayData*>(reinterpret_cast<char*>(ret) + extra);
+  return reinterpret_cast<ArrayData*>(reinterpret_cast<char*>(ret));
 }
 
 }

@@ -433,7 +433,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   auto const scale = other.m_scale;
   auto const ad = mode == AllocMode::Request
     ? reqAlloc(scale)
-    : staticAlloc(scale, arrprov::tagSize(&other) + sizeOfStrKeyTable);
+    : staticAlloc(scale, sizeOfStrKeyTable);
   // Copy everything including tombstones. This is a requirement for remove() to
   // work correctly, which assumes the position is the same in the original and
   // in the copy of the array, in case copying is needed.

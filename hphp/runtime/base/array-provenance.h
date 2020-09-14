@@ -238,15 +238,7 @@ bool arrayWantsTag(const ArrayData* a);
 bool arrayWantsTag(const APCArray* a);
 bool arrayWantsTag(const AsioExternalThreadEvent* a);
 
-auto constexpr kInlineTagSize = 8;
-
-/*
- * Space requirement for a tag for `a'.
- */
-template<typename A>
-size_t tagSize(const A* a) {
-  return RO::EvalArrayProvenance && arrayWantsTag(a) ? kInlineTagSize : 0;
-}
+auto constexpr kAPCTagSize = 8;
 
 /*
  * Get the provenance tag for `a`.

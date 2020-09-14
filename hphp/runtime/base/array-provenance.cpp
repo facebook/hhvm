@@ -223,42 +223,38 @@ bool arrayWantsTag(const AsioExternalThreadEvent* ev) {
 namespace {
 
 /*
- * Whether provenance for a given array should be request-local.
- *
- * True for refcounted request arrays, else false.
+ * Mutable access to a given object's provenance slot.
  */
-bool wants_local_prov(const ArrayData* ad) { return ad->isRefCounted(); }
-constexpr bool wants_local_prov(const APCArray* a) { return false; }
-constexpr bool wants_local_prov(const AsioExternalThreadEvent* ev) {
-  return true;
+Tag& tag_slot(ArrayData* ad) {
+  assertx(ad->isVanilla());
+  static_assert(ArrayData::sizeofTag() == sizeof(Tag));
+  auto const mem = reinterpret_cast<char*>(ad) + ArrayData::offsetofTag();
+  return *reinterpret_cast<Tag*>(mem);
+}
+Tag& tag_slot(APCArray* a) {
+  auto const mem = reinterpret_cast<char*>(a) - kAPCTagSize;
+  return *reinterpret_cast<Tag*>(mem);
+}
+Tag& tag_slot(AsioExternalThreadEvent* a) {
+  return rl_array_provenance->tags[a];
 }
 
 /*
- * Get the provenance slot for a non-request array.
+ * Const access to a given object's provenance slot.
  */
-Tag& tag_for_nonreq(ArrayData* ad) {
-  assertx(arrayWantsTag(ad));
-  assertx(!wants_local_prov(ad));
-
-  auto const mem = reinterpret_cast<char*>(ad)
-    - kInlineTagSize
-    - (ad->hasStrKeyTable() ? sizeof(StrKeyTable) : 0)
-    - (ad->hasApcTv() ? sizeof(APCTypedValue) : 0);
-
-  return *reinterpret_cast<Tag*>(mem);
+Tag tag_slot(const ArrayData* a) {
+  return tag_slot(const_cast<ArrayData*>(a));
 }
-
-Tag& tag_for_nonreq(APCArray* a) {
-  auto const mem = reinterpret_cast<char*>(a) - kInlineTagSize;
-  return *reinterpret_cast<Tag*>(mem);
+Tag tag_slot(const APCArray* a) {
+  return tag_slot(const_cast<APCArray*>(a));
 }
-
-Tag& tag_for_nonreq(AsioExternalThreadEvent*) {
-  always_assert(false); // only req-local provenance is supported
+Tag tag_slot(const AsioExternalThreadEvent* a) {
+  auto const& table = rl_array_provenance->tags;
+  auto const it = table.find(a);
+  if (it == table.end()) return {};
+  assertx(it->second.valid());
+  return it->second;
 }
-
-template<typename A>
-Tag tag_for_nonreq(const A* a) { return tag_for_nonreq(const_cast<A*>(a)); }
 
 /*
  * Used to override the provenance tag reported for ArrayData*'s in a given
@@ -287,50 +283,26 @@ thread_local folly::Optional<Tag> tl_tag_override = folly::none;
 
 template<typename A>
 Tag getTagImpl(const A* a) {
-  using ProvenanceTable = decltype(rl_array_provenance->tags);
-
-  auto const get = [] (
-    const A* a,
-    const ProvenanceTable& tbl
-  ) -> Tag {
-    auto const it = tbl.find(a);
-    if (it == tbl.cend()) return {};
-    assertx(it->second.valid());
-    return it->second;
-  };
-
-  if (wants_local_prov(a)) {
-    return get(a, rl_array_provenance->tags);
-  } else {
-    return tag_for_nonreq(a);
-  }
+  return tag_slot(a);
 }
 
-template<Mode mode, typename A>
+template<typename A>
 bool setTagImpl(A* a, Tag tag) {
   assertx(tag.valid());
   if (!arrayWantsTag(a)) return false;
-
-  if (wants_local_prov(a)) {
-    assertx(mode == Mode::Emplace || !getTag(a) || tl_tag_override);
-    rl_array_provenance->tags[a] = tag;
-  } else {
-    tag_for_nonreq(a) = tag;
-  }
+  tag_slot(a) = tag;
   return true;
 }
 
 template<typename A>
 void clearTagImpl(const A* a) {
   if (!arrayWantsTag(a)) return;
-
-  if (wants_local_prov(a)) {
+  if constexpr (std::is_same<A, AsioExternalThreadEvent>::value) {
     rl_array_provenance->tags.erase(a);
   } else {
-    tag_for_nonreq(a) = Tag{};
+    tag_slot(a) = {};
   }
 }
-
 
 } // namespace
 
@@ -350,18 +322,17 @@ Tag getTag(const AsioExternalThreadEvent* ev) {
 
 template<Mode mode>
 void setTag(ArrayData* ad, Tag tag) {
-  if (setTagImpl<mode>(ad, tag)) {
-    ad->setHasProvenanceData(true);
-  }
+  assertx(IMPLIES(mode == Mode::Insert, !ad->hasProvenanceData()));
+  if (setTagImpl(ad, tag)) ad->setHasProvenanceData(true);
 }
 template<Mode mode>
 void setTag(APCArray* a, Tag tag) {
-  setTagImpl<mode>(a, tag);
+  setTagImpl(a, tag);
 }
 
 template <Mode mode>
 void setTag(AsioExternalThreadEvent* ev, Tag tag) {
-  setTagImpl<mode>(ev, tag);
+  setTagImpl(ev, tag);
 }
 
 template void setTag<Mode::Insert>(ArrayData*, Tag);
@@ -373,7 +344,6 @@ template void setTag<Mode::Emplace>(AsioExternalThreadEvent*, Tag);
 
 void clearTag(ArrayData* ad) {
   ad->setHasProvenanceData(false);
-  clearTagImpl(ad);
 }
 void clearTag(APCArray* a) {
   clearTagImpl(a);
@@ -389,7 +359,6 @@ void reassignTag(ArrayData* ad) {
       return;
     }
   }
-
   clearTag(ad);
 }
 

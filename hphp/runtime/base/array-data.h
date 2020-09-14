@@ -585,6 +585,8 @@ public:
    */
   static constexpr size_t offsetofSize() { return offsetof(ArrayData, m_size); }
   static constexpr size_t sizeofSize() { return sizeof(m_size); }
+  static constexpr size_t offsetofTag() { return offsetof(ArrayData, m_extra); }
+  static constexpr size_t sizeofTag() { return sizeof(m_extra); }
 
   const StrKeyTable& missingKeySideTable() const {
     assertx(this->hasStrKeyTable());
@@ -670,8 +672,9 @@ protected:
   friend struct c_Map;
   friend struct c_ImmMap;
 
-  // m_extra is free for use by different ArrayKind implementations.
-  // Right now, it's only used by bespoke arrays for the bespoke layout ID.
+  // m_extra is used by bespoke arrays for the bespoke layout ID, and by
+  // dvarrays for the array provenance tag. Since we never enable both
+  // features at the same time, sharing the field is okay.
   uint32_t m_size;
   uint32_t m_extra;
 };

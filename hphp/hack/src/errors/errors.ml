@@ -5449,6 +5449,12 @@ let context_implicit_policy_leakage
   in
   add_list (Typing.err_code Typing.ContextImplicitPolicyLeakage) reasons
 
+let unknown_information_flow pos str =
+  add
+    (Typing.err_code Typing.UnknownInformationFlow)
+    pos
+    ("Unable to analyze information flow for " ^ str ^ ". This might be unsafe.")
+
 let reified_function_reference call_pos =
   add
     (Typing.err_code Typing.ReifiedFunctionReference)

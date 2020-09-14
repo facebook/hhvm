@@ -106,9 +106,8 @@ let set_local_type env lid pty =
     set_cont env K.Next lenv
 
 let get_local_type env lid =
-  match get_lenv_opt env K.Next with
-  | None -> Tunion []
-  | Some lenv -> LMap.find lid lenv.le_vars
+  Option.(
+    get_lenv_opt env K.Next >>= fun lenv -> LMap.find_opt lid lenv.le_vars)
 
 let get_lpc_policy env k =
   match get_lenv_opt env k with

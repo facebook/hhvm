@@ -1416,6 +1416,8 @@ val illegal_information_flow :
 val context_implicit_policy_leakage :
   Pos.t -> Pos.t list -> Pos.t list * string -> Pos.t list * string -> unit
 
+val unknown_information_flow : Pos.t -> string -> unit
+
 val reified_function_reference : Pos.t -> unit
 
 val class_meth_abstract_call : string -> string -> Pos.t -> Pos.t -> unit

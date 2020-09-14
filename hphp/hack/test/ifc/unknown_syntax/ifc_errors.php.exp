@@ -1,0 +1,10 @@
+File "ifc_errors.php", line 16, characters 3-45:
+Unable to analyze information flow for statement. This might be unsafe. (Typing[4385])
+File "ifc_errors.php", line 21, characters 3-15:
+Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
+File "ifc_errors.php", line 9, characters 14-22:
+This may be the data source with policy `PRIVATE`
+File "ifc_errors.php", line 6, characters 14-21:
+This may be the data sink with policy `PUBLIC`
+File "ifc_errors.php", line 13, characters 3-16:
+Another program point contributing to the illegal flow

@@ -195,7 +195,15 @@ let refresh_lvar_type ~pos renv env lid (ety : T.locl_ty) =
     | Tunion _ -> false
     | _ -> true
   in
-  let pty = Env.get_local_type env lid in
+  let pty =
+    match Env.get_local_type env lid with
+    | None ->
+      Errors.unknown_information_flow
+        pos
+        ("variable `" ^ Local_id.get_name lid ^ "`");
+      Lift.ty renv ety
+    | Some pty -> pty
+  in
   if is_simple pty then
     (* if the type is already simple, do not refresh it with
        what Hack found *)
@@ -376,7 +384,9 @@ let rec flux_target ~pos renv env ((_, lhs_ty), lhs_exp) =
      * be observed via the updated element.
      *)
     (env, element_pty, pc)
-  | _ -> fail "unhandled flux target (lvalue)"
+  | _ ->
+    Errors.unknown_information_flow pos "lvalue";
+    (env, Lift.ty renv lhs_ty, Env.get_lpc_policy env K.Next)
 
 and assign ~pos renv env op lhs_exp rhs_exp =
   let expr = expr ~pos renv in
@@ -455,7 +465,8 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
           | A.CIexpr e -> fst @@ expr env e
           | A.CIstatic ->
             (* TODO(T72024862): Handle late static binding *)
-            fail "late static binding is not supported"
+            Errors.unknown_information_flow pos "late static binding";
+            env
           | _ -> env
         in
         let rec find_class_name ty =
@@ -518,7 +529,8 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
       | A.CIexpr e -> fst @@ expr env e
       | A.CIstatic ->
         (* TODO(T72024862): Handle late static binding *)
-        fail "late static binding is not supported"
+        Errors.unknown_information_flow pos "late static binding";
+        env
       | _ -> env
     in
     let obj_pty = Lift.ty renv lty in
@@ -609,7 +621,8 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
   | A.PU_atom _
   | A.PU_identifier (_, _, _)
   | A.Any ->
-    fail "expr"
+    Errors.unknown_information_flow pos "expression";
+    (env, Lift.ty renv ety)
 
 and stmt renv env ((pos, s) : Tast.stmt) =
   let expr = expr renv in
@@ -622,12 +635,11 @@ and stmt renv env ((pos, s) : Tast.stmt) =
     (* Stash the PC so they can be restored after the if *)
     let pc = Env.get_lpc_policy env K.Next in
     let env =
-      let epol =
-        match ety with
-        | Tprim p -> p
-        | _ -> fail "condition expression must be of type bool"
-      in
-      Env.push_pc env K.Next epol
+      match ety with
+      | Tprim p -> Env.push_pc env K.Next p
+      | _ ->
+        Errors.unknown_information_flow (fst (fst e)) "scrutinee";
+        env
     in
     let cenv = Env.get_cenv env in
     let env = block renv (Env.set_cenv env cenv) b1 in
@@ -688,7 +700,10 @@ and stmt renv env ((pos, s) : Tast.stmt) =
     let env = Env.merge_conts_from ~union env base_cenv [K.Catch] in
     let env = Env.merge_conts_from ~union env after_try [K.Next] in
     Env.set_pc env K.Next base_pc
-  | _ -> env
+  | A.Noop -> env
+  | _ ->
+    Errors.unknown_information_flow pos "statement";
+    env
 
 and block renv env (blk : Tast.block) =
   let seq env s =

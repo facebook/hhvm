@@ -644,4 +644,5 @@ ReifiedFunctionReference = 4381
 ClassMethAbstractCall = 4382
 KindMismatch = 4383
 UnboundNameTypeConstantAccess = 4384
+UnknownInformationFlow = 4385
   |}]

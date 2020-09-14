@@ -44,6 +44,9 @@ val expand_type_and_narrow :
   Errors.typing_error_callback ->
   env * locl_ty
 
+val solve_to_equal_bound_or_wrt_variance :
+  env -> Reason.t -> int -> Errors.typing_error_callback -> env
+
 val close_tyvars_and_solve : env -> Errors.typing_error_callback -> env
 
 val solve_all_unsolved_tyvars_gi :

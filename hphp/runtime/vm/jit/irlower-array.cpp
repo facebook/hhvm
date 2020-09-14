@@ -233,17 +233,58 @@ namespace {
 
 using MakeArrayFn = ArrayData*(uint32_t);
 
-void implNewArray(IRLS& env, const IRInstruction* inst, MakeArrayFn target,
-                  SyncOptions sync = SyncOptions::None) {
-  cgCallHelper(vmain(env), env, CallSpec::direct(target), callDest(env, inst),
-               sync, argGroup(env, inst).ssa(0));
+folly::Optional<arrprov::Tag> getProvenanceTag(const IRInstruction* inst) {
+  if (!RO::EvalArrayProvenance) return folly::none;
+  if (inst->marker().func()->isProvenanceSkipFrame()) return folly::none;
+  return arrprov::tagFromSK(inst->marker().sk());
 }
 
-void implAllocArray(IRLS& env, const IRInstruction* inst, MakeArrayFn target,
-                    SyncOptions sync = SyncOptions::None) {
+template <typename T, typename U>
+T convertAsBytes(U u) {
+  static_assert(std::is_trivially_copyable<T>::value);
+  static_assert(std::is_trivially_copyable<U>::value);
+  static_assert(sizeof(T) == sizeof(U));
+  T t;
+  std::memcpy(&t, &u, sizeof(T));
+  return t;
+}
+
+ArrayData* newTaggedDArray(uint32_t size, uint32_t tagImm) {
+  arrprov::TagOverride _(convertAsBytes<arrprov::Tag>(tagImm));
+  return MixedArray::MakeReserveDArray(size);
+}
+
+ArrayData* allocTaggedVArray(uint32_t size, uint32_t tagImm) {
+  arrprov::TagOverride _(convertAsBytes<arrprov::Tag>(tagImm));
+  return PackedArray::MakeUninitializedVArray(size);
+}
+
+void implNewTaggedDArray(IRLS& env, const IRInstruction* inst,
+                         arrprov::Tag tag) {
+  auto const tagImm = convertAsBytes<uint32_t>(tag);
+  cgCallHelper(vmain(env), env, CallSpec::direct(newTaggedDArray),
+               callDest(env, inst), SyncOptions::None,
+               argGroup(env, inst).ssa(0).imm(tagImm));
+}
+
+void implAllocTaggedVArray(IRLS& env, const IRInstruction* inst,
+                           arrprov::Tag tag) {
+  auto const extra = inst->extra<PackedArrayData>();
+  auto const tagImm = convertAsBytes<uint32_t>(tag);
+  cgCallHelper(vmain(env), env, CallSpec::direct(allocTaggedVArray),
+               callDest(env, inst), SyncOptions::None,
+               argGroup(env, inst).imm(extra->size).imm(tagImm));
+}
+
+void implNewArray(IRLS& env, const IRInstruction* inst, MakeArrayFn target) {
+  cgCallHelper(vmain(env), env, CallSpec::direct(target), callDest(env, inst),
+               SyncOptions::None, argGroup(env, inst).ssa(0));
+}
+
+void implAllocArray(IRLS& env, const IRInstruction* inst, MakeArrayFn target) {
   auto const extra = inst->extra<PackedArrayData>();
   cgCallHelper(vmain(env), env, CallSpec::direct(target), callDest(env, inst),
-               sync, argGroup(env, inst).imm(extra->size));
+               SyncOptions::None, argGroup(env, inst).imm(extra->size));
 }
 
 }
@@ -252,6 +293,9 @@ void cgNewDictArray(IRLS& env, const IRInstruction* inst) {
   implNewArray(env, inst, MixedArray::MakeReserveDict);
 }
 void cgNewDArray(IRLS& env, const IRInstruction* inst) {
+  if (auto const tag = getProvenanceTag(inst)) {
+    return implNewTaggedDArray(env, inst, *tag);
+  }
   implNewArray(env, inst, MixedArray::MakeReserveDArray);
 }
 
@@ -259,16 +303,25 @@ void cgAllocVec(IRLS& env, const IRInstruction* inst) {
   implAllocArray(env, inst, PackedArray::MakeUninitializedVec);
 }
 void cgAllocVArray(IRLS& env, const IRInstruction* inst) {
+  if (auto const tag = getProvenanceTag(inst)) {
+    return implAllocTaggedVArray(env, inst, *tag);
+  }
   implAllocArray(env, inst, PackedArray::MakeUninitializedVArray);
 }
 
 namespace {
 
+ArrayData* newTaggedStructDArray(uint32_t size, const StringData* const* keys,
+                                 const TypedValue* values, uint32_t tagImm) {
+  arrprov::TagOverride _(convertAsBytes<arrprov::Tag>(tagImm));
+  return MixedArray::MakeStructDArray(size, keys, values);
+}
+
 void newStructImpl(
   IRLS& env,
   const IRInstruction* inst,
   MixedArray* (*f)(uint32_t, const StringData* const*, const TypedValue*),
-  SyncOptions sync = SyncOptions::None
+  folly::Optional<arrprov::Tag> tag = folly::none
 ) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<NewStructData>();
@@ -277,10 +330,19 @@ void newStructImpl(
   auto table = v.allocData<const StringData*>(extra->numKeys);
   memcpy(table, extra->keys, extra->numKeys * sizeof(*extra->keys));
 
-  auto const args = argGroup(env, inst)
+  auto const sync = SyncOptions::None;
+  auto args = argGroup(env, inst)
     .imm(extra->numKeys)
     .dataPtr(table)
     .addr(sp, cellsToBytes(extra->offset.offset));
+
+  if (tag) {
+    assertx(inst->is(NewStructDArray));
+    args.imm(convertAsBytes<uint32_t>(*tag));
+    auto const target = CallSpec::direct(newTaggedStructDArray);
+    cgCallHelper(v, env, target, callDest(env, inst), sync, args);
+    return;
+  }
 
   cgCallHelper(v, env, CallSpec::direct(f), callDest(env, inst), sync, args);
 }
@@ -288,14 +350,12 @@ void newStructImpl(
 }
 
 void cgNewStructDArray(IRLS& env, const IRInstruction* inst) {
-  newStructImpl(env, inst, MixedArray::MakeStructDArray);
+  auto const tag = getProvenanceTag(inst);
+  newStructImpl(env, inst, MixedArray::MakeStructDArray, tag);
 }
 
 void cgNewStructDict(IRLS& env, const IRInstruction* inst) {
-  newStructImpl(
-    env, inst, MixedArray::MakeStructDict,
-    RuntimeOption::EvalArrayProvenance ? SyncOptions::Sync : SyncOptions::None
-  );
+  newStructImpl(env, inst, MixedArray::MakeStructDict);
 }
 
 void cgNewKeysetArray(IRLS& env, const IRInstruction* inst) {
@@ -313,12 +373,18 @@ void cgNewKeysetArray(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
+ArrayData* allocTaggedStructDArray(uint32_t size, const int32_t* hash,
+                                   uint32_t tagImm) {
+  arrprov::TagOverride _(convertAsBytes<arrprov::Tag>(tagImm));
+  return MixedArray::AllocStructDArray(size, hash);
+}
+
 template<typename ArrayInit>
 void allocStructImpl(
   IRLS& env,
   const IRInstruction* inst,
   MixedArray* (*f)(uint32_t, const int32_t*),
-  SyncOptions sync = SyncOptions::None
+  folly::Optional<arrprov::Tag> tag = folly::none
 ) {
   arrprov::TagOverride ap_override{arrprov::tagFromSK(inst->marker().sk())};
   auto const extra = inst->extra<NewStructData>();
@@ -338,21 +404,29 @@ void allocStructImpl(
   auto table = v.allocData<HashTableEntry>(ad->hashSize());
   memcpy(table, ad->hashTab(), ad->hashSize() * sizeof(HashTableEntry));
 
-  auto const args = argGroup(env, inst).imm(extra->numKeys).dataPtr(table);
+  auto const sync = SyncOptions::None;
+  auto args = argGroup(env, inst).imm(extra->numKeys).dataPtr(table);
+
+  if (tag) {
+    assertx(inst->is(AllocStructDArray));
+    args.imm(convertAsBytes<uint32_t>(*tag));
+    auto const target = CallSpec::direct(allocTaggedStructDArray);
+    cgCallHelper(v, env, target, callDest(env, inst), sync, args);
+    return;
+  }
+
   cgCallHelper(v, env, CallSpec::direct(f), callDest(env, inst), sync, args);
 }
 
 }
 
 void cgAllocStructDArray(IRLS& env, const IRInstruction* inst) {
-  allocStructImpl<DArrayInit>(env, inst, MixedArray::AllocStructDArray);
+  auto const tag = getProvenanceTag(inst);
+  allocStructImpl<DArrayInit>(env, inst, MixedArray::AllocStructDArray, tag);
 }
 
 void cgAllocStructDict(IRLS& env, const IRInstruction* inst) {
-  allocStructImpl<DictInit>(
-    env, inst, MixedArray::AllocStructDict,
-    RuntimeOption::EvalArrayProvenance ? SyncOptions::Sync : SyncOptions::None
-  );
+  allocStructImpl<DictInit>(env, inst, MixedArray::AllocStructDict);
 }
 
 void cgInitDictElem(IRLS& env, const IRInstruction* inst) {

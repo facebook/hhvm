@@ -10,7 +10,6 @@
     heap_global_storage
     hhi
     imported_core
-    naming_heap_api
     naming_global
     nast
     provider_context

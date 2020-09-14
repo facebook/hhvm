@@ -95,16 +95,6 @@
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library
-  (name naming_heap_api)
-  (modules
-    naming_heap_api)
-  (libraries
-    ast_provider
-    naming
-    naming_table)
-  (preprocess (pps ppx_deriving.std))) ; See T41851208
-
-(library
   (name naming_global)
   (modules
     naming_global)

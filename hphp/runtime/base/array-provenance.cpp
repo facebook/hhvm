@@ -48,48 +48,120 @@ TRACE_SET_MOD(runtime);
 
 namespace {
 
-static auto constexpr kKindMask = 0x7;
+using TagID = uint32_t;
+using TagStorage = std::pair<LowPtr<const StringData>, int32_t>;
 
-Tag::Kind extractKind(const char* ptr) {
-  return static_cast<Tag::Kind>(uintptr_t(ptr) & kKindMask);
+static constexpr TagID kKindBits = 3;
+static constexpr TagID kKindMask = 0x7;
+static constexpr size_t kMaxTagID = (1 << (8 * sizeof(TagID) - kKindBits)) - 1;
+
+struct TagHashCompare {
+  bool equal(TagStorage a, TagStorage b) const {
+    return a == b;
+  }
+  size_t hash(TagStorage a) const {
+    static_assert(IMPLIES(use_lowptr, sizeof(TagStorage) == sizeof(int64_t)));
+    if constexpr (use_lowptr) {
+      auto result = int64_t{};
+      memcpy(&result, &a, sizeof(TagStorage));
+      return hash_int64(result);
+    }
+    auto const first = safe_cast<int64_t>(uintptr_t(a.first.get()));
+    return hash_int64_pair(first, a.second);
+  }
+};
+
+using TagIDs = tbb::concurrent_hash_map<TagStorage, TagID, TagHashCompare>;
+
+static std::atomic<size_t> s_numTags;
+static TagIDs s_tagIDs;
+
+TagStorage* getRawTagStorageArray() {
+  assertx(!use_lowptr || RO::EvalArrayProvenance);
+  static auto const result = reinterpret_cast<TagStorage*>(
+    malloc((kMaxTagID + 1) * sizeof(TagStorage))
+  );
+  return result;
 }
 
-const StringData* extractName(const char* ptr) {
-  return reinterpret_cast<const StringData*>(uintptr_t(ptr) & ~kKindMask);
+TagStorage getTagStorage(TagID i) {
+  return getRawTagStorageArray()[i];
 }
 
-const char* packKindAndName(Tag::Kind kind, const StringData* name) {
-  auto const ptr = reinterpret_cast<uintptr_t>(name);
-  assertx(!(ptr & kKindMask));
-  return reinterpret_cast<const char*>(ptr + static_cast<uintptr_t>(kind));
+TagID getTagID(TagStorage tag) {
+  {
+    TagIDs::const_accessor it;
+    if (s_tagIDs.find(it, tag)) return it->second;
+  }
+  TagIDs::accessor it;
+  if (s_tagIDs.insert(it, tag)) {
+    auto const i = s_numTags++;
+    always_assert(i <= kMaxTagID);
+    getRawTagStorageArray()[i] = tag;
+    it->second = i;
+  }
+  return it->second;
 }
 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Tag::Tag(Tag::Kind kind, const StringData* name, int32_t line)
-  : m_name(packKindAndName(kind, name))
-  , m_line(line) {}
+Tag::Tag(const Func* func, Offset offset) {
+  // Builtins have empty filenames, so use the unit; else use func->filename
+  // in order to resolve the original filenames of flattened traits.
+  auto const unit = func->unit();
+  auto const file = func->isBuiltin() ? unit->filepath() : func->filename();
+  *this = Known(file, unit->getLineNumber(offset));
+}
+
+Tag::Tag(Tag::Kind kind, const StringData* name, int32_t line) {
+  auto const k = TagID(kind);
+  assertx(k < kKindMask);
+  assertx((k & kKindMask) == k);
+  assertx((k & uintptr_t(name)) == 0);
+  assertx(kind != Kind::Invalid);
+
+  if (kind == Kind::Known) {
+    m_id = k | (getTagID({name, line}) << kKindBits);
+  } else if (uintptr_t(name) <= std::numeric_limits<TagID>::max()) {
+    m_id = k | safe_cast<TagID>(uintptr_t(name));
+  } else {
+    m_id = kKindMask | (getTagID({name, -int(k)}) << kKindBits);
+  }
+
+  // Check that we can undo tag compression and get back the original values.
+  assertx(this->kind() == kind);
+  assertx(this->name() == name);
+  assertx(this->line() == line);
+}
 
 Tag::Kind Tag::kind() const {
-  return extractKind(m_name.get());
+  auto const bits = m_id & kKindMask;
+  if (bits < kKindMask) return Tag::Kind(bits);
+  return Tag::Kind(-getTagStorage(size_t(m_id) >> kKindBits).second);
 }
 const StringData* Tag::name() const {
-  return extractName(m_name.get());
+  auto const bits = m_id & kKindMask;
+  if (bits < TagID(Kind::Known)) {
+    return reinterpret_cast<StringData*>(m_id & ~kKindMask);
+  }
+  return getTagStorage(size_t(m_id) >> kKindBits).first;
 }
 int32_t Tag::line() const {
-  return kind() == Kind::Known ? m_line : -1;
+  auto const bits = m_id & kKindMask;
+  if (bits != TagID(Kind::Known)) return -1;
+  return getTagStorage(size_t(m_id) >> kKindBits).second;
 }
 uint64_t Tag::hash() const {
-  return folly::hash::hash_combine(uintptr_t(m_name.get()), m_line);
+  return m_id;
 }
 
 bool Tag::operator==(const Tag& other) const {
-  return m_name == other.m_name && m_line == other.m_line;
+  return m_id == other.m_id;
 }
 bool Tag::operator!=(const Tag& other) const {
-  return m_name != other.m_name || m_line != other.m_line;
+  return m_id != other.m_id;
 }
 
 std::string Tag::toString() const {
@@ -169,7 +241,7 @@ Tag& tag_for_nonreq(ArrayData* ad) {
   assertx(!wants_local_prov(ad));
 
   auto const mem = reinterpret_cast<char*>(ad)
-    - sizeof(Tag)
+    - kInlineTagSize
     - (ad->hasStrKeyTable() ? sizeof(StrKeyTable) : 0)
     - (ad->hasApcTv() ? sizeof(APCTypedValue) : 0);
 
@@ -177,7 +249,7 @@ Tag& tag_for_nonreq(ArrayData* ad) {
 }
 
 Tag& tag_for_nonreq(APCArray* a) {
-  auto const mem = reinterpret_cast<char*>(a) - sizeof(Tag);
+  auto const mem = reinterpret_cast<char*>(a) - kInlineTagSize;
   return *reinterpret_cast<Tag*>(mem);
 }
 
@@ -363,6 +435,8 @@ TagOverride::~TagOverride() {
 }
 
 Tag tagFromPC() {
+  if (!RO::EvalArrayProvenance) return {};
+
   auto log_violation = [&](const char* why) {
     auto const rate = RO::EvalLogArrayProvenanceDiagnosticsSampleRate;
     if (StructuredLog::coinflip(rate)) {
@@ -388,17 +462,8 @@ Tag tagFromPC() {
     return {};
   }
 
-  auto const make_tag = [&] (
-    const ActRec* fp,
-    Offset offset
-  ) {
-    auto const func = fp->func();
-    auto const unit = fp->unit();
-    // Builtins have empty filenames, so use the unit; else use func->filename
-    // in order to resolve the original filenames of flattened traits.
-    auto const file = func->isBuiltin() ? unit->filepath() : func->filename();
-    auto const line = unit->getLineNumber(offset);
-    return Tag { file, line };
+  auto const make_tag = [&] (const ActRec* fp, Offset offset) {
+    return Tag { fp->func(), offset };
   };
 
   auto const skip_frame = [] (const ActRec* fp) {
@@ -413,13 +478,8 @@ Tag tagFromPC() {
 
 Tag tagFromSK(SrcKey sk) {
   assert(sk.valid());
-  auto const unit = sk.unit();
-  auto const func = sk.func();
-  // Builtins have empty filenames, so use the unit; else use func->filename
-  // in order to resolve the original filenames of flattened traits.
-  auto const file = func->isBuiltin() ? unit->filepath() : func->filename();
-  auto const line = unit->getLineNumber(sk.offset());
-  return Tag { file, line };
+  if (!RO::EvalArrayProvenance) return {};
+  return Tag { sk.func(), sk.offset() };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1079,10 +1079,10 @@ ProvTag provTagHere(ISS& env) {
   auto const unit = env.ctx.func && env.ctx.func->originalUnit
     ? env.ctx.func->originalUnit
     : env.ctx.unit;
-  return arrprov::Tag {
+  return arrprov::Tag::Known(
     unit->filename,
     static_cast<int>(unit->srcLocs[idx].past.line)
-  };
+  );
 }
 
 /*

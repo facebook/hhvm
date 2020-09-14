@@ -53,8 +53,6 @@ struct Tag {
   enum class Kind {
     /* uninitialized */
     Invalid,
-    /* known unit + line number */
-    Known,
     /* result of a union in a repo build */
     UnknownRepo,
     /* lost original line number as a result of trait ${x}init merges */
@@ -65,14 +63,18 @@ struct Tag {
     RuntimeLocation,
     /* some piece of the runtime prevented a backtrace from being collected--
      * e.g. the JIT will use this to prevent a tag being assigned to an array
-     * inside of the JIT corresponding to the PHP location that entered the JIT
-     */
+     * in the JIT corresponding to the PHP location that entered the JIT */
     RuntimeLocationPoison,
+    /* known unit + line number. Must be the last kind - see name() for why */
+    Known,
+    /* NOTE: We CANNOT fit another kind here; kind 7 is reserved */
   };
 
   constexpr Tag() = default;
-  Tag(const StringData* filename, int32_t line) {
-    *this = Tag(Kind::Known, filename, line);
+  Tag(const Func* func, Offset offset);
+
+  static Tag Known(const StringData* filename, int32_t line) {
+    return Tag(Kind::Known, filename, line);
   }
   static Tag RepoUnion() {
     return Tag(Kind::UnknownRepo, nullptr);
@@ -138,8 +140,7 @@ struct Tag {
 private:
   Tag(Kind kind, const StringData* name, int32_t line = -1);
 
-  LowPtr<const char> m_name{nullptr};
-  int32_t m_line{0};
+  uint32_t m_id = 0;
 };
 
 /*
@@ -162,12 +163,12 @@ struct ArrayProvenanceTable {
 /*
  * Create a tag based on the current PC and unit.
  *
- * Attempts to sync VM regs and returns folly::none on failure.
+ * Returns an invalid tag if arrprov is off, or if we can't sync the VM regs.
  */
 Tag tagFromPC();
 
 /*
- * Create a tag based on the given SrcKey
+ * Create a tag based on `sk`. Returns an invalid tag if arrprov is off.
  */
 Tag tagFromSK(SrcKey sk);
 
@@ -237,12 +238,14 @@ bool arrayWantsTag(const ArrayData* a);
 bool arrayWantsTag(const APCArray* a);
 bool arrayWantsTag(const AsioExternalThreadEvent* a);
 
+auto constexpr kInlineTagSize = 8;
+
 /*
  * Space requirement for a tag for `a'.
  */
 template<typename A>
 size_t tagSize(const A* a) {
-  return RO::EvalArrayProvenance && arrayWantsTag(a) ? sizeof(Tag) : 0;
+  return RO::EvalArrayProvenance && arrayWantsTag(a) ? kInlineTagSize : 0;
 }
 
 /*

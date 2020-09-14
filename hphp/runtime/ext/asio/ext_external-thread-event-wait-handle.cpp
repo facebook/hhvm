@@ -73,10 +73,8 @@ c_ExternalThreadEventWaitHandle::Create(
 ) {
   auto wh = req::make<c_ExternalThreadEventWaitHandle>();
 
-  if (RO::EvalArrayProvenance) {
-    if (auto const tag = arrprov::tagFromPC()) {
-      setTag(event, tag);
-    }
+  if (auto const tag = arrprov::tagFromPC()) {
+    setTag(event, tag);
   }
 
   wh->initialize(event, priv_data);

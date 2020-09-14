@@ -1209,8 +1209,7 @@ Array VariableUnserializer::unserializeArray() {
     throwArraySizeOutOfBounds();
   }
 
-  auto provTag = unserializeProvenanceTag();
-  if (!RO::EvalArrayProvenance) provTag = {};
+  auto const provTag = unserializeProvenanceTag();
 
   if (size == 0) {
     expectChar('}');
@@ -1253,11 +1252,6 @@ arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
     return {};
   }
 
-  auto const finish = [&] (auto tag) -> arrprov::Tag {
-    if (!RO::EvalArrayProvenance) return {};
-    return tag;
-  };
-
   auto const read_name = [&]() -> const StringData* {
     if (peek() == 't') {
       assertx(m_unitFilename);
@@ -1284,6 +1278,10 @@ arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
   }
   expectChar('p');
 
+  // We assert that we don't construct a non-trivial arrprov::Tag when arrprov
+  // is disabled, because doing so is expensive. We must construct them lazily.
+#define FINISH(x) (RO::EvalArrayProvenance ? arrprov::Tag::x : arrprov::Tag{})
+
   if (peek() == ':') {
     expectChar(':');
     expectChar('i');
@@ -1292,22 +1290,28 @@ arrprov::Tag VariableUnserializer::unserializeProvenanceTag() {
     expectChar(';');
     auto const name = read_name();
     expectChar(';');
-    return finish(arrprov::Tag(name, line));
+    return FINISH(Known(name, line));
   } else if (peek() == 'u') {
     expectChar('u');
     expectChar(';');
-    return finish(arrprov::Tag::RepoUnion());
+    return FINISH(RepoUnion());
   } else if (peek() == 'r') {
-    return finish(arrprov::Tag::TraitMerge(expect_name()));
+    auto const name = expect_name();
+    return FINISH(TraitMerge(name));
   } else if (peek() == 'e') {
-    return finish(arrprov::Tag::LargeEnum(expect_name()));
+    auto const name = expect_name();
+    return FINISH(LargeEnum(name));
   } if (peek() == 'c') {
-    return finish(arrprov::Tag::RuntimeLocation(expect_name()));
+    auto const name = expect_name();
+    return FINISH(RuntimeLocation(name));
   } if (peek() == 'z') {
-    return finish(arrprov::Tag::RuntimeLocationPoison(expect_name()));
+    auto const name = expect_name();
+    return FINISH(RuntimeLocationPoison(name));
   } else {
     return {};
   }
+
+#undef FINISH
 }
 
 Array VariableUnserializer::unserializeDict() {
@@ -1396,8 +1400,7 @@ Array VariableUnserializer::unserializeVArray() {
     throwArraySizeOutOfBounds();
   }
 
-  auto provTag = unserializeProvenanceTag();
-  if (!RO::EvalArrayProvenance) provTag = {};
+  auto const provTag = unserializeProvenanceTag();
 
   if (size == 0) {
     expectChar('}');
@@ -1468,8 +1471,7 @@ Array VariableUnserializer::unserializeDArray() {
     throwArraySizeOutOfBounds();
   }
 
-  auto provTag = unserializeProvenanceTag();
-  if (!RO::EvalArrayProvenance) provTag = {};
+  auto const provTag = unserializeProvenanceTag();
 
   if (size == 0) {
     expectChar('}');

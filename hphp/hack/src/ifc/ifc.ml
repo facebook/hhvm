@@ -675,6 +675,7 @@ and stmt renv env ((pos, s) : Tast.stmt) =
       { renv with re_exn = fresh_exn }
     in
     let env = block try_renv env try_blk in
+    let after_try = Env.get_cenv env in
 
     if not @@ String.equal exn Decl.exception_id then
       fail "catch is only supported for \\Exception, got '%s'" exn;
@@ -685,6 +686,7 @@ and stmt renv env ((pos, s) : Tast.stmt) =
     let env = block renv env catch_blk in
 
     let env = Env.merge_conts_from ~union env base_cenv [K.Catch] in
+    let env = Env.merge_conts_from ~union env after_try [K.Next] in
     Env.set_pc env K.Next base_pc
   | _ -> env
 
@@ -1043,6 +1045,9 @@ class Governed
   public function __construct(public string $purpose = "") { }
 }
 class External
+  implements
+    HH\ParameterAttribute {}
+class CanCall
   implements
     HH\ParameterAttribute {}
 |}

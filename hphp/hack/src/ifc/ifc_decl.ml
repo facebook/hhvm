@@ -39,6 +39,8 @@ let construct_id = "__construct"
 
 let external_id = "\\External"
 
+let callable_id = "\\CanCall"
+
 let make_callable_name cls_name_opt name =
   match cls_name_opt with
   | None -> name
@@ -71,10 +73,15 @@ let callable_decl attrs args =
         FDInferFlows
   in
   let fd_args =
+    let mk_arg_kind param id f def =
+      match get_attr id param.A.param_user_attributes with
+      | Some { A.ua_name = (pos, _); _ } -> f pos
+      | None -> def
+    in
     let f param =
-      match get_attr external_id param.A.param_user_attributes with
-      | Some { A.ua_name = (pos, _); _ } -> AKExternal pos
-      | None -> AKDefault
+      AKDefault
+      |> mk_arg_kind param external_id (fun p -> AKExternal p)
+      |> mk_arg_kind param callable_id (fun p -> AKCallable p)
     in
     List.map ~f args
   in
@@ -272,6 +279,9 @@ let make_callable_scheme renv pol fp args =
       | AKExternal pos ->
         let ext = Env.new_policy_var renv "external" in
         (L.(ext < policy) ~pos acc, set_policy ext ty)
+      | AKCallable pos ->
+        let c = Env.new_policy_var renv "callable" in
+        (L.(policy < c) ~pos acc, set_policy c ty)
     in
     List.map2_env [] ~f fp.fp_type.f_args args
   in

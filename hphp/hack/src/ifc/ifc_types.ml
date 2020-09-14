@@ -188,6 +188,7 @@ type fun_decl_kind =
 type arg_kind =
   | AKDefault
   | AKExternal of Pos.t
+  | AKCallable of Pos.t
 
 type fun_decl = {
   fd_kind: fun_decl_kind;

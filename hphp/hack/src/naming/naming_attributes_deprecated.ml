@@ -25,14 +25,6 @@ let deprecated ~kind (_, name) attrs =
           Printf.sprintf "The %s %s is deprecated: " kind name
         in
         Some (deprecated_prefix ^ msg)
-      | Error p ->
-        Errors.attribute_param_type p "static string literal";
-        None
+      | Error _ -> None
     end
-  | Some { ua_name = (pos, _); ua_params = [] } ->
-    Errors.attribute_too_few_arguments pos SN.UserAttributes.uaDeprecated 1;
-    None
-  | Some { ua_name = (pos, _); ua_params = _ } ->
-    Errors.attribute_too_many_arguments pos SN.UserAttributes.uaDeprecated 2;
-    None
-  | None -> None
+  | _ -> None

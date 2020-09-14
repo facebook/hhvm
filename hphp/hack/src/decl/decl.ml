@@ -272,13 +272,12 @@ let rec ifun_decl
   fe
 
 and fun_decl (ctx : Provider_context.t) (f : Nast.fun_) : Typing_defs.fun_elt =
-  let (errors, fe) =
-    Errors.do_ (fun () ->
+  let fe =
+    Errors.ignore_ (fun () ->
         let dep = Dep.Fun (snd f.f_name) in
         let env = { Decl_env.mode = f.f_mode; droot = Some dep; ctx } in
         fun_decl_in_env env ~is_lambda:false f)
   in
-  let fe = { fe with fe_decl_errors = Some errors } in
   record_fun (snd f.f_name);
   fe
 

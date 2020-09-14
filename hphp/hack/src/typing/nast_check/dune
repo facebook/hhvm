@@ -5,5 +5,6 @@
     ast
     core_kernel
     nast
+    nast_eval
     utils_core
     tast))

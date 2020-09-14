@@ -30,8 +30,7 @@
 (library
   (name naming_attributes_deprecated)
   (modules
-    naming_attributes_deprecated
-    nast_eval)
+    naming_attributes_deprecated)
   (libraries
     annotated_ast
     naming_attributes
@@ -39,8 +38,20 @@
     errors
     naming_special_names
     nast
+    nast_eval
     pos)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
+
+(library
+  (name nast_eval)
+  (modules
+    nast_eval)
+  (libraries
+    annotated_ast
+    errors
+    nast
+    pos)
+  (preprocess (pps ppx_deriving.std)));
 
 (library
   (name naming_types)

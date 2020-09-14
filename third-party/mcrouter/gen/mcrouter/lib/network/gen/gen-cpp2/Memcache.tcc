@@ -11,46 +11,469 @@
 #include <thrift/lib/cpp2/gen/service_tcc.h>
 
 namespace facebook { namespace memcache { namespace thrift {
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McGetRequest*>> Memcache_mcGet_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McGetReply*>> Memcache_mcGet_presult;
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McSetRequest*>> Memcache_mcSet_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McSetReply*>> Memcache_mcSet_presult;
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McDeleteRequest*>> Memcache_mcDelete_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McDeleteReply*>> Memcache_mcDelete_presult;
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McLeaseGetRequest*>> Memcache_mcLeaseGet_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McLeaseGetReply*>> Memcache_mcLeaseGet_presult;
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McLeaseSetRequest*>> Memcache_mcLeaseSet_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McLeaseSetReply*>> Memcache_mcLeaseSet_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McAddRequest*>> Memcache_mcAdd_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McAddReply*>> Memcache_mcAdd_presult;
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McReplaceRequest*>> Memcache_mcReplace_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McReplaceReply*>> Memcache_mcReplace_presult;
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McGetsRequest*>> Memcache_mcGets_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McGetsReply*>> Memcache_mcGets_presult;
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McCasRequest*>> Memcache_mcCas_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McCasReply*>> Memcache_mcCas_presult;
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McIncrRequest*>> Memcache_mcIncr_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McIncrReply*>> Memcache_mcIncr_presult;
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McDecrRequest*>> Memcache_mcDecr_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McDecrReply*>> Memcache_mcDecr_presult;
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McMetagetRequest*>> Memcache_mcMetaget_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McMetagetReply*>> Memcache_mcMetaget_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McAppendRequest*>> Memcache_mcAppend_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McAppendReply*>> Memcache_mcAppend_presult;
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McPrependRequest*>> Memcache_mcPrepend_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McPrependReply*>> Memcache_mcPrepend_presult;
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McTouchRequest*>> Memcache_mcTouch_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McTouchReply*>> Memcache_mcTouch_presult;
-typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McFlushReRequest*>> Memcache_mcFlushRe_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McFlushReReply*>> Memcache_mcFlushRe_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McCasRequest*>> Memcache_mcCas_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McCasReply*>> Memcache_mcCas_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McDecrRequest*>> Memcache_mcDecr_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McDecrReply*>> Memcache_mcDecr_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McDeleteRequest*>> Memcache_mcDelete_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McDeleteReply*>> Memcache_mcDelete_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McFlushAllRequest*>> Memcache_mcFlushAll_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McFlushAllReply*>> Memcache_mcFlushAll_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McFlushReRequest*>> Memcache_mcFlushRe_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McFlushReReply*>> Memcache_mcFlushRe_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McGatRequest*>> Memcache_mcGat_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McGatReply*>> Memcache_mcGat_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McGatsRequest*>> Memcache_mcGats_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McGatsReply*>> Memcache_mcGats_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McGetRequest*>> Memcache_mcGet_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McGetReply*>> Memcache_mcGet_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McGetsRequest*>> Memcache_mcGets_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McGetsReply*>> Memcache_mcGets_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McIncrRequest*>> Memcache_mcIncr_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McIncrReply*>> Memcache_mcIncr_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McLeaseGetRequest*>> Memcache_mcLeaseGet_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McLeaseGetReply*>> Memcache_mcLeaseGet_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McLeaseSetRequest*>> Memcache_mcLeaseSet_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McLeaseSetReply*>> Memcache_mcLeaseSet_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McMetagetRequest*>> Memcache_mcMetaget_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McMetagetReply*>> Memcache_mcMetaget_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McPrependRequest*>> Memcache_mcPrepend_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McPrependReply*>> Memcache_mcPrepend_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McReplaceRequest*>> Memcache_mcReplace_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McReplaceReply*>> Memcache_mcReplace_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McSetRequest*>> Memcache_mcSet_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McSetReply*>> Memcache_mcSet_presult;
+typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McTouchRequest*>> Memcache_mcTouch_pargs;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McTouchReply*>> Memcache_mcTouch_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, apache::thrift::protocol::T_STRUCT, facebook::memcache::McVersionRequest*>> Memcache_mcVersion_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, apache::thrift::protocol::T_STRUCT, facebook::memcache::McVersionReply*>> Memcache_mcVersion_presult;
+template <typename ProtocolIn_, typename ProtocolOut_>
+void MemcacheAsyncProcessor::process_mcAdd(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
+    return;
+  }
+  // make sure getConnectionContext is null
+  // so async calls don't accidentally use it
+  iface_->setConnectionContext(nullptr);
+  Memcache_mcAdd_pargs args;
+  facebook::memcache::McAddRequest uarg_request;
+  args.get<0>().value = &uarg_request;
+  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcAdd", ctx));
+  try {
+    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
+  }
+  catch (const std::exception& ex) {
+    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
+        ex, std::move(req), ctx, eb, "mcAdd");
+    return;
+  }
+  req->setStartedProcessing();
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McAddReply>>(std::move(req), std::move(ctxStack), return_mcAdd<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcAdd<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+  iface_->async_eb_mcAdd(std::move(callback), args.get<0>().ref());
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+folly::IOBufQueue MemcacheAsyncProcessor::return_mcAdd(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McAddReply const& _return) {
+  ProtocolOut_ prot;
+  Memcache_mcAdd_presult result;
+  result.get<0>().value = const_cast<facebook::memcache::McAddReply*>(&_return);
+  result.setIsSet(0, true);
+  return serializeResponse("mcAdd", &prot, protoSeqId, ctx, result);
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void MemcacheAsyncProcessor::throw_wrapped_mcAdd(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  {
+    (void)protoSeqId;
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
+        ew, std::move(req), reqCtx, ctx, "mcAdd");
+    return;
+  }
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
+void MemcacheAsyncProcessor::process_mcAppend(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
+    return;
+  }
+  // make sure getConnectionContext is null
+  // so async calls don't accidentally use it
+  iface_->setConnectionContext(nullptr);
+  Memcache_mcAppend_pargs args;
+  facebook::memcache::McAppendRequest uarg_request;
+  args.get<0>().value = &uarg_request;
+  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcAppend", ctx));
+  try {
+    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
+  }
+  catch (const std::exception& ex) {
+    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
+        ex, std::move(req), ctx, eb, "mcAppend");
+    return;
+  }
+  req->setStartedProcessing();
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McAppendReply>>(std::move(req), std::move(ctxStack), return_mcAppend<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcAppend<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+  iface_->async_eb_mcAppend(std::move(callback), args.get<0>().ref());
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+folly::IOBufQueue MemcacheAsyncProcessor::return_mcAppend(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McAppendReply const& _return) {
+  ProtocolOut_ prot;
+  Memcache_mcAppend_presult result;
+  result.get<0>().value = const_cast<facebook::memcache::McAppendReply*>(&_return);
+  result.setIsSet(0, true);
+  return serializeResponse("mcAppend", &prot, protoSeqId, ctx, result);
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void MemcacheAsyncProcessor::throw_wrapped_mcAppend(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  {
+    (void)protoSeqId;
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
+        ew, std::move(req), reqCtx, ctx, "mcAppend");
+    return;
+  }
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
+void MemcacheAsyncProcessor::process_mcCas(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
+    return;
+  }
+  // make sure getConnectionContext is null
+  // so async calls don't accidentally use it
+  iface_->setConnectionContext(nullptr);
+  Memcache_mcCas_pargs args;
+  facebook::memcache::McCasRequest uarg_request;
+  args.get<0>().value = &uarg_request;
+  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcCas", ctx));
+  try {
+    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
+  }
+  catch (const std::exception& ex) {
+    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
+        ex, std::move(req), ctx, eb, "mcCas");
+    return;
+  }
+  req->setStartedProcessing();
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McCasReply>>(std::move(req), std::move(ctxStack), return_mcCas<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcCas<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+  iface_->async_eb_mcCas(std::move(callback), args.get<0>().ref());
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+folly::IOBufQueue MemcacheAsyncProcessor::return_mcCas(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McCasReply const& _return) {
+  ProtocolOut_ prot;
+  Memcache_mcCas_presult result;
+  result.get<0>().value = const_cast<facebook::memcache::McCasReply*>(&_return);
+  result.setIsSet(0, true);
+  return serializeResponse("mcCas", &prot, protoSeqId, ctx, result);
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void MemcacheAsyncProcessor::throw_wrapped_mcCas(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  {
+    (void)protoSeqId;
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
+        ew, std::move(req), reqCtx, ctx, "mcCas");
+    return;
+  }
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
+void MemcacheAsyncProcessor::process_mcDecr(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
+    return;
+  }
+  // make sure getConnectionContext is null
+  // so async calls don't accidentally use it
+  iface_->setConnectionContext(nullptr);
+  Memcache_mcDecr_pargs args;
+  facebook::memcache::McDecrRequest uarg_request;
+  args.get<0>().value = &uarg_request;
+  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcDecr", ctx));
+  try {
+    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
+  }
+  catch (const std::exception& ex) {
+    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
+        ex, std::move(req), ctx, eb, "mcDecr");
+    return;
+  }
+  req->setStartedProcessing();
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McDecrReply>>(std::move(req), std::move(ctxStack), return_mcDecr<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcDecr<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+  iface_->async_eb_mcDecr(std::move(callback), args.get<0>().ref());
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+folly::IOBufQueue MemcacheAsyncProcessor::return_mcDecr(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McDecrReply const& _return) {
+  ProtocolOut_ prot;
+  Memcache_mcDecr_presult result;
+  result.get<0>().value = const_cast<facebook::memcache::McDecrReply*>(&_return);
+  result.setIsSet(0, true);
+  return serializeResponse("mcDecr", &prot, protoSeqId, ctx, result);
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void MemcacheAsyncProcessor::throw_wrapped_mcDecr(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  {
+    (void)protoSeqId;
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
+        ew, std::move(req), reqCtx, ctx, "mcDecr");
+    return;
+  }
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
+void MemcacheAsyncProcessor::process_mcDelete(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
+    return;
+  }
+  // make sure getConnectionContext is null
+  // so async calls don't accidentally use it
+  iface_->setConnectionContext(nullptr);
+  Memcache_mcDelete_pargs args;
+  facebook::memcache::McDeleteRequest uarg_request;
+  args.get<0>().value = &uarg_request;
+  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcDelete", ctx));
+  try {
+    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
+  }
+  catch (const std::exception& ex) {
+    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
+        ex, std::move(req), ctx, eb, "mcDelete");
+    return;
+  }
+  req->setStartedProcessing();
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McDeleteReply>>(std::move(req), std::move(ctxStack), return_mcDelete<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcDelete<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+  iface_->async_eb_mcDelete(std::move(callback), args.get<0>().ref());
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+folly::IOBufQueue MemcacheAsyncProcessor::return_mcDelete(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McDeleteReply const& _return) {
+  ProtocolOut_ prot;
+  Memcache_mcDelete_presult result;
+  result.get<0>().value = const_cast<facebook::memcache::McDeleteReply*>(&_return);
+  result.setIsSet(0, true);
+  return serializeResponse("mcDelete", &prot, protoSeqId, ctx, result);
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void MemcacheAsyncProcessor::throw_wrapped_mcDelete(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  {
+    (void)protoSeqId;
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
+        ew, std::move(req), reqCtx, ctx, "mcDelete");
+    return;
+  }
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
+void MemcacheAsyncProcessor::process_mcFlushAll(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
+    return;
+  }
+  // make sure getConnectionContext is null
+  // so async calls don't accidentally use it
+  iface_->setConnectionContext(nullptr);
+  Memcache_mcFlushAll_pargs args;
+  facebook::memcache::McFlushAllRequest uarg_request;
+  args.get<0>().value = &uarg_request;
+  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcFlushAll", ctx));
+  try {
+    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
+  }
+  catch (const std::exception& ex) {
+    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
+        ex, std::move(req), ctx, eb, "mcFlushAll");
+    return;
+  }
+  req->setStartedProcessing();
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McFlushAllReply>>(std::move(req), std::move(ctxStack), return_mcFlushAll<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcFlushAll<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+  iface_->async_eb_mcFlushAll(std::move(callback), args.get<0>().ref());
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+folly::IOBufQueue MemcacheAsyncProcessor::return_mcFlushAll(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McFlushAllReply const& _return) {
+  ProtocolOut_ prot;
+  Memcache_mcFlushAll_presult result;
+  result.get<0>().value = const_cast<facebook::memcache::McFlushAllReply*>(&_return);
+  result.setIsSet(0, true);
+  return serializeResponse("mcFlushAll", &prot, protoSeqId, ctx, result);
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void MemcacheAsyncProcessor::throw_wrapped_mcFlushAll(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  {
+    (void)protoSeqId;
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
+        ew, std::move(req), reqCtx, ctx, "mcFlushAll");
+    return;
+  }
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
+void MemcacheAsyncProcessor::process_mcFlushRe(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
+    return;
+  }
+  // make sure getConnectionContext is null
+  // so async calls don't accidentally use it
+  iface_->setConnectionContext(nullptr);
+  Memcache_mcFlushRe_pargs args;
+  facebook::memcache::McFlushReRequest uarg_request;
+  args.get<0>().value = &uarg_request;
+  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcFlushRe", ctx));
+  try {
+    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
+  }
+  catch (const std::exception& ex) {
+    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
+        ex, std::move(req), ctx, eb, "mcFlushRe");
+    return;
+  }
+  req->setStartedProcessing();
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McFlushReReply>>(std::move(req), std::move(ctxStack), return_mcFlushRe<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcFlushRe<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+  iface_->async_eb_mcFlushRe(std::move(callback), args.get<0>().ref());
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+folly::IOBufQueue MemcacheAsyncProcessor::return_mcFlushRe(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McFlushReReply const& _return) {
+  ProtocolOut_ prot;
+  Memcache_mcFlushRe_presult result;
+  result.get<0>().value = const_cast<facebook::memcache::McFlushReReply*>(&_return);
+  result.setIsSet(0, true);
+  return serializeResponse("mcFlushRe", &prot, protoSeqId, ctx, result);
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void MemcacheAsyncProcessor::throw_wrapped_mcFlushRe(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  {
+    (void)protoSeqId;
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
+        ew, std::move(req), reqCtx, ctx, "mcFlushRe");
+    return;
+  }
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
+void MemcacheAsyncProcessor::process_mcGat(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
+    return;
+  }
+  // make sure getConnectionContext is null
+  // so async calls don't accidentally use it
+  iface_->setConnectionContext(nullptr);
+  Memcache_mcGat_pargs args;
+  facebook::memcache::McGatRequest uarg_request;
+  args.get<0>().value = &uarg_request;
+  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcGat", ctx));
+  try {
+    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
+  }
+  catch (const std::exception& ex) {
+    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
+        ex, std::move(req), ctx, eb, "mcGat");
+    return;
+  }
+  req->setStartedProcessing();
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McGatReply>>(std::move(req), std::move(ctxStack), return_mcGat<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcGat<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+  iface_->async_eb_mcGat(std::move(callback), args.get<0>().ref());
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+folly::IOBufQueue MemcacheAsyncProcessor::return_mcGat(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McGatReply const& _return) {
+  ProtocolOut_ prot;
+  Memcache_mcGat_presult result;
+  result.get<0>().value = const_cast<facebook::memcache::McGatReply*>(&_return);
+  result.setIsSet(0, true);
+  return serializeResponse("mcGat", &prot, protoSeqId, ctx, result);
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void MemcacheAsyncProcessor::throw_wrapped_mcGat(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  {
+    (void)protoSeqId;
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
+        ew, std::move(req), reqCtx, ctx, "mcGat");
+    return;
+  }
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
+void MemcacheAsyncProcessor::process_mcGats(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
+    return;
+  }
+  // make sure getConnectionContext is null
+  // so async calls don't accidentally use it
+  iface_->setConnectionContext(nullptr);
+  Memcache_mcGats_pargs args;
+  facebook::memcache::McGatsRequest uarg_request;
+  args.get<0>().value = &uarg_request;
+  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcGats", ctx));
+  try {
+    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
+  }
+  catch (const std::exception& ex) {
+    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
+        ex, std::move(req), ctx, eb, "mcGats");
+    return;
+  }
+  req->setStartedProcessing();
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McGatsReply>>(std::move(req), std::move(ctxStack), return_mcGats<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcGats<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+  iface_->async_eb_mcGats(std::move(callback), args.get<0>().ref());
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+folly::IOBufQueue MemcacheAsyncProcessor::return_mcGats(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McGatsReply const& _return) {
+  ProtocolOut_ prot;
+  Memcache_mcGats_presult result;
+  result.get<0>().value = const_cast<facebook::memcache::McGatsReply*>(&_return);
+  result.setIsSet(0, true);
+  return serializeResponse("mcGats", &prot, protoSeqId, ctx, result);
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void MemcacheAsyncProcessor::throw_wrapped_mcGats(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  {
+    (void)protoSeqId;
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
+        ew, std::move(req), reqCtx, ctx, "mcGats");
+    return;
+  }
+}
+
 template <typename ProtocolIn_, typename ProtocolOut_>
 void MemcacheAsyncProcessor::process_mcGet(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
@@ -99,95 +522,95 @@ void MemcacheAsyncProcessor::throw_wrapped_mcGet(apache::thrift::ResponseChannel
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcSet(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcGets(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
     return;
   }
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
-  Memcache_mcSet_pargs args;
-  facebook::memcache::McSetRequest uarg_request;
+  Memcache_mcGets_pargs args;
+  facebook::memcache::McGetsRequest uarg_request;
   args.get<0>().value = &uarg_request;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcSet", ctx));
+  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcGets", ctx));
   try {
     deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
   }
   catch (const std::exception& ex) {
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ex, std::move(req), ctx, eb, "mcSet");
+        ex, std::move(req), ctx, eb, "mcGets");
     return;
   }
   req->setStartedProcessing();
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McSetReply>>(std::move(req), std::move(ctxStack), return_mcSet<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcSet<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
-  iface_->async_eb_mcSet(std::move(callback), args.get<0>().ref());
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McGetsReply>>(std::move(req), std::move(ctxStack), return_mcGets<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcGets<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+  iface_->async_eb_mcGets(std::move(callback), args.get<0>().ref());
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-folly::IOBufQueue MemcacheAsyncProcessor::return_mcSet(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McSetReply const& _return) {
+folly::IOBufQueue MemcacheAsyncProcessor::return_mcGets(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McGetsReply const& _return) {
   ProtocolOut_ prot;
-  Memcache_mcSet_presult result;
-  result.get<0>().value = const_cast<facebook::memcache::McSetReply*>(&_return);
+  Memcache_mcGets_presult result;
+  result.get<0>().value = const_cast<facebook::memcache::McGetsReply*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse("mcSet", &prot, protoSeqId, ctx, result);
+  return serializeResponse("mcGets", &prot, protoSeqId, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcSet(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcGets(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
   {
     (void)protoSeqId;
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "mcSet");
+        ew, std::move(req), reqCtx, ctx, "mcGets");
     return;
   }
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcDelete(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+void MemcacheAsyncProcessor::process_mcIncr(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
     return;
   }
   // make sure getConnectionContext is null
   // so async calls don't accidentally use it
   iface_->setConnectionContext(nullptr);
-  Memcache_mcDelete_pargs args;
-  facebook::memcache::McDeleteRequest uarg_request;
+  Memcache_mcIncr_pargs args;
+  facebook::memcache::McIncrRequest uarg_request;
   args.get<0>().value = &uarg_request;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcDelete", ctx));
+  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcIncr", ctx));
   try {
     deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
   }
   catch (const std::exception& ex) {
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ex, std::move(req), ctx, eb, "mcDelete");
+        ex, std::move(req), ctx, eb, "mcIncr");
     return;
   }
   req->setStartedProcessing();
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McDeleteReply>>(std::move(req), std::move(ctxStack), return_mcDelete<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcDelete<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
-  iface_->async_eb_mcDelete(std::move(callback), args.get<0>().ref());
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McIncrReply>>(std::move(req), std::move(ctxStack), return_mcIncr<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcIncr<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+  iface_->async_eb_mcIncr(std::move(callback), args.get<0>().ref());
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-folly::IOBufQueue MemcacheAsyncProcessor::return_mcDelete(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McDeleteReply const& _return) {
+folly::IOBufQueue MemcacheAsyncProcessor::return_mcIncr(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McIncrReply const& _return) {
   ProtocolOut_ prot;
-  Memcache_mcDelete_presult result;
-  result.get<0>().value = const_cast<facebook::memcache::McDeleteReply*>(&_return);
+  Memcache_mcIncr_presult result;
+  result.get<0>().value = const_cast<facebook::memcache::McIncrReply*>(&_return);
   result.setIsSet(0, true);
-  return serializeResponse("mcDelete", &prot, protoSeqId, ctx, result);
+  return serializeResponse("mcIncr", &prot, protoSeqId, ctx, result);
 }
 
 template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcDelete(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+void MemcacheAsyncProcessor::throw_wrapped_mcIncr(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
   if (!ew) {
     return;
   }
   {
     (void)protoSeqId;
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "mcDelete");
+        ew, std::move(req), reqCtx, ctx, "mcIncr");
     return;
   }
 }
@@ -287,288 +710,6 @@ void MemcacheAsyncProcessor::throw_wrapped_mcLeaseSet(apache::thrift::ResponseCh
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcAdd(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
-  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
-    return;
-  }
-  // make sure getConnectionContext is null
-  // so async calls don't accidentally use it
-  iface_->setConnectionContext(nullptr);
-  Memcache_mcAdd_pargs args;
-  facebook::memcache::McAddRequest uarg_request;
-  args.get<0>().value = &uarg_request;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcAdd", ctx));
-  try {
-    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
-  }
-  catch (const std::exception& ex) {
-    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ex, std::move(req), ctx, eb, "mcAdd");
-    return;
-  }
-  req->setStartedProcessing();
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McAddReply>>(std::move(req), std::move(ctxStack), return_mcAdd<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcAdd<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
-  iface_->async_eb_mcAdd(std::move(callback), args.get<0>().ref());
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-folly::IOBufQueue MemcacheAsyncProcessor::return_mcAdd(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McAddReply const& _return) {
-  ProtocolOut_ prot;
-  Memcache_mcAdd_presult result;
-  result.get<0>().value = const_cast<facebook::memcache::McAddReply*>(&_return);
-  result.setIsSet(0, true);
-  return serializeResponse("mcAdd", &prot, protoSeqId, ctx, result);
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcAdd(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
-  if (!ew) {
-    return;
-  }
-  {
-    (void)protoSeqId;
-    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "mcAdd");
-    return;
-  }
-}
-
-template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcReplace(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
-  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
-    return;
-  }
-  // make sure getConnectionContext is null
-  // so async calls don't accidentally use it
-  iface_->setConnectionContext(nullptr);
-  Memcache_mcReplace_pargs args;
-  facebook::memcache::McReplaceRequest uarg_request;
-  args.get<0>().value = &uarg_request;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcReplace", ctx));
-  try {
-    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
-  }
-  catch (const std::exception& ex) {
-    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ex, std::move(req), ctx, eb, "mcReplace");
-    return;
-  }
-  req->setStartedProcessing();
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McReplaceReply>>(std::move(req), std::move(ctxStack), return_mcReplace<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcReplace<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
-  iface_->async_eb_mcReplace(std::move(callback), args.get<0>().ref());
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-folly::IOBufQueue MemcacheAsyncProcessor::return_mcReplace(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McReplaceReply const& _return) {
-  ProtocolOut_ prot;
-  Memcache_mcReplace_presult result;
-  result.get<0>().value = const_cast<facebook::memcache::McReplaceReply*>(&_return);
-  result.setIsSet(0, true);
-  return serializeResponse("mcReplace", &prot, protoSeqId, ctx, result);
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcReplace(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
-  if (!ew) {
-    return;
-  }
-  {
-    (void)protoSeqId;
-    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "mcReplace");
-    return;
-  }
-}
-
-template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcGets(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
-  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
-    return;
-  }
-  // make sure getConnectionContext is null
-  // so async calls don't accidentally use it
-  iface_->setConnectionContext(nullptr);
-  Memcache_mcGets_pargs args;
-  facebook::memcache::McGetsRequest uarg_request;
-  args.get<0>().value = &uarg_request;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcGets", ctx));
-  try {
-    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
-  }
-  catch (const std::exception& ex) {
-    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ex, std::move(req), ctx, eb, "mcGets");
-    return;
-  }
-  req->setStartedProcessing();
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McGetsReply>>(std::move(req), std::move(ctxStack), return_mcGets<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcGets<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
-  iface_->async_eb_mcGets(std::move(callback), args.get<0>().ref());
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-folly::IOBufQueue MemcacheAsyncProcessor::return_mcGets(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McGetsReply const& _return) {
-  ProtocolOut_ prot;
-  Memcache_mcGets_presult result;
-  result.get<0>().value = const_cast<facebook::memcache::McGetsReply*>(&_return);
-  result.setIsSet(0, true);
-  return serializeResponse("mcGets", &prot, protoSeqId, ctx, result);
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcGets(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
-  if (!ew) {
-    return;
-  }
-  {
-    (void)protoSeqId;
-    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "mcGets");
-    return;
-  }
-}
-
-template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcCas(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
-  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
-    return;
-  }
-  // make sure getConnectionContext is null
-  // so async calls don't accidentally use it
-  iface_->setConnectionContext(nullptr);
-  Memcache_mcCas_pargs args;
-  facebook::memcache::McCasRequest uarg_request;
-  args.get<0>().value = &uarg_request;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcCas", ctx));
-  try {
-    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
-  }
-  catch (const std::exception& ex) {
-    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ex, std::move(req), ctx, eb, "mcCas");
-    return;
-  }
-  req->setStartedProcessing();
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McCasReply>>(std::move(req), std::move(ctxStack), return_mcCas<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcCas<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
-  iface_->async_eb_mcCas(std::move(callback), args.get<0>().ref());
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-folly::IOBufQueue MemcacheAsyncProcessor::return_mcCas(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McCasReply const& _return) {
-  ProtocolOut_ prot;
-  Memcache_mcCas_presult result;
-  result.get<0>().value = const_cast<facebook::memcache::McCasReply*>(&_return);
-  result.setIsSet(0, true);
-  return serializeResponse("mcCas", &prot, protoSeqId, ctx, result);
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcCas(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
-  if (!ew) {
-    return;
-  }
-  {
-    (void)protoSeqId;
-    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "mcCas");
-    return;
-  }
-}
-
-template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcIncr(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
-  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
-    return;
-  }
-  // make sure getConnectionContext is null
-  // so async calls don't accidentally use it
-  iface_->setConnectionContext(nullptr);
-  Memcache_mcIncr_pargs args;
-  facebook::memcache::McIncrRequest uarg_request;
-  args.get<0>().value = &uarg_request;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcIncr", ctx));
-  try {
-    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
-  }
-  catch (const std::exception& ex) {
-    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ex, std::move(req), ctx, eb, "mcIncr");
-    return;
-  }
-  req->setStartedProcessing();
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McIncrReply>>(std::move(req), std::move(ctxStack), return_mcIncr<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcIncr<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
-  iface_->async_eb_mcIncr(std::move(callback), args.get<0>().ref());
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-folly::IOBufQueue MemcacheAsyncProcessor::return_mcIncr(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McIncrReply const& _return) {
-  ProtocolOut_ prot;
-  Memcache_mcIncr_presult result;
-  result.get<0>().value = const_cast<facebook::memcache::McIncrReply*>(&_return);
-  result.setIsSet(0, true);
-  return serializeResponse("mcIncr", &prot, protoSeqId, ctx, result);
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcIncr(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
-  if (!ew) {
-    return;
-  }
-  {
-    (void)protoSeqId;
-    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "mcIncr");
-    return;
-  }
-}
-
-template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcDecr(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
-  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
-    return;
-  }
-  // make sure getConnectionContext is null
-  // so async calls don't accidentally use it
-  iface_->setConnectionContext(nullptr);
-  Memcache_mcDecr_pargs args;
-  facebook::memcache::McDecrRequest uarg_request;
-  args.get<0>().value = &uarg_request;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcDecr", ctx));
-  try {
-    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
-  }
-  catch (const std::exception& ex) {
-    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ex, std::move(req), ctx, eb, "mcDecr");
-    return;
-  }
-  req->setStartedProcessing();
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McDecrReply>>(std::move(req), std::move(ctxStack), return_mcDecr<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcDecr<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
-  iface_->async_eb_mcDecr(std::move(callback), args.get<0>().ref());
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-folly::IOBufQueue MemcacheAsyncProcessor::return_mcDecr(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McDecrReply const& _return) {
-  ProtocolOut_ prot;
-  Memcache_mcDecr_presult result;
-  result.get<0>().value = const_cast<facebook::memcache::McDecrReply*>(&_return);
-  result.setIsSet(0, true);
-  return serializeResponse("mcDecr", &prot, protoSeqId, ctx, result);
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcDecr(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
-  if (!ew) {
-    return;
-  }
-  {
-    (void)protoSeqId;
-    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "mcDecr");
-    return;
-  }
-}
-
-template <typename ProtocolIn_, typename ProtocolOut_>
 void MemcacheAsyncProcessor::process_mcMetaget(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
     return;
@@ -611,53 +752,6 @@ void MemcacheAsyncProcessor::throw_wrapped_mcMetaget(apache::thrift::ResponseCha
     (void)protoSeqId;
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
         ew, std::move(req), reqCtx, ctx, "mcMetaget");
-    return;
-  }
-}
-
-template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcAppend(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
-  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
-    return;
-  }
-  // make sure getConnectionContext is null
-  // so async calls don't accidentally use it
-  iface_->setConnectionContext(nullptr);
-  Memcache_mcAppend_pargs args;
-  facebook::memcache::McAppendRequest uarg_request;
-  args.get<0>().value = &uarg_request;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcAppend", ctx));
-  try {
-    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
-  }
-  catch (const std::exception& ex) {
-    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ex, std::move(req), ctx, eb, "mcAppend");
-    return;
-  }
-  req->setStartedProcessing();
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McAppendReply>>(std::move(req), std::move(ctxStack), return_mcAppend<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcAppend<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
-  iface_->async_eb_mcAppend(std::move(callback), args.get<0>().ref());
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-folly::IOBufQueue MemcacheAsyncProcessor::return_mcAppend(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McAppendReply const& _return) {
-  ProtocolOut_ prot;
-  Memcache_mcAppend_presult result;
-  result.get<0>().value = const_cast<facebook::memcache::McAppendReply*>(&_return);
-  result.setIsSet(0, true);
-  return serializeResponse("mcAppend", &prot, protoSeqId, ctx, result);
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcAppend(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
-  if (!ew) {
-    return;
-  }
-  {
-    (void)protoSeqId;
-    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "mcAppend");
     return;
   }
 }
@@ -710,6 +804,100 @@ void MemcacheAsyncProcessor::throw_wrapped_mcPrepend(apache::thrift::ResponseCha
 }
 
 template <typename ProtocolIn_, typename ProtocolOut_>
+void MemcacheAsyncProcessor::process_mcReplace(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
+    return;
+  }
+  // make sure getConnectionContext is null
+  // so async calls don't accidentally use it
+  iface_->setConnectionContext(nullptr);
+  Memcache_mcReplace_pargs args;
+  facebook::memcache::McReplaceRequest uarg_request;
+  args.get<0>().value = &uarg_request;
+  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcReplace", ctx));
+  try {
+    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
+  }
+  catch (const std::exception& ex) {
+    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
+        ex, std::move(req), ctx, eb, "mcReplace");
+    return;
+  }
+  req->setStartedProcessing();
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McReplaceReply>>(std::move(req), std::move(ctxStack), return_mcReplace<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcReplace<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+  iface_->async_eb_mcReplace(std::move(callback), args.get<0>().ref());
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+folly::IOBufQueue MemcacheAsyncProcessor::return_mcReplace(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McReplaceReply const& _return) {
+  ProtocolOut_ prot;
+  Memcache_mcReplace_presult result;
+  result.get<0>().value = const_cast<facebook::memcache::McReplaceReply*>(&_return);
+  result.setIsSet(0, true);
+  return serializeResponse("mcReplace", &prot, protoSeqId, ctx, result);
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void MemcacheAsyncProcessor::throw_wrapped_mcReplace(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  {
+    (void)protoSeqId;
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
+        ew, std::move(req), reqCtx, ctx, "mcReplace");
+    return;
+  }
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
+void MemcacheAsyncProcessor::process_mcSet(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
+    return;
+  }
+  // make sure getConnectionContext is null
+  // so async calls don't accidentally use it
+  iface_->setConnectionContext(nullptr);
+  Memcache_mcSet_pargs args;
+  facebook::memcache::McSetRequest uarg_request;
+  args.get<0>().value = &uarg_request;
+  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcSet", ctx));
+  try {
+    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
+  }
+  catch (const std::exception& ex) {
+    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
+        ex, std::move(req), ctx, eb, "mcSet");
+    return;
+  }
+  req->setStartedProcessing();
+  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McSetReply>>(std::move(req), std::move(ctxStack), return_mcSet<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcSet<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
+  iface_->async_eb_mcSet(std::move(callback), args.get<0>().ref());
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+folly::IOBufQueue MemcacheAsyncProcessor::return_mcSet(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McSetReply const& _return) {
+  ProtocolOut_ prot;
+  Memcache_mcSet_presult result;
+  result.get<0>().value = const_cast<facebook::memcache::McSetReply*>(&_return);
+  result.setIsSet(0, true);
+  return serializeResponse("mcSet", &prot, protoSeqId, ctx, result);
+}
+
+template <class ProtocolIn_, class ProtocolOut_>
+void MemcacheAsyncProcessor::throw_wrapped_mcSet(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
+  if (!ew) {
+    return;
+  }
+  {
+    (void)protoSeqId;
+    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
+        ew, std::move(req), reqCtx, ctx, "mcSet");
+    return;
+  }
+}
+
+template <typename ProtocolIn_, typename ProtocolOut_>
 void MemcacheAsyncProcessor::process_mcTouch(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
   if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
     return;
@@ -752,194 +940,6 @@ void MemcacheAsyncProcessor::throw_wrapped_mcTouch(apache::thrift::ResponseChann
     (void)protoSeqId;
     apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
         ew, std::move(req), reqCtx, ctx, "mcTouch");
-    return;
-  }
-}
-
-template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcFlushRe(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
-  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
-    return;
-  }
-  // make sure getConnectionContext is null
-  // so async calls don't accidentally use it
-  iface_->setConnectionContext(nullptr);
-  Memcache_mcFlushRe_pargs args;
-  facebook::memcache::McFlushReRequest uarg_request;
-  args.get<0>().value = &uarg_request;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcFlushRe", ctx));
-  try {
-    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
-  }
-  catch (const std::exception& ex) {
-    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ex, std::move(req), ctx, eb, "mcFlushRe");
-    return;
-  }
-  req->setStartedProcessing();
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McFlushReReply>>(std::move(req), std::move(ctxStack), return_mcFlushRe<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcFlushRe<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
-  iface_->async_eb_mcFlushRe(std::move(callback), args.get<0>().ref());
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-folly::IOBufQueue MemcacheAsyncProcessor::return_mcFlushRe(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McFlushReReply const& _return) {
-  ProtocolOut_ prot;
-  Memcache_mcFlushRe_presult result;
-  result.get<0>().value = const_cast<facebook::memcache::McFlushReReply*>(&_return);
-  result.setIsSet(0, true);
-  return serializeResponse("mcFlushRe", &prot, protoSeqId, ctx, result);
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcFlushRe(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
-  if (!ew) {
-    return;
-  }
-  {
-    (void)protoSeqId;
-    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "mcFlushRe");
-    return;
-  }
-}
-
-template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcFlushAll(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
-  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
-    return;
-  }
-  // make sure getConnectionContext is null
-  // so async calls don't accidentally use it
-  iface_->setConnectionContext(nullptr);
-  Memcache_mcFlushAll_pargs args;
-  facebook::memcache::McFlushAllRequest uarg_request;
-  args.get<0>().value = &uarg_request;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcFlushAll", ctx));
-  try {
-    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
-  }
-  catch (const std::exception& ex) {
-    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ex, std::move(req), ctx, eb, "mcFlushAll");
-    return;
-  }
-  req->setStartedProcessing();
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McFlushAllReply>>(std::move(req), std::move(ctxStack), return_mcFlushAll<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcFlushAll<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
-  iface_->async_eb_mcFlushAll(std::move(callback), args.get<0>().ref());
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-folly::IOBufQueue MemcacheAsyncProcessor::return_mcFlushAll(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McFlushAllReply const& _return) {
-  ProtocolOut_ prot;
-  Memcache_mcFlushAll_presult result;
-  result.get<0>().value = const_cast<facebook::memcache::McFlushAllReply*>(&_return);
-  result.setIsSet(0, true);
-  return serializeResponse("mcFlushAll", &prot, protoSeqId, ctx, result);
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcFlushAll(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
-  if (!ew) {
-    return;
-  }
-  {
-    (void)protoSeqId;
-    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "mcFlushAll");
-    return;
-  }
-}
-
-template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcGat(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
-  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
-    return;
-  }
-  // make sure getConnectionContext is null
-  // so async calls don't accidentally use it
-  iface_->setConnectionContext(nullptr);
-  Memcache_mcGat_pargs args;
-  facebook::memcache::McGatRequest uarg_request;
-  args.get<0>().value = &uarg_request;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcGat", ctx));
-  try {
-    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
-  }
-  catch (const std::exception& ex) {
-    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ex, std::move(req), ctx, eb, "mcGat");
-    return;
-  }
-  req->setStartedProcessing();
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McGatReply>>(std::move(req), std::move(ctxStack), return_mcGat<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcGat<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
-  iface_->async_eb_mcGat(std::move(callback), args.get<0>().ref());
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-folly::IOBufQueue MemcacheAsyncProcessor::return_mcGat(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McGatReply const& _return) {
-  ProtocolOut_ prot;
-  Memcache_mcGat_presult result;
-  result.get<0>().value = const_cast<facebook::memcache::McGatReply*>(&_return);
-  result.setIsSet(0, true);
-  return serializeResponse("mcGat", &prot, protoSeqId, ctx, result);
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcGat(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
-  if (!ew) {
-    return;
-  }
-  {
-    (void)protoSeqId;
-    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "mcGat");
-    return;
-  }
-}
-
-template <typename ProtocolIn_, typename ProtocolOut_>
-void MemcacheAsyncProcessor::process_mcGats(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::Cpp2RequestContext* ctx, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
-  if (!validateRpcKind(req, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE)) {
-    return;
-  }
-  // make sure getConnectionContext is null
-  // so async calls don't accidentally use it
-  iface_->setConnectionContext(nullptr);
-  Memcache_mcGats_pargs args;
-  facebook::memcache::McGatsRequest uarg_request;
-  args.get<0>().value = &uarg_request;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "Memcache.mcGats", ctx));
-  try {
-    deserializeRequest<ProtocolIn_>(args, ctx->getMethodName(), serializedRequest, ctxStack.get());
-  }
-  catch (const std::exception& ex) {
-    apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
-        ex, std::move(req), ctx, eb, "mcGats");
-    return;
-  }
-  req->setStartedProcessing();
-  auto callback = std::make_unique<apache::thrift::HandlerCallback<facebook::memcache::McGatsReply>>(std::move(req), std::move(ctxStack), return_mcGats<ProtocolIn_,ProtocolOut_>, throw_wrapped_mcGats<ProtocolIn_, ProtocolOut_>, ctx->getProtoSeqId(), eb, tm, ctx);
-  iface_->async_eb_mcGats(std::move(callback), args.get<0>().ref());
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-folly::IOBufQueue MemcacheAsyncProcessor::return_mcGats(int32_t protoSeqId, apache::thrift::ContextStack* ctx, facebook::memcache::McGatsReply const& _return) {
-  ProtocolOut_ prot;
-  Memcache_mcGats_presult result;
-  result.get<0>().value = const_cast<facebook::memcache::McGatsReply*>(&_return);
-  result.setIsSet(0, true);
-  return serializeResponse("mcGats", &prot, protoSeqId, ctx, result);
-}
-
-template <class ProtocolIn_, class ProtocolOut_>
-void MemcacheAsyncProcessor::throw_wrapped_mcGats(apache::thrift::ResponseChannelRequest::UniquePtr req,int32_t protoSeqId,apache::thrift::ContextStack* ctx,folly::exception_wrapper ew,apache::thrift::Cpp2RequestContext* reqCtx) {
-  if (!ew) {
-    return;
-  }
-  {
-    (void)protoSeqId;
-    apache::thrift::detail::ap::process_throw_wrapped_handler_error<ProtocolOut_>(
-        ew, std::move(req), reqCtx, ctx, "mcGats");
     return;
   }
 }

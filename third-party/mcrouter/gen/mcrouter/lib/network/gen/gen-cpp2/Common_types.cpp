@@ -19,174 +19,21 @@ namespace detail {
 void TccStructTraits<::facebook::memcache::thrift::McVersionRequest>::translateFieldName(
     FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
     FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "key") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-}
-void TccStructTraits<::facebook::memcache::thrift::McVersionReply>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "result") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "value") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "message") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "appSpecificErrorCode") {
-    fid = 4;
-    _ftype = apache::thrift::protocol::T_I16;
-  }
-}
-void TccStructTraits<::facebook::memcache::thrift::McStatsRequest>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "key") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-}
-void TccStructTraits<::facebook::memcache::thrift::McStatsReply>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "result") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "message") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "stats") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_LIST;
-  }
-  else if (_fname == "appSpecificErrorCode") {
-    fid = 4;
-    _ftype = apache::thrift::protocol::T_I16;
-  }
-}
-void TccStructTraits<::facebook::memcache::thrift::McShutdownRequest>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "key") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-}
-void TccStructTraits<::facebook::memcache::thrift::McShutdownReply>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "result") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "message") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "appSpecificErrorCode") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_I16;
-  }
-}
-void TccStructTraits<::facebook::memcache::thrift::McQuitRequest>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "key") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-}
-void TccStructTraits<::facebook::memcache::thrift::McQuitReply>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "result") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "message") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "appSpecificErrorCode") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_I16;
-  }
-}
-void TccStructTraits<::facebook::memcache::thrift::McExecRequest>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "key") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-}
-void TccStructTraits<::facebook::memcache::thrift::McExecReply>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "result") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "response") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "message") {
-    fid = 3;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
-  else if (_fname == "appSpecificErrorCode") {
-    fid = 4;
-    _ftype = apache::thrift::protocol::T_I16;
-  }
-}
-void TccStructTraits<::facebook::memcache::thrift::GoAwayAcknowledgement>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-}
-void TccStructTraits<::facebook::memcache::thrift::GoAwayRequest>::translateFieldName(
-    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
-    FOLLY_MAYBE_UNUSED int16_t& fid,
-    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-  if (false) {}
-  else if (_fname == "result") {
-    fid = 1;
-    _ftype = apache::thrift::protocol::T_I32;
-  }
-  else if (_fname == "reason") {
-    fid = 2;
-    _ftype = apache::thrift::protocol::T_STRING;
-  }
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 1;
+  static constexpr folly::StringPiece _names[] = {
+    "key",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
 }
 
 } // namespace detail
@@ -232,7 +79,7 @@ bool McVersionRequest::operator<(const McVersionRequest& rhs) const {
 
 void swap(McVersionRequest& a, McVersionRequest& b) {
   using ::std::swap;
-  swap(a.key, b.key);
+  swap(a.key_ref().value(), b.key_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -247,7 +94,46 @@ template uint32_t McVersionRequest::write<>(apache::thrift::CompactProtocolWrite
 template uint32_t McVersionRequest::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t McVersionRequest::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }}} // facebook::memcache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::facebook::memcache::thrift::McVersionReply>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 4;
+  static constexpr folly::StringPiece _names[] = {
+    "result",
+    "value",
+    "message",
+    "appSpecificErrorCode",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+    4,
+  };
+  static constexpr TType _types[] = {
+    TType::T_I32,
+    TType::T_STRING,
+    TType::T_STRING,
+    TType::T_I16,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -314,10 +200,10 @@ bool McVersionReply::operator<(const McVersionReply& rhs) const {
 
 void swap(McVersionReply& a, McVersionReply& b) {
   using ::std::swap;
-  swap(a.result, b.result);
-  swap(a.value, b.value);
-  swap(a.message, b.message);
-  swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+  swap(a.result_ref().value(), b.result_ref().value());
+  swap(a.value_ref().value(), b.value_ref().value());
+  swap(a.message_ref().value(), b.message_ref().value());
+  swap(a.appSpecificErrorCode_ref().value(), b.appSpecificErrorCode_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -332,7 +218,37 @@ template uint32_t McVersionReply::write<>(apache::thrift::CompactProtocolWriter*
 template uint32_t McVersionReply::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t McVersionReply::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }}} // facebook::memcache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::facebook::memcache::thrift::McStatsRequest>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 1;
+  static constexpr folly::StringPiece _names[] = {
+    "key",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -372,7 +288,7 @@ bool McStatsRequest::operator<(const McStatsRequest& rhs) const {
 
 void swap(McStatsRequest& a, McStatsRequest& b) {
   using ::std::swap;
-  swap(a.key, b.key);
+  swap(a.key_ref().value(), b.key_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -387,7 +303,46 @@ template uint32_t McStatsRequest::write<>(apache::thrift::CompactProtocolWriter*
 template uint32_t McStatsRequest::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t McStatsRequest::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }}} // facebook::memcache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::facebook::memcache::thrift::McStatsReply>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 4;
+  static constexpr folly::StringPiece _names[] = {
+    "result",
+    "message",
+    "stats",
+    "appSpecificErrorCode",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+    4,
+  };
+  static constexpr TType _types[] = {
+    TType::T_I32,
+    TType::T_STRING,
+    TType::T_LIST,
+    TType::T_I16,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -462,10 +417,10 @@ const ::std::vector<::std::string>& McStatsReply::get_stats() const& {
 
 void swap(McStatsReply& a, McStatsReply& b) {
   using ::std::swap;
-  swap(a.result, b.result);
-  swap(a.message, b.message);
-  swap(a.stats, b.stats);
-  swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+  swap(a.result_ref().value(), b.result_ref().value());
+  swap(a.message_ref().value(), b.message_ref().value());
+  swap(a.stats_ref().value(), b.stats_ref().value());
+  swap(a.appSpecificErrorCode_ref().value(), b.appSpecificErrorCode_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -480,7 +435,37 @@ template uint32_t McStatsReply::write<>(apache::thrift::CompactProtocolWriter*) 
 template uint32_t McStatsReply::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t McStatsReply::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }}} // facebook::memcache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::facebook::memcache::thrift::McShutdownRequest>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 1;
+  static constexpr folly::StringPiece _names[] = {
+    "key",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -520,7 +505,7 @@ bool McShutdownRequest::operator<(const McShutdownRequest& rhs) const {
 
 void swap(McShutdownRequest& a, McShutdownRequest& b) {
   using ::std::swap;
-  swap(a.key, b.key);
+  swap(a.key_ref().value(), b.key_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -535,7 +520,43 @@ template uint32_t McShutdownRequest::write<>(apache::thrift::CompactProtocolWrit
 template uint32_t McShutdownRequest::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t McShutdownRequest::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }}} // facebook::memcache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::facebook::memcache::thrift::McShutdownReply>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 3;
+  static constexpr folly::StringPiece _names[] = {
+    "result",
+    "message",
+    "appSpecificErrorCode",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+  };
+  static constexpr TType _types[] = {
+    TType::T_I32,
+    TType::T_STRING,
+    TType::T_I16,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -593,9 +614,9 @@ bool McShutdownReply::operator<(const McShutdownReply& rhs) const {
 
 void swap(McShutdownReply& a, McShutdownReply& b) {
   using ::std::swap;
-  swap(a.result, b.result);
-  swap(a.message, b.message);
-  swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+  swap(a.result_ref().value(), b.result_ref().value());
+  swap(a.message_ref().value(), b.message_ref().value());
+  swap(a.appSpecificErrorCode_ref().value(), b.appSpecificErrorCode_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -610,7 +631,37 @@ template uint32_t McShutdownReply::write<>(apache::thrift::CompactProtocolWriter
 template uint32_t McShutdownReply::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t McShutdownReply::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }}} // facebook::memcache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::facebook::memcache::thrift::McQuitRequest>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 1;
+  static constexpr folly::StringPiece _names[] = {
+    "key",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -650,7 +701,7 @@ bool McQuitRequest::operator<(const McQuitRequest& rhs) const {
 
 void swap(McQuitRequest& a, McQuitRequest& b) {
   using ::std::swap;
-  swap(a.key, b.key);
+  swap(a.key_ref().value(), b.key_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -665,7 +716,43 @@ template uint32_t McQuitRequest::write<>(apache::thrift::CompactProtocolWriter*)
 template uint32_t McQuitRequest::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t McQuitRequest::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }}} // facebook::memcache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::facebook::memcache::thrift::McQuitReply>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 3;
+  static constexpr folly::StringPiece _names[] = {
+    "result",
+    "message",
+    "appSpecificErrorCode",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+  };
+  static constexpr TType _types[] = {
+    TType::T_I32,
+    TType::T_STRING,
+    TType::T_I16,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -723,9 +810,9 @@ bool McQuitReply::operator<(const McQuitReply& rhs) const {
 
 void swap(McQuitReply& a, McQuitReply& b) {
   using ::std::swap;
-  swap(a.result, b.result);
-  swap(a.message, b.message);
-  swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+  swap(a.result_ref().value(), b.result_ref().value());
+  swap(a.message_ref().value(), b.message_ref().value());
+  swap(a.appSpecificErrorCode_ref().value(), b.appSpecificErrorCode_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -740,7 +827,37 @@ template uint32_t McQuitReply::write<>(apache::thrift::CompactProtocolWriter*) c
 template uint32_t McQuitReply::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t McQuitReply::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }}} // facebook::memcache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::facebook::memcache::thrift::McExecRequest>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 1;
+  static constexpr folly::StringPiece _names[] = {
+    "key",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+  };
+  static constexpr TType _types[] = {
+    TType::T_STRING,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -780,7 +897,7 @@ bool McExecRequest::operator<(const McExecRequest& rhs) const {
 
 void swap(McExecRequest& a, McExecRequest& b) {
   using ::std::swap;
-  swap(a.key, b.key);
+  swap(a.key_ref().value(), b.key_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -795,7 +912,46 @@ template uint32_t McExecRequest::write<>(apache::thrift::CompactProtocolWriter*)
 template uint32_t McExecRequest::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t McExecRequest::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }}} // facebook::memcache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::facebook::memcache::thrift::McExecReply>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 4;
+  static constexpr folly::StringPiece _names[] = {
+    "result",
+    "response",
+    "message",
+    "appSpecificErrorCode",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+    3,
+    4,
+  };
+  static constexpr TType _types[] = {
+    TType::T_I32,
+    TType::T_STRING,
+    TType::T_STRING,
+    TType::T_I16,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -862,10 +1018,10 @@ bool McExecReply::operator<(const McExecReply& rhs) const {
 
 void swap(McExecReply& a, McExecReply& b) {
   using ::std::swap;
-  swap(a.result, b.result);
-  swap(a.response, b.response);
-  swap(a.message, b.message);
-  swap(a.appSpecificErrorCode, b.appSpecificErrorCode);
+  swap(a.result_ref().value(), b.result_ref().value());
+  swap(a.response_ref().value(), b.response_ref().value());
+  swap(a.message_ref().value(), b.message_ref().value());
+  swap(a.appSpecificErrorCode_ref().value(), b.appSpecificErrorCode_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -880,7 +1036,23 @@ template uint32_t McExecReply::write<>(apache::thrift::CompactProtocolWriter*) c
 template uint32_t McExecReply::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t McExecReply::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }}} // facebook::memcache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::facebook::memcache::thrift::GoAwayAcknowledgement>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -920,7 +1092,40 @@ template uint32_t GoAwayAcknowledgement::write<>(apache::thrift::CompactProtocol
 template uint32_t GoAwayAcknowledgement::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t GoAwayAcknowledgement::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
+
+
 }}} // facebook::memcache::thrift
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::facebook::memcache::thrift::GoAwayRequest>::translateFieldName(
+    FOLLY_MAYBE_UNUSED folly::StringPiece _fname,
+    FOLLY_MAYBE_UNUSED int16_t& fid,
+    FOLLY_MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) noexcept {
+  using TType = apache::thrift::protocol::TType;
+  constexpr size_t _size = 2;
+  static constexpr folly::StringPiece _names[] = {
+    "result",
+    "reason",
+  };
+  static constexpr int16_t _ids[] = {
+    1,
+    2,
+  };
+  static constexpr TType _types[] = {
+    TType::T_I32,
+    TType::T_STRING,
+  };
+  static constexpr st::translate_field_name_table
+      table{_size, _names, _ids, _types};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
 namespace facebook { namespace memcache { namespace thrift {
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -969,8 +1174,8 @@ bool GoAwayRequest::operator<(const GoAwayRequest& rhs) const {
 
 void swap(GoAwayRequest& a, GoAwayRequest& b) {
   using ::std::swap;
-  swap(a.result, b.result);
-  swap(a.reason, b.reason);
+  swap(a.result_ref().value(), b.result_ref().value());
+  swap(a.reason_ref().value(), b.reason_ref().value());
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   swap(a.__isset, b.__isset);
 THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -984,5 +1189,7 @@ template void GoAwayRequest::readNoXfer<>(apache::thrift::CompactProtocolReader*
 template uint32_t GoAwayRequest::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t GoAwayRequest::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t GoAwayRequest::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
 
 }}} // facebook::memcache::thrift

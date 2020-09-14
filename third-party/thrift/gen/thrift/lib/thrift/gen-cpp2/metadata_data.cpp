@@ -18,5 +18,10 @@ constexpr const std::array<::apache::thrift::metadata::ThriftPrimitiveType, 10> 
 constexpr const std::array<folly::StringPiece, 10> TEnumDataStorage<::apache::thrift::metadata::ThriftPrimitiveType>::names;
 
 
+constexpr const std::size_t TEnumDataStorage<::apache::thrift::metadata::ThriftType::Type>::size;
+constexpr const std::array<::apache::thrift::metadata::ThriftType::Type, 10> TEnumDataStorage<::apache::thrift::metadata::ThriftType::Type>::values;
+constexpr const std::array<folly::StringPiece, 10> TEnumDataStorage<::apache::thrift::metadata::ThriftType::Type>::names;
+
+
 } // namespace thrift
 } // namespace apache

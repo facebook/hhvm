@@ -375,8 +375,20 @@ class ThriftServiceMetadataResponse;
 // END hash_and_equal_to
 namespace apache { namespace thrift { namespace metadata {
 class ThriftListType final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftListType;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftListType() {}
@@ -386,6 +398,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   ThriftListType(ThriftListType&&) = default;
   ThriftListType(const ThriftListType& src);
+
 
   ThriftListType& operator=(ThriftListType&&) = default;
   ThriftListType& operator=(const ThriftListType& src);
@@ -439,9 +452,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftListType >;
+  friend void swap(ThriftListType& a, ThriftListType& b);
 };
-
-void swap(ThriftListType& a, ThriftListType& b);
 
 template <class Protocol_>
 uint32_t ThriftListType::read(Protocol_* iprot) {
@@ -453,8 +465,20 @@ uint32_t ThriftListType::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftSetType final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftSetType;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftSetType() {}
@@ -464,6 +488,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   ThriftSetType(ThriftSetType&&) = default;
   ThriftSetType(const ThriftSetType& src);
+
 
   ThriftSetType& operator=(ThriftSetType&&) = default;
   ThriftSetType& operator=(const ThriftSetType& src);
@@ -517,9 +542,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftSetType >;
+  friend void swap(ThriftSetType& a, ThriftSetType& b);
 };
-
-void swap(ThriftSetType& a, ThriftSetType& b);
 
 template <class Protocol_>
 uint32_t ThriftSetType::read(Protocol_* iprot) {
@@ -531,8 +555,20 @@ uint32_t ThriftSetType::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftMapType final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftMapType;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftMapType() {}
@@ -542,6 +578,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   ThriftMapType(ThriftMapType&&) = default;
   ThriftMapType(const ThriftMapType& src);
+
 
   ThriftMapType& operator=(ThriftMapType&&) = default;
   ThriftMapType& operator=(const ThriftMapType& src);
@@ -608,9 +645,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftMapType >;
+  friend void swap(ThriftMapType& a, ThriftMapType& b);
 };
-
-void swap(ThriftMapType& a, ThriftMapType& b);
 
 template <class Protocol_>
 uint32_t ThriftMapType::read(Protocol_* iprot) {
@@ -622,8 +658,20 @@ uint32_t ThriftMapType::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftEnumType final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftEnumType;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftEnumType() {}
@@ -634,6 +682,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftEnumType(ThriftEnumType&&) = default;
 
   ThriftEnumType(const ThriftEnumType&) = default;
+
 
   ThriftEnumType& operator=(ThriftEnumType&&) = default;
 
@@ -720,9 +769,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftEnumType >;
+  friend void swap(ThriftEnumType& a, ThriftEnumType& b);
 };
-
-void swap(ThriftEnumType& a, ThriftEnumType& b);
 
 template <class Protocol_>
 uint32_t ThriftEnumType::read(Protocol_* iprot) {
@@ -734,8 +782,20 @@ uint32_t ThriftEnumType::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftStructType final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftStructType;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftStructType() {}
@@ -746,6 +806,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftStructType(ThriftStructType&&) = default;
 
   ThriftStructType(const ThriftStructType&) = default;
+
 
   ThriftStructType& operator=(ThriftStructType&&) = default;
 
@@ -832,9 +893,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftStructType >;
+  friend void swap(ThriftStructType& a, ThriftStructType& b);
 };
-
-void swap(ThriftStructType& a, ThriftStructType& b);
 
 template <class Protocol_>
 uint32_t ThriftStructType::read(Protocol_* iprot) {
@@ -846,8 +906,20 @@ uint32_t ThriftStructType::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftUnionType final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftUnionType;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftUnionType() {}
@@ -858,6 +930,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftUnionType(ThriftUnionType&&) = default;
 
   ThriftUnionType(const ThriftUnionType&) = default;
+
 
   ThriftUnionType& operator=(ThriftUnionType&&) = default;
 
@@ -944,9 +1017,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftUnionType >;
+  friend void swap(ThriftUnionType& a, ThriftUnionType& b);
 };
-
-void swap(ThriftUnionType& a, ThriftUnionType& b);
 
 template <class Protocol_>
 uint32_t ThriftUnionType::read(Protocol_* iprot) {
@@ -958,8 +1030,20 @@ uint32_t ThriftUnionType::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftTypedefType final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftTypedefType;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftTypedefType() {}
@@ -969,6 +1053,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   ThriftTypedefType(ThriftTypedefType&&) = default;
   ThriftTypedefType(const ThriftTypedefType& src);
+
 
   ThriftTypedefType& operator=(ThriftTypedefType&&) = default;
   ThriftTypedefType& operator=(const ThriftTypedefType& src);
@@ -1067,9 +1152,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftTypedefType >;
+  friend void swap(ThriftTypedefType& a, ThriftTypedefType& b);
 };
-
-void swap(ThriftTypedefType& a, ThriftTypedefType& b);
 
 template <class Protocol_>
 uint32_t ThriftTypedefType::read(Protocol_* iprot) {
@@ -1081,8 +1165,20 @@ uint32_t ThriftTypedefType::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftStreamType final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftStreamType;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftStreamType() {}
@@ -1092,6 +1188,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   ThriftStreamType(ThriftStreamType&&) = default;
   ThriftStreamType(const ThriftStreamType& src);
+
 
   ThriftStreamType& operator=(ThriftStreamType&&) = default;
   ThriftStreamType& operator=(const ThriftStreamType& src);
@@ -1158,9 +1255,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftStreamType >;
+  friend void swap(ThriftStreamType& a, ThriftStreamType& b);
 };
-
-void swap(ThriftStreamType& a, ThriftStreamType& b);
 
 template <class Protocol_>
 uint32_t ThriftStreamType::read(Protocol_* iprot) {
@@ -1172,8 +1268,20 @@ uint32_t ThriftStreamType::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftSinkType final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftSinkType;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftSinkType() {}
@@ -1183,6 +1291,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 
   ThriftSinkType(ThriftSinkType&&) = default;
   ThriftSinkType(const ThriftSinkType& src);
+
 
   ThriftSinkType& operator=(ThriftSinkType&&) = default;
   ThriftSinkType& operator=(const ThriftSinkType& src);
@@ -1262,9 +1371,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftSinkType >;
+  friend void swap(ThriftSinkType& a, ThriftSinkType& b);
 };
-
-void swap(ThriftSinkType& a, ThriftSinkType& b);
 
 template <class Protocol_>
 uint32_t ThriftSinkType::read(Protocol_* iprot) {
@@ -1276,8 +1384,20 @@ uint32_t ThriftSinkType::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftType final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftType;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    true;
+
+
+ public:
   enum Type : int {
     __EMPTY__ = 0,
     t_primitive = 1,
@@ -1935,7 +2055,197 @@ class ThriftType final  {
     return std::move(value_.t_sink);
   }
 
-  Type getType() const { return type_; }
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftPrimitiveType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> t_primitive_ref() const& {
+    return {value_.t_primitive, type_, t_primitive, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftPrimitiveType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> t_primitive_ref() const&& {
+    return {value_.t_primitive, type_, t_primitive, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftPrimitiveType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> t_primitive_ref() & {
+    return {value_.t_primitive, type_, t_primitive, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftPrimitiveType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> t_primitive_ref() && {
+    return {value_.t_primitive, type_, t_primitive, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftListType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> t_list_ref() const& {
+    return {value_.t_list, type_, t_list, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftListType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> t_list_ref() const&& {
+    return {value_.t_list, type_, t_list, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftListType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> t_list_ref() & {
+    return {value_.t_list, type_, t_list, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftListType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> t_list_ref() && {
+    return {value_.t_list, type_, t_list, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftSetType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> t_set_ref() const& {
+    return {value_.t_set, type_, t_set, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftSetType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> t_set_ref() const&& {
+    return {value_.t_set, type_, t_set, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftSetType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> t_set_ref() & {
+    return {value_.t_set, type_, t_set, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftSetType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> t_set_ref() && {
+    return {value_.t_set, type_, t_set, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftMapType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> t_map_ref() const& {
+    return {value_.t_map, type_, t_map, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftMapType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> t_map_ref() const&& {
+    return {value_.t_map, type_, t_map, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftMapType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> t_map_ref() & {
+    return {value_.t_map, type_, t_map, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftMapType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> t_map_ref() && {
+    return {value_.t_map, type_, t_map, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftEnumType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> t_enum_ref() const& {
+    return {value_.t_enum, type_, t_enum, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftEnumType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> t_enum_ref() const&& {
+    return {value_.t_enum, type_, t_enum, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftEnumType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> t_enum_ref() & {
+    return {value_.t_enum, type_, t_enum, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftEnumType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> t_enum_ref() && {
+    return {value_.t_enum, type_, t_enum, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftStructType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> t_struct_ref() const& {
+    return {value_.t_struct, type_, t_struct, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftStructType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> t_struct_ref() const&& {
+    return {value_.t_struct, type_, t_struct, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftStructType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> t_struct_ref() & {
+    return {value_.t_struct, type_, t_struct, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftStructType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> t_struct_ref() && {
+    return {value_.t_struct, type_, t_struct, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftUnionType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> t_union_ref() const& {
+    return {value_.t_union, type_, t_union, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftUnionType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> t_union_ref() const&& {
+    return {value_.t_union, type_, t_union, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftUnionType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> t_union_ref() & {
+    return {value_.t_union, type_, t_union, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftUnionType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> t_union_ref() && {
+    return {value_.t_union, type_, t_union, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftTypedefType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> t_typedef_ref() const& {
+    return {value_.t_typedef, type_, t_typedef, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftTypedefType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> t_typedef_ref() const&& {
+    return {value_.t_typedef, type_, t_typedef, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftTypedefType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> t_typedef_ref() & {
+    return {value_.t_typedef, type_, t_typedef, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftTypedefType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> t_typedef_ref() && {
+    return {value_.t_typedef, type_, t_typedef, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftStreamType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> t_stream_ref() const& {
+    return {value_.t_stream, type_, t_stream, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftStreamType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> t_stream_ref() const&& {
+    return {value_.t_stream, type_, t_stream, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftStreamType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> t_stream_ref() & {
+    return {value_.t_stream, type_, t_stream, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftStreamType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> t_stream_ref() && {
+    return {value_.t_stream, type_, t_stream, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftSinkType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> t_sink_ref() const& {
+    return {value_.t_sink, type_, t_sink, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftSinkType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> t_sink_ref() const&& {
+    return {value_.t_sink, type_, t_sink, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftSinkType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> t_sink_ref() & {
+    return {value_.t_sink, type_, t_sink, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T =  ::apache::thrift::metadata::ThriftSinkType>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> t_sink_ref() && {
+    return {value_.t_sink, type_, t_sink, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  Type getType() const { return static_cast<Type>(type_); }
 
   template <class Protocol_>
   uint32_t read(Protocol_* iprot);
@@ -1951,7 +2261,7 @@ class ThriftType final  {
     (&val)->~T();
   }
 
-  Type type_;
+  std::underlying_type_t<Type> type_;
   storage_type value_;
 
  private:
@@ -1959,9 +2269,8 @@ class ThriftType final  {
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftType >;
+  friend void swap(ThriftType& a, ThriftType& b);
 };
-
-void swap(ThriftType& a, ThriftType& b);
 
 template <class Protocol_>
 uint32_t ThriftType::read(Protocol_* iprot) {
@@ -1973,8 +2282,20 @@ uint32_t ThriftType::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftEnum final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftEnum;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftEnum() {}
@@ -1985,6 +2306,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftEnum(ThriftEnum&&) = default;
 
   ThriftEnum(const ThriftEnum&) = default;
+
 
   ThriftEnum& operator=(ThriftEnum&&) = default;
 
@@ -2107,9 +2429,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftEnum >;
+  friend void swap(ThriftEnum& a, ThriftEnum& b);
 };
-
-void swap(ThriftEnum& a, ThriftEnum& b);
 
 template <class Protocol_>
 uint32_t ThriftEnum::read(Protocol_* iprot) {
@@ -2121,8 +2442,20 @@ uint32_t ThriftEnum::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftField final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftField;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftField() :
@@ -2135,6 +2468,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftField(ThriftField&&) = default;
 
   ThriftField(const ThriftField&) = default;
+
 
   ThriftField& operator=(ThriftField&&) = default;
 
@@ -2331,9 +2665,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftField >;
+  friend void swap(ThriftField& a, ThriftField& b);
 };
-
-void swap(ThriftField& a, ThriftField& b);
 
 template <class Protocol_>
 uint32_t ThriftField::read(Protocol_* iprot) {
@@ -2345,8 +2678,20 @@ uint32_t ThriftField::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftStruct final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftStruct;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftStruct() :
@@ -2358,6 +2703,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftStruct(ThriftStruct&&) = default;
 
   ThriftStruct(const ThriftStruct&) = default;
+
 
   ThriftStruct& operator=(ThriftStruct&&) = default;
 
@@ -2517,9 +2863,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftStruct >;
+  friend void swap(ThriftStruct& a, ThriftStruct& b);
 };
-
-void swap(ThriftStruct& a, ThriftStruct& b);
 
 template <class Protocol_>
 uint32_t ThriftStruct::read(Protocol_* iprot) {
@@ -2531,8 +2876,20 @@ uint32_t ThriftStruct::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftException final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftException;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftException() {}
@@ -2543,6 +2900,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftException(ThriftException&&) = default;
 
   ThriftException(const ThriftException&) = default;
+
 
   ThriftException& operator=(ThriftException&&) = default;
 
@@ -2665,9 +3023,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftException >;
+  friend void swap(ThriftException& a, ThriftException& b);
 };
-
-void swap(ThriftException& a, ThriftException& b);
 
 template <class Protocol_>
 uint32_t ThriftException::read(Protocol_* iprot) {
@@ -2679,8 +3036,20 @@ uint32_t ThriftException::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftFunction final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftFunction;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
   ThriftFunction();
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
@@ -2692,6 +3061,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftFunction(ThriftFunction&&) = default;
 
   ThriftFunction(const ThriftFunction&) = default;
+
 
   ThriftFunction& operator=(ThriftFunction&&) = default;
 
@@ -2926,9 +3296,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftFunction >;
+  friend void swap(ThriftFunction& a, ThriftFunction& b);
 };
-
-void swap(ThriftFunction& a, ThriftFunction& b);
 
 template <class Protocol_>
 uint32_t ThriftFunction::read(Protocol_* iprot) {
@@ -2940,8 +3309,20 @@ uint32_t ThriftFunction::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftService final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftService;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftService() {}
@@ -2952,6 +3333,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftService(ThriftService&&) = default;
 
   ThriftService(const ThriftService&) = default;
+
 
   ThriftService& operator=(ThriftService&&) = default;
 
@@ -3036,20 +3418,24 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::string&> parent_ref() const& {
-    return {parent, __isset.parent};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> parent_ref() const& {
+    return {this->parent, __isset.parent};
   }
 
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::string&&> parent_ref() const&& {
-    return {std::move(parent), __isset.parent};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> parent_ref() const&& {
+    return {std::move(this->parent), __isset.parent};
   }
 
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::string&> parent_ref() & {
-    return {parent, __isset.parent};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> parent_ref() & {
+    return {this->parent, __isset.parent};
   }
 
-  FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::string&&> parent_ref() && {
-    return {std::move(parent), __isset.parent};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> parent_ref() && {
+    return {std::move(this->parent), __isset.parent};
   }
 THRIFT_IGNORE_ISSET_USE_WARNING_END
 
@@ -3113,9 +3499,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftService >;
+  friend void swap(ThriftService& a, ThriftService& b);
 };
-
-void swap(ThriftService& a, ThriftService& b);
 
 template <class Protocol_>
 uint32_t ThriftService::read(Protocol_* iprot) {
@@ -3127,8 +3512,20 @@ uint32_t ThriftService::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftModuleContext final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftModuleContext;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftModuleContext() {}
@@ -3139,6 +3536,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftModuleContext(ThriftModuleContext&&) = default;
 
   ThriftModuleContext(const ThriftModuleContext&) = default;
+
 
   ThriftModuleContext& operator=(ThriftModuleContext&&) = default;
 
@@ -3225,9 +3623,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftModuleContext >;
+  friend void swap(ThriftModuleContext& a, ThriftModuleContext& b);
 };
-
-void swap(ThriftModuleContext& a, ThriftModuleContext& b);
 
 template <class Protocol_>
 uint32_t ThriftModuleContext::read(Protocol_* iprot) {
@@ -3239,8 +3636,20 @@ uint32_t ThriftModuleContext::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftServiceContext final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftServiceContext;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftServiceContext() {}
@@ -3251,6 +3660,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftServiceContext(ThriftServiceContext&&) = default;
 
   ThriftServiceContext(const ThriftServiceContext&) = default;
+
 
   ThriftServiceContext& operator=(ThriftServiceContext&&) = default;
 
@@ -3367,9 +3777,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftServiceContext >;
+  friend void swap(ThriftServiceContext& a, ThriftServiceContext& b);
 };
-
-void swap(ThriftServiceContext& a, ThriftServiceContext& b);
 
 template <class Protocol_>
 uint32_t ThriftServiceContext::read(Protocol_* iprot) {
@@ -3381,8 +3790,20 @@ uint32_t ThriftServiceContext::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftMetadata final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftMetadata;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftMetadata() {}
@@ -3393,6 +3814,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftMetadata(ThriftMetadata&&) = default;
 
   ThriftMetadata(const ThriftMetadata&) = default;
+
 
   ThriftMetadata& operator=(ThriftMetadata&&) = default;
 
@@ -3581,9 +4003,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftMetadata >;
+  friend void swap(ThriftMetadata& a, ThriftMetadata& b);
 };
-
-void swap(ThriftMetadata& a, ThriftMetadata& b);
 
 template <class Protocol_>
 uint32_t ThriftMetadata::read(Protocol_* iprot) {
@@ -3595,8 +4016,20 @@ uint32_t ThriftMetadata::read(Protocol_* iprot) {
 }}} // apache::thrift::metadata
 namespace apache { namespace thrift { namespace metadata {
 class ThriftServiceMetadataResponse final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = ThriftServiceMetadataResponse;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftServiceMetadataResponse() {}
@@ -3607,6 +4040,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   ThriftServiceMetadataResponse(ThriftServiceMetadataResponse&&) = default;
 
   ThriftServiceMetadataResponse(const ThriftServiceMetadataResponse&) = default;
+
 
   ThriftServiceMetadataResponse& operator=(ThriftServiceMetadataResponse&&) = default;
 
@@ -3723,9 +4157,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< ThriftServiceMetadataResponse >;
+  friend void swap(ThriftServiceMetadataResponse& a, ThriftServiceMetadataResponse& b);
 };
-
-void swap(ThriftServiceMetadataResponse& a, ThriftServiceMetadataResponse& b);
 
 template <class Protocol_>
 uint32_t ThriftServiceMetadataResponse::read(Protocol_* iprot) {
@@ -3735,3 +4168,20 @@ uint32_t ThriftServiceMetadataResponse::read(Protocol_* iprot) {
 }
 
 }}} // apache::thrift::metadata
+
+namespace apache { namespace thrift {
+
+template <> struct TEnumDataStorage<::apache::thrift::metadata::ThriftType::Type>;
+
+template <> struct TEnumTraits<::apache::thrift::metadata::ThriftType::Type> {
+  using type = ::apache::thrift::metadata::ThriftType::Type;
+
+  static constexpr std::size_t const size = 10;
+  static folly::Range<type const*> const values;
+  static folly::Range<folly::StringPiece const*> const names;
+
+  static char const* findName(type value);
+  static bool findValue(char const* name, type* out);
+
+};
+}} // apache::thrift

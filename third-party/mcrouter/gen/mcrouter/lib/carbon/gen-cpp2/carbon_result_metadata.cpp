@@ -19,15 +19,15 @@ using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
 using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 void EnumMetadata<::carbon::Result>::gen(ThriftMetadata& metadata) {
-  auto res = metadata.enums.emplace("carbon_result.Result", ::apache::thrift::metadata::ThriftEnum{});
+  auto res = metadata.enums_ref()->emplace("carbon_result.Result", ::apache::thrift::metadata::ThriftEnum{});
   if (!res.second) {
     return;
   }
   ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
-  enum_metadata.name = "carbon_result.Result";
+  enum_metadata.name_ref() = "carbon_result.Result";
   using EnumTraits = TEnumTraits<::carbon::Result>;
   for (std::size_t i = 0; i < EnumTraits::size; ++i) {
-    enum_metadata.elements.emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
+    enum_metadata.elements_ref()->emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 

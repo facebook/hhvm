@@ -10,3 +10,36 @@
 #include "thrift/lib/thrift/gen-cpp2/reflection_types.h"
 
 
+namespace apache {
+namespace thrift {
+namespace detail {
+namespace md {
+
+template <>
+class EnumMetadata<::apache::thrift::reflection::Type>
+    : private EmptyMetadata {
+ public:
+  using EmptyMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::reflection::StructField>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::reflection::DataType>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+template <>
+class StructMetadata<::apache::thrift::reflection::Schema>
+    : private EmptyStructMetadata {
+ public:
+  using EmptyStructMetadata::gen;
+};
+} // namespace md
+} // namespace detail
+} // namespace thrift
+} // namespace apache

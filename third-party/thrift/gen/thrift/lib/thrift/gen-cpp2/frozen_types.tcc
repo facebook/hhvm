@@ -20,21 +20,21 @@ struct TccStructTraits<::apache::thrift::frozen::schema::Field> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::apache::thrift::frozen::schema::Layout> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::apache::thrift::frozen::schema::Schema> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 
 } // namespace detail
@@ -251,7 +251,7 @@ _readField_fields:
 _readField_typeName:
   {
     
-    iprot->readString(this->typeName);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->typeName);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.typeName = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -334,7 +334,7 @@ uint32_t Layout::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("fields", apache::thrift::protocol::T_MAP, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, ::std::map<int16_t,  ::apache::thrift::frozen::schema::Field>>::serializedSize<false>(*prot_, this->fields);
   xfer += prot_->serializedFieldSize("typeName", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeString(this->typeName);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->typeName);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -350,7 +350,7 @@ uint32_t Layout::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("fields", apache::thrift::protocol::T_MAP, 3);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, ::std::map<int16_t,  ::apache::thrift::frozen::schema::Field>>::serializedSize<false>(*prot_, this->fields);
   xfer += prot_->serializedFieldSize("typeName", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->serializedSizeString(this->typeName);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->typeName);
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -369,7 +369,7 @@ uint32_t Layout::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, ::std::map<int16_t,  ::apache::thrift::frozen::schema::Field>>::write(*prot_, this->fields);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("typeName", apache::thrift::protocol::T_STRING, 4);
-  xfer += prot_->writeString(this->typeName);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->typeName);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldStop();
   xfer += prot_->writeStructEnd();

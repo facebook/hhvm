@@ -15,11 +15,11 @@ namespace apache { namespace thrift {
 template <> struct TEnumDataStorage<::apache::thrift::ProtocolId> {
   using type = ::apache::thrift::ProtocolId;
   static constexpr const std::size_t size = 2;
-  static constexpr const std::array<type, 2> values = {{
+  static constexpr const std::array<type, size> values = {{
     type::BINARY,
     type::COMPACT,
   }};
-  static constexpr const std::array<folly::StringPiece, 2> names = {{
+  static constexpr const std::array<folly::StringPiece, size> names = {{
     "BINARY",
     "COMPACT",
   }};
@@ -27,7 +27,7 @@ template <> struct TEnumDataStorage<::apache::thrift::ProtocolId> {
 template <> struct TEnumDataStorage<::apache::thrift::RpcKind> {
   using type = ::apache::thrift::RpcKind;
   static constexpr const std::size_t size = 7;
-  static constexpr const std::array<type, 7> values = {{
+  static constexpr const std::array<type, size> values = {{
     type::SINGLE_REQUEST_SINGLE_RESPONSE,
     type::SINGLE_REQUEST_NO_RESPONSE,
     type::STREAMING_REQUEST_SINGLE_RESPONSE,
@@ -36,7 +36,7 @@ template <> struct TEnumDataStorage<::apache::thrift::RpcKind> {
     type::STREAMING_REQUEST_STREAMING_RESPONSE,
     type::SINK,
   }};
-  static constexpr const std::array<folly::StringPiece, 7> names = {{
+  static constexpr const std::array<folly::StringPiece, size> names = {{
     "SINGLE_REQUEST_SINGLE_RESPONSE",
     "SINGLE_REQUEST_NO_RESPONSE",
     "STREAMING_REQUEST_SINGLE_RESPONSE",
@@ -49,7 +49,7 @@ template <> struct TEnumDataStorage<::apache::thrift::RpcKind> {
 template <> struct TEnumDataStorage<::apache::thrift::RpcPriority> {
   using type = ::apache::thrift::RpcPriority;
   static constexpr const std::size_t size = 6;
-  static constexpr const std::array<type, 6> values = {{
+  static constexpr const std::array<type, size> values = {{
     type::HIGH_IMPORTANT,
     type::HIGH,
     type::IMPORTANT,
@@ -57,7 +57,7 @@ template <> struct TEnumDataStorage<::apache::thrift::RpcPriority> {
     type::BEST_EFFORT,
     type::N_PRIORITIES,
   }};
-  static constexpr const std::array<folly::StringPiece, 6> names = {{
+  static constexpr const std::array<folly::StringPiece, size> names = {{
     "HIGH_IMPORTANT",
     "HIGH",
     "IMPORTANT",
@@ -69,12 +69,12 @@ template <> struct TEnumDataStorage<::apache::thrift::RpcPriority> {
 template <> struct TEnumDataStorage<::apache::thrift::CompressionAlgorithm> {
   using type = ::apache::thrift::CompressionAlgorithm;
   static constexpr const std::size_t size = 3;
-  static constexpr const std::array<type, 3> values = {{
+  static constexpr const std::array<type, size> values = {{
     type::NONE,
     type::ZLIB,
     type::ZSTD,
   }};
-  static constexpr const std::array<folly::StringPiece, 3> names = {{
+  static constexpr const std::array<folly::StringPiece, size> names = {{
     "NONE",
     "ZLIB",
     "ZSTD",
@@ -83,11 +83,11 @@ template <> struct TEnumDataStorage<::apache::thrift::CompressionAlgorithm> {
 template <> struct TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags> {
   using type = ::apache::thrift::RequestRpcMetadataFlags;
   static constexpr const std::size_t size = 2;
-  static constexpr const std::array<type, 2> values = {{
+  static constexpr const std::array<type, size> values = {{
     type::UNKNOWN,
     type::QUERY_SERVER_LOAD,
   }};
-  static constexpr const std::array<folly::StringPiece, 2> names = {{
+  static constexpr const std::array<folly::StringPiece, size> names = {{
     "UNKNOWN",
     "QUERY_SERVER_LOAD",
   }};
@@ -95,13 +95,13 @@ template <> struct TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags> {
 template <> struct TEnumDataStorage<::apache::thrift::ResponseRpcErrorCategory> {
   using type = ::apache::thrift::ResponseRpcErrorCategory;
   static constexpr const std::size_t size = 4;
-  static constexpr const std::array<type, 4> values = {{
+  static constexpr const std::array<type, size> values = {{
     type::INTERNAL_ERROR,
     type::INVALID_REQUEST,
     type::LOADSHEDDING,
     type::SHUTDOWN,
   }};
-  static constexpr const std::array<folly::StringPiece, 4> names = {{
+  static constexpr const std::array<folly::StringPiece, size> names = {{
     "INTERNAL_ERROR",
     "INVALID_REQUEST",
     "LOADSHEDDING",
@@ -111,7 +111,7 @@ template <> struct TEnumDataStorage<::apache::thrift::ResponseRpcErrorCategory> 
 template <> struct TEnumDataStorage<::apache::thrift::ResponseRpcErrorCode> {
   using type = ::apache::thrift::ResponseRpcErrorCode;
   static constexpr const std::size_t size = 14;
-  static constexpr const std::array<type, 14> values = {{
+  static constexpr const std::array<type, size> values = {{
     type::UNKNOWN,
     type::OVERLOAD,
     type::TASK_EXPIRED,
@@ -127,7 +127,7 @@ template <> struct TEnumDataStorage<::apache::thrift::ResponseRpcErrorCode> {
     type::INTERRUPTION,
     type::APP_OVERLOAD,
   }};
-  static constexpr const std::array<folly::StringPiece, 14> names = {{
+  static constexpr const std::array<folly::StringPiece, size> names = {{
     "UNKNOWN",
     "OVERLOAD",
     "TASK_EXPIRED",
@@ -147,13 +147,58 @@ template <> struct TEnumDataStorage<::apache::thrift::ResponseRpcErrorCode> {
 template <> struct TEnumDataStorage<::apache::thrift::InterfaceKind> {
   using type = ::apache::thrift::InterfaceKind;
   static constexpr const std::size_t size = 2;
-  static constexpr const std::array<type, 2> values = {{
+  static constexpr const std::array<type, size> values = {{
     type::USER,
     type::DEBUGGING,
   }};
-  static constexpr const std::array<folly::StringPiece, 2> names = {{
+  static constexpr const std::array<folly::StringPiece, size> names = {{
     "USER",
     "DEBUGGING",
+  }};
+};
+
+template <> struct TEnumDataStorage<::apache::thrift::CodecConfig::Type> {
+  using type = ::apache::thrift::CodecConfig::Type;
+  static constexpr const std::size_t size = 2;
+  static constexpr const std::array<type, size> values = {{
+    type::zlibConfig,
+    type::zstdConfig,
+  }};
+  static constexpr const std::array<folly::StringPiece, size> names = {{
+    "zlibConfig",
+    "zstdConfig",
+  }};
+};
+
+template <> struct TEnumDataStorage<::apache::thrift::PayloadExceptionMetadata::Type> {
+  using type = ::apache::thrift::PayloadExceptionMetadata::Type;
+  static constexpr const std::size_t size = 5;
+  static constexpr const std::array<type, size> values = {{
+    type::declaredException,
+    type::proxyException,
+    type::proxiedException,
+    type::appClientException,
+    type::appServerException,
+  }};
+  static constexpr const std::array<folly::StringPiece, size> names = {{
+    "declaredException",
+    "proxyException",
+    "proxiedException",
+    "appClientException",
+    "appServerException",
+  }};
+};
+
+template <> struct TEnumDataStorage<::apache::thrift::PayloadMetadata::Type> {
+  using type = ::apache::thrift::PayloadMetadata::Type;
+  static constexpr const std::size_t size = 2;
+  static constexpr const std::array<type, size> values = {{
+    type::responseMetadata,
+    type::exceptionMetadata,
+  }};
+  static constexpr const std::array<folly::StringPiece, size> names = {{
+    "responseMetadata",
+    "exceptionMetadata",
   }};
 };
 

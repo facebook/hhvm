@@ -27,21 +27,21 @@ struct TccStructTraits<::apache::thrift::reflection::StructField> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::apache::thrift::reflection::DataType> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 template <>
 struct TccStructTraits<::apache::thrift::reflection::Schema> {
   static void translateFieldName(
       folly::StringPiece _fname,
       int16_t& fid,
-      apache::thrift::protocol::TType& _ftype);
+      apache::thrift::protocol::TType& _ftype) noexcept;
 };
 
 } // namespace detail
@@ -99,7 +99,7 @@ _readField_type:
 _readField_name:
   {
     
-    iprot->readString(this->name);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->name);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.name = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -222,7 +222,7 @@ uint32_t StructField::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("type", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->type);
   xfer += prot_->serializedFieldSize("name", apache::thrift::protocol::T_STRING, 3);
-  xfer += prot_->serializedSizeString(this->name);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->name);
   if (this->annotations_ref().has_value()) {
     xfer += prot_->serializedFieldSize("annotations", apache::thrift::protocol::T_MAP, 4);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, std::unordered_map<::std::string, ::std::string>>::serializedSize<false>(*prot_, this->annotations);
@@ -242,7 +242,7 @@ uint32_t StructField::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedFieldSize("type", apache::thrift::protocol::T_I64, 2);
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::serializedSize<false>(*prot_, this->type);
   xfer += prot_->serializedFieldSize("name", apache::thrift::protocol::T_STRING, 3);
-  xfer += prot_->serializedSizeString(this->name);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->name);
   if (this->annotations_ref().has_value()) {
     xfer += prot_->serializedFieldSize("annotations", apache::thrift::protocol::T_MAP, 4);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, std::unordered_map<::std::string, ::std::string>>::serializedSize<false>(*prot_, this->annotations);
@@ -264,7 +264,7 @@ uint32_t StructField::write(Protocol_* prot_) const {
   xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::integral, int64_t>::write(*prot_, this->type);
   xfer += prot_->writeFieldEnd();
   xfer += prot_->writeFieldBegin("name", apache::thrift::protocol::T_STRING, 3);
-  xfer += prot_->writeString(this->name);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->name);
   xfer += prot_->writeFieldEnd();
   if (this->annotations_ref().has_value()) {
     xfer += prot_->writeFieldBegin("annotations", apache::thrift::protocol::T_MAP, 4);
@@ -310,7 +310,7 @@ void DataType::readNoXfer(Protocol_* iprot) {
 _readField_name:
   {
     
-    iprot->readString(this->name);
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::read(*iprot, this->name);
     THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
     this->__isset.name = true;
     THRIFT_IGNORE_ISSET_USE_WARNING_END
@@ -463,7 +463,7 @@ uint32_t DataType::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("DataType");
   xfer += prot_->serializedFieldSize("name", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeString(this->name);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->name);
   if (this->fields_ref().has_value()) {
     xfer += prot_->serializedFieldSize("fields", apache::thrift::protocol::T_MAP, 2);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>>::serializedSize<false>(*prot_, this->fields);
@@ -489,7 +489,7 @@ uint32_t DataType::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("DataType");
   xfer += prot_->serializedFieldSize("name", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->serializedSizeString(this->name);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->name);
   if (this->fields_ref().has_value()) {
     xfer += prot_->serializedFieldSize("fields", apache::thrift::protocol::T_MAP, 2);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>, std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>>::serializedSize<false>(*prot_, this->fields);
@@ -515,7 +515,7 @@ uint32_t DataType::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("DataType");
   xfer += prot_->writeFieldBegin("name", apache::thrift::protocol::T_STRING, 1);
-  xfer += prot_->writeString(this->name);
+  xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::string, ::std::string>::write(*prot_, this->name);
   xfer += prot_->writeFieldEnd();
   if (this->fields_ref().has_value()) {
     xfer += prot_->writeFieldBegin("fields", apache::thrift::protocol::T_MAP, 2);

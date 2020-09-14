@@ -41,7 +41,7 @@ const char* ThriftMetadataServiceAsyncProcessor::getServiceName() {
 }
 
 void ThriftMetadataServiceAsyncProcessor::getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
-  ::apache::thrift::detail::md::ServiceMetadata<ThriftMetadataServiceSvIf>::gen(response.metadata, response.context);
+  ::apache::thrift::detail::md::ServiceMetadata<ThriftMetadataServiceSvIf>::gen(*response.metadata_ref(), *response.context_ref());
 }
 
 void ThriftMetadataServiceAsyncProcessor::processSerializedRequest(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {

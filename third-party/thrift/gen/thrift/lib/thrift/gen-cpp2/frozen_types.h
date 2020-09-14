@@ -89,8 +89,20 @@ class Schema;
 // END hash_and_equal_to
 namespace apache { namespace thrift { namespace frozen { namespace schema {
 class Field final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = Field;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   Field() :
@@ -103,6 +115,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   Field(Field&&) = default;
 
   Field(const Field&) = default;
+
 
   Field& operator=(Field&&) = default;
 
@@ -221,9 +234,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< Field >;
+  friend void swap(Field& a, Field& b);
 };
-
-void swap(Field& a, Field& b);
 
 template <class Protocol_>
 uint32_t Field::read(Protocol_* iprot) {
@@ -235,8 +247,20 @@ uint32_t Field::read(Protocol_* iprot) {
 }}}} // apache::thrift::frozen::schema
 namespace apache { namespace thrift { namespace frozen { namespace schema {
 class Layout final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = Layout;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   Layout() :
@@ -249,6 +273,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   Layout(Layout&&) = default;
 
   Layout(const Layout&) = default;
+
 
   Layout& operator=(Layout&&) = default;
 
@@ -445,9 +470,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< Layout >;
+  friend void swap(Layout& a, Layout& b);
 };
-
-void swap(Layout& a, Layout& b);
 
 template <class Protocol_>
 uint32_t Layout::read(Protocol_* iprot) {
@@ -459,8 +483,20 @@ uint32_t Layout::read(Protocol_* iprot) {
 }}}} // apache::thrift::frozen::schema
 namespace apache { namespace thrift { namespace frozen { namespace schema {
 class Schema final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+
  public:
   using __fbthrift_cpp2_type = Schema;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
 
 THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   Schema() :
@@ -474,6 +510,7 @@ THRIFT_IGNORE_ISSET_USE_WARNING_BEGIN
   Schema(Schema&&) = default;
 
   Schema(const Schema&) = default;
+
 
   Schema& operator=(Schema&&) = default;
 
@@ -665,9 +702,8 @@ THRIFT_IGNORE_ISSET_USE_WARNING_END
   void readNoXfer(Protocol_* iprot);
 
   friend class ::apache::thrift::Cpp2Ops< Schema >;
+  friend void swap(Schema& a, Schema& b);
 };
-
-void swap(Schema& a, Schema& b);
 
 template <class Protocol_>
 uint32_t Schema::read(Protocol_* iprot) {

@@ -11,13 +11,3 @@
 
 #include "mcrouter/lib/network/gen/gen-cpp2/MemcacheService_data.h"
 
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-

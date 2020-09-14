@@ -13,9 +13,9 @@ include(HPHPFunctions)
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   FB_MYSQL_DOWNLOAD_ARGS
   SOURCE_URL
-  "https://github.com/facebook/mysql-5.6/archive/fb-prod8-202007.tar.gz"
+  "https://github.com/facebook/mysql-5.6/archive/fb-prod8-202008.tar.gz"
   SOURCE_HASH
-  "SHA512=6f362dfae963c67985eda050b778c26729c8ec98110f9ed72d295061cdde0f7d2276d4126facab5f5bd741d63bb8afe3c6ca38eb4876f9db97fba07e405899ec"
+  "SHA512=6de43546849529cb84b7cda0ed227bdabbc2effb9e8aa4df3a2032caac032031192297cb445b8ebf991254a3275176c07b300cfef37711b03abd27c9676ea3c2"
 )
 ExternalProject_Add(
   bundled_fbmysqlclient

@@ -14,24 +14,21 @@ namespace apache {
 namespace thrift {
 namespace detail {
 namespace md {
-using ThriftMetadata = ::apache::thrift::metadata::ThriftMetadata;
-using ThriftServiceContext = ::apache::thrift::metadata::ThriftServiceContext;
-using ThriftService = ::apache::thrift::metadata::ThriftService;
 
 template <>
 class StructMetadata<::apache::thrift::frozen::schema::Field> {
  public:
-  static void gen(ThriftMetadata& metadata);
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::apache::thrift::frozen::schema::Layout> {
  public:
-  static void gen(ThriftMetadata& metadata);
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::apache::thrift::frozen::schema::Schema> {
  public:
-  static void gen(ThriftMetadata& metadata);
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 } // namespace md
 } // namespace detail

@@ -69,9 +69,14 @@ impl<'ast> Visitor<'ast> for Checker {
 
         // Ensure the context tracks whether we're in a backtick.
         match &e.1 {
-            ExpressionTree(_) => {
+            ExpressionTree(et) => {
                 c.in_expression_tree = true;
-                let res = e.recurse(c, self);
+
+                // Only run the syntax check on the original syntax
+                // from the user. Ignore the desugared expression.
+                let user_syntax = &et.1;
+                let res = user_syntax.accept(c, self);
+
                 c.in_expression_tree = false;
                 return res;
             }

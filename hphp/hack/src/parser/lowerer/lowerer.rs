@@ -43,6 +43,7 @@ use std::{
     slice::Iter,
 };
 
+use crate::desugar_expression_tree::desugar;
 use crate::modifier;
 
 fn unescape_single(s: &str) -> std::result::Result<BString, escaper::InvalidString> {
@@ -169,7 +170,7 @@ pub struct Env<'a> {
 
     // Cache none pos, lazy_static doesn't allow Rc.
     pos_none: Pos,
-    empty_ns_env: RcOc<NamespaceEnv>,
+    pub empty_ns_env: RcOc<NamespaceEnv>,
 
     pub saw_yield: bool, /* Information flowing back up */
     pub lifted_awaits: Option<LiftedAwaits>,
@@ -2088,11 +2089,15 @@ where
                 Self::p_hint(&c.cast_type, env)?,
                 Self::p_expr(&c.cast_operand, env)?,
             )),
-            PrefixedCodeExpression(c) => Ok(E_::mk_expression_tree(
-                Self::p_hint(&c.prefixed_code_prefix, env)?,
-                Self::p_expr(&c.prefixed_code_expression, env)?,
-                None,
-            )),
+            PrefixedCodeExpression(c) => {
+                let e = Self::p_expr(&c.prefixed_code_expression, env)?;
+                let desugared_e = desugar(&e, &env);
+                Ok(E_::mk_expression_tree(
+                    Self::p_hint(&c.prefixed_code_prefix, env)?,
+                    e,
+                    Some(desugared_e),
+                ))
+            }
             ConditionalExpression(c) => {
                 let alter = Self::p_expr(&c.conditional_alternative, env)?;
                 let consequence = Self::mp_optional(Self::p_expr, &c.conditional_consequence, env)?;

@@ -6,6 +6,7 @@
 #[macro_use]
 extern crate lazy_static;
 
+mod desugar_expression_tree;
 mod lowerer;
 mod modifier;
 mod scour_comment;

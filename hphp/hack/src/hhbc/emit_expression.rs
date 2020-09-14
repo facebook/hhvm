@@ -505,6 +505,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::ClassGet(e) => emit_class_get(emitter, env, QueryOp::CGet, &e.0, &e.1),
         Expr_::String2(es) => emit_string2(emitter, env, pos, es),
         Expr_::BracedExpr(e) => emit_expr(emitter, env, e),
+        Expr_::ExpressionTree(e) => emit_expr(emitter, env, &e.1),
         Expr_::Id(e) => Ok(emit_pos_then(pos, emit_id(emitter, env, e)?)),
         Expr_::Xml(e) => emit_xhp(emitter, env, pos, e),
         Expr_::Callconv(_) => Err(unrecoverable(

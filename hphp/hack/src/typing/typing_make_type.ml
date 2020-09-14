@@ -132,10 +132,17 @@ let intersection r tyl =
 
 let unenforced ty = { et_type = ty; et_enforced = false }
 
-let has_member r name ty class_id =
+let has_member r ~name ~ty ~class_id ~explicit_targs =
   ConstraintType
     (mk_constraint_type
-       (r, Thas_member { hm_name = name; hm_type = ty; hm_class_id = class_id }))
+       ( r,
+         Thas_member
+           {
+             hm_name = name;
+             hm_type = ty;
+             hm_class_id = class_id;
+             hm_explicit_targs = explicit_targs;
+           } ))
 
 let list_destructure r tyl =
   ConstraintType

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5761768068f74f1cb328f28430329cb9>>
+// @generated SignedSource<<8f79507194f9ea5522b4d7f0d3c3d26f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -557,6 +557,7 @@ pub struct HasMember<'a> {
     /// HHVM would access the private member of a parent class instead of the
     /// one from the current class.
     pub class_id: nast::ClassId_<'a>,
+    pub explicit_targs: Option<&'a [nast::Targ<'a>]>,
 }
 impl<'a> TrivialDrop for HasMember<'a> {}
 

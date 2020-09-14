@@ -1402,7 +1402,9 @@ and get_tyvars_i env (ty : internal_type) =
         ISet.union (ISet.union positive1 positive2) positive3,
         ISet.union (ISet.union negative1 negative2) negative3 )
     | (_, Thas_member hm) ->
-      let { hm_type; hm_name = _; hm_class_id = _ } = hm in
+      let { hm_type; hm_name = _; hm_class_id = _; hm_explicit_targs = _ } =
+        hm
+      in
       get_tyvars env hm_type
     | (_, TCunion (lty, cty))
     | (_, TCintersection (lty, cty)) ->

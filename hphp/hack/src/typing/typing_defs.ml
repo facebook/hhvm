@@ -733,12 +733,32 @@ let class_id_equal cid1 cid2 = Int.equal (class_id_compare cid1 cid2) 0
 
 let has_member_compare ~normalize_lists hm1 hm2 =
   let ty_compare = ty_compare ~normalize_lists in
-  let { hm_name = (_, m1); hm_type = ty1; hm_class_id = cid1 } = hm1 in
-  let { hm_name = (_, m2); hm_type = ty2; hm_class_id = cid2 } = hm2 in
+  let {
+    hm_name = (_, m1);
+    hm_type = ty1;
+    hm_class_id = cid1;
+    hm_explicit_targs = targs1;
+  } =
+    hm1
+  in
+  let {
+    hm_name = (_, m2);
+    hm_type = ty2;
+    hm_class_id = cid2;
+    hm_explicit_targs = targs2;
+  } =
+    hm2
+  in
+  let targ_compare (_, (_, hint1)) (_, (_, hint2)) =
+    Aast_defs.compare_hint_ hint1 hint2
+  in
   match String.compare m1 m2 with
   | 0 ->
     (match ty_compare ty1 ty2 with
-    | 0 -> class_id_compare cid1 cid2
+    | 0 ->
+      (match class_id_compare cid1 cid2 with
+      | 0 -> Option.compare (List.compare targ_compare) targs1 targs2
+      | comp -> comp)
     | comp -> comp)
   | comp -> comp
 

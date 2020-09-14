@@ -277,9 +277,26 @@ module Full = struct
   let pu_concat k ty access = k ty ^^ text (":@" ^ access)
 
   let thas_member k hm =
-    let { hm_name = (_, name); hm_type; hm_class_id = _ } = hm in
+    let { hm_name = (_, name); hm_type; hm_class_id = _; hm_explicit_targs } =
+      hm
+    in
+    (* TODO: T71614503 print explicit type arguments appropriately *)
+    let printed_explicit_targs =
+      match hm_explicit_targs with
+      | None -> text "None"
+      | Some _ -> text "Some <targs>"
+    in
     Concat
-      [text "has_member"; text "("; text name; comma_sep; k hm_type; text ")"]
+      [
+        text "has_member";
+        text "(";
+        text name;
+        comma_sep;
+        k hm_type;
+        comma_sep;
+        printed_explicit_targs;
+        text ")";
+      ]
 
   let tdestructure k d =
     let { d_required; d_optional; d_variadic; d_kind } = d in

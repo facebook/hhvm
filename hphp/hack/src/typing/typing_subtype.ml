@@ -341,8 +341,17 @@ let rec describe_ty_super env ?(short = false) ty =
   | ConstraintType ty ->
     (match deref_constraint_type ty with
     | (_, Thas_member hm) ->
-      let { hm_name = (_, name); hm_type = _; hm_class_id = _ } = hm in
-      Printf.sprintf "an object with member `%s`" name
+      let {
+        hm_name = (_, name);
+        hm_type = _;
+        hm_class_id = _;
+        hm_explicit_targs = targs;
+      } =
+        hm
+      in
+      (match targs with
+      | None -> Printf.sprintf "an object with property `%s`" name
+      | Some _ -> Printf.sprintf "an object with method `%s`" name)
     | (_, Tdestructure _) ->
       Typing_print.with_blank_tyvars (fun () ->
           Typing_print.full_strip_ns_i env (ConstraintType ty))
@@ -873,7 +882,12 @@ and simplify_subtype_i
         end
       | ( r,
           Thas_member
-            { hm_name = name; hm_type = member_ty; hm_class_id = class_id } ) ->
+            {
+              hm_name = name;
+              hm_type = member_ty;
+              hm_class_id = class_id;
+              hm_explicit_targs = explicit_targs;
+            } ) ->
         (match ety_sub with
         | ConstraintType cty ->
           begin
@@ -884,8 +898,18 @@ and simplify_subtype_i
                     hm_name = name_sub;
                     hm_type = ty_sub;
                     hm_class_id = cid_sub;
+                    hm_explicit_targs = explicit_targs_sub;
                   } ) ->
-              if Nast.equal_sid name_sub name && class_id_equal cid_sub class_id
+              if
+                let targ_equal (_, (_, hint1)) (_, (_, hint2)) =
+                  Aast_defs.equal_hint_ hint1 hint2
+                in
+                Nast.equal_sid name_sub name
+                && class_id_equal cid_sub class_id
+                && Option.equal
+                     (List.equal ~equal:targ_equal)
+                     explicit_targs_sub
+                     explicit_targs
               then
                 simplify_subtype ~subtype_env ~this_ty ty_sub member_ty env
               else

@@ -349,9 +349,9 @@ class ['env] constraint_type_mapper : ['env] locl_constraint_type_mapper_type =
       | TCintersection (lty, cty) -> this#on_TCintersection env r lty cty
 
     method on_Thas_member env r hm =
-      let { hm_name; hm_type; hm_class_id } = hm in
+      let { hm_name; hm_type; hm_class_id; hm_explicit_targs } = hm in
       let (env, hm_type) = this#on_type env hm_type in
-      let hm = { hm_name; hm_type; hm_class_id } in
+      let hm = { hm_name; hm_type; hm_class_id; hm_explicit_targs } in
       (env, mk_constraint_type (r, Thas_member hm))
 
     method on_Tdestructure env r { d_required; d_optional; d_variadic; d_kind }

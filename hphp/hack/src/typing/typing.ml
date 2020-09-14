@@ -2268,7 +2268,14 @@ and expr_
     Thas_member(m, #1) where #1 is a fresh type variable. *)
     let (env, mem_ty) = Env.fresh_type env p in
     let r = Reason.Rwitness (fst e1) in
-    let has_member_ty = MakeType.has_member r m mem_ty (CIexpr e1) in
+    let has_member_ty =
+      MakeType.has_member
+        r
+        ~name:m
+        ~ty:mem_ty
+        ~class_id:(CIexpr e1)
+        ~explicit_targs:None
+    in
     let lty1 = LoclType ty1 in
     let (env, result_ty) =
       match nullsafe with

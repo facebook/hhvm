@@ -142,7 +142,7 @@ void emitCallerDynamicCallChecksUnknown(IRGS& env, SSATmp* callee) {
 
 void emitCallerRxChecksKnown(IRGS& env, const Func* callee) {
   assertx(callee);
-  if (RuntimeOption::EvalRxEnforceCalls <= 0) return;
+  if (RuntimeOption::EvalPureEnforceCalls <= 0) return;
   auto const callerLevel = curRxLevel(env);
   if (!rxEnforceCallsInLevel(callerLevel)) return;
 
@@ -155,7 +155,7 @@ namespace {
 
 void emitCallerRxChecksUnknown(IRGS& env, SSATmp* callee) {
   assertx(!callee->hasConstVal());
-  if (RuntimeOption::EvalRxEnforceCalls <= 0) return;
+  if (RuntimeOption::EvalPureEnforceCalls <= 0) return;
   auto const callerLevel = curRxLevel(env);
   if (!rxEnforceCallsInLevel(callerLevel)) return;
 

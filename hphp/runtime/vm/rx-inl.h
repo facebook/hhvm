@@ -57,7 +57,12 @@ inline const char* rxLevelToString(RxLevel level) {
 }
 
 inline bool rxEnforceCallsInLevel(RxLevel level) {
-  return level >= RxLevel::Shallow;
+  assertx(RuntimeOption::EvalPureEnforceCalls > 0);
+  if (RuntimeOption::EvalRxEnforceCalls > 0) {
+    return level >= RxLevel::Shallow;
+  } else {
+    return level >= RxLevel::Pure;
+  }
 }
 
 inline RxLevel rxRequiredCalleeLevel(RxLevel level) {

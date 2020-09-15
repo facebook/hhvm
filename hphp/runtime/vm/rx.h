@@ -69,6 +69,10 @@ constexpr bool funcAttrIsAnyRx(Attr a) {
   return static_cast<uint32_t>(a) & kRxAttrMask;
 }
 
+constexpr bool funcAttrIsPure(Attr a) {
+  return static_cast<uint32_t>(a) & AttrRxLevel2;
+}
+
 bool rxEnforceCallsInLevel(RxLevel level);
 RxLevel rxRequiredCalleeLevel(RxLevel level);
 

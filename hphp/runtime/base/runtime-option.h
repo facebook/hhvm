@@ -1206,12 +1206,14 @@ struct RuntimeOption {
    */                                                                   \
   F(int32_t, ForbidUnserializeIncompleteClass, 0)                       \
   F(int32_t, RxEnforceCalls, 0)                                         \
+  F(int32_t, PureEnforceCalls, 0)                                       \
   /*                                                                    \
    * 0 - Nothing                                                        \
    * 1 - Warn                                                           \
    * 2 - Fail unit verification (i.e. fail to load it)                  \
    */                                                                   \
   F(int32_t, RxVerifyBody, 0)                                           \
+  F(int32_t, PureVerifyBody, 0)                                         \
   F(bool, RxIsEnabled, EvalRxPretendIsEnabled)                          \
   /*                                                                    \
    * Controls behavior on reflection to default value expressions       \

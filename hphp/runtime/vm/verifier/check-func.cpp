@@ -101,7 +101,7 @@ struct FuncChecker {
   bool checkMemberKey(State* cur, PC, Op);
   bool checkInputs(State* cur, PC, Block* b);
   bool checkOutputs(State* cur, PC, Block* b);
-  bool checkRxOp(State* cur, PC, Op);
+  bool checkRxOp(State* cur, PC, Op, bool);
   bool checkSig(PC pc, int len, const FlavorDesc* args, const FlavorDesc* sig);
   bool checkTerminal(State* cur, Op op, Block* b);
   bool checkIter(State* cur, PC pc);
@@ -1442,7 +1442,11 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   return ok;
 }
 
-bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
+bool FuncChecker::checkRxOp(State* cur, PC pc, Op op, bool pure) {
+  const auto type = pure ? "Pure" : "Rx";
+  const auto is_enforcement_below_failure = pure
+      ? RuntimeOption::EvalPureVerifyBody < 2
+      : RuntimeOption::EvalRxVerifyBody < 2;
   switch (op) {
     // nops
     case Op::Nop:
@@ -1722,8 +1726,8 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
           break;
       }
       ferror("Dim through object for write is only allowed on locals and "
-             "$this in Rx functions\n");
-      return RuntimeOption::EvalRxVerifyBody < 2;
+             "$this in {} functions\n", type);
+      return is_enforcement_below_failure;
     }
 
     // member final read: QueryM is always safe
@@ -1769,14 +1773,14 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
           break;
       }
       if (cur->afterDim) {
-        ferror("writes to embedded objects are forbidden in Rx functions: {}\n",
-               opcodeToName(op));
-        return RuntimeOption::EvalRxVerifyBody < 2;
+        ferror("writes to embedded objects are forbidden in {} functions: {}\n",
+               type, opcodeToName(op));
+        return is_enforcement_below_failure;
       }
       if (!cur->mbrMustContainMutableLocalOrThis) {
-        ferror("property writes are only allowed on mutable values in Rx "
-               "functions: {}\n", opcodeToName(op));
-        return RuntimeOption::EvalRxVerifyBody < 2;
+        ferror("property writes are only allowed on mutable values in {} "
+               "functions: {}\n", type, opcodeToName(op));
+        return is_enforcement_below_failure;
       }
       return true;
     }
@@ -1793,8 +1797,9 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::SetOpG:
     case Op::IncDecG:
     case Op::UnsetG:
-      ferror("globals are forbidden in Rx functions: {}\n", opcodeToName(op));
-      return RuntimeOption::EvalRxVerifyBody < 2;
+      ferror("globals are forbidden in {} functions: {}\n",
+             type, opcodeToName(op));
+      return is_enforcement_below_failure;
 
     // unsafe: class statics
     case Op::BaseSC:
@@ -1806,8 +1811,9 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::SetS:
     case Op::SetOpS:
     case Op::IncDecS:
-      ferror("statics are forbidden in Rx functions: {}\n", opcodeToName(op));
-      return RuntimeOption::EvalRxVerifyBody < 2;
+      ferror("statics are forbidden in {} functions: {}\n",
+             type, opcodeToName(op));
+      return is_enforcement_below_failure;
 
     // unsafe: defines and includes
     case Op::Incl:
@@ -1815,9 +1821,9 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::Req:
     case Op::ReqOnce:
     case Op::ReqDoc:
-      ferror("defines/includes are forbidden in Rx functions: {}\n",
-             opcodeToName(op));
-      return RuntimeOption::EvalRxVerifyBody < 2;
+      ferror("defines/includes are forbidden in {} functions: {}\n",
+             type, opcodeToName(op));
+      return is_enforcement_below_failure;
 
     // unsafe: misc
     case Op::CheckProp:
@@ -1827,8 +1833,8 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::Eval:
     case Op::Print:
     case Op::Silence:
-      ferror("{} cannot appear in Rx function\n", opcodeToName(op));
-      return RuntimeOption::EvalRxVerifyBody < 2;
+      ferror("{} cannot appear in {} function\n", opcodeToName(op), type);
+      return is_enforcement_below_failure;
   }
   not_reached();
 }
@@ -1930,7 +1936,12 @@ bool FuncChecker::checkExnEdge(State cur, Op op, Block* b) {
 bool FuncChecker::checkBlock(State& cur, Block* b) {
   bool ok = true;
   auto const verify_rx = (RuntimeOption::EvalRxVerifyBody > 0) &&
-    funcAttrIsAnyRx(m_func->attrs) && !m_func->isRxDisabled;
+                         funcAttrIsAnyRx(m_func->attrs) &&
+                         // defer this to next check
+                         !funcAttrIsPure(m_func->attrs) &&
+                         !m_func->isRxDisabled;
+  auto const verify_pure = (RuntimeOption::EvalPureVerifyBody > 0) &&
+                            funcAttrIsPure(m_func->attrs);
   if (m_errmode == kVerbose) {
     std::cout << blockToString(b, m_graph, m_func) << std::endl;
   }
@@ -1951,7 +1962,8 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     if (flags & TF) ok &= checkTerminal(&cur, op, b);
     if (isIter(pc)) ok &= checkIter(&cur, pc);
     ok &= checkOutputs(&cur, pc, b);
-    if (verify_rx) ok &= checkRxOp(&cur, pc, op);
+    if (verify_rx) ok &= checkRxOp(&cur, pc, op, false);
+    if (verify_pure) ok &= checkRxOp(&cur, pc, op, true);
     prev_pc = pc;
   }
   ok &= checkSuccEdges(b, &cur);

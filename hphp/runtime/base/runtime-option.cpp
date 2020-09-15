@@ -2816,6 +2816,13 @@ void RuntimeOption::Load(
     RuntimeOption::EvalJitForceVMRegSync = true;
   }
 
+  // we need to maintain an invariant that PureEnforceCalls >= RxEnforceCalls...
+  // We can't be stricter on rx than on pure, as that would break rx assumptions
+  RuntimeOption::EvalPureEnforceCalls = std::max(
+    RuntimeOption::EvalPureEnforceCalls, RuntimeOption::EvalRxEnforceCalls);
+  RuntimeOption::EvalPureVerifyBody = std::max(
+    RuntimeOption::EvalPureVerifyBody, RuntimeOption::EvalRxVerifyBody);
+
   // Initialize defaults for repo-specific parser configuration options.
   RepoOptions::setDefaults(config, ini);
 }

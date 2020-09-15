@@ -505,7 +505,6 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::ClassGet(e) => emit_class_get(emitter, env, QueryOp::CGet, &e.0, &e.1),
         Expr_::String2(es) => emit_string2(emitter, env, pos, es),
         Expr_::BracedExpr(e) => emit_expr(emitter, env, e),
-        Expr_::ExpressionTree(e) => emit_expr(emitter, env, &e.1),
         Expr_::Id(e) => Ok(emit_pos_then(pos, emit_id(emitter, env, e)?)),
         Expr_::Xml(e) => emit_xhp(emitter, env, pos, e),
         Expr_::Callconv(_) => Err(unrecoverable(
@@ -531,6 +530,16 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::PUAtom(_) | Expr_::PUIdentifier(_) => Err(unrecoverable(
             "TODO(T35357243): Pocket Universes syntax must be erased by now",
         )),
+        Expr_::ExpressionTree(et) => {
+            let desugared_expr = &et.2;
+            if let Some(expr) = desugared_expr {
+                emit_expr(emitter, env, expr)
+            } else {
+                Err(unrecoverable(
+                    "TODO(exprtrees): Expression Trees need to be desugared before emission",
+                ))
+            }
+        }
         _ => unimplemented!("TODO(hrust)"),
     }
 }

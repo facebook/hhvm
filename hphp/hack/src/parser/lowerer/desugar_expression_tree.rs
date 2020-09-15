@@ -1,6 +1,6 @@
 use crate::lowerer::Env;
 use bstr::BString;
-use naming_special_names_rust::{collections, typehints};
+use naming_special_names_rust::typehints;
 use ocamlrep::rc::RcOc;
 use oxidized::{
     aast, ast,
@@ -184,7 +184,7 @@ fn vec_literal(items: Vec<Expr>) -> Expr {
     let fields: Vec<_> = items.into_iter().map(|e| ast::Afield::AFvalue(e)).collect();
     Expr::new(
         Pos::make_none(),
-        Expr_::Collection(Box::new((make_id(collections::VEC), None, fields))),
+        Expr_::Collection(Box::new((make_id("vec"), None, fields))),
     )
 }
 

@@ -51,13 +51,9 @@ bool(false)
 Notice: Observing static map-like darray in is_dict from %s/test/slow/array_provenance/is-tests.php:49 in %s/test/slow/array_provenance/is-tests.php on line 73
 bool(false)
 --- is $tuple ----
-
-Notice: Observing static list-like varray in is_tuple from %s/test/slow/array_provenance/is-tests.php:48 in %s/test/slow/array_provenance/is-tests.php on line 75
 bool(true)
 bool(false)
 --- as $tuple ----
-
-Notice: Observing static list-like varray in is_tuple from %s/test/slow/array_provenance/is-tests.php:48 in %s/test/slow/array_provenance/is-tests.php on line 40
 varray(3) {
   int(1)
   int(2)
@@ -66,13 +62,9 @@ varray(3) {
 string(6) "failed"
 --- is $shape ----
 bool(false)
-
-Notice: Observing static map-like darray in is_shape from %s/test/slow/array_provenance/is-tests.php:49 in %s/test/slow/array_provenance/is-tests.php on line 82
 bool(true)
 --- as $tuple ----
 string(6) "failed"
-
-Notice: Observing static map-like darray in is_shape from %s/test/slow/array_provenance/is-tests.php:49 in %s/test/slow/array_provenance/is-tests.php on line 32
 darray(2) {
   ["foo"]=>
   int(5)

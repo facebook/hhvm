@@ -1,7 +1,7 @@
 =====================================
 as/is shape/tuple:
 
-varray as shape: Expected shape('a' => int, 'b' => bool) at ["a"], got varray
+varray as shape: Expected shape('a' => int, 'b' => bool), got varray
 varray is shape: false
 darray as shape: {"a":17,"b":false}
 darray is shape: true

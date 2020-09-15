@@ -272,6 +272,7 @@ bool opcodeMayRaise(Opcode opc) {
     return RuntimeOption::EvalHackArrCompatCheckCompare;
 
   case IsTypeStruct:
+    return RuntimeOption::EvalHackArrIsShapeTupleNotices ||
            RuntimeOption::EvalIsExprEnableUnresolvedWarning ||
            RuntimeOption::EvalIsVecNotices;
 

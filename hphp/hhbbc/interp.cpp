@@ -3070,11 +3070,10 @@ void isTypeStructImpl(ISS& env, SArray inputTS) {
     case TypeStructure::Kind::T_void:
     case TypeStructure::Kind::T_null:
       return check(ts_type);
-    // TODO(kshaunak): Change `deopt` for tuple to "vec", for shape to "dict".
     case TypeStructure::Kind::T_tuple:
-      return check(ts_type, TDArr);
+      return check(ts_type, TVec);
     case TypeStructure::Kind::T_shape:
-      return check(ts_type, TVArr);
+      return check(ts_type, TDict);
     case TypeStructure::Kind::T_dict:
       return check(ts_type, TDArr);
     case TypeStructure::Kind::T_vec:

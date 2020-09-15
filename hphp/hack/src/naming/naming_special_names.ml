@@ -256,8 +256,6 @@ module UserAttributes = struct
 
   let uaOnlyRxIfImpl = "__OnlyRxIfImpl"
 
-  let uaProbabilisticModel = "__PPL"
-
   let uaLSB = "__LSB"
 
   let uaAtMostRxAsFunc = "__AtMostRxAsFunc"
@@ -339,7 +337,6 @@ module UserAttributes = struct
           (uaMutableReturn, [fn; mthd]);
           (uaShallowReactive, [fn; mthd]);
           (uaOnlyRxIfImpl, [parameter; mthd]);
-          (uaProbabilisticModel, [cls]);
           (uaLSB, [staticProperty]);
           (uaSealed, [cls]);
           (uaReturnsVoidToRx, [fn; mthd]);

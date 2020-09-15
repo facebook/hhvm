@@ -245,8 +245,6 @@ pub mod user_attributes {
 
     pub const ONLY_RX_IF_IMPL: &str = "__OnlyRxIfImpl";
 
-    pub const PROBABILISTIC_MODEL: &str = "__PPL";
-
     pub const LSB: &str = "__LSB";
 
     pub const AT_MOST_RX_AS_FUNC: &str = "__AtMostRxAsFunc";
@@ -312,7 +310,6 @@ pub mod user_attributes {
             MUTABLE_RETURN,
             SHALLOW_REACTIVE,
             ONLY_RX_IF_IMPL,
-            PROBABILISTIC_MODEL,
             LSB,
             SEALED,
             RETURNS_VOID_TO_RX,

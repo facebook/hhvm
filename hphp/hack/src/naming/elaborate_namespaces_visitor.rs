@@ -5,7 +5,6 @@
 
 use core_utils_rust as core_utils;
 use namespaces_rust as namespaces;
-use naming_attributes_rust as naming_attributes;
 use naming_special_names_rust as sn;
 use std::collections::HashSet;
 
@@ -41,7 +40,6 @@ struct Env {
     // find a way to specify that the lifetimes of these outlived the node I was taking them from
     namespace: ocamlrep::rc::RcOc<namespace_env::Env>,
     type_params: HashSet<String>,
-    in_ppl: bool,
 }
 
 impl Env {
@@ -49,7 +47,6 @@ impl Env {
         Self {
             namespace,
             type_params: HashSet::new(),
-            in_ppl: false,
         }
     }
 
@@ -137,10 +134,6 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
     // The following functions just set the namespace env correctly
     fn visit_class_(&mut self, env: &mut Env, cd: &mut Class_) -> Result<(), ()> {
         let mut env = env.clone();
-        env.in_ppl = naming_attributes::mem(
-            sn::user_attributes::PROBABILISTIC_MODEL,
-            &cd.user_attributes,
-        );
         env.namespace = cd.namespace.clone();
         env.extend_tparams(&cd.tparams);
         cd.recurse(&mut env, self.object())
@@ -230,14 +223,6 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
     // Actually rewrites the names
     fn visit_expr_(&mut self, env: &mut Env, e: &mut Expr_) -> Result<(), ()> {
         // Sets env for lambdas
-        let orig_in_ppl_flag = env.in_ppl;
-        match e {
-            Expr_::Efun(_) | Expr_::Lfun(_) => {
-                env.in_ppl = false;
-            }
-            _ => {}
-        }
-
         match e {
             Expr_::Call(c) => {
                 let (func, targs, args, uargs) = (&mut c.0, &mut c.1, &mut c.2, &mut c.3);
@@ -248,9 +233,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                 uargs.accept(env, self.object())?;
 
                 if let Some(sid) = func.1.as_id_mut() {
-                    if !(sn::special_functions::is_special_function(&sid.1)
-                        || (sn::ppl_functions::is_reserved(&sid.1) && env.in_ppl))
-                    {
+                    if !sn::special_functions::is_special_function(&sid.1) {
                         sid.1 = namespaces::elaborate_id(
                             &env.namespace,
                             namespaces::ElaborateKind::Fun,
@@ -368,7 +351,6 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
             }
             _ => e.recurse(env, self.object())?,
         }
-        env.in_ppl = orig_in_ppl_flag;
         Ok(())
     }
 

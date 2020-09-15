@@ -97,7 +97,7 @@ struct MixedArray::MarkedDictArrayInitializer {
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
     ad->initHeader_16(HeaderKind::Dict, StaticValue, ArrayData::kLegacyArray);
-    assertx(ad->checkInvariants());
+    assertx(!RuntimeOption::EvalHackArrDVArrs || ad->checkInvariants());
   }
 };
 MixedArray::MarkedDictArrayInitializer MixedArray::s_marked_dict_initializer;
@@ -414,10 +414,7 @@ MixedArray* MixedArray::SlowCopy(MixedArray* ad, const ArrayData& old,
 
 // for internal use by copyStatic() and copyMixed()
 ALWAYS_INLINE
-MixedArray* MixedArray::CopyMixed(const MixedArray& other,
-                                  AllocMode mode,
-                                  HeaderKind dest_hk) {
-  assertx(dest_hk == HeaderKind::Mixed || dest_hk == HeaderKind::Dict);
+MixedArray* MixedArray::CopyMixed(const MixedArray& other, AllocMode mode) {
   if (mode == AllocMode::Static) {
     assertx(other.m_size == other.m_used);
     assertx(!other.keyTypes().mayIncludeCounted());
@@ -453,13 +450,13 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   auto const count = mode == AllocMode::Request ? OneReference : StaticValue;
   auto const aux = other.auxBits() | other.keyTypes().packForAux() |
                    (shouldCreateStrKeyTable ? kHasStrKeyTable : 0);
-  ad->initHeader_16(dest_hk, count, aux);
+  ad->initHeader_16(other.m_kind, count, aux);
 
   // We want SlowCopy to be a tail call in the opt build, but we still want to
   // check assertions in debug builds, so we check them in this helper.
   auto const check = [&](MixedArray* res) {
     assertx(res->checkInvariants());
-    assertx(res->m_kind == dest_hk);
+    assertx(res->m_kind == other.m_kind);
     assertx(res->isLegacyArray() == other.isLegacyArray());
     assertx(res->keyTypes() == other.keyTypes());
     assertx(res->m_size == other.m_size);
@@ -497,7 +494,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
 NEVER_INLINE ArrayData* MixedArray::CopyStatic(const ArrayData* in) {
   auto a = asMixed(in);
   assertx(a->checkInvariants());
-  auto ret = CopyMixed(*a, AllocMode::Static, in->m_kind);
+  auto ret = CopyMixed(*a, AllocMode::Static);
 
   if (RuntimeOption::EvalArrayProvenance) {
     assertx(!ret->hasProvenanceData());
@@ -513,7 +510,7 @@ NEVER_INLINE ArrayData* MixedArray::CopyStatic(const ArrayData* in) {
 
 NEVER_INLINE MixedArray* MixedArray::copyMixed() const {
   assertx(checkInvariants());
-  auto const out = CopyMixed(*this, AllocMode::Request, m_kind);
+  auto const out = CopyMixed(*this, AllocMode::Request);
   return asMixed(tagArrProv(out, this));
 }
 
@@ -745,6 +742,7 @@ bool MixedArray::checkInvariants() const {
   assertx(hasVanillaMixedLayout());
   assertx(IMPLIES(isDArray(), isMixedKind()));
   assertx(IMPLIES(isNotDVArray(), isDictKind()));
+  assertx(IMPLIES(isLegacyArray(), isHAMSafeDArray()));
   assertx(!RuntimeOption::EvalHackArrDVArrs || isNotDVArray());
   assertx(checkCount());
   assertx(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
@@ -1430,38 +1428,37 @@ ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
   if (in->isDArray()) return in;
   if (RuntimeOption::EvalHackArrDVArrs) {
     if (RuntimeOption::EvalHackArrDVArrMark && !in->isLegacyArray()) {
-      if (copy) {
-        auto const ma = asMixed(in);
-        in = CopyMixed(*ma, AllocMode::Request, HeaderKind::Dict);
-      }
+      if (copy) in = CopyMixed(*asMixed(in), AllocMode::Request);
       in->setLegacyArray(true);
     }
     return in;
   }
-  auto a = asMixed(in);
 
-  auto const size = a->size();
-  if (!size) return ArrayData::CreateDArray();
+  if (in->empty()) return ArrayData::CreateDArray();
+
+  auto const a = asMixed(in);
   if (copy) return ToDArrayImpl(a);
 
   a->m_kind = HeaderKind::Mixed;
-  a->setLegacyArray(false);
   if (RO::EvalArrayProvenance) arrprov::reassignTag(a);
   assertx(a->checkInvariants());
   return a;
 }
 
 ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
-  assertx(ad->hasVanillaMixedLayout());
   assertx(asMixed(ad)->checkInvariants());
   if (ad->isDictKind()) return ad;
 
+  if (ad->isLegacyArray() && RO::EvalHackArrCompatCastMarkedArrayNotices) {
+    raise_hack_arr_compat_cast_marked_array_notice(ad);
+  }
   auto a = asMixed(ad);
   if (a->empty() && a->m_nextKI == 0) return ArrayData::CreateDict();
 
-  if (copy) return CopyMixed(*a, AllocMode::Request, HeaderKind::Dict);
+  if (copy) a = CopyMixed(*a, AllocMode::Request);
 
   a->m_kind = HeaderKind::Dict;
+  a->setLegacyArray(false);
   if (RO::EvalArrayProvenance) arrprov::clearTag(a);
   assertx(a->checkInvariants());
   return a;

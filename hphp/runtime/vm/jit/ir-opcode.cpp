@@ -302,7 +302,9 @@ bool opcodeMayRaise(Opcode opc) {
   case ConcatStrStr:
   case ConstructInstance:
   case ContEnter:
+  case ConvArrLikeToDict:
   case ConvArrLikeToKeyset:
+  case ConvArrLikeToVec:
   case ConvTVToBool:
   case ConvTVToDbl:
   case ConvTVToInt:
@@ -543,8 +545,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ContStarted:
   case ContStartedCheck:
   case ContValid:
-  case ConvArrLikeToDict:
-  case ConvArrLikeToVec:
   case ConvArrLikeToDArr:
   case ConvArrLikeToVArr:
   case ConvBoolToDbl:

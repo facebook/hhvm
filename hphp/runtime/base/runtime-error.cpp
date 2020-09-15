@@ -376,10 +376,9 @@ void raise_array_serialization_notice(SerializationSite src,
       tag.toString());
 }
 
-void
-raise_hack_arr_compat_array_producing_func_notice(const std::string& name) {
-  raise_notice("Hack Array Compat: Calling array producing function %s",
-               name.c_str());
+void raise_hack_arr_compat_cast_marked_array_notice(const ArrayData* ad) {
+  raise_notice("Hack Array Compat: Casting marked %s to Hack array",
+               getDataTypeString(ad->toDataType()).data());
 }
 
 namespace {

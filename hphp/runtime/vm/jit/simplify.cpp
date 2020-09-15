@@ -1870,11 +1870,20 @@ SSATmp* arrayLikeConvImpl(State& env, const IRInstruction* inst, C convert) {
   arrprov::TagOverride ap_override{arrprov::tagFromSK(inst->marker().sk())};
   auto const src = inst->src(0);
   if (!src->hasConstVal()) return nullptr;
+
   /* we can't fold the conversion if this function is skip frame
    * and we would assign a new tag at this location */
   if (RO::EvalArrayProvenance &&
       inst->func()->isProvenanceSkipFrame()) return nullptr;
+
+  /* we can't fold the conversion if we need to raise an array mark notice */
   auto const before = src->arrLikeVal();
+  if (before->isLegacyArray() && RO::EvalHackArrCompatCastMarkedArrayNotices &&
+      ((before->isDArray() && inst->is(ConvArrLikeToDict)) ||
+       (before->isVArray() && inst->is(ConvArrLikeToVec)))) {
+    return nullptr;
+  }
+
   auto converted = convert(const_cast<ArrayData*>(before));
   if (!converted) return nullptr;
   ArrayData::GetScalarArray(&converted);

@@ -192,7 +192,7 @@ void raise_convert_rcls_meth_to_type(const char* typeName);
 
 void raise_hack_arr_compat_serialize_notice(const ArrayData*);
 
-void raise_hack_arr_compat_array_producing_func_notice(const std::string& name);
+void raise_hack_arr_compat_cast_marked_array_notice(const ArrayData*);
 
 void raise_hackarr_compat_is_operator(const char* source, const char* target);
 

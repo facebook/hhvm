@@ -76,7 +76,7 @@ struct PackedArray::MarkedVecInitializer {
     auto const ad = reinterpret_cast<ArrayData*>(&s_theEmptyMarkedVec);
     ad->m_size = 0;
     ad->initHeader_16(HeaderKind::Vec, StaticValue, aux);
-    assertx(checkInvariants(ad));
+    assertx(!RuntimeOption::EvalHackArrDVArrs || checkInvariants(ad));
   }
 };
 PackedArray::MarkedVecInitializer PackedArray::s_marked_vec_initializer;
@@ -113,6 +113,7 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
   assertx(arr->m_size <= capacity(arr));
   assertx(IMPLIES(arr->isVArray(), arr->isPackedKind()));
   assertx(IMPLIES(arr->isNotDVArray(), arr->isVecKind()));
+  assertx(IMPLIES(arr->isLegacyArray(), arr->isHAMSafeVArray()));
   assertx(!RO::EvalHackArrDVArrs || arr->isVecKind());
   assertx(arrprov::arrayWantsTag(arr) || !arr->hasProvenanceData());
 
@@ -812,7 +813,6 @@ ArrayData* PackedArray::Prepend(ArrayData* adIn, TypedValue v) {
 
 ArrayData* PackedArray::ToVArray(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
-  assertx(adIn->hasVanillaPackedLayout());
   if (adIn->isVArray()) return adIn;
   if (RuntimeOption::EvalHackArrDVArrs) {
     if (RuntimeOption::EvalHackArrDVArrMark && !adIn->isLegacyArray()) {
@@ -823,10 +823,10 @@ ArrayData* PackedArray::ToVArray(ArrayData* adIn, bool copy) {
     return adIn;
   }
 
-  if (adIn->size() == 0) return ArrayData::CreateVArray();
+  if (adIn->empty()) return ArrayData::CreateVArray();
   auto const ad = copy ? Copy(adIn) : adIn;
+
   ad->m_kind = HeaderKind::Packed;
-  ad->setLegacyArray(false);
   if (RO::EvalArrayProvenance) arrprov::reassignTag(ad);
   assertx(checkInvariants(ad));
   return ad;
@@ -843,7 +843,6 @@ ArrayData* PackedArray::ToDArray(ArrayData* adIn, bool /*copy*/) {
 
 ArrayData* PackedArray::ToDict(ArrayData* ad, bool copy) {
   assertx(checkInvariants(ad));
-  assertx(ad->hasVanillaPackedLayout());
   if (ad->empty()) return ArrayData::CreateDict();
   auto const mixed = copy ? ToMixedCopy(ad) : ToMixed(ad);
   mixed->m_kind = HeaderKind::Dict;
@@ -853,9 +852,11 @@ ArrayData* PackedArray::ToDict(ArrayData* ad, bool copy) {
 
 ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
-  assertx(adIn->hasVanillaPackedLayout());
-
   if (adIn->isVecKind()) return adIn;
+
+  if (adIn->isLegacyArray() && RO::EvalHackArrCompatCastMarkedArrayNotices) {
+    raise_hack_arr_compat_cast_marked_array_notice(adIn);
+  }
   if (adIn->empty()) return ArrayData::CreateVec();
 
   ArrayData* ad;
@@ -869,6 +870,7 @@ ArrayData* PackedArray::ToVec(ArrayData* adIn, bool copy) {
     ad->initHeader_16(HeaderKind::Vec, OneReference, aux);
   } else {
     adIn->m_kind = HeaderKind::Vec;
+    adIn->setLegacyArray(false);
     ad = adIn;
   }
   if (RO::EvalArrayProvenance) arrprov::clearTag(ad);

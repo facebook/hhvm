@@ -1767,9 +1767,20 @@ void castImpl(ISS& env, Type target, void(*fn)(TypedValue*)) {
 
   if (fn && !needsRuntimeProvenance) {
     if (auto val = tv(t)) {
-      if (auto result = eval_cell([&] { fn(&*val); return *val; })) {
-        constprop(env);
-        target = *result;
+      // Legacy dvarrays may raise a notice on cast. In order to simplify the
+      // rollout of these notices, we don't const-fold casts on these arrays.
+      auto const may_raise_notice = [&]{
+        if (!tvIsArrayLike(*val)) return false;
+        auto const ad = val->m_data.parr;
+        if (!ad->isLegacyArray()) return false;
+        return (ad->isDArray() && target == TDict) ||
+               (ad->isVArray() && target == TVec);
+      }();
+      if (!may_raise_notice) {
+        if (auto result = eval_cell([&] { fn(&*val); return *val; })) {
+          constprop(env);
+          target = *result;
+        }
       }
     }
   }

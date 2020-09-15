@@ -464,7 +464,7 @@ private:
 private:
   enum class AllocMode : bool { Request, Static };
 
-  static MixedArray* CopyMixed(const MixedArray& other, AllocMode, HeaderKind);
+  static MixedArray* CopyMixed(const MixedArray& other, AllocMode);
   static MixedArray* CopyReserve(const MixedArray* src, size_t expectedSize);
 
   // Slow paths used for MixedArrays with references or counted string keys.

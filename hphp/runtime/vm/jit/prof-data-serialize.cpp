@@ -774,8 +774,11 @@ void maybe_output_prof_trans_rec_trace(
   if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::print_profiles)) {
     auto const sk = profTransRec->srcKey();
     auto const unit = sk.unit();
+    auto const func = sk.func();
     const char *filePath = "";
-    if (unit->filepath()->data() && unit->filepath()->size()) {
+    if (func->originalFilename() && func->originalFilename()->size()) {
+      filePath = func->originalFilename()->data();
+    } else if (unit->filepath()->data() && unit->filepath()->size()) {
       filePath = unit->filepath()->data();
     }
     folly::dynamic blocks = folly::dynamic::array;
@@ -924,7 +927,9 @@ void maybe_output_target_profile_trace(
         auto const func = srcKey.func();
         auto const unit = srcKey.unit();
         const char *filePath = "";
-        if (unit->filepath()->data() && unit->filepath()->size()) {
+        if (func->originalFilename() && func->originalFilename()->size()) {
+          filePath = func->originalFilename()->data();
+        } else if (unit->filepath()->data() && unit->filepath()->size()) {
           filePath = unit->filepath()->data();
         }
         folly::dynamic targetProfileInfo = folly::dynamic::object;

@@ -25,15 +25,16 @@
 #include "hphp/util/tiny-vector.h"
 #include "hphp/util/trace.h"
 
+#include <folly/Optional.h>
+
 namespace HPHP { namespace jit { namespace irgen {
 
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
 
-using Locations = TinyVector<Location, 2>;
-
-Locations getVanillaLocationsForBuiltin(const IRGS& env, SrcKey sk) {
+folly::Optional<Location> getVanillaLocationForBuiltin(const IRGS& env,
+                                                        SrcKey sk) {
   auto const op = sk.op();
   auto const soff = env.irb->fs().bcSPOff();
 
@@ -41,25 +42,25 @@ Locations getVanillaLocationsForBuiltin(const IRGS& env, SrcKey sk) {
   auto const func = op == Op::FCallBuiltin
     ? Unit::lookupBuiltin(sk.unit()->lookupLitstrId(getImm(sk.pc(), 3).u_SA))
     : curFunc(env);
-  if (!func) return {};
+  if (!func) return folly::none;
   auto const param = getBuiltinVanillaParam(func->fullName()->data());
-  if (param < 0) return {};
+  if (param < 0) return folly::none;
 
   if (op == Op::FCallBuiltin) {
-    if (getImm(sk.pc(), 0).u_IVA != func->numParams()) return {};
-    if (getImm(sk.pc(), 2).u_IVA != func->numInOutParams()) return {};
+    if (getImm(sk.pc(), 0).u_IVA != func->numParams()) return folly::none;
+    if (getImm(sk.pc(), 2).u_IVA != func->numInOutParams()) return folly::none;
     return {Location::Stack{soff - func->numParams() + 1 + param}};
   } else {
     return {Location::Local{safe_cast<uint32_t>(param)}};
   }
 }
 
-Locations getVanillaLocations(const IRGS& env, SrcKey sk) {
+folly::Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
   auto const op = sk.op();
   auto const soff = env.irb->fs().bcSPOff();
 
   if (op == Op::FCallBuiltin || op == Op::NativeImpl) {
-    return getVanillaLocationsForBuiltin(env, sk);
+    return getVanillaLocationForBuiltin(env, sk);
   } else if (isMemberDimOp(op) || isMemberFinalOp(op)) {
     return {Location::MBase{}};
   }
@@ -86,12 +87,13 @@ Locations getVanillaLocations(const IRGS& env, SrcKey sk) {
     }
 
     default:
-      return {};
+      return folly::none;
   }
   always_assert(false);
 }
 
 void guardToVanilla(IRGS& env, SrcKey sk, Location loc) {
+  assertx(!env.irb->guardFailBlock());
   auto const& type = env.irb->typeOf(loc, DataTypeSpecific);
   if (!(type.isKnownDataType() && type <= TArrLike)) return;
 
@@ -100,7 +102,8 @@ void guardToVanilla(IRGS& env, SrcKey sk, Location loc) {
   auto const gc = GuardConstraint(DataTypeSpecialized).setWantVanillaArray();
   env.irb->constrainLocation(loc, gc);
   if (type.arrSpec().vanilla()) return;
-  if (!env.irb->guardFailBlock()) env.irb->setGuardFailBlock(makeExit(env));
+
+  env.irb->setGuardFailBlock(makeExit(env));
   auto const target_type = type.unspecialize().narrowToVanilla();
   checkType(env, loc, target_type, -1);
 }
@@ -110,13 +113,12 @@ void guardToVanilla(IRGS& env, SrcKey sk, Location loc) {
 
 bool checkBespokeInputs(IRGS& env, SrcKey sk) {
   if (!allowBespokeArrayLikes()) return true;
-  auto const locs = getVanillaLocations(env, sk);
 
-  for (auto const loc : locs) {
-    auto const& type = env.irb->fs().typeOf(loc);
-    if (!type.maybe(TArrLike) || type.arrSpec().vanilla()) continue;
+  if (auto const loc = getVanillaLocation(env, sk)) {
+    auto const& type = env.irb->fs().typeOf(*loc);
+    if (!type.maybe(TArrLike) || type.arrSpec().vanilla()) return true;
     FTRACE_MOD(Trace::region, 2, "At {}: {}: input {} may be bespoke: {}\n",
-               sk.offset(), opcodeToName(sk.op()), show(loc), type);
+               sk.offset(), opcodeToName(sk.op()), show(*loc), type);
     return false;
   }
   return true;
@@ -124,11 +126,12 @@ bool checkBespokeInputs(IRGS& env, SrcKey sk) {
 
 void handleBespokeInputs(IRGS& env, SrcKey sk) {
   if (!allowBespokeArrayLikes()) return;
-  auto const locs = getVanillaLocations(env, sk);
 
-  assertx(!env.irb->guardFailBlock());
-  for (auto const loc : locs) guardToVanilla(env, sk, loc);
-  env.irb->resetGuardFailBlock();
+  if (auto const loc = getVanillaLocation(env, sk)) {
+    assertx(!env.irb->guardFailBlock());
+    guardToVanilla(env, sk, *loc);
+    env.irb->resetGuardFailBlock();
+  }
 }
 
 void handleVanillaOutputs(IRGS& env, SrcKey sk) {

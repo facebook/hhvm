@@ -2626,8 +2626,6 @@ and expr_
     let check_body_under_known_params env ?ret_ty ft : env * _ * locl_ty =
       let old_reactivity = env_reactivity env in
       let env = Env.set_env_reactive env reactivity in
-      let old_inside_ppl_class = env.inside_ppl_class in
-      let env = { env with inside_ppl_class = false } in
       let is_coroutine = Ast_defs.(equal_fun_kind f.f_fun_kind FCoroutine) in
       let ft =
         {
@@ -2640,7 +2638,6 @@ and expr_
       in
       let (env, tefun, ty) = anon_make ?ret_ty env p f ft idl is_anon in
       let env = Env.set_env_reactive env old_reactivity in
-      let env = { env with inside_ppl_class = old_inside_ppl_class } in
       let inferred_ty =
         mk
           ( Reason.Rwitness p,
@@ -4724,50 +4721,6 @@ and dispatch_call
     make_call
       env
       (Tast.make_typed_expr fpos fty (Aast.Class_const (tcid, m)))
-      tal
-      tel
-      typed_unpack_element
-      ty
-  (* <<__PPL>>: sample, factor, observe, condition *)
-  | Id (pos, id) when env.inside_ppl_class && SN.PPLFunctions.is_reserved id ->
-    let m = (pos, String_utils.lstrip id "\\") in
-    (* Mock these as type equivalent to \Infer -> sample... *)
-    let infer_e = CI (p, "\\Infer") in
-    let (env, _tal, _, ty1) =
-      static_class_id ~check_constraints:true p env [] infer_e
-    in
-    let nullsafe = None in
-    let (env, (tfty, tal)) =
-      TOG.obj_get
-        ~obj_pos:p
-        ~is_method:true
-        ~nullsafe
-        ~coerce_from_ty:None
-        ~explicit_targs
-        env
-        ty1
-        infer_e
-        m
-        Errors.unify_error
-    in
-    let (env, (tel, typed_unpack_element, ty)) =
-      call
-        ~expected
-        ~method_call_info:
-          (TR.make_call_info
-             ~receiver_is_self:false
-             ~is_static:false
-             ty1
-             (snd m))
-        p
-        env
-        tfty
-        el
-        unpacked_element
-    in
-    make_call
-      env
-      (Tast.make_typed_expr fpos tfty (Aast.Fun_id m))
       tal
       tel
       typed_unpack_element

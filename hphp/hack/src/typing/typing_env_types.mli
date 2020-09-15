@@ -30,7 +30,6 @@ type env = {
   in_try: bool;
   in_case: bool;
   inside_constructor: bool;
-  inside_ppl_class: bool;
   (* A set of constraints that are global to a given method *)
   global_tpenv: Type_parameter_env.t;
   log_levels: int SMap.t;

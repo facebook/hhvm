@@ -555,7 +555,6 @@ let env_as_value env =
     in_try;
     in_case;
     inside_constructor;
-    inside_ppl_class;
     global_tpenv;
     log_levels = _;
     allow_wildcards;
@@ -575,7 +574,6 @@ let env_as_value env =
       ("in_try", bool_as_value in_try);
       ("in_case", bool_as_value in_case);
       ("inside_constructor", bool_as_value inside_constructor);
-      ("inside_ppl_class", bool_as_value inside_ppl_class);
       ("global_tpenv", tpenv_as_value env global_tpenv);
       ("allow_wildcards", bool_as_value allow_wildcards);
       ( "inference_env",

@@ -83,8 +83,6 @@ let get_inside_constructor env = env.Typing_env_types.inside_constructor
 
 let get_decl_env env = env.Typing_env_types.decl_env
 
-let get_inside_ppl_class env = env.Typing_env_types.inside_ppl_class
-
 let get_val_kind = Typing_env.get_val_kind
 
 let get_file = Typing_env.get_file
@@ -237,8 +235,6 @@ let def_env ctx d =
   | SetNamespaceEnv _
   | FileAttributes _ ->
     empty ctx
-
-let set_ppl_lambda env = { env with Typing_env_types.inside_ppl_class = false }
 
 let typing_env_as_tast_env env = env
 

@@ -851,15 +851,6 @@ and class_def_ env c tc =
     List.iter (Cls.methods tc) (check_override ~is_static:false);
     List.iter (Cls.smethods tc) (check_override ~is_static:true)
   );
-  let env =
-    {
-      env with
-      inside_ppl_class =
-        Naming_attributes.mem
-          SN.UserAttributes.uaProbabilisticModel
-          c.c_user_attributes;
-    }
-  in
   let (pc, _) = c.c_name in
   let extends = List.map c.c_extends (Decl_hint.hint env.decl_env) in
   let implements = List.map c.c_implements (Decl_hint.hint env.decl_env) in

@@ -146,8 +146,6 @@ val get_file : env -> Relative_path.t
 
 val set_fn_kind : env -> Ast_defs.fun_kind -> env
 
-val set_inside_ppl_class : env -> bool -> env
-
 val set_self : env -> string -> locl_ty -> env
 
 val set_parent : env -> string -> decl_ty -> env

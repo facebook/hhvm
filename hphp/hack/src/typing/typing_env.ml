@@ -560,7 +560,6 @@ let empty ?(mode = FileInfo.Mstrict) ctx file ~droot =
     in_try = false;
     in_case = false;
     inside_constructor = false;
-    inside_ppl_class = false;
     decl_env = { mode; droot; ctx };
     genv =
       {
@@ -881,8 +880,6 @@ let set_fn_kind env fn_type =
   let genv = env.genv in
   let genv = { genv with fun_kind = fn_type } in
   { env with genv }
-
-let set_inside_ppl_class env inside_ppl_class = { env with inside_ppl_class }
 
 let set_self env self_id self_ty =
   let genv = env.genv in

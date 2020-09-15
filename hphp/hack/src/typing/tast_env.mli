@@ -227,10 +227,6 @@ val get_inside_constructor : env -> bool
 (** Returns a {!Decl_env.env} *)
 val get_decl_env : env -> Decl_env.env
 
-(** Returns whether or not the typing environment is
-    inside a <<__PPL>> annotated class. *)
-val get_inside_ppl_class : env -> bool
-
 (** Construct an empty {!env}. Unlikely to be the best choice; prefer using
     {!Tast_visitor} or constructing an {!env} from a {!Tast.def}. *)
 val empty : Provider_context.t -> env
@@ -249,11 +245,6 @@ val restore_fun_env : env -> Tast.fun_ -> env
 (** Construct an {!env} from a pocket universe definition and the {!env} of the context
     it appears in. *)
 val restore_pu_enum_env : env -> Tast.pu_enum -> env
-
-(** Construct an {!env} where inside_ppl_class is {false}. Due to rewriting
-    limitations, we are unable to rewrite lambdas inside <<__PPL>> classes.
-    If you are using {!Tast_visitor}, you should have no need of this. *)
-val set_ppl_lambda : env -> env
 
 val typing_env_as_tast_env : Typing_env_types.env -> env
 

@@ -23,7 +23,6 @@ type env = {
   mode: FileInfo.mode;
   ctx: Provider_context.t;
   type_params: Aast.reify_kind SMap.t;
-  in_ppl: bool;
   (* Need some context to differentiate global consts and other Id's *)
   seen_names: Pos.t SMap.t;
   (* Special context for pocket universes *)
@@ -161,7 +160,6 @@ let handler ctx =
         droot = Typing_deps.Dep.Fun "";
         ctx;
         type_params = SMap.empty;
-        in_ppl = false;
         seen_names = SMap.empty;
         pu_case_types = SMap.empty;
         pu_member_types = SMap.empty;
@@ -171,19 +169,12 @@ let handler ctx =
       }
 
     method! at_class_ env c =
-      let is_ppl =
-        List.exists c.Aast.c_user_attributes ~f:(fun { Aast.ua_name; _ } ->
-            String.equal
-              (snd ua_name)
-              Naming_special_names.UserAttributes.uaProbabilisticModel)
-      in
       let new_env =
         {
           env with
           droot = Typing_deps.Dep.Class (snd c.Aast.c_name);
           mode = c.Aast.c_mode;
           type_params = extend_type_params SMap.empty c.Aast.c_tparams;
-          in_ppl = is_ppl;
         }
       in
       new_env
@@ -295,9 +286,6 @@ let handler ctx =
     (* Below are the methods where we check for unbound names *)
     method! at_expr env e =
       match snd e with
-      | Aast.Call ((_, Aast.Id (p, name)), _, _, _)
-        when env.in_ppl && Naming_special_names.PPLFunctions.is_reserved name ->
-        { env with seen_names = SMap.add name p env.seen_names }
       | Aast.FunctionPointer (Aast.FP_id ((p, name) as id), _)
       | Aast.Call ((_, Aast.Id ((p, name) as id)), _, _, _) ->
         let () = check_fun_name env id in

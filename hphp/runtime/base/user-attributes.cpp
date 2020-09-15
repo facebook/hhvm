@@ -28,7 +28,8 @@ namespace HPHP {
 
 TRACE_SET_MOD(stats);
 
-UserAttributeMap::Map UserAttributeMap::s_empty_map;
+// Somehow the visibility attribute is important for shared-library builds.
+UserAttributeMap::Map UserAttributeMap::s_empty_map EXTERNALLY_VISIBLE;
 
 struct UserAttributeMap::MapCompare {
   bool operator()(const copy_ptr<Map>& a, const copy_ptr<Map>& b) const {

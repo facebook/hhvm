@@ -263,9 +263,12 @@ struct BlobEncoder {
 
   template<class T>
   typename std::enable_if<
-    std::is_same<typename T::value_type,
-                 std::pair<typename T::key_type const,
-                           typename T::mapped_type>>::value &&
+    (std::is_same<typename T::value_type,
+                  std::pair<typename T::key_type const,
+                            typename T::mapped_type>>::value ||
+     std::is_same<typename T::value_type,
+                  std::pair<typename T::key_type,
+                            typename T::mapped_type>>::value) &&
     !IsNontrivialSerializable<T,BlobEncoder>::value
   >::type encode(const T& map) {
     encodeContainer(map, "map");
@@ -475,9 +478,12 @@ struct BlobDecoder {
 
   template<class T>
   typename std::enable_if<
-    std::is_same<typename T::value_type,
-                 std::pair<typename T::key_type const,
-                           typename T::mapped_type>>::value &&
+    (std::is_same<typename T::value_type,
+                  std::pair<typename T::key_type const,
+                            typename T::mapped_type>>::value ||
+     std::is_same<typename T::value_type,
+                  std::pair<typename T::key_type,
+                            typename T::mapped_type>>::value) &&
     !IsNontrivialSerializable<T,BlobDecoder>::value
   >::type decode(T& map) {
     uint32_t size;

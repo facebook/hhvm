@@ -375,11 +375,19 @@ std::string warmupStatusString() {
     if (jit::mcgen::retranslateAllPending()) {
       status_str = "Waiting on retranslateAll().\n";
     } else {
-      auto checkCodeSize = [&](std::string name) {
+      auto checkCodeSize = [&](std::string name, uint32_t maxSize) {
         assertx(!s_counters.empty());
         auto series = s_counters.at(name);
         if (!series) {
           status_str = "initializing";
+          return;
+        }
+        auto const codeSize = series->getSum();
+        if (codeSize < maxSize / RuntimeOption::EvalJitWarmupMinFillFactor) {
+          folly::format(&status_str,
+                        "Code.{} is still to small to be considered warm. "
+                        "({} of max {})\n",
+                        name, codeSize, maxSize);
           return;
         }
         auto const codeSizeRate = series->getRateByDuration(
@@ -390,8 +398,8 @@ std::string warmupStatusString() {
                         name, codeSizeRate);
         }
       };
-      checkCodeSize("main");
-      checkCodeSize("hot");
+      checkCodeSize("main", CodeCache::ASize);
+      checkCodeSize("hot", CodeCache::AHotSize);
     }
     if (status_str.empty()) {
       if (RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) {

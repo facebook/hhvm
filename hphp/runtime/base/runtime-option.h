@@ -840,6 +840,7 @@ struct RuntimeOption {
   F(uint32_t, JitWarmupStatusBytes,    ((25 << 10) + 1))                \
   F(uint32_t, JitWarmupMaxCodeGenRate, 20000)                           \
   F(uint32_t, JitWarmupRateSeconds,    64)                              \
+  F(uint32_t, JitWarmupMinFillFactor,  10)                              \
   F(uint32_t, JitWriteLeaseExpiration, 1500) /* in microseconds */      \
   F(int, JitRetargetJumps,             1)                               \
   /* Sync VM reg state for all native calls. */                         \

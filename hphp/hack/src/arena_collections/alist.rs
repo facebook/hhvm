@@ -670,7 +670,7 @@ where
         entries.iter().find(|(k, _)| key == k.borrow())
     } else {
         let index = entries
-            .binary_search_by(|(k, _)| key.cmp(k.borrow()))
+            .binary_search_by(|(k, _)| k.borrow().cmp(key))
             .ok()?;
         Some(&entries[index])
     }

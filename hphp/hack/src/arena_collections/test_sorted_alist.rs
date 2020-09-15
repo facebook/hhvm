@@ -44,6 +44,19 @@ fn len_with_duplicate_keys() {
     assert_eq!(alist.len(), 2);
 }
 
+#[test]
+fn get_with_many_entries() {
+    let b = &Bump::new();
+    let mut entries = bumpalo::collections::Vec::new_in(&b);
+    for i in 0..1024 {
+        entries.push((i, &*b.alloc_str(i.to_string().as_str())))
+    }
+    let alist = new(b, &entries[..]);
+    for i in 0..1024 {
+        assert_eq!(alist.get(&i), Some(&i.to_string().as_str()));
+    }
+}
+
 // Doctests ////////////////////////////////////////////////////////////////////
 
 // The tests below are copied from doc comments. We should eventually be able to

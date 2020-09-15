@@ -40,8 +40,6 @@ type genv = {
   in_mode: FileInfo.mode;
   (* various options that control the strictness of the typechecker *)
   ctx: Provider_context.t;
-  (* are we in a __PPL attributed class *)
-  in_ppl: bool;
   (* In function foo<T1, ..., Tn> or class<T1, ..., Tn>, the field
    * type_params knows T1 .. Tn. It is able to find out about the
    * constraint on these parameters. *)
@@ -74,10 +72,6 @@ module Env : sig
     Provider_context.t -> FileInfo.mode -> Aast.nsenv -> genv * lenv
 
   val make_const_env : Provider_context.t -> Nast.gconst -> genv * lenv
-
-  val in_ppl : genv * lenv -> bool
-
-  val set_ppl : genv * lenv -> bool -> genv * lenv
 
   val add_lvar : genv * lenv -> Ast_defs.id -> positioned_ident -> unit
 
@@ -138,21 +132,16 @@ end = struct
       goto_targets = ref SMap.empty;
     }
 
-  let make_class_genv ctx tparams mode (cid, ckind) namespace is_ppl final =
+  let make_class_genv ctx tparams mode (cid, ckind) namespace final =
     {
       in_mode = mode;
       ctx;
-      in_ppl = is_ppl;
       type_params = get_tparam_names tparams;
       current_cls = Some (cid, ckind, final);
       namespace;
     }
 
   let make_class_env ctx c =
-    let is_ppl =
-      List.exists c.Aast.c_user_attributes ~f:(fun { Aast.ua_name; _ } ->
-          String.equal (snd ua_name) SN.UserAttributes.uaProbabilisticModel)
-    in
     let genv =
       make_class_genv
         ctx
@@ -160,7 +149,6 @@ end = struct
         c.Aast.c_mode
         (c.Aast.c_name, c.Aast.c_kind)
         c.Aast.c_namespace
-        is_ppl
         c.Aast.c_final
     in
     let lenv = empty_local None in
@@ -170,7 +158,6 @@ end = struct
     {
       in_mode = FileInfo.Mstrict;
       ctx;
-      in_ppl = false;
       type_params = get_tparam_names tparams;
       current_cls = None;
       namespace = tdef_namespace;
@@ -187,7 +174,6 @@ end = struct
     {
       in_mode = f_mode;
       ctx;
-      in_ppl = false;
       type_params = get_tparam_names params;
       current_cls = None;
       namespace = f_namespace;
@@ -200,7 +186,6 @@ end = struct
     {
       in_mode = cst.Aast.cst_mode;
       ctx;
-      in_ppl = false;
       type_params = SSet.empty;
       current_cls = None;
       namespace = cst.Aast.cst_namespace;
@@ -210,7 +195,6 @@ end = struct
     {
       in_mode = FileInfo.Mpartial;
       ctx;
-      in_ppl = false;
       type_params = SSet.empty;
       current_cls = None;
       namespace = Namespace_env.empty_with_default;
@@ -226,7 +210,6 @@ end = struct
     {
       in_mode = mode;
       ctx;
-      in_ppl = false;
       type_params = SSet.empty;
       current_cls = None;
       namespace;
@@ -243,12 +226,6 @@ end = struct
     let lenv = empty_local None in
     let env = (genv, lenv) in
     env
-
-  let in_ppl (genv, _lenv) = genv.in_ppl
-
-  let set_ppl (genv, lenv) in_ppl =
-    let genv = { genv with in_ppl } in
-    (genv, lenv)
 
   (* Adds a local variable, without any check *)
   let add_lvar (_, lenv) (_, name) (p, x) =
@@ -1998,15 +1975,10 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Call ((p, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.fun_ ->
     arg_unpack_unexpected unpacked_element;
-    let (genv, _) = env in
     begin
       match el with
       | [] ->
         Errors.naming_too_few_arguments p;
-        N.Any
-      | [(_, Aast.String s)] when genv.in_ppl && SN.PPLFunctions.is_reserved s
-        ->
-        Errors.ppl_meth_pointer p ("fun(" ^ s ^ ")");
         N.Any
       | [(p, Aast.String x)] -> N.Fun_id (p, x)
       | [(p, _)] ->
@@ -2142,12 +2114,6 @@ and expr_ env p (e : Nast.expr_) =
       Errors.naming_too_few_arguments p;
       N.Any
     | el -> N.List (exprl env el))
-  (* sample, factor, observe, condition *)
-  | Aast.Call ((p1, Aast.Id (p2, cn)), tal, el, unpacked_element)
-    when Env.in_ppl env && SN.PPLFunctions.is_reserved cn ->
-    let n_expr = N.Id (p2, cn) in
-    N.Call
-      ((p1, n_expr), targl env p tal, exprl env el, oexpr env unpacked_element)
   | Aast.Call ((p, Aast.Id f), tal, el, unpacked_element) ->
     N.Call
       ((p, N.Id f), targl env p tal, exprl env el, oexpr env unpacked_element)
@@ -2325,7 +2291,6 @@ and expr_ env p (e : Nast.expr_) =
     Aast.Any
 
 and expr_lambda env f =
-  let env = Env.set_ppl env false in
   let h =
     Aast.type_hint_option_map ~f:(hint ~allow_retonly:true env) f.Aast.f_ret
   in

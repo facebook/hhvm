@@ -4302,12 +4302,6 @@ let invalid_ppl_static_call pos reason =
   in
   add (Typing.err_code Typing.InvalidPPLStaticCall) pos error_msg
 
-let ppl_meth_pointer pos func =
-  let error_msg =
-    Markdown_lite.md_codify func ^ " cannot be used with a `<<__PPL>>` class"
-  in
-  add (Typing.err_code Typing.PPLMethPointer) pos error_msg
-
 let coroutine_outside_experimental pos =
   add
     (Typing.err_code Typing.CoroutineOutsideExperimental)

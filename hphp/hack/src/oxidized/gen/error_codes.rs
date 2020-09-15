@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<975b182f61b0159040831e16c5dda782>>
+// @generated SignedSource<<ea549011968d40e5fb6f177fb6fdf190>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -572,7 +572,7 @@ pub enum Typing {
     MutableExpressionAsMultipleMutableArguments,
     InvalidUnsetTargetInRx,
     CoroutineOutsideExperimental,
-    PPLMethPointer,
+    PPLMethPointerDEPRECATED,
     InvalidTruthinessTestDEPRECATED,
     RePrefixedNonString,
     BadRegexPattern,

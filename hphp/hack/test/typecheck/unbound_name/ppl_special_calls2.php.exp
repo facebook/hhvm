@@ -1,4 +1,0 @@
-File "ppl_special_calls2.php", line 7, characters 12-17:
-Unbound name: `sample` (a global constant) (Naming[2049])
-File "ppl_special_calls2.php", line 7, characters 12-17:
-Unbound global constant (Typing) (Typing[4106])

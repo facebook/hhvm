@@ -31,10 +31,9 @@ module SN = Naming_special_names
 type env = {
   namespace: Namespace_env.env;
   type_params: SSet.t;
-  in_ppl: bool;
 }
 
-let make_env namespace = { namespace; type_params = SSet.empty; in_ppl = false }
+let make_env namespace = { namespace; type_params = SSet.empty }
 
 (* While elaboration for codegen and typing is similar, there are currently a
  *   couple differences between the two and are toggled by this flag (XHP).
@@ -116,12 +115,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
      * The following functions just set the namespace env correctly
      *)
     method! on_class_ env c =
-      let in_ppl =
-        Naming_attributes.mem
-          SN.UserAttributes.uaProbabilisticModel
-          c.c_user_attributes
-      in
-      let env = { env with namespace = c.c_namespace; in_ppl } in
+      let env = { env with namespace = c.c_namespace } in
       let env = extend_tparams env c.c_tparams in
       super#on_class_ env c
 
@@ -227,21 +221,11 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
         Do (b, e)
       | _ -> super#on_stmt_ env stmt
 
-    (* Lambda environments *)
-    method! on_Lfun env e =
-      let env = { env with in_ppl = false } in
-      super#on_Lfun env e
-
-    method! on_Efun env e =
-      let env = { env with in_ppl = false } in
-      super#on_Efun env e
-
     (* The function that actually rewrites names *)
     method! on_expr_ env expr =
       match expr with
       | Call ((p, Id (p2, cn)), targs, el, uarg)
-        when SN.SpecialFunctions.is_special_function cn
-             || (SN.PPLFunctions.is_reserved cn && env.in_ppl) ->
+        when SN.SpecialFunctions.is_special_function cn ->
         Call
           ( (p, Id (p2, cn)),
             List.map targs ~f:(self#on_targ env),

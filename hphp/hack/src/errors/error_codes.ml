@@ -540,7 +540,7 @@ module Typing = struct
     | MutableExpressionAsMultipleMutableArguments
     | InvalidUnsetTargetInRx
     | CoroutineOutsideExperimental
-    | PPLMethPointer
+    | PPLMethPointerDEPRECATED
     | InvalidTruthinessTestDEPRECATED
     | RePrefixedNonString
     | BadRegexPattern

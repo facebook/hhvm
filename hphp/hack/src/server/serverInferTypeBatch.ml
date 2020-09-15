@@ -9,16 +9,19 @@
 
 open Hh_prelude
 
-type pos = Relative_path.t * int * int * (int * int) option [@@deriving eq]
+type pos = Relative_path.t * int * int * (int * int) option
 
 type spos = string * int * int * (int * int) option [@@deriving eq, ord]
 
 let recheck_typing ctx (pos_list : pos list) =
   let files_to_check =
-    pos_list |> List.remove_consecutive_duplicates ~equal:equal_pos
+    pos_list
+    |> List.map ~f:(fun (path, _, _, _) -> path)
+    |> List.remove_consecutive_duplicates ~equal:Relative_path.equal
+    (* note: our caller has already sorted pos_list *)
   in
   let tasts =
-    List.map files_to_check ~f:(fun (path, _, _, _) ->
+    List.map files_to_check ~f:(fun path ->
         let (_ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
         let { Tast_provider.Compute_tast.tast; _ } =
           Tast_provider.compute_tast_unquarantined ~ctx ~entry

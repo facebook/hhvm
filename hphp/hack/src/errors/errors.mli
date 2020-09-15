@@ -473,9 +473,6 @@ val extend_sealed : Pos.t -> Pos.t -> string -> string -> string -> unit
 
 val trait_prop_const_class : Pos.t -> string -> unit
 
-val extend_ppl :
-  Pos.t -> string -> bool -> Pos.t -> string -> string -> string -> unit
-
 val read_before_write : Pos.t * string -> unit
 
 val implement_abstract :
@@ -1026,10 +1023,6 @@ val function_is_not_coroutine : Pos.t -> string -> unit
 
 val coroutinness_mismatch :
   bool -> Pos.t -> Pos.t -> typing_error_callback -> unit
-
-val invalid_ppl_call : Pos.t -> string -> unit
-
-val invalid_ppl_static_call : Pos.t -> string -> unit
 
 val coroutine_outside_experimental : Pos.t -> unit
 

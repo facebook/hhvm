@@ -525,15 +525,15 @@ module Typing = struct
     | CallSiteReactivityMismatch
     | RxParameterConditionMismatch
     | AmbiguousObjectAccess
-    | ExtendPPL
+    | ExtendPPLDEPRECATED
     | ReassignMaybeMutableVar
     | MaybeMutableArgumentMismatch
     | ImmutableArgumentMismatch
     | ImmutableCallOnMutable
     | InvalidCallMaybeMutable
     | MutabilityMismatch
-    | InvalidPPLCall
-    | InvalidPPLStaticCall
+    | InvalidPPLCallDEPRECATED
+    | InvalidPPLStaticCallDEPRECATED
     | TypeTestInLambdaDEPRECATED
     | InvalidTraversableInRx
     | ReassignMutableThis

@@ -3313,37 +3313,6 @@ let trait_prop_const_class pos x =
     ^ Markdown_lite.md_codify x
     ^ " is incompatible with a const class" )
 
-let extend_ppl
-    child_pos
-    child_class_type
-    child_is_ppl
-    parent_pos
-    parent_class_type
-    parent_name
-    verb =
-  let name = strip_ns parent_name |> Markdown_lite.md_codify in
-  let warning =
-    if child_is_ppl then
-      child_class_type
-      ^ " annotated with `<<__PPL>>` cannot "
-      ^ verb
-      ^ " non-`<<__PPL>>` "
-      ^ parent_class_type
-      ^ ": "
-      ^ name
-    else
-      child_class_type
-      ^ " must be annotated with `<<__PPL>>` to "
-      ^ verb
-      ^ " `<<__PPL>>` "
-      ^ parent_class_type
-      ^ ": "
-      ^ name
-  in
-  add_list
-    (Typing.err_code Typing.ExtendPPL)
-    [(child_pos, warning); (parent_pos, "Declaration is here")]
-
 let read_before_write (pos, v) =
   add
     (Typing.err_code Typing.ReadBeforeWrite)
@@ -4274,18 +4243,6 @@ let coroutinness_mismatch
         else
           m1 );
     ]
-
-let invalid_ppl_call pos context =
-  let error_msg =
-    "Cannot call a method on an object of a `<<__PPL>>` class " ^ context
-  in
-  add (Typing.err_code Typing.InvalidPPLCall) pos error_msg
-
-let invalid_ppl_static_call pos reason =
-  let error_msg =
-    "Cannot call a static method on a `<<__PPL>>` class " ^ reason
-  in
-  add (Typing.err_code Typing.InvalidPPLStaticCall) pos error_msg
 
 let coroutine_outside_experimental pos =
   add

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fac05d621ff11ef39ad13395d16df648>>
+// @generated SignedSource<<73da56546d559079a7b093cd24ad7d26>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -557,15 +557,15 @@ pub enum Typing {
     CallSiteReactivityMismatch,
     RxParameterConditionMismatch,
     AmbiguousObjectAccess,
-    ExtendPPL,
+    ExtendPPLDEPRECATED,
     ReassignMaybeMutableVar,
     MaybeMutableArgumentMismatch,
     ImmutableArgumentMismatch,
     ImmutableCallOnMutable,
     InvalidCallMaybeMutable,
     MutabilityMismatch,
-    InvalidPPLCall,
-    InvalidPPLStaticCall,
+    InvalidPPLCallDEPRECATED,
+    InvalidPPLStaticCallDEPRECATED,
     TypeTestInLambdaDEPRECATED,
     InvalidTraversableInRx,
     ReassignMutableThis,

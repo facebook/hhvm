@@ -3,6 +3,7 @@
   (wrapped false)
   (modules
     ai
+    ai_init
     ai_options)
   (libraries
     errors)

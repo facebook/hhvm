@@ -143,6 +143,7 @@
     hh_server.exe
     hh_single_compile.exe
     hh_single_type_check.exe
+    ai/zoncolan.exe
     ))
 
 (alias
@@ -176,4 +177,3 @@
     hh_single_compile.bc
     hh_single_type_check.bc
     ))
-

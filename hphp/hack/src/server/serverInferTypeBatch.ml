@@ -53,7 +53,8 @@ let result_to_string result (fn, line, char, range_end) =
     in
     json_to_string obj)
 
-let helper ctx acc pos_list =
+let helper env acc pos_list =
+  let ctx = Provider_utils.ctx_from_server_env env in
   let tasts =
     List.fold
       (recheck_typing ctx pos_list)
@@ -83,10 +84,10 @@ let helper ctx acc pos_list =
       in
       result_to_string result pos :: acc)
 
-let parallel_helper workers ctx pos_list =
+let parallel_helper workers env pos_list =
   MultiWorker.call
     workers
-    ~job:(helper ctx)
+    ~job:(helper env)
     ~neutral:[]
     ~merge:List.rev_append
     ~next:(MultiWorker.next workers pos_list)
@@ -109,11 +110,10 @@ let go :
            let fn = Relative_path.create_detect_prefix fn in
            (fn, line, char, range_end))
   in
-  let ctx = Provider_utils.ctx_from_server_env env in
   let results =
     if List.length pos_list < 10 then
-      helper ctx [] pos_list
+      helper env [] pos_list
     else
-      parallel_helper workers ctx pos_list
+      parallel_helper workers env pos_list
   in
   results

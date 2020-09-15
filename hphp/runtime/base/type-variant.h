@@ -827,7 +827,12 @@ struct Variant : private TypedValue {
   }
 
   // Is "define('CONSTANT', <this value>)" legal?
-  bool isAllowedAsConstantValue() const;
+  enum class AllowedAsConstantValue {
+      Allowed
+    , NotAllowed
+    , ContainsObject // Allowed if constant of an "enum class".
+  };
+  AllowedAsConstantValue isAllowedAsConstantValue() const;
 
   /**
    * Get reference count of weak or strong binding. For debugging purpose.

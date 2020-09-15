@@ -149,7 +149,8 @@ TypedValue lookupCnsEHelperNormal(rds::Handle tv_handle,
       Variant v = callback(nm);
       const TypedValue cns = v.detach();
       assertx(tvIsPlausible(cns));
-      assertx(tvAsCVarRef(&cns).isAllowedAsConstantValue());
+      assertx(tvAsCVarRef(&cns).isAllowedAsConstantValue() ==
+              Variant::AllowedAsConstantValue::Allowed);
       // Resources are allowed as constant but we can't cache them
       if (type(cns) != KindOfResource) {
         tvIncRefGen(cns);
@@ -174,7 +175,8 @@ TypedValue lookupCnsEHelperPersistent(rds::Handle tv_handle,
     Variant v = callback(nm);
     const TypedValue cns = v.detach();
     assertx(tvIsPlausible(cns));
-    assertx(tvAsCVarRef(&cns).isAllowedAsConstantValue());
+    assertx(tvAsCVarRef(&cns).isAllowedAsConstantValue() ==
+            Variant::AllowedAsConstantValue::Allowed);
     return cns;
   }
   return lookupCnsEHelper(nm);

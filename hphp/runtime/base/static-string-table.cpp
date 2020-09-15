@@ -347,7 +347,7 @@ Array lookupDefinedConstants(bool categorize /*= false */) {
       assertx(val(tv).pcnt);
       auto callback = reinterpret_cast<Native::ConstantCallback>(val(tv).pcnt);
       auto cns = callback(key.get());
-      assertx(cns.isAllowedAsConstantValue());
+      assertx(cns.isAllowedAsConstantValue() == Variant::AllowedAsConstantValue::Allowed);
       tbl->set(key, cns, true);
     }
   }

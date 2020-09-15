@@ -900,7 +900,8 @@ TypedValue Unit::lookupCns(const StringData* cnsName) {
     Variant v = callback(cnsName);
     const TypedValue tvRet = v.detach();
     assertx(tvIsPlausible(tvRet));
-    assertx(tvAsCVarRef(&tvRet).isAllowedAsConstantValue());
+    assertx(tvAsCVarRef(&tvRet).isAllowedAsConstantValue() ==
+            Variant::AllowedAsConstantValue::Allowed);
 
     if (rds::isNormalHandle(handle) && type(tvRet) != KindOfResource) {
       tvIncRefGen(tvRet);
@@ -973,7 +974,8 @@ void Unit::defCns(Id id) {
     raise_error(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());
   }
 
-  assertx(tvAsCVarRef(&cnsVal).isAllowedAsConstantValue() ||
+  assertx(tvAsCVarRef(&cnsVal).isAllowedAsConstantValue() ==
+           Variant::AllowedAsConstantValue::Allowed ||
           (cnsVal.m_type == KindOfUninit &&
            cnsVal.m_data.pcnt != nullptr));
 

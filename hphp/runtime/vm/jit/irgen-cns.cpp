@@ -118,26 +118,24 @@ void implClsCns(IRGS& env,
   if (cls) {
     Slot ignore;
     auto const tv = cls->cnsNameToTV(cnsNameStr, ignore);
-    if (tv && tv->m_type != KindOfUninit &&
+    if (tv && !(tv->m_type == KindOfUninit || tv->m_type == KindOfObject) &&
         classIsPersistentOrCtxParent(env, cls)) {
       push(env, staticTVCns(env, tv));
       return;
     }
   }
 
-  // Otherwise, load the constant out of RDS.  Right now we always guard that
-  // it is at least uncounted (this means a constant set to STDIN or something
-  // will always side exit here).
+  // Otherwise, load the constant out of RDS.
   cond(
     env,
     [&] (Block* taken) {
       auto const prds = gen(env, LdClsCns, clsCnsName, taken);
-      gen(env, CheckTypeMem, TUncountedInit, taken, prds);
+      gen(env, CheckInitMem, TInitCell, taken, prds);
       return prds;
     },
     [&] (SSATmp* prds) {
-      auto const val = gen(env, LdMem, TUncountedInit, prds);
-      push(env, val);
+      auto const val = gen(env, LdMem, TInitCell, prds);
+      pushIncRef(env, val);
       return nullptr;
     },
     [&] () -> SSATmp* {
@@ -145,7 +143,7 @@ void implClsCns(IRGS& env,
       // instruction, by doing a slower lookup.
       hint(env, Block::Hint::Unlikely);
       auto const val = gen(env, InitClsCns, clsCnsName);
-      push(env, val);
+      pushIncRef(env, val);
       gen(env, Jmp, makeExit(env, nextBcOff(env)));
       return nullptr;
     }

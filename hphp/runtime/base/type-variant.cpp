@@ -347,7 +347,7 @@ bool Variant::isScalar() const noexcept {
   not_reached();
 }
 
-static bool isAllowedAsConstantValueImpl(TypedValue tv) {
+static Variant::AllowedAsConstantValue isAllowedAsConstantValueImpl(TypedValue tv) {
   switch (tv.m_type) {
     case KindOfNull:
     case KindOfBoolean:
@@ -364,33 +364,48 @@ static bool isAllowedAsConstantValueImpl(TypedValue tv) {
     case KindOfResource:
     case KindOfFunc:
     case KindOfClsMeth:
-      return true;
+      return Variant::AllowedAsConstantValue::Allowed;
 
     case KindOfDArray:
     case KindOfVArray:
     case KindOfVec:
     case KindOfDict: {
-      auto allowed = true;
+      auto allowed = Variant::AllowedAsConstantValue::Allowed;
       IterateV(tv.m_data.parr, [&] (TypedValue v) {
-        if (!isAllowedAsConstantValueImpl(v)) allowed = false;
-        return !allowed;
-      });
+        switch (isAllowedAsConstantValueImpl(v)) {
+          case Variant::AllowedAsConstantValue::NotAllowed: {
+            allowed = Variant::AllowedAsConstantValue::NotAllowed;
+            break;
+          }
+          case Variant::AllowedAsConstantValue::ContainsObject: {
+            allowed = Variant::AllowedAsConstantValue::ContainsObject;
+            break;
+          }
+          case Variant::AllowedAsConstantValue::Allowed: {
+            break;
+          }
+        }
+        return (allowed != Variant::AllowedAsConstantValue::NotAllowed);
+       });
+
       return allowed;
     }
 
-    case KindOfUninit:
     case KindOfObject:
+      return Variant::AllowedAsConstantValue::ContainsObject;
+
+    case KindOfUninit:
     case KindOfClass:
     case KindOfLazyClass:
     case KindOfRFunc:
     case KindOfRClsMeth:
     case KindOfRecord:
-      return false;
+      return Variant::AllowedAsConstantValue::NotAllowed;
   }
   not_reached();
 }
 
-bool Variant::isAllowedAsConstantValue() const {
+Variant::AllowedAsConstantValue Variant::isAllowedAsConstantValue() const {
   return isAllowedAsConstantValueImpl(*this);
 }
 

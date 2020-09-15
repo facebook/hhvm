@@ -821,6 +821,9 @@ ObjectData* ObjectData::clone() {
 
 bool ObjectData::equal(const ObjectData& other) const {
   if (this == &other) return true;
+  if ((this->m_cls->attrs() & AttrEnumClass) || (other.m_cls->attrs() & AttrEnumClass)) {
+    return false; // Never compare for structural equality.
+  }
   if (isCollection()) {
     return collections::equals(this, &other);
   }

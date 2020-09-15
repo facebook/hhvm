@@ -166,7 +166,9 @@ enum Attr {
   // skip tagging the return value with the builtin's callsite.)
   AttrProvenanceSkipFrame  = (1u << 29), //       |          |    X    //
                                          //       |          |         //
-
+  // Is this an "enum class" (in the sense of the "enum dependent types" feature)?
+  AttrEnumClass            = (1u << 30), //    X  |          |         //
+                                         //       |          |         //
   // XXX: The enum is used as a bitmask and without a value in the highest bit
   //      we get assertions in dev builds.
   AttrUnusedMaxAttr        = (1u << 31),

@@ -1519,7 +1519,21 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) con
     false
   );
 
-  assertx(tvAsCVarRef(&ret).isAllowedAsConstantValue());
+  switch (tvAsCVarRef(&ret).isAllowedAsConstantValue()) {
+    case Variant::AllowedAsConstantValue::Allowed:
+      break;
+    case Variant::AllowedAsConstantValue::NotAllowed: {
+      always_assert(false);
+    }
+    case Variant::AllowedAsConstantValue::ContainsObject: {
+      // Generally, objects are not allowed as class constants.
+      if (!(attrs() & AttrEnumClass)) {
+        raise_error("Value unsuitable as class constant");
+      }
+      break;
+    }
+  }
+
   clsCnsData.set(StrNR(clsCnsName), tvAsCVarRef(ret), true /* isKey */);
 
   // The caller will inc-ref the returned value, so undo the inc-ref caused by
@@ -1671,6 +1685,21 @@ void Class::setParent() {
         m_parent->name()->data()
       );
     }
+    if (!(m_attrCopy & AttrEnumClass) && (parentAttrs & AttrEnumClass)) {
+      raise_error(
+        "Non-enum class %s cannot extend enum class parent %s",
+        m_preClass->name()->data(),
+        m_parent->name()->data()
+      );
+    }
+    if ((m_attrCopy & AttrEnumClass) && !(parentAttrs & AttrEnumClass)){
+      raise_error(
+        "Enum class %s cannot extend non-enum class parent %s",
+        m_preClass->name()->data(),
+        m_parent->name()->data()
+      );
+    }
+
     m_preClass->enforceInMaybeSealedParentWhitelist(m_parent->preClass());
     if (m_parent->m_maybeRedefsPropTy) m_maybeRedefsPropTy = true;
   }

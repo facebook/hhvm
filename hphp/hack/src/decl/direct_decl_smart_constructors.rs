@@ -3373,7 +3373,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 | Reactivity::MaybeReactive(_)
                 | Reactivity::RxVar(_)
                 | Reactivity::Cipp(_)
-                | Reactivity::CippLocal(_) => None,
+                | Reactivity::CippLocal(_)
+                | Reactivity::CippGlobal => None,
             },
             dynamicallycallable: attributes.dynamically_callable,
             type_: ty,

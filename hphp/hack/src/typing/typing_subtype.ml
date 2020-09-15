@@ -2341,6 +2341,24 @@ and simplify_subtype_reactivity
       CippLocal _ )
     when is_call_site ->
     valid env
+  (* CippLocal can also call nonreactive *)
+  | ( (Nonreactive | Reactive _ | Local _ | Shallow _ | MaybeReactive _),
+      CippLocal _ )
+    when is_call_site ->
+    valid env
+  (* Anything can call CippGlobal*)
+  (* Nonreactive is covered from above*)
+  | ( CippGlobal,
+      ( Reactive _ | Local _ | Shallow _ | MaybeReactive _ | Cipp _
+      | CippLocal _ | CippGlobal | Pure _ ) )
+    when is_call_site ->
+    valid env
+  (* CippGlobal can call anything *)
+  | ( ( Nonreactive | Pure _ | Reactive _ | Local _ | Shallow _
+      | MaybeReactive _ | Cipp _ | CippLocal _ | CippGlobal ),
+      CippGlobal )
+    when is_call_site ->
+    valid env
   | _ -> check_condition_type_has_matching_reactive_method env
 
 and should_check_fun_params_reactivity (ft_super : locl_fun_type) =

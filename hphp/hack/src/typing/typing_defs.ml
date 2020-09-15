@@ -955,6 +955,7 @@ and equal_reactivity r1 r2 =
   | (RxVar r1, RxVar r2) -> Option.equal equal_reactivity r1 r2
   | (Cipp s1, Cipp s2) -> Option.equal String.equal s1 s2
   | (CippLocal s1, CippLocal s2) -> Option.equal String.equal s1 s2
+  | (CippGlobal, CippGlobal) -> true
   | _ -> false
 
 and equal_param_rx_annotation pa1 pa2 =

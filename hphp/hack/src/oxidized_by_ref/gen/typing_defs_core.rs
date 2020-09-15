@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8f79507194f9ea5522b4d7f0d3c3d26f>>
+// @generated SignedSource<<68c8e52e5d134fd5a6965f5307929018>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -671,6 +671,7 @@ pub enum Reactivity<'a> {
     RxVar(Option<&'a Reactivity<'a>>),
     Cipp(Option<&'a str>),
     CippLocal(Option<&'a str>),
+    CippGlobal,
 }
 impl<'a> TrivialDrop for Reactivity<'a> {}
 

@@ -405,6 +405,7 @@ and reactivity =
   | RxVar of reactivity option
   | Cipp of string option
   | CippLocal of string option
+  | CippGlobal
 
 (** Companion to fun_params type, intended to consolidate checking of
  * implicit params for functions. *)

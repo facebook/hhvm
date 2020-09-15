@@ -555,6 +555,7 @@ let reactivity_to_string env r =
     | Cipp (Some s) -> "cipp(" ^ s ^ ")"
     | CippLocal None -> "cipp_local"
     | CippLocal (Some s) -> "cipp_local(" ^ s ^ ")"
+    | CippGlobal -> "cipp_global"
   in
   aux r
 

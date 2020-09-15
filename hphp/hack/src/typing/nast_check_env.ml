@@ -40,6 +40,7 @@ let is_some_reactivity_attribute { ua_name = (_, name); _ } =
   || String.equal name SN.UserAttributes.uaShallowReactive
   || String.equal name SN.UserAttributes.uaCipp
   || String.equal name SN.UserAttributes.uaCippLocal
+  || String.equal name SN.UserAttributes.uaCippGlobal
 
 (* During Nast_check, all reactivity kinds are the same *)
 let fun_is_reactive user_attributes =

@@ -231,6 +231,8 @@ pub mod user_attributes {
 
     pub const CIPP_LOCAL: &str = "__CippLocal";
 
+    pub const CIPP_GLOBAL: &str = "__CippGlobal";
+
     pub const REACTIVE: &str = "__Rx";
 
     pub const LOCAL_REACTIVE: &str = "__RxLocal";
@@ -303,6 +305,7 @@ pub mod user_attributes {
             PURE,
             CIPP,
             CIPP_LOCAL,
+            CIPP_GLOBAL,
             REACTIVE,
             LOCAL_REACTIVE,
             MUTABLE,
@@ -777,6 +780,8 @@ pub mod rx {
 
     pub const CIPP_LOCAL: &str = "CippLocal";
 
+    pub const CIPP_GLOBAL: &str = "CippGlobal";
+
     pub const RX: &str = "Rx";
 
     pub const RX_LOCAL: &str = "RxLocal";
@@ -798,6 +803,7 @@ pub mod rx {
                 PURE,
                 CIPP,
                 CIPP_LOCAL,
+                CIPP_GLOBAL,
                 RX,
                 RX_LOCAL,
                 RX_SHALLOW,

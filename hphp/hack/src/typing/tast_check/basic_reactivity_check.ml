@@ -534,6 +534,8 @@ let get_reactivity_from_user_attributes user_attributes =
         Some (Cipp (get_params ua_params))
       else if String.equal n UA.uaCippLocal then
         Some (CippLocal (get_params ua_params))
+      else if String.equal n UA.uaCippGlobal then
+        Some CippGlobal
       else
         go tl
   in

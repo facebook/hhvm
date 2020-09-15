@@ -20,8 +20,6 @@
 #include <cinttypes>
 #include <folly/portability/SysMman.h>
 
-#if USE_JEMALLOC_EXTENT_HOOKS
-
 namespace HPHP { namespace alloc {
 
 void RangeState::reserve() {
@@ -65,6 +63,13 @@ RangeState::RangeState(uintptr_t lowAddr, uintptr_t highAddr)
   reserve();
 }
 
-}}
+RangeState::RangeState(uintptr_t lowAddr, uintptr_t highAddr, Mapped)
+  : low_use(lowAddr)
+  , low_map(highAddr)                   // already mapped the whole range
+  , high_use(highAddr)
+  , high_map(highAddr)
+  , low_internal(reinterpret_cast<char*>(lowAddr))
+  , high_internal(reinterpret_cast<char*>(highAddr)) {
+}
 
-#endif
+}}

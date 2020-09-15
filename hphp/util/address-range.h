@@ -46,8 +46,6 @@ constexpr size_t kLocalArenaSizeLimit = 64ull << 30;
 // Extra pages for Arena 0
 constexpr uintptr_t kArena0Base = 2ull << 40;
 
-#if USE_JEMALLOC_EXTENT_HOOKS
-
 namespace alloc {
 
 // List of address ranges ManagedArena can manage.
@@ -65,13 +63,18 @@ enum class Direction : uint32_t {
 };
 
 enum class Reserved {};
+enum class Mapped {};
 
 struct RangeMapper;
 
 // An address range, supporting bump mapping and allocation from both ends.
-struct alignas(64) RangeState {
+struct RangeState {
   // Default constructor that does nothing.
   RangeState() = default;
+
+  // Constructor that accepts an already mapped address range (so there is no
+  // need for mappers).
+  RangeState(uintptr_t lowAddr, uintptr_t highAddr, Mapped);
 
   // Constructor that accepts an already reserved address range.
   RangeState(uintptr_t lowAddr, uintptr_t highAddr, Reserved);
@@ -235,6 +238,17 @@ struct alignas(64) RangeState {
     } while (true);
   }
 
+  // Reset low_use, for immediate deallocation after allocation. Return whether
+  // the operation was successful.
+  bool tryFreeLow(void* ptr, size_t size) {
+    auto const p = reinterpret_cast<uintptr_t>(ptr);
+    assert(p < low_use.load(std::memory_order_relaxed));
+    assert(p >= low());
+    uintptr_t expected = p + size;
+    return low_use.compare_exchange_strong(expected, p,
+                                           std::memory_order_relaxed);
+  }
+
   std::atomic<uintptr_t> low_use{0};
   std::atomic<uintptr_t> low_map{0};
   std::atomic<uintptr_t> high_use{0};
@@ -253,8 +267,6 @@ static_assert(sizeof(RangeState) <= 64, "");
 RangeState& getRange(AddrRangeClass rc);
 
 }
-
-#endif // USE_JEMALLOC_EXTENT_HOOKS
 
 }
 

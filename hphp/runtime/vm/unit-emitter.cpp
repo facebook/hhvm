@@ -75,8 +75,8 @@ using MergeKind = Unit::MergeKind;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using BytecodeArena = ReadOnlyArena<VMColdAllocator<char>>;
-static BytecodeArena& get_readonly_arena() {
+using BytecodeArena = ReadOnlyArena<VMColdAllocator<char>, false, 8>;
+static BytecodeArena& bytecode_arena() {
   static BytecodeArena arena(RuntimeOption::EvalHHBCArenaChunkSize);
   return arena;
 }
@@ -86,7 +86,7 @@ static BytecodeArena& get_readonly_arena() {
  */
 size_t hhbc_arena_capacity() {
   if (!RuntimeOption::RepoAuthoritative) return 0;
-  return get_readonly_arena().capacity();
+  return bytecode_arena().capacity();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -515,15 +515,9 @@ ServiceData::ExportedTimeSeries* g_hhbc_size = ServiceData::createTimeSeries(
 static const unsigned char*
 allocateBCRegion(const unsigned char* bc, size_t bclen) {
   g_hhbc_size->addValue(bclen);
-  if (RuntimeOption::RepoAuthoritative) {
-    // In RepoAuthoritative, we assume we won't ever deallocate units
-    // and that this is read-only, mostly cold data.  So we throw it
-    // in a bump-allocator that's mprotect'd to prevent writes.
-    return static_cast<const unsigned char*>(
-      get_readonly_arena().allocate(bc, bclen)
-    );
-  }
-  auto mem = static_cast<unsigned char*>(malloc(bclen));
+  auto mem = static_cast<unsigned char*>(
+    RuntimeOption::RepoAuthoritative ? bytecode_arena().allocate(bclen)
+                                     : malloc(bclen));
   std::copy(bc, bc + bclen, mem);
   return mem;
 }

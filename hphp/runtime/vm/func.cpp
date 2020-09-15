@@ -54,6 +54,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <iomanip>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -584,92 +585,128 @@ void Func::print_attrs(std::ostream& out, Attr attrs) {
 }
 
 void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
-  if (preClass() != nullptr) {
-    out << "Method";
-    print_attrs(out, m_attrs);
-    if (isPhpLeafFn()) out << " (leaf)";
-    if (isMemoizeWrapper()) out << " (memoize_wrapper)";
-    if (isMemoizeWrapperLSB()) out << " (memoize_wrapper_lsb)";
-    if (cls() != nullptr) {
-      out << ' ' << fullName()->data();
-    } else {
-      out << ' ' << preClass()->name()->data() << "::" << m_name->data();
-    }
-  } else {
-    out << "Function";
-    print_attrs(out, m_attrs);
-    if (isPhpLeafFn()) out << " (leaf)";
-    if (isMemoizeWrapper()) out << " (memoize_wrapper)";
-    if (isMemoizeWrapperLSB()) out << " (memoize_wrapper_lsb)";
-    out << ' ' << m_name->data();
-  }
-
-  out << " at " << base();
-  out << std::endl;
-
-  if (!opts.metadata) return;
-
-  const ParamInfoVec& params = shared()->m_params;
-  for (uint32_t i = 0; i < params.size(); ++i) {
-    auto const& param = params[i];
-    out << " Param: " << localVarName(i)->data();
-    if (param.typeConstraint.hasConstraint()) {
-      out << " " << param.typeConstraint.displayName(cls(), true);
-    }
-    if (param.userType) {
-      out << " (" << param.userType->data() << ")";
-    }
-    if (param.funcletOff != kInvalidOffset) {
-      out << " DV" << " at " << param.funcletOff;
-      if (param.phpCode) {
-        out << " = " << param.phpCode->data();
+  if (opts.name) {
+    if (preClass() != nullptr) {
+      out << "Method";
+      print_attrs(out, m_attrs);
+      if (isPhpLeafFn()) out << " (leaf)";
+      if (isMemoizeWrapper()) out << " (memoize_wrapper)";
+      if (isMemoizeWrapperLSB()) out << " (memoize_wrapper_lsb)";
+      if (cls() != nullptr) {
+        out << ' ' << fullName()->data();
+      } else {
+        out << ' ' << preClass()->name()->data() << "::" << m_name->data();
       }
+    } else {
+      out << "Function";
+      print_attrs(out, m_attrs);
+      if (isPhpLeafFn()) out << " (leaf)";
+      if (isMemoizeWrapper()) out << " (memoize_wrapper)";
+      if (isMemoizeWrapperLSB()) out << " (memoize_wrapper_lsb)";
+      out << ' ' << m_name->data();
     }
+
+    out << " at " << base();
     out << std::endl;
   }
 
-  if (returnTypeConstraint().hasConstraint() ||
-      (returnUserType() && !returnUserType()->empty())) {
-    out << " Ret: ";
-    if (returnTypeConstraint().hasConstraint()) {
-      out << " " << returnTypeConstraint().displayName(cls(), true);
+  if (opts.metadata) {
+    const ParamInfoVec& params = shared()->m_params;
+    for (uint32_t i = 0; i < params.size(); ++i) {
+      auto const& param = params[i];
+      out << " Param: " << localVarName(i)->data();
+      if (param.typeConstraint.hasConstraint()) {
+        out << " " << param.typeConstraint.displayName(cls(), true);
+      }
+      if (param.userType) {
+        out << " (" << param.userType->data() << ")";
+      }
+      if (param.funcletOff != kInvalidOffset) {
+        out << " DV" << " at " << param.funcletOff;
+        if (param.phpCode) {
+          out << " = " << param.phpCode->data();
+        }
+      }
+      out << std::endl;
     }
-    if (returnUserType() && !returnUserType()->empty()) {
-      out << " (" << returnUserType()->data() << ")";
+
+    if (returnTypeConstraint().hasConstraint() ||
+        (returnUserType() && !returnUserType()->empty())) {
+      out << " Ret: ";
+      if (returnTypeConstraint().hasConstraint()) {
+        out << " " << returnTypeConstraint().displayName(cls(), true);
+      }
+      if (returnUserType() && !returnUserType()->empty()) {
+        out << " (" << returnUserType()->data() << ")";
+      }
+      out << std::endl;
     }
-    out << std::endl;
+
+    if (repoReturnType().tag() != RepoAuthType::Tag::Cell) {
+      out << "repoReturnType: " << show(repoReturnType()) << '\n';
+    }
+    if (repoAwaitedReturnType().tag() != RepoAuthType::Tag::Cell) {
+      out << "repoAwaitedReturnType: " << show(repoAwaitedReturnType()) << '\n';
+    }
+    out << "maxStackCells: " << maxStackCells() << '\n'
+        << "numLocals: " << numLocals() << '\n'
+        << "numIterators: " << numIterators() << '\n';
+
+    const EHEntVec& ehtab = shared()->m_ehtab;
+    size_t ehId = 0;
+    for (auto it = ehtab.begin(); it != ehtab.end(); ++it, ++ehId) {
+      out << " EH " << ehId << " Catch for " <<
+        it->m_base << ":" << it->m_past;
+      if (it->m_parentIndex != -1) {
+        out << " outer EH " << it->m_parentIndex;
+      }
+      if (it->m_iterId != -1) {
+        out << " iterId " << it->m_iterId;
+      }
+      out << " handle at " << it->m_handler;
+      if (it->m_end != kInvalidOffset) {
+        out << ":" << it->m_end;
+      }
+      if (it->m_parentIndex != -1) {
+        out << " parentIndex " << it->m_parentIndex;
+      }
+      out << std::endl;
+    }
   }
 
-  if (repoReturnType().tag() != RepoAuthType::Tag::Cell) {
-    out << "repoReturnType: " << show(repoReturnType()) << '\n';
-  }
-  if (repoAwaitedReturnType().tag() != RepoAuthType::Tag::Cell) {
-    out << "repoAwaitedReturnType: " << show(repoAwaitedReturnType()) << '\n';
-  }
-  out << "maxStackCells: " << maxStackCells() << '\n'
-      << "numLocals: " << numLocals() << '\n'
-      << "numIterators: " << numIterators() << '\n';
+  if (opts.startOffset != kInvalidOffset) {
+    auto startOffset = std::max(base(), opts.startOffset);
+    auto stopOffset = std::min(past(), opts.stopOffset);
 
-  const EHEntVec& ehtab = shared()->m_ehtab;
-  size_t ehId = 0;
-  for (auto it = ehtab.begin(); it != ehtab.end(); ++it, ++ehId) {
-    out << " EH " << ehId << " Catch for " <<
-      it->m_base << ":" << it->m_past;
-    if (it->m_parentIndex != -1) {
-      out << " outer EH " << it->m_parentIndex;
+    if (startOffset >= stopOffset) {
+      return;
     }
-    if (it->m_iterId != -1) {
-      out << " iterId " << it->m_iterId;
+
+    const auto bc = unit()->entry();
+    const auto* it = &bc[startOffset];
+    int prevLineNum = -1;
+    while (it < &bc[stopOffset]) {
+      if (opts.showLines) {
+        int lineNum = unit()->getLineNumber(offsetOf(it));
+        if (lineNum != prevLineNum) {
+          out << "  // line " << lineNum << std::endl;
+          prevLineNum = lineNum;
+        }
+      }
+
+      out << std::string(opts.indentSize, ' ');
+      prettyPrintInstruction(out, offsetOf(it));
+      it += instrLen(it);
     }
-    out << " handle at " << it->m_handler;
-    if (it->m_end != kInvalidOffset) {
-      out << ":" << it->m_end;
-    }
-    if (it->m_parentIndex != -1) {
-      out << " parentIndex " << it->m_parentIndex;
-    }
-    out << std::endl;
   }
+}
+
+void Func::prettyPrintInstruction(std::ostream& out, Offset offset) const {
+  const auto bc = unit()->entry();
+  const auto* it = &bc[offset];
+  out << std::setw(4) << (it - bc) << ": "
+    << instrToString(it, this)
+    << std::endl;
 }
 
 

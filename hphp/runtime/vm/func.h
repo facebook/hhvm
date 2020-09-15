@@ -1003,18 +1003,57 @@ struct Func final {
 
   struct PrintOpts {
     PrintOpts()
-      : metadata(true)
+      : name(true)
+      , metadata(true)
+      , startOffset(0)
+      , stopOffset(kInvalidOffset)
+      , showLines(true)
+      , indentSize(1)
     {}
+
+    PrintOpts& noName() {
+      name = false;
+      return *this;
+    }
 
     PrintOpts& noMetadata() {
       metadata = false;
       return *this;
     }
 
+    PrintOpts& noBytecode() {
+      startOffset = kInvalidOffset;
+      stopOffset = kInvalidOffset;
+      return *this;
+    }
+
+    PrintOpts& range(Offset start, Offset stop) {
+      startOffset = start;
+      stopOffset = stop;
+      return *this;
+    }
+
+    PrintOpts& noLineNumbers() {
+      showLines = false;
+      return *this;
+    }
+
+    PrintOpts& indent(int i) {
+      indentSize = i;
+      return *this;
+    }
+
+    bool name;
     bool metadata;
+    Offset startOffset;
+    Offset stopOffset;
+    bool showLines;
+    int indentSize;
   };
 
   void prettyPrint(std::ostream& out, const PrintOpts& = PrintOpts()) const;
+
+  void prettyPrintInstruction(std::ostream& out, Offset offset) const;
 
   /*
    * Print function attributes to out.

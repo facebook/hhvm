@@ -658,10 +658,9 @@ dynamic getTrans(TransID transId) {
     if (unit) {
       auto const newFunc = unit->getFunc(block.bcStart);
       always_assert(newFunc);
-      newFunc->prettyPrint(byteInfo, HPHP::Func::PrintOpts().noMetadata());
-      unit->prettyPrint(byteInfo, HPHP::Unit::PrintOpts().range(block.bcStart,
-                                                                block.bcPast)
-                                                         .noFuncs());
+      newFunc->prettyPrint(byteInfo,
+                           HPHP::Func::PrintOpts().noName().noMetadata()
+                                                  .range(block.bcStart, block.bcPast));
     }
 
     blocks.push_back(dynamic::object("sha1", block.sha1.toString())
@@ -766,14 +765,14 @@ void printTrans(TransID transId) {
       always_assert(newFunc);
       if (newFunc != curFunc) {
         byteInfo << '\n';
-        newFunc->prettyPrint(byteInfo, Func::PrintOpts().noMetadata());
+        newFunc->prettyPrint(byteInfo, Func::PrintOpts().noMetadata().noBytecode());
       }
       curFunc = newFunc;
 
-      unit->prettyPrint(
+      newFunc->prettyPrint(
         byteInfo,
-        Unit::PrintOpts().range(block.bcStart, block.bcPast).noFuncs());
-        g_logger->printBytecode(byteInfo.str());
+        Func::PrintOpts().noName().noMetadata().range(block.bcStart, block.bcPast));
+      g_logger->printBytecode(byteInfo.str());
     }
   }
 

@@ -237,19 +237,14 @@ dynamic getIRInstruction(const IRInstruction& inst,
     markerObj = dynamic(nullptr);
   } else {
     auto func = newMarker.func();
-    func->prettyPrint(mStr, Func::PrintOpts());
+    func->prettyPrint(mStr, Func::PrintOpts().noBytecode());
     mStr << std::string(kIndent, ' ')
          << newMarker.show()
          << '\n';
 
     auto const bcOffset = newMarker.bcOff();
     // TODO(T46690139)
-    func->unit()->prettyPrint(
-      mStr, Unit::PrintOpts()
-      .range(bcOffset, bcOffset+1)
-      .noLineNumbers()
-      .noFuncs()
-      .indent(0));
+    func->prettyPrintInstruction(mStr, bcOffset);
     std::vector<std::string> vec;
     folly::split('\n', mStr.str(), vec);
     for (auto const& s : vec) {
@@ -720,19 +715,14 @@ void printIRInstruction(std::ostream& os,
     } else {
       auto func = newMarker.func();
       if (!curMarker.hasFunc() || func != curMarker.func()) {
-        func->prettyPrint(mStr, Func::PrintOpts());
+        func->prettyPrint(mStr, Func::PrintOpts().noBytecode());
       }
       mStr << std::string(kIndent, ' ')
            << newMarker.show()
            << '\n';
 
       auto bcOffset = newMarker.bcOff();
-      func->unit()->prettyPrint(
-        mStr, Unit::PrintOpts()
-        .range(bcOffset, bcOffset+1)
-        .noLineNumbers()
-        .noFuncs()
-        .indent(0));
+      func->prettyPrintInstruction(mStr, bcOffset);
       std::vector<std::string> vec;
       folly::split('\n', mStr.str(), vec);
       os << markerEndl;

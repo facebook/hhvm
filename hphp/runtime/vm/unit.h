@@ -716,44 +716,6 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Pretty printer.                                                    [const]
 
-  struct PrintOpts {
-    PrintOpts()
-      : startOffset(kInvalidOffset)
-      , stopOffset(kInvalidOffset)
-      , showLines(true)
-      , showFuncs(true)
-      , indentSize(1)
-    {}
-
-    PrintOpts& range(Offset start, Offset stop) {
-      startOffset = start;
-      stopOffset = stop;
-      return *this;
-    }
-
-    PrintOpts& noLineNumbers() {
-      showLines = false;
-      return *this;
-    }
-
-    PrintOpts& noFuncs() {
-      showFuncs = false;
-      return *this;
-    }
-
-    PrintOpts& indent(int i) {
-      indentSize = i;
-      return *this;
-    }
-
-    Offset startOffset;
-    Offset stopOffset;
-    bool showLines;
-    bool showFuncs;
-    int indentSize;
-  };
-
-  void prettyPrint(std::ostream&, PrintOpts = PrintOpts()) const;
   std::string toString() const;
 
   /////////////////////////////////////////////////////////////////////////////

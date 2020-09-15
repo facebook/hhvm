@@ -300,8 +300,7 @@ void OfflineCode::printRangeInfo(std::ostream& os,
     if (rangeInfo.unit) {
       auto const currUnit = *rangeInfo.unit;
       auto const func = currUnit->getFunc(currBC);
-      auto const bcPast = currBC + instrLen(func->at(currBC));
-      currUnit->prettyPrint(os, Unit::PrintOpts().range(currBC, bcPast));
+      func->prettyPrintInstruction(os, currBC);
     } else {
       auto const currSha1 = rangeInfo.sha1 ?
         rangeInfo.sha1->toString() :

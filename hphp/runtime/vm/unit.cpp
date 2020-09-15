@@ -1830,60 +1830,8 @@ Array Unit::getSystemFunctions() {
 ///////////////////////////////////////////////////////////////////////////////
 // Pretty printer.
 
-void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
-  auto startOffset = opts.startOffset != kInvalidOffset
-    ? opts.startOffset : 0;
-  auto stopOffset = opts.stopOffset != kInvalidOffset
-    ? opts.stopOffset : m_bclen;
-
-  auto print = [&](const Func* func, Offset startOffset, Offset stopOffset) {
-    startOffset = std::max(func->base(), startOffset);
-    stopOffset = std::min(func->past(), stopOffset);
-    if (startOffset >= stopOffset) {
-      return;
-    }
-
-    if (opts.showFuncs && startOffset == func->base()) {
-      out.put('\n');
-      func->prettyPrint(out);
-    }
-
-    const auto* it = &m_bc[startOffset];
-    int prevLineNum = -1;
-    while (it < &m_bc[stopOffset]) {
-      if (opts.showLines) {
-        int lineNum = getLineNumber(func->offsetOf(it));
-        if (lineNum != prevLineNum) {
-          out << "  // line " << lineNum << std::endl;
-          prevLineNum = lineNum;
-        }
-      }
-
-      out << std::string(opts.indentSize, ' ')
-        << std::setw(4) << (it - m_bc) << ": "
-        << instrToString(it, func)
-        << std::endl;
-      it += instrLen(it);
-    }
-  };
-
-  std::map<Offset,const Func*> funcMap;
-  for (auto& func : funcs()) {
-    print(func, startOffset, stopOffset);
-  }
-  for (auto it = m_preClasses.begin();
-      it != m_preClasses.end(); ++it) {
-    Func* const* methods = (*it)->methods();
-    size_t const numMethods = (*it)->numMethods();
-    for (size_t i = 0; i < numMethods; ++i) {
-      print(methods[i], startOffset, stopOffset);
-    }
-  }
-}
-
 std::string Unit::toString() const {
   std::ostringstream ss;
-  prettyPrint(ss);
   for (auto& pc : m_preClasses) {
     pc->prettyPrint(ss);
   }

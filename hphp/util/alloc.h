@@ -32,6 +32,7 @@
 #include "hphp/util/exception.h"
 #include "hphp/util/jemalloc-util.h"
 #include "hphp/util/low-ptr-def.h"
+#include "hphp/util/read-only-arena.h"
 #include "hphp/util/slab-manager.h"
 
 enum class NotNull {};
@@ -434,6 +435,24 @@ template<typename T> using APCAllocator =
   WrapAllocator<apc_malloc, apc_sized_free, T>;
 template<typename T> using LocalAllocator =
   WrapAllocator<local_malloc, local_sized_free, T>;
+
+// Per-thread buffer for global data, using a bump allocator.
+using TLStaticArena = ReadOnlyArena<LowerAllocator<char>, true, 16>;
+extern __thread TLStaticArena* tl_static_arena;
+extern bool s_enable_static_arena;
+
+inline void* static_alloc(size_t size) {
+  if (tl_static_arena) return tl_static_arena->allocate(size);
+  return lower_malloc(size);
+}
+
+// This can only free the memory allocated using static_alloc(), immediately
+// after allocation, and it must happen in the same thread where allocation
+// happens.
+inline void static_try_free(void* ptr, size_t size) {
+  if (tl_static_arena) return tl_static_arena->deallocate(ptr, size);
+  return lower_sized_free(ptr, size);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -1843,6 +1843,8 @@ void RuntimeOption::Load(
       low_2m_pages(EvalMaxLowMemHugePages);
       high_2m_pages(EvalMaxHighArenaHugePages);
     }
+    s_enable_static_arena =
+      Config::GetBool(ini, config, "Eval.UseTLStaticArena", true);
 
     replacePlaceholders(EvalHackCompilerExtractPath);
     replacePlaceholders(EvalHackCompilerFallbackPath);

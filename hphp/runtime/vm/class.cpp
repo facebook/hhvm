@@ -286,7 +286,8 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const size = sizeof_Class + prefix_sz
                     + sizeof(m_classVec[0]) * classVecLen;
 
-  auto const mem = lower_malloc(size);
+  auto const mem = RO::RepoAuthoritative ? static_alloc(size)
+                                         : lower_malloc(size);
   MemoryStats::LogAlloc(AllocKind::Class, size);
   auto const classPtr = reinterpret_cast<void*>(
     reinterpret_cast<uintptr_t>(mem) + prefix_sz
@@ -295,7 +296,8 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
     return new (classPtr) Class(preClass, parent, std::move(usedTraits),
                                 classVecLen, funcVecLen);
   } catch (...) {
-    lower_free(mem);
+    if (RO::RepoAuthoritative) static_try_free(mem, size);
+    else lower_sized_free(mem, size);
     throw;
   }
 }
@@ -481,7 +483,9 @@ void Class::atomicRelease() {
   assertx(!m_cachedClass.bound());
   assertx(!getCount());
   this->~Class();
-  lower_free(mallocPtr());
+  if (!RuntimeOption::RepoAuthoritative) {
+    lower_free(mallocPtr());
+  }
 }
 
 Class::~Class() {

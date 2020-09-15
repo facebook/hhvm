@@ -784,11 +784,6 @@ and pp_class_type : Format.formatter -> class_type -> unit =
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 
-  Format.fprintf fmt "@[%s =@ " "tc_ppl";
-  Format.fprintf fmt "%B" x.tc_ppl;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
   Format.fprintf fmt "@[%s =@ " "tc_deferred_init_members";
   SSet.pp fmt x.tc_deferred_init_members;
   Format.fprintf fmt "@]";

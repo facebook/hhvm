@@ -47,7 +47,6 @@ let to_class_type
       dc_abstract;
       dc_final;
       dc_const;
-      dc_ppl;
       dc_deferred_init_members;
       dc_kind;
       dc_is_xhp;
@@ -137,7 +136,6 @@ let to_class_type
     tc_abstract = dc_abstract;
     tc_final = dc_final;
     tc_const = dc_const;
-    tc_ppl = dc_ppl;
     tc_deferred_init_members = dc_deferred_init_members;
     tc_kind = dc_kind;
     tc_is_xhp = dc_is_xhp;

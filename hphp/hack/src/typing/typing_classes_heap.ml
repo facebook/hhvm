@@ -195,13 +195,6 @@ module Api = struct
     | Lazy lc -> Attrs.mem SN.UserAttributes.uaConst lc.sc.sc_user_attributes
     | Eager c -> c.tc_const
 
-  let ppl t =
-    Counters.count_decl_accessor @@ fun () ->
-    match t with
-    | Lazy lc ->
-      Attrs.mem SN.UserAttributes.uaProbabilisticModel lc.sc.sc_user_attributes
-    | Eager c -> c.tc_ppl
-
   let kind t =
     Counters.count_decl_accessor @@ fun () ->
     match t with

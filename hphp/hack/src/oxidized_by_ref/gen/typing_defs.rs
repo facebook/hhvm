@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<44505d39012ebc9668d5c30fdad0cc59>>
+// @generated SignedSource<<c6d78f01be9ab7ca34575e895cc97ddb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -152,8 +152,6 @@ pub struct ClassType<'a> {
     pub abstract_: bool,
     pub final_: bool,
     pub const_: bool,
-    /// True when the class is annotated with the __PPL attribute.
-    pub ppl: bool,
     /// When a class is abstract (or in a trait) the initialization of
     /// a protected member can be delayed
     pub deferred_init_members: s_set::SSet<'a>,

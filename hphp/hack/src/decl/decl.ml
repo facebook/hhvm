@@ -571,9 +571,6 @@ and class_decl
     (c : Shallow_decl_defs.shallow_class) : Decl_defs.decl_class_type =
   let is_abstract = class_is_abstract c in
   let const = Attrs.mem SN.UserAttributes.uaConst c.sc_user_attributes in
-  let is_ppl =
-    Attrs.mem SN.UserAttributes.uaProbabilisticModel c.sc_user_attributes
-  in
   let (_p, cls_name) = c.sc_name in
   let class_dep = Dep.Class cls_name in
   let env = { Decl_env.mode = c.sc_mode; droot = Some class_dep; ctx } in
@@ -703,7 +700,6 @@ and class_decl
     {
       dc_final = c.sc_final;
       dc_const = const;
-      dc_ppl = is_ppl;
       dc_abstract = is_abstract;
       dc_need_init = has_concrete_cstr;
       dc_deferred_init_members = deferred_members;

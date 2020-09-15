@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f857e1935c4191c4f1af61c3e8a97e4d>>
+// @generated SignedSource<<bffa439303ac434d96b1ee7357209b2d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -237,7 +237,6 @@ pub struct DeclClassType<'a> {
     pub final_: bool,
     pub is_disposable: bool,
     pub const_: bool,
-    pub ppl: bool,
     pub deferred_init_members: s_set::SSet<'a>,
     pub kind: oxidized::ast_defs::ClassKind,
     pub is_xhp: bool,

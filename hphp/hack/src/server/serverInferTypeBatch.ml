@@ -20,15 +20,18 @@ let recheck_typing ctx (pos_list : pos list) =
     |> List.remove_consecutive_duplicates ~equal:Relative_path.equal
     (* note: our caller has already sorted pos_list *)
   in
-  let tasts =
-    List.map files_to_check ~f:(fun path ->
-        let (_ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+  let (ctx, paths_and_tasts) =
+    List.fold
+      files_to_check
+      ~init:(ctx, [])
+      ~f:(fun (ctx, paths_and_tasts) path ->
+        let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
         let { Tast_provider.Compute_tast.tast; _ } =
           Tast_provider.compute_tast_unquarantined ~ctx ~entry
         in
-        (path, tast))
+        (ctx, (path, tast) :: paths_and_tasts))
   in
-  tasts
+  (ctx, paths_and_tasts)
 
 let result_to_string result (fn, line, char, range_end) =
   Hh_json.(
@@ -55,9 +58,10 @@ let result_to_string result (fn, line, char, range_end) =
 
 let helper env acc pos_list =
   let ctx = Provider_utils.ctx_from_server_env env in
+  let (ctx, paths_and_tasts) = recheck_typing ctx pos_list in
   let tasts =
     List.fold
-      (recheck_typing ctx pos_list)
+      paths_and_tasts
       ~init:Relative_path.Map.empty
       ~f:(fun map (key, data) -> Relative_path.Map.add map ~key ~data)
   in

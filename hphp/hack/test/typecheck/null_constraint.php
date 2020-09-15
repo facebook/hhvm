@@ -14,6 +14,7 @@ class MyClass {
   public function doStuff() {}
 }
 
+
 function test<T as ?MyClass>(T $arg): void {
   if ($arg !== null) {
     $arg->doStuff();
@@ -21,8 +22,9 @@ function test<T as ?MyClass>(T $arg): void {
   }
 }
 
+function expectString(string $_):void { }
 function test2<T as ?string>(T $arg): void {
   if ($arg) {
-    $arg[0];
+    expectString($arg[0]);
   }
 }

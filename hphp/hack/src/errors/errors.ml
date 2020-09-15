@@ -4113,21 +4113,6 @@ let non_class_member ~is_method s pos1 ty pos2 =
     (Typing.err_code Typing.NonClassMember)
     [(pos1, msg); (pos2, "Definition is here")]
 
-let ambiguous_member ~is_method s pos1 ty pos2 =
-  let msg =
-    Printf.sprintf
-      "You are trying to access the %s %s but there is more than one implementation on %s"
-      ( if is_method then
-        "method"
-      else
-        "property" )
-      (Markdown_lite.md_codify s)
-      ty
-  in
-  add_list
-    (Typing.err_code Typing.AmbiguousMember)
-    [(pos1, msg); (pos2, "Definition is here")]
-
 let null_container p null_witness =
   add_list
     (Typing.err_code Typing.NullContainer)

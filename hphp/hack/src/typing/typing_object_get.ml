@@ -688,63 +688,45 @@ and obj_get_
       k_lhs
       on_error
   | (r, Tgeneric _) ->
-    (* TODO(T69551141) handle type arguments? *)
-    let resl =
-      TUtils.try_over_concrete_supertypes env ety1 (fun env ty ->
-          (* We probably don't want to rewrap new types for the 'this' closure *)
-          (* TODO AKENN: we shouldn't refine constraints by changing
-           * the type like this *)
-          let k_lhs' _ty = ety1 in
-          let (env, ty) =
-            if is_nonnull then
-              Typing_solver.non_null env obj_pos ty
-            else
-              (env, ty)
-          in
-          obj_get_
-            ~inst_meth
-            ~obj_pos
-            ~is_method
-            ~nullsafe
-            ~explicit_targs
-            ~coerce_from_ty
-            ~is_nonnull
-            env
-            ty
-            cid
-            id
-            k_lhs'
-            on_error)
-    in
-    begin
-      match resl with
-      | [] ->
-        let err =
-          if read_context then
-            Errors.non_object_member_read
-          else
-            Errors.non_object_member_write
-        in
-        err
-          ~is_method
-          id_str
-          id_pos
-          (Typing_print.error env ety1)
-          (Reason.to_pos r)
-          on_error;
-        (env, (err_witness env id_pos, []))
-      | ((_env, (ty, _)) as res) :: rest ->
-        if List.exists rest (fun (_, (ty', _)) -> not @@ ty_equal ty' ty) then (
-          Errors.ambiguous_member
-            ~is_method
-            id_str
-            id_pos
-            (Typing_print.error env ety1)
-            (get_pos ety1);
-          (env, (err_witness env id_pos, []))
-        ) else
-          res
-    end
+    let (env, tyl) = TUtils.get_concrete_supertypes env ety1 in
+    if List.is_empty tyl then (
+      let err =
+        if read_context then
+          Errors.non_object_member_read
+        else
+          Errors.non_object_member_write
+      in
+      err
+        ~is_method
+        id_str
+        id_pos
+        (Typing_print.error env ety1)
+        (Reason.to_pos r)
+        on_error;
+      (env, (err_witness env id_pos, []))
+    ) else
+      let (env, ty) = Typing_intersection.intersect_list env r tyl in
+      let (env, ty) =
+        if is_nonnull then
+          Typing_solver.non_null env obj_pos ty
+        else
+          (env, ty)
+      in
+      let k_lhs' _ty = ety1 in
+      obj_get_
+        ~inst_meth
+        ~obj_pos
+        ~is_method
+        ~nullsafe
+        ~explicit_targs
+        ~coerce_from_ty
+        ~is_nonnull
+        env
+        ty
+        cid
+        id
+        k_lhs'
+        on_error
   | (_, Toption ty) -> nullable_obj_get ~read_context ty
   | (r, Tprim Tnull) ->
     let ty = mk (r, Tunion []) in

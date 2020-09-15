@@ -5168,44 +5168,29 @@ and class_get_
       cid
       ty
       (p, mid)
-  | (_, Tgeneric _) ->
-    (* TODO(T69551141) handle type arguments? *)
-    let resl =
-      TUtils.try_over_concrete_supertypes env cty (fun env ty ->
-          class_get_
-            ~is_method
-            ~is_const
-            ~this_ty
-            ~explicit_targs
-            ~incl_tc
-            ~coerce_from_ty
-            env
-            cid
-            ty
-            (p, mid))
-    in
-    begin
-      match resl with
-      | [] ->
-        Errors.non_class_member
-          ~is_method
-          mid
-          p
-          (Typing_print.error env cty)
-          (get_pos cty);
-        (env, (err_witness env p, []))
-      | ((_, (ty, _)) as res) :: rest ->
-        if List.exists rest (fun (_, (ty', _)) -> not @@ ty_equal ty' ty) then (
-          Errors.ambiguous_member
-            ~is_method
-            mid
-            p
-            (Typing_print.error env cty)
-            (get_pos cty);
-          (env, (err_witness env p, []))
-        ) else
-          res
-    end
+  | (r, Tgeneric _) ->
+    let (env, tyl) = TUtils.get_concrete_supertypes env cty in
+    if List.is_empty tyl then begin
+      Errors.non_class_member
+        ~is_method
+        mid
+        p
+        (Typing_print.error env cty)
+        (get_pos cty);
+      (env, (err_witness env p, []))
+    end else
+      let (env, ty) = Typing_intersection.intersect_list env r tyl in
+      class_get_
+        ~is_method
+        ~is_const
+        ~this_ty
+        ~explicit_targs
+        ~incl_tc
+        ~coerce_from_ty
+        env
+        cid
+        ty
+        (p, mid)
   | (_, Tclass ((_, c), _, paraml)) ->
     let class_ = Env.get_class env c in
     (match class_ with

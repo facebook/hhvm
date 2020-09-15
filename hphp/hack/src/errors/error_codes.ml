@@ -429,7 +429,7 @@ module Typing = struct
     | ContravariantThis
     | InstanceofAlwaysFalseDEPRECATED
     | InstanceofAlwaysTrueDEPRECATED
-    | AmbiguousMember
+    | AmbiguousMemberDEPRECATED
     | InstanceofGenericClassnameDEPRECATED
     | RequiredFieldIsOptional
     | FinalProperty

@@ -615,9 +615,6 @@ val unknown_object_member :
 val non_class_member :
   is_method:bool -> string -> Pos.t -> string -> Pos.t -> unit
 
-val ambiguous_member :
-  is_method:bool -> string -> Pos.t -> string -> Pos.t -> unit
-
 val null_container : Pos.t -> (Pos.t * string) list -> unit
 
 val option_mixed : Pos.t -> unit

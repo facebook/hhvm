@@ -153,6 +153,14 @@ struct Process {
   static int64_t GetMemUsageMb();
 
   /**
+   * Get the total systems cpu delay in milliseconds.
+   *
+   * The cpu delay measure the total amount of time that a processes were
+   * runnable, but not running because the CPUs were busy.
+   */
+  static int64_t GetSystemCPUDelayMS();
+
+  /**
    * Get the number of threads running in the current process.
    */
   static int GetNumThreads();

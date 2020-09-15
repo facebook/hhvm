@@ -79,6 +79,12 @@ struct PIDController {
     return output;
   }
 
+  void setStartingOutput(double output) {
+    if (output > max) output = max;
+    if (output < min) output = min;
+    m_integral = output / kI;
+  }
+
   double dt;
   double max;
   double min;

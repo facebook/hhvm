@@ -122,6 +122,38 @@ int64_t Process::GetMemUsageMb() {
   return ProcStatus::valid() ? ProcStatus::adjustedRssKb() / 1024 : 0;
 }
 
+int64_t Process::GetSystemCPUDelayMS() {
+  static FILE* fp = nullptr;
+  if (!fp) {
+    if (!(fp = fopen("/proc/schedstat", "r"))) {
+      return -1;
+    }
+  }
+  // Refresh the proc info.
+  rewind(fp);
+  fflush(fp);
+
+  int64_t totalCpuDelay = 0;
+  // Supposedly this should be enough to hold th important lines of the
+  // schedstat file.
+  char buf[320];
+  while (fgets(buf, sizeof(buf), fp) != nullptr) {
+    if (strncmp(buf, "cpu", 3) == 0) {
+      uint64_t cpuDelay;
+      if (sscanf(buf,
+                 "%*s %*u %*u %*u %*u %*u %*u %*u %lu %*u",
+                 &cpuDelay) != 1) {
+        return -1;
+      }
+      totalCpuDelay += cpuDelay;
+    }
+  }
+  // The kernel reports the information in nanoseconds.  Convert it
+  // to milliseconds.
+  return totalCpuDelay / 1000000;
+}
+
+
 int Process::GetNumThreads() {
   ProcStatus::update();
   return ProcStatus::valid() ? ProcStatus::nThreads() : 1;

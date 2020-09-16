@@ -150,7 +150,7 @@ struct RangeState {
   // running) to allocate without adding new mappings.
   bool trivial(size_t size, size_t align, Direction d) const {
     auto const mask = align - 1;
-    assert((align & mask) == 0);
+    assertx((align & mask) == 0);
     if (d == Direction::LowToHigh) {
       auto const use = low_use.load(std::memory_order_acquire);
       auto const aligned = (use + mask) & ~mask;
@@ -165,7 +165,7 @@ struct RangeState {
   // Whether free space in this range is insufficient for the allocation.
   bool infeasible(size_t size, size_t align, Direction d) const {
     auto const mask = align - 1;
-    assert((align & mask) == 0);
+    assertx((align & mask) == 0);
     if (d == Direction::LowToHigh) {
       auto const newUse =
         ((low_use.load(std::memory_order_acquire) + mask) & ~mask) + size;
@@ -207,7 +207,7 @@ struct RangeState {
     auto const mapFrontier = low_map.load(std::memory_order_acquire);
     auto oldUse = low_use.load(std::memory_order_acquire);
     auto const mask = align - 1;
-    assert((align & mask) == 0);
+    assertx((align & mask) == 0);
     do {
       auto const aligned = (oldUse + mask) & ~mask;
       auto const newUse = aligned + size;
@@ -225,7 +225,7 @@ struct RangeState {
     auto const mapFrontier = high_map.load(std::memory_order_acquire);
     auto oldUse = high_use.load(std::memory_order_acquire);
     auto const mask = align - 1;
-    assert((align & mask) == 0);
+    assertx((align & mask) == 0);
     do {
       auto const newUse = (oldUse - size) & ~mask;
       // Need to add more mapping.
@@ -242,8 +242,8 @@ struct RangeState {
   // the operation was successful.
   bool tryFreeLow(void* ptr, size_t size) {
     auto const p = reinterpret_cast<uintptr_t>(ptr);
-    assert(p < low_use.load(std::memory_order_relaxed));
-    assert(p >= low());
+    assertx(p < low_use.load(std::memory_order_relaxed));
+    assertx(p >= low());
     uintptr_t expected = p + size;
     return low_use.compare_exchange_strong(expected, p,
                                            std::memory_order_relaxed);

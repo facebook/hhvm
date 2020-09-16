@@ -77,6 +77,9 @@ fn rewrite_expr(e: &Expr) -> Expr {
         Int(_) => meth_call("intLiteral", vec![e.clone()]),
         // Convert `"foo"` to `$v->stringLiteral("foo")`.
         String(_) => meth_call("stringLiteral", vec![e.clone()]),
+        // Convert `true` to `$v->boolLiteral(true)`.
+        True => meth_call("boolLiteral", vec![e.clone()]),
+        False => meth_call("boolLiteral", vec![e.clone()]),
         // Convert `$x` to `$v->localVar("$x")` (note the quoting).
         Lvar(lid) => meth_call("localVar", vec![string_literal(&((lid.1).1))]),
         Binop(bop) => match &**bop {
@@ -146,7 +149,7 @@ fn rewrite_stmt(s: &Stmt) -> Option<Expr> {
             // Convert `return;` to `$v->returnStatement(null)`.
             None => Some(meth_call("returnStatement", vec![null_literal()])),
         },
-        // Convert `if (...) { ... } else { ...}` to `$v-ifStatement($v->..., vec[...], vec[...])`.
+        // Convert `if (...) {...} else {...}` to `$v-ifStatement($v->..., vec[...], vec[...])`.
         If(if_stmt) => match &**if_stmt {
             (e, then_block, else_block) => {
                 let then_stmts = rewrite_stmts(then_block);
@@ -159,6 +162,17 @@ fn rewrite_stmt(s: &Stmt) -> Option<Expr> {
                         vec_literal(then_stmts),
                         vec_literal(else_stmts),
                     ],
+                ))
+            }
+        },
+        // Convert `while (...) {...}` to `$v->whileStatement($v->..., vec[...])`.
+        While(w) => match &**w {
+            (e, body) => {
+                let body_stmts = rewrite_stmts(body);
+
+                Some(meth_call(
+                    "whileStatement",
+                    vec![rewrite_expr(&e), vec_literal(body_stmts)],
                 ))
             }
         },

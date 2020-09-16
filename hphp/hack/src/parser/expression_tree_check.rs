@@ -49,6 +49,7 @@ impl<'ast> Visitor<'ast> for Checker {
             Expr(_) => {}
             Return(_) => {}
             If(_) => {}
+            While(_) => {}
             // Primarily used for if without else, but also used for standalone ;.
             Noop => {}
             // Ban any other statement syntax inside expression trees.
@@ -90,9 +91,10 @@ impl<'ast> Visitor<'ast> for Checker {
 
         if c.in_expression_tree {
             let valid_syntax = match &e.1 {
-                // Allow integer and string literals.
+                // Allow integer, string and boolean literals.
                 Int(_) => true,
                 String(_) => true,
+                True | False => true,
                 // Allow local variables $foo.
                 Lvar(_) => true,
                 // Only allow + for binary operators.

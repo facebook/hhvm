@@ -24,8 +24,9 @@ function foo(): void {
   // Ban PHP-style lambdas.
   $f = Code`function() { return 1; }`;
 
-  // Ban loops.
-  $f = Code`() ==> { while(true) {} }`;
+  // Ban loops other than while.
+  $f = Code`() ==> { do {} while(true); }`;
+  $f = Code`() ==> { for($i = 0; $i < 10; $i++) {} }`;
 
   // Ban lambdas with default arguments.
   $f = Code`($x = 1) ==> { return $x; }`;

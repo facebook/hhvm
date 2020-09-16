@@ -8,7 +8,9 @@ File "invalid_operator.php", line 22, characters 13-20:
 Unsupported syntax for expression trees. (Parsing[1002])
 File "invalid_operator.php", line 25, characters 13-36:
 Unsupported syntax for expression trees. (Parsing[1002])
-File "invalid_operator.php", line 28, characters 22-35:
+File "invalid_operator.php", line 28, characters 22-39:
 Unsupported syntax for expression trees. (Parsing[1002])
-File "invalid_operator.php", line 31, characters 14-15:
+File "invalid_operator.php", line 29, characters 22-50:
+Unsupported syntax for expression trees. (Parsing[1002])
+File "invalid_operator.php", line 32, characters 14-15:
 Unsupported syntax for expression trees. (Parsing[1002])

@@ -1,8 +1,0 @@
-int(43)
-int(44)
-varray(1) {
-  string(1) "a"
-}
-varray(1) {
-  string(2) "a2"
-}

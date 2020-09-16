@@ -1245,6 +1245,8 @@ val invalid_argument_type_for_condition_in_rx :
 val callsite_reactivity_mismatch :
   Pos.t -> Pos.t -> string -> Pos.t option -> string -> unit
 
+val callsite_cipp_mismatch : Pos.t -> Pos.t -> string -> string -> unit
+
 val rx_parameter_condition_mismatch :
   string -> Pos.t -> Pos.t -> typing_error_callback -> unit
 

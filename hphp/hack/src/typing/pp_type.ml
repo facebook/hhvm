@@ -288,6 +288,8 @@ and show_shape_kind : shape_kind -> string =
 and pp_reactivity : Format.formatter -> reactivity -> unit =
  fun fmt r ->
   match r with
+  (* Nonreactive functions are printed in error messages as "normal", *)
+  (* But for this printing purpose, we print the same as the ast structure *)
   | Nonreactive -> Format.pp_print_string fmt "Nonreactive"
   | RxVar v ->
     Format.pp_print_string fmt "RxVar {";

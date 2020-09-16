@@ -9,4 +9,4 @@ File "classes.php", line 6, characters 17-34:
 File "classes.php", line 41, characters 31-37:
 Reactive functions can only call other reactive functions. (Typing[4200])
 File "classes.php", line 9, characters 19-29:
-This function is non-reactive.
+This function is normal.

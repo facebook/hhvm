@@ -653,7 +653,8 @@ module Typing = struct
     | ClassMethAbstractCall
     | KindMismatch
     | UnboundNameTypeConstantAccess
-    | UnknownInformationFlow (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | UnknownInformationFlow
+    | CallsiteCIPPMismatch (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

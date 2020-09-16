@@ -5,4 +5,4 @@ Memoized functions cannot return mutable objects. (Parsing[1002])
 File "test_memoized_mutable.php", line 15, characters 16-18:
 Reactive functions can only call other reactive functions. (Typing[4200])
 File "test_memoized_mutable.php", line 4, characters 19-29:
-This function is non-reactive.
+This function is normal.

@@ -3731,6 +3731,19 @@ let callsite_reactivity_mismatch
             );
           ]) )
 
+let callsite_cipp_mismatch f_pos def_pos callee_cipp caller_cipp =
+  add_list
+    (Typing.err_code Typing.CallsiteCIPPMismatch)
+    [
+      ( f_pos,
+        "CIPP mismatch: "
+        ^ caller_cipp
+        ^ " function cannot call "
+        ^ callee_cipp
+        ^ " function." );
+      (def_pos, "This is the declaration of the function being called.");
+    ]
+
 let invalid_argument_of_rx_mutable_function pos =
   add
     (Typing.err_code Typing.InvalidArgumentOfRxMutableFunction)

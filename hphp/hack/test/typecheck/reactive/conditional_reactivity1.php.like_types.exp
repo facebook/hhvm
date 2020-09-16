@@ -1,7 +1,7 @@
 File "conditional_reactivity1.php", line 22, characters 48-65:
 Reactive functions can only call other reactive functions. (Typing[4200])
 File "conditional_reactivity1.php", line 17, characters 23-57:
-This function is non-reactive.
+This function is normal.
 File "conditional_reactivity1.php", line 20, characters 8-103:
 Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
 File "conditional_reactivity1.php", line 16, characters 3-24:

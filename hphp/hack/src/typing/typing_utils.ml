@@ -549,7 +549,7 @@ let reactivity_to_string env r =
     | Local None -> "local reactive"
     | Local (Some ty) -> cond_reactive "conditionally local reactive" ty
     | MaybeReactive n -> "maybe (" ^ aux n ^ ")"
-    | Nonreactive -> "non-reactive"
+    | Nonreactive -> "normal"
     | RxVar _ -> "maybe reactive"
     | Cipp None -> "cipp"
     | Cipp (Some s) -> "cipp(" ^ s ^ ")"

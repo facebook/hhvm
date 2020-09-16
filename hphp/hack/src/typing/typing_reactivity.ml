@@ -196,6 +196,13 @@ let check_reactivity_matches
           (Reason.to_pos reason)
           (TU.reactivity_to_string env callee_reactivity)
           cause_pos
+      | ((Cipp _ | CippGlobal | CippLocal _), _)
+      | (_, (Cipp _ | CippGlobal | CippLocal _)) ->
+        Errors.callsite_cipp_mismatch
+          pos
+          (Reason.to_pos reason)
+          (TU.reactivity_to_string env callee_reactivity)
+          (TU.reactivity_to_string env caller_reactivity)
       | _ ->
         Errors.callsite_reactivity_mismatch
           pos

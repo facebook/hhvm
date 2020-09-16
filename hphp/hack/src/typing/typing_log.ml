@@ -454,7 +454,7 @@ let rec reactivity_to_string env r =
     | Some ty -> " " ^ Typing_print.debug_decl env ty
   in
   match r with
-  | Nonreactive -> "nonreactive"
+  | Nonreactive -> "normal"
   | Local opt_ty -> from_decl opt_ty "local"
   | Shallow opt_ty -> from_decl opt_ty "shallow"
   | Reactive opt_ty -> from_decl opt_ty "reactive"

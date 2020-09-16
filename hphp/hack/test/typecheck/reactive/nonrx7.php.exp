@@ -3,4 +3,4 @@ Invalid argument list for `__NonRx` attribute that is placed on anonymous functi
 File "nonrx7.php", line 5, characters 9-45:
 Reactive functions can only call other reactive functions. (Typing[4200])
 File "nonrx7.php", line 5, characters 9-45:
-This function is non-reactive.
+This function is normal.

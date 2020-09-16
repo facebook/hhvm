@@ -70,7 +70,6 @@
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 
-#include "hphp/util/abi-cxx.h"
 #include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"

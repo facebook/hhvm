@@ -1056,7 +1056,7 @@ and xhp_attribute_decl env (h, cv, tag, maybe_enum) =
     Errors.xhp_required_with_default p id;
   let hint_ =
     match maybe_enum with
-    | Some (pos, _optional, items) ->
+    | Some (pos, items) ->
       let is_int item =
         match item with
         | (_, Aast.Int _) -> true

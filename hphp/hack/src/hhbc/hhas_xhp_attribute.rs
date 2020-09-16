@@ -10,7 +10,7 @@ pub struct HhasXhpAttribute<'a> {
     pub type_: Option<&'a tast::Hint>,
     pub class_var: &'a tast::ClassVar,
     pub tag: Option<tast::XhpAttrTag>,
-    pub maybe_enum: Option<&'a (Pos, bool, Vec<tast::Expr>)>,
+    pub maybe_enum: Option<&'a (Pos, Vec<tast::Expr>)>,
 }
 
 impl<'a> HhasXhpAttribute<'a> {

@@ -410,7 +410,7 @@ and ('ex, 'fb, 'en, 'hi) xhp_attr =
   'hi type_hint
   * ('ex, 'fb, 'en, 'hi) class_var
   * xhp_attr_tag option
-  * (pos * bool * ('ex, 'fb, 'en, 'hi) expr list) option
+  * (pos * ('ex, 'fb, 'en, 'hi) expr list) option
 
 and ('ex, 'fb, 'en, 'hi) class_attr =
   | CA_name of sid

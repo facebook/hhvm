@@ -960,17 +960,6 @@ where
         // a later pass.
         let mut parser1 = self.clone();
         let token = parser1.next_token();
-        let (token, optional) = match token.kind() {
-            TokenKind::Question => {
-                let enum_token = parser1.next_token();
-                let token = S!(make_token, parser1, token);
-                (enum_token, token)
-            }
-            _ => {
-                let missing = S!(make_missing, parser1, self.pos());
-                (token, missing)
-            }
-        };
         match token.kind() {
             TokenKind::Enum => {
                 self.continue_from(parser1);
@@ -982,7 +971,6 @@ where
                 S!(
                     make_xhp_enum_type,
                     self,
-                    optional,
                     enum_token,
                     left_brace,
                     values,

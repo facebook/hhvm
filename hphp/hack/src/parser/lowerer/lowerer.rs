@@ -4350,10 +4350,9 @@ where
                             let (hint, enum_) = match &ty.syntax {
                                 XHPEnumType(c) => {
                                     let p = Self::p_pos(ty, env);
-                                    let opt = !(&c.xhp_enum_optional.is_missing());
                                     let vals =
                                         Self::could_map(Self::p_expr, &c.xhp_enum_values, env)?;
-                                    (None, Some((p, opt, vals)))
+                                    (None, Some((p, vals)))
                                 }
                                 _ => (Some(Self::p_hint(ty, env)?), None),
                             };

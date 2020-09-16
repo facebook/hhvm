@@ -3266,9 +3266,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         &mut self,
         _arg0: Self::R,
         _arg1: Self::R,
-        _arg2: Self::R,
         xhp_enum_values: Self::R,
-        _arg4: Self::R,
+        _arg3: Self::R,
     ) -> Self::R {
         Node::XhpEnumType(self.alloc(xhp_enum_values))
     }

@@ -373,7 +373,7 @@ fn emit_xhp_attribute_array(xal: &[HhasXhpAttribute]) -> Result<Expr> {
         }
     }
     fn inner_array(xa: &HhasXhpAttribute) -> Result<Vec<Expr>> {
-        let enum_opt = xa.maybe_enum.map(|(_, _, es)| es);
+        let enum_opt = xa.maybe_enum.map(|(_, es)| es);
         let expr = match &(xa.class_var).expr {
             Some(e) => e.clone(),
             None => mk_expr(Expr_::Null),

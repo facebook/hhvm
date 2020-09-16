@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f434b376e41b641c24bf8a61b4b21732>>
+// @generated SignedSource<<7d0c9e6093187f095b97cb69b0c6bc45>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -924,7 +924,7 @@ pub struct XhpAttr<'a, Ex, Fb, En, Hi>(
     pub TypeHint<'a, Hi>,
     pub ClassVar<'a, Ex, Fb, En, Hi>,
     pub Option<oxidized::aast::XhpAttrTag>,
-    pub Option<(&'a Pos<'a>, bool, &'a [Expr<'a, Ex, Fb, En, Hi>])>,
+    pub Option<(&'a Pos<'a>, &'a [Expr<'a, Ex, Fb, En, Hi>])>,
 );
 impl<'a, Ex: TrivialDrop, Fb: TrivialDrop, En: TrivialDrop, Hi: TrivialDrop> TrivialDrop
     for XhpAttr<'a, Ex, Fb, En, Hi>

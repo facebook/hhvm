@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9c556746c6bbe6f494089370e24d796b>>
+// @generated SignedSource<<63bfd83b652578821f43b4596a4b1978>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -864,7 +864,7 @@ pub struct XhpAttr<Ex, Fb, En, Hi>(
     pub TypeHint<Hi>,
     pub ClassVar<Ex, Fb, En, Hi>,
     pub Option<XhpAttrTag>,
-    pub Option<(Pos, bool, Vec<Expr<Ex, Fb, En, Hi>>)>,
+    pub Option<(Pos, Vec<Expr<Ex, Fb, En, Hi>>)>,
 );
 
 #[derive(

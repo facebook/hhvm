@@ -2634,6 +2634,7 @@ where
                             {
                                 Some(errors::fun_arg_invalid_arg)
                             }
+                            PipeVariableExpression(_) => Some(errors::fun_arg_invalid_arg),
                             BinaryExpression(_) => Some(errors::fun_arg_inout_set),
                             QualifiedName(_) => Some(errors::fun_arg_inout_const),
                             Token(_) if expression.is_name() => Some(errors::fun_arg_inout_const),

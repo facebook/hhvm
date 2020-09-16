@@ -246,7 +246,7 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = varr
      2 => varray["pipe", "w"]  // stderr
   ];
 
-  if (!$GLOBALS['USE_UNIX_SOCKET']) {
+  if (!\HH\global_get('USE_UNIX_SOCKET')) {
     // Grab an available port.
     $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
     socket_bind($sock, "localhost", 0) || die("Could not bind socket");

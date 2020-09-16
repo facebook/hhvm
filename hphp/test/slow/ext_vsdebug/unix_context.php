@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main1(): void {
 if (PHP_OS === 'Linux') {
-  $GLOBALS['USE_UNIX_SOCKET'] = true;
+  \HH\global_set('USE_UNIX_SOCKET', true);
   require(__DIR__ . '/context.php');
   main();
 } else {

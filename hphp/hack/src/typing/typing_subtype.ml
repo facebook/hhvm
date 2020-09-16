@@ -691,26 +691,15 @@ and simplify_subtype_i
           (match deref lty with
           | (r, Toption ty) ->
             let ty_null = MakeType.null r in
-            let (env, p1) =
-              simplify_subtype_i
-                ~subtype_env
-                ~this_ty
-                (LoclType ty_null)
-                ty_super
-                env
-            in
-            if TL.is_unsat p1 then
-              invalid_env env
-            else
-              let (env, p2) =
-                simplify_subtype_i
-                  ~subtype_env
-                  ~this_ty
-                  (LoclType ty)
-                  ty_super
-                  env
-              in
-              (env, TL.conj p1 p2)
+            if_unsat
+              invalid_env
+              (simplify_subtype_i
+                 ~subtype_env
+                 ~this_ty
+                 (LoclType ty_null)
+                 ty_super
+                 env)
+            &&& simplify_subtype_i ~subtype_env ~this_ty (LoclType ty) ty_super
           | (_, (Tintersection _ | Tunion _ | Terr | Tvar _)) ->
             default_subtype env
           | _ ->
@@ -1074,26 +1063,15 @@ and simplify_subtype_i
         (* Likewise, reduce nullable on left to a union *)
         | (r, Toption ty) ->
           let ty_null = MakeType.null r in
-          let (env, p1) =
-            simplify_subtype_i
-              ~subtype_env
-              ~this_ty
-              (LoclType ty_null)
-              ety_super
-              env
-          in
-          if TL.is_unsat p1 then
-            invalid_env env
-          else
-            let (env, p2) =
-              simplify_subtype_i
-                ~subtype_env
-                ~this_ty
-                (LoclType ty)
-                ety_super
-                env
-            in
-            (env, TL.conj p1 p2)
+          if_unsat
+            invalid_env
+            (simplify_subtype_i
+               ~subtype_env
+               ~this_ty
+               (LoclType ty_null)
+               ety_super
+               env)
+          &&& simplify_subtype_i ~subtype_env ~this_ty (LoclType ty) ety_super
         | (_, Tintersection tyl)
           when let (_, non_ty_opt, _) = find_type_with_exact_negation env tyl in
                Option.is_some non_ty_opt ->

@@ -14,5 +14,5 @@ function f(int $x): int {
 }
 
 function test(): void {
-  $y = call_user_func(fun('f'), 32);
+  $y = (fun('f'))(32);
 }

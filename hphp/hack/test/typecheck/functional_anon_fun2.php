@@ -18,7 +18,7 @@ function test(): void {
     return $x;
   };
   $f = function($x) use ($f) {
-    return call_user_func($f, $x);
+    return ($f)($x);
   };
-  call_user_func(fun(f), 0);
+  (fun(f))(0);
 }

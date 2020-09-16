@@ -16,5 +16,5 @@ class C {
 }
 
 function test(): void {
-  $y = call_user_func(fun('C::f'), 32);
+  $y = (fun('C::f'))(32);
 }

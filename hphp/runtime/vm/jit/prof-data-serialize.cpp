@@ -937,7 +937,7 @@ void maybe_output_target_profile_trace(
         targetProfileInfo["profile_raw_name"] = name->toCppString();
         targetProfileInfo["profile"] = prof.value().toDynamic();
         targetProfileInfo["file_path"] = filePath;
-        targetProfileInfo["line_number"] = unit->getLineNumber(srcKey.offset());
+        targetProfileInfo["line_number"] = unit->getLineNumber(pt.bcOff);
         targetProfileInfo["function_name"] = func->fullName()->data();
         HPHP::Trace::traceRelease("json:%s\n", folly::toJson(targetProfileInfo).c_str());
       }

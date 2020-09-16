@@ -1546,6 +1546,9 @@ and fun_ ctx f =
   let f_unsafe_cap =
     Aast.type_hint_option_map ~f:(hint env) f.Aast.f_unsafe_cap
   in
+  let file_attributes =
+    file_attributes ctx f.Aast.f_mode f.Aast.f_file_attributes
+  in
   let named_fun =
     {
       N.f_annotation = ();
@@ -1563,8 +1566,7 @@ and fun_ ctx f =
       f_fun_kind = f_kind;
       f_variadic = variadicity;
       f_user_attributes = user_attributes env f.Aast.f_user_attributes;
-      (* Fix file attributes if they are important *)
-      f_file_attributes = [];
+      f_file_attributes = file_attributes;
       f_external = f.Aast.f_external;
       f_namespace = f.Aast.f_namespace;
       f_doc_comment = f.Aast.f_doc_comment;

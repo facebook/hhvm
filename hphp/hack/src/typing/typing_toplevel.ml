@@ -347,6 +347,7 @@ let rec fun_def ctx f :
       let env =
         Typing.attributes_check_def env SN.AttributeKinds.fn f.f_user_attributes
       in
+      let (env, file_attrs) = Typing.file_attributes env f.f_file_attributes in
       let reactive =
         fun_reactivity env.decl_env f.f_user_attributes f.f_params
       in
@@ -452,7 +453,6 @@ let rec fun_def ctx f :
           if partial_callback 4030 then Errors.expecting_return_type_hint pos
         | Some hint -> Typing_return.async_suggest_return f.f_fun_kind hint pos
       end;
-      let (env, file_attrs) = Typing.file_attributes env f.f_file_attributes in
       let (env, tparams) = List.map_env env f.f_tparams Typing.type_param in
       let (env, user_attributes) =
         List.map_env env f.f_user_attributes Typing.user_attribute
@@ -806,6 +806,7 @@ and class_def_ env c tc =
     in
     Typing.attributes_check_def env kind c.c_user_attributes
   in
+  let (env, file_attrs) = Typing.file_attributes env c.c_file_attributes in
   let ctx = Env.get_ctx env in
   if
     ( Ast_defs.(equal_class_kind c.c_kind Cnormal)
@@ -958,7 +959,6 @@ and class_def_ env c tc =
   let (typed_static_methods, static_methods_global_inference_envs) =
     List.filter_map static_methods (method_def env tc) |> List.unzip
   in
-  let (env, file_attrs) = Typing.file_attributes env c.c_file_attributes in
   let (methods, constr_global_inference_env) =
     match typed_constructor with
     | None -> (typed_static_methods @ typed_methods, [])

@@ -221,6 +221,21 @@ let add_block_annots ~pos ?join_map ?refinement_map blk =
   @ Option.to_list (Option.map ~f:mk_refinement_annot refinement_map)
   @ blk
 
+let set_tcopt_unstable_features env { fa_user_attributes; _ } =
+  match
+    Naming_attributes.find
+      SN.UserAttributes.uaEnableUnstableFeatures
+      fa_user_attributes
+  with
+  | None -> env
+  | Some { ua_name = _; ua_params } ->
+    let ( = ) = String.equal in
+    List.fold ua_params ~init:env ~f:(fun env feature ->
+        match snd feature with
+        | Aast.String s when s = SN.UnstableFeatures.coeffects_provisional ->
+          Env.map_tcopt ~f:TypecheckerOptions.set_coeffects env
+        | _ -> env)
+
 (* Given a localized parameter type and parameter information, infer
  * a type for the parameter default expression (if present) and check that
  * it is a subtype of the parameter type (if present). If no parameter type
@@ -6792,6 +6807,7 @@ and file_attributes env file_attrs =
       let (env, user_attributes) =
         List.map_env env fa.fa_user_attributes user_attribute
       in
+      let env = set_tcopt_unstable_features env fa in
       ( env,
         {
           Aast.fa_user_attributes = user_attributes;

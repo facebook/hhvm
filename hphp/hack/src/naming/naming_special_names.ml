@@ -804,3 +804,9 @@ module XHP = struct
 
   let is_xhp_category name = String_utils.string_starts_with name "%"
 end
+
+(* This should be a subset of rust_parser_errors::UnstableFeatures that is relevant
+ * to the typechecker *)
+module UnstableFeatures = struct
+  let coeffects_provisional = "coeffects_provisional"
+end

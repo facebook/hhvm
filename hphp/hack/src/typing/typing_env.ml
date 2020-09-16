@@ -33,6 +33,11 @@ let pp_env _ _ = Printf.printf "%s\n" "<env>"
 
 let get_tcopt env = env.genv.tcopt
 
+let map_tcopt env ~f =
+  let tcopt = f env.genv.tcopt in
+  let genv = { env.genv with tcopt } in
+  { env with genv }
+
 let get_ctx env = env.decl_env.Decl_env.ctx
 
 let set_log_level env key log_level =

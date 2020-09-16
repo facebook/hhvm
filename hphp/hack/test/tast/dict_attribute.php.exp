@@ -486,7 +486,29 @@
             ]
           }
          ];
-       f_file_attributes = []; f_external = false;
+       f_file_attributes =
+       [{ fa_user_attributes =
+          [{ ua_name = ([3:9-11], "\\Fi");
+             ua_params =
+             [(([3:12-36], dict<string, int>),
+               (KeyValCollection (Dict, None,
+                  [((([3:17-20], string), (String "a")),
+                    (([3:24-25], int), (Int "1")));
+                    ((([3:27-30], string), (String "b")),
+                     (([3:34-35], int), (Int "2")))
+                    ]
+                  )))
+               ]
+             }
+            ];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
+            ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;
+            ns_const_uses = <opaque>; ns_name = None; ns_auto_ns_map = [];
+            ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       f_external = false;
        f_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
          ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>;

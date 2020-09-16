@@ -1751,14 +1751,7 @@ end
 
 module PrintTypedef = struct
   let typedef tcopt = function
-    | {
-        td_pos;
-        td_vis = _;
-        td_tparams;
-        td_constraint;
-        td_type;
-        td_decl_errors = _;
-      } ->
+    | { td_pos; td_vis = _; td_tparams; td_constraint; td_type } ->
       let tparaml_s = PrintClass.tparam_list tcopt td_tparams in
       let constr_s =
         match td_constraint with

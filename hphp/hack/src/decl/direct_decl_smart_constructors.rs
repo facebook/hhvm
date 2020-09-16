@@ -2482,11 +2482,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             tparams,
             constraint,
             type_: ty,
-            // NB: We have no intention of populating this
-            // field. Any errors historically emitted during
-            // shallow decl should be migrated to a NAST
-            // check.
-            decl_errors: Some(Errors::empty()),
         };
 
         self.add_typedef(name, typedef);

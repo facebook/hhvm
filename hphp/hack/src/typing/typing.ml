@@ -6818,9 +6818,6 @@ and type_param env t =
 
 and typedef_def ctx typedef =
   let env = EnvFromDef.typedef_env ctx typedef in
-  let tdecl = Env.get_typedef env (snd typedef.t_name) in
-  Typing_helpers.add_decl_errors
-    Option.(map tdecl (fun tdecl -> value_exn tdecl.td_decl_errors));
   let env =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       (fst typedef.t_name)

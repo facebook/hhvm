@@ -299,15 +299,7 @@ let rec class_ tcopt class_name class_type impl =
 (*****************************************************************************)
 and typedef ctx type_name =
   match Decl_provider.get_typedef ctx type_name with
-  | Some
-      {
-        td_tparams;
-        td_type;
-        td_pos = _;
-        td_constraint = _;
-        td_vis = _;
-        td_decl_errors = _;
-      } ->
+  | Some { td_tparams; td_type; td_pos = _; td_constraint = _; td_vis = _ } ->
     let root = (Typing_deps.Dep.Class type_name, None) in
     let env =
       List.fold_left td_tparams ~init:SMap.empty ~f:(fun env tp ->

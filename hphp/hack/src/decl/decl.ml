@@ -1166,16 +1166,14 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
   let td_tparams = List.map params (type_param env) in
   let td_type = Decl_hint.hint env concrete_type in
   let td_constraint = Option.map tcstr (Decl_hint.hint env) in
-  let td_decl_errors = None in
-  { td_vis; td_tparams; td_constraint; td_type; td_pos; td_decl_errors }
+  { td_vis; td_tparams; td_constraint; td_type; td_pos }
 
 and type_typedef_naming_and_decl
     ~(write_shmem : bool) (ctx : Provider_context.t) (tdef : Nast.typedef) :
     Typing_defs.typedef_type =
   let tdef = Errors.ignore_ (fun () -> Naming.typedef ctx tdef) in
-  let (errors, tdecl) = Errors.do_ (fun () -> typedef_decl ctx tdef) in
+  let tdecl = typedef_decl ctx tdef in
   record_typedef (snd tdef.t_name);
-  let tdecl = { tdecl with td_decl_errors = Some errors } in
   if write_shmem then Decl_heap.Typedefs.add (snd tdef.t_name) tdecl;
   tdecl
 

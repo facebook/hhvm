@@ -103,15 +103,7 @@ class virtual type_validator =
       else
         match Env.get_typedef acc.env name with
         | None -> this#on_class acc r (pos, name) tyl
-        | Some
-            {
-              td_pos;
-              td_vis;
-              td_tparams;
-              td_type;
-              td_constraint;
-              td_decl_errors = _;
-            } ->
+        | Some { td_pos; td_vis; td_tparams; td_type; td_constraint } ->
           if SSet.mem name acc.expanded_typedefs then
             acc
           else

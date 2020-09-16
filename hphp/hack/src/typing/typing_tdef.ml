@@ -23,8 +23,7 @@ module MakeType = Typing_make_type
 
 let expand_typedef_ ?(force_expand = false) ety_env env r x argl =
   let pos = Reason.to_pos r in
-  let { td_pos; td_vis; td_tparams; td_type; td_constraint; td_decl_errors = _ }
-      =
+  let { td_pos; td_vis; td_tparams; td_type; td_constraint } =
     unsafe_opt @@ Typing_env.get_typedef env x
   in
   match Typing_defs.has_expanded ety_env x with

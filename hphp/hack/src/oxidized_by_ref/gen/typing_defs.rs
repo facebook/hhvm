@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a66d467607284b5cbe167cdd8062c9db>>
+// @generated SignedSource<<3b80f8fc5ce3bcc24ea41ef4c979844c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -346,7 +346,6 @@ pub struct TypedefType<'a> {
     pub tparams: &'a [Tparam<'a>],
     pub constraint: Option<Ty<'a>>,
     pub type_: Ty<'a>,
-    pub decl_errors: Option<errors::Errors<'a>>,
 }
 impl<'a> TrivialDrop for TypedefType<'a> {}
 

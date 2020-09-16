@@ -318,7 +318,6 @@ struct
       td_tparams = List.map tdef.td_tparams type_param;
       td_constraint = ty_opt tdef.td_constraint;
       td_type = ty tdef.td_type;
-      td_decl_errors = None;
     }
 
   and shallow_class sc =

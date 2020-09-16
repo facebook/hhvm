@@ -260,7 +260,6 @@ and typedef_type = {
   td_tparams: decl_tparam list;
   td_constraint: decl_ty option;
   td_type: decl_ty;
-  td_decl_errors: Errors.t option;
 }
 
 and decl_tparam = decl_ty tparam

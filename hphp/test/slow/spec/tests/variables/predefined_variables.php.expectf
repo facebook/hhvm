@@ -1,5 +1,5 @@
 int(1)
 varray(1) {
-  string(60) "%s/variables/predefined_variables.php"
+  string(%d) "%s/variables/predefined_variables.php"
 }
 darray(%d) {%a}

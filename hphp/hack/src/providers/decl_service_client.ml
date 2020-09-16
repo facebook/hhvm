@@ -70,11 +70,13 @@ let rpc_get_class (t : t) (name : string) :
     let ptr = Decl_ipc_ffi_externs.get_decl t.client FileInfo.Class name in
     let class_decl_opt = pointer_to_option ptr in
     String.Table.add_exn t.class_cache name class_decl_opt;
-    let path_and_kind_opt =
-      Option.map class_decl_opt ~f:(fun sc ->
-          (Pos.filename (fst sc.Shallow_decl_defs.sc_name), Naming_types.TClass))
-    in
-    add_to_cache t.type_path_and_kind_cache name path_and_kind_opt;
+    Option.iter class_decl_opt ~f:(fun sc ->
+        add_to_cache
+          t.type_path_and_kind_cache
+          name
+          (Some
+             ( Pos.filename (fst sc.Shallow_decl_defs.sc_name),
+               Naming_types.TClass )));
     class_decl_opt
 
 let rpc_get_typedef (t : t) (name : string) : Typing_defs.typedef_type option =
@@ -84,11 +86,11 @@ let rpc_get_typedef (t : t) (name : string) : Typing_defs.typedef_type option =
     let ptr = Decl_ipc_ffi_externs.get_decl t.client FileInfo.Typedef name in
     let typedef_decl_opt = pointer_to_option ptr in
     String.Table.add_exn t.typedef_cache name typedef_decl_opt;
-    let path_and_kind_opt =
-      Option.map typedef_decl_opt ~f:(fun td ->
-          (Pos.filename td.Typing_defs.td_pos, Naming_types.TTypedef))
-    in
-    add_to_cache t.type_path_and_kind_cache name path_and_kind_opt;
+    Option.iter typedef_decl_opt ~f:(fun td ->
+        add_to_cache
+          t.type_path_and_kind_cache
+          name
+          (Some (Pos.filename td.Typing_defs.td_pos, Naming_types.TTypedef)));
     typedef_decl_opt
 
 let rpc_get_record_def (t : t) (name : string) :
@@ -99,11 +101,11 @@ let rpc_get_record_def (t : t) (name : string) :
     let ptr = Decl_ipc_ffi_externs.get_decl t.client FileInfo.RecordDef name in
     let record_decl_opt = pointer_to_option ptr in
     String.Table.add_exn t.record_cache name record_decl_opt;
-    let path_and_kind_opt =
-      Option.map record_decl_opt ~f:(fun rdt ->
-          (Pos.filename rdt.Typing_defs.rdt_pos, Naming_types.TRecordDef))
-    in
-    add_to_cache t.type_path_and_kind_cache name path_and_kind_opt;
+    Option.iter record_decl_opt ~f:(fun rdt ->
+        add_to_cache
+          t.type_path_and_kind_cache
+          name
+          (Some (Pos.filename rdt.Typing_defs.rdt_pos, Naming_types.TRecordDef)));
     record_decl_opt
 
 let rpc_get_gconst (t : t) (name : string) : Typing_defs.decl_ty option =

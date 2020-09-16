@@ -194,7 +194,7 @@ let test_compute_tast_counting () =
   in
 
   Asserter.Int_asserter.assert_equals
-    113
+    111
     (Telemetry_test_utils.int_exn telemetry "decl_accessors.count")
     "There should be this many decl_accessor_count for shared_mem provider";
   Asserter.Int_asserter.assert_equals

@@ -138,7 +138,6 @@ type class_elt = {
 and fun_elt = {
   fe_deprecated: string option;
   fe_type: decl_ty;
-  fe_decl_errors: Errors.t option;
   fe_pos: Pos.t;
 }
 

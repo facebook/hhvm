@@ -341,10 +341,6 @@ let rec fun_def ctx f :
       Reason.expr_display_id_map := IMap.empty;
       let pos = fst f.f_name in
       let decl_header = get_decl_function_header env (snd f.f_name) in
-      Typing_helpers.add_decl_errors
-        (Option.bind
-           (Env.get_fun env (snd f.f_name))
-           ~f:(fun x -> x.fe_decl_errors));
       let env = Env.open_tyvars env (fst f.f_name) in
       let env = Env.set_env_function_pos env pos in
       let env = Env.set_env_pessimize env in

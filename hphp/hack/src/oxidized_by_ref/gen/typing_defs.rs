@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c6d78f01be9ab7ca34575e895cc97ddb>>
+// @generated SignedSource<<a66d467607284b5cbe167cdd8062c9db>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -77,7 +77,6 @@ impl<'a> TrivialDrop for ClassElt<'a> {}
 pub struct FunElt<'a> {
     pub deprecated: Option<&'a str>,
     pub type_: Ty<'a>,
-    pub decl_errors: Option<errors::Errors<'a>>,
     pub pos: &'a pos::Pos<'a>,
 }
 impl<'a> TrivialDrop for FunElt<'a> {}

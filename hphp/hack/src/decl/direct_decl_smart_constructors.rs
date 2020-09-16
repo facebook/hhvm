@@ -2689,10 +2689,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 let fun_elt = FunElt {
                     deprecated,
                     type_,
-                    // NB: We have no intention of populating this field.
-                    // Any errors historically emitted during shallow decl
-                    // should be migrated to a NAST check.
-                    decl_errors: Some(Errors::empty()),
                     pos,
                 };
                 self.add_fun(name, fun_elt);

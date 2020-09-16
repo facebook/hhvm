@@ -346,7 +346,7 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
                 ~returns_void_to_rx;
           } )
   in
-  { fe_pos = fst f.f_name; fe_type; fe_deprecated; fe_decl_errors = None }
+  { fe_pos = fst f.f_name; fe_type; fe_deprecated }
 
 (*****************************************************************************)
 (* Section declaring the type of a class *)
@@ -828,7 +828,6 @@ and build_constructor
       fe_pos = pos;
       fe_deprecated = method_.sm_deprecated;
       fe_type = method_.sm_type;
-      fe_decl_errors = None;
     }
   in
   if write_shmem then Decl_heap.Constructors.add class_name fe;
@@ -1073,14 +1072,7 @@ and method_decl_acc
       elt_deprecated = m.sm_deprecated;
     }
   in
-  let fe =
-    {
-      fe_pos = pos;
-      fe_deprecated = None;
-      fe_type = m.sm_type;
-      fe_decl_errors = None;
-    }
-  in
+  let fe = { fe_pos = pos; fe_deprecated = None; fe_type = m.sm_type } in
   if write_shmem then
     if is_static then
       Decl_heap.StaticMethods.add (elt.elt_origin, id) fe

@@ -157,13 +157,7 @@ struct
       ft_reactive = fun_reactive ft.ft_reactive;
     }
 
-  and fun_elt fe =
-    {
-      fe with
-      fe_type = ty fe.fe_type;
-      fe_pos = pos fe.fe_pos;
-      fe_decl_errors = None;
-    }
+  and fun_elt fe = { fe with fe_type = ty fe.fe_type; fe_pos = pos fe.fe_pos }
 
   and fun_reactive = function
     | Local (Some ty1) -> Local (Some (ty ty1))

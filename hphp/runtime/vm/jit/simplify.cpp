@@ -2997,11 +2997,9 @@ SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
   auto const oneTy = TBool | TInt | TDbl | TStr | TRes;
   if (ty <= oneTy) return cns(env, 1);
 
-  if (!allowBespokeArrayLikes() || ty.arrSpec().vanilla()) {
-    if (ty.subtypeOfAny(TVec, TVArr)) return gen(env, CountVec, val);
-    if (ty.subtypeOfAny(TDict, TDArr)) return gen(env, CountDict, val);
-    if (ty <= TKeyset) return gen(env, CountKeyset, val);
-  }
+  if (ty.subtypeOfAny(TVec, TVArr)) return gen(env, CountVec, val);
+  if (ty.subtypeOfAny(TDict, TDArr)) return gen(env, CountDict, val);
+  if (ty <= TKeyset) return gen(env, CountKeyset, val);
 
   if (ty < TObj) {
     auto const cls = ty.clsSpec().cls();

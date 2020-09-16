@@ -1100,7 +1100,6 @@ std::string RuntimeOption::RepoCentralPath;
 int32_t RuntimeOption::RepoCentralFileMode;
 std::string RuntimeOption::RepoCentralFileUser;
 std::string RuntimeOption::RepoCentralFileGroup;
-std::string RuntimeOption::RepoEvalMode;
 std::string RuntimeOption::RepoJournal = "delete";
 bool RuntimeOption::RepoAllowFallbackPath = true;
 bool RuntimeOption::RepoCommit = true;
@@ -1733,18 +1732,6 @@ void RuntimeOption::Load(
 
     replacePlaceholders(RepoLocalPath);
     replacePlaceholders(RepoCentralPath);
-
-    // Repo - Eval
-    Config::Bind(RepoEvalMode, ini, config, "Repo.Eval.Mode");
-    if (RepoEvalMode.empty()) {
-      RepoEvalMode = "readonly";
-    } else if (RepoEvalMode.compare("local")
-               && RepoEvalMode.compare("central")
-               && RepoEvalMode.compare("readonly")) {
-      Logger::Error("Bad config setting: Repo.Eval.Mode=%s",
-                    RepoEvalMode.c_str());
-      RepoEvalMode = "readonly";
-    }
 
     Config::Bind(RepoJournal, ini, config, "Repo.Journal", RepoJournal);
     Config::Bind(RepoCommit, ini, config, "Repo.Commit",

@@ -83,7 +83,7 @@ struct Repo : RepoProxy {
     case UnitOrigin::File:
       return m_localWritable ? RepoIdLocal : RepoIdCentral;
     case UnitOrigin::Eval:
-      return m_evalRepoId;
+      return RepoIdInvalid;
     default:
       assertx(false);
       return RepoIdInvalid;
@@ -260,7 +260,6 @@ private:
   sqlite3* m_dbc; // Database connection, shared by multiple attached databases.
   bool m_localReadable;
   bool m_localWritable;
-  int m_evalRepoId;
   unsigned m_txDepth; // Transaction nesting depth.
   bool m_rollback; // If true, rollback rather than commit.
   RepoStmt m_beginStmt;

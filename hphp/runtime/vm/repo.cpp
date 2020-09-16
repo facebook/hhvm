@@ -116,7 +116,7 @@ Repo::Repo()
     m_getUnitPath{GetUnitPathStmt(*this, 0), GetUnitPathStmt(*this, 1)},
     m_getUnit{GetUnitStmt(*this, 0), GetUnitStmt(*this, 1)},
     m_dbc(nullptr), m_localReadable(false), m_localWritable(false),
-    m_evalRepoId(-1), m_txDepth(0), m_rollback(false), m_beginStmt(*this),
+    m_txDepth(0), m_rollback(false), m_beginStmt(*this),
     m_rollbackStmt(*this), m_commitStmt(*this), m_urp(*this), m_pcrp(*this),
     m_rrp(*this), m_frp(*this), m_lsrp(*this) {
 
@@ -791,20 +791,6 @@ void Repo::commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin,
 void Repo::connect() {
   initCentral();
   initLocal();
-  if (!RuntimeOption::RepoEvalMode.compare("local")) {
-    m_evalRepoId = (m_localWritable) ? RepoIdLocal : RepoIdCentral;
-  } else if (!RuntimeOption::RepoEvalMode.compare("central")) {
-    m_evalRepoId = RepoIdCentral;
-  } else {
-    assertx(!RuntimeOption::RepoEvalMode.compare("readonly"));
-    m_evalRepoId = RepoIdInvalid;
-  }
-  TRACE(1, "Repo.Eval.Mode=%s\n",
-           (m_evalRepoId == RepoIdLocal)
-           ? "local"
-           : (m_evalRepoId == RepoIdCentral)
-             ? "central"
-             : "readonly");
 }
 
 void Repo::disconnect() noexcept {
@@ -813,7 +799,6 @@ void Repo::disconnect() noexcept {
     m_dbc = nullptr;
     m_localReadable = false;
     m_localWritable = false;
-    m_evalRepoId = RepoIdInvalid;
   }
 }
 

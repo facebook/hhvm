@@ -336,7 +336,6 @@ void write_units(UnitEmitterQueue& ueq,
   folly::Optional<trace_time> timer;
 
   RuntimeOption::RepoCommit = true;
-  RuntimeOption::RepoEvalMode = "local";
   RuntimeOption::RepoDebugInfo = false; // Don't record UnitSourceLoc
   open_repo(output_repo);
   SCOPE_EXIT { Repo::shutdown(); };
@@ -514,7 +513,6 @@ int main(int argc, char** argv) try {
 
   LitstrTable::init();
   RuntimeOption::RepoLocalMode = "--";
-  RuntimeOption::RepoEvalMode = "readonly";
   open_repo(input_repo);
   Repo::get().loadGlobalData(false);
   LitstrTable::fini();

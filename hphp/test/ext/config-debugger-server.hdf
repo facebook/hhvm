@@ -33,7 +33,6 @@ Sandbox {
 Repo {
   Local.Mode = r-
   Central.Path = /var/facebook/hhvm/cli_%{schema}.hhbc
-  Eval.Mode = readonly
   Commit = true
   DebugInfo = true
 }

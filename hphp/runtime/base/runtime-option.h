@@ -1334,7 +1334,6 @@ public:
   static std::string RepoCentralFileUser;
   static std::string RepoCentralFileGroup;
   static bool RepoAllowFallbackPath;
-  static std::string RepoEvalMode;
   static std::string RepoJournal;
   static bool RepoCommit;
   static bool RepoDebugInfo;

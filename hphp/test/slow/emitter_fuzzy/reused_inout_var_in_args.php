@@ -22,6 +22,7 @@ strstr(
 
 class B {
   function main_1468() {
-    self(mapWithKey($this, inout $this));
+    $x = $this;
+    self(mapWithKey($x, inout $x));
   }
 }

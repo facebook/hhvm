@@ -2629,7 +2629,8 @@ where
                             VariableExpression(x)
                                 if sn::superglobals::is_any_global(
                                     self.text(&x.variable_expression),
-                                ) =>
+                                ) || self.text(&x.variable_expression)
+                                    == sn::special_idents::THIS =>
                             {
                                 Some(errors::fun_arg_invalid_arg)
                             }

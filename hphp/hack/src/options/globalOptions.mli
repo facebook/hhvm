@@ -151,6 +151,8 @@ type t = {
   tco_like_type_hints: bool;
   (* Enables union and intersection type hints *)
   tco_union_intersection_type_hints: bool;
+  (* Enables checking of coeffects *)
+  tco_coeffects: bool;
   (* Enables like casts *)
   tco_like_casts: bool;
   (* A simpler form of pessimization, only wraps the outermost type in like
@@ -315,6 +317,7 @@ val make :
   ?profile_desc:string ->
   ?tco_like_type_hints:bool ->
   ?tco_union_intersection_type_hints:bool ->
+  ?tco_coeffects:bool ->
   ?tco_like_casts:bool ->
   ?tco_simple_pessimize:float ->
   ?tco_complex_coercion:bool ->
@@ -485,6 +488,10 @@ val profile_desc : t -> string
 val tco_like_type_hints : t -> bool
 
 val tco_union_intersection_type_hints : t -> bool
+
+val coeffects : t -> bool
+
+val set_coeffects : t -> t
 
 val tco_like_casts : t -> bool
 

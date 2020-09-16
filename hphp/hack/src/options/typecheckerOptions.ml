@@ -95,6 +95,10 @@ let log_levels = GlobalOptions.log_levels
 
 let shallow_class_decl = GlobalOptions.tco_shallow_class_decl
 
+let coeffects = GlobalOptions.coeffects
+
+let set_coeffects = GlobalOptions.set_coeffects
+
 let like_type_hints = GlobalOptions.tco_like_type_hints
 
 let like_casts = GlobalOptions.tco_like_casts

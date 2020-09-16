@@ -57,6 +57,7 @@ type t = {
   profile_desc: string;
   tco_like_type_hints: bool;
   tco_union_intersection_type_hints: bool;
+  tco_coeffects: bool;
   tco_like_casts: bool;
   tco_simple_pessimize: float;
   tco_complex_coercion: bool;
@@ -217,6 +218,7 @@ let default =
     profile_desc = "";
     tco_like_type_hints = false;
     tco_union_intersection_type_hints = false;
+    tco_coeffects = false;
     tco_like_casts = false;
     tco_simple_pessimize = 0.0;
     tco_complex_coercion = false;
@@ -326,6 +328,7 @@ let make
     ?(tco_like_type_hints = default.tco_like_type_hints)
     ?(tco_union_intersection_type_hints =
       default.tco_union_intersection_type_hints)
+    ?(tco_coeffects = default.tco_coeffects)
     ?(tco_like_casts = default.tco_like_casts)
     ?(tco_simple_pessimize = default.tco_simple_pessimize)
     ?(tco_complex_coercion = default.tco_complex_coercion)
@@ -440,6 +443,7 @@ let make
     profile_desc;
     tco_like_type_hints;
     tco_union_intersection_type_hints;
+    tco_coeffects;
     tco_like_casts;
     tco_simple_pessimize;
     tco_complex_coercion;
@@ -599,6 +603,10 @@ let profile_desc t = t.profile_desc
 let tco_like_type_hints t = t.tco_like_type_hints
 
 let tco_union_intersection_type_hints t = t.tco_union_intersection_type_hints
+
+let coeffects t = t.tco_coeffects
+
+let set_coeffects t = { t with tco_coeffects = true }
 
 let tco_like_casts t = t.tco_like_casts
 

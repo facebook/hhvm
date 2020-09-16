@@ -309,11 +309,7 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
                            TypedValue* values) -> ArrayData* {
       // TODO(jgriego) surely we have a better way of instrumenting this ...
       ARRPROV_USE_RUNTIME_LOCATION();
-      if (RO::EvalHackArrDVArrs) {
-        return PackedArray::MakeVec(count, values);
-      } else {
-        return PackedArray::MakeVArray(count, values);
-      }
+      return PackedArray::MakeVArray(count, values);
     };
     auto const packedArr = v.makeReg();
     {

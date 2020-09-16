@@ -7,8 +7,8 @@ class :xhp {
         throw new Exception('fail');
       }
     };
-    $assert(is_array($attributes));
-    $assert(is_array($children));
+    $assert(HH\is_any_array($attributes));
+    $assert(HH\is_any_array($children));
     $assert($file === __FILE__);
     $assert($line === $attributes['line']);
   }

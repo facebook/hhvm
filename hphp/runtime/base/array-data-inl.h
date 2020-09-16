@@ -90,15 +90,23 @@ ALWAYS_INLINE ArrayData* ArrayData::Create() {
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateVArray(arrprov::Tag tag /* = {} */) {
+  auto const ad = RuntimeOption::EvalHackArrDVArrs ?
+    (RuntimeOption::EvalHackArrDVArrMark ?
+     staticEmptyMarkedVec() : staticEmptyVec()) :
+    staticEmptyVArray();
   return RO::EvalArrayProvenance
-    ? arrprov::tagStaticArr(staticEmptyVArray(), tag)
-    : staticEmptyVArray();
+    ? arrprov::tagStaticArr(ad, tag)
+    : ad;
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateDArray(arrprov::Tag tag /* = {} */) {
+  auto const ad = RuntimeOption::EvalHackArrDVArrs ?
+    (RuntimeOption::EvalHackArrDVArrMark ?
+     staticEmptyMarkedDictArray() : staticEmptyDictArray()) :
+    staticEmptyDArray();
   return RO::EvalArrayProvenance
-    ? arrprov::tagStaticArr(staticEmptyDArray(), tag)
-    : staticEmptyDArray();
+    ? arrprov::tagStaticArr(ad, tag)
+    : ad;
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateVec(arrprov::Tag tag /* = {} */) {

@@ -460,7 +460,6 @@ void emitNewVec(IRGS& env, uint32_t numArgs) {
 }
 
 void emitNewVArray(IRGS& env, uint32_t numArgs) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
   emitNewPackedLayoutArray(env, numArgs, AllocVArray);
 }
 

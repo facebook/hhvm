@@ -846,7 +846,7 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
     // Convert unpack args to the proper type.
     if (RuntimeOption::EvalHackArrDVArrs) {
       tvCastToVecInPlace(&unpackArgs);
-      tvSetLegacyArrayInPlace(&unpackArgs, RuntimeOption::EvalHackArrDVArrs);
+      tvSetLegacyArrayInPlace(&unpackArgs, RuntimeOption::EvalHackArrDVArrMark);
       stack.pushVec(unpackArgs.m_data.parr);
     } else {
       tvCastToVArrayInPlace(&unpackArgs);
@@ -944,10 +944,11 @@ static void prepareFuncEntry(ActRec *ar, Array&& generics) {
     }
     if (UNLIKELY(func->hasVariadicCaptureParam())) {
       ARRPROV_USE_RUNTIME_LOCATION();
+      auto const ad = ArrayData::CreateVArray();
       if (RuntimeOption::EvalHackArrDVArrs) {
-        stack.pushVecNoRc(ArrayData::CreateVec());
+        stack.pushVecNoRc(ad);
       } else {
-        stack.pushArrayNoRc(ArrayData::CreateVArray());
+        stack.pushArrayNoRc(ad);
       }
     }
   }
@@ -966,12 +967,12 @@ static void prepareFuncEntry(ActRec *ar, Array&& generics) {
     // Currently does not work with closures
     assertx(!func->isClosureBody());
     // push for first local
+    auto const ad = generics.isNull() ? ArrayData::CreateVArray()
+                                      : generics.detach();
     if (RuntimeOption::EvalHackArrDVArrs) {
-      stack.pushVecNoRc(generics.isNull() ? ArrayData::CreateVec()
-                                          : generics.detach());
+      stack.pushVecNoRc(ad);
     } else {
-      stack.pushArrayNoRc(generics.isNull() ? ArrayData::CreateVArray()
-                                            : generics.detach());
+      stack.pushArrayNoRc(ad);
     }
     nlocals++;
   } else {
@@ -3444,6 +3445,7 @@ OPTBLD_INLINE void iopArrayIdx() {
   if (isClsMethType(type(arr))) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       tvCastToVecInPlace(arr);
+      tvSetLegacyArrayInPlace(arr, RuntimeOption::EvalHackArrDVArrMark);
     } else {
       tvCastToVArrayInPlace(arr);
     }

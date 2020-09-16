@@ -884,9 +884,13 @@ std::string describe_actual_type(tv_rval val) {
     case KindOfPersistentString:
     case KindOfString:        return "string";
     case KindOfPersistentVec:
-    case KindOfVec:           return "HH\\vec";
+    case KindOfVec:           {
+      return val.val().parr->isLegacyArray() ? "varray" : "HH\\vec";
+    }
     case KindOfPersistentDict:
-    case KindOfDict:          return "HH\\dict";
+    case KindOfDict:          {
+      return val.val().parr->isLegacyArray() ? "darray" : "HH\\dict";
+    }
     case KindOfPersistentKeyset:
     case KindOfKeyset:        return "HH\\keyset";
     case KindOfPersistentDArray:

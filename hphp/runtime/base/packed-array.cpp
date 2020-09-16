@@ -437,7 +437,11 @@ ArrayData* PackedArray::MakePackedImpl(uint32_t size,
 ArrayData* PackedArray::MakeVArray(uint32_t size, const TypedValue* values) {
   // Values are in reverse order since they come from the stack, which
   // grows down.
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    auto const ad = MakeVec(size, values);
+    ad->setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
+    return ad;
+  }
   auto ad = MakePackedImpl<true>(size, values, HeaderKind::Packed);
   assertx(ad->isPackedKind());
   assertx(ad->isVArray());
@@ -472,7 +476,11 @@ ArrayData* PackedArray::MakeVecNatural(uint32_t size, const TypedValue* values) 
 }
 
 ArrayData* PackedArray::MakeUninitializedVArray(uint32_t size) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs);
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    auto const ad = MakeUninitializedVec(size);
+    ad->setLegacyArray(RuntimeOption::EvalHackArrDVArrMark);
+    return ad;
+  }
   auto ad = MakeReserveImpl(size, HeaderKind::Packed);
   ad->m_size = size; // pos = 0
   assertx(ad->isPackedKind());

@@ -30,7 +30,7 @@ trait T {
         if (is_double($l)) echo "$text is_double\n";
         if (is_null($l)) echo "$text is_null\n";
         if (is_double($l)) echo "$text is_double\n";
-        if (is_array($l)) echo "$text is_array\n";
+        if (HH\is_any_array($l)) echo "$text is_array\n";
         if (is_object($l)) echo "$text is_object\n";
       }
     }

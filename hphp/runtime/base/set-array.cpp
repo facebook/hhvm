@@ -757,7 +757,14 @@ ArrayData* SetArray::ToDArrayImpl(const SetArray* ad) {
 }
 
 ArrayData* SetArray::ToDArray(ArrayData* ad, bool copy) {
-  if (RuntimeOption::EvalHackArrDVArrs) return ToDict(ad, copy);
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    auto out = ToDict(ad, copy);
+    if (RuntimeOption::EvalHackArrDVArrMark) {
+      if (out->cowCheck()) out = out->copy();
+      out->setLegacyArray(true);
+    }
+    return out;
+  }
   auto out = ToDArrayImpl(SetArray::asSet(ad));
   assertx(out->isDArray());
   return out;

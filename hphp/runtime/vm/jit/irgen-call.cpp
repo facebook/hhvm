@@ -406,11 +406,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   for (auto i = 0; i < numToPack; ++i) {
     assertTypeStack(env, BCSPRelOffset{i}, TInitCell);
   }
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    emitNewVec(env, numToPack);
-  } else {
-    emitNewVArray(env, numToPack);
-  }
+  emitNewVArray(env, numToPack);
+
   if (generics) push(env, generics);
 
   doCall(FCallArgs(
@@ -1438,11 +1435,7 @@ void emitResolveObjMethod(IRGS& env) {
   }
 
   assertx(func);
-  auto methPair = gen(
-    env,
-    RuntimeOption::EvalHackArrDVArrs ? AllocVec : AllocVArray,
-    PackedArrayData { 2 }
-  );
+  auto methPair = gen(env, AllocVArray, PackedArrayData { 2 });
   gen(env, InitVecElem, IndexData { 0 }, methPair, obj);
   gen(env, InitVecElem, IndexData { 1 }, methPair, func);
   decRef(env, name);

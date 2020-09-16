@@ -111,13 +111,13 @@ VariableSerializer::getKind(const ArrayData* arr) const {
     case Type::VarExport:
     case Type::Serialize:
     case Type::JSON:
+    case Type::DebuggerDump:
+    case Type::DebuggerSerialize:
       return true;
     case Type::Internal:
     case Type::DebugDump:
-    case Type::DebuggerDump:
     case Type::PHPOutput:
     case Type::APCSerialize:
-    case Type::DebuggerSerialize:
       return false;
     }
     always_assert(false);

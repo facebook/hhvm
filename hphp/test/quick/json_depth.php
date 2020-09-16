@@ -1,7 +1,7 @@
 <?hh
 
 function darray_recursive($x) {
-  if (!HH\is_php_array($x)) {
+  if (!HH\is_any_array($x)) {
     return $x;
   }
   $result = darray[];

@@ -77,6 +77,7 @@ function entrypoint_xenon(): void {
     AwaitAllWaitHandle::class.'::fromVec',
     RescheduleWaitHandle::class.'::create',
     Awaitable::class.'::result',
+    'HH\array_mark_legacy',
   ];
   verifyTestRun($stacks, $required_functions, $optional_functions);
   if ($success) {

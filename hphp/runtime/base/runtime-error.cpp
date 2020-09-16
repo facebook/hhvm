@@ -645,12 +645,15 @@ std::string param_type_error_message(
   }
   assertx(param_num > 0);
 
+  auto const isLegacy =
+    isArrayLikeType(type(actual_value)) &&
+    val(actual_value).parr->isLegacyArray();
   return folly::sformat(
     "{}() expects parameter {} to be {}, {} given",
     func_name,
     param_num,
     expected_type,
-    getDataTypeString(type(actual_value)).data());
+    getDataTypeString(type(actual_value), isLegacy).data());
 }
 
 void raise_param_type_warning(

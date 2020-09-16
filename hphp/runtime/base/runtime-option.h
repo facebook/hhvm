@@ -657,7 +657,7 @@ struct RuntimeOption {
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
   F(uint64_t, JitMatureSize,           125 << 20)                       \
-  F(bool, JitMatureAfterWarmup,        true)                            \
+  F(bool, JitMatureAfterWarmup,        false)                           \
   F(double, JitMaturityExponent,       1.)                              \
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(int, JitConcurrently,              1)                               \

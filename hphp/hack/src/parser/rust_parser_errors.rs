@@ -5011,6 +5011,16 @@ where
             _ => err(self_, errors::not_allowed_in_write("Unary expression")),
         };
 
+        let check_variable = |self_: &mut Self, text| {
+            if !allow_reassign {
+                if text == sn::special_idents::THIS {
+                    err(self_, errors::reassign_this)
+                } else if text == sn::superglobals::GLOBALS {
+                    err(self_, errors::not_allowed_in_write("`$GLOBALS`"))
+                }
+            }
+        };
+
         match &loperand.syntax {
             ListExpression(x) => Self::syntax_to_list_no_separators(&x.list_members)
                 .for_each(|n| self.check_lvalue(false, n)),
@@ -5022,16 +5032,8 @@ where
                     err(self, errors::not_allowed_in_write("`->:` operator"))
                 }
             }
-            VariableExpression(x) => {
-                if !allow_reassign {
-                    let text = self.text(&x.variable_expression);
-                    if text == sn::special_idents::THIS {
-                        err(self, errors::reassign_this)
-                    } else if text == sn::superglobals::GLOBALS {
-                        err(self, errors::not_allowed_in_write("`$GLOBALS`"))
-                    }
-                }
-            }
+            CatchClause(x) => check_variable(self, self.text(&x.catch_variable)),
+            VariableExpression(x) => check_variable(self, self.text(&x.variable_expression)),
             DecoratedExpression(x) => match Self::token_kind(&x.decorated_expression_decorator) {
                 Some(TokenKind::Clone) => err(self, errors::not_allowed_in_write("`clone`")),
                 Some(TokenKind::Await) => err(self, errors::not_allowed_in_write("`await`")),
@@ -5131,6 +5133,9 @@ where
                 self.check_lvalue(false, &x.foreach_value);
                 self.check_lvalue(false, &x.foreach_key);
                 check_rvalue(self, &x.foreach_collection);
+            }
+            CatchClause(_) => {
+                self.check_lvalue(false, node);
             }
             _ => {}
         }
@@ -5516,9 +5521,10 @@ where
             TraitUseAliasItem(_) => self.trait_use_alias_item_modifier_errors(node),
             EnumDeclaration(_) => self.enum_decl_errors(node),
             Enumerator(_) => self.enumerator_errors(node),
-            PostfixUnaryExpression(_) | BinaryExpression(_) | ForeachStatement(_) => {
-                self.assignment_errors(node)
-            }
+            PostfixUnaryExpression(_)
+            | BinaryExpression(_)
+            | ForeachStatement(_)
+            | CatchClause(_) => self.assignment_errors(node),
             XHPEnumType(_) | XHPExpression(_) => self.xhp_errors(node),
             PropertyDeclarator(x) => {
                 let init = &x.property_initializer;

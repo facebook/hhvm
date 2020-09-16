@@ -1,0 +1,87 @@
+vec(2) {
+  string(1) "A"
+  string(1) "E"
+}
+rfunc1
+vec(2) {
+  string(1) "I"
+  NULL
+}
+rfunc2
+vec(2) {
+  NULL
+  string(1) "E"
+}
+rfunc3
+NULL
+rfunc4
+vec(3) {
+  NULL
+  string(1) "A"
+  NULL
+}
+rfunc5
+vec(3) {
+  NULL
+  NULL
+  string(1) "A"
+}
+rfunc6
+vec(2) {
+  string(1) "A"
+  string(1) "E"
+}
+T::rsmeth1
+vec(2) {
+  string(1) "I"
+  NULL
+}
+T::rsmeth2
+vec(2) {
+  NULL
+  string(1) "E"
+}
+T::rsmeth3
+NULL
+T::rsmeth4
+vec(3) {
+  NULL
+  string(1) "A"
+  NULL
+}
+T::rsmeth5
+vec(3) {
+  NULL
+  NULL
+  string(1) "A"
+}
+T::rsmeth6
+vec(2) {
+  string(1) "A"
+  string(1) "E"
+}
+T::rmeth1
+vec(2) {
+  string(1) "I"
+  NULL
+}
+T::rmeth2
+vec(2) {
+  NULL
+  string(1) "E"
+}
+T::rmeth3
+NULL
+T::rmeth4
+vec(3) {
+  NULL
+  string(1) "A"
+  NULL
+}
+T::rmeth5
+vec(3) {
+  NULL
+  NULL
+  string(1) "A"
+}
+T::rmeth6

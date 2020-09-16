@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/asio/asio-session.h"
@@ -60,8 +61,9 @@ const StaticString
   s_suspend("suspend"),
   s_resume("resume"),
   s_exception("exception"),
-  s_name("name"),
-  s_return("return");
+  s_return("return"),
+  s_reified_classes("reified_classes"),
+  s_reified_generics_var("0ReifiedGenerics");
 
 RDS_LOCAL_NO_CHECK(uint64_t, rl_func_sequence_id){0};
 
@@ -149,6 +151,84 @@ bool shouldRunUserProfiler(const Func* func) {
   return true;
 }
 
+Array getReifiedClasses(const ActRec* ar) {
+  using K = TypeStructure::Kind;
+
+  auto const func = ar->func();
+  auto const& tparams = func->getReifiedGenericsInfo();
+  VecInit clist{tparams.m_typeParamInfo.size()};
+
+  auto const loc = frame_local(ar, ar->func()->numParams());
+  assertx(
+    func->localVarName(func->numParams()) == s_reified_generics_var.get()
+  );
+  assertx(isArrayLikeType(type(loc)));
+
+  int idx = 0;
+  auto const generics = val(loc).parr;
+
+  for (auto const& pinfo : tparams.m_typeParamInfo) {
+    if (!pinfo.m_isReified) {
+      clist.append(init_null());
+      continue;
+    }
+    auto const ts = generics->at(idx++);
+    assertx(isArrayLikeType(type(ts)));
+
+    auto const kind = get_ts_kind(val(ts).parr);
+
+    switch (kind) {
+    case K::T_class:
+    case K::T_interface:
+    case K::T_trait:
+    case K::T_enum:
+      clist.append(
+        String{const_cast<StringData*>(get_ts_classname(val(ts).parr))}
+      );
+      break;
+
+    case K::T_void:
+    case K::T_int:
+    case K::T_bool:
+    case K::T_float:
+    case K::T_string:
+    case K::T_resource:
+    case K::T_num:
+    case K::T_arraykey:
+    case K::T_noreturn:
+    case K::T_mixed:
+    case K::T_tuple:
+    case K::T_fun:
+    case K::T_array:
+    case K::T_typevar:
+    case K::T_shape:
+    case K::T_dict:
+    case K::T_vec:
+    case K::T_keyset:
+    case K::T_vec_or_dict:
+    case K::T_nonnull:
+    case K::T_darray:
+    case K::T_varray:
+    case K::T_varray_or_darray:
+    case K::T_arraylike:
+    case K::T_null:
+    case K::T_nothing:
+    case K::T_dynamic:
+      clist.append(init_null());
+      break;
+
+    case K::T_unresolved:
+    case K::T_typeaccess:
+    case K::T_xhp:
+    case K::T_reifiedtype:
+      // These type structures should always be resolved
+      always_assert(false);
+    }
+  }
+
+  return clist.toArray();
+}
+
 ALWAYS_INLINE
 ActRec* getParentFrame(const ActRec* ar) {
   return g_context->getPrevVMStateSkipFrame(ar);
@@ -196,6 +276,10 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
                                       s_args,
                                       hhvm_get_frame_args(ar));
   addFramePointers(ar, frameinfo, true);
+
+  if (ar->func()->hasReifiedGenerics()) {
+    frameinfo.set(s_reified_classes, getReifiedClasses(ar));
+  }
 
   const auto params = make_vec_array(
     (isResume && isResumeAware()) ? s_resume : s_enter,
@@ -290,7 +374,6 @@ static Variant call_intercept_handler(
 }
 
 const StaticString
-  s_value("value"),
   s_callback("callback"),
   s_prepend_this("prepend_this");
 

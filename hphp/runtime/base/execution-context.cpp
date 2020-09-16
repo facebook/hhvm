@@ -1243,7 +1243,7 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
   if (callByHPHPInvoke && it != nullptr) {
     if (it->isAsync()) {
       invokeFunc(
-        Unit::lookupFunc(s_enter_async_entry_point.get()),
+        Func::lookup(s_enter_async_entry_point.get()),
         make_vec_array_tagged(ARRPROV_HERE(), Variant{it}),
         nullptr, nullptr, false
       );

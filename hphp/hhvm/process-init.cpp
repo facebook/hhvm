@@ -142,7 +142,7 @@ void ProcessInit() {
   }
 
   SystemLib::s_nullFunc =
-    Unit::lookupFunc(makeStaticString("__SystemLib\\__86null"));
+    Func::lookup(makeStaticString("__SystemLib\\__86null"));
 
 #define INIT_SYSTEMLIB_CLASS_FIELD(cls)                                 \
   {                                                                     \

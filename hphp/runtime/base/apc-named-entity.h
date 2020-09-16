@@ -40,7 +40,7 @@ struct APCNamedEntity {
   APCHandle* getHandle() { return &m_handle; }
   Variant getEntityOrNull() const {
     assertx(m_handle.kind() == APCKind::FuncEntity);
-    auto const f = Unit::loadFunc(m_entity, m_name);
+    auto const f = Func::load(m_entity, m_name);
     return f ? Variant{f} : Variant{Variant::NullInit{}};
   }
 

@@ -40,7 +40,7 @@ folly::Optional<Location> getVanillaLocationForBuiltin(const IRGS& env,
 
   assertx(op == Op::FCallBuiltin || op == Op::NativeImpl);
   auto const func = op == Op::FCallBuiltin
-    ? Unit::lookupBuiltin(sk.unit()->lookupLitstrId(getImm(sk.pc(), 3).u_SA))
+    ? Func::lookupBuiltin(sk.unit()->lookupLitstrId(getImm(sk.pc(), 3).u_SA))
     : curFunc(env);
   if (!func) return folly::none;
   auto const param = getBuiltinVanillaParam(func->fullName()->data());

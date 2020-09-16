@@ -1511,7 +1511,7 @@ Func* read_func(ProfDataDeserializer& ser) {
           fid = ~fid;
           auto const name = read_string(ser);
           if (name->isame(s_86ctor.get())) return SystemLib::s_nullCtor;
-          return Unit::lookupFunc(name);
+          return Func::lookup(name);
         }
         auto const id = read_raw<uint32_t>(ser);
         if (id & 0x80000000) {
@@ -1525,14 +1525,14 @@ Func* read_func(ProfDataDeserializer& ser) {
         auto const unit = read_unit(ser);
         for (auto const f : unit->funcs()) {
           if (f->base() == id) {
-            Unit::bindFunc(f);
+            Func::bind(f);
             auto const handle = f->funcHandle();
             if (!rds::isPersistentHandle(handle) &&
                 (!rds::isHandleInit(handle, rds::NormalTag{}) ||
                  rds::handleToRef<LowPtr<Func>,
                                   rds::Mode::Normal>(handle).get() != f)) {
               rds::uninitHandle(handle);
-              Unit::defFunc(f, false);
+              Func::def(f, false);
             }
             return f;
           }

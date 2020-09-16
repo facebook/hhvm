@@ -1041,7 +1041,7 @@ static Array HHVM_METHOD(ReflectionFile, getAttributesNamespaced) {
 // helper for __construct
 static bool HHVM_METHOD(ReflectionFunction, __initName, const String& name) {
   if (name.isNull()) { return false; }
-  const Func* func = Unit::loadFunc(name.get());
+  const Func* func = Func::load(name.get());
   if (!func) { return false; }
   ReflectionFuncHandle::Get(this_)->setFunc(func);
   return true;
@@ -2341,7 +2341,7 @@ static void set_debugger_reflection_method_info(Array& ret, const Func* func,
 
 Array get_function_info(const String& name) {
   if (name.get() == nullptr) return null_array;
-  const Func* func = Unit::loadFunc(name.get());
+  const Func* func = Func::load(name.get());
   if (!func) return null_array;
   auto ret = Array::CreateDArray();
   ret.set(s_name,       make_tv<KindOfPersistentString>(func->name()));

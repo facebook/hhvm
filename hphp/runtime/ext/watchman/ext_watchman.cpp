@@ -336,7 +336,7 @@ struct ActiveSubscription {
             m_path.c_str());
       }
       auto unit_result = Variant::attach(context->invokeUnit(unit));
-      auto func = Unit::loadFunc(String(m_callbackFunc.c_str()).get());
+      auto func = Func::load(String(m_callbackFunc.c_str()).get());
       if (!func) {
         throw std::runtime_error(
           folly::sformat("Callback '{}' no longer exists", m_callbackFunc));
@@ -628,7 +628,7 @@ Object HHVM_FUNCTION(HH_watchman_subscribe,
   }
 
   // Validate callback
-  const Func* f = Unit::loadFunc(callback_function.get());
+  const Func* f = Func::load(callback_function.get());
   if (!f || f->hasVariadicCaptureParam() || f->numParams() != 5 ||
     !f->fullName() || !f->filename())
   {

@@ -780,7 +780,7 @@ folly::Optional<Type> const_fold(ISS& env,
       if (!f->isStatic()) return nullptr;
       return f;
     }
-    return Unit::lookupBuiltin(phpFunc.name);
+    return Func::lookupBuiltin(phpFunc.name);
   }();
 
   if (!func) return folly::none;

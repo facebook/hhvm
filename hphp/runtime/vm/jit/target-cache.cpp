@@ -119,7 +119,7 @@ const Func* FuncCache::lookup(rds::Handle handle, StringData* sd) {
   if (!notClassMethodPair(sd)) return nullptr;
 
   // Miss. Does it actually exist?
-  auto const* func = Unit::loadFunc(sd);
+  auto const* func = Func::load(sd);
   if (UNLIKELY(func == nullptr)) raise_call_to_undefined(sd);
 
   assertx(!func->implCls());

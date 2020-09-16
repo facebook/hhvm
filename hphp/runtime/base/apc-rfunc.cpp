@@ -41,7 +41,7 @@ APCHandle::Pair APCRFunc::Construct(RFuncData* rfuncData) {
 
 Variant APCRFunc::Make(const APCHandle* handle) {
     auto apcrfunc = APCRFunc::fromHandle(handle);
-    auto const f = Unit::loadFunc(apcrfunc->m_entity, apcrfunc->m_name);
+    auto const f = Func::load(apcrfunc->m_entity, apcrfunc->m_name);
     auto const generics_arr = apcrfunc->m_generics->toLocal();
     auto const generics = generics_arr.getArrayData();
     generics->incRefCount();

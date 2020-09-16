@@ -3923,7 +3923,7 @@ OPTBLD_INLINE void fcallFuncRClsMeth(PC origpc, PC& pc, const FCallArgs& fca) {
 Func* resolveFuncImpl(Id id) {
   auto unit = vmfp()->func()->unit();
   auto const nep = unit->lookupNamedEntityPairId(id);
-  auto func = Unit::loadFunc(nep.second, nep.first);
+  auto func = Func::load(nep.second, nep.first);
   if (func == nullptr) raise_resolve_undefined(unit->lookupLitstrId(id));
   return func;
 }
@@ -3936,7 +3936,7 @@ OPTBLD_INLINE void iopResolveFunc(Id id) {
 OPTBLD_INLINE void iopResolveMethCaller(Id id) {
   auto unit = vmfp()->func()->unit();
   auto const nep = unit->lookupNamedEntityPairId(id);
-  auto func = Unit::loadFunc(nep.second, nep.first);
+  auto func = Func::load(nep.second, nep.first);
   assertx(func && func->isMethCaller());
   checkMethCaller(func, arGetContextClass(vmfp()));
   vmStack().pushFunc(func);
@@ -3989,7 +3989,7 @@ OPTBLD_INLINE void iopFCallFunc(PC origpc, PC& pc, FCallArgs fca) {
 
 OPTBLD_INLINE void iopFCallFuncD(PC origpc, PC& pc, FCallArgs fca, Id id) {
   auto const nep = vmfp()->unit()->lookupNamedEntityPairId(id);
-  auto const func = Unit::loadFunc(nep.second, nep.first);
+  auto const func = Func::load(nep.second, nep.first);
   if (UNLIKELY(func == nullptr)) {
     raise_call_to_undefined(vmfp()->unit()->lookupLitstrId(id));
   }

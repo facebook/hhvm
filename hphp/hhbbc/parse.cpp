@@ -750,7 +750,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
         auto const cls = Unit::lookupClass(ret->cls->name);
         return cls ? cls->lookupMethod(ret->name) : nullptr;
       } else {
-        return Unit::lookupBuiltin(ret->name);
+        return Func::lookupBuiltin(ret->name);
       }
     }();
 

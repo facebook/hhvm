@@ -41,7 +41,7 @@ static Array HHVM_STATIC_METHOD(BuiltinEnum, getNames) {
   const EnumValues* values = EnumCache::getValuesBuiltin(self_);
   if (values->names.size() != values->values.size()) {
     vm_call_user_func(
-      Unit::lookupFunc(s_invariant_violation.get()),
+      Func::lookup(s_invariant_violation.get()),
       make_vec_array(s_overlappingErrorMessage)
     );
   }

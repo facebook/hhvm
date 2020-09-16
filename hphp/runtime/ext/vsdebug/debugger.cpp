@@ -1653,7 +1653,7 @@ bool Debugger::tryResolveBreakpoint(
     assertx(bp->m_type == BreakpointType::Function);
 
     const HPHP::String functionName(bp->m_function);
-    Func* func = Unit::lookupFunc(functionName.get());
+    Func* func = Func::lookup(functionName.get());
 
     if (func != nullptr) {
       BreakpointManager* bpMgr = m_session->getBreakpointManager();

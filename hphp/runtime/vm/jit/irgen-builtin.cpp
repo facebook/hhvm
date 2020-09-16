@@ -2039,7 +2039,7 @@ void emitFCallBuiltin(IRGS& env,
                       uint32_t numNonDefault,
                       uint32_t numOut,
                       const StringData* funcName) {
-  auto const callee = Unit::lookupBuiltin(funcName);
+  auto const callee = Func::lookupBuiltin(funcName);
   if (!callee) PUNT(Missing-builtin);
 
   if (callee->numInOutParams() != numOut) PUNT(bad-inout);

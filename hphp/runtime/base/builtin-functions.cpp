@@ -605,7 +605,7 @@ vm_decode_function(const_variant_ref function,
     }
 
     if (!cls) {
-      HPHP::Func* f = HPHP::Unit::loadFunc(name.get());
+      HPHP::Func* f = HPHP::Func::load(name.get());
       if (!f) {
         if (flags == DecodeFlags::Warn) {
           raise_invalid_argument_warning("function: method '%s' not found",
@@ -669,7 +669,7 @@ Variant vm_call_user_func(const_variant_ref function, const Variant& params,
 Variant
 invoke(const String& function, const Variant& params,
        bool allowDynCallNoPointer /* = false */) {
-  Func* func = Unit::loadFunc(function.get());
+  Func* func = Func::load(function.get());
   if (func && (isContainer(params) || params.isNull())) {
     auto ret = Variant::attach(
       g_context->invokeFunc(func, params, nullptr, nullptr, true, false,
@@ -1292,7 +1292,7 @@ Variant require(const String& file,
 }
 
 bool function_exists(const String& function_name) {
-  auto f = Unit::lookupFunc(function_name.get());
+  auto f = Func::lookup(function_name.get());
   return (f != nullptr) &&
          (f->arFuncPtr() != Native::unimplementedWrapper);
 }

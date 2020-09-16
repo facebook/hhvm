@@ -333,8 +333,7 @@ Func* setupNullClsMethod(Func* f, Class* cls, StringData* name) {
 
 Func* setup86ctorMethod(Class* cls) {
   if (!s_nullFunc) {
-    s_nullFunc =
-      Unit::lookupFunc(makeStaticString("__SystemLib\\__86null"));
+    s_nullFunc = Func::lookup(makeStaticString("__SystemLib\\__86null"));
   }
   return setupNullClsMethod(s_nullFunc, cls, s_86ctor.get());
 }
@@ -342,7 +341,7 @@ Func* setup86ctorMethod(Class* cls) {
 Func* setup86ReifiedInitMethod(Class* cls) {
   if (!s_singleArgNullFunc) {
     s_singleArgNullFunc =
-      Unit::lookupFunc(makeStaticString("__SystemLib\\__86single_arg_null"));
+      Func::lookup(makeStaticString("__SystemLib\\__86single_arg_null"));
   }
   return setupNullClsMethod(s_singleArgNullFunc, cls, s_86reifiedinit.get());
 }

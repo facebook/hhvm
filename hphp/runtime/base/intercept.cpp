@@ -213,7 +213,7 @@ void rename_function(const String& old_name, const String& new_name) {
   auto const oldNe = const_cast<NamedEntity*>(NamedEntity::get(old));
   auto const newNe = const_cast<NamedEntity*>(NamedEntity::get(n3w));
 
-  Func* func = Unit::lookupFunc(oldNe);
+  Func* func = Func::lookup(oldNe);
   if (!func) {
     // It's the caller's responsibility to ensure that the old function
     // exists.
@@ -232,7 +232,7 @@ void rename_function(const String& old_name, const String& new_name) {
     }
   }
 
-  auto const fnew = Unit::lookupFunc(newNe);
+  auto const fnew = Func::lookup(newNe);
   if (fnew && fnew != func) {
     raise_error("Function already defined: %s", n3w->data());
   }

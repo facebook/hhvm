@@ -362,123 +362,6 @@ Func* Unit::getCachedEntryPoint() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Func lookup.
-
-const StaticString s_DebuggerMain("__DebuggerMain");
-
-void Unit::defFunc(Func* func, bool debugger) {
-  assertx(!func->isMethod());
-  auto const handle = func->funcHandle();
-
-  if (UNLIKELY(debugger)) {
-    // Don't define the __debugger_main() function
-    if (func->userAttributes().count(s_DebuggerMain.get())) return;
-  }
-
-  if (rds::isPersistentHandle(handle)) {
-    auto& funcAddr = rds::handleToRef<LowPtr<Func>,
-                                      rds::Mode::Persistent>(handle);
-    auto const oldFunc = funcAddr.get();
-    if (oldFunc == func) return;
-    if (UNLIKELY(oldFunc != nullptr)) {
-      assertx(oldFunc->isBuiltin() && !func->isBuiltin());
-      raise_error(Strings::REDECLARE_BUILTIN, func->name()->data());
-    }
-    funcAddr = func;
-  } else {
-    assertx(rds::isNormalHandle(handle));
-    auto& funcAddr = rds::handleToRef<LowPtr<Func>, rds::Mode::Normal>(handle);
-    if (!rds::isHandleInit(handle, rds::NormalTag{})) {
-      rds::initHandle(handle);
-    } else {
-      if (funcAddr.get() == func) return;
-      if (func->attrs() & AttrIsMethCaller) {
-        // emit the duplicated meth_caller directly
-        return;
-      }
-      raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());
-    }
-    funcAddr = func;
-  }
-
-  if (func->isUnique()) func->getNamedEntity()->setUniqueFunc(func);
-
-  if (UNLIKELY(debugger)) phpDebuggerDefFuncHook(func);
-}
-
-Func* Unit::lookupFunc(const NamedEntity* ne) {
-  return ne->getCachedFunc();
-}
-
-Func* Unit::lookupFunc(const StringData* name) {
-  const NamedEntity* ne = NamedEntity::get(name);
-  return ne->getCachedFunc();
-}
-
-Func* Unit::lookupBuiltin(const StringData* name) {
-  // Builtins are either persistent (the normal case), or defined at the
-  // beginning of every request (if JitEnableRenameFunction or interception is
-  // enabled). In either case, they're unique, so they should be present in the
-  // NamedEntity.
-  auto const ne = NamedEntity::get(name);
-  auto const f = ne->uniqueFunc();
-  return (f && f->isBuiltin()) ? f : nullptr;
-}
-
-Func* Unit::loadFunc(const NamedEntity* ne, const StringData* name) {
-  Func* func = ne->getCachedFunc();
-  if (LIKELY(func != nullptr)) return func;
-  if (AutoloadHandler::s_instance->autoloadFunc(
-        const_cast<StringData*>(name))) {
-    func = ne->getCachedFunc();
-  }
-  return func;
-}
-
-Func* Unit::loadFunc(const StringData* name) {
-  String normStr;
-  auto ne = NamedEntity::get(name, true, &normStr);
-
-  // Try to fetch from cache
-  Func* func_ = ne->getCachedFunc();
-  if (LIKELY(func_ != nullptr)) return func_;
-
-  // Normalize the namespace
-  if (normStr) {
-    name = normStr.get();
-  }
-
-  // Autoload the function
-  return AutoloadHandler::s_instance->autoloadFunc(
-    const_cast<StringData*>(name)
-  ) ? ne->getCachedFunc() : nullptr;
-}
-
-void Unit::bindFunc(Func *func) {
-  assertx(!func->isMethod());
-  auto const ne = func->getNamedEntity();
-
-  auto const persistent =
-    (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited) &&
-    (func->attrs() & AttrPersistent);
-
-  auto const init_val = LowPtr<Func>(func);
-
-  ne->m_cachedFunc.bind(
-    persistent ? rds::Mode::Persistent : rds::Mode::Normal,
-    rds::LinkName{"Func", func->name()},
-    &init_val
-  );
-  if (func->isUnique() && func == ne->getCachedFunc()) {
-    // we need to check that we actually were responsible for the bind here
-    // before we set the uniqueFunc on `ne`.  this seems strange, but it's
-    // because meth_caller funcs are unique but can have the same name.
-    ne->setUniqueFunc(func);
-  }
-  func->setFuncHandle(ne->m_cachedFunc);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Class lookup utilities
 
 namespace {
@@ -939,7 +822,7 @@ TypedValue Unit::loadCns(const StringData* cnsName) {
 
 Variant Unit::getCns(const StringData* name) {
   const StringData* func_name = Constant::funcNameFromName(name);
-  Func* func = Unit::lookupFunc(func_name);
+  Func* func = Func::lookup(func_name);
   assertx(
     func &&
     "The function should have been autoloaded when we loaded the constant");
@@ -1280,7 +1163,7 @@ void Unit::initialMerge() {
     if (allFuncsUnique) {
       allFuncsUnique = (func->attrs() & AttrUnique);
     }
-    bindFunc(func);
+    Func::bind(func);
     if (rds::isPersistentHandle(func->funcHandle())) {
       needsCompact = true;
     }
@@ -1533,7 +1416,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
     } else {
       do {
         Func* func = *it;
-        defFunc(func, debugger);
+        Func::def(func, debugger);
       } while (++it != fend);
     }
   }

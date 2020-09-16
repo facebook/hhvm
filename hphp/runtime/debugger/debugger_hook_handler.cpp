@@ -70,7 +70,7 @@ void proxySetBreakPoints(DebuggerProxy* proxy) {
     auto funcName = bp->getFuncName();
     if (!funcName.empty()) {
       auto fName = makeStaticString(funcName);
-      Func* f = Unit::lookupFunc(fName);
+      Func* f = Func::lookup(fName);
       if (f == nullptr) continue;
       bp->m_bindState = BreakPointInfo::KnownToBeValid;
       phpAddBreakPointFuncEntry(f);

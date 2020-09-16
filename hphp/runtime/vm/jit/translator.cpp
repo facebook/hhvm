@@ -1176,7 +1176,7 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni) {
   const Func* builtinFunc = nullptr;
   if (ni.op() == OpFCallBuiltin) {
     auto str = ni.m_unit->lookupLitstrId(ni.imm[3].u_SA);
-    builtinFunc = Unit::lookupBuiltin(str);
+    builtinFunc = Func::lookupBuiltin(str);
   }
   auto pc = ni.pc();
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {

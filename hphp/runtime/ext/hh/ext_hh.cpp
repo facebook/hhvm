@@ -576,7 +576,7 @@ bool HHVM_FUNCTION(clear_static_memoization,
   }
 
   if (isStringType(funcStr.m_type)) {
-    auto const func = Unit::loadFunc(funcStr.m_data.pstr);
+    auto const func = Func::load(funcStr.m_data.pstr);
     return func && clear(func);
   }
 
@@ -821,7 +821,7 @@ enum class DynamicAttr : int8_t { Ignore, Require };
 
 template <DynamicAttr DA = DynamicAttr::Require>
 TypedValue dynamicFun(const StringData* fun) {
-  auto const func = Unit::loadFunc(fun);
+  auto const func = Func::load(fun);
   if (!func) {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat("Unable to find function {}", fun->data())

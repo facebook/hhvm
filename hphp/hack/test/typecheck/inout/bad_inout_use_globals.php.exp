@@ -1,2 +1,0 @@
-File "bad_inout_use_globals.php", line 6, characters 5-18:
-You cannot decorate this argument as `inout` (Parsing[1002])

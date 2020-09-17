@@ -109,9 +109,7 @@ void AutoloadHandler::requestShutdown() {
 }
 
 bool AutoloadHandler::setMap(const Array& map, String root) {
-  assertx(!(RuntimeOption::RepoAuthoritative &&
-            RuntimeOption::EvalUseRepoAutoloadMap &&
-            Repo::get().global().AutoloadMap));
+  assertx(!RuntimeOption::RepoAuthoritative);
 
   m_req_map = req::make_unique<UserAutoloadMap>(
       UserAutoloadMap::fromFullMap(map, std::move(root)));

@@ -1301,8 +1301,6 @@ struct RuntimeOption {
    *  `isTvArrayLike` instead of being a strict PHP array check.
    */                                                                   \
   F(bool, EnablePerFileCoverage, false)                                 \
-  /* Should we use the autoload map from the repo */                    \
-  F(bool, UseRepoAutoloadMap, true)                                     \
   F(bool, LogOnIsArrayFunction, false)                                  \
   /* Unit prefetching options */                                        \
   F(uint32_t, UnitPrefetcherMaxThreads, 0)                              \

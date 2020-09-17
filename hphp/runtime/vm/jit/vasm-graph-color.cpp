@@ -6921,7 +6921,14 @@ void hoist_spills_in_loop(State& state,
           // physical register has to be removed.
           if (!candidates[canonicalize(inst.copy_.d)]) break;
           if (inst.copy_.s.isPhys() || inst.copy_.s == inst.copy_.d) {
-            assertx(results.rematerialized[inst.copy_.d]);
+            // The dest of the copy is a candidate, which means it's
+            // live-in to the loop. However, if the source is a
+            // physical register, we're defining dest (inside the
+            // loop). This can only happen if we've rematerialized the
+            // dest. The only other case is if this is a nop copy,
+            // which always can be removed.
+            assertx(!inst.copy_.s.isPhys() ||
+                    results.rematerialized[inst.copy_.d]);
             inst.nop_ = nop{};
             inst.op = Vinstr::nop;
             results.changed[b] = true;

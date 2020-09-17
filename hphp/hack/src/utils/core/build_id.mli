@@ -16,3 +16,5 @@ val build_commit_time_string : string
 val build_mode : string
 
 val is_build_optimized : bool
+
+val is_dev_build : bool

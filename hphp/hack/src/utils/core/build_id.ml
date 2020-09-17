@@ -29,4 +29,10 @@ let is_build_optimized =
   || String_utils.string_starts_with build_mode "opt"
   || build_mode = ""
 
+let is_dev_build =
+  (* FB development build hashes are empty. *)
+  String.equal build_revision ""
+  (* Dune build hashes are short. *)
+  || String.length build_revision <= 16
+
 (* fail open if we don't know build mode *)

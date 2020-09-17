@@ -926,16 +926,21 @@ and simplify_subtype_i
             solved. Once this case is moved, we can clean up obj_get from the Tvar and
             Tintersection cases *)
           | _ ->
+            let (is_method, explicit_targs) =
+              match explicit_targs with
+              | None -> (false, [])
+              | Some targs -> (true, targs)
+            in
             let (obj_get_ty, error_prop) =
               Errors.try_with_result
                 (fun () ->
                   let (env, (obj_get_ty, _tal)) =
                     Typing_object_get.obj_get
                       ~obj_pos:(Reason.to_pos r)
-                      ~is_method:false
+                      ~is_method
                       ~coerce_from_ty:None
                       ~nullsafe:None
-                      ~explicit_targs:[]
+                      ~explicit_targs
                       env
                       ty_sub
                       class_id

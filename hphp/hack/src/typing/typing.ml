@@ -4642,7 +4642,8 @@ and dispatch_call
       typed_unpack_element
       ty
   (* Call instance method *)
-  | Obj_get (e1, (pos_id, Id m), nullflavor) ->
+  | Obj_get (e1, (pos_id, Id m), nullflavor)
+    when not (TypecheckerOptions.method_call_inference (Env.get_tcopt env)) ->
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
     let nullsafe =
       match nullflavor with
@@ -4690,6 +4691,124 @@ and dispatch_call
       tel
       typed_unpack_element
       ty
+  (* Call instance method using new method call inference *)
+  | Obj_get (receiver, (pos_id, Id meth), nullflavor) ->
+    (*****
+      Typecheck `Obj_get` by enforcing that:
+      - `<instance_type>` <: `Thas_member(m, #1)`
+      where #1 is a fresh type variable.
+    *****)
+    (* Get type of instance *)
+    let (env, typed_receiver, receiver_ty) =
+      expr ~accept_using_var:true env receiver
+    in
+    let env = might_throw env in
+    (* Check if call is nullsafe, e.g. $x?->f() *)
+    let nullsafe =
+      match nullflavor with
+      | OG_nullthrows -> None
+      | OG_nullsafe -> Some p
+    in
+    (*
+      Generate a fresh types `method_ty` for the type of the instance method, i.e. #1
+    *)
+    let (env, method_ty) = Env.fresh_type env p in
+    (* Create `Thas_member` constraint type *)
+    let reason = Reason.Rwitness (fst receiver) in
+    let has_method_ty =
+      MakeType.has_member
+        reason
+        ~name:meth
+        ~ty:method_ty
+        ~class_id:(CIexpr receiver)
+        ~explicit_targs:(Some explicit_targs)
+    in
+    (* Define the receiver type to use in LHS of subtyping *)
+    let (env, receiver_sub_ty) =
+      if Option.is_none nullsafe then
+        (env, receiver_ty)
+      else
+        (* If nullsafe, then check `receiver & nonnull <: Thas_member(...).
+           We want a bare `Thas_member(...)` on RHS of check (T75797924). *)
+        let r = Reason.Rnone in
+        let nonnull_ty = MakeType.nonnull r in
+        let (env, inter_ty) = Inter.intersect ~r env receiver_ty nonnull_ty in
+        (env, with_reason inter_ty (get_reason receiver_ty))
+    in
+    let env =
+      Type.sub_type_i
+        (fst receiver)
+        Reason.URnone
+        env
+        (LoclType receiver_sub_ty)
+        has_method_ty
+        Errors.unify_error
+    in
+    (* Perhaps solve for `method_ty`. Opening and closing a scope is too coarse
+       here - type parameters are localised to fresh type variables over the
+       course of subtyping above, and we do not want to solve these until later
+       (see T75252607 for details).
+       After T71287635, we should not need to solve early at all - transitive
+       closure of subtyping should give enough information. *)
+    let env = Env.set_tyvar_variance env method_ty in
+    let env =
+      match get_var method_ty with
+      | Some var ->
+        Typing_solver.solve_to_equal_bound_or_wrt_variance
+          env
+          Reason.Rnone
+          var
+          Errors.unify_error
+      | None -> env
+    in
+    let localize_targ env (_, targ) = Phase.localize_targ env targ in
+    let (env, typed_targs) =
+      List.map_env env ~f:(localize_targ ~check_well_kinded:true) explicit_targs
+    in
+    check_disposable_in_return env method_ty;
+    let (env, (typed_params, typed_unpack_element, ret_ty)) =
+      call
+        ~nullsafe
+        ~expected
+        ~method_call_info:
+          (TR.make_call_info
+             ~receiver_is_self:false
+             ~is_static:false
+             receiver_ty
+             (snd meth))
+        p
+        env
+        method_ty
+        el
+        unpacked_element
+    in
+    (* If the call is nullsafe AND the receiver is nullable,
+       make the return type nullable too *)
+    let (env, ret_ty) =
+      if Option.is_some nullsafe then
+        let r = Reason.Rnullsafe_op p in
+        let null_ty = MakeType.null r in
+        let (env, null_or_nothing_ty) =
+          Inter.intersect env ~r null_ty receiver_ty
+        in
+        let (env, ret_option_ty) = Union.union env null_or_nothing_ty ret_ty in
+        (env, with_reason ret_option_ty r)
+      else
+        (env, ret_ty)
+    in
+    make_call
+      env
+      (Tast.make_typed_expr
+         fpos
+         method_ty
+         (Aast.Obj_get
+            ( typed_receiver,
+              Tast.make_typed_expr pos_id method_ty (Aast.Id meth),
+              nullflavor )))
+      typed_targs
+      typed_params
+      typed_unpack_element
+      ret_ty
   (* Function invocation *)
   | Fun_id x ->
     let (env, fty, tal) = fun_type_of_id env x explicit_targs el in

@@ -11,9 +11,6 @@
     server_load_flag
     utils_exit
     utils_multifile
-    (select coroutine_errors.ml from
-    (facebook -> facebook/coroutine_errors.ml)
-    (-> ../stubs/coroutine_errors.ml))
     (select error_message_sentinel.ml from
-    (facebook -> facebook/error_message_sentinel.ml)
-    (-> ../stubs/error_message_sentinel.ml))))
+      (facebook -> facebook/error_message_sentinel.ml)
+      (-> ../stubs/error_message_sentinel.ml))))

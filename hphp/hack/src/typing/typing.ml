@@ -1401,8 +1401,7 @@ and expr_
       e
       explicit_targs
       el
-      unpacked_element
-      ~in_suspend =
+      unpacked_element =
     let (env, te, result) =
       dispatch_call
         ~is_using_clause
@@ -1413,7 +1412,6 @@ and expr_
         explicit_targs
         el
         unpacked_element
-        ~in_suspend
     in
     let env = forget_fake_members env p e in
     (env, te, result)
@@ -2053,7 +2051,6 @@ and expr_
         explicit_targs
         el
         unpacked_element
-        ~in_suspend:false
     in
     (env, te, ty)
   | FunctionPointer (FP_id fid, targs) ->
@@ -2427,16 +2424,7 @@ and expr_
              explicit_targs
              el
              unpacked_element
-             ~in_suspend:true
-      | (epos, _) ->
-        let (env, te, ty) = expr env e in
-        (* not a call - report an error *)
-        Errors.non_call_argument_in_suspend
-          epos
-          (Reason.to_string
-             ("This is " ^ Typing_print.error env ty)
-             (get_reason ty));
-        (env, te, ty)
+      | _ -> expr env e
     in
     make_result env p (Aast.Suspend te) ty
   | New ((pos, c), explicit_targs, el, unpacked_element, p1) ->
@@ -4106,8 +4094,7 @@ and dispatch_call
     ((fpos, fun_expr) as e)
     explicit_targs
     el
-    unpacked_element
-    ~in_suspend =
+    unpacked_element =
   let make_call env te tal tel typed_unpack_element ty =
     make_result env p (Aast.Call (te, tal, tel, typed_unpack_element)) ty
   in
@@ -4132,92 +4119,19 @@ and dispatch_call
     make_call env (Tast.make_typed_expr fpos fty (Aast.Id id)) tal tel None ty
   in
   let overload_function = overload_function make_call fpos in
-  let check_coroutine_call env fty =
-    let () =
-      if is_return_disposable_fun_type env fty && not is_using_clause then
-        Errors.invalid_new_disposable p
-      else
-        ()
-    in
-    (* returns
-       - Some true if type is definitely a coroutine
-       - Some false if type is definitely not a coroutine
-       - None if type is Tunion that contains
-         both coroutine and non-coroutine constituents *)
-    (* TODO: replace the case analysis here with a subtyping check;
-     * see T37483866 and the linked diff for discussion.
-     *)
-    let rec is_coroutine env ty =
-      let (env, ety) =
-        Typing_solver.expand_type_and_solve
-          env
-          (get_pos ty)
-          ty
-          Errors.unify_error
-          ~description_of_expected:"a function value"
-      in
-      match get_node ety with
-      | Tfun ft -> (env, Some (get_ft_is_coroutine ft))
-      | Tunion ts
-      | Tintersection ts ->
-        are_coroutines env ts
-      | _ -> (env, Some false)
-    and are_coroutines env ts =
-      let (env, ts_are_coroutines) = List.map_env env ts ~f:is_coroutine in
-      let ts_are_coroutines =
-        match ts_are_coroutines with
-        | None :: _ -> None
-        | Some x :: xs ->
-          (*if rest of the list has the same value as the first element
-            return value of the first element or None otherwise*)
-          if
-            List.for_all
-              xs
-              ~f:(Option.value_map ~default:false ~f:(Bool.equal x))
-          then
-            Some x
-          else
-            None
-        | _ -> Some false
-      in
-      (env, ts_are_coroutines)
-    in
-    let (env, fty_is_coroutine) = is_coroutine env fty in
-    let () =
-      match (in_suspend, fty_is_coroutine) with
-      | (true, Some true)
-      | (false, Some false) ->
-        ()
-      | (true, _) ->
-        (* non-coroutine call in suspend *)
-        Errors.non_coroutine_call_in_suspend
-          fpos
-          (Reason.to_string
-             ("This is " ^ Typing_print.error env fty)
-             (get_reason fty))
-      | (false, _) ->
-        (*coroutine call outside of suspend *)
-        Errors.coroutine_call_outside_of_suspend p
-    in
-    env
-  in
-  let check_function_in_suspend name =
-    if in_suspend then Errors.function_is_not_coroutine fpos name
-  in
-  let check_class_function_in_suspend class_name function_name =
-    check_function_in_suspend (class_name ^ "::" ^ function_name)
+  let check_disposable_in_return env fty =
+    if is_return_disposable_fun_type env fty && not is_using_clause then
+      Errors.invalid_new_disposable p
   in
   match fun_expr with
   (* Special function `echo` *)
   | Id ((p, pseudo_func) as id)
     when String.equal pseudo_func SN.SpecialFunctions.echo ->
-    check_function_in_suspend SN.SpecialFunctions.echo;
     let (env, tel, _) = exprs ~accept_using_var:true env el in
     make_call_special env id tel (MakeType.void (Reason.Rwitness p))
   (* Special function `isset` *)
   | Id ((_, pseudo_func) as id)
     when String.equal pseudo_func SN.PseudoFunctions.isset ->
-    check_function_in_suspend SN.PseudoFunctions.isset;
     let (env, tel, _) =
       exprs ~accept_using_var:true ~check_defined:false env el
     in
@@ -4227,7 +4141,6 @@ and dispatch_call
   (* Special function `unset` *)
   | Id ((_, pseudo_func) as id)
     when String.equal pseudo_func SN.PseudoFunctions.unset ->
-    check_function_in_suspend SN.PseudoFunctions.unset;
     let (env, tel, _) = exprs env el in
     if Option.is_some unpacked_element then
       Errors.unpacking_disallowed_builtin_function p pseudo_func;
@@ -4279,8 +4192,6 @@ and dispatch_call
     when String.equal array_filter SN.StdlibFunctions.array_filter
          && (not (List.is_empty el))
          && Option.is_none unpacked_element ->
-    check_function_in_suspend SN.StdlibFunctions.array_filter;
-
     (* dispatch the call to typecheck the arguments *)
     let (env, fty, tal) = fun_type_of_id env id explicit_targs el in
     let (env, (tel, typed_unpack_element, res)) =
@@ -4361,7 +4272,6 @@ and dispatch_call
     when String.equal type_structure SN.StdlibFunctions.type_structure
          && Int.equal (List.length el) 2
          && Option.is_none unpacked_element ->
-    check_function_in_suspend SN.StdlibFunctions.type_structure;
     (match el with
     | [e1; e2] ->
       (match e2 with
@@ -4385,8 +4295,6 @@ and dispatch_call
     when String.equal array_map SN.StdlibFunctions.array_map
          && (not (List.is_empty el))
          && Option.is_none unpacked_element ->
-    check_function_in_suspend SN.StdlibFunctions.array_map;
-
     (* This uses the arity to determine a signature for array_map. But there
      * is more: for two-argument use of array_map, we specialize the return
      * type to the collection that's passed in, below. *)
@@ -4491,7 +4399,6 @@ and dispatch_call
   | Class_const (((_, CI (_, shapes)) as class_id), ((_, idx) as method_id))
     when String.equal shapes SN.Shapes.cShapes && String.equal idx SN.Shapes.idx
     ->
-    check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.idx;
     overload_function
       p
       env
@@ -4527,7 +4434,6 @@ and dispatch_call
   | Class_const (((_, CI (_, shapes)) as class_id), ((_, at) as method_id))
     when String.equal shapes SN.Shapes.cShapes && String.equal at SN.Shapes.at
     ->
-    check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.at;
     overload_function
       p
       env
@@ -4546,7 +4452,6 @@ and dispatch_call
       (((_, CI (_, shapes)) as class_id), ((_, key_exists) as method_id))
     when String.equal shapes SN.Shapes.cShapes
          && String.equal key_exists SN.Shapes.keyExists ->
-    check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.keyExists;
     overload_function
       p
       env
@@ -4578,7 +4483,6 @@ and dispatch_call
       (((_, CI (_, shapes)) as class_id), ((_, remove_key) as method_id))
     when String.equal shapes SN.Shapes.cShapes
          && String.equal remove_key SN.Shapes.removeKey ->
-    check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.removeKey;
     overload_function
       p
       env
@@ -4608,7 +4512,6 @@ and dispatch_call
   | Class_const (((_, CI (_, shapes)) as class_id), ((_, to_array) as method_id))
     when String.equal shapes SN.Shapes.cShapes
          && String.equal to_array SN.Shapes.toArray ->
-    check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.toArray;
     overload_function
       p
       env
@@ -4626,7 +4529,6 @@ and dispatch_call
   | Class_const (((_, CI (_, shapes)) as class_id), ((_, to_array) as method_id))
     when String.equal shapes SN.Shapes.cShapes
          && String.equal to_array SN.Shapes.toDict ->
-    check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.toDict;
     overload_function
       p
       env
@@ -4643,7 +4545,6 @@ and dispatch_call
   (* Special function `parent::__construct` *)
   | Class_const ((pos, CIparent), ((_, construct) as id))
     when String.equal construct SN.Members.__construct ->
-    check_class_function_in_suspend "parent" SN.Members.__construct;
     let (env, tel, typed_unpack_element, ty, pty, ctor_fty) =
       call_parent_construct p env el unpacked_element
     in
@@ -4711,7 +4612,7 @@ and dispatch_call
           k_lhs
           Errors.unify_error
     in
-    let env = check_coroutine_call env fty in
+    check_disposable_in_return env fty;
     let ty =
       if Nast.equal_class_id_ e1 CIparent then
         this_ty
@@ -4761,7 +4662,7 @@ and dispatch_call
         m
         Errors.unify_error
     in
-    let env = check_coroutine_call env tfty in
+    check_disposable_in_return env tfty;
     let (env, (tel, typed_unpack_element, ty)) =
       call
         ~nullsafe
@@ -4792,7 +4693,7 @@ and dispatch_call
   (* Function invocation *)
   | Fun_id x ->
     let (env, fty, tal) = fun_type_of_id env x explicit_targs el in
-    let env = check_coroutine_call env fty in
+    check_disposable_in_return env fty;
     let (env, (tel, typed_unpack_element, ty)) =
       call ~expected p env fty el unpacked_element
     in
@@ -4805,7 +4706,7 @@ and dispatch_call
       ty
   | Id ((_, id) as x) ->
     let (env, fty, tal) = fun_type_of_id env x explicit_targs el in
-    let env = check_coroutine_call env fty in
+    check_disposable_in_return env fty;
     let (env, (tel, typed_unpack_element, ty)) =
       call ~expected p env fty el unpacked_element
     in
@@ -5016,7 +4917,7 @@ and dispatch_call
         fty
         Errors.unify_error
     in
-    let env = check_coroutine_call env fty in
+    check_disposable_in_return env fty;
     let (env, (tel, typed_unpack_element, ty)) =
       call ~expected p env fty el unpacked_element
     in

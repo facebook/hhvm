@@ -2028,24 +2028,6 @@ let interface_use_trait p =
     p
     "Interfaces cannot use traits"
 
-let await_in_coroutine p =
-  add
-    (NastCheck.err_code NastCheck.AwaitInCoroutine)
-    p
-    "`await` is not allowed in coroutines."
-
-let yield_in_coroutine p =
-  add
-    (NastCheck.err_code NastCheck.YieldInCoroutine)
-    p
-    "`yield` is not allowed in coroutines."
-
-let suspend_outside_of_coroutine p =
-  add
-    (NastCheck.err_code NastCheck.SuspendOutsideOfCoroutine)
-    p
-    "`suspend` is only allowed in coroutines."
-
 let suspend_in_finally p =
   add
     (NastCheck.err_code NastCheck.SuspendInFinally)
@@ -2134,12 +2116,6 @@ let illegal_function_name pos mname =
     (NastCheck.err_code NastCheck.IllegalFunctionName)
     pos
     ("Illegal function name: " ^ (strip_ns mname |> Markdown_lite.md_codify))
-
-let inout_params_in_coroutine pos =
-  add
-    (NastCheck.err_code NastCheck.InoutParamsInCoroutine)
-    pos
-    "`inout` parameters cannot be defined on coroutines."
 
 let conflicting_mutable_and_maybe_mutable_attributes pos =
   add
@@ -2276,12 +2252,6 @@ let conditionally_reactive_annotation_invalid_arguments ~is_method pos =
     ^ " is marked with `<<__OnlyRxIfImpl>>` attribute that have "
     ^ "invalid arguments. This attribute must have one argument and it should be the "
     ^ "`::class` class constant." )
-
-let coroutine_in_constructor pos =
-  add
-    (NastCheck.err_code NastCheck.CoroutineInConstructor)
-    pos
-    "A class constructor may not be a coroutine"
 
 let switch_non_terminal_default pos =
   add
@@ -4201,67 +4171,6 @@ let array_get_with_optional_field pos1 pos2 name =
           (Markdown_lite.md_codify name) );
       (pos2, "This is where the field was declared as optional.");
     ]
-
-let non_call_argument_in_suspend pos msgs =
-  add_list
-    (Typing.err_code Typing.NonCallArgumentInSuspend)
-    ( [(pos, "`suspend` operator expects call to a coroutine as an argument.")]
-    @ msgs )
-
-let non_coroutine_call_in_suspend pos msgs =
-  add_list
-    (Typing.err_code Typing.NonCoroutineCallInSuspend)
-    ( [
-        ( pos,
-          "Only coroutine functions are allowed to be called in `suspend` operator."
-        );
-      ]
-    @ msgs )
-
-let coroutine_call_outside_of_suspend pos =
-  add_list
-    (Typing.err_code Typing.CoroutineCallOutsideOfSuspend)
-    [
-      ( pos,
-        "Coroutine calls are only allowed when they are arguments to `suspend` operator"
-      );
-    ]
-
-let function_is_not_coroutine pos name =
-  add_list
-    (Typing.err_code Typing.FunctionIsNotCoroutine)
-    [
-      ( pos,
-        "Function "
-        ^ Markdown_lite.md_codify name
-        ^ " is not a coroutine and cannot be used in as an argument of `suspend` operator."
-      );
-    ]
-
-let coroutinness_mismatch
-    pos1_is_coroutine pos1 pos2 (on_error : typing_error_callback) =
-  let m1 = "This is a coroutine." in
-  let m2 = "This is not a coroutine." in
-  on_error
-    ~code:(Typing.err_code Typing.CoroutinnessMismatch)
-    [
-      ( pos1,
-        if pos1_is_coroutine then
-          m1
-        else
-          m2 );
-      ( pos2,
-        if pos1_is_coroutine then
-          m2
-        else
-          m1 );
-    ]
-
-let coroutine_outside_experimental pos =
-  add
-    (Typing.err_code Typing.CoroutineOutsideExperimental)
-    pos
-    Coroutine_errors.error_message
 
 let return_disposable_mismatch
     pos1_return_disposable pos1 pos2 (on_error : typing_error_callback) =

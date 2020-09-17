@@ -11,13 +11,11 @@ open Hh_prelude
 open Aast
 module SN = Naming_special_names
 
-let check_param _env params p user_attributes f_type name =
+let check_param _env params p user_attributes name =
   List.iter params (fun param ->
       match param.param_callconv with
       | Some Ast_defs.Pinout ->
         let pos = param.param_pos in
-        if Ast_defs.(equal_fun_kind f_type FCoroutine) then
-          Errors.inout_params_in_coroutine pos;
         if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos
       | None -> ());
   let inout =
@@ -70,13 +68,11 @@ let handler =
 
     method! at_fun_ env f =
       let (p, name) = f.f_name in
-      let f_type = f.f_fun_kind in
-      check_param env f.f_params p f.f_user_attributes f_type name
+      check_param env f.f_params p f.f_user_attributes name
 
     method! at_method_ env m =
       let (p, name) = m.m_name in
-      let f_type = m.m_fun_kind in
-      check_param env m.m_params p m.m_user_attributes f_type name
+      check_param env m.m_params p m.m_user_attributes name
 
     method! at_expr _ (_, e) =
       match e with

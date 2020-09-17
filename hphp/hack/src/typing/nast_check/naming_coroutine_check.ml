@@ -11,12 +11,6 @@ open Hh_prelude
 open Aast
 open Nast_check_env
 
-let is_coroutine env =
-  Option.equal
-    Ast_defs.equal_fun_kind
-    env.function_kind
-    (Some Ast_defs.FCoroutine)
-
 let is_generator env =
   let fun_kind = env.function_kind in
   Option.equal Ast_defs.equal_fun_kind fun_kind (Some Ast_defs.FGenerator)
@@ -36,32 +30,18 @@ let handler =
 
     method! at_expr env (p, e) =
       match e with
-      | Yield _
-      | Yield_break ->
-        if is_coroutine env then Errors.yield_in_coroutine p
-      | Await _ ->
-        if is_coroutine env then Errors.await_in_coroutine p;
-        if is_sync env then Errors.await_in_sync_function p
-      | Suspend _ ->
-        if not (is_coroutine env) then
-          Errors.suspend_outside_of_coroutine p
-        else if env.is_finally then
-          Errors.suspend_in_finally p
+      | Await _ when is_sync env -> Errors.await_in_sync_function p
       | _ -> ()
 
-    method! at_stmt env s =
-      match snd s with
-      | Using { us_has_await = has_await; us_expr = e; _ } when has_await ->
-        let p = fst e in
-        if is_coroutine env then Errors.await_in_coroutine p;
-        if is_sync env then Errors.await_in_sync_function p
-      | Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _) ->
-        if is_coroutine env then Errors.await_in_coroutine p;
-        if is_sync env then Errors.await_in_sync_function p
-      | Return (Some _) when is_generator env -> Errors.return_in_gen (fst s)
-      | Awaitall _ ->
-        let p = fst s in
-        if is_coroutine env then Errors.await_in_coroutine p;
-        if is_sync env then Errors.await_in_sync_function p
+    method! at_stmt env =
+      function
+      | (_, Using { us_has_await; us_expr = (p, _); _ })
+        when us_has_await && is_sync env ->
+        Errors.await_in_sync_function p
+      | (_, Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _))
+      | (p, Awaitall _)
+        when is_sync env ->
+        Errors.await_in_sync_function p
+      | (p, Return (Some _)) when is_generator env -> Errors.return_in_gen p
       | _ -> ()
   end

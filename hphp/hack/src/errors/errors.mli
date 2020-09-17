@@ -712,12 +712,6 @@ val continue_in_switch : Pos.t -> unit
 
 val await_in_sync_function : Pos.t -> unit
 
-val await_in_coroutine : Pos.t -> unit
-
-val yield_in_coroutine : Pos.t -> unit
-
-val suspend_outside_of_coroutine : Pos.t -> unit
-
 val suspend_in_finally : Pos.t -> unit
 
 val static_memoized_function : Pos.t -> unit
@@ -1013,19 +1007,6 @@ val reading_from_append : Pos.t -> unit
 
 val nullable_cast : Pos.t -> string -> Pos.t -> unit
 
-val non_call_argument_in_suspend : Pos.t -> (Pos.t * string) list -> unit
-
-val non_coroutine_call_in_suspend : Pos.t -> (Pos.t * string) list -> unit
-
-val coroutine_call_outside_of_suspend : Pos.t -> unit
-
-val function_is_not_coroutine : Pos.t -> string -> unit
-
-val coroutinness_mismatch :
-  bool -> Pos.t -> Pos.t -> typing_error_callback -> unit
-
-val coroutine_outside_experimental : Pos.t -> unit
-
 val return_disposable_mismatch :
   bool -> Pos.t -> Pos.t -> typing_error_callback -> unit
 
@@ -1105,8 +1086,6 @@ val must_extend_disposable : Pos.t -> unit
 val accept_disposable_invariant :
   Pos.t -> Pos.t -> typing_error_callback -> unit
 
-val inout_params_in_coroutine : Pos.t -> unit
-
 val inout_params_special : Pos.t -> unit
 
 val inout_params_memoize : Pos.t -> Pos.t -> unit
@@ -1172,8 +1151,6 @@ val decl_override_missing_hint : Pos.t -> typing_error_callback -> unit
 val atmost_rx_as_rxfunc_invalid_location : Pos.t -> unit
 
 val no_atmost_rx_as_rxfunc_for_rx_if_args : Pos.t -> unit
-
-val coroutine_in_constructor : Pos.t -> unit
 
 val pu_duplication : Pos.t -> string -> string -> string -> unit
 

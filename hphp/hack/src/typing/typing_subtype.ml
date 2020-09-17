@@ -2589,7 +2589,6 @@ and simplify_param_accept_disposable ~subtype_env param1 param2 env =
  *   <<__MutableReturn>> attribute
  *   <<__Rx>> attribute
  *   <<__Mutable>> attribute
- *   whether or not the function is a coroutine
  *   variadic arity
  *)
 and simplify_subtype_funs_attributes
@@ -2618,14 +2617,6 @@ and simplify_subtype_funs_attributes
     p_super
     ft_super.ft_reactive
     env
-  |> check_with
-       (Bool.equal (get_ft_is_coroutine ft_sub) (get_ft_is_coroutine ft_super))
-       (fun () ->
-         Errors.coroutinness_mismatch
-           (get_ft_is_coroutine ft_super)
-           p_super
-           p_sub
-           subtype_env.on_error)
   |> check_with
        (Bool.equal
           (get_ft_return_disposable ft_sub)
@@ -2761,7 +2752,7 @@ and simplify_subtype_funs
     simplify_subtype_possibly_enforced ~subtype_env
   in
   let simplify_subtype_params = simplify_subtype_params ~subtype_env in
-  (* First apply checks on attributes, coroutine-ness and variadic arity *)
+  (* First apply checks on attributes and variadic arity *)
   env
   |> simplify_subtype_funs_attributes
        ~subtype_env

@@ -5009,7 +5009,7 @@ where
         }
     }
 
-    fn check_lvalue(&mut self, allow_reassign: bool, loperand: &'a Syntax<Token, Value>) {
+    fn check_lvalue(&mut self, loperand: &'a Syntax<Token, Value>) {
         let append_errors = |self_: &mut Self, node, error| {
             self_.errors.push(Self::make_error_from_node(node, error))
         };
@@ -5022,14 +5022,14 @@ where
         };
 
         let check_variable = |self_: &mut Self, text| {
-            if !allow_reassign && text == sn::special_idents::THIS {
+            if text == sn::special_idents::THIS {
                 err(self_, errors::reassign_this)
             }
         };
 
         match &loperand.syntax {
             ListExpression(x) => Self::syntax_to_list_no_separators(&x.list_members)
-                .for_each(|n| self.check_lvalue(false, n)),
+                .for_each(|n| self.check_lvalue(n)),
             SafeMemberSelectionExpression(_) => {
                 err(self, errors::not_allowed_in_write("`?->` operator"))
             }
@@ -5054,9 +5054,9 @@ where
                 _ => {}
             },
             ParenthesizedExpression(x) => {
-                self.check_lvalue(allow_reassign, &x.parenthesized_expression_expression)
+                self.check_lvalue(&x.parenthesized_expression_expression)
             }
-            SubscriptExpression(x) => self.check_lvalue(true, &x.subscript_receiver),
+            SubscriptExpression(x) => self.check_lvalue(&x.subscript_receiver),
             LambdaExpression(_)
             | AnonymousFunction(_)
             | AwaitableCreationExpression(_)
@@ -5094,7 +5094,7 @@ where
     fn assignment_errors(&mut self, node: &'a Syntax<Token, Value>) {
         let check_unary_expression = |self_: &mut Self, op, loperand: &'a Syntax<Token, Value>| {
             if Self::does_unop_create_write(Self::token_kind(op)) {
-                self_.check_lvalue(true, loperand)
+                self_.check_lvalue(loperand)
             }
         };
         match &node.syntax {
@@ -5109,21 +5109,21 @@ where
                 if Self::does_decorator_create_write(Self::token_kind(
                     &x.decorated_expression_decorator,
                 )) {
-                    self.check_lvalue(true, &loperand)
+                    self.check_lvalue(&loperand)
                 }
             }
             BinaryExpression(x) => {
                 let loperand = &x.binary_left_operand;
                 if Self::does_binop_create_write_on_left(Self::token_kind(&x.binary_operator)) {
-                    self.check_lvalue(false, &loperand);
+                    self.check_lvalue(&loperand);
                 }
             }
             ForeachStatement(x) => {
-                self.check_lvalue(false, &x.foreach_value);
-                self.check_lvalue(false, &x.foreach_key);
+                self.check_lvalue(&x.foreach_value);
+                self.check_lvalue(&x.foreach_key);
             }
             CatchClause(_) => {
-                self.check_lvalue(false, node);
+                self.check_lvalue(node);
             }
             _ => {}
         }

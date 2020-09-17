@@ -442,7 +442,7 @@ static CallMap s_callMap {
                              DSSA, SNone, {{SSA, 0}}},
     {InterfaceSupportsDbl, IFaceSupportFn{interface_supports_double},
                              DSSA, SNone, {{SSA, 0}}},
-    {OODeclExists, &Unit::classExists, DSSA, SSync,
+    {OODeclExists, &Class::exists, DSSA, SSync,
                      {{SSA, 0}, {SSA, 1}, extra(&ClassKindData::kind)}},
 
     /* is/as expressions */

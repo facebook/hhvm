@@ -923,7 +923,7 @@ SSATmp* meth_caller_get_name(IRGS& env, SSATmp *value) {
       return ret;
     };
 
-    auto const mcCls = Unit::lookupClass(s_meth_caller_cls.get());
+    auto const mcCls = Class::lookup(s_meth_caller_cls.get());
     assertx(mcCls && meth_caller_has_expected_prop(mcCls));
     return cond(
       env,
@@ -1161,7 +1161,7 @@ SSATmp* opt_is_meth_caller(IRGS& env, const ParamPrep& params) {
       value);
   }
   if (value->isA(TObj)) {
-    auto const mcCls = Unit::lookupClass(s_meth_caller_cls.get());
+    auto const mcCls = Class::lookup(s_meth_caller_cls.get());
     assertx(mcCls);
     return gen(env, EqCls, cns(env, mcCls), gen(env, LdObjClass, value));
   }

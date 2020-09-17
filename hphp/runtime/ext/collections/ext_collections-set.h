@@ -355,7 +355,7 @@ struct SetIterator {
   ~SetIterator() {}
 
   static Object newInstance() {
-    static Class* cls = Unit::lookupClass(s_SetIterator.get());
+    static Class* cls = Class::lookup(s_SetIterator.get());
     assertx(cls);
     return Object{cls};
   }

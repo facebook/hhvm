@@ -117,7 +117,7 @@ struct ReflectionClassHandle {
     return *this;
   }
   String init(const String& name) {
-    auto const cls = Unit::loadClass(name.get());
+    auto const cls = Class::load(name.get());
     if (!cls) return empty_string();
     setClass(cls);
     return cls->nameStr();

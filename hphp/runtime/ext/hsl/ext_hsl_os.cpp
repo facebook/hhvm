@@ -1316,7 +1316,7 @@ struct OSExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\fork_and_execve, HSL_os_fork_and_execve);
 
     loadSystemlib();
-    s_FileDescriptorClass = Unit::lookupClass(s_FQHSLFileDescriptor.get());
+    s_FileDescriptorClass = Class::lookup(s_FQHSLFileDescriptor.get());
     assertx(s_FileDescriptorClass);
   }
 

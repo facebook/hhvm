@@ -79,7 +79,7 @@ void profile(const StringData* name) {
 
   assertx(name->isStatic());
   unsigned inc = 1;
-  Class* c = Unit::lookupClass(name);
+  Class* c = Class::lookup(name);
 
   // Don't profile final classes since they can be checked more efficiently via
   // direct pointer comparison through ExtendsClass than via InstanceOfBitmask.
@@ -176,7 +176,7 @@ void init() {
       uint64_t accum = 0;
       for (auto& item : counts) {
         if (i >= kNumInstanceBits) break;
-        auto const cls = Unit::lookupUniqueClassInContext(
+        auto const cls = Class::lookupUniqueInContext(
           item.first, nullptr, nullptr);
         if (cls) {
           assertx(cls->attrs() & AttrUnique);

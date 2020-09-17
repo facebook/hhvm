@@ -52,7 +52,7 @@ void proxySetBreakPoints(DebuggerProxy* proxy) {
     auto className = bp->getClass();
     if (!className.empty()) {
       auto clsName = makeStaticString(className);
-      auto cls = Unit::lookupClass(clsName);
+      auto cls = Class::lookup(clsName);
       if (cls == nullptr) continue;
       bp->m_bindState = BreakPointInfo::KnownToBeInvalid;
       size_t numFuncs = cls->numMethods();
@@ -95,10 +95,10 @@ void proxySetBreakPoints(DebuggerProxy* proxy) {
       continue;
     } else if (!exceptionClassName.empty()) {
       auto expClsName = makeStaticString(exceptionClassName);
-      auto cls = Unit::lookupClass(expClsName);
+      auto cls = Class::lookup(expClsName);
       if (cls != nullptr) {
         static auto baseClsName = makeStaticString("Exception");
-        auto baseCls = Unit::lookupClass(baseClsName);
+        auto baseCls = Class::lookup(baseClsName);
         if (baseCls != nullptr) {
           if (cls->classof(baseCls)) {
             bp->m_bindState = BreakPointInfo::KnownToBeValid;

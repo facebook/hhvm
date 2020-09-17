@@ -263,75 +263,11 @@ inline RecordDesc* Unit::lookupRecordDesc(const StringData* name) {
   return lookupRecordDesc(NamedEntity::get(name));
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Class lookup.
-
-inline Class* Unit::lookupClass(const NamedEntity* ne) {
-  return ne->getCachedClass();
-}
-
-inline Class* Unit::lookupClass(const StringData* name) {
-  return lookupClass(NamedEntity::get(name));
-}
-
 inline const RecordDesc* Unit::lookupUniqueRecDesc(const StringData* name) {
   auto ne = NamedEntity::get(name);
   auto rec = ne->recordList();
   if (LIKELY(rec && (rec->attrs() & AttrUnique))) return rec;
   return nullptr;
-}
-
-inline const Class* Unit::lookupUniqueClassInContext(const NamedEntity* ne,
-                                                     const Class* ctx,
-                                                     const Unit* unit) {
-  Class* cls = ne->clsList();
-  if (UNLIKELY(cls == nullptr)) return nullptr;
-  if (cls->attrs() & AttrUnique) return cls;
-  if (unit && cls->preClass()->unit() == unit) return cls;
-  if (!ctx) return nullptr;
-  return ctx->getClassDependency(cls->name());
-}
-
-inline const Class* Unit::lookupUniqueClassInContext(const StringData* name,
-                                                     const Class* ctx,
-                                                     const Unit* unit) {
-  return lookupUniqueClassInContext(NamedEntity::get(name), ctx, unit);
-}
-
-inline Class* Unit::loadClass(const StringData* name) {
-  if (name->isSymbol()) {
-    if (auto const result = name->getCachedClass()) return result;
-  }
-  auto const orig = name;
-
-  auto const result = [&]() -> Class* {
-    String normStr;
-    auto ne = NamedEntity::get(name, true, &normStr);
-
-    // Try to fetch from cache
-    Class* class_ = ne->getCachedClass();
-    if (LIKELY(class_ != nullptr)) return class_;
-
-    // Normalize the namespace
-    if (normStr) name = normStr.get();
-
-    // Autoload the class
-    return loadClass(ne, name);
-  }();
-
-  if (orig->isSymbol() && result && classHasPersistentRDS(result)) {
-    const_cast<StringData*>(orig)->setCachedClass(result);
-  }
-  return result;
-}
-
-inline Class* Unit::getClass(const StringData* name, bool tryAutoload) {
-  String normStr;
-  auto ne = NamedEntity::get(name, true, &normStr);
-  if (normStr) {
-    name = normStr.get();
-  }
-  return getClass(ne, name, tryAutoload);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

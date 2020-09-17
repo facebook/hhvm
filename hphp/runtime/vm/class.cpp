@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/enum-cache.h"
@@ -25,14 +26,18 @@
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/server/memory-stats.h"
+#include "hphp/runtime/vm/frame-restore.h"
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/memo-cache.h"
+#include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
 #include "hphp/runtime/vm/property-profile.h"
 #include "hphp/runtime/vm/reified-generics.h"
+#include "hphp/runtime/vm/reverse-data-map.h"
 #include "hphp/runtime/vm/trait-method-import-data.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/unit-util.h"
@@ -195,7 +200,7 @@ unsigned loadUsedTraits(PreClass* preClass,
 
   auto const traitsFlattened = !!(preClass->attrs() & AttrNoExpandTrait);
   for (auto const& traitName : preClass->usedTraits()) {
-    Class* classPtr = Unit::loadClass(traitName);
+    Class* classPtr = Class::load(traitName);
     if (classPtr == nullptr) {
       raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
     }
@@ -613,7 +618,7 @@ Class::Avail Class::avail(Class*& parent,
   if (Class *ourParent = m_parent.get()) {
     if (!parent) {
       PreClass *ppcls = ourParent->m_preClass.get();
-      parent = Unit::getClass(ppcls->namedEntity(),
+      parent = Class::get(ppcls->namedEntity(),
                               m_preClass.get()->parent(), tryAutoload);
       if (!parent) {
         parent = ourParent;
@@ -634,7 +639,7 @@ Class::Avail Class::avail(Class*& parent,
     assertx(pdi->isame(di->name()));
 
     PreClass *pint = di->m_preClass.get();
-    Class* interface = Unit::getClass(pint->namedEntity(), pdi,
+    Class* interface = Class::get(pint->namedEntity(), pdi,
                                       tryAutoload);
     if (interface != di) {
       if (interface == nullptr) {
@@ -655,7 +660,7 @@ Class::Avail Class::avail(Class*& parent,
         auto di = m_interfaces[i].get();
 
         PreClass *pint = di->m_preClass.get();
-        Class* interface = Unit::getClass(pint->namedEntity(), pint->name(),
+        Class* interface = Class::get(pint->namedEntity(), pint->name(),
                                           tryAutoload);
         if (interface != di) {
           if (interface == nullptr) {
@@ -674,7 +679,7 @@ Class::Avail Class::avail(Class*& parent,
       auto usedTrait = m_extra->m_usedTraits[i].get();
       const StringData* usedTraitName = m_preClass.get()->usedTraits()[i];
       PreClass* ptrait = usedTrait->m_preClass.get();
-      Class* trait = Unit::getClass(ptrait->namedEntity(), usedTraitName,
+      Class* trait = Class::get(ptrait->namedEntity(), usedTraitName,
                                     tryAutoload);
       if (trait != usedTrait) {
         if (trait == nullptr) {
@@ -3297,7 +3302,7 @@ void Class::checkInterfaceMethods() {
 void Class::addInterfacesFromUsedTraits(InterfaceMap::Builder& builder) const {
 
   for (auto const& traitName : m_preClass->usedTraits()) {
-    auto const trait = Unit::lookupClass(traitName);
+    auto const trait = Class::lookup(traitName);
     assertx(trait->attrs() & AttrTrait);
     int numIfcs = trait->m_interfaces.size();
 
@@ -3327,7 +3332,7 @@ void Class::setInterfaces() {
 
   for (auto it = m_preClass->interfaces().begin();
        it != m_preClass->interfaces().end(); ++it) {
-    auto cp = Unit::loadClass(*it);
+    auto cp = Class::load(*it);
     if (cp == nullptr) {
       raise_error("Undefined interface: %s", (*it)->data());
     }
@@ -3363,7 +3368,7 @@ void Class::setInterfaces() {
         (!(attrs() & AttrInterface) ||
          !m_preClass->name()->isame(s_Stringish.get()))) {
       // Add Stringish
-      Class* stringish = Unit::lookupClass(s_Stringish.get());
+      Class* stringish = Class::lookup(s_Stringish.get());
       assertx(stringish != nullptr);
       assertx((stringish->attrs() & AttrInterface));
       interfacesBuilder.add(stringish->name(), LowPtr<Class>(stringish));
@@ -3371,7 +3376,7 @@ void Class::setInterfaces() {
       if (!m_preClass->name()->isame(s_XHPChild.get()) &&
           !interfacesBuilder.contains(s_XHPChild.get())) {
         // All Stringish are also XHPChild
-        Class* xhpChild = Unit::lookupClass(s_XHPChild.get());
+        Class* xhpChild = Class::lookup(s_XHPChild.get());
         assertx(xhpChild != nullptr);
         assertx((xhpChild->attrs() & AttrInterface));
         interfacesBuilder.add(xhpChild->name(), LowPtr<Class>(xhpChild));
@@ -3487,7 +3492,7 @@ void Class::setRequirements() {
     for (auto const& req : m_preClass->requirements()) {
       assertx(req.is_extends());
       auto const reqName = req.name();
-      auto const reqCls = Unit::lookupClass(reqName);
+      auto const reqCls = Class::lookup(reqName);
       if (reqCls) {
         if (reqCls->attrs() & (AttrTrait | AttrInterface | AttrFinal)) {
           raise_error("Interface '%s' requires extension of '%s', but %s "
@@ -3505,7 +3510,7 @@ void Class::setRequirements() {
     // requirements onto a class's preClass.
     for (auto const& req : m_preClass->requirements()) {
       auto const reqName = req.name();
-      if (auto const reqCls = Unit::lookupClass(reqName)) {
+      if (auto const reqCls = Class::lookup(reqName)) {
         if (req.is_extends()) {
           if (reqCls->attrs() & (AttrTrait | AttrInterface | AttrFinal)) {
             raise_error(Strings::TRAIT_BAD_REQ_EXTENDS,
@@ -3865,7 +3870,7 @@ void Class::checkRequirementConstraints() const {
         raiseUnsatisfiedRequirement(req);
       }
     } else {
-      auto reqExtCls = Unit::lookupClass(reqName);
+      auto reqExtCls = Class::lookup(reqName);
       if (UNLIKELY(
             (reqExtCls == nullptr) ||
             (reqExtCls->attrs() & (AttrTrait | AttrInterface)))) {
@@ -4053,7 +4058,7 @@ struct TMIOps {
 
   static const Class* findTraitClass(const Class* cls,
                                      const StringData* traitName) {
-    auto ret = Unit::loadClass(traitName);
+    auto ret = Class::load(traitName);
     if (!ret) return nullptr;
     auto const& usedTraits = cls->preClass()->usedTraits();
     if (std::find_if(usedTraits.begin(), usedTraits.end(),
@@ -4204,6 +4209,235 @@ void Class::importTraitMethods(MethodMapBuilder& builder) {
   for (auto const& mdata : traitMethods) {
     importTraitMethod(this, mdata, builder);
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Lookup.
+
+namespace {
+
+void setupClass(Class* newClass, NamedEntity* nameList) {
+  bool const isPersistent =
+    (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative) &&
+    newClass->verifyPersistent();
+  nameList->m_cachedClass.bind(
+    isPersistent ? rds::Mode::Persistent : rds::Mode::Normal,
+    rds::LinkName{"NEClass", newClass->name()}
+  );
+
+  if (newClass->isBuiltin()) {
+    assertx(newClass->isUnique());
+    for (auto i = newClass->numMethods(); i--;) {
+      auto const func = newClass->getMethod(i);
+      if (func->isCPPBuiltin() && func->isStatic()) {
+        assertx(func->isUnique());
+        NamedEntity::get(func->fullName())->setUniqueFunc(func);
+      }
+    }
+  }
+
+  newClass->setClassHandle(nameList->m_cachedClass);
+  newClass->incAtomicCount();
+
+  InstanceBits::ifInitElse(
+    [&] { newClass->setInstanceBits();
+          nameList->pushClass(newClass); },
+    [&] { nameList->pushClass(newClass); }
+  );
+
+  if (RuntimeOption::EvalEnableReverseDataMap) {
+    // The corresponding deregister is in NamedEntity::removeClass().
+    data_map::register_start(newClass);
+    for (unsigned i = 0, n = newClass->numMethods(); i < n; i++) {
+      if (auto meth = newClass->getMethod(i)) {
+        if (meth->cls() == newClass) {
+          meth->registerInDataMap();
+        }
+      }
+    }
+  }
+}
+
+}
+
+Class* Class::def(const PreClass* preClass, bool failIsFatal /* = true */) {
+  FTRACE(3, "  Defining cls {} failIsFatal {}\n",
+         preClass->name()->data(), failIsFatal);
+  NamedEntity* const nameList = preClass->namedEntity();
+  Class* top = nameList->clsList();
+
+  /*
+   * Check if there is already a name defined in this request for this
+   * NamedEntity.
+   *
+   * Raise a fatal unless the existing class definition is identical to the
+   * one this invocation would create.
+   */
+  auto existingKind = nameList->checkSameName<PreClass>();
+  if (existingKind) {
+    FrameRestore fr(preClass);
+    raise_error("Cannot declare class with the same name (%s) as an "
+                "existing %s", preClass->name()->data(), existingKind);
+    return nullptr;
+  }
+
+  // If there was already a class declared with DefClass, check if it's
+  // compatible.
+  if (Class* cls = nameList->getCachedClass()) {
+    if (cls->preClass() != preClass) {
+      if (failIsFatal) {
+        FrameRestore fr(preClass);
+        raise_error("Class already declared: %s", preClass->name()->data());
+      }
+      return nullptr;
+    }
+    assertx(!RO::RepoAuthoritative ||
+            (cls->isPersistent() && classHasPersistentRDS(cls)));
+    return cls;
+  }
+
+  // Get a compatible Class, and add it to the list of defined classes.
+  Class* parent = nullptr;
+  for (;;) {
+    // Search for a compatible extant class.  Searching from most to least
+    // recently created may have better locality than alternative search orders.
+    // In addition, its the only simple way to make this work lock free...
+    for (Class* class_ = top; class_ != nullptr; ) {
+      Class* cur = class_;
+      class_ = class_->m_next;
+      if (cur->preClass() != preClass) continue;
+      Class::Avail avail = cur->avail(parent, failIsFatal /*tryAutoload*/);
+      if (LIKELY(avail == Class::Avail::True)) {
+        cur->setCached();
+        DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(cur));
+        assertx(!RO::RepoAuthoritative ||
+                (cur->isPersistent() && classHasPersistentRDS(cur)));
+        return cur;
+      }
+      if (avail == Class::Avail::Fail) {
+        if (failIsFatal) {
+          FrameRestore fr(preClass);
+          raise_error("unknown class %s", parent->name()->data());
+        }
+        return nullptr;
+      }
+      assertx(avail == Class::Avail::False);
+    }
+
+    if (!parent && preClass->parent()->size() != 0) {
+      parent = Class::get(preClass->parent(), failIsFatal);
+      if (parent == nullptr) {
+        if (failIsFatal) {
+          FrameRestore fr(preClass);
+          raise_error("unknown class %s", preClass->parent()->data());
+        }
+        return nullptr;
+      }
+    }
+
+    if (!failIsFatal) {
+      // Check interfaces
+      for (auto it = preClass->interfaces().begin();
+                 it != preClass->interfaces().end(); ++it) {
+        if (!Class::get(*it, false)) return nullptr;
+      }
+      // traits
+      for (auto const& traitName : preClass->usedTraits()) {
+        if (!Class::get(traitName, false)) return nullptr;
+      }
+      // enum
+      if (preClass->attrs() & AttrEnum) {
+        auto const enumBaseTy =
+          preClass->enumBaseTy().underlyingDataTypeResolved();
+        if (!enumBaseTy ||
+            (!isIntType(*enumBaseTy) && !isStringType(*enumBaseTy))) {
+          return nullptr;
+        }
+      }
+    }
+
+    // Create a new class.
+    ClassPtr newClass;
+    {
+      FrameRestore fr(preClass);
+      newClass = Class::newClass(const_cast<PreClass*>(preClass), parent);
+    }
+    Lock l(g_classesMutex);
+
+    if (UNLIKELY(top != nameList->clsList())) {
+      top = nameList->clsList();
+      continue;
+    }
+
+    setupClass(newClass.get(), nameList);
+
+    /*
+     * call setCached after adding to the class list, otherwise the
+     * target-cache short circuit at the top could return a class
+     * which is not yet on the clsList().
+     */
+    newClass.get()->setCached();
+    DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(newClass.get()));
+    assertx(!RO::RepoAuthoritative ||
+            (newClass.get()->isPersistent() &&
+             classHasPersistentRDS(newClass.get())));
+    return newClass.get();
+  }
+}
+
+Class* Class::defClosure(const PreClass* preClass) {
+  auto const nameList = preClass->namedEntity();
+
+  if (nameList->clsList()) return nameList->clsList();
+
+  auto const parent = c_Closure::classof();
+
+  assertx(preClass->parent() == parent->name());
+  // Create a new class.
+
+  ClassPtr newClass {
+    Class::newClass(const_cast<PreClass*>(preClass), parent)
+  };
+
+  Lock l(g_classesMutex);
+
+  if (UNLIKELY(nameList->clsList() != nullptr)) return nameList->clsList();
+
+  setupClass(newClass.get(), nameList);
+
+  if (classHasPersistentRDS(newClass.get())) newClass.get()->setCached();
+  return newClass.get();
+}
+
+Class* Class::load(const NamedEntity* ne, const StringData* name) {
+  Class* cls;
+  if (LIKELY((cls = ne->getCachedClass()) != nullptr)) {
+    return cls;
+  }
+  return loadMissing(ne, name);
+}
+
+Class* Class::loadMissing(const NamedEntity* ne, const StringData* name) {
+  VMRegAnchor _;
+  AutoloadHandler::s_instance->autoloadClass(
+    StrNR(const_cast<StringData*>(name)));
+  return Class::lookup(ne);
+}
+
+Class* Class::get(const NamedEntity* ne, const StringData *name, bool tryAutoload) {
+  Class *cls = lookup(ne);
+  if (UNLIKELY(!cls)) {
+    if (tryAutoload) {
+      return loadMissing(ne, name);
+    }
+  }
+  return cls;
+}
+
+bool Class::exists(const StringData* name, bool autoload, ClassKind kind) {
+  Class* cls = Class::get(name, autoload);
+  return cls &&
+    (cls->attrs() & (AttrInterface | AttrTrait)) == classKindAsAttr(kind);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

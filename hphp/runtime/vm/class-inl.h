@@ -700,5 +700,70 @@ inline const StringData* classToStringHelper(const Class* cls) {
  }
  return cls->name();
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Lookup.
+
+inline Class* Class::lookup(const NamedEntity* ne) {
+  return ne->getCachedClass();
+}
+
+inline Class* Class::lookup(const StringData* name) {
+  return lookup(NamedEntity::get(name));
+}
+
+inline const Class* Class::lookupUniqueInContext(const NamedEntity* ne,
+                                                 const Class* ctx,
+                                                 const Unit* unit) {
+  Class* cls = ne->clsList();
+  if (UNLIKELY(cls == nullptr)) return nullptr;
+  if (cls->attrs() & AttrUnique) return cls;
+  if (unit && cls->preClass()->unit() == unit) return cls;
+  if (!ctx) return nullptr;
+  return ctx->getClassDependency(cls->name());
+}
+
+inline const Class* Class::lookupUniqueInContext(const StringData* name,
+                                                 const Class* ctx,
+                                                 const Unit* unit) {
+  return lookupUniqueInContext(NamedEntity::get(name), ctx, unit);
+}
+
+inline Class* Class::load(const StringData* name) {
+  if (name->isSymbol()) {
+    if (auto const result = name->getCachedClass()) return result;
+  }
+  auto const orig = name;
+
+  auto const result = [&]() -> Class* {
+    String normStr;
+    auto ne = NamedEntity::get(name, true, &normStr);
+
+    // Try to fetch from cache
+    Class* class_ = ne->getCachedClass();
+    if (LIKELY(class_ != nullptr)) return class_;
+
+    // Normalize the namespace
+    if (normStr) name = normStr.get();
+
+    // Autoload the class
+    return load(ne, name);
+  }();
+
+  if (orig->isSymbol() && result && classHasPersistentRDS(result)) {
+    const_cast<StringData*>(orig)->setCachedClass(result);
+  }
+  return result;
+}
+
+inline Class* Class::get(const StringData* name, bool tryAutoload) {
+  String normStr;
+  auto ne = NamedEntity::get(name, true, &normStr);
+  if (normStr) {
+    name = normStr.get();
+  }
+  return get(ne, name, tryAutoload);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -641,7 +641,7 @@ inline const Class* lookupUniqueClass(IRGS& env,
                                       bool trustUnit = false) {
   // TODO: Once top level code is entirely dead it should be safe to always
   // trust the unit.
-  return Unit::lookupUniqueClassInContext(
+  return Class::lookupUniqueInContext(
     name, curClass(env), trustUnit ? curUnit(env) : nullptr);
 }
 

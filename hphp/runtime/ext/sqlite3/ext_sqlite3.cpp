@@ -38,7 +38,7 @@ namespace HPHP {
 #define IMPLEMENT_GET_CLASS(cls)                                               \
   Class *cls::getClass() {                                                     \
     if (s_class == nullptr) {                                                  \
-      s_class = Unit::lookupClass(s_className.get());                          \
+      s_class = Class::lookup(s_className.get());                          \
       assertx(s_class);                                                        \
     }                                                                          \
     return s_class;                                                            \

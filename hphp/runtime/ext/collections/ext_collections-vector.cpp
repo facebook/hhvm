@@ -708,11 +708,11 @@ void CollectionsExtension::initVector() {
 
   loadSystemlib("collections-vector");
 
-  c_Vector::s_cls = Unit::lookupClass(s_HH_Vector.get());
+  c_Vector::s_cls = Class::lookup(s_HH_Vector.get());
   assertx(c_Vector::s_cls);
   finishClass<c_Vector>();
 
-  c_ImmVector::s_cls = Unit::lookupClass(s_HH_ImmVector.get());
+  c_ImmVector::s_cls = Class::lookup(s_HH_ImmVector.get());
   assertx(c_ImmVector::s_cls);
   finishClass<c_ImmVector>();
 }

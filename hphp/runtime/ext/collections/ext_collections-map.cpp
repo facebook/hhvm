@@ -787,11 +787,11 @@ void CollectionsExtension::initMap() {
 
   loadSystemlib("collections-map");
 
-  c_Map::s_cls = Unit::lookupClass(s_HH_Map.get());
+  c_Map::s_cls = Class::lookup(s_HH_Map.get());
   assertx(c_Map::s_cls);
   finishClass<c_Map>();
 
-  c_ImmMap::s_cls = Unit::lookupClass(s_HH_ImmMap.get());
+  c_ImmMap::s_cls = Class::lookup(s_HH_ImmMap.get());
   assertx(c_ImmMap::s_cls);
   finishClass<c_ImmMap>();
 }

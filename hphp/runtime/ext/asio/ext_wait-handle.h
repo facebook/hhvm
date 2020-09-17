@@ -70,7 +70,7 @@ struct c_ExternalThreadEventWaitHandle;
 
 #define WAITHANDLE_CLASSOF(cn) \
   static Class* classof() { \
-    static Class* cls = Unit::lookupClass(makeStaticString("HH\\" #cn)); \
+    static Class* cls = Class::lookup(makeStaticString("HH\\" #cn)); \
     return cls; \
   }
 

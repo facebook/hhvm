@@ -43,7 +43,7 @@ struct IntlBreakIterator : IntlError {
 
   static Object newInstance(icu::BreakIterator* bi = nullptr) {
     if (!c_IntlBreakIterator) {
-      c_IntlBreakIterator = Unit::lookupClass(s_IntlBreakIterator.get());
+      c_IntlBreakIterator = Class::lookup(s_IntlBreakIterator.get());
       assertx(c_IntlBreakIterator);
     }
     Object obj{c_IntlBreakIterator};
@@ -56,7 +56,7 @@ struct IntlBreakIterator : IntlError {
   static Object newCodePointInstance(CodePointBreakIterator* bi = nullptr) {
     if (!c_IntlCodePointBreakIterator) {
       c_IntlCodePointBreakIterator =
-        Unit::lookupClass(s_IntlCodePointBreakIterator.get());
+        Class::lookup(s_IntlCodePointBreakIterator.get());
       assertx(c_IntlCodePointBreakIterator);
     }
     Object obj{c_IntlCodePointBreakIterator};

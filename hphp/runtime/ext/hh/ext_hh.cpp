@@ -559,7 +559,7 @@ bool HHVM_FUNCTION(clear_static_memoization,
   };
 
   if (isStringType(clsStr.m_type)) {
-    auto const cls = Unit::loadClass(clsStr.m_data.pstr);
+    auto const cls = Class::load(clsStr.m_data.pstr);
     if (!cls) return false;
     if (isStringType(funcStr.m_type)) {
       auto const func = cls->lookupMethod(funcStr.m_data.pstr);
@@ -617,7 +617,7 @@ bool HHVM_FUNCTION(clear_lsb_memoization,
     return true;
   };
 
-  auto const cls = Unit::loadClass(clsStr.get());
+  auto const cls = Class::load(clsStr.get());
   if (!cls) return false;
 
   if (isStringType(funcStr.m_type)) {
@@ -843,7 +843,7 @@ TypedValue dynamicFun(const StringData* fun) {
 
 template <DynamicAttr DA = DynamicAttr::Require, bool checkVis = true>
 TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth) {
-  auto const c = Unit::loadClass(cls);
+  auto const c = Class::load(cls);
   if (!c) {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat("Unable to find class {}", cls->data())

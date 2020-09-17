@@ -265,7 +265,7 @@ DEBUG_ONLY bool throwable_has_expected_props() {
   // to know.
   auto const isException = [&](const TypeConstraint& tc) {
     if (!tc.isObject()) return false;
-    auto const cls = Unit::lookupClass(tc.namedEntity());
+    auto const cls = Class::lookup(tc.namedEntity());
     return cls && cls == SystemLib::s_ExceptionClass;
   };
 

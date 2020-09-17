@@ -186,7 +186,7 @@ struct GeneratorExtension final : Extension {
       Generator::s_className.get(),
       Native::NDIFlags::NO_SWEEP | Native::NDIFlags::CTOR_THROWS);
     loadSystemlib("generator");
-    Generator::s_class = Unit::lookupClass(Generator::s_className.get());
+    Generator::s_class = Class::lookup(Generator::s_className.get());
     assertx(Generator::s_class);
   }
 };

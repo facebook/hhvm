@@ -471,7 +471,7 @@ std::string resolveContextMsg(const TSCtx& ctx) {
 /* returns the unresolved TypeStructure; if aliasName is not an alias,
  * return an empty Array. */
 Array getAlias(TSEnv& env, const String& aliasName) {
-  if (aliasName.same(s_this) || Unit::lookupClass(aliasName.get())) {
+  if (aliasName.same(s_this) || Class::lookup(aliasName.get())) {
     return Array::CreateDArray();
   }
 
@@ -536,8 +536,8 @@ const Class* getClass(TSEnv& env, const TSCtx& ctx, const String& clsName) {
     ts = getAlias(env, name);
   }
 
-  auto const cls = env.allow_partial ? Unit::lookupClass(name.get())
-                                     : Unit::loadClass(name.get());
+  auto const cls = env.allow_partial ? Class::lookup(name.get())
+                                     : Class::load(name.get());
   if (!cls) {
     env.partial = true;
     if (env.allow_partial) return nullptr;

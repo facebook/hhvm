@@ -101,7 +101,7 @@ Variant HHVM_FUNCTION(class_implements, const Variant& obj,
                                         bool autoload /* = true */) {
   Class* cls;
   if (obj.isString()) {
-    cls = Unit::getClass(obj.getStringData(), autoload);
+    cls = Class::get(obj.getStringData(), autoload);
     if (!cls) {
       String err = "class_implements(): Class %s does not exist";
       if (autoload) {
@@ -129,7 +129,7 @@ Variant HHVM_FUNCTION(class_parents, const Variant& obj,
                                      bool autoload /* = true */) {
   Class* cls;
   if (obj.isString()) {
-    cls = Unit::getClass(obj.getStringData(), autoload);
+    cls = Class::get(obj.getStringData(), autoload);
     if (!cls) {
       String err = "class_parents(): Class %s does not exist";
       if (autoload) {
@@ -155,7 +155,7 @@ Variant HHVM_FUNCTION(class_uses, const Variant& obj,
                                   bool autoload /* = true */) {
   Class* cls;
   if (obj.isString()) {
-    cls = Unit::getClass(obj.getStringData(), autoload);
+    cls = Class::get(obj.getStringData(), autoload);
     if (!cls) {
       String err = "class_uses(): Class %s does not exist";
       if (autoload) {
@@ -244,7 +244,7 @@ struct SPLExtension final : Extension {
 
     loadSystemlib();
 
-    s_DirectoryIterator_class = Unit::lookupClass(s_DirectoryIterator.get());
+    s_DirectoryIterator_class = Class::lookup(s_DirectoryIterator.get());
     assertx(s_DirectoryIterator_class);
   }
 } s_SPL_extension;

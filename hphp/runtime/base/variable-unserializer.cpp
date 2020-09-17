@@ -623,7 +623,7 @@ void VariableUnserializer::unserializeRemainingProps(
       String k(kdata + subLen, ksize - subLen, CopyString);
       Class* ctx = (Class*)-1;
       if (kdata[1] != '*') {
-        ctx = Unit::lookupClass(
+        ctx = Class::lookup(
           String(kdata + 1, subLen - 2, CopyString).get());
       }
       unserializeProp(obj.get(), k, ctx, key,
@@ -685,7 +685,7 @@ const StringData* getAlternateCollectionName(const StringData* clsName) {
 
 Class* tryAlternateCollectionClass(const StringData* clsName) {
   auto altName = getAlternateCollectionName(clsName);
-  return altName ? Unit::getClass(altName, /* autoload */ false) : nullptr;
+  return altName ? Class::get(altName, /* autoload */ false) : nullptr;
 }
 
 /*
@@ -948,7 +948,7 @@ void VariableUnserializer::unserializeVariant(
             // In order to support the legacy {O|V}:{Set|Vector|Map}
             // serialization, we defer autoloading until we know that there's
             // no alternate (builtin) collection class.
-            cls = Unit::getClass(clsName.get(), /* autoload */ false);
+            cls = Class::get(clsName.get(), /* autoload */ false);
             if (!cls) {
               cls = tryAlternateCollectionClass(clsName.get());
             }
@@ -959,12 +959,12 @@ void VariableUnserializer::unserializeVariant(
             if (!is_valid_class_name(clsName.slice())) {
               throwInvalidClassName();
             }
-            cls = Unit::loadClass(clsName.get()); // with autoloading
+            cls = Class::load(clsName.get()); // with autoloading
           }
         }
       } else {
         // Collections are CPP builtins; don't attempt to autoload
-        cls = Unit::getClass(clsName.get(), /* autoload */ false);
+        cls = Class::get(clsName.get(), /* autoload */ false);
         if (!cls) {
           cls = tryAlternateCollectionClass(clsName.get());
         }
@@ -1161,12 +1161,12 @@ void VariableUnserializer::unserializeVariant(
       auto obj = [&]() -> Object {
         if (whitelistCheck(clsName)) {
           // Try loading without the autoloader first
-          auto cls = Unit::getClass(clsName.get(), /* autoload */ false);
+          auto cls = Class::get(clsName.get(), /* autoload */ false);
           if (!cls) {
             if (!is_valid_class_name(clsName.slice())) {
               throwInvalidClassName();
             }
-            cls = Unit::loadClass(clsName.get());
+            cls = Class::load(clsName.get());
           }
           if (cls) {
             return Object::attach(g_context->createObject(cls, init_null_variant,

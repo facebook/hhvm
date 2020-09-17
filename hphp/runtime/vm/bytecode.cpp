@@ -1136,7 +1136,7 @@ static inline Class* lookupClsRef(TypedValue* input) {
   if (isStringType(input->m_type) || isLazyClassType(input->m_type)) {
     auto const cname = isStringType(input->m_type) ?
       input->m_data.pstr : input->m_data.plazyclass.name();
-    class_ = Unit::loadClass(cname);
+    class_ = Class::load(cname);
     if (class_ == nullptr) {
       raise_error(Strings::UNKNOWN_CLASS, cname->data());
     }
@@ -2479,7 +2479,7 @@ OPTBLD_INLINE void iopRaiseClassStringConversionWarning() {
 
 OPTBLD_INLINE void iopResolveClass(Id id) {
   auto const cname = vmfp()->unit()->lookupLitstrId(id);
-  auto const class_ = Unit::loadClass(cname);
+  auto const class_ = Class::load(cname);
   // TODO (T61651936): Disallow implicit conversion to string
   if (class_ == nullptr) {
     if (RuntimeOption::EvalRaiseClassConversionWarning) {
@@ -2530,7 +2530,7 @@ OPTBLD_INLINE void iopClassGetTS() {
     reified_types->incRefCount();
     reified_types = addToReifiedGenericsTable(mangledTypeName, reified_types);
   }
-  auto const cls = Unit::loadClass(name);
+  auto const cls = Class::load(name);
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, name->data());
   }
@@ -4011,7 +4011,7 @@ void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
   auto cls = obj->getVMClass();
   auto const ctx = [&] {
     if (!fca.context) return arGetContextClass(vmfp());
-    return Unit::loadClass(fca.context);
+    return Class::load(fca.context);
   }();
   // if lookup throws, obj will be decref'd via stack
   res = lookupObjMethod(func, cls, methName, ctx, true);
@@ -4217,7 +4217,7 @@ OPTBLD_INLINE void iopResolveClsMethod(const StringData* methName) {
 OPTBLD_INLINE void iopResolveClsMethodD(Id classId,
                                         const StringData* methName) {
   auto const nep = vmfp()->func()->unit()->lookupNamedEntityPairId(classId);
-  auto cls = Unit::loadClass(nep.second, nep.first);
+  auto cls = Class::load(nep.second, nep.first);
   if (UNLIKELY(cls == nullptr)) {
     raise_error("Failure to resolve class name \'%s\'", nep.first->data());
   }
@@ -4270,7 +4270,7 @@ OPTBLD_INLINE void iopResolveRClsMethod(const StringData* methName) {
 OPTBLD_INLINE void iopResolveRClsMethodD(Id classId,
                                          const StringData* methName) {
   auto const nep = vmfp()->func()->unit()->lookupNamedEntityPairId(classId);
-  auto cls = Unit::loadClass(nep.second, nep.first);
+  auto cls = Class::load(nep.second, nep.first);
   if (UNLIKELY(cls == nullptr)) {
     raise_error("Failure to resolve class name \'%s\'", nep.first->data());
   }
@@ -4290,7 +4290,7 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
                         bool logAsDynamicCall = true) {
   auto const ctx = [&] {
     if (!fca.context) return liveClass();
-    return Unit::loadClass(fca.context);
+    return Class::load(fca.context);
   }();
   auto obj = liveClass() && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
   const Func* func;
@@ -4361,7 +4361,7 @@ iopFCallClsMethodD(PC origpc, PC& pc, FCallArgs fca, const StringData*,
                    Id classId, const StringData* methName) {
   const NamedEntityPair &nep =
     vmfp()->func()->unit()->lookupNamedEntityPairId(classId);
-  Class* cls = Unit::loadClass(nep.second, nep.first);
+  Class* cls = Class::load(nep.second, nep.first);
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, nep.first->data());
   }
@@ -4409,7 +4409,7 @@ ObjectData* newObjImpl(Class* cls, ArrayData* reified_types) {
 void newObjDImpl(Id id, ArrayData* reified_types) {
   const NamedEntityPair &nep =
     vmfp()->func()->unit()->lookupNamedEntityPairId(id);
-  auto cls = Unit::loadClass(nep.second, nep.first);
+  auto cls = Class::load(nep.second, nep.first);
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS,
                 vmfp()->func()->unit()->lookupLitstrId(id)->data());
@@ -4974,7 +4974,7 @@ OPTBLD_INLINE void iopParent() {
 OPTBLD_INLINE void iopCreateCl(uint32_t numArgs, uint32_t clsIx) {
   auto const func = vmfp()->func();
   auto const preCls = func->unit()->lookupPreClassId(clsIx);
-  auto const c = Unit::defClosure(preCls);
+  auto const c = Class::defClosure(preCls);
 
   auto const cls = c->rescope(const_cast<Class*>(func->cls()));
   assertx(!cls->needInitialization());
@@ -5427,7 +5427,7 @@ OPTBLD_INLINE void iopOODeclExists(OODeclExistsOp subop) {
     case OODeclExistsOp::Trait : kind = ClassKind::Trait; break;
     case OODeclExistsOp::Interface : kind = ClassKind::Interface; break;
   }
-  tvAsVariant(name) = Unit::classExists(name->m_data.pstr, autoload, kind);
+  tvAsVariant(name) = Class::exists(name->m_data.pstr, autoload, kind);
 }
 
 OPTBLD_INLINE void iopSilence(tv_lval loc, SilenceOp subop) {

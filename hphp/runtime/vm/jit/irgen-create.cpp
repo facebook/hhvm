@@ -348,7 +348,7 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
  */
 void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
   auto const preCls = curFunc(env)->unit()->lookupPreClassId(clsIx);
-  auto cls = Unit::defClosure(preCls);
+  auto cls = Class::defClosure(preCls);
 
   assertx(cls);
   assertx(cls->attrs() & AttrUnique);

@@ -774,7 +774,7 @@ folly::Optional<Type> const_fold(ISS& env,
   Class* cls = nullptr;
   auto const func = [&] () -> HPHP::Func* {
     if (phpFunc.cls) {
-      cls = Unit::lookupClass(phpFunc.cls->name);
+      cls = Class::lookup(phpFunc.cls->name);
       if (!cls || !(cls->attrs() & AttrBuiltin)) return nullptr;
       auto const f = cls->lookupMethod(phpFunc.name);
       if (!f->isStatic()) return nullptr;

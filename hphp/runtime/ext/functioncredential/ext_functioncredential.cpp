@@ -49,7 +49,7 @@ const FunctionCredential* FunctionCredential::fromObject(
 // static
 Class* FunctionCredential::classof() {
   static Class* cls_FunctionCredential =
-      Unit::lookupClass(s_FunctionCredential.get());
+      Class::lookup(s_FunctionCredential.get());
   assertx(cls_FunctionCredential);
   return cls_FunctionCredential;
 }

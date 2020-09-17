@@ -288,7 +288,7 @@ Class* vm_decode_class_from_name(
                       "is undefined", clsName.data(), funcName.data());
       }
     }
-    cls = Unit::loadClass(clsName.get());
+    cls = Class::load(clsName.get());
   }
   return cls;
 }
@@ -417,7 +417,7 @@ bool checkMethCallerTarget(const Func* meth, const Class* ctx, bool error) {
 }
 
 void checkMethCaller(const Func* func, const Class* ctx) {
-  auto const cls = Unit::loadClass(func->methCallerClsName());
+  auto const cls = Class::load(func->methCallerClsName());
   if (!cls) {
     SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
       "meth_caller(): class {} not found", func->methCallerClsName()->data()
@@ -579,7 +579,7 @@ vm_decode_function(const_variant_ref function,
           }
         }
       } else {
-        cc = Unit::loadClass(c.get());
+        cc = Class::load(c.get());
       }
       if (!cc) {
         if (flags == DecodeFlags::Warn) {
@@ -687,7 +687,7 @@ invoke(const String& function, const Variant& params,
 
 Variant invoke_static_method(const String& s, const String& method,
                              const Variant& params, bool fatal /* = true */) {
-  HPHP::Class* class_ = Unit::lookupClass(s.get());
+  HPHP::Class* class_ = Class::lookup(s.get());
   if (class_ == nullptr) {
     o_invoke_failed(s.data(), method.data(), fatal);
     return uninit_null();

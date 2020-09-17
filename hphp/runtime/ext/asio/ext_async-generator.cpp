@@ -139,7 +139,7 @@ void AsioExtension::initAsyncGenerator() {
   );
   loadSystemlib("async-generator");
   AsyncGenerator::s_class =
-    Unit::lookupClass(AsyncGenerator::s_className.get());
+    Class::lookup(AsyncGenerator::s_className.get());
   assertx(AsyncGenerator::s_class);
 }
 

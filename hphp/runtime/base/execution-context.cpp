@@ -1058,7 +1058,7 @@ TypedValue ExecutionContext::lookupClsCns(const NamedEntity* ne,
                                       const StringData* cns) {
   Class* class_ = nullptr;
   try {
-    class_ = Unit::loadClass(ne, cls);
+    class_ = Class::load(ne, cls);
   } catch (Object& ex) {
     // For compatibility with php, throwing through a constant lookup has
     // different behavior inside a property initializer (86pinit/86sinit).
@@ -1080,7 +1080,7 @@ TypedValue ExecutionContext::lookupClsCns(const NamedEntity* ne,
 }
 
 static Class* loadClass(StringData* clsName) {
-  Class* class_ = Unit::loadClass(clsName);
+  Class* class_ = Class::load(clsName);
   if (class_ == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, clsName->data());
   }
@@ -2011,7 +2011,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
 
     enum VarAction { StoreFrame, StoreEnv };
 
-    auto const uninit_cls = Unit::loadClass(s_uninitClsName.get());
+    auto const uninit_cls = Class::load(s_uninitClsName.get());
 
     auto& env = m_debuggerEnv;
 

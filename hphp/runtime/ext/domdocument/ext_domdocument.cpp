@@ -66,7 +66,7 @@ extern xmlNodePtr SimpleXMLElement_exportNode(const Object& sxe);
 
 #define IMPLEMENT_GET_CLASS_FUNCTION(CLASS)                                    \
 Class* get ## CLASS ## Class() {                                               \
-  static Class* cls = Unit::lookupClass(s_ ## CLASS.get());                    \
+  static Class* cls = Class::lookup(s_ ## CLASS.get());                    \
   assertx(cls);                                                                \
   return cls;                                                                  \
 }                                                                              \

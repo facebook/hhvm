@@ -661,11 +661,11 @@ void CollectionsExtension::initSet() {
 
   loadSystemlib("collections-set");
 
-  c_Set::s_cls = Unit::lookupClass(s_HH_Set.get());
+  c_Set::s_cls = Class::lookup(s_HH_Set.get());
   assertx(c_Set::s_cls);
   finishClass<c_Set>();
 
-  c_ImmSet::s_cls = Unit::lookupClass(s_HH_ImmSet.get());
+  c_ImmSet::s_cls = Class::lookup(s_HH_ImmSet.get());
   assertx(c_ImmSet::s_cls);
   finishClass<c_ImmSet>();
 }

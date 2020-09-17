@@ -46,17 +46,17 @@ const StaticString
   s_SimpleXMLIterator("SimpleXMLIterator");
 
 const Class* SimpleXMLElement_classof() {
-  static auto cls = Unit::lookupClass(s_SimpleXMLElement.get());
+  static auto cls = Class::lookup(s_SimpleXMLElement.get());
   return cls;
 }
 
 const Class* SimpleXMLElementIterator_classof() {
-  static auto cls = Unit::lookupClass(s_SimpleXMLElementIterator.get());
+  static auto cls = Class::lookup(s_SimpleXMLElementIterator.get());
   return cls;
 }
 
 const Class* SimpleXMLIterator_classof() {
-  static auto cls = Unit::lookupClass(s_SimpleXMLIterator.get());
+  static auto cls = Class::lookup(s_SimpleXMLIterator.get());
   return cls;
 }
 
@@ -1148,7 +1148,7 @@ static const Class* class_from_name(const String& class_name,
                                     const char* callee) {
   const Class* cls;
   if (!class_name.empty()) {
-    cls = Unit::loadClass(class_name.get());
+    cls = Class::load(class_name.get());
     if (!cls) {
       raise_invalid_argument_warning("class not found: %s", class_name.data());
       return nullptr;

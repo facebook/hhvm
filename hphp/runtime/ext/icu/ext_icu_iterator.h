@@ -50,7 +50,7 @@ struct IntlIterator : IntlError {
 
   static Object newInstance(icu::StringEnumeration *se = nullptr) {
     if (!c_IntlIterator) {
-      c_IntlIterator = Unit::lookupClass(s_IntlIterator.get());
+      c_IntlIterator = Class::lookup(s_IntlIterator.get());
       assertx(c_IntlIterator);
     }
     Object obj{c_IntlIterator};

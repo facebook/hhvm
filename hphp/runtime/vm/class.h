@@ -96,6 +96,18 @@ enum class ClsCnsLookup {
   IncludeTypesPartial
 };
 
+/*
+ * Class kinds---classes, interfaces, traits, and enums.
+ *
+ * "Normal class" refers to any classes that are not interfaces, traits, enums.
+ */
+enum class ClassKind {
+  Class = AttrNone,
+  Interface = AttrInterface,
+  Trait = AttrTrait,
+  Enum = AttrEnum
+};
+
 using ClassPtr = AtomicSharedLowPtr<Class>;
 
 // Since native instance dtors can be release functions, they have to have
@@ -1332,6 +1344,80 @@ public:
   }
 
   /////////////////////////////////////////////////////////////////////////////
+  // Lookup.                                                           [static]
+
+  /*
+   * Define a new Class from `preClass' for this request.
+   *
+   * Raises a fatal error in various conditions (e.g., Class already defined,
+   * parent Class not defined, etc.) if `failIsFatal' is set).
+   *
+   * Also always fatals if a type alias already exists in this request with the
+   * same name as that of `preClass', regardless of the value of `failIsFatal'.
+   */
+  static Class* def(const PreClass* preClass, bool failIsFatal = true);
+
+  /*
+   * Define a closure from preClass. Closures have unique names, so unlike
+   * defClass, this is a one time operation.
+   */
+  static Class* defClosure(const PreClass* preClass);
+
+  /*
+   * Look up the Class in this request with name `name', or with the name
+   * mapped to the NamedEntity `ne'.
+   *
+   * Return nullptr if the class is not yet defined in this request.
+   */
+  static Class* lookup(const NamedEntity* ne);
+  static Class* lookup(const StringData* name);
+
+  /*
+   * Finds a class which is guaranteed to be unique in the specified
+   * context. The class has not necessarily been loaded in the
+   * current request.
+   *
+   * Return nullptr if there is no such class.
+   */
+  static const Class* lookupUniqueInContext(const NamedEntity* ne,
+                                            const Class* ctx,
+                                            const Unit* unit);
+  static const Class* lookupUniqueInContext(const StringData* name,
+                                            const Class* ctx,
+                                            const Unit* unit);
+
+  /*
+   * Look up, or autoload and define, the Class in this request with name
+   * `name', or with the name mapped to the NamedEntity `ne'.
+   *
+   * @requires: NamedEntity::get(name) == ne
+   */
+  static Class* load(const NamedEntity* ne, const StringData* name);
+  static Class* load(const StringData* name);
+
+  /*
+   * Autoload the Class with name `name' and bind it `ne' in this request.
+   *
+   * @requires: NamedEntity::get(name) == ne
+   */
+  static Class* loadMissing(const NamedEntity* ne, const StringData* name);
+
+  /*
+   * Same as lookupClass(), but if `tryAutoload' is set, call and return
+   * loadMissingClass().
+   */
+  static Class* get(const NamedEntity* ne, const StringData* name,
+                    bool tryAutoload);
+  static Class* get(const StringData* name, bool tryAutoload);
+
+  /*
+   * Whether a Class with name `name' of type `kind' has been defined in this
+   * request, autoloading it if `autoload' is set.
+   */
+  static bool exists(const StringData* name,
+                          bool autoload, ClassKind kind);
+
+  /////////////////////////////////////////////////////////////////////////////
   // ExtraData.
 
 private:
@@ -1792,18 +1878,6 @@ private:
 extern Mutex g_classesMutex;
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Class kinds---classes, interfaces, traits, and enums.
- *
- * "Normal class" refers to any classes that are not interfaces, traits, enums.
- */
-enum class ClassKind {
-  Class = AttrNone,
-  Interface = AttrInterface,
-  Trait = AttrTrait,
-  Enum = AttrEnum
-};
 
 Attr classKindAsAttr(ClassKind kind);
 

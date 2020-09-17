@@ -56,7 +56,7 @@ static const Class* get_cls(const Variant& class_or_object) {
   } else if (class_or_object.isArray()) {
     // do nothing but avoid the toString conversion notice
   } else {
-    cls = Unit::loadClass(class_or_object.toString().get());
+    cls = Class::load(class_or_object.toString().get());
   }
   return cls;
 }
@@ -77,23 +77,23 @@ Array HHVM_FUNCTION(get_declared_traits) {
 
 bool HHVM_FUNCTION(class_exists, const String& class_name,
                                  bool autoload /* = true */) {
-  return Unit::classExists(class_name.get(), autoload, ClassKind::Class);
+  return Class::exists(class_name.get(), autoload, ClassKind::Class);
 }
 
 bool HHVM_FUNCTION(interface_exists, const String& interface_name,
                                      bool autoload /* = true */) {
   return
-    Unit::classExists(interface_name.get(), autoload, ClassKind::Interface);
+    Class::exists(interface_name.get(), autoload, ClassKind::Interface);
 }
 
 bool HHVM_FUNCTION(trait_exists, const String& trait_name,
                                  bool autoload /* = true */) {
-  return Unit::classExists(trait_name.get(), autoload, ClassKind::Trait);
+  return Class::exists(trait_name.get(), autoload, ClassKind::Trait);
 }
 
 bool HHVM_FUNCTION(enum_exists, const String& enum_name,
                    bool autoload /* = true */) {
-  Class* cls = Unit::getClass(enum_name.get(), autoload);
+  Class* cls = Class::get(enum_name.get(), autoload);
   return cls && isEnum(cls);
 }
 
@@ -107,7 +107,7 @@ Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
 }
 
 Array HHVM_FUNCTION(get_class_constants, const String& className) {
-  auto const cls = Unit::loadClass(className.get());
+  auto const cls = Class::load(className.get());
   if (cls == NULL) {
     return empty_darray();
   }
@@ -136,7 +136,7 @@ Array HHVM_FUNCTION(get_class_constants, const String& className) {
 }
 
 Variant HHVM_FUNCTION(get_class_vars, const String& className) {
-  const Class* cls = Unit::loadClass(className.get());
+  const Class* cls = Class::load(className.get());
   if (!cls) {
     return false;
   }
@@ -247,7 +247,7 @@ Variant HHVM_FUNCTION(get_parent_class,
     if (object.isObject()) {
       cls = object.asCObjRef()->getVMClass();
     } else if (object.isString()) {
-      cls = Unit::loadClass(object.asCStrRef().get());
+      cls = Class::load(object.asCStrRef().get());
       if (!cls) return false;
     } else if (object.isClass()) {
       cls = object.toClassVal();
@@ -277,7 +277,7 @@ static bool is_a_impl(const Variant& class_or_object, const String& class_name,
   const Class* cls = get_cls(class_or_object);
   if (!cls) return false;
   if (cls->attrs() & AttrTrait) return false;
-  const Class* other = Unit::lookupClass(class_name.get());
+  const Class* other = Class::lookup(class_name.get());
   if (!other) return false;
   if (other->attrs() & AttrTrait) return false;
   if (other == cls) return !subclass_only;
@@ -319,7 +319,7 @@ Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
     cls = obj->getVMClass();
     assertx(cls);
   } else if (class_or_object.isString()) {
-    cls = Unit::loadClass(class_or_object.toString().get());
+    cls = Class::load(class_or_object.toString().get());
     if (!cls) return false;
   } else {
     raise_warning(
@@ -401,7 +401,7 @@ String getMethCallerClsOrMethNameHelper(const char* fn, TypedValue v) {
         val(v).pfunc->methCallerMethName()));
     }
   } else if (tvIsObject(v)) {
-    auto const mcCls = Unit::lookupClass(s_meth_caller_cls.get());
+    auto const mcCls = Class::lookup(s_meth_caller_cls.get());
     assertx(mcCls);
     if (mcCls == val(v).pobj->getVMClass()) {
       auto const obj = val(v).pobj;

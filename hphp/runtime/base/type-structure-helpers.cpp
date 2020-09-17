@@ -121,7 +121,7 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
 } // namespace
 
 bool tvInstanceOf(const TypedValue* tv, const NamedEntity* ne) {
-  return tvInstanceOfImpl(tv, [ne]() { return Unit::lookupClass(ne); });
+  return tvInstanceOfImpl(tv, [ne]() { return Class::lookup(ne); });
 }
 
 bool tvInstanceOf(const TypedValue* tv, const Class* cls) {
@@ -368,7 +368,7 @@ bool typeStructureIsTypeList(
   bool found = false;
   if (!strict && clsname) {
     auto const ne = NamedEntity::get(clsname);
-    if (auto const cls = Unit::lookupClass(ne)) {
+    if (auto const cls = Class::lookup(ne)) {
       found = true;
       tpinfo = cls->getReifiedGenericsInfo().m_typeParamInfo;
       if (tpinfo.size() == 0) return true;
@@ -411,7 +411,7 @@ bool checkReifiedGenericsMatch(
   // TODO(T31677864): Handle non KindOfObject types
   if (c1.m_type != KindOfObject) return true;
   auto const obj = c1.m_data.pobj;
-  auto const cls = Unit::lookupClass(ne);
+  auto const cls = Class::lookup(ne);
   assertx(cls);
   if (!cls->hasReifiedGenerics()) {
     if (!strict) return true;
@@ -632,7 +632,7 @@ bool checkTypeStructureMatchesTVImpl(
 
     case TypeStructure::Kind::T_enum: {
       assertx(ts.exists(s_classname));
-      auto const cls = Unit::lookupClass(ts[s_classname].asStrRef().get());
+      auto const cls = Class::lookup(ts[s_classname].asStrRef().get());
       if (!isOrAsOp) {
         if (auto const dt = cls ? cls->enumBaseTy() : folly::none) {
           return equivDataTypes(*dt, type);

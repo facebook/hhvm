@@ -796,7 +796,7 @@ struct LibXMLExtension final : Extension {
 
       loadSystemlib();
 
-      s_LibXMLError_class = Unit::lookupClass(s_LibXMLError.get());
+      s_LibXMLError_class = Class::lookup(s_LibXMLError.get());
 
       // Set up callbacks to support stream wrappers for reading and writing
       // xml files and loading external entities.

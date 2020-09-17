@@ -585,7 +585,7 @@ struct VectorIterator {
   ~VectorIterator() {}
 
   static Object newInstance() {
-    static Class* cls = Unit::lookupClass(s_VectorIterator.get());
+    static Class* cls = Class::lookup(s_VectorIterator.get());
     assertx(cls);
     return Object{cls};
   }

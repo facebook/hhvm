@@ -747,7 +747,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   if (fe.isNative) {
     auto const f = [&] () -> HPHP::Func* {
       if (ret->cls) {
-        auto const cls = Unit::lookupClass(ret->cls->name);
+        auto const cls = Class::lookup(ret->cls->name);
         return cls ? cls->lookupMethod(ret->name) : nullptr;
       } else {
         return Func::lookupBuiltin(ret->name);

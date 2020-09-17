@@ -180,7 +180,7 @@ APCHandle::Pair APCObject::ConstructSlow(ObjectData* objectData,
         prop->ctx = nullptr;
       } else {
         // Private.
-        auto* ctx = Unit::lookupClass(cls.get());
+        auto* ctx = Class::lookup(cls.get());
         if (ctx && ctx->attrs() & AttrUnique) {
           prop->ctx = ctx;
         } else {
@@ -309,7 +309,7 @@ Object APCObject::createObjectSlow() const {
   if (auto const c = m_cls.left()) {
     klass = c;
   } else {
-    klass = Unit::loadClass(m_cls.right());
+    klass = Class::load(m_cls.right());
     if (!klass) {
       Logger::Error("APCObject::getObject(): Cannot find class %s",
                     m_cls.right()->data());
@@ -334,7 +334,7 @@ Object APCObject::createObjectSlow() const {
         if (auto const cls = prop->ctx.left()) {
           ctx = cls;
         } else {
-          ctx = Unit::lookupClass(prop->ctx.right());
+          ctx = Class::lookup(prop->ctx.right());
           if (!ctx) continue;
         }
       }

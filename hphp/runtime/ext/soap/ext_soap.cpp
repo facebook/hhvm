@@ -51,7 +51,7 @@ const StaticString s___dorequest("__dorequest");
 #define IMPLEMENT_GET_CLASS(cls)                                               \
 Class* cls::getClass() {                                                       \
   if (s_class == nullptr) {                                                    \
-    s_class = Unit::lookupClass(s_className.get());                            \
+    s_class = Class::lookup(s_className.get());                            \
     assertx(s_class);                                                          \
   }                                                                            \
   return s_class;                                                              \
@@ -2117,7 +2117,7 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
   }
 
   assertx(class_name.get());
-  Class* cls = Unit::lookupClass(class_name.get());
+  Class* cls = Class::lookup(class_name.get());
   assertx(cls);
   auto ret = DArrayInit(cls->numMethods()).toArray();
   Class::getMethodNames(cls, nullptr, ret);

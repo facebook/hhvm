@@ -67,6 +67,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/vm/frame-restore.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hh-utils.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
@@ -365,42 +366,6 @@ Func* Unit::getCachedEntryPoint() const {
 // Class lookup utilities
 
 namespace {
-struct FrameRestore : private VMRegAnchor {
-  explicit FrameRestore(const PreClass* preClass) :
-    FrameRestore(VMParserFrame { preClass->unit()->filepath(), preClass->line1() }) {}
-
-  explicit FrameRestore(const PreRecordDesc* pr) :
-    FrameRestore(VMParserFrame { pr->unit()->filepath(), pr->line1() }) {}
-
-  explicit FrameRestore(const PreTypeAlias* ta) :
-    FrameRestore(VMParserFrame { ta->unit->filepath(), ta->line1 }) {}
-
-  explicit NEVER_INLINE FrameRestore(const VMParserFrame& parserframe) :
-    m_parserframe(parserframe) {
-    m_oldParserframe = BacktraceArgs::setGlobalParserFrame(&m_parserframe);
-  }
-
-  ~FrameRestore() {
-    BacktraceArgs::setGlobalParserFrame(m_oldParserframe);
-  }
-
- private:
-  VMParserFrame m_parserframe;
-  VMParserFrame* m_oldParserframe;
-};
-
-template<class T>
-const char* checkSameName(NamedEntity* nameList) {
-  if (!std::is_same<T, PreTypeAlias>::value && nameList->getCachedTypeAlias()) {
-    return "type";
-  } else if (!std::is_same<T, RecordDesc>::value &&
-             nameList->getCachedRecordDesc()) {
-    return "record";
-  } else if (!std::is_same<T, PreClass>::value && nameList->getCachedClass()) {
-    return "class";
-  }
-  return nullptr;
-}
 
 void setupRecord(RecordDesc* newRecord, NamedEntity* nameList) {
   bool const isPersistent =
@@ -414,235 +379,6 @@ void setupRecord(RecordDesc* newRecord, NamedEntity* nameList) {
   newRecord->incAtomicCount();
   nameList->pushRecordDesc(newRecord);
 }
-
-void setupClass(Class* newClass, NamedEntity* nameList) {
-  bool const isPersistent =
-    (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative) &&
-    newClass->verifyPersistent();
-  nameList->m_cachedClass.bind(
-    isPersistent ? rds::Mode::Persistent : rds::Mode::Normal,
-    rds::LinkName{"NEClass", newClass->name()}
-  );
-
-  if (newClass->isBuiltin()) {
-    assertx(newClass->isUnique());
-    for (auto i = newClass->numMethods(); i--;) {
-      auto const func = newClass->getMethod(i);
-      if (func->isCPPBuiltin() && func->isStatic()) {
-        assertx(func->isUnique());
-        NamedEntity::get(func->fullName())->setUniqueFunc(func);
-      }
-    }
-  }
-
-  newClass->setClassHandle(nameList->m_cachedClass);
-  newClass->incAtomicCount();
-
-  InstanceBits::ifInitElse(
-    [&] { newClass->setInstanceBits();
-          nameList->pushClass(newClass); },
-    [&] { nameList->pushClass(newClass); }
-  );
-
-  if (RuntimeOption::EvalEnableReverseDataMap) {
-    // The corresponding deregister is in NamedEntity::removeClass().
-    data_map::register_start(newClass);
-    for (unsigned i = 0, n = newClass->numMethods(); i < n; i++) {
-      if (auto meth = newClass->getMethod(i)) {
-        if (meth->cls() == newClass) {
-          meth->registerInDataMap();
-        }
-      }
-    }
-  }
-}
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Class lookup.
-
-Class* Unit::defClass(const PreClass* preClass,
-                      bool failIsFatal /* = true */) {
-  FTRACE(3, "  Defining cls {} failIsFatal {}\n",
-         preClass->name()->data(), failIsFatal);
-  NamedEntity* const nameList = preClass->namedEntity();
-  Class* top = nameList->clsList();
-
-  /*
-   * Check if there is already a name defined in this request for this
-   * NamedEntity.
-   *
-   * Raise a fatal unless the existing class definition is identical to the
-   * one this invocation would create.
-   */
-  auto existingKind = checkSameName<PreClass>(nameList);
-  if (existingKind) {
-    FrameRestore fr(preClass);
-    raise_error("Cannot declare class with the same name (%s) as an "
-                "existing %s", preClass->name()->data(), existingKind);
-    return nullptr;
-  }
-
-  // If there was already a class declared with DefClass, check if it's
-  // compatible.
-  if (Class* cls = nameList->getCachedClass()) {
-    if (cls->preClass() != preClass) {
-      if (failIsFatal) {
-        FrameRestore fr(preClass);
-        raise_error("Class already declared: %s", preClass->name()->data());
-      }
-      return nullptr;
-    }
-    assertx(!RO::RepoAuthoritative ||
-            (cls->isPersistent() && classHasPersistentRDS(cls)));
-    return cls;
-  }
-
-  // Get a compatible Class, and add it to the list of defined classes.
-  Class* parent = nullptr;
-  for (;;) {
-    // Search for a compatible extant class.  Searching from most to least
-    // recently created may have better locality than alternative search orders.
-    // In addition, its the only simple way to make this work lock free...
-    for (Class* class_ = top; class_ != nullptr; ) {
-      Class* cur = class_;
-      class_ = class_->m_next;
-      if (cur->preClass() != preClass) continue;
-      Class::Avail avail = cur->avail(parent, failIsFatal /*tryAutoload*/);
-      if (LIKELY(avail == Class::Avail::True)) {
-        cur->setCached();
-        DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(cur));
-        assertx(!RO::RepoAuthoritative ||
-                (cur->isPersistent() && classHasPersistentRDS(cur)));
-        return cur;
-      }
-      if (avail == Class::Avail::Fail) {
-        if (failIsFatal) {
-          FrameRestore fr(preClass);
-          raise_error("unknown class %s", parent->name()->data());
-        }
-        return nullptr;
-      }
-      assertx(avail == Class::Avail::False);
-    }
-
-    if (!parent && preClass->parent()->size() != 0) {
-      parent = Unit::getClass(preClass->parent(), failIsFatal);
-      if (parent == nullptr) {
-        if (failIsFatal) {
-          FrameRestore fr(preClass);
-          raise_error("unknown class %s", preClass->parent()->data());
-        }
-        return nullptr;
-      }
-    }
-
-    if (!failIsFatal) {
-      // Check interfaces
-      for (auto it = preClass->interfaces().begin();
-                 it != preClass->interfaces().end(); ++it) {
-        if (!Unit::getClass(*it, false)) return nullptr;
-      }
-      // traits
-      for (auto const& traitName : preClass->usedTraits()) {
-        if (!Unit::getClass(traitName, false)) return nullptr;
-      }
-      // enum
-      if (preClass->attrs() & AttrEnum) {
-        auto const enumBaseTy =
-          preClass->enumBaseTy().underlyingDataTypeResolved();
-        if (!enumBaseTy ||
-            (!isIntType(*enumBaseTy) && !isStringType(*enumBaseTy))) {
-          return nullptr;
-        }
-      }
-    }
-
-    // Create a new class.
-    ClassPtr newClass;
-    {
-      FrameRestore fr(preClass);
-      newClass = Class::newClass(const_cast<PreClass*>(preClass), parent);
-    }
-    Lock l(g_classesMutex);
-
-    if (UNLIKELY(top != nameList->clsList())) {
-      top = nameList->clsList();
-      continue;
-    }
-
-    setupClass(newClass.get(), nameList);
-
-    /*
-     * call setCached after adding to the class list, otherwise the
-     * target-cache short circuit at the top could return a class
-     * which is not yet on the clsList().
-     */
-    newClass.get()->setCached();
-    DEBUGGER_ATTACHED_ONLY(phpDebuggerDefClassHook(newClass.get()));
-    assertx(!RO::RepoAuthoritative ||
-            (newClass.get()->isPersistent() &&
-             classHasPersistentRDS(newClass.get())));
-    return newClass.get();
-  }
-}
-
-Class* Unit::defClosure(const PreClass* preClass) {
-  auto const nameList = preClass->namedEntity();
-
-  if (nameList->clsList()) return nameList->clsList();
-
-  auto const parent = c_Closure::classof();
-
-  assertx(preClass->parent() == parent->name());
-  // Create a new class.
-
-  ClassPtr newClass {
-    Class::newClass(const_cast<PreClass*>(preClass), parent)
-  };
-
-  Lock l(g_classesMutex);
-
-  if (UNLIKELY(nameList->clsList() != nullptr)) return nameList->clsList();
-
-  setupClass(newClass.get(), nameList);
-
-  if (classHasPersistentRDS(newClass.get())) newClass.get()->setCached();
-  return newClass.get();
-}
-
-Class* Unit::loadClass(const NamedEntity* ne,
-                       const StringData* name) {
-  Class* cls;
-  if (LIKELY((cls = ne->getCachedClass()) != nullptr)) {
-    return cls;
-  }
-  return loadMissingClass(ne, name);
-}
-
-Class* Unit::loadMissingClass(const NamedEntity* ne,
-                              const StringData* name) {
-  VMRegAnchor _;
-  AutoloadHandler::s_instance->autoloadClass(
-    StrNR(const_cast<StringData*>(name)));
-  return Unit::lookupClass(ne);
-}
-
-Class* Unit::getClass(const NamedEntity* ne,
-                      const StringData *name, bool tryAutoload) {
-  Class *cls = lookupClass(ne);
-  if (UNLIKELY(!cls)) {
-    if (tryAutoload) {
-      return loadMissingClass(ne, name);
-    }
-  }
-  return cls;
-}
-
-bool Unit::classExists(const StringData* name, bool autoload, ClassKind kind) {
-  Class* cls = Unit::getClass(name, autoload);
-  return cls &&
-    (cls->attrs() & (AttrInterface | AttrTrait)) == classKindAsAttr(kind);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -654,7 +390,7 @@ RecordDesc* Unit::defRecordDesc(PreRecordDesc* preRecord,
 
   // Error out if there is already a different type
   // with the same name in the request
-  auto existingKind = checkSameName<RecordDesc>(nameList);
+  auto existingKind = nameList->checkSameName<RecordDesc>();
   if (existingKind) {
     FrameRestore fr(preRecord);
     raise_error("Cannot declare record with the same (%s) as an "
@@ -956,7 +692,7 @@ TypeAlias resolveTypeAlias(Unit* unit, const PreTypeAlias* thisType) {
   const StringData* typeName = thisType->value;
   auto targetNE = NamedEntity::get(typeName);
 
-  if (auto klass = Unit::lookupClass(targetNE)) {
+  if (auto klass = Class::lookup(targetNE)) {
     return typeAliasFromClass(thisType, klass);
   }
 
@@ -971,7 +707,7 @@ TypeAlias resolveTypeAlias(Unit* unit, const PreTypeAlias* thisType) {
   if (AutoloadHandler::s_instance->autoloadNamedType(
         StrNR(const_cast<StringData*>(typeName))
       )) {
-    if (auto klass = Unit::lookupClass(targetNE)) {
+    if (auto klass = Class::lookup(targetNE)) {
       return typeAliasFromClass(thisType, klass);
     }
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
@@ -1048,7 +784,7 @@ Unit::DefTypeAliasResult Unit::defTypeAlias(Id id, bool failIsFatal) {
   }
 
   // There might also be a class or record with this name already.
-  auto existingKind = checkSameName<PreTypeAlias>(nameList);
+  auto existingKind = nameList->checkSameName<PreTypeAlias>();
   if (existingKind) {
     if (!failIsFatal) return Unit::DefTypeAliasResult::Fail;
     FrameRestore _(thisType);
@@ -1475,7 +1211,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
       }
       if (debugger) phpDebuggerDefClassHook(cls);
     } else {
-      if (UNLIKELY(!defClass(pre, false))) define.set(ix - first);
+      if (UNLIKELY(!Class::def(pre, false))) define.set(ix - first);
     }
   }
   // iterate over everything else and add to define set
@@ -1509,7 +1245,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
       // Consider the above optimization
       if (i < end - first && UNLIKELY(uintptr_t(obj) & 1)) {
         Class* cls = (Class*)(uintptr_t(obj) & ~1);
-        if (defClass(cls->preClass(), failIsFatal)) {
+        if (Class::def(cls->preClass(), failIsFatal)) {
           madeProgress = true;
           define.reset(i);
         }
@@ -1521,7 +1257,7 @@ void Unit::mergeImpl(MergeInfo* mi) {
         case MergeKind::Class: {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_class);
-          if (defClass((PreClass*)obj, failIsFatal)) {
+          if (Class::def((PreClass*)obj, failIsFatal)) {
             madeProgress = true;
             define.reset(i);
           }

@@ -25,7 +25,7 @@ struct IntlDatePatternGenerator : IntlError {
   ) {
     if (!c_IntlDatePatternGenerator) {
       c_IntlDatePatternGenerator =
-        Unit::lookupClass(s_IntlDatePatternGenerator.get());
+        Class::lookup(s_IntlDatePatternGenerator.get());
       assertx(c_IntlDatePatternGenerator);
     }
     Object ret{c_IntlDatePatternGenerator};

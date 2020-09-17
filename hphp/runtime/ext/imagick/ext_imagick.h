@@ -82,7 +82,7 @@ struct ImagickExtension final : Extension {
     \
    private: \
     static void initClass() {                                   \
-      cls = Unit::lookupClass(                                  \
+      cls = Class::lookup(                                  \
         req::ptr<StringData>::attach(                           \
           StringData::Make(#CLS)                                \
         ).get()                                                 \

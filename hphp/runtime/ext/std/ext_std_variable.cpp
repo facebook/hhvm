@@ -203,7 +203,7 @@ bool HHVM_FUNCTION(HH_is_meth_caller, TypedValue v) {
   if (tvIsFunc(v)) {
     return val(v).pfunc->isMethCaller();
   } else if (tvIsObject(v)) {
-    auto const mcCls = Unit::lookupClass(s_meth_caller_cls.get());
+    auto const mcCls = Class::lookup(s_meth_caller_cls.get());
     assertx(mcCls);
     return mcCls == val(v).pobj->getVMClass();
   }
@@ -579,7 +579,7 @@ bool HHVM_FUNCTION(HH_is_late_init_prop_init,
 bool HHVM_FUNCTION(HH_is_late_init_sprop_init,
                    const String& clsName,
                    const String& name) {
-  auto const cls = Unit::loadClass(clsName.get());
+  auto const cls = Class::load(clsName.get());
   if (!cls) {
     SystemLib::throwInvalidArgumentExceptionObject(
       folly::sformat("Unknown class {}", clsName)

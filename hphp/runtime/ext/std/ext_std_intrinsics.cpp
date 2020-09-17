@@ -339,7 +339,7 @@ Object HHVM_FUNCTION(dummy_dict_await) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(create_class_pointer, StringArg name) {
-  auto const cls = Unit::loadClass(name.get());
+  auto const cls = Class::load(name.get());
   return cls ? Variant{cls} : init_null();
 }
 
@@ -347,7 +347,7 @@ Variant HHVM_FUNCTION(create_clsmeth_pointer, StringArg cls, StringArg meth) {
   if (RuntimeOption::RepoAuthoritative) {
     raise_error("You can't use %s() in RepoAuthoritative mode", __FUNCTION__+2);
   }
-  auto const c = Unit::loadClass(cls.get());
+  auto const c = Class::load(cls.get());
   if (!c) return init_null();
   auto const m = c->lookupMethod(meth.get());
   if (!m || !m->isStaticInPrologue()) return init_null();

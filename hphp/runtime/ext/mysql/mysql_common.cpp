@@ -1122,7 +1122,7 @@ Variant MySQLStmt::result_metadata() {
   Array args;
   args.append(Variant(req::make<MySQLResult>(mysql_result)));
 
-  auto cls = Unit::lookupClass(s_mysqli_result.get());
+  auto cls = Class::lookup(s_mysqli_result.get());
   Object obj{cls};
 
   tvDecRefGen(

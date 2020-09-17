@@ -54,7 +54,7 @@ IntlCalendar::ParseArg(const Variant& cal, const icu::Locale &locale,
         : (new icu::GregorianCalendar(locale, error));
     calOwned = true;
   } else if (cal.isObject()) {
-    auto IntlCalendar_Class = Unit::lookupClass(s_IntlCalendar.get());
+    auto IntlCalendar_Class = Class::lookup(s_IntlCalendar.get());
     auto obj = cal.toObject();
     auto cls = obj->getVMClass();
     if (!IntlCalendar_Class ||

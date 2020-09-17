@@ -2114,7 +2114,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
             } else {
               attrMask = AttrPrivate;
               String cls = memberName.substr(1, subLen - 2);
-              ctx = Unit::lookupClass(cls.get());
+              ctx = Class::lookup(cls.get());
               if (ctx) {
                 memberName = memberName.substr(subLen);
               } else {

@@ -482,7 +482,7 @@ void CompletionsCommand::addClassConstantCompletions(
   folly::dynamic& targets
 ) {
   HPHP::String classStr(context.matchContext.c_str());
-  Class* cls = Unit::loadClass(classStr.get());
+  Class* cls = Class::load(classStr.get());
   if (cls == nullptr) {
     return;
   }
@@ -515,7 +515,7 @@ void CompletionsCommand::addClassStaticCompletions(
   folly::dynamic& targets
 ) {
   HPHP::String classStr(context.matchContext.c_str());
-  Class* cls = Unit::loadClass(classStr.get());
+  Class* cls = Class::load(classStr.get());
 
   while (cls != nullptr) {
     // Add static propreties of this class.

@@ -225,7 +225,7 @@ getNamedTypeWithAutoload(const NamedEntity* ne,
     return rec;
   }
   Class *klass = nullptr;
-  klass = Unit::lookupClass(ne);
+  klass = Class::lookup(ne);
   // We don't have the class, record or the typedef, so autoload.
   if (!klass) {
     String nameStr(const_cast<StringData*>(name));
@@ -237,7 +237,7 @@ getNamedTypeWithAutoload(const NamedEntity* ne,
       if (auto rec = Unit::lookupRecordDesc(ne)) {
         return rec;
       }
-      klass = Unit::lookupClass(ne);
+      klass = Class::lookup(ne);
     }
   }
   return klass;
@@ -309,7 +309,7 @@ bool TypeConstraint::maybeMixed() const {
     return def->type == AnnotType::Mixed;
   }
   // If its a known class, its definitely not mixed. Otherwise it might be.
-  return !Unit::lookupClass(m_namedEntity);
+  return !Class::lookup(m_namedEntity);
 }
 
 bool
@@ -440,7 +440,7 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
     if (auto const rec = Unit::lookupRecordDesc(m_namedEntity)) {
       return rec;
     }
-    return Unit::lookupClass(m_namedEntity);
+    return Class::lookup(m_namedEntity);
   }();
   auto ptd = boost::get<const TypeAlias*>(&p);
   auto td = ptd ? *ptd : nullptr;
@@ -612,7 +612,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
       // We can't save the Class* since it might move around from request to
       // request.
       assertx(m_namedEntity);
-      c = Unit::lookupClass(m_namedEntity);
+      c = Class::lookup(m_namedEntity);
       // If we're being conservative we can only use the class if its persistent
       // (otherwise what we infer may not be valid in all requests).
       if (isPasses && c && !classHasPersistentRDS(c)) c = nullptr;
@@ -724,8 +724,8 @@ bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
     if (m_typeName->isame(clsName)) return true;
 
     assertx(m_namedEntity);
-    auto const c1 = Unit::lookupClass(clsName);
-    auto const c2 = Unit::lookupClass(m_namedEntity);
+    auto const c1 = Class::lookup(clsName);
+    auto const c2 = Class::lookup(m_namedEntity);
     // If both names map to persistent classes we can just check for a subtype
     // relationship.
     if (c1 && c2 &&
@@ -1169,7 +1169,7 @@ void TypeConstraint::verifyFail(const Func* func, tv_lval c,
       ).str()
     );
   } else {
-    auto cls = Unit::lookupClass(m_typeName);
+    auto cls = Class::lookup(m_typeName);
     if (cls && isInterface(cls)) {
       auto const msg =
         folly::format(

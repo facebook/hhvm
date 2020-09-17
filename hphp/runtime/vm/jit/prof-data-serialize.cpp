@@ -600,7 +600,7 @@ Class* read_class_internal(ProfDataDeserializer& ser) {
     ne->m_cachedClass.markUninit();
   }
 
-  auto const cls = Unit::defClass(preClass, true);
+  auto const cls = Class::def(preClass, true);
   if (cls->pinitVec().size()) cls->initPropHandle();
   if (cls->numStaticProperties()) cls->initSPropHandles();
 
@@ -1358,7 +1358,7 @@ void write_class(ProfDataSerializer& ser, const Class* cls) {
   if (cls->preClass()->attrs() & AttrNoExpandTrait) {
     for (auto const tName : cls->preClass()->usedTraits()) {
       auto const trait =
-        Unit::lookupUniqueClassInContext(tName, nullptr, nullptr);
+        Class::lookupUniqueInContext(tName, nullptr, nullptr);
       assertx(trait);
       record_dep(trait);
     }

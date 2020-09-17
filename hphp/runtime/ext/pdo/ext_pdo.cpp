@@ -510,7 +510,7 @@ static Object pdo_stmt_instantiate(sp_PDOResource dbh, const String& clsname,
                          "constructor arguments must be passed as an array");
     return Object();
   }
-  Class* cls = Unit::loadClass(name.get());
+  Class* cls = Class::load(name.get());
   if (!cls) {
     return Object();
   }
@@ -527,7 +527,7 @@ static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
   if (clsname.empty()) {
     return;
   }
-  Class* cls = Unit::loadClass(clsname.get());
+  Class* cls = Class::load(clsname.get());
   if (!cls) {
     return;
   }
@@ -562,7 +562,7 @@ static bool valid_statement_class(sp_PDOResource dbh, const Variant& opt,
     PDO_HANDLE_DBH_ERR(dbh);
     return false;
   }
-  HPHP::Class* cls = HPHP::Unit::loadClass(clsname.get());
+  HPHP::Class* cls = HPHP::Class::load(clsname.get());
   if (cls) {
     const HPHP::Func* method = cls->getDeclaredCtor();
     if (method && method->isPublic()) {
@@ -684,7 +684,7 @@ static bool do_fetch_class_prepare(sp_PDOStatement stmt) {
     stmt->fetch.clsname = "stdclass";
   }
   stmt->fetch.constructor = empty_string(); //NULL;
-  HPHP::Class* cls = HPHP::Unit::loadClass(clsname.get());
+  HPHP::Class* cls = HPHP::Class::load(clsname.get());
   if (cls) {
     const HPHP::Func* method = cls->getDeclaredCtor();
     if (method) {

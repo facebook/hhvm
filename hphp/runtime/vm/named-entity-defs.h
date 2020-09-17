@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 
 namespace HPHP {
@@ -64,6 +65,18 @@ void NamedEntity::foreach_cached_func(Fn fn) {
       fn(func);
     }
   });
+}
+
+template<class T>
+const char* NamedEntity::checkSameName() {
+  if (!std::is_same<T, PreTypeAlias>::value && getCachedTypeAlias()) {
+    return "type";
+  } else if (!std::is_same<T, RecordDesc>::value && getCachedRecordDesc()) {
+    return "record";
+  } else if (!std::is_same<T, PreClass>::value && getCachedClass()) {
+    return "class";
+  }
+  return nullptr;
 }
 
 }

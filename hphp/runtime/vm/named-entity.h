@@ -234,6 +234,9 @@ struct NamedEntity {
    */
   static std::vector<std::pair<const char*, int64_t>> tableStats();
 
+  template<class T>
+  const char* checkSameName();
+
 private:
   static Map* table();
 

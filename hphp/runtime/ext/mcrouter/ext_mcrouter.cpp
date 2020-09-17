@@ -101,7 +101,7 @@ static void mcr_throwException(const std::string& message,
                                carbon::Result result = compatibility::mc_res_unknown,
                                const std::string& key = "") {
   if (!c_MCRouterException) {
-    c_MCRouterException = Unit::lookupClass(s_MCRouterException.get());
+    c_MCRouterException = Class::lookup(s_MCRouterException.get());
     assertx(c_MCRouterException);
   }
 
@@ -121,7 +121,7 @@ static void mcr_throwOptionException(
   const std::vector<mc::McrouterOptionError>& errors) {
   if (!c_MCRouterOptionException) {
     c_MCRouterOptionException =
-      Unit::lookupClass(s_MCRouterOptionException.get());
+      Class::lookup(s_MCRouterOptionException.get());
     assertx(c_MCRouterOptionException);
   }
 

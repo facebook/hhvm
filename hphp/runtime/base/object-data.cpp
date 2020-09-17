@@ -235,7 +235,7 @@ StrNR ObjectData::getClassName() const {
 
 bool ObjectData::instanceof(const String& s) const {
   assertx(kindIsValid());
-  auto const cls = Unit::lookupClass(s.get());
+  auto const cls = Class::lookup(s.get());
   return cls && instanceof(cls);
 }
 
@@ -401,7 +401,7 @@ Variant ObjectData::o_get(const String& propName, bool error /* = true */,
 
   Class* ctx = nullptr;
   if (!context.empty()) {
-    ctx = Unit::lookupClass(context.get());
+    ctx = Class::lookup(context.get());
   }
 
   // Can't use propImpl here because if the property is not accessible and
@@ -438,7 +438,7 @@ void ObjectData::o_set(const String& propName, const Variant& v,
 
   Class* ctx = nullptr;
   if (!context.empty()) {
-    ctx = Unit::lookupClass(context.get());
+    ctx = Class::lookup(context.get());
   }
 
   // Can't use setProp here because if the property is not accessible and
@@ -479,7 +479,7 @@ void ObjectData::o_setArray(const Array& properties) {
         ctx = m_cls;
       } else {
         // Private.
-        ctx = Unit::lookupClass(cls.get());
+        ctx = Class::lookup(cls.get());
         if (!ctx) continue;
       }
       k = k.substr(subLen);
@@ -622,7 +622,7 @@ Array ObjectData::o_toIterArray(const String& context) {
 
   Class* ctx = nullptr;
   if (!context.empty()) {
-    ctx = Unit::lookupClass(context.get());
+    ctx = Class::lookup(context.get());
   }
 
   // Get all declared properties first, bottom-to-top in the inheritance

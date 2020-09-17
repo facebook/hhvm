@@ -407,7 +407,7 @@ struct MapIterator {
   ~MapIterator() {}
 
   static Object newInstance() {
-    static Class* cls = Unit::lookupClass(s_MapIterator.get());
+    static Class* cls = Class::lookup(s_MapIterator.get());
     assertx(cls);
     return Object{cls};
   }

@@ -363,7 +363,7 @@ int64_t HHVM_FUNCTION(connection_timeout) {
 
 static Class* getClassByName(const char* name, int len) {
   String className(name, len, CopyString);
-  return Unit::loadClass(className.get());
+  return Class::load(className.get());
 }
 
 Variant HHVM_FUNCTION(constant, const String& name) {

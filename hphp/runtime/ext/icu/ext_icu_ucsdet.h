@@ -57,7 +57,7 @@ struct EncodingMatch : IntlError {
   static Object newInstance(const UCharsetMatch* match,
                             const std::shared_ptr<UCharsetDetector>& det) {
     if (UNLIKELY(!c_EncodingMatch)) {
-      c_EncodingMatch = Unit::lookupClass(s_EncodingMatch.get());
+      c_EncodingMatch = Class::lookup(s_EncodingMatch.get());
       assertx(c_EncodingMatch);
     }
     Object ret{c_EncodingMatch};

@@ -39,7 +39,7 @@ namespace HPHP {
 #define IMPLEMENT_GET_CLASS(cls)                                               \
   Class* cls::getClass() {                                                     \
     if (s_class == nullptr) {                                                  \
-      s_class = Unit::lookupClass(s_className.get());                          \
+      s_class = Class::lookup(s_className.get());                          \
       assertx(s_class);                                                        \
     }                                                                          \
     return s_class;                                                            \
@@ -2009,7 +2009,7 @@ static struct AsyncMysqlExtension final : Extension {
     loadSystemlib("async_mysql_exceptions");
     loadSystemlib();
 
-    s_queryClass = Unit::lookupClass(s_queryClassName.get());
+    s_queryClass = Class::lookup(s_queryClassName.get());
   }
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
     Config::Bind(

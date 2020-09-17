@@ -53,7 +53,7 @@ struct IntlDateFormatter : IntlError {
 
   static Object newInstance() {
     if (!c_IntlDateFormatter) {
-      c_IntlDateFormatter = Unit::lookupClass(s_IntlDateFormatter.get());
+      c_IntlDateFormatter = Class::lookup(s_IntlDateFormatter.get());
       assertx(c_IntlDateFormatter);
     }
     return Object{c_IntlDateFormatter};

@@ -167,7 +167,7 @@ void clsCnsHelper(IRGS& env, SSATmp* ptv, Block* exit = nullptr) {
 void emitClsCnsD(IRGS& env,
                  const StringData* cnsNameStr,
                  const StringData* clsNameStr) {
-  implClsCns(env, Unit::lookupClass(clsNameStr), cnsNameStr, clsNameStr);
+  implClsCns(env, Class::lookup(clsNameStr), cnsNameStr, clsNameStr);
 }
 
 void emitClsCns(IRGS& env, const StringData* cnsNameStr) {

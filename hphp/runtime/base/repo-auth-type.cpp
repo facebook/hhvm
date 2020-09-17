@@ -428,7 +428,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     // fallthrough
   case T::SubObj:
     {
-      auto const cls = Unit::lookupClass(ty.clsName());
+      auto const cls = Class::lookup(ty.clsName());
       if (!cls) return false;
       return tv.m_type == KindOfObject &&
              tv.m_data.pobj->getVMClass()->classof(cls);
@@ -439,7 +439,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     // fallthrough
   case T::ExactObj:
     {
-      auto const cls = Unit::lookupClass(ty.clsName());
+      auto const cls = Class::lookup(ty.clsName());
       if (!cls) return false;
       return tv.m_type == KindOfObject && tv.m_data.pobj->getVMClass() == cls;
     }
@@ -449,7 +449,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     // fallthrough
   case T::SubCls:
     {
-      auto const cls = Unit::lookupClass(ty.clsName());
+      auto const cls = Class::lookup(ty.clsName());
       if (!cls) return false;
       return tv.m_type == KindOfClass &&
              tv.m_data.pclass->classof(cls);
@@ -460,7 +460,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     // fallthrough
   case T::ExactCls:
     {
-      auto const cls = Unit::lookupClass(ty.clsName());
+      auto const cls = Class::lookup(ty.clsName());
       if (!cls) return false;
       return tv.m_type == KindOfClass && tv.m_data.pclass == cls;
     }

@@ -153,7 +153,7 @@ void CollectionsExtension::initPair() {
 
   loadSystemlib("collections-pair");
 
-  c_Pair::s_cls = Unit::lookupClass(s_HH_Pair.get());
+  c_Pair::s_cls = Class::lookup(s_HH_Pair.get());
   assertx(c_Pair::s_cls);
 
   finishClass<c_Pair>();

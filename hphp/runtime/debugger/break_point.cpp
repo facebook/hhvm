@@ -968,10 +968,10 @@ bool BreakPointInfo::MatchClass(const char *fcls, const std::string &bcls,
   }
 
   String sdBClsName(bcls);
-  Class* clsB = Unit::lookupClass(sdBClsName.get());
+  Class* clsB = Class::lookup(sdBClsName.get());
   if (!clsB) return false;
   String sdFClsName(fcls, CopyString);
-  Class* clsF = Unit::lookupClass(sdFClsName.get());
+  Class* clsF = Class::lookup(sdFClsName.get());
   if (clsB == clsF) return true;
   String sdFuncName(func, CopyString);
   Func* f = clsB->lookupMethod(sdFuncName.get());

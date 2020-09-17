@@ -38,7 +38,7 @@ APCHandle::Pair APCRClsMeth::Construct(RClsMethData* data) {
 
 Variant APCRClsMeth::Make(const APCHandle* handle) {
   auto apc_rclsmeth = APCRClsMeth::fromHandle(handle);
-  auto const cls = Unit::loadClass(apc_rclsmeth->m_cls_name);
+  auto const cls = Class::load(apc_rclsmeth->m_cls_name);
   auto const func = cls->lookupMethod(apc_rclsmeth->m_func_name);
   auto const generics = apc_rclsmeth->m_generics->toLocal();
   auto const generics_arr = generics.getArrayData();

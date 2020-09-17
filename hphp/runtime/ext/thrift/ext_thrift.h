@@ -77,7 +77,7 @@ struct RpcOptions {
 
   static Class* PhpClass() {
     if (!c_RpcOptions) {
-      c_RpcOptions = Unit::lookupClass(s_RpcOptions.get());
+      c_RpcOptions = Class::lookup(s_RpcOptions.get());
       assert(c_RpcOptions);
     }
     return c_RpcOptions;

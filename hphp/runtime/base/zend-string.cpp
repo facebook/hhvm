@@ -39,6 +39,7 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
+#include <folly/lang/CString.h>
 #include <folly/portability/String.h>
 
 #define PHP_QPRINT_MAXL 75
@@ -192,9 +193,9 @@ int string_rfind(const char *input, int len, char ch, int pos,
   const void *ptr;
   if (case_sensitive) {
     if (pos >= 0) {
-      ptr = memrchr(input + pos, ch, len - pos);
+      ptr = folly::memrchr(input + pos, ch, len - pos);
     } else {
-      ptr = memrchr(input, ch, len + pos + 1);
+      ptr = folly::memrchr(input, ch, len + pos + 1);
     }
   } else {
     if (pos >= 0) {

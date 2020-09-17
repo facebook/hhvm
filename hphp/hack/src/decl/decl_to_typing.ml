@@ -69,7 +69,7 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
     ce_flags =
       make_ce_flags
         ~xhp_attr:None
-        ~synthesized:mro.mro_via_req_extends
+        ~synthesized:(is_set mro_via_req_extends mro.mro_flags)
         ~abstract
         ~final
         ~const:false
@@ -83,7 +83,7 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
 let shallow_method_to_telt child_class mro subst meth : tagged_elt =
   {
     id = snd meth.sm_name;
-    inherit_when_private = mro.mro_copy_private_members;
+    inherit_when_private = is_set mro_copy_private_members mro.mro_flags;
     elt = shallow_method_to_class_elt child_class mro subst meth;
   }
 
@@ -118,7 +118,7 @@ let shallow_prop_to_telt child_class mro subst prop : tagged_elt =
   in
   {
     id = snd sp_name;
-    inherit_when_private = mro.mro_copy_private_members;
+    inherit_when_private = is_set mro_copy_private_members mro.mro_flags;
     elt =
       {
         ce_visibility = visibility;
@@ -152,7 +152,7 @@ let shallow_const_to_class_const child_class mro subst const =
   in
   ( snd scc_name,
     {
-      cc_synthesized = mro.mro_via_req_extends;
+      cc_synthesized = is_set mro_via_req_extends mro.mro_flags;
       cc_abstract;
       cc_pos = fst scc_name;
       cc_type = ty;
@@ -189,7 +189,8 @@ let typeconst_structure mro class_name stc =
   in
   let abstract =
     match stc.stc_abstract with
-    | TCAbstract (Some _) when not mro.mro_passthrough_abstract_typeconst ->
+    | TCAbstract (Some _)
+      when not (is_set mro_passthrough_abstract_typeconst mro.mro_flags) ->
       false
     | TCAbstract _ -> true
     | TCPartiallyAbstract
@@ -236,8 +237,8 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
   in
   let typeconst =
     match abstract with
-    | TCAbstract (Some default) when not mro.mro_passthrough_abstract_typeconst
-      ->
+    | TCAbstract (Some default)
+      when not (is_set mro_passthrough_abstract_typeconst mro.mro_flags) ->
       {
         ttc_abstract = TCConcrete;
         ttc_name;

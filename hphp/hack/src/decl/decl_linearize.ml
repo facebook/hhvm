@@ -86,13 +86,7 @@ let emitted_mro_elements_equal a b =
     mro_use_pos = _;
     mro_ty_pos = _;
     (* Compare everything else *)
-    mro_via_req_extends;
-    mro_via_req_impl;
-    mro_xhp_attrs_only;
-    mro_consts_only;
-    mro_copy_private_members;
-    mro_passthrough_abstract_typeconst;
-    mro_class_not_found;
+    mro_flags;
     mro_cyclic;
     mro_required_at;
     mro_trait_reuse;
@@ -100,13 +94,7 @@ let emitted_mro_elements_equal a b =
   } =
     a
   in
-  mro_via_req_extends = b.mro_via_req_extends
-  && mro_via_req_impl = b.mro_via_req_impl
-  && mro_xhp_attrs_only = b.mro_xhp_attrs_only
-  && mro_consts_only = b.mro_consts_only
-  && mro_copy_private_members = b.mro_copy_private_members
-  && mro_passthrough_abstract_typeconst = b.mro_passthrough_abstract_typeconst
-  && mro_class_not_found = b.mro_class_not_found
+  Int.equal mro_flags b.mro_flags
   && Option.is_none mro_cyclic = Option.is_none b.mro_cyclic
   && Option.is_none mro_required_at = Option.is_none b.mro_required_at
   && Option.equal String.equal mro_trait_reuse b.mro_trait_reuse
@@ -117,17 +105,11 @@ let empty_mro_element =
     mro_name = "";
     mro_use_pos = Pos.none;
     mro_ty_pos = Pos.none;
+    mro_flags = 0;
     mro_type_args = [];
-    mro_class_not_found = false;
     mro_cyclic = None;
     mro_trait_reuse = None;
     mro_required_at = None;
-    mro_via_req_extends = false;
-    mro_via_req_impl = false;
-    mro_xhp_attrs_only = false;
-    mro_consts_only = false;
-    mro_copy_private_members = false;
-    mro_passthrough_abstract_typeconst = false;
   }
 
 let disallow_trait_reuse env =
@@ -167,32 +149,45 @@ let rec ancestor_linearization
   let lin = get_linearization env class_name in
   let lin =
     Sequence.map lin ~f:(fun c ->
-        let mro_via_req_extends =
-          c.mro_via_req_extends || equal_source_type source ReqExtends
+        let via_req_extends =
+          is_set mro_via_req_extends c.mro_flags
+          || equal_source_type source ReqExtends
         in
-        let mro_via_req_impl =
-          c.mro_via_req_impl || equal_source_type source ReqImpl
+        let via_req_impl =
+          is_set mro_via_req_impl c.mro_flags
+          || equal_source_type source ReqImpl
         in
-        let mro_xhp_attrs_only =
-          c.mro_xhp_attrs_only || equal_source_type source XHPAttr
+        let xhp_attrs_only =
+          is_set mro_xhp_attrs_only c.mro_flags
+          || equal_source_type source XHPAttr
         in
-        let mro_consts_only = c.mro_consts_only || is_interface source in
-        let mro_copy_private_members =
-          c.mro_copy_private_members && equal_source_type source Trait
+        let consts_only =
+          is_set mro_consts_only c.mro_flags || is_interface source
         in
-        let mro_passthrough_abstract_typeconst =
-          c.mro_passthrough_abstract_typeconst && not child_class_concrete
+        let copy_private_members =
+          is_set mro_copy_private_members c.mro_flags
+          && equal_source_type source Trait
+        in
+        let passthrough_abstract_typeconst =
+          is_set mro_passthrough_abstract_typeconst c.mro_flags
+          && not child_class_concrete
+        in
+        let mro_flags =
+          c.mro_flags
+          |> set_bit mro_via_req_extends via_req_extends
+          |> set_bit mro_via_req_impl via_req_impl
+          |> set_bit mro_xhp_attrs_only xhp_attrs_only
+          |> set_bit mro_consts_only consts_only
+          |> set_bit mro_copy_private_members copy_private_members
+          |> set_bit
+               mro_passthrough_abstract_typeconst
+               passthrough_abstract_typeconst
         in
         {
           c with
           mro_trait_reuse =
             Option.map c.mro_trait_reuse ~f:(Fn.const class_name);
-          mro_via_req_extends;
-          mro_via_req_impl;
-          mro_xhp_attrs_only;
-          mro_consts_only;
-          mro_copy_private_members;
-          mro_passthrough_abstract_typeconst;
+          mro_flags;
         })
   in
   match Sequence.next lin with
@@ -255,16 +250,25 @@ let rec ancestor_linearization
 and linearize (env : env) (c : shallow_class) : linearization =
   let mro_name = snd c.sc_name in
   (* The first class doesn't have its type parameters filled in *)
+  let mro_flags =
+    set_bit
+      mro_copy_private_members
+      (Ast_defs.equal_class_kind c.sc_kind Ast_defs.Ctrait)
+      empty_mro_element.mro_flags
+  in
+  let mro_flags =
+    set_bit
+      mro_passthrough_abstract_typeconst
+      (not Ast_defs.(equal_class_kind c.sc_kind Cnormal))
+      mro_flags
+  in
   let child =
     {
       empty_mro_element with
       mro_name;
       mro_use_pos = fst c.sc_name;
       mro_ty_pos = fst c.sc_name;
-      mro_copy_private_members =
-        Ast_defs.equal_class_kind c.sc_kind Ast_defs.Ctrait;
-      mro_passthrough_abstract_typeconst =
-        not Ast_defs.(equal_class_kind c.sc_kind Cnormal);
+      mro_flags;
     }
   in
   let get_ancestors kind = List.map ~f:(ancestor_from_ty kind) in
@@ -408,7 +412,7 @@ and next_state
           let (next, synths) =
             match env.linearization_kind with
             | Member_resolution ->
-              if next.mro_via_req_extends then
+              if is_set mro_via_req_extends next.mro_flags then
                 let synths =
                   match (next.mro_required_at, child_class_kind) with
                   (* Always aggregate synthesized ancestors for traits and
@@ -430,7 +434,8 @@ and next_state
              Stringish as an ancestor if we have some ancestor which requires
              it. *)
               let should_skip =
-                (next.mro_via_req_extends || next.mro_via_req_impl)
+                ( is_set mro_via_req_extends next.mro_flags
+                || is_set mro_via_req_impl next.mro_flags )
                 && String.( <> ) next.mro_name SN.Classes.cStringish
               in
               let next =
@@ -490,12 +495,12 @@ and get_linearization (env : env) (class_name : string) : linearization =
           and we should look into removing it (along with
           Typing_classes_heap.members_fully_known) after we have removed legacy
           decl. *)
+        let mro_flags =
+          set_bit mro_class_not_found true empty_mro_element.mro_flags
+        in
+        (* This class is not known to exist! *)
         Sequence.singleton
-          {
-            empty_mro_element with
-            mro_name = class_name;
-            mro_class_not_found = true (* This class is not known to exist! *);
-          })
+          { empty_mro_element with mro_name = class_name; mro_flags })
 
 let get_linearization
     (ctx : Provider_context.t) (key : string * Decl_defs.linearization_kind) :

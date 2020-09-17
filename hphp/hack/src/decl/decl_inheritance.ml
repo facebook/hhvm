@@ -48,19 +48,22 @@ let get_shallow_classes_and_substs
     methods. *)
 let filter_for_method_lookup lin =
   Sequence.filter lin ~f:(fun (mro, _, _) ->
-      (not mro.mro_xhp_attrs_only) && not mro.mro_consts_only)
+      (not (is_set mro_xhp_attrs_only mro.mro_flags))
+      && not (is_set mro_consts_only mro.mro_flags))
 
 (** Return a linearization suitable for property lookup, where ancestors are
     included in the linearization only if the child class inherits their
     properties or XHP attributes. *)
 let filter_for_prop_lookup lin =
-  Sequence.filter lin ~f:(fun (mro, _, _) -> not mro.mro_consts_only)
+  Sequence.filter lin ~f:(fun (mro, _, _) ->
+      not (is_set mro_consts_only mro.mro_flags))
 
 (** Return a linearization suitable for lookup of class constants and type
     constants, where ancestors are included in the linearization only if the
     child class inherits their constants. *)
 let filter_for_const_lookup lin =
-  Sequence.filter lin ~f:(fun (mro, _, _) -> not mro.mro_xhp_attrs_only)
+  Sequence.filter lin ~f:(fun (mro, _, _) ->
+      not (is_set mro_xhp_attrs_only mro.mro_flags))
 
 module SPairSet = Reordered_argument_set (Caml.Set.Make (struct
   type t = string * string

@@ -118,6 +118,7 @@ let blacklisted_types =
     ("aast_defs", "LocalIdMap");
     ("aast_defs", "ByteString");
     ("decl_defs", "Linearization");
+    ("decl_defs", "MroElement");
     ("errors", "Marker");
     ("errors", "MarkedMessage");
     ("errors", "PositionGroup");

@@ -62,6 +62,61 @@ type source_type =
   | ReqExtends
 [@@deriving eq, show]
 
+(* Is this bit set in the flags? *)
+let is_set bit flags = not (Int.equal 0 (Int.bit_and bit flags))
+
+(* Set a single bit to a boolean value *)
+let set_bit bit value flags =
+  if value then
+    Int.bit_or bit flags
+  else
+    Int.bit_and (Int.bit_not bit) flags
+
+(* MRO element flags *)
+
+(** True if this element referred to a class whose definition could not be
+    found. This is always indicative of an "Unbound name" error (emitted by
+    Naming), so one could imagine omitting elements with this flag set from the
+    linearization (since correct programs will not have them), but keeping
+    track of them helps reduce cascading errors in the event of a typo.
+    Additionally, it's helpful to do this (for now) to keep the behavior of
+    shallow_class_decl equivalent to legacy decl. *)
+let mro_class_not_found = 1 lsl 0
+
+(** True if this element is included in the linearization (directly or
+    indirectly) because of a require extends relationship. *)
+let mro_via_req_extends = 1 lsl 1
+
+(** True if this element is included in the linearization (directly or
+    indirectly) because of a require implements relationship. *)
+let mro_via_req_impl = 1 lsl 2
+
+(** True if this element is included in the linearization because of any
+    XHP-attribute-inclusion relationship, and thus, the linearized class
+    inherits only the XHP attributes from this element. *)
+let mro_xhp_attrs_only = 1 lsl 3
+
+(** True if this element is included in the linearization because of a
+    interface-implementation relationship, and thus, the linearized class
+    inherits only the class constants and type constants from this element. *)
+let mro_consts_only = 1 lsl 4
+
+(** True if this element is included in the linearization via an unbroken chain
+    of trait-use relationships, and thus, the linearized class inherits the
+    private members of this element (on account of the runtime behavior where
+    they are effectively copied into the linearized class). *)
+let mro_copy_private_members = 1 lsl 5
+
+(** True if this element is included in the linearization via an unbroken chain
+    of abstract classes, and thus, abstract type constants with default values
+    are inherited unchanged. When this flag is not set, a concrete class was
+    present in the chain. Since we convert abstract type constants with
+    defaults to concrete ones when they are included in a concrete class, any
+    type constant which 1) is abstract, 2) has a default, and 3) was inherited
+    from an ancestor with this flag not set, should be inherited as a concrete
+    type constant instead. *)
+let mro_passthrough_abstract_typeconst = 1 lsl 6
+
 type mro_element = {
   mro_name: string;  (** The class's name *)
   mro_use_pos: Pos.t;
@@ -70,18 +125,13 @@ type mro_element = {
           position of the class name A in the line "class B extends A". *)
   mro_ty_pos: Pos.t;
       (** Like mro_use_pos, but includes type arguments (if any). *)
+  mro_flags: int;
+      (** Bitflag which specifies in what contexts that element of the linearization should or
+      should not be used. *)
   mro_type_args: decl_ty list;
       (** The type arguments with which this ancestor class was instantiated. The
           first class in the linearization (the one which was linearized) will have
           an empty list here, even when it takes type parameters. *)
-  mro_class_not_found: bool;
-      (** True if this element referred to a class whose definition could not be
-          found. This is always indicative of an "Unbound name" error (emitted by
-          Naming), so one could imagine omitting elements with this flag set from the
-          linearization (since correct programs will not have them), but keeping
-          track of them helps reduce cascading errors in the event of a typo.
-          Additionally, it's helpful to do this (for now) to keep the behavior of
-          shallow_class_decl equivalent to legacy decl. *)
   mro_cyclic: SSet.t option;
       (** When this is [Some], this mro_element represents an attempt to include a
           linearization within itself. We include these in the linearization for the
@@ -99,34 +149,6 @@ type mro_element = {
           required by some ancestor, this will be [Some], and the position will be
           the location where this requirement was most recently included into the
           hierarchy. *)
-  mro_via_req_extends: bool;
-      (** True if this element is included in the linearization (directly or
-          indirectly) because of a require extends relationship. *)
-  mro_via_req_impl: bool;
-      (** True if this element is included in the linearization (directly or
-          indirectly) because of a require implements relationship. *)
-  mro_xhp_attrs_only: bool;
-      (** True if this element is included in the linearization because of any
-          XHP-attribute-inclusion relationship, and thus, the linearized class
-          inherits only the XHP attributes from this element. *)
-  mro_consts_only: bool;
-      (** True if this element is included in the linearization because of a
-          interface-implementation relationship, and thus, the linearized class
-          inherits only the class constants and type constants from this element. *)
-  mro_copy_private_members: bool;
-      (** True if this element is included in the linearization via an unbroken chain
-          of trait-use relationships, and thus, the linearized class inherits the
-          private members of this element (on account of the runtime behavior where
-          they are effectively copied into the linearized class). *)
-  mro_passthrough_abstract_typeconst: bool;
-      (** True if this element is included in the linearization via an unbroken chain
-          of abstract classes, and thus, abstract type constants with default values
-          are inherited unchanged. When this flag is not set, a concrete class was
-          present in the chain. Since we convert abstract type constants with
-          defaults to concrete ones when they are included in a concrete class, any
-          type constant which 1) is abstract, 2) has a default, and 3) was inherited
-          from an ancestor with this flag not set, should be inherited as a concrete
-          type constant instead. *)
 }
 [@@deriving eq, show]
 

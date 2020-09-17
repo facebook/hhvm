@@ -31,24 +31,28 @@ let all_ancestors lin =
 
 let parents_and_traits lin =
   lin
-  |> Sequence.filter ~f:(fun mro -> not mro.mro_consts_only)
+  |> Sequence.filter ~f:(fun mro -> not (is_set mro_consts_only mro.mro_flags))
   |> Sequence.map ~f:(fun mro -> (mro.mro_name, ()))
 
 let members_fully_known lin =
-  lazy (Sequence.for_all lin ~f:(fun mro -> not mro.mro_class_not_found))
+  lazy
+    (Sequence.for_all lin ~f:(fun mro ->
+         not (is_set mro_class_not_found mro.mro_flags)))
 
 let req_ancestor_names ctx class_name =
   let key = (class_name, Decl_defs.Member_resolution) in
   Decl_linearize.get_linearization ctx key
   |> Sequence.filter ~f:(fun mro ->
-         mro.mro_via_req_extends || mro.mro_via_req_impl)
+         is_set mro_via_req_extends mro.mro_flags
+         || is_set mro_via_req_impl mro.mro_flags)
   |> Sequence.map ~f:(fun mro -> (mro.mro_name, ()))
 
 let all_requirements ctx class_name =
   let key = (class_name, Decl_defs.Member_resolution) in
   lazy
     ( Decl_linearize.get_linearization ctx key
-    |> Sequence.filter ~f:(fun mro -> not mro.mro_xhp_attrs_only)
+    |> Sequence.filter ~f:(fun mro ->
+           not (is_set mro_xhp_attrs_only mro.mro_flags))
     |> Sequence.filter_map ~f:(fun mro ->
            Option.map mro.mro_required_at (fun pos ->
                (pos, type_of_mro_element mro)))

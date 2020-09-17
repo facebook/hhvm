@@ -1838,24 +1838,30 @@ let handle_mode
                       [
                         ( if Option.is_some mro.mro_required_at then
                           Some "requirement"
-                        else if mro.mro_via_req_extends || mro.mro_via_req_impl
+                        else if
+                        is_set mro_via_req_extends mro.mro_flags
+                        || is_set mro_via_req_impl mro.mro_flags
                       then
                           Some "synthesized"
                         else
                           None );
-                        ( if mro.mro_xhp_attrs_only then
+                        ( if is_set mro_xhp_attrs_only mro.mro_flags then
                           Some "xhp_attrs_only"
                         else
                           None );
-                        ( if mro.mro_consts_only then
+                        ( if is_set mro_consts_only mro.mro_flags then
                           Some "consts_only"
                         else
                           None );
-                        ( if mro.mro_copy_private_members then
+                        ( if is_set mro_copy_private_members mro.mro_flags then
                           Some "copy_private_members"
                         else
                           None );
-                        ( if mro.mro_passthrough_abstract_typeconst then
+                        ( if
+                          is_set
+                            mro_passthrough_abstract_typeconst
+                            mro.mro_flags
+                        then
                           Some "PAT"
                         else
                           None );

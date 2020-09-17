@@ -1,13 +1,13 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$get = $GLOBALS['_GET'];
+$get = \HH\global_get('_GET');
 parse_str("", inout $get);
-$GLOBALS['_GET'] = $get;
+\HH\global_set('_GET', $get);
 $_REQUEST = array_merge($_REQUEST, $_GET);
 
-$post = $GLOBALS['_POST'];
+$post = \HH\global_get('_POST');
 parse_str("", inout $post);
-$GLOBALS['_POST'] = $post;
+\HH\global_set('_POST', $post);
 $_REQUEST = array_merge($_REQUEST, $_POST);
 
 // what exactly is this testing?

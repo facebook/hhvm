@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>>
 function entrypoint_T64(): void {
-  $GLOBALS['HTTP_RAW_POST_DATA'] = <<<EOF
+  \HH\global_set('HTTP_RAW_POST_DATA', <<<EOF
 <?xml version='1.0' ?>
 <!DOCTYPE DOC [
 <!NOTATION application_xml SYSTEM 'http://www.isi.edu/in-notes/iana/assignments/media-types/application/xml'>
@@ -13,7 +13,8 @@ function entrypoint_T64(): void {
     </test:echoOk>
   </env:Body>
 </env:Envelope>
-EOF;
+EOF
+);
   include "soap12-test.inc";
   test();
 }

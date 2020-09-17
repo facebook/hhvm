@@ -14,7 +14,7 @@ class book{
 }
 <<__EntryPoint>>
 function main_entry(): void {
-  $GLOBALS['HTTP_RAW_POST_DATA']="
+  \HH\global_set('HTTP_RAW_POST_DATA', "
   <env:Envelope xmlns:env=\"http://schemas.xmlsoap.org/soap/envelope/\"
   	xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
   	xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"
@@ -30,7 +30,7 @@ function main_entry(): void {
   </dotest>
    </env:Body>
   <env:Header/>
-  </env:Envelope>";
+  </env:Envelope>");
   $options=darray[
   		'actor' =>'http://schema.nothing.com',
   		'classmap' => darray['book'=>'book', 'wsdltype2'=>'classname2']
@@ -38,6 +38,6 @@ function main_entry(): void {
 
   $server = new SoapServer(dirname(__FILE__)."/classmap.wsdl",$options);
   $server->setClass("test");
-  $server->handle($GLOBALS['HTTP_RAW_POST_DATA']);
+  $server->handle(\HH\global_get('HTTP_RAW_POST_DATA'));
   echo "ok\n";
 }

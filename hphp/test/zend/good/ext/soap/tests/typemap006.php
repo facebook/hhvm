@@ -20,7 +20,7 @@ class book{
 }
 <<__EntryPoint>>
 function entrypoint_typemap006(): void {
-  $GLOBALS['HTTP_RAW_POST_DATA']="
+  \HH\global_set('HTTP_RAW_POST_DATA', "
   <env:Envelope xmlns:env=\"http://schemas.xmlsoap.org/soap/envelope/\"
   	xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
   	xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"
@@ -33,7 +33,7 @@ function entrypoint_typemap006(): void {
   </ns1:dotest2>
    </env:Body>
   <env:Header/>
-  </env:Envelope>";
+  </env:Envelope>");
 
   $options=darray[
   		'uri'     => "http://schemas.nothing.com",
@@ -45,6 +45,6 @@ function entrypoint_typemap006(): void {
 
   $server = new SoapServer(NULL,$options);
   $server->setClass("test");
-  $server->handle($GLOBALS['HTTP_RAW_POST_DATA']);
+  $server->handle(\HH\global_get('HTTP_RAW_POST_DATA'));
   echo "ok\n";
 }

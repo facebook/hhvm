@@ -10,11 +10,11 @@ function ut_main($bundle) {
 
 function ut_run2($bundle) {
   // Run unit test in OO mode.
-  $GLOBALS['oo-mode'] = true;
+  \HH\global_set('oo-mode', true);
   $oo_result = ut_main($bundle);
 
   // Run unit test in procedural mode.
-  $GLOBALS['oo-mode'] = false;
+  \HH\global_set('oo-mode', false);
   $proc_result = ut_main($bundle);
 
   // Show error if the APIs produce different results.

@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 include_once( 'ut_common.inc' );
-$GLOBALS['oo-mode'] = true;
+\HH\global_set('oo-mode', true);
 $res_str = '';
 /*
  * Clone

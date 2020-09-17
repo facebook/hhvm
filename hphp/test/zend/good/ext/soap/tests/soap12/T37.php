@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>>
 function entrypoint_T37(): void {
-  $GLOBALS['HTTP_RAW_POST_DATA'] = <<<EOF
+  \HH\global_set('HTTP_RAW_POST_DATA', <<<EOF
 <?xml version='1.0' ?>
 <env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"> 
   <env:Header>
@@ -11,7 +11,8 @@ function entrypoint_T37(): void {
   <env:Body>
   </env:Body>
 </env:Envelope>
-EOF;
+EOF
+);
   include "soap12-test.inc";
   test();
 }

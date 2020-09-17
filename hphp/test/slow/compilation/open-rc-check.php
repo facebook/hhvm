@@ -1,8 +1,8 @@
 <?hh
 
 function fatal_handler() {
-    chmod($GLOBALS['file'], 0600);
-    @unlink($GLOBALS['file']);
+    chmod(\HH\global_get('file'), 0600);
+    @unlink(\HH\global_get('file'));
 }
 
 
@@ -12,9 +12,9 @@ register_shutdown_function(fun('fatal_handler'));
 
 $file = tempnam(sys_get_temp_dir(), 'cannotopen');
 $data = "//Nothing";
-$GLOBALS['file'] = $file;
+\HH\global_set('file', $file);
 
-if (file_put_contents($GLOBALS['file'], $data) !== false && chmod($GLOBALS['file'], 0000)) {
-    require $GLOBALS['file'];
+if (file_put_contents(\HH\global_get('file'), $data) !== false && chmod(\HH\global_get('file'), 0000)) {
+    require \HH\global_get('file');
 }
 }

@@ -4,7 +4,7 @@ function gen() {
 
   sleep(1);
   $sprop = '$sprop_'.time() % 60;
-  $f = fopen($GLOBALS['filename'], "w");
+  $f = fopen(\HH\global_get('filename'), "w");
   fwrite($f, <<<"EOD"
 <?hh
 class C {
@@ -32,12 +32,12 @@ function visit_root($node) {
 function entrypoint_deadstaticprops(): void {
 
   echo "start\n";
-  $GLOBALS['filename'] = '/tmp/dead-static-props.php';
+  \HH\global_set('filename', '/tmp/dead-static-props.php');
   gen();
-  include $GLOBALS['filename'];
+  include \HH\global_get('filename');
   $c = new C;
   $c->f(); // access static prop
   $hg = heapgraph_create();
   HH\heapgraph_foreach_root_node($hg, 'visit_root');
-  unlink($GLOBALS['filename']);
+  unlink(\HH\global_get('filename'));
 }

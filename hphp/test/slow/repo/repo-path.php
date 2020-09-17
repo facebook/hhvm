@@ -2,8 +2,8 @@
 
 <<__EntryPoint>>
 function main() {
-  $argc = $GLOBALS['argc'];
-  $argv = $GLOBALS['argv'];
+  $argc = \HH\global_get('argc');
+  $argv = \HH\global_get('argv');
 
   if ($argc > 1) {
     echo getenv('SUDO_USER') ?: getenv('USER');

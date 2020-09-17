@@ -68,14 +68,8 @@ function test_basic(): void {
   VS($x2 ??= 44, 44);
   VS($x2, 44);
 
-  VS($GLOBALS['x_global'] ??= 71, 45);
-  VS($GLOBALS['x_global'], 45);
-
   VS($x_global ??= 72, 72);
   VS($x_global, 72);
-
-  VS($GLOBALS['x_non_existent'] ??= 46, 46);
-  VS($GLOBALS['x_non_existent'], 46);
 
   $x_string = "forty_seven";
   VS($x_string ??= 73, "forty_seven");
@@ -264,8 +258,6 @@ function test_multi_dim_side_effects(): void {
 }
 <<__EntryPoint>>
 function entrypoint_null_coalesce_assignment(): void {
-  $GLOBALS['x_global'] = 45;
-
   /*
    * CALL TEST FUNCTIONS
    */

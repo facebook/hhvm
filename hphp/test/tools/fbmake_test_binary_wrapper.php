@@ -35,7 +35,7 @@ function start($test) {
 }
 
 function test_is_running() {
-  return $GLOBALS['current'] != '';
+  return \HH\global_get('current') != '';
 }
 
 function loop_tests($cmd, $line_func) {
@@ -75,7 +75,7 @@ abstract final class ToolsFbmakeTestBinaryWrapperPhp {
 <<__EntryPoint>>
 async function main(): Awaitable<void> {
   chdir(__DIR__.'/../../../');
-  $argv = $GLOBALS['argv'];
+  $argv = \HH\global_get('argv');
   $cmd = sprintf(
     "./hphp/tools/run_test_binary.sh ".
     "'%s' '%s' '%s' '%s' ".

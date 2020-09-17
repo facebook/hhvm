@@ -1,9 +1,9 @@
 <?hh
 
 function ut_run($mainFunc) {
-    $GLOBALS['oo-mode'] = true;
+    \HH\global_set('oo-mode', true);
     $oo_result = $mainFunc();
-    $GLOBALS['oo-mode'] = false;
+    \HH\global_set('oo-mode', false);
     $proc_result = $mainFunc();
     if($proc_result !== $oo_result) {
       echo "ERROR: OO- and procedural APIs produce different results!\n";
@@ -24,46 +24,46 @@ function dump($val) {
 }
 function ut_coll_create( $locale )
 {
-    return $GLOBALS['oo-mode'] ? Collator::create( $locale ) : collator_create( $locale );
+    return \HH\global_get('oo-mode') ? Collator::create( $locale ) : collator_create( $locale );
 }
 function ut_coll_compare( $coll, $str1, $str2 )
 {
-    return $GLOBALS['oo-mode'] ?
+    return \HH\global_get('oo-mode') ?
       $coll->compare( $str1, $str2 ) : collator_compare( $coll, $str1, $str2 );
 }
 function ut_coll_sort_with_sort_keys( $coll, inout $arr )
 {
-    return $GLOBALS['oo-mode'] ?
+    return \HH\global_get('oo-mode') ?
       $coll->sortWithSortKeys( inout $arr ) : collator_sort_with_sort_keys( $coll, inout $arr );
 }
 function ut_coll_sort( $coll, inout $arr, $sort_flag = Collator::SORT_REGULAR )
 {
-    return $GLOBALS['oo-mode'] ?
+    return\HH\global_get('oo-mode') ?
       $coll->sort( inout $arr, $sort_flag ) : collator_sort( $coll, inout $arr, $sort_flag );
 }
 function ut_coll_asort( $coll, inout $arr, $sort_flag = Collator::SORT_REGULAR )
 {
-    return $GLOBALS['oo-mode'] ?
+    return \HH\global_get('oo-mode') ?
       $coll->asort( inout $arr, $sort_flag ) : collator_asort( $coll, inout $arr, $sort_flag );
 }
 function ut_coll_get_locale( $coll, $type )
 {
-    return $GLOBALS['oo-mode'] ?
+    return \HH\global_get('oo-mode') ?
       $coll->getLocale( $type ) : collator_get_locale( $coll, $type );
 }
 function ut_coll_set_strength( $coll, $strength )
 {
-    return $GLOBALS['oo-mode'] ?
+    return \HH\global_get('oo-mode') ?
       $coll->setStrength( $strength ) : collator_set_strength( $coll, $strength );
 }
 function ut_coll_set_attribute( $coll, $attr, $val )
 {
-    return $GLOBALS['oo-mode'] ?
+    return \HH\global_get('oo-mode') ?
       $coll->setAttribute( $attr, $val ) : collator_set_attribute( $coll, $attr, $val );
 }
 function ut_coll_set_default( $coll )
 {
-    return $GLOBALS['oo-mode'] ? Collator::setDefault( $coll ) : collator_set_default( $coll );
+    return \HH\global_get('oo-mode') ? Collator::setDefault( $coll ) : collator_set_default( $coll );
 }
 function sort_arrays( $locale, $arrays, $sort_flag = Collator::SORT_REGULAR )
 {

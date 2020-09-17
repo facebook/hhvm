@@ -22,10 +22,6 @@ Fatal error: Invalid expression in constant initializer in %s/test/slow/constant
 Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(bd0d19e2788469ce4a17d5490e0660b0) : eval()'d code on line 1
 
 ==============================================================
-"const BADARRAY = [$GLOBALS];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(9b0f8039d51cbc98c2175ce725aa58b7) : eval()'d code on line 1
-
-==============================================================
 "const BADARRAY = [1, [2, $a], 3];" ====>
 Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(540a37a49686a5eb499f596edd372fb0) : eval()'d code on line 1
 
@@ -58,10 +54,6 @@ Fatal error: Invalid expression in constant initializer in %s/test/slow/constant
 Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(3f497f8def3a9300559b51d8e65f5104) : eval()'d code on line 1
 
 ==============================================================
-"const BADVEC = vec[$GLOBALS];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(28728fcbd98e05b89cb269e26def9ac4) : eval()'d code on line 1
-
-==============================================================
 "const BADVEC = vec[1, vec[2, $a], 3];" ====>
 Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(d36769e0816cc71e0acaf1e025ae1cbb) : eval()'d code on line 1
 
@@ -92,10 +84,6 @@ Fatal error: Invalid expression in constant initializer in %s/test/slow/constant
 ==============================================================
 "const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => foobaz()], 3 => 3];" ====>
 Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(39b8b56b41a14164b3558c464f46f3a2) : eval()'d code on line 1
-
-==============================================================
-"const BADDICT = dict[1 => $GLOBALS];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(1f8f68d32fb6b1cc6d6cdc0510a8a7d0) : eval()'d code on line 1
 
 ==============================================================
 "const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => $a], 3 => 33];" ====>

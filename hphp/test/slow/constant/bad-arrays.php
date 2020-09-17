@@ -8,7 +8,6 @@ const TESTS = vec[
   'const BADARRAY = [foobaz()];',
   'const BADARRAY = [1, [2, new stdclass], 3];',
   'const BADARRAY = [1, [2, foobaz()], 3];',
-  'const BADARRAY = [$GLOBALS];',
   'const BADARRAY = [1, [2, $a], 3];',
   'const BADARRAY = [1, [2, 100 + $a + 200], 3];',
 
@@ -18,7 +17,6 @@ const TESTS = vec[
   'const BADVEC = vec[foobaz()];',
   'const BADVEC = vec[1, vec[2, new stdclass], 3];',
   'const BADVEC = vec[1, vec[2, foobaz()], 3];',
-  'const BADVEC = vec[$GLOBALS];',
   'const BADVEC = vec[1, vec[2, $a], 3];',
   'const BADVEC = vec[1, vec[2, 100 + $a + 200], 3];',
 
@@ -28,7 +26,6 @@ const TESTS = vec[
   'const BADDICT = dict[1 => foobaz()];',
   'const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => new stdclass], 3 => 3];',
   'const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => foobaz()], 3 => 3];',
-  'const BADDICT = dict[1 => $GLOBALS];',
   'const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => $a], 3 => 33];',
   'const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => 100 + $a + 200], 3 => 3];',
 

@@ -22,10 +22,6 @@ Fatal error: Invalid expression in constant initializer in %s/test/slow/class_co
 Fatal error: Invalid expression in constant initializer in %s/test/slow/class_constant/bad-arrays.php(%d)(c3507d07f6e88fbf4016f9d1d25ba2cd) : eval()'d code on line 1
 
 ==============================================================
-"class Cls1 { const BADARRAY = [$GLOBALS]; };" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/class_constant/bad-arrays.php(%d)(4c5fad00357856640925a640787c34b3) : eval()'d code on line 1
-
-==============================================================
 "class Cls1 { static public $a = 123; const BADARRAY = [1, [2, $a], 3]; };" ====>
 Fatal error: Invalid expression in constant initializer in %s/test/slow/class_constant/bad-arrays.php(%d)(8f14abd971e1989d427c2c856b841732) : eval()'d code on line 1
 
@@ -58,10 +54,6 @@ Fatal error: Invalid expression in constant initializer in %s/test/slow/class_co
 Fatal error: Invalid expression in constant initializer in %s/test/slow/class_constant/bad-arrays.php(%d)(7244e253ac27fa408e50aac5684aefdc) : eval()'d code on line 1
 
 ==============================================================
-"class Cls1 { const BADVEC = vec[$GLOBALS]; };" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/class_constant/bad-arrays.php(%d)(2b04e6bc510d54586c84ffe3d6e097a0) : eval()'d code on line 1
-
-==============================================================
 "class Cls1 { static public $a = 123; const BADVEC = vec[1, vec[2, $a], 3]; };" ====>
 Fatal error: Invalid expression in constant initializer in %s/test/slow/class_constant/bad-arrays.php(%d)(1d301f5d4628eeec0f4fc73a80aef3ab) : eval()'d code on line 1
 
@@ -92,10 +84,6 @@ Fatal error: Invalid expression in constant initializer in %s/test/slow/class_co
 ==============================================================
 "class Cls1 { const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => foobaz()], 3 => 3]; };" ====>
 Fatal error: Invalid expression in constant initializer in %s/test/slow/class_constant/bad-arrays.php(%d)(e75442db39bbdd5f77a62f8794adc6ad) : eval()'d code on line 1
-
-==============================================================
-"class Cls1 { const BADDICT = dict[1 => $GLOBALS]; };" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/class_constant/bad-arrays.php(%d)(2298854cff71412aa0ddaea9c74edcde) : eval()'d code on line 1
 
 ==============================================================
 "class Cls1 { static public $a = 123; const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => $a], 3 => 33]; };" ====>

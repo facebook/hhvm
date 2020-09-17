@@ -7,8 +7,4 @@ MAX_HEIGHT2 = 10.5
 Inside globalConst
 MAX_HEIGHT2 = 10.5
 COEFFICIENT_2 = 2.345
----------------- Global Variables using $GLOBALS -------------------
-bool(false)
-$average = 55
-$result = 3.456
 ---------------- instance/static properties & constants -------------------

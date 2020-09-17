@@ -571,7 +571,9 @@ let check =
           | [(_, If (((p, _), Id (_, c)), then_stmt, else_stmt))]
             when SN.Rx.is_enabled c ->
             (match ctx.reactivity with
-            | Pure _ ->
+            | Pure _
+            | MaybeReactive (Pure _)
+            | RxVar (Some (Pure _)) ->
               Errors.rx_enabled_in_non_rx_context p;
               List.iter b.fb_ast (self#on_stmt (env, ctx))
             | _ ->

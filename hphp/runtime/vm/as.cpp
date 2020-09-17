@@ -2524,7 +2524,7 @@ void parse_function_flags(AsmState& as) {
       as.fe->isPairGenerator = true;
     } else if (flag == "isRxDisabled") {
       // this relies on attributes being parsed before flags
-      if (!funcAttrIsAnyRx(as.fe->attrs)) {
+      if (!funcAttrIsAnyRx(as.fe->attrs) || funcAttrIsPure(as.fe->attrs)) {
         as.error("isRxDisabled on non-rx func");
       }
       as.fe->isRxDisabled = true;

@@ -1062,7 +1062,7 @@ fn emit_iterator_key_value_storage(
                     &pos,
                     "Cannot re-assign $this",
                 ));
-            } else if !(superglobals::is_superglobal(&name) || name == superglobals::GLOBALS) {
+            } else if !(superglobals::is_superglobal(&name)) {
                 return Ok(Some(name.into()));
             }
         };

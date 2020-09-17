@@ -5022,12 +5022,8 @@ where
         };
 
         let check_variable = |self_: &mut Self, text| {
-            if !allow_reassign {
-                if text == sn::special_idents::THIS {
-                    err(self_, errors::reassign_this)
-                } else if text == sn::superglobals::GLOBALS {
-                    err(self_, errors::not_allowed_in_write("`$GLOBALS`"))
-                }
+            if !allow_reassign && text == sn::special_idents::THIS {
+                err(self_, errors::reassign_this)
             }
         };
 

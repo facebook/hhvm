@@ -352,9 +352,7 @@ fn add_var(env: &Env, st: &mut State, var: &str) {
     // If it's bound as a parameter or definite assignment, don't add it
     // Also don't add the pipe variable and superglobals
     (should_capture_var(env, var))
-        && !(var == special_idents::DOLLAR_DOLLAR
-            || superglobals::GLOBALS == var
-            || superglobals::is_superglobal(var))
+        && !(var == special_idents::DOLLAR_DOLLAR || superglobals::is_superglobal(var))
     {
         st.captured_vars.add(var.to_string())
     }

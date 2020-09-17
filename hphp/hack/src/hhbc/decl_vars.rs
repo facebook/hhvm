@@ -6,7 +6,7 @@
 use ast_body::AstBody;
 use hhas_param_rust::HhasParam;
 use naming_special_names_rust::{
-    emitter_special_functions, pseudo_functions, special_idents, superglobals,
+    emitter_special_functions, pseudo_functions, special_idents,
 };
 use oxidized::{
     aast,
@@ -81,10 +81,7 @@ impl<'a> DeclvarVisitor<'a> {
 
     fn add_local<S: Into<String> + AsRef<str>>(&mut self, barethis: BareThisUsage, name: S) {
         let name_ref = name.as_ref();
-        if name_ref == superglobals::GLOBALS
-            || name_ref == special_idents::DOLLAR_DOLLAR
-            || special_idents::is_tmp_var(name_ref)
-        {
+        if name_ref == special_idents::DOLLAR_DOLLAR || special_idents::is_tmp_var(name_ref) {
             ()
         } else if name_ref == special_idents::THIS {
             self.with_this(barethis)

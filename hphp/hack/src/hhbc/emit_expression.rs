@@ -426,27 +426,18 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         )),
         Expr_::ArrayGet(e) => {
             let (base_expr, opt_elem_expr) = &**e;
-            match (base_expr.lvar_name(), opt_elem_expr) {
-                (Some(name), Some(e)) if name == superglobals::GLOBALS => {
-                    Ok(InstrSeq::gather(vec![
-                        emit_expr(emitter, env, e)?,
-                        emit_pos(pos),
-                        instr::cgetg(),
-                    ]))
-                }
-                _ => Ok(emit_array_get(
-                    emitter,
-                    env,
-                    pos,
-                    None,
-                    QueryOp::CGet,
-                    base_expr,
-                    opt_elem_expr.as_ref(),
-                    false,
-                    false,
-                )?
-                .0),
-            }
+            Ok(emit_array_get(
+                emitter,
+                env,
+                pos,
+                None,
+                QueryOp::CGet,
+                base_expr,
+                opt_elem_expr.as_ref(),
+                false,
+                false,
+            )?
+            .0)
         }
         Expr_::ObjGet(e) => {
             Ok(emit_obj_get(emitter, env, pos, QueryOp::CGet, &e.0, &e.1, &e.2, false)?.0)
@@ -1576,31 +1567,18 @@ fn emit_record(
 fn emit_call_isset_expr(e: &mut Emitter, env: &Env, outer_pos: &Pos, expr: &tast::Expr) -> Result {
     let pos = &expr.0;
     if let Some((base_expr, opt_elem_expr)) = expr.1.as_array_get() {
-        return Ok(match (base_expr.1.as_lvar(), opt_elem_expr) {
-            (Some(tast::Lid(_, id)), Some(elem))
-                if local_id::get_name(&id) == superglobals::GLOBALS =>
-            {
-                InstrSeq::gather(vec![
-                    emit_expr(e, env, elem)?,
-                    emit_pos(outer_pos),
-                    instr::issetg(),
-                ])
-            }
-            _ => {
-                emit_array_get(
-                    e,
-                    env,
-                    pos,
-                    None,
-                    QueryOp::Isset,
-                    base_expr,
-                    opt_elem_expr.as_ref(),
-                    false,
-                    false,
-                )?
-                .0
-            }
-        });
+        return Ok(emit_array_get(
+            e,
+            env,
+            pos,
+            None,
+            QueryOp::Isset,
+            base_expr,
+            opt_elem_expr.as_ref(),
+            false,
+            false,
+        )?
+        .0);
     }
     if let Some((cid, id)) = expr.1.as_class_get() {
         return emit_class_get(e, env, QueryOp::Isset, cid, id);
@@ -3892,12 +3870,7 @@ fn emit_conditional_expr(
 fn emit_local(e: &mut Emitter, env: &Env, notice: BareThisOp, lid: &aast_defs::Lid) -> Result {
     let tast::Lid(pos, id) = lid;
     let id_name = local_id::get_name(id);
-    if superglobals::GLOBALS == id_name {
-        Err(emit_fatal::raise_fatal_parse(
-            pos,
-            "Access $GLOBALS via wrappers",
-        ))
-    } else if superglobals::is_superglobal(id_name) {
+    if superglobals::is_superglobal(id_name) {
         Ok(InstrSeq::gather(vec![
             instr::string(string_utils::locals::strip_dollar(id_name)),
             emit_pos(pos),
@@ -4203,46 +4176,21 @@ fn emit_quiet_expr(
     null_coalesce_assignment: bool,
 ) -> Result<(InstrSeq, Option<NumParams>)> {
     match &expr.1 {
-        tast::Expr_::Lvar(lid) if local_id::get_name(&lid.1) == superglobals::GLOBALS => Ok((
-            InstrSeq::gather(vec![
-                emit_pos(&lid.0),
-                instr::string(string_utils::locals::strip_dollar(local_id::get_name(
-                    &lid.1,
-                ))),
-                emit_pos(pos),
-                instr::cgetg(),
-            ]),
-            None,
-        )),
         tast::Expr_::Lvar(lid) if !is_local_this(env, &lid.1) => Ok((
             instr::cgetquietl(get_local(e, env, pos, local_id::get_name(&lid.1))?),
             None,
         )),
-        tast::Expr_::ArrayGet(x) => match ((x.0).1.as_lvar(), x.1.as_ref()) {
-            (Some(tast::Lid(_, id)), Some(elem))
-                if local_id::get_name(id) == superglobals::GLOBALS =>
-            {
-                Ok((
-                    InstrSeq::gather(vec![
-                        emit_expr(e, env, elem)?,
-                        emit_pos(pos),
-                        instr::cgetg(),
-                    ]),
-                    None,
-                ))
-            }
-            _ => emit_array_get(
-                e,
-                env,
-                pos,
-                None,
-                QueryOp::CGetQuiet,
-                &x.0,
-                x.1.as_ref(),
-                false,
-                null_coalesce_assignment,
-            ),
-        },
+        tast::Expr_::ArrayGet(x) => emit_array_get(
+            e,
+            env,
+            pos,
+            None,
+            QueryOp::CGetQuiet,
+            &x.0,
+            x.1.as_ref(),
+            false,
+            null_coalesce_assignment,
+        ),
         tast::Expr_::ObjGet(x) => emit_obj_get(
             e,
             env,
@@ -4724,10 +4672,6 @@ fn emit_base_(
     };
     use tast::Expr_ as E_;
     match expr_ {
-        E_::Lvar(x) if &(x.1).1 == superglobals::GLOBALS => Err(emit_fatal::raise_fatal_runtime(
-            pos,
-            "Cannot use [] with $GLOBALS",
-        )),
         E_::Lvar(x) if superglobals::is_superglobal(&(x.1).1) => {
             let base_instrs = emit_pos_then(
                 &x.0,
@@ -4784,32 +4728,6 @@ fn emit_base_(
             ))
         }
         E_::ArrayGet(x) => match (&(x.0).1, x.1.as_ref()) {
-            (E_::Lvar(v), Some(expr)) if local_id::get_name(&v.1) == superglobals::GLOBALS => {
-                Ok(match expr.1.as_lvar() {
-                    Some(tast::Lid(pos, id)) => {
-                        let v = get_local(e, env, pos, local_id::get_name(id))?;
-                        emit_default(
-                            e,
-                            instr::empty(),
-                            instr::empty(),
-                            instr::basegl(v, base_mode),
-                            0,
-                            0,
-                        )
-                    }
-                    _ => {
-                        let elem_instrs = emit_expr(e, env, expr)?;
-                        emit_default(
-                            e,
-                            elem_instrs,
-                            instr::empty(),
-                            instr::basegc(base_offset, base_mode),
-                            1,
-                            0,
-                        )
-                    }
-                })
-            }
             // $a[] can not be used as the base of an array get unless as an lval
             (_, None) if !env.flags.contains(env::Flags::ALLOWS_ARRAY_APPEND) => {
                 return Err(emit_fatal::raise_fatal_runtime(
@@ -5432,27 +5350,6 @@ pub fn emit_lval_op_nonlist_steps(
                 })
             }
             E_::ArrayGet(x) => match (&(x.0).1, x.1.as_ref()) {
-                (E_::Lvar(v), Some(expr)) if local_id::get_name(&v.1) == superglobals::GLOBALS => {
-                    let final_global_op_instrs = emit_final_global_op(pos, op);
-                    if rhs_stack_size == 0 {
-                        (
-                            emit_expr(e, env, expr)?,
-                            instr::empty(),
-                            final_global_op_instrs,
-                        )
-                    } else {
-                        let (index_instrs, under_top) = emit_first_expr(e, env, expr)?;
-                        if under_top {
-                            (
-                                instr::empty(),
-                                InstrSeq::gather(vec![rhs_instrs, index_instrs]),
-                                final_global_op_instrs,
-                            )
-                        } else {
-                            (index_instrs, rhs_instrs, final_global_op_instrs)
-                        }
-                    }
-                }
                 (_, None) if !env.flags.contains(env::Flags::ALLOWS_ARRAY_APPEND) => {
                     return Err(emit_fatal::raise_fatal_runtime(
                         pos,

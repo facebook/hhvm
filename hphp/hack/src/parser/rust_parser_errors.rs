@@ -2609,17 +2609,25 @@ where
         })
     }
 
+    fn check_disallowed_variables(&mut self, node: &'a Syntax<Token, Value>) {
+        match &node.syntax {
+            VariableExpression(x)
+                // TODO(T75820862): Allow $GLOBALS to be used as a variable name
+                if self.text(&x.variable_expression) == sn::superglobals::GLOBALS =>
+            {
+                self.errors
+                    .push(Self::make_error_from_node(node, errors::globals_disallowed))
+            }
+            _ => {}
+        }
+    }
+
     fn function_call_argument_errors(
         &mut self,
         in_constructor_call: bool,
         node: &'a Syntax<Token, Value>,
     ) {
         if let Some(e) = match &node.syntax {
-            VariableExpression(x)
-                if self.text(&x.variable_expression) == sn::superglobals::GLOBALS =>
-            {
-                Some(errors::globals_without_subscript)
-            }
             DecoratedExpression(x) => {
                 if let Token(token) = &x.decorated_expression_decorator.syntax {
                     if token.kind() == TokenKind::Inout {
@@ -5088,21 +5096,6 @@ where
     }
 
     fn assignment_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        let check_rvalue = |self_: &mut Self, roperand: &'a Syntax<Token, Value>| {
-            let append_errors = |self_: &mut Self, node, error| {
-                self_.errors.push(Self::make_error_from_node(node, error))
-            };
-            match &roperand.syntax {
-                VariableExpression(x)
-                    if self_.text(&x.variable_expression) == sn::superglobals::GLOBALS =>
-                {
-                    append_errors(self_, roperand, errors::globals_without_subscript)
-                }
-
-                _ => {}
-            }
-        };
-
         let check_unary_expression = |self_: &mut Self, op, loperand: &'a Syntax<Token, Value>| {
             if Self::does_unop_create_write(Self::token_kind(op)) {
                 self_.check_lvalue(true, loperand)
@@ -5125,16 +5118,13 @@ where
             }
             BinaryExpression(x) => {
                 let loperand = &x.binary_left_operand;
-                let roperand = &x.binary_right_operand;
                 if Self::does_binop_create_write_on_left(Self::token_kind(&x.binary_operator)) {
                     self.check_lvalue(false, &loperand);
-                    check_rvalue(self, &roperand);
                 }
             }
             ForeachStatement(x) => {
                 self.check_lvalue(false, &x.foreach_value);
                 self.check_lvalue(false, &x.foreach_key);
-                check_rvalue(self, &x.foreach_collection);
             }
             CatchClause(_) => {
                 self.check_lvalue(false, node);
@@ -5488,6 +5478,7 @@ where
             | ConditionalExpression(_)
             | CollectionLiteralExpression(_)
             | VariableExpression(_) => {
+                self.check_disallowed_variables(node);
                 self.dynamic_method_call_errors(node);
                 self.expression_errors(node);
                 self.check_nonrx_annotation(node);

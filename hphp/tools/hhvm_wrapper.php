@@ -241,7 +241,7 @@ function determine_trace_env(OptionMap $opts): string {
 
 function argv_for_shell(): string {
   $ret = '';
-  foreach ($GLOBALS['argv'] as $arg) {
+  foreach (\HH\global_get('argv') as $arg) {
     $ret .= '"'.$arg.'" ';
   }
   return $ret;

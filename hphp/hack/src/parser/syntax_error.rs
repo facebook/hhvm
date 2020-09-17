@@ -900,8 +900,8 @@ pub fn lowering_parsing_error(text: &str, syntax: &str) -> Error {
 }
 pub const xhp_class_attribute_type_constant: Error =
     Cow::Borrowed("Type constants are not allowed on xhp class attributes");
-pub const globals_without_subscript: Error =
-    Cow::Borrowed("`$GLOBALS` access requires a subscript.");
+pub const globals_disallowed: Error =
+    Cow::Borrowed("`$GLOBALS` variable is removed from the language. Use HH\\global functions");
 pub const invalid_await_position_pipe: Error =
     Cow::Borrowed("`await` cannot be used as an expression right of a pipe operator.");
 pub fn invalid_modifier_for_declaration(decl: &str, modifier: &str) -> Error {

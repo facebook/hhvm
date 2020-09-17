@@ -180,7 +180,11 @@ let check_reactivity_matches
       (* Pure functions can only call pure functions *)
       | ( (MaybeReactive (Pure _) | Pure _),
           ( MaybeReactive (Reactive _ | Shallow _ | Local _ | Nonreactive)
-          | Reactive _ | Shallow _ | Local _ | Nonreactive ) )
+          | Reactive _ | Shallow _ | Local _ | Nonreactive ) ) ->
+        Errors.nonpure_function_call
+          pos
+          (Reason.to_pos reason)
+          (TU.reactivity_to_string env callee_reactivity)
       (* Reactive functions can only call reactive or pure functions *)
       | ( (MaybeReactive (Reactive _) | Reactive _),
           ( MaybeReactive (Shallow _ | Local _ | Nonreactive)

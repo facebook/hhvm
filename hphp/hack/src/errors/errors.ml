@@ -4855,6 +4855,14 @@ let nonreactive_function_call pos decl_pos callee_reactivity cause_pos_opt =
             );
           ]) )
 
+let nonpure_function_call pos decl_pos callee_reactivity =
+  add_list
+    (Typing.err_code Typing.NonpureFunctionCall)
+    [
+      (pos, "Pure functions can only call other pure functions.");
+      (decl_pos, "This function is " ^ callee_reactivity ^ ".");
+    ]
+
 let nonreactive_call_from_shallow pos decl_pos callee_reactivity cause_pos_opt =
   add_list
     (Typing.err_code Typing.NonreactiveCallFromShallow)

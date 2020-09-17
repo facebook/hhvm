@@ -1108,6 +1108,8 @@ val missing_xhp_required_attr : Pos.t -> string -> (Pos.t * string) list -> unit
 
 val nonreactive_function_call : Pos.t -> Pos.t -> string -> Pos.t option -> unit
 
+val nonpure_function_call : Pos.t -> Pos.t -> string -> unit
+
 val nonreactive_indexing : bool -> Pos.t -> unit
 
 val inout_argument_bad_expr : Pos.t -> unit

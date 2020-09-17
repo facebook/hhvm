@@ -124,24 +124,32 @@ let prop =
   in
   (fun fmt c -> aux 0 fmt (conjuncts c))
 
+let pp_lenv fmt lenv =
+  pp_open_vbox fmt 0;
+  fprintf
+    fmt
+    "@[<hov2>lvars:@ %a@]"
+    (LMap.make_pp Local_id.pp ptype)
+    lenv.le_vars;
+  let policy_set fmt s = list comma_sep policy fmt (PCSet.elements s) in
+  if not (PCSet.is_empty lenv.le_pc) then
+    fprintf fmt "@,@[<hov2>pc: @[<hov>%a@]@]" policy_set lenv.le_pc;
+  pp_close_box fmt ()
+
 let locals fmt env =
-  let pp_lenv fmt lenv =
-    pp_open_vbox fmt 0;
-    fprintf
-      fmt
-      "@[<hov2>lvars:@ %a@]"
-      (LMap.make_pp Local_id.pp ptype)
-      lenv.le_vars;
-    let policy_set fmt s = list comma_sep policy fmt (PCSet.elements s) in
-    if not (PCSet.is_empty lenv.le_pc) then
-      fprintf fmt "@,@[<hov2>pc: @[<hov>%a@]@]" policy_set lenv.le_pc;
-    pp_close_box fmt ()
-  in
   let pp_lenv_opt fmt = function
     | Some lenv -> pp_lenv fmt lenv
     | None -> fprintf fmt "<empty>"
   in
   pp_lenv_opt fmt (Env.get_lenv_opt env Typing_cont_key.Next)
+
+let all_locals fmt env =
+  let pp k lenv =
+    let cont = Typing_continuations.to_string k in
+    fprintf fmt "@,@[<hov2>%s: @[<hov>%a@]@]" cont pp_lenv lenv
+  in
+  fprintf fmt "Locals:";
+  KMap.iter pp env.e_cont
 
 let renv fmt renv =
   pp_open_vbox fmt 0;

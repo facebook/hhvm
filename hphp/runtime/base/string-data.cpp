@@ -83,7 +83,7 @@ const SymbolPrefix* getSymbolPrefix(const StringData* sd) {
 }
 
 bool StringData::isSymbol() const {
-  return m_aux16 >> StringData::kSymbolOffsetInAux;
+  return m_aux16 >> 8;
 }
 
 void StringData::markSymbolsLoaded() {
@@ -157,8 +157,7 @@ StringData* StringData::MakeSharedAt(folly::StringPiece sl, MemBlock range) {
 #endif
   auto const count = trueStatic ? StaticValue : UncountedValue;
   if (symbol) {
-    sd->initHeader_16(HeaderKind::String, count,
-                      1 << StringData::kSymbolOffsetInAux);
+    sd->initHeader_16(HeaderKind::String, count, 1 << 8);
     getSymbolPrefix(sd)->cls = nullptr;
     getSymbolPrefix(sd)->ne = nullptr;
   } else {

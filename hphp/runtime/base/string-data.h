@@ -426,7 +426,6 @@ struct StringData final : MaybeCountable,
    * After loading a majority of symbols, call StringData::markSymbolsLoaded
    * to avoid allocating these extra caches on any more static strings.
    */
-  static constexpr size_t kSymbolOffsetInAux = 15;
   bool isSymbol() const;
   static void markSymbolsLoaded();
 

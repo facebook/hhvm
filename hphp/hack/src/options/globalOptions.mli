@@ -266,6 +266,10 @@ type t = {
    * with such positions are flagged
    *)
   tco_report_pos_from_reason: bool;
+  (* Type check this proportion of all files. Default is 1.0.
+   * DO NOT set to any other value except for testing purposes.
+   *)
+  tco_typecheck_sample_rate: float;
 }
 [@@deriving eq, show]
 
@@ -370,6 +374,7 @@ val make :
   ?tco_higher_kinded_types:bool ->
   ?tco_method_call_inference:bool ->
   ?tco_report_pos_from_reason:bool ->
+  ?tco_typecheck_sample_rate:float ->
   unit ->
   t
 
@@ -600,3 +605,5 @@ val tco_higher_kinded_types : t -> bool
 val tco_method_call_inference : t -> bool
 
 val tco_report_pos_from_reason : t -> bool
+
+val tco_typecheck_sample_rate : t -> float

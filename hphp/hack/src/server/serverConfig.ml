@@ -427,6 +427,7 @@ let load ~silent config_filename options =
         (bool_opt "enable_first_class_function_pointers" config)
       ?tco_method_call_inference:(bool_opt "method_call_inference" config)
       ?tco_report_pos_from_reason:(bool_opt "report_pos_from_reason" config)
+      ?tco_typecheck_sample_rate:(float_opt "typecheck_sample_rate" config)
       ()
   in
   Errors.allowed_fixme_codes_strict :=

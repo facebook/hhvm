@@ -109,6 +109,7 @@ impl Default for GlobalOptions<'_> {
             tco_higher_kinded_types: false,
             tco_method_call_inference: false,
             tco_report_pos_from_reason: false,
+            tco_typecheck_sample_rate: 1.0,
         }
     }
 }

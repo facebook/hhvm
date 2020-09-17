@@ -814,8 +814,27 @@ let go_with_interrupt
     ~(memory_cap : int option)
     ~(check_info : check_info) :
     (Errors.t, Delegate.state, Telemetry.t, 'a) job_result =
-  let fnl = List.map fnl ~f:(fun path -> Check { path; deferred_count = 0 }) in
   let opts = Provider_context.get_tcopt ctx in
+  let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
+  let fnl =
+    if sample_rate >= 1.0 then
+      fnl
+    else
+      let result =
+        List.filter
+          ~f:(fun x ->
+            float (Base.String.hash (Relative_path.suffix x) mod 1000000)
+            <= sample_rate *. 1000000.0)
+          fnl
+      in
+      Hh_logger.log
+        "Sampling %f percent of files: %d out of %d"
+        sample_rate
+        (List.length result)
+        (List.length fnl);
+      result
+  in
+  let fnl = List.map fnl ~f:(fun path -> Check { path; deferred_count = 0 }) in
   Mocking.with_test_mocking fnl @@ fun fnl ->
   let result =
     if should_process_sequentially opts fnl then begin

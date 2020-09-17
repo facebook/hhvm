@@ -87,6 +87,10 @@ fn rewrite_expr(e: &Expr) -> Expr {
             (Bop::Plus, lhs, rhs) => {
                 meth_call("plus", vec![rewrite_expr(&lhs), rewrite_expr(&rhs)])
             }
+            // Convert `... = ...` to `$v->assign($v->..., $v->...)`.
+            (Bop::Eq(None), lhs, rhs) => {
+                meth_call("assign", vec![rewrite_expr(&lhs), rewrite_expr(&rhs)])
+            }
             _ => meth_call(
                 "unsupportedSyntax",
                 vec![string_literal("bad binary operator")],

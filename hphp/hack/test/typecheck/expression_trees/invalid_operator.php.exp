@@ -14,3 +14,9 @@ File "invalid_operator.php", line 29, characters 22-50:
 Unsupported syntax for expression trees. (Parsing[1002])
 File "invalid_operator.php", line 32, characters 14-15:
 Unsupported syntax for expression trees. (Parsing[1002])
+File "invalid_operator.php", line 35, characters 32-36:
+Unsupported syntax for expression trees. (Parsing[1002])
+File "invalid_operator.php", line 36, characters 32-38:
+Unsupported syntax for expression trees. (Parsing[1002])
+File "invalid_operator.php", line 39, characters 24-30:
+Unsupported syntax for expression trees. (Parsing[1002])

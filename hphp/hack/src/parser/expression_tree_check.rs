@@ -97,9 +97,11 @@ impl<'ast> Visitor<'ast> for Checker {
                 True | False => true,
                 // Allow local variables $foo.
                 Lvar(_) => true,
-                // Only allow + for binary operators.
                 Binop(bop) => match **bop {
+                    // Allow the addition operator.
                     (Bop::Plus, _, _) => true,
+                    // Allow $x = 1, but not $x += 1.
+                    (Bop::Eq(None), _, _) => true,
                     _ => false,
                 },
                 // Allow simple function calls.

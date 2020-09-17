@@ -773,9 +773,6 @@ let check_subtype_scheme ~pos sub_scheme sup_scheme : pos_flow list =
   let sub_prop =
     sub_prop |> Logic.quantify ~pred ~quant:Qexists |> Logic.simplify
   in
-  (* Format.printf "%s@." sub_proto.fp_name;
-   * Format.printf "LATTICE: %a@." Pp.security_lattice sup_lattice;
-   * Format.printf "PROP: %a@." Pp.prop sub_prop; *)
   Logic.entailment_violations sup_lattice sub_prop
 
 let analyse_callable

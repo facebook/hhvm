@@ -51,7 +51,7 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-RegionContext getContext(SrcKey sk) {
+RegionContext getContext(SrcKey sk, bool profiling) {
   RegionContext ctx { sk, liveSpOff() };
 
   auto const func = sk.func();
@@ -61,11 +61,21 @@ RegionContext getContext(SrcKey sk) {
   always_assert(func == fp->func());
   auto const ctxClass = func->cls();
   auto const addLiveType = [&](Location loc, tv_rval tv) {
-    auto const bespoke = tvIsArrayLike(tv) && !val(tv).parr->isVanilla();
-    ctx.liveTypes.push_back({loc, typeFromTV(tv, ctxClass)});
-    ctx.liveBespoke |= bespoke;
-    FTRACE(2, "Added live type: {}{}\n", show(ctx.liveTypes.back()),
-           bespoke ? " (bespoke)" : "");
+    auto const type = typeFromTV(tv, ctxClass);
+    if (profiling) {
+      // Generate a translation for vanilla arrays, even if the live types are
+      // bespoke.
+      auto const unspecialized =
+        tvIsArrayLike(tv) ? type.unspecialize().narrowToVanilla() : type;
+      assertx(IMPLIES(unspecialized != type, allowBespokeArrayLikes()));
+      ctx.liveTypes.push_back({loc, unspecialized});
+    } else {
+      auto const bespoke = tvIsArrayLike(tv) && !val(tv).parr->isVanilla();
+      ctx.liveTypes.push_back({loc, type});
+      ctx.liveBespoke |= bespoke;
+    }
+
+    FTRACE(2, "Added live type: {}\n", show(ctx.liveTypes.back()));
   };
 
   // Track local types.
@@ -164,7 +174,7 @@ TCA getTranslation(TransArgs args) {
     return tca;
   }
 
-  return mcgen::retranslate(args, getContext(args.sk));
+  return mcgen::retranslate(args, getContext(args.sk, args.kind == TransKind::Profile));
 }
 
 TCA getFuncBody(Func* func) {
@@ -284,7 +294,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       auto trflags = info.args[1].trflags;
       auto args = TransArgs{sk};
       args.flags = trflags;
-      start = mcgen::retranslate(args, getContext(args.sk));
+      start = mcgen::retranslate(args, getContext(args.sk, tc::profileFunc(sk.func())));
       SKTRACE(2, sk, "retranslated @%p\n", start);
       break;
     }

@@ -219,11 +219,24 @@ void emitGuards(irgen::IRGS& irgs,
   }
 
   // Emit type guards/preconditions.
-  for (auto const& preCond : typePreConditions) {
-    auto type = preCond.type;
-    auto loc  = preCond.location;
-    assertx(type <= TCell);
-    irgen::checkType(irgs, loc, type, bcOff);
+  if (irgs.context.kind == TransKind::Profile) {
+    // If we're in a profiling tracelet, weaken vanilla guards so that
+    // logging arrays can flow through tracelets.
+    for (auto const& preCond : typePreConditions) {
+      auto const origType = preCond.type;
+      auto type = origType <= TArrLike ? origType.unspecialize()
+                                       : origType;
+      auto loc  = preCond.location;
+      assertx(type <= TCell);
+      irgen::checkType(irgs, loc, type, bcOff);
+    }
+  } else {
+    for (auto const& preCond : typePreConditions) {
+      auto type = preCond.type;
+      auto loc  = preCond.location;
+      assertx(type <= TCell);
+      irgen::checkType(irgs, loc, type, bcOff);
+    }
   }
 
   // Finish emitting guards, and emit profiling counters.

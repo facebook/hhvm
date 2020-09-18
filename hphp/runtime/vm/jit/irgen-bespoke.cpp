@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/irgen-builtin.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-state.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/util/tiny-vector.h"
@@ -93,6 +94,7 @@ folly::Optional<Location> getVanillaLocation(const IRGS& env, SrcKey sk) {
 }
 
 void guardToVanilla(IRGS& env, SrcKey sk, Location loc) {
+  assertx(env.formingRegion || env.context.kind != TransKind::Profile);
   assertx(!env.irb->guardFailBlock());
   auto const& type = env.irb->typeOf(loc, DataTypeSpecific);
   if (!(type.isKnownDataType() && type <= TArrLike)) return;
@@ -103,9 +105,107 @@ void guardToVanilla(IRGS& env, SrcKey sk, Location loc) {
   env.irb->constrainLocation(loc, gc);
   if (type.arrSpec().vanilla()) return;
 
-  env.irb->setGuardFailBlock(makeExit(env));
   auto const target_type = type.unspecialize().narrowToVanilla();
+  env.irb->setGuardFailBlock(makeExit(env));
   checkType(env, loc, target_type, -1);
+  env.irb->resetGuardFailBlock();
+}
+
+// In a profiling tracelet, we don't want to guard on the array being vanilla,
+// so we emit code to handle both vanilla and logging arrays.
+void emitLoggingDiamond(IRGS& env, SrcKey sk, Location loc, Block* nextBlock) {
+  assertx(!env.formingRegion && env.context.kind == TransKind::Profile);
+  assertx(!env.irb->guardFailBlock());
+  auto const& type = env.irb->typeOf(loc, DataTypeSpecific);
+  if (!(type.isKnownDataType() && type <= TArrLike)) return;
+
+  FTRACE_MOD(Trace::hhir, 2, "At {}: {}: log when {} is bespoke: {}\n",
+             sk.offset(), opcodeToName(sk.op()), show(loc), type);
+  ifThen(
+    env,
+    [&](Block* taken) {
+      auto const target_type = type.unspecialize().narrowToVanilla();
+      env.irb->setGuardFailBlock(taken);
+      checkType(env, loc, target_type, -1);
+      env.irb->resetGuardFailBlock();
+    },
+    [&] {
+      // Note that nextBlock is null iff opcodeChangesPC (which, for
+      // layout-sensitive bytecodes, implies that opcodeBreaksBB and we are at
+      // the end of the tracelet). Therefore we don't need to worry about
+      // control flow after the InterpOneCF.
+      interpOne(env);
+      if (nextBlock) gen(env, Jmp, nextBlock);
+    }
+  );
+}
+
+Block* emitDiamondOnLocation(IRGS& env, SrcKey sk, Location loc) {
+  assertx(env.context.kind == TransKind::Profile);
+
+  auto const op = curFunc(env)->getOp(bcOff(env));
+  auto const opChangePC = opcodeChangesPC(op);
+  auto const nextBlock = opChangePC ? nullptr
+                                    : defBlock(env, Block::Hint::Likely);
+  assertx(IMPLIES(opChangePC, opcodeBreaksBB(op, false)));
+
+  emitLoggingDiamond(env, sk, loc, nextBlock);
+
+  auto const cur = env.irb->curBlock();
+  auto const vanillaBlock = defBlock(env, Block::Hint::Likely);
+  if (cur->empty() || !cur->back().isBlockEnd()) {
+    gen(env, Jmp, vanillaBlock);
+  } else if (!cur->back().isTerminal()) {
+    cur->back().setNext(vanillaBlock);
+  }
+  env.irb->appendBlock(vanillaBlock);
+
+  return nextBlock;
+}
+
+/* We have a vanilla and a logging side of the diamond. The logging side may
+ * have lost type information because of using InterpOne. Emit AssertTypes with
+ * the type information from the vanilla side after the merge point to regain
+ * this information. This is not relevant for InterpOneCF cases, as those only
+ * occur at the end of the tracelet. */
+void emitDiamondTypeAssertions(IRGS& env, SrcKey sk, Block* merge) {
+  assertx(merge);
+  auto const dropVanilla = [&](Type type) {
+    return type.isKnownDataType() && type <= TArrLike ? type.unspecialize()
+                                                      : type;
+  };
+  auto const locals = curFunc(env)->numLocals();
+  auto const pushed = getStackPushed(sk.pc());
+  std::vector<Type> vanillaLocalTypes;
+  vanillaLocalTypes.reserve(locals);
+  std::vector<Type> vanillaStackTypes;
+  vanillaStackTypes.reserve(pushed);
+  for (uint32_t i = 0; i < locals; i ++) {
+    auto const type = env.irb->fs().local(i).type;
+    vanillaLocalTypes.push_back(dropVanilla(type));
+  }
+  for (int32_t i = 0; i < pushed; i ++) {
+    auto const idx = BCSPRelOffset{-i};
+    auto const type = env.irb->fs().stack(offsetFromIRSP(env, idx)).type;
+    vanillaStackTypes.push_back(dropVanilla(type));
+  }
+
+  auto const cur = env.irb->curBlock();
+  if (cur->empty() || !cur->back().isBlockEnd()) {
+    gen(env, Jmp, merge);
+  } else if (!cur->back().isTerminal()) {
+    cur->back().setNext(merge);
+  }
+  env.irb->appendBlock(merge);
+
+  for (uint32_t i = 0; i < locals; i ++) {
+    gen(env, AssertLoc, vanillaLocalTypes[i], LocalId(i), fp(env));
+  }
+  for (int32_t i = 0; i < pushed; i ++) {
+    auto const idx = BCSPRelOffset{-i};
+    gen(env, AssertStk, vanillaStackTypes[i],
+        IRSPRelOffsetData { offsetFromIRSP(env, idx) }, sp(env));
+  }
 }
 }
 
@@ -124,14 +224,33 @@ bool checkBespokeInputs(IRGS& env, SrcKey sk) {
   return true;
 }
 
-void handleBespokeInputs(IRGS& env, SrcKey sk) {
-  if (!allowBespokeArrayLikes()) return;
-
-  if (auto const loc = getVanillaLocation(env, sk)) {
-    assertx(!env.irb->guardFailBlock());
-    guardToVanilla(env, sk, *loc);
-    env.irb->resetGuardFailBlock();
+void handleBespokeInputs(IRGS& env, SrcKey sk,
+                         std::function<void(IRGS&)> emitVanilla) {
+  if (!allowBespokeArrayLikes()) {
+    // No bespokes, just irgen for vanilla
+    emitVanilla(env);
+    return;
   }
+
+  auto const loc = getVanillaLocation(env, sk);
+  if (!loc) {
+    // No layout-sensitive inputs, just irgen for vanilla
+    emitVanilla(env);
+    return;
+  }
+
+  if (env.formingRegion || env.context.kind != TransKind::Profile) {
+    // We're forming a region or not in a profiling tracelet, irgen as normal
+    guardToVanilla(env, sk, *loc);
+    emitVanilla(env);
+    return;
+  }
+
+  // We potentially have a logging array in a profiling tracelet; emit a
+  // diamond to handle it.
+  auto const mergeBlock = emitDiamondOnLocation(env, sk, *loc);
+  emitVanilla(env);
+  if (mergeBlock) emitDiamondTypeAssertions(env, sk, mergeBlock);
 }
 
 void handleVanillaOutputs(IRGS& env, SrcKey sk) {
@@ -141,17 +260,8 @@ void handleVanillaOutputs(IRGS& env, SrcKey sk) {
 
   auto const vanilla = topC(env);
   auto const logging = gen(env, NewLoggingArray, vanilla);
-  ifThen(env,
-    [&](Block* taken) {
-      auto const eq = gen(env, EqArrayDataPtr, vanilla, logging);
-      gen(env, JmpZero, taken, eq);
-    },
-    [&]{
-      discard(env);
-      push(env, logging);
-      gen(env, Jmp, makeExit(env, nextBcOff(env)));
-    }
-  );
+  discard(env);
+  push(env, logging);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

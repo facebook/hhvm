@@ -38,7 +38,7 @@ bool checkBespokeInputs(IRGS&, SrcKey);
  * Having this hook allows us to handle these cases in wildly different ways
  * based on runtime flags, profiling vs. optimizing, etc.
  */
-void handleBespokeInputs(IRGS&, SrcKey);
+void handleBespokeInputs(IRGS&, SrcKey, std::function<void(IRGS&)> emitVanilla);
 
 /*
  * After emitting code for the given SrcKey, call this method to perform any

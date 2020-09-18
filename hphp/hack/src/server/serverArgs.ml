@@ -465,10 +465,14 @@ let write_symbol_info options = options.write_symbol_info
 (* Setters *)
 (*****************************************************************************)
 
+let set_ai_mode options ai_mode = { options with ai_mode }
+
 let set_check_mode options check_mode = { options with check_mode }
 
 let set_gen_saved_ignore_type_errors options ignore_type_errors =
   { options with gen_saved_ignore_type_errors = ignore_type_errors }
+
+let set_max_procs options procs = { options with max_procs = Some procs }
 
 let set_no_load options is_no_load = { options with no_load = is_no_load }
 

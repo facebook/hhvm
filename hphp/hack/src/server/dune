@@ -8,7 +8,7 @@
     serverEnv
     serverLocalConfig)
   (libraries
-    ai
+    ai_options
     build_options
     ci_util
     cli_args

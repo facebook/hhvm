@@ -31,3 +31,13 @@ val serve_one_iteration :
  * disable this behavior, forcing only one recheck per serve_one_iteration
  * call. This is useful in tests to observe intermediate state. *)
 val force_break_recheck_loop_for_test : bool -> unit
+
+val program_init : ServerEnv.genv -> ServerEnv.env -> ServerEnv.env
+
+val setup_server :
+  informant_managed:bool ->
+  monitor_pid:int option ->
+  ServerArgs.options ->
+  ServerConfig.t ->
+  ServerLocalConfig.t ->
+  ServerEnv.genv * ServerEnv.env

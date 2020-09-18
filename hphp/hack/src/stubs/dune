@@ -2,8 +2,17 @@
   (name ai_stubs)
   (wrapped false)
   (modules
-    ai
-    ai_init
+    ai)
+  (libraries
+    ai_options
+    errors)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
+  (name ai_options_stubs)
+  (wrapped false)
+  (modules
     ai_options)
   (libraries
     errors)

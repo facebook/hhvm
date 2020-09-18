@@ -98,9 +98,13 @@ module type S = sig
   (* Setters *)
   (****************************************************************************)
 
+  val set_ai_mode : options -> Ai_options.t option -> options
+
   val set_check_mode : options -> bool -> options
 
   val set_gen_saved_ignore_type_errors : options -> bool -> options
+
+  val set_max_procs : options -> int -> options
 
   val set_saved_state_target :
     options -> ServerMonitorUtils.target_saved_state option -> options

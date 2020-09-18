@@ -7,9 +7,9 @@
  *
  *)
 
-type t = unit
+type t = { analyses: string list }
 
-let prepare ~server:_ _ = ()
+let prepare ~server:_ _ = { analyses = [] }
 
 let set_json_mode opt _ = opt
 

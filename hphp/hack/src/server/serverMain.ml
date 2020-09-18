@@ -1236,10 +1236,25 @@ let num_workers options local_config =
       nbr_procs
     )
 
-let setup_server ~informant_managed ~monitor_pid options config local_config =
-  let num_workers =
-    num_workers options local_config |> Ai.modify_worker_count
+(* The hardware we are running on are Intel Skylake and Haswell family
+   processors with 80, 56, or 48 cores.  Turns out that there are only 1/2
+   actual CPUs, the rest are hyperthreads. Using worker processes for
+   hyperthreads is slower than using just the number of actual computation
+   cores. *)
+let modify_worker_count hack_worker_count =
+  let n_procs = Sys_utils.nbr_procs in
+  let workers =
+    if hack_worker_count < n_procs then
+      (* Already limited, use what we have *)
+      hack_worker_count
+    else
+      (* Use half. *)
+      max 1 (n_procs / 2)
   in
+  workers
+
+let setup_server ~informant_managed ~monitor_pid options config local_config =
+  let num_workers = num_workers options local_config |> modify_worker_count in
   let handle =
     SharedMem.init ~num_workers (ServerConfig.sharedmem_config config)
   in

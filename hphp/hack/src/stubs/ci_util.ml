@@ -10,6 +10,7 @@ type status = StatusUnknown [@@deriving enum, show]
 
 type info = {
   id: string;
+  owner: string;
   status: status;
   (* Enqueued timestamp *)
   created_t: float;

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_DIRECTORY_H_
-#define incl_HPHP_DIRECTORY_H_
+#pragma once
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/resource-data.h"
@@ -109,4 +108,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_DIRECTORY_H_

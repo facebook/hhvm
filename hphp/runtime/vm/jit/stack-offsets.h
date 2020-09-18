@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_STACK_OFFSETS_H_
-#define incl_HPHP_JIT_STACK_OFFSETS_H_
+#pragma once
 
 #include "hphp/util/safe-cast.h"
 
@@ -351,4 +350,3 @@ FPRelOffset::to<IRSPRelOffset>(FPInvOffset sp) const {
 
 }}
 
-#endif // incl_HPHP_JIT_STACK_OFFSETS_H_

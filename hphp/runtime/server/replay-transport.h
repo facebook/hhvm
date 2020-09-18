@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_REPLAY_TRANSPORT_H_
-#define incl_HPHP_REPLAY_TRANSPORT_H_
+#pragma once
 
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -81,4 +80,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_REPLAY_TRANSPORT_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PAGELET_SERVER_H_
-#define incl_HPHP_PAGELET_SERVER_H_
+#pragma once
 
 #include <string>
 #include <atomic>
@@ -201,4 +200,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_PAGELET_SERVER_H_

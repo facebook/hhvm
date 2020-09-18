@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HTTP_SERVER_SERVER_H_
-#define incl_HPHP_HTTP_SERVER_SERVER_H_
+#pragma once
 
 #include <algorithm>
 #include <chrono>
@@ -445,4 +444,3 @@ struct InvalidHeaderException : ServerException {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HTTP_SERVER_SERVER_H_

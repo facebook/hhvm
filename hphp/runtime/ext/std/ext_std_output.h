@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_OUTPUT_H_
-#define incl_HPHP_EXT_OUTPUT_H_
+#pragma once
 
 #include "hphp/runtime/ext/std/ext_std.h"
 
@@ -69,4 +68,3 @@ void HHVM_FUNCTION(hphp_clear_hardware_events, void);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_OUTPUT_H_

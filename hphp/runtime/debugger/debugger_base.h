@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_BASE_H_
-#define incl_HPHP_EVAL_DEBUGGER_BASE_H_
+#pragma once
 
 #include <memory>
 #include <string>
@@ -243,4 +242,3 @@ struct DebuggerUsageLogger {
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_BASE_H_

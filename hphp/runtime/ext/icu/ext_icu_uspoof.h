@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_ICU_USPOOF_H
-#define incl_HPHP_ICU_USPOOF_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/icu/icu.h"
@@ -60,4 +59,3 @@ struct SpoofChecker : IntlError {
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Intl
 
-#endif // incl_HPHP_ICU_USPOOF_H

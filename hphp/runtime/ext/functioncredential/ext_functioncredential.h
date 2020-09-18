@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_FUNCTIONCREDENTIAL_H_
-#define incl_HPHP_EXT_FUNCTIONCREDENTIAL_H_
+#pragma once
 
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/vm/class.h"
@@ -40,4 +39,3 @@ private:
 
 }
 
-#endif // incl_HPHP_EXT_FUNCTIONCREDENTIAL_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SNAPSHOT_LOADER_H_
-#define incl_HPHP_SNAPSHOT_LOADER_H_
+#pragma once
 
 #include <stdio.h>
 #include <string>
@@ -68,4 +67,3 @@ struct SnapshotLoader {
 
 }
 
-#endif // incl_HPHP_SNAPSHOT_LOADER_H_

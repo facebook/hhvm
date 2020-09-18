@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_STREAM_H_
-#define incl_HPHP_EXT_STREAM_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -278,4 +277,3 @@ bool HHVM_FUNCTION(stream_socket_shutdown,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_STREAM_H_

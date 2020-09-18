@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_SERVER_H_
-#define incl_HPHP_EXT_SERVER_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -81,4 +80,3 @@ int64_t HHVM_FUNCTION(server_process_start_time);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_SERVER_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_OBJECT_H_
-#define incl_HPHP_OBJECT_H_
+#pragma once
 
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/req-ptr.h"
@@ -207,4 +206,3 @@ ALWAYS_INLINE Object toObject(tv_rval tv) {
 
 }
 
-#endif // incl_HPHP_OBJECT_H_

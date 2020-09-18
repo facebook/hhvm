@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_BREAKPOINT_MGR_H_
-#define incl_HPHP_VSDEBUG_BREAKPOINT_MGR_H_
+#pragma once
 
 #include "hphp/runtime/ext/vsdebug/break_mode.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
@@ -263,4 +262,3 @@ private:
 }
 }
 
-#endif //incl_HPHP_VSDEBUG_BREAKPOINT_MGR_H_

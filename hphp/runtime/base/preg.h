@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PREG_H_
-#define incl_HPHP_PREG_H_
+#pragma once
 
 #include "hphp/runtime/base/type-string.h"
 
@@ -183,4 +182,3 @@ struct PregWithErrorGuard {
 
 }
 
-#endif // incl_HPHP_PREG_H__

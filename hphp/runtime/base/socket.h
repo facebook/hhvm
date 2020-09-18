@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SOCKET_H_
-#define incl_HPHP_SOCKET_H_
+#pragma once
 
 #include "hphp/runtime/base/file.h"
 
@@ -162,4 +161,3 @@ struct StreamSocket final : Socket {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_SOCKET_H_

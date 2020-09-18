@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_DEBUGGER_CMD_INTERNAL_TESTING_H_
-#define incl_HPHP_DEBUGGER_CMD_INTERNAL_TESTING_H_
+#pragma once
 
 #include "hphp/runtime/debugger/debugger_command.h"
 
@@ -41,4 +40,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_DEBUGGER_CMD_INTERNAL_TESTING_H_

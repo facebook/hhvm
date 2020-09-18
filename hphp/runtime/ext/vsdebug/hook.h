@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_HOOK_H_
-#define incl_HPHP_VSDEBUG_HOOK_H_
+#pragma once
 
 #include "hphp/runtime/vm/debugger-hook.h"
 
@@ -71,4 +70,3 @@ private:
 }
 }
 
-#endif // incl_HPHP_VSDEBUG_HOOK_H_

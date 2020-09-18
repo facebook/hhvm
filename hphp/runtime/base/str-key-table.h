@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STR_KEY_TABLE_H_
-#define incl_HPHP_STR_KEY_TABLE_H_
+#pragma once
 
 #include <bitset>
 
@@ -41,4 +40,3 @@ private:
 
 } // namespace HPHP
 
-#endif // incl_HPHP_STR_KEY_TABLE_H_

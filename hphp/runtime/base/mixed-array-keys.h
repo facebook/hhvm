@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_MIXED_ARRAY_KEYS_H_
-#define incl_HPHP_MIXED_ARRAY_KEYS_H_
+#pragma once
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/string-data.h"
@@ -151,4 +150,3 @@ private:
 
 } // namespace HPHP
 
-#endif // incl_HPHP_MIXED_ARRAY_KEYS_H_

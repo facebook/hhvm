@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HTTP_REQUEST_HANDLER_H_
-#define incl_HPHP_HTTP_REQUEST_HANDLER_H_
+#pragma once
 
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/server/virtual-host.h"
@@ -84,4 +83,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HTTP_REQUEST_HANDLER_H_

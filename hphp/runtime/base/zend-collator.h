@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZEND_COLLATOR_H_
-#define incl_HPHP_ZEND_COLLATOR_H_
+#pragma once
 
 #include "hphp/runtime/ext/icu/icu.h"
 
@@ -39,4 +38,3 @@ bool collator_asort(Variant& array, int sort_flags, bool ascending,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ZEND_COLLATOR_H_

@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_HOTPROFILER_H_
-#define incl_HPHP_EXT_HOTPROFILER_H_
+#pragma once
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/util/rds-local.h"
@@ -330,4 +329,3 @@ DECLARE_EXTERN_REQUEST_LOCAL(ProfilerFactory, s_profiler_factory);
 
 }
 
-#endif // incl_HPHP_EXT_HOTPROFILER_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_SESSION_H_
-#define incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_SESSION_H_
+#pragma once
 
 #include "hphp/runtime/server/fastcgi/fastcgi-protocol.h"
 #include "hphp/runtime/server/fastcgi/fastcgi-transport.h"
@@ -411,5 +410,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HTTP_SERVER_FASTCGI_FASTCGI_SESSION_H_
 

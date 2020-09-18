@@ -14,8 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ICU_H
-#define incl_HPHP_ICU_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -166,4 +165,3 @@ DECLARE_EXTERN_REQUEST_LOCAL(IntlGlobalError, s_intl_error);
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
 
-#endif // incl_HPHP_ICU_H

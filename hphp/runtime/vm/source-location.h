@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_SOURCE_LOCATION_H_
-#define incl_HPHP_VM_SOURCE_LOCATION_H_
+#pragma once
 
 #include "hphp/parser/location.h"
 #include "hphp/runtime/base/types.h"
@@ -176,4 +175,3 @@ LineToOffsetRangeVecMap getLineToOffsetRangeVecMap(const Unit* unit);
 #include "hphp/runtime/vm/source-location-inl.h"
 #undef incl_HPHP_VM_SOURCE_LOCATION_INL_H_
 
-#endif // incl_HPHP_VM_SOURCE_LOCATION_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HHPROF_H_
-#define incl_HPHP_HHPROF_H_
+#pragma once
 
 #include "hphp/util/alloc.h"
 
@@ -139,4 +138,3 @@ struct HHProf {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // incl_HPHP_HHPROF_H_

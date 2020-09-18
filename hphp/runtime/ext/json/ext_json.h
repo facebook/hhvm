@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_JSON_H_
-#define incl_HPHP_EXT_JSON_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -68,4 +67,3 @@ extern const int64_t k_JSON_ERROR_UTF8;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_JSON_H_

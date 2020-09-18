@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_CURL_H_
-#define incl_HPHP_EXT_CURL_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -78,4 +77,3 @@ bool HHVM_FUNCTION(curl_share_setopt, const Resource& sh,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_CURL_H_

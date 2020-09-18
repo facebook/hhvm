@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZIP_FILE_H_
-#define incl_HPHP_ZIP_FILE_H_
+#pragma once
 
 #include "hphp/runtime/base/plain-file.h"
 #include <zlib.h>
@@ -71,4 +70,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ZIP_FILE_H_

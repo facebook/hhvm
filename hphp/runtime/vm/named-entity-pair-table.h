@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_NAMED_ENTITY_PAIR_TABLE_H_
-#define incl_HPHP_NAMED_ENTITY_PAIR_TABLE_H_
+#pragma once
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/containers.h"
@@ -68,4 +67,3 @@ struct NamedEntityPairTable
 #include "hphp/runtime/vm/named-entity-pair-table-inl.h"
 #undef incl_HPHP_NAMED_ENTITY_PAIR_TABLE_INL_H_
 
-#endif // incl_HPHP_NAMED_ENTITY_PAIR_TABLE_H_

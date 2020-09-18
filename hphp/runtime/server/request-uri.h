@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_REQUEST_URI_H_
-#define incl_HPHP_REQUEST_URI_H_
+#pragma once
 
 #include "hphp/runtime/base/type-string.h"
 
@@ -109,4 +108,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_REQUEST_URI_H_

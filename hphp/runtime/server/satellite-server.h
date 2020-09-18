@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SATELLITE_SERVER_H_
-#define incl_HPHP_SATELLITE_SERVER_H_
+#pragma once
 
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -120,4 +119,3 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_SATELLITE_SERVER_H_

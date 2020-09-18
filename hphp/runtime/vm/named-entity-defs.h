@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_NAMED_ENTITY_DEFS_H_
-#define incl_HPHP_VM_NAMED_ENTITY_DEFS_H_
+#pragma once
 
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/class.h"
@@ -80,4 +79,3 @@ const char* NamedEntity::checkSameName() {
 }
 
 }
-#endif // incl_HPHP_VM_NAMED_ENTITY_DEFS_H_

@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PDO_MYSQL_H_
-#define incl_HPHP_PDO_MYSQL_H_
+#pragma once
 
 #include "hphp/runtime/ext/pdo/pdo_driver.h"
 
@@ -56,4 +55,3 @@ struct PDOMySql : PDODriver {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_PDO_MYSQL_H_

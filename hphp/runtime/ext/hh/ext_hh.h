@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_HH_H_
-#define incl_HPHP_EXT_HH_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -43,4 +42,3 @@ extern const StaticString
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_HH_H_

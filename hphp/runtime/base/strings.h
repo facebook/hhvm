@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STRINGS_H_
-#define incl_HPHP_STRINGS_H_
+#pragma once
 
 namespace HPHP {
 namespace Strings {
@@ -139,4 +138,3 @@ constexpr char NONEXHAUSTIVE_SWITCH[] =
 } // namespace Strings
 } // namespace HPHP
 
-#endif // incl_HPHP_STRINGS_H_

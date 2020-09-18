@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_MACHINE_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_MACHINE_H_
+#pragma once
 
 #include <vector>
 #include "hphp/runtime/base/req-root.h"
@@ -59,4 +58,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_MACHINE_H_

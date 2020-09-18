@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_DEBUGGER_H_
-#define incl_HPHP_VSDEBUG_DEBUGGER_H_
+#pragma once
 
 #include <atomic>
 #include <unordered_map>
@@ -777,4 +776,3 @@ struct DebuggerNoBreakContext {
 }
 }
 
-#endif // incl_HPHP_VSDEBUG_DEBUGGER_H_

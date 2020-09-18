@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_CODE_COVERAGE_H_
-#define incl_HPHP_EVAL_CODE_COVERAGE_H_
+#pragma once
 
 #include "hphp/runtime/base/req-hash-map.h"
 #include "hphp/runtime/base/req-vector.h"
@@ -75,4 +74,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EVAL_CODE_COVERAGE_H_

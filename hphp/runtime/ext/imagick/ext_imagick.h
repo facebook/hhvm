@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_IMAGICK_H_
-#define incl_HPHP_EXT_IMAGICK_H_
+#pragma once
 
 #include <vector>
 
@@ -388,4 +387,3 @@ void loadImagickPixelIteratorClass();
 //////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
 
-#endif // incl_HPHP_EXT_IMAGICK_H_

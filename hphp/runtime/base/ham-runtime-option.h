@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HAM_RUNTIME_OPTION_H_
-#define incl_HPHP_HAM_RUNTIME_OPTION_H_
+#pragma once
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,4 +26,3 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HAM_RUNTIME_OPTION_H_

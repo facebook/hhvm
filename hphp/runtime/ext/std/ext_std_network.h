@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_NETWORK_H_
-#define incl_HPHP_EXT_NETWORK_H_
+#pragma once
 
 #include "hphp/runtime/ext/std/ext_std.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
@@ -79,4 +78,3 @@ bool validate_dns_arguments(const String& host, const String& type,
                             int& ntype);
 }
 
-#endif // incl_HPHP_EXT_NETWORK_H_

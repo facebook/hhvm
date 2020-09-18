@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_SQLITE3_H_
-#define incl_HPHP_EXT_SQLITE3_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/req-vector.h"
@@ -153,4 +152,3 @@ bool HHVM_METHOD(SQLite3Result, finalize);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_SQLITE3_H_

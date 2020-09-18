@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HPHP_ARRAY_H_
-#define incl_HPHP_HPHP_ARRAY_H_
+#pragma once
 
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-data.h"
@@ -601,4 +600,3 @@ HASH_TABLE_CHECK_OFFSETS(MixedArray, MixedArrayElm)
 
 }
 
-#endif // incl_HPHP_HPHP_ARRAY_H_

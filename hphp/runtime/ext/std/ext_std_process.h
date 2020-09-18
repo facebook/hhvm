@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_STD_PROCESS_H_
-#define incl_HPHP_EXT_STD_PROCESS_H_
+#pragma once
 
 #include "hphp/runtime/ext/std/ext_std.h"
 #include <signal.h>
@@ -66,4 +65,3 @@ String HHVM_FUNCTION(escapeshellcmd,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_STD_PROCESS_H_

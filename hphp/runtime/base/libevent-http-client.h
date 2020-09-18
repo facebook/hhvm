@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_LIBEVENT_HTTP_CLIENT_H_
-#define incl_HPHP_LIBEVENT_HTTP_CLIENT_H_
+#pragma once
 
 #include <map>
 #include <memory>
@@ -124,4 +123,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_LIBEVENT_HTTP_CLIENT_H_

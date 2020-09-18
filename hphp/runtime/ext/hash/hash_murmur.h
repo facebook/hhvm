@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_HASH_MURMUR_H_
-#define incl_HPHP_EXT_HASH_MURMUR_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -35,6 +34,5 @@ const int SEED = 4193360111ul;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_HASH_MURMUR_H_
 
 

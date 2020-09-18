@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXTENSION_H_
-#define incl_HPHP_EXTENSION_H_
+#pragma once
 
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -153,4 +152,3 @@ extern "C" Extension* getModule() { \
 
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
-#endif // incl_HPHP_EXTENSION_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HTTP_CLIENT_H_
-#define incl_HPHP_HTTP_CLIENT_H_
+#pragma once
 
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/base/string-buffer.h"
@@ -127,4 +126,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HTTP_CLIENT_H_

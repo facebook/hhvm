@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_FILE_AWAIT_H
-#define incl_HPHP_FILE_AWAIT_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
@@ -81,4 +80,3 @@ struct FileAwait : AsioExternalThreadEvent {
 
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
-#endif // incl_HPHP_FILE_AWAIT_H

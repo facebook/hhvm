@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ARRAY_UTIL_H_
-#define incl_HPHP_ARRAY_UTIL_H_
+#pragma once
 
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/req-hash-set.h"
@@ -136,4 +135,3 @@ struct ArrayUtil final {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ARRAY_UTIL_H_

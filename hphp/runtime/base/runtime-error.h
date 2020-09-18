@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_ERROR_H_
-#define incl_HPHP_RUNTIME_ERROR_H_
+#pragma once
 
 #include <cstdarg>
 #include <string>
@@ -262,4 +261,3 @@ void raise_clsmeth_compat_type_hint_property_notice(
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_RUNTIME_ERROR_H_

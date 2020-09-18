@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_EXT_ASYNC_MYSQL_H_
-#define incl_EXT_ASYNC_MYSQL_H_
+#pragma once
 
 #include <algorithm>
 #include <memory>
@@ -439,4 +438,3 @@ struct AsyncMysqlRowIterator {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_EXT_ASYNC_MYSQL_H_

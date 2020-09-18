@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_EXTENSION_REGISTRY_H
-#define incl_HPHP_EXTENSION_REGISTRY_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -51,4 +50,3 @@ void deserialize(jit::ProfDataDeserializer& des);
 
 }
 
-#endif // incl_HPHP_EXTENSION_REGISTRY_H

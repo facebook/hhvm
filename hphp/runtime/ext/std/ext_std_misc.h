@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_MISC_H_
-#define incl_HPHP_EXT_MISC_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/std/ext_std.h"
@@ -60,4 +59,3 @@ extern const double k_NAN;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_MISC_H_

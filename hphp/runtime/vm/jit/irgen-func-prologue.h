@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_IRGEN_FUNC_PROLOGUE_H
-#define incl_HPHP_JIT_IRGEN_FUNC_PROLOGUE_H
+#pragma once
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -50,4 +49,3 @@ void emitImplicitContextCheck(IRGS& env, const Func* callee);
 
 }}}
 
-#endif // incl_HPHP_JIT_IRGEN_FUNC_PROLOGUE_H

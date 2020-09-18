@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PROGRAM_FUNCTIONS_H_
-#define incl_HPHP_PROGRAM_FUNCTIONS_H_
+#pragma once
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -162,4 +161,3 @@ struct HphpSessionAndThread {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_PROGRAM_FUNCTIONS_H_

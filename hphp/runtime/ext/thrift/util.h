@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_THRIFT_UTIL_H
-#define incl_HPHP_EXT_THRIFT_UTIL_H
+#pragma once
 
 #include "hphp/runtime/base/array-init.h"
 
@@ -55,4 +54,3 @@ inline void set_with_intish_key_cast(
 
 }}
 
-#endif // incl_HPHP_EXT_THRIFT_UTIL_H

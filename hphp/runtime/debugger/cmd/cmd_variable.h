@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_VARIABLE_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_VARIABLE_H_
+#pragma once
 
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/req-root.h"
@@ -62,4 +61,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_VARIABLE_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_SERVER_H_
-#define incl_HPHP_EVAL_DEBUGGER_SERVER_H_
+#pragma once
 
 #include <vector>
 
@@ -61,4 +60,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_SERVER_H_

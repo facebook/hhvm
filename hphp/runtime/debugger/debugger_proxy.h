@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_PROXY_H_
-#define incl_HPHP_EVAL_DEBUGGER_PROXY_H_
+#pragma once
 
 #include <string>
 #include <map>
@@ -173,4 +172,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_PROXY_H_

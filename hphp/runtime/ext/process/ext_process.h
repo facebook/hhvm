@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_PROCESS_H_
-#define incl_HPHP_EXT_PROCESS_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include <sys/wait.h>
@@ -79,4 +78,3 @@ int64_t HHVM_FUNCTION(pcntl_wtermsig,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_PROCESS_H_

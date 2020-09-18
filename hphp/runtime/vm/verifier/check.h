@@ -18,8 +18,7 @@
  * This is the Verifier's public interface.
  */
 
-#ifndef incl_HPHP_VM_VERIFIER_CHECK_H_
-#define incl_HPHP_VM_VERIFIER_CHECK_H_
+#pragma once
 
 namespace HPHP {
 
@@ -113,4 +112,3 @@ bool checkNativeFunc(const FuncEmitter*, ErrorMode mode = kStderr);
 
 }} // HPHP::Verifier
 
-#endif // incl_HPHP_VM_VERIFIER_CHECK_UNIT_H_

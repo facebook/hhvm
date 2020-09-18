@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_IPC_H_
-#define incl_HPHP_EXT_IPC_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -105,4 +104,3 @@ bool HHVM_FUNCTION(shm_remove_var,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_IPC_H_

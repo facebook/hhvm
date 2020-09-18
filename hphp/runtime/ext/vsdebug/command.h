@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_COMMAND_H_
-#define incl_HPHP_VSDEBUG_COMMAND_H_
+#pragma once
 
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
@@ -732,4 +731,3 @@ struct InfoCommand : public VSCommand {
 }
 }
 
-#endif // incl_HPHP_VSDEBUG_COMMAND_H_

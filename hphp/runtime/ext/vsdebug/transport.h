@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_TRANSPORT_H_
-#define incl_HPHP_VSDEBUG_TRANSPORT_H_
+#pragma once
 
 #include <folly/dynamic.h>
 #include <folly/json.h>
@@ -166,4 +165,3 @@ private:
 }
 }
 
-#endif // incl_HPHP_VSDEBUG_TRANSPORT_H_

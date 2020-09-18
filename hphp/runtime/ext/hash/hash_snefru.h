@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_HASH_SNEFRU_H_
-#define incl_HPHP_EXT_HASH_SNEFRU_H_
+#pragma once
 
 #include "hphp/runtime/ext/hash/hash_engine.h"
 
@@ -35,4 +34,3 @@ struct hash_snefru : HashEngine {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_HASH_SNEFRU_H_

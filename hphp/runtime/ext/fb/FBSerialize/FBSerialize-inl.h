@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_FBSERIALIZE_INL_H_
-#define incl_HPHP_FBSERIALIZE_INL_H_
+#pragma once
 
 #include <folly/Bits.h>
 #include <folly/Conv.h>
@@ -710,4 +709,3 @@ inline void FBUnserializer<V>::advance(size_t delta) {
 
 }}
 
-#endif // incl_HPHP_FBSERIALIZE_INL_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_DEBUGGER_THRIFT_BUFFER_H_
-#define incl_HPHP_DEBUGGER_THRIFT_BUFFER_H_
+#pragma once
 
 #include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/base/thrift-buffer.h"
@@ -81,4 +80,3 @@ struct DebuggerWireHelpers {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_DEBUGGER_THRIFT_BUFFER_H_

@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZEND_PRINTF_H_
-#define incl_HPHP_ZEND_PRINTF_H_
+#pragma once
 
 // NOTE: See also "hphp/zend/zend-printf.*".
 
@@ -34,4 +33,3 @@ String string_printf(const char *format, int len, const Array& args);
 
 }
 
-#endif // incl_HPHP_ZEND_PRINTF_H_

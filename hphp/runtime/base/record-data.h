@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RECORD_DATA_H_
-#define incl_HPHP_RECORD_DATA_H_
+#pragma once
 
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/record-common.h"
@@ -87,4 +86,3 @@ ALWAYS_INLINE void decRefRec(RecordData* rec) {
 #include "hphp/runtime/base/record-data-inl.h"
 #undef incl_HPHP_RECORD_DATA_INL_H_
 
-#endif // incl_HPHP_RECORD_DATA_H_

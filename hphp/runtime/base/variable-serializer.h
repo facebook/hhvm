@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VARIABLE_SERIALIZER_H_
-#define incl_HPHP_VARIABLE_SERIALIZER_H_
+#pragma once
 
 #include "hphp/runtime/base/req-hash-map.h"
 #include "hphp/runtime/base/req-vector.h"
@@ -361,4 +360,3 @@ extern const StaticString s_serializedNativeDataKey;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_VARIABLE_SERIALIZER_H_

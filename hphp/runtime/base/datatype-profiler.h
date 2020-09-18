@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_DATATYPE_PROFILER_H_
-#define incl_HPHP_DATATYPE_PROFILER_H_
+#pragma once
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/util/stacktrace-profiler.h"
@@ -46,4 +45,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
 
-#endif // incl_HPHP_DATATYPE_PROFILER_H_

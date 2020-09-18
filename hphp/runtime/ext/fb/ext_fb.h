@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_FB_H_
-#define incl_HPHP_EXT_FB_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -75,4 +74,3 @@ Variant fb_compact_unserialize(const char* str, int len,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_FB_H_

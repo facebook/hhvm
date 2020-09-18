@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_PREG_H_
-#define incl_HPHP_EXT_PREG_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -64,4 +63,3 @@ String HHVM_FUNCTION(sql_regcase, const String& str);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_PREG_H_

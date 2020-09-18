@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_SPL_H_
-#define incl_HPHP_EXT_SPL_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -40,4 +39,3 @@ Array HHVM_FUNCTION(iterator_to_array, const Variant& obj,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_SPL_H_

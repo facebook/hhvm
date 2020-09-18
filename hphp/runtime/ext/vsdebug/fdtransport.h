@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_FDTRANSPORT_H_
-#define incl_HPHP_VSDEBUG_FDTRANSPORT_H_
+#pragma once
 
 #include "hphp/runtime/ext/vsdebug/transport.h"
 
@@ -39,4 +38,3 @@ private:
 }
 }
 
-#endif // incl_HPHP_VSDEBUG_FDTRANSPORT_H_

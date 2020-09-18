@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_MYSQL_H_
-#define incl_HPHP_EXT_MYSQL_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/config.h"
@@ -75,4 +74,3 @@ extern mysqlExtension s_mysql_extension;
 
 }
 
-#endif // incl_HPHP_EXT_MYSQL_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CERT_RELOADER_H_
-#define incl_HPHP_CERT_RELOADER_H_
+#pragma once
 
 #include <functional>
 #include <string>
@@ -55,4 +54,3 @@ private:
 
 }
 
-#endif // incl_HPHP_CERT_RELOADER_H_

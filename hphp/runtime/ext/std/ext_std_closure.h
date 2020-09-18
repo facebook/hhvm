@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_CLOSURE_H_
-#define incl_HPHP_EXT_CLOSURE_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/func.h"
@@ -187,4 +186,3 @@ ObjectData* createClosure(Class* cls);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_CLOSURE_H_

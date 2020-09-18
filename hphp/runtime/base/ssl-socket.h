@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SSL_SOCKET_H_
-#define incl_HPHP_SSL_SOCKET_H_
+#pragma once
 
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/socket.h"
@@ -164,4 +163,3 @@ struct Certificate : SweepableResourceData {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_SSL_SOCKET_H_

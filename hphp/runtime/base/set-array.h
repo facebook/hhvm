@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SET_ARRAY_H_
-#define incl_HPHP_SET_ARRAY_H_
+#pragma once
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-common.h"
@@ -438,4 +437,3 @@ HASH_TABLE_CHECK_OFFSETS(SetArray, SetArrayElm)
 
 }
 
-#endif // incl_HPHP_SET_ARRAY_H_

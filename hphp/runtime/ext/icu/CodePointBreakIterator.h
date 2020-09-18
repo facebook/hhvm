@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_EXT_ICU_CODEPOINTBREAKITERATOR_H
-#define incl_HPHP_EXT_ICU_CODEPOINTBREAKITERATOR_H
+#pragma once
 
 #include <unicode/brkiter.h>
 #include <unicode/uchriter.h>
@@ -170,4 +169,3 @@ struct CodePointBreakIterator : icu::BreakIterator {
 
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Intl
-#endif // incl_HPHP_EXT_ICU_CODEPOINTBREAKITERATOR_H

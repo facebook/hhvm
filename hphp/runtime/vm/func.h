@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_FUNC_H_
-#define incl_HPHP_VM_FUNC_H_
+#pragma once
 
 #include "hphp/runtime/base/atomic-countable.h"
 #include "hphp/runtime/base/attr.h"
@@ -1592,4 +1591,3 @@ inline tracing::Props traceProps(const Func* f) {
 #include "hphp/runtime/vm/func-inl.h"
 #undef incl_HPHP_VM_FUNC_INL_H_
 
-#endif // incl_HPHP_VM_FUNC_H_

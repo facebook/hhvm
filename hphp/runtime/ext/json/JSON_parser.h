@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JSON_PARSER_H_
-#define incl_HPHP_JSON_PARSER_H_
+#pragma once
 
 #include <cstdint>
 
@@ -62,4 +61,3 @@ void json_set_last_error_code(json_error_codes ec);
 
 }
 
-#endif // incl_HPHP_JSON_PARSER_H_

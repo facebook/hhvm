@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_APC_H_
-#define incl_HPHP_EXT_APC_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include <set>
@@ -205,4 +204,3 @@ bool apc_get_random_entries(std::ostream &out, uint32_t count);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_APC_H_

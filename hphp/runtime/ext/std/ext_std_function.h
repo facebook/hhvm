@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_FUNCTION_H_
-#define incl_HPHP_EXT_FUNCTION_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/std/ext_std.h"
@@ -48,4 +47,3 @@ String HHVM_FUNCTION(HH_fun_get_function, TypedValue v);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_FUNCTION_H_

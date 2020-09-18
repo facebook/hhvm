@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_URL_H_
-#define incl_HPHP_EXT_URL_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -57,4 +56,3 @@ String HHVM_FUNCTION(urlencode, const String& str);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_URL_H_

@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ARRAY_H_
-#define incl_HPHP_EXT_ARRAY_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/array-util.h"
@@ -273,4 +272,3 @@ inline int64_t countHelper(TypedValue tv) {
 
 }
 
-#endif // incl_HPHP_EXT_ARRAY_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STRING_UTIL_H_
-#define incl_HPHP_STRING_UTIL_H_
+#pragma once
 
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 
@@ -171,4 +170,3 @@ size_t safe_address(size_t nmemb, size_t size, size_t offset);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_STRING_UTIL_H_

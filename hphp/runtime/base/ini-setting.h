@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_INI_SETTING_H_
-#define incl_HPHP_INI_SETTING_H_
+#pragma once
 
 #include "hphp/runtime/base/type-variant.h"
 
@@ -442,4 +441,3 @@ void add_default_config_files_globbed(
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_INI_SETTING_H_

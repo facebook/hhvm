@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_XHPROF_H
-#define incl_HPHP_XHPROF_H
+#pragma once
 
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/base/type-array.h"
@@ -24,4 +23,3 @@ void HHVM_FUNCTION(fb_setprofile, const Variant& callback,
 
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
-#endif // incl_HPHP_XHPROF_H

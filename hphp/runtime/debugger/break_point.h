@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_BREAK_POINT_H_
-#define incl_HPHP_EVAL_DEBUGGER_BREAK_POINT_H_
+#pragma once
 
 #include <list>
 #include <memory>
@@ -281,4 +280,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_BREAK_POINT_H_

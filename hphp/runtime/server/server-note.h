@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_SERVER_NOTE_H_
-#define incl_HPHP_SERVER_NOTE_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -36,4 +35,3 @@ ServerNote* get_server_note();
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_SERVER_NOTE_H_

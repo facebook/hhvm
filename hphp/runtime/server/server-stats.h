@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SERVERSTATS_H_
-#define incl_HPHP_SERVERSTATS_H_
+#pragma once
 
 #include "hphp/runtime/base/execution-profiler.h"
 #include "hphp/runtime/base/string-data.h"
@@ -237,4 +236,3 @@ void server_stats_log_mutex(const std::string& stack, int64_t elapsed_us);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_SERVERSTATS_H_

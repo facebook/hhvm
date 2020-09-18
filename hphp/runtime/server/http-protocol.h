@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HTTP_PROTOCOL_H_
-#define incl_HPHP_HTTP_PROTOCOL_H_
+#pragma once
 
 #include "hphp/runtime/server/transport.h"
 
@@ -82,4 +81,3 @@ struct HttpProtocol {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HTTP_PROTOCOL_H_

@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZEND_URL_H_
-#define incl_HPHP_ZEND_URL_H_
+#pragma once
 
 #include "hphp/runtime/base/type-string.h"
 
@@ -51,4 +50,3 @@ String url_raw_decode(const char *s, size_t len);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ZEND_URL_H_

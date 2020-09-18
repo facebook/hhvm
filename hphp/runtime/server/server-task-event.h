@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_EXT_ASIO_SERVER_TASK_WAIT_HANDLE_H_
-#define incl_EXT_ASIO_SERVER_TASK_WAIT_HANDLE_H_
+#pragma once
 
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 
@@ -74,4 +73,3 @@ struct ServerTaskEvent final : AsioExternalThreadEvent {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_EXT_ASIO_SERVER_TASK_WAIT_HANDLE_H_

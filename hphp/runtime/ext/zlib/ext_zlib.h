@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ZLIB_H_
-#define incl_HPHP_EXT_ZLIB_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
@@ -79,4 +78,3 @@ Variant HHVM_FUNCTION(gzwrite, const Resource& zp, const String& str,
 
 }
 
-#endif // incl_HPHP_EXT_ZLIB_H_

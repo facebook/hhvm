@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_ICU_UCSDET_H
-#define incl_HPHP_ICU_UCSDET_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/icu/icu.h"
@@ -86,4 +85,3 @@ struct EncodingMatch : IntlError {
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Intl
 
-#endif // incl_HPHP_ICU_UCSDET_H

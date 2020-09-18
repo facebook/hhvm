@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_MEMORYSTATS_H_
-#define incl_HPHP_MEMORYSTATS_H_
+#pragma once
 
 #include <array>
 #include <atomic>
@@ -60,4 +59,3 @@ struct MemoryStats {
 
 }
 
-#endif //incl_HPHP_MEMORYSTATS_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HTTP_SERVER_TRANSPORT_H_
-#define incl_HPHP_HTTP_SERVER_TRANSPORT_H_
+#pragma once
 
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/request-tracing.h"
@@ -541,4 +540,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HTTP_SERVER_TRANSPORT_H_

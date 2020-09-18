@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_MYSQL_COMMON_H_
-#define incl_HPHP_MYSQL_COMMON_H_
+#pragma once
 
 #include "hphp/runtime/base/req-list.h"
 #include "hphp/runtime/base/req-optional.h"
@@ -471,4 +470,3 @@ const char *php_mysql_get_field_name(int field_type);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_MYSQL_COMMON_H_

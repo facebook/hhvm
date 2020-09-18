@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_LOGGING_H_
-#define incl_HPHP_VSDEBUG_LOGGING_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/async-func.h"
@@ -77,4 +76,3 @@ private:
 }
 }
 
-#endif // incl_HPHP_VSDEBUG_LOGGING_H_

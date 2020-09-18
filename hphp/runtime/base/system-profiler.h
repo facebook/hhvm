@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SYSTEM_PROFILER_H_
-#define incl_HPHP_SYSTEM_PROFILER_H_
+#pragma once
 
 #include <string>
 
@@ -63,4 +62,3 @@ extern SystemProfiler *g_system_profiler;
 
 }
 
-#endif // incl_HPHP_SYSTEM_PROFILER_H_

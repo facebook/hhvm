@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_SOAP_H_
-#define incl_HPHP_EXT_SOAP_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/soap/soap.h"
@@ -190,4 +189,3 @@ struct SoapHeader {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_SOAP_H_

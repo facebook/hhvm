@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_HASH_RIPEMD_H_
-#define incl_HPHP_EXT_HASH_RIPEMD_H_
+#pragma once
 
 #include "hphp/runtime/ext/hash/hash_engine.h"
 
@@ -62,4 +61,3 @@ struct hash_ripemd320 : HashEngine {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_HASH_RIPEMD_H_

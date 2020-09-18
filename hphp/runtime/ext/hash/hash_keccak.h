@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_HASH_KECCAK_H_
-#define incl_HPHP_EXT_HASH_KECCAK_H_
+#pragma once
 
 #include "hphp/runtime/ext/hash/hash_engine.h"
 
@@ -39,4 +38,3 @@ struct hash_keccak : HashEngine {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_HASH_KECCAK_H_

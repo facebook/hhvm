@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_OBJECT_ITERATOR_H_
-#define incl_HPHP_OBJECT_ITERATOR_H_
+#pragma once
 
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/object-data.h"
@@ -131,4 +130,3 @@ void IteratePropToArrayOrderNoInc(const ObjectData* obj, DeclFn declFn,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_OBJECT_ITERATOR_H_

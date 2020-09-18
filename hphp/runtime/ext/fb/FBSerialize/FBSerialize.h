@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_FBSERIALIZE_H_
-#define incl_HPHP_FBSERIALIZE_H_
+#pragma once
 
 namespace HPHP { namespace serialize {
 
@@ -190,4 +189,3 @@ struct FBUnserializer : private FBSerializeBase {
 
 #include "FBSerialize-inl.h"
 
-#endif // incl_HPHP_FBSERIALIZE_H_

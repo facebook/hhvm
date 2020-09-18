@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_WARMUP_REQUEST_HANDLER_H_
-#define incl_HPHP_WARMUP_REQUEST_HANDLER_H_
+#pragma once
 
 #include <memory>
 
@@ -105,4 +104,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_WARMUP_REQUEST_HANDLER_H_

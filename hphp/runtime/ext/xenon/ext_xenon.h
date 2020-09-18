@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_XENON_H_
-#define incl_HPHP_EXT_XENON_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include <semaphore.h>
@@ -137,4 +136,3 @@ struct Xenon final {
 };
 }
 
-#endif // incl_HPHP_EXT_XENON_H_

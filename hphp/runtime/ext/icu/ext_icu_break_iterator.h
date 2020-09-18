@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_EXT_ICU_BREAK_ITERATOR_H
-#define incl_HPHP_EXT_ICU_BREAK_ITERATOR_H
+#pragma once
 
 #include "hphp/runtime/ext/icu/icu.h"
 #include "hphp/runtime/ext/icu/CodePointBreakIterator.h"
@@ -118,4 +117,3 @@ struct IntlBreakIterator : IntlError {
 
 /////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Intl
-#endif // icl_HPHP_EXT_ICU_BREAK_ITERATOR_H

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_MEMBER_OPERATIONS_H_
-#define incl_HPHP_VM_MEMBER_OPERATIONS_H_
+#pragma once
 
 #include <type_traits>
 
@@ -2824,4 +2823,3 @@ inline void UnsetProp(Class* ctx, tv_lval base, TypedValue key) {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // incl_HPHP_VM_MEMBER_OPERATIONS_H_

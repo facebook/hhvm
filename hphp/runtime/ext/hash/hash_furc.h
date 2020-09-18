@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_HASH_FURC_H_
-#define incl_HPHP_EXT_HASH_FURC_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -30,4 +29,3 @@ uint32_t furc_maximum_pool_size();
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_HASH_FURC_H_

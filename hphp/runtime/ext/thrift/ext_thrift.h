@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_THRIFT_H_
-#define incl_HPHP_EXT_THRIFT_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -105,4 +104,3 @@ struct RpcOptions {
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
-#endif // incl_HPHP_EXT_THRIFT_H_

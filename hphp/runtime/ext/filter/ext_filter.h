@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_EXT_FILTER_H_
-#define incl_EXT_FILTER_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -82,4 +81,3 @@ extern const int64_t k_FILTER_FLAG_NO_PRIV_RANGE;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_EXT_FILTER_H_

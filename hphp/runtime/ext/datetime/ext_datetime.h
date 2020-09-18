@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_DATETIME_H_
-#define incl_HPHP_EXT_DATETIME_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/timestamp.h"
@@ -256,4 +255,3 @@ Array HHVM_FUNCTION(date_sun_info,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_DATETIME_H_

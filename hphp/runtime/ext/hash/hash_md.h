@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_HASH_MD_H_
-#define incl_HPHP_EXT_HASH_MD_H_
+#pragma once
 
 #include "hphp/runtime/ext/hash/hash_engine.h"
 
@@ -53,4 +52,3 @@ struct hash_md2 : HashEngine {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_HASH_MD_H_

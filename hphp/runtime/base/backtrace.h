@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_BACKTRACE_H_
-#define incl_HPHP_BACKTRACE_H_
+#pragma once
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/resource-data.h"
@@ -434,4 +433,3 @@ backtrace_detail::from_ret_t<F> fromLeafWH(
 #include "hphp/runtime/base/backtrace-inl.h"
 #undef incl_HPHP_BACKTRACE_INL_H_
 
-#endif // incl_HPHP_BACKTRACE_H_

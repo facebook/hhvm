@@ -14,8 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ICU_MATCHER_H_
-#define incl_HPHP_ICU_MATCHER_H_
+#pragma once
 
 #include <boost/scoped_ptr.hpp>
 
@@ -44,4 +43,3 @@ struct ICUMatcher {
 
 }
 
-#endif // incl_HPHP_ICU_MATCHER_H_

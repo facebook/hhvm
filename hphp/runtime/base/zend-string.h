@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZEND_STRING_H_
-#define incl_HPHP_ZEND_STRING_H_
+#pragma once
 
 // NOTE: See also "hphp/zend/zend-string.*".
 
@@ -206,4 +205,3 @@ void string_charmask(const char *input, int len, char *mask);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ZEND_STRING_H_

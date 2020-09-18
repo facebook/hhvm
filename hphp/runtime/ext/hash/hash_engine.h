@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_HASH_ENGINE_H_
-#define incl_HPHP_EXT_HASH_ENGINE_H_
+#pragma once
 
 #include "hphp/util/assertions.h"
 
@@ -57,4 +56,3 @@ typedef std::map<std::string,std::shared_ptr<HashEngine>> HashEngineMap;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_HASH_ENGINE_H_

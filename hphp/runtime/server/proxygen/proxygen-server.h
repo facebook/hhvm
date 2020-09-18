@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HTTP_SERVER_PROXYGEN_SERVER_H_
-#define incl_HPHP_HTTP_SERVER_PROXYGEN_SERVER_H_
+#pragma once
 
 #include "hphp/runtime/server/cert-reloader.h"
 #include "hphp/runtime/server/proxygen/proxygen-transport.h"
@@ -313,4 +312,3 @@ struct ProxygenTransportTraits {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HTTP_SERVER_PROXYGEN_SERVER_H_

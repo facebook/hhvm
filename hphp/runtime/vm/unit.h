@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_UNIT_H_
-#define incl_HPHP_VM_UNIT_H_
+#pragma once
 
 #include "hphp/parser/location.h"
 
@@ -731,4 +730,3 @@ struct UnitExtended : Unit {
 #include "hphp/runtime/vm/unit-inl.h"
 #undef incl_HPHP_VM_UNIT_INL_H_
 
-#endif // incl_HPHP_VM_UNIT_H_

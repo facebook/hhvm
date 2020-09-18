@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_MB_H_
-#define incl_HPHP_EXT_MB_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -222,4 +221,3 @@ Variant HHVM_FUNCTION(mb_substr,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_MB_H_

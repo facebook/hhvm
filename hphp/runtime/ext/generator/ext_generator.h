@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_GENERATOR_H_
-#define incl_HPHP_EXT_GENERATOR_H_
+#pragma once
 
 
 #include "hphp/runtime/base/builtin-functions.h"
@@ -206,4 +205,3 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_GENERATOR_H_

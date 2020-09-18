@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_APACHE_H_
-#define incl_HPHP_EXT_APACHE_H_
+#pragma once
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/extension.h"
@@ -66,4 +65,3 @@ static Array get_headers(const HeaderMap& headers, bool allHeaders = false) {
 
 }
 
-#endif // incl_HPHP_EXT_APACHE_H_

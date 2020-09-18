@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_DEBUGGER_H_
-#define incl_HPHP_EXT_DEBUGGER_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -35,4 +34,3 @@ Array HHVM_FUNCTION(debugger_get_info);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_DEBUGGER_H_

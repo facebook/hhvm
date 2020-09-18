@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_SOCKET_H_
-#define incl_HPHP_EXT_SOCKET_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/network.h"
@@ -167,4 +166,3 @@ Variant sockopen_impl(const HostURL &hosturl, Variant& errnum,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_SOCKET_H_

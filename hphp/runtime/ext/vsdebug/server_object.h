@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_SERVER_OBJ_H_
-#define incl_HPHP_VSDEBUG_SERVER_OBJ_H_
+#pragma once
 
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -138,4 +137,3 @@ struct VariableSubScope : public ServerObject {
 
 }
 }
-#endif // incl_HPHP_VSDEBUG_SERVER_OBJ_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PLAIN_FILE_H_
-#define incl_HPHP_PLAIN_FILE_H_
+#pragma once
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -111,4 +110,3 @@ void setThreadLocalIO(FILE* in, FILE* out, FILE* err);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_PLAIN_FILE_H_

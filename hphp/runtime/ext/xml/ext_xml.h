@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_XML_H_
-#define incl_HPHP_EXT_XML_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -95,4 +94,3 @@ String HHVM_FUNCTION(utf8_encode,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_XML_H_

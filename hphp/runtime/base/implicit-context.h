@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_IMPLICIT_CONTEXT_H_
-#define incl_HPHP_IMPLICIT_CONTEXT_H_
+#pragma once
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/req-hash-map.h"
@@ -43,4 +42,3 @@ req::fast_map<const StringData*, std::pair<TypedValue, StringData*>,
 
 } // namespace HPHP
 
-#endif // incl_HPHP_IMPLICIT_CONTEXT_H_

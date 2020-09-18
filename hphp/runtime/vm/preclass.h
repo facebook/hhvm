@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_PRECLASS_H_
-#define incl_HPHP_VM_PRECLASS_H_
+#pragma once
 
 #include "hphp/runtime/base/atomic-shared-ptr.h"
 #include "hphp/runtime/base/attr.h"
@@ -481,4 +480,3 @@ typedef AtomicSharedPtr<PreClass> PreClassPtr;
 #include "hphp/runtime/vm/preclass-inl.h"
 #undef incl_HPHP_VM_PRECLASS_INL_H_
 
-#endif // incl_HPHP_VM_PRECLASS_H_

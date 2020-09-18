@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PDO_DRIVER_H_
-#define incl_HPHP_PDO_DRIVER_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/req-ptr.h"
@@ -707,4 +706,3 @@ void throw_pdo_exception(const Variant& info,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_PDO_DRIVER_H_

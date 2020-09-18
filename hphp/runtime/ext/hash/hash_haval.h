@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_HASH_HAVAL_H_
-#define incl_HPHP_EXT_HASH_HAVAL_H_
+#pragma once
 
 #include "hphp/runtime/ext/hash/hash_engine.h"
 
@@ -39,4 +38,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_HASH_HAVAL_H_

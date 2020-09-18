@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_EXTENDED_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_EXTENDED_H_
+#pragma once
 
 #include <map>
 
@@ -54,4 +53,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_EXTENDED_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_OPTION_H_
-#define incl_HPHP_RUNTIME_OPTION_H_
+#pragma once
 
 #include <folly/dynamic.h>
 #include <folly/experimental/io/FsUtil.h>
@@ -1439,4 +1438,3 @@ inline bool unitPrefetchingEnabled() {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_RUNTIME_OPTION_H_

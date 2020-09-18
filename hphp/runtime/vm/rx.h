@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_RX_H_
-#define incl_HPHP_VM_RX_H_
+#pragma once
 
 #include "hphp/runtime/base/attr.h"
 
@@ -83,4 +82,3 @@ RxLevel rxRequiredCalleeLevel(RxLevel level);
 #include "hphp/runtime/vm/rx-inl.h"
 #undef incl_HPHP_VM_RX_INL_H_
 
-#endif // incl_HPHP_VM_RX_H_

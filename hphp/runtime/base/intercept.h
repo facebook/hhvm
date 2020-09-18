@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_INTERCEPT_H_
-#define incl_HPHP_INTERCEPT_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -61,4 +60,3 @@ void rename_function(const String& old_name, const String& new_name);
 
 }
 
-#endif // incl_HPHP_INTERCEPT_H_

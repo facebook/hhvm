@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_HASH_H_
-#define incl_HPHP_EXT_HASH_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -45,4 +44,3 @@ int64_t HHVM_FUNCTION(hphp_murmurhash, const String& key,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_HASH_H_

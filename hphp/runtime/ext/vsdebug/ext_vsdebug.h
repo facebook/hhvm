@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_VSDEBUG_H_
-#define incl_HPHP_EXT_VSDEBUG_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/vsdebug/transport.h"
@@ -66,4 +65,3 @@ private:
 }
 }
 
-#endif // incl_HPHP_EXT_VSDEBUG_H_

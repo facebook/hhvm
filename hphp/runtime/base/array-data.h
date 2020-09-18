@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ARRAY_DATA_H_
-#define incl_HPHP_ARRAY_DATA_H_
+#pragma once
 
 #include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/countable.h"
@@ -844,4 +843,3 @@ ArrayData* tagArrProv(ArrayData* ad, const APCArray* src);
 
 #include "hphp/runtime/base/array-data-inl.h"
 
-#endif // incl_HPHP_ARRAY_DATA_H_

@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PC_FILTER_H_
-#define incl_HPHP_PC_FILTER_H_
+#pragma once
 
 #include "hphp/runtime/vm/func.h"
 
@@ -108,4 +107,3 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_PC_FILTER_H_

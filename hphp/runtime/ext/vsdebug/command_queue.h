@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_COMMAND_QUEUE_H_
-#define incl_HPHP_VSDEBUG_COMMAND_QUEUE_H_
+#pragma once
 
 #include <condition_variable>
 #include <mutex>
@@ -77,4 +76,3 @@ private:
 }
 }
 
-#endif // incl_HPHP_VSDEBUG_COMMAND_QUEUE_H_

@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZEND_PACK_H_
-#define incl_HPHP_ZEND_PACK_H_
+#pragma once
 
 #include <cstdint>
 
@@ -91,4 +90,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ZEND_PACK_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_THREAD_INIT_FINI_H_
-#define incl_HPHP_THREAD_INIT_FINI_H_
+#pragma once
 
 #include "hphp/util/portability.h"
 #include "hphp/util/assertions.h"
@@ -118,4 +117,3 @@ struct InitFiniNode {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_THREAD_INIT_FINI_H_

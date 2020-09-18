@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_VERIFIER_CFG_H_
-#define incl_HPHP_VM_VERIFIER_CFG_H_
+#pragma once
 
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/repo.h"
@@ -314,4 +313,3 @@ inline LinearBlocks linearBlocks(const Graph* g) {
 
 }} // HPHP::Verifier
 
-#endif // incl_HPHP_VM_VERIFIER_CFG_H_

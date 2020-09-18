@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_FILE_H_
-#define incl_HPHP_EXT_FILE_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
@@ -348,4 +347,3 @@ void HHVM_FUNCTION(closedir,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_FILE_H_

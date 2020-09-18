@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VSDEBUG_PHP_EXECUTOR_H_
-#define incl_HPHP_VSDEBUG_PHP_EXECUTOR_H_
+#pragma once
 
 #include "hphp/runtime/ext/vsdebug/command.h"
 
@@ -54,4 +53,3 @@ protected:
 }
 }
 
-#endif // incl_HPHP_VSDEBUG_HOOK_H_

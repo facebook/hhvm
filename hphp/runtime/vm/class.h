@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_CLASS_H_
-#define incl_HPHP_VM_CLASS_H_
+#pragma once
 
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
@@ -1910,4 +1909,3 @@ const StringData* classToStringHelper(const Class* cls);
 #include "hphp/runtime/vm/class-inl.h"
 #undef incl_HPHP_VM_CLASS_INL_H_
 
-#endif // incl_HPHP_VM_CLASS_H_

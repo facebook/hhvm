@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_BC_PATTERN_H_
-#define incl_HPHP_VM_BC_PATTERN_H_
+#pragma once
 
 #include "hphp/runtime/vm/hhbc.h"
 
@@ -189,4 +188,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_VM_BC_PATTERN_H_

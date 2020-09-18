@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_STD_STRING_H_
-#define incl_HPHP_EXT_STD_STRING_H_
+#pragma once
 
 #include "hphp/runtime/ext/std/ext_std.h"
 
@@ -31,4 +30,3 @@ Variant HHVM_FUNCTION(wordwrap, const String& str, int64_t linewidth = 75,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_OUTPUT_H_

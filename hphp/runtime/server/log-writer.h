@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_LOG_WRITER_H_
-#define incl_HPHP_LOG_WRITER_H_
+#pragma once
 
 #include <string>
 
@@ -257,4 +256,3 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_LOG_WRITER_H_

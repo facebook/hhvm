@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_SIMPLEXML_H_
-#define incl_HPHP_EXT_SIMPLEXML_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
@@ -39,4 +38,3 @@ xmlNodePtr SimpleXMLElement_exportNode(const Object& sxe);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // incl_HPHP_EXT_SIMPLEXML_H_

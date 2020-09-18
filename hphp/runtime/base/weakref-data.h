@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_WEAKREF_DATA_H_
-#define incl_HPHP_WEAKREF_DATA_H_
+#pragma once
 
 #include "hphp/runtime/base/req-memory.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -48,4 +47,3 @@ struct WeakRefData {
 void weakref_cleanup();
 
 } // namespace HPHP
-#endif // incl_HPHP_WEAKREF_DATA_H_

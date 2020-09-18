@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_COUNTABLE_H_
-#define incl_HPHP_COUNTABLE_H_
+#pragma once
 
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/util/alloc.h"
@@ -346,4 +345,3 @@ ALWAYS_INLINE bool Countable::cowCheck() const {
 }
 
 }
-#endif // incl_HPHP_COUNTABLE_H_

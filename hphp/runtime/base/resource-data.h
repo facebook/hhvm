@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RESOURCE_DATA_H_
-#define incl_HPHP_RESOURCE_DATA_H_
+#pragma once
 
 #include <iostream>
 #include "hphp/runtime/base/countable.h"
@@ -319,4 +318,3 @@ typename std::enable_if<
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_RESOURCE_DATA_H_

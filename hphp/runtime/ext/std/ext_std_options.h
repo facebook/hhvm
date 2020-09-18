@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_OPTIONS_H_
-#define incl_HPHP_EXT_OPTIONS_H_
+#pragma once
 
 #include "hphp/runtime/ext/std/ext_std.h"
 
@@ -37,4 +36,3 @@ Variant HHVM_FUNCTION(version_compare,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_OPTIONS_H_

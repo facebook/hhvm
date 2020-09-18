@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ERROR_H_
-#define incl_HPHP_EXT_ERROR_H_
+#pragma once
 
 #include "hphp/runtime/ext/std/ext_std.h"
 
@@ -66,4 +65,3 @@ String debug_string_backtrace(bool skip, bool ignore_args = false,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_ERROR_H_

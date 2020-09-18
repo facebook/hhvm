@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SORT_FLAGS_H_
-#define incl_HPHP_SORT_FLAGS_H_
+#pragma once
 
 #include <stdint.h>
 #include "hphp/util/assertions.h"
@@ -121,4 +120,3 @@ inline SortFunction getSortFunction(SortFunction s, bool ascending = true) {
 
 }
 
-#endif // incl_HPHP_SORT_FLAGS_H_

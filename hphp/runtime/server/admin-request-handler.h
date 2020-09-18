@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ADMIN_REQUEST_HANDLER_H_
-#define incl_HPHP_ADMIN_REQUEST_HANDLER_H_
+#pragma once
 
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/server.h"
@@ -96,4 +95,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ADMIN_REQUEST_HANDLER_H_

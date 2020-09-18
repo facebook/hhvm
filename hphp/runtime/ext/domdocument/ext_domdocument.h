@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_DOMDOCUMENT_H_
-#define incl_HPHP_EXT_DOMDOCUMENT_H_
+#pragma once
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/ext/extension.h"
@@ -147,4 +146,3 @@ struct DOMXPath {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_DOMDOCUMENT_H_

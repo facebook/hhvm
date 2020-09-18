@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_URL_H_
-#define incl_HPHP_URL_H_
+#pragma once
 
 #include <string>
 
@@ -46,5 +45,4 @@ std::string getCommand(const char* serverObject);
 ///////////////////////////////////////////////////////////////////////////////
 }  // namespace HPHP
 
-#endif // incl_HPHP_URL_H_
 

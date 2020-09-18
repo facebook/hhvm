@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_CLASS_H_
-#define incl_HPHP_EXT_CLASS_H_
+#pragma once
 
 #include "hphp/runtime/ext/std/ext_std.h"
 
@@ -64,4 +63,3 @@ String HHVM_FUNCTION(HH_class_get_class_name, TypedValue v);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_CLASS_H_

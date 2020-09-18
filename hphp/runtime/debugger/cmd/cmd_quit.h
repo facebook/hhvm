@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_QUIT_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_QUIT_H_
+#pragma once
 
 #include "hphp/runtime/debugger/debugger_command.h"
 
@@ -33,4 +32,3 @@ struct CmdQuit : DebuggerCommand {
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_QUIT_H_

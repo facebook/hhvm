@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_OUTPUT_FILE_H_
-#define incl_HPHP_OUTPUT_FILE_H_
+#pragma once
 
 #include "hphp/runtime/base/file.h"
 
@@ -57,4 +56,3 @@ protected:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_OUTPUT_FILE_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_UNIT_EMITTER_H_
-#define incl_HPHP_VM_UNIT_EMITTER_H_
+#pragma once
 
 #include <list>
 #include <memory>
@@ -650,4 +649,3 @@ std::unique_ptr<UnitEmitter> createFatalUnit(
 #include "hphp/runtime/vm/unit-emitter-inl.h"
 #undef incl_HPHP_VM_UNIT_EMITTER_INL_H_
 
-#endif // incl_HPHP_VM_UNIT_EMITTER_H_

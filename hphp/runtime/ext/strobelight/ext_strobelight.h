@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_STROBELIGHT_H_
-#define incl_HPHP_EXT_STROBELIGHT_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -127,4 +126,3 @@ struct Strobelight final {
 
 }
 
-#endif // incl_HPHP_EXT_STROBELIGHT_H_

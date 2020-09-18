@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STRING_BUFFER_H_
-#define incl_HPHP_STRING_BUFFER_H_
+#pragma once
 
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/type-string.h"
@@ -223,4 +222,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_STRING_BUFFER_H_

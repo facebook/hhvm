@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_FUNC_EMITTER_H_
-#define incl_HPHP_VM_FUNC_EMITTER_H_
+#pragma once
 
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
@@ -346,4 +345,3 @@ struct FuncRepoProxy : public RepoProxy {
 #include "hphp/runtime/vm/func-emitter-inl.h"
 #undef incl_HPHP_VM_FUNC_EMITTER_INL_H_
 
-#endif // incl_HPHP_VM_FUNC_EMITTER_H_

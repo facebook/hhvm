@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_LDAP_H_
-#define incl_HPHP_EXT_LDAP_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -196,4 +195,3 @@ String HHVM_FUNCTION(ldap_escape,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_LDAP_H_

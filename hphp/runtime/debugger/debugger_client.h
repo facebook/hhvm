@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CLIENT_H_
-#define incl_HPHP_EVAL_DEBUGGER_CLIENT_H_
+#pragma once
 
 #include <boost/smart_ptr/shared_array.hpp>
 #include <map>
@@ -523,4 +522,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CLIENT_H_

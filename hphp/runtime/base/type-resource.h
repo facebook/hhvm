@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RESOURCE_H_
-#define incl_HPHP_RESOURCE_H_
+#pragma once
 
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/resource-data.h"
@@ -173,4 +172,3 @@ extern const Resource null_resource;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_RESOURCE_DATA_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_H_
-#define incl_HPHP_EVAL_DEBUGGER_H_
+#pragma once
 
 #include <set>
 #include <vector>
@@ -227,4 +226,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_H_

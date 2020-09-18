@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_DATETIME_H_
-#define incl_HPHP_DATETIME_H_
+#pragma once
 
 #include <memory>
 
@@ -370,4 +369,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_DATETIME_H_

@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PHP_MAILPARSE_MIME_H_
-#define incl_HPHP_PHP_MAILPARSE_MIME_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/mailparse/rfc822.h"
@@ -155,4 +154,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_PHP_MAILPARSE_MIME_H_

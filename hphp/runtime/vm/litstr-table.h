@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_LITSTR_TABLE_H_
-#define incl_HPHP_LITSTR_TABLE_H_
+#pragma once
 
 #include "hphp/runtime/base/string-functors.h"
 #include "hphp/runtime/vm/named-entity.h"
@@ -171,4 +170,3 @@ Id decodeUnitLitstrId(Id id);
 #include "hphp/runtime/vm/litstr-table-inl.h"
 #undef incl_HPHP_LITSTR_TABLE_INL_H_
 
-#endif // incl_HPHP_LITSTR_TABLE_H_

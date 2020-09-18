@@ -14,8 +14,7 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ZEND_PHP_CONFIG_H_
-#define incl_HPHP_ZEND_PHP_CONFIG_H_
+#pragma once
 
 /* $Id: acconfig.h,v 1.40.2.1.2.1 2007/01/01 09:35:45 sebastian Exp $ */
 #define ZEND_API
@@ -2438,4 +2437,3 @@ int zend_sprintf(char *buffer, const char *format, ...);
  */
 /* #undef PTHREADS */
 
-#endif // incl_HPHP_ZEND_PHP_CONFIG_H_

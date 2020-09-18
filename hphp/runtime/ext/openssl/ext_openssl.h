@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_OPENSSL_H_
-#define incl_HPHP_EXT_OPENSSL_H_
+#pragma once
 
 #include <folly/portability/OpenSSL.h>
 
@@ -225,4 +224,3 @@ Array HHVM_FUNCTION(openssl_get_md_methods, bool aliases = false);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_OPENSSL_H_

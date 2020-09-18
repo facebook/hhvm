@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_FILE_H_
-#define incl_HPHP_FILE_H_
+#pragma once
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/req-list.h"
@@ -303,4 +302,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_FILE_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SETLOCALE_H_
-#define incl_HPHP_SETLOCALE_H_
+#pragma once
 
 #include <vector>
 #include <string>
@@ -54,4 +53,3 @@ extern RDS_LOCAL(ThreadSafeLocaleHandler, g_thread_safe_locale_handler);
 
 }
 
-#endif // incl_HPHP_SETLOCALE_H_

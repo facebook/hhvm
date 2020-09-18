@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HTTP_SERVER_H_
-#define incl_HPHP_HTTP_SERVER_H_
+#pragma once
 
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/satellite-server.h"
@@ -149,4 +148,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_HTTP_SERVER_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TIMESTAMP_H_
-#define incl_HPHP_TIMESTAMP_H_
+#pragma once
 
 #include <cstdint>
 #include <limits.h>
@@ -46,4 +45,3 @@ struct TimeStamp {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_TIMESTAMP_H_

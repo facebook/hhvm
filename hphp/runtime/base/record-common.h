@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RECORD_COMMON_H_
-#define incl_HPHP_RECORD_COMMON_H_
+#pragma once
 
 #include "hphp/runtime/vm/record.h"
 
@@ -52,4 +51,3 @@ protected:
   static RecordType* allocRecord(size_t size, AllocMode mode);
 };
 } // namespace HPHP
-#endif // incl_HPHP_RECORD_COMMON_H_

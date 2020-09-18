@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VARIANT_H_
-#define incl_HPHP_VARIANT_H_
+#pragma once
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/record-data.h"
@@ -1737,4 +1736,3 @@ private:
 
 }
 
-#endif // incl_HPHP_VARIANT_H_

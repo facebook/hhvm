@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_EXAMPLE_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_EXAMPLE_H_
+#pragma once
 
 #include "hphp/runtime/debugger/cmd/cmd_extended.h"
 
@@ -41,4 +40,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_EXAMPLE_H_

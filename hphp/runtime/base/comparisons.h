@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_COMPARISONS_H_
-#define incl_HPHP_COMPARISONS_H_
+#pragma once
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-comparisons.h"
@@ -935,4 +934,3 @@ inline int64_t compare(const ResourceHdr* v1, const ResourceHdr* v2) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_COMPARISONS_H_

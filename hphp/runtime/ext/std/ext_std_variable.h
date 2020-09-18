@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VARIABLE_H_
-#define incl_HPHP_VARIABLE_H_
+#pragma once
 
 #include "hphp/runtime/ext/std/ext_std.h"
 
@@ -55,4 +54,3 @@ Variant HHVM_FUNCTION(unserialize, const String& str, const Array& options);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_VARIABLE_H_

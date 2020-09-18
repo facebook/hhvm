@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EVAL_DEBUGGER_CMD_ALL_H_
-#define incl_HPHP_EVAL_DEBUGGER_CMD_ALL_H_
+#pragma once
 
 #include "hphp/runtime/debugger/cmd/cmd_auth.h"
 #include "hphp/runtime/debugger/cmd/cmd_eval.h"
@@ -53,4 +52,3 @@
 #include "hphp/runtime/debugger/cmd/cmd_internal_testing.h"
 //tag: new_cmd.php inserts new command here, do NOT remove/modify this line
 
-#endif // incl_HPHP_EVAL_DEBUGGER_CMD_ALL_H_

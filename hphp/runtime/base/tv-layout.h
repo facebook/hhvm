@@ -14,8 +14,7 @@
   +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TV_LAYOUT_H
-#define incl_HPHP_TV_LAYOUT_H
+#pragma once
 
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/util/type-traits.h"
@@ -519,4 +518,3 @@ struct Tv7Up : public LayoutBase<Tv7Up,
 } // namespace tv_layout
 } // namespace HPHP
 
-#endif // incl_HPHP_TV_LAYOUT_H

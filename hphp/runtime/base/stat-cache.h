@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STAT_CACHE_H_
-#define incl_HPHP_STAT_CACHE_H_
+#pragma once
 
 #ifdef __linux__
 #include <sys/inotify.h>
@@ -141,4 +140,3 @@ struct StatCache {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // incl_HPHP_STAT_CACHE_H_

@@ -394,8 +394,6 @@ struct SourceOutputData {
 };
 
 using ProfileOutputData = std::vector<SourceOutputData>;
-using EventData = std::pair<LoggingProfile::EventMapKey, size_t>;
-using ProfileData = std::pair<LoggingProfile*, std::vector<EventData>>;
 using ProfileMap = tbb::concurrent_hash_map<SrcKey, LoggingProfile*,
                                             SrcKey::TbbHashCompare>;
 

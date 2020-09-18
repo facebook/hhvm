@@ -5053,9 +5053,7 @@ where
                 Some(TokenKind::Inout) => err(self, errors::not_allowed_in_write("`inout`")),
                 _ => {}
             },
-            ParenthesizedExpression(x) => {
-                self.check_lvalue(&x.parenthesized_expression_expression)
-            }
+            ParenthesizedExpression(x) => self.check_lvalue(&x.parenthesized_expression_expression),
             SubscriptExpression(x) => self.check_lvalue(&x.subscript_receiver),
             LambdaExpression(_)
             | AnonymousFunction(_)

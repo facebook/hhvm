@@ -5,9 +5,7 @@
 
 use ast_body::AstBody;
 use hhas_param_rust::HhasParam;
-use naming_special_names_rust::{
-    emitter_special_functions, pseudo_functions, special_idents,
-};
+use naming_special_names_rust::{emitter_special_functions, pseudo_functions, special_idents};
 use oxidized::{
     aast,
     aast_visitor::{visit, AstParams, Node, Visitor},

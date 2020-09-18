@@ -60,5 +60,8 @@ final class RpcOptions {
   public function setWriteHeader(string $key, string $value): RpcOptions;
 
   <<__Native>>
+  public function setHeader(string $key, string $value): RpcOptions;
+
+  <<__Native>>
   public function __toString(): string;
 }

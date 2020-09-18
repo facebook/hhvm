@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native-data.h"
+#include "thrift/lib/cpp2/async/RequestCallback.h"
 
 namespace HPHP { namespace thrift {
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,12 +98,7 @@ struct RpcOptions {
     return Native::data<RpcOptions>(object_);
   }
 
-  int32_t chunkBufferSize{100};
-
-  std::string routingKey;
-  std::string shardId;
-
-  std::map<std::string, std::string> writeHeaders;
+  apache::thrift::RpcOptions rpcOptions;
  private:
   static Class* c_RpcOptions;
 };

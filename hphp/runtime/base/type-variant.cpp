@@ -113,11 +113,11 @@ void objReleaseWrapper(ObjectData* obj) noexcept {
 
 }
 
-static_assert(typeToDestrIdx(KindOfDArray)   == 0, "Array destruct index");
-static_assert(typeToDestrIdx(KindOfVArray)   == 1, "Array destruct index");
-static_assert(typeToDestrIdx(KindOfKeyset)   == 2, "Keyset destruct index");
-static_assert(typeToDestrIdx(KindOfDict)     == 3, "Dict destruct index");
-static_assert(typeToDestrIdx(KindOfVec)      == 4, "Vec destruct index");
+static_assert(typeToDestrIdx(KindOfDArray)   == 0, "darray destruct index");
+static_assert(typeToDestrIdx(KindOfVArray)   == 1, "varray destruct index");
+static_assert(typeToDestrIdx(KindOfDict)     == 2, "Dict destruct index");
+static_assert(typeToDestrIdx(KindOfVec)      == 3, "Vec destruct index");
+static_assert(typeToDestrIdx(KindOfKeyset)   == 4, "Keyset destruct index");
 static_assert(typeToDestrIdx(KindOfRecord)   == 5, "Record destruct index");
 static_assert(typeToDestrIdx(KindOfString)   == 6, "String destruct index");
 static_assert(typeToDestrIdx(KindOfObject)   == 8, "Object destruct index");
@@ -134,9 +134,9 @@ static_assert(kDestrTableSize == 13,
 RawDestructor g_destructors[] = {
   (RawDestructor)&mixedReleaseWrapper,                // KindOfDArray
   (RawDestructor)&packedReleaseWrapper,               // KindOfVArray
-  (RawDestructor)&keysetReleaseWrapper,               // KindOfKeyset
   (RawDestructor)&mixedReleaseWrapper,                // KindOfDict
   (RawDestructor)&packedReleaseWrapper,               // KindOfVec
+  (RawDestructor)&keysetReleaseWrapper,               // KindOfKeyset
   (RawDestructor)getMethodPtr(&RecordData::release),  // KindOfRecord
   (RawDestructor)getMethodPtr(&StringData::release),  // KindOfString
   nullptr, // hole

@@ -892,13 +892,6 @@ void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Update FrameState for a base at a known location.
- */
-void simpleBaseImpl(IRGS& env, SSATmp* base, MOpMode mode, Location l) {
-  env.irb->fs().setMemberBase(base);
-}
-
-/*
  * We'd like to use value-type access rather than ref-type access for "lookup"
  * member-op sequences (that is, ones with mode Warn, None, or InOut).
  *
@@ -1606,18 +1599,15 @@ void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode) {
     gen(env, RaiseUninitLoc, cns(env, baseName));
   }
 
-  simpleBaseImpl(
-    env, base, mode, Location::Local { safe_cast<uint32_t>(loc.id) }
-  );
+  env.irb->fs().setMemberBase(base);
 }
 
 void emitBaseC(IRGS& env, uint32_t idx, MOpMode mode) {
   auto const bcOff = BCSPRelOffset{safe_cast<int32_t>(idx)};
-  auto const irOff = offsetFromIRSP(env, bcOff);
   stMBase(env, ldStkAddr(env, bcOff));
 
   auto base = topC(env, bcOff);
-  simpleBaseImpl(env, base, mode, Location::Stack { offsetFromFP(env, irOff) });
+  env.irb->fs().setMemberBase(base);
 }
 
 void emitBaseH(IRGS& env) {

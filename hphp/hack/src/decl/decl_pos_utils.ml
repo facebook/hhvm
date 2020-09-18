@@ -308,7 +308,7 @@ struct
     {
       te_base = ty te.te_base;
       te_constraint = ty_opt te.te_constraint;
-      te_includes = List.map ~f:ty te.te_includes;
+      te_includes = List.map te.te_includes ty;
     }
 
   and typedef tdef =

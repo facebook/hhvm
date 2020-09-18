@@ -655,7 +655,9 @@ module Typing = struct
     | UnboundNameTypeConstantAccess
     | UnknownInformationFlow
     | CallsiteCIPPMismatch
-    | NonpureFunctionCall (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | NonpureFunctionCall
+    | IncompatibleEnumInclusion
+    | RedeclaringClassishConstant (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

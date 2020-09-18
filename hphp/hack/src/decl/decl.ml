@@ -494,6 +494,10 @@ and class_parents_decl
   List.iter c.sc_xhp_attr_uses class_type;
   List.iter c.sc_req_extends class_type;
   List.iter c.sc_req_implements class_type;
+  let enum_includes =
+    Aast.enum_includes_map ~f:(fun et -> et.te_includes) c.sc_enum_type
+  in
+  List.iter enum_includes class_type;
   ()
 
 and is_disposable_type (env : Decl_env.env) (hint : Typing_defs.decl_ty) : bool

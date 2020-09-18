@@ -706,3 +706,9 @@ let type_hint_option_map ~f ta =
 
 (* extract an hint from a type annotation *)
 let hint_of_type_hint = snd
+
+(* helper function to access the list of enums included by an enum *)
+let enum_includes_map ?(default = []) ~f includes =
+  match includes with
+  | None -> default
+  | Some includes -> f includes

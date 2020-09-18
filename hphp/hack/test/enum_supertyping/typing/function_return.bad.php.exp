@@ -1,0 +1,6 @@
+File "function_return.bad.php", line 16, characters 36-47:
+Invalid return type (Typing[4110])
+File "function_return.bad.php", line 16, characters 19-25:
+Expected `SubEnum`
+File "function_return.bad.php", line 12, characters 6-14:
+But got `arraykey` arising from an implicit `as arraykey` constraint on this type

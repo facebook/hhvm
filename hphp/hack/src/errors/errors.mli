@@ -1417,3 +1417,15 @@ val alias_with_implicit_constraints_as_hk_type :
   used_class_in_def_name:string ->
   used_class_tparam_name:string ->
   unit
+
+val reinheriting_classish_const :
+  Pos.t -> string -> Pos.t -> string -> string -> string -> unit
+
+val redeclaring_classish_const :
+  Pos.t -> string -> Pos.t -> string -> string -> unit
+
+val incompatible_enum_inclusion_base : Pos.t -> string -> string -> unit
+
+val incompatible_enum_inclusion_constraint : Pos.t -> string -> string -> unit
+
+val enum_inclusion_not_enum : Pos.t -> string -> string -> unit

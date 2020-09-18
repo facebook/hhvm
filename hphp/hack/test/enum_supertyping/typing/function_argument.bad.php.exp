@@ -1,0 +1,6 @@
+File "function_argument.bad.php", line 20, characters 7-18:
+Invalid argument (Typing[4110])
+File "function_argument.bad.php", line 16, characters 14-20:
+Expected `SubEnum`
+File "function_argument.bad.php", line 12, characters 6-14:
+But got `arraykey` arising from an implicit `as arraykey` constraint on this type

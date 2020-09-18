@@ -1,0 +1,4 @@
+File "duplicate_parent_transitive.bad.php", line 13, characters 3-3:
+SuperEnum cannot re-declare constant A (Typing[4389])
+File "duplicate_parent_transitive.bad.php", line 12, characters 6-14:
+because it already inherited it via SubEnumA

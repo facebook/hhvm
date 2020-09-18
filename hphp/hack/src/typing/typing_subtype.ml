@@ -391,6 +391,14 @@ and simplify_subtype
     ty_super =
   simplify_subtype_i ~subtype_env ~this_ty (LoclType ty_sub) (LoclType ty_super)
 
+and get_enum_includes env enum_name =
+  match Env.get_enum env enum_name with
+  | None -> []
+  | Some enum_cls_decl ->
+    (match Cls.enum_type enum_cls_decl with
+    | None -> []
+    | Some enum -> enum.te_includes)
+
 (* Attempt to "solve" a subtype assertion ty_sub <: ty_super.
  * Return a proposition that is equivalent, but simpler, than
  * the original assertion. Fail with Unsat error_function if
@@ -1529,15 +1537,14 @@ and simplify_subtype_i
             valid env
           else
             default_subtype env
-        | (_, Tnewtype (name_sub, tyl_sub, _))
-          when String.equal name_sub name_super ->
-          if List.is_empty tyl_sub then
-            valid env
-          else if Env.is_enum env name_super && Env.is_enum env name_sub then
-            valid env
-          else
-            let td = Env.get_typedef env name_super in
-            begin
+        | (_, Tnewtype (name_sub, tyl_sub, _)) ->
+          if String.equal name_sub name_super then
+            if List.is_empty tyl_sub then
+              valid env
+            else if Env.is_enum env name_super && Env.is_enum env name_sub then
+              valid env
+            else
+              let td = Env.get_typedef env name_super in
               match td with
               | Some { td_tparams; _ } ->
                 let variance_reifiedl =
@@ -1551,7 +1558,35 @@ and simplify_subtype_i
                   tyl_super
                   env
               | None -> invalid_env env
-            end
+          else if
+            (* this implements the enum supertying subtype relation *)
+            Env.is_enum env name_super
+            && Env.is_enum env name_sub
+            && not (List.is_empty (get_enum_includes env name_super))
+          then
+            let name_of_decl (ty : decl_ty) : string option =
+              match get_node ty with
+              | Tapply ((_, name), _) -> Some name
+              | _ -> None
+            in
+            let rec includes_enum sub_enum super_enum =
+              match
+                List.filter_map
+                  ~f:name_of_decl
+                  (get_enum_includes env super_enum)
+              with
+              | [] -> false
+              | super_include :: super_includes ->
+                String.equal super_include sub_enum
+                || includes_enum sub_enum super_include
+                || List.exists ~f:(includes_enum sub_enum) super_includes
+            in
+            if includes_enum name_sub name_super then
+              valid env
+            else
+              invalid_env env
+          else
+            default_subtype env
         | _ -> default_subtype env))
     | (_, Tunapplied_alias n_sup) ->
       (match ety_sub with

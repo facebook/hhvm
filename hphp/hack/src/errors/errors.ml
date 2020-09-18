@@ -5442,6 +5442,82 @@ let alias_with_implicit_constraints_as_hk_type
         ^ "." );
     ]
 
+let reinheriting_classish_const
+    dest_classish_pos
+    dest_classish_name
+    src_classish_pos
+    src_classish_name
+    existing_const_origin
+    const_name =
+  add_list
+    (Typing.err_code Typing.RedeclaringClassishConstant)
+    [
+      ( src_classish_pos,
+        strip_ns dest_classish_name
+        ^ " cannot re-inherit constant "
+        ^ const_name
+        ^ " from "
+        ^ src_classish_name );
+      ( dest_classish_pos,
+        "because it already inherited it via " ^ strip_ns existing_const_origin
+      );
+    ]
+
+let redeclaring_classish_const
+    classish_pos
+    classish_name
+    redeclaration_pos
+    existing_const_origin
+    const_name =
+  add_list
+    (Typing.err_code Typing.RedeclaringClassishConstant)
+    [
+      ( redeclaration_pos,
+        strip_ns classish_name ^ " cannot re-declare constant " ^ const_name );
+      ( classish_pos,
+        "because it already inherited it via " ^ strip_ns existing_const_origin
+      );
+    ]
+
+let incompatible_enum_inclusion_base
+    dest_classish_pos dest_classish_name src_classish_name =
+  add_list
+    (Typing.err_code Typing.IncompatibleEnumInclusion)
+    [
+      ( dest_classish_pos,
+        "Enum "
+        ^ strip_ns dest_classish_name
+        ^ " includes enum "
+        ^ strip_ns src_classish_name
+        ^ " but their base types are incompatible" );
+    ]
+
+let incompatible_enum_inclusion_constraint
+    dest_classish_pos dest_classish_name src_classish_name =
+  add_list
+    (Typing.err_code Typing.IncompatibleEnumInclusion)
+    [
+      ( dest_classish_pos,
+        "Enum "
+        ^ strip_ns dest_classish_name
+        ^ " includes enum "
+        ^ strip_ns src_classish_name
+        ^ " but their constraints are incompatible" );
+    ]
+
+let enum_inclusion_not_enum
+    dest_classish_pos dest_classish_name src_classish_name =
+  add_list
+    (Typing.err_code Typing.IncompatibleEnumInclusion)
+    [
+      ( dest_classish_pos,
+        "Enum "
+        ^ strip_ns dest_classish_name
+        ^ " includes "
+        ^ strip_ns src_classish_name
+        ^ " which is not an enum" );
+    ]
+
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

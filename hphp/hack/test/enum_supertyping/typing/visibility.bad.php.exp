@@ -1,0 +1,2 @@
+File "visibility.bad.php", line 9, characters 6-6:
+Enum B includes enum A but their constraints are incompatible (Typing[4388])

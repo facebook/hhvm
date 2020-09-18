@@ -151,6 +151,7 @@ type ureason =
   | URnewtype_cstr
   | URclass_req
   | URenum
+  | URenum_include
   | URenum_cstr
   | URenum_underlying
   | URenum_incompatible_cstr

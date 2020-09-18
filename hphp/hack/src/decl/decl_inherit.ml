@@ -467,7 +467,7 @@ let from_parent env c =
     | Ast_defs.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
     | _ -> c.sc_extends
   in
-  let inherited_l = List.map extends (from_class env c) in
+  let inherited_l = List.map extends ~f:(from_class env c) in
   List.fold_right ~f:add_inherited inherited_l ~init:empty
 
 let from_requirements env c acc reqs =
@@ -527,5 +527,13 @@ let make env c =
       ~f:(from_interface_constants env)
       ~init:acc
       c.sc_req_implements
+  in
+  let included_enums =
+    match c.sc_enum_type with
+    | None -> []
+    | Some enum_type -> enum_type.te_includes
+  in
+  let acc =
+    List.fold_left ~f:(from_interface_constants env) ~init:acc included_enums
   in
   List.fold_left ~f:(from_interface_constants env) ~init:acc c.sc_implements

@@ -58,6 +58,7 @@ type source_type =
   | Trait
   | XHPAttr
   | Interface
+  | IncludedEnum
   | ReqImpl
   | ReqExtends
 [@@deriving eq, show]

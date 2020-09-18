@@ -647,4 +647,6 @@ UnboundNameTypeConstantAccess = 4384
 UnknownInformationFlow = 4385
 CallsiteCIPPMismatch = 4386
 NonpureFunctionCall = 4387
+IncompatibleEnumInclusion = 4388
+RedeclaringClassishConstant = 4389
   |}]

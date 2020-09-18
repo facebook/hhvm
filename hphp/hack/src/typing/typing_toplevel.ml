@@ -763,6 +763,92 @@ and check_const_trait_members pos env use_list =
         if not (get_ce_const ce) then Errors.trait_prop_const_class pos x)
   | _ -> ()
 
+let check_consistent_enum_inclusion included_cls dest_cls =
+  match (Cls.enum_type included_cls, Cls.enum_type dest_cls) with
+  | (Some included_e, Some dest_e) ->
+    (* ensure that the base types are identical *)
+    if not (Typing_defs.equal_decl_ty included_e.te_base dest_e.te_base) then
+      Errors.incompatible_enum_inclusion_base
+        (Cls.pos dest_cls)
+        (Cls.name dest_cls)
+        (Cls.name included_cls);
+    (* ensure that the visibility constraint are compatible *)
+    (match (included_e.te_constraint, dest_e.te_constraint) with
+    | (None, Some _) ->
+      Errors.incompatible_enum_inclusion_constraint
+        (Cls.pos dest_cls)
+        (Cls.name dest_cls)
+        (Cls.name included_cls)
+    | (_, _) -> ())
+  | (None, _) ->
+    Errors.enum_inclusion_not_enum
+      (Cls.pos dest_cls)
+      (Cls.name dest_cls)
+      (Cls.name included_cls)
+  | (_, _) -> ()
+
+let check_enum_includes env cls =
+  (* checks that there are no duplicated enum-constants when folded-decls are enabled *)
+  if Ast_defs.is_c_enum cls.c_kind then (
+    let (dest_class_pos, dest_class_name) = cls.c_name in
+    let enum_constant_map = ref SMap.empty in
+    (* prepopulate the map with the constants declared in cls *)
+    List.iter cls.c_consts ~f:(fun cc ->
+        enum_constant_map :=
+          SMap.add
+            (snd cc.cc_id)
+            (fst cc.cc_id, dest_class_name)
+            !enum_constant_map);
+    (* for all included enums *)
+    let included_enums =
+      Aast.enum_includes_map cls.c_enum ~f:(fun ce ->
+          List.filter_map ce.e_includes ~f:(fun ie ->
+              match snd ie with
+              | Happly (sid, _) ->
+                (match Env.get_class env (snd sid) with
+                | None -> None
+                | Some ie_cls -> Some (fst ie, ie_cls))
+              | _ -> None))
+    in
+    List.iter included_enums ~f:(fun (ie_pos, ie_cls) ->
+        let src_class_name = Cls.name ie_cls in
+        (* 1. Check for consistency *)
+        (match Env.get_class env dest_class_name with
+        | None -> ()
+        | Some cls -> check_consistent_enum_inclusion ie_cls cls);
+        (* 2. Check for duplicates *)
+        List.iter (Cls.consts ie_cls) ~f:(fun (const_name, class_const) ->
+            ( if String.equal const_name "class" then
+              ()
+            else if SMap.mem const_name !enum_constant_map then
+              (* distinguish between multiple inherit and redeclare *)
+              let (origin_const_pos, origin_class_name) =
+                SMap.find const_name !enum_constant_map
+              in
+              if String.equal origin_class_name dest_class_name then
+                (* redeclare *)
+                Errors.redeclaring_classish_const
+                  dest_class_pos
+                  dest_class_name
+                  origin_const_pos
+                  src_class_name
+                  const_name
+              else
+                (* multiple inherit *)
+                Errors.reinheriting_classish_const
+                  dest_class_pos
+                  dest_class_name
+                  ie_pos
+                  src_class_name
+                  origin_class_name
+                  const_name );
+            enum_constant_map :=
+              SMap.add
+                const_name
+                (dest_class_pos, class_const.cc_origin)
+                !enum_constant_map))
+  )
+
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
@@ -813,7 +899,7 @@ and class_def_ env c tc =
     || Ast_defs.(equal_class_kind c.c_kind Cabstract) )
     && not (shallow_decl_enabled ctx)
   then (
-    (* This check is only for eager mode. The same check is performed
+    (* These checks are only for eager mode. The same checks are performed
      * for shallow mode in Typing_inheritance *)
     let method_pos ~is_static class_id meth_id =
       let get_meth =
@@ -848,6 +934,7 @@ and class_def_ env c tc =
     List.iter (Cls.methods tc) (check_override ~is_static:false);
     List.iter (Cls.smethods tc) (check_override ~is_static:true)
   );
+  check_enum_includes env c;
   let (pc, _) = c.c_name in
   let extends = List.map c.c_extends (Decl_hint.hint env.decl_env) in
   let implements = List.map c.c_implements (Decl_hint.hint env.decl_env) in

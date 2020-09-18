@@ -709,6 +709,7 @@ type ureason =
   | URnewtype_cstr
   | URclass_req
   | URenum
+  | URenum_include
   | URenum_cstr
   | URenum_underlying
   | URenum_incompatible_cstr
@@ -756,6 +757,7 @@ let string_of_ureason = function
   | URnewtype_cstr -> "Invalid constraint on `newtype`"
   | URclass_req -> "Unable to satisfy trait/interface requirement"
   | URenum -> "Constant does not match the type of the enum it is in"
+  | URenum_include -> "Inclusion of enum of incompatible type"
   | URenum_cstr -> "Invalid constraint on enum"
   | URenum_underlying -> "Invalid underlying type for enum"
   | URenum_incompatible_cstr ->

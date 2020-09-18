@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8c754a86fbb757fea88ecbc03b217dae>>
+// @generated SignedSource<<6fd61e575abe39d561b5b9d103b66d41>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -240,6 +240,7 @@ pub enum Ureason<'a> {
     URnewtypeCstr,
     URclassReq,
     URenum,
+    URenumInclude,
     URenumCstr,
     URenumUnderlying,
     URenumIncompatibleCstr,

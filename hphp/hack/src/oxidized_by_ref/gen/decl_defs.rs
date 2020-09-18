@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f0ea0383030260d69cdefd2ef0b4d8cc>>
+// @generated SignedSource<<7f881af082a368524bb13c4f72480455>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -88,6 +88,7 @@ pub enum SourceType {
     Trait,
     XHPAttr,
     Interface,
+    IncludedEnum,
     ReqImpl,
     ReqExtends,
 }

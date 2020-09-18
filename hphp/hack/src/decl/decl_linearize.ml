@@ -124,7 +124,8 @@ let is_requirement (source : source_type) =
   | Parent
   | Trait
   | XHPAttr
-  | Interface ->
+  | Interface
+  | IncludedEnum ->
     false
 
 let is_interface (source : source_type) =
@@ -132,6 +133,19 @@ let is_interface (source : source_type) =
   | Interface
   | ReqImpl ->
     true
+  | Child
+  | Parent
+  | Trait
+  | XHPAttr
+  | ReqExtends
+  | IncludedEnum ->
+    false
+
+let is_includedEnum (source : source_type) =
+  match source with
+  | IncludedEnum -> true
+  | Interface
+  | ReqImpl
   | Child
   | Parent
   | Trait
@@ -162,7 +176,9 @@ let rec ancestor_linearization
           || equal_source_type source XHPAttr
         in
         let consts_only =
-          is_set mro_consts_only c.mro_flags || is_interface source
+          is_set mro_consts_only c.mro_flags
+          || is_interface source
+          || is_includedEnum source
         in
         let copy_private_members =
           is_set mro_copy_private_members c.mro_flags
@@ -279,6 +295,10 @@ and linearize (env : env) (c : shallow_class) : linearization =
   let req_extends c = get_ancestors ReqExtends c.sc_req_extends in
   let parents c = get_ancestors Parent (from_parent c) in
   let extends c = get_ancestors Parent c.sc_extends in
+  let includes c =
+    Aast.enum_includes_map c.sc_enum_type ~f:(fun enum_type ->
+        get_ancestors IncludedEnum enum_type.te_includes)
+  in
   (* HHVM implicitly adds the Stringish interface to every class, interface, and
      trait with a __toString method. The primitive type `string` is considered
      to also implement this interface. *)
@@ -302,6 +322,7 @@ and linearize (env : env) (c : shallow_class) : linearization =
       List.concat
         [
           List.rev (interfaces c);
+          List.rev (includes c);
           List.rev (req_implements c);
           List.rev (xhp_attr_uses c);
           List.rev (traits c);

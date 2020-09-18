@@ -326,7 +326,7 @@ let class_ env c =
       {
         te_base = hint e.e_base;
         te_constraint = Option.map e.e_constraint hint;
-        te_includes = List.map ~f:hint e.e_includes;
+        te_includes = List.map e.e_includes hint;
       }
     in
     List.iter ~f:add_cstr_dep et.te_includes;

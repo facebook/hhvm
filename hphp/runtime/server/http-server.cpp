@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/replay-transport.h"
@@ -200,6 +201,7 @@ HttpServer::HttpServer() {
       auto const sat_requests = getSatelliteRequestCount();
       counters["satellite_inflight_requests"] = sat_requests.first;
       counters["satellite_queued_requests"] = sat_requests.second;
+      counters["uptime"] = f_server_uptime();
     }
   );
 

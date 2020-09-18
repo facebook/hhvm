@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_VM_JIT_RELOCATION_X64_H_
-#define incl_HPHP_RUNTIME_VM_JIT_RELOCATION_X64_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/relocation.h"
 
@@ -30,4 +29,3 @@ size_t relocate(RelocationInfo&, CodeBlock&, TCA, TCA, CodeBlock&, CGMeta&,
 
 }}}
 
-#endif

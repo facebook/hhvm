@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TRANSLATOR_H_
-#define incl_HPHP_TRANSLATOR_H_
+#pragma once
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/repo-auth-type.h"
@@ -388,4 +387,3 @@ void translateInstr(irgen::IRGS&, const NormalizedInstruction&);
 #include "hphp/runtime/vm/jit/translator-inl.h"
 #undef incl_HPHP_TRANSLATOR_INL_H_
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TV_TYPE_H_
-#define incl_HPHP_TV_TYPE_H_
+#pragma once
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -94,4 +93,3 @@ ALWAYS_INLINE double tvAssertDouble(T&& tv) {
 
 }
 
-#endif

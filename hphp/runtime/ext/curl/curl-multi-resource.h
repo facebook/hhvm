@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_CURL_MULTI_RESOURCE_H
-#define incl_HPHP_CURL_MULTI_RESOURCE_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -45,4 +44,3 @@ struct CurlMultiResource : SweepableResourceData {
 
 /////////////////////////////////////////////////////////////////////////////
 }
-#endif

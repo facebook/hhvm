@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_FIXUP_H_
-#define incl_HPHP_FIXUP_H_
+#pragma once
 
 #include <vector>
 #include "hphp/runtime/vm/jit/types.h"
@@ -188,4 +187,3 @@ inline void syncVMRegs(bool soft = false) {
 
 }}
 
-#endif

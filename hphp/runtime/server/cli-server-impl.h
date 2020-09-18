@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CLI_SERVER_IMPL_H_
-#define incl_HPHP_CLI_SERVER_IMPL_H_
+#pragma once
 
 #include "hphp/util/afdt-util.h"
 #include "hphp/util/exception.h"
@@ -54,4 +53,3 @@ int cli_read_fd(int afdt_fd);
 void cli_write_fd(int afdt_fd, int fd);
 
 }
-#endif

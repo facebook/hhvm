@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_PHP_GLOBALS_H_
-#define incl_HPHP_PHP_GLOBALS_H_
+#pragma once
 
 namespace HPHP {
 
@@ -64,4 +63,3 @@ Variant php_global(const StaticString&);
 
 #include "hphp/runtime/base/php-globals-inl.h"
 
-#endif

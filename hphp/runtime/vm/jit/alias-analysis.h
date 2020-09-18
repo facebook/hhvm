@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ALIAS_ANALYSIS_H_
-#define incl_HPHP_ALIAS_ANALYSIS_H_
+#pragma once
 
 #include <bitset>
 #include <string>
@@ -191,4 +190,3 @@ std::string show(ALocBits);
 
 }}
 
-#endif

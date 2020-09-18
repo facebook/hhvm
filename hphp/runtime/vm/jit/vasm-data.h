@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_DATA_H_
-#define incl_HPHP_JIT_VASM_DATA_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/containers.h"
 
@@ -90,4 +89,3 @@ struct VdataBlock {
 
 }}
 
-#endif

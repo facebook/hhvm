@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_BLOCK_H_
-#define incl_HPHP_VM_BLOCK_H_
+#pragma once
 
 #include <algorithm>
 
@@ -413,4 +412,3 @@ inline folly::Optional<Block::Hint> nameToHint(const std::string& hintStr) {
 
 }}
 
-#endif

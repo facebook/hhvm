@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_FUNC_ORDER_H_
-#define incl_HPHP_JIT_FUNC_ORDER_H_
+#pragma once
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/act-rec.h"
@@ -61,4 +60,3 @@ void recordTranslation(const TransRec& transRec);
 
 } } }
 
-#endif

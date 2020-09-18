@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_REPO_AUTH_TYPE_DEFS_H_
-#define incl_HPHP_REPO_AUTH_TYPE_DEFS_H_
+#pragma once
 
 #include <cstdint>
 #include <vector>
@@ -278,4 +277,3 @@ std::string show(const RepoAuthType::Array&);
 
 #include "hphp/runtime/base/repo-auth-type-array-inl.h"
 
-#endif

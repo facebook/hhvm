@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HASH_TABLE_H_
-#define incl_HPHP_HASH_TABLE_H_
+#pragma once
 
 #include "hphp/runtime/base/hash-table-x64.h"
 #include "hphp/runtime/base/string-data.h"
@@ -495,4 +494,3 @@ private:
 
 #include "hphp/runtime/base/hash-table-inl.h"
 
-#endif  // incl_HPHP_HASH_TABLE_H_

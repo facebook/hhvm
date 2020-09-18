@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TYPE_SPECIALIZATION_H_
-#define incl_HPHP_JIT_TYPE_SPECIALIZATION_H_
+#pragma once
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/bespoke-layout.h"
@@ -359,4 +358,3 @@ private:
 
 #include "hphp/runtime/vm/jit/type-specialization-inl.h"
 
-#endif

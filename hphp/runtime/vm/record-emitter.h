@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_RECORD_EMIT_H_
-#define incl_HPHP_VM_RECORD_EMIT_H_
+#pragma once
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/array-data.h"
@@ -170,4 +169,3 @@ struct RecordRepoProxy : RepoProxy {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

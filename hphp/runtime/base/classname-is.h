@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CLASSNAME_IS_H
-#define incl_HPHP_CLASSNAME_IS_H
+#pragma once
 
 namespace HPHP {
 
@@ -54,4 +53,3 @@ T InstantStatic<T, TInit, init>::value(init());
 
 }
 
-#endif

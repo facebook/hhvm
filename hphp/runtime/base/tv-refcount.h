@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TV_REFCOUNT_H_
-#define incl_HPHP_TV_REFCOUNT_H_
+#pragma once
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/countable.h"
@@ -243,4 +242,3 @@ ALWAYS_INLINE void tvIncRefGenUnsafe(TypedValue tv) {
 
 }
 
-#endif

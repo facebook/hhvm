@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_PRINT_H_
-#define incl_HPHP_VM_PRINT_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
@@ -122,4 +121,3 @@ inline void disasmRange(std::ostream& os, TransKind kind, TcaRange r) {
 
 }}
 
-#endif

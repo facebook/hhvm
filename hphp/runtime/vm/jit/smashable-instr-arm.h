@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_SMASHABLE_INSTR_ARM_H_
-#define incl_HPHP_JIT_SMASHABLE_INSTR_ARM_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/align-arm.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -117,4 +116,3 @@ inline void smashInst(TCA addr, uint32_t newInst) {
 
 }}}
 
-#endif

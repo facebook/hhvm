@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_REPO_AUTH_TYPE_CODEC_H_
-#define incl_HPHP_REPO_AUTH_TYPE_CODEC_H_
+#pragma once
 
 #include "hphp/runtime/base/repo-auth-type.h"
 
@@ -62,4 +61,3 @@ void encodeRAT(UnitEmitter& ue, RepoAuthType rat);
 
 #include "hphp/runtime/base/repo-auth-type-codec-inl.h"
 
-#endif

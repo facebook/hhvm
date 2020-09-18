@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_NORMALIZED_INSTRUCTION_H_
-#define incl_HPHP_NORMALIZED_INSTRUCTION_H_
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -67,4 +66,3 @@ struct NormalizedInstruction {
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
-#endif

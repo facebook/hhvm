@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HHVM_AS_H_
-#define incl_HPHP_HHVM_AS_H_
+#pragma once
 
 #include <memory>
 #include <string>
@@ -65,4 +64,3 @@ struct AssemblerUnserializationError : AssemblerError {
 
 }
 
-#endif

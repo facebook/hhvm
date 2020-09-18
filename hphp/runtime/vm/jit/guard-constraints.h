@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_GUARD_CONSTRAINTS_H_
-#define incl_HPHP_VM_GUARD_CONSTRAINTS_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
@@ -55,4 +54,3 @@ struct GuardConstraints {
 
 }}
 
-#endif

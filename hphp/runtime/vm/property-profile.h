@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PROPERTY_PROFILE_H_
-#define incl_HPHP_PROPERTY_PROFILE_H_
+#pragma once
 
 #include <cinttypes>
 
@@ -49,4 +48,3 @@ void deserialize(jit::ProfDataDeserializer&);
 
 } }
 
-#endif

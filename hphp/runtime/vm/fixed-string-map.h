@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_FIXED_STRING_MAP_H_
-#define incl_HPHP_FIXED_STRING_MAP_H_
+#pragma once
 
 #include <cstdint>
 #include <limits>
@@ -132,4 +131,3 @@ private:
 
 #include "hphp/runtime/vm/fixed-string-map-inl.h"
 
-#endif

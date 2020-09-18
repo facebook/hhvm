@@ -14,8 +14,7 @@
   +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ARRAY_PROVENANCE_H
-#define incl_HPHP_ARRAY_PROVENANCE_H
+#pragma once
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
@@ -332,4 +331,3 @@ TypedValue markTvShallow(TypedValue in, bool legacy);
 
 }}
 
-#endif

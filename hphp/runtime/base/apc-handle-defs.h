@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_APC_HANDLE_DEFS_H_
-#define incl_HPHP_APC_HANDLE_DEFS_H_
+#pragma once
 
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -67,4 +66,3 @@ inline void APCHandle::atomicDecRef() const {
 
 }
 
-#endif

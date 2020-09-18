@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_APC_ARRAY_H_
-#define incl_HPHP_APC_ARRAY_H_
+#pragma once
 
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -290,4 +289,3 @@ private:
 
 }
 
-#endif

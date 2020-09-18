@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZEND_SCANF_H_
-#define incl_HPHP_ZEND_SCANF_H_
+#pragma once
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,4 +39,3 @@ int string_sscanf(const char *string, const char *format, int numVars,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

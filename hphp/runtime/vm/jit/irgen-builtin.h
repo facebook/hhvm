@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_IRGEN_BUILTIN_H_
-#define incl_HPHP_JIT_IRGEN_BUILTIN_H_
+#pragma once
 
 #include <cstdint>
 
@@ -49,4 +48,3 @@ Type builtinOutType(const Func* builtin, uint32_t i);
 
 }}}
 
-#endif

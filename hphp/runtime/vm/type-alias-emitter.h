@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TYPE_ALIAS_EMITTER_H_
-#define incl_HPHP_TYPE_ALIAS_EMITTER_H_
+#pragma once
 
 #include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/base/array-data.h"
@@ -86,4 +85,3 @@ struct TypeAliasEmitter {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

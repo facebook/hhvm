@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_REGION_PROF_COUNTERS_H_
-#define incl_HPHP_JIT_REGION_PROF_COUNTERS_H_
+#pragma once
 
 #include "hphp/runtime/base/prof-counters.h"
 
@@ -159,4 +158,3 @@ struct RegionProfCounters {
 
 } }
 
-#endif

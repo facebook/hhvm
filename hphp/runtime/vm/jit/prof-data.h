@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PROF_TRANS_DATA_H_
-#define incl_HPHP_PROF_TRANS_DATA_H_
+#pragma once
 
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/rds-local.h"
@@ -680,4 +679,3 @@ struct ProfData {
 
 }}
 
-#endif

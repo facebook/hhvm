@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_APC_RCLSMETH_H_
-#define incl_HPHP_APC_RCLSMETH_H_
+#pragma once
 
 #include "hphp/runtime/base/apc-handle.h"
 
@@ -46,4 +45,3 @@ public:
 
 } // namespace HPHP
 
-#endif

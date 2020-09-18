@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_IR_INSTRUCTION_H_
-#define incl_HPHP_IR_INSTRUCTION_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
@@ -480,4 +479,3 @@ Type thisTypeFromFunc(const Func* func);
 
 #include "hphp/runtime/vm/jit/ir-instruction-inl.h"
 
-#endif

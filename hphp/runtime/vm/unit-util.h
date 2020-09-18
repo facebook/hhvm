@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_UNIT_UTIL_H_
-#define incl_HPHP_VM_UNIT_UTIL_H_
+#pragma once
 
 #include <folly/Range.h>
 
@@ -86,4 +85,3 @@ inline bool isMangledReifiedGenericInClosure(const StringData* name) {
 //////////////////////////////////////////////////////////////////////
 
 }
-#endif

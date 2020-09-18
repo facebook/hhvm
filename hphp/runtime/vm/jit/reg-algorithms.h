@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_REGALGORITHMS_H_
-#define incl_HPHP_VM_REGALGORITHMS_H_
+#pragma once
 
 #include <vector>
 
@@ -53,4 +52,3 @@ jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp);
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif

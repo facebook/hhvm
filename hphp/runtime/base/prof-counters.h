@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PROF_COUNTERS_H_
-#define incl_HPHP_PROF_COUNTERS_H_
+#pragma once
 
 #include <cstdint>
 #include <vector>
@@ -88,4 +87,3 @@ private:
 
 }
 
-#endif

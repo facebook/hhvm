@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_JIT_TEST_MATCH_H
-#define incl_HPHP_VM_JIT_TEST_MATCH_H
+#pragma once
 
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 
@@ -82,4 +81,3 @@ bool match(const IRInstruction& inst, Args... args) {
 
 }}
 
-#endif

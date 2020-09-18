@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_MEMORY_EFFECTS_H_
-#define incl_HPHP_MEMORY_EFFECTS_H_
+#pragma once
 
 #include <string>
 
@@ -221,4 +220,3 @@ std::string show(MemEffects);
 
 }}
 
-#endif

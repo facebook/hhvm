@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_THRIFT_TRANSPORT_H_
-#define incl_HPHP_THRIFT_TRANSPORT_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -281,4 +280,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif

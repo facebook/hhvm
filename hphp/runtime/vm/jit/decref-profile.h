@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_DECREF_PROFILE_H_
-#define incl_HPHP_JIT_DECREF_PROFILE_H_
+#pragma once
 
 #include <folly/dynamic.h>
 #include <folly/Format.h>
@@ -149,4 +148,3 @@ inline TargetProfile<DecRefProfile> decRefProfile(const TransContext& context,
 
 } }
 
-#endif

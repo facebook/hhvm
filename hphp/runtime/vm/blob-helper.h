@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_VM_BLOB_HELPER_H_
-#define incl_HPHP_RUNTIME_VM_BLOB_HELPER_H_
+#pragma once
 
 #include <algorithm>
 #include <cstdlib>
@@ -545,4 +544,3 @@ private:
 
 }
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TYPE_H_
-#define incl_HPHP_JIT_TYPE_H_
+#pragma once
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/bespoke-layout.h"
@@ -992,4 +991,3 @@ namespace std {
 #include "hphp/runtime/vm/jit/type-inl.h"
 #undef incl_HPHP_JIT_TYPE_INL_H_
 
-#endif

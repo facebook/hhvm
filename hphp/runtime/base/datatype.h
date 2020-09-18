@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_DATATYPE_H_
-#define incl_HPHP_DATATYPE_H_
+#pragma once
 
 #include <cstdint>
 #include <cstdio>
@@ -459,4 +458,3 @@ template<> class FormatValue<HPHP::DataType> {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif

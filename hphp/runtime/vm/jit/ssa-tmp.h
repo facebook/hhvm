@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_SSATMP_H_
-#define incl_HPHP_VM_SSATMP_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -101,4 +100,3 @@ private:
 
 }}
 
-#endif

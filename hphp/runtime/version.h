@@ -1,5 +1,4 @@
-#ifndef incl_HHVM_VERSION_H
-#define incl_HHVM_VERSION_H
+#pragma once
 
 // This file needs to be valid C, not just C++
 
@@ -35,4 +34,3 @@
   HHVM_VERSION_STRINGIFY(HHVM_VERSION_PATCH) HHVM_VERSION_SUFFIX
 #define HHVM_VERSION (HHVM_VERSION_C_STRING_LITERALS)
 
-#endif // incl_HHVM_VERSION_H

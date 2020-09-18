@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_REPO_AUTOLOAD_MAP_BUILDER_H_
-#define incl_HPHP_REPO_AUTOLOAD_MAP_BUILDER_H_
+#pragma once
 
 #include "hphp/runtime/base/repo-autoload-map.h"
 #include "hphp/runtime/base/string-data.h"
@@ -91,4 +90,3 @@ private:
 }
 
 
-#endif

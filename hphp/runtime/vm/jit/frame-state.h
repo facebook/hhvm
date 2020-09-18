@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_FRAME_STATE_H_
-#define incl_HPHP_JIT_FRAME_STATE_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/alias-class.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -477,4 +476,3 @@ std::string show(const FrameStateMgr&);
 
 }}}
 
-#endif

@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_IMAGE_H_
-#define incl_HPHP_EXT_IMAGE_H_
+#pragma once
 
 
 #include "hphp/runtime/ext/extension.h"
@@ -270,4 +269,3 @@ Variant HHVM_FUNCTION(imagepalettecopy,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_EXT_IMAGE_H_

@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_PACKED_ARRAY_H_
-#define incl_HPHP_PACKED_ARRAY_H_
+#pragma once
 
 #include <cstddef>
 #include <cstdint>
@@ -240,4 +239,3 @@ private:
 
 }
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_REQ_PTR_H_
-#define incl_HPHP_REQ_PTR_H_
+#pragma once
 
 #include "hphp/runtime/base/countable.h"
 #include "hphp/util/portability.h"
@@ -387,4 +386,3 @@ struct hash<HPHP::req::ptr<T>> {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_REPO_H_
-#define incl_HPHP_VM_REPO_H_
+#pragma once
 
 #include <vector>
 #include <utility>
@@ -288,4 +287,3 @@ bool batchCommitWithoutRetry(const std::vector<std::unique_ptr<UnitEmitter>>&,
 
 }
 
-#endif

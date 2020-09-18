@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SERVER_MEMORY_PROTECTOR_H_
-#define incl_HPHP_SERVER_MEMORY_PROTECTOR_H_
+#pragma once
 
 #include <atomic>
 #include <chrono>
@@ -73,4 +72,3 @@ struct HostHealthMonitor {
 
 }
 
-#endif

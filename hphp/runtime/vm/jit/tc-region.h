@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TC_REGION_H_
-#define incl_HPHP_JIT_TC_REGION_H_
+#pragma once
 
 #include "hphp/runtime/vm/srckey.h"
 
@@ -28,4 +27,3 @@ void invalidateSrcKey(SrcKey sk);
 
 }}}
 
-#endif

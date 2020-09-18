@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_REG_H_
-#define incl_HPHP_JIT_VASM_REG_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/vasm.h"
@@ -1353,4 +1352,3 @@ namespace std {
 
 #include "hphp/runtime/vm/jit/vasm-reg-inl.h"
 
-#endif

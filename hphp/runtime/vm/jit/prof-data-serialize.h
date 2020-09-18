@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PROF_DATA_SERIALIZE_H_
-#define incl_HPHP_PROF_DATA_SERIALIZE_H_
+#pragma once
 
 #include <string>
 #include "hphp/runtime/vm/jit/containers.h"
@@ -204,4 +203,3 @@ bool serializeOptProfEnabled();
 //////////////////////////////////////////////////////////////////////
 } }
 
-#endif

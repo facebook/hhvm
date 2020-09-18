@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_STATS_H_
-#define incl_HPHP_STATS_H_
+#pragma once
 
 #include <atomic>
 
@@ -121,4 +120,3 @@ void incStatGrouped(const StringData* cat, const StringData* name, int n = 1);
 
 } }
 
-#endif

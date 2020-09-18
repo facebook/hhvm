@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CONCURRENT_SHARED_STORE_H_
-#define incl_HPHP_CONCURRENT_SHARED_STORE_H_
+#pragma once
 
 #include <atomic>
 #include <utility>
@@ -478,4 +477,3 @@ private:
 
 }
 
-#endif

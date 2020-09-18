@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_REIFIEDGENERICSINFO_H_
-#define incl_HPHP_VM_REIFIEDGENERICSINFO_H_
+#pragma once
 
 #include <algorithm>
 #include <stdint.h>
@@ -57,4 +56,3 @@ struct ReifiedGenericsInfo {
 
 }
 
-#endif

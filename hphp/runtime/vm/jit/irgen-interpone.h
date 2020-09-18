@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_IRGEN_INTERPONE_H_
-#define incl_HPHP_JIT_IRGEN_INTERPONE_H_
+#pragma once
 
 #include <folly/Optional.h>
 
@@ -41,4 +40,3 @@ void interpOne(IRGS&, folly::Optional<Type>, int popped, int pushed,
 }}}
 
 
-#endif

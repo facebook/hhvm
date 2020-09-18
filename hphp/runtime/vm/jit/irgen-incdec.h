@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_IRGEN_INCDEC_H
-#define incl_HPHP_JIT_IRGEN_INCDEC_H
+#pragma once
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
@@ -65,4 +64,3 @@ inline SSATmp* incDec(IRGS& env, IncDecOp op, SSATmp* src) {
 
 }}}
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_ABI_ARM_H
-#define incl_HPHP_JIT_ABI_ARM_H
+#pragma once
 
 #include "hphp/runtime/vm/jit/abi-regs.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
@@ -248,4 +247,3 @@ const vixl::Register rAsm_w(vixl::w18);
 
 }}}
 
-#endif

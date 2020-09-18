@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_EMIT_H_
-#define incl_HPHP_JIT_VASM_EMIT_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -75,4 +74,3 @@ Vcost computeVunitCost(const Vunit& unit);
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif

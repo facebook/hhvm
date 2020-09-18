@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_SIMPLIFY_INTERNAL_H_
-#define incl_HPHP_JIT_VASM_SIMPLIFY_INTERNAL_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vasm.h"
@@ -118,4 +117,3 @@ namespace ppc64 { bool simplify(Env& env, Vlabel b, size_t i); }
 
 }}
 
-#endif

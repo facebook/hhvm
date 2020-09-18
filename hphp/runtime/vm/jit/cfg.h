@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_CFG_H_
-#define incl_HPHP_VM_CFG_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
@@ -113,4 +112,3 @@ void forEachInst(const BlockList& blocks, Body body);
 
 #include "hphp/runtime/vm/jit/cfg-inl.h"
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_CODE_GEN_TLS_ARM_H_
-#define incl_HPHP_VM_CODE_GEN_TLS_ARM_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -51,4 +50,3 @@ Vreg emitTLSLea(Vout& v, TLSDatum<T> datum, int offset) {
 
 }}}}
 
-#endif

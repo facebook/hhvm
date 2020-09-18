@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HEAP_PROFILING_H_
-#define incl_HPHP_HEAP_PROFILING_H_
+#pragma once
 
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/util/alloc-defs.h"
@@ -54,4 +53,3 @@ struct AllocSamples : public std::vector<HeapAllocSample,
 
 }
 
-#endif

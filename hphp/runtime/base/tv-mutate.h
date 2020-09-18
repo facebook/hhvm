@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TV_MUTATE_H_
-#define incl_HPHP_TV_MUTATE_H_
+#pragma once
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/tv-array-like.h"
@@ -263,4 +262,3 @@ ALWAYS_INLINE void tvDebugTrash(tv_lval lval) {
 
 }
 
-#endif

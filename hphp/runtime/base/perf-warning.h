@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_BASE_PERF_WARNING_H_
-#define incl_HPHP_RUNTIME_BASE_PERF_WARNING_H_
+#pragma once
 
 #include "hphp/util/struct-log.h"
 
@@ -66,4 +65,3 @@ void logAHMSubMapWarning(folly::StringPiece mapName);
 
 #include "hphp/runtime/base/perf-warning-inl.h"
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_TRANSL_HOPT_NATIVECALLS_H_
-#define incl_HPHP_VM_TRANSL_HOPT_NATIVECALLS_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
@@ -108,4 +107,3 @@ private:
 
 }}}
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_APC_STATS_H_
-#define incl_HPHP_APC_STATS_H_
+#pragma once
 
 #include "hphp/runtime/base/apc-string.h"
 #include "hphp/util/service-data.h"
@@ -325,4 +324,3 @@ private:
 
 }
 
-#endif

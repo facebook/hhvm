@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_VM_RINGBUFFER_H_
-#define incl_HPHP_VM_RINGBUFFER_H_
+#pragma once
 
 #include "hphp/util/ringbuffer.h"
 
@@ -24,4 +23,3 @@ void dumpRingBuffer(int numEntries, uint32_t threadId);
 
 } }
 
-#endif

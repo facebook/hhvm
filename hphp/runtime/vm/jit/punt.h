@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_JIT_PUNT_H_
-#define incl_HPHP_VM_JIT_PUNT_H_
+#pragma once
 
 #include <stdexcept>
 
@@ -61,4 +60,3 @@ struct RetryIRGen : std::runtime_error {
 //////////////////////////////////////////////////////////////////////
 }}
 
-#endif

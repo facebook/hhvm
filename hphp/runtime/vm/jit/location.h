@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_LOCATION_H_
-#define incl_HPHP_JIT_LOCATION_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 
@@ -84,4 +83,3 @@ std::string show(Location);
 
 #include "hphp/runtime/vm/jit/location-inl.h"
 
-#endif

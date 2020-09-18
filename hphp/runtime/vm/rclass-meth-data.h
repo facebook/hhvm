@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RCLS_METH_DATA_H_
-#define incl_HPHP_RCLS_METH_DATA_H_
+#pragma once
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/countable.h"
@@ -73,4 +72,3 @@ ALWAYS_INLINE void decRefRClsMeth(RClsMethData* rc) {
 
 } // namespace HPHP
 
-#endif

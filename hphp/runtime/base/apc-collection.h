@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_APC_COLLECTION_H_
-#define incl_HPHP_APC_COLLECTION_H_
+#pragma once
 
 #include "hphp/runtime/base/apc-handle.h"
 
@@ -55,4 +54,3 @@ private:
 
 }
 
-#endif

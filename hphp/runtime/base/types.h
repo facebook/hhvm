@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TYPES_H_
-#define incl_HPHP_TYPES_H_
+#pragma once
 
 #include <cstdint>
 #include "hphp/util/low-ptr.h"
@@ -126,4 +125,3 @@ constexpr FuncId DummyFuncId = -2;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

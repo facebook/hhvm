@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TRANSL_TYPES_H_
-#define incl_HPHP_TRANSL_TYPES_H_
+#pragma once
 
 #include <vector>
 
@@ -286,4 +285,3 @@ inline std::string show(const Reason &r) {
 
 }}
 
-#endif

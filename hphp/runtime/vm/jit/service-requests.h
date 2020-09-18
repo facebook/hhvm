@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_SERVICE_REQUESTS_H_
-#define incl_HPHP_JIT_SERVICE_REQUESTS_H_
+#pragma once
 
 #include "hphp/runtime/vm/srckey.h"
 
@@ -356,4 +355,3 @@ static_assert(sizeof(ReqInfo) == 0x30,
 
 #include "hphp/runtime/vm/jit/service-requests-inl.h"
 
-#endif

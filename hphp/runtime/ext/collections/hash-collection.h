@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_COLLECTIONS_HASHCOLLECTION_H
-#define incl_HPHP_COLLECTIONS_HASHCOLLECTION_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/collections/ext_collections.h"
@@ -666,4 +665,3 @@ struct HashCollection : ObjectData {
 
 /////////////////////////////////////////////////////////////////////////////
 }
-#endif

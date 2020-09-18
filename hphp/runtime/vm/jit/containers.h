@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_CONTAINERS_H_
-#define incl_HPHP_JIT_CONTAINERS_H_
+#pragma once
 
 #include <array>
 #include <deque>
@@ -148,4 +147,3 @@ template<class T> void destroy(T* t) {
 
 }}
 
-#endif

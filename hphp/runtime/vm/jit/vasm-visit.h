@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_VISIT_H_
-#define incl_HPHP_JIT_VASM_VISIT_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
@@ -426,4 +425,3 @@ PredVector computePreds(const Vunit& unit);
 
 }}
 
-#endif

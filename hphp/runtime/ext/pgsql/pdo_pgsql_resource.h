@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
    */
 
-#ifndef incl_HPHP_PDO_PGSQL_RESOURCE_H_
-#define incl_HPHP_PDO_PGSQL_RESOURCE_H_
+#pragma once
 
 #include "hphp/runtime/ext/pdo/pdo_driver.h"
 #include "pdo_pgsql_connection.h"
@@ -35,4 +34,3 @@ struct PDOPgSqlResource : PDOResource {
 };
 }
 
-#endif

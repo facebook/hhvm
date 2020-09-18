@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_ALIGNMENT_H_
-#define incl_HPHP_JIT_ALIGNMENT_H_
+#pragma once
 
 #include <cstdint>
 #include <string>
@@ -90,4 +89,3 @@ struct AlignInfo {
 
 }}
 
-#endif

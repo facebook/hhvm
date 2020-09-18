@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CONFIG_H_
-#define incl_HPHP_CONFIG_H_
+#pragma once
 
 #include "hphp/util/hdf.h"
 
@@ -359,4 +358,3 @@ template<> class FormatValue<HPHP::HackStrictOption> {
 };
 
 }
-#endif /* incl_HPHP_CONFIG_H_ */

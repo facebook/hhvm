@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_BASE_STRUCT_LOG_UTIL_H_
-#define incl_HPHP_RUNTIME_BASE_STRUCT_LOG_UTIL_H_
+#pragma once
 
 #include <folly/Range.h>
 
@@ -41,4 +40,3 @@ void logSerDes(const char* format,
 
 }
 
-#endif

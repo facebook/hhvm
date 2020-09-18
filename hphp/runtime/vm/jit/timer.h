@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_VM_JIT_TIMER_H_
-#define incl_HPHP_RUNTIME_VM_JIT_TIMER_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -125,4 +124,3 @@ struct Timer {
 
 } }
 
-#endif

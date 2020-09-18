@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_UNIT_H_
-#define incl_HPHP_JIT_VASM_UNIT_H_
+#pragma once
 
 #include "hphp/runtime/base/datatype.h"
 
@@ -286,4 +285,3 @@ inline tracing::Props traceProps(const Vunit& v) {
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif

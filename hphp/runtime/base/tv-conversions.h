@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TV_CONVERSIONS_H_
-#define incl_HPHP_TV_CONVERSIONS_H_
+#pragma once
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/req-root.h"
@@ -112,4 +111,3 @@ TypedValue tvClassToString(TypedValue key);
 
 #include "hphp/runtime/base/tv-conversions-inl.h"
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HASH_TABLE_X64_H_
-#define incl_HPHP_HASH_TABLE_X64_H_
+#pragma once
 
 #define MixedArray_SCALE        16
 #define MixedArray_DATA         32
@@ -33,4 +32,3 @@
 #define SetArrayElm_TYPE      8
 #define SetArrayElm_QUADWORDS 2
 
-#endif

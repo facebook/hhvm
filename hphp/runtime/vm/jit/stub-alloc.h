@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_STUB_ALLOC_H_
-#define incl_HPHP_JIT_STUB_ALLOC_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/util/data-block.h"
@@ -50,4 +49,3 @@ std::set<TCA> getFreeTCStubs();
 
 }}
 
-#endif

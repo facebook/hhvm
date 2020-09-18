@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_BYTECODE_H_
-#define incl_HPHP_VM_BYTECODE_H_
+#pragma once
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/rds-util.h"
@@ -691,4 +690,3 @@ uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
 
 }
 
-#endif

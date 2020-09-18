@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_PACKED_ARRAY_DEFS_H_
-#define incl_HPHP_PACKED_ARRAY_DEFS_H_
+#pragma once
 
 #include "hphp/runtime/base/packed-array.h"
 
@@ -162,4 +161,3 @@ ALWAYS_INLINE void PackedArray::IterateVNoInc(const ArrayData* arr, F fn) {
 
 }
 
-#endif

@@ -15,8 +15,7 @@
 */
 
 
-#ifndef incl_HPHP_UTIL_CODE_CACHE_H_
-#define incl_HPHP_UTIL_CODE_CACHE_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/types.h"
 
@@ -231,4 +230,3 @@ private:
 
 }}
 
-#endif

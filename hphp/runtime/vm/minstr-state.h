@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_VM_MINSTR_STATE_H_
-#define incl_HPHP_RUNTIME_VM_MINSTR_STATE_H_
+#pragma once
 
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -56,4 +55,3 @@ struct MInstrState {
 
 }
 
-#endif

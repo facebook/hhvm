@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_SPEC_HOLDER_H_
-#define incl_HPHP_EXT_SPEC_HOLDER_H_
+#pragma once
 
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
 #include "hphp/runtime/ext/thrift/transport.h"
@@ -192,4 +191,3 @@ struct SpecHolder {
 
 }}
 
-#endif

@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_VM_RUNTIME_H_
-#define incl_HPHP_VM_RUNTIME_H_
+#pragma once
 
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
@@ -146,4 +145,3 @@ int64_t zero_error_level();
 void restore_error_level(int64_t oldLevel);
 
 }
-#endif

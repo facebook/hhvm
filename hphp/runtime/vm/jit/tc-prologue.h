@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TC_PROLOGUE_H_
-#define incl_HPHP_JIT_TC_PROLOGUE_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/types.h"
 
@@ -58,4 +57,3 @@ void smashFuncCallers(TCA start, ProfTransRec* rec);
 
 }}
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HOOKS_H_
-#define incl_HPHP_HOOKS_H_
+#pragma once
 
 namespace HPHP {
 
@@ -23,4 +22,3 @@ extern void invalidatePath(const std::string& path);
 
 }
 
-#endif

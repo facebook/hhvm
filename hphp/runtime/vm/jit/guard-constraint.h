@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_GUARD_CONSTRAINT_H_
-#define incl_HPHP_JIT_GUARD_CONSTRAINT_H_
+#pragma once
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -186,4 +185,3 @@ GuardConstraint applyConstraint(GuardConstraint origGc, GuardConstraint newGc);
 
 #include "hphp/runtime/vm/jit/guard-constraint-inl.h"
 
-#endif

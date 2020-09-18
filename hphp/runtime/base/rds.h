@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_RDS_H_
-#define incl_HPHP_RUNTIME_RDS_H_
+#pragma once
 
 #include "hphp/runtime/base/rds-symbol.h"
 #include "hphp/runtime/base/types.h"
@@ -542,4 +541,3 @@ extern rds::Link<bool, Mode::Persistent> s_persistentTrue;
 
 #include "hphp/runtime/base/rds-inl.h"
 
-#endif

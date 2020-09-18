@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TV_VARIANT_H_
-#define incl_HPHP_TV_VARIANT_H_
+#pragma once
 
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/tv-val.h"
@@ -69,4 +68,3 @@ ALWAYS_INLINE const Variant& tvAsCVarRef(const TypedValue& tv) {
 
 }
 
-#endif

@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_TRANS_REC_H_
-#define incl_HPHP_TRANS_REC_H_
+#pragma once
 
 #include "hphp/util/sha1.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
@@ -100,4 +99,3 @@ private:
 
 } }
 
-#endif

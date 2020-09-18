@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PROXYGEN_SERVER_TRANSPORT_H_
-#define incl_HPHP_PROXYGEN_SERVER_TRANSPORT_H_
+#pragma once
 
 #include "hphp/runtime/server/transport.h"
 #include <algorithm>
@@ -403,4 +402,3 @@ using ProxygenTransportList =
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

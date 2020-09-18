@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_VM_TRANSLATOR_HOPT_VECTOR_TRANSLATOR_HELPERS_H_
-#define incl_HPHP_RUNTIME_VM_TRANSLATOR_HOPT_VECTOR_TRANSLATOR_HELPERS_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -129,4 +128,3 @@ inline KeyType getKeyTypeNoInt(const SSATmp* key) {
 
 }}}
 
-#endif

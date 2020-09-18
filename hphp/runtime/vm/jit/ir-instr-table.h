@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_IR_INSTR_TABLE_H_
-#define incl_HPHP_IR_INSTR_TABLE_H_
+#pragma once
 
 #include <folly/Hash.h>
 
@@ -105,4 +104,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_SURPRISE_FLAGS_H_
-#define incl_HPHP_RUNTIME_SURPRISE_FLAGS_H_
+#pragma once
 
 #include "hphp/runtime/base/rds-header.h"
 
@@ -158,4 +157,3 @@ inline size_t fetchAndClearSurpriseFlags() {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

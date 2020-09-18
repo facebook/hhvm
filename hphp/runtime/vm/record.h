@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_RECORD_H_
-#define incl_HPHP_VM_RECORD_H_
+#pragma once
 
 #include "hphp/runtime/base/atomic-countable.h"
 #include "hphp/runtime/base/atomic-shared-ptr.h"
@@ -279,4 +278,3 @@ extern Mutex g_recordsMutex;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

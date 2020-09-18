@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TYPE_STRUCTURE_H
-#define incl_HPHP_TYPE_STRUCTURE_H
+#pragma once
 
 #include <cstdint>
 #include "hphp/runtime/base/req-vector.h"
@@ -155,4 +154,3 @@ Array resolvePartial(const Array& ts,
 
 }
 
-#endif

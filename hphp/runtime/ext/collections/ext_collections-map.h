@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_EXT_COLLECTIONS_MAP_H
-#define incl_HPHP_EXT_COLLECTIONS_MAP_H
+#pragma once
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/collections/hash-collection.h"
@@ -454,4 +453,3 @@ struct MapIterator {
 
 /////////////////////////////////////////////////////////////////////////////
 }}
-#endif

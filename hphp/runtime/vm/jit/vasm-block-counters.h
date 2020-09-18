@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_BLOCK_COUNTERS_H_
-#define incl_HPHP_JIT_VASM_BLOCK_COUNTERS_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
@@ -58,4 +57,3 @@ void deserialize(ProfDataDeserializer& des);
 
 } }
 
-#endif

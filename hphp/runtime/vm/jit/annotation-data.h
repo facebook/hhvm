@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ANNOTATION_DATA_H_
-#define incl_HPHP_ANNOTATION_DATA_H_
+#pragma once
 
 #include <string>
 
@@ -110,4 +109,3 @@ struct AnnotationData {
 
 }} // namespace HPHP::jit
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STRING_HASH_SET_H_
-#define incl_HPHP_STRING_HASH_SET_H_
+#pragma once
 
 #include "hphp/runtime/base/string-functors.h"
 #include "hphp/runtime/base/req-hash-set.h"
@@ -33,4 +32,3 @@ using StringIFastSet = req::fast_set<String,hphp_string_hash,hphp_string_isame>;
 using StringFastSet = req::fast_set<String,hphp_string_hash,hphp_string_same>;
 
 }}
-#endif

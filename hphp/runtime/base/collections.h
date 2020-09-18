@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_COLLECTIONS_H_
-#define incl_HPHP_COLLECTIONS_H_
+#pragma once
 
 #include <folly/Optional.h>
 
@@ -197,4 +196,3 @@ inline bool isTypeName(const StringData* str) {
 
 /////////////////////////////////////////////////////////////////////////////
 }}
-#endif

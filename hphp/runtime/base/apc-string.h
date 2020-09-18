@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_APC_STRING_H_
-#define incl_HPHP_APC_STRING_H_
+#pragma once
 
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-typed-value.h"
@@ -122,4 +121,3 @@ private:
 
 }
 
-#endif

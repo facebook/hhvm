@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_REPO_AUTH_TYPE_ARRAY_INL_H_
-#define incl_HPHP_REPO_AUTH_TYPE_ARRAY_INL_H_
+#pragma once
 
 #include <type_traits>
 #include <limits>
@@ -123,4 +122,3 @@ void RepoAuthType::Array::serialize(SerDe& sd) const {
 
 }
 
-#endif

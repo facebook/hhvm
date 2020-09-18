@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SWEEPABLE_H_
-#define incl_HPHP_SWEEPABLE_H_
+#pragma once
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/type-scan.h"
@@ -107,4 +106,3 @@ struct SweepableMember : Sweepable {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

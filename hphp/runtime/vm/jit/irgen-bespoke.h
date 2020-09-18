@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_IRGEN_BESPOKE_H
-#define incl_HPHP_IRGEN_BESPOKE_H
+#pragma once
 
 #include "hphp/runtime/vm/jit/irgen-state.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -50,4 +49,3 @@ void handleVanillaOutputs(IRGS&, SrcKey);
 
 }}}
 
-#endif

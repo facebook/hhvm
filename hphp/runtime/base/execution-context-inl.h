@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXECUTION_CONTEXT_INL_H_
-#define incl_HPHP_EXECUTION_CONTEXT_INL_H_
+#pragma once
 
 #include "hphp/runtime/vm/act-rec.h"
 
@@ -305,4 +304,3 @@ template<class Fn> void ExecutionContext::sweepDynPropTable(Fn fn) {
 
 }
 
-#endif

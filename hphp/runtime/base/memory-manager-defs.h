@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_MEMORY_MANAGER_DEFS_H
-#define incl_HPHP_MEMORY_MANAGER_DEFS_H
+#pragma once
 
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
@@ -627,4 +626,3 @@ template<class Fn> void MemoryManager::sweepApcStrings(Fn fn) {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif

@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ALIAS_CLASS_H_
-#define incl_HPHP_ALIAS_CLASS_H_
+#pragma once
 
 #include "hphp/runtime/base/rds.h"
 
@@ -516,4 +515,3 @@ std::string show(AliasClass);
 
 }}
 
-#endif

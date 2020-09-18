@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_REPO_HELPERS_H_
-#define incl_HPHP_VM_REPO_HELPERS_H_
+#pragma once
 
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/types.h"
@@ -228,4 +227,3 @@ struct RepoProxy {
 
 }
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CPP_BASE_EXCEPTIONS_H_
-#define incl_HPHP_CPP_BASE_EXCEPTIONS_H_
+#pragma once
 
 #include <string>
 #include <atomic>
@@ -211,4 +210,3 @@ String throwable_to_string(ObjectData* throwable);
 
 }
 
-#endif

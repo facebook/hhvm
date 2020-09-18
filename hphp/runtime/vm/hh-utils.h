@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_HH_UTILS_H_
-#define incl_HPHP_VM_HH_UTILS_H_
+#pragma once
 
 namespace HPHP {
 
@@ -29,4 +28,3 @@ void autoTypecheck(const Unit* unit);
 
 }
 
-#endif

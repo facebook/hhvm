@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_VM_VM_REGS_H_
-#define incl_HPHP_RUNTIME_VM_VM_REGS_H_
+#pragma once
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/rds-header.h"
@@ -277,4 +276,3 @@ struct VMRegGuard {
 
 }
 
-#endif

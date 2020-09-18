@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_SMASHABLE_INSTR_H_
-#define incl_HPHP_JIT_SMASHABLE_INSTR_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
@@ -126,4 +125,3 @@ bool optimizeSmashedJcc(TCA inst);
 
 }}
 
-#endif

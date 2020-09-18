@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_PHYSREG_H_
-#define incl_HPHP_JIT_PHYSREG_H_
+#pragma once
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/bitops.h"
@@ -503,4 +502,3 @@ namespace std {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif

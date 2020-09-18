@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_IR_OPCODE_H_
-#define incl_HPHP_VM_IR_OPCODE_H_
+#pragma once
 
 #include <type_traits>
 #include <vector>
@@ -214,4 +213,3 @@ template<> class FormatValue<HPHP::jit::Opcode> {
 
 #include "hphp/runtime/vm/jit/ir-opcode-inl.h"
 
-#endif

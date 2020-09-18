@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TRANSLATOR_RUNTIME_H_
-#define incl_HPHP_TRANSLATOR_RUNTIME_H_
+#pragma once
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds.h"
@@ -211,4 +210,3 @@ uintptr_t tlsBaseNoInline();
 
 }}
 
-#endif

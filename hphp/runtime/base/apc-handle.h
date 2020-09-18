@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_APC_HANDLE_H_
-#define incl_HPHP_APC_HANDLE_H_
+#pragma once
 
 #include <atomic>
 
@@ -307,4 +306,3 @@ private:
 
 }
 
-#endif

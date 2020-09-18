@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_INCREF_PROFILE_H_
-#define incl_HPHP_JIT_INCREF_PROFILE_H_
+#pragma once
 
 #include <folly/dynamic.h>
 #include <folly/Format.h>
@@ -111,4 +110,3 @@ struct IncRefProfile {
 
 } }
 
-#endif

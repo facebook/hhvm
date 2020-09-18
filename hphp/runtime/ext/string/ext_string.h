@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_STRING_H_
-#define incl_HPHP_EXT_STRING_H_
+#pragma once
 
 #include "hphp/zend/zend-html.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
@@ -362,4 +361,3 @@ Variant HHVM_FUNCTION(metaphone,
 
 }
 
-#endif

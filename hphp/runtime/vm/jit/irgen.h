@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_IRGEN_H_
-#define incl_HPHP_JIT_IRGEN_H_
+#pragma once
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/types.h"
@@ -352,4 +351,3 @@ Type predictedType(const IRGS&, const Location&);
 
 }}}
 
-#endif

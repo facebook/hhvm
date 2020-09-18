@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_LOWER_H_
-#define incl_HPHP_JIT_VASM_LOWER_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/vasm.h"
 
@@ -67,4 +66,3 @@ void vlower(VLS& env, Vlabel b, size_t i);
 
 #include "hphp/runtime/vm/jit/vasm-lower-inl.h"
 
-#endif

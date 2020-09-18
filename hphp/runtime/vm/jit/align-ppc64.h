@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_ALIGN_PPC64_H_
-#define incl_HPHP_JIT_ALIGN_PPC64_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/alignment.h"
@@ -45,4 +44,3 @@ constexpr size_t cache_line_size() { return 128; }
 
 }}}
 
-#endif

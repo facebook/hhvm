@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_IRGEN_SPROP_GLOBAL_H_
-#define incl_HPHP_JIT_IRGEN_SPROP_GLOBAL_H_
+#pragma once
 
 #include "hphp/runtime/vm/containers.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -51,4 +50,3 @@ ClsPropLookup ldClsPropAddr(IRGS&, SSATmp*, SSATmp*, bool, bool, bool);
 }}}
 
 
-#endif

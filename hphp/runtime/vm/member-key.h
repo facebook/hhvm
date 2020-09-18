@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_MEMBER_KEY_H_
-#define incl_HPHP_VM_MEMBER_KEY_H_
+#pragma once
 
 #include "hphp/runtime/base/types.h"
 
@@ -128,4 +127,3 @@ std::string show(MemberKey);
 
 }
 
-#endif

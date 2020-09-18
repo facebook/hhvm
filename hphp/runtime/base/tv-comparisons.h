@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_TV_COMPARISONS_H_
-#define incl_HPHP_TV_COMPARISONS_H_
+#pragma once
 
 #include "hphp/runtime/base/typed-value.h"
 
@@ -131,4 +130,3 @@ int64_t tvCompare(TypedValue, TypedValue);
 
 }
 
-#endif

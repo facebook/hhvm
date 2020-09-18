@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_EDGE_H_
-#define incl_HPHP_VM_EDGE_H_
+#pragma once
 
 #include <boost/intrusive/list.hpp>
 
@@ -73,4 +72,3 @@ using EdgeSet = jit::flat_set<Edge*>;
 
 }}
 
-#endif

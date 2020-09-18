@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_REPO_GLOBAL_DATA_H_
-#define incl_HPHP_REPO_GLOBAL_DATA_H_
+#pragma once
 
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
@@ -208,4 +207,3 @@ std::string show(const Repo::GlobalData& gd);
 }
 
 
-#endif

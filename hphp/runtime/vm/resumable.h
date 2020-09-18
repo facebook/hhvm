@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_VM_RESUMABLE_H_
-#define incl_HPHP_RUNTIME_VM_RESUMABLE_H_
+#pragma once
 
 #include <folly/Optional.h>
 
@@ -245,4 +244,3 @@ static_assert(Resumable::arOff() == 0,
 
 }
 
-#endif

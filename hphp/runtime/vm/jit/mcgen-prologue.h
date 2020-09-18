@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_MCGEN_PROLOGUE_H_
-#define incl_HPHP_JIT_MCGEN_PROLOGUE_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/types.h"
 
@@ -49,4 +48,3 @@ bool regeneratePrologues(Func* func, tc::FuncMetaInfo&);
 
 }}}
 
-#endif

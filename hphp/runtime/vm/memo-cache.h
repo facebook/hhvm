@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_VM_MEMO_CACHE_H_
-#define incl_HPHP_RUNTIME_VM_MEMO_CACHE_H_
+#pragma once
 
 #include "hphp/runtime/vm/func.h"
 
@@ -207,4 +206,3 @@ static constexpr size_t kMemoCacheMaxSpecializedKeys = 6;
 
 }
 
-#endif

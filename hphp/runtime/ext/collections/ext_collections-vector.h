@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_EXT_COLLECTIONS_VECTOR_H
-#define incl_HPHP_EXT_COLLECTIONS_VECTOR_H
+#pragma once
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -627,4 +626,3 @@ struct VectorIterator {
 
 /////////////////////////////////////////////////////////////////////////////
 }}
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STRING_FUNCTORS_H_
-#define incl_HPHP_STRING_FUNCTORS_H_
+#pragma once
 
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/util/assertions.h"
@@ -75,4 +74,3 @@ struct StringDataPairHashICompare {
 };
 
 }
-#endif

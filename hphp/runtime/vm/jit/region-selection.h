@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_REGION_SELECTION_H_
-#define incl_HPHP_JIT_REGION_SELECTION_H_
+#pragma once
 
 #include <memory>
 #include <utility>
@@ -578,4 +577,3 @@ std::string show(const RegionDesc&);
 
 }}
 
-#endif

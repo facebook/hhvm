@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_REPO_AUTH_TYPE_H_
-#define incl_HPHP_REPO_AUTH_TYPE_H_
+#pragma once
 
 #include <limits>
 #include <string>
@@ -395,4 +394,3 @@ std::string show(RepoAuthType);
 
 }
 
-#endif

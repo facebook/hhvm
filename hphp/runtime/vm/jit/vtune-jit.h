@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_VM_VTUNE_JIT_H
-#define incl_HPHP_VM_VTUNE_JIT_H
+#pragma once
 
 #include "translator.h"
 
@@ -29,4 +28,3 @@ void reportHelperToVtune(const char *name,
                          void *end);
 }}
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ATOMIC_SHARED_PTR_H_
-#define incl_HPHP_ATOMIC_SHARED_PTR_H_
+#pragma once
 
 #include "hphp/util/low-ptr.h"
 
@@ -143,4 +142,3 @@ using AtomicSharedLowPtr = AtomicSharedPtrImpl<T, true>;
 
 }
 
-#endif

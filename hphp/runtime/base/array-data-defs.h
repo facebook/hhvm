@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ARRAY_DATA_DEFS_H_
-#define incl_HPHP_ARRAY_DATA_DEFS_H_
+#pragma once
 
 #include "hphp/runtime/base/array-data.h"
 
@@ -399,4 +398,3 @@ inline ArrayData* ArrayData::remove(const Variant& k) {
 
 }
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_IS_TYPE_STRUCT_PROFILE_H_
-#define incl_HPHP_JIT_IS_TYPE_STRUCT_PROFILE_H_
+#pragma once
 
 #include <cstdint>
 #include <string>
@@ -49,4 +48,3 @@ private:
 
 }}
 
-#endif

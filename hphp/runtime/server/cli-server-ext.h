@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CLI_SERVER_EXT_H_
-#define incl_HPHP_CLI_SERVER_EXT_H_
+#pragma once
 
 #include "hphp/util/trace.h"
 
@@ -126,4 +125,3 @@ x##_cli_client(__VA_ARGS__)
 
 #include "hphp/runtime/server/cli-server-ext-detail.h"
 
-#endif

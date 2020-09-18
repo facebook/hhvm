@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STRING_HASH_MAP_H_
-#define incl_HPHP_STRING_HASH_MAP_H_
+#pragma once
 
 #include "hphp/runtime/base/string-functors.h"
 #include "hphp/runtime/base/req-hash-map.h"
@@ -32,4 +31,3 @@ template<typename T>
 using StringFastMap = req::fast_map<String,T,hphp_string_hash,hphp_string_same>;
 
 }}
-#endif

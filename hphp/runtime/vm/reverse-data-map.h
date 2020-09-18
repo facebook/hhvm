@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_REVERSE_DATA_MAP_H_
-#define incl_HPHP_REVERSE_DATA_MAP_H_
+#pragma once
 
 #include <folly/DiscriminatedPtr.h>
 
@@ -80,4 +79,3 @@ result find_containing(const void* addr);
 
 }}
 
-#endif

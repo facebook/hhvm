@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_PHP_GLOBALS_INL_H_
-#define incl_HPHP_PHP_GLOBALS_INL_H_
+#pragma once
 
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -48,4 +47,3 @@ inline Variant php_global(const StaticString& name) {
 }
 
 
-#endif

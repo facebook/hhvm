@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_BASE_REQ_HASH_MAP_H_
-#define incl_HPHP_RUNTIME_BASE_REQ_HASH_MAP_H_
+#pragma once
 
 #include "hphp/runtime/base/req-malloc.h"
 #include <folly/container/F14Map.h>
@@ -139,4 +138,3 @@ struct fast_map : std::conditional_t<
 };
 
 }}
-#endif

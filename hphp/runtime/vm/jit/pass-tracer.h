@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_PASS_TRACER_H_
-#define incl_HPHP_PASS_TRACER_H_
+#pragma once
 
 #include <string>
 
@@ -88,4 +87,3 @@ using VpassTracer = PassTracerImpl<Vunit>;
 }}
 
 
-#endif

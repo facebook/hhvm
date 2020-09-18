@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_CALL_TARGET_PROFILE_H_
-#define incl_HPHP_JIT_CALL_TARGET_PROFILE_H_
+#pragma once
 
 #include <folly/dynamic.h>
 
@@ -79,4 +78,3 @@ inline const StringData* callTargetProfileKey() {
 
 }}
 
-#endif

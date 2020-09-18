@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_IRGEN_MINSTR_H_
-#define incl_HPHP_JIT_IRGEN_MINSTR_H_
+#pragma once
 
 #include "hphp/runtime/base/static-string-table.h"
 
@@ -244,4 +243,3 @@ SSATmp* profiledType(IRGS& env, SSATmp* tmp, Finish finish) {
 
 }}}
 
-#endif

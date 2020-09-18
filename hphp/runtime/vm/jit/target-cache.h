@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_VM_JIT_TARGETCACHE_H_
-#define incl_HPHP_RUNTIME_VM_JIT_TARGETCACHE_H_
+#pragma once
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -154,4 +153,3 @@ const Func* handleStaticCall(const Class* cls,
 
 }}
 
-#endif

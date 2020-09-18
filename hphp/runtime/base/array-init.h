@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ARRAY_INIT_H_
-#define incl_HPHP_ARRAY_INIT_H_
+#pragma once
 
 #include <boost/variant.hpp>
 #include <type_traits>
@@ -1016,4 +1015,3 @@ MixedPHPArrayInitBase<TArray>::MixedPHPArrayInitBase(size_t n,
 
 }
 
-#endif

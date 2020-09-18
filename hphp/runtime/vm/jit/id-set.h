@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_ID_SET_
-#define incl_HPHP_JIT_ID_SET_
+#pragma once
 
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -335,4 +334,3 @@ void swap(IdSet<K>& a, IdSet<K>& b) noexcept {
 
 }}
 
-#endif

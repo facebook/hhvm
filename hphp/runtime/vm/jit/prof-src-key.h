@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_PROF_SRC_KEY_H_
-#define incl_HPHP_JIT_PROF_SRC_KEY_H_
+#pragma once
 
 #include "hphp/runtime/vm/srckey.h"
 
@@ -58,4 +57,3 @@ typedef hphp_hash_set<ProfSrcKey, ProfSrcKey::Hasher> ProfSrcKeySet;
 
 } }
 
-#endif

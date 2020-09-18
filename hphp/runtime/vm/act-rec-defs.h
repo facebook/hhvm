@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ACT_REC_DEFS_H_
-#define incl_HPHP_ACT_REC_DEFS_H_
+#pragma once
 
 #include "hphp/runtime/vm/act-rec.h"
 
@@ -51,4 +50,3 @@ inline void ActRec::setReturnVMExit() {
 
 }
 
-#endif

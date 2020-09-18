@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_CONTAINERS_H_
-#define incl_HPHP_VM_CONTAINERS_H_
+#pragma once
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/compact-vector.h"
@@ -46,4 +45,3 @@ using vm_flat_map = boost::container::flat_map<K, V, C,
                                                VMAllocator<std::pair<K,V>>>;
 
 }
-#endif

@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_REQUEST_EVENT_HANDLER_H_
-#define incl_HPHP_REQUEST_EVENT_HANDLER_H_
+#pragma once
 
 namespace HPHP {
 
@@ -55,4 +54,3 @@ private:
 
 }
 
-#endif

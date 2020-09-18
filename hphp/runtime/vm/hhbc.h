@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_HHBC_H_
-#define incl_HPHP_VM_HHBC_H_
+#pragma once
 
 #include <type_traits>
 
@@ -1179,4 +1178,3 @@ struct hash<HPHP::Op> {
 
 //////////////////////////////////////////////////////////////////////
 
-#endif

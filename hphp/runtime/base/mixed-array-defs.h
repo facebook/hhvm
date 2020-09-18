@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HPHP_ARRAY_DEFS_H_
-#define incl_HPHP_HPHP_ARRAY_DEFS_H_
+#pragma once
 
 #include "hphp/runtime/base/mixed-array.h"
 
@@ -377,4 +376,3 @@ ALWAYS_INLINE size_t uncountedAllocExtra(const ArrayData* ad, bool apc_tv) {
 
 }
 
-#endif

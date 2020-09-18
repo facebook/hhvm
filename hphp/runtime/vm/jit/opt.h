@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_HHIR_OPT_H_
-#define incl_HPHP_HHIR_OPT_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/id-set.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -56,4 +55,3 @@ void optimize(IRUnit& unit, TransKind kind);
 
 }}
 
-#endif

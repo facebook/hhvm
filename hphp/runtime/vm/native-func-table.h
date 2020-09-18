@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_VM_NATIVE_FUNC_TABLE_H
-#define incl_HPHP_RUNTIME_VM_NATIVE_FUNC_TABLE_H
+#pragma once
 
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/base/string-functors.h"
@@ -32,4 +31,3 @@ struct FuncTable {
 };
 
 }}
-#endif

@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_LIBXML_H_
-#define incl_HPHP_EXT_LIBXML_H_
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 
@@ -283,4 +282,3 @@ inline xmlDocPtr XMLNodeData::docp() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif

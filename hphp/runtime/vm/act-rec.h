@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ACT_REC_H_
-#define incl_HPHP_ACT_REC_H_
+#pragma once
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -324,4 +323,3 @@ bool isReturnHelper(void* address);
 
 #include "hphp/runtime/vm/act-rec-inl.h"
 
-#endif

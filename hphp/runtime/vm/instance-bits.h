@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_VM_INSTANCE_BITS_H_
-#define incl_HPHP_RUNTIME_VM_INSTANCE_BITS_H_
+#pragma once
 
 #include <atomic>
 #include <bitset>
@@ -122,4 +121,3 @@ void deserialize(jit::ProfDataDeserializer&);
 
 }}
 
-#endif

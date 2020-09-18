@@ -16,8 +16,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-#ifndef incl_HPHP_FILE_UTIL_DEFS_H_
-#define incl_HPHP_FILE_UTIL_DEFS_H_
+#pragma once
 
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
@@ -134,4 +133,3 @@ bool runRelative(std::string suffix, String cmd,
 }
 }
 
-#endif

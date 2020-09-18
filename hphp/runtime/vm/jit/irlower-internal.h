@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_IRLOWER_INTERNAL_H_
-#define incl_HPHP_JIT_IRLOWER_INTERNAL_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -155,4 +154,3 @@ IR_OPCODES
 
 #include "irlower-internal-inl.h"
 
-#endif

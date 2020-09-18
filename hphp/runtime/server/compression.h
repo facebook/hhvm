@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_COMPRESSION_H_
-#define incl_HPHP_COMPRESSION_H_
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -241,4 +240,3 @@ struct ResponseCompressorManager {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif  // incl_HPHP_COMPRESSION_H_

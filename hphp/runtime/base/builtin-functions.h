@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_BUILTIN_FUNCTIONS_H_
-#define incl_HPHP_BUILTIN_FUNCTIONS_H_
+#pragma once
 
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/variable-unserializer.h"
@@ -468,4 +467,3 @@ bool function_exists(const String& function_name);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

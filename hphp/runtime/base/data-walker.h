@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_DATA_WALKER_H_
-#define incl_HPHP_DATA_WALKER_H_
+#pragma once
 
 #include "hphp/runtime/base/req-hash-map.h"
 #include "hphp/runtime/base/req-hash-set.h"
@@ -145,4 +144,3 @@ inline DataWalker::LookupFeature operator~(DataWalker::LookupFeature f) {
 
 }
 
-#endif

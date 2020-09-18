@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_IRGEN_INTERNAL_H_
-#define incl_HPHP_JIT_IRGEN_INTERNAL_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/irgen.h"
 
@@ -899,4 +898,3 @@ SSATmp* convertClsMethToVec(IRGS& env, SSATmp* clsMeth);
 SSATmp* convertClassKey(IRGS& env, SSATmp* key);
 }}}
 
-#endif

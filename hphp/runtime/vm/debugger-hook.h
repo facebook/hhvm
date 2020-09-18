@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_DEBUGGER_HOOK_H_
-#define incl_HPHP_DEBUGGER_HOOK_H_
+#pragma once
 
 #include <functional>
 
@@ -299,4 +298,3 @@ String getCurrentFilePath(int* pLine);
 
 }
 
-#endif

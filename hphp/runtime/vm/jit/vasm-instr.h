@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_INSTR_H_
-#define incl_HPHP_JIT_VASM_INSTR_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
@@ -1448,4 +1447,3 @@ Width width(Vinstr::Opcode op);
 
 }}
 
-#endif

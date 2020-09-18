@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_EXT_COLLECTIONS_H
-#define incl_HPHP_EXT_COLLECTIONS_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/header-kind.h"
@@ -121,4 +120,3 @@ struct CollectionPropHandler: Native::BasePropHandler {
 
 /////////////////////////////////////////////////////////////////////////////
 }}
-#endif

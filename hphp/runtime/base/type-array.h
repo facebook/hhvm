@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ARRAY_H_
-#define incl_HPHP_ARRAY_H_
+#pragma once
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/datatype.h"
@@ -645,4 +644,3 @@ ALWAYS_INLINE Array toArray(tv_rval rval) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_BASE_REQ_BITSET_H_
-#define incl_HPHP_RUNTIME_BASE_REQ_BITSET_H_
+#pragma once
 
 #include "hphp/runtime/base/req-malloc.h"
 #include <boost/dynamic_bitset.hpp>
@@ -28,4 +27,3 @@ using dynamic_bitset = boost::dynamic_bitset<
 >;
 
 }}
-#endif

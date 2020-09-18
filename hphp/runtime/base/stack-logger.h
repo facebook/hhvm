@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_STACK_LOGGER_H_
-#define incl_HPHP_STACK_LOGGER_H_
+#pragma once
 
 namespace HPHP {
 
@@ -25,4 +24,3 @@ void log_native_stack(const char* msg);
 
 }
 
-#endif

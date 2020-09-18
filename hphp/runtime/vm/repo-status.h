@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_REPO_STATUS_H_
-#define incl_HPHP_VM_REPO_STATUS_H_
+#pragma once
 
 namespace HPHP {
 
@@ -26,4 +25,3 @@ enum class RepoStatus {
 
 }
 
-#endif

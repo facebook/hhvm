@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_PRINT_H_
-#define incl_HPHP_JIT_VASM_PRINT_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -81,4 +80,3 @@ extern const char* area_names[];
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TARGET_PROFILE_H_
-#define incl_HPHP_JIT_TARGET_PROFILE_H_
+#pragma once
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -302,4 +301,3 @@ private:
 
 }}
 
-#endif

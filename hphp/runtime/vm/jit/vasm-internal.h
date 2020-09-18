@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_INTERNAL_H_
-#define incl_HPHP_JIT_VASM_INTERNAL_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vasm.h"
@@ -141,4 +140,3 @@ void setCallFuncId(Venv& env, TCA callRetAddr);
 
 #include "hphp/runtime/vm/jit/vasm-internal-inl.h"
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_ABI_REGS_H
-#define incl_HPHP_JIT_ABI_REGS_H
+#pragma once
 
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
@@ -47,4 +46,3 @@ struct Abi {
 
 }}
 
-#endif

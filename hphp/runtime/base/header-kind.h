@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HEADER_KIND_H_
-#define incl_HPHP_HEADER_KIND_H_
+#pragma once
 
 #include "hphp/util/compilation-flags.h"
 
@@ -348,4 +347,3 @@ inline constexpr bool collectionAllowsIntStringKeys(CollectionType ctype) {
 
 }
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_MEMBER_REFLECTION_H_
-#define incl_HPHP_MEMBER_REFLECTION_H_
+#pragma once
 
 #include "hphp/runtime/base/mixed-array.h"
 
@@ -92,4 +91,3 @@ constexpr const char* const kMemberReflectionTableName =
 
 }
 
-#endif

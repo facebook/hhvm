@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_METH_PROFILE_H_
-#define incl_HPHP_JIT_METH_PROFILE_H_
+#pragma once
 
 #include <folly/dynamic.h>
 
@@ -129,4 +128,3 @@ private:
 
 }}
 
-#endif

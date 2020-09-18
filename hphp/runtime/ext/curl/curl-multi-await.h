@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_CURL_MULTI_AWAIT_H
-#define incl_HPHP_CURL_MULTI_AWAIT_H
+#pragma once
 
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/curl/curl-multi-resource.h"
@@ -33,4 +32,3 @@ struct CurlMultiAwait : AsioExternalThreadEvent {
 
 /////////////////////////////////////////////////////////////////////////////
 }
-#endif

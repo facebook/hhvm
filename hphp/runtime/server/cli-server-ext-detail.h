@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CLI_SERVER_EXT_DETAIL_H_
-#define incl_HPHP_CLI_SERVER_EXT_DETAIL_H_
+#pragma once
 
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/server/cli-server.h"
@@ -250,4 +249,3 @@ CLISrvResult<TSuccess, TError> invoke_on_cli_client(const std::string& id, CLISr
 } // namespace HPHP::detail
 } // namespace HPHP
 
-#endif

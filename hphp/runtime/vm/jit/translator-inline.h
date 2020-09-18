@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TRANSLATOR_INLINE_H_
-#define incl_HPHP_TRANSLATOR_INLINE_H_
+#pragma once
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/vm/func.h"
@@ -67,4 +66,3 @@ inline int localOffset(int locId) {
 
 }}
 
-#endif

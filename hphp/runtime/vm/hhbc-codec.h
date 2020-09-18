@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_HHBC_CODEC_H_
-#define incl_HPHP_VM_HHBC_CODEC_H_
+#pragma once
 
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -210,4 +209,3 @@ void encodeFCallArgs(UnitEmitter& ue, const FCallArgsBase& fca,
 
 }
 
-#endif

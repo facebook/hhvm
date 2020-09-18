@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_UNWIND_ITANIUM_H_
-#define incl_HPHP_JIT_UNWIND_ITANIUM_H_
+#pragma once
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/rds.h"
@@ -132,4 +131,3 @@ void initUnwinder(TCA base, size_t size, PersonalityFunc fn);
 
 }}
 
-#endif

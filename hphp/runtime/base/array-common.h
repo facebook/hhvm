@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ARRAY_COMMON_H_
-#define incl_HPHP_ARRAY_COMMON_H_
+#pragma once
 
 #include <sys/types.h>
 
@@ -68,4 +67,3 @@ ArrayData* castObjToDArray(ObjectData*);
 
 }
 
-#endif

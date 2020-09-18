@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TC_INTERNAL_H_
-#define incl_HPHP_JIT_TC_INTERNAL_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/tc.h"
 
@@ -232,4 +231,3 @@ void recycleStop();
 
 }}}
 
-#endif

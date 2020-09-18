@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_REQUEST_INJECTION_DATA_H_
-#define incl_HPHP_REQUEST_INJECTION_DATA_H_
+#pragma once
 
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/surprise-flags.h"
@@ -479,4 +478,3 @@ private:
 #include "hphp/runtime/base/request-injection-data-inl.h"
 #undef incl_HPHP_REQUEST_INJECTION_DATA_INL_H_
 
-#endif

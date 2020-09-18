@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_APC_FILE_STORAGE_H_
-#define incl_HPHP_APC_FILE_STORAGE_H_
+#pragma once
 
 #include <atomic>
 #include <string>
@@ -79,4 +78,3 @@ extern APCFileStorage s_apc_file_storage;
 
 }
 
-#endif

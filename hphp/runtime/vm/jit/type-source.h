@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TYPE_SOURCE_H_
-#define incl_HPHP_JIT_TYPE_SOURCE_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/util/assertions.h"
@@ -84,4 +83,3 @@ std::string show(const TypeSourceSet&);
 
 }}
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RFUNC_H_
-#define incl_HPHP_RFUNC_H_
+#pragma once
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/countable.h"
@@ -67,4 +66,3 @@ ALWAYS_INLINE void decRefRFunc(RFuncData* rfunc) {
 
 } // namespace HPHP
 
-#endif

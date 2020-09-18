@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_H_
-#define incl_HPHP_JIT_VASM_H_
+#pragma once
 
 #include "hphp/runtime/base/rds.h"
 
@@ -181,4 +180,3 @@ template<> struct hash<HPHP::jit::Vlabel> {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif

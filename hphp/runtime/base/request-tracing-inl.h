@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_REQUEST_TRACING_INL_H_
-#define incl_HPHP_REQUEST_TRACING_INL_H_
+#pragma once
 
 #include <folly/AtomicHashMap.h>
 #include <folly/MapUtil.h>
@@ -353,4 +352,3 @@ void visit_process_stats(F&& fun) {
 ////////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif

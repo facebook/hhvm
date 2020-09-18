@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TREADMILL_H_
-#define incl_HPHP_TREADMILL_H_
+#pragma once
 
 #include <stdint.h>
 #include <memory>
@@ -123,4 +122,3 @@ struct Session final {
 
 #include "hphp/runtime/vm/treadmill-inl.h"
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_RDS_HEADER_H_
-#define incl_HPHP_RUNTIME_RDS_HEADER_H_
+#pragma once
 
 #include <atomic>
 #include <cstddef>
@@ -145,4 +144,3 @@ static_assert((kVmMInstrStateOff % 16) == 0,
 
 } }
 
-#endif

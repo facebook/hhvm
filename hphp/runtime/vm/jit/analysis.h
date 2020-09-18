@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ANALYSIS_H_
-#define incl_HPHP_ANALYSIS_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/cfg.h"
 
@@ -94,4 +93,3 @@ SSATmp* least_common_ancestor(SSATmp*, SSATmp*);
 }}
 
 
-#endif

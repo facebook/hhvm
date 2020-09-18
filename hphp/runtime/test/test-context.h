@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_TEST_CONTEXT_H_
-#define incl_HPHP_TEST_CONTEXT_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/translator.h"
 
@@ -31,4 +30,3 @@ const auto test_context =
 
 }}
 
-#endif

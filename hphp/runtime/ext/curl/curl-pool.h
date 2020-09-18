@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_CURL_POOL_H
-#define incl_HPHP_CURL_POOL_H
+#pragma once
 
 #include "hphp/util/mutex.h"
 
@@ -72,4 +71,3 @@ private:
 
 /////////////////////////////////////////////////////////////////////////////
 }
-#endif

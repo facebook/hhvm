@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_IR_UNIT_H_
-#define incl_HPHP_IR_UNIT_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/annotation-data.h"
 #include "hphp/runtime/vm/jit/block.h"
@@ -308,4 +307,3 @@ jit::vector<Block*> findMainExitBlocks(const IRUnit& unit, SrcKey lastSk);
 
 #include "hphp/runtime/vm/jit/ir-unit-inl.h"
 
-#endif

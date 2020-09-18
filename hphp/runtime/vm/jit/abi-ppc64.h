@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_ABI_PPC64_H_
-#define incl_HPHP_JIT_ABI_PPC64_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -164,4 +163,3 @@ inline Vflags required_flags(jit::ConditionCode /*cc*/) {
 
 }}}
 
-#endif

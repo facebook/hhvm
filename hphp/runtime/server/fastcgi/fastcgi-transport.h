@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_TRANSPORT_H_
-#define incl_HPHP_RUNTIME_SERVER_FASTCGI_FASTCGI_TRANSPORT_H_
+#pragma once
 
 #include "hphp/runtime/server/transport.h"
 #include "hphp/util/synchronizable.h"
@@ -339,4 +338,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

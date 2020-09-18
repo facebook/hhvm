@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_OBJECT_DATA_H_
-#define incl_HPHP_OBJECT_DATA_H_
+#pragma once
 
 #include "hphp/runtime/base/classname-is.h"
 #include "hphp/runtime/base/countable.h"
@@ -646,4 +645,3 @@ typename std::enable_if<
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif

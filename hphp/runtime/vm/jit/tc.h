@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TC_H_
-#define incl_HPHP_JIT_TC_H_
+#pragma once
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -501,4 +500,3 @@ void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs);
 
 }}}
 
-#endif

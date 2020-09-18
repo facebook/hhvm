@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_CURL_RESOURCE_H
-#define incl_HPHP_CURL_RESOURCE_H
+#pragma once
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/req-optional.h"
@@ -154,4 +153,3 @@ struct CurlResource : SweepableResourceData {
 
 /////////////////////////////////////////////////////////////////////////////
 }
-#endif

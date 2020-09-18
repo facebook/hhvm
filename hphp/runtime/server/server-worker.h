@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HTTP_SERVER_SERVER_WORKER_H
-#define incl_HPHP_HTTP_SERVER_SERVER_WORKER_H
+#pragma once
 
 #include "hphp/runtime/server/server.h"
 #include "hphp/runtime/server/job-queue-vm-stack.h"
@@ -142,4 +141,3 @@ protected:
 
 }
 
-#endif

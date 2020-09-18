@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_CODE_GEN_CF_H_
-#define incl_HPHP_VM_CODE_GEN_CF_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/string-tag.h"
@@ -376,4 +375,3 @@ VregList doWhile(Vout& v, ConditionCode cc,
 
 }}
 
-#endif

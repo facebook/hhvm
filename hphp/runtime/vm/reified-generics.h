@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_REIFIEDGENERICS_H_
-#define incl_HPHP_VM_REIFIEDGENERICS_H_
+#pragma once
 
 #include "hphp/runtime/base/tv-val.h"
 
@@ -77,4 +76,3 @@ void raise_warning_for_soft_reified(size_t i, bool fun, const StringData *name);
 
 }
 
-#endif

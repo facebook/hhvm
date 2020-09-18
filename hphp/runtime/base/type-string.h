@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TYPE_STRING_H_
-#define incl_HPHP_TYPE_STRING_H_
+#pragma once
 
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/static-string-table.h"
@@ -601,4 +600,3 @@ template<> class FormatValue<HPHP::StaticString> {
 };
 }
 
-#endif

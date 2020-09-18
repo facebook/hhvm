@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TYPE_CONSTRAINT_H_
-#define incl_HPHP_TYPE_CONSTRAINT_H_
+#pragma once
 
 #include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/vm/named-entity.h"
@@ -552,4 +551,3 @@ inline bool setOpNeedsTypeCheck(const TypeConstraint& tc,
 void applyFlagsToUB(TypeConstraint& ub, const TypeConstraint& tc);
 }
 
-#endif

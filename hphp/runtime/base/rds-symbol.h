@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RDS_SYMBOL_H_
-#define incl_HPHP_RDS_SYMBOL_H_
+#pragma once
 
 #include "hphp/runtime/base/types.h"
 
@@ -177,4 +176,3 @@ size_t symbol_hash(const Symbol&);
 
 }}
 
-#endif

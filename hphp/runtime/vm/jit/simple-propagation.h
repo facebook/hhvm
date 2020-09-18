@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_SIMPLE_PROPAGATION_H_
-#define incl_HPHP_JIT_SIMPLE_PROPAGATION_H_
+#pragma once
 
 namespace HPHP { namespace jit {
 
@@ -40,4 +39,3 @@ void constProp(IRUnit&, IRInstruction*);
 
 }}
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ARRAY_HELPERS_H_
-#define incl_HPHP_ARRAY_HELPERS_H_
+#pragma once
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/tv-mutate.h"
@@ -62,4 +61,3 @@ enable_if_lval_t<C&&, void> setElem(C&& elem, TypedValue v, bool move = false) {
 
 }
 
-#endif

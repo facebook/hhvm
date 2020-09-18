@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_ALIGN_ARM_H_
-#define incl_HPHP_JIT_ALIGN_ARM_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/alignment.h"
@@ -50,4 +49,3 @@ const AlignInfo& alignment_info(Alignment alignment);
 
 }}}
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ROOT_MAP_H_
-#define incl_HPHP_ROOT_MAP_H_
+#pragma once
 
 #include "hphp/runtime/base/req-hash-map.h"
 #include "hphp/runtime/base/req-ptr.h"
@@ -109,4 +108,3 @@ private:
 };
 
 }
-#endif

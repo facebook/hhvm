@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TYPED_VALUE_H_
-#define incl_HPHP_TYPED_VALUE_H_
+#pragma once
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
@@ -361,4 +360,3 @@ extern const TypedValue immutable_uninit_base;
 
 }
 
-#endif

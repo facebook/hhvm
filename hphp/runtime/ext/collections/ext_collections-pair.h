@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_EXT_COLLECTIONS_PAIR_H
-#define incl_HPHP_EXT_COLLECTIONS_PAIR_H
+#pragma once
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -219,4 +218,3 @@ struct PairIterator {
 
 /////////////////////////////////////////////////////////////////////////////
 }}
-#endif

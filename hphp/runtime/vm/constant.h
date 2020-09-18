@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CONSTANT_H_
-#define incl_HPHP_CONSTANT_H_
+#pragma once
 
 #include <ostream>
 
@@ -49,4 +48,3 @@ struct Constant {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

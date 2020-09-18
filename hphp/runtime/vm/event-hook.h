@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_VM_EVENT_HOOK_H_
-#define incl_HPHP_VM_EVENT_HOOK_H_
+#pragma once
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/rds-header.h"
@@ -174,4 +173,3 @@ private:
 
 }
 
-#endif

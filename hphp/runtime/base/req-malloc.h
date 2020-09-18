@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_BASE_REQ_MALLOC_H_
-#define incl_HPHP_RUNTIME_BASE_REQ_MALLOC_H_
+#pragma once
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/type-scan.h"
@@ -277,4 +276,3 @@ template<class T> T* calloc_raw_array(size_t count) {
 
 }}
 
-#endif

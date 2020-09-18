@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_MEMORY_MANAGER_INL_H
-#define incl_HPHP_MEMORY_MANAGER_INL_H
+#pragma once
 
 #include <limits>
 #include <utility>
@@ -418,4 +417,3 @@ template<class T> void destroy_raw(T* t) {
 }
 
 }
-#endif

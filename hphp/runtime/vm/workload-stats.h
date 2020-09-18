@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_WORKLOAD_STATS_H_
-#define incl_HPHP_WORKLOAD_STATS_H_
+#pragma once
 
 #include <cstdint>
 
@@ -60,4 +59,3 @@ struct WorkloadStats final {
 
 }
 
-#endif

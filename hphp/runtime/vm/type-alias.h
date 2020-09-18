@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TYPE_ALIAS_H_
-#define incl_HPHP_TYPE_ALIAS_H_
+#pragma once
 
 #include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/base/array-data.h"
@@ -121,4 +120,3 @@ bool operator!=(const TypeAlias& l, const TypeAlias& r);
 #include "hphp/runtime/vm/type-alias-inl.h"
 #undef incl_HPHP_TYPE_ALIAS_INL_H_
 
-#endif

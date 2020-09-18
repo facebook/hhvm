@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_JIT_ARG_GROUP_H
-#define incl_HPHP_JIT_ARG_GROUP_H
+#pragma once
 
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
@@ -300,4 +299,3 @@ ArgGroup toArgGroup(const NativeCalls::CallInfo&,
                     const IRInstruction*);
 
 }}
-#endif

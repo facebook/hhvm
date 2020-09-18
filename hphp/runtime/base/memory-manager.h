@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_MEMORY_MANAGER_H_
-#define incl_HPHP_MEMORY_MANAGER_H_
+#pragma once
 
 #include <array>
 #include <string>
@@ -1095,4 +1094,3 @@ void reset_alloc_sampling();
 
 #include "hphp/runtime/base/memory-manager-inl.h"
 
-#endif

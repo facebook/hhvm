@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_CODE_RELOCATION_H_
-#define incl_HPHP_CODE_RELOCATION_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/util/data-block.h"
@@ -135,4 +134,3 @@ size_t relocate(RelocationInfo& rel,
 
 }}
 
-#endif

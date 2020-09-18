@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_ALIGN_INTERNAL_H_
-#define incl_HPHP_JIT_ALIGN_INTERNAL_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/alignment.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
@@ -61,4 +60,3 @@ void align(CodeBlock& cb, CGMeta* meta,
 
 #include "hphp/runtime/vm/jit/align-internal-inl.h"
 
-#endif

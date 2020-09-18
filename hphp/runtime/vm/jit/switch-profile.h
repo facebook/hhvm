@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_SWITCH_PROFILE_H_
-#define incl_HPHP_JIT_SWITCH_PROFILE_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/target-profile.h"
 
@@ -97,4 +96,3 @@ std::vector<SwitchCaseCount> sortedSwitchProfile(
 
 }}
 
-#endif

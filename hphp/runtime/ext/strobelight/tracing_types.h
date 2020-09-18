@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_TRACING_TYPES_H
-#define incl_HPHP_TRACING_TYPES_H
+#pragma once
 
 // THIS FILE SHOULD NOT INCLUDE ANY OTHER HEADERS
 
@@ -33,4 +32,3 @@ struct backtrace_t {
 }
 }
 
-#endif

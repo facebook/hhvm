@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_VM_NAMEVALUETABLE_H_
-#define incl_HPHP_RUNTIME_VM_NAMEVALUETABLE_H_
+#pragma once
 
 #include <folly/Bits.h>
 
@@ -126,4 +125,3 @@ private:
 
 }
 
-#endif

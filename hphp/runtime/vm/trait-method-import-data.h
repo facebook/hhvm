@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TRAIT_METHOD_IMPORT_DATA_H_
-#define incl_HPHP_TRAIT_METHOD_IMPORT_DATA_H_
+#pragma once
 
 #include <hphp/runtime/base/string-data.h>
 #include <hphp/runtime/vm/preclass.h>
@@ -196,4 +195,3 @@ private:
 
 #include "hphp/runtime/vm/trait-method-import-data-inl.h"
 
-#endif

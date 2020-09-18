@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_BASE_RDS_UTIL_H_
-#define incl_HPHP_RUNTIME_BASE_RDS_UTIL_H_
+#pragma once
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -77,4 +76,3 @@ attachTSCache(const Func*);
 
 }}
 
-#endif

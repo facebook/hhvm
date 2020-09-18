@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_USER_ATTRIBUTES_H_
-#define incl_HPHP_USER_ATTRIBUTES_H_
+#pragma once
 
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -122,4 +121,3 @@ private:
 
 }
 
-#endif

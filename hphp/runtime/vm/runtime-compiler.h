@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_VM_RUNTIME_COMPILER_H_
-#define incl_HPHP_VM_RUNTIME_COMPILER_H_
+#pragma once
 
 #include <cstddef>
 
@@ -67,4 +66,3 @@ using CompileStringFn = Unit* (*)(const char*, int, const SHA1&, const char*,
 extern CompileStringFn g_hphp_compiler_parse;
 
 }
-#endif

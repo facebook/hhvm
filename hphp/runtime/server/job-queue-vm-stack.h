@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_BASE_SERVER_JOB_QUEUE_VM_STACK_H_
-#define incl_HPHP_RUNTIME_BASE_SERVER_JOB_QUEUE_VM_STACK_H_
+#pragma once
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
@@ -28,4 +27,3 @@ struct JobQueueDropVMStack {
 //////////////////////////////////////////////////////////////////////
 }
 
-#endif

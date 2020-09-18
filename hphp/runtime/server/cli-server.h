@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CLI_SERVER_H_
-#define incl_HPHP_CLI_SERVER_H_
+#pragma once
 
 /*
  * CLI Server
@@ -151,4 +150,3 @@ Array cli_env();
 
 }
 
-#endif

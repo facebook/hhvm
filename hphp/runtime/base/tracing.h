@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TRACING_H
-#define incl_HPHP_TRACING_H
+#pragma once
 
 #include "hphp/runtime/base/string-data.h"
 
@@ -415,4 +414,3 @@ struct Pause {
 
 }}
 
-#endif

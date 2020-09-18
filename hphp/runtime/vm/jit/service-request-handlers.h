@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_SERVICE_REQUEST_HANDLERS_H_
-#define incl_HPHP_JIT_SERVICE_REQUEST_HANDLERS_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -71,4 +70,3 @@ TCA funcBodyHelper(ActRec* fp);
 
 }}}
 
-#endif

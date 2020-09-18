@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TYPE_STRUCTURE_HELPERS_H_
-#define incl_HPHP_TYPE_STRUCTURE_HELPERS_H_
+#pragma once
 
 #include <string>
 
@@ -141,4 +140,3 @@ bool doesTypeStructureContainTUnresolved(const ArrayData* ts);
 
 }
 
-#endif

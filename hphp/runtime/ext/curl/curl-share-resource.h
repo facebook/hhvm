@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CURL_SHARE_RESOURCE_H
-#define incl_HPHP_CURL_SHARE_RESOURCE_H
+#pragma once
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/type-scan.h"
@@ -46,4 +45,3 @@ struct CurlShareResource : SweepableResourceData {
 
 /////////////////////////////////////////////////////////////////////////////
 }
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_CALL_SPEC_H_
-#define incl_HPHP_JIT_CALL_SPEC_H_
+#pragma once
 
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 
@@ -443,4 +442,3 @@ private:
 
 }}
 
-#endif

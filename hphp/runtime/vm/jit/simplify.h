@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_SIMPLIFY_H_
-#define incl_HPHP_JIT_SIMPLIFY_H_
+#pragma once
 
 #include <folly/Optional.h>
 
@@ -91,4 +90,3 @@ void simplifyPass(IRUnit&);
 
 }}
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TYPE_PROFILE_H_
-#define incl_HPHP_JIT_TYPE_PROFILE_H_
+#pragma once
 
 #include <folly/dynamic.h>
 
@@ -62,4 +61,3 @@ struct TypeProfile {
 
 }}
 
-#endif

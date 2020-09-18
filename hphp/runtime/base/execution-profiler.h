@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_EXECUTION_PROFILER_H_
-#define incl_HPHP_EXECUTION_PROFILER_H_
+#pragma once
 
 #include "hphp/runtime/base/request-info.h"
 
@@ -45,4 +44,3 @@ private:
 
 }
 
-#endif

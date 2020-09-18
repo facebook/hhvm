@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_INFO_H_
-#define incl_HPHP_JIT_VASM_INFO_H_
+#pragma once
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -67,4 +66,3 @@ bool isPure(const Vinstr& inst);
 
 }}
 
-#endif

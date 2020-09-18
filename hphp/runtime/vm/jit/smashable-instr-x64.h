@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_SMASHABLE_INSTR_X64_H_
-#define incl_HPHP_JIT_SMASHABLE_INSTR_X64_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/align-x64.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -79,4 +78,3 @@ constexpr size_t kSmashCmpqImmOff = 4;
 
 }}}
 
-#endif

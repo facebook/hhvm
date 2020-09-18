@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXECUTION_CONTEXT_H_
-#define incl_HPHP_EXECUTION_CONTEXT_H_
+#pragma once
 
 #include "hphp/runtime/base/req-list.h"
 #include "hphp/runtime/base/req-tiny-vector.h"
@@ -651,4 +650,3 @@ extern rds::local::AliasedRDSLocal<ExecutionContext,
 
 #include "hphp/runtime/base/execution-context-inl.h"
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_CODE_GEN_TLS_H_
-#define incl_HPHP_VM_CODE_GEN_TLS_H_
+#pragma once
 
 #include "hphp/util/thread-local.h"
 
@@ -99,4 +98,3 @@ void emitTLSLoad(Vout& v, TLSDatum<ThreadLocalNoCheck<T>> datum, Vreg d);
 // This has to follow all the arch-specific includes.
 #include "hphp/runtime/vm/jit/code-gen-tls-inl.h"
 
-#endif

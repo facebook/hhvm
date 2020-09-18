@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_INDEXED_STRING_MAP_H_
-#define incl_HPHP_VM_INDEXED_STRING_MAP_H_
+#pragma once
 
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
@@ -262,4 +261,3 @@ private:
 
 }
 
-#endif

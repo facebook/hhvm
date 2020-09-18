@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UNIT_CACHE_H_
-#define incl_HPHP_UNIT_CACHE_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -175,4 +174,3 @@ void drainUnitPrefetcher();
 
 }
 
-#endif

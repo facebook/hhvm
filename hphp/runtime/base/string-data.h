@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STRING_DATA_H_
-#define incl_HPHP_STRING_DATA_H_
+#pragma once
 
 #include <folly/Range.h>
 
@@ -700,4 +699,3 @@ template<> class FormatValue<HPHP::StringData*> {
 
 #include "hphp/runtime/base/string-data-inl.h"
 
-#endif

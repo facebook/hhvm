@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_LITSTR_REPO_PROXY_H_
-#define incl_HPHP_VM_LITSTR_REPO_PROXY_H_
+#pragma once
 
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/repo-status.h"
@@ -74,4 +73,3 @@ private:
 
 }
 
-#endif

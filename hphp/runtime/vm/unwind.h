@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_UNWIND_H_
-#define incl_HPHP_UNWIND_H_
+#pragma once
 
 #include <stdexcept>
 #include "hphp/runtime/base/exceptions.h"
@@ -98,4 +97,3 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev);
 #include "hphp/runtime/vm/unwind-inl.h"
 #undef incl_HPHP_VM_UNWIND_INL_H_
 
-#endif

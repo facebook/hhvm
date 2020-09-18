@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef incl_HPHP_PDO_PGSQL_STATEMENT_H_
-#define incl_HPHP_PDO_PGSQL_STATEMENT_H_
+#pragma once
 
 #include "hphp/runtime/ext/pdo/pdo_driver.h"
 #include "pdo_pgsql_resource.h"
@@ -102,4 +101,3 @@ private:
 
 }
 
-#endif

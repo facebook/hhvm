@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_REQUEST_TRACING_H_
-#define incl_HPHP_REQUEST_TRACING_H_
+#pragma once
 
 #include <folly/Optional.h>
 #include <folly/Range.h>
@@ -230,4 +229,3 @@ void visit_process_stats(F&&);
 
 #include "hphp/runtime/base/request-tracing-inl.h"
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TRANS_CFG_H_
-#define incl_HPHP_TRANS_CFG_H_
+#pragma once
 
 #include <vector>
 
@@ -104,4 +103,3 @@ TransIDSet findPredTrans(const RegionDesc& rd, const ProfData* profData);
 
 } }
 
-#endif

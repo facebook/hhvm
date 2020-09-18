@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_DOUBLE_TO_INT64_H_
-#define incl_HPHP_DOUBLE_TO_INT64_H_
+#pragma once
 
 #include <limits>
 
@@ -43,4 +42,3 @@ inline int64_t double_to_int64(double v)
 
 }
 
-#endif

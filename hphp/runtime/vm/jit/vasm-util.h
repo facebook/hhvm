@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_VASM_UTIL_H_
-#define incl_HPHP_VASM_UTIL_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -218,4 +217,3 @@ jit::vector<LiveSet> computeLiveness(const Vunit& unit,
 
 }}
 
-#endif

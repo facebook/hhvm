@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_TRANSLATE_REGION_H_
-#define incl_HPHP_TRANSLATE_REGION_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -61,4 +60,3 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
 
 }}
 
-#endif

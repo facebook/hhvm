@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_APC_NAMED_ENTITY_H_
-#define incl_HPHP_APC_NAMED_ENTITY_H_
+#pragma once
 
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/vm/unit.h"
@@ -52,4 +51,3 @@ private:
 
 }
 
-#endif

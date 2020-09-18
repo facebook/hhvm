@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TYPE_ARRAY_ELEM_H_
-#define incl_HPHP_JIT_TYPE_ARRAY_ELEM_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/type.h"
 
@@ -69,4 +68,3 @@ std::pair<Type, bool> keysetFirstLastType(Type arr, bool isFirst);
 
 }}
 
-#endif

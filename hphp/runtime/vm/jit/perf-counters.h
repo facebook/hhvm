@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_PERF_COUNTERS_H_
-#define incl_HPHP_JIT_PERF_COUNTERS_H_
+#pragma once
 
 #include "hphp/util/rds-local.h"
 
@@ -84,4 +83,3 @@ void getPerfCounters(Array& ret);
 
 }}
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_CODE_GEN_FIXUPS_H_
-#define incl_HPHP_JIT_CODE_GEN_FIXUPS_H_
+#pragma once
 
 #include "hphp/runtime/base/backtrace.h"
 
@@ -243,4 +242,3 @@ private:
 };
 }
 
-#endif

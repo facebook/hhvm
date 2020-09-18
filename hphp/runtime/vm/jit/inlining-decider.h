@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_INLINING_H_
-#define incl_HPHP_JIT_INLINING_H_
+#pragma once
 
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/annotation-data.h"
@@ -112,4 +111,3 @@ void setBaseInliningProfCount(uint64_t value);
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif

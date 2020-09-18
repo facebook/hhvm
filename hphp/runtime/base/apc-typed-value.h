@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_APC_TYPED_VALUE_H_
-#define incl_HPHP_APC_TYPED_VALUE_H_
+#pragma once
 
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-handle-defs.h"
@@ -274,4 +273,3 @@ inline Variant APCHandle::toLocal() const {
 
 }
 
-#endif

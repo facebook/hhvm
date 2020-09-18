@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_MCGEN_TRANSLATE_H_
-#define incl_HPHP_JIT_MCGEN_TRANSLATE_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -86,4 +85,3 @@ CompactVector<Trace::BumpRelease> unbumpFunctions();
 
 }}}
 
-#endif

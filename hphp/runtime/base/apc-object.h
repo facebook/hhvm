@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_APC_OBJECT_H_
-#define incl_HPHP_APC_OBJECT_H_
+#pragma once
 
 #include <cinttypes>
 
@@ -120,4 +119,3 @@ private:
 
 }
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_STATE_VECTOR_H_
-#define incl_HPHP_JIT_STATE_VECTOR_H_
+#pragma once
 
 #include <type_traits>
 #include <utility>
@@ -117,4 +116,3 @@ private:
 
 }}
 
-#endif

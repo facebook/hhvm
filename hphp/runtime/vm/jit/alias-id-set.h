@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_ALIAS_IDSET_
-#define incl_HPHP_JIT_ALIAS_IDSET_
+#pragma once
 
 #include "hphp/util/assertions.h"
 
@@ -251,4 +250,3 @@ static_assert(sizeof(AliasIdSet) == sizeof(uint64_t), "");
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif

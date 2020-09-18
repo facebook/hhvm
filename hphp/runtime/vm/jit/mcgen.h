@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_MCGEN_H_
-#define incl_HPHP_JIT_MCGEN_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -179,4 +178,3 @@ int getActiveWorker();
 
 }}}
 
-#endif

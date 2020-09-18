@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_ABI_H
-#define incl_HPHP_JIT_ABI_H
+#pragma once
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi-regs.h"
@@ -187,4 +186,3 @@ Vflags required_flags(ConditionCode cc);
 
 }}
 
-#endif

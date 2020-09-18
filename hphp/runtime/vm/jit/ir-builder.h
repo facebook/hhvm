@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_IRBUILDER_H_
-#define incl_HPHP_VM_IRBUILDER_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -401,4 +400,3 @@ struct BlockPusher {
 
 }}}
 
-#endif

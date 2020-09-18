@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TC_RECORD_H_
-#define incl_HPHP_JIT_TC_RECORD_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -106,4 +105,3 @@ std::string warmupStatusString();
 
 }}}
 
-#endif

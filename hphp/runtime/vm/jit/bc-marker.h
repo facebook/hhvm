@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_BCMARKER_H_
-#define incl_HPHP_JIT_BCMARKER_H_
+#pragma once
 
 #include <string>
 
@@ -153,4 +152,3 @@ private:
 
 }}
 
-#endif

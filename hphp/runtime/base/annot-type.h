@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ANNOT_TYPE_H_
-#define incl_HPHP_ANNOT_TYPE_H_
+#pragma once
 
 #include "hphp/runtime/base/datatype.h"
 
@@ -170,4 +169,3 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName);
 
 }
 
-#endif

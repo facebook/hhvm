@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RUNTIME_VM_WORKER_H
-#define incl_HPHP_RUNTIME_VM_WORKER_H
+#pragma once
 
 #include "hphp/util/async-func.h"
 #include <functional>
@@ -60,4 +59,3 @@ struct VMWorker : private std::function<void(void)>
 
 }
 
-#endif

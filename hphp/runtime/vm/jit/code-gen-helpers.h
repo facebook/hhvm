@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_CODE_GEN_HELPERS_H_
-#define incl_HPHP_VM_CODE_GEN_HELPERS_H_
+#pragma once
 
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -348,4 +347,3 @@ uint64_t auxToMask(AuxUnion);
 
 #include "hphp/runtime/vm/jit/code-gen-helpers-inl.h"
 
-#endif

@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_TC_RELOCATE_H_
-#define incl_HPHP_TC_RELOCATE_H_
+#pragma once
 
 #include <set>
 #include <cstdio>
@@ -57,4 +56,3 @@ void tryRelocateNewTranslation(SrcKey sk, TransLoc& loc,
 
 }}}
 
-#endif

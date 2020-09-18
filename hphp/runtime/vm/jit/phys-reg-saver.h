@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_PHYS_REG_SAVER_H_
-#define incl_HPHP_JIT_PHYS_REG_SAVER_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
@@ -57,4 +56,3 @@ private:
 
 }}
 
-#endif

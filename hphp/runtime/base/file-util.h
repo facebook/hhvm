@@ -16,8 +16,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-#ifndef incl_HPHP_FILE_UTIL_H_
-#define incl_HPHP_FILE_UTIL_H_
+#pragma once
 
 #include "hphp/util/file.h"
 
@@ -143,4 +142,3 @@ bool isSystemName(folly::StringPiece path);
 }
 }
 
-#endif

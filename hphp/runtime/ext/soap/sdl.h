@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PHP_SDL_H
-#define incl_HPHP_PHP_SDL_H
+#pragma once
 
 #include "hphp/runtime/ext/soap/encoding.h"
 #include "hphp/runtime/base/http-client.h"
@@ -355,4 +354,3 @@ void schema_pass2(sdlCtx *ctx);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

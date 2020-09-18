@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_VERIFIER_PRETTY_H_
-#define incl_HPHP_VM_VERIFIER_PRETTY_H_
+#pragma once
 
 #include <string>
 
@@ -76,4 +75,3 @@ void verify_error(const UnitEmitter*, const FuncEmitter*, bool throws,
 
 }}
 
-#endif

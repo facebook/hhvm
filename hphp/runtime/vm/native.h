@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_VM_NATIVE_H
-#define incl_HPHP_RUNTIME_VM_NATIVE_H
+#pragma once
 
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -668,4 +667,3 @@ const ConstantMap* getClassConstants(const StringData* clsName) {
 //////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Native
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_VASM_GEN_H_
-#define incl_HPHP_JIT_VASM_GEN_H_
+#pragma once
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/containers.h"
@@ -244,4 +243,3 @@ uint64_t areaWeightFactor(AreaIndex area);
 
 #include "hphp/runtime/vm/jit/vasm-gen-inl.h"
 
-#endif

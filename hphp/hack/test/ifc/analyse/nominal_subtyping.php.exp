@@ -10,7 +10,7 @@ Analyzing __construct:
   Locals:
     lvars: { $pd -> <$pd> }
 Constraints:
-  [\D < PD, $pd < PD, pc < PD]
+  [\D < PD, pc < PD, $pd < PD]
 
 Analyzing __construct:
 * pc: pc
@@ -25,7 +25,7 @@ Analyzing __construct:
     lvars: { $pd -> <$pd>; $pe -> <$pe> }
     pc: exn
 Constraints:
-  [\E < PD, $pd < PD, pc < PD, \E < PE, $pe < PE, pc < PE,
+  [\E < PD, pc < PD, $pd < PD, \E < PE, pc < PE, $pe < PE,
    \D#__construct < pcjoin, pc < pcjoin,
    {(this: \E<\E, lump'1>)->\D#__construct<pcjoin, \D#__construct>(<$pd>): <\D#__construct_ret> [\Exception<exn,
                                                                     exn>]},
@@ -59,8 +59,8 @@ Analyzing __construct:
     lvars: { $pd -> <$pd>; $pe -> <$pe>; $pf -> <$pf> }
     pc: exn
 Constraints:
-  [\F < PD, $pd < PD, pc < PD, \F < PE, $pe < PE, pc < PE, \F < PF, $pf < PF,
-   pc < PF, \E#__construct < pcjoin, pc < pcjoin,
+  [\F < PD, pc < PD, $pd < PD, \F < PE, pc < PE, $pe < PE, \F < PF, pc < PF,
+   $pf < PF, \E#__construct < pcjoin, pc < pcjoin,
    {(this: \F<\F, lump'1>)->\E#__construct<pcjoin, \E#__construct>(<$pd>,
                                                                    <$pe>): <\E#__construct_ret> [\Exception<exn,
                                                                     exn>]},

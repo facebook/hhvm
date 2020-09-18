@@ -1,15 +1,11 @@
 File "exception_subtyping.php", line 27, characters 5-20:
 Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
-File "exception_subtyping.php", line 23, characters 23-23:
-This may be the data source with policy `PRIVATE`
 File "exception_subtyping.php", line 8, characters 16-23:
 This may be the data source with policy `PRIVATE`
 File "exception_subtyping.php", line 10, characters 16-22:
 This may be the data sink with policy `PUBLIC`
 File "exception_subtyping.php", line 18, characters 3-18:
 Data with policy `PRIVATE` appears in context `PUBLIC`. (Typing[4379])
-File "exception_subtyping.php", line 15, characters 21-22:
-This may be the data source with policy `PRIVATE`
 File "exception_subtyping.php", line 8, characters 16-23:
 This may be the data source with policy `PRIVATE`
 File "exception_subtyping.php", line 10, characters 16-22:

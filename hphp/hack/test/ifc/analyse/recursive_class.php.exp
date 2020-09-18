@@ -10,8 +10,8 @@ Analyzing __construct:
   Locals:
     lvars: { $prop -> <$prop>; $r -> \R<\R'1, lump'2> }
 Constraints:
-  [\R < lump'1, $prop < lump'1, pc < lump'1, \R < lump'1, lump'2 = lump'1,
-   \R'1 < lump'1, pc < lump'1]
+  [\R < lump'1, pc < lump'1, $prop < lump'1, \R < lump'1, pc < lump'1,
+   lump'2 = lump'1, \R'1 < lump'1]
 
 Analyzing recursiveGet:
 * pc: pc
@@ -41,5 +41,5 @@ Analyzing recursiveWrite:
     lvars: {}
 Constraints:
   [lump'1 < .r, \R < .r, lump'1 < .r'1, .r < .r'1, lump'1 < .r'2,
-   .r'1 < .r'2, .r'2 < lump'1, PUBLIC < lump'1, pc < lump'1]
+   .r'1 < .r'2, .r'2 < lump'1, pc < lump'1, lit < lump'1]
 

@@ -30,10 +30,20 @@ let should_print ~user_mode ~phase =
 
 let fail fmt = Format.kasprintf (fun s -> raise (FlowInference s)) fmt
 
+exception SubtypeFailure of string * ptype * ptype
+
 (* A constraint accumulator that registers a subtyping
    requirement t1 <: t2 *)
 let rec subtype ~pos t1 t2 acc =
   let subtype = subtype ~pos in
+  let err msg = raise (SubtypeFailure (msg, t1, t2)) in
+  let rec first_ok ~f msg = function
+    | [] -> err msg
+    | x :: l ->
+      begin
+        try f x with SubtypeFailure (msg, _, _) -> first_ok ~f msg l
+      end
+  in
   match (t1, t2) with
   | (Tprim p1, Tprim p2)
   | (Tgeneric p1, Tgeneric p2) ->
@@ -42,7 +52,7 @@ let rec subtype ~pos t1 t2 acc =
     (match List.zip tl1 tl2 with
     | Some zip ->
       List.fold zip ~init:acc ~f:(fun acc (t1, t2) -> subtype t1 t2 acc)
-    | None -> fail "incompatible tuple types")
+    | None -> err "incompatible tuple types")
   | (Tclass cl1, Tclass cl2) ->
     (* Nominal subtyping records flows in properties (through the lump policy)
      * common to both classes. The typechecker ensures that the subtyping
@@ -61,7 +71,7 @@ let rec subtype ~pos t1 t2 acc =
     let zipped_args =
       match List.zip f1.f_args f2.f_args with
       | Some zip -> zip
-      | None -> failwith "functions have different number of arguments"
+      | None -> err "functions have different number of arguments"
     in
     (* Contravariant in argument types *)
     List.fold ~f:(fun acc (t1, t2) -> subtype t2 t1 acc) ~init:acc zipped_args
@@ -70,16 +80,35 @@ let rec subtype ~pos t1 t2 acc =
     (* Covariant in its own identity *)
     |> L.(f1.f_self < f2.f_self) ~pos
     (* Covariant in return type and exceptions *)
-    |> L.(subtype f1.f_ret f2.f_ret && subtype f1.f_exn f2.f_exn)
+    |> subtype f1.f_ret f2.f_ret
+    |> subtype f1.f_exn f2.f_exn
   | (Tunion tl, _) ->
     List.fold tl ~init:acc ~f:(fun acc t1 -> subtype t1 t2 acc)
-  | (pty1, pty2) ->
-    fail "unhandled subtyping query for %a <: %a" Pp.ptype pty1 Pp.ptype pty2
+  | (_, Tinter tl) ->
+    List.fold tl ~init:acc ~f:(fun acc t2 -> subtype t1 t2 acc)
+  | (_, Tunion tl) ->
+    (* It is not complete to try all the RHS elements in sequence
+       but that's how typing_subtype.ml works today *)
+    first_ok "nothing" tl ~f:(fun t2 -> subtype t1 t2 acc)
+  | (Tinter tl, _) ->
+    (* Same remark as for (_ <: Tunion _) *)
+    first_ok "mixed" tl ~f:(fun t1 -> subtype t1 t2 acc)
+  | _ -> err "unhandled subtyping query"
 
 (* A constraint accumulator that registers that t1 = t2 *)
-and equivalent ~pos t1 t2 acc =
+let equivalent ~pos t1 t2 acc =
   let subtype = subtype ~pos in
   subtype t1 t2 (subtype t2 t1 acc)
+
+(* Overwrite subtype and equivalent catching the SubtypeFailure
+   exception *)
+let (subtype, equivalent) =
+  let wrap f ~pos t1 t2 acc =
+    try f ~pos t1 t2 acc
+    with SubtypeFailure (msg, tsub, tsup) ->
+      fail "subtype: %s (%a <: %a)" msg Pp.ptype tsub Pp.ptype tsup
+  in
+  (wrap subtype, wrap equivalent)
 
 (* Generates a fresh sub/super policy of the argument polic *)
 let adjust_policy ?(prefix = "weak") ~pos ~adjustment renv env policy =
@@ -108,20 +137,20 @@ let adjust_ptype ?prefix ~pos ~adjustment renv env ty =
     let freshen_con = freshen @@ flip adjustment in
     let freshen_pol_cov = adjust_policy ~adjustment in
     let freshen_pol_con = adjust_policy ~adjustment:(flip adjustment) in
-    let simple_freshen f policy =
-      let (env, p) = freshen_pol_cov env policy in
+    let simple_freshen env f p =
+      let (env, p) = freshen_pol_cov env p in
       (env, f p)
     in
-    let on_list mk tl =
+    let on_list env mk tl =
       let (env, tl') = List.map_env env tl ~f:freshen_cov in
       (env, mk tl')
     in
     match ty with
-    | Tprim policy -> simple_freshen (fun p -> Tprim p) policy
-    | Tgeneric policy -> simple_freshen (fun p -> Tgeneric p) policy
-    | Ttuple tl -> on_list (fun l -> Ttuple l) tl
-    | Tunion tl -> on_list (fun l -> Tunion l) tl
-    | Tinter tl -> on_list (fun l -> Tinter l) tl
+    | Tprim p -> simple_freshen env (fun p -> Tprim p) p
+    | Tgeneric p -> simple_freshen env (fun p -> Tgeneric p) p
+    | Ttuple tl -> on_list env (fun l -> Ttuple l) tl
+    | Tunion tl -> on_list env (fun l -> Tunion l) tl
+    | Tinter tl -> on_list env (fun l -> Tinter l) tl
     | Tclass class_ ->
       let (env, super_pol) = freshen_pol_cov env class_.c_self in
       (env, Tclass { class_ with c_self = super_pol })
@@ -135,55 +164,46 @@ let adjust_ptype ?prefix ~pos ~adjustment renv env ty =
   in
   freshen adjustment env ty
 
-let rec add_dependencies ~pos pl t acc =
-  match t with
-  | Tinter [] ->
-    (* The policy p flows into a value of type mixed.
-       Here we choose that mixed will be public; we
-       could choose a different default policy or
-       have mixed carry a policy (preferable). *)
-    L.(pl <* [Pbot PosSet.empty]) ~pos acc
+(* Returns the set of policies, to be understood as a join,
+   that governs an object with the argument type *)
+let rec object_policy = function
   | Tprim pol
   | Tgeneric pol
-  (* For classes and functions, we only add a dependency to the self policy and
-     not to its properties *)
   | Tclass { c_self = pol; _ }
   | Tfun { f_self = pol; _ } ->
-    L.(pl <* [pol]) ~pos acc
+    PSet.singleton pol
+  | Tinter tl
   | Tunion tl
-  | Ttuple tl
-  | Tinter tl ->
-    let f acc t = add_dependencies ~pos pl t acc in
-    List.fold tl ~init:acc ~f
+  | Ttuple tl ->
+    let f set t = PSet.union (object_policy t) set in
+    List.fold tl ~init:PSet.empty ~f
 
-let policy_join ~pos renv env ?(prefix = "join") p1 p2 =
+let add_dependencies ~pos pl t acc =
+  L.(pl <* PSet.elements (object_policy t)) ~pos acc
+
+let policy_join ?(prefix = "join") renv p1 p2 =
+  let id ~pos:_ acc = acc in
   match Logic.policy_join p1 p2 with
-  | Some p -> (env, p)
-  | None ->
-    (match (p1, p2) with
-    | (Pfree_var (v1, s1), Pfree_var (v2, s2))
-      when equal_policy_var v1 v2 && Scope.equal s1 s2 ->
-      (env, p1)
-    | _ ->
-      let pv = Env.new_policy_var renv prefix in
-      let env = Env.acc env L.((p1 < pv) ~pos && (p2 < pv) ~pos) in
-      (env, pv))
+  | Some p -> (id, p)
+  | None when equal_policy p1 p2 -> (id, p1)
+  | _ ->
+    let pv = Env.new_policy_var renv prefix in
+    (L.(p1 < pv && p2 < pv), pv)
 
-let mk_union t1 t2 =
-  let (l1, l2) =
-    match (t1, t2) with
-    | (Tunion u1, Tunion u2) -> (u1, u2)
-    | (Tunion u, t) -> ([t], u)
-    | (t, Tunion u) -> ([t], u)
-    | _ -> ([t1], [t2])
-  in
-  let merge_type_lists l1 l2 =
-    let f t = not (List.exists l2 ~f:(phys_equal t)) in
-    List.filter ~f l1 @ l2
-  in
-  match merge_type_lists l1 l2 with
-  | [t] -> t
-  | u -> Tunion u
+let policy_join_env ?prefix ~pos renv env p1 p2 =
+  let (facc, p) = policy_join ?prefix renv p1 p2 in
+  (Env.acc env (facc ~pos), p)
+
+(* This function only needs to be sound: true is returned
+   only if the two types are equal for sure, but false
+   could be returned when the two types are same *)
+let sound_equal_ptype (pty1 : ptype) pty2 = phys_equal pty1 pty2
+
+let union env t1 t2 =
+  if sound_equal_ptype t1 t2 then
+    (env, t1)
+  else
+    (env, Tunion [t1; t2])
 
 (* Uses a Hack-inferred type to update the flow type of a local
    variable *)
@@ -228,7 +248,7 @@ let add_params renv =
 let binop ~pos renv env ty1 ty2 =
   match (ty1, ty2) with
   | (Tprim p1, Tprim p2) ->
-    let (env, pj) = policy_join ~pos renv env ~prefix:"bop" p1 p2 in
+    let (env, pj) = policy_join_env ~pos renv env ~prefix:"bop" p1 p2 in
     (env, Tprim pj)
   | _ -> fail "unexpected Binop types"
 
@@ -249,14 +269,14 @@ let property_ptype renv obj_ptype property property_ty =
   Lift.ty ~prefix:property ~lump:prop_pol renv property_ty
 
 let throw ~pos renv env exn_ty =
-  let union env t1 t2 = (env, mk_union t1 t2) in
   let env = Env.merge_conts_into ~union env [K.Next] K.Catch in
-  let lpc = Env.get_lpc_policy env K.Next in
+  let lpc = Env.get_lpc env K.Next in
   Env.acc
     env
-    L.(
-      subtype ~pos exn_ty renv.re_exn
-      && add_dependencies ~pos (PCSet.elements lpc) renv.re_exn)
+    (L.(
+       subtype exn_ty renv.re_exn
+       && add_dependencies (PSet.elements lpc) renv.re_exn)
+       ~pos)
 
 let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
   let (callee, ret_pty) =
@@ -277,9 +297,9 @@ let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
    * PC dependencies, as well as the function's own self policy *)
   let (env, pc_joined) =
     let join pc' (env, pc) =
-      policy_join ~pos renv env ~prefix:"pcjoin" pc pc'
+      policy_join_env ~pos renv env ~prefix:"pcjoin" pc pc'
     in
-    PCSet.fold join (Env.get_gpc_policy renv env K.Next) (env, callee)
+    PSet.fold join (Env.get_pc renv env K.Next) (env, callee)
   in
   let hole_ty =
     {
@@ -318,10 +338,12 @@ let call ~pos renv env call_type that_pty_opt args_pty ret_ty =
   (* Any function call may throw, so we need to update the current PC and
    * exception dependencies based on the callee's exception policy
    *)
-  let env = Env.push_pc env K.Next callee_exn_policy in
+  let env = Env.push_pcs env K.Next (PSet.singleton callee_exn_policy) in
   let env = throw ~pos renv env callee_exn in
   (env, ret_pty)
 
+(* Lifts the element locl type found in vec_ty using the lump
+   policy of the vec_pty policied type (must be a \Vec class) *)
 let vec_element_pty renv vec_ty vec_pty =
   let lump =
     match vec_pty with
@@ -341,54 +363,68 @@ let vec_element_pty renv vec_ty vec_pty =
   in
   element_pty vec_ty
 
-(* Finds what we flow into in an assignment. Uses the TAST invariant that
- * the lhs' type is the type after the assignment occurred. *)
-let rec flux_target ~pos renv env ((_, lhs_ty), lhs_exp) =
-  let expr = expr ~pos renv in
+(* Deals with a true assignment to either a local variable
+   or an object property *)
+let asn ~expr ~pos renv env ((_, lhs_ty), lhs_exp) rhs_pty =
   match lhs_exp with
   | A.Lvar (_, lid) ->
     let prefix = Local_id.to_string lid in
-    let local_pty = Lift.ty ~prefix renv lhs_ty in
-    let env = Env.set_local_type env lid local_pty in
-    (env, local_pty, Env.get_lpc_policy env K.Next)
+    let lhs_pty = Lift.ty ~prefix renv lhs_ty in
+    (* set asn to true to mark the local as assigned in the
+       current code branch *)
+    let env = Env.set_local_type env lid lhs_pty in
+    let deps = PSet.elements (Env.get_lpc env K.Next) in
+    let env = Env.acc env (add_dependencies ~pos deps lhs_pty) in
+    let env = Env.acc env (subtype ~pos rhs_pty lhs_pty) in
+    env
   | A.Obj_get (obj, (_, A.Id (_, property)), _) ->
     let (env, obj_pty) = expr env obj in
     let obj_pol = (receiver_of_obj_get obj_pty property).c_self in
-    let prop_pty = property_ptype renv obj_pty property lhs_ty in
-    let env = Env.acc env (add_dependencies ~pos [obj_pol] prop_pty) in
-    (env, prop_pty, Env.get_gpc_policy renv env K.Next)
-  | A.Array_get ((((_, vec_ty), _) as vec), ix_opt) ->
-    (* Copy-on-Write handling of Array_get LHS in an assignment. When there is
-     * an assignmnet lhs[ix] = rhs or lhs[] = rhs, we
-     * 1. evaluate ix in case it has side-effects
-     * 2. (a) retrieve the original flux type for the vector
-     *    (b) use flux_target recursively on the vector to generate a new flux
-     *        type and retrieve info. from the mutation root
-     *    (c) make the original flux type flow into the new one to achieve CoW
-     * 3. record the flow due to length increase when ix is not present. (not
-     *    implemented, TODO: T68269878)
-     * 4. access and return the element parameter of the vector
-     *)
-    let env =
-      match ix_opt with
-      | Some ix -> fst @@ expr env ix
-      | None -> env
-    in
-    let (env, old_vec_pty) = expr env vec in
-    let (env, vec_pty, pc) = flux_target ~pos renv env vec in
-    let env = Env.acc env @@ subtype ~pos old_vec_pty vec_pty in
-    let element_pty = vec_element_pty renv vec_ty vec_pty in
-    (* Even though the runtime updates the entire vector, we treat
-     * the mutation as if it were happening on a single element.
-     * That is sound because, after the mutation, changes can only
-     * be observed via the updated element.
-     *)
-    (env, element_pty, pc)
+    let lhs_pty = property_ptype renv obj_pty property lhs_ty in
+    let deps = obj_pol :: PSet.elements (Env.get_pc renv env K.Next) in
+    let env = Env.acc env (add_dependencies ~pos deps lhs_pty) in
+    let env = Env.acc env (subtype ~pos rhs_pty lhs_pty) in
+    env
   | _ ->
     Errors.unknown_information_flow pos "lvalue";
-    (env, Lift.ty renv lhs_ty, Env.get_lpc_policy env K.Next)
+    env
 
-and assign ~pos renv env op lhs_exp rhs_exp =
+(* A wrapper for asn that deals with Hack arrays' syntactic
+   sugar; it is important to get it right to account for the
+   CoW semantics of Hack arrays:
+
+     $x->p[4][] = "hi";
+
+   does not mutate an array cell, but the property p of
+   the object $x instead.  *)
+let rec asn_top ~expr ~pos renv env lhs rhs_pty =
+  match snd lhs with
+  | A.Array_get ((((_, vec_ty), _) as vec), ix_opt) ->
+    (* TODO(T68269878): track flows due to length changes *)
+    let (env, _ix_ty_opt) =
+      match ix_opt with
+      | Some ix ->
+        let (env, ty) = expr env ix in
+        (env, Some ty)
+      | None -> (env, None)
+    in
+    (* we now compute the type of the new array resulting
+       from the insertion/update *)
+    let (env, vec_pty) =
+      let (env, old_vec_pty) = expr env vec in
+      let (env, vec_pty) =
+        adjust_ptype ~pos ~adjustment:Aweaken renv env old_vec_pty
+      in
+      (* the rhs flows into the element type *)
+      let elem_pty = vec_element_pty renv vec_ty vec_pty in
+      let env = Env.acc env (subtype ~pos rhs_pty elem_pty) in
+      (env, vec_pty)
+    in
+    (* assign the vector itself *)
+    asn_top ~expr ~pos renv env vec vec_pty
+  | _ -> asn ~expr ~pos renv env lhs rhs_pty
+
+let rec assign ~pos renv env op lhs_exp rhs_exp =
   let expr = expr ~pos renv in
   let (env, rhs_pty) =
     if Option.is_none op then
@@ -399,22 +435,21 @@ and assign ~pos renv env op lhs_exp rhs_exp =
       let (env, rhs_pty) = expr env rhs_exp in
       binop ~pos renv env lhs_pty rhs_pty
   in
-  let (env, lhs_pty, pc) = flux_target ~pos renv env lhs_exp in
-  let env = Env.acc env (subtype ~pos rhs_pty lhs_pty) in
-  let env = Env.acc env (add_dependencies ~pos (PCSet.elements pc) lhs_pty) in
-  (env, lhs_pty)
+  let env = asn_top ~expr ~pos renv env lhs_exp rhs_pty in
+  (env, rhs_pty)
 
 (* Generate flow constraints for an expression *)
-and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
+and expr ~pos renv env (((_epos, ety), e) : Tast.expr) =
   let expr = expr ~pos renv in
   match e with
+  | A.Null
   | A.True
   | A.False
   | A.Int _
   | A.Float _
   | A.String _ ->
     (* literals are public *)
-    (env, Tprim (Pbot (PosSet.singleton epos)))
+    (env, Tprim (Env.new_policy_var renv "lit"))
   | A.Binop (Ast_defs.Eq op, e1, e2) -> assign ~pos renv env op e1 e2
   | A.Binop (_, e1, e2) ->
     let (env, ty1) = expr env e1 in
@@ -555,7 +590,7 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
      * their changes are not visible outside of the lambda's scope
      *)
     let env = Env.filter_conts env (K.equal K.Next) in
-    let env = Env.set_pc env K.Next PCSet.empty in
+    let env = Env.set_lpc env K.Next PSet.empty in
     let env =
       let freshen = adjust_ptype ~pos ~adjustment:Aweaken in
       Env.freshen_cenv ~freshen renv env captured_ids
@@ -582,7 +617,6 @@ and expr ~pos renv env (((epos, ety), e) : Tast.expr) =
   | A.Shape _
   | A.ValCollection (_, _, _)
   | A.KeyValCollection (_, _, _)
-  | A.Null
   | A.Omitted
   | A.Id _
   | A.Dollardollar _
@@ -632,26 +666,20 @@ and stmt renv env ((pos, s) : Tast.stmt) =
     env
   | A.If ((((pos, _), _) as e), b1, b2) ->
     let (env, ety) = expr ~pos env e in
-    (* Stash the PC so they can be restored after the if *)
-    let pc = Env.get_lpc_policy env K.Next in
-    let env =
-      match ety with
-      | Tprim p -> Env.push_pc env K.Next p
-      | _ ->
-        Errors.unknown_information_flow (fst (fst e)) "scrutinee";
-        env
-    in
+    (* stash the PC so it can be restored after the if *)
+    let pc = Env.get_lpc env K.Next in
+    (* use object_policy to account for both booleans
+       and null checks *)
+    let env = Env.push_pcs env K.Next (object_policy ety) in
     let cenv = Env.get_cenv env in
     let env = block renv (Env.set_cenv env cenv) b1 in
     let cenv1 = Env.get_cenv env in
     let env = block renv (Env.set_cenv env cenv) b2 in
     let cenv2 = Env.get_cenv env in
-    let union _env t1 t2 = (env, mk_union t1 t2) in
     let env = Env.merge_and_set_cenv ~union env cenv1 cenv2 in
     (* Restore the program counter from before the IF *)
-    Env.set_pc env K.Next pc
+    Env.set_lpc env K.Next pc
   | A.Return e ->
-    let union env t1 t2 = (env, mk_union t1 t2) in
     let env = Env.merge_conts_into ~union env [K.Next] K.Exit in
     begin
       match e with
@@ -660,12 +688,13 @@ and stmt renv env ((pos, s) : Tast.stmt) =
         let (env, te) = expr ~pos env e in
         (* to account for enclosing conditionals, make the return
           type depend on the local pc *)
-        let lpc = Env.get_lpc_policy env K.Next in
+        let lpc = Env.get_lpc env K.Next in
         Env.acc
           env
-          L.(
-            add_dependencies ~pos (PCSet.elements lpc) renv.re_ret
-            && subtype ~pos te renv.re_ret)
+          (L.(
+             add_dependencies (PSet.elements lpc) renv.re_ret
+             && subtype te renv.re_ret)
+             ~pos)
     end
   | A.Throw e ->
     let (env, exn_ty) = expr ~pos env e in
@@ -674,9 +703,8 @@ and stmt renv env ((pos, s) : Tast.stmt) =
     (* NOTE: for now we only support try with a single catch block and no finally
      * block. Only \Exception is allowed to be caught
      *)
-    let union env t1 t2 = (env, mk_union t1 t2) in
     let base_cenv = Env.get_cenv env in
-    let base_pc = Env.get_lpc_policy env K.Next in
+    let base_pc = Env.get_lpc env K.Next in
     let env = Env.drop_conts env [K.Catch] in
 
     (* Create a fresh exception for the try block since none of the outer
@@ -699,7 +727,7 @@ and stmt renv env ((pos, s) : Tast.stmt) =
 
     let env = Env.merge_conts_from ~union env base_cenv [K.Catch] in
     let env = Env.merge_conts_from ~union env after_try [K.Next] in
-    Env.set_pc env K.Next base_pc
+    Env.set_lpc env K.Next base_pc
   | A.Noop -> env
   | _ ->
     Errors.unknown_information_flow pos "statement";

@@ -24,6 +24,8 @@ File "lambda.php", line 9, characters 14-19:
 This may be the data sink with policy `B`
 File "lambda.php", line 48, characters 3-72:
 Another program point contributing to the illegal flow
+File "lambda.php", line 49, characters 9-14:
+Another program point contributing to the illegal flow
 File "lambda.php", line 50, characters 7-15:
 Another program point contributing to the illegal flow
 File "lambda.php", line 54, characters 5-14:

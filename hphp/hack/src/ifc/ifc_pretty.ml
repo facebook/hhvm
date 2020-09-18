@@ -72,9 +72,6 @@ let prop =
     | Cconj (Cflow (_, a, b), Cflow (_, c, d))
       when equal_policy a d && equal_policy b c ->
       [`q (a, b)]
-    | Cflow (_, a, (Pbot _ as b))
-    | Cflow (_, (Ptop _ as b), a) ->
-      [`q (a, b)]
     | Cconj (cl, cr) -> conjuncts cl @ conjuncts cr
     | Ctrue -> []
     | c -> [`c c]
@@ -131,8 +128,8 @@ let pp_lenv fmt lenv =
     "@[<hov2>lvars:@ %a@]"
     (LMap.make_pp Local_id.pp ptype)
     lenv.le_vars;
-  let policy_set fmt s = list comma_sep policy fmt (PCSet.elements s) in
-  if not (PCSet.is_empty lenv.le_pc) then
+  let policy_set fmt s = list comma_sep policy fmt (PSet.elements s) in
+  if not (PSet.is_empty lenv.le_pc) then
     fprintf fmt "@,@[<hov2>pc: @[<hov>%a@]@]" policy_set lenv.le_pc;
   pp_close_box fmt ()
 

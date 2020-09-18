@@ -16,8 +16,8 @@ Analyzing __construct:
         $mInt -> <$mInt>;
         $other -> \Other<\Other, lump'2> }
 Constraints:
-  [\My < MINT, $mInt < MINT, pc < MINT, \My < OTHER, lump'2 = OTHER,
-   \Other < OTHER, pc < OTHER, \My < lump'1, $mBool < lump'1, pc < lump'1]
+  [\My < MINT, pc < MINT, $mInt < MINT, \My < OTHER, pc < OTHER,
+   lump'2 = OTHER, \Other < OTHER, \My < lump'1, pc < lump'1, $mBool < lump'1]
 
 Analyzing getMInt:
 * pc: pc
@@ -45,7 +45,7 @@ Analyzing setMInt:
   Locals:
     lvars: { $candidate -> <$candidate> }
 Constraints:
-  [\My < MINT, $candidate < MINT, pc < MINT]
+  [\My < MINT, pc < MINT, $candidate < MINT]
 
 Analyzing \tlGetMyInt:
 * pc: pc
@@ -73,7 +73,7 @@ Analyzing \tlSetMyInt:
   Locals:
     lvars: { $obj -> \My<\My, lump'1>; $val -> <$val> }
 Constraints:
-  [\My < MINT, $val < MINT, pc < MINT]
+  [\My < MINT, pc < MINT, $val < MINT]
 
 Analyzing \tlGetOther:
 * pc: pc
@@ -116,5 +116,5 @@ Analyzing \tlSetOtherBool:
   Locals:
     lvars: { $bool -> <$bool>; $obj -> \My<\My, lump'1> }
 Constraints:
-  [OTHER < .other, \My < .other, .other < OBOOL, $bool < OBOOL, pc < OBOOL]
+  [OTHER < .other, \My < .other, .other < OBOOL, pc < OBOOL, $bool < OBOOL]
 

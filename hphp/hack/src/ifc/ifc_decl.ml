@@ -272,7 +272,6 @@ let make_callable_scheme renv pol fp args =
     | None -> Env.new_policy_var renv "implicit"
   in
   let rec set_policy p pty = Mapper.ptype (set_policy p) (const p) pty in
-  let pbot = Pbot PosSet.empty in
   let (acc, args) =
     let f acc ty = function
       | AKDefault -> (acc, set_policy policy ty)

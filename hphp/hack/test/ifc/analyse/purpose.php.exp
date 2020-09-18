@@ -10,7 +10,7 @@ Analyzing __construct:
   Locals:
     lvars: { $di -> <$di> }
 Constraints:
-  [\D < lump'1, $di < lump'1, pc < lump'1]
+  [\D < lump'1, pc < lump'1, $di < lump'1]
 
 Analyzing __construct:
 * pc: pc
@@ -24,8 +24,8 @@ Analyzing __construct:
   Locals:
     lvars: { $ci -> <$ci>; $d -> \D<\D, lump'2> }
 Constraints:
-  [\C < SECRET, $ci < SECRET, pc < SECRET, \C < SECRET, lump'2 = SECRET,
-   \D < SECRET, pc < SECRET]
+  [\C < SECRET, pc < SECRET, $ci < SECRET, \C < SECRET, pc < SECRET,
+   lump'2 = SECRET, \D < SECRET]
 
 Analyzing getShallow1:
 * pc: pc
@@ -81,5 +81,5 @@ Analyzing writeDeep:
   Locals:
     lvars: {}
 Constraints:
-  [SECRET < .d, \C < .d, .d < SECRET, PUBLIC < SECRET, pc < SECRET]
+  [SECRET < .d, \C < .d, .d < SECRET, pc < SECRET, lit < SECRET]
 

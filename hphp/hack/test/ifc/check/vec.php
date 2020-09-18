@@ -31,8 +31,11 @@ class COW {
     public vec<int> $vx,
   ) {}
 
-  // copy-on-write semantics means $this->vx is vec[$x] and thus does not depend
-  // on $this->y
+  // copy-on-write semantics means $this->vx is vec[$x] and thus
+  // does not depend on $this->y
+  //
+  // This test currently does not pass; the analysis detects the
+  // spurious flow
   public function copyOnWrite(vec<int> $v): void {
     $v[] = $this->x;
     $this->vx = $v;

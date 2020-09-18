@@ -37,7 +37,7 @@ module Infix = struct
 
   let ( =* ) ~pos al bl = on_lists ~pos al bl ~op:( = )
 
-  let ( && ) c1 c2 env = c2 (c1 env)
+  let ( && ) ~pos c1 c2 env = c2 ~pos (c1 ~pos env)
 end
 
 (* Compute the meet of two policies, returns None if

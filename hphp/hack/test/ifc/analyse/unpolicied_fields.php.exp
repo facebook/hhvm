@@ -10,8 +10,8 @@ Analyzing __construct:
   Locals:
     lvars: { $cd -> \D<\D, lump'2>; $cx -> <$cx>; $cy -> <$cy> }
 Constraints:
-  [\C = PUBLIC, $cx = PUBLIC, pc = PUBLIC, \C < lump'1, $cy < lump'1,
-   pc < lump'1, \C < lump'1, lump'2 = lump'1, \D < lump'1, pc < lump'1]
+  [\C < PUBLIC, pc < PUBLIC, $cx < PUBLIC, \C < lump'1, pc < lump'1,
+   $cy < lump'1, \C < lump'1, pc < lump'1, lump'2 = lump'1, \D < lump'1]
 
 Analyzing testGetUnpolicied:
 * pc: pc
@@ -39,8 +39,8 @@ Analyzing testSetMultipleUnpolicied:
   Locals:
     lvars: { $d -> \D<\D, lump'2> }
 Constraints:
-  [\C < lump'1, PUBLIC < lump'1, pc < lump'1, \C < lump'1, lump'2 = lump'1,
-   \D < lump'1, pc < lump'1]
+  [\C < lump'1, pc < lump'1, lit < lump'1, \C < lump'1, pc < lump'1,
+   lump'2 = lump'1, \D < lump'1]
 
 Analyzing testSetDeep:
 * pc: pc
@@ -54,7 +54,7 @@ Analyzing testSetDeep:
   Locals:
     lvars: { $i -> <$i> }
 Constraints:
-  [lump'1 < .cd, \C < .cd, .cd < lump'1, $i < lump'1, pc < lump'1]
+  [lump'1 < .cd, \C < .cd, .cd < lump'1, pc < lump'1, $i < lump'1]
 
 Analyzing __construct:
 * pc: pc
@@ -68,5 +68,5 @@ Analyzing __construct:
   Locals:
     lvars: { $di -> <$di> }
 Constraints:
-  [\D < lump'1, $di < lump'1, pc < lump'1]
+  [\D < lump'1, pc < lump'1, $di < lump'1]
 

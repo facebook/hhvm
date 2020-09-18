@@ -13,10 +13,10 @@ module Utils = Ifc_utils
 module K = Typing_cont_key
 module LSet = Local_id.Set
 
-(* Only elementary logic about the (read-only) environment should
+(* Only elementary logic about the environments should
    be in this file to avoid circular dependencies;
-   use higher-order functions to parameterize
-   complex behavior! *)
+   use higher-order functions to parameterize complex
+   behavior! *)
 
 let new_policy_var { re_scope; re_pvar_counters; _ } prefix =
   let suffix =
@@ -33,7 +33,6 @@ let new_policy_var { re_scope; re_pvar_counters; _ } prefix =
 (* Creates a read-only environment sufficient to call functions
    from ifc_lift.ml *)
 let new_renv scope decl_env saved_tenv : proto_renv =
-  let dummy_pol = Pbot PosSet.empty in
   {
     re_scope = scope;
     re_decl = decl_env;
@@ -42,7 +41,7 @@ let new_renv scope decl_env saved_tenv : proto_renv =
     (* the fields below are initialized with dummy values *)
     re_this = None;
     re_ret = ();
-    re_gpc = dummy_pol;
+    re_gpc = pbot;
     re_exn = ();
   }
 
@@ -59,7 +58,7 @@ let prep_renv renv this_ty_opt ret_ty gpc_pol exn_ty : renv =
     re_exn = exn_ty;
   }
 
-let empty_lenv = { le_vars = LMap.empty; le_pc = PCSet.empty }
+let empty_lenv = { le_vars = LMap.empty; le_pc = PSet.empty }
 
 let new_env =
   { e_cont = KMap.singleton K.Next empty_lenv; e_acc = []; e_deps = SSet.empty }
@@ -79,7 +78,7 @@ let merge_lenv ~union env lenv1 lenv2 =
   let (env, le_vars) =
     LMap.merge_env env lenv1.le_vars lenv2.le_vars ~combine
   in
-  let le_pc = PCSet.union lenv1.le_pc lenv2.le_pc in
+  let le_pc = PSet.union lenv1.le_pc lenv2.le_pc in
   (env, { le_vars; le_pc })
 
 (* Merge continuation envs, if a continuation is assigned a
@@ -93,47 +92,44 @@ let merge_and_set_cenv ~union env cenv1 cenv2 =
 
 let get_lenv_opt env k = KMap.find_opt k (get_cenv env)
 
-let lenv_set_local_type lenv lid pty =
-  { lenv with le_vars = LMap.add lid pty lenv.le_vars }
-
-let set_cont env k lenv = set_cenv env (KMap.add k lenv (get_cenv env))
+let set_lenv env k lenv = set_cenv env (KMap.add k lenv (get_cenv env))
 
 let set_local_type env lid pty =
   match get_lenv_opt env K.Next with
   | None -> env
   | Some lenv ->
-    let lenv = lenv_set_local_type lenv lid pty in
-    set_cont env K.Next lenv
+    let lenv = { lenv with le_vars = LMap.add lid pty lenv.le_vars } in
+    set_lenv env K.Next lenv
 
 let get_local_type env lid =
   Option.(
     get_lenv_opt env K.Next >>= fun lenv -> LMap.find_opt lid lenv.le_vars)
 
-let get_lpc_policy env k =
+let get_lpc env k =
   match get_lenv_opt env k with
-  | None -> PCSet.empty
+  | None -> PSet.empty
   | Some lenv -> lenv.le_pc
 
-let get_gpc_policy renv env k = PCSet.add renv.re_gpc (get_lpc_policy env k)
+let set_lpc env k pc =
+  match get_lenv_opt env k with
+  | None -> env
+  | Some lenv -> set_lenv env k { lenv with le_pc = pc }
 
-let push_pc env k pc =
+let get_pc renv env k = PSet.add renv.re_gpc (get_lpc env k)
+
+let push_pcs env k pcset =
   match get_lenv_opt env k with
   | None -> env
   | Some lenv ->
-    let lenv = { lenv with le_pc = PCSet.add pc lenv.le_pc } in
-    set_cont env k lenv
-
-let set_pc env k pc =
-  match get_lenv_opt env k with
-  | None -> env
-  | Some lenv -> set_cont env k { lenv with le_pc = pc }
+    let lenv = { lenv with le_pc = PSet.union pcset lenv.le_pc } in
+    set_lenv env k lenv
 
 let merge_lenv_into ~union env lenv k =
   match get_lenv_opt env k with
-  | None -> set_cont env k lenv
+  | None -> set_lenv env k lenv
   | Some lenv' ->
     let (env, merged_lenv) = merge_lenv ~union env lenv lenv' in
-    set_cont env k merged_lenv
+    set_lenv env k merged_lenv
 
 let merge_conts_into ~union env ks k_to =
   let f (env, lenv) k =
@@ -171,20 +167,20 @@ let move_conts_into ~union env ks k_to =
   drop_conts env ks
 
 let merge_pcs_into env ks k_to =
-  let f pc k = PCSet.union (get_lpc_policy env k) pc in
-  let pc = List.fold ~f ~init:PCSet.empty ks in
+  let f pc k = PSet.union (get_lpc env k) pc in
+  let pc = List.fold ~f ~init:PSet.empty ks in
   match get_lenv_opt env k_to with
   | None -> env
   | Some lenv ->
-    set_cont env k_to { lenv with le_pc = PCSet.union pc lenv.le_pc }
+    set_lenv env k_to { lenv with le_pc = PSet.union pc lenv.le_pc }
 
-(* Freshen lids and drop all other locals *)
+(* Freshen the types of locals in 'lids' and drop all other locals *)
 let freshen_cenv ~freshen renv env lids =
   let lids = List.map ~f:snd lids |> LSet.of_list in
   let freshen_lenv env _ lenv =
     let (env, vars) =
       LMap.filter (fun lid _ -> LSet.mem lid lids) lenv.le_vars
-      |> LMap.map_env (fun e _ -> freshen renv e) env
+      |> LMap.map_env (fun env _ l -> freshen renv env l) env
     in
     (env, { lenv with le_vars = vars })
   in

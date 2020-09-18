@@ -10,7 +10,7 @@ Analyzing \binop:
   Locals:
     lvars: { $x -> <$x>; $y -> <$y> }
 Constraints:
-  $x < ret
+  [$x < bop, lit < bop, bop < ret]
 
 Analyzing \assign0:
 * pc: pc
@@ -24,7 +24,7 @@ Analyzing \assign0:
   Locals:
     lvars: { $arg -> <$arg>; $x -> <$x'1> }
 Constraints:
-  [$arg < $x, PUBLIC < $x'1, $x'1 < ret]
+  [$arg < $x, lit < $x'1, $x'1 < ret]
 
 Analyzing \assign1:
 * pc: pc
@@ -38,7 +38,7 @@ Analyzing \assign1:
   Locals:
     lvars: { $arg -> <$arg>; $x -> <$x'1> }
 Constraints:
-  [$arg < $x, $x < $x'1, $x'1 < ret]
+  [$arg < $x, $x < bop, lit < bop, bop < $x'1, $x'1 < ret]
 
 Analyzing \condition:
 * pc: pc
@@ -52,6 +52,6 @@ Analyzing \condition:
   Locals:
     lvars: { $a0 -> <$a0>; $a1 -> <$a1>; $a2 -> <$a2>; $x -> <$x'2> }
 Constraints:
-  [$a0 < $x, $a2 < $x, $a1 < $x'1, $a2 < $x'1, $x < $x'2, $x'1 < $x'2,
-   $x'2 < ret]
+  [$a2 < bop, lit < bop, bop < $x, $a0 < $x, bop < $x'1, $a1 < $x'1,
+   $x < $x'2, $x'1 < $x'2, $x'2 < ret]
 

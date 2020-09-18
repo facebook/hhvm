@@ -24,7 +24,7 @@ Analyzing \collection:
   Locals:
     lvars: {}
 Constraints:
-  [PUBLIC < lump'2, PUBLIC < lump'2, lump'2 = lump'1, \HH\vec'1 < \HH\vec]
+  [lit < lump'2, lit'1 < lump'2, lump'2 = lump'1, \HH\vec'1 < \HH\vec]
 
 Analyzing \add:
 * pc: pc
@@ -38,7 +38,7 @@ Analyzing \add:
   Locals:
     lvars: { $vec -> \HH\vec<\HH\vec'1, lump'2> }
 Constraints:
-  [lump'1 = lump'2, \HH\vec < \HH\vec'1, PUBLIC < lump'2]
+  [\HH\vec < weak, lit < lump'1, lump'1 = lump'2, weak < \HH\vec'1]
 
 Analyzing \retElem:
 * pc: pc

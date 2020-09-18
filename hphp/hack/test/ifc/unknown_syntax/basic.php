@@ -9,13 +9,6 @@ function casting(num $x): int {
   }
 }
 
-function assignment(): void {
-  // IFC does not recognize this syntax, but we can stil use $x
-  $x = null;
-
-  $y = $x;
-}
-
 function variable_in_scope(): int {
   do {
     // $x is always in scope

@@ -80,6 +80,9 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
   | T.Tdependent (T.DTthis, tbound) ->
     (* TODO(T72024862): This treatment ignores late static binding. *)
     ty tbound
+  | T.Toption t ->
+    let tnull = Tprim (get_policy ?prefix lump renv) in
+    Tunion [tnull; ty t]
   (* ---  types below are not yet supported *)
   | T.Tdependent (_, _ty) -> fail "Tdependent"
   | T.Tdarray (_keyty, _valty) -> fail "Tdarray"
@@ -89,7 +92,6 @@ let rec ty ?prefix ?lump renv (t : T.locl_ty) =
   | T.Terr -> fail "Terr"
   | T.Tnonnull -> fail "Tnonnull"
   | T.Tdynamic -> fail "Tdynamic"
-  | T.Toption _ty -> fail "Toption"
   | T.Tshape (_sh_kind, _sh_type_map) -> fail "Tshape"
   | T.Tnewtype (_name, _ty_list, _as_bound) -> fail "Tnewtype"
   | T.Tobject -> fail "Tobject"

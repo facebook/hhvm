@@ -251,7 +251,6 @@ and record_def_type = {
   rdt_fields: (Nast.sid * record_field_req) list;
   rdt_abstract: bool;
   rdt_pos: Pos.t;
-  rdt_errors: Errors.t option;
 }
 
 and typedef_type = {

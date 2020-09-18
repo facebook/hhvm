@@ -1105,16 +1105,14 @@ let record_def_decl (rd : Nast.record_def) : Typing_defs.record_def_type =
     rdt_fields = fields;
     rdt_abstract = rd.rd_abstract;
     rdt_pos = rd.rd_span;
-    rdt_errors = None;
   }
 
 let type_record_def_naming_and_decl
     ~(write_shmem : bool) (ctx : Provider_context.t) (rd : Nast.record_def) :
     Typing_defs.record_def_type =
   let rd = Errors.ignore_ (fun () -> Naming.record_def ctx rd) in
-  let (errors, tdecl) = Errors.do_ (fun () -> record_def_decl rd) in
+  let tdecl = record_def_decl rd in
   record_record_def (snd rd.rd_name);
-  let tdecl = { tdecl with rdt_errors = Some errors } in
   if write_shmem then Decl_heap.RecordDefs.add (snd rd.rd_name) tdecl;
   tdecl
 

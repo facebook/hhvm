@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3b80f8fc5ce3bcc24ea41ef4c979844c>>
+// @generated SignedSource<<703af153b8ee7a7aab040319af94cdcf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -324,7 +324,6 @@ pub struct RecordDefType<'a> {
     pub fields: &'a [(nast::Sid<'a>, RecordFieldReq)],
     pub abstract_: bool,
     pub pos: &'a pos::Pos<'a>,
-    pub errors: Option<errors::Errors<'a>>,
 }
 impl<'a> TrivialDrop for RecordDefType<'a> {}
 

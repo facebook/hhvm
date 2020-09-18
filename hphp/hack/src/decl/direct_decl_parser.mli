@@ -15,3 +15,9 @@ type decls = {
 [@@deriving show]
 
 val parse_decls : ?contents:string -> Relative_path.t -> decls
+
+val parse_decls_parallel :
+  MultiWorker.worker list ->
+  Relative_path.t list MultiWorker.Hh_bucket.next ->
+  ParserOptions.t ->
+  FileInfo.t Relative_path.Map.t * Errors.t * Relative_path.Set.t

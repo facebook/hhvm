@@ -38,6 +38,7 @@
     full_fidelity
     naming
     naming_heap
+    procs_procs
     shallow_class_diff
     shallow_classes_provider
     shallow_decl_defs

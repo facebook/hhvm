@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_CURRENT_EXECUTABLE_H_
-#define incl_HPHP_UTIL_CURRENT_EXECUTABLE_H_
+#pragma once
 
 #include <string>
 
@@ -25,4 +24,3 @@ namespace HPHP {
   std::string current_executable_directory();
 }
 
-#endif // incl_HPHP_UTIL_CURRENT_EXECUTABLE_H_

@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_TYPE_ARITH_BUILTINS_H_
-#define incl_HHBBC_TYPE_ARITH_BUILTINS_H_
+#pragma once
 
 #include "hphp/hhbbc/misc.h"
 
@@ -46,4 +45,3 @@ Type native_function_out_type(const php::Func* func, uint32_t index);
 
 }}
 
-#endif

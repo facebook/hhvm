@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_NON_INVALIDATING_VECTOR_H_
-#define incl_NON_INVALIDATING_VECTOR_H_
+#pragma once
 
 #include "hphp/util/portability.h"
 
@@ -112,4 +111,3 @@ private:
 
 }
 
-#endif

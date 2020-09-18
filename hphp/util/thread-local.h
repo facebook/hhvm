@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_THREAD_LOCAL_H_
-#define incl_HPHP_THREAD_LOCAL_H_
+#pragma once
 
 #include <cerrno>
 #include <pthread.h>
@@ -358,4 +357,3 @@ struct ThreadLocalFlat {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#endif // incl_HPHP_THREAD_LOCAL_H_

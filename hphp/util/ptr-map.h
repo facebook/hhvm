@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_PTRMAP_H_
-#define incl_HPHP_UTIL_PTRMAP_H_
+#pragma once
 
 #include <algorithm>
 #include <vector>
@@ -121,4 +120,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif

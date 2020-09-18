@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_COMPACT_VECTOR_H_
-#define incl_HPHP_COMPACT_VECTOR_H_
+#pragma once
 
 #include <stdlib.h>
 #include <cstring>
@@ -474,4 +473,3 @@ void CompactVector<T, A>::pop_back() {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

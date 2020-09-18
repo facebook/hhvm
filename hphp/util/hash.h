@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HASH_H_
-#define incl_HPHP_HASH_H_
+#pragma once
 
 #include <stdint.h>
 #include <cstring>
@@ -327,4 +326,3 @@ extern "C" {
 }
 #endif
 
-#endif // incl_HPHP_HASH_H_

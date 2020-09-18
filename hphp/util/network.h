@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_NETWORK_H_
-#define incl_HPHP_NETWORK_H_
+#pragma once
 
 #include <cstdlib>
 #include <string>
@@ -80,4 +79,3 @@ std::string GetPrimaryIPv6();
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_NETWORK_H_

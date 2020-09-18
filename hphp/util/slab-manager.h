@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_SLAB_MANAGER_H_
-#define incl_HPHP_UTIL_SLAB_MANAGER_H_
+#pragma once
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/portability.h"
@@ -194,4 +193,3 @@ struct SlabManager : TaggedSlabList {
 
 }
 
-#endif

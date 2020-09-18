@@ -17,8 +17,7 @@
 // Owner of the mmapped file which is the cache.
 // Handles all read accesses.  No writing is permitted (WORM cache).
 
-#ifndef incl_HPHP_MMAP_FILE_H_
-#define incl_HPHP_MMAP_FILE_H_
+#pragma once
 
 #include <cstdint>
 #include <string>
@@ -59,4 +58,3 @@ struct MmapFile {
 
 }  // namespace HPHP
 
-#endif  // incl_HPHP_MMAP_FILE_H_

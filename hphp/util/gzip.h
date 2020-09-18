@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_GZIP_H_
-#define incl_HPHP_GZIP_H_
+#pragma once
 
 #include "hphp/util/string-holder.h"
 #include <zlib.h>
@@ -60,4 +59,3 @@ struct GzipCompressor {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif  // incl_HPHP_GZIP_H_

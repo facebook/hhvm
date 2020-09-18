@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_TEXT_ART_H_
-#define incl_HPHP_UTIL_TEXT_ART_H_
+#pragma once
 
 namespace HPHP { namespace TextArt {
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,4 +46,3 @@ extern bool s_use_utf8;
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_UTIL_TEXT_ART_H_

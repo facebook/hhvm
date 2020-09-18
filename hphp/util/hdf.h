@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CONFIG_HDF_H_
-#define incl_HPHP_CONFIG_HDF_H_
+#pragma once
 
 #include <string>
 #include <map>
@@ -422,4 +421,3 @@ struct HdfInvalidOperation : HdfException {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_CONFIG_HDF_H_

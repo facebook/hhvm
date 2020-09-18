@@ -14,8 +14,7 @@
   +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_BITSET_VIEW_H_
-#define incl_HPHP_BITSET_VIEW_H_
+#pragma once
 
 namespace HPHP {
 
@@ -159,4 +158,3 @@ private:
 
 
 
-#endif // incl_HPHP_BITSET_VIEW_H_

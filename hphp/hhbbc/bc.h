@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_BC_H_
-#define incl_HHBBC_BC_H_
+#pragma once
 
 #include <vector>
 #include <utility>
@@ -1434,4 +1433,3 @@ auto visit(const Bytecode& b, Visit v) {
 
 }
 
-#endif

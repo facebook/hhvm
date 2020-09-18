@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_COMPILATION_ALLOC_FLAGS_H
-#define incl_HPHP_COMPILATION_ALLOC_FLAGS_H
+#pragma once
 
 #include <cstddef>
 
@@ -78,4 +77,3 @@ extern const size_t s_pageSize;
 
 }
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SHM_COUNTER_H_
-#define incl_HPHP_SHM_COUNTER_H_
+#pragma once
 
 #include <string.h>
 
@@ -71,4 +70,3 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_SHM_COUNTER_H_

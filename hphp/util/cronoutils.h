@@ -71,8 +71,7 @@
  * NEED_GETOPT_DEFS can be defined and declarations are provided here.
  */
 
-#ifndef incl_HPHP_CRONOUTILS_H_
-#define incl_HPHP_CRONOUTILS_H_
+#pragma once
 
 /* Header files */
 
@@ -154,4 +153,3 @@ extern int  period_seconds[];
 #define CRONO_DEBUG(msg_n_args)  \
 do { if (debug_file) print_debug_msg  msg_n_args; } while (0)
 
-#endif

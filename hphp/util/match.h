@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_UTIL_MATCH_H_
-#define incl_HPHP_UTIL_MATCH_H_
+#pragma once
 
 #include <type_traits>
 #include <utility>
@@ -119,4 +118,3 @@ match(Var& v, Funcs&&... funcs) {
 
 }
 
-#endif

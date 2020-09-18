@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_UTIL_TEXT_COLOR_H_
-#define incl_HPHP_UTIL_TEXT_COLOR_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -63,4 +62,3 @@ std::string add_bgcolor(const char *color, const char *bgcolor);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

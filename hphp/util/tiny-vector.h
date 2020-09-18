@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_TINYVECTOR_H_
-#define incl_HPHP_UTIL_TINYVECTOR_H_
+#pragma once
 
 #include <algorithm>
 #include <memory>
@@ -467,4 +466,3 @@ void swap(TinyVector<T, InternalSize, MinHeapCapacity, Allocator>& v1,
 
 }
 
-#endif

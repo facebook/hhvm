@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_READ_ONLY_ARENA_H_
-#define incl_HPHP_READ_ONLY_ARENA_H_
+#pragma once
 
 #include "hphp/util/address-range.h"
 #include "hphp/util/slab-manager.h"
@@ -207,4 +206,3 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 }
-#endif

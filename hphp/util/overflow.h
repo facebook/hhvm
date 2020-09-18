@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_OVERFLOW_H
-#define incl_HPHP_UTIL_OVERFLOW_H
+#pragma once
 
 namespace HPHP {
 
@@ -72,4 +71,3 @@ mul_overflow(T a, T b) {
 
 }
 
-#endif

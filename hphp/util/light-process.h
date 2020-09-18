@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_LIGHT_PROCESS_H_
-#define incl_HPHP_LIGHT_PROCESS_H_
+#pragma once
 
 #ifdef _MSC_VER
 # error LightProcess is not supported under MSVC!
@@ -135,4 +134,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_LIGHT_PROCESS_H_

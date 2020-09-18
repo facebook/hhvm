@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CAPABILITY_H_
-#define incl_HPHP_CAPABILITY_H_
+#pragma once
 
 #if !defined(SKIP_USER_CHANGE)
 
@@ -41,4 +40,3 @@ struct Capability {
 
 #endif
 
-#endif // incl_HPHP_CAPABILITY_H_

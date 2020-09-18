@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_UTIL_NUMA_H
-#define incl_HPHP_UTIL_NUMA_H
+#pragma once
 
 #include <atomic>
 
@@ -91,4 +90,3 @@ inline constexpr bool numa_node_allowed(int node) { return true; }
 #endif
 
 } // namespace HPHP
-#endif

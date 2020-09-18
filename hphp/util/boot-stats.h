@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_BOOT_STATS
-#define incl_HPHP_BOOT_STATS
+#pragma once
 
 #include <chrono>
 #include <cstdint>
@@ -109,4 +108,3 @@ struct BootStats {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

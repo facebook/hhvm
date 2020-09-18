@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_MANAGED_ARENA_H_
-#define incl_HPHP_UTIL_MANAGED_ARENA_H_
+#pragma once
 
 #include "hphp/util/alloc-defs.h"
 #include "hphp/util/bump-mapper.h"
@@ -159,4 +158,3 @@ DefaultArena* next_extra_arena(int node);
 }
 
 #endif // USE_JEMALLOC_EXTENT_HOOKS
-#endif

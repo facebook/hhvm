@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_CFG_OPTS_H_
-#define incl_HHBBC_CFG_OPTS_H_
+#pragma once
 
 #include "hphp/hhbbc/representation.h"
 
@@ -68,4 +67,3 @@ void split_critical_edges(const Index&, FuncAnalysis&, php::WideFunc& func);
 
 }}
 
-#endif

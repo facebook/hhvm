@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_WORD_MEM_H_
-#define incl_HPHP_WORD_MEM_H_
+#pragma once
 
 #include <limits>
 #include <folly/Portability.h>
@@ -285,4 +284,3 @@ T* wordfillones(T* ptr, size_t numT) {
 
 }
 
-#endif

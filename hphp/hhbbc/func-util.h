@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_FUNC_UTIL_H_
-#define incl_HPHP_FUNC_UTIL_H_
+#pragma once
 
 #include <cstdint>
 
@@ -76,4 +75,3 @@ int dyn_call_error_level(const php::Func*);
 
 }}
 
-#endif

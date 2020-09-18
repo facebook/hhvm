@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_OPTION_H_
-#define incl_HPHP_OPTION_H_
+#pragma once
 
 #include <map>
 #include <set>
@@ -150,4 +149,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // incl_HPHP_OPTION_H_

@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    */
-#ifndef incl_HPHP_CPUID_H_
-#define incl_HPHP_CPUID_H_
+#pragma once
 
 namespace HPHP {
 
@@ -76,4 +75,3 @@ ProcessorFamily getProcessorFamily() {
 
 }
 
-#endif

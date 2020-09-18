@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_JOB_QUEUE_H_
-#define incl_HPHP_UTIL_JOB_QUEUE_H_
+#pragma once
 
 #include <atomic>
 #include <memory>
@@ -911,4 +910,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

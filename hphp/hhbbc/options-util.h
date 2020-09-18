@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_OPTIONS_UTIL_H_
-#define incl_HPHP_OPTIONS_UTIL_H_
+#pragma once
 
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/misc.h"
@@ -40,4 +39,3 @@ int trace_bump_for(const php::Class*,
 }}
 
 
-#endif

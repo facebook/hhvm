@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_HASH_MAP_H_
-#define incl_HPHP_HASH_MAP_H_
+#pragma once
 
 #include "hphp/util/functional.h"
 #include "folly/container/F14Map.h"
@@ -67,4 +66,3 @@ using hphp_const_char_map = hphp_hash_map<const char*, T, cstr_hash, eqstr>;
 
 }
 
-#endif

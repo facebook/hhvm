@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HOST_HEALTH_MONITOR_TYPES_H_
-#define incl_HPHP_HOST_HEALTH_MONITOR_TYPES_H_
+#pragma once
 
 #include <string>
 
@@ -83,4 +82,3 @@ inline int64_t healthLevelToInt(HealthLevel level) {
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

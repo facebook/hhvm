@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_BITOPS_H_
-#define incl_HPHP_BITOPS_H_
+#pragma once
 
 #if !defined(__x86_64__) && !defined(__aarch64__)
 #include <folly/Bits.h>
@@ -203,4 +202,3 @@ inline bool bitvec_test(const uint64_t* bits, size_t index) {
 
 } // HPHP
 
-#endif

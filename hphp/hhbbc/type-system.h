@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_TYPE_SYSTEM_H_
-#define incl_HHBBC_TYPE_SYSTEM_H_
+#pragma once
 
 #include <cstdint>
 #include <vector>
@@ -1856,4 +1855,3 @@ Type adjust_type_for_prop(const Index& index,
 
 }}
 
-#endif

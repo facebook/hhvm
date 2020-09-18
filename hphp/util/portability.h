@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_PORTABILITY_H_
-#define incl_HPHP_PORTABILITY_H_
+#pragma once
 
 #include <folly/Likely.h> // defining LIKELY/UNLIKELY is part of this header
 #include <folly/Portability.h>
@@ -281,4 +280,3 @@
 #define ASM_LOCAL_LABEL(x) ".L" x
 #endif
 
-#endif

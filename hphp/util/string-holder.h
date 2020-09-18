@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STRING_HOLDER_H_
-#define incl_HPHP_STRING_HOLDER_H_
+#pragma once
 
 #include <stdint.h>
 #include <cstddef>
@@ -75,4 +74,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_STRING_HOLDER_H_

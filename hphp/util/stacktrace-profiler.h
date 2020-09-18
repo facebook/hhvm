@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PROBE_H
-#define incl_HPHP_PROBE_H
+#pragma once
 
 #include <string>
 #include <mutex>
@@ -119,4 +118,3 @@ extern std::atomic<bool> enable_stacktrace_profiler;
 
 }
 
-#endif

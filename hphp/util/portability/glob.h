@@ -21,8 +21,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef incl_HPHP_UTIL_PORTABILITY_GLOB_H_
-#define incl_HPHP_UTIL_PORTABILITY_GLOB_H_
+#pragma once
 
 typedef struct {
   size_t gl_pathc;
@@ -52,4 +51,3 @@ extern "C" void globfree(glob_t*);
 #define GLOB_NOMATCH 3
 #define GLOB_NOSYS   4
 
-#endif

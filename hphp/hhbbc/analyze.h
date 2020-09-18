@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_ANALYZE_H_
-#define incl_HHBBC_ANALYZE_H_
+#pragma once
 
 #include <vector>
 #include <utility>
@@ -235,4 +234,3 @@ State locally_propagated_bid_state(const Index& index,
 
 }}
 
-#endif

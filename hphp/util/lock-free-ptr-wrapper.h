@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_LOCK_FREE_PTR_WRAPPER_H_
-#define incl_LOCK_FREE_PTR_WRAPPER_H_
+#pragma once
 
 #include <atomic>
 #include <type_traits>
@@ -300,4 +299,3 @@ T LockFreePtrWrapper<T>::update_and_unlock(T&& v) {
 //////////////////////////////////////////////////////////////////////
 }
 
-#endif

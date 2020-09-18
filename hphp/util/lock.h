@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_LOCK_H_
-#define incl_HPHP_LOCK_H_
+#pragma once
 
 #include "hphp/util/mutex.h"
 #include "hphp/util/synchronizable.h"
@@ -176,4 +175,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif  // incl_HPHP_LOCK_H_

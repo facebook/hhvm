@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_EXCEPTION_H_
-#define incl_HPHP_EXCEPTION_H_
+#pragma once
 
 #include <cstdarg>
 #include <stdexcept>
@@ -92,4 +91,3 @@ struct FileOpenException : Exception {
 
 }
 
-#endif // incl_HPHP_EXCEPTION_H_

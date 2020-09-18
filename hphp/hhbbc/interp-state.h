@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_INTERP_STATE_H_
-#define incl_HHBBC_INTERP_STATE_H_
+#pragma once
 
 #include <vector>
 #include <string>
@@ -592,4 +591,3 @@ std::string state_string(const php::Func&, const State&, const CollectedInfo&);
 //////////////////////////////////////////////////////////////////////
 
 }}
-#endif

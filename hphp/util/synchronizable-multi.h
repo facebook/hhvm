@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SYNCHRONIZABLE_MULTI_H_
-#define incl_HPHP_SYNCHRONIZABLE_MULTI_H_
+#pragma once
 
 #include "hphp/util/mutex.h"
 #include <pthread.h>
@@ -126,4 +125,3 @@ struct SynchronizableMulti {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_SYNCHRONIZABLE_MULTI_H_

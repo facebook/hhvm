@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_HARDWARE_COUNTER_H_
-#define incl_HPHP_UTIL_HARDWARE_COUNTER_H_
+#pragma once
 
 #include "hphp/util/thread-local.h"
 
@@ -138,4 +137,3 @@ struct HardwareCounter {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

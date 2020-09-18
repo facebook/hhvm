@@ -1,5 +1,4 @@
-#ifndef incl_ETCH_HELPERS_H
-#define incl_ETCH_HELPERS_H
+#pragma once
 
 #ifdef _MSC_VER
 #define CFI(x)            .cfi_##x
@@ -93,4 +92,3 @@
 #define ETCH_RET1         %rax
 #endif
 
-#endif // incl_ETCH_HELPERS_H

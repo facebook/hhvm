@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_SPARSE_ID_CONTAINERS_H_
-#define incl_HPHP_SPARSE_ID_CONTAINERS_H_
+#pragma once
 
 #include <cstdlib>
 #include <cstring>
@@ -782,4 +781,3 @@ void swap(sparse_id_map<K,V,LK,LKE>& a, sparse_id_map<K,V,LK,LKE>& b) {
 
 }
 
-#endif

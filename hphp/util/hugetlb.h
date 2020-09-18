@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_HUGETLB_H_
-#define incl_HPHP_UTIL_HUGETLB_H_
+#pragma once
 
 #include <cstddef>
 
@@ -90,4 +89,3 @@ int mprotect_1g_pages(int prot);
 
 }
 
-#endif

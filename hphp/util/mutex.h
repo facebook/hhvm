@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_MUTEX_H_
-#define incl_HPHP_MUTEX_H_
+#pragma once
 
 #include <pthread.h>
 #include <time.h>
@@ -329,4 +328,3 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_MUTEX_H_

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_ZSTD_HELPERS_H_
-#define incl_HPHP_UTIL_ZSTD_HELPERS_H_
+#pragma once
 
 #include <cstddef>
 #include <memory>
@@ -63,4 +62,3 @@ struct ZstdCompressor {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

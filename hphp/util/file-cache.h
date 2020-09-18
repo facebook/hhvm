@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_FILE_CACHE_H_
-#define incl_HPHP_FILE_CACHE_H_
+#pragma once
 
 #include <memory>
 #include <string>
@@ -85,4 +84,3 @@ struct FileCache {
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

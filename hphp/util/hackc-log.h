@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_HACKC_LOG_H_
-#define incl_HPHP_UTIL_HACKC_LOG_H_
+#pragma once
 
 #include <folly/dynamic.h>
 
@@ -29,4 +28,3 @@ void logOptions(const folly::dynamic&);
 } // namespace HackC
 } // namespace HPHP
 
-#endif // incl_HPHP_UTIL_HACKC_LOG_H_

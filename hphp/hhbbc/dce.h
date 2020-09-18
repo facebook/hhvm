@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_DCE_H_
-#define incl_HHBBC_DCE_H_
+#pragma once
 
 #include <vector>
 
@@ -57,4 +56,3 @@ const StaticString s_unreachable("static analysis error: supposedly "
 
 }}
 
-#endif

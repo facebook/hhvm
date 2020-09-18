@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_LOGGER_H_
-#define incl_HPHP_LOGGER_H_
+#pragma once
 
 #include <atomic>
 #include <chrono>
@@ -209,4 +208,3 @@ protected:
 
 #include "hphp/util/logger-inl.h"
 
-#endif // incl_HPHP_LOGGER_H_

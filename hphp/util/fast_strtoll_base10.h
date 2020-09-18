@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_FAST_STRTOLL_BASE10_H_
-#define incl_HPHP_UTIL_FAST_STRTOLL_BASE10_H_
+#pragma once
 
 namespace HPHP {
 
@@ -48,4 +47,3 @@ inline int64_t fast_strtoll_base10(const char* p) {
 
 }
 
-#endif

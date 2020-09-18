@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PROCESS_EXEC_H_
-#define incl_HPHP_PROCESS_EXEC_H_
+#pragma once
 
 #include <string>
 
@@ -56,4 +55,3 @@ struct EnableForkInDebuggerGuard {
 ////////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif

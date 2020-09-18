@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_MAPHUGE_H_
-#define incl_HPHP_MAPHUGE_H_
+#pragma once
 
 #include <folly/portability/SysMman.h>
 
@@ -41,4 +40,3 @@ inline void hintHuge(void* mem, size_t length) {
 
 }
 
-#endif

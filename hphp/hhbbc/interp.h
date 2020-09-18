@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_INTERP_H_
-#define incl_HHBBC_INTERP_H_
+#pragma once
 
 #include <functional>
 #include <vector>
@@ -227,4 +226,3 @@ SString getNameFromType(const Type& t);
 
 }}
 
-#endif

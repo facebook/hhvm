@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_UNIT_UTIL_H_
-#define incl_HHBBC_UNIT_UTIL_H_
+#pragma once
 
 #include "hphp/hhbbc/misc.h"
 
@@ -33,4 +32,3 @@ bool is_systemlib_part(const php::Unit&);
 
 }}
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PROCESS_H_
-#define incl_HPHP_PROCESS_H_
+#pragma once
 
 #include <atomic>
 #include <cassert>
@@ -324,4 +323,3 @@ struct Process {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

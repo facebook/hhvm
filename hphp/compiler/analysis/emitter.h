@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_COMPILER_EMITTER_H_
-#define incl_HPHP_COMPILER_EMITTER_H_
+#pragma once
 
 #include <memory>
 
@@ -48,4 +47,3 @@ extern "C" {
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif

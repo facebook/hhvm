@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_PARALLEL_H_
-#define incl_HHBBC_PARALLEL_H_
+#pragma once
 
 #include <stdexcept>
 #include <iterator>
@@ -187,4 +186,3 @@ auto map(Items&& inputs, Func func) -> std::vector<decltype(func(inputs[0]))> {
 
 }}
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_TYPE_SCAN_DETAIL_H_
-#define incl_HPHP_UTIL_TYPE_SCAN_DETAIL_H_
+#pragma once
 
 #include <array>
 #include <tuple>
@@ -348,4 +347,3 @@ constexpr const char* const kSilenceForbiddenBaseName =
 
 }}}
 
-#endif

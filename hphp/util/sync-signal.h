@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_SYNC_SIGNAL_H
-#define incl_HPHP_UTIL_SYNC_SIGNAL_H
+#pragma once
 
 #include <cstdint>
 #include <pthread.h>
@@ -49,4 +48,3 @@ void postfork_restart_handler_thread();
 
 }
 
-#endif

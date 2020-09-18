@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_STATS_H_
-#define incl_HHBBC_STATS_H_
+#pragma once
 
 namespace HPHP { namespace HHBBC {
 
@@ -54,4 +53,3 @@ void print_stats(const StatsHolder&);
 
 }}
 
-#endif

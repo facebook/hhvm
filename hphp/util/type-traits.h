@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_TYPE_TRAITS_H_
-#define incl_HPHP_UTIL_TYPE_TRAITS_H_
+#pragma once
 
 #include <type_traits>
 #include <functional>
@@ -160,4 +159,3 @@ struct is_invocable : public std::is_constructible<
 
 }
 
-#endif

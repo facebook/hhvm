@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CONV_10_H_
-#define incl_HPHP_CONV_10_H_
+#pragma once
 
 #include <folly/Range.h>
 
@@ -25,4 +24,3 @@ folly::StringPiece conv_10(int64_t num, char* buf_end);
 
 }
 
-#endif

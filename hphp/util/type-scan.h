@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_TYPE_SCAN_H_
-#define incl_HPHP_UTIL_TYPE_SCAN_H_
+#pragma once
 
 #include <cstdint>
 #include <stdexcept>
@@ -413,4 +412,3 @@ struct Scanner {
 
 }}
 
-#endif

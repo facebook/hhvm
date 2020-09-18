@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_RANK_H_
-#define incl_HPHP_RANK_H_
+#pragma once
 
 #include <limits.h>
 
@@ -81,4 +80,3 @@ extern void insertRank(Rank r);
 
 }
 
-#endif

@@ -1,5 +1,4 @@
-#ifndef incl_HPHP_UTIL_HPHP_CONFIG_H_
-#define incl_HPHP_UTIL_HPHP_CONFIG_H_
+#pragma once
 
 #ifndef FACEBOOK
 # define HPHP_OSS 1
@@ -203,4 +202,3 @@ ${HHVM_EXTENSIONS_ENABLED_DEFINE_STRING}
 #endif
 #endif
 
-#endif

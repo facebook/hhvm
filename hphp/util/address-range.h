@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_ADDRESS_RANGE_H_
-#define incl_HPHP_UTIL_ADDRESS_RANGE_H_
+#pragma once
 
 #include "hphp/util/alloc-defs.h"
 
@@ -270,4 +269,3 @@ RangeState& getRange(AddrRangeClass rc);
 
 }
 
-#endif

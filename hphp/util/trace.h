@@ -15,8 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_TRACE_H_
-#define incl_HPHP_TRACE_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -527,4 +526,3 @@ class FormatValue<Val,
 };
 }
 
-#endif /* incl_HPHP_TRACE_H_ */

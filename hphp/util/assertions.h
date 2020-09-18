@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_ASSERTIONS_H_
-#define incl_HPHP_ASSERTIONS_H_
+#pragma once
 
 #include <cassert>
 #include <cstdio>
@@ -213,4 +212,3 @@ T* assert_not_null(T* ptr) {
 
 }
 
-#endif

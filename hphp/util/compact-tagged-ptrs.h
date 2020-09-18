@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_UTIL_COMPACT_TAGGED_PTRS_H_
-#define incl_HPHP_UTIL_COMPACT_TAGGED_PTRS_H_
+#pragma once
 
 #include "hphp/util/assertions.h"
 
@@ -133,4 +132,3 @@ void swap(CompactSizedPtr<T>& p1, CompactSizedPtr<T>& p2) noexcept {
 
 }
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ATOMIC_VECTOR_H
-#define incl_HPHP_ATOMIC_VECTOR_H
+#pragma once
 
 #include <atomic>
 #include <memory>
@@ -159,4 +158,3 @@ struct AtomicLowPtrVector
 
 #include "hphp/util/atomic-vector-inl.h"
 
-#endif

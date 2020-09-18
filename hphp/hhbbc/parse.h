@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_PARSE_H_
-#define incl_HHBBC_PARSE_H_
+#pragma once
 
 #include <vector>
 #include <memory>
@@ -32,4 +31,3 @@ void parse_unit(php::Program& prog, const UnitEmitter* ue);
 
 }}
 
-#endif

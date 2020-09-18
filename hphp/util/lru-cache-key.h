@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef incl_HPHP_UTIL_LRU_CACHE_KEY_H
-#define incl_HPHP_UTIL_LRU_CACHE_KEY_H
+#pragma once
 
 #include <atomic>
 #include <cstring>
@@ -102,4 +101,3 @@ private:
 
 } // namespace HPHP
 
-#endif

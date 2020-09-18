@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_INSERTION_ORDERED_MAP_H_
-#define incl_INSERTION_ORDERED_MAP_H_
+#pragma once
 
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/member.hpp>
@@ -123,4 +122,3 @@ private:
 
 }
 
-#endif

@@ -71,8 +71,7 @@
 // because formats tend to change over time.  This approach is resilient to
 // changes to the format since it'll still pick up the right content offsets.
 
-#ifndef incl_HPHP_CACHE_SAVER_H_
-#define incl_HPHP_CACHE_SAVER_H_
+#pragma once
 
 #include <sys/types.h>
 
@@ -160,4 +159,3 @@ struct CacheSaver {
 
 }  // namespace HPHP
 
-#endif  // incl_HPHP_CACHE_SAVER_H_

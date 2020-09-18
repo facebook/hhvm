@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_PERF_EVENT_H_
-#define incl_HPHP_UTIL_PERF_EVENT_H_
+#pragma once
 
 #include <cstdint>
 
@@ -135,4 +134,3 @@ void perf_event_resume();
 
 }
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_THREAD_LOCAL_EMULATE_H_
-#define incl_HPHP_THREAD_LOCAL_EMULATE_H_
+#pragma once
 
 namespace HPHP {
 
@@ -150,4 +149,3 @@ template<typename T> using ThreadLocalNoCheck = ThreadLocalImpl<false,T>;
 
 }
 
-#endif // incl_HPHP_THREAD_LOCAL_EMULATE_H_

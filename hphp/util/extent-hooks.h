@@ -14,8 +14,7 @@
   +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_EXTENT_HOOK_H_
-#define incl_HPHP_UTIL_EXTENT_HOOK_H_
+#pragma once
 
 #include "hphp/util/alloc-defs.h"
 #include "hphp/util/bump-mapper.h"
@@ -167,4 +166,3 @@ struct RangeFallbackExtentAllocator : RangeState {
 }}
 
 #endif // USE_JEMALLOC_EXTENT_HOOKS
-#endif // incl_HPHP_UTIL_EXTENT_HOOK_H_

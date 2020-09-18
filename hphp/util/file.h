@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_FILE_H_
-#define incl_HPHP_UTIL_FILE_H_
+#pragma once
 
 #include <folly/Range.h>
 
@@ -71,4 +70,3 @@ inline bool isAbsolutePath(folly::StringPiece path) {
 ////////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif

@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_UTIL_ARENA_H_
-#define incl_HPHP_UTIL_ARENA_H_
+#pragma once
 
 #include <vector>
 #include <cstdlib>
@@ -170,4 +169,3 @@ inline void* operator new[](size_t nbytes,
 
 //////////////////////////////////////////////////////////////////////
 
-#endif

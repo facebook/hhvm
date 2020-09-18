@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_BUMP_MAPPER_H_
-#define incl_HPHP_UTIL_BUMP_MAPPER_H_
+#pragma once
 
 #include "hphp/util/address-range.h"
 #include "hphp/util/alloc-defs.h"
@@ -163,5 +162,4 @@ struct BumpFileMapper : public RangeMapper {
 
 }}
 
-#endif
 #endif

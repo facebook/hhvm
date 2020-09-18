@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_DATA_BLOCK_H
-#define incl_HPHP_DATA_BLOCK_H
+#pragma once
 
 #include <cstdint>
 #include <cstring>
@@ -361,4 +360,3 @@ struct CodeCursor : UndoMarker {
 };
 }
 
-#endif

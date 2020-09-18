@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JSON_H_
-#define incl_HPHP_JSON_H_
+#pragma once
 
 #include "hphp/util/hash-map.h"
 
@@ -262,4 +261,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // incl_HPHP_JSON_H_

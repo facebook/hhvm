@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_BROTLI_HELPERS_H_
-#define incl_HPHP_UTIL_BROTLI_HELPERS_H_
+#pragma once
 
 #include "hphp/util/string-holder.h"
 
@@ -43,4 +42,3 @@ struct BrotliCompressor {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif

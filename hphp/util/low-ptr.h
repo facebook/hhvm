@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_LOW_PTR_H_
-#define incl_HPHP_LOW_PTR_H_
+#pragma once
 
 #include "hphp/util/low-ptr-def.h"
 #include "hphp/util/assertions.h"
@@ -267,4 +266,3 @@ template<class T> class FormatValue<HPHP::LowPtr<T>> {
 };
 }
 
-#endif // incl_HPHP_LOW_PTR_H_

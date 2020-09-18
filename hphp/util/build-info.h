@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_BUILD_INFO_H_
-#define incl_HPHP_BUILD_INFO_H_
+#pragma once
 
 #include <folly/Range.h>
 
@@ -61,4 +60,3 @@ void replacePlaceholders(std::string&);
 
 }
 
-#endif

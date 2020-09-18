@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_UTIL_ASM_X64_LEGACY_H_
-#define incl_HPHP_UTIL_ASM_X64_LEGACY_H_
+#pragma once
 
 namespace HPHP { namespace jit {
 
@@ -1397,4 +1396,3 @@ private:
 
 }}
 
-#endif

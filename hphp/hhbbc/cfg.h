@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_CFG_H_
-#define incl_HHBBC_CFG_H_
+#pragma once
 
 #include <vector>
 
@@ -171,4 +170,3 @@ void visitExnLeaves(const php::Func& func, Fun f) {
 
 }}
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ANALYSIS_RESULT_H_
-#define incl_HPHP_ANALYSIS_RESULT_H_
+#pragma once
 
 #include "hphp/compiler/option.h"
 
@@ -107,4 +106,3 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // incl_HPHP_ANALYSIS_RESULT_H_

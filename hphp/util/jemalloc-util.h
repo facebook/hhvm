@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_MALLOC_SIZE_CLASS_H_
-#define incl_HPHP_UTIL_MALLOC_SIZE_CLASS_H_
+#pragma once
 
 #include "hphp/util/alloc-defs.h" // must include before checking USE_JEMALLOC
 
@@ -173,4 +172,3 @@ size_t mallctl_all_pdirty();
 
 }
 
-#endif

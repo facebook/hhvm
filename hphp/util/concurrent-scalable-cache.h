@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef incl_HPHP_UTIL_SCALABLE_CACHE_H
-#define incl_HPHP_UTIL_SCALABLE_CACHE_H
+#pragma once
 
 #include "hphp/util/concurrent-lru-cache.h"
 #include "hphp/util/lru-cache-key.h"
@@ -186,4 +185,3 @@ size() const {
 
 } // namespace HPHP
 
-#endif

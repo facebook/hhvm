@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_RADIX_MAP_H_
-#define incl_HPHP_UTIL_RADIX_MAP_H_
+#pragma once
 
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/assertions.h"
@@ -363,4 +362,3 @@ private:
 
 }
 
-#endif

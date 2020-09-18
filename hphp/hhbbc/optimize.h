@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_OPTIMIZE_H_
-#define incl_HPHP_OPTIMIZE_H_
+#pragma once
 
 #include "hphp/hhbbc/context.h"
 
@@ -58,4 +57,3 @@ Bytecode gen_constant(const TypedValue& cell);
 
 }}
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_UNWIND_ITANIUM_H_
-#define incl_HPHP_UTIL_UNWIND_ITANIUM_H_
+#pragma once
 
 #include <cstdint>
 #include <exception>
@@ -86,4 +85,3 @@ typeinfoFromUE(_Unwind_Exception* eo) {
 
 }
 
-#endif

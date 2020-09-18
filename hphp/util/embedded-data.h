@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_EMBEDDED_DATA_H_
-#define incl_HPHP_UTIL_EMBEDDED_DATA_H_
+#pragma once
 
 #ifdef __cplusplus
 
@@ -83,4 +82,3 @@ ssize_t hphp_read_embedded_data(const char* section, char* buf, size_t len);
 
 #endif //__cplusplus
 
-#endif

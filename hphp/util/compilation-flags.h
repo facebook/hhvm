@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_COMPILATION_FLAGS_H_
-#define incl_HPHP_COMPILATION_FLAGS_H_
+#pragma once
 
 #include "hphp/util/wide-tv-val-def.h"
 
@@ -85,4 +84,3 @@ constexpr bool facebook =
 
 }
 
-#endif

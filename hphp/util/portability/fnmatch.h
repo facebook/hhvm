@@ -21,8 +21,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef incl_HPHP_UTIL_PORTABILITY_FNMATCH_H_
-#define incl_HPHP_UTIL_PORTABILITY_FNMATCH_H_
+#pragma once
 
 #define FNM_NOMATCH 1
 
@@ -35,4 +34,3 @@
 
 extern "C" int fnmatch(const char *pattern, const char *string, int flags);
 
-#endif

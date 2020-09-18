@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_STRUCT_LOG_H_
-#define incl_HPHP_UTIL_STRUCT_LOG_H_
+#pragma once
 
 #include <set>
 #include <string>
@@ -68,4 +67,3 @@ void recordRequestGlobals(StructuredLogEntry&);
 
 }
 
-#endif

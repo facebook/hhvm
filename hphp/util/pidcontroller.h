@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_PIDCONTOLLER_H_
-#define incl_HPHP_PIDCONTOLLER_H_
+#pragma once
 
 #include <cmath>
 #include <limits>
@@ -101,4 +100,3 @@ private:
 
 }
 
-#endif // incl_HPHP_PIDCONTOLLER_H_

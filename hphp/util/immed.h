@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_IMMED_H
-#define incl_HPHP_UTIL_IMMED_H
+#pragma once
 
 #include "hphp/util/safe-cast.h"
 
@@ -125,4 +124,3 @@ private:
 };
 
 }}
-#endif

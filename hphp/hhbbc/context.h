@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_CONTEXT_H_
-#define incl_HHBBC_CONTEXT_H_
+#pragma once
 
 #include <folly/Hash.h>
 #include <folly/Optional.h>
@@ -115,4 +114,3 @@ struct VisitContext {
 
 }}
 
-#endif

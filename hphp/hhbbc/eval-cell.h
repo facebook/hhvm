@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_EVAL_CELL_H_
-#define incl_HHBBC_EVAL_CELL_H_
+#pragma once
 
 #include <stdexcept>
 #include <exception>
@@ -97,4 +96,3 @@ eval_cell_value(Pred p) {
 
 }}
 
-#endif

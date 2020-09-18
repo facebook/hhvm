@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_FUNCTIONAL_H_
-#define incl_HPHP_FUNCTIONAL_H_
+#pragma once
 
 #include <cstring>
 #include <string>
@@ -203,4 +202,3 @@ struct string_lessi {
 
 }
 
-#endif

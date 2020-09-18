@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_BUILTIN_SYMBOLS_H_
-#define incl_HPHP_BUILTIN_SYMBOLS_H_
+#pragma once
 
 #include <memory>
 
@@ -34,4 +33,3 @@ struct BuiltinSymbols {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // incl_HPHP_BUILTIN_SYMBOLS_H_

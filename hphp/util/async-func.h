@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_CONCURRENCY_ASYNC_FUNC_H_
-#define incl_HPHP_CONCURRENCY_ASYNC_FUNC_H_
+#pragma once
 
 #include <pthread.h>
 
@@ -230,4 +229,3 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_CONCURRENCY_ASYNC_FUNC_H_

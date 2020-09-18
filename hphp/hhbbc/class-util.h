@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_CLASS_UTIL_H_
-#define incl_HHBBC_CLASS_UTIL_H_
+#pragma once
 
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
@@ -89,4 +88,3 @@ std::string normalized_class_name(const php::Class& cls);
 
 }}
 
-#endif

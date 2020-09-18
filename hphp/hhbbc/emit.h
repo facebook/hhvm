@@ -13,8 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_EMIT_H_
-#define incl_HHBBC_EMIT_H_
+#pragma once
 
 #include <vector>
 #include <memory>
@@ -38,4 +37,3 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index&, php::Unit&);
 
 }}
 
-#endif

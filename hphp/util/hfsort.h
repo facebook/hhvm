@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_UTIL_HFSORT_H
-#define incl_HPHP_UTIL_HFSORT_H
+#pragma once
 
 #include <string>
 #include <unordered_set>
@@ -150,4 +149,3 @@ void TargetGraph::printDot(char* fileName, L getLabel) const {
 
 }}
 
-#endif

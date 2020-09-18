@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ARCH_H
-#define incl_HPHP_ARCH_H
+#pragma once
 
 #include "hphp/util/assertions.h"
 
@@ -73,4 +72,3 @@ bool arch_any(Arch a, Tail&&... archs) {
 
 }
 
-#endif

@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ASYNC_JOB_H_
-#define incl_HPHP_ASYNC_JOB_H_
+#pragma once
 
 #include <algorithm>
 #include <random>
@@ -193,4 +192,3 @@ struct JobDispatcher {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ASYNC_JOB_H_

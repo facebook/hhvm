@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_SERVICE_DATA_H_
-#define incl_HPHP_SERVICE_DATA_H_
+#pragma once
 
 #include <atomic>
 #include <chrono>
@@ -304,4 +303,3 @@ struct ExportedHistogram {
 
 #include "hphp/util/service-data-inl.h"
 
-#endif // incl_HPHP_SERVICE_DATA_H_

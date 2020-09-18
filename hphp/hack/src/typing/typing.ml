@@ -4698,20 +4698,17 @@ and dispatch_call
       - `<instance_type>` <: `Thas_member(m, #1)`
       where #1 is a fresh type variable.
     *****)
-    (* Get type of instance *)
     let (env, typed_receiver, receiver_ty) =
       expr ~accept_using_var:true env receiver
     in
     let env = might_throw env in
-    (* Check if call is nullsafe, e.g. $x?->f() *)
     let nullsafe =
       match nullflavor with
       | OG_nullthrows -> None
       | OG_nullsafe -> Some p
     in
-    (*
-      Generate a fresh types `method_ty` for the type of the instance method, i.e. #1
-    *)
+    (* Generate a fresh type `method_ty` for the type of the
+       instance method, i.e. #1 *)
     let (env, method_ty) = Env.fresh_type env p in
     (* Create `Thas_member` constraint type *)
     let reason = Reason.Rwitness (fst receiver) in
@@ -4729,7 +4726,9 @@ and dispatch_call
         (env, receiver_ty)
       else
         (* If nullsafe, then check `receiver & nonnull <: Thas_member(...).
-           We want a bare `Thas_member(...)` on RHS of check (T75797924). *)
+           We want a bare `Thas_member(...)` on RHS of subtyping, to ensure
+           we call through to `Typing_object_get` without making any incomplete
+           steps in subtyping (e.g. with intersection on LHS) *)
         let r = Reason.Rnone in
         let nonnull_ty = MakeType.nonnull r in
         let (env, inter_ty) = Inter.intersect ~r env receiver_ty nonnull_ty in
@@ -4746,10 +4745,10 @@ and dispatch_call
     in
     (* Perhaps solve for `method_ty`. Opening and closing a scope is too coarse
        here - type parameters are localised to fresh type variables over the
-       course of subtyping above, and we do not want to solve these until later
-       (see T75252607 for details).
-       After T71287635, we should not need to solve early at all - transitive
-       closure of subtyping should give enough information. *)
+       course of subtyping above, and we do not want to solve these until later.
+       Once we typecheck all function calls with a subtyping of function types,
+       we should not need to solve early at all - transitive closure of
+       subtyping should give enough information. *)
     let env = Env.set_tyvar_variance env method_ty in
     let env =
       match get_var method_ty with

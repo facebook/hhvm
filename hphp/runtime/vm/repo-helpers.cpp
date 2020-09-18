@@ -32,7 +32,7 @@ TRACE_SET_MOD(hhbc);
 
 // Try to look at a SQL statement and figure out which repoId it's targeting.
 static int debugComputeRepoIdFromSQL(Repo& repo, const std::string& stmt) {
-  for (int i = 0; i < RepoIdCount; ++i) {
+  for (int i = 0; i < repo.numOpenRepos(); ++i) {
     auto const name = std::string{" "} + repo.dbName(i);
     auto const pos = stmt.find(name);
     if (pos != std::string::npos) {

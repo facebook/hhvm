@@ -1134,7 +1134,7 @@ std::unique_ptr<UnitEmitter> UnitRepoProxy::loadEmitter(
   }
   // Look for a repo that contains a unit with matching SHA1.
   int repoId;
-  for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
+  for (repoId = m_repo.numOpenRepos() - 1; repoId >= 0; --repoId) {
     if (getUnit[repoId].get(*ue, sha1) == RepoStatus::success) {
       break;
     }

@@ -76,6 +76,11 @@ struct Repo : RepoProxy {
     assertx(repoId < RepoIdCount);
     return kDbs[repoId];
   }
+
+  int8_t numOpenRepos() const {
+    return m_numOpenRepos;
+  }
+
   sqlite3* dbc() const { return m_dbc; }
   int repoIdForNewUnit(UnitOrigin unitOrigin) const {
     switch (unitOrigin) {
@@ -236,7 +241,7 @@ struct Repo : RepoProxy {
   void disconnect() noexcept;
   void initCentral();
   RepoStatus openCentral(const char* repoPath, std::string& errorMsg);
-  void initLocal();
+  bool initLocal();
   bool attachLocal(const char* repoPath, bool isWritable);
   void pragmas(int repoId); // throws(RepoExc)
   void getIntPragma(int repoId, const char* name, int& val); // throws(RepoExc)
@@ -269,6 +274,7 @@ private:
   RecordRepoProxy m_rrp;
   FuncRepoProxy m_frp;
   LitstrRepoProxy m_lsrp;
+  int8_t m_numOpenRepos;
 };
 
 //////////////////////////////////////////////////////////////////////

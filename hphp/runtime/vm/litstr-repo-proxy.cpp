@@ -35,7 +35,7 @@ void LitstrRepoProxy::createSchema(int repoId, RepoTxn& txn) {
 
 void LitstrRepoProxy::load(bool lazy) {
   assertx(s_loadedRepoId.load(std::memory_order_relaxed) == RepoIdInvalid);
-  for (int repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
+  for (int repoId = m_repo.numOpenRepos() - 1; repoId >= 0; --repoId) {
     // Return success on the first loaded repo.  In the case of an error we
     // continue on to the next repo.
     GetLitstrCountStmt stmt{m_repo, repoId};

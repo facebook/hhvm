@@ -118,7 +118,7 @@ Repo::Repo()
     m_dbc(nullptr), m_localReadable(false), m_localWritable(false),
     m_txDepth(0), m_rollback(false), m_beginStmt(*this),
     m_rollbackStmt(*this), m_commitStmt(*this), m_urp(*this), m_pcrp(*this),
-    m_rrp(*this), m_frp(*this), m_lsrp(*this) {
+    m_rrp(*this), m_frp(*this), m_lsrp(*this), m_numOpenRepos(0) {
 
   ++s_nRepos;
   connect();
@@ -150,12 +150,7 @@ size_t Repo::stringLengthLimit() const {
 }
 
 bool Repo::hasGlobalData() {
-  for (int repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
-    if (repoName(repoId).empty()) {
-      // The repo wasn't loadable
-      continue;
-    }
-
+for (int repoId = numOpenRepos() - 1; repoId >= 0; --repoId) {
     RepoStmt stmt(*this);
     const auto& tbl = table(repoId, "GlobalData");
     stmt.prepare(
@@ -191,11 +186,7 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
    * that our unit test suite is currently running RepoAuthoritative
    * tests with the compiled repo as the Central repo.
    */
-  for (int repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
-    if (repoName(repoId).empty()) {
-      // The repo wasn't loadable
-      continue;
-    }
+  for (int repoId = numOpenRepos() - 1; repoId >= 0; --repoId) {
     try {
       RepoStmt stmt(*this);
       const auto& tbl = table(repoId, "GlobalData");
@@ -515,12 +506,7 @@ std::optional<String> Repo::findPath(int64_t unitSn, const std::string& root) {
   }
 
   int repoId;
-  for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
-    if (repoName(repoId).empty()) {
-      // The repo wasn't loadable
-      continue;
-    }
-
+  for (repoId = numOpenRepos() - 1; repoId >= 0; --repoId) {
     auto maybeRelPath = m_getUnitPath[repoId].get(unitSn);
     if (maybeRelPath.has_value()) {
       auto relPath = maybeRelPath.value();
@@ -572,7 +558,7 @@ RepoStatus Repo::findUnit(const char* path, const std::string& root,
     return RepoStatus::error;
   }
   int repoId;
-  for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
+  for (repoId = numOpenRepos() - 1; repoId >= 0; --repoId) {
     if (*path == '/' && !root.empty() &&
         !strncmp(root.c_str(), path, root.size()) &&
         (m_getUnit[repoId].get(path + root.size(), unitSn) ==
@@ -606,7 +592,7 @@ RepoStatus Repo::findFile(const char *path, const std::string& root,
     return RepoStatus::error;
   }
   int repoId;
-  for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
+  for (repoId = numOpenRepos() - 1; repoId >= 0; --repoId) {
     if (*path == '/' && !root.empty() &&
         !strncmp(root.c_str(), path, root.size()) &&
         (m_getFileHash[repoId].get(path + root.size(), sha1) ==
@@ -788,7 +774,11 @@ void Repo::commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin,
 
 void Repo::connect() {
   initCentral();
-  initLocal();
+  if (initLocal()) {
+    m_numOpenRepos = 2;
+  } else {
+    m_numOpenRepos = 1;
+  }
 }
 
 void Repo::disconnect() noexcept {
@@ -798,6 +788,7 @@ void Repo::disconnect() noexcept {
     m_localReadable = false;
     m_localWritable = false;
   }
+  m_numOpenRepos = 0;
 }
 
 void Repo::initCentral() {
@@ -1051,7 +1042,7 @@ RepoStatus Repo::openCentral(const char* rawPath, std::string& errorMsg) {
   return RepoStatus::success;
 }
 
-void Repo::initLocal() {
+bool Repo::initLocal() {
   if (RuntimeOption::RepoLocalMode.compare("--")) {
     bool isWritable;
     if (!RuntimeOption::RepoLocalMode.compare("rw")) {
@@ -1062,25 +1053,31 @@ void Repo::initLocal() {
     }
 
     if (!RuntimeOption::RepoLocalPath.empty()) {
-      if (!attachLocal(RuntimeOption::RepoLocalPath.c_str(), isWritable) &&
-          s_deleteLocalOnFailure) {
-        unlink(RuntimeOption::RepoLocalPath.c_str());
-        s_deleteLocalOnFailure = false;
-        Logger::Warning("Deleting local repo because it was corrupt");
-        attachLocal(RuntimeOption::RepoLocalPath.c_str(), true);
+      if (attachLocal(RuntimeOption::RepoLocalPath.c_str(), isWritable)) {
+        return true;
       }
+      if (!s_deleteLocalOnFailure) {
+        return false;
+      }
+
+      unlink(RuntimeOption::RepoLocalPath.c_str());
+      s_deleteLocalOnFailure = false;
+      Logger::Warning("Deleting local repo because it was corrupt");
+      return attachLocal(RuntimeOption::RepoLocalPath.c_str(), true);
     } else if (RuntimeOption::RepoAllowFallbackPath) {
       if (!RuntimeOption::ServerExecutionMode()) {
         std::string cliRepo = s_cliFile;
         if (!cliRepo.empty()) {
           cliRepo += ".hhbc";
         }
-        attachLocal(cliRepo.c_str(), isWritable);
+        return attachLocal(cliRepo.c_str(), isWritable);
       } else {
-        attachLocal("hhvm.hhbc", isWritable);
+        return attachLocal("hhvm.hhbc", isWritable);
       }
     }
   }
+
+  return false;
 }
 
 bool Repo::attachLocal(const char* path, bool isWritable) {

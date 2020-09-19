@@ -203,6 +203,20 @@ void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
   }
 }
 
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+struct ArrayReachInfo {
+  Location loc;
+  Type type;
+  size_t guardIndex;
+};
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Emit type guards.
  */
@@ -219,16 +233,25 @@ void emitGuards(irgen::IRGS& irgs,
   }
 
   // Emit type guards/preconditions.
+  std::vector<ArrayReachInfo> arrayReachLocs;
   if (irgs.context.kind == TransKind::Profile) {
     // If we're in a profiling tracelet, weaken vanilla guards so that
     // logging arrays can flow through tracelets.
-    for (auto const& preCond : typePreConditions) {
+    for (size_t i = 0; i < typePreConditions.size(); i++) {
+      auto const& preCond = typePreConditions[i];
       auto const origType = preCond.type;
-      auto type = origType <= TArrLike ? origType.unspecialize()
-                                       : origType;
+      auto const isVanillaGuard = origType.arrSpec().vanilla();
+      auto type = isVanillaGuard ? origType.unspecialize() : origType;
       auto loc  = preCond.location;
       assertx(type <= TCell);
       irgen::checkType(irgs, loc, type, bcOff);
+      if (isVanillaGuard) {
+        // We are passing through what would be a vanilla guard, had this not
+        // been a profiling tracelet. Record that the array entered this
+        // tracelet, so we know to specialize it when we do bespoke tracelet
+        // generation.
+        arrayReachLocs.push_back(ArrayReachInfo {loc, type, i});
+      }
     }
   } else {
     for (auto const& preCond : typePreConditions) {
@@ -239,9 +262,18 @@ void emitGuards(irgen::IRGS& irgs,
     }
   }
 
+  // We should only have array reach events to record if we're in a profiling
+  // tracelet, in which case isEntry should be true.
+  assertx(IMPLIES(!arrayReachLocs.empty(), isEntry));
+
   // Finish emitting guards, and emit profiling counters.
   if (isEntry) {
     irgen::gen(irgs, EndGuards);
+
+    for (auto const& reachLoc : arrayReachLocs) {
+      irgen::genLogArrayReach(irgs, reachLoc.loc, reachLoc.type,
+                              reachLoc.guardIndex);
+    }
 
     if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
       irgen::checkCoverage(irgs);

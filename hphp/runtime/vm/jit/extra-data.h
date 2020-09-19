@@ -539,6 +539,27 @@ struct TransIDData : IRExtraData {
 };
 
 /*
+ * Translation ID and guard number.
+ *
+ * Used by logging arrays to track the tracelets entered and which array guards
+ * were constrained to DataTypeSpecialized.
+ */
+struct TransGuardData : IRExtraData {
+  explicit TransGuardData(TransID transId, size_t guardIdx)
+    : transId(transId)
+    , guardIdx(guardIdx)
+  {}
+
+  std::string show() const {
+    return folly::sformat("tid={}, guardIdx={}", transId, guardIdx);
+  }
+
+  TransID transId;
+  size_t guardIdx;
+};
+
+
+/*
  * FP-relative offset.
  */
 struct FPRelOffsetData : IRExtraData {
@@ -1662,6 +1683,7 @@ X(ReqBindJmp,                   ReqBindJmpData);
 X(ReqRetranslateOpt,            IRSPRelOffsetData);
 X(CheckCold,                    TransIDData);
 X(IncProfCounter,               TransIDData);
+X(LogArrayReach,                TransGuardData);
 X(DefFuncEntryFP,               FuncData);
 X(Call,                         CallData);
 X(CallBuiltin,                  CallBuiltinData);

@@ -197,6 +197,10 @@ void LoggingArray::updateKindAndSize() {
   assertx(checkInvariants());
 }
 
+void LoggingArray::logReachEvent(TransID tid, size_t guardIdx) {
+  profile->logReach(tid, guardIdx);
+}
+
 std::string LoggingLayout::describe() const {
   return "Logging";
 }

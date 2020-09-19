@@ -209,6 +209,21 @@ double LoggingProfile::getProfileWeight() const {
   return getTotalEvents() * getSampleCountMultiplier();
 }
 
+void LoggingProfile::logReach(TransID tid, size_t guardIdx) {
+  // Hold the read mutex for the duration of the mutation so that export cannot
+  // begin until the mutation is complete.
+  folly::SharedMutex::ReadHolder lock{s_exportStartedLock};
+  if (s_exportStarted.load(std::memory_order_relaxed)) return;
+
+  ReachMap::accessor it;
+  if (reachedTracelets.insert(it, {tid, guardIdx})) {
+    it->second = 1;
+  } else {
+    it->second++;
+  }
+  FTRACE(6, "{} reached {}, guard {} [count={}]\n", source.getSymbol(), tid,
+         guardIdx, it->second);
+}
 void LoggingProfile::logEvent(ArrayOp op) {
   logEventImpl(EventKey(op));
 }
@@ -348,20 +363,39 @@ struct EntryTypesEscalationOutputData {
   uint64_t count;
 };
 
+struct TraceletReachOutputData {
+  TraceletReachOutputData(TransID tid, size_t guardIdx, uint64_t count)
+    : tid(tid)
+    , guardIdx(guardIdx)
+    , count(count)
+  {}
+
+  bool operator<(const TraceletReachOutputData& other) const {
+    return count > other.count;
+  }
+
+  TransID tid;
+  size_t guardIdx;
+  uint64_t count;
+};
+
 struct SourceOutputData {
   SourceOutputData(const LoggingProfile* profile,
                    std::vector<OperationOutputData>&& operations,
                    std::vector<SinkOutputData>&& sinkData,
                    std::vector<EntryTypesEscalationOutputData>&& monoEscalations,
-                   std::vector<EntryTypesUseOutputData>&& monoUses)
+                   std::vector<EntryTypesUseOutputData>&& monoUses,
+                   std::vector<TraceletReachOutputData>&& traceletReachData)
     : profile(profile)
     , monotypeEscalations(std::move(monoEscalations))
     , monotypeUses(std::move(monoUses))
     , sinks(std::move(sinkData))
+    , traceletReach(std::move(traceletReachData))
   {
     std::sort(sinks.begin(), sinks.end());
     std::sort(monotypeEscalations.begin(), monotypeEscalations.end());
     std::sort(operations.begin(), operations.end());
+    std::sort(traceletReach.begin(), traceletReach.end());
 
     readCount = 0;
     writeCount = 0;
@@ -388,6 +422,7 @@ struct SourceOutputData {
   std::vector<EntryTypesEscalationOutputData> monotypeEscalations;
   std::vector<EntryTypesUseOutputData> monotypeUses;
   std::vector<SinkOutputData> sinks;
+  std::vector<TraceletReachOutputData> traceletReach;
   uint64_t readCount;
   uint64_t writeCount;
   double weight;
@@ -471,6 +506,12 @@ bool exportSortedProfiles(FILE* file, const ProfileOutputData& profileData) {
                     useData.state.toString());
     }
 
+    LOG_OR_RETURN(file, "  Reached tracelets:\n");
+    for (auto const& traceletData : sourceData.traceletReach) {
+      LOG_OR_RETURN(file, "  {: >6}x {}, guard {}\n", traceletData.count,
+                    traceletData.tid, traceletData.guardIdx);
+    }
+
     LOG_OR_RETURN(file, "\n");
   }
 
@@ -549,8 +590,21 @@ SourceOutputData sortSourceData(const LoggingProfile* profile) {
     }
   );
 
+  std::vector<TraceletReachOutputData> reaches;
+  reaches.reserve(profile->reachedTracelets.size());
+  std::transform(
+    profile->reachedTracelets.begin(), profile->reachedTracelets.end(),
+    std::back_inserter(reaches),
+    [](const std::pair<LoggingProfile::ReachLocation, size_t>& reachData) {
+      return TraceletReachOutputData(reachData.first.first,
+                                     reachData.first.second,
+                                     reachData.second);
+    }
+  );
+
   return SourceOutputData(profile, std::move(operations), std::move(sinks),
-                          std::move(escalations), std::move(uses));
+                          std::move(escalations), std::move(uses),
+                          std::move(reaches));
 }
 
 ProfileOutputData sortProfileData() {

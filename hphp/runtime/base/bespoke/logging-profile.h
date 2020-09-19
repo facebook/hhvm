@@ -93,6 +93,14 @@ struct LoggingProfile {
   using EventMap = tbb::concurrent_hash_map<EventMapKey, size_t,
                                             EventMapHasher>;
 
+  // ReachLocations are a pair of a TransID and the index of the
+  // weakened DataTypeSpecialized guard the logging array reached
+  using ReachLocation = std::pair<TransID, size_t>;
+  using ReachMapHasher = pairHashCompare<
+    TransID, size_t, integralHashCompare<TransID>, integralHashCompare<size_t>>;
+  using ReachMap = tbb::concurrent_hash_map<ReachLocation, size_t,
+                                            ReachMapHasher>;
+
   // The key maps the EntryType before the operation to the EntryType after the
   // operation
   using EntryTypesMapKey = std::pair<uint16_t, uint16_t>;
@@ -110,6 +118,7 @@ struct LoggingProfile {
 
   // We take specific inputs rather than templated inputs because we're going
   // to follow up soon with limitations on the number of arguments we can log.
+  void logReach(TransID tid, size_t guardIdx);
   void logEvent(ArrayOp op);
   void logEvent(ArrayOp op, int64_t k);
   void logEvent(ArrayOp op, const StringData* k);
@@ -129,6 +138,7 @@ public:
   LoggingArray* staticArray = nullptr;
   EventMap events;
   EntryTypesMap monotypeEvents;
+  ReachMap reachedTracelets;
 };
 
 // Return a profile for the given (valid) SrcKey. If no profile for the SrcKey

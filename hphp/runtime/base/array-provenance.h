@@ -139,6 +139,28 @@ struct Tag {
 private:
   Tag(Kind kind, const StringData* name, int32_t line = -1);
 
+  /* these are here since we needed to be friends with these types */
+  static Tag get(const ArrayData* ad);
+  static Tag get(const APCArray* a);
+  static Tag get(const AsioExternalThreadEvent* ev);
+  static void set(ArrayData* ad, Tag tag);
+  static void set(APCArray* a, Tag tag);
+  static void set(AsioExternalThreadEvent* ev, Tag tag);
+
+  /* we are just everybody's best friend */
+  friend Tag getTag(const ArrayData* a);
+  friend Tag getTag(const APCArray* a);
+  friend Tag getTag(const AsioExternalThreadEvent* ev);
+
+  friend void setTag(ArrayData* a, Tag tag);
+  friend void setTag(APCArray* a, Tag tag);
+  friend void setTag(AsioExternalThreadEvent* ev, Tag tag);
+
+  friend void clearTag(ArrayData* ad);
+  friend void clearTag(APCArray* a);
+  friend void clearTag(AsioExternalThreadEvent* ev);
+
+private:
   uint32_t m_id = 0;
 };
 
@@ -247,19 +269,11 @@ Tag getTag(const APCArray* a);
 Tag getTag(const AsioExternalThreadEvent* ev);
 
 /*
- * Set mode: insert or emplace.
- *
- * Just controls whether we assert about provenance not already being set: we
- * assert for Insert mode, and not for Emplace.
- */
-enum class Mode { Insert, Emplace };
-
-/*
  * Set the provenance tag for `a` to `tag`.
  */
-template<Mode mode = Mode::Insert> void setTag(ArrayData* a, Tag tag);
-template<Mode mode = Mode::Insert> void setTag(APCArray* a, Tag tag);
-template<Mode mode = Mode::Insert> void setTag(AsioExternalThreadEvent* ev, Tag tag);
+void setTag(ArrayData* a, Tag tag);
+void setTag(APCArray* a, Tag tag);
+void setTag(AsioExternalThreadEvent* ev, Tag tag);
 
 /*
  * Clear a tag for a released array---only call this if the array is henceforth

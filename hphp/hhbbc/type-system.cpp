@@ -1684,7 +1684,7 @@ folly::Optional<TypedValue> fromTypeVec(const std::vector<Type> &elems,
   auto var = ai.toVariant();
   if (tag.valid()) {
     assertx(RuntimeOption::EvalArrayProvenance);
-    arrprov::setTag<arrprov::Mode::Emplace>(var.asArrRef().get(), tag.get());
+    arrprov::setTag(var.asArrRef().get(), tag.get());
   }
   if (force_static) var.setEvalScalar();
   return tvReturn(std::move(var));
@@ -1727,7 +1727,7 @@ folly::Optional<TypedValue> fromTypeMap(const ArrayLikeMap<Key> &elems,
     if (tag.valid()) {
       assertx(RuntimeOption::EvalArrayProvenance);
       assertx(arrprov::arrayWantsTag(var.asCArrRef().get()));
-      arrprov::setTag<arrprov::Mode::Emplace>(var.asArrRef().get(), tag.get());
+      arrprov::setTag(var.asArrRef().get(), tag.get());
     }
     if (force_static) var.setEvalScalar();
     return tvReturn(std::move(var));

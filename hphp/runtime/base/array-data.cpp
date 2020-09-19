@@ -245,7 +245,7 @@ void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
   auto const DEBUG_ONLY inserted = s_arrayDataMap.insert(ad).second;
   assertx(inserted);
 
-  if (tag.valid()) arrprov::setTag<arrprov::Mode::Emplace>(ad, tag);
+  if (tag.valid()) arrprov::setTag(ad, tag);
   return replace(ad);
 }
 
@@ -1080,7 +1080,7 @@ ArrayData* tagArrProvImpl(ArrayData* ad, const SrcArr* src) {
   auto const do_tag = [] (ArrayData* ad, arrprov::Tag tag) {
     if (ad->isStatic()) return tagStaticArr(ad, tag);
 
-    arrprov::setTag<arrprov::Mode::Emplace>(ad, tag);
+    arrprov::setTag(ad, tag);
     return ad;
   };
 

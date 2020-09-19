@@ -330,9 +330,6 @@ void APCArray::Delete(APCHandle* handle) {
   auto const arr = APCArray::fromHandle(handle);
   auto const prov_off = arrprov::arrayWantsTag(arr) ? arrprov::kAPCTagSize : 0;
   arr->~APCArray();
-  if (RuntimeOption::EvalArrayProvenance) {
-    arrprov::clearTag(arr);
-  }
   apc_free(reinterpret_cast<char*>(arr) - prov_off);
 }
 

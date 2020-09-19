@@ -181,8 +181,8 @@ const EnumValues* EnumCache::loadEnumValues(
   // based on the actual PC by the reflection methods that access this cache.
   if (RO::EvalArrayProvenance) {
     auto const tag = arrprov::Tag::LargeEnum(klass->name());
-    arrprov::setTag<arrprov::Mode::Emplace>(names.get(), tag);
-    arrprov::setTag<arrprov::Mode::Emplace>(values.get(), tag);
+    arrprov::setTag(names.get(), tag);
+    arrprov::setTag(values.get(), tag);
   }
 
   // If we saw dynamic constants we cannot cache the enum values across requests
@@ -239,7 +239,7 @@ Array EnumCache::tagEnumWithProvenance(Array input) {
                   arrprov::getTag(input.get())));
   if (input.size() > RO::EvalArrayProvenanceLargeEnumLimit) return input;
   auto const ad = input->copy();
-  arrprov::setTag<arrprov::Mode::Emplace>(ad, arrprov::tagFromPC());
+  arrprov::setTag(ad, arrprov::tagFromPC());
   return Array::attach(ad);
 }
 

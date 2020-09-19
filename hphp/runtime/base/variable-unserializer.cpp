@@ -1216,7 +1216,7 @@ Array VariableUnserializer::unserializeArray() {
     auto arr =  m_forceDArrays || type() == Type::Serialize
       ? Array::CreateDArray()
       : Array::Create();
-    if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), provTag);
+    if (provTag) arrprov::setTag(arr.get(), provTag);
     return arr;
   }
   // For large arrays, do a naive pre-check for OOM.
@@ -1242,7 +1242,7 @@ Array VariableUnserializer::unserializeArray() {
 
   check_non_safepoint_surprise();
   expectChar('}');
-  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), provTag);
+  if (provTag) arrprov::setTag(arr.get(), provTag);
   return arr;
 }
 
@@ -1456,7 +1456,7 @@ Array VariableUnserializer::unserializeVArray() {
 
   check_non_safepoint_surprise();
   expectChar('}');
-  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), provTag);
+  if (provTag) arrprov::setTag(arr.get(), provTag);
   return arr;
 }
 
@@ -1500,7 +1500,7 @@ Array VariableUnserializer::unserializeDArray() {
 
   check_non_safepoint_surprise();
   expectChar('}');
-  if (provTag) arrprov::setTag<arrprov::Mode::Emplace>(arr.get(), provTag);
+  if (provTag) arrprov::setTag(arr.get(), provTag);
   return arr;
 }
 

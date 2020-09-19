@@ -45,6 +45,8 @@ struct StringData;
 struct VariableSerializer;
 struct Variant;
 
+namespace arrprov { struct Tag; }
+
 /*
  * arr_lval is a tv_lval augmented with an ArrayData*, and is used to return an
  * lval from array mutations. `arr` holds the copied/escalated/grown array if
@@ -567,8 +569,6 @@ public:
    */
   static constexpr size_t offsetofSize() { return offsetof(ArrayData, m_size); }
   static constexpr size_t sizeofSize() { return sizeof(m_size); }
-  static constexpr size_t offsetofTag() { return offsetof(ArrayData, m_extra); }
-  static constexpr size_t sizeofTag() { return sizeof(m_extra); }
 
   const StrKeyTable& missingKeySideTable() const {
     assertx(this->hasStrKeyTable());
@@ -653,6 +653,7 @@ protected:
   friend struct BaseMap;
   friend struct c_Map;
   friend struct c_ImmMap;
+  friend struct arrprov::Tag;
 
   // m_extra is used by bespoke arrays for the bespoke layout ID, and by
   // dvarrays for the array provenance tag. Since we never enable both

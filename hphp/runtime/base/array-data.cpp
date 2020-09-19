@@ -1152,9 +1152,11 @@ void ArrayData::setLegacyArray(bool legacy) {
   /* TODO(jgriego) we should be asserting that the
    * mark-ee should have provenance here but it's not
    * safe and sane yet */
-  if (legacy && !isLegacyArray() && hasProvenanceData()) {
+  if (legacy &&
+      !isLegacyArray() &&
+      RO::EvalArrayProvenance &&
+      arrprov::getTag(this).valid()) {
     arrprov::clearTag(this);
-    setHasProvenanceData(false);
   }
   if (isVanilla()) {
     m_aux16 = (m_aux16 & ~kLegacyArray) | (legacy ? kLegacyArray : 0);

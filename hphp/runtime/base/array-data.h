@@ -113,16 +113,10 @@ struct ArrayData : MaybeCountable {
   static auto constexpr kLegacyArray = 2;
 
   /*
-   * Indicates that this array has provenance data available in a side table
-   * See array-provenance.h
-   */
-  static auto constexpr kHasProvenanceData = 4;
-
-  /*
    * Indicates that this array has a side table that contains information about
    * its keys.
    */
-  static auto constexpr kHasStrKeyTable = 8;
+  static auto constexpr kHasStrKeyTable = 4;
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
@@ -261,17 +255,6 @@ public:
    * co-allocated APCTypedValue preceding this array.
    */
   bool hasApcTv() const;
-
-  /*
-   * Whether this ArrayData has provenance data stored in the
-   * side table--see array-provenance.h
-   */
-  bool hasProvenanceData() const;
-
-  /*
-   * Sets the provenance data bit
-   */
-  void setHasProvenanceData(bool value);
 
   /*
    * Whether the array has legacy behaviors enabled (this bit can only be set

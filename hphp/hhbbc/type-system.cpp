@@ -2697,10 +2697,9 @@ bool Type::checkInvariants() const {
     assert(!isKeyset || m_data.aval->isKeysetType());
     assert(!isDict || m_data.aval->isDictType());
     assertx(!RuntimeOption::EvalHackArrDVArrs || m_data.aval->isNotDVArray());
-    assertx(!m_data.aval->hasProvenanceData() || RO::EvalArrayProvenance);
-    assertx(!m_data.aval->hasProvenanceData() || bits() & kProvBits);
-    assertx(!m_data.aval->hasProvenanceData() ||
-            arrprov::getTag(m_data.aval).valid());
+    assertx(IMPLIES(RO::EvalArrayProvenance &&
+                    arrprov::getTag(m_data.aval).valid(),
+                    bits() & kProvBits));
     break;
   case DataTag::ArrLikePacked: {
     assert(!m_data.packed->elems.empty());

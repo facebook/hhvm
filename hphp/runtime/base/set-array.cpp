@@ -47,6 +47,7 @@ struct SetArray::Initializer {
     auto const ad = reinterpret_cast<SetArray*>(&s_theEmptySetArray);
     ad->initHash(SetArray::SmallScale);
     ad->m_size = 0;
+    ad->m_extra = 0;
     ad->m_scale_used = SetArray::SmallScale;
     ad->initHeader(HeaderKind::Keyset, StaticValue);
     assertx(ad->checkInvariants());
@@ -88,6 +89,7 @@ ArrayData* SetArray::MakeReserveSet(uint32_t size) {
   ad->initHash(scale);
   ad->initHeader(HeaderKind::Keyset, OneReference);
   ad->m_size         = 0;
+  ad->m_extra        = 0;
   ad->m_scale_used   = scale;               // scale = scale, used = 0
 
   assertx(ad->kind() == kKeysetKind);
@@ -379,6 +381,7 @@ SetArray* SetArray::grow(bool copy) {
 
   auto ad            = reqAlloc(newScale);
   ad->m_size         = m_size;
+  ad->m_extra        = 0;
   ad->m_scale_used   = newScale | (uint64_t{oldUsed} << 32);
   ad->initHeader(HeaderKind::Keyset, OneReference);
 
@@ -481,6 +484,7 @@ bool SetArray::checkInvariants() const {
   assertx(isNotDVArray());
   assertx(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
   assertx(HashSize(m_scale) == folly::nextPowTwo<uint64_t>(capacity()));
+  assertx(m_extra == 0);
 
   if (isZombie()) return true;
 

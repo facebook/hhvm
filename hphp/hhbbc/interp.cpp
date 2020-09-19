@@ -225,7 +225,7 @@ bool mutate_add_elem_array(ISS& env, ProvTag loc, Fn&& mutate) {
   if (arrprov::arrayWantsTag(*arr)) {
     if (tag == ProvTag::NoTag) {
       arrprov::setTag(*arr, loc.get());
-    } else if (!(*arr)->hasProvenanceData()) {
+    } else if (!arrprov::getTag(*arr).valid()) {
       arrprov::setTag(*arr, tag.get());
     }
   }
@@ -234,7 +234,7 @@ bool mutate_add_elem_array(ISS& env, ProvTag loc, Fn&& mutate) {
   // definitely assigned one leaving this op.
   assertx(!loc.valid() ||
           !arrprov::arrayWantsTag(*arr) ||
-          (*arr)->hasProvenanceData());
+          arrprov::getTag(*arr).valid());
   return true;
 }
 

@@ -639,12 +639,13 @@ void staticArrayStreamer(const ArrayData* ad, std::string& out) {
   }
   out += ")";
 
-  if (ad->hasProvenanceData() && RuntimeOption::EvalArrayProvenance) {
-    out += " [";
-    if (auto const tag = arrprov::getTag(ad)) {
+  if (RO::EvalArrayProvenance) {
+    auto const tag = arrprov::getTag(ad);
+    if (tag.valid()) {
+      out += " [";
       out += tag.toString();
+      out += "]";
     }
-    out += "]";
   }
 }
 

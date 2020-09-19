@@ -96,7 +96,7 @@ let get_typedef_pos ctx name =
 
 let get_gconst_pos ctx name =
   Decl_provider.get_gconst ctx name
-  |> Option.map ~f:(fun (ty, _) -> Typing_defs.get_pos ty)
+  |> Option.map ~f:(fun ty -> Typing_defs.get_pos ty)
 
 let get_class_or_typedef_pos ctx name =
   Option.first_some (get_class_pos ctx name) (get_typedef_pos ctx name)
@@ -1275,7 +1275,7 @@ and add_signature_dependencies ctx env obj =
       add_dep ctx ~this:None env @@ func.fe_type
     | GConst c
     | GConstName c ->
-      let (ty, _) =
+      let ty =
         value_or_not_found description @@ Decl_provider.get_gconst ctx c
       in
       add_dep ctx ~this:None env ty

@@ -59,7 +59,7 @@ module Typedef = struct
 end
 
 module GConst = struct
-  type t = decl_ty * Errors.t
+  type t = decl_ty
 
   let prefix = Prefix.make ()
 

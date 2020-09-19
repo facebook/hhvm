@@ -31,7 +31,7 @@ val declare_const_in_file :
   Provider_context.t ->
   Relative_path.t ->
   string ->
-  Typing_defs.decl_ty * Errors.t
+  Typing_defs.decl_ty
 
 val declare_record_def_in_file :
   write_shmem:bool ->

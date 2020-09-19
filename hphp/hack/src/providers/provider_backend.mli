@@ -13,7 +13,7 @@ module Decl_cache_entry : sig
     | Class_decl : string -> Obj.t t
     | Record_decl : string -> Typing_defs.record_def_type t
     | Typedef_decl : string -> Typing_defs.typedef_type t
-    | Gconst_decl : string -> (Typing_defs.decl_ty * Errors.t) t
+    | Gconst_decl : string -> Typing_defs.decl_ty t
 
   type 'a key = 'a t
 

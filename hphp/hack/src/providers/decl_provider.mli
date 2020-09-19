@@ -27,7 +27,7 @@ type record_def_decl = Typing_defs.record_def_type
 
 type typedef_decl = Typing_defs.typedef_type
 
-type gconst_decl = Typing_defs.decl_ty * Errors.t
+type gconst_decl = Typing_defs.decl_ty
 
 val get_fun : Provider_context.t -> fun_key -> fun_decl option
 

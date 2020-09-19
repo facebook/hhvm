@@ -32,5 +32,4 @@ module Typedefs : ReadOnly with type key = StringKey.t and type t = typedef_type
 module RecordDefs :
   ReadOnly with type key = StringKey.t and type t = record_def_type
 
-module GConsts :
-  ReadOnly with type key = StringKey.t and type t = decl_ty * Errors.t
+module GConsts : ReadOnly with type key = StringKey.t and type t = decl_ty

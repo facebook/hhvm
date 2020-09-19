@@ -272,12 +272,9 @@ let rec ifun_decl
   fe
 
 and fun_decl (ctx : Provider_context.t) (f : Nast.fun_) : Typing_defs.fun_elt =
-  let fe =
-    Errors.ignore_ (fun () ->
-        let dep = Dep.Fun (snd f.f_name) in
-        let env = { Decl_env.mode = f.f_mode; droot = Some dep; ctx } in
-        fun_decl_in_env env ~is_lambda:false f)
-  in
+  let dep = Dep.Fun (snd f.f_name) in
+  let env = { Decl_env.mode = f.f_mode; droot = Some dep; ctx } in
+  let fe = fun_decl_in_env env ~is_lambda:false f in
   record_fun (snd f.f_name);
   fe
 
@@ -1199,12 +1196,12 @@ let const_decl (ctx : Provider_context.t) (cst : Nast.gconst) :
 
 let iconst_decl
     ~(write_shmem : bool) (ctx : Provider_context.t) (cst : Nast.gconst) :
-    Typing_defs.decl_ty * Errors.t =
+    Typing_defs.decl_ty =
   let cst = Errors.ignore_ (fun () -> Naming.global_const ctx cst) in
-  let (errors, hint_ty) = Errors.do_ (fun () -> const_decl ctx cst) in
+  let hint_ty = const_decl ctx cst in
   record_const (snd cst.cst_name);
-  if write_shmem then Decl_heap.GConsts.add (snd cst.cst_name) (hint_ty, errors);
-  (hint_ty, errors)
+  if write_shmem then Decl_heap.GConsts.add (snd cst.cst_name) hint_ty;
+  hint_ty
 
 (*****************************************************************************)
 let rec name_and_declare_types_program
@@ -1229,7 +1226,7 @@ let rec name_and_declare_types_program
       | Typedef typedef -> type_typedef_decl_if_missing ~sh ctx typedef
       | Stmt _ -> ()
       | Constant cst ->
-        let (_ : decl_ty * Errors.t) = iconst_decl ~write_shmem:true ctx cst in
+        let (_ : decl_ty) = iconst_decl ~write_shmem:true ctx cst in
         ())
 
 let make_env
@@ -1287,7 +1284,7 @@ let declare_const_in_file
     ~(write_shmem : bool)
     (ctx : Provider_context.t)
     (file : Relative_path.t)
-    (name : string) : Typing_defs.decl_ty * Errors.t =
+    (name : string) : Typing_defs.decl_ty =
   match Ast_provider.find_gconst_in_file ctx file name with
   | Some cst -> iconst_decl ~write_shmem ctx cst
   | None -> err_not_found file name

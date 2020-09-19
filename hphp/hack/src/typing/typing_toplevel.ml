@@ -1591,8 +1591,6 @@ let gconst_def ctx cst =
   Errors.run_with_span cst.cst_span @@ fun () ->
   let env = EnvFromDef.gconst_env ctx cst in
   let env = Env.set_env_pessimize env in
-  add_decl_errors (Option.map (Env.get_gconst env (snd cst.cst_name)) ~f:snd);
-
   let (typed_cst_value, env) =
     let value = cst.cst_value in
     match cst.cst_type with

@@ -47,7 +47,7 @@ module RecordDef : sig
 end
 
 module GConst : sig
-  type t = decl_ty * Errors.t
+  type t = decl_ty
 
   val prefix : Prefix.t
 

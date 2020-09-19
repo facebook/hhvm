@@ -26,9 +26,12 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////////////
 
+static_assert(bespoke::Layout::kMaxIndex < BespokeArray::kExtraMagicBit);
+
 BespokeArray* BespokeArray::asBespoke(ArrayData* ad) {
-  assertx(!ad->isVanilla());
-  return reinterpret_cast<BespokeArray*>(ad);
+  auto ret = reinterpret_cast<BespokeArray*>(ad);
+  assertx(ret->checkInvariants());
+  return ret;
 }
 const BespokeArray* BespokeArray::asBespoke(const ArrayData* ad) {
   return asBespoke(const_cast<ArrayData*>(ad));
@@ -39,11 +42,11 @@ BespokeLayout BespokeArray::layout() const {
 }
 
 const bespoke::Layout* BespokeArray::layoutRaw() const {
-  return bespoke::layoutForIndex(static_cast<uint16_t>(m_extra));
+  return bespoke::layoutForIndex(m_extra_hi16 & ~(1 << 15));
 }
 
 void BespokeArray::setLayoutRaw(const bespoke::Layout* layout) {
-  m_extra = layout->index();
+  m_extra_hi16 = kExtraMagicBit | layout->index();
 }
 
 size_t BespokeArray::heapSize() const {
@@ -55,6 +58,13 @@ void BespokeArray::scan(type_scan::Scanner& scan) const {
 
 ArrayData* BespokeArray::ToVanilla(const ArrayData* ad, const char* reason) {
   return BespokeArray::asBespoke(ad)->layoutRaw()->escalateToVanilla(ad, reason);
+}
+
+bool BespokeArray::checkInvariants() const {
+  assertx(!isVanilla());
+  assertx(kindIsValid());
+  assertx(m_extra_hi16 & kExtraMagicBit);
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////

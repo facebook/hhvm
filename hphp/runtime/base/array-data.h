@@ -655,11 +655,35 @@ protected:
   friend struct c_ImmMap;
   friend struct arrprov::Tag;
 
-  // m_extra is used by bespoke arrays for the bespoke layout ID, and by
-  // dvarrays for the array provenance tag. Since we never enable both
-  // features at the same time, sharing the field is okay.
   uint32_t m_size;
-  uint32_t m_extra;
+  /*
+   * m_extra is used both to store bespoke IDs and for array provenance (for
+   * v/darrays.) It's fine to share the field since we already refuse to enable
+   * these features together.
+   *
+   * When RO::EvalArrayProvenance is on, this stores an arrprov::Tag--otherwise
+   * we use this field as follows:
+   *
+   * When the array is bespoke (m_kind & kBespokeKindMask):
+   *
+   *   bits 0..15: for private bespoke-array use. we don't require these to be
+   *                have any specific value but are reserved for use by bespoke
+   *                layouts
+   *
+   *   bits 16..30: store the bespoke layout index
+   *
+   *   bit 31:      must be set
+   *
+   * When the array is vanilla and array provenance is off, m_extra must be 0.
+   */
+  union {
+    uint32_t m_extra;
+    struct {
+      /* NB the names are definitely little-endian centric but whatever */
+      uint16_t m_extra_lo16;
+      uint16_t m_extra_hi16;
+    };
+  };
 };
 
 static_assert(ArrayData::kPackedKind == uint8_t(HeaderKind::Packed), "");

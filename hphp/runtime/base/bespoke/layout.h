@@ -28,9 +28,10 @@ struct Layout {
   Layout();
   virtual ~Layout() {}
 
-  /* bespoke indexes are 16 bits wide, the last 3 values are reserved
-   * (see jit::ArraySpec for why) */
-  static uint16_t constexpr kMaxIndex = (1 << 16) - 4;
+  /* bespoke indexes are 15 bits wide--when we store them in m_extra of
+   * ArrayData we always set the sign bit--this allows us to test
+   * (size>=constant * && vanilla()) in one go */
+  static uint16_t constexpr kMaxIndex = (1 << 15) - 1;
 
   uint16_t index() const { return m_index; }
 

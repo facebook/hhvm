@@ -49,9 +49,20 @@ void waitOnExportProfiles();
  * a variety of possible memory layouts. Eventually, our goal is to generate
  * these layouts at runtime, based on profiling information.
  *
- * Bespoke arrays store their bespoke layout in the ArrayData's m_extra field.
+ * Bespoke arrays store their bespoke layout in the ArrayData's m_extra_hi16
+ * field.
+ *
+ * Individual bespoke layouts may choose to use m_extra_lo16 for whatever they
+ * like.
  */
 struct BespokeArray : ArrayData {
+  /*
+   * We set the MSB of m_extra_hi16 when we store the bespoke layout there. This
+   * is so (on little-endian systems) we can do a single comparison to test both
+   * (size >= some constant) and bespoke-ness together.
+   */
+  static constexpr uint16_t kExtraMagicBit = (1 << 15);
+
   static BespokeArray* asBespoke(ArrayData*);
   static const BespokeArray* asBespoke(const ArrayData*);
 
@@ -65,6 +76,8 @@ public:
   size_t heapSize() const;
   void scan(type_scan::Scanner& scan) const;
   void setLegacyArrayBit(bool legacy);
+
+  bool checkInvariants() const;
 
   // Escalate the given bespoke array-like to a vanilla array-like.
   // The provided `reason` may be logged.

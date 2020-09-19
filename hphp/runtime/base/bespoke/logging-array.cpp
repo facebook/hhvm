@@ -168,8 +168,6 @@ void LoggingArray::FreeStatic(LoggingArray* lad) {
 }
 
 bool LoggingArray::checkInvariants() const {
-  assertx(!isVanilla());
-  assertx(kindIsValid());
   assertx(wrapped->isVanilla());
   assertx(wrapped->kindIsValid());
   assertx(wrapped->size() == size());

@@ -462,6 +462,8 @@ type t = {
   remote_worker_key: string option;
   (* If set, uses the check ID when logging events in the context of remove init/work *)
   remote_check_id: string option;
+  (* Indicates whether the remote version specifier is required for remote type check from non-prod server *)
+  remote_version_specifier_required: bool;
   (* The version of the package the remote worker is to install *)
   remote_version_specifier: string option;
   (* Name of the transport channel used by remote type checking. TODO: move into remote_type_check. *)
@@ -551,6 +553,7 @@ let default =
     remote_type_check = RemoteTypeCheck.default;
     remote_worker_key = None;
     remote_check_id = None;
+    remote_version_specifier_required = true;
     remote_version_specifier = None;
     remote_transport_channel = None;
     naming_sqlite_path = None;
@@ -929,6 +932,13 @@ let load_ fn ~silent ~current_version overrides =
   in
   let remote_worker_key = string_opt "remote_worker_key" config in
   let remote_check_id = string_opt "remote_check_id" config in
+  let remote_version_specifier_required =
+    bool_if_min_version
+      "remote_version_specifier_required"
+      ~default:default.remote_version_specifier_required
+      ~current_version
+      config
+  in
   let remote_version_specifier = string_opt "remote_version_specifier" config in
   let remote_transport_channel = string_opt "remote_transport_channel" config in
   let enable_naming_table_fallback =
@@ -1055,6 +1065,7 @@ let load_ fn ~silent ~current_version overrides =
     remote_type_check;
     remote_worker_key;
     remote_check_id;
+    remote_version_specifier_required;
     remote_version_specifier;
     remote_transport_channel;
     naming_sqlite_path;

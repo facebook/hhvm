@@ -26,7 +26,7 @@ use crate::{State, Node};
 pub struct DirectDeclSmartConstructors<'src> {
     pub state: State<'src>,
 }
-impl<'src> SmartConstructors<'src, State<'src>> for DirectDeclSmartConstructors<'src> {
+impl<'src> SmartConstructors<State<'src>> for DirectDeclSmartConstructors<'src> {
     type Token = CompactToken;
     type R = Node<'src>;
 

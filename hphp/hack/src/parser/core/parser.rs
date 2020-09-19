@@ -16,7 +16,7 @@ use stack_limit::StackLimit;
 
 pub struct Parser<'a, S, T>
 where
-    S: SmartConstructors<'a, T>,
+    S: SmartConstructors<T>,
     S::R: NodeType,
 {
     lexer: Lexer<'a, S::Token>,
@@ -27,7 +27,7 @@ where
 
 impl<'a, S, T: Clone> Parser<'a, S, T>
 where
-    S: SmartConstructors<'a, T>,
+    S: SmartConstructors<T>,
     S::R: NodeType,
 {
     pub fn new(source: &SourceText<'a>, env: ParserEnv, sc: S) -> Self {

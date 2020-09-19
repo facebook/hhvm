@@ -26,7 +26,7 @@ use crate::*;
 pub struct FactsSmartConstructors<'src> {
     pub state: HasScriptContent<'src>,
 }
-impl<'src> SmartConstructors<'src, HasScriptContent<'src>> for FactsSmartConstructors<'src> {
+impl<'src> SmartConstructors<HasScriptContent<'src>> for FactsSmartConstructors<'src> {
     type Token = PositionedToken;
     type R = Node;
 

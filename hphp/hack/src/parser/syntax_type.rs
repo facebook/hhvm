@@ -18,7 +18,7 @@
  */
 use crate::syntax::*;
 
-pub trait SyntaxType<'a, C>: SyntaxTypeBase<'a, C>
+pub trait SyntaxType<C>: SyntaxTypeBase<C>
 {
     fn make_end_of_file(ctx: &C, end_of_file_token: Self) -> Self;
     fn make_script(ctx: &C, script_declarations: Self) -> Self;

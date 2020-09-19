@@ -273,7 +273,7 @@ struct ParserErrors<'a, Token, Value, State> {
 impl<'a, Token: 'a, Value: 'a, State: 'a> ParserErrors<'a, Token, Value, State>
 where
     Syntax<Token, Value>: SyntaxTrait,
-    Token: LexableToken<'a> + std::fmt::Debug,
+    Token: LexableToken + std::fmt::Debug,
     Value: SyntaxValueType<Token> + std::fmt::Debug,
     State: Clone,
 {

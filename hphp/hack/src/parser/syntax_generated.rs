@@ -20,9 +20,9 @@ use crate::lexable_token::LexableToken;
 use crate::syntax::*;
 use crate::syntax_kind::SyntaxKind;
 
-impl<'src, T, V, C> SyntaxType<'src, C> for Syntax<T, V>
+impl<T, V, C> SyntaxType<C> for Syntax<T, V>
 where
-    T: LexableToken<'src>,
+    T: LexableToken,
     V: SyntaxValueType<T>,
 {
     fn make_end_of_file(_: &C, end_of_file_token: Self) -> Self {
@@ -1915,9 +1915,9 @@ where
 
  }
 
-impl<'src, T, V> Syntax<T, V>
+impl<T, V> Syntax<T, V>
 where
-    T: LexableToken<'src>,
+    T: LexableToken,
 {
     pub fn fold_over_children_owned<U>(
         f: &dyn Fn(Self, U) -> U,

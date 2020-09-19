@@ -31,7 +31,7 @@ pub struct ScourComment<'a, T, V> {
 
 impl<'src, T, V> ScourComment<'src, T, V>
 where
-    T: LexablePositionedToken<'src>,
+    T: LexablePositionedToken,
     V: SyntaxValueType<T>,
     Syntax<T, V>: PositionedSyntaxTrait,
 {

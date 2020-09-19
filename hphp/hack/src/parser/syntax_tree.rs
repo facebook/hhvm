@@ -25,7 +25,7 @@ pub struct SyntaxTree<'a, Syntax, State> {
 
 impl<'a, T, V, State> SyntaxTree<'a, Syntax<T, V>, State>
 where
-    T: LexableToken<'a>,
+    T: LexableToken,
     V: SyntaxValueType<T>,
     Syntax<T, V>: SyntaxTrait,
 {

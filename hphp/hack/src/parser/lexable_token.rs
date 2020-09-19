@@ -11,12 +11,11 @@ use crate::{
     token_kind::TokenKind, trivia_kind::TriviaKind,
 };
 
-pub trait LexableToken<'a>: Clone {
+pub trait LexableToken: Clone {
     type Trivia: LexableTrivia;
 
     fn make(
         kind: TokenKind,
-        source_text: &SourceText<'a>,
         offset: usize,
         width: usize,
         leading: Self::Trivia,
@@ -52,7 +51,7 @@ pub trait LexableToken<'a>: Clone {
     fn into_trivia_and_width(self) -> (Self::Trivia, usize, Self::Trivia);
 }
 
-pub trait LexablePositionedToken<'a>: LexableToken<'a>
+pub trait LexablePositionedToken: LexableToken
 where
     Self: Debug,
 {

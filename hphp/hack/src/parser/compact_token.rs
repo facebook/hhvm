@@ -203,12 +203,11 @@ impl CompactToken {
     }
 }
 
-impl<'a> LexableToken<'a> for CompactToken {
+impl LexableToken for CompactToken {
     type Trivia = CompactTrivia;
 
     fn make(
         kind: TokenKind,
-        _source: &SourceText,
         offset: usize,
         width: usize,
         leading: Self::Trivia,

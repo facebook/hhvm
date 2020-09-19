@@ -34,12 +34,11 @@ pub struct PositionedTokenImpl {
 // counted pointer to the actual shared struct
 pub type PositionedToken = RcOc<PositionedTokenImpl>;
 
-impl<'a> LexableToken<'a> for PositionedToken {
+impl LexableToken for PositionedToken {
     type Trivia = PositionedTrivia;
 
     fn make(
         kind: TokenKind,
-        _source: &SourceText,
         offset: usize,
         width: usize,
         leading: Self::Trivia,
@@ -165,7 +164,7 @@ impl PositionedTokenImpl {
     }
 }
 
-impl<'a> LexablePositionedToken<'a> for PositionedToken {
+impl LexablePositionedToken for PositionedToken {
     fn text<'b>(&self, source_text: &'b SourceText) -> &'b str {
         source_text.sub_as_str(self.start_offset(), self.width())
     }

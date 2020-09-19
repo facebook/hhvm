@@ -113,8 +113,8 @@ impl<'a, T> Context<'a, T> {
 
 pub trait ParserTrait<'a, S, T: Clone>: Clone
 where
-    S: SmartConstructors<'a, T>,
-    <S as SmartConstructors<'a, T>>::R: NodeType,
+    S: SmartConstructors<T>,
+    <S as SmartConstructors<T>>::R: NodeType,
 {
     fn make(
         _: Lexer<'a, S::Token>,
@@ -298,7 +298,6 @@ where
             lexer.advance(1);
             let token = S::Token::make(
                 TokenKind::LessThan,
-                lexer.source(),
                 lexer.start(),
                 1,
                 <S::Token as LexableToken>::Trivia::new(),

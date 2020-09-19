@@ -18,7 +18,7 @@ use parser_core_types::trivia_kind::TriviaKind;
 
 pub struct StatementParser<'a, S, T>
 where
-    S: SmartConstructors<'a, T>,
+    S: SmartConstructors<T>,
     S::R: NodeType,
 {
     lexer: Lexer<'a, S::Token>,
@@ -30,7 +30,7 @@ where
 
 impl<'a, S, T: Clone> Clone for StatementParser<'a, S, T>
 where
-    S: SmartConstructors<'a, T>,
+    S: SmartConstructors<T>,
     S::R: NodeType,
 {
     fn clone(&self) -> Self {
@@ -46,7 +46,7 @@ where
 
 impl<'a, S, T: Clone> ParserTrait<'a, S, T> for StatementParser<'a, S, T>
 where
-    S: SmartConstructors<'a, T>,
+    S: SmartConstructors<T>,
     S::R: NodeType,
 {
     fn make(
@@ -126,7 +126,7 @@ where
 
 impl<'a, S, T: Clone> StatementParser<'a, S, T>
 where
-    S: SmartConstructors<'a, T>,
+    S: SmartConstructors<T>,
     S::R: NodeType,
 {
     fn with_type_parser<F, U>(&mut self, f: F) -> U

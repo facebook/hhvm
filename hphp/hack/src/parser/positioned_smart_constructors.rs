@@ -37,14 +37,14 @@ impl<'src, S, State: StateType<'src, S>> PositionedSmartConstructors<'src, S, St
 impl<'src, S, State> SyntaxSmartConstructors<'src, S, State> for PositionedSmartConstructors<'src, S, State>
 where
     State: StateType<'src, S>,
-    S: SyntaxType<'src, State> + Clone,
-    S::Token: LexableToken<'src>,
+    S: SyntaxType<State> + Clone,
+    S::Token: LexableToken,
 {}
 
-impl<'src, S, State> SmartConstructors<'src, State> for PositionedSmartConstructors<'src, S, State>
+impl<'src, S, State> SmartConstructors<State> for PositionedSmartConstructors<'src, S, State>
 where
-    S::Token: LexableToken<'src>,
-    S: SyntaxType<'src, State> + Clone,
+    S::Token: LexableToken,
+    S: SyntaxType<State> + Clone,
     State: StateType<'src, S>,
 {
     type Token = S::Token;

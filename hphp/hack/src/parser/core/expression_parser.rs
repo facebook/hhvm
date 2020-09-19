@@ -13,7 +13,6 @@ use crate::operator::{Assoc, Operator};
 use crate::parser_env::ParserEnv;
 use crate::parser_trait::{Context, ParserTrait};
 use crate::smart_constructors::{NodeType, SmartConstructors};
-use crate::source_text::SourceText;
 use crate::statement_parser::StatementParser;
 use crate::type_parser::TypeParser;
 use parser_core_types::lexable_token::LexableToken;
@@ -38,7 +37,7 @@ impl<P> BinaryExpressionPrefixKind<P> {
 
 pub struct ExpressionParser<'a, S, T>
 where
-    S: SmartConstructors<'a, T>,
+    S: SmartConstructors<T>,
     S::R: NodeType,
 {
     lexer: Lexer<'a, S::Token>,
@@ -53,7 +52,7 @@ where
 
 impl<'a, S, T: Clone> std::clone::Clone for ExpressionParser<'a, S, T>
 where
-    S: SmartConstructors<'a, T>,
+    S: SmartConstructors<T>,
     S::R: NodeType,
 {
     fn clone(&self) -> Self {
@@ -72,7 +71,7 @@ where
 
 impl<'a, S, T: Clone> ParserTrait<'a, S, T> for ExpressionParser<'a, S, T>
 where
-    S: SmartConstructors<'a, T>,
+    S: SmartConstructors<T>,
     S::R: NodeType,
 {
     fn make(
@@ -155,7 +154,7 @@ where
 
 impl<'a, S, T: Clone> ExpressionParser<'a, S, T>
 where
-    S: SmartConstructors<'a, T>,
+    S: SmartConstructors<T>,
     S::R: NodeType,
 {
     fn allow_as_expressions(&self) -> bool {
@@ -813,7 +812,7 @@ where
         //
         //
 
-        let merge = |token: S::Token, head: Option<S::Token>, source: &SourceText<'a>| {
+        let merge = |token: S::Token, head: Option<S::Token>| {
             // TODO: Assert that new head has no leading trivia, old head has no
             // trailing trivia.
             // Invariant: A token inside a list of string fragments is always a head,
@@ -858,7 +857,7 @@ where
                     let (l, _, _) = head.into_trivia_and_width();
                     let (_, _, t) = token.into_trivia_and_width();
                     // TODO: Make a "position" type that is a tuple of source and offset.
-                    Some(S::Token::make(k, source, o, w, l, t))
+                    Some(S::Token::make(k, o, w, l, t))
                 }
                 None => {
                     let token = match token.kind() {
@@ -1002,7 +1001,7 @@ where
                     // TODO: Give an error.
                     // We got a { not followed by a $. Ignore it.
                     // TODO: Give a warning?
-                    merge(left_brace, head, parser.lexer.source())
+                    merge(left_brace, head)
                 }
             }
         };
@@ -1041,7 +1040,7 @@ where
                     _ => {
                         // We got a $ not followed by a { or variable name. Ignore it.
                         // TODO: Give a warning?
-                        merge(dollar, head, parser.lexer.source())
+                        merge(dollar, head)
                     }
                 }
             };
@@ -1053,7 +1052,7 @@ where
             let token = self.next_token_in_string(&literal_kind);
             match token.kind() {
                 TokenKind::HeredocStringLiteralTail | TokenKind::DoubleQuotedStringLiteralTail => {
-                    let head = merge(token, head, self.lexer.source());
+                    let head = merge(token, head);
                     put_opt(self, head, &mut acc);
                     break;
                 }
@@ -1065,7 +1064,7 @@ where
                     acc.push(expr)
                 }
                 TokenKind::Dollar => head = handle_dollar(self, token, head, &mut acc),
-                _ => head = merge(token, head, self.lexer.source()),
+                _ => head = merge(token, head),
             }
         }
 

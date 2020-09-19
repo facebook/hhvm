@@ -30,7 +30,7 @@ struct LexerPostSnapshot {
     errors: Vec<SyntaxError>,
 }
 
-impl<'a, Token: LexableToken<'a>> PartialEq<Lexer<'a, Token>> for LexerPreSnapshot {
+impl<'a, Token: LexableToken> PartialEq<Lexer<'a, Token>> for LexerPreSnapshot {
     fn eq(&self, other: &Lexer<'a, Token>) -> bool {
         self.start == other.start && self.offset == other.offset && self.in_type == other.in_type
     }
@@ -62,7 +62,7 @@ prove no new error added. Actually it is observed that new errors are added betw
 struct LexerCache<Token>(LexerPreSnapshot, Token, LexerPostSnapshot);
 
 #[derive(Debug, Clone)]
-pub struct Lexer<'a, Token: LexableToken<'a>> {
+pub struct Lexer<'a, Token: LexableToken> {
     source: SourceText<'a>,
     start: usize,
     offset: usize,
@@ -85,7 +85,7 @@ pub enum KwSet {
     NoKeywords,
 }
 
-impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
+impl<'a, Token: LexableToken> Lexer<'a, Token> {
     fn to_lexer_pre_snapshot(&self) -> LexerPreSnapshot {
         LexerPreSnapshot {
             start: self.start,
@@ -2003,7 +2003,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             TokenKind::DoubleQuotedStringLiteralHead => Token::Trivia::new(),
             _ => self.scan_trailing_php_trivia(),
         };
-        Token::make(kind, self.source(), token_start, w, leading, trailing)
+        Token::make(kind, token_start, w, leading, trailing)
     }
 
     fn scan_assert_progress(&mut self, tokenizer: impl Fn(&mut Self) -> Token) -> Token {
@@ -2103,14 +2103,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             let token_start = x.offset;
             let (kind, w, leading) =
                 x.scan_token_and_leading_trivia(&Self::scan_token_outside_type, KwSet::NoKeywords);
-            Token::make(
-                kind,
-                x.source(),
-                token_start,
-                w,
-                leading,
-                Token::Trivia::new(),
-            )
+            Token::make(kind, token_start, w, leading, Token::Trivia::new())
         };
         self.scan_assert_progress(&tokenizer)
     }
@@ -2128,14 +2121,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             }
             _ => Token::Trivia::new(),
         };
-        Token::make(
-            kind,
-            self.source(),
-            token_start,
-            w,
-            Token::Trivia::new(),
-            trailing,
-        )
+        Token::make(kind, token_start, w, Token::Trivia::new(), trailing)
     }
 
     pub fn next_docstring_header(&mut self) -> (Token, &'a [u8]) {
@@ -2148,7 +2134,6 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         let w = self.width();
         let token = Token::make(
             TokenKind::HeredocStringLiteralHead,
-            self.source(),
             token_start,
             w,
             leading,
@@ -2175,17 +2160,12 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             // an XHP body then we want any whitespace or newlines to be leading trivia
             // of the body token.
             match kind {
-                TokenKind::GreaterThan | TokenKind::SlashGreaterThan if no_trailing => Token::make(
-                    kind,
-                    lexer.source(),
-                    token_start,
-                    w,
-                    leading,
-                    Token::Trivia::new(),
-                ),
+                TokenKind::GreaterThan | TokenKind::SlashGreaterThan if no_trailing => {
+                    Token::make(kind, token_start, w, leading, Token::Trivia::new())
+                }
                 _ => {
                     let trailing = lexer.scan_trailing_php_trivia();
-                    Token::make(kind, lexer.source(), token_start, w, leading, trailing)
+                    Token::make(kind, token_start, w, leading, trailing)
                 }
             }
         };
@@ -2215,7 +2195,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
             } else {
                 Token::Trivia::new()
             };
-            Token::make(kind, lexer.source(), token_start, w, leading, trailing)
+            Token::make(kind, token_start, w, leading, trailing)
         };
         self.scan_assert_progress(&scanner)
     }
@@ -2242,7 +2222,6 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
     fn make_markup_token(&self) -> Token {
         Token::make(
             TokenKind::Markup,
-            self.source(),
             self.start,
             self.width(),
             Token::Trivia::new(),
@@ -2265,7 +2244,6 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         let trailing = self.scan_trailing_php_trivia();
         let name = Token::make(
             TokenKind::Name,
-            self.source(),
             name_token_offset,
             size,
             Token::Trivia::new(),
@@ -2278,7 +2256,6 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         let markup_text = self.make_markup_token();
         let less_than_question_token = Token::make(
             TokenKind::LessThanQuestion,
-            self.source(),
             self.offset,
             2,
             Token::Trivia::new(),

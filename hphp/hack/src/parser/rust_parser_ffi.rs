@@ -27,7 +27,7 @@ pub trait ParseScript<'a, Sc, ScState> {
         stack_limit: Option<&'a StackLimit>,
     ) -> (<Sc::R as NodeType>::R, Vec<SyntaxError>, ScState)
     where
-        Sc: SmartConstructors<'a, ScState>,
+        Sc: SmartConstructors<ScState>,
         Sc::R: NodeType,
         <Sc::R as NodeType>::R: ToOcaml,
         ScState: Clone + ToOcaml;
@@ -39,7 +39,7 @@ pub fn parse<'a, Sc, ScState, ParseFun>(
 ) -> UnsafeOcamlPtr
 where
     ParseFun: ParseScript<'a, Sc, ScState>,
-    Sc: SmartConstructors<'a, ScState>,
+    Sc: SmartConstructors<ScState>,
     Sc::R: NodeType,
     <Sc::R as NodeType>::R: ToOcaml,
     ScState: Clone + ToOcaml,
@@ -183,7 +183,7 @@ macro_rules! parse {
                             source: &SourceText<'a>,
                             env: ParserEnv,
                             stack_limit: Option<&'a StackLimit>,
-                        ) -> (<<$sc as smart_constructors::SmartConstructors<'a, $scstate>>::R as NodeType>::R , Vec<SyntaxError>, $scstate)
+                        ) -> (<<$sc as smart_constructors::SmartConstructors<$scstate>>::R as NodeType>::R , Vec<SyntaxError>, $scstate)
                         {
                             $parse_script(source, env, stack_limit)
                         }

@@ -108,7 +108,7 @@ impl<'a, Token, Value>
     SyntaxSmartConstructors<'a, Syntax<Token, Value>, State<'a, Syntax<Token, Value>>>
     for DeclModeSmartConstructors<'a, Syntax<Token, Value>, Token, Value>
 where
-    Token: LexableToken<'a>,
+    Token: LexableToken,
     Value: SyntaxValueType<Token>,
 {
     fn make_yield_expression(&mut self, _r1: Self::R, _r2: Self::R) -> Self::R {
@@ -191,7 +191,7 @@ fn replace_body<'a, Token, Value>(
     saw_yield: bool,
 ) -> Syntax<Token, Value>
 where
-    Token: LexableToken<'a>,
+    Token: LexableToken,
     Value: SyntaxValueType<Token>,
 {
     match body.syntax {
@@ -199,7 +199,6 @@ where
             let stmts = if saw_yield {
                 let token = Token::make(
                     TokenKind::Yield,
-                    &st.source,
                     0,
                     0,
                     Token::Trivia::new(),

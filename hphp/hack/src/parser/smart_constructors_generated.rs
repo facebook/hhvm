@@ -20,8 +20,8 @@ use parser_core_types::{
   lexable_token::LexableToken,
 };
 
-pub trait SmartConstructors<'src, State>: Clone {
-    type Token: LexableToken<'src>;
+pub trait SmartConstructors<State>: Clone {
+    type Token: LexableToken;
     type R;
 
     fn state_mut(&mut self) -> &mut State;

@@ -44,8 +44,8 @@ pub struct Syntax<T, V> {
     pub value: V,
 }
 
-pub trait SyntaxTypeBase<'a, C> {
-    type Token: LexableToken<'a>;
+pub trait SyntaxTypeBase<C> {
+    type Token: LexableToken;
     type Value: SyntaxValueType<Self::Token>;
 
     fn make_missing(ctx: &C, offset: usize) -> Self;
@@ -57,9 +57,9 @@ pub trait SyntaxTypeBase<'a, C> {
     fn value(&self) -> &Self::Value;
 }
 
-impl<'a, T, V, C> SyntaxTypeBase<'a, C> for Syntax<T, V>
+impl<T, V, C> SyntaxTypeBase<C> for Syntax<T, V>
 where
-    T: LexableToken<'a>,
+    T: LexableToken,
     V: SyntaxValueType<T>,
 {
     type Token = T;
@@ -94,9 +94,9 @@ where
     }
 }
 
-impl<'src, T, V> Syntax<T, V>
+impl<T, V> Syntax<T, V>
 where
-    T: LexableToken<'src>,
+    T: LexableToken,
     V: SyntaxValueType<T>,
 {
     pub fn make(syntax: SyntaxVariant<T, V>, value: V) -> Self {

@@ -380,7 +380,7 @@ use parser_core_types::syntax::SyntaxVariant::*;
 
 trait Lowerer<'a, T, V>
 where
-    T: LexablePositionedToken<'a>,
+    T: LexablePositionedToken,
     Syntax<T, V>: PositionedSyntaxTrait,
     V: SyntaxValueWithKind + SyntaxValueType<T> + std::fmt::Debug,
 {

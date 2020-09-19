@@ -8,7 +8,7 @@ use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
 use crate::{
     lexable_token::LexableToken, lexable_trivia::LexableTrivia, minimal_trivia::MinimalTrivia,
-    source_text::SourceText, token_kind::TokenKind, trivia_kind::TriviaKind,
+    token_kind::TokenKind, trivia_kind::TriviaKind,
 };
 
 #[derive(Debug, Clone, PartialEq, FromOcamlRep, ToOcamlRep)]
@@ -19,7 +19,7 @@ pub struct MinimalToken {
     pub trailing: MinimalTrivia,
 }
 
-impl<'a> LexableToken<'a> for MinimalToken {
+impl LexableToken for MinimalToken {
     type Trivia = MinimalTrivia;
 
     fn kind(&self) -> TokenKind {
@@ -28,7 +28,6 @@ impl<'a> LexableToken<'a> for MinimalToken {
 
     fn make(
         kind: TokenKind,
-        _source: &SourceText,
         _offset: usize,
         width: usize,
         leading: Self::Trivia,

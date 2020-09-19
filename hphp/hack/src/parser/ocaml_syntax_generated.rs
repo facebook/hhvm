@@ -23,7 +23,7 @@ use parser_core_types::syntax_kind::SyntaxKind;
 use parser_core_types::syntax::{SyntaxType, SyntaxValueType};
 use parser_core_types::positioned_token::PositionedToken;
 
-impl<V, C> SyntaxType<'_, C> for OcamlSyntax<V>
+impl<V, C> SyntaxType<C> for OcamlSyntax<V>
 where
     C: Context,
     V: SyntaxValueType<PositionedToken> + ToOcaml,

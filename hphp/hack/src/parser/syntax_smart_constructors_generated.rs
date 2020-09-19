@@ -20,8 +20,8 @@ use parser_core_types::syntax::*;
 use smart_constructors::{NoState, SmartConstructors};
 use crate::StateType;
 
-pub trait SyntaxSmartConstructors<'src, S: SyntaxType<'src, State>, State = NoState>:
-    SmartConstructors<'src, State, R=S, Token=S::Token>
+pub trait SyntaxSmartConstructors<'src, S: SyntaxType<State>, State = NoState>:
+    SmartConstructors<State, R=S, Token=S::Token>
 where
     State: StateType<'src, S>,
 {

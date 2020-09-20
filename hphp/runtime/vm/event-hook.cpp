@@ -277,7 +277,8 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
                                       hhvm_get_frame_args(ar));
   addFramePointers(ar, frameinfo, true);
 
-  if (ar->func()->hasReifiedGenerics()) {
+  if ((RO::EnableArgsInBacktraces || !isResume) &&
+      ar->func()->hasReifiedGenerics()) {
     frameinfo.set(s_reified_classes, getReifiedClasses(ar));
   }
 
